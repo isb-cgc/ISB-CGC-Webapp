@@ -1,0 +1,90 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# Pycharm project files
+.idea
+.idea/*
+
+# Project ignorable files
+.DS_Store
+*.p12
+*.pem
+.sass-cache
+gitkit-server-config.json
+privatekey.json
+client_secrets.json
+client_secrets_native.json
+ISB-CGC-test-client-secrets.json
+ISB-CGC-test-private-key.json
+settings.json
+advanced_settings.json
+*.patch
+GenespotRE/secret_settings.py
+
+# dummy datasets
+*.tsv
+*.csv
+*.xls
+*.txt
+
+# NodeJS dev-dependencies etc
+bower_components
+bower_components/*
+node_modules
+node_modules/*
+
+certs/*
+*.key
+*.crt
