@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block header %}
+    <script type="text/javascript" src="{% static 'js/libs/jquery.tablesorter.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/user_details.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+
+    <h2>Users</h2>
+
+    <table id="user-listing" class="table table-striped tablesorter">
+        <thead>
+        <tr>
+            <th>User ID</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Email Address</th>
+            <th>Last Logged In</th>
+            <th>NIH Username</th>
+            <th>dbGaP Authorized</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for each_user in users.items %}
+            <tr>
+                {% if user.is_authenticated %}
+                    {% if user.id == each_user.id|add:0 %}
+                        <td><a href="{% url 'user_detail' user.id %}">{{ each_user.id }}</a></td>
+                    {% else %}
+                        <td>{{ each_user.id }}</td>
+                    {% endif %}
+                {% endif %}
+
+                <td>{{ each_user.first_name }}</td>
+                <td>{{ each_user.last_name }}</td>
+                <td>{{ each_user.email }}</td>
+                <td>{{ each_user.last_login }}</td>
+                <td>{% if each_user.NIH_username == 'None' %}{% else %}{{ each_user.NIH_username }}{% endif %}</td>
+                <td>
+                    {% if each_user.dbGaP_authorized == 'None' or each_user.dbGaP_authorized == '0'%}
+                        No
+                    {% else %}
+                        Yes
+                    {% endif %}
+                </td>
+                <td>
+                    <img src="{{ each_user.extra_data.picture }}" width="30" height="30" style="border-radius:50%" />
+                </td>
+            </tr>
+        {% empty %}
+
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+

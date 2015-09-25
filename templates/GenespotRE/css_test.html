@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <h1>This page is for testing overall base css</h1>
+
+    <h1>The quick brown fox jumped over the lazy dog</h1>
+    <h2>The quick brown fox jumped over the lazy dog</h2>
+    <h3>The quick brown fox jumped over the lazy dog</h3>
+    <h4>The quick brown fox jumped over the lazy dog</h4>
+    <h5>The quick brown fox jumped over the lazy dog</h5>
+
+    <button type="button" class="btn btn-default">Default</button>
+    <button type="button" class="btn btn-primary">Primary</button>
+    <button type="button" class="btn btn-success">Success</button>
+    <button type="button" class="btn btn-info">Info</button>
+    <button type="button" class="btn btn-warning">Warning</button>
+    <button type="button" class="btn btn-danger">Danger</button>
+
+    <div class="btn-group">
+        <button type="button" class="btn btn-default">Left</button>
+        <button type="button" class="btn btn-default">Middle</button>
+        <button type="button" class="btn btn-default">Right</button>
+    </div>
+
+    <table class="table table-striped space-top-10">
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Source</th>
+            <th>Visibility</th>
+            <th>Column</th>
+        </tr>
+        <tr>
+            <td>1</td>
+            <td>2</td>
+            <td>3</td>
+            <td>4</td>
+            <td>5</td>
+        </tr>
+        <tr>
+            <td>1</td>
+            <td>2</td>
+            <td>3</td>
+            <td>4</td>
+            <td>5</td>
+        </tr>
+        <tr>
+            <td>1</td>
+            <td>2</td>
+            <td>3</td>
+            <td>4</td>
+            <td>5</td>
+        </tr>
+        <tr>
+            <td>1</td>
+            <td>2</td>
+            <td>3</td>
+            <td>4</td>
+            <td>5</td>
+        </tr>
+    </table>
+
+    <div class="dropdown">
+        <button class="btn btn-default dropdown-toggle" type="button" id="dropdowntest" data-toggle="dropdown" aria-expanded="true">
+            Dropdown Menu <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" role="menu" aria-labelledby="dropdowntest">
+            <li class="dropdown-header">Title</li>
+            <li><a href="#">Action</a></li>
+            <li class="disabled"><a href="#">Disabled</a></li>
+            <li><a href="#">Less Action</a></li>
+            <li class="divider"></li>
+            <li><a href="#">Separate</a></li>
+        </ul>
+    </div>
+
+    <ol class="breadcrumb space-top-10">
+        <li><a href="#">Home</a></li>
+        <li><a href="#">Library</a></li>
+        <li class="active">Home</li>
+    </ol>
+
+    <div role="tabpanel" class="space-top-10">
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#home" data-toggle="tab">Home</a></li>
+            <li><a href="#profile" data-toggle="tab">Profile</a></li>
+            <li><a href="#messages" data-toggle="tab">Messages</a></li>
+            <li><a href="#settings" data-toggle="tab">Settings</a></li>
+            <li class="navbar-right"><a href="#righty" data-toggle="tab">Righty</a></li>
+        </ul>
+
+        <div class="tab-content">
+            <div class="tab-pane active" id="home">Home</div>
+            <div class="tab-pane" id="profile">Profile</div>
+            <div class="tab-pane" id="messages">Messages</div>
+            <div class="tab-pane" id="settings">Settings</div>
+            <div class="tab-pane" id="righty">Righty</div>
+        </div>
+    </div>
+    <div class="space-top-10"></div>
+    <div class="alert alert-success alert-dismissable">
+        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        Success!</div>
+    <div class="alert alert-info alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        Information!</div>
+    <div class="alert alert-warning alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        Warning!</div>
+    <div class="alert alert-danger alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        Danger!</div>
+
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
+      Modal Launch
+    </button>
+
+    <input type="text" placeholder="Text Input">
+    <input type="email" placeholder="Email Input">
+
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+          </div>
+          <div class="modal-body">
+            ...
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary">Save changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+{% endblock %}
+

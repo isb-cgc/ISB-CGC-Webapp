@@ -39,14 +39,13 @@ This project also includes the Endpoints API that the django application is runn
 2. Download [Google Cloud SDK](https://cloud.google.com/sdk/) and install. Make sure that the edited .bash_profile or .bashrc file is pointing to the right location of google-cloud-sdk directory. 
 3. Authenticate the Google Cloud Platform by running
 `gcloud auth login`
-4. If you are using isb-cgc as your Google Cloud Project, you will need access to the ISB-CGC Google Drive directory (please ask project members for this information) to download the following:
+4. If you are using isb-cgc as your Google Cloud Project, you will need access to the ISB-CGC Google Drive directory (please ask project members for this information) to download the following. Please refer to Deploying to New Cloud Project for instructions on how to generate private keys and client secrets.:
   - privatekey.pem (This was generated from a .p12 file downloaded from within the isb-cgc project)
   - privatekey.json
   - lib.zip
   - client_secrets.json
   - google_api_key.txt (This should be placed in the genome_browser directory.)
   - dev_2015-07-09_metadata_attr_samples.sql
-  Otherwise, please refer to Deploying to New Cloud Project for instructions on how to generate private keys and client secrets.
 5. Set up python virtual environment with Python 2.7, Django 1.7.1, MySQL 5.6:
 6. `pip install django==1.7.1`
 7. `pip install MySQL-python` - You may need to install MySQL if it is not already installed. It is recommended to use [homebrew](http://brew.sh/) if you are on OS X.
@@ -59,17 +58,18 @@ This project also includes the Endpoints API that the django application is runn
 14. Enter a mysql shell and run `CREATE USER 'django'@'localhost' IDENTIFIED BY 'PASSWORD'`
     and `GRANT SELECT, INSERT, UPDATE, DELETE ON <DATABASE NAME>.* TO 'django'@'localhost'`. Remember to set the password appropriately.
 15. run `python scripts/add_site_ids.py`, making sure the settings in the script are correct to your environment.
-16. Import metadata_samples and metadata_attr tables with `mysql -u root -p <databasename> < 7-23-15_metadata_attr_samples.sql` .
-17. Import the feature definition tables by using a .sql dump file. There are multiple feature definition tables that are required.
+16. run scripts/add_alldata_cohort.py. This has several parameters that it can take in. This is required to create an "All TCGA Data". It has be created both in SQL and BigQuery if you want users to be able to visualize it. Please adjust database connector parameters accordingly in the code itself and read through to get an understanding of how it works.
+17. Import metadata_samples and metadata_attr tables with `mysql -u root -p <databasename> < 7-23-15_metadata_attr_samples.sql` .
+18. Import the feature definition tables by using a .sql dump file. There are multiple feature definition tables that are required.
   - feature_defs_cnvr
   - feature_defs_gexp
   - feature_defs_gnab
   - feature_defs_meth
   - feature_defs_mirn
   - feature_defs_rppa
-18. run `dev_appserver.py .`
-19. Go to [http://localhost:8080/](http://localhost:8080) and hope for the best!
-20. If the site works, go to [http://localhost:8080/admin](http://localhost:8080/admin) and enter the superuser name and password you created.
+19. run `dev_appserver.py .`
+20. Go to [http://localhost:8080/](http://localhost:8080) and hope for the best!
+21. If the site works, go to [http://localhost:8080/admin](http://localhost:8080/admin) and enter the superuser name and password you created.
   - Open the Social Applications table in admin to add a new Social Application. Make the provider Google, name it whatever you want ('Google' is fine), copy and paste the client_id and client_secret from our client_secrets.json file into the Social Application's Client id and Secret key fields. Leave the Key field blank. 
   - Then select isb-cgc.appspot.com, localhost:8000, and localhost:8080 in the Available sites field and move them to the Chosen sites field.
   

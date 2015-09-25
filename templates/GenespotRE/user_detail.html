@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load tz %}
+
+{% block header %}
+{#    <script type="text/javascript" src="{% static 'js/user_details.js' %}"></script>#}
+{% endblock %}
+
+{% block page_name %}user-details{% endblock %}
+
+{% block content %}
+    <img src="{{ user_details.extra_data.picture }}" class="avatar space-top-10" />
+
+    <h4>Welcome {{ user_details.first_name }} {{ user_details.last_name }}!</h4>
+    <h4>Verify dbGaP access and start running your own custom pipelines all in one place.</h4>
+    <div class="row">
+        <div class="panel panel-default user-panel">
+            <div class="panel-heading">
+                <h5>
+                    Personal Details
+                </h5>
+            </div>
+            <div class="panel-body">
+                <table class="user-info">
+                    <tr>
+                        <td>User ID</td>
+                        <td>{{ user_details.id }}</td>
+                    </tr>
+                    <tr>
+                        <td>Name</td>
+                        <td>{{ user_details.first_name }} {{ user_details.last_name }}</td>
+                    </tr>
+                    <tr>
+                        <td>Email Address</td>
+                        <td>{{ user_details.email }}</td>
+                    </tr>
+
+                    <tr>
+                        <td>Last Logged In</td>
+                        <td>{{ user_details.last_login|localtime }}</td>
+                    </tr>
+                    <tr>
+                        <td>Date Joined</td>
+                        <td>{{ user_details.date_joined|localtime }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="panel panel-default data-panel">
+            <div class="panel-heading">
+                <h5>
+                    Data Access
+                </h5>
+            </div>
+            <div class="panel-body">
+                {% if not user_details.NIH_username %} {# No eRA account, no dbGaP #}
+                    <p>
+                    Apply for dbGaP Authorized Access to access underlying Level 1 genomics data.
+                    </p>
+                    <a href="{{ eRA_login_url }}">Associate with eRA Commons Account</a>
+
+                    <a href="https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login" target="_blank">Learn More</a>
+
+                {% elif not user_details.dbGaP_authorized %} {# no dbGaP #}
+                    <p><i class="fa fa-check-circle"></i> eRA Account Authenticated</p>
+                    <hr>
+                    <p>Congratulations, {{ user_details.NIH_username }}! Your eRA account has been authenticated. Now we need to verify if you have dbGaP authorization. This process may take up to 24 hours.</p>
+
+                    <a href="#">How to Apply for dbGaP Access</a>
+                {% else %} {# Both authorized #}
+                    <p><i class="fa fa-check-circle"></i> dbGaP Access Authorized</p>
+                    <hr>
+                    <p>
+                        Congratulations, {{ user_details.NIH_username }}! You now have access to ISB-CGC controlled access TCGA data until
+                        {{ user_details.NIH_assertion_expiration|localtime }}
+                        {% if TIMEZONE != "" %}
+                            in {{ TIME_ZONE }} time.
+                        {% endif %}
+                    </p>
+
+                    <a href="#">How to Access Controlled-Access Data</a>
+                    <a href="#">Data Use Certification Agreement</a>
+                {% endif %}
+                {% if membership %}
+                    <hr>
+                    <p>
+                       You are a member of the group isb-cgc-cntl.
+                        <a data-toggle="modal" data-target="#bucket-contents-modal">View bucket contents</a>
+                    </p>
+                {% endif %}
+
+
+            </div>
+        </div>
+
+        <div class="panel panel-default gcp-panel">
+            <div class="panel-heading">
+                <h5>
+                    Google Cloud Platform
+                </h5>
+            </div>
+            <div class="panel-body">
+                {% if False %}
+                    <p>
+                        Connect to Google Cloud Platform to start uploading your own datasets, setup your own virtual machines and run custom processing pipelines on TCGA.
+                    </p>
+                    <a href="#">Sign Up</a>
+                {% else %}
+                    <p><i class="fa fa-check-circle"></i> Connected to Google Cloud Platform</p>
+                    <hr>
+                    <p>
+                        User Google Cloud Platform to run custom pipelines or visualize your own datasets.
+                    </p>
+
+                    <!-- Button trigger modal -->
+                    <a class="more-credits-modal" data-toggle="modal" data-target="#more-credits-modal">
+                        Request Credits
+                    </a>
+
+                    <a href="#">Run a Custom Pipeline</a>
+                    <a href="#">Upload Your Own Datasets</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="more-credits-modal" tabindex="-1" role="dialog" aria-labelledby="MoreCreditLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="MoreCreditLabel">Request Additional Google Cloud Platform Credits</h4>
+                </div>
+                <form id="request-credits" method="POST" action="#" class="form-horizontal">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="name" class="col-sm-3 control-label">Name</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" name="name" id="name" placeholder="Name" value="{{ user_details.first_name }} {{ user_details.last_name }}"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="email" class="col-sm-3 control-label">Email Address</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" name="email" id="email" placeholder="email@example.com" value="{{ user_details.email }}"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="credits" class="col-sm-3 control-label">Credits Requested</label>
+                            <div class="col-sm-9">
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-default" value="1000">$1000</button>
+                                    <button type="button" class="btn btn-default" value="2000">$2000</button>
+                                    <button type="button" class="btn btn-default" value="5000">$5000</button>
+                                </div>
+                                <input type="hidden" name="credits" value=""/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="project-details" class="col-sm-3 control-label">Project Details</label>
+                            <div class="col-sm-9">
+                                <textarea class="form-control" name="project-details" id="project-details" rows="3" placeholder="Explain your project and why you need additional Google Cloud Platform Credits..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        {% csrf_token %}
+                        <input type="submit" value="Submit Request" class="btn btn-primary" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="bucket-contents-modal" tabindex="-1" role="dialog" aria-labelledby="BucketContentsLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="ControlledDataTitle">Contents of isb-cgc-mock-cntl Bucket:</h4>
+                </div>
+                <ul>
+                {% for item in object_list %}
+                    <li>
+                    {{ item.name }}
+                    </li>
+                {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block js_file %}{% static 'js/user_details.js' %}{% endblock %}

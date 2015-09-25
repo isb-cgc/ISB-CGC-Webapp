@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block header %}
+    <script type="text/javascript" src="{% static 'js/libs/jquery-1.11.1.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/libs/jquery-ui-autocomplete.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/libs/bootstrap-tokenfield.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/libs/d3.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/seqpeek_view/vendor/underscore.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/seqpeek_view/vendor/require.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/seqpeek_view/seqpeek_view.js' %}"></script>
+
+    <link type="text/css" rel="stylesheet" href="{% static 'css/jquery-ui.min.css' %}" />
+{#    <link type="text/css" rel="stylesheet" href="{% static 'css/seqpeek.css' %}" />#}
+    <link type="text/css" rel="stylesheet" href="{% static 'css/bootstrap-tokenfield.min.css' %}" />
+    <link type="text/css" rel="stylesheet" href="{% static 'css/tokenfield-typeahead.min.css' %}" />
+{% endblock %}
+{% block page_name %}seqpeek{% endblock %}
+{% block content %}
+    {% if plot_data %}
+        <h2>SeqPeek {{ plot_data.gene_label}}</h2>
+    {% else %}
+        <h2>SeqPeek</h2>
+    {% endif %}
+
+    {% if plot_data %}
+        <button class="btn btn-primary space-bottom-10" id="seqpeek_selection_toggle">Toggle Select</button>
+        <div>
+            Number of unique selected samples: <label id="number_selected_samples">0</label>
+        </div>
+        <table id="seqpeek-table">
+            <thead>
+            <tr>
+                <th>Tumor Type</th>
+                <th>Samples (#)</th>
+                <th style="text-align: center;">
+                    <canvas id="seqpeek-mini-locator" width="400" height="24"></canvas>
+                    <svg height="24">
+                        <rect x="5" y="1" height="21" width="10" style="stroke: red; fill-opacity: 0.0;"></rect>
+                        <text x="20" y="15" font-size="10">current view</text>
+                        <rect x="85" y="7" height="10" width="30" style="fill: rgb(170,170,170); stroke-opacity: 0.0;"></rect>
+                        <text x="120" y="15" font-size="10">whole protein</text>
+                    </svg>
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for track in plot_data.tracks %}
+                <tr>
+                    <td>{{ track.label }}</td>
+                    <td>{{ track.statistics.samples.numberOf }}</td>
+                    <td id="{{ track.render_info.row_id }}"></td>
+                </tr>
+            {% endfor %}
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td id="seqpeek-tick-element"></td>
+                </tr>
+            </tbody>
+        </table>
+        <script type="text/javascript">
+            __data_bundle = {{ data_bundle|safe }};
+        </script>
+    {% endif %}
+
+<form action="" method="GET" class="form-horizontal" id="seqpeek-form">
+    <div class="form-group">
+        <label for="genes" class="col-md-2 control-label">Select a Gene:</label>
+        <div class="col-md-8">
+            {% if request.GET.gene %}
+                <input class="form-control" type="text" id="genes" name="gene" value="{{ gene }}"/>
+            {% else %}
+                <input class="form-control" type="text" id="genes" name="gene" placeholder="Start typing a gene name here"/>
+            {% endif %}
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="disease-types" class="col-md-2 control-label">Select Tumor Types:</label>
+        <div class="col-md-8">
+            {% if request.GET.tumor_type %}
+                <input class="form-control" type="text" id="disease-types" name="tumor_type" value="{{ tumor_list }}"/>
+            {% else %}
+                <input class="form-control" type="text" id="disease-types" name="tumor_type" />
+            {% endif %}
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-2"></div>
+        <input class="btn btn-primary space-left-15" type="submit" value="Submit" />
+    </div>
+</form>
+
+
+    <script>
+    var gene_list = {{ symbol_list|safe }};
+    var disease_codes = {{ disease_codes|safe }};
+    </script>
+
+{% endblock %}
+
+{% block js_file %}{% static 'js/seqpeek_view/selection_widgets.js' %}{% endblock %}

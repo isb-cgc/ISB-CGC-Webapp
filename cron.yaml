@@ -1,0 +1,10 @@
+cron:
+- description: NIH authorized-list update
+  url: /tasks/get_nih_authorized_list
+  schedule: every 24 hours
+- description: 2x/day automated logout job
+  url: /tasks/check_users_sweeper
+  schedule: every 12 hours
+- description: CloudSQL logging
+  url: /tasks/CloudSQL_logging
+  schedule: every 24 hours

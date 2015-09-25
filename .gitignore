@@ -72,6 +72,7 @@ settings.json
 advanced_settings.json
 *.patch
 GenespotRE/secret_settings.py
+migrations/
 
 # dummy datasets
 *.tsv

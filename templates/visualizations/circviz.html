@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+
+{% block header %}
+
+    <script type="text/javascript" src="{% static 'js/libs/science.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/libs/science.stats.min.js' %}"></script>
+
+{% endblock %}
+
+{% block page_name %}circviz{% endblock %}
+
+{% block content %}
+    <div class="col-lg-12">
+    <h2>{% if viz|length %}{{ viz.name }}{% else %}{{ request.POST.vis_title }}{% endif %}</h2>
+
+    <button class="btn btn-default space-bottom-10 inline-block" id="1_random_edge">Add 1 Random Edges</button>
+    <button class="btn btn-default space-bottom-10 inline-block" id="30_random_edge">Add 30 Random Edges</button>
+    <button class="btn btn-default space-bottom-10 inline-block" id="30_edges_remove">Remove 30 Random Edges</button>
+    <!-- <button id="all_edges_remove">Remove all Random Edges</button> -->
+    <br />
+    <button class="btn btn-default space-bottom-10 inline-block" id="30_nodes_add">Add 30 Nodes</button>
+    <button class="btn btn-default space-bottom-10 inline-block" id="30_nodes_remove">Remove 30 Nodes</button>
+    <br />
+    <button class="btn btn-default space-bottom-10" id="get_api_data">API Pairwise</button>
+
+    <p>Drag the circvis (on the rings) to rotate the entire display.</p>
+
+    <div id="wedge" style="font: 10px sans-serif;margin:10px;"></div>
+
+    </div>
+
+    <script>
+    var api_url = '{{ api_url }}';
+    </script>
+{% endblock %}
+
+{% block js_file %}{% static 'js/circvis.js' %}{% endblock %}

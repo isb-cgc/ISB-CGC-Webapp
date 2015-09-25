@@ -1,0 +1,50 @@
+application: <YOUR-APP-ID>
+version: 1
+runtime: python27
+api_version: 1
+threadsafe: false
+
+libraries:
+- name: MySQLdb
+  version: "latest"
+- name: ssl
+  version: "latest"
+- name: pycrypto
+  version: "2.6"
+- name: endpoints
+  version: 1.0
+
+builtins:
+- django_wsgi: on
+- remote_api: on
+- appstats: on
+- deferred: on
+
+handlers:
+- url: /favicon.ico
+  static_files: static/img/favicon.ico
+  upload: static/imgfavicon.ico
+- url: /static
+  static_dir: static
+- url: /_ah/spi/.*
+  script: cgc_api.APPLICATION
+- url: /remoteapi.*
+  script: google.appengine.ext.remote_api.handler.application
+  login: admin
+- url: /_ah/queue/deferred
+  script: google.appengine.ext.deferred.deferred.application
+  login: admin
+- url: /.*
+  script: main.application
+- url: /static/admin
+  static_dir: static/admin
+  expiration: 0
+- url: /robots.txt
+  static_files: static/robots.txt
+  upload: static/robots.txt
+
+
+
+env_variables:
+  DJANGO_SETTINGS_MODULE: 'GenespotRE.settings'
+  SETTINGS_VERSION: ''

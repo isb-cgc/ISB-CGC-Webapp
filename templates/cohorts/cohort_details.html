@@ -1,0 +1,340 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+
+{% block header %}
+{% endblock %}
+
+{% block page_name %}cohort-details{% endblock %}
+
+{% block secondary_nav %}
+    <div class="container">
+        <div class="row">
+            <div class="menu-bar">
+                <div class="cohort-title col-md-8">
+                    <h3>{{ cohort.name }}</h3>
+                </div>
+                <div class="menu-items-right col-md-4">
+                    <a class="btn btn-default space-top-5" id="cancel-add-filter-btn" style="display:none;">Cancel</a>
+                    <a class="btn btn-primary space-top-5" data-toggle="modal" data-target="#apply-filters-modal" style="display:none;">Apply New Filters</a>
+                    <div class="dropdown dropdown-menu-right space-top-5">
+                        <a role="button" class="dropdown-toggle " type="button" id="create-dropdown" data-toggle="dropdown" aria-label="create-item" role="button" aria-expaneded="true">
+                            <i class="fa fa-bars"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="create-dropdown">
+                            {% if cohort.perm.perm == 'OWNER' %}
+                            <li role="presentation"><a href="#" id="add-filter-btn">Add New Filters</a></li>
+                            {% endif %}
+                            <li role="presentation"><a href="#" class="show-flyout" title="Show Comments">Comments</a></li>
+    {#                        <li role="presentation"><a href="#">Edit Barcodes</a></li>#}
+                            {% if cohort.perm == 'OWNER' %}
+                            <li role="presentation"><a href="#" data-toggle="modal" data-target="#delete-cohort-modal">Delete Cohort</a></li>
+                            <li role="presentation" class="divider"></li>
+                            {% endif %}
+    {#                        <li role="presentation"><a href="#">Revision History</a></li>#}
+
+                            <li role="presentation"><a href="{% url 'clone_cohort' cohort.id %}">Make a Copy</a></li>
+                            {% if cohort.perm.perm == 'OWNER' %}
+                            <li role="presentation"><a href="#" data-toggle="modal" data-target="#share-cohort-modal">Share with Others</a></li>
+                            {% endif %}
+    {#                        <li role="presentation"><a href="#">Export to Google Cloud Platform</a></li>#}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div id="filter-panel" class="col-lg-4" style="display:none;">
+        <div class="tabpanel" role="tabpanel">
+            <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active"><a href="#clinical-filters" role="tab" data-toggle="tab" title="Donor Filters">Donor</a></li>
+                <li role="presentation" class=""><a href="#data-filters" role="tab" data-toggle="tab" title="Donor Filters">Data Type</a></li>
+{#                <li role="presentation" class=""><a href="#molecular-filters" role="tab" data-toggle="tab" title="Donor Filters">Molecular</a></li>#}
+            </ul>
+            <div class="tab-content">
+                <div role="tabpanel" class="tab-pane active" id="clinical-filters">
+                    <div class="panel-group" id="clin-accordion" role="tablist" aria-multiselectable="true">
+                        {% for attr in clin_attr %}
+                            {% if attr in attr_list_count %}
+                                <div class="panel panel-default">
+                                    <a role="button" data-toggle="collapse" data-parent="#clin-accordion" href="#collapse-{{ attr }}" aria-expanded="true" aria-controls="collapse-{{ attr }}">
+                                        <div class="panel-heading" role="tab" id="heading-{{ attr }}"><i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ attr|get_readable_name }}</div>
+                                    </a>
+                                    <div id="collapse-{{ attr }}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-{{ attr }}">
+                                        <div class="panel-body">
+                                            <ul class="search-checkbox-list" id="{{ attr }}">
+                                                {% with attr_list_count|get_item:attr|how_many_more:6 as num_more %}
+                                                    {% for v in attr_list_count|get_item:attr %}
+                                                        {% if forloop.counter0 < 6 %}
+                                                            <li>
+                                                                <input type="checkbox" name="elements-selected" id="{{ attr }}-{{ v.value|replace_whitespace:'_' }}" >
+                                                                <label for="{{ attr }}-{{ v.value|replace_whitespace:'_' }}">{% if v.value == 'None' %}NA{% else %}{{ v.value }}{% endif %}</label>
+                                                                <span class="count">({{ v.count }})</span>
+                                                            </li>
+                                                        {% elif forloop.counter0 == 6 and num_more > 0 %}
+                                                            <a class="show-more">{{ num_more }} more</a>
+                                                            <li class="extra-values" style="display:none;">
+                                                                <input type="checkbox" name="elements-selected" id="{{ attr }}-{{ v.value|replace_whitespace:'_' }}" >
+                                                                <label for="{{ attr }}-{{ v.value|replace_whitespace:'_' }}">{% if v.value == 'None' %}NA{% else %}{{ v.value }}{% endif %}</label>
+                                                                <span class="count">({{ v.count }})</span>
+                                                            </li>
+                                                        {% else %}
+                                                            <li class="extra-values" style="display:none;">
+                                                                <input type="checkbox" name="elements-selected" id="{{ attr }}-{{ v.value|replace_whitespace:'_' }}" >
+                                                                <label for="{{ attr }}-{{ v.value|replace_whitespace:'_' }}">{% if v.value == 'None' %}NA{% else %}{{ v.value }}{% endif %}</label>
+                                                                <span class="count">({{ v.count }})</span>
+                                                            </li>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    {% if num_more > 0 %}
+                                                        <a class="show-less" style="display:none;">less</a>
+                                                    {% endif %}
+                                                {% endwith %}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                <!-- data filters tab -->
+                <div role="tabpanel" class="tab-pane" id="data-filters">
+                    <div class="panel-group" id="data-type-accordion" role="tablist" aria-multiselectable="true">
+                        {% for attr in data_attr %}
+                            <div class="panel panel-default">
+                                <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-{{ attr }}" aria-expanded="true" aria-controls="collapse-{{ attr }}">
+                                    <div class="panel-heading" role="tab" id="heading-{{ attr }}"><i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ attr|get_readable_name }}</div>
+                                </a>
+                                <div id="collapse-{{ attr }}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-{{ attr }}">
+                                    <div class="panel-body">
+                                        <ul class="search-checkbox-list" id="{{ attr }}">
+                                            {% if attr in attr_list_count %}
+                                                {% for v in attr_list_count|get_item:attr %}
+                                                    <li>
+                                                        <input type="checkbox" name="elements-selected" id="{{ attr }}-{{ v.value|replace_whitespace:'_' }}" >
+                                                        <label for="{{ attr }}-{{ v.value|replace_whitespace:'_' }}">{{ v.value }}</label>
+                                                        <span class="count">({{ v.count }})</span>
+                                                    </li>
+                                                {% endfor %}
+
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+{#                <div role="tabpanel" class="tab-pane" id="molecular-filters">#}
+{#                    molecular filters#}
+{#                </div>#}
+            </div>
+        </div>
+    </div>
+
+    <div id="content-panel" class="col-md-8 col-md-offset-2">
+        <div class="selected-filters panel" style="display:none;">
+            <div class="panel-heading">
+                <h4>New Filters <a role="button" id="clear-filters">Clear All</a></h4>
+            </div>
+            <div class="panel-body">
+
+            </div>
+        </div>
+
+        <div class="cohort-selected-filters panel">
+            <div class="panel-heading">
+                <h4>Selected Filters</h4>
+            </div>
+            <div class="panel-body">
+                {% for filter in cohort.get_filters %}
+                    <span class="filter-label label label-default space-right-5">{{ filter.name }}: {{ filter.value }}</span>
+                {% empty %}
+                    <p>There were no filters used to create this cohort.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="cohort-info panel">
+            <div class="panel-heading">
+                <h4>Details</h4>
+            </div>
+            <div class="panel-body">
+                <p>Total Number of Samples: {{ total_samples }}</p>
+                <p>Total Number of Participants: {{ total_patients }}</p>
+                <p>Your Permissions: {{ cohort.perm.perm }}</p>
+                <p>Revision History:</p>
+                <ul>
+                    {% for item in cohort.get_revision_history %}
+                        <li>{{ item }}</li>
+                    {% endfor %}
+                </ul>
+                {% if shared_with_users and cohort.perm == 'OWNER'%}
+                    <h4>Shared With Users:</h4>
+                    <ul>
+                    {% for user in shared_with_users %}
+                        <li>{{ user.first_name }} {{ user.last_name }} [{{ user.email }}]</li>
+                    {% endfor %}
+                    </ul>
+
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="clinical-trees panel">
+            <div class="panel-heading">
+                <h4>Clinical Features</h4>
+            </div>
+            <div class="panel-body">
+                <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
+                <div id="tree-graph-clinical"></div>
+            </div>
+            <div id="more-graphs"><button class="btn btn-default" role="button">Show More</button></div>
+            <div id="less-graphs" style="display: none;"><button class="btn btn-default" role="button">Show Less</button></div>
+        </div>
+        <div class="parallel-sets panel">
+            <div class="panel-heading">
+                <h4>Data Availability</h4>
+            </div>
+            <div class="panel-body">
+                <div id="multi-categorical"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Comment Flyout -->
+    <div class="fly-out comment-flyout comments">
+        <div class="flyout-heading">
+            <h4>Comments <a role="button" class="hide-flyout"><i class="fa fa-times"></i></a></h4>
+        </div>
+        <div class="flyout-body">
+            {% for comment in cohort.cohort_comment.all %}
+                <h5 class="comment-username">{{ comment.user.first_name }} {{ comment.user.last_name }}</h5>
+                <p class="comment-date">{{ comment.date_created }}</p>
+                <p class="comment-content">{{ comment.content }}</p>
+            {% endfor %}
+        </div>
+        <div class="flyout-footer">
+            <form class="add-comment" action="{% url 'save_cohort_comment' %}" method="POST">
+                {% csrf_token %}
+                <label for="content">Add Comment</label>
+                <textarea class="form-control space-bottom-10" name="content"></textarea>
+                <input type="hidden" name="cohort_id" value="{{ cohort.id }}" />
+                <button class="btn btn-primary save-comment-btn" type="submit">Comment</button>
+            </form>
+        </div>
+    </div>
+
+    {% if cohort.perm.perm == 'OWNER' %}
+    <!-- Share Cohort Modal -->
+    <div class="modal fade" id="share-cohort-modal" tabindex="-1" role="dialog" aria-labelledby="shareCohortModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="shareCohortModal">Share Cohort</h4>
+                </div>
+                <form id="share-cohort-form" method="POST" action="{% url 'share_cohort' cohort.id %}">
+                    <div class="modal-body">
+                        <label for="selected-users">Please select users to share this cohort with:</label>
+                        <select name="users" id="selected-users" multiple="multiple">
+                            {% for user in users %}
+                            <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }} ({{ user.email }})</option>
+                            {% endfor %}
+                        </select>
+
+                    </div>
+                    <div class="modal-footer">
+                        {% csrf_token %}
+                        <input type="submit" value="Share Cohort" class="btn btn-primary" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Create Cohort Modal -->
+    <div class="modal fade" id="create-cohort-modal" tabindex="-1" role="dialog" aria-labelledby="createCohortModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="createCohortModal">Create Cohort</h4>
+                </div>
+                <form id="create-cohort-form" method="POST" action="{% url 'save_cohort' %}">
+                    <div class="modal-body">
+                        <label for="cohort-name">Name:</label>
+                        <input class="form-control" type="text" id="cohort-name" name="name" value="{{ cohort.name }}"/>
+                    </div>
+                    <div class="modal-footer">
+                        {% csrf_token %}
+                        <input type="submit" value="Create Cohort" class="btn btn-primary" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Apply Filters Modal -->
+    <div class="modal fade" id="apply-filters-modal" tabindex="-1" role="dialog" aria-labelledby="applyFiltersModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="applyFiltersModal">Apply New Filters</h4>
+                </div>
+                <form id="apply-filters-form" method="POST" action="{% url 'save_cohort' %}">
+                    <div class="modal-body">
+                        <label for="cohort-name">Applying new filters will permanently modify the existing cohort.</label>
+                        <input type="hidden" id="cohort-name" name="name" value="{{ cohort.name }}"/>
+                        <input type="hidden" name="apply-filters" value="True"/>
+                    </div>
+                    <div class="modal-footer">
+                        {% csrf_token %}
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <input type="submit" value="Apply Filters" class="btn btn-primary" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Cohort Modal -->
+    <div class="modal fade" id="delete-cohort-modal" tabindex="-1" role="dialog" aria-labelledby="deleteCohortModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="deleteCohortModal">Delete Cohort</h4>
+                </div>
+                <form id="delete-cohort-form" method="POST" action="{% url 'delete_cohort' %}">
+                    <div class="modal-body">
+                        <label for="cohort-name">Are you sure you want to delete this cohort?</label>
+                        <input type="hidden" id="cohort-id" name="id" value="{{ cohort.id }}"/>
+                    </div>
+                    <div class="modal-footer">
+                        {% csrf_token %}
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <input type="submit" value="Delete" class="btn btn-primary" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+    var attr_list = {{ attr_list|safe }};
+    var attr_counts = {{ attr_list_count|safe }};
+    var total_samples = {{ total_samples|safe }};
+    var base_api_url = '{{ base_api_url|safe }}';
+    var cohort_id = {{ cohort.id }};
+    </script>
+{% endblock %}
+
+{% block js_file %}{% static 'js/cohort_details.js' %}{% endblock %}

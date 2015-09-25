@@ -1,0 +1,285 @@
+/********************************
+ ** FILE: base.css
+ ********************************/
+body {
+  margin: 0;
+  padding: 13px 0;
+  font-family:nyt-franklin,nyt-franklin-1,'Helvetica Neue',Arial,sans-serif;
+  font-weight:400;
+  font-size:11px;
+  line-height:13px;
+  color:#333
+  background-color: #fff;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  color: #000;
+}
+
+/* Structure */
+.cancer {
+  font-family: Arial;
+}
+#cancer-chartFrame{
+  width: 970px;
+  height: 550px;
+  -webkit-transition: height ease-in-out 1s;  
+  -moz-transition: height ease-in-out 1s;    
+  -o-transition: height ease-in-out 1s;    
+  -ms-transition: height ease-in-out 1s;        
+}
+
+
+#cancer-chart {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+#cancer-error {
+  
+  
+}
+#cancer-error p {
+  text-align: center;
+  font-size: 16px;
+  line-height: 20px;
+  margin: 10px;
+  border: solid 1px #CCC;
+  background: #ffd;
+  padding: 10px;
+  
+}
+
+#cancer-error a {
+  text-decoration: underline;
+}
+
+#cancer-chartCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  
+}
+#cancer-chartCanvas svg {
+  height: 100%;
+  overflow: hidden;config/
+	assets.yml
+	settings.yml
+
+}
+
+#cancer-tooltipContainer {
+  position: absolute;
+  bottom: 0;
+  width: 230px;
+  left: -125px;
+  font-size: 12px;
+  line-height: 16px;
+  padding: 10px;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.9);
+  color: #000;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+  -moz-box-shadow: 0 1px 5px rgba(0,0,0,0.4);  
+  border:1px solid rgba(200,200,200,0.85);
+  text-align:center;
+}
+
+#cancer-tooltip {
+ text-align:center;  
+  z-index: 1000;
+  position: absolute;
+  display: none;
+}
+
+#cancer-tooltip .cancer-tail {
+  position: absolute;
+  bottom: -8px;
+  left: 105px;
+  width: 40px;
+  height: 8px;
+  background: url(http://graphics8.nytimes.com/packages/images/newsgraphics/2012/0202-federal-budget/tail_white.png) 50% 0%;
+}
+#cancer-tooltip .cancer-department {
+  text-transform: uppercase;
+  text-align: left;
+  font-size: 10px;
+  margin-bottom: 2px;
+  color:#666;
+  text-align:center;  
+
+}
+#cancer-tooltip .cancer-rule{
+  height:1px;
+  margin:1px auto 3px;
+  background:#ddd;
+  width:130px;
+}
+
+#cancer-tooltip .cancer-discretion{
+  color:#666;
+/*   text-transform:uppercase;*/
+  font-size: 11px;   
+  text-align:center;  
+  font-style:italic;
+}
+#cancer-tooltip .cancer-name {
+  text-align: left;
+  font-size: 13px;
+/*  width:170px;*/
+ text-align:center;  
+}
+#cancer-tooltip .cancer-value {
+/*  position:absolute;*/
+ text-align:center;
+  right:10px;
+  top:28px;
+  font-size: 16px;
+/*  width:100px;*/
+ text-align:center;  
+  overflow:hidden;
+  font-weight:bold;
+}
+#cancer-tooltip .cancer-change {
+  padding-left:10px;
+/*  width:110px;  */
+  font-size: 16px;  
+  text-align:right;  
+  overflow:hidden;
+/*  position:absolute;*/
+  font-weight:bold;  
+  color:#666;
+ text-align:center;  
+ display:inline;
+}
+#cancer-tooltip .cancer-valuesContainer {
+  padding-top:7px;
+  
+}
+#cancer-tooltip.cancer-minus .cancer-change{
+  color:#900;
+}
+#cancer-tooltip.cancer-plus .cancer-change{
+  color:#090;
+}
+
+/* Navigation */
+.cancer-navBar {
+  border-top: solid 1px #DDD;
+  padding: 15px 0 0;
+  margin: 0 10px;
+  z-index: 100;
+  position: absolute;
+  width: 950px;
+}
+
+
+.cancer-navigation {
+  
+}
+
+ul {
+  list-style-type: none;
+  padding:0;
+  margin:0;
+}
+.cancer-navigation li {
+  color: #999;
+  font-size: 14px;
+  cursor: pointer;
+  float: left;
+  padding: 10px 18px;
+  border-top: solid 1px #CCC;
+  border-bottom: solid 1px #CCC;
+  border-left: solid 1px #CCC;
+  background: #f9f9f9;
+  margin: 0 0;
+}
+
+.cancer-navigation li:first-of-type{
+  border-radius: 4px 0 0 4px;
+}
+.cancer-navigation li:last-of-type{
+
+  border-right: solid 1px #CCC;
+  border-radius: 0 4px 4px 0;
+}
+.cancer-navigation li.selected {
+  color: #000;
+  background: #e9e9e9;
+  border-color: #AAA;
+  box-shadow: inset 0px 0px 4px rgba(0,0,0,0.2);
+}
+
+
+/*Category List*/
+#cancer-categoryBrowser li{
+  cursor: pointer;
+  background-image: none;
+  background-color: none;
+  border-bottom: solid 1px #f0f0f0;
+  padding: 3px;
+  margin: 0 0 1px 0;
+}
+#cancer-categoryBrowser li:hover {
+  background-color: #f3f3f3;
+}
+
+/********************************
+ ** FILE: color_key.css
+ ********************************/
+
+.change-decrease3 {
+  background-color: #d84b2a;
+}
+.change-decrease2 {
+  background-color: #ee9586;
+}
+.change-decrease1{
+  background-color: #e4b7b2;
+}
+.change-same {
+  background-color: #CCC;
+}
+.change-increase1 {
+  background-color: #beccae;
+}
+.change-increase2 {
+  background-color: #9caf84;
+}
+.change-increase3 {
+  background-color: #7aa25c;
+}
+
+
+/*"#19022a", "#43013a", "#5f0046", "#9e002f", "#ce1129", "#f6441a", "#f68617", "#ffa61e"]),*/
+
+
+/*text color for changes*/
+.change-decrease3 span.label {
+    color: #eeb0a2;
+}
+.change-decrease2 span.label {
+    color: #f8d0ca;
+}
+.change-decrease1 span.label {
+    color: #f3dfdd;
+}
+.change-same span.label {
+    color: #FFFFFF;
+}
+.change-increase1 span.label {
+    color: #e2e8db;
+}
+.change-increase2 span.label {
+    color: #d3dbc9;
+}
+.change-increase3 span.label {
+    color: #c5d6b7;
+}
+

@@ -1,0 +1,64 @@
+/********************************
+ ** FILE: color_key.css
+ ********************************/
+    
+.age-10to20 {
+  background-color: #ffa61e;
+}
+
+.age-20to30 {
+  background-color: #f68617;
+}
+
+.age-30to40 {
+  background-color: #f6441a;
+}
+
+.age-40to50 {
+  background-color: #ce1129;
+}
+
+.age-50to60 {
+  background-color: #9e002f;
+}
+
+.age-60to70 {
+  background-color: #5f0046;
+}
+
+.age-70to80 {
+  background-color: #43013a;
+}
+
+.age-80to90 {
+  background-color: #19022a;
+}
+
+
+
+
+
+/*text color for changes*/
+/*.change-decrease3 span.label {
+    color: #eeb0a2;
+}
+.change-decrease2 span.label {
+    color: #f8d0ca;
+}
+.change-decrease1 span.label {
+    color: #f3dfdd;
+}
+.change-same span.label {
+    color: #FFFFFF;
+}
+.change-increase1 span.label {
+    color: #e2e8db;
+}
+.change-increase2 span.label {
+    color: #d3dbc9;
+}
+.change-increase3 span.label {
+    color: #c5d6b7;
+}*/
+
+/*"#19022a", "#43013a", "#5f0046", "#9e002f", "#ce1129", "#f6441a", "#f68617", "#ffa61e"]),*/
