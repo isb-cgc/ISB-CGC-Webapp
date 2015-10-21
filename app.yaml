@@ -1,18 +1,12 @@
-application: <YOUR-APP-ID>
-version: 1
-runtime: python27
+runtime: custom
+module: default
 api_version: 1
-threadsafe: false
+threadsafe: true
+vm: true
 
-libraries:
-- name: MySQLdb
-  version: "latest"
-- name: ssl
-  version: "latest"
-- name: pycrypto
-  version: "2.6"
-- name: endpoints
-  version: 1.0
+resources:
+  cpu: .5
+  memory_gb: 2.2
 
 builtins:
 - django_wsgi: on
@@ -43,8 +37,7 @@ handlers:
   static_files: static/robots.txt
   upload: static/robots.txt
 
-
-
 env_variables:
-  DJANGO_SETTINGS_MODULE: 'GenespotRE.settings'
-  SETTINGS_VERSION: ''
+  DJANGO_SETTINGS_MODULE: 'GenespotRE.settings' 
+  SETTINGS_VERSION: 'dev'
+  VERSION_NAME: 'default'

@@ -4,11 +4,8 @@ when you run "manage.py test".
 
 Replace this with more appropriate tests for your application.
 """
-from django.core.wsgi import get_wsgi_application
-from django.test import TestCase, Client
-from webtest import TestApp
-from django.core.urlresolvers import reverse
-from google.appengine.ext import testbed
+from django.test import TestCase
+
 from models import *
 
 

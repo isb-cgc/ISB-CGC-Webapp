@@ -1,7 +1,9 @@
 import operator
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Q
+
 
 class CohortManager(models.Manager):
     def search(self, search_terms):
@@ -15,6 +17,11 @@ class CohortManager(models.Manager):
 
         # Use operator's or_ to string together all of your Q objects.
         return qs.filter(reduce(operator.and_, [reduce(operator.or_, q_objects), Q(active=True)]))
+
+    def get_all_tcga_cohort(self):
+        isb_user = User.objects.get(is_superuser=True, username='isb')
+        all_isb_cohort_ids = Cohort_Perms.objects.filter(user=isb_user, perm=Cohort_Perms.OWNER).values_list('cohort_id', flat=True)
+        return Cohort.objects.filter(name='All TCGA Data', id__in=all_isb_cohort_ids)[0]
 
 class Cohort(models.Model):
     id = models.AutoField(primary_key=True)

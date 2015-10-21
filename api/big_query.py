@@ -6,80 +6,16 @@ from googleapiclient.errors import HttpError
 from protorpc import messages
 from protorpc import remote
 import endpoints
+from endpoints import NotFoundException
 
+from Feature_Matrix import FMItem
 from api_helpers import *
-
 import bq_data_access.methylation_data as meth
 import bq_data_access.copynumber_data as cnvr
 import bq_data_access.protein_data as rppa
 import bq_data_access.mirna_data as mirn
 import bq_data_access.maf_data as maf
-from endpoints import NotFoundException
 
-class FMItem(messages.Message):
-    sample                               = messages.StringField(1)
-    percent_lymphocyte_infiltration      = messages.StringField(2)
-    percent_monocyte_infiltration        = messages.StringField(3)
-    percent_necrosis                     = messages.StringField(4)
-    percent_neutrophil_infiltration      = messages.StringField(5)
-    percent_normal_cells                 = messages.StringField(6)
-    percent_stromal_cells                = messages.StringField(7)
-    percent_tumor_cells                  = messages.StringField(8)
-    percent_tumor_nuclei                 = messages.StringField(9)
-    gender                               = messages.StringField(10)
-    history_of_neoadjuvant_treatment     = messages.StringField(11)
-    icd_o_3_histology                    = messages.StringField(12)
-    prior_dx                             = messages.StringField(13)
-    vital_status                         = messages.StringField(14)
-    country                              = messages.StringField(15)
-    disease_code                         = messages.StringField(16)
-    histological_type                    = messages.StringField(17)
-    icd_10                               = messages.StringField(18)
-    icd_o_3_site                         = messages.StringField(19)
-    tumor_tissue_site                    = messages.StringField(20)
-    tumor_type                           = messages.StringField(21)
-    age_at_initial_pathologic_diagnosis  = messages.StringField(22)
-    days_to_birth                        = messages.StringField(23)
-    days_to_initial_pathologic_diagnosis = messages.StringField(24)
-    year_of_initial_pathologic_diagnosis = messages.StringField(25)
-    days_to_last_known_alive             = messages.StringField(26)
-    tumor_necrosis_percent               = messages.StringField(27)
-    tumor_nuclei_percent                 = messages.StringField(28)
-    tumor_weight                         = messages.StringField(29)
-    person_neoplasm_cancer_status        = messages.StringField(30)
-    pathologic_N                         = messages.StringField(31)
-    radiation_therapy                    = messages.StringField(32)
-    pathologic_T                         = messages.StringField(33)
-    race                                 = messages.StringField(34)
-    days_to_last_followup                = messages.StringField(35)
-    ethnicity                            = messages.StringField(36)
-    TP53                                 = messages.StringField(37)
-    RB1                                  = messages.StringField(38)
-    NF1                                  = messages.StringField(39)
-    APC                                  = messages.StringField(40)
-    CTNNB1                               = messages.StringField(41)
-    PIK3CA                               = messages.StringField(42)
-    PTEN                                 = messages.StringField(43)
-    FBXW7                                = messages.StringField(44)
-    NRAS                                 = messages.StringField(45)
-    ARID1A                               = messages.StringField(46)
-    CDKN2A                               = messages.StringField(47)
-    SMAD4                                = messages.StringField(48)
-    BRAF                                 = messages.StringField(49)
-    NFE2L2                               = messages.StringField(50)
-    IDH1                                 = messages.StringField(51)
-    PIK3R1                               = messages.StringField(52)
-    HRAS                                 = messages.StringField(53)
-    EGFR                                 = messages.StringField(54)
-    BAP1                                 = messages.StringField(55)
-    KRAS                                 = messages.StringField(56)
-    sampleType                           = messages.StringField(57)
-    DNAseq_data                          = messages.StringField(58)
-    mirnPlatform                         = messages.StringField(59)
-    cnvrPlatform                         = messages.StringField(60)
-    methPlatform                         = messages.StringField(61)
-    gexpPlatform                         = messages.StringField(62)
-    rppaPlatform                         = messages.StringField(63)
 
 class MAFRecord(messages.Message):
     hugo_symbol = messages.StringField(1)

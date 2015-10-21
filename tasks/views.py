@@ -1,29 +1,38 @@
-from django.http import HttpResponse
+import io
 import pysftp
 import json
 import StringIO
-from googleapiclient import http
-from googleapiclient.errors import HttpError
-from accounts.models import NIH_User
-from django.contrib.auth.models import User
-from datetime import datetime
-from pytz.gae import pytz
-import io
-from django.views.decorators.csrf import csrf_exempt
-from google_helpers.directory_service import get_directory_resource
-from google_helpers.storage_service import get_storage_resource
-from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
-from google.appengine.api.taskqueue import Task, Queue
-from django.conf import settings
-import argparse
 import csv
 import logging
-import MySQLdb
 import os
+import pytz
+from datetime import datetime
+
+from django.http import HttpResponse
+from django.contrib.auth.models import User
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
+from django.conf import settings
+
+from googleapiclient import http
+from googleapiclient.errors import HttpError
+from google_helpers.directory_service import get_directory_resource
+from google_helpers.storage_service import get_storage_resource
+from google_helpers.resourcemanager_service import get_crm_resource
+from google_helpers.logging_service import get_logging_resource
+from google.appengine.api.taskqueue import Task, Queue
+
+from accounts.models import NIH_User
+from api.api_helpers import sql_connection
+
+debug = settings.DEBUG
 
 logger = logging.getLogger(__name__)
 
 FALLBACK_QUEUE_NAME = 'logout-sweeper'
+ACL_GOOGLE_GROUP = settings.ACL_GOOGLE_GROUP
 
 LOGIN_EXPIRATION_SECONDS = 30
 
@@ -70,20 +79,18 @@ def get_nih_authorized_list(request):
     except Exception, e:
         return HttpResponse(e)
 
-import pprint
 
-
-# scrub isb-cgc-cntl of user emails that don't have an NIH_username corresponding to the dbGaP_authorized_list
+# scrub ACL_GOOGLE_GROUP of user emails that don't have an NIH_username corresponding to the dbGaP_authorized_list
 def scrub_nih_users(dbGaP_authorized_list):
         rows = [row.strip() for row in dbGaP_authorized_list.split('\n') if row.strip()]
 
         directory_service, directory_http_auth = get_directory_resource()
-        result = directory_service.members().list(groupKey='isb-cgc-cntl@isb-cgc.org').execute(http=directory_http_auth)
+        result = directory_service.members().list(groupKey=ACL_GOOGLE_GROUP).execute(http=directory_http_auth)
         members = result['members']
-        # loop through everyone in isb-cgc-cntl@isb-cgc.org
+        # loop through everyone in ACL_GOOGLE_GROUP
         for member in members:
             email = member['email']
-            logger.info("Checking user {} on isb-cgc-cntl list".format(email))
+            logger.info("Checking user {} on ACL_GOOGLE_GROUP list".format(email))
             # skip email  907668440978-oskt05du3ao083cke14641u35deokgjj@developer.gserviceaccount.com?
             try:
                 # get user id from email
@@ -94,23 +101,84 @@ def scrub_nih_users(dbGaP_authorized_list):
 
                 # verify that nih_username is in one of the rows
                 if not matching_row_exists(rows, 'login', nih_username):
-                    # remove from isb-cgc-cntl
-                    directory_service.members().delete(groupKey='isb-cgc-cntl@isb-cgc.org', memberKey=email).execute(http=directory_http_auth)
-                    logger.warn("Deleted user {} from isb-cgc-cntl because a matching entry was not found in the dbGaP authorized list.".format(email))
+                    # remove from ACL_GOOGLE_GROUP
+                    directory_service.members().delete(groupKey=ACL_GOOGLE_GROUP, memberKey=email).execute(http=directory_http_auth)
+                    logger.warn("Deleted user {} from ACL_GOOGLE_GROUP because a matching entry was not found in the dbGaP authorized list.".format(email))
                     # change dbGaP_authorized to False
                     nih_user.dbGaP_authorized = False
                     nih_user.save()
                     logger.warn("Changed NIH user {}'s dbGaP_authorized to False because a matching entry was not found in the dbGaP authorized list.".format(nih_username))
 
-            # if that user is somehow on isb-cgc-cntl but has 0 or plural entries in User or NIH_User
+            # if that user is somehow on ACL_GOOGLE_GROUP but has 0 or plural entries in User or NIH_User
             except (MultipleObjectsReturned, ObjectDoesNotExist), e:
                 logger.debug("Problem getting either {}'s user id or their NIH username: {}".format(email, str(e)))
-                # remove from isb-cgc-cntl
-                directory_service.members().delete(groupKey='isb-cgc-cntl@isb-cgc.org', memberKey=email).execute(http=directory_http_auth)
+                # remove from ACL_GOOGLE_GROUP
+                directory_service.members().delete(groupKey=ACL_GOOGLE_GROUP, memberKey=email).execute(http=directory_http_auth)
                 continue  # ?
 
 
+def IAM_logging(request):
 
+    log_message = get_iam_policy()
+    write_log_entry("iam", log_message)
+
+    return HttpResponse('')
+
+
+def get_iam_policy():
+    """ Calls the Cloud Resource Manager API and
+        Returns IAM policy associated with the project
+    """
+    crm_client = get_crm_resource()
+
+    # get getIamPolicy
+    body = {}
+    iam_policy = crm_client.projects().getIamPolicy(
+        resource=settings.BIGQUERY_PROJECT_NAME, body=body).execute()
+    return iam_policy
+
+
+def write_log_entry(log_name, log_message):
+    """ Creates a log entry using the Cloud logging API
+        Writes a struct payload as the log message
+        Also, the API writes the log to bucket and BigQuery
+        Works only with the Compute Service
+        Returns http insert status
+
+        type log_name: str
+        param log_name: The name of the log entry
+        type log_message: json
+        param log_message: The struct/json payload
+    """
+    client = get_logging_resource()
+
+    # write using logging API (metadata)
+    entry_metadata = {
+        "timestamp": datetime.utcnow().isoformat("T") + "Z",
+        "serviceName": "compute.googleapis.com",
+        "severity": "INFO",
+        "labels": {}
+    }
+
+    # Create a POST body for the write log entries request(Payload).
+    body = {
+        "commonLabels": {
+            "compute.googleapis.com/resource_id": log_name,
+            "compute.googleapis.com/resource_type": log_name
+        },
+        "entries": [
+            {
+                "metadata": entry_metadata,
+                "log": log_name,
+                "structPayload": log_message
+            }
+        ]
+    }
+
+    resp = client.projects().logs().entries().write(
+        projectsId=settings.BIGQUERY_PROJECT_NAME, logsId=log_name, body=body).execute()
+
+    return resp
 
 
 @csrf_exempt
@@ -132,20 +200,21 @@ def check_user_login(request):
             now_in_utc = pytz.utc.localize(datetime.now())
 
             if (expire_time - now_in_utc).total_seconds() <= 0:
-                # take user off isb-cgc-cntl, without bothering to check if dbGaP_authorized or not
+                # take user off ACL_GOOGLE_GROUP, without bothering to check if user is dbGaP_authorized or not
                 directory_service, directory_http_auth = get_directory_resource()
                 user_email = User.objects.get(id=user_id).email
                 try:
-                    logger.info('user ' + str(user_email) + ' being removed from isb-cgc-cntl')
+                    logger.info('user ' + str(user_email) + ' being removed from ACL_GOOGLE_GROUP')
                     result = directory_service.members().delete(
-                        groupKey='isb-cgc-cntl@isb-cgc.org',
+                        groupKey=ACL_GOOGLE_GROUP,
                         memberKey=user_email).execute(http=directory_http_auth)
 
                 except HttpError, e:
-                    logger.debug(user_email + ' was not removed from isb-cgc-cntl: ' + str(e))
+                    logger.debug(user_email + ' was not removed from ACL_GOOGLE_GROUP: ' + str(e))
 
-                logger.info('user id ' + str(nih_user.NIH_username) + ' being removed from nih_users')
-                nih_user.delete()
+                nih_user.active = 0
+                nih_user.save()
+                logger.info('User with NIH username ' + str(nih_user.NIH_username) + ' is deactivated in NIH_User table')
 
     return HttpResponse('')
 
@@ -206,7 +275,6 @@ def find_matching_rows(csv_rows, field_name, field_value, match_limit=float('inf
 
     return matches
 
-import subprocess
 
 def CloudSQL_logging(request):
 
@@ -224,35 +292,109 @@ def CloudSQL_logging(request):
                '--password',
                settings.DATABASES['default']['PASSWORD']
                ]
-    # subprocess.call(arglist)
-
+    # uncomment in managed VM -- pexpect is not allowed in GAE
+    # import pexpect
+    # child = pexpect.spawn(' '.join(arglist))
+    # child.expect('Enter password:')
+    # child.sendline(settings.DATABASES['default']['PASSWORD'])
+    # i = child.expect(['Permission denied', 'Terminal type', '[#\$] '])
+    # if i == 2:
+    #     output = child.read()
+    #     date_start_char = output.find('#1')
+    #     date_str = output[date_start_char+1:date_start_char+7]
+    #     storage_service = get_storage_resource()
+    #     media = http.MediaIoBaseUpload(io.BytesIO(output), 'text/plain')
+    #     filename = 'cloudsql_activity_log_' + date_str + '.txt'
+    #     storage_service.objects().insert(bucket='isb-cgc_logs',
+    #                                      name=filename,
+    #                                      media_body=media,
+    #                                      ).execute()
 
     return HttpResponse('')
 
 
 def get_binary_log_filenames():
-    database = settings.DATABASES['default']
-    env = os.getenv('SERVER_SOFTWARE')
-    if env and env.startswith('Google App Engine/'):
-        db = MySQLdb.connect(
-            unix_socket=database['HOST'],
-            db=database['NAME'],
-            user=database['USER'],
-        )
-    else:
-        db = MySQLdb.connect(
-            host=settings.IPV4,
-            db=database['NAME'],
-            user=database['USER'],
-            passwd=database['PASSWORD']
-        )
+    db = sql_connection()
     try:
         cursor = db.cursor()
         cursor.execute('SHOW BINARY LOGS;')
         filenames = []
         for row in cursor.fetchall():
             filenames.append(row[0])
+        return filenames
     except (TypeError, IndexError) as e:
         logger.warn('Error in retrieving binary log filenames: {}'.format(e))
 
-    return filenames
+
+@login_required
+def remove_user_from_ACL(request, nih_username):
+    edit_dbGaP_authentication_list(nih_username)
+    if request.user.is_superuser:
+        try:
+            nih_user = NIH_User.objects.get(NIH_username=nih_username)
+            user = User.objects.get(id=nih_user.user_id)
+            email = user.email
+        except (ObjectDoesNotExist, MultipleObjectsReturned), e:
+            logger.error("Error when attempting to emergency remove NIH username {} from ACL: {}".format(nih_username, e))
+            return HttpResponse("Error when attempting to emergency remove NIH username {} from ACL: {}".format(nih_username, e))
+
+        service, http_auth = get_directory_resource()
+        try:
+            result = service.members().delete(
+                groupKey=ACL_GOOGLE_GROUP,
+                memberKey=email
+            ).execute(http=http_auth)
+            logger.info(result)
+        except HttpError as e:
+            logger.error("Error when attempting to emergency remove NIH username {} from ACL: {}".format(nih_username, e))
+            return HttpResponse("HttpError when attempting to emergency remove NIH username {nih_username} with email {email} from ACL.".format(
+                nih_username=nih_username, email=email))
+
+        logger.warn("Successfully emergency removed user with NIH username {nih_username} and email {email} from ACL.".format(
+            nih_username=nih_username, email=email))
+        # also deactivate NIH user in NIH_User table
+        nih_user.active = 0
+        nih_user.dbGaP_authorized = 0
+        nih_user.save()
+        logger.warn("Successfully emergency deactivated user with NIH username {nih_username} and email {email} from NIH_User table.".format(
+            nih_username=nih_username, email=email))
+        edit_dbGaP_authentication_list(nih_username)
+        return HttpResponse("Successfully removed user with NIH username {nih_username} and email {email} from ACL.".format(
+            nih_username=nih_username, email=email))
+    else:
+        return redirect(settings.BASE_URL)
+
+
+def edit_dbGaP_authentication_list(nih_username):
+
+    nih_username = nih_username.upper()
+
+    # 1. read the contents of the dbGaP authentication list
+    storage_service = get_storage_resource()
+    filename = settings.DBGAP_AUTHENTICATION_LIST_FILENAME
+    bucket_name = settings.DBGAP_AUTHENTICATION_LIST_BUCKET
+    req = storage_service.objects().get_media(bucket=bucket_name,
+                                              object=filename)
+    dbGaP_authorized_list = req.execute()
+    rows = [row.strip() for row in dbGaP_authorized_list.split('\n') if row.strip()]
+
+    # 2. remove the line with the offending nih_username
+    for row in rows:
+        # todo: potential bug if nih_username for one row is part of someone else's email
+        if nih_username in row:
+            try:
+                rows.remove(row)
+            except ValueError as e:
+                logger.warn("Couldn't remove a row from {}. {}".format(
+                    settings.DBGAP_AUTHENTICATION_LIST_FILENAME, e))
+
+    # 3. reinsert the new dbGaP authentication list
+    new_authentication_list = "\n".join(rows)
+    media = http.MediaIoBaseUpload(io.BytesIO(new_authentication_list), 'text/plain')
+    req = storage_service.objects().insert(bucket=bucket_name,
+                                           name=filename,
+                                           media_body=media
+                                           )
+    req.execute()
+    logger.info("NIH user {} removed from {}".format(
+        nih_username, settings.DBGAP_AUTHENTICATION_LIST_FILENAME))

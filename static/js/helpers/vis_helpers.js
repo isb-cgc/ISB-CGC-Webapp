@@ -217,7 +217,7 @@ define(['jquery'], function($) {
         select_cohort_callback: function(obj, value, label) {
             var span_obj = $('<div class="filter-label label label-default space-right-5" value="' + value + '" name="cohort-ids">'
                         + label
-                        + '<a class="remove-cohort space-left-5"><i class="fa fa-times"></i></a>'
+                        + '<a role="button" class="remove-cohort space-left-5" aria-label="Remove Cohort Button"><i class="fa fa-times"></i></a>'
                         + '</div>');
             var helpers = this;
             span_obj.children('.remove-cohort').on('click', function() { helpers.remove_cohort_callback(this); });

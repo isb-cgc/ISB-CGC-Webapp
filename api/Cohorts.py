@@ -1,23 +1,22 @@
+import logging
+from datetime import datetime
+
 import endpoints
 from google.appengine.ext import ndb
 from protorpc import messages, message_types
 from protorpc import remote
-from django.conf import settings
-from metadata import MetadataItem, IncomingMetadataItem
-
 from oauth2client.client import AccessTokenCredentials
-import logging
-from datetime import datetime
-
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.contrib.auth.models import User as Django_User
-from accounts.models import NIH_User
-from cohorts.models import Cohort as Django_Cohort, Cohort_Perms, Patients, Samples, Filters, Cohort_Comments
-from bq_data_access.cohort_bigquery import BigQueryCohortSupport
 import django
 
+from metadata import MetadataItem, IncomingMetadataItem
 
+from accounts.models import NIH_User
+from cohorts.models import Cohort as Django_Cohort, Cohort_Perms, Patients, Samples, Filters
+from bq_data_access.cohort_bigquery import BigQueryCohortSupport
 from api_helpers import *
+
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +34,7 @@ IMPORTANT_FEATURES = [
     'gender',
     'vital_status',
     'country',
-    'disease_code',
+    'Study',
     'age_at_initial_pathologic_diagnosis',
     'TP53',
     'RB1',
@@ -190,6 +189,7 @@ class SavedCohort(messages.Message):
 
 
 def get_user_email_from_token(access_token):
+    print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     user_email = None
     credentials = AccessTokenCredentials(access_token, 'test-user')
     http = credentials.authorize(httplib2.Http())
@@ -211,6 +211,7 @@ class Cohort_Endpoints_API(remote.Service):
     @endpoints.method(GET_RESOURCE, CohortsList,
                       path='cohorts_list', http_method='GET', name='cohorts.list')
     def cohorts_list(self, request):
+        print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         user_email = None
 
         if endpoints.get_current_user() is not None:
@@ -300,7 +301,7 @@ class Cohort_Endpoints_API(remote.Service):
     @endpoints.method(GET_RESOURCE, CohortPatientsSamplesList,
                       path='cohort_patients_samples_list', http_method='GET', name='cohorts.cohort_patients_samples_list')
     def cohort_patients_samples_list(self, request):
-
+        print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         user_email = None
 
         if endpoints.get_current_user() is not None:
@@ -373,6 +374,7 @@ class Cohort_Endpoints_API(remote.Service):
     @endpoints.method(GET_RESOURCE, PatientDetails,
                       path='patient_details', http_method='GET', name='cohorts.patient_details')
     def patient_details(self, request):
+        print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
 
         patient_barcode = request.__getattribute__('patient_barcode')
 
@@ -398,7 +400,6 @@ class Cohort_Endpoints_API(remote.Service):
             clinical_cursor.execute(clinical_query_str, query_tuple)
             row = clinical_cursor.fetchone()
             item = MetadataItem(
-                adenocarcinoma_invasion=str(row["adenocarcinoma_invasion"]),
                 age_at_initial_pathologic_diagnosis=None if "age_at_initial_pathologic_diagnosis" not in row or row["age_at_initial_pathologic_diagnosis"] is None else int(row["age_at_initial_pathologic_diagnosis"]),
                 anatomic_neoplasm_subdivision=str(row["anatomic_neoplasm_subdivision"]),
                 batch_number=None if "batch_number" not in row or row["batch_number"] is None else int(row["batch_number"]),
@@ -409,13 +410,12 @@ class Cohort_Endpoints_API(remote.Service):
                 clinical_T=str(row["clinical_T"]),
                 colorectal_cancer=str(row["colorectal_cancer"]),
                 country=str(row["country"]),
-                country_of_procurement=str(row["country_of_procurement"]),
                 days_to_birth=None if "days_to_birth" not in row or row['days_to_birth'] is None else int(row["days_to_birth"]),
                 days_to_death=None if "days_to_death" not in row or row['days_to_death'] is None else int(row["days_to_death"]),
                 days_to_initial_pathologic_diagnosis=None if "days_to_initial_pathologic_diagnosis" not in row or row['days_to_initial_pathologic_diagnosis'] is None else int(row["days_to_initial_pathologic_diagnosis"]),
                 days_to_last_followup=None if "days_to_last_followup" not in row or row['days_to_last_followup'] is None else int(row["days_to_last_followup"]),
                 days_to_submitted_specimen_dx=None if "days_to_submitted_specimen_dx" not in row or row['days_to_submitted_specimen_dx'] is None else int(row["days_to_submitted_specimen_dx"]),
-                Disease_Code=str(row["Disease_Code"]),
+                Study=str(row["Study"]),
                 ethnicity=str(row["ethnicity"]),
                 frozen_specimen_anatomic_site=str(row["frozen_specimen_anatomic_site"]),
                 gender=str(row["gender"]),
@@ -429,7 +429,6 @@ class Cohort_Endpoints_API(remote.Service):
                 icd_10=str(row["icd_10"]),
                 icd_o_3_histology=str(row["icd_o_3_histology"]),
                 icd_o_3_site=str(row["icd_o_3_site"]),
-                lymph_node_examined_count=None if "lymph_node_examined_count" not in row or row["lymph_node_examined_count"] is None else int(row["lymph_node_examined_count"]),  # 42)
                 lymphatic_invasion=str(row["lymphatic_invasion"]),
                 lymphnodes_examined=str(row["lymphnodes_examined"]),
                 lymphovascular_invasion_present=str(row["lymphovascular_invasion_present"]),
@@ -455,12 +454,11 @@ class Cohort_Endpoints_API(remote.Service):
                 race=str(row["race"]),
                 residual_tumor=str(row["residual_tumor"]),
                 tobacco_smoking_history=str(row["tobacco_smoking_history"]),
-                total_number_of_pregnancies=None if "total_number_of_pregnancies" not in row or row["total_number_of_pregnancies"] is None else int(row["total_number_of_pregnancies"]),
                 tumor_tissue_site=str(row["tumor_tissue_site"]),
                 tumor_type=str(row["tumor_type"]),
-                venous_invasion=str(row["venous_invasion"]),
+                weiss_venous_invasion=str(row["weiss_venous_invasion"]),
                 vital_status=str(row["vital_status"]),
-                weight=None if "weight" not in row or row["weight"] is None else int(row["weight"]),
+                weight=None if "weight" not in row or row["weight"] is None else int(float(row["weight"])),
                 year_of_initial_pathologic_diagnosis=str(row["year_of_initial_pathologic_diagnosis"])
             )
 
@@ -491,7 +489,7 @@ class Cohort_Endpoints_API(remote.Service):
     @endpoints.method(GET_RESOURCE, SampleDetails,
                       path='sample_details', http_method='GET', name='cohorts.sample_details')
     def sample_details(self, request):
-
+        print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         sample_barcode = request.__getattribute__('sample_barcode')
         biospecimen_query_str = 'select * ' \
                                 'from metadata_biospecimen ' \
@@ -563,7 +561,6 @@ class Cohort_Endpoints_API(remote.Service):
                 batch_number=None if "batch_number" not in row or row["batch_number"] is None else int(row["batch_number"]),
                 bcr=str(row["bcr"]),
                 days_to_collection=None if "days_to_collection" not in row or row['days_to_collection'] is None else int(row["days_to_collection"]),
-                Disease_Code=str(row["Disease_Code"]),
                 max_percent_lymphocyte_infiltration=None if "max_percent_lymphocyte_infiltration" not in row or row["max_percent_lymphocyte_infiltration"] is None else int(row["max_percent_lymphocyte_infiltration"]),  # 46)
                 max_percent_monocyte_infiltration=None if "max_percent_monocyte_infiltration" not in row or row["max_percent_monocyte_infiltration"] is None else int(row["max_percent_monocyte_infiltration"]),  # 47)
                 max_percent_necrosis=None if "max_percent_necrosis" not in row or row["max_percent_necrosis"] is None else int(row["max_percent_necrosis"]),  # 48)
@@ -583,11 +580,8 @@ class Cohort_Endpoints_API(remote.Service):
                 ParticipantBarcode=str(row["ParticipantBarcode"]),
                 Project=str(row["Project"]),
                 SampleBarcode=str(row["SampleBarcode"]),
-                Study=str(row["Study"]),
-                tumor_pathology=str(row["tumor_pathology"])
+                Study=str(row["Study"])
             )
-
-
             aliquot_cursor = db.cursor(MySQLdb.cursors.DictCursor)
             aliquot_cursor.execute(aliquot_query_str, extra_query_tuple)
             aliquot_data = []
@@ -598,7 +592,6 @@ class Cohort_Endpoints_API(remote.Service):
             patient_cursor.execute(patient_query_str, query_tuple)
             row = patient_cursor.fetchone()
             patient_barcode = str(row["ParticipantBarcode"])
-
 
             data_cursor = db.cursor(MySQLdb.cursors.DictCursor)
             data_cursor.execute(data_query_str, extra_query_tuple)
@@ -630,7 +623,6 @@ class Cohort_Endpoints_API(remote.Service):
             data_cursor.close()
             db.close()
 
-
             return SampleDetails(biospecimen_data=item, aliquots=aliquot_data,
                                  patient=patient_barcode, data_details=data_data,
                                  data_details_count=len(data_data))
@@ -647,7 +639,7 @@ class Cohort_Endpoints_API(remote.Service):
     @endpoints.method(GET_RESOURCE, DataFileNameKeyList,
                       path='datafilenamekey_list', http_method='GET', name='cohorts.datafilenamekey_list')
     def datafilenamekey_list(self, request):
-
+        print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         user_email = None
         dbGaP_authorized = False
 
@@ -719,6 +711,7 @@ class Cohort_Endpoints_API(remote.Service):
     @endpoints.method(POST_RESOURCE, SavedCohort,
                       path='save_cohort', http_method='POST', name='cohort.save')
     def save_cohort(self, request):
+        print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         user_email = None
 
         if endpoints.get_current_user() is not None:
@@ -760,8 +753,6 @@ class Cohort_Endpoints_API(remote.Service):
             # patient_query_str += ' GROUP BY ParticipantBarcode'
             sample_query_str += ' GROUP BY SampleBarcode'
 
-            print '\npatient_query_str'
-            print patient_query_str
             patient_barcodes = []
             sample_barcodes = []
             try:
@@ -834,6 +825,7 @@ class Cohort_Endpoints_API(remote.Service):
     @endpoints.method(DELETE_RESOURCE, ReturnJSON,
                       path='delete_cohort', http_method='POST', name='cohort.delete')
     def delete_cohort(self, request):
+        print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         user_email = None
         result_message = None
 

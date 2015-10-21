@@ -1,5 +1,5 @@
-# ISB CGC Webapp
-This is the repository of code for the web application developed by the Institute for Systems Biology for the Cancer Genomics Cloud Pilot Project.
+# UI-prototyping
+ISB-CGC UI prototyping
 
 This project uses Google App Engine, Python 2.7, Django 1.7.1, and MySQL 5.6
 
@@ -14,12 +14,11 @@ These are the required libraries that are not included (this should be zipped an
 - googleapiclient
 - httplib2
 - identitytoolkit
+- endpoints==1.0
 - oauth2client
 - openid
 - pyasn1
 - pyasn1_modules
-- pysftp.py
-- pytz (pytz-gae)
 - requests==2.3 (in order to work with django-allauth)
 - requests_oauthlib
 - rsa
@@ -28,75 +27,89 @@ These are the required libraries that are not included (this should be zipped an
 - uritemplate
 - zoneinfo
 
-NOTE: Google's Python Development Server does NOT come with pycrypto and must be added to local virtual environment used to run dev_appserver.py. It is included when the app is deployed, so there is no need to zip it and include in /lib folder.
-
 This project also includes the Endpoints API that the django application is running off of. Different versions of the application can access different version of the api as described [here](https://cloud.google.com/appengine/docs/python/endpoints/test_deploy#accessing_backend_api_versions_deployed_to_non-default_application_versions)
 
 # Installation Instructions For Local Development (OSX, Linux Distributions)
 
 1. Download [Google App Engine SDK for Python](https://cloud.google.com/appengine/downloads#Google_App_Engine_SDK_for_Python) and install. Be sure to add the google_appengine directory to your PATH.
 `export PATH=$PATH:/path/to/google_appengine`
-2. Download [Google Cloud SDK](https://cloud.google.com/sdk/) and install. Make sure that the edited .bash_profile or .bashrc file is pointing to the right location of google-cloud-sdk directory. 
+2. Download [Google Cloud SDK](https://cloud.google.com/sdk/) and install. Make sure that the edited .bash_profile or .bashrc file is pointing to the right location of google-cloud-sdk directory.
 3. Authenticate the Google Cloud Platform by running
 `gcloud auth login`
-4. If you are using isb-cgc as your Google Cloud Project, you will need access to the ISB-CGC Google Drive directory (please ask project members for this information) to download the following. Please refer to Deploying to New Cloud Project for instructions on how to generate private keys and client secrets.:
+4. If you are using isb-cgc as your Google Cloud Project, you will need access to the ISB-CGC Google Drive directory (please ask project members for this information) to download the following:
   - privatekey.pem (This was generated from a .p12 file downloaded from within the isb-cgc project)
   - privatekey.json
-  - lib.zip
+  - lib.zip 
   - client_secrets.json
   - google_api_key.txt (This should be placed in the genome_browser directory.)
-  - dev_2015-07-09_metadata_attr_samples.sql
+  - client_cert.pem, client_key.pem, server_ca.pem, all in GenespotRE/
+  - local-sqldump_10-22-2015.sql.gz
+  Otherwise, please refer to Deploying to New Cloud Project for instructions on how to generate private keys and client secrets.
 5. Set up python virtual environment with Python 2.7, Django 1.7.1, MySQL 5.6:
 6. `pip install django==1.7.1`
 7. `pip install MySQL-python` - You may need to install MySQL if it is not already installed. It is recommended to use [homebrew](http://brew.sh/) if you are on OS X.
-8. Create databases dev, stage, test, and prod (this is not strictly necessary), but all subsequent operations on databases should be done for all the databases you plan to use.
+8. You should probably be okay importing the MySQL dump from drive:
+   'mysql -uroot -p < local-sqldump_10-22-2015.sql'
 9. `pip install pycrypto` - Needed as previously noted
 10. In GenespotRE/secret_settings.py change the local database settings to match your local settings. You will also need to change other settings if not using isb-cgc as your Google Cloud Project (Pointing to correct .pem and .json files, and DEVELOPER_COHORT_TABLE_ID should be set to a unique table in a dataset in Big Query). You may need to change the name of the user, and password to match your local settings. Do not commit these changes.  Do similarly for scripts/add_site_ids.py and scripts/add_alldata_cohort.py. You can add additionaly sets of settings to the secret settings file if you like. Use an environment variable set in app.yaml and manage.py to switch between settings.
 11. run `python manage.py makemigrations` - Setting up Django models
-12. run `python manage.py migrate` - Setting up Django models
-13. run `python manage.py createsuperuser` and leave the superuser's email blank.
-14. Enter a mysql shell and run `CREATE USER 'django'@'localhost' IDENTIFIED BY 'PASSWORD'`
-    and `GRANT SELECT, INSERT, UPDATE, DELETE ON <DATABASE NAME>.* TO 'django'@'localhost'`. Remember to set the password appropriately.
-15. run `python scripts/add_site_ids.py`, making sure the settings in the script are correct to your environment.
-16. run scripts/add_alldata_cohort.py. This has several parameters that it can take in. This is required to create an "All TCGA Data". It has be created both in SQL and BigQuery if you want users to be able to visualize it. Please adjust database connector parameters accordingly in the code itself and read through to get an understanding of how it works.
-17. Import metadata_samples and metadata_attr tables with `mysql -u root -p <databasename> < 7-23-15_metadata_attr_samples.sql` .
-18. Import the feature definition tables by using a .sql dump file. There are multiple feature definition tables that are required.
-  - feature_defs_cnvr
-  - feature_defs_gexp
-  - feature_defs_gnab
-  - feature_defs_meth
-  - feature_defs_mirn
-  - feature_defs_rppa
-19. run `dev_appserver.py .`
-20. Go to [http://localhost:8080/](http://localhost:8080) and hope for the best!
-21. If the site works, go to [http://localhost:8080/admin](http://localhost:8080/admin) and enter the superuser name and password you created.
-  - Open the Social Applications table in admin to add a new Social Application. Make the provider Google, name it whatever you want ('Google' is fine), copy and paste the client_id and client_secret from our client_secrets.json file into the Social Application's Client id and Secret key fields. Leave the Key field blank. 
-  - Then select isb-cgc.appspot.com, localhost:8000, and localhost:8080 in the Available sites field and move them to the Chosen sites field.
-  
-When running the app through dev_appserver.py, it is simulating the environment on the cloud. It is recommended to run the app this way, and not through the django manage.py runserver in order to simulate how it will run when deployed.
+12. run `python manage.py migrate` - Setting up Django models.  If you get errors from mysql being unwilling to create things that already exist, or delete things that don't exist, you can try using the --fake at the end. 
+13. If you did not use a sql dump, and have not done so before, run `python manage.py createsuperuser` and leave the superuser's email blank.  Running this more than once will create multiple superusers which will produce a bug.
+14. If you did no use a sql dump, enter a mysql shell and run `CREATE USER 'django'@'localhost' IDENTIFIED BY 'PASSWORD'` and `GRANT SELECT, INSERT, UPDATE, DELETE ON <DATABASE NAME>.* TO 'django'@'localhost'`. Remember to set the password appropriately.
 
-When app is running, api is also running at the same time. It is currently set up to look at local MySQL database if running locally, so make sure you have MySQL running. You can explore your local api [here](http://localhost:8080/_ah/api/explorer).
-The main api endpoints can be explored at [https://isb-cgc.appspot.com/_ah/api/explorer](https://isb-cgc.appspot.com/_ah/api/explorer)
-The development api endpoints can be explored at [https://dev-dot-isb-cgc.appspot.com/_ah/api/explorer](https://dev-dot-isb-cgc.appspot.com/_ah/api/explorer)
+LOCAL TEST:
+
+L1. For a local test, run 'gcloud preview app run ./app.yaml' and go
+to [http://localhost:8080/](http://localhost:8080), hoping for the
+best!
+
+L2. If the site works, go to [http://localhost:8080/admin](http://localhost:8080/admin) and enter the superuser name and password you created.
+  - Open the Social Applications table in admin to add a new Social Application. Make the provider Google, name it whatever you want ('Google' is fine), copy and paste the client_id and client_secret from our client_secrets.json file into the Social Application's Client id and Secret key fields. Leave the Key field blank.
+  - Then select isb-cgc.appspot.com, localhost:8000, and localhost:8080 in the Available sites field and move them to the Chosen sites field.
+
+L3. When app is running, api is also running at the same time. It is currently set up to look at local MySQL database if running locally, so make sure you have MySQL running. You can explore your local api [here](http://localhost:8080/_ah/api/explorer).
+
+CLOUD TEST:
+
+C1. For a cloud test, set your own module in app.yaml, ensuring that 'module: MOD' and " 'VERSION_NAME': 'MOD' " are consistent.  MOD will be used below in the URIs, etc.
+
+C2. Check in the Developer's Console, and ensure that the following URLs are in the Redirect URIs:
+- https://MOD-dot-isb-cgc.appspot.com
+- http://MOD-dot-isb-cgc.appspot.com
+- https://MOD-dot-isb-cgc.appspot.com/accounts/google/login/callback/
+- http://MOD-dot-isb-cgc.appspot.com/accounts/google/login/callback/
+
+C3. From the shell, run 'gcloud preview app deploy ./app.yaml --set-default' and go
+to https://MOD-dot-isb-cgc.appspot.com.
+
+C4. The main api endpoints can be explored at https://MOD-dot-isb-cgc.appspot.com/_ah/api/explorer
+
+C5 When you are finished working with instances, and no longer need them, please delete the version, through the Developers Console: 
+  - (along the left hand side) Dev Console > Compute > App Engine > Versions
+  - Select the MOD Module (top left of main panel: whichever ne you used)
+  - Put a checkmark by each and choose delete.  Once all non-defaults
+    are deleted, you will be allowed to delete the default Version.
+  - We get charged $$ for having lots of zombie vm's running, so clean up!
+
 
 # Working on front-end html and css
 Make sure SASS is installed. SASS files are compiled from sass/ into the static/css/ directory.
 
-For SASS: run this from root directory 
+For SASS: run this from root directory
 ```
 sass --watch sass/main.sass:static/css/main.css
 ```
 
 # Deploying to a new Google Cloud Project
 
-NOTE: These are only instructions for setting up the AppEngine application and does not include Computational or BigQuery instructions. 
+NOTE: These are only instructions for setting up the AppEngine application and does not include Computational or BigQuery instructions.
 
-1. Under APIs & Auth --> APIs 
+1. Under APIs & Auth --> APIs
   - Enable Identity Toolkit API
 2. Under Apis & Auth --> Credentials
   - Create a new Client ID
     - Select Web Application
-    - Javascript Origins should include 
+    - Javascript Origins should include
       - http://localhost:8000
       - http://localhost:8080
       - http://YOUR-APP-ID.appspot.com/
@@ -135,6 +148,5 @@ NOTE: These are only instructions for setting up the AppEngine application and d
 10. The Cloud Project should now be ready for you to deploy. Either deploy from the Google App Engine Launcher, or through the terminal `appcfg.py update` in the root directory of your project.
 11. Go to `http://<YOUR-APP-ID>.appspot.com/` and hope for the best!
 12. If the site works, go to `http://<YOUR-APP-ID>.appspot.com/admin` and enter the superuser name and password you created.
-  - Open the Social Applications table in admin to add a new Social Application. Make the provider Google, name it whatever you want ('Google' is fine), copy and paste the client_id and client_secret from our client_secrets.json file into the Social Application's Client id and Secret key fields. Leave the Key field blank. 
+  - Open the Social Applications table in admin to add a new Social Application. Make the provider Google, name it whatever you want ('Google' is fine), copy and paste the client_id and client_secret from our client_secrets.json file into the Social Application's Client id and Secret key fields. Leave the Key field blank.
   - Then select isb-cgc.appspot.com, localhost:8000, and localhost:8080 in the Available sites field and move them to the Chosen sites field.
-  

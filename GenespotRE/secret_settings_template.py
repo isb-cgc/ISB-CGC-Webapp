@@ -1,13 +1,21 @@
 import os
 
+### MVM STUFF
+SSL_DIR = os.path.abspath(os.path.dirname(__file__))+os.sep
+if 'VERSION_NAME' in os.environ:
+    VER = os.getenv('VERSION_NAME')
+else:
+    VER = 'DEV'
+###
+
 SETTINGS = {
     'SECRET_KEY': '', # Django SECRET_KEY
     'DEBUG': True,
     'PROJECT_ID': '000000000000', # Google Cloud Project ID #
     'BQ_PROJECT_ID': '000000000000', # Google Cloud Project ID #
 
-    'CLOUD_BASE_URL': 'http://example.appspot.com', # Deployed url
-    'CLOUD_API_URL': 'https://example.appspot.com', # Deployed api url
+    'CLOUD_BASE_URL': 'http://'+VER+'-dot-isb-cgc.appspot.com', # Deployed url
+    'CLOUD_API_URL': 'https://'+VER+'-dot-isb-cgc.appspot.com', # Deployed api url
 
     'LOCAL_BASE_URL': 'http://localhost:8000', # Localhost url
 
@@ -21,9 +29,18 @@ SETTINGS = {
     'CLOUD_DATABASE': {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'HOST': '/cloudsql/<your-app-id>:<your-database-instance>',
+            'HOST': '<ip-of-cloudsql-instance>',
             'NAME': '<name-of-database-in-cloudsql>',
-            'USER': '<username>'
+            'USER': '<username>',
+            'PASSWORD': '<password>',
+            'PORT': 3306,
+            'OPTIONS': {
+                'ssl': {
+                    'ca': SSL_DIR + 'server-ca.pem',
+                    'cert': SSL_DIR + 'client-cert.pem',
+                    'key': SSL_DIR + 'client-key.pem'
+                }
+            }
         }
     },
     'CLOUD_DATABASE_LOCAL_CONNECTION': {
@@ -66,11 +83,17 @@ SETTINGS = {
     'DBGAP_AUTHENTICATION_LIST_BUCKET': '', # name of bucket containing dbGap Authentication list file
     'ACL_GOOGLE_GROUP': '', # Google group used for ACL list
     'ERA_LOGIN_URL': '', # Url to Python SAML virtul machine
-    'IPV4': '173.194.225.46', # ??? Who is using this ???
+    'IPV4': '', # IP address of CloudSQL database
+
+    # Compute services
+    'PAIRWISE_SERVICE_URL': '',
+
+    # Cloud Storage Buckets
+    'OPEN_DATA_BUCKET': '',
+    'CONTROLLED_DATA_BUCKET': ''
 }
 
 def get(setting):
-    #TODO: This should throw an exception
     if setting in SETTINGS:
         return SETTINGS[setting]
     else:

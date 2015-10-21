@@ -1,11 +1,11 @@
 import json
+
 import endpoints
-from protorpc import messages, message_types
+from protorpc import messages
 from protorpc import remote
+
 # from django.contrib.auth.models import User
-import pprint
 from api_helpers import *
-import itertools
 
 
 class ExtraUserData(messages.Message):

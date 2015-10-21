@@ -1,24 +1,32 @@
 import json
 import collections
+import csv
+import sys
+# import pexpect
+
 from django.utils import formats
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.core.urlresolvers import reverse
+from django.core.exceptions import ObjectDoesNotExist
 from django.views.decorators.csrf import csrf_protect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from google.appengine.api import urlfetch
-from django.db.models import Count
 from django.contrib.auth.models import User
 from django.conf import settings
+
+from django.http import StreamingHttpResponse
+from google.appengine.api import urlfetch
 
 from models import Cohort, Patients, Samples, Cohort_Perms, Source, Filters, Cohort_Comments
 from visualizations.models import Plot_Cohorts, Plot
 from bq_data_access.cohort_bigquery import BigQueryCohortSupport
 
+debug = settings.DEBUG # RO global for this file
 urlfetch.set_default_fetch_deadline(60)
 
 def convert(data):
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     if isinstance(data, basestring):
         return str(data)
     elif isinstance(data, collections.Mapping):
@@ -33,8 +41,59 @@ COHORT_API = settings.BASE_API_URL + '/_ah/api/cohort_api/v1'
 META_DISCOVERY_URL = settings.BASE_API_URL + '/_ah/api/discovery/v1/apis/meta_api/v1/rest'
 METADATA_API = settings.BASE_API_URL + '/_ah/api/meta_api/v1'
 
+
+def data_availability_sort(key, value, data_attr, attr_details):
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+    if key == 'has_Illumina_DNASeq':
+        attr_details['DNA_sequencing'] = sorted(value, key=lambda k: int(k['count']), reverse=True)
+    if key == 'has_SNP6':
+        attr_details['SNP_CN'] = sorted(value, key=lambda k: int(k['count']), reverse=True)
+    if key == 'has_RPPA':
+        attr_details['Protein'] = sorted(value, key=lambda k: int(k['count']), reverse=True)
+    if key == 'has_27k':
+        attr_details['DNA_methylation'].append({
+            'value': '27k',
+            'count': [v['count'] for v in value if v['value'] == 'True'][0]
+        })
+    if key == 'has_450k':
+        attr_details['DNA_methylation'].append({
+            'value': '450k',
+            'count': [v['count'] for v in value if v['value'] == 'True'][0]
+        })
+    if key == 'has_HiSeq_miRnaSeq':
+        attr_details['miRNA_sequencing'].append({
+            'value': 'Illumina HiSeq',
+            'count': [v['count'] for v in value if v['value'] == 'True'][0]
+        })
+    if key == 'has_GA_miRNASeq':
+        attr_details['miRNA_sequencing'].append({
+            'value': 'Illumina GA',
+            'count': [v['count'] for v in value if v['value'] == 'True'][0]
+        })
+    if key == 'has_UNC_HiSeq_RNASeq':
+        attr_details['RNA_sequencing'].append({
+            'value': 'UNC Illumina HiSeq',
+            'count': [v['count'] for v in value if v['value'] == 'True'][0]
+        })
+    if key == 'has_UNC_GA_RNASeq':
+        attr_details['RNA_sequencing'].append({
+            'value': 'UNC Illumina GA',
+            'count': [v['count'] for v in value if v['value'] == 'True'][0]
+        })
+    if key == 'has_BCGSC_HiSeq_RNASeq':
+        attr_details['RNA_sequencing'].append({
+            'value': 'BCGSC Illumina HiSeq',
+            'count': [v['count'] for v in value if v['value'] == 'True'][0]
+        })
+    if key == 'has_BCGSC_GA_RNASeq':
+        attr_details['RNA_sequencing'].append({
+            'value': 'BCGSC Illumina GA',
+            'count': [v['count'] for v in value if v['value'] == 'True'][0]
+        })
+
 @login_required
 def cohort_detail(request, cohort_id=0):
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     users = User.objects.filter(is_superuser=0)
     cohort = None
     shared_with_users = []
@@ -42,7 +101,7 @@ def cohort_detail(request, cohort_id=0):
     # service = build('meta', 'v1', discoveryServiceUrl=META_DISCOVERY_URL)
     clin_attr = [
         'Project',
-        'Disease_Code',
+        'Study',
         'vital_status',
         # 'survival_time',
         'gender',
@@ -64,28 +123,28 @@ def cohort_detail(request, cohort_id=0):
         'icd_o_3_histology'
     ]
 
-    data_attr = [
-        'has_Illumina_DNASeq',
-        'has_BCGSC_HiSeq_RNASeq',
-        'has_UNC_HiSeq_RNASeq',
-        'has_BCGSC_GA_RNASeq',
-        'has_UNC_GA_RNASeq',
-        'has_HiSeq_miRnaSeq',
-        'has_GA_miRNASeq',
-        'has_RPPA',
-        'has_SNP6',
-        'has_27k',
-        'has_450k'
-    ]
-    #
     # data_attr = [
-    #     'DNA_sequencing',
-    #     'RNA_sequencing',
-    #     'miRNA_sequencing',
-    #     'Protein',
-    #     'SNP/CN',
-    #     'DNA_methylation'
+    #     'has_Illumina_DNASeq',
+    #     'has_BCGSC_HiSeq_RNASeq',
+    #     'has_UNC_HiSeq_RNASeq',
+    #     'has_BCGSC_GA_RNASeq',
+    #     'has_UNC_GA_RNASeq',
+    #     'has_HiSeq_miRnaSeq',
+    #     'has_GA_miRNASeq',
+    #     'has_RPPA',
+    #     'has_SNP6',
+    #     'has_27k',
+    #     'has_450k'
     # ]
+
+    data_attr = [
+        'DNA_sequencing',
+        'RNA_sequencing',
+        'miRNA_sequencing',
+        'Protein',
+        'SNP_CN',
+        'DNA_methylation'
+    ]
 
     molec_attr = [
         'somatic_mutation_status',
@@ -104,8 +163,14 @@ def cohort_detail(request, cohort_id=0):
 
     # Get and sort counts
     attr_details = convert(results['count'])
+    attr_details['RNA_sequencing'] = []
+    attr_details['miRNA_sequencing'] = []
+    attr_details['DNA_methylation'] = []
     for key, value in attr_details.items():
-        attr_details[key] = sorted(value, key=lambda k: int(k['count']), reverse=True)
+        if key.startswith('has_'):
+            data_availability_sort(key, value, data_attr, attr_details)
+        else:
+            attr_details[key] = sorted(value, key=lambda k: int(k['count']), reverse=True)
 
     template_values = {
         'request': request,
@@ -116,20 +181,32 @@ def cohort_detail(request, cohort_id=0):
         'clin_attr': clin_attr,
         'data_attr': data_attr,
         'molec_attr': molec_attr,
+        'base_url': settings.BASE_URL,
         'base_api_url': settings.BASE_API_URL
     }
     template = 'cohorts/new_cohort.html'
 
     if cohort_id != 0:
-        cohort = Cohort.objects.get(id=cohort_id, active=True)
-        cohort.perm = cohort.get_perm(request)
-        shared_with_ids = Cohort_Perms.objects.filter(cohort=cohort, perm=Cohort_Perms.READER).values_list('user', flat=True)
-        shared_with_users = User.objects.filter(id__in=shared_with_ids)
-        template = 'cohorts/cohort_details.html'
-        template_values['cohort'] = cohort
-        template_values['total_samples'] = len(cohort.samples_set.all())
-        template_values['total_patients'] = len(cohort.patients_set.all())
-        template_values['shared_with_users'] = shared_with_users
+        try:
+            cohort = Cohort.objects.get(id=cohort_id, active=True)
+            cohort.perm = cohort.get_perm(request)
+
+            if not cohort.perm:
+                messages.error(request, 'You do not have permission to view that cohort.')
+                return redirect('user_landing')
+
+            shared_with_ids = Cohort_Perms.objects.filter(cohort=cohort, perm=Cohort_Perms.READER).values_list('user', flat=True)
+            shared_with_users = User.objects.filter(id__in=shared_with_ids)
+            template = 'cohorts/cohort_details.html'
+            template_values['cohort'] = cohort
+            template_values['total_samples'] = len(cohort.samples_set.all())
+            template_values['total_patients'] = len(cohort.patients_set.all())
+            template_values['shared_with_users'] = shared_with_users
+        except ObjectDoesNotExist:
+            # Cohort doesn't exist, return to user landing with error.
+            messages.error(request, 'The cohort you were looking for does not exist.')
+            return redirect('user_landing')
+
     return render(request, template, template_values)
 
 '''
@@ -141,6 +218,7 @@ This save view only works coming from cohort editing or creation views.
 @login_required
 @csrf_protect
 def save_cohort(request):
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     redirect_url = reverse('user_landing')
 
     samples = []
@@ -241,6 +319,7 @@ def save_cohort(request):
 @login_required
 @csrf_protect
 def delete_cohort(request):
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     redirect_url = 'user_landing'
     cohort_ids = request.POST.getlist('id')
     Cohort.objects.filter(id__in=cohort_ids).update(active=False)
@@ -249,6 +328,7 @@ def delete_cohort(request):
 @login_required
 @csrf_protect
 def share_cohort(request, cohort_id=0):
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     user_ids = request.POST.getlist('users')
     users = User.objects.filter(id__in=user_ids)
 
@@ -270,6 +350,7 @@ def share_cohort(request, cohort_id=0):
 @login_required
 @csrf_protect
 def clone_cohort(request, cohort_id):
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     redirect_url = 'cohort_details'
     parent_cohort = Cohort.objects.get(id=cohort_id)
     new_name = 'Copy of %s' % parent_cohort.name
@@ -309,6 +390,7 @@ def clone_cohort(request, cohort_id):
 @login_required
 @csrf_protect
 def set_operation(request):
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     redirect_url = '/user_landing/'
 
     if request.POST:
@@ -427,20 +509,22 @@ def set_operation(request):
 @login_required
 @csrf_protect
 def union_cohort(request):
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     redirect_url = '/cohorts/'
 
     return redirect(redirect_url)
 
 @login_required
 @csrf_protect
-def intersect_cohort(request):
+def intersect_cohort(request): 
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     redirect_url = '/cohorts/'
-
     return redirect(redirect_url)
 
 @login_required
 @csrf_protect
 def set_minus_cohort(request):
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     redirect_url = '/cohorts/'
 
     return redirect(redirect_url)
@@ -448,6 +532,7 @@ def set_minus_cohort(request):
 @login_required
 @csrf_protect
 def save_comment(request):
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     content = request.POST.get('content').encode('utf-8')
     cohort = Cohort.objects.get(id=int(request.POST.get('cohort_id')))
     obj = Cohort_Comments.objects.create(user=request.user, cohort=cohort, content=content)
@@ -463,6 +548,7 @@ def save_comment(request):
 @login_required
 @csrf_protect
 def save_cohort_from_plot(request):
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     cohort_name = request.POST.get('cohort-name', 'Plot Selected Cohort')
     if cohort_name:
         # Create Cohort
@@ -520,3 +606,77 @@ def save_cohort_from_plot(request):
                     'Cohort failed to save.' \
                     '</div></div></div>'
     return HttpResponse(response_str, status=500)
+
+@login_required
+@csrf_protect
+def cohort_filelist(request, cohort_id=0):
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+    if cohort_id == 0:
+        messages.error('Cohort provided does not exist.')
+        return redirect('/user_landing')
+
+    data_url = METADATA_API + ('/cohort_files?cohort_id=%s' % cohort_id)
+    result = urlfetch.fetch(data_url, deadline=60)
+    items = json.loads(result.content)
+    if 'file_list' in items:
+        file_list = items['file_list']
+    cohort = Cohort.objects.get(id=cohort_id, active=True)
+
+    if int(items['total_file_count']) == 0:
+        messages.info(request, 'There were no files found for this cohort.')
+
+    return render(request, 'cohorts/cohort_filelist.html', {'request': request,
+                                                            'cohort': cohort,
+                                                            'base_api_url': settings.BASE_API_URL,
+                                                            'file_count': items['total_file_count'],
+                                                            'page': items['page'],
+                                                            'download_url': reverse('download_filelist', kwargs={'cohort_id': cohort_id}),
+                                                            'platform_counts': items['platform_count_list'],
+                                                            'filelist': file_list})
+
+
+
+class Echo(object):
+    """An object that implements just the write method of the file-like
+    interface.
+    """
+    def write(self, value):
+        """Write the value by returning it, instead of storing in a buffer."""
+        return value
+
+def streaming_csv_view(request, cohort_id=0):
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+    if cohort_id == 0:
+        messages.error('Cohort provided does not exist.')
+        return redirect('/user_landing')
+
+    data_url = METADATA_API + ('/cohort_files?cohort_id=%s&limit=-1' % cohort_id)
+    if 'params' in request.GET:
+        params = request.GET.get('params').split(',')
+
+        for param in params:
+            data_url += '&' + param + '=True'
+
+    result = urlfetch.fetch(data_url, deadline=60)
+    items = json.loads(result.content)
+    if 'file_list' in items:
+        file_list = items['file_list']
+        """A view that streams a large CSV file."""
+        # Generate a sequence of rows. The range is based on the maximum number of
+        # rows that can be handled by a single sheet in most spreadsheet
+        # applications.
+        rows = ()
+        rows = (["Sample", "Platform", "Pipeline", "DataLevel", "FilePath"],)
+        for file in file_list:
+            rows += ([file['sample'], file['platform'], file['pipeline'], file['datalevel'], (settings.OPEN_DATA_BUCKET + file['filename'])],)
+        pseudo_buffer = Echo()
+        writer = csv.writer(pseudo_buffer)
+        response = StreamingHttpResponse((writer.writerow(row) for row in rows),
+                                         content_type="text/csv")
+        response['Content-Disposition'] = 'attachment; filename="somefilename.csv"'
+        return response
+
+    elif 'error' in items:
+        messages.error(request, items['error']['message'])
+        return redirect(reverse('cohort_filelist', kwargs={'cohort_id':cohort_id}))
+    return render(request)

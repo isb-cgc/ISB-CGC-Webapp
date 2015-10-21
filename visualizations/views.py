@@ -1,3 +1,7 @@
+import json
+import collections
+import datetime
+
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_protect
@@ -5,14 +9,13 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.core import serializers
 from django.core.urlresolvers import reverse
 from django.utils import formats
 
 from models import SavedViz, Plot, Plot_Cohorts, Viz_Perms, Plot_Comments
 from cohorts.models import Cohort, Cohort_Perms, Patients, Samples
 from bq_data_access.feature_search.util import SearchableFieldHelper
-import json, collections, pprint, datetime
+
 
 def _decode_list(data):
     rv = []
@@ -397,7 +400,7 @@ def genericplot(request, id=0):
         title = request.POST.get('vis_title', 'Unititled Visualization')
         cohort_id = request.POST.get('cohort_id', None)
         if not cohort_id:
-            cohort = Cohort.objects.get(name='All TCGA Data')
+            cohort = Cohort.objects.get_all_tcga_cohort()
         else:
             cohort = Cohort.objects.get(id=cohort_id)
 
@@ -684,7 +687,7 @@ def save_comment(request):
 @login_required
 def add_plot(request):
     # TODO: Double check that user owns viz
-    cohort = Cohort.objects.get(name='All TCGA Data')
+    cohort = Cohort.objects.get_all_tcga_cohort()
     # Fetch cohorts list used for autocomplete listing
     cohort_perms = Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True)
     cohort_listing = Cohort.objects.filter(id__in=cohort_perms, active=True).values('id', 'name')

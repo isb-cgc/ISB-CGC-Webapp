@@ -8,3 +8,6 @@ cron:
 - description: CloudSQL logging
   url: /tasks/CloudSQL_logging
   schedule: every 24 hours
+- description: IAM logging
+  url: /tasks/IAM_logging
+  schedule: every 1 minutes

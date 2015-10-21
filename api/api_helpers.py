@@ -1,4 +1,4 @@
-from random import randint
+import sys
 
 import os
 import MySQLdb
@@ -7,32 +7,54 @@ from oauth2client.client import GoogleCredentials
 from django.conf import settings
 from googleapiclient.discovery import build
 
+
+debug = settings.DEBUG
+
 # Database connection
 def sql_connection():
-    env = os.getenv('SERVER_SOFTWARE')
-    if env and env.startswith('Google App Engine/') or os.getenv('SETTINGS_MODE') == 'prod':
+    if debug:
+        print >> sys.stderr, "      ****** sql_connection() Called. *******"
+        env = os.getenv('SERVER_SOFTWARE')
+        print >> sys.stderr, "Printing Environment."
+        print >> sys.stderr, env
+        database = settings.DATABASES['default']
+        print >> sys.stderr, "Printing Database."
+        print >> sys.stderr, database
+    if env.startswith('Google App Engine/'):
         # Connecting from App Engine
-        database = settings.DATABASES['default']
-        db = MySQLdb.connect(
-            unix_socket=database['HOST'],
-            db=database['NAME'],
-            user=database['USER'],
-        )
+        if debug: print >> sys.stderr, "PASSED env.startswith('Google App Engine/')"
+        try:
+            db = MySQLdb.connect(
+                host = database['HOST'],
+                port = 3306, #database['PORT'],
+                db = database['NAME'],
+                user = database['USER'],
+                passwd = database['PASSWORD'],
+                ssl = database['OPTIONS']['ssl'])            
+        except:
+            print >> sys.stderr, "Unexpected ERROR in sql_connection(): ", sys.exc_info()[0]
+            #return HttpResponse( traceback.format_exc() ) 
+            raise # if you want to soldier bravely on despite the exception, but comment to stderr
     else:
+        if debug: print >> sys.stderr, "FAILED env.startswith('Google App Engine/')"
         # Connecting to localhost
-        database = settings.DATABASES['default']
-        db = MySQLdb.connect(
-            host='127.0.0.1',
-            port=3306,
-            db=database['NAME'],
-            user=database['USER'],
-            passwd=database['PASSWORD']
-        )
+        try:
+            db = MySQLdb.connect(
+                host='127.0.0.1',
+                db=database['NAME'],
+                user=database['USER'],
+                passwd=database['PASSWORD'])
+        except:
+            print >> sys.stderr, "Unexpected ERROR in sql_connection(): ", sys.exc_info()[0]
+            #return HttpResponse( traceback.format_exc() ) 
+            raise # if you want to soldier bravely on despite the exception, but comment to stderr
 
+    if debug: print >> sys.stderr, "Made it to the end of sql_connection()."
     return db
 
 
 def sql_age_by_ranges(value):
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     result = ''
     if not isinstance(value, basestring):
         #value is a list of ranges
@@ -80,6 +102,7 @@ def sql_age_by_ranges(value):
     return result
 
 def gql_age_by_ranges(q, key, value):
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     result = ''
     if not isinstance(value, basestring):
         # value is a list of ranges
@@ -118,6 +141,7 @@ def gql_age_by_ranges(q, key, value):
     return result
 
 def normalize_ages(ages):
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     result = []
     new_age_list = {'10 to 39': 0, '40 to 49': 0, '50 to 59': 0, '60 to 69': 0, '70 to 79': 0, 'Over 80': 0, 'None': 0}
     for age in ages:
@@ -149,6 +173,8 @@ def normalize_ages(ages):
     return result
 
 def applyFilter(field, dict):
+# this one gets called a lot...
+#    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     query_dict = dict.copy()
     if field in dict:
         query_dict.pop(field, None)
@@ -162,6 +188,8 @@ def applyFilter(field, dict):
     return where_clause
 
 def build_where_clause(dict):
+# this one gets called a lot
+#    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     first = True
     query_str = ''
     big_query_str = ''  # todo: make this work for non-string values -- use {}.format
@@ -241,7 +269,7 @@ def possible_future_authorization_function():
     from oauth2client.client import flow_from_clientsecrets
     from oauth2client.file import Storage
     from oauth2client import tools
-    from django.conf import settings
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     flow = flow_from_clientsecrets(settings.CLIENT_SECRETS, scope='https://www.googleapis.com/auth/bigquery')
     ## in future, make storage file temporary somehow?
     storage = Storage('bigquery_credentials.dat')
@@ -256,6 +284,7 @@ def possible_future_authorization_function():
 
 
 def authorize_credentials_with_Google():
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     # documentation: https://developers.google.com/accounts/docs/application-default-credentials
     SCOPES = ['https://www.googleapis.com/auth/bigquery']
     credentials = GoogleCredentials.from_stream(settings.GOOGLE_APPLICATION_CREDENTIALS).create_scoped(SCOPES)
@@ -267,6 +296,7 @@ def authorize_credentials_with_Google():
 
 # TODO refactor to remove duplicate code
 def authorize_credentials_with_google_from_file(credentials_path):
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     # documentation: https://developers.google.com/accounts/docs/application-default-credentials
     SCOPES = ['https://www.googleapis.com/auth/bigquery']
     credentials = GoogleCredentials.from_stream(credentials_path).create_scoped(SCOPES)

@@ -64,6 +64,35 @@ def replace_whitespace(str, chr):
     return result
 
 @register.filter
+def get_data_attr_id(value, attr):
+    display_str = attr + '-' + value
+    data_attr_dictionary = {
+        'DNA_sequencing-True': 'has_Illumina_DNASeq-True',
+        'DNA_sequencing-False': 'has_Illumina_DNASeq-False',
+
+        'RNA_sequencing-UNC Illumina HiSeq': 'has_UNC_HiSeq_RNASeq-True',
+        'RNA_sequencing-BCGSC Illumina HiSeq': 'has_BCGSC_HiSeq_RNASeq-True',
+        'RNA_sequencing-UNC Illumina GA': 'has_UNC_GA_RNASeq-True',
+        'RNA_sequencing-BCGSC Illumina GA': 'has_BCGSC_GA_RNASeq-True',
+
+        'miRNA_sequencing-Illumina GA': 'has_GA_miRNASeq-True',
+        'miRNA_sequencing-Illumina HiSeq': 'has_HiSeq_miRnaSeq-True',
+
+        'Protein-False': 'has_RPPA-False',
+        'Protein-True': 'has_RPPA-True',
+
+        'SNP_CN-True': 'has_SNP6-True',
+        'SNP_CN-False': 'has_SNP6-False',
+
+        'DNA_methylation-450k': 'has_450k-True',
+        'DNA_methylation-27k': 'has_27k-True'
+    }
+    if data_attr_dictionary.get(display_str):
+        return data_attr_dictionary[display_str]
+    else:
+        return display_str
+
+@register.filter
 def get_disease_name(disease_code):
     disease_dictionary = {
         "ACC": 'Adrenocortical carcinoma',
