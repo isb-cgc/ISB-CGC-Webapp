@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+
+{% block header %}
+{% endblock %}
+
+{% block page_name %}cohort-filelist{% endblock %}
+
+{% block secondary_nav %}
+    <div class="container">
+        <div class="row">
+            <div class="menu-bar">
+                <div class="cohort-title col-md-8">
+                    <h3><a href="{% url 'cohort_details' cohort.id %}" aria-label="Back to Cohort"><i class="fa fa-chevron-left"></i></a> {{ cohort.name }}</h3>
+                </div>
+                <div class="menu-items-right col-md-4">
+{#                    <a class="btn btn-default space-top-5" id="cancel-add-filter-btn" style="display:none;">Cancel</a>#}
+{#                    <a class="btn btn-primary space-top-5" data-toggle="modal" data-target="#apply-filters-modal" style="display:none;">Apply New Filters</a>#}
+                    <div class="dropdown dropdown-menu-right space-top-5">
+                        <a role="button" class="dropdown-toggle " type="button" id="create-dropdown" data-toggle="dropdown" aria-label="Dropdown Menu" aria-expanded="true">
+                            <i class="fa fa-bars"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="create-dropdown">
+                            <li role="menuitem"><a href="{{ download_url }}" title="Download Files as CSV"><i class="fa fa-download"></i> Download File List as CSV</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div id="filter-panel" class="col-lg-3">
+        <div class="panel panel-default">
+            <div class="panel-heading" id="heading-platforms">Platforms</div>
+            <div class="panel-body">
+                <ul class="search-checkbox-list" id="{{ attr }}">
+                    {% for platform in platform_counts %}
+                        <li>
+                            <input type="checkbox" name="platform-selected" id="{{ platform.platform }}" >
+                            <label for="{{ platform.platform }}">{{ platform.platform|get_readable_name }}</label>
+                            <span class="count">({{ platform.count }})</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="content-panel" class="col-md-9">
+        <div class="filelist-panel panel">
+            <div class="panel-heading">
+                <h4>File Listing</h4>
+            </div>
+            <div class="panel-body">
+                <p>Showing 20 files of <span class="file-count">{{ file_count }}</span>. Page: <span class="page-num">{{ page }}</span></p>
+                <a role="button" id="prev-page" class="btn btn-default disabled">Previous Page</a>
+                <a role="button" id="next-page" class="btn btn-default">Next Page</a>
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th class="col-barcode">Sample Barcode</th>
+                        <th class="col-pipeline">Pipeline</th>
+                        <th class="col-platform">Platform</th>
+                        <th class="col-datalevel">Data Level</th>
+                        <th class="col-datatype">Data Type</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for file in filelist %}
+                        <tr>
+                        <td>{{ file.sample }}</td>
+                        <td>{{ file.pipeline }}</td>
+                        <td>{{ file.platform|get_readable_name }}</td>
+                        <td>{{ file.datalevel }}</td>
+                        <td>{{ file.datatype }}</td>
+                        </tr>
+                    {% empty %}
+                        <p>There were no files found for this cohort.</p>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Cohort Modal -->
+    <div class="modal fade" id="create-cohort-modal" tabindex="-1" role="dialog" aria-labelledby="createCohortModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="createCohortModal">Create Cohort</h4>
+                </div>
+                <form id="create-cohort-form" method="POST" action="{% url 'save_cohort' %}">
+                    <div class="modal-body">
+                        <label for="cohort-name">Name:</label>
+                        <input class="form-control" type="text" id="cohort-name" name="name" value="{{ cohort.name }}"/>
+                    </div>
+                    <div class="modal-footer">
+                        {% csrf_token %}
+                        <input type="submit" value="Create Cohort" class="btn btn-primary" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+    var base_api_url = '{{ base_api_url|safe }}';
+    var cohort_id = {{ cohort.id }};
+    var page = {{ page }};
+    var total_files = {{ file_count }};
+    var download_url = '{{ download_url }}';
+    </script>
+{% endblock %}
+
+{% block js_file %}{% static 'js/cohort_filelist.js' %}{% endblock %}
