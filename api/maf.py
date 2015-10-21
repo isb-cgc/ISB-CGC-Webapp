@@ -5,6 +5,7 @@ from MySQLdb.cursors import DictCursor
 
 from api_helpers import *
 
+
 # Generated code - in scripts/maf_import in Python do:
 #
 # > import import_maf

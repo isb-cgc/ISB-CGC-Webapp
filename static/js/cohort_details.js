@@ -206,7 +206,7 @@ require([
         var form = this;
         $.ajax({
             type: 'POST',
-            url: base_api_url + '/cohorts/save_cohort_comment/',
+            url: base_url + '/cohorts/save_cohort_comment/',
             data: $(this).serialize(),
             success: function(data) {
                 data = JSON.parse(data);

@@ -253,7 +253,7 @@ schema = [
       "type": "STRING"
     },
     {
-      "name": "venous_invasion",
+      "name": "weiss_venous_invasion",
       "type": "STRING"
     },
     {

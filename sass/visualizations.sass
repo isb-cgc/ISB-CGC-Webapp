@@ -98,18 +98,6 @@
                 float: right
                 &:hover
                     cursor: pointer
-
-            .main-settings
-                .form-group > label > a
-                    font-size: 18px
-                    cursor: pointer
-
-                div.label
-                    display: block
-                    text-align: left
-                    margin: 0px 0px 5px 0px
-                    white-space: normal
-
             .cohort-listing
                 div.filter-label
                     display: block
@@ -128,9 +116,6 @@
                 .select-cohort
                     display: block
                     text-align: left
-
-            .search-term-field
-                width: 100%
 
             .comment-username
                 font-weight: bold
@@ -155,6 +140,13 @@
             position: relative
             overflow: hidden
 
+        .pairwise-result
+            .table
+                th.logp, th.n, th.na, th.nb, th.pa, th.pb
+                    width: 60px
+                td
+                    word-wrap: break-word
+                    word-break: break-word
 
     .legend
         display: inline-block
@@ -215,8 +207,8 @@
 #circviz
     margin-top: 80px
 
-    svg
-        cursor:default
+    //svg
+    //    cursor:default
 
     .ticks .labels
         stroke: black

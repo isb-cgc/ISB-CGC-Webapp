@@ -2,8 +2,11 @@ import endpoints
 from protorpc import messages
 from protorpc import message_types
 from protorpc import remote
+from django.conf import settings
 
 from api_helpers import *
+
+debug = settings.DEBUG
 
 METADATA_SHORTLIST = [
     # 'adenocarcinoma_invasion',
@@ -32,7 +35,7 @@ METADATA_SHORTLIST = [
     # 'days_to_initial_pathologic_diagnosis',
     # 'days_to_last_followup',
     # 'days_to_submitted_specimen_dx',
-    'Disease_Code',
+    'Study',
     'ethnicity',
     # 'frozen_specimen_anatomic_site',
     'gender',
@@ -104,20 +107,18 @@ METADATA_SHORTLIST = [
     # 'SampleBarcode',
     'SampleTypeCode',
     # 'Study',
-    'tissue_type',
     'tobacco_smoking_history',
     # 'total_number_of_pregnancies',
     # 'tumor_pathology',
     'tumor_tissue_site',
     'tumor_type',
-    # 'venous_invasion',
+    # 'weiss_venous_invasion',
     'vital_status'
     # 'weight',
     # 'year_of_initial_pathologic_diagnosis',
 ]
 
 metadata_dict = {
-    'adenocarcinoma_invasion': 'VARCHAR(10)',
     'age_at_initial_pathologic_diagnosis': 'INTEGER',
     'anatomic_neoplasm_subdivision': 'VARCHAR(63)',
     'avg_percent_lymphocyte_infiltration': 'FLOAT',
@@ -136,14 +137,13 @@ metadata_dict = {
     'clinical_stage': 'VARCHAR(12)',
     'colorectal_cancer': 'VARCHAR(10)',
     'country': 'VARCHAR(63)',
-    'country_of_procurement': 'VARCHAR(63)',
     'days_to_birth': 'INTEGER',
     'days_to_collection': 'INTEGER',
     'days_to_death': 'INTEGER',
     'days_to_initial_pathologic_diagnosis': 'INTEGER',
     'days_to_last_followup': 'INTEGER',
     'days_to_submitted_specimen_dx': 'INTEGER',
-    'Disease_Code': 'VARCHAR(4)',
+    'Study': 'VARCHAR(4)',
     'ethnicity': 'VARCHAR(20)',
     'frozen_specimen_anatomic_site': 'VARCHAR(63)',
     'gender': 'VARCHAR(15)',
@@ -158,7 +158,6 @@ metadata_dict = {
     'icd_10': 'VARCHAR(8)',
     'icd_o_3_histology': 'VARCHAR(10)',
     'icd_o_3_site': 'VARCHAR(8)',
-    'lymph_node_examined_count': 'INTEGER',
     'lymphatic_invasion': 'VARCHAR(8)',
     'lymphnodes_examined': 'VARCHAR(8)',
     'lymphovascular_invasion_present': 'VARCHAR(63)',
@@ -193,7 +192,6 @@ metadata_dict = {
     'pathologic_stage': 'VARCHAR(10)',
     'person_neoplasm_cancer_status': 'VARCHAR(15)',
     'pregnancies': 'VARCHAR(35)',
-    'preservation_method': 'VARCHAR(20)',
     'primary_neoplasm_melanoma_dx': 'VARCHAR(10)',
     'primary_therapy_outcome_success': 'VARCHAR(35)',
     'prior_dx': 'VARCHAR(50)',
@@ -203,13 +201,10 @@ metadata_dict = {
     'residual_tumor': 'VARCHAR(5)',
     'SampleBarcode': 'VARCHAR(16)',
     'Study': 'VARCHAR(4)',
-    'tissue_type': 'VARCHAR(15)',
-    'tumor_pathology': 'VARCHAR(50)',
     'tobacco_smoking_history': 'VARCHAR(30)',
-    'total_number_of_pregnancies': 'INTEGER',
     'tumor_tissue_site': 'VARCHAR(20)',
     'tumor_type': 'VARCHAR(4)',
-    'venous_invasion': 'VARCHAR(63)',
+    'weiss_venous_invasion': 'VARCHAR(63)',
     'vital_status': 'VARCHAR(63)',
     'weight': 'VARCHAR(63)',
     'year_of_initialPY_pathologic_diagnosis': 'VARCHAR(63)',
@@ -261,7 +256,7 @@ class MetaAttrValuesList(messages.Message):
     days_to_initial_pathologic_diagnosis                = messages.MessageField(MetaValueListCount, 24, repeated=True)
     days_to_last_followup                               = messages.MessageField(MetaValueListCount, 25, repeated=True)
     days_to_submitted_specimen_dx                       = messages.MessageField(MetaValueListCount, 26, repeated=True)
-    Disease_Code                                        = messages.MessageField(MetaValueListCount, 27, repeated=True)
+    Study                                               = messages.MessageField(MetaValueListCount, 27, repeated=True)
     ethnicity                                           = messages.MessageField(MetaValueListCount, 28, repeated=True)
     frozen_specimen_anatomic_site                       = messages.MessageField(MetaValueListCount, 29, repeated=True)
     gender                                              = messages.MessageField(MetaValueListCount, 30, repeated=True)
@@ -318,14 +313,12 @@ class MetaAttrValuesList(messages.Message):
     race                                                = messages.MessageField(MetaValueListCount, 81, repeated=True)
     residual_tumor                                      = messages.MessageField(MetaValueListCount, 82, repeated=True)
     SampleBarcode                                       = messages.MessageField(MetaValueListCount, 83, repeated=True)
-    Study                                               = messages.MessageField(MetaValueListCount, 84, repeated=True)
-    tissue_type                                         = messages.MessageField(MetaValueListCount, 85, repeated=True)
     tobacco_smoking_history                             = messages.MessageField(MetaValueListCount, 86, repeated=True)
     total_number_of_pregnancies                         = messages.MessageField(MetaValueListCount, 87, repeated=True)
     tumor_tissue_site                                   = messages.MessageField(MetaValueListCount, 88, repeated=True)
     tumor_pathology                                     = messages.MessageField(MetaValueListCount, 89, repeated=True)
     tumor_type                                          = messages.MessageField(MetaValueListCount, 90, repeated=True)
-    venous_invasion                                     = messages.MessageField(MetaValueListCount, 91, repeated=True)
+    weiss_venous_invasion                                     = messages.MessageField(MetaValueListCount, 91, repeated=True)
     vital_status                                        = messages.MessageField(MetaValueListCount, 92, repeated=True)
     weight                                              = messages.MessageField(MetaValueListCount, 93, repeated=True)
     year_of_initial_pathologic_diagnosis                = messages.MessageField(MetaValueListCount, 94, repeated=True)
@@ -370,7 +363,7 @@ class MetadataItem(messages.Message):
     days_to_initial_pathologic_diagnosis                            = messages.IntegerField(24)
     days_to_last_followup                                           = messages.IntegerField(25)
     days_to_submitted_specimen_dx                                   = messages.IntegerField(26)
-    Disease_Code                                                    = messages.StringField(27)
+    Study                                                           = messages.StringField(27)
     ethnicity                                                       = messages.StringField(28)
     frozen_specimen_anatomic_site                                   = messages.StringField(29)
     gender                                                          = messages.StringField(30)
@@ -427,14 +420,12 @@ class MetadataItem(messages.Message):
     race                                                            = messages.StringField(81)
     residual_tumor                                                  = messages.StringField(82)
     SampleBarcode                                                   = messages.StringField(83)
-    Study                                                           = messages.StringField(84)
-    tissue_type                                                     = messages.StringField(85)
     tobacco_smoking_history                                         = messages.StringField(86)
     total_number_of_pregnancies                                     = messages.IntegerField(87)
     tumor_tissue_site                                               = messages.StringField(88)
     tumor_pathology                                                 = messages.StringField(89)
     tumor_type                                                      = messages.StringField(90)
-    venous_invasion                                                 = messages.StringField(91)
+    weiss_venous_invasion                                           = messages.StringField(91)
     vital_status                                                    = messages.StringField(92)
     weight                                                          = messages.IntegerField(93)
     year_of_initial_pathologic_diagnosis                            = messages.StringField(94)
@@ -482,7 +473,7 @@ class IncomingMetadataItem(messages.Message):
     days_to_initial_pathologic_diagnosis                            = messages.IntegerField(24)
     days_to_last_followup                                           = messages.IntegerField(25)
     days_to_submitted_specimen_dx                                   = messages.IntegerField(26)
-    Disease_Code                                                    = messages.StringField(27)
+    Study                                                           = messages.StringField(27)
     ethnicity                                                       = messages.StringField(28)
     frozen_specimen_anatomic_site                                   = messages.StringField(29)
     gender                                                          = messages.StringField(30)
@@ -539,14 +530,12 @@ class IncomingMetadataItem(messages.Message):
     race                                                            = messages.StringField(81)
     residual_tumor                                                  = messages.StringField(82)
     SampleBarcode                                                   = messages.StringField(83)
-    Study                                                           = messages.StringField(84)
-    tissue_type                                                     = messages.StringField(85)
     tobacco_smoking_history                                         = messages.StringField(86)
     total_number_of_pregnancies                                     = messages.IntegerField(87)
     tumor_tissue_site                                               = messages.StringField(88)
     tumor_pathology                                                 = messages.StringField(89)
     tumor_type                                                      = messages.StringField(90)
-    venous_invasion                                                 = messages.StringField(91)
+    weiss_venous_invasion                                                 = messages.StringField(91)
     vital_status                                                    = messages.StringField(92)
     weight                                                          = messages.IntegerField(93)
     year_of_initial_pathologic_diagnosis                            = messages.StringField(94)
@@ -573,7 +562,7 @@ class MetaDomainsList(messages.Message):
     gender                                      = messages.StringField(1, repeated=True)
     history_of_neoadjuvant_treatment            = messages.StringField(2, repeated=True)
     country                                     = messages.StringField(3, repeated=True)
-    Disease_Code                                = messages.StringField(4, repeated=True)
+    Study                                       = messages.StringField(4, repeated=True)
     ethnicity                                   = messages.StringField(5, repeated=True)
     histological_type                           = messages.StringField(6, repeated=True)
     icd_10                                      = messages.StringField(7, repeated=True)
@@ -740,6 +729,63 @@ def normalize_metadata_ages(ages):
         result.append({'count': value, 'value': key})
     return result
 
+class PlatformCount(messages.Message):
+    platform = messages.StringField(1)
+    count = messages.IntegerField(2)
+
+class FileDetails(messages.Message):
+    sample = messages.StringField(1)
+    filename = messages.StringField(2)
+    pipeline = messages.StringField(3)
+    platform = messages.StringField(4)
+    datalevel = messages.StringField(5)
+    datatype = messages.StringField(6)
+
+class SampleFiles(messages.Message):
+    total_file_count = messages.IntegerField(1)
+    page = messages.IntegerField(2)
+    platform_count_list = messages.MessageField(PlatformCount, 3, repeated=True)
+    file_list = messages.MessageField(FileDetails, 4, repeated=True)
+
+class SampleFileCount(messages.Message):
+    sample_id = messages.StringField(1)
+    count = messages.IntegerField(2)
+
+class CohortFileCountSampleList(messages.Message):
+    sample_list = messages.MessageField(SampleFileCount, 1, repeated=True)
+
+class IncomingPlatformSelection(messages.Message):
+    ABSOLiD_DNASeq                      = messages.StringField(1)
+    Genome_Wide_SNP_6                   = messages.StringField(2)
+    HumanMethylation27                  = messages.StringField(3)
+    HumanMethylation450                 = messages.StringField(4)
+    IlluminaGA_DNASeq                   = messages.StringField(5)
+    IlluminaGA_DNASeq_automated         = messages.StringField(6)
+    IlluminaGA_DNASeq_Cont_automated    = messages.StringField(7)
+    IlluminaGA_DNASeq_curated           = messages.StringField(8)
+    IlluminaGA_miRNASeq                 = messages.StringField(9)
+    IlluminaGA_None                     = messages.StringField(10)
+    IlluminaGA_RNASeq                   = messages.StringField(11)
+    IlluminaGA_RNASeqV2                 = messages.StringField(12)
+    IlluminaHiSeq_DNASeq                = messages.StringField(13)
+    IlluminaHiSeq_DNASeq_automated      = messages.StringField(14)
+    IlluminaHiSeq_DNASeq_Cont_automated = messages.StringField(15)
+    IlluminaHiSeq_miRNASeq              = messages.StringField(16)
+    IlluminaHiSeq_None                  = messages.StringField(17)
+    IlluminaHiSeq_RNASeq                = messages.StringField(18)
+    IlluminaHiSeq_RNASeqV2              = messages.StringField(19)
+    IlluminaHiSeq_TotalRNASeqV2         = messages.StringField(20)
+    IlluminaMiSeq_DNASeq                = messages.StringField(21)
+    IlluminaMiSeq_None                  = messages.StringField(22)
+    LifeIonTorrentPGM_None              = messages.StringField(23)
+    LifeIonTorrentProton_None           = messages.StringField(24)
+    MDA_RPPA_Core                       = messages.StringField(25)
+    microsat_i                          = messages.StringField(26)
+    Mixed_DNASeq_Cont                   = messages.StringField(27)
+    Mixed_DNASeq_Cont_curated           = messages.StringField(28)
+    Mixed_DNASeq_curated                = messages.StringField(29)
+    RocheGSFLX_DNASeq                   = messages.StringField(30)
+
 
 Meta_Endpoints = endpoints.api(name='meta_api', version='v1')
 
@@ -891,8 +937,10 @@ class Meta_Endpoints_API(remote.Service):
         sample_ids = None
 
         db = sql_connection()
-
         query_str, value_tuple, selector_list = generateSQLQuery(request)
+        if debug: print >> sys.stderr,query_str
+
+        print query_str
 
         try:
             cursor = db.cursor(MySQLdb.cursors.DictCursor)
@@ -904,7 +952,6 @@ class Meta_Endpoints_API(remote.Service):
                     item = createDataItem(row, selector_list)
                 else:
                     item = MetadataItem(
-                        adenocarcinoma_invasion=str(row["adenocarcinoma_invasion"]),
                         age_at_initial_pathologic_diagnosis=None if "age_at_initial_pathologic_diagnosis" not in row or row["age_at_initial_pathologic_diagnosis"] is None else int(row["age_at_initial_pathologic_diagnosis"]),
                         anatomic_neoplasm_subdivision=str(row["anatomic_neoplasm_subdivision"]),
                         avg_percent_lymphocyte_infiltration=None if "avg_percent_lymphocyte_infiltration" not in row or row["avg_percent_lymphocyte_infiltration"] is None else float(row["avg_percent_lymphocyte_infiltration"]),
@@ -923,14 +970,13 @@ class Meta_Endpoints_API(remote.Service):
                         clinical_T=str(row["clinical_T"]),
                         colorectal_cancer=str(row["colorectal_cancer"]),
                         country=str(row["country"]),
-                        country_of_procurement=str(row["country_of_procurement"]),
                         days_to_birth=None if "days_to_birth" not in row or row['days_to_birth'] is None else int(row["days_to_birth"]),
                         days_to_collection=None if "days_to_collection" not in row or row['days_to_collection'] is None else int(row["days_to_collection"]),
                         days_to_death=None if "days_to_death" not in row or row['days_to_death'] is None else int(row["days_to_death"]),
                         days_to_initial_pathologic_diagnosis=None if "days_to_initial_pathologic_diagnosis" not in row or row['days_to_initial_pathologic_diagnosis'] is None else int(row["days_to_initial_pathologic_diagnosis"]),
                         days_to_last_followup=None if "days_to_last_followup" not in row or row['days_to_last_followup'] is None else int(row["days_to_last_followup"]),
                         days_to_submitted_specimen_dx=None if "days_to_submitted_specimen_dx" not in row or row['days_to_submitted_specimen_dx'] is None else int(row["days_to_submitted_specimen_dx"]),
-                        Disease_Code=str(row["Disease_Code"]),
+                        Study=str(row["Study"]),
                         ethnicity=str(row["ethnicity"]),
                         frozen_specimen_anatomic_site=str(row["frozen_specimen_anatomic_site"]),
                         gender=str(row["gender"]),
@@ -944,7 +990,6 @@ class Meta_Endpoints_API(remote.Service):
                         icd_10=str(row["icd_10"]),
                         icd_o_3_histology=str(row["icd_o_3_histology"]),
                         icd_o_3_site=str(row["icd_o_3_site"]),
-                        lymph_node_examined_count=None if "lymph_node_examined_count" not in row or row["lymph_node_examined_count"] is None else int(row["lymph_node_examined_count"]),  # 42)
                         lymphatic_invasion=str(row["lymphatic_invasion"]),
                         lymphnodes_examined=str(row["lymphnodes_examined"]),
                         lymphovascular_invasion_present=str(row["lymphovascular_invasion_present"]),
@@ -978,7 +1023,6 @@ class Meta_Endpoints_API(remote.Service):
                         pathologic_T=str(row["pathologic_T"]),
                         person_neoplasm_cancer_status=str(row["person_neoplasm_cancer_status"]),
                         pregnancies=str(row["pregnancies"]),
-                        preservation_method=str(row["preservation_method"]),
                         primary_neoplasm_melanoma_dx=str(row["primary_neoplasm_melanoma_dx"]),
                         primary_therapy_outcome_success=str(row["primary_therapy_outcome_success"]),
                         prior_dx=str(row["prior_dx"]),
@@ -987,16 +1031,12 @@ class Meta_Endpoints_API(remote.Service):
                         race=str(row["race"]),
                         residual_tumor=str(row["residual_tumor"]),
                         SampleBarcode=str(row["SampleBarcode"]),
-                        Study=str(row["Study"]),
-                        tissue_type=str(row["tissue_type"]),
                         tobacco_smoking_history=str(row["tobacco_smoking_history"]),
-                        total_number_of_pregnancies=None if "total_number_of_pregnancies" not in row or row["total_number_of_pregnancies"] is None else int(row["total_number_of_pregnancies"]),
                         tumor_tissue_site=str(row["tumor_tissue_site"]),
-                        tumor_pathology=str(row["tumor_pathology"]),
                         tumor_type=str(row["tumor_type"]),
-                        venous_invasion=str(row["venous_invasion"]),
+                        weiss_venous_invasion=str(row["weiss_venous_invasion"]),
                         vital_status=str(row["vital_status"]),
-                        weight=None if "weight" not in row or row["weight"] is None else int(row["weight"]),
+                        weight=None if "weight" not in row or row["weight"] is None else int(float(row["weight"])),
                         year_of_initial_pathologic_diagnosis=str(row["year_of_initial_pathologic_diagnosis"]),
                         SampleTypeCode=str(row["SampleTypeCode"]),
                         has_Illumina_DNASeq=str(bool(row["has_Illumina_DNASeq"])),
@@ -1031,6 +1071,7 @@ class Meta_Endpoints_API(remote.Service):
                           path='metadata_counts', http_method='GET',
                       name='meta.metadata_counts')
     def metadata_counts(self, request):
+
         query_dict = {}
         sample_ids = None
         is_landing = False
@@ -1042,7 +1083,7 @@ class Meta_Endpoints_API(remote.Service):
         if is_landing:
             try:
                 cursor = db.cursor()
-                cursor.execute('SELECT Disease_Code, COUNT(Disease_Code) as disease_count FROM metadata_samples GROUP BY Disease_Code;')
+                cursor.execute('SELECT Study, COUNT(Study) as disease_count FROM metadata_samples GROUP BY Study;')
                 data = []
                 for row in cursor.fetchall():
                     value_list_count = MetaValueListCount(
@@ -1051,7 +1092,7 @@ class Meta_Endpoints_API(remote.Service):
                     )
                     data.append(value_list_count)
 
-                attr_values_list = MetaAttrValuesList(Disease_Code=data)
+                attr_values_list = MetaAttrValuesList(Study=data)
 
                 return MetadataItemList(count=attr_values_list)
 
@@ -1080,9 +1121,6 @@ class Meta_Endpoints_API(remote.Service):
         # Get the list of valid parameters from request
         for key, value in MetadataItem.__dict__.items():
             if not key.startswith('_'):
-                # if key == 'has_Illumina_DNASeq':
-                    # print "\n\nrequest.__getattribute__('has_Illumina_DNASeq')"
-                    # print request.__getattribute__('has_Illumina_DNASeq')
                 if request.__getattribute__(key) is not None:
                     if key.startswith('has_'):
                         query_dict[key] = '1' if request.__getattribute__(key) == 'True' else '0'
@@ -1168,6 +1206,8 @@ class Meta_Endpoints_API(remote.Service):
         for key in METADATA_SHORTLIST:
             value_list_item.__setattr__(key, None if key not in value_list else value_list[key])
 
+        # pprint.pprint(value_list_item)
+
         return MetadataItemList(count=value_list_item, total=total)
 
 
@@ -1228,7 +1268,7 @@ class Meta_Endpoints_API(remote.Service):
             'prior_dx',
             'vital_status',
             'country',
-            'Disease_Code',
+            'Study',
             'histological_type',
             'icd_10',
             'icd_o_3_site',
@@ -1273,7 +1313,7 @@ class Meta_Endpoints_API(remote.Service):
                 prior_dx                             = items['prior_dx'],
                 vital_status                         = items['vital_status'],
                 country                              = items['country'],
-                Disease_Code                         = items['Disease_Code'],
+                Study                                = items['Study'],
                 histological_type                    = items['histological_type'],
                 icd_10                               = items['icd_10'],
                 icd_o_3_site                         = items['icd_o_3_site'],
@@ -1299,3 +1339,98 @@ class Meta_Endpoints_API(remote.Service):
 
         except (IndexError, TypeError):
             raise endpoints.NotFoundException('Error in meta_domains')
+
+
+    GET_RESOURCE = endpoints.ResourceContainer(IncomingPlatformSelection,
+                                               cohort_id=messages.IntegerField(1, required=True),
+                                               page=messages.IntegerField(2),
+                                               limit=messages.IntegerField(3)
+                                               )
+    @endpoints.method(GET_RESOURCE, SampleFiles,
+                      path='cohort_files', http_method='GET',
+                      name='meta.cohort_files')
+    def cohort_files(self, request):
+        limit = 20
+        page = 1
+        offset = 0
+        cohort_id = request.cohort_id
+        if request.__getattribute__('page') != None:
+            page = request.page
+            offset = (page - 1) * 20
+        if request.__getattribute__('limit') != None:
+            limit = request.limit
+
+        platform_count_query = 'select Platform, count(Platform) as platform_count from metadata_data where SampleBarcode in (select sample_id from cohorts_samples where cohort_id=%s) and SecurityProtocol="dbGap open-access" and DatafileUploaded="true" group by Platform;'
+        count_query = 'select count(*) as row_count from metadata_data where SampleBarcode in (select sample_id from cohorts_samples where cohort_id=%s) and SecurityProtocol="dbGap open-access" and DatafileUploaded="true"'
+        query = 'select SampleBarcode, DatafileNameKey, Pipeline, Platform, DataLevel, Datatype from metadata_data where SampleBarcode in (select sample_id from cohorts_samples where cohort_id=%s) and SecurityProtocol="dbGap open-access" and DatafileUploaded="true"'
+
+        # Check for incoming platform selectors
+        platform_selector_list = []
+        for key, value in IncomingPlatformSelection.__dict__.items():
+            if not key.startswith('_'):
+                if request.__getattribute__(key) is not None and request.__getattribute__(key) == 'True':
+                    platform_selector_list.append(key)
+
+        if len(platform_selector_list):
+            count_query += ' and Platform in ("' + '","'.join(platform_selector_list) + '");'
+            query += ' and Platform in ("' + '","'.join(platform_selector_list) + '")'
+
+        else:
+            count_query += ';'
+
+        query_tuple = (cohort_id,)
+        if limit != -1:
+            query += ' limit %s'
+            query_tuple += (limit,)
+
+        if offset != 0:
+            query += ' offset %s'
+            query_tuple += (offset,)
+        query += ';'
+        db = sql_connection()
+        cursor = db.cursor(MySQLdb.cursors.DictCursor)
+
+        try:
+            cursor.execute(count_query, (cohort_id,))
+            count = cursor.fetchone()['row_count']
+            cursor.execute(platform_count_query, (cohort_id,))
+
+            platform_count_list = []
+            if cursor.rowcount > 0:
+                for row in cursor.fetchall():
+                    platform_count_list.append(PlatformCount(platform=row['Platform'], count=row['platform_count']))
+            else:
+                platform_count_list.append(PlatformCount(platform='None', count=0))
+            cursor.execute(query, query_tuple)
+            list = []
+
+            if cursor.rowcount > 0:
+                for item in cursor.fetchall():
+                    list.append(FileDetails(sample=item['SampleBarcode'], filename=item['DatafileNameKey'], pipeline=item['Pipeline'], platform=item['Platform'], datalevel=item['DataLevel'], datatype=item['Datatype']))
+            else:
+                list.append(FileDetails(sample='None', filename='', pipeline='', platform='', datalevel=''))
+            return SampleFiles(total_file_count=count, page=page, platform_count_list=platform_count_list, file_list=list)
+
+        except (IndexError, TypeError):
+            raise endpoints.ServiceException('Error getting counts')
+
+    GET_RESOURCE = endpoints.ResourceContainer(sample_id=messages.StringField(1, required=True))
+    @endpoints.method(GET_RESOURCE, SampleFiles,
+                      path='sample_files', http_method='GET',
+                      name='meta.sample_files')
+    def sample_files(self, request):
+        sample_id = request.sample_id
+
+        query = 'select SampleBarcode, DatafileName, Pipeline, Platform from metadata_data where SampleBarcode=%s;'
+
+        db = sql_connection()
+        cursor = db.cursor(MySQLdb.cursors.DictCursor)
+
+        try:
+            cursor.execute(query, (sample_id,))
+            list = []
+            for item in cursor.fetchall():
+                list.append(FileDetails(filename=item['DatafileName'], pipeline=item['Pipeline'], platform=item['Platform']))
+            return SampleFiles(sample_id=sample_id, file_list=list)
+        except:
+            raise endpoints.ServiceException('Error getting file details')

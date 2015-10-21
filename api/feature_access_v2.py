@@ -1,13 +1,11 @@
+import logging
+
 from endpoints import api as endpoints_api, method as endpoints_method
 from endpoints import BadRequestException, InternalServerErrorException
-
 from protorpc import remote
 from protorpc.messages import Message, MessageField, StringField
 
-import logging
-
 from bq_data_access.feature_search.common import BackendException, EmptyQueryException, InvalidFieldException, InvalidDataTypeException
-
 from bq_data_access.mrna_data import GEXP_FEATURE_TYPE
 from bq_data_access.clinical_data import CLINICAL_FEATURE_TYPE
 from bq_data_access.methylation_data import METH_FEATURE_TYPE
@@ -15,7 +13,6 @@ from bq_data_access.copynumber_data import CNVR_FEATURE_TYPE
 from bq_data_access.protein_data import RPPA_FEATURE_TYPE
 from bq_data_access.mirna_data import MIRN_FEATURE_TYPE
 from bq_data_access.maf_data import GNAB_FEATURE_TYPE
-
 from bq_data_access.feature_search.gexp import GEXPSearcher
 from bq_data_access.feature_search.clinical import ClinicalSearcher
 from bq_data_access.feature_search.methylation import METHSearcher
@@ -23,6 +20,7 @@ from bq_data_access.feature_search.copynumber import CNVRSearcher
 from bq_data_access.feature_search.protein import RPPASearcher
 from bq_data_access.feature_search.microrna import MIRNSearcher
 from bq_data_access.feature_search.mutation import GNABSearcher
+
 
 class ClinicalFeatureType(Message):
     feature_type = StringField(1)

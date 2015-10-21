@@ -8,6 +8,7 @@ class NIH_User(models.Model):
     NIH_assertion = models.TextField(null=True)
     NIH_assertion_expiration = models.DateTimeField(null=True)
     dbGaP_authorized = models.BooleanField(default=False)
+    active = models.BooleanField(default=True)
 
     class Meta:
         verbose_name = "NIH User"

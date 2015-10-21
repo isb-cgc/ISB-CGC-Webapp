@@ -1,38 +1,31 @@
+import sys
+import logging
+import json
+import collections
+import io
+import time
+from datetime import datetime
+
+from oauth2client.client import GoogleCredentials
+from google.appengine.api import modules, urlfetch
+from google.appengine.ext import deferred
+from googleapiclient import discovery, http
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.http import HttpResponse
 from django.db.models import Count
 from django.utils import formats
-import json
-import collections
+from django.contrib.auth.models import User
+from django.conf import settings
+
+from google_helpers.genomics_service import get_genomics_resource
 from visualizations.models import SavedViz, Viz_Perms
 from cohorts.models import Cohort, Cohort_Perms
-from datetime import timedelta
-from google.appengine.api import urlfetch
-from google.appengine.ext import deferred
-from scripts.clusterTest import run_cluster
-from django.conf import settings
-from googleapiclient import discovery
-from googleapiclient import http
-from googleapiclient.errors import HttpError
-from oauth2client.client import GoogleCredentials
-from google.appengine.api.taskqueue import Task
-import cloudstorage as gcs
-from threading import Thread
-import datetime
-import io
-import os
-from pytz.gae import pytz
-from django.utils import timezone
-import logging
-
 from accounts.models import NIH_User
-from django.contrib.auth.models import User
+from scripts.clusterTest import run_cluster
 
-from google_helpers.directory_service import get_directory_resource
-from google_helpers.storage_service import get_storage_resource
-from google_helpers.genomics_service import get_genomics_resource
 
+debug = settings.DEBUG
 logger = logging.getLogger(__name__)
 
 urlfetch.set_default_fetch_deadline(60)
@@ -48,6 +41,7 @@ ERA_LOGIN_URL = settings.ERA_LOGIN_URL
 
 
 def convert(data):
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     if isinstance(data, basestring):
         return str(data)
     elif isinstance(data, collections.Mapping):
@@ -59,6 +53,7 @@ def convert(data):
 
 
 def _decode_list(data):
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     rv = []
     for item in data:
         if isinstance(item, unicode):
@@ -72,6 +67,7 @@ def _decode_list(data):
 
 
 def _decode_dict(data):
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     rv = {}
     for key, value in data.iteritems():
         if isinstance(key, unicode):
@@ -86,25 +82,44 @@ def _decode_dict(data):
     return rv
 
 '''
+Returns the genespot-re-demo which is just a CSS demo and skin
+'''
+def genespotre(request):
+    return render(request, 'GenespotRE/genespot-re-demo.html', {})
+
+'''
 Handles login and user creation for new users.
 Returns user to landing page.
 '''
 def landing_page(request):
-    version = {}
-    version['version'] = request.environ["CURRENT_VERSION_ID"].split('.')[0]
-    version_id = request.environ["CURRENT_VERSION_ID"].split('.')[1]
-    timestamp = long(version_id) / pow(2,28)
-    update_time = datetime.datetime.fromtimestamp(timestamp) - timedelta(hours=7)
-    version['date'] = update_time.strftime("%d/%m/%y %X")
-
+    if debug: 
+        print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+        print >> sys.stderr,'App Version: '+modules.get_current_version_name()
+        try:
+            print >> sys.stderr,'App BACKEND_ID: '+os.getenv('BACKEND_ID')
+        except:
+            print >> sys.stderr,"Printing os.getenv('BACKEND_ID') Failed"
+    ## CURRENT_VERSION_ID unavailable in mvm...
+    ## can use "BACKEND_ID"? e.g. 'mvm:20151016t222058'
+    ## Below uses the current local time, not deployment time PT,...
+    version = { 'version': modules.get_current_version_name(),
+                'date': time.strftime("%d/%m/%y %X")}
     return render(request, 'GenespotRE/landing.html',
-        {'request': request,
-         'version': version})
+                  {'request': request,
+                   'version': version})
+    # version = {}
+    #version['version'] = request.environ["CURRENT_VERSION_ID"].split('.')[0]
+    #version_id = request.environ["CURRENT_VERSION_ID"].split('.')[1]
+    # timestamp = long(version_id) / pow(2,28)
+    # update_time = datetime.fromtimestamp(timestamp) - timedelta(hours=7)
+    # version['date'] = update_time.strftime("%d/%m/%y %X")
+
 
 '''
 Returns css_test page used to test css for general ui elements
 '''
 def css_test(request):
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     return render(request, 'GenespotRE/css_test.html', {'request': request})
 
 
@@ -113,11 +128,10 @@ Returns page that lists users
 '''
 @login_required
 def user_list(request):
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     url = USER_API_URL + '/users'
     result = urlfetch.fetch(url, deadline=60)
     users = json.loads(str(result.content))
-
-
     return render(request, 'GenespotRE/user_list.html', {'request': request,
                                                           'users': users})
 
@@ -129,7 +143,7 @@ Returns page that has user details
 '''
 @login_required
 def user_detail(request, user_id):
-
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     if int(request.user.id) == int(user_id):
 
         user = User.objects.get(id=user_id)
@@ -146,13 +160,15 @@ def user_detail(request, user_id):
         }
         try:
             nih_user = NIH_User.objects.get(user_id=user_id)
+            print nih_user
             user_details['NIH_username'] = nih_user.NIH_username
             user_details['NIH_assertion_expiration'] = nih_user.NIH_assertion_expiration
             user_details['dbGaP_authorized'] = nih_user.dbGaP_authorized
+            user_details['NIH_active'] = nih_user.active
         except (MultipleObjectsReturned, ObjectDoesNotExist), e:
             logger.debug("Error when retrieving nih_user with user_id {}. {}".format(str(user_id), str(e)))
 
-        nih_login_redirect_url = settings.BASE_URL + '/nih_login/'
+        nih_login_redirect_url = settings.BASE_URL + '/accounts/nih_login/'
 
         eRA_login_url = ERA_LOGIN_URL.strip('/') + '/?sso&redirect_url=' + nih_login_redirect_url
 
@@ -164,12 +180,27 @@ def user_detail(request, user_id):
     else:
         return render(request, '500.html')
 
+
+@login_required
+def bucket_object_list(request):
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+    credentials = GoogleCredentials.get_application_default()
+    service = discovery.build('storage', 'v1', credentials=credentials)
+
+    req = service.objects().list(bucket='isb-cgc-dev')
+    resp = req.execute()
+    object_list = None
+    if 'items' in resp:
+        object_list = json.dumps(resp['items'])
+
+        return HttpResponse(object_list)
+
 '''
 Returns page users see after signing in
 '''
 @login_required
 def user_landing(request):
-
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     # check to see if user has read access to 'All TCGA Data' cohort
     isb_superuser = User.objects.get(username='isb')
     superuser_perm = Cohort_Perms.objects.get(user=isb_superuser)
@@ -216,6 +247,7 @@ Returns Results from text search
 '''
 @login_required
 def search_cohorts_viz(request):
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     q = request.GET.get('q', None)
     result_obj = {
         'q': q
@@ -248,11 +280,48 @@ def search_cohorts_viz(request):
 
 @login_required
 def feature_test(request):
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     return render(request, 'GenespotRE/feature_test.html', {'request': request})
 
 @login_required
-def igv(request):
+def taskq_test(request):
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+    deferred.defer(run_cluster)
+    # deferred.defer(run_task, "test 2")
+    # deferred.defer(run_task, "test 3")
+    # deferred.defer(run_task, "test 4")
+    # deferred.defer(run_task, "test 5")
 
+    return render(request, 'GenespotRE/taskq_test.html', {'request': request})
+
+@login_required
+def bucket_access_test(request):
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+    credentials = GoogleCredentials.get_application_default()
+    service = discovery.build('storage', 'v1', credentials=credentials)
+
+    media = http.MediaIoBaseUpload(io.BytesIO('test data'), 'text/plain')
+    # print '\n\n', media
+    filename = 'test-' + str(datetime.now().replace(microsecond=0).isoformat())
+    # print filename
+    req = service.objects().insert(bucket='isb-cgc-dev',
+                             name=filename,
+                             media_body=media,
+                             )
+    req.execute()
+
+    req = service.objects().list(bucket='isb-cgc-dev')
+    resp = req.execute()
+    # print resp['items']
+    # for item in resp['items']:
+    #     print json.dumps(item, indent=2)
+
+    return render(request, 'GenespotRE/bucket_test.html', {'request': request})
+
+
+@login_required
+def igv(request):
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     service, http_auth = get_genomics_resource()
     datasets = convert(service.datasets().list(projectNumber=settings.PROJECT_ID).execute())
 
@@ -287,216 +356,8 @@ def igv(request):
         dataset['readGroupSets'] = rgsets
 
     return render(request, 'GenespotRE/igv.html', {'request': request,
-                                                    'datasets': dataset_objs
+                                                    'datasets': dataset_objs})
 
-                                                    })
-
-
-@login_required
-def nih_login(request):
-    guid = request.GET.get('guid', None)
-
-    if guid:
-        if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):
-            # read eRA commons identity info from DBGAP_AUTHENTICATION_LIST_BUCKET bucket and delete it
-            contents = retrieve_expirable_object_contents_and_delete(
-                DBGAP_AUTHENTICATION_LIST_BUCKET,
-                str(guid),
-                expiration_seconds=60000)
-        # for development only
-        else:
-            storage_client = get_storage_resource()
-            req = storage_client.objects().get_media(bucket=DBGAP_AUTHENTICATION_LIST_BUCKET, object=str(guid))
-            contents = req.execute()
-            # delete object
-            req = storage_client.objects().delete(bucket=DBGAP_AUTHENTICATION_LIST_BUCKET, object=str(guid))
-            resp = req.execute()
-
-        if contents:
-            contents_json = json.loads(contents)
-
-            NIH_username = None if 'NIH_username' not in contents_json else contents_json['NIH_username']
-            NIH_assertion = None if 'NIH_assertion' not in contents_json else contents_json['NIH_assertion']
-            NIH_assertion_expiration = datetime.datetime.now() + datetime.timedelta(days=1)
-            NIH_assertion_expiration = pytz.utc.localize(NIH_assertion_expiration)
-            is_dbGaP_authorized = False if 'is_dbGaP_authorized' not in contents_json else contents_json['is_dbGaP_authorized']
-
-            updated_values = {
-                'NIH_assertion': NIH_assertion,
-                'NIH_assertion_expiration': NIH_assertion_expiration,
-                'dbGaP_authorized': is_dbGaP_authorized,
-                'user_id': request.user.id
-            }
-
-            directory_service, http_auth = get_directory_resource()
-
-            # if there is a preexisting entry in NIH_User
-            # that maps google identity user_a@gmail.com to nih_username nih_username_a
-            # but later user_b@gmail.com authenticates through NIH with the same nih_username_a
-            # then 1) user_a@gmail.com needs to be removed from the google group
-            check_google_group_for_preexisting_email_linked_to_NIH_username_and_delete(NIH_username, request.user.id, directory_service, http_auth)
-
-            # and 2) the NIH_User table entry needs to be updated with the new user_id, NIH_assertion, etc.
-            nih_user, created = NIH_User.objects.update_or_create(
-                NIH_username=NIH_username,
-                defaults=updated_values
-            )
-
-            user_email = User.objects.get(id=request.user.id).email
-            try:
-                result = directory_service.members().get(groupKey=ACL_GOOGLE_GROUP,
-                                                         memberKey=user_email).execute(http=http_auth)
-                # if the user is in the google group but isn't dbGaP authorized, delete member from group
-                if len(result) and not is_dbGaP_authorized:
-                    directory_service.members().delete(groupKey=ACL_GOOGLE_GROUP,
-                                                       memberKey=user_email).execute(http=http_auth)
-            # if the member doesn't yet exist in the google group...
-            except HttpError:
-                # ...but the member is dbGaP authorized...
-                if is_dbGaP_authorized:
-                    body = {
-                        "email": user_email,
-                        "role": "MEMBER"
-                    }
-                    # ...then insert the member into the google group
-                    directory_service.members().insert(
-                        groupKey=ACL_GOOGLE_GROUP,
-                        body=body
-                    ).execute(http=http_auth)
-
-            # put task in queue to delete NIH_User entry after NIH_assertion_expiration has passed
-            task = Task(url='/tasks/check_user_login', params={'user_id': request.user.id}, countdown=COUNTDOWN_SECONDS)
-            task.add(queue_name='logout-worker')
-            print('enqueued check_login task for user, {}, for {} hours from now'.format(
-                request.user.id, COUNTDOWN_SECONDS / (60*60)))
-
-        else:
-            # if there's nothing in the object, or if the object doesn't exist
-            # then the nih login should have succeeded
-            # but the identity information wasn't written to the bucket
-            pass
-
-    else:
-        # if guid was not returned, there was an error with the nih login
-        pass
-
-    # redirect to user detail page
-    return redirect('/users/' + str(request.user.id))
-
-
-def check_google_group_for_preexisting_email_linked_to_NIH_username_and_delete(
-        NIH_username, user_id, directory_service, http_auth):
-    try:
-        preexisting_nih_user_id = NIH_User.objects.get(NIH_username=NIH_username).user_id
-        if user_id != preexisting_nih_user_id:
-            preexisting_nih_user_email = User.objects.get(id=preexisting_nih_user_id).email
-            try:
-                directory_service.members().delete(groupKey=ACL_GOOGLE_GROUP,
-                                                   memberKey=preexisting_nih_user_email).execute(http=http_auth)
-            except HttpError:
-                return
-    except NIH_User.DoesNotExist:
-        return
-
-
-
-# Exception subclass to indicate a specific scenario: an 'expirable' GCS object
-# has been succecssfully retrieved, but it is deemed to be expired (this is to
-# distinguish between other error cases, such as when an object is simply not
-# found, or an irrecoverable error occurs while attempting to retrieve the
-# object)
-class ExpiredObjectError(Exception):
-    pass
-
-
-# attempt to do the following, for the specified GCS object:
-# 1) retrieve the object's metadata and contents
-# 2) compare the object's creation time to the specified expiration (expressed
-#    in seconds), raising an ExpiredObjectError if the object is expired
-# 3) regardless of what happens, attempt to delete the object before returning
-#
-# if the object is successfully retrieved and is NOT expired, return its
-# contents, as a string
-def retrieve_expirable_object_contents_and_delete(bucket, object_name, expiration_seconds=15):
-    metadata, contents = get_object_with_metadata(bucket, object_name)
-
-    creation_time = datetime.datetime.utcfromtimestamp(metadata.st_ctime)
-    age = datetime.datetime.utcnow() - creation_time
-
-    # as soon as we have successfully retrieved the object, delete it. while it is
-    # possible that an ExpiredObjectError will be raised below, any client should
-    # consider such an error irrecoverable, since an expired object will never
-    # stop being expired.
-    delete_object(bucket, object_name)
-
-    # check object for expiry -- if it is expired, raise an ExpiredObjectError
-    if age.total_seconds() >= expiration_seconds:
-        error_msg = 'object, gs://{}/{}, has expired (expiration_seconds: {})'.format(
-            bucket, object_name, expiration_seconds)
-        raise ExpiredObjectError(error_msg)
-
-    return contents
-
-
-# fetch and return the specified object's metadata and contents
-# (return format: $metadata, $contents)
-# if either metadata or contents is not found, raise an IOError
-def get_object_with_metadata(bucket, object_name):
-    ret_vals = {}
-
-    def get_metadata():
-        ret_vals['metadata'] = get_object_metadata(bucket, object_name)
-
-    def get_contents():
-        ret_vals['contents'] = read_object(bucket, object_name)
-    metadata_thread = Thread(target=get_metadata)
-    contents_thread = Thread(target=get_contents)
-
-    metadata_thread.start()
-    contents_thread.start()
-    metadata_thread.join()
-    contents_thread.join()
-
-    missing = filter(lambda k: k not in ret_vals, ['metadata', 'contents'])
-    if missing:
-        raise gcs.NotFoundError('unable to find {} for gs://{}/{}'.format(
-            ' or '.join(missing), bucket, object_name))
-
-    return ret_vals['metadata'], ret_vals['contents']
-
-
-# fetch the specified object's metadata, as returned by the python client's
-# 'stat' call
-def get_object_metadata(bucket, object_name):
-    return gcs.stat(gcs_filename(bucket, object_name))
-
-
-# read the specified object and return its contents as a string
-def read_object(bucket, object_name):
-    with gcs.open(gcs_filename(bucket, object_name)) as gcs_file:
-        # gcs_file.seek(-1024, os.SEEK_END)  # file is longer than 1024 characters -- about 26584
-        return gcs_file.read()
-
-
-# try to delete the specified object, ignoring gcs.NotFoundError, if encountered
-def delete_object(bucket, object_name):
-    try:
-        gcs.delete(gcs_filename(bucket, object_name))
-    except gcs.NotFoundError:
-        pass
-
-
-# write the specified contents, with the (optional) specified content type, to
-# the specified GCS bucket/object
-def write_object(bucket, object_name, contents, content_type='text/plain'):
-    with gcs.open(gcs_filename(bucket, object_name),
-                  'w',
-                  content_type=content_type,
-                  options={'x-goog-meta-foo': 'foo'}) as f:
-        f.write(contents)
-
-
-# given a bucket and object name, return the filename representation, by which
-# that object should be addressed within the GAE GCS client code
-def gcs_filename(bucket, object_name):
-    return '/{}/{}'.format(bucket, object_name)
+def health_check(request):
+#    print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+    return HttpResponse('')

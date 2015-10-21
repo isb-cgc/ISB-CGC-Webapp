@@ -1,16 +1,23 @@
 # Django settings for GAE_Django17 project.
 import os
+
 import secret_settings
 
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + os.sep
 
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + os.sep
 DEBUG = secret_settings.get('DEBUG')
 TEMPLATE_DEBUG = DEBUG
 
-ADMINS = (
-    # ('Your Name', 'your_email@example.com'),
-)
 
+### added for connecting to CloudSQL with SSL certs on MVM platform
+SSL_DIR = os.path.abspath(os.path.dirname(__file__))+os.sep
+MVM_ON = True
+###
+
+#ADMINS = (
+    # ('Your Name', 'your_email@example.com'),
+#)
+ADMINS = (('Eric', 'edownes@systemsbiology.org'))
 MANAGERS = ADMINS
 
 PROJECT_ID = secret_settings.get('PROJECT_ID')
@@ -18,15 +25,21 @@ BQ_PROJECT_ID = secret_settings.get('BQ_PROJECT_ID')
 
 CLOUD_BASE_URL = secret_settings.get('CLOUD_BASE_URL')
 CLOUD_API_URL = secret_settings.get('CLOUD_API_URL')
-
 LOCAL_BASE_URL = secret_settings.get('LOCAL_BASE_URL')
 
+# Compute services
+PAIRWISE_SERVICE_URL = secret_settings.get('PAIRWISE_SERVICE_URL')
+
+# Data Buckets
+OPEN_DATA_BUCKET = secret_settings.get('OPEN_DATA_BUCKET')
+CONTROLLED_DATA_BUCKET = secret_settings.get('CONTROLLED_DATA_BUCKET')
 
 # BigQuery cohort storage settings
 COHORT_DATASET_ID = secret_settings.get('COHORT_DATASET_ID')
-DEVELOPER_COHORT_TABLE_ID = None
+DEVELOPER_COHORT_TABLE_ID = secret_settings.get('DEVELOPER_COHORT_TABLE_ID')
 
-if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):  # or os.getenv('SETTINGS_MODE') == 'prod':
+if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):  
+    # or os.getenv('SETTINGS_MODE') == 'prod':
     DATABASES = secret_settings.get('CLOUD_DATABASE')
     BASE_URL = CLOUD_BASE_URL
     BASE_API_URL = CLOUD_API_URL
@@ -135,6 +148,7 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    'django.core.context_processors.tz'
 )
 
 # Make this unique, and don't share it with anybody.
@@ -186,6 +200,8 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'GenespotRE',
     'visualizations',
+    'genome_browser',
+    'seqpeek',
     'cohorts'
 )
 
@@ -256,8 +272,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     # 'allauth.account.context_processors.account', # deprecated in django-allauth
     'django.core.context_processors.request',
     'django.contrib.auth.context_processors.auth',
-    'django.contrib.messages.context_processors.messages',
-    'django.core.context_processors.tz'
+    'django.contrib.messages.context_processors.messages'
 )
 
 TEMPLATE_DIRS += (

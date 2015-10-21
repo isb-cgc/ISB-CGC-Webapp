@@ -96,17 +96,17 @@ nav {
   color: #000;
   border-radius: 3px; }
   .btn.active, .active.btn-primary, .active.btn-success, .btn.focus, .focus.btn-primary, .focus.btn-success {
-    background-color: #4F8DF4;
-    border-color: #4F8DF4; }
+    background-color: #0c4fba;
+    border-color: #0c4fba; }
 
 .btn-primary {
   color: #fff;
-  background-color: #4F8DF4;
-  border-color: #296EE1; }
+  background-color: #0c4fba;
+  border-color: #0a429d; }
   .btn-primary:hover, .btn-primary:disabled, .btn-primary:active, .btn-primary:focus {
     color: #fff;
-    background-color: #296EE1;
-    border-color: #296EE1; }
+    background-color: #0a429d;
+    border-color: #0a429d; }
 
 .btn-success {
   background-color: #89D889;
@@ -116,14 +116,14 @@ nav {
     border-color: #76b876; }
 
 .dropdown.open > .dropdown-toggle.btn-primary {
-  background-color: #296EE1;
-  border-color: #296EE1; }
+  background-color: #0a429d;
+  border-color: #0a429d; }
 .dropdown.dropdown-menu-right {
   text-align: right; }
 .dropdown .dropdown-toggle:hover {
   background-color: #EEE; }
   .dropdown .dropdown-toggle:hover.btn-primary {
-    background-color: #296EE1; }
+    background-color: #0a429d; }
 .dropdown .dropdown-menu {
   border-radius: 1px;
   margin: 0px; }
@@ -144,10 +144,10 @@ nav {
     margin-right: 0px; }
   .nav-tabs > li.active > a, .nav-tabs > li > a > li.active > a, .nav-tabs li.active > a:focus > li.active > a, .nav-tabs.nav-stacked > li.active > a > li.active > a, .nav-tabs.nav-stacked > li:hover > a > li.active > a, .nav-tabs li.active > a:focus, .nav-tabs > li > a li.active > a:focus, .nav-tabs li.active > a:focus li.active > a:focus {
     border: none;
-    border-bottom: 2px #4F8DF4 solid;
+    border-bottom: 2px #0c4fba solid;
     font-weight: bold; }
   .nav-tabs > li.active:hover > a, .nav-tabs > li > a > li.active:hover > a, .nav-tabs li.active > a:focus > li.active:hover > a {
-    border-bottom: 2px #4F8DF4 solid; }
+    border-bottom: 2px #0c4fba solid; }
   .nav-tabs > li:hover > a, .nav-tabs > li > a > li:hover > a, .nav-tabs li.active > a:focus > li:hover > a, .nav-tabs.nav-stacked > li.active > a > li:hover > a, .nav-tabs.nav-stacked > li:hover > a > li:hover > a {
     background-color: #DFEBFE;
     border-radius: 0px;
@@ -161,9 +161,9 @@ nav {
     border-bottom-left-radius: 3px; }
   .nav-tabs.nav-stacked > li.active > a, .nav-tabs > li > a.nav-stacked > li.active > a, .nav-tabs li.active > a.nav-stacked:focus > li.active > a, .nav-tabs.nav-stacked li.active > a:focus, .nav-tabs > li > a.nav-stacked li.active > a:focus, .nav-tabs li.active > a.nav-stacked:focus li.active > a:focus {
     border: none;
-    border-right: 2px #4F8DF4 solid; }
+    border-right: 2px #0c4fba solid; }
   .nav-tabs.nav-stacked > li.active:hover > a, .nav-tabs > li > a.nav-stacked > li.active:hover > a, .nav-tabs li.active > a.nav-stacked:focus > li.active:hover > a {
-    border-right: 2px #4F8DF4 solid; }
+    border-right: 2px #0c4fba solid; }
   .nav-tabs.nav-stacked > li:hover > a, .nav-tabs > li > a.nav-stacked > li:hover > a, .nav-tabs li.active > a.nav-stacked:focus > li:hover > a {
     background-color: #DFEBFE;
     border-right: 2px transparent solid; }
@@ -194,7 +194,7 @@ nav {
   .alert.alert-warning {
     background-color: #F8F8F8;
     border-color: #FFA000; }
-  .alert.alert-danger {
+  .alert.alert-error {
     background-color: #F8F8F8;
     border-color: #D32F2F; }
 
@@ -346,6 +346,14 @@ nav {
 /********************************************
  * Whole Site Widget Style
  ****************************************** */
+a.skip-nav {
+  position: absolute;
+  top: -1000px;
+  left: -1000px;
+  height: 1px;
+  width: 1px;
+  overflow: hidden; }
+
 .navbar-brand {
   height: 50px;
   padding: 5px 5px 5px 20px;
@@ -437,7 +445,7 @@ nav {
       width: 20px;
       height: 20px; }
       #search .search-right-column .search-box i.fa-check {
-        color: #4F8DF4; }
+        color: #0c4fba; }
     #search .search-right-column .search-box ul li span {
       margin-left: 10px; }
   #search .search-right-column .results-box {
@@ -845,6 +853,31 @@ nav {
       fill: #2196F3;
       stroke: #2196F3; }
 
+#cohort-filelist {
+  padding-top: 15px;
+  margin-top: 115px; }
+  #cohort-filelist .menu-bar h3 {
+    margin-top: 0px; }
+  #cohort-filelist .menu-bar a.btn, #cohort-filelist .menu-bar a.btn-primary, #cohort-filelist .menu-bar a.btn-success, #cohort-filelist .menu-bar .dropdown {
+    float: right; }
+  #cohort-filelist #filter-panel .panel .panel-heading {
+    background-color: #fff; }
+  #cohort-filelist #filter-panel .panel .panel-body {
+    padding: 10px 10px 0px 10px; }
+    #cohort-filelist #filter-panel .panel .panel-body ul {
+      list-style: none;
+      padding-left: 10px; }
+  #cohort-filelist .filelist-panel .page-num, #cohort-filelist .filelist-panel .file-count {
+    display: inline-block; }
+  #cohort-filelist .filelist-panel table {
+    table-layout: fixed;
+    word-break: break-all;
+    word-wrap: break-word; }
+    #cohort-filelist .filelist-panel table .col-barcode, #cohort-filelist .filelist-panel table .col-pipeline {
+      width: 150px; }
+    #cohort-filelist .filelist-panel table .col-datalevel {
+      width: 90px; }
+
 .parsets-tooltip {
   background-color: rgba(1, 48, 127, 0.8);
   border-radius: 3px;
@@ -888,9 +921,9 @@ nav {
       #visualizations .plot .panel-heading .options-bar i {
         margin-left: 5px; }
       #visualizations .plot .panel-heading .options-bar .toggle-selection.active {
-        color: #4F8DF4; }
+        color: #0c4fba; }
       #visualizations .plot .panel-heading .options-bar .expected_fill.selected {
-        stroke: #4F8DF4;
+        stroke: #0c4fba;
         stroke-opacity: 1;
         stroke-width: 3px; }
     #visualizations .plot .panel-heading h5 {
@@ -986,6 +1019,11 @@ nav {
     #visualizations .plot .panel-body {
       position: relative;
       overflow: hidden; }
+    #visualizations .plot .pairwise-result .table th.logp, #visualizations .plot .pairwise-result .table th.n, #visualizations .plot .pairwise-result .table th.na, #visualizations .plot .pairwise-result .table th.nb, #visualizations .plot .pairwise-result .table th.pa, #visualizations .plot .pairwise-result .table th.pb {
+      width: 60px; }
+    #visualizations .plot .pairwise-result .table td {
+      word-wrap: break-word;
+      word-break: break-word; }
   #visualizations .legend {
     display: inline-block;
     margin: 20px;
@@ -1224,7 +1262,7 @@ nav {
       margin-left: 5px;
       width: 500px; }
     #user-details .row .fa-check-circle {
-      color: #4F8DF4;
+      color: #0c4fba;
       font-size: 21px;
       line-height: 10px; }
     #user-details .row hr {

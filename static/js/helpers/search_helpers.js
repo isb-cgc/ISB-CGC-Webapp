@@ -121,7 +121,6 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         get_readable_name: function(csv_name) {
-//            console.log('getting readable name');
             var translation_dictionary = {
                 'DNAseq_data':              'DNAseq',
                 'Yes':                      'GA',

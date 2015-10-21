@@ -85,6 +85,8 @@ require([
 
         plot.find('.plot-div').empty();
         plot.find('.legend').empty();
+        plot.find('.pairwise-result').empty();
+
         var cohort_str = '';
         for (var i = 0; i < cohorts.length; i++) {
             if (i == 0) {
@@ -107,6 +109,43 @@ require([
             type: 'GET',
             url: api_url,
             success: function(data, status, xhr) {
+                if (data.hasOwnProperty('pairwise_result')) {
+                    var pairwise_div = plot.find('.pairwise-result');
+                    if (data['pairwise_result'].hasOwnProperty('result_vectors')) {
+                        var vectors = data['pairwise_result']['result_vectors'];
+
+                        var output = $('<table class="table"><thead><tr>' +
+                            '<th class="feature1">Feature 1</th>' +
+                            '<th class="feature2">Feature 2</th>' +
+                            '<th class="logp">logp</th>' +
+                            '<th class="n">n</th>' +
+                            '<th class="na">n_A</th>' +
+                            '<th class="nb">n_B</th>' +
+                            '<th class="pa">p_A</th>' +
+                            '<th class="pb">p_B</th>' +
+                            '<th class="comparison-type">Comparison Type</th>' +
+                            '<th class="correlation-coeff">Correlation Coefficient</th>' +
+                            '<th class="exclusion-rules">Exclusion Rules</th>' +
+                            '</tr></thead><tbody></tbody></table>');
+                        for (var i = 0; i < vectors.length; i++) {
+                            var tr = '<tr><td>' + vectors[i]['feature_1'] + '</td>' +
+                                '<td>' + vectors[i]['feature_2'] + '</td>' +
+                                '<td>' + vectors[i]['_logp'] + '</td>' +
+                                '<td>' + vectors[i]['n'] + '</td>' +
+                                '<td>' + vectors[i]['n_A'] + '</td>' +
+                                '<td>' + vectors[i]['n_B'] + '</td>' +
+                                '<td>' + vectors[i]['p_A'] + '</td>' +
+                                '<td>' + vectors[i]['p_B'] + '</td>' +
+                                '<td>' + vectors[i]['comparison_type'] + '</td>' +
+                                '<td>' + vectors[i]['correlation_coefficient'] + '</td>' +
+                                '<td>' + vectors[i]['exclusion_rules'] + '</td></tr>';
+                            output.find('tbody').append(tr);
+                        }
+                        pairwise_div.html(output);
+                    } else {
+                        pairwise_div.html('Pairwise returned no results.')
+                    }
+                }
                 if (data.hasOwnProperty('items')) {
                     x_type = data['types']['x'];
                     if (y_attr && y_attr != '') {
@@ -458,7 +497,7 @@ require([
                     generate_plot(plot, x_attr, y_attr, color_by, cohorts, cohort_override);
                 });
 
-
+                obj.find('.update-plot').trigger('click');
 
             },
             error: function() {

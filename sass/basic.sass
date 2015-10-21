@@ -212,7 +212,7 @@ nav
     &.alert-warning
         background-color: $bg-color
         border-color: $warning-bgcolor-dark
-    &.alert-danger
+    &.alert-error
         background-color: $bg-color
         border-color: $danger-bgcolor-dark
 
@@ -364,6 +364,15 @@ nav
 /********************************************
  * Whole Site Widget Style
  *******************************************/
+
+a.skip-nav
+    position: absolute
+    top: -1000px
+    left: -1000px
+    height: 1px
+    width: 1px
+    overflow: hidden
+
 .navbar-brand
     height: 50px
     padding: 5px 5px 5px 20px

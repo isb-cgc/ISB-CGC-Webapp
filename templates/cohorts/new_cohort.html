@@ -4,6 +4,7 @@
 
 {% block header %}
 {% endblock %}
+{% block link_page_name %}cohort-details{% endblock %}
 {% block page_name %}cohort-details{% endblock %}
 
 {% block secondary_nav %}
@@ -16,7 +17,7 @@
                     {#                <h4 class="total-samples">{{ total_samples }} Samples</h4>#}
                 </div>
                 <div class="col-md-2">
-                    <a class="btn btn-primary space-top-10 float-right" data-toggle="modal" data-target="#create-cohort-modal">Save As New Cohort</a>
+                    <a role="button" class="btn btn-primary space-top-10 float-right" data-toggle="modal" data-target="#create-cohort-modal">Save As New Cohort</a>
                 </div>
             </div>
         </div>
@@ -93,8 +94,9 @@
                                             {% if attr in attr_list_count %}
                                                 {% for v in attr_list_count|get_item:attr %}
                                                     <li>
-                                                        <input type="checkbox" name="elements-selected" id="{{ attr }}-{{ v.value|replace_whitespace:'_' }}" >
-                                                        <label for="{{ attr }}-{{ v.value|replace_whitespace:'_' }}">{{ v.value }}</label>
+                                                        <!-- todo: make a custom tag for the id for data_attr attributes-->
+                                                        <input type="checkbox" name="elements-selected" id="{{ v.value|get_data_attr_id:attr }}" >
+                                                        <label for="{{ v.value|get_data_attr_id:attr }}">{{ v.value }}</label>
                                                         <span class="count">({{ v.count }})</span>
                                                     </li>
                                                 {% endfor %}

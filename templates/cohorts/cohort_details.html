@@ -5,6 +5,7 @@
 {% block header %}
 {% endblock %}
 
+{% block link_page_name %}cohort-details{% endblock %}
 {% block page_name %}cohort-details{% endblock %}
 
 {% block secondary_nav %}
@@ -18,24 +19,24 @@
                     <a class="btn btn-default space-top-5" id="cancel-add-filter-btn" style="display:none;">Cancel</a>
                     <a class="btn btn-primary space-top-5" data-toggle="modal" data-target="#apply-filters-modal" style="display:none;">Apply New Filters</a>
                     <div class="dropdown dropdown-menu-right space-top-5">
-                        <a role="button" class="dropdown-toggle " type="button" id="create-dropdown" data-toggle="dropdown" aria-label="create-item" role="button" aria-expaneded="true">
+                        <a role="button" class="dropdown-toggle " type="button" id="create-dropdown" data-toggle="dropdown" aria-label="create-item" aria-expanded="true">
                             <i class="fa fa-bars"></i>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="create-dropdown">
                             {% if cohort.perm.perm == 'OWNER' %}
-                            <li role="presentation"><a href="#" id="add-filter-btn">Add New Filters</a></li>
+                            <li role="menuitem"><a href="#" id="add-filter-btn">Add New Filters</a></li>
                             {% endif %}
-                            <li role="presentation"><a href="#" class="show-flyout" title="Show Comments">Comments</a></li>
+                            <li role="menuitem"><a href="#" class="show-flyout" title="Show Comments">Comments</a></li>
     {#                        <li role="presentation"><a href="#">Edit Barcodes</a></li>#}
                             {% if cohort.perm == 'OWNER' %}
-                            <li role="presentation"><a href="#" data-toggle="modal" data-target="#delete-cohort-modal">Delete Cohort</a></li>
-                            <li role="presentation" class="divider"></li>
+                            <li role="menuitem"><a href="#" data-toggle="modal" data-target="#delete-cohort-modal">Delete Cohort</a></li>
+                            <li role="menuitem" class="divider"></li>
                             {% endif %}
     {#                        <li role="presentation"><a href="#">Revision History</a></li>#}
 
-                            <li role="presentation"><a href="{% url 'clone_cohort' cohort.id %}">Make a Copy</a></li>
+                            <li role="menuitem"><a href="{% url 'clone_cohort' cohort.id %}">Make a Copy</a></li>
                             {% if cohort.perm.perm == 'OWNER' %}
-                            <li role="presentation"><a href="#" data-toggle="modal" data-target="#share-cohort-modal">Share with Others</a></li>
+                            <li role="menuitem"><a href="#" data-toggle="modal" data-target="#share-cohort-modal">Share with Others</a></li>
                             {% endif %}
     {#                        <li role="presentation"><a href="#">Export to Google Cloud Platform</a></li>#}
                         </ul>
@@ -115,12 +116,12 @@
                                             {% if attr in attr_list_count %}
                                                 {% for v in attr_list_count|get_item:attr %}
                                                     <li>
-                                                        <input type="checkbox" name="elements-selected" id="{{ attr }}-{{ v.value|replace_whitespace:'_' }}" >
-                                                        <label for="{{ attr }}-{{ v.value|replace_whitespace:'_' }}">{{ v.value }}</label>
+                                                        <!-- todo: make a custom tag for the id for data_attr attributes-->
+                                                        <input type="checkbox" name="elements-selected" id="{{ v.value|get_data_attr_id:attr }}" >
+                                                        <label for="{{ v.value|get_data_attr_id:attr }}">{{ v.value }}</label>
                                                         <span class="count">({{ v.count }})</span>
                                                     </li>
                                                 {% endfor %}
-
                                             {% endif %}
                                         </ul>
                                     </div>
@@ -202,6 +203,7 @@
             </div>
             <div class="panel-body">
                 <div id="multi-categorical"></div>
+                <a href="{% url 'cohort_filelist' cohort.id %}">View File list</a>
             </div>
         </div>
 
@@ -210,7 +212,7 @@
     <!-- Comment Flyout -->
     <div class="fly-out comment-flyout comments">
         <div class="flyout-heading">
-            <h4>Comments <a role="button" class="hide-flyout"><i class="fa fa-times"></i></a></h4>
+            <h4>Comments <a role="button" class="hide-flyout" aria-label="Hide Flyout"><i class="fa fa-times"></i></a></h4>
         </div>
         <div class="flyout-body">
             {% for comment in cohort.cohort_comment.all %}
@@ -223,7 +225,7 @@
             <form class="add-comment" action="{% url 'save_cohort_comment' %}" method="POST">
                 {% csrf_token %}
                 <label for="content">Add Comment</label>
-                <textarea class="form-control space-bottom-10" name="content"></textarea>
+                <textarea id="content" class="form-control space-bottom-10" name="content"></textarea>
                 <input type="hidden" name="cohort_id" value="{{ cohort.id }}" />
                 <button class="btn btn-primary save-comment-btn" type="submit">Comment</button>
             </form>
@@ -269,8 +271,8 @@
                 </div>
                 <form id="create-cohort-form" method="POST" action="{% url 'save_cohort' %}">
                     <div class="modal-body">
-                        <label for="cohort-name">Name:</label>
-                        <input class="form-control" type="text" id="cohort-name" name="name" value="{{ cohort.name }}"/>
+                        <label for="create-cohort-name">Name:</label>
+                        <input class="form-control" type="text" id="create-cohort-name" name="name" value="{{ cohort.name }}"/>
                     </div>
                     <div class="modal-footer">
                         {% csrf_token %}
@@ -291,8 +293,8 @@
                 </div>
                 <form id="apply-filters-form" method="POST" action="{% url 'save_cohort' %}">
                     <div class="modal-body">
-                        <label for="cohort-name">Applying new filters will permanently modify the existing cohort.</label>
-                        <input type="hidden" id="cohort-name" name="name" value="{{ cohort.name }}"/>
+                        <label for="apply-filter-cohort-name">Applying new filters will permanently modify the existing cohort.</label>
+                        <input type="hidden" id="apply-filter-cohort-name" name="name" value="{{ cohort.name }}"/>
                         <input type="hidden" name="apply-filters" value="True"/>
                     </div>
                     <div class="modal-footer">
@@ -332,6 +334,7 @@
     var attr_list = {{ attr_list|safe }};
     var attr_counts = {{ attr_list_count|safe }};
     var total_samples = {{ total_samples|safe }};
+    var base_url = '{{ base_url|safe }}';
     var base_api_url = '{{ base_api_url|safe }}';
     var cohort_id = {{ cohort.id }};
     </script>
