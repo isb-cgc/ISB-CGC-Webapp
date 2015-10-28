@@ -73,12 +73,16 @@ advanced_settings.json
 *.patch
 GenespotRE/secret_settings.py
 migrations/
+.env
 
 # dummy datasets
 *.tsv
 *.csv
 *.xls
 *.txt
+
+# Vagrant Files
+.vagrant/
 
 # NodeJS dev-dependencies etc
 bower_components
