@@ -200,7 +200,6 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'GenespotRE',
     'visualizations',
-    'genome_browser',
     'seqpeek',
     'cohorts'
 )
