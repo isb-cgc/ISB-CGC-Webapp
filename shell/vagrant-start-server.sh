@@ -1,4 +1,4 @@
-source /home/vagrant/www/.env 2> /dev/null
+export $(cat /home/vagrant/www/.env | grep -v ^# | xargs) 2> /dev/null
 
 echo "Starting server..."
 sudo killall python 2> /dev/null

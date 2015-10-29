@@ -74,6 +74,7 @@ advanced_settings.json
 GenespotRE/secret_settings.py
 migrations/
 .env
+scripts/metadata_featdef_tables.sql
 
 # dummy datasets
 *.tsv
