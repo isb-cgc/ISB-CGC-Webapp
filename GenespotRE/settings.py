@@ -316,3 +316,22 @@ ACL_GOOGLE_GROUP                    = secret_settings.get('ACL_GOOGLE_GROUP')
 ERA_LOGIN_URL                       = secret_settings.get('ERA_LOGIN_URL')
 IPV4                                = secret_settings.get('IPV4')
 
+
+
+##############################
+#   Start django-finalware   #
+##############################
+
+INSTALLED_APPS += (
+    'finalware',)
+TEMPLATE_CONTEXT_PROCESSORS += (
+    'finalware.context_processors.contextify',)
+
+SITE_SUPERUSER_USERNAME = secret_settings.get('SU_USER')
+SITE_SUPERUSER_EMAIL = ''
+SITE_SUPERUSER_PASSWORD = secret_settings.get('SU_PASS')
+
+
+############################
+#   End django-finalware   #
+############################
