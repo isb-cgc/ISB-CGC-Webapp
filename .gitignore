@@ -71,7 +71,6 @@ ISB-CGC-test-private-key.json
 settings.json
 advanced_settings.json
 *.patch
-GenespotRE/secret_settings.py
 migrations/
 .env
 scripts/metadata_featdef_tables.sql
