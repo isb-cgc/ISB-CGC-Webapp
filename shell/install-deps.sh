@@ -12,14 +12,20 @@ echo "Preparing System..."
 apt-get -y install software-properties-common
 export CLOUD_SDK_REPO=cloud-sdk-`lsb_release -c -s`
 echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list
+curl --silent https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+if [ -n "$CI" ]; then
+# CI Takes care of Python update
+apt-get update -qq
+else
 # Add apt-get repository to update python from 2.7.6 (default) to latest 2.7.x
 add-apt-repository -y ppa:fkrull/deadsnakes-python2.7
-curl --silent https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
 apt-get update -qq
+apt-get install -qq -y python2.7
+fi
 
 # Install apt-get dependencies
 echo "Installing Dependencies..."
-apt-get install -qq -y unzip libffi-dev libssl-dev libmysqlclient-dev python2.7 python2.7-dev git
+apt-get install -qq -y unzip libffi-dev libssl-dev libmysqlclient-dev python2.7-dev git
 echo "Dependencies Installed"
 
 # Install PIP + Dependencies
