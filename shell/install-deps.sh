@@ -1,8 +1,10 @@
 if [ -n "$CI" ]; then
 export HOME=/home/ubuntu
+export HOMEROOT=/home/ubuntu
 else
 export $(cat /home/vagrant/www/.env | grep -v ^# | xargs) 2> /dev/null
 export HOME=/home/vagrant
+export HOMEROOT=/home/vagrant/www
 fi
 
 # Install and update apt-get info
@@ -23,7 +25,7 @@ echo "Dependencies Installed"
 # Install PIP + Dependencies
 echo "Installing Python Libraries..."
 curl --silent https://bootstrap.pypa.io/get-pip.py | python
-pip install -q -r ${HOME}/www/requirements.txt -t ${HOME}/www/lib --upgrade --only-binary all
+pip install -q -r ${HOMEROOT}/requirements.txt -t ${HOMEROOT}/lib --upgrade --only-binary all
 echo "Libraries Installed"
 
 # Install Google App Engine
@@ -31,8 +33,8 @@ echo "Installing Google App Engine..."
 wget -q https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.27.zip -O ${HOME}/google_appengine.zip
 unzip -nq ${HOME}/google_appengine.zip -d $HOME
 export PATH=$PATH:${HOME}/google_appengine/
-mkdir ${HOME}/www/lib/endpoints/ 2> /dev/null
-cp ${HOME}/google_appengine/lib/endpoints-1.0/endpoints/* ${HOME}/www/lib/endpoints/
+mkdir ${HOMEROOT}/lib/endpoints/ 2> /dev/null
+cp ${HOME}/google_appengine/lib/endpoints-1.0/endpoints/* ${HOMEROOT}/lib/endpoints/
 echo "Google App Engine Installed"
 
 # Install Google Cloud SDK
