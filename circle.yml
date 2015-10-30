@@ -1,0 +1,14 @@
+machine:
+  timezone:
+    America/Los_Angeles
+  environment:
+    PYTHONPATH: /home/ubuntu/ISB-CGC-WebApp:/home/ubuntu/ISB-CGC-WebApp/lib
+  python:
+    version: 2.7.10
+dependencies:
+  override:
+    - sudo shell/install-deps.py
+database:
+  post:
+    - mysql -u ubuntu -e "USE mysql; SET PASSWORD FOR 'ubuntu'@'localhost' = PASSWORD('isb')"
+    - sudo shell/database-setup.py

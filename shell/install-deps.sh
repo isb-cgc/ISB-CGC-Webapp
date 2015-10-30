@@ -1,4 +1,9 @@
+if [ -z ${CI+x} ]; then
+export HOME=/home/ubuntu
+else
 export $(cat /home/vagrant/www/.env | grep -v ^# | xargs) 2> /dev/null
+export HOME=/home/vagrant
+fi
 
 # Install and update apt-get info
 echo "Preparing System..."
@@ -18,16 +23,16 @@ echo "Dependencies Installed"
 # Install PIP + Dependencies
 echo "Installing Python Libraries..."
 curl --silent https://bootstrap.pypa.io/get-pip.py | python
-pip install -q -r /home/vagrant/www/requirements.txt -t /home/vagrant/www/lib --upgrade --only-binary all
+pip install -q -r ${HOME}/www/requirements.txt -t ${HOME}/www/lib --upgrade --only-binary all
 echo "Libraries Installed"
 
 # Install Google App Engine
 echo "Installing Google App Engine..."
-wget -q https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.27.zip -O /home/vagrant/google_appengine.zip
-unzip -nq /home/vagrant/google_appengine.zip -d /home/vagrant
-export PATH=$PATH:/home/vagrant/google_appengine/
-mkdir /home/vagrant/www/lib/endpoints/ 2> /dev/null
-cp /home/vagrant/google_appengine/lib/endpoints-1.0/endpoints/* /home/vagrant/www/lib/endpoints/
+wget -q https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.27.zip -O ${HOME}/google_appengine.zip
+unzip -nq ${HOME}/google_appengine.zip -d $HOME
+export PATH=$PATH:${HOME}/google_appengine/
+mkdir ${HOME}/www/lib/endpoints/ 2> /dev/null
+cp ${HOME}/google_appengine/lib/endpoints-1.0/endpoints/* ${HOME}/www/lib/endpoints/
 echo "Google App Engine Installed"
 
 # Install Google Cloud SDK
