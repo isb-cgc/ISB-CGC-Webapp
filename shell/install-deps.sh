@@ -1,4 +1,4 @@
-if [ -z ${CI+x} ]; then
+if [ -n "$CI" ]; then
 export HOME=/home/ubuntu
 else
 export $(cat /home/vagrant/www/.env | grep -v ^# | xargs) 2> /dev/null

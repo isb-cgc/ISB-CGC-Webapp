@@ -1,4 +1,4 @@
-if [ -z ${CI+x} ]; then
+if [ -n "$CI" ]; then
 export HOME=/home/ubuntu
 export MYSQL_ROOT_USER=ubuntu
 else
