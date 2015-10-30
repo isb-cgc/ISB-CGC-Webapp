@@ -7,8 +7,8 @@ machine:
     version: 2.7.10
 dependencies:
   override:
-    - sudo ./shell/install-deps.sh
+    - sudo /home/ubuntu/ISB-CGC-WebApp/shell/install-deps.sh
 database:
   post:
     - mysql -u ubuntu -e "USE mysql; SET PASSWORD FOR 'ubuntu'@'localhost' = PASSWORD('isb')"
-    - sudo ./shell/database-setup.sh
+    - sudo /home/ubuntu/ISB-CGC-WebApp/shell/database-setup.sh
