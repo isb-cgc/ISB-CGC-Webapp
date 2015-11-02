@@ -25,7 +25,7 @@ fi
 
 # Install apt-get dependencies
 echo "Installing Dependencies..."
-apt-get install -qq -y unzip libffi-dev libssl-dev libmysqlclient-dev python2.7-dev git
+apt-get install -qq -y unzip libffi-dev libssl-dev libmysqlclient-dev python2.7-dev git ruby
 echo "Dependencies Installed"
 
 # Install PIP + Dependencies
@@ -33,6 +33,9 @@ echo "Installing Python Libraries..."
 curl --silent https://bootstrap.pypa.io/get-pip.py | python
 pip install -q -r ${HOMEROOT}/requirements.txt -t ${HOMEROOT}/lib --upgrade --only-binary all
 echo "Libraries Installed"
+
+# Install SASS
+gem install sass
 
 # Install Google App Engine
 echo "Installing Google App Engine..."

@@ -1,5 +1,8 @@
 export $(cat /home/vagrant/www/.env | grep -v ^# | xargs) 2> /dev/null
 
+echo "Starting SASS compiler..."
+sudo killall sass 2> /dev/null
+sass --watch /home/vagrant/www/sass/main.sass:/home/vagrant/www/static/css/main.css > /home/vagrant/parentDir/outputSASS.log 2> /home/vagrant/parentDir/errorSASS.log &
 echo "Starting server..."
 sudo killall python 2> /dev/null
 touch /home/vagrant/parentDir/output.log

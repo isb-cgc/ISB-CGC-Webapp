@@ -25,13 +25,7 @@ From there simply perform these steps.
 
 In the projects parent folder, there should be two files: `error.log` and `output.log`. The `error.log` file should show any errors from your Django server. You can open it up in any text editor, though one that allows you to tail the file for updates (like PyCharm) is often best.
 
-# Working on front-end html and css
-Make sure SASS is installed. SASS files are compiled from sass/ into the static/css/ directory.
 
-For SASS: run this from root directory
-```
-sass --watch sass/main.sass:static/css/main.css
-```
 
 # Deploying to a new Google Cloud Project
 
