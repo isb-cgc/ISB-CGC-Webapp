@@ -1,5 +1,5 @@
 if [ -n "$CI" ]; then
-export HOME=/home/ubuntu
+export HOME=/home/ubuntu/ISB-CGC-Webapp
 export HOMEROOT=/home/ubuntu/ISB-CGC-Webapp
 else
 export $(cat /home/vagrant/www/.env | grep -v ^# | xargs) 2> /dev/null
