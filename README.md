@@ -25,7 +25,16 @@ From there simply perform these steps.
 
 In the projects parent folder, there should be two files: `error.log` and `output.log`. The `error.log` file should show any errors from your Django server. You can open it up in any text editor, though one that allows you to tail the file for updates (like PyCharm) is often best.
 
+## Adding Python Dependencies
 
+To add Python Libraries or Dependencies, you should add them to the requirements.txt file and they will automatically be pulled down when a new developer starts the system.
+
+To update your existing python dependencies because of a change or to pull down additional libraries you need, SSH into the virtual machine and run `pip install`. You can do this by doing the following
+
+ 1. Open a terminal in the project directory
+ 2. Type `vagrant ssh` to login to the virtual machine
+ 3. Change directory to the `www` directory (`/home/vagrant/www/` is the full path)
+ 4. Run `pip install -r requirements.txt --upgrade -t lib/`
 
 # Deploying to a new Google Cloud Project
 
