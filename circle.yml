@@ -2,7 +2,7 @@ machine:
   timezone:
     America/Los_Angeles
   environment:
-    PYTHONPATH: /home/ubuntu/ISB-CGC-WebApp:/home/ubuntu/ISB-CGC-WebApp/lib
+    PYTHONPATH: /home/ubuntu/ISB-CGC-Webapp:/home/ubuntu/ISB-CGC-Webapp/lib
   python:
     version: 2.7.10
 dependencies:
