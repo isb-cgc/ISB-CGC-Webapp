@@ -11,4 +11,4 @@ dependencies:
 database:
   post:
     - mysql -u ubuntu -e "USE mysql; SET PASSWORD FOR 'ubuntu'@'localhost' = PASSWORD('isb')"
-    - /bin/sh ./shell/database-setup.sh
+    - sudo -E /bin/sh ./shell/database-setup.sh
