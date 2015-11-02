@@ -13,4 +13,5 @@ Vagrant.configure(2) do |config|
   config.vm.provision "shell", path: 'shell/create-database.sh'
   config.vm.provision "shell", path: 'shell/database-setup.sh'
   config.vm.provision "shell", path: 'shell/vagrant-start-server.sh'
+  config.vm.provision "shell", path: 'shell/vagrant-set-env.sh'
 end
