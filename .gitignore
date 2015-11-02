@@ -71,14 +71,18 @@ ISB-CGC-test-private-key.json
 settings.json
 advanced_settings.json
 *.patch
-GenespotRE/secret_settings.py
 migrations/
+.env
+scripts/metadata_featdef_tables.sql
 
 # dummy datasets
 *.tsv
 *.csv
 *.xls
 *.txt
+
+# Vagrant Files
+.vagrant/
 
 # NodeJS dev-dependencies etc
 bower_components
