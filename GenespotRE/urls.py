@@ -29,4 +29,12 @@ urlpatterns = patterns('',
     url(r'session_security/', include('session_security.urls')),
     url(r'^tasks/', include('tasks.urls')),
     url(r'^_ah/health$', views.health_check),
+
+    # ------------------------------------------
+    # Blink views
+    # ------------------------------------------
+
+    url(r'^help/', views.help_page, name='help_page'),
+    url(r'^about/', views.about_page, name='about_page'),
+    url(r'^dashboard/', views.dashboard_page, name='dashboard_page'),
 )

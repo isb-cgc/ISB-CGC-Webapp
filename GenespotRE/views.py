@@ -360,3 +360,15 @@ def igv(request):
 def health_check(request):
 #    print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     return HttpResponse('')
+
+#------------------------------------
+# Blink Views -----------------------
+#------------------------------------
+def help_page(request):
+    return render(request, 'GenespotRE/help.html')
+
+def about_page(request):
+    return render(request, 'GenespotRE/about.html')
+
+def dashboard_page(request):
+    return render(request, 'GenespotRE/dashboard.html')

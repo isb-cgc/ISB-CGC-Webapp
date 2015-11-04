@@ -38,6 +38,8 @@
                 {% if user.is_authenticated %}
                     <a href="{% url 'user_landing' %}"><img class="navbar-brand" src="{% static 'img/isblogo.png' %}" alt="ISB Logo"/></a>
                     <li><a href="{% url 'user_landing' %}">ISB-CGC</a></li>
+                    <li><a href="{% url 'about_page' %}">About</a></li>
+                    <li><a href="{% url 'help_page' %}">Help</a></li>
                     {% if '/user_landing/' in request.path %}
                         <li class="search-item col-lg-9">
                             <form id="search-submit">
