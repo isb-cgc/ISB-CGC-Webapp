@@ -40,7 +40,7 @@ PyCharm Pro can be used to run your server through Vagrant and the Google App En
  10. Go to **Run > Edit Configurations**
  11. If there is not an App Engine server Configuartion, add one
  12. Set the host to `0.0.0.0`
- 13. Set Additional Options to `--skip_sdk_update_check  --admin_host 0.0.0.0 /home/vagrant/www`
+ 13. Set Additional Options to `--skip_sdk_update_check --use_mtime_file_watcher=True --admin_host 0.0.0.0 /home/vagrant/www`
    * Optionally set PyCharm to run a browser at url `http://127.0.0.1:8080/`
  14. Set the Python Interpreter to the Vagrant Machine (if it is not set to that already)
  15. Set the working directory to `\home\vagrant\www`
