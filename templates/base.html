@@ -1,11 +1,14 @@
 {% load l10n %}
 {% load staticfiles %}
-<!DOCTYPE html
-        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<!DOCTYPE html>
+<html lang="en" class="no-js">
 <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
     <title>{% block title %}ISB-CGC{% endblock %}</title>
+    <meta name="description" content="{% block description %}ISB-CGC project to visualize genome data{% endblock %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
     {% block extra_css_libs %}{% endblock %}
     <link type="text/css" rel="stylesheet" href="{% static 'css/select2.min.css' %}" />
     <link type="text/css" rel="stylesheet" href="{% static 'css/main.css' %}" />
@@ -24,13 +27,14 @@
 
 </head>
 <body>
+<!-- Site header -->
 {% include 'share/site_header.html' %}
 
 <div id="secondary-nav" class="navbar-fixed-top">
     {% block secondary_nav %}{% endblock %}
 </div>
 
-<div id="{% block page_name %}content{% endblock %}" class="container">
+<main id="{% block page_name %}content{% endblock %}" class="container">
     {% if messages %}
         <div class="row">
             <div class="col-lg-12">
@@ -68,7 +72,7 @@
             </div>
         </div>
     </div>
-</div>
+</main>
 {% load session_security_tags %}
 {% load i18n l10n %}
 {% load url from future %}
