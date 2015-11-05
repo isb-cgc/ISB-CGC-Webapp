@@ -1,0 +1,61 @@
+{% load staticfiles%}
+
+<header>
+    <a href="#{% block link_page_name %}content{% endblock %}" class="skip-nav">Skip to main content</a>
+    <div id="spinner-overlay" style="display:none;">
+        <i class="fa fa-spinner fa-spin"></i>
+    </div>
+
+    <nav class="navbar navbar-fixed-top" role="navigation">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-9">
+                <div class="nav navbar-left">
+                     <ul class="nav navbar-nav">
+                        <a href="{% url 'user_landing' %}"><img class="navbar-brand" src="{% static 'img/isblogo.png' %}" alt="ISB Logo"/></a>
+                        <li><a href="{% url 'user_landing' %}">ISB-CGC</a></li>
+                        <li><a href="{% url 'about_page' %}">About</a></li>
+                        <li><a href="{% url 'help_page' %}">Help</a></li>
+                    </ul>
+                </div>
+                </div>
+                <div class="nav navbar-right">
+
+
+                    {% if user.is_authenticated %}
+                        <div id="user-login" class="navbar-form inline-block">
+                            <a class="avatar-link" href="{% url 'user_detail' user.id %}">
+                                <img src="{{ user.socialaccount_set.all.0.get_avatar_url }}" width="32" height="32" alt="Avatar Link to User Details">
+                            </a>
+
+                            <div class="dropdown">
+                                <a role="button" class="dropdown-toggle" id="user-dropdown" data-toggle="dropdown" aria-label="User Dropdown" aria-expanded="true">
+                                    {{ user.first_name }} <i class="fa fa-caret-down"></i>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-label="user-dropdown">
+                                    <li role="menuitem"><a href="#logout-modal" data-toggle="modal" data-target="#logout-modal" title="Sign Out"><i class="fa fa-sign-out"></i>Sign Out</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div>
+                            <button><i class="fa fa-bars"></i>Menu</button>
+                            <ul>
+                                <li><a>WORKBOOKS <i class="fa fa-caret-down"></i></a></li>
+                                <li>PROJECTS <i class="fa fa-caret-down"></i></li>
+                                <li>ANALYSES <i class="fa fa-caret-down"></i></li>
+                                <li>GENES <i class="fa fa-caret-down"></i></li>
+                                <li>VARIABLES <i class="fa fa-caret-down"></i></li>
+                                <li>COHORTS <i class="fa fa-caret-down"></i></li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <div id="user-login" class="navbar-form inline-block">
+                            <!-- same thing as /accounts/login-->
+                            <a class="login-link" href="{% url 'account_login' %}" title="Sign In"><i class="fa fa-sign-in"></i> Sign In</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>

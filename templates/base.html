@@ -24,75 +24,7 @@
 
 </head>
 <body>
-<a href="#{% block link_page_name %}content{% endblock %}" class="skip-nav">Skip to main content</a>
-<div id="spinner-overlay" style="display:none;">
-    <i class="fa fa-spinner fa-spin"></i>
-</div>
-<nav class="navbar navbar-fixed-top" role="navigation">
-    <div class="container">
-        <div class="row">
-        <div class="col-lg-9">
-        <div class="nav navbar-left">
-
-            <ul class="nav navbar-nav">
-                {% if user.is_authenticated %}
-                    <a href="{% url 'user_landing' %}"><img class="navbar-brand" src="{% static 'img/isblogo.png' %}" alt="ISB Logo"/></a>
-                    <li><a href="{% url 'user_landing' %}">ISB-CGC</a></li>
-                    <li><a href="{% url 'about_page' %}">About</a></li>
-                    <li><a href="{% url 'help_page' %}">Help</a></li>
-                    {% if '/user_landing/' in request.path %}
-                        <li class="search-item col-lg-9">
-                            <form id="search-submit">
-                                <div class="input-group">
-                                    <input type="text" class="form-control" aria-label="Search Box" placeholder="Search Cohorts and Visualizations">
-                                    <span class="input-group-btn">
-                                        <button class="btn btn-default" type="submit" aria-label="Search"><i class="fa fa-search"></i></button>
-                                    </span>
-                                </div>
-                            </form>
-                        </li>
-                    {% endif %}
-{#                    <li {% if '/search/' in request.path %}class="active"{% endif %}><a href="{% url 'search' %}">Search</a></li>#}
-{#                    <li {% if '/visualizations/' in request.path %}class="active"{% endif %}><a href="{% url 'vizlist' %}">Visualizations</a></li>#}
-{#                    <li {% if '/users/' in request.path %}class="active"{% endif %}><a href="{% url 'users' %}">Users</a></li>#}
-{#                    <li {% if '/genome/' in request.path %}class="active"{% endif %}><a href="/genome" target="_blank">Genome Browser</a></li>#}
-
-                {% else %}
-                    <a href="/"><img class="navbar-brand" src="{% static 'img/isblogo.png' %}" alt="ISB Logo"/></a>
-                    <li><a href="/">ISB-CGC</a></li>
-{#                    <li {% if request.path == '/' %}class="active"{% endif %}><a href="/">Home</a></li>#}
-                {% endif %}
-            </ul>
-        </div>
-        </div>
-        <div class="nav navbar-right">
-            <div id="user-login" class="navbar-form inline-block">
-
-                {% if user.is_authenticated %}
-                    <a class="avatar-link" href="{% url 'user_detail' user.id %}">
-                        <img src="{{ user.socialaccount_set.all.0.get_avatar_url }}" width="32" height="32" alt="Avatar Link to User Details">
-                    </a>
-
-                    <div class="dropdown">
-                        <a role="button" class="dropdown-toggle" id="user-dropdown" data-toggle="dropdown" aria-label="User Dropdown" aria-expanded="true">
-                            {{ user.first_name }} <i class="fa fa-caret-down"></i>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-label="user-dropdown">
-                            <li role="menuitem"><a href="#logout-modal" data-toggle="modal" data-target="#logout-modal" title="Sign Out"><i class="fa fa-sign-out"></i>Sign Out</a></li>
-                        </ul>
-                    </div>
-{#                    <a href="#logout-modal" data-toggle="modal" data-target="#logout-modal" title="Sign Out"><i class="fa fa-sign-out"></i>Sign Out</a>#}
-                {% else %}
-                    <!--same thing as /accounts/login-->
-                    <a class="login-link" href="{% url 'account_login' %}" title="Sign In"><i class="fa fa-sign-in"></i> Sign In</a>
-
-                {% endif %}
-{#                <div id="signin"></div>#}
-            </div>
-        </div>
-        </div>
-    </div>
-</nav>
+{% include 'share/site_header.html' %}
 
 <div id="secondary-nav" class="navbar-fixed-top">
     {% block secondary_nav %}{% endblock %}
