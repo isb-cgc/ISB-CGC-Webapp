@@ -16,5 +16,5 @@ deployment:
   staging:
     branch: master
     commands:
-      - PATH=$PATH:/home/ubuntu/ISB-CGC-Webapp/google-cloud-sdk/bin sudo -E shell/gcloud_authenticate.sh
-      - PATH=$PATH:/home/ubuntu/ISB-CGC-Webapp/google-cloud-sdk/bin sudo -E gcloud preview app deploy app.yaml --no-promote 
+      - PATH=$PATH:/home/ubuntu/google-cloud-sdk/bin sudo -E shell/gcloud_authenticate.sh
+      - PATH=$PATH:/home/ubuntu/google-cloud-sdk/bin sudo -E gcloud preview app deploy app.yaml --no-promote

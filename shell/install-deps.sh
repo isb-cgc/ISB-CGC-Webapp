@@ -1,5 +1,5 @@
 if [ -n "$CI" ]; then
-export HOME=/home/ubuntu/ISB-CGC-Webapp
+export HOME=/home/ubuntu
 export HOMEROOT=/home/ubuntu/ISB-CGC-Webapp
 else
 export $(cat /home/vagrant/www/.env | grep -v ^# | xargs) 2> /dev/null
@@ -45,6 +45,7 @@ echo "Google App Engine Installed"
 
 # Install Google Cloud SDK
 echo "Installing Google Cloud SDK..."
+export CLOUDSDK_CORE_DISABLE_PROMPTS=1
 curl https://sdk.cloud.google.com | bash
 export PATH=$PATH:${HOME}/google-cloud-sdk/bin
 echo 'export PATH=$PATH:${HOME}/google-cloud-sdk/bin' | tee -a /home/vagrant/.bash_profile
