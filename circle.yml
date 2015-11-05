@@ -16,5 +16,5 @@ deployment:
   staging:
     branch: [master, continuous-integration]
     commands:
-      - PATH= sudo -E /bin/sh ./shell/gcloud_authenticate.sh
-      - PATH= sudo -E ./google-cloud-sdk/bin/gcloud preview app deploy app.yaml --no-promote
+      - sudo -E /bin/sh ./shell/gcloud_authenticate.sh
+      - sudo -E ./google-cloud-sdk/bin/gcloud preview app deploy app.yaml --no-promote
