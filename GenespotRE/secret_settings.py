@@ -109,6 +109,15 @@ SETTINGS = {
     'SU_PASS': os.environ.get('SUPERUSER_PASSWORD'),
 }
 
+if os.environ.has_key('DB_SSL_CERT'):
+    SETTINGS['DATABASE']['default']['OPTIONS'] = {
+        'ssl': {
+            'ca': os.environ.get('DB_SSL_CA'),
+            'cert': os.environ.get('DB_SSL_CERT'),
+            'key': os.environ.get('DB_SSL_KEY')
+        }
+    }
+
 def get(setting):
     #TODO: This should throw an exception
     if setting in SETTINGS:
