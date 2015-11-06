@@ -17,4 +17,4 @@ deployment:
     branch: [master, continuous-integration]
     commands:
       - sudo -E /bin/sh ./shell/gcloud_authenticate.sh
-      - sudo -E ./google-cloud-sdk/bin/gcloud preview app deploy app.yaml --no-promote --version $CIRCLE_BUILD_NUM --verbosity info
+      - sudo -E ./google-cloud-sdk/bin/gcloud preview app deploy app.yaml --no-promote --version $CIRCLE_BUILD_NUM
