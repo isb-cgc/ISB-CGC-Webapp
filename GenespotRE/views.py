@@ -17,6 +17,7 @@ from django.db.models import Count
 from django.utils import formats
 from django.contrib.auth.models import User
 from django.conf import settings
+from django.template import RequestContext
 
 from google_helpers.genomics_service import get_genomics_resource
 from visualizations.models import SavedViz, Viz_Perms
@@ -365,10 +366,11 @@ def health_check(request):
 # Blink Views -----------------------
 #------------------------------------
 def help_page(request):
+    print request.user
     return render(request, 'GenespotRE/help.html')
 
 def about_page(request):
-    return render(request, 'GenespotRE/about.html')
+    return render(request, 'GenespotRE/about.html', {'request', request})
 
 def dashboard_page(request):
-    return render(request, 'GenespotRE/dashboard.html')
+    return render(request, 'GenespotRE/dashboard.html', {'request', request})

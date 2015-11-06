@@ -6,7 +6,7 @@
         <i class="fa fa-spinner fa-spin"></i>
     </div>
 
-    <nav class="navbar navbar-fixed-top" role="navigation">
+    <div class="navbar navbar-fixed-top" role="navigation">
         <div class="container">
             <div class="row">
                 <div class="col-lg-9">
@@ -20,8 +20,6 @@
                 </div>
                 </div>
                 <div class="nav navbar-right">
-
-
                     {% if user.is_authenticated %}
                         <div id="user-login" class="navbar-form inline-block">
                             <a class="avatar-link" href="{% url 'user_detail' user.id %}">
@@ -38,16 +36,6 @@
                             </div>
                         </div>
                         <button><i class="fa fa-bars"></i>Menu</button>
-                        <div>
-                            <ul>
-                                <li><a>WORKBOOKS <i class="fa fa-caret-down"></i></a></li>
-                                <li>PROJECTS <i class="fa fa-caret-down"></i></li>
-                                <li>ANALYSES <i class="fa fa-caret-down"></i></li>
-                                <li>GENES <i class="fa fa-caret-down"></i></li>
-                                <li>VARIABLES <i class="fa fa-caret-down"></i></li>
-                                <li>COHORTS <i class="fa fa-caret-down"></i></li>
-                            </ul>
-                        </div>
                     {% else %}
                         <div id="user-login" class="navbar-form inline-block">
                             <!-- same thing as /accounts/login-->
@@ -57,5 +45,131 @@
                 </div>
             </div>
         </div>
-    </nav>
+        {% if user.is_authenticated %}
+        <nav class="site-nav" role="navigation">
+            <ul>
+                <li>
+                    <a>WORKBOOKS <i class="fa fa-caret-down"></i></a>
+                    <ul>
+                        <li>
+                            <h5>Recent</h5>
+                            <ul>
+                                <li> Workbook A </li>
+                                <li> Workbook B </li>
+                                <li> Workbook C </li>
+                                <li> Workbook D </li>
+                                <li> Workbook E </li>
+                                <li> More
+                                    <ul>
+                                        <li>Workbook F</li>
+                                        <li>Workbook H</li>
+                                        <li>Workbook I</li>
+                                        <li>Workbook J</li>
+                                        <li>Workbook K</li>
+                                        <li>Workbook L</li>
+
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                        <li><a href="/">Saved Workbooks (10)</a></li>
+                        <li><a href="/">Create a New Workbook</a></li>
+                        <li><a href="/">Sample Workbooks</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a>PROJECTS <i class="fa fa-caret-down"></i></a>
+                    <ul>
+                        <li>
+                            <h5>Start New Workbook With ...</h5>
+                            <ul>
+                                <li> Projects A </li>
+                                <li> Projects B </li>
+                                <li> Projects C </li>
+
+                            </ul>
+                        </li>
+                        <li><a href="/">Saved Projectss (10)</a></li>
+                        <li><a href="/">Upload Project Data</a></li>
+                        <li><a href="/">Public Projects (2)</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a>ANALYSES <i class="fa fa-caret-down"></i></a>
+                    <ul>
+                        <li>
+                            <h5>Start New Workbook With ...</h5>
+                            <ul>
+                                <li> Analysis A </li>
+                                <li> Analysis B </li>
+                                <li> Analysis C </li>
+                            </ul>
+                        </li>
+                        <li><a href="/">Browse All Analyses</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a>GENES <i class="fa fa-caret-down"></i></a>
+                    <ul>
+                        <li>
+                            <h5>Start New Workbook With ...</h5>
+                            <ul>
+                                <li> Gene Favorite A </li>
+                                <li> Gene Favorite B </li>
+                                <li> Gene Favorite C </li>
+                            </ul>
+                        </li>
+                        <li><a href="/">Manage Gene Favorite (10)</a></li>
+                        <li><a href="/">Create Gene Favorite(s)</a></li>
+                        <li><a href="/">Select Genes for a New Workbook</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a>VARIABLES <i class="fa fa-caret-down"></i></a>
+                    <ul>
+                        <li>
+                            <h5>Start New Workbook With ...</h5>
+                            <ul>
+                                <li> Variables Favorite A </li>
+                                <li> Variables Favorite B </li>
+                                <li> Variables Favorite C </li>
+                            </ul>
+                        </li>
+                        <li><a href="/">Manage Variables Favorite (10)</a></li>
+                        <li><a href="/">Create Favorite Variable(s)</a></li>
+                        <li><a href="/">Select Variabless for a New Workbook</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a>COHORTS <i class="fa fa-caret-down"></i></a>
+                    <ul>
+                        <li>
+                            <h5>Start New Workbook With ...</h5>
+                            <ul>
+                                <li> Cohorts A </li>
+                                <li> Cohorts B </li>
+                                <li> Cohorts C </li>
+                                <li> Cohorts D </li>
+                                <li> Cohorts E </li>
+                                <li> More
+                                    <ul>
+                                        <li>Cohorts F</li>
+                                        <li>Cohorts H</li>
+                                        <li>Cohorts I</li>
+                                        <li>Cohorts J</li>
+                                        <li>Cohorts K</li>
+                                        <li>Cohorts L</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                        <li><a>Manage Saved Cohorts (10)</a></li>
+                        <li><a>Public Cohorts (25)</a></li>
+                        <li><a>Select Cohort for a New Workbook</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
 </header>
