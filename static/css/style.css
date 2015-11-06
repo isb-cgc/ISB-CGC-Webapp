@@ -1,11 +1,7 @@
-/********************************************
- * Main File that gets compiled
- * New Sass files should be added here to be
- * compiled.
- *******************************************/
 @import url("/static/css/vendor.css");
 @import url("/static/css/font-awesome.min.css");
 @import url("/static/css/jquery-ui.min.css");
+@import url("/static/css/main.css");
 /********************************************
  * Main General Styles
  *******************************************/

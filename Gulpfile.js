@@ -4,19 +4,19 @@ var sassdoc = require('sassdoc');
 var converter = require('sass-convert');
 
 gulp.task('sass', function(){
-    gulp.src('sass/main.sass')
+    gulp.src('blink_sass/style.sass')
         .pipe(sass().on('error', sass.logError))
         .pipe(gulp.dest('static/css/'));
 })
 
 gulp.task('bootstrap-sass', function(){
-    gulp.src('sass/vendor/vendor.scss')
+    gulp.src('blink_sass/vendor/vendor.scss')
         .pipe(sass().on('error', sass.logError))
         .pipe(gulp.dest('static/css/'));
 })
 
 gulp.task('sass-convert', function(){
-    gulp.src('sass/variables.sass')
+    gulp.src('blink_sass/variables.sass')
         .pipe(converter({
             from: 'sass',
             to: 'scss',
@@ -26,6 +26,6 @@ gulp.task('sass-convert', function(){
 })
 
 gulp.task('default', function(){
-    gulp.watch('sass/**/*.sass', ['sass']);
-    gulp.watch('sass/variables.sass', ['sass-convert', 'bootstrap-sass']);
+    gulp.watch('blink_sass/**/*.sass', ['sass']);
+    gulp.watch(['blink_sass/variables.sass', 'blink_sass/**/*.scss'], ['sass-convert', 'bootstrap-sass']);
 })

@@ -1,175 +1,169 @@
 {% load staticfiles%}
 
-<header>
-    <a href="#{% block link_page_name %}content{% endblock %}" class="skip-nav">Skip to main content</a>
-    <div id="spinner-overlay" style="display:none;">
-        <i class="fa fa-spinner fa-spin"></i>
-    </div>
 
-    <header class="navbar navbar-fixed-top" role="navigation">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-9">
-                <div class="nav navbar-left">
-                     <ul class="nav navbar-nav">
-                        <a href="{% url 'user_landing' %}"><img class="navbar-brand" src="{% static 'img/isblogo.png' %}" alt="ISB Logo"/></a>
-                        <li><a href="{% url 'user_landing' %}">ISB-CGC</a></li>
-                        <li><a href="{% url 'about_page' %}">About</a></li>
-                        <li><a href="{% url 'help_page' %}">Help</a></li>
-                    </ul>
-                </div>
-                </div>
-                <div class="nav navbar-right">
-                    {% if user.is_authenticated %}
-                        <div id="user-login" class="navbar-form inline-block">
-                            <a class="avatar-link" href="{% url 'user_detail' user.id %}">
-                                <img src="{{ user.socialaccount_set.all.0.get_avatar_url }}" width="32" height="32" alt="Avatar Link to User Details">
+<header class="navbar navbar-fixed-top site-header" role="header">
+    <nav class="container">
+        <div class="row">
+            <div class="col-lg-9">
+            <div class="nav navbar-left">
+                 <ul class="nav navbar-nav">
+                    <a href="{% url 'user_landing' %}"><img class="navbar-brand" src="{% static 'img/isblogo.png' %}" alt="ISB Logo"/></a>
+                    <li><a href="{% url 'user_landing' %}">ISB-CGC</a></li>
+                    <li><a href="{% url 'about_page' %}">About</a></li>
+                    <li><a href="{% url 'help_page' %}">Help</a></li>
+                </ul>
+            </div>
+            </div>
+            <div class="nav navbar-right">
+                {% if user.is_authenticated %}
+                    <div id="user-login" class="navbar-form inline-block">
+                        <a class="avatar-link" href="{% url 'user_detail' user.id %}">
+                            <img src="{{ user.socialaccount_set.all.0.get_avatar_url }}" width="32" height="32" alt="Avatar Link to User Details">
+                        </a>
+
+                        <div class="dropdown">
+                            <a role="button" class="dropdown-toggle" id="user-dropdown" data-toggle="dropdown" aria-label="User Dropdown" aria-expanded="true">
+                                {{ user.first_name }} <i class="fa fa-caret-down"></i>
                             </a>
-
-                            <div class="dropdown">
-                                <a role="button" class="dropdown-toggle" id="user-dropdown" data-toggle="dropdown" aria-label="User Dropdown" aria-expanded="true">
-                                    {{ user.first_name }} <i class="fa fa-caret-down"></i>
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-label="user-dropdown">
-                                    <li role="menuitem"><a href="#logout-modal" data-toggle="modal" data-target="#logout-modal" title="Sign Out"><i class="fa fa-sign-out"></i>Sign Out</a></li>
-                                </ul>
-                            </div>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-label="user-dropdown">
+                                <li role="menuitem"><a href="#logout-modal" data-toggle="modal" data-target="#logout-modal" title="Sign Out"><i class="fa fa-sign-out"></i>Sign Out</a></li>
+                            </ul>
                         </div>
-                        <a type="button" class="btn btn-plain" data-toggle="collapse" data-target="#subnav" aria-expanded="false" aria-controls="subnav"><i class="fa fa-bars"></i>Menu</a>
-                    {% else %}
-                        <div id="user-login" class="navbar-form inline-block">
-                            <!-- same thing as /accounts/login-->
-                            <a class="login-link" href="{% url 'account_login' %}" title="Sign In"><i class="fa fa-sign-in"></i> Sign In</a>
-                        </div>
-                    {% endif %}
-                </div>
+                    </div>
+                    <a type="button" class="btn btn-plain" data-toggle="collapse" data-target="#subnav" aria-expanded="false" aria-controls="subnav"><i class="fa fa-bars"></i>Menu</a>
+                {% else %}
+                    <div id="user-login" class="navbar-form inline-block">
+                        <!-- same thing as /accounts/login-->
+                        <a class="login-link" href="{% url 'account_login' %}" title="Sign In"><i class="fa fa-sign-in"></i> Sign In</a>
+                    </div>
+                {% endif %}
             </div>
         </div>
-        {% if user.is_authenticated %}
-        <nav class="site-nav collapse" role="navigation" id="subnav">
-            <ul class="nav navbar-nav">
-                <li>
-                    <a>WORKBOOKS <i class="fa fa-caret-down"></i></a>
-                    <ul>
-                        <li>
-                            <h5>Recent</h5>
-                            <ul>
-                                <li> Workbook A </li>
-                                <li> Workbook B </li>
-                                <li> Workbook C </li>
-                                <li> Workbook D </li>
-                                <li> Workbook E </li>
-                                <li> More
-                                    <ul>
-                                        <li>Workbook F</li>
-                                        <li>Workbook H</li>
-                                        <li>Workbook I</li>
-                                        <li>Workbook J</li>
-                                        <li>Workbook K</li>
-                                        <li>Workbook L</li>
+    </nav>
+    {% if user.is_authenticated %}
+    <nav class="site-nav collapse" role="navigation" id="subnav">
+        <ul class="nav navbar-nav">
+            <li>
+                <a>WORKBOOKS <i class="fa fa-caret-down"></i></a>
+                <ul>
+                    <li>
+                        <h5>Recent</h5>
+                        <ul>
+                            <li> Workbook A </li>
+                            <li> Workbook B </li>
+                            <li> Workbook C </li>
+                            <li> Workbook D </li>
+                            <li> Workbook E </li>
+                            <li> More
+                                <ul>
+                                    <li>Workbook F</li>
+                                    <li>Workbook H</li>
+                                    <li>Workbook I</li>
+                                    <li>Workbook J</li>
+                                    <li>Workbook K</li>
+                                    <li>Workbook L</li>
 
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                        <li><a href="/">Saved Workbooks (10)</a></li>
-                        <li><a href="/">Create a New Workbook</a></li>
-                        <li><a href="/">Sample Workbooks</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <a>PROJECTS <i class="fa fa-caret-down"></i></a>
-                    <ul>
-                        <li>
-                            <h5>Start New Workbook With ...</h5>
-                            <ul>
-                                <li> Projects A </li>
-                                <li> Projects B </li>
-                                <li> Projects C </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><a href="/">Saved Workbooks (10)</a></li>
+                    <li><a href="/">Create a New Workbook</a></li>
+                    <li><a href="/">Sample Workbooks</a></li>
+                </ul>
+            </li>
+            <li>
+                <a>PROJECTS <i class="fa fa-caret-down"></i></a>
+                <ul>
+                    <li>
+                        <h5>Start New Workbook With ...</h5>
+                        <ul>
+                            <li> Projects A </li>
+                            <li> Projects B </li>
+                            <li> Projects C </li>
 
-                            </ul>
-                        </li>
-                        <li><a href="/">Saved Projectss (10)</a></li>
-                        <li><a href="/">Upload Project Data</a></li>
-                        <li><a href="/">Public Projects (2)</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <a>ANALYSES <i class="fa fa-caret-down"></i></a>
-                    <ul>
-                        <li>
-                            <h5>Start New Workbook With ...</h5>
-                            <ul>
-                                <li> Analysis A </li>
-                                <li> Analysis B </li>
-                                <li> Analysis C </li>
-                            </ul>
-                        </li>
-                        <li><a href="/">Browse All Analyses</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <a>GENES <i class="fa fa-caret-down"></i></a>
-                    <ul>
-                        <li>
-                            <h5>Start New Workbook With ...</h5>
-                            <ul>
-                                <li> Gene Favorite A </li>
-                                <li> Gene Favorite B </li>
-                                <li> Gene Favorite C </li>
-                            </ul>
-                        </li>
-                        <li><a href="/">Manage Gene Favorite (10)</a></li>
-                        <li><a href="/">Create Gene Favorite(s)</a></li>
-                        <li><a href="/">Select Genes for a New Workbook</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <a>VARIABLES <i class="fa fa-caret-down"></i></a>
-                    <ul>
-                        <li>
-                            <h5>Start New Workbook With ...</h5>
-                            <ul>
-                                <li> Variables Favorite A </li>
-                                <li> Variables Favorite B </li>
-                                <li> Variables Favorite C </li>
-                            </ul>
-                        </li>
-                        <li><a href="/">Manage Variables Favorite (10)</a></li>
-                        <li><a href="/">Create Favorite Variable(s)</a></li>
-                        <li><a href="/">Select Variabless for a New Workbook</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <a>COHORTS <i class="fa fa-caret-down"></i></a>
-                    <ul>
-                        <li>
-                            <h5>Start New Workbook With ...</h5>
-                            <ul>
-                                <li> Cohorts A </li>
-                                <li> Cohorts B </li>
-                                <li> Cohorts C </li>
-                                <li> Cohorts D </li>
-                                <li> Cohorts E </li>
-                                <li> More
-                                    <ul>
-                                        <li>Cohorts F</li>
-                                        <li>Cohorts H</li>
-                                        <li>Cohorts I</li>
-                                        <li>Cohorts J</li>
-                                        <li>Cohorts K</li>
-                                        <li>Cohorts L</li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                        <li><a>Manage Saved Cohorts (10)</a></li>
-                        <li><a>Public Cohorts (25)</a></li>
-                        <li><a>Select Cohort for a New Workbook</a></li>
-                    </ul>
-                </li>
-            </ul>
-        </nav>
-        {% endif %}
-    </hea>
+                        </ul>
+                    </li>
+                    <li><a href="/">Saved Projectss (10)</a></li>
+                    <li><a href="/">Upload Project Data</a></li>
+                    <li><a href="/">Public Projects (2)</a></li>
+                </ul>
+            </li>
+            <li>
+                <a>ANALYSES <i class="fa fa-caret-down"></i></a>
+                <ul>
+                    <li>
+                        <h5>Start New Workbook With ...</h5>
+                        <ul>
+                            <li> Analysis A </li>
+                            <li> Analysis B </li>
+                            <li> Analysis C </li>
+                        </ul>
+                    </li>
+                    <li><a href="/">Browse All Analyses</a></li>
+                </ul>
+            </li>
+            <li>
+                <a>GENES <i class="fa fa-caret-down"></i></a>
+                <ul>
+                    <li>
+                        <h5>Start New Workbook With ...</h5>
+                        <ul>
+                            <li> Gene Favorite A </li>
+                            <li> Gene Favorite B </li>
+                            <li> Gene Favorite C </li>
+                        </ul>
+                    </li>
+                    <li><a href="/">Manage Gene Favorite (10)</a></li>
+                    <li><a href="/">Create Gene Favorite(s)</a></li>
+                    <li><a href="/">Select Genes for a New Workbook</a></li>
+                </ul>
+            </li>
+            <li>
+                <a>VARIABLES <i class="fa fa-caret-down"></i></a>
+                <ul>
+                    <li>
+                        <h5>Start New Workbook With ...</h5>
+                        <ul>
+                            <li> Variables Favorite A </li>
+                            <li> Variables Favorite B </li>
+                            <li> Variables Favorite C </li>
+                        </ul>
+                    </li>
+                    <li><a href="/">Manage Variables Favorite (10)</a></li>
+                    <li><a href="/">Create Favorite Variable(s)</a></li>
+                    <li><a href="/">Select Variabless for a New Workbook</a></li>
+                </ul>
+            </li>
+            <li>
+                <a>COHORTS <i class="fa fa-caret-down"></i></a>
+                <ul>
+                    <li>
+                        <h5>Start New Workbook With ...</h5>
+                        <ul>
+                            <li> Cohorts A </li>
+                            <li> Cohorts B </li>
+                            <li> Cohorts C </li>
+                            <li> Cohorts D </li>
+                            <li> Cohorts E </li>
+                            <li> More
+                                <ul>
+                                    <li>Cohorts F</li>
+                                    <li>Cohorts H</li>
+                                    <li>Cohorts I</li>
+                                    <li>Cohorts J</li>
+                                    <li>Cohorts K</li>
+                                    <li>Cohorts L</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><a>Manage Saved Cohorts (10)</a></li>
+                    <li><a>Public Cohorts (25)</a></li>
+                    <li><a>Select Cohort for a New Workbook</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+    {% endif %}
 </header>

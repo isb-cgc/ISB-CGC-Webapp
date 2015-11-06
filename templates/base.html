@@ -11,7 +11,7 @@
 
     {% block extra_css_libs %}{% endblock %}
     <link type="text/css" rel="stylesheet" href="{% static 'css/select2.min.css' %}" />
-    <link type="text/css" rel="stylesheet" href="{% static 'css/main.css' %}" />
+    <link type="text/css" rel="stylesheet" href="{% static 'css/style.css' %}" />
     <script type="text/javascript" src="{% static 'js/libs/modernizr.js' %}"></script>
     {% block header %}{% endblock %}
 
@@ -27,7 +27,11 @@
 
 </head>
 <body>
-<!-- Site header -->
+<a href="#{% block link_page_name %}content{% endblock %}" class="skip-nav">Skip to main content</a>
+<div id="spinner-overlay" style="display:none;">
+    <i class="fa fa-spinner fa-spin"></i>
+</div>
+<!--Include site main header-->
 {% include 'share/site_header.html'  %}
 
 <div id="secondary-nav" class="navbar-fixed-top">
