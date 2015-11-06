@@ -2,16 +2,393 @@
  * Main File that gets compiled
  * New Sass files should be added here to be
  * compiled.
- ****************************************** */
-@import url("/static/css/bootstrap.min.css");
+ *******************************************/
+@import url("/static/css/vendor.css");
 @import url("/static/css/font-awesome.min.css");
 @import url("/static/css/jquery-ui.min.css");
 /********************************************
- * Style Variables
- ****************************************** */
+ * Main General Styles
+ *******************************************/
+body {
+  background-color: #F8F8F8;
+  font-family: 'Proxima Nova-Regular', Arial, sans-serif; }
+
+blockquote {
+  border-left-color: #006DC6;
+  font-size: 14px;
+  margin: 10px 20px;
+  padding: 2px 20px; }
+
+textarea {
+  height: 40px; }
+
+a {
+  color: #616161; }
+  a:hover {
+    color: #616161; }
+
+form table td {
+  padding: 10px; }
+
+#spinner-overlay {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000; }
+  #spinner-overlay i {
+    position: fixed;
+    left: 47%;
+    top: 45%;
+    margin: auto;
+    font-size: 200px; }
+
+h1, h2, h3, h4, h5, h6 {
+  color: #000;
+  font-weight: 250;
+  margin-top: 10px;
+  margin-bottom: 10px; }
+
+/********************************************
+ * Navbar Styles
+ *******************************************/
+nav {
+  background-color: #FFF; }
+
+.navbar {
+  border-bottom-color: #D5D5D5;
+  margin-bottom: 0px;
+  padding-bottom: 0px;
+  height: 56px; }
+
+.navbar-nav .search-item .input-group {
+  margin-top: 10px;
+  margin-left: 41px; }
+  .navbar-nav .search-item .input-group i {
+    padding: 3px; }
+
+.navbar-nav li a:hover {
+  background-color: #fff; }
+
+.navbar-right {
+  margin-top: 6px; }
+
+#secondary-nav {
+  background-color: #fff;
+  border-bottom: 1px solid #D5D5D5;
+  box-shadow: 0px 1px 2px #D5D5D5;
+  top: 55px;
+  z-index: 101; }
+  #secondary-nav .dropdown > a {
+    cursor: pointer;
+    font-size: 30px;
+    padding: 0px 5px; }
+  #secondary-nav .menu-items-right {
+    text-align: right; }
+
+/********************************************
+ * Overwriting Bootstrap
+ *******************************************/
+.btn, .btn.active, .btn.focus, .btn-primary, .btn-primary:hover, .btn-primary:disabled, .btn-primary:active, .btn-primary:focus, .btn-success, .btn-success:hover {
+  color: #000;
+  border-radius: 3px; }
+  .active.btn, .active.btn-primary, .active.btn-success, .focus.btn, .focus.btn-primary, .focus.btn-success {
+    background-color: #0c4fba;
+    border-color: #0c4fba; }
+
+.btn-primary {
+  color: #fff;
+  background-color: #0c4fba;
+  border-color: #0a429d; }
+  .btn-primary:hover, .btn-primary:disabled, .btn-primary:active, .btn-primary:focus {
+    color: #fff;
+    background-color: #0a429d;
+    border-color: #0a429d; }
+
+.btn-success {
+  background-color: #89D889;
+  border-color: #76b876; }
+  .btn-success:hover {
+    background-color: #76b876;
+    border-color: #76b876; }
+
+.dropdown.open > .dropdown-toggle.btn-primary {
+  background-color: #0a429d;
+  border-color: #0a429d; }
+
+.dropdown.dropdown-menu-right {
+  text-align: right; }
+
+.dropdown .dropdown-toggle:hover {
+  background-color: #EEE; }
+  .dropdown .dropdown-toggle:hover.btn-primary {
+    background-color: #0a429d; }
+
+.dropdown .dropdown-menu {
+  border-radius: 1px;
+  margin: 0px; }
+  .dropdown .dropdown-menu > li > a {
+    padding: 3px 10px; }
+  .dropdown .dropdown-menu i {
+    text-align: center;
+    width: 20px; }
+  .dropdown .dropdown-menu.dropdown-menu-right > li > a {
+    text-align: right; }
+
+.nav-tabs, .nav-tabs > li > a, .nav-tabs > li.active > a, .nav-tabs li.active > a:focus, .nav-tabs > li.active:hover > a, .nav-tabs > li:hover > a, .nav-tabs.nav-stacked > li.active > a, .nav-tabs.nav-stacked li.active > a:focus, .nav-tabs.nav-stacked > li.active:hover > a, .nav-tabs.nav-stacked > li:hover > a {
+  background-color: #fff;
+  border: none;
+  border-radius: 0px;
+  margin-left: 0px; }
+  .nav-tabs > li > a, .nav-tabs > li > a > li > a, .nav-tabs > li.active > a > li > a, .nav-tabs li.active > a:focus > li > a, .nav-tabs > li.active:hover > a > li > a, .nav-tabs > li:hover > a > li > a, .nav-tabs.nav-stacked > li.active > a > li > a, .nav-tabs.nav-stacked li.active > a:focus > li > a, .nav-tabs.nav-stacked > li.active:hover > a > li > a, .nav-tabs.nav-stacked > li:hover > a > li > a {
+    margin-right: 0px; }
+  .nav-tabs > li.active > a, .nav-tabs > li > a > li.active > a, .nav-tabs li.active > a:focus > li.active > a, .nav-tabs.nav-stacked > li.active > a > li.active > a, .nav-tabs.nav-stacked > li:hover > a > li.active > a, .nav-tabs li.active > a:focus, .nav-tabs > li > a li.active > a:focus, .nav-tabs.nav-stacked li.active > a:focus li.active > a:focus {
+    border: none;
+    border-bottom: 2px #0c4fba solid;
+    font-weight: bold; }
+  .nav-tabs > li.active:hover > a, .nav-tabs > li > a > li.active:hover > a, .nav-tabs li.active > a:focus > li.active:hover > a {
+    border-bottom: 2px #0c4fba solid; }
+  .nav-tabs > li:hover > a, .nav-tabs > li > a > li:hover > a, .nav-tabs li.active > a:focus > li:hover > a, .nav-tabs.nav-stacked > li.active > a > li:hover > a, .nav-tabs.nav-stacked > li:hover > a > li:hover > a {
+    background-color: #DFEBFE;
+    border-radius: 0px;
+    border-bottom: 2px transparent solid; }
+  .nav-tabs .navbar-right, .nav-tabs > li.active > a .navbar-right, .nav-tabs li.active > a:focus .navbar-right, .nav-tabs > li:hover > a .navbar-right {
+    margin-top: 0px;
+    margin-right: -2px; }
+  .nav-tabs.nav-stacked > li:first-child > a, .nav-tabs > li > a.nav-stacked > li:first-child > a, .nav-tabs li.active > a.nav-stacked:focus > li:first-child > a {
+    border-top-left-radius: 3px; }
+  .nav-tabs.nav-stacked > li:last-child > a, .nav-tabs > li > a.nav-stacked > li:last-child > a, .nav-tabs li.active > a.nav-stacked:focus > li:last-child > a {
+    border-bottom-left-radius: 3px; }
+  .nav-tabs.nav-stacked > li.active > a, .nav-tabs > li > a.nav-stacked > li.active > a, .nav-tabs li.active > a.nav-stacked:focus > li.active > a, .nav-tabs.nav-stacked li.active > a:focus, .nav-tabs > li > a.nav-stacked li.active > a:focus, .nav-tabs li.active > a.nav-stacked:focus li.active > a:focus {
+    border: none;
+    border-right: 2px #0c4fba solid; }
+  .nav-tabs.nav-stacked > li.active:hover > a, .nav-tabs > li > a.nav-stacked > li.active:hover > a, .nav-tabs li.active > a.nav-stacked:focus > li.active:hover > a {
+    border-right: 2px #0c4fba solid; }
+  .nav-tabs.nav-stacked > li:hover > a, .nav-tabs > li > a.nav-stacked > li:hover > a, .nav-tabs li.active > a.nav-stacked:focus > li:hover > a {
+    background-color: #DFEBFE;
+    border-right: 2px transparent solid; }
+
+.tab-content {
+  background-color: #FFF;
+  padding: 5px 10px; }
+
+.breadcrumb {
+  background-color: #F8F8F8;
+  border-radius: 0px;
+  margin-bottom: 10px;
+  padding: 5px 15px; }
+
+.alert {
+  border-radius: 1px;
+  border: 5px solid transparent;
+  padding: 10px; }
+  .alert .close {
+    right: 0px; }
+  .alert.alert-success {
+    background-color: #F8F8F8;
+    border-color: #76b876; }
+  .alert.alert-info {
+    color: #64B5F6;
+    background-color: #F8F8F8;
+    border-color: #1976D2; }
+  .alert.alert-warning {
+    background-color: #F8F8F8;
+    border-color: #FFA000; }
+  .alert.alert-error {
+    background-color: #F8F8F8;
+    border-color: #D32F2F; }
+
+.container-fluid {
+  padding-bottom: 15px; }
+
+.modal-content {
+  border-radius: 1px; }
+  .modal-content .modal-header {
+    padding: 10px; }
+    .modal-content .modal-header .close {
+      margin-top: 0px;
+      opacity: 0.5; }
+  .modal-content .modal-body {
+    padding: 10px; }
+  .modal-content .modal-footer {
+    padding: 10px; }
+
+.form-control {
+  border-radius: 1px;
+  padding: 5px 10px; }
+
+.ui-autocomplete {
+  max-height: 200px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 10000; }
+  .ui-autocomplete .ui-menu-item {
+    color: #000; }
+    .ui-autocomplete .ui-menu-item.ui-state-focus {
+      color: #000;
+      background-color: #F8F8F8;
+      border-color: #F8F8F8; }
+
+.tokenfield .token {
+  border-radius: 1px;
+  margin: 2px 5px 0px 0px; }
+
+.label {
+  font-weight: normal;
+  font-size: 100%;
+  color: #616161;
+  border-radius: 15px;
+  margin: 5px;
+  padding: 5px 15px; }
+  .label.label-default {
+    background-color: #F4F8FF; }
+    .label.label-default:hover {
+      color: #616161;
+      background-color: #DFEBFE; }
+
+.panel {
+  border-color: #D5D5D5;
+  border-top-color: transparent;
+  box-shadow: 0px 1px 2px #D5D5D5; }
+  .panel .panel-heading {
+    border-bottom-color: #D5D5D5;
+    color: #616161; }
+
+/********************************************
+ * Tablesorter Style Overrides
+ *******************************************/
+.tablesorter th {
+  cursor: pointer; }
+  .tablesorter th:first-child {
+    cursor: auto; }
+
+.tablesorter .headerSortUp:after {
+  content: "\f077";
+  float: right;
+  font-family: FontAwesome;
+  margin-left: -20px; }
+
+.tablesorter .headerSortDown:after {
+  content: "\f078";
+  float: right;
+  font-family: FontAwesome;
+  margin-left: -20px; }
+
+/********************************************
+ * Handy Classes
+ *******************************************/
+.inline-block {
+  display: inline-block;
+  vertical-align: top; }
+
+.block {
+  display: block; }
+
+.float-right {
+  float: right; }
+
+.float-left {
+  float: left; }
+
+.space-top-15 {
+  margin-top: 15px; }
+
+.space-bottom-15 {
+  margin-bottom: 15px; }
+
+.space-left-15 {
+  margin-left: 15px; }
+
+.space-right-15 {
+  margin-right: 15px; }
+
+.space-top-10 {
+  margin-top: 10px; }
+
+.space-bottom-10 {
+  margin-bottom: 10px; }
+
+.space-left-10 {
+  margin-left: 10px; }
+
+.space-right-10 {
+  margin-right: 10px; }
+
+.space-top-5 {
+  margin-top: 5px; }
+
+.space-bottom-5 {
+  margin-bottom: 5px; }
+
+.space-left-5 {
+  margin-left: 5px; }
+
+.space-right-5 {
+  margin-right: 5px; }
+
+/********************************************
+ * Logout Modal
+ *******************************************/
+#logout-modal h5 {
+  margin-bottom: 5px; }
+
+#logout-modal table {
+  display: none;
+  margin-bottom: 0px; }
+  #logout-modal table td {
+    padding: 5px 10px; }
+  #logout-modal table .selection {
+    width: 75px;
+    text-align: center; }
+
+#logout-modal .indent {
+  padding-left: 30px; }
+
+#logout-modal label {
+  font-weight: 500;
+  margin-bottom: 3px; }
+
+/********************************************
+ * Whole Site Widget Style
+ *******************************************/
+a.skip-nav {
+  position: absolute;
+  top: -1000px;
+  left: -1000px;
+  height: 1px;
+  width: 1px;
+  overflow: hidden; }
+
+.navbar-brand {
+  height: 50px;
+  padding: 5px 5px 5px 20px;
+  width: auto; }
+
+#user-login .avatar-link:hover {
+  text-decoration: none; }
+
+#user-login .login-link {
+  font-size: 16px; }
+
+#user-login img {
+  margin: 0px 10px;
+  border-radius: 50%;
+  border: 1px solid #F8F8F8; }
+
+#user-login .dropdown {
+  display: inline-block;
+  font-size: 16px;
+  margin-right: 15px; }
+  #user-login .dropdown > a:hover, #user-login .dropdown > a:focus {
+    background-color: #fff;
+    cursor: pointer;
+    text-decoration: none; }
+  #user-login .dropdown > ul {
+    margin-top: 10px; }
+
 /********************************************
  * Landing Page Styles
- ****************************************** */
+ *******************************************/
 #landing {
   padding-top: 15px;
   margin-top: 80px; }
@@ -41,7 +418,7 @@
 
 /********************************************
  * Search Page Styles
- ****************************************** */
+ *******************************************/
 #search .search-left-column {
   padding-right: 0px; }
   #search .search-left-column h5 {
@@ -57,6 +434,7 @@
       margin: 0px; }
     #search .search-left-column .search-checkbox-list li span {
       float: right; }
+
 #search .search-right-column {
   padding-left: 0px; }
   #search .search-right-column h5 {
@@ -83,12 +461,15 @@
     display: none; }
     #search .search-right-column .results-box .save-data-modal {
       margin-top: 10px; }
+
 #search .panel {
   border-radius: 1px;
   margin-bottom: 0px; }
+
 #search .last-panel .panel-body ul {
   list-style: disc;
   margin-left: 25px; }
+
 #search .panel-heading {
   padding: 0px; }
   #search .panel-heading h5 {
@@ -98,13 +479,16 @@
     display: block; }
   #search .panel-heading a:hover {
     text-decoration: none; }
+
 #search .result-item .result-selector {
   float: left;
   margin: 12px 10px 10px 10px;
   position: absolute; }
+
 #search .result-item .result-content {
   margin-left: 35px;
   display: inline-block; }
+
 #search .saved-search.col-md-2 {
   padding-left: 0px; }
   #search .saved-search.col-md-2 .content {
@@ -115,10 +499,13 @@
       list-style: disc; }
       #search .saved-search.col-md-2 .content ul li {
         margin-left: 18px; }
+
 #search #save-search-modal h5 {
   margin-bottom: 5px; }
+
 #search #save-search-modal .search-table-container {
   margin: 5px 0px 0px 30px; }
+
 #search #save-search-modal table {
   display: none;
   margin-bottom: 0px; }
@@ -127,15 +514,20 @@
   #search #save-search-modal table .selection {
     width: 75px;
     text-align: center; }
+
 #search #save-search-modal .indent {
   padding-left: 30px; }
+
 #search #save-search-modal label {
   font-weight: 500;
   margin-bottom: 3px; }
+
 #search #save-data-tab h5 {
   margin-bottom: 5px; }
+
 #search #save-data-tab .search-table-container {
   margin: 5px 0px 0px 30px; }
+
 #search #save-data-tab table {
   display: none;
   margin-bottom: 0px; }
@@ -144,11 +536,14 @@
   #search #save-data-tab table .selection {
     width: 75px;
     text-align: center; }
+
 #search #save-data-tab .indent {
   padding-left: 30px; }
+
 #search #save-data-tab label {
   font-weight: 500;
   margin-bottom: 3px; }
+
 #search #tree-graph-clinical {
   display: block; }
   #search #tree-graph-clinical .tree-graph {
@@ -158,8 +553,10 @@
     padding: 5px; }
     #search #tree-graph-clinical .tree-graph .graph-title {
       text-align: center; }
+
 #search #file-access a {
   text-decoration: underline; }
+
 #search #multi-categorical {
   overflow-x: scroll; }
   #search #multi-categorical svg {
@@ -192,14 +589,14 @@
   #search #multi-categorical .dimension > rect {
     display: none; }
   #search #multi-categorical .category:hover rect {
-    fill-opacity: 0.3; }
+    fill-opacity: .3; }
   #search #multi-categorical .dimension:hover > rect {
-    fill-opacity: 0.3; }
+    fill-opacity: .3; }
   #search #multi-categorical .ribbon path {
     stroke-opacity: 0;
-    fill-opacity: 0.5; }
+    fill-opacity: .5; }
   #search #multi-categorical .ribbon path.active {
-    fill-opacity: 0.9; }
+    fill-opacity: .9; }
   #search #multi-categorical .ribbon-mouse path {
     fill-opacity: 0; }
   #search #multi-categorical .category-9 {
@@ -243,7 +640,7 @@
   margin-top: 115px; }
   #cohort-details .menu-bar h3 {
     margin-top: 0px; }
-  #cohort-details .menu-bar a.btn, #cohort-details .menu-bar .dropdown {
+  #cohort-details .menu-bar a.btn, #cohort-details .menu-bar a.btn-primary, #cohort-details .menu-bar a.btn-success, #cohort-details .menu-bar .dropdown {
     float: right; }
   #cohort-details .total-samples {
     margin-top: 0px; }
@@ -443,14 +840,14 @@
     #cohort-details #multi-categorical .dimension > rect {
       display: none; }
     #cohort-details #multi-categorical .category:hover rect {
-      fill-opacity: 0.3; }
+      fill-opacity: .3; }
     #cohort-details #multi-categorical .dimension:hover > rect {
-      fill-opacity: 0.3; }
+      fill-opacity: .3; }
     #cohort-details #multi-categorical .ribbon path {
       stroke-opacity: 0;
-      fill-opacity: 0.5; }
+      fill-opacity: .5; }
     #cohort-details #multi-categorical .ribbon path.active {
-      fill-opacity: 0.9; }
+      fill-opacity: .9; }
     #cohort-details #multi-categorical .ribbon-mouse path {
       fill-opacity: 0; }
     #cohort-details #multi-categorical .category-9 {
@@ -489,7 +886,7 @@
   margin-top: 115px; }
   #cohort-filelist .menu-bar h3 {
     margin-top: 0px; }
-  #cohort-filelist .menu-bar a.btn, #cohort-filelist .menu-bar .dropdown {
+  #cohort-filelist .menu-bar a.btn, #cohort-filelist .menu-bar a.btn-primary, #cohort-filelist .menu-bar a.btn-success, #cohort-filelist .menu-bar .dropdown {
     float: right; }
   #cohort-filelist #filter-panel .panel .panel-heading {
     background-color: #fff; }
@@ -525,7 +922,7 @@
 
 /********************************************
  * Visualizations Styles
- ****************************************** */
+ *******************************************/
 #visualizations {
   margin-top: 115px; }
   #visualizations .data-holder {
@@ -568,7 +965,7 @@
       overflow: hidden; }
       #visualizations .plot .plot-div .extent {
         fill: #000;
-        fill-opacity: 0.1;
+        fill-opacity: .1;
         stroke: #fff; }
       #visualizations .plot .plot-div .expected_fill.selected {
         stroke: #01307F;
@@ -688,9 +1085,10 @@
   margin-top: 20px; }
   #seqpeek #seqpeek-form > div {
     width: 80%; }
+
 #seqpeek .extent {
   fill: #000;
-  fill-opacity: 0.1; }
+  fill-opacity: .1; }
 
 #circviz {
   margin-top: 80px; }
@@ -698,7 +1096,7 @@
     stroke: black;
     text-anchor: middle;
     visibility: hidden;
-    dy: 0.35em;
+    dy: .35em;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 13px;
     font-weight: normal; }
@@ -711,7 +1109,8 @@
     font-size: 12px;
     font-weight: normal; }
   #circviz svg .ideogram .radial_lines {
-    /*stroke:#444; */
+    stroke: null;
+    /*stroke:#444;*/
     stroke-width: 1.5px; }
   #circviz svg .wedge .background {
     fill: none;
@@ -775,6 +1174,7 @@
 
 #igv i.igv-app-icon {
   background-color: transparent; }
+
 #igv .igvNavigationZoom {
   font-size: 24px; }
   #igv .igvNavigationZoom i:first-child {
@@ -784,8 +1184,8 @@
   position: fixed;
   top: 0px;
   left: 0px;
-  /*display : block; */
-  /*visibility: hidden; */
+  /*display : block;*/
+  /*visibility: hidden;*/
   z-index: 100000;
   font-family: inherit !important;
   font-size: 16px !important;
@@ -876,5 +1276,3 @@
       margin: 0px -15px 10px -15px; }
   #user-details .modal h4 {
     text-align: left; }
-
-/*# sourceMappingURL=main.css.map */

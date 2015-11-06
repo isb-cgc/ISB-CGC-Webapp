@@ -6,7 +6,7 @@
         <i class="fa fa-spinner fa-spin"></i>
     </div>
 
-    <div class="navbar navbar-fixed-top" role="navigation">
+    <header class="navbar navbar-fixed-top" role="navigation">
         <div class="container">
             <div class="row">
                 <div class="col-lg-9">
@@ -35,7 +35,7 @@
                                 </ul>
                             </div>
                         </div>
-                        <button><i class="fa fa-bars"></i>Menu</button>
+                        <a type="button" class="btn btn-plain" data-toggle="collapse" data-target="#subnav" aria-expanded="false" aria-controls="subnav"><i class="fa fa-bars"></i>Menu</a>
                     {% else %}
                         <div id="user-login" class="navbar-form inline-block">
                             <!-- same thing as /accounts/login-->
@@ -46,8 +46,8 @@
             </div>
         </div>
         {% if user.is_authenticated %}
-        <nav class="site-nav" role="navigation">
-            <ul>
+        <nav class="site-nav collapse" role="navigation" id="subnav">
+            <ul class="nav navbar-nav">
                 <li>
                     <a>WORKBOOKS <i class="fa fa-caret-down"></i></a>
                     <ul>
@@ -171,5 +171,5 @@
             </ul>
         </nav>
         {% endif %}
-    </div>
+    </hea>
 </header>
