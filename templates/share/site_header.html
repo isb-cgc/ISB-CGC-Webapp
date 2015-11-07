@@ -7,10 +7,10 @@
             <div class="col-lg-9">
             <div class="nav navbar-left">
                  <ul class="nav navbar-nav">
-                    <a href="{% url 'user_landing' %}"><img class="navbar-brand" src="{% static 'img/isblogo.png' %}" alt="ISB Logo"/></a>
-                    <li><a href="{% url 'user_landing' %}">ISB-CGC</a></li>
-                    <li><a href="{% url 'about_page' %}">About</a></li>
-                    <li><a href="{% url 'help_page' %}">Help</a></li>
+                    <a href="{% url 'dashboard' %}"><img class="navbar-brand" src="{% static 'img/isblogo.png' %}" alt="ISB Logo"/></a>
+                    <li><a href="{% url 'dashboard' %}">ISB-CGC</a></li>
+                    <li class="navbar-link"><a href="{% url 'about_page' %}">About</a></li>
+                    <li class="navbar-link"><a href="{% url 'help_page' %}">Help</a></li>
                 </ul>
             </div>
             </div>
@@ -41,42 +41,42 @@
         </div>
     </nav>
     {% if user.is_authenticated %}
-    <nav class="site-nav collapse" role="navigation" id="subnav">
-        <ul class="nav navbar-nav">
-            <li>
+    <!--{# TODO: takeout class in when the subnav css is ready #}-->
+    <nav class="nav subnav collapse in" role="navigation" id="subnav">
+        <ul class="container">
+            <li class="menu-item has-drop-down">
                 <a>WORKBOOKS <i class="fa fa-caret-down"></i></a>
-                <ul>
-                    <li>
-                        <h5>Recent</h5>
-                        <ul>
-                            <li> Workbook A </li>
-                            <li> Workbook B </li>
-                            <li> Workbook C </li>
-                            <li> Workbook D </li>
-                            <li> Workbook E </li>
-                            <li> More
-                                <ul>
-                                    <li>Workbook F</li>
-                                    <li>Workbook H</li>
-                                    <li>Workbook I</li>
-                                    <li>Workbook J</li>
-                                    <li>Workbook K</li>
-                                    <li>Workbook L</li>
-
+                <ul class="sub-menu drop">
+                    <li class="menu-item">
+                        <strong>Recent</strong>
+                        <ul class="navitem-list">
+                            <li class="menu-item"> Workbook A </li>
+                            <li class="menu-item"> Workbook B </li>
+                            <li class="menu-item"> Workbook C </li>
+                            <li class="menu-item"> Workbook D </li>
+                            <li class="menu-item"> Workbook E </li>
+                            <li class="menu-item has-drop-down"> More
+                                <ul class="navitem-sublist drop">
+                                    <li class="menu-item">Workbook F</li>
+                                    <li class="menu-item">Workbook H</li>
+                                    <li class="menu-item">Workbook I</li>
+                                    <li class="menu-item">Workbook J</li>
+                                    <li class="menu-item">Workbook K</li>
+                                    <li class="menu-item">Workbook L</li>
                                 </ul>
                             </li>
                         </ul>
                     </li>
-                    <li><a href="/">Saved Workbooks (10)</a></li>
-                    <li><a href="/">Create a New Workbook</a></li>
-                    <li><a href="/">Sample Workbooks</a></li>
+                    <li class="menu-item"><a href="/">Saved Workbooks (10)</a></li>
+                    <li class="menu-item"><a href="/">Create a New Workbook</a></li>
+                    <li class="menu-item"><a href="/">Sample Workbooks</a></li>
                 </ul>
             </li>
-            <li>
+            <li class="menu-item has-drop-down">
                 <a>PROJECTS <i class="fa fa-caret-down"></i></a>
-                <ul>
+                <ul class="sub-menu drop">
                     <li>
-                        <h5>Start New Workbook With ...</h5>
+                        <strong>Start New Workbook With ...</strong>
                         <ul>
                             <li> Projects A </li>
                             <li> Projects B </li>
@@ -89,11 +89,11 @@
                     <li><a href="/">Public Projects (2)</a></li>
                 </ul>
             </li>
-            <li>
+            <li class="menu-item has-drop-down">
                 <a>ANALYSES <i class="fa fa-caret-down"></i></a>
-                <ul>
+                <ul class="sub-menu drop">
                     <li>
-                        <h5>Start New Workbook With ...</h5>
+                        <strong>Start New Workbook With ...</strong>
                         <ul>
                             <li> Analysis A </li>
                             <li> Analysis B </li>
@@ -103,11 +103,11 @@
                     <li><a href="/">Browse All Analyses</a></li>
                 </ul>
             </li>
-            <li>
+            <li class="menu-item has-drop-down">
                 <a>GENES <i class="fa fa-caret-down"></i></a>
-                <ul>
+                <ul class="sub-menu drop">
                     <li>
-                        <h5>Start New Workbook With ...</h5>
+                        <strong>Start New Workbook With ...</strong>
                         <ul>
                             <li> Gene Favorite A </li>
                             <li> Gene Favorite B </li>
@@ -119,11 +119,11 @@
                     <li><a href="/">Select Genes for a New Workbook</a></li>
                 </ul>
             </li>
-            <li>
+            <li class="menu-item has-drop-down">
                 <a>VARIABLES <i class="fa fa-caret-down"></i></a>
-                <ul>
+                <ul class="sub-menu drop">
                     <li>
-                        <h5>Start New Workbook With ...</h5>
+                        <strong>Start New Workbook With ...</strong>
                         <ul>
                             <li> Variables Favorite A </li>
                             <li> Variables Favorite B </li>
@@ -135,32 +135,32 @@
                     <li><a href="/">Select Variabless for a New Workbook</a></li>
                 </ul>
             </li>
-            <li>
+            <li class="menu-item has-drop-down">
                 <a>COHORTS <i class="fa fa-caret-down"></i></a>
-                <ul>
-                    <li>
-                        <h5>Start New Workbook With ...</h5>
+                <ul class="sub-menu drop">
+                    <li class="menu-item">
+                        <strong>Start New Workbook With ...</strong>
                         <ul>
-                            <li> Cohorts A </li>
-                            <li> Cohorts B </li>
-                            <li> Cohorts C </li>
-                            <li> Cohorts D </li>
-                            <li> Cohorts E </li>
-                            <li> More
-                                <ul>
-                                    <li>Cohorts F</li>
-                                    <li>Cohorts H</li>
-                                    <li>Cohorts I</li>
-                                    <li>Cohorts J</li>
-                                    <li>Cohorts K</li>
-                                    <li>Cohorts L</li>
+                            <li class="menu-item"> Cohorts A </li>
+                            <li class="menu-item"> Cohorts B </li>
+                            <li class="menu-item"> Cohorts C </li>
+                            <li class="menu-item"> Cohorts D </li>
+                            <li class="menu-item"> Cohorts E </li>
+                            <li class="menu-item has-drop-down"> More
+                                <ul class="drop">
+                                    <li class="menu-item">Cohorts F</li>
+                                    <li class="menu-item">Cohorts H</li>
+                                    <li class="menu-item">Cohorts I</li>
+                                    <li class="menu-item">Cohorts J</li>
+                                    <li class="menu-item">Cohorts K</li>
+                                    <li class="menu-item">Cohorts L</li>
                                 </ul>
                             </li>
                         </ul>
                     </li>
-                    <li><a>Manage Saved Cohorts (10)</a></li>
-                    <li><a>Public Cohorts (25)</a></li>
-                    <li><a>Select Cohort for a New Workbook</a></li>
+                    <li class="menu-item"><a>Manage Saved Cohorts (10)</a></li>
+                    <li class="menu-item"><a>Public Cohorts (25)</a></li>
+                    <li class="menu-item"><a>Select Cohort for a New Workbook</a></li>
                 </ul>
             </li>
         </ul>

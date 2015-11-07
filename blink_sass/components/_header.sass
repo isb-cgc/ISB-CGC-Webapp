@@ -1,2 +1,63 @@
 nav, .site-header
   background: $nav-bg
+
+
+.navbar-link a
+  color: $link-color
+  &:hover, &:focus
+    color: darken($link-color, 10%)
+
+
+.subnav
+  background-color: darken($white, 10%)
+
+  ul, li
+    list-style: none
+    padding: 0
+    margin-bottom: 0
+
+  li
+    padding: 10px
+
+  & > ul > li
+    display: inline-block
+    vertical-align: top
+    position: relative
+    padding: 15px 15px
+
+    //>.navitem-list, > ul
+    //  display: none
+    //  width: 250px
+    //  padding: 7px 15px
+    //
+    //  > li
+    //    padding: 10px
+    //    border-bottom: 1px solid $white
+    //    &:last-child
+    //      border-bottom: none
+
+    &:hover
+      background: darken($white, 15%)
+
+      > .navitem-list, &:hover > ul
+        display: block
+        position: absolute
+        background: darken($white, 15%)
+        top: 100%
+        left: 0
+
+  .menu-item
+    .sub-menu
+      width: 250px
+      padding: 7px 15px
+      > li
+        padding: 10px
+        border-bottom: 1px solid $white
+        &:last-child
+          border-bottom: none
+
+  .menu-item.has-drop-down
+    > .drop
+      display: none
+    &:hover > .drop
+      display: block
