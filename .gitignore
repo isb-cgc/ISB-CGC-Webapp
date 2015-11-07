@@ -73,6 +73,7 @@ advanced_settings.json
 *.patch
 migrations/
 .env
+*.env
 scripts/metadata_featdef_tables.sql
 
 # dummy datasets
