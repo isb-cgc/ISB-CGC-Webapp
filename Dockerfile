@@ -13,9 +13,9 @@ RUN DEBIAN_FRONTEND=noninteractive easy_install -U distribute
 ADD . /app
 
 # We need to recompile some of the items because of differences in compiler versions
-RUN pip install -r /app/requirements.txt
+RUN pip install -r /app/requirements.txt -t /app/lib/ --upgrade
 
-ENV PYTHONPATH=/app:/app/lib -t /app/lib/ --upgrade
+ENV PYTHONPATH=/app:/app/lib
 
 RUN /app/manage.py makemigrations
 RUN /app/manage.py migrate
