@@ -37,6 +37,23 @@ class Cohort(models.Model):
         return len(self.patients_set.all())
 
     '''
+    Sets the last viewed time for a cohort
+    '''
+    def mark_viewed (self, request, user=None):
+        if user is None:
+            user = request.user
+
+        last_view = self.cohort_last_view_set.filter(user=user)
+        if last_view is None or len(last_view) is 0:
+            last_view = self.cohort_last_view_set.create(user=user)
+        else:
+            last_view = last_view[0]
+
+        last_view.save(False, True)
+
+        return last_view
+
+    '''
     Returns the highest level of permission the user has.
     '''
     def get_perm(self, request):
@@ -162,3 +179,8 @@ class Cohort_Comments(models.Model):
     user = models.ForeignKey(User, null=False, blank=False)
     date_created = models.DateTimeField(auto_now_add=True)
     content = models.CharField(max_length=1024, null=False)
+
+class Cohort_Last_View(models.Model):
+    cohort = models.ForeignKey(Cohort, blank=False)
+    user = models.ForeignKey(User, null=False, blank=False)
+    date_created = models.DateTimeField(auto_now_add=True, auto_now=True)
