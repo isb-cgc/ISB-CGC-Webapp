@@ -95,7 +95,7 @@ def get_mysql_connection():
     db_settings = secret_settings.get('DATABASE')['default']
     db = None
     ssl = None
-    if db_settings['OPTIONS'] and db_settings['OPTIONS']['ssl']:
+    if 'OPTIONS' in db_settings and 'ssl' in db_settings['OPTIONS']:
         ssl = db_settings['OPTIONS']['ssl']
 
     if env and env.startswith('Google App Engine/'):  # or os.getenv('SETTINGS_MODE') == 'prod':
