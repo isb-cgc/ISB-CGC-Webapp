@@ -4,7 +4,7 @@ from GenespotRE import secret_settings
 
 db_settings = secret_settings.get('DATABASE')['default']
 ssl = None
-if db_settings['OPTIONS'] and db_settings['OPTIONS']['ssl']:
+if 'OPTIONS' in db_settings and 'ssl' in db_settings['OPTIONS']:
     ssl = db_settings['OPTIONS']['ssl']
 db = MySQLdb.connect(host=db_settings['HOST'], port=db_settings['PORT'], db=db_settings['NAME'], user=db_settings['USER'], passwd=db_settings['PASSWORD'], ssl=ssl)
 
