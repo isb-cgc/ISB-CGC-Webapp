@@ -1,4 +1,12 @@
 @import url("/static/css/main.css");
+.menu-item.has-drop-down__more:after {
+  display: inline-block;
+  font: normal normal normal 14px/1 FontAwesome;
+  font-size: inherit;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale; }
+
 nav, .site-header {
   background: #fff; }
 
@@ -7,8 +15,24 @@ nav, .site-header {
   .navbar-link a:hover, .navbar-link a:focus {
     color: #349ef3; }
 
+.navbar-item {
+  display: inline-block;
+  vertical-align: middle;
+  padding-right: 5px;
+  padding-left: 5px; }
+  .navbar-item__text {
+    display: inline-block;
+    font-size: 16px;
+    vertical-align: middle; }
+    .navbar-item__text:hover {
+      text-decoration: none; }
+    .navbar-item__text i.fa {
+      padding: 0 5px; }
+
 .subnav {
   background-color: #e6e6e6; }
+  .subnav a:hover {
+    text-decoration: none; }
   .subnav ul, .subnav li {
     list-style: none;
     padding: 0;
@@ -19,7 +43,7 @@ nav, .site-header {
     display: inline-block;
     vertical-align: top;
     position: relative;
-    padding: 15px 15px; }
+    padding: 15px 25px; }
     .subnav > ul > li:hover {
       background: #d9d9d9; }
       .subnav > ul > li:hover > .navitem-list, .subnav > ul > li:hover:hover > ul {
@@ -28,15 +52,36 @@ nav, .site-header {
         background: #d9d9d9;
         top: 100%;
         left: 0; }
-  .subnav .menu-item .sub-menu {
+
+.menu-item {
+  position: relative; }
+  .menu-item .sub-menu {
     width: 250px;
-    padding: 7px 15px; }
-    .subnav .menu-item .sub-menu > li {
-      padding: 10px;
+    padding: 10px 15px; }
+    .menu-item .sub-menu > li {
+      padding: 10px 5px;
       border-bottom: 1px solid #fff; }
-      .subnav .menu-item .sub-menu > li:last-child {
+      .menu-item .sub-menu > li:last-child {
         border-bottom: none; }
-  .subnav .menu-item.has-drop-down > .drop {
+    .menu-item .sub-menu .item-list li:hover {
+      background: #cccccc; }
+  .menu-item.has-drop-down > .drop {
     display: none; }
-  .subnav .menu-item.has-drop-down:hover > .drop {
+  .menu-item.has-drop-down:hover > .drop {
+    display: block; }
+  .menu-item.has-drop-down__more:after {
+    content: "\f0da";
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 15px; }
+  .menu-item.has-drop-down__more > .drop {
+    display: none;
+    position: absolute;
+    left: 100%;
+    top: -10px;
+    padding: 10px;
+    background: #f2f2f2;
+    width: 250px; }
+  .menu-item.has-drop-down__more:hover > .drop {
     display: block; }

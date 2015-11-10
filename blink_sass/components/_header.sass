@@ -7,9 +7,24 @@ nav, .site-header
   &:hover, &:focus
     color: darken($link-color, 10%)
 
+.navbar-item
+  display: inline-block
+  vertical-align: middle
+  padding-right: 5px
+  padding-left: 5px
+  &__text
+    display: inline-block
+    font-size: 16px
+    vertical-align: middle
+    &:hover
+      text-decoration: none
+    i.fa
+      padding: 0 5px
 
 .subnav
   background-color: darken($white, 10%)
+  a:hover
+    text-decoration: none
 
   ul, li
     list-style: none
@@ -23,18 +38,7 @@ nav, .site-header
     display: inline-block
     vertical-align: top
     position: relative
-    padding: 15px 15px
-
-    //>.navitem-list, > ul
-    //  display: none
-    //  width: 250px
-    //  padding: 7px 15px
-    //
-    //  > li
-    //    padding: 10px
-    //    border-bottom: 1px solid $white
-    //    &:last-child
-    //      border-bottom: none
+    padding: 15px 25px
 
     &:hover
       background: darken($white, 15%)
@@ -46,18 +50,41 @@ nav, .site-header
         top: 100%
         left: 0
 
-  .menu-item
-    .sub-menu
-      width: 250px
-      padding: 7px 15px
-      > li
-        padding: 10px
-        border-bottom: 1px solid $white
-        &:last-child
-          border-bottom: none
+.menu-item
+  position: relative
 
-  .menu-item.has-drop-down
+  .sub-menu
+    width: 250px
+    padding: 10px 15px
+    > li
+      padding: 10px 5px
+      border-bottom: 1px solid $white
+
+      &:last-child
+        border-bottom: none
+    .item-list li:hover
+      background: darken($white, 20%)
+
+  &.has-drop-down
     > .drop
       display: none
     &:hover > .drop
       display: block
+
+    &__more
+      &:after
+        @extend %fa
+        content: "\f0da" // caret right
+        @include vertical-align(absolute)
+        right: 15px
+
+      > .drop
+        display: none
+        position: absolute
+        left: 100%
+        top: -10px
+        padding: 10px
+        background: darken($white, 5%)
+        width: 250px
+      &:hover > .drop
+        display: block
