@@ -36,18 +36,18 @@ function (
         var TICK_TRACK_HEIGHT = 25;
         var REGION_TRACK_HEIGHT = 5;
         var PROTEIN_DOMAIN_HEIGHT = 20;
-        var VIEWPORT_WIDTH = 1500;
+        var VIEWPORT_WIDTH = 900;
         var SAMPLE_PLOT_TRACK_STEM_HEIGHT = 30;
         var TRACK_SVG_WIDTH = VIEWPORT_WIDTH + Y_AXIS_SCALE_WIDTH;
 
-        var AMINO_ACID_POSITION_FIELD_NAME = "amino_acid_position";
-        var COORDINATE_FIELD_NAME = "amino_acid_position";
+        var AMINO_ACID_POSITION_FIELD_NAME = "uniprot_aapos";
+        var COORDINATE_FIELD_NAME = "uniprot_aapos";
         var TYPE_FIELD_NAME = "variant_classification";
         var AMINO_ACID_MUTATION_FIELD_NAME = "amino_acid_mutation";
         var AMINO_ACID_WILDTYPE_FIELD_NAME = "amino_acid_wildtype";
         var DNA_CHANGE_FIELD_NAME = "dna_change";
 
-        var SAMPLE_ID_FIELD_NAME = "tumor_sample_barcode";
+        var SAMPLE_ID_FIELD_NAME = "sample_id";
 
         var DNA_CHANGE_KEY_FN = function(data_point) {
             var id = data_point[DNA_CHANGE_FIELD_NAME];
@@ -90,11 +90,13 @@ function (
         };
 
         var MUTATION_TYPE_COLOR_MAP = {
-            Nonsense_Mutation: "red",
-            Silent: "green",
-            Frame_Shift_Del: "gold",
-            Frame_Shift_Ins: "gold",
-            Missense_Mutation: "blue"
+            Nonsense_Mutation: "#71C560",
+            Silent: "#9768C4",
+            Frame_Shift_Del: "#98B8B8",
+            Frame_Shift_Ins: "#98B8B8",
+            Missense_Mutation: "#4F473D",
+            In_Frame_Ins: "#C1B14C",
+            In_Frame_Del: "#C1B14C"
         };
 
         var TCGA_SIX_CATEGORIES = [
@@ -205,7 +207,7 @@ function (
                 seqpeek_data.push({
                     variants: track['mutations'],
                     tumor_type: track['label'],
-                    row_id: track['render_info']['row_id'],
+                    row_id: track['row_id'],
                     is_summary_track: track['type'] == 'summary',
                     track_type: track['type'] == 'summary' ? 'bar_plot' : undefined,
                     y_axis_type: this.sample_track_type_user_setting == "sample_plot" ? "lin" : "log2"

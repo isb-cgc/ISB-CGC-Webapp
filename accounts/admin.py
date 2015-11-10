@@ -8,14 +8,18 @@ class NIH_UserAdmin(admin.ModelAdmin):
     list_display = (
         'user',
         'NIH_username',
-        'NIH_assertion',
+        'NIH_assertion_truncated',
         'NIH_assertion_expiration',
         'dbGaP_authorized',
+        'active',
         'google_email'
     )
 
     def google_email(self, obj):
         return User.objects.get(pk=obj.user_id).email
+
+    def NIH_assertion_truncated(self, obj):
+        return obj.NIH_assertion[:10] + '...'
 
 
 class BucketAdmin(admin.ModelAdmin):

@@ -239,7 +239,7 @@ define(['jquery'], function($) {
                 form.reset();
             },
             error: function() {
-                console.log('failed to save comment')
+                console.log('failed to save comment');
                 form.reset();
             }
         });

@@ -22,6 +22,7 @@ MANAGERS = ADMINS
 
 PROJECT_ID = secret_settings.get('PROJECT_ID')
 BQ_PROJECT_ID = secret_settings.get('BQ_PROJECT_ID')
+IGV_PROJECT_ID = secret_settings.get('IGV_PROJECT_ID')
 
 CLOUD_BASE_URL = secret_settings.get('CLOUD_BASE_URL')
 CLOUD_API_URL = secret_settings.get('CLOUD_API_URL')
@@ -200,7 +201,6 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'GenespotRE',
     'visualizations',
-    'genome_browser',
     'seqpeek',
     'cohorts'
 )
@@ -314,6 +314,8 @@ LOGIN_EXPIRATION_HOURS = 24
 DBGAP_AUTHENTICATION_LIST_FILENAME  = secret_settings.get('DBGAP_AUTHENTICATION_LIST_FILENAME')
 DBGAP_AUTHENTICATION_LIST_BUCKET    = secret_settings.get('DBGAP_AUTHENTICATION_LIST_BUCKET')
 ACL_GOOGLE_GROUP                    = secret_settings.get('ACL_GOOGLE_GROUP')
+OPEN_ACL_GOOGLE_GROUP               = secret_settings.get('OPEN_ACL_GOOGLE_GROUP')
 ERA_LOGIN_URL                       = secret_settings.get('ERA_LOGIN_URL')
 IPV4                                = secret_settings.get('IPV4')
+SAML_FOLDER                         = secret_settings.get('SAML_FOLDER')
 

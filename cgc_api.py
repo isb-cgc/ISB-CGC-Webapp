@@ -12,13 +12,14 @@ package = 'isb-cgc-api'
 
 
 APPLICATION = endpoints.api_server([
-    MAFEndpointsAPI,
     Cohort_Endpoints,
     BQ_Endpoints,
     FeatureAccessEndpoints,
     Meta_Endpoints,
     FeatureDataEndpoints,
+    SingleFeatureDataAccess,
     Pairwise_Endpoints,
-    User_Endpoints
+    User_Endpoints,
+    SeqPeekViewDataAccessAPI
 ])
 

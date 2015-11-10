@@ -186,6 +186,34 @@ require([
         }
     });
 
+    $('#seqpeek-list input[type="checkbox"]').on('change', function() {
+        clear_viz_objects();
+        if ($('#seqpeek-list tr:not(:first) input[type="checkbox"]:checked').length == 0) {
+            $('#delete-sp-btn').prop('disabled', 'disabled');
+            $('#share-sp-btn').prop('disabled', 'disabled');
+            $('#seqpeek-list .select-all').prop('checked', false);
+        } else {
+            $('#delete-sp-btn').removeAttr('disabled');
+            $('#share-sp-btn').removeAttr('disabled');
+
+            $('#seqpeek-list input[type="checkbox"]').each(function() {
+                if ($(this).is(':checked') && $(this).val() != 'on') {
+                    var token_str = '<span class="cohort-label label label-default space-right-5" value="'
+                        + $(this).val() + '" name="viz-ids">'
+                        + $(this).parents('tr').find('.name-col a').html()
+                        + ' <a role="button" class="delete-x"><i class="fa fa-times"></a>'
+                        + '</span>';
+                    var cohort_token = $(token_str);
+                    $('.selected-viz').each(function() {
+                        $(this).append(cohort_token.clone());
+                    });
+                    $('.delete-x').on('click', delete_x_callback);
+                }
+            })
+
+        }
+    });
+
     $('#set-op-cohort').on('submit', function() {
         var form = $(this);
         $('#selected-ids').children().each(function() {
@@ -282,17 +310,10 @@ require([
         type: 'numeric'
     });
 
-    $('#cohort-table').tablesorter({
+    $('#cohort-table, #viz-table, #seqpeek-table').tablesorter({
         headers: {
             0: {sorter:false},
             4: {sorter:'customDate'}
-        },
-        sortList: [[4,1]]
-    });
-    $('#viz-table').tablesorter({
-        headers: {
-            0: {sorter:false},
-            4: {sorter: 'customDate'}
         },
         sortList: [[4,1]]
     });
@@ -371,4 +392,6 @@ require([
     $('#delete-cohorts').prop('disabled', 'disabled');
     $('#delete-viz-btn').prop('disabled', 'disabled');
     $('#share-viz-btn').prop('disabled', 'disabled');
+    $('#delete-sp-btn').prop('disabled', 'disabled');
+    $('#share-sp-btn').prop('disabled', 'disabled');
 });

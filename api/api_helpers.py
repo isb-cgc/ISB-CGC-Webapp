@@ -3,7 +3,7 @@ import sys
 import os
 import MySQLdb
 import httplib2
-from oauth2client.client import GoogleCredentials
+from oauth2client.client import GoogleCredentials, AccessTokenCredentials
 from django.conf import settings
 from googleapiclient.discovery import build
 
@@ -287,7 +287,8 @@ def authorize_credentials_with_Google():
     if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     # documentation: https://developers.google.com/accounts/docs/application-default-credentials
     SCOPES = ['https://www.googleapis.com/auth/bigquery']
-    credentials = GoogleCredentials.from_stream(settings.GOOGLE_APPLICATION_CREDENTIALS).create_scoped(SCOPES)
+    credentials = GoogleCredentials.get_application_default().create_scoped(SCOPES)
+#    credentials = GoogleCredentials.from_stream(settings.GOOGLE_APPLICATION_CREDENTIALS).create_scoped(SCOPES)
     http = httplib2.Http()
     http = credentials.authorize(http)
     service = build('bigquery', 'v2', http=http)
@@ -305,3 +306,15 @@ def authorize_credentials_with_google_from_file(credentials_path):
     service = build('bigquery', 'v2', http=http)
 
     return service
+
+
+def get_user_email_from_token(access_token):
+    print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+    user_email = None
+    credentials = AccessTokenCredentials(access_token, 'test-user')
+    http = credentials.authorize(httplib2.Http())
+    user_info_service = build('oauth2', 'v2', http=http)
+    user_info = user_info_service.userinfo().get().execute()
+    if 'email' in user_info:
+        user_email = user_info['email']
+    return user_email

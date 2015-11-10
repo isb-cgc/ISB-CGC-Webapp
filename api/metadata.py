@@ -3,8 +3,16 @@ from protorpc import messages
 from protorpc import message_types
 from protorpc import remote
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from django.contrib.auth.models import User as Django_User
+from accounts.models import NIH_User
+from cohorts.models import Cohort_Perms,  Cohort as Django_Cohort,Patients, Samples, Filters
+import django
+import logging
 
 from api_helpers import *
+
+logger = logging.getLogger(__name__)
 
 debug = settings.DEBUG
 
@@ -740,6 +748,7 @@ class FileDetails(messages.Message):
     platform = messages.StringField(4)
     datalevel = messages.StringField(5)
     datatype = messages.StringField(6)
+    gg_readgroupset_id = messages.StringField(7)
 
 class SampleFiles(messages.Message):
     total_file_count = messages.IntegerField(1)
@@ -1344,7 +1353,8 @@ class Meta_Endpoints_API(remote.Service):
     GET_RESOURCE = endpoints.ResourceContainer(IncomingPlatformSelection,
                                                cohort_id=messages.IntegerField(1, required=True),
                                                page=messages.IntegerField(2),
-                                               limit=messages.IntegerField(3)
+                                               limit=messages.IntegerField(3),
+                                               token=messages.StringField(4)
                                                )
     @endpoints.method(GET_RESOURCE, SampleFiles,
                       path='cohort_files', http_method='GET',
@@ -1354,15 +1364,56 @@ class Meta_Endpoints_API(remote.Service):
         page = 1
         offset = 0
         cohort_id = request.cohort_id
-        if request.__getattribute__('page') != None:
+
+        is_dbGaP_authorized = False
+        user_email = None
+        user_id = None
+        if endpoints.get_current_user() is not None:
+            user_email = endpoints.get_current_user().email()
+        # users have the option of pasting the access token in the query string
+        # or in the 'token' field in the api explorer
+        # but this is not required
+        access_token = request.__getattribute__('token')
+        if access_token:
+            user_email = get_user_email_from_token(access_token)
+
+        if user_email or user_id:
+            django.setup()
+            try:
+                user_id = Django_User.objects.get(email=user_email).id
+            except (ObjectDoesNotExist, MultipleObjectsReturned), e:
+                logger.warn(e)
+                raise endpoints.NotFoundException("%s does not have an entry in the user database." % user_email)
+            try:
+                cohort_perm = Cohort_Perms.objects.get(cohort_id=cohort_id, user_id=user_id)
+            except (ObjectDoesNotExist, MultipleObjectsReturned), e:
+                logger.warn(e)
+                raise endpoints.NotFoundException("%s does not have permission to view cohort %d." % (user_email, cohort_id))
+
+            try:
+                is_dbGaP_authorized = bool(NIH_User.objects.get(user_id=user_id).dbGaP_authorized)
+            except (ObjectDoesNotExist, MultipleObjectsReturned), e:
+                logger.info("%s does not have an entry in NIH_User: %s" % (user_email, str(e)))
+        else:
+            logger.warn("Authentication required for cohort_files endpoint.")
+            raise endpoints.NotFoundException("No user email found.")
+
+        if request.__getattribute__('page') is not None:
             page = request.page
             offset = (page - 1) * 20
-        if request.__getattribute__('limit') != None:
+        if request.__getattribute__('limit') is not None:
             limit = request.limit
 
-        platform_count_query = 'select Platform, count(Platform) as platform_count from metadata_data where SampleBarcode in (select sample_id from cohorts_samples where cohort_id=%s) and SecurityProtocol="dbGap open-access" and DatafileUploaded="true" group by Platform;'
-        count_query = 'select count(*) as row_count from metadata_data where SampleBarcode in (select sample_id from cohorts_samples where cohort_id=%s) and SecurityProtocol="dbGap open-access" and DatafileUploaded="true"'
-        query = 'select SampleBarcode, DatafileNameKey, Pipeline, Platform, DataLevel, Datatype from metadata_data where SampleBarcode in (select sample_id from cohorts_samples where cohort_id=%s) and SecurityProtocol="dbGap open-access" and DatafileUploaded="true"'
+        platform_count_query = 'select Platform, count(Platform) as platform_count from metadata_data where SampleBarcode in (select sample_id from cohorts_samples where cohort_id=%s) and DatafileUploaded="true" '
+        count_query = 'select count(*) as row_count from metadata_data where SampleBarcode in (select sample_id from cohorts_samples where cohort_id=%s) and DatafileUploaded="true" '
+        query = 'select SampleBarcode, DatafileNameKey, Pipeline, Platform, DataLevel, Datatype, GG_readgroupset_id from metadata_data where SampleBarcode in (select sample_id from cohorts_samples where cohort_id=%s) and DatafileUploaded="true" '
+
+        if not is_dbGaP_authorized:
+            platform_count_query += ' and SecurityProtocol="dbGap open-access" group by Platform;'
+            count_query += ' and SecurityProtocol="dbGap open-access" '
+            query += ' and SecurityProtocol="dbGap open-access" '
+        else:
+            platform_count_query += ' group by Platform;'
 
         # Check for incoming platform selectors
         platform_selector_list = []
@@ -1402,17 +1453,19 @@ class Meta_Endpoints_API(remote.Service):
             else:
                 platform_count_list.append(PlatformCount(platform='None', count=0))
             cursor.execute(query, query_tuple)
-            list = []
+
+            file_list = []
 
             if cursor.rowcount > 0:
                 for item in cursor.fetchall():
-                    list.append(FileDetails(sample=item['SampleBarcode'], filename=item['DatafileNameKey'], pipeline=item['Pipeline'], platform=item['Platform'], datalevel=item['DataLevel'], datatype=item['Datatype']))
+                    file_list.append(FileDetails(sample=item['SampleBarcode'], filename=item['DatafileNameKey'], pipeline=item['Pipeline'], platform=item['Platform'], datalevel=item['DataLevel'], datatype=item['Datatype'], gg_readgroupset_id=item['GG_readgroupset_id']))
             else:
-                list.append(FileDetails(sample='None', filename='', pipeline='', platform='', datalevel=''))
-            return SampleFiles(total_file_count=count, page=page, platform_count_list=platform_count_list, file_list=list)
+                file_list.append(FileDetails(sample='None', filename='', pipeline='', platform='', datalevel=''))
+            return SampleFiles(total_file_count=count, page=page, platform_count_list=platform_count_list, file_list=file_list)
 
         except (IndexError, TypeError):
             raise endpoints.ServiceException('Error getting counts')
+
 
     GET_RESOURCE = endpoints.ResourceContainer(sample_id=messages.StringField(1, required=True))
     @endpoints.method(GET_RESOURCE, SampleFiles,
@@ -1423,14 +1476,20 @@ class Meta_Endpoints_API(remote.Service):
 
         query = 'select SampleBarcode, DatafileName, Pipeline, Platform from metadata_data where SampleBarcode=%s;'
 
+        platform_query = 'select Platform, count(Platform) as platform_count from metadata_data where SampleBarcode=%s group by Platform;'
+
         db = sql_connection()
         cursor = db.cursor(MySQLdb.cursors.DictCursor)
 
         try:
             cursor.execute(query, (sample_id,))
-            list = []
+            file_list = []
+            platform_list = []
             for item in cursor.fetchall():
-                list.append(FileDetails(filename=item['DatafileName'], pipeline=item['Pipeline'], platform=item['Platform']))
-            return SampleFiles(sample_id=sample_id, file_list=list)
+                file_list.append(FileDetails(filename=item['DatafileName'], pipeline=item['Pipeline'], platform=item['Platform']))
+            cursor.execute(platform_query, (sample_id,))
+            for item in cursor.fetchall():
+                platform_list.append(PlatformCount(platform=item['Platform'], count=item['platform_count']))
+            return SampleFiles(total_file_count=len(file_list), page=1, platform_count_list=platform_list, file_list=file_list)
         except:
-            raise endpoints.ServiceException('Error getting file details')
+            raise endpoints.NotFoundException('Error getting file details')

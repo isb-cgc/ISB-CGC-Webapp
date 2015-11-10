@@ -203,6 +203,7 @@ require([
 
     $('.add-comment').on('submit', function(event) {
         event.preventDefault();
+        console.log(base_url + '/cohorts/save_cohort_comment/');
         var form = this;
         $.ajax({
             type: 'POST',

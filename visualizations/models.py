@@ -21,6 +21,16 @@ class SavedVizManager(models.Manager):
         # Use operator's or_ to string together all of your Q objects.
         return qs.filter(reduce(operator.and_, [reduce(operator.or_, q_objects), Q(active=True)]))
 
+    def generic_viz_only(self, request):
+        viz_perms = Viz_Perms.objects.filter(user=request.user).values_list('visualization', flat=True)
+        plot_viz_ids = Plot.objects.filter(visualization__in=viz_perms).exclude(plot_type='seqpeek').values_list('visualization', flat=True)
+        return SavedViz.objects.filter(id__in=plot_viz_ids, active=True)
+
+    def seqpeek_only(self, request):
+        viz_perms = Viz_Perms.objects.filter(user=request.user).values_list('visualization', flat=True)
+        plot_viz_ids = Plot.objects.filter(visualization__in=viz_perms, plot_type='seqpeek').values_list('visualization', flat=True)
+        return SavedViz.objects.filter(id__in=plot_viz_ids, active=True)
+
 class SavedViz(models.Model):
     name = models.TextField(null=True)
     last_date_saved = models.DateTimeField(auto_now=True)

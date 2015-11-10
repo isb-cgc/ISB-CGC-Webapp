@@ -1,9 +1,10 @@
-import sys
 import logging
 import json
 import collections
 import io
 import time
+import os
+import sys
 from datetime import datetime
 
 from oauth2client.client import GoogleCredentials
@@ -15,10 +16,14 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.db.models import Count
 from django.utils import formats
+from django.contrib import messages
 from django.contrib.auth.models import User
 from django.conf import settings
 
+debug = settings.DEBUG
 from google_helpers.genomics_service import get_genomics_resource
+from google_helpers.directory_service import get_directory_resource
+from googleapiclient.errors import HttpError
 from visualizations.models import SavedViz, Viz_Perms
 from cohorts.models import Cohort, Cohort_Perms
 from accounts.models import NIH_User
@@ -38,10 +43,11 @@ USER_API_URL = settings.BASE_API_URL + '/_ah/api/user_api/v1'
 ACL_GOOGLE_GROUP = settings.ACL_GOOGLE_GROUP
 DBGAP_AUTHENTICATION_LIST_BUCKET = settings.DBGAP_AUTHENTICATION_LIST_BUCKET
 ERA_LOGIN_URL = settings.ERA_LOGIN_URL
+OPEN_ACL_GOOGLE_GROUP = settings.OPEN_ACL_GOOGLE_GROUP
 
 
 def convert(data):
-    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+    # if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     if isinstance(data, basestring):
         return str(data)
     elif isinstance(data, collections.Mapping):
@@ -53,7 +59,7 @@ def convert(data):
 
 
 def _decode_list(data):
-    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+    # if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     rv = []
     for item in data:
         if isinstance(item, unicode):
@@ -67,7 +73,7 @@ def _decode_list(data):
 
 
 def _decode_dict(data):
-    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+    # if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     rv = {}
     for key, value in data.iteritems():
         if isinstance(key, unicode):
@@ -168,14 +174,14 @@ def user_detail(request, user_id):
         except (MultipleObjectsReturned, ObjectDoesNotExist), e:
             logger.debug("Error when retrieving nih_user with user_id {}. {}".format(str(user_id), str(e)))
 
-        nih_login_redirect_url = settings.BASE_URL + '/accounts/nih_login/'
-
-        eRA_login_url = ERA_LOGIN_URL.strip('/') + '/?sso&redirect_url=' + nih_login_redirect_url
+        # nih_login_redirect_url = settings.BASE_URL + '/accounts/nih_login/'
+        #
+        # eRA_login_url = ERA_LOGIN_URL.strip('/') + '/?sso&redirect_url=' + nih_login_redirect_url
 
         return render(request, 'GenespotRE/user_detail.html',
                       {'request': request,
                        'user_details': user_details,
-                       'eRA_login_url': eRA_login_url
+                       # 'eRA_login_url': eRA_login_url
                        })
     else:
         return render(request, '500.html')
@@ -200,6 +206,23 @@ Returns page users see after signing in
 '''
 @login_required
 def user_landing(request):
+
+    directory_service, http_auth = get_directory_resource()
+    user_email = User.objects.get(id=request.user.id).email
+    # add user to isb-cgc-open if they are not already on the group
+    try:
+        body = {
+            "email": user_email,
+            "role": "MEMBER"
+        }
+        directory_service.members().insert(
+            groupKey=OPEN_ACL_GOOGLE_GROUP,
+            body=body
+        ).execute(http=http_auth)
+
+    except HttpError, e:
+        logger.info(e)
+
     if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     # check to see if user has read access to 'All TCGA Data' cohort
     isb_superuser = User.objects.get(username='isb')
@@ -219,9 +242,14 @@ def user_landing(request):
         item.owner = item.get_owner()
         # print local_zone.localize(item.last_date_saved)
 
-    viz_perms = Viz_Perms.objects.filter(user=request.user).values_list('visualization', flat=True)
-    visualizations = SavedViz.objects.filter(id__in=viz_perms, active=True).order_by('-last_date_saved')
+    # viz_perms = Viz_Perms.objects.filter(user=request.user).values_list('visualization', flat=True)
+    visualizations = SavedViz.objects.generic_viz_only(request).order_by('-last_date_saved')
     for item in visualizations:
+        item.perm = item.get_perm(request).get_perm_display()
+        item.owner = item.get_owner()
+
+    seqpeek_viz = SavedViz.objects.seqpeek_only(request).order_by('-last_date_saved')
+    for item in seqpeek_viz:
         item.perm = item.get_perm(request).get_perm_display()
         item.owner = item.get_owner()
 
@@ -238,6 +266,7 @@ def user_landing(request):
                                                             'user_list': users,
                                                             'cohorts_listing': cohort_listing,
                                                             'visualizations': visualizations,
+                                                            'seqpeek_list': seqpeek_viz,
                                                             'base_url': settings.BASE_URL,
                                                             'base_api_url': settings.BASE_API_URL
                                                             })
@@ -320,27 +349,46 @@ def bucket_access_test(request):
 
 
 @login_required
-def igv(request):
+def igv(request, readgroupset_id=None):
     if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     service, http_auth = get_genomics_resource()
-    datasets = convert(service.datasets().list(projectNumber=settings.PROJECT_ID).execute())
+    datasets = convert(service.datasets().list(projectNumber=settings.IGV_PROJECT_ID).execute())
 
     dataset_ids = []
     dataset_objs = []
+    nih_user = None
 
-    if NIH_User.objects.get(user_id=request.user.id).dbGaP_authorized is True:
-        for dataset in datasets['datasets']:
+    for dataset in datasets['datasets']:
+        if 'isPublic' in dataset and dataset['isPublic'] is True:
             dataset_ids.append(dataset['id'])
             dataset_objs.append({'id': dataset['id'], 'name': dataset['name']})
-    else:
-        for dataset in datasets['datasets']:
-            if 'isPublic' in dataset and dataset['isPublic'] is True:
+
+    try:
+        nih_user = NIH_User.objects.get(user_id=request.user.id)
+    except (MultipleObjectsReturned, ObjectDoesNotExist), e:
+        if type(e) is MultipleObjectsReturned:
+            logger.warn("Multiple NIH_User objects for user id {}".format(request.user.id))
+
+    if nih_user is not None:
+        if nih_user.dbGaP_authorized is True and nih_user.active is True:
+            dataset_ids = []
+            dataset_objs = []
+            for dataset in datasets['datasets']:
                 dataset_ids.append(dataset['id'])
                 dataset_objs.append({'id': dataset['id'], 'name': dataset['name']})
 
+
     content = convert(service.readgroupsets().search(body={'datasetIds':dataset_ids}).execute())
     read_group_set_ids = []
+    selected = {}
+    context = {'request': request}
     for rgset in content['readGroupSets']:
+
+        if readgroupset_id and rgset['id'] == readgroupset_id:
+            selected['rgs_id'] = rgset['id']
+            selected['dataset_id'] = rgset['datasetId']
+            context['selected'] = selected
+
         read_group_set_ids.append({
             'datasetId': rgset['datasetId'],
             'id': rgset['id'],
@@ -354,10 +402,14 @@ def igv(request):
             if rgset['datasetId'] == dataset['id']:
                 rgsets.append(rgset)
         dataset['readGroupSets'] = rgsets
-
-    return render(request, 'GenespotRE/igv.html', {'request': request,
-                                                    'datasets': dataset_objs})
+    context['datasets'] = dataset_objs
+    if 'selected' not in context and readgroupset_id:
+        messages.info(request, 'The selected readgroupset id (%s) does not exist in the available datasets.' % readgroupset_id)
+    return render(request, 'GenespotRE/igv.html', context)
 
 def health_check(request):
 #    print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     return HttpResponse('')
+
+def help(request):
+    return render(request, 'GenespotRE/help.html')

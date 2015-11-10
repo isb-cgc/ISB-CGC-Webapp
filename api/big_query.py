@@ -14,7 +14,7 @@ import bq_data_access.methylation_data as meth
 import bq_data_access.copynumber_data as cnvr
 import bq_data_access.protein_data as rppa
 import bq_data_access.mirna_data as mirn
-import bq_data_access.maf_data as maf
+import bq_data_access.gnab_data as maf
 
 
 class MAFRecord(messages.Message):
@@ -811,7 +811,7 @@ class BQ_Endpoints_API(remote.Service):
                       path='bq_maf_genes', http_method='GET', name='bq.maf_genes')
     def bq_maf_genes(self, request):
         service = authorize_credentials_with_Google()
-        query_str = "select hugo_symbol from [isb_cgc.maf_test] group by hugo_symbol order by hugo_symbol;"
+        query_str = "select Hugo_Symbol from [tcga_data_open.MAF] group by Hugo_Symbol order by Hugo_Symbol;"
         response = sync_query(service, settings.BQ_PROJECT_ID, query_str)
 
         data = []
@@ -886,7 +886,7 @@ class BQ_Endpoints_API(remote.Service):
         if request.__getattribute__('limit') is not None:
             query_dict['limit'] = request.__getattribute__('limit')
 
-        test_query_str = 'SELECT * FROM [isb_cgc.interpro]'
+        test_query_str = 'SELECT * FROM [test.interpro_filtered]'
         if len(query_dict) > 0:
             if 'uniprot_id' in query_dict:
                 test_query_str += ' where uniprot_id'
