@@ -7,8 +7,18 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale; }
 
+body {
+  transition: all 0.4s ease-in; }
+
+.menu-open {
+  padding-top: 50px;
+  transition: all 0.4s ease-in; }
+
 nav, .site-header {
   background: #fff; }
+
+.navbar-right {
+  margin-right: 0; }
 
 .navbar-link a {
   color: #64B5F6; }

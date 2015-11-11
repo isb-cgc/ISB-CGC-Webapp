@@ -4,7 +4,7 @@
 <header class="navbar navbar-fixed-top site-header" role="header">
     <nav class="container">
         <div class="row">
-            <div class="col-lg-9">
+            <div class="col-lg-12">
             <div class="nav navbar-left">
                  <ul class="nav navbar-nav">
                     <a href="{% url 'dashboard' %}"><img class="navbar-brand" src="{% static 'img/isblogo.png' %}" alt="ISB Logo"/></a>
@@ -13,7 +13,7 @@
                     <li class="navbar-link"><a href="{% url 'help_page' %}">Help</a></li>
                 </ul>
             </div>
-            </div>
+
             <div class="nav navbar-right">
                 {% if user.is_authenticated %}
                     <div id="user-login" class="navbar-form navbar-item">
@@ -40,11 +40,11 @@
                     </div>
                 {% endif %}
             </div>
+            </div>
         </div>
     </nav>
     {% if user.is_authenticated %}
-    <!--{# TODO: takeout class in when the subnav css is ready #}-->
-    <nav class="nav subnav collapse in" role="navigation" id="subnav">
+    <nav class="nav subnav collapse" role="navigation" id="subnav">
         <ul class="container">
             <li class="menu-item has-drop-down">
                 <a>WORKBOOKS <i class="fa fa-caret-down"></i></a>
