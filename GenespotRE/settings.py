@@ -203,7 +203,8 @@ INSTALLED_APPS = (
     'seqpeek',
     'cohorts',
     'projects',
-    'genes'
+    'genes',
+    'variables'
 )
 
 #############################
