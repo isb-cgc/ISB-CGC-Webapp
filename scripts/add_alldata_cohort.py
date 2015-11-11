@@ -7,6 +7,7 @@ from MySQLdb.cursors import DictCursor
 import datetime
 import httplib2
 
+from GenespotRE import secret_settings
 from apiclient.discovery import build
 from oauth2client.client import GoogleCredentials
 
@@ -91,6 +92,7 @@ class BigQueryCohortSupport(object):
 
 def get_mysql_connection():
     env = os.getenv('SERVER_SOFTWARE')
+    db_settings = secret_settings.get('DATABASE')['default']
     db = None
     if env and env.startswith('Google App Engine/'):  # or os.getenv('SETTINGS_MODE') == 'prod':
         # Connecting from App Engine
@@ -99,10 +101,8 @@ def get_mysql_connection():
             db='',
             user='',
         )
-    elif os.getenv('SETTINGS_MODE') == 'prod':
-        db = connect(host='', port=0000, db='', user='', passwd='')
     else:
-        db = connect(host='127.0.0.1', port=0000, db='', user='', passwd='')
+        db = connect(host=db_settings['HOST'], port=db_settings['PORT'], db=db_settings['NAME'], user=db_settings['USER'], passwd=db_settings['PASSWORD'])
 
     return db
 
