@@ -183,4 +183,4 @@ class Cohort_Comments(models.Model):
 class Cohort_Last_View(models.Model):
     cohort = models.ForeignKey(Cohort, blank=False)
     user = models.ForeignKey(User, null=False, blank=False)
-    date_created = models.DateTimeField(auto_now_add=True, auto_now=True)
+    last_view = models.DateTimeField(auto_now_add=True, auto_now=True)
