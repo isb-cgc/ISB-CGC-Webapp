@@ -204,7 +204,8 @@ INSTALLED_APPS = (
     'cohorts',
     'projects',
     'genes',
-    'variables'
+    'variables',
+    'workbooks'
 )
 
 #############################

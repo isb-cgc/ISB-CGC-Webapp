@@ -4,18 +4,20 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Q
 
+from cohorts.models import Cohort
+
 # Create your models here.
 class Workbook(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.TextField(null=False)
-    owner = model.ForeignKey(User)
+    owner = models.ForeignKey(User)
     date_created = models.DateTimeField(auto_now_add=True)
     last_date_saved = models.DateTimeField(auto_now_add=True)
 
 class Worksheet(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.TextField(null=False, blank=False)
-    owner = model.ForeignKey(User)
+    owner = models.ForeignKey(User)
     workbook = models.ForeignKey(Workbook)
     cohort = models.ForeignKey(Cohort, null=False, blank=False)
     # genes = models.ForeignKey(Gene, blank=False, related_name='worksheet_gene')
