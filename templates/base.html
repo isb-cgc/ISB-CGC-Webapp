@@ -1,14 +1,17 @@
 {% load l10n %}
 {% load staticfiles %}
-<!DOCTYPE html
-        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<!DOCTYPE html>
+<html lang="en" class="no-js">
 <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
     <title>{% block title %}ISB-CGC{% endblock %}</title>
+    <meta name="description" content="{% block description %}ISB-CGC project to visualize genome data{% endblock %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
     {% block extra_css_libs %}{% endblock %}
     <link type="text/css" rel="stylesheet" href="{% static 'css/select2.min.css' %}" />
-    <link type="text/css" rel="stylesheet" href="{% static 'css/main.css' %}" />
+    <link type="text/css" rel="stylesheet" href="{% static 'css/style.css' %}" />
     <script type="text/javascript" src="{% static 'js/libs/modernizr.js' %}"></script>
     {% block header %}{% endblock %}
 
@@ -23,80 +26,19 @@
     </script>
 
 </head>
-<body>
+<body id="body">
 <a href="#{% block link_page_name %}content{% endblock %}" class="skip-nav">Skip to main content</a>
 <div id="spinner-overlay" style="display:none;">
     <i class="fa fa-spinner fa-spin"></i>
 </div>
-<nav class="navbar navbar-fixed-top" role="navigation">
-    <div class="container">
-        <div class="row">
-        <div class="col-lg-9">
-        <div class="nav navbar-left">
-
-            <ul class="nav navbar-nav">
-                {% if user.is_authenticated %}
-                    <a href="{% url 'user_landing' %}"><img class="navbar-brand" src="{% static 'img/isblogo.png' %}" alt="ISB Logo"/></a>
-                    <li><a href="{% url 'user_landing' %}">ISB-CGC</a></li>
-                    {% if '/user_landing/' in request.path %}
-                        <li class="search-item col-lg-9">
-                            <form id="search-submit">
-                                <div class="input-group">
-                                    <input type="text" class="form-control" aria-label="Search Box" placeholder="Search Cohorts and Visualizations">
-                                    <span class="input-group-btn">
-                                        <button class="btn btn-default" type="submit" aria-label="Search"><i class="fa fa-search"></i></button>
-                                    </span>
-                                </div>
-                            </form>
-                        </li>
-                    {% endif %}
-{#                    <li {% if '/search/' in request.path %}class="active"{% endif %}><a href="{% url 'search' %}">Search</a></li>#}
-{#                    <li {% if '/visualizations/' in request.path %}class="active"{% endif %}><a href="{% url 'vizlist' %}">Visualizations</a></li>#}
-{#                    <li {% if '/users/' in request.path %}class="active"{% endif %}><a href="{% url 'users' %}">Users</a></li>#}
-{#                    <li {% if '/genome/' in request.path %}class="active"{% endif %}><a href="/genome" target="_blank">Genome Browser</a></li>#}
-
-                {% else %}
-                    <a href="/"><img class="navbar-brand" src="{% static 'img/isblogo.png' %}" alt="ISB Logo"/></a>
-                    <li><a href="/">ISB-CGC</a></li>
-{#                    <li {% if request.path == '/' %}class="active"{% endif %}><a href="/">Home</a></li>#}
-                {% endif %}
-            </ul>
-        </div>
-        </div>
-        <div class="nav navbar-right">
-            <div id="user-login" class="navbar-form inline-block">
-
-                {% if user.is_authenticated %}
-                    <a class="avatar-link" href="{% url 'user_detail' user.id %}">
-                        <img src="{{ user.socialaccount_set.all.0.get_avatar_url }}" width="32" height="32" alt="Avatar Link to User Details">
-                    </a>
-
-                    <div class="dropdown">
-                        <a role="button" class="dropdown-toggle" id="user-dropdown" data-toggle="dropdown" aria-label="User Dropdown" aria-expanded="true">
-                            {{ user.first_name }} <i class="fa fa-caret-down"></i>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-label="user-dropdown">
-                            <li role="menuitem"><a href="#logout-modal" data-toggle="modal" data-target="#logout-modal" title="Sign Out"><i class="fa fa-sign-out"></i>Sign Out</a></li>
-                        </ul>
-                    </div>
-{#                    <a href="#logout-modal" data-toggle="modal" data-target="#logout-modal" title="Sign Out"><i class="fa fa-sign-out"></i>Sign Out</a>#}
-                {% else %}
-                    <!--same thing as /accounts/login-->
-                    <a class="login-link" href="{% url 'account_login' %}" title="Sign In"><i class="fa fa-sign-in"></i> Sign In</a>
-
-                {% endif %}
-{#                <div id="signin"></div>#}
-            </div>
-        </div>
-        </div>
-    </div>
-</nav>
+<!--Include site main header-->
+{% include 'share/site_header.html'  %}
 
 <div id="secondary-nav" class="navbar-fixed-top">
     {% block secondary_nav %}{% endblock %}
 </div>
 
-<div id="{% block page_name %}content{% endblock %}" class="container">
+<main id="{% block page_name %}content{% endblock %}" class="container">
     {% if messages %}
         <div class="row">
             <div class="col-lg-12">
@@ -134,7 +76,7 @@
             </div>
         </div>
     </div>
-</div>
+</main>
 {% load session_security_tags %}
 {% load i18n l10n %}
 {% load url from future %}
@@ -157,5 +99,6 @@
     {% endlocalize %}
 {% endif %}
 <script data-main="{% block js_file %}{% endblock %}" src="{% static 'js/libs/require.js' %}"></script>
+
 </body>
 </html>
