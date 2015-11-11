@@ -1,5 +1,15 @@
 {% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+{#{% load tz %}#}
+{% block header %}
+{% endblock %}
+
+{% block link_page_name %}user-landing{% endblock %}
+{% block page_name %}user-landing{% endblock %}
 
 {% block content %}
     <h1>This is the dashboard page</h1>
 {% endblock %}
+
+{% block js_file %}{% static 'js/dashboard.js' %}{% endblock %}
