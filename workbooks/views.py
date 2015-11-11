@@ -3,8 +3,8 @@ import json
 import re
 from google.appengine.api import urlfetch
 from django.shortcuts import render
-from mock_data import EGFR_GBM_LGG as FAKE_PLOT_DATA
-from maf_api_mock_data import EGFR_BLCA_BRCA as FAKE_MAF_DATA
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.conf import settings
 
 
