@@ -1,4 +1,4 @@
-runtime: python27
+runtime: custom #use 'python27' for pycharm configuration
 module: default
 api_version: 1
 threadsafe: true
