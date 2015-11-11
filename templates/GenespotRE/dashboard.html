@@ -5,11 +5,27 @@
 {% block header %}
 {% endblock %}
 
-{% block link_page_name %}user-landing{% endblock %}
-{% block page_name %}user-landing{% endblock %}
+{% block link_page_name %}dashboard{% endblock %}
+{% block page_name %}dashboard{% endblock %}
 
 {% block content %}
-    <h1>This is the dashboard page</h1>
+    <h1 class="page-title">This is the dashboard page</h1>
+    <section>
+        <div class="panel-header">
+            <p>Sample Analyses can be customized with the specific data you want to analyze.</p>
+        </div>
+        <div class="panel-body">
+            <ul class="card-list">
+                <li>
+                    <img src="">
+                    <p>Analysis Name</p>
+                </li>
+            </ul>
+        </div>
+    </section>
+    <section>
+
+    </section>
 {% endblock %}
 
 {% block js_file %}{% static 'js/dashboard.js' %}{% endblock %}

@@ -7,6 +7,12 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale; }
 
+.main-content {
+  margin-top: 80px; }
+
+/********************************************
+ * Main General Styles
+ *******************************************/
 body {
   transition: all 0.4s ease-in; }
 
