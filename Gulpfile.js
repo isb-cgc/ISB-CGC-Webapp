@@ -22,7 +22,7 @@ gulp.task('sass-convert', function(){
             to: 'scss',
             rename: true
         }))
-        .pipe(gulp.dest('sass/vendor/'));
+        .pipe(gulp.dest('blink_sass/vendor/'));
 })
 
 gulp.task('default', function(){

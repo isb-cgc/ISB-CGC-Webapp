@@ -40,5 +40,4 @@ require([
     $('.modal').on('hide.bs.modal', function() {
         $(this).find('form')[0].reset();
     });
-
-})
+});
