@@ -1,5 +1,5 @@
 {% load staticfiles%}
-
+{% load cohort_filters %}
 
 <header class="navbar navbar-fixed-top site-header" role="header">
     <nav class="container">
@@ -139,28 +139,27 @@
             <li class="menu-item has-drop-down">
                 <a>COHORTS <i class="fa fa-caret-down"></i></a>
                 <ul class="sub-menu drop">
+                    {% if user.cohort_last_view_set.all|length > 0 %}
                     <li class="menu-item">
                         <strong>Start New Workbook With ...</strong>
                         <ul class="item-list">
-                            <li class="menu-item"> Cohorts A </li>
-                            <li class="menu-item"> Cohorts B </li>
-                            <li class="menu-item"> Cohorts C </li>
-                            <li class="menu-item"> Cohorts D </li>
-                            <li class="menu-item"> Cohorts E </li>
+                            {% for clv in user.cohort_last_view_set.all|dictsortreversed:'last_view'|slice:':5' %}
+                            <li class="menu-item"><a href="{% url 'cohort_details' clv.cohort.id %}">{{ clv.cohort.name }}</a></li>
+                            {% endfor %}
+                            {% if user.cohort_last_view_set.all|length > 5 %}
                             <li class="menu-item has-drop-down__more"> More
                                 <ul class="drop">
-                                    <li class="menu-item">Cohorts F</li>
-                                    <li class="menu-item">Cohorts H</li>
-                                    <li class="menu-item">Cohorts I</li>
-                                    <li class="menu-item">Cohorts J</li>
-                                    <li class="menu-item">Cohorts K</li>
-                                    <li class="menu-item">Cohorts L</li>
+                                    {% for clv in user.cohort_last_view_set.all|dictsortreversed:'last_view'|slice:'5:' %}
+                                    <li class="menu-item"><a href="{% url 'cohort_details' clv.cohort.id %}">{{ clv.cohort.name }}</a></li>
+                                    {% endfor %}
                                 </ul>
                             </li>
+                            {% endif %}
                         </ul>
                     </li>
-                    <li class="menu-item"><a>Manage Saved Cohorts (10)</a></li>
-                    <li class="menu-item"><a>Public Cohorts (25)</a></li>
+                    {% endif %}
+                    <li class="menu-item"><a href="{% url 'cohort' %}">Manage Saved Cohorts ({{ user.cohort_perms_set.all|cohort_owner_permission|length }})</a></li>
+                    <li class="menu-item"><a>Public Cohorts (1)</a></li>
                     <li class="menu-item"><a>Select Cohort for a New Workbook</a></li>
                 </ul>
             </li>
