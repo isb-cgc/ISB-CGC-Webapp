@@ -370,7 +370,8 @@ def help_page(request):
     return render(request, 'GenespotRE/help.html')
 
 def about_page(request):
-    return render(request, 'GenespotRE/about.html', {'request', request})
+    return render(request, 'GenespotRE/about.html', {'request': request, 'data': 'data'})
 
+@login_required
 def dashboard_page(request):
-    return render(request, 'GenespotRE/dashboard.html', {'request', request})
+    return render(request, 'GenespotRE/dashboard.html', {'request': request, 'data': 'data'})

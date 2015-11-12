@@ -2,10 +2,15 @@ var gulp = require('gulp');
 var sass = require('gulp-sass');
 var sassdoc = require('sassdoc');
 var converter = require('sass-convert');
+var autoprefixer = require('gulp-autoprefixer');
+var sourcemaps = require('gulp-sourcemaps');
 
 gulp.task('sass', function(){
     gulp.src('blink_sass/style.sass')
         .pipe(sass().on('error', sass.logError))
+        .pipe(sourcemaps.init())
+        .pipe(autoprefixer())
+        .pipe(sourcemaps.write())
         .pipe(gulp.dest('static/css/'));
 })
 
@@ -22,7 +27,7 @@ gulp.task('sass-convert', function(){
             to: 'scss',
             rename: true
         }))
-        .pipe(gulp.dest('sass/vendor/'));
+        .pipe(gulp.dest('blink_sass/vendor/'));
 })
 
 gulp.task('default', function(){

@@ -7,7 +7,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.conf import settings
 
-
 def workbook_list(request):
     template = 'workbooks/workbook_list.html'
     return render(request, template, context);
