@@ -975,14 +975,6 @@ a.skip-nav {
         float: right; }
         #visualizations .plot .fly-out .hide-flyout:hover {
           cursor: pointer; }
-      #visualizations .plot .fly-out .main-settings .form-group > label > a {
-        font-size: 18px;
-        cursor: pointer; }
-      #visualizations .plot .fly-out .main-settings div.label {
-        display: block;
-        text-align: left;
-        margin: 0px 0px 5px 0px;
-        white-space: normal; }
       #visualizations .plot .fly-out .cohort-listing div.filter-label {
         display: block;
         text-align: left; }
@@ -997,8 +989,6 @@ a.skip-nav {
       #visualizations .plot .fly-out .cohort-search .select-cohort {
         display: block;
         text-align: left; }
-      #visualizations .plot .fly-out .search-term-field {
-        width: 100%; }
       #visualizations .plot .fly-out .comment-username {
         font-weight: bold;
         font-size: 14px;
@@ -1209,22 +1199,8 @@ a.skip-nav {
     display: inline-block; }
     #user-landing #circviz-icons i:first-child {
       margin-right: -20px; }
-  #user-landing #selected-ids .cohort-label, #user-landing .selected-cohorts .cohort-label {
+  #user-landing #selected-ids .cohort-label {
     display: inline-block; }
-  #user-landing #cohort-table, #user-landing #viz-table, #user-landing #search-cohort-table, #user-landing #search-viz-table {
-    table-layout: fixed;
-    width: 100%; }
-    #user-landing #cohort-table .checkbox-col, #user-landing #viz-table .checkbox-col, #user-landing #search-cohort-table .checkbox-col, #user-landing #search-viz-table .checkbox-col {
-      width: 25px; }
-    #user-landing #cohort-table .sample-col, #user-landing #viz-table .sample-col, #user-landing #search-cohort-table .sample-col, #user-landing #search-viz-table .sample-col {
-      width: 110px; }
-    #user-landing #cohort-table .owner-col, #user-landing #viz-table .owner-col, #user-landing #search-cohort-table .owner-col, #user-landing #search-viz-table .owner-col {
-      width: 190px;
-      overflow-x: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap; }
-    #user-landing #cohort-table .date-col, #user-landing #viz-table .date-col, #user-landing #search-cohort-table .date-col, #user-landing #search-viz-table .date-col {
-      width: 190px; }
 
 #user-details {
   margin-top: 80px; }
