@@ -11,3 +11,6 @@ cron:
 - description: IAM logging
   url: /tasks/IAM_logging
   schedule: every 1 minutes
+- description: admin, login, token, groups: Admin Directory API logging
+  url: /tasks/create_and_log_reports
+  schedule: every 24 hours

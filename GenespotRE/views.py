@@ -88,12 +88,6 @@ def _decode_dict(data):
     return rv
 
 '''
-Returns the genespot-re-demo which is just a CSS demo and skin
-'''
-def genespotre(request):
-    return render(request, 'GenespotRE/genespot-re-demo.html', {})
-
-'''
 Handles login and user creation for new users.
 Returns user to landing page.
 '''
@@ -125,7 +119,7 @@ def landing_page(request):
 Returns css_test page used to test css for general ui elements
 '''
 def css_test(request):
-    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+    # if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     return render(request, 'GenespotRE/css_test.html', {'request': request})
 
 
@@ -134,7 +128,7 @@ Returns page that lists users
 '''
 @login_required
 def user_list(request):
-    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+    # if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     url = USER_API_URL + '/users'
     result = urlfetch.fetch(url, deadline=60)
     users = json.loads(str(result.content))
@@ -172,7 +166,10 @@ def user_detail(request, user_id):
             user_details['dbGaP_authorized'] = nih_user.dbGaP_authorized
             user_details['NIH_active'] = nih_user.active
         except (MultipleObjectsReturned, ObjectDoesNotExist), e:
-            logger.debug("Error when retrieving nih_user with user_id {}. {}".format(str(user_id), str(e)))
+            if type(e) is MultipleObjectsReturned:
+                # in this case there is more than one nih_username linked to the same google identity
+                logger.warn("Error when retrieving nih_user with user_id {}. {}".format(str(user_id), str(e)))
+                # todo: add code to unlink all accounts?
 
         # nih_login_redirect_url = settings.BASE_URL + '/accounts/nih_login/'
         #
@@ -305,48 +302,6 @@ def search_cohorts_viz(request):
             })
         result_obj['visualizations'] = list
     return HttpResponse(json.dumps(result_obj), status=200)
-
-
-@login_required
-def feature_test(request):
-    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
-    return render(request, 'GenespotRE/feature_test.html', {'request': request})
-
-@login_required
-def taskq_test(request):
-    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
-    deferred.defer(run_cluster)
-    # deferred.defer(run_task, "test 2")
-    # deferred.defer(run_task, "test 3")
-    # deferred.defer(run_task, "test 4")
-    # deferred.defer(run_task, "test 5")
-
-    return render(request, 'GenespotRE/taskq_test.html', {'request': request})
-
-@login_required
-def bucket_access_test(request):
-    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
-    credentials = GoogleCredentials.get_application_default()
-    service = discovery.build('storage', 'v1', credentials=credentials)
-
-    media = http.MediaIoBaseUpload(io.BytesIO('test data'), 'text/plain')
-    # print '\n\n', media
-    filename = 'test-' + str(datetime.now().replace(microsecond=0).isoformat())
-    # print filename
-    req = service.objects().insert(bucket='isb-cgc-dev',
-                             name=filename,
-                             media_body=media,
-                             )
-    req.execute()
-
-    req = service.objects().list(bucket='isb-cgc-dev')
-    resp = req.execute()
-    # print resp['items']
-    # for item in resp['items']:
-    #     print json.dumps(item, indent=2)
-
-    return render(request, 'GenespotRE/bucket_test.html', {'request': request})
-
 
 @login_required
 def igv(request, readgroupset_id=None):

@@ -40,4 +40,4 @@ handlers:
 env_variables:
   GAE_TMP_FORCE_REUSE_API_CONNECTION: true
   DJANGO_SETTINGS_MODULE: 'GenespotRE.settings'
-  SETTINGS_VERSION: 'uat'
+  SETTINGS_VERSION: 'prod'

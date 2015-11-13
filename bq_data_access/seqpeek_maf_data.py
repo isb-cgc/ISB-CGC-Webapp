@@ -18,7 +18,6 @@ class SeqPeekDataProvider(GNABFeatureProvider):
 
         query_template = \
             ("SELECT ParticipantBarcode, Tumor_SampleBarcode, Tumor_AliquotBarcode, "
-             "    Normal_SampleBarcode, Normal_AliquotBarcode, "
              "    Hugo_symbol, "
              "    UniProt_AApos, "
              "    variant_classification, "
@@ -57,7 +56,7 @@ class SeqPeekDataProvider(GNABFeatureProvider):
 
         skip_count = 0
         for row in query_response['rows']:
-            uniprot_aapos = row['f'][6]['v']
+            uniprot_aapos = row['f'][4]['v']
             if uniprot_aapos is None:
                 skip_count += 1
                 continue
@@ -66,19 +65,10 @@ class SeqPeekDataProvider(GNABFeatureProvider):
                 'patient_id': row['f'][0]['v'],
                 'sample_id': row['f'][1]['v'],
                 'aliquot_id': row['f'][2]['v'],
-                'hugo_symbol': row['f'][5]['v'],
+                'hugo_symbol': row['f'][3]['v'],
                 'uniprot_aapos': int(uniprot_aapos),
-                'variant_classification': row['f'][7]['v'],
-                'uniprot_id': row['f'][8]['v'],
-            })
-            result.append({
-                'patient_id': row['f'][0]['v'],
-                'sample_id': row['f'][3]['v'],
-                'aliquot_id': row['f'][4]['v'],
-                'hugo_symbol': row['f'][5]['v'],
-                'uniprot_aapos': int(uniprot_aapos),
-                'variant_classification': row['f'][7]['v'],
-                'uniprot_id': row['f'][8]['v'],
+                'variant_classification': row['f'][5]['v'],
+                'uniprot_id': row['f'][6]['v'],
             })
 
         logging.debug("Query result is {qrows} rows, skipped {skipped} rows".format(qrows=num_result_rows,

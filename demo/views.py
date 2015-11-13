@@ -103,7 +103,6 @@ def index(request):
             logger.info('error is because')
             logger.warn(auth.get_last_error_reason())
 
-        logger.info(request.META['HTTP_X_FORWARDED_FOR'])
         not_auth_warn = not auth.is_authenticated()
 
         if not errors:
@@ -112,12 +111,26 @@ def index(request):
             NIH_username = request.session['samlNameId']
             request.session['samlSessionIndex'] = auth.get_session_index()
 
-            # check if there is an NIH_User with the same NIH_username
+            user_email = User.objects.get(id=request.user.id).email
+
+            # check to see if user already has authenticated through
+            # another NIH_username. If so, don't allow the same google email
+            # to be linked to two different NIH usernames
+            nih_usernames_already_linked_to_google_identity = NIH_User.objects.filter(user_id=request.user.id)
+            for nih_user in nih_usernames_already_linked_to_google_identity:
+                if nih_user.NIH_username != NIH_username:
+                    logger.warn()
+                    messages.warning(request, "User {} is already linked to the eRA commons identity {}. "
+                                           "Please unlink these before authenticating with the eRA commons identity {}."
+                                     .format(user_email, nih_user.NIH_username, NIH_username))
+                    return redirect('/users/' + str(request.user.id))
+
+            # check if there is another google identity with the same NIH_username
             try:
                 preexisting_nih_user = NIH_User.objects.get(NIH_username=NIH_username)
                 if preexisting_nih_user.user_id != request.user.id:
                     logger.warn("User id {} tried to log into the NIH account {} that is already linked to user {}".format(
-                        request.user.id,
+                        user_email,
                         NIH_username,
                         preexisting_nih_user.user_id
                     ))
@@ -160,7 +173,6 @@ def index(request):
                 request.user.id, COUNTDOWN_SECONDS / (60*60)))
 
             # add or remove user from ACL_GOOGLE_GROUP if they are or are not dbGaP authorized
-            user_email = User.objects.get(id=request.user.id).email
             directory_client, http_auth = get_directory_resource()
             try:
                 result = directory_client.members().get(groupKey=ACL_GOOGLE_GROUP,
@@ -184,8 +196,17 @@ def index(request):
                     ).execute(http=http_auth)
                     logger.info(result)
                     logger.info("User {} added to {}.".format(user_email, ACL_GOOGLE_GROUP))
-                    # todo: determine if we should have a message or the warning message on accessing protected data?
-                    # messages.info(request, "You now have access to protected data for the next 24 hours or until you log out.")
+                    warn_message = '''
+                    WARNING NOTICE
+                    You are reminded that when accessing controlled access information you are bound by the dbGaP TCGA DATA USE CERTIFICATION AGREEMENT (DUCA).
+
+                    You are accessing a US Government web site which may contain information that must be protected under the US Privacy Act or other sensitive information and is intended for Government authorized use only.
+
+                    Unauthorized attempts to upload information, change information, or use of this web site may result in disciplinary action, civil, and/or criminal penalties. Unauthorized users of this website should have no expectation of privacy regarding any communications or data processed by this website.
+
+                    Anyone accessing this website expressly consents to monitoring of their actions and all communications or data transiting or stored on related to this website and is advised that if such monitoring reveals possible evidence of criminal activity, NIH may provide that evidence to law enforcement officials.
+                    '''
+                    messages.info(request, warn_message)
 
             return HttpResponseRedirect(auth.redirect_to('https://{}'.format(req['http_host'])))
 

@@ -365,7 +365,8 @@ define(['jquery'], function($) {
                     escapeMarkup: function (markup) { return markup; },
                     minimumInputLength: 1,
                     templateResult: helpers.select2_formatting,
-                    templateSelection: helpers.select2_formatting
+                    templateSelection: helpers.select2_formatting,
+                    width: '100%'
                 })
             } else {
                 // Initialize select box with new features from feature search url

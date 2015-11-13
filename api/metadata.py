@@ -16,6 +16,9 @@ logger = logging.getLogger(__name__)
 
 debug = settings.DEBUG
 
+OPEN_DATA_BUCKET = settings.OPEN_DATA_BUCKET
+CONTROLLED_DATA_BUCKET = settings.CONTROLLED_DATA_BUCKET
+
 METADATA_SHORTLIST = [
     # 'adenocarcinoma_invasion',
     'age_at_initial_pathologic_diagnosis',
@@ -749,6 +752,7 @@ class FileDetails(messages.Message):
     datalevel = messages.StringField(5)
     datatype = messages.StringField(6)
     gg_readgroupset_id = messages.StringField(7)
+    cloudstorage_location = messages.StringField(8)
 
 class SampleFiles(messages.Message):
     total_file_count = messages.IntegerField(1)
@@ -1406,7 +1410,7 @@ class Meta_Endpoints_API(remote.Service):
 
         platform_count_query = 'select Platform, count(Platform) as platform_count from metadata_data where SampleBarcode in (select sample_id from cohorts_samples where cohort_id=%s) and DatafileUploaded="true" '
         count_query = 'select count(*) as row_count from metadata_data where SampleBarcode in (select sample_id from cohorts_samples where cohort_id=%s) and DatafileUploaded="true" '
-        query = 'select SampleBarcode, DatafileNameKey, Pipeline, Platform, DataLevel, Datatype, GG_readgroupset_id from metadata_data where SampleBarcode in (select sample_id from cohorts_samples where cohort_id=%s) and DatafileUploaded="true" '
+        query = 'select SampleBarcode, DatafileName, DatafileNameKey, Pipeline, Platform, DataLevel, Datatype, GG_readgroupset_id from metadata_data where SampleBarcode in (select sample_id from cohorts_samples where cohort_id=%s) and DatafileUploaded="true" '
 
         if not is_dbGaP_authorized:
             platform_count_query += ' and SecurityProtocol="dbGap open-access" group by Platform;'
@@ -1458,7 +1462,8 @@ class Meta_Endpoints_API(remote.Service):
 
             if cursor.rowcount > 0:
                 for item in cursor.fetchall():
-                    file_list.append(FileDetails(sample=item['SampleBarcode'], filename=item['DatafileNameKey'], pipeline=item['Pipeline'], platform=item['Platform'], datalevel=item['DataLevel'], datatype=item['Datatype'], gg_readgroupset_id=item['GG_readgroupset_id']))
+                    print item
+                    file_list.append(FileDetails(sample=item['SampleBarcode'], cloudstorage_location=item['DatafileNameKey'], filename=item['DatafileName'], pipeline=item['Pipeline'], platform=item['Platform'], datalevel=item['DataLevel'], datatype=item['Datatype'], gg_readgroupset_id=item['GG_readgroupset_id']))
             else:
                 file_list.append(FileDetails(sample='None', filename='', pipeline='', platform='', datalevel=''))
             return SampleFiles(total_file_count=count, page=page, platform_count_list=platform_count_list, file_list=file_list)
@@ -1472,9 +1477,30 @@ class Meta_Endpoints_API(remote.Service):
                       path='sample_files', http_method='GET',
                       name='meta.sample_files')
     def sample_files(self, request):
-        sample_id = request.sample_id
+        '''
+        Takes a SampleBarcode and returns a list of filenames and their associated cloudstorage locations, pipelines, and platforms.
+        Also returns counts for the number of files derived from each platform.
+        Checks user for dbGaP authorization and returns "Restricted" if a filename is controlled access and the user is not dbGaP authorized
+        :param sample_id: SampleBarcode
+        :return SampleFiles: a list of filenames and their associated cloudstorage locations, pipelines, and platforms
+        as well as counts for the number of files for each platform.
+        '''
 
-        query = 'select SampleBarcode, DatafileName, Pipeline, Platform from metadata_data where SampleBarcode=%s;'
+        sample_id = request.sample_id
+        dbGaP_authorized = False
+
+        query = 'select SampleBarcode, DatafileName, Pipeline, Platform, IF(SecurityProtocol LIKE "%%open%%", DatafileNameKey, "Restricted") as DatafileNameKey from metadata_data where SampleBarcode=%s;'
+
+        if endpoints.get_current_user():
+            user_email = endpoints.get_current_user()
+            try:
+                user_id = Django_User.objects.get(email=user_email)
+                nih_user = NIH_User.objects.get(user_id=user_id)
+                dbGaP_authorized = nih_user.dbGaP_authorized and nih_user.active
+                if dbGaP_authorized:
+                    query = 'select SampleBarcode, DatafileName, Pipeline, Platform, DatafileNameKey, SecurityProtocol from metadata_data where SampleBarcode=%s;'
+            except (ObjectDoesNotExist, MultipleObjectsReturned) as e:
+                logger.warn("Tried accessing sample_files endpoint with user {}: {}".format(user_email, str(e)))
 
         platform_query = 'select Platform, count(Platform) as platform_count from metadata_data where SampleBarcode=%s group by Platform;'
 
@@ -1486,10 +1512,14 @@ class Meta_Endpoints_API(remote.Service):
             file_list = []
             platform_list = []
             for item in cursor.fetchall():
-                file_list.append(FileDetails(filename=item['DatafileName'], pipeline=item['Pipeline'], platform=item['Platform']))
+                if dbGaP_authorized:
+                    cloudstorage_location = 'None' if item['DatafileNameKey'] == '' else 'gs://{}/{}'.format(OPEN_DATA_BUCKET if 'open' in item['SecurityProtocol'] else CONTROLLED_DATA_BUCKET, item['DatafileNameKey'])
+                else:
+                    cloudstorage_location = 'None' if item['DatafileNameKey'] == '' or item['DatafileNameKey'] == 'Restricted' else 'gs://{}/{}'.format(OPEN_DATA_BUCKET, item['DatafileNameKey'])
+                file_list.append(FileDetails(filename=item['DatafileName'], pipeline=item['Pipeline'], platform=item['Platform'], cloudstorage_location=cloudstorage_location))
             cursor.execute(platform_query, (sample_id,))
             for item in cursor.fetchall():
                 platform_list.append(PlatformCount(platform=item['Platform'], count=item['platform_count']))
             return SampleFiles(total_file_count=len(file_list), page=1, platform_count_list=platform_list, file_list=file_list)
-        except:
-            raise endpoints.NotFoundException('Error getting file details')
+        except Exception as e:
+            raise endpoints.NotFoundException('Error getting file details: {}'.format(str(e)))

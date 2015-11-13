@@ -989,10 +989,12 @@ a.skip-nav {
         float: right; }
         #visualizations .plot .fly-out .hide-flyout:hover, #seqpeek .plot .fly-out .hide-flyout:hover {
           cursor: pointer; }
-      #visualizations .plot .fly-out .cohort-listing div.filter-label, #seqpeek .plot .fly-out .cohort-listing div.filter-label {
+      #visualizations .plot .fly-out .filter-label, #seqpeek .plot .fly-out .filter-label {
         display: block;
-        text-align: left; }
-        #visualizations .plot .fly-out .cohort-listing div.filter-label a, #seqpeek .plot .fly-out .cohort-listing div.filter-label a {
+        text-align: left;
+        padding: 5px 10px;
+        margin: 2px 0px; }
+        #visualizations .plot .fly-out .filter-label a, #seqpeek .plot .fly-out .filter-label a {
           cursor: pointer;
           float: right; }
       #visualizations .plot .fly-out .add-cohort, #seqpeek .plot .fly-out .add-cohort {
@@ -1036,6 +1038,26 @@ a.skip-nav {
     vertical-align: top; }
     #visualizations .legend .unselected, #seqpeek .legend .unselected {
       fill-opacity: 0; }
+    #visualizations .legend td:last-child, #visualizations .legend th:last-child, #seqpeek .legend td:last-child, #seqpeek .legend th:last-child {
+      padding-left: 5px; }
+    #visualizations .legend td.nonsense-mutation, #seqpeek .legend td.nonsense-mutation {
+      background-color: #71C560;
+      width: 25px; }
+    #visualizations .legend td.silent, #seqpeek .legend td.silent {
+      background-color: #9768C4;
+      width: 25px; }
+    #visualizations .legend td.frame-shift-del, #seqpeek .legend td.frame-shift-del {
+      background-color: #98B8B8;
+      width: 25px; }
+    #visualizations .legend td.frame-shift-ins, #seqpeek .legend td.frame-shift-ins {
+      background-color: #98B8B8;
+      width: 25px; }
+    #visualizations .legend td.missense-mutation, #seqpeek .legend td.missense-mutation {
+      background-color: #4F473D;
+      width: 25px; }
+    #visualizations .legend td.in-frame-ins, #visualizations .legend td.in-frame-del, #seqpeek .legend td.in-frame-ins, #seqpeek .legend td.in-frame-del {
+      background-color: #C1B14C;
+      width: 25px; }
   #visualizations #search-details table, #seqpeek #search-details table {
     display: inline-block;
     vertical-align: top; }

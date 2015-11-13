@@ -76,7 +76,8 @@
                             {{ user.first_name }} <i class="fa fa-caret-down"></i>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-label="user-dropdown">
-                            <li role="menuitem"><a href="#logout-modal" data-toggle="modal" data-target="#logout-modal" title="Sign Out"><i class="fa fa-sign-out"></i>Sign Out</a></li>
+                            <li role="menuitem"><a href="{% url 'help' %}"><i class="fa fa-question"></i> Help</a></li>
+                            <li role="menuitem"><a href="#logout-modal" data-toggle="modal" data-target="#logout-modal" title="Sign Out"><i class="fa fa-sign-out"></i> Sign Out</a></li>
                         </ul>
                     </div>
 {#                    <a href="#logout-modal" data-toggle="modal" data-target="#logout-modal" title="Sign Out"><i class="fa fa-sign-out"></i>Sign Out</a>#}

@@ -11,7 +11,7 @@ CLOUD_SQL_SETTINGS = {
 
 LOCAL_SQL_SETTINGS = {
     'host': '127.0.0.1',
-    'port': 0000,
+    'port': 3306,
     'db': '',
     'user': '',
     'password': ''

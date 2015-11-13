@@ -43,8 +43,8 @@ def get_readable_name(csv_name):
         'person_neoplasm_cancer_status': 'Tumor Status',
         'neoplasm_histologic_grade': 'Histological Grade',
         'icd_10': 'ICD-10',
-        'icd_o_3_histology': 'ICD-O-3 Site',
-        'icd_o_3_site': 'ICD-O-3 Histology'
+        'icd_o_3_histology': 'ICD-O-3 Histology',
+        'icd_o_3_site': 'ICD-O-3 Site'
     }
     if translation_dictionary.get(csv_name):
         return translation_dictionary.get(csv_name)

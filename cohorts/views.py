@@ -414,9 +414,8 @@ def set_operation(request):
                     first = False
                 else:
                     notes += ', ' + cohort.name
-            cohort_patients = Patients.objects.filter(cohort_id__in=cohort_ids).distinct()
-            cohort_samples = Samples.objects.filter(cohort_id__in=cohort_ids).distinct()
-
+            patients = Patients.objects.filter(cohort_id__in=cohort_ids).distinct().values_list('patient_id', flat=True)
+            samples = Samples.objects.filter(cohort_id__in=cohort_ids).distinct().values_list('sample_id', flat=True)
         elif op == 'intersect':
             notes = 'Intersection of '
             cohort_ids = request.POST.getlist('selected-ids')
@@ -428,25 +427,28 @@ def set_operation(request):
                     first = False
                 else:
                     notes += ', ' + cohort.name
-            cohort_patients = tuple(Patients.objects.filter(cohort=cohorts[0]))
-            cohort_samples = tuple(Samples.objects.filter(cohort=cohorts[0]))
+            cohort_patients = tuple(Patients.objects.filter(cohort=cohorts[0]).values_list('patient_id', flat=True))
+            cohort_samples = tuple(Samples.objects.filter(cohort=cohorts[0]).values_list('sample_id', flat=True))
             for i in range(1, len(cohorts)):
-                new_patient_list = tuple(Patients.objects.filter(cohort=cohorts[i]))
-                new_sample_list = tuple(Samples.objects.filter(cohort=cohorts[i]))
+                new_patient_list = tuple(Patients.objects.filter(cohort=cohorts[i]).values_list('patient_id', flat=True))
+                new_sample_list = tuple(Samples.objects.filter(cohort=cohorts[i]).values_list('sample_id', flat=True))
                 cohort_patients = set(cohort_patients).intersection(new_patient_list)
                 cohort_samples = set(cohort_samples).intersection(new_sample_list)
-
+            patients = list(cohort_patients)
+            samples = list(cohort_samples)
         elif op == 'complement':
             base_id = request.POST.get('base-id')
             subtract_ids = request.POST.getlist('subtract-ids')
 
-            base_patients = tuple(Patients.objects.filter(cohort_id=base_id))
-            subtract_patients = tuple(Patients.objects.filter(cohort_id__in=subtract_ids).distinct())
+            base_patients = tuple(Patients.objects.filter(cohort_id=base_id).values_list('patient_id', flat=True))
+            subtract_patients = tuple(Patients.objects.filter(cohort_id__in=subtract_ids).distinct().values_list('patient_id', flat=True))
             cohort_patients = set(base_patients).difference(subtract_patients)
+            patients = list(cohort_patients)
 
-            base_samples = tuple(Samples.objects.filter(cohort_id=base_id))
-            subtract_samples = tuple(Samples.objects.filter(cohort_id__in=subtract_ids).distinct())
+            base_samples = tuple(Samples.objects.filter(cohort_id=base_id).values_list('sample_id', flat=True))
+            subtract_samples = tuple(Samples.objects.filter(cohort_id__in=subtract_ids).distinct().values_list('sample_id', flat=True))
             cohort_samples = set(base_samples).difference(subtract_samples)
+            samples = list(cohort_samples)
 
             notes = 'Subtracted '
             base_cohort = Cohort.objects.get(id=base_id)
@@ -460,14 +462,10 @@ def set_operation(request):
                     notes += ', ' + item.name
             notes += ' from %s.' % base_cohort.name
 
-        if len(cohort_samples) or len(cohort_patients):
+        if len(samples) or len(patients):
             new_cohort = Cohort.objects.create(name=name)
             perm = Cohort_Perms(cohort=new_cohort, user=request.user, perm=Cohort_Perms.OWNER)
             perm.save()
-
-            # Reduce to simply a list of barcodes for both samples and patients
-            samples = map(lambda x: x.sample_id, cohort_samples)
-            patients = map(lambda x: x.patient_id, cohort_patients)
 
             # Store cohort to BigQuery
             project_id = settings.BQ_PROJECT_ID
@@ -689,9 +687,9 @@ def streaming_csv_view(request, cohort_id=0):
         # rows that can be handled by a single sheet in most spreadsheet
         # applications.
         rows = ()
-        rows = (["Sample", "Platform", "Pipeline", "DataLevel", "FilePath"],)
+        rows = (["Sample", "Platform", "Pipeline", "DataLevel", "CloudStorageLocation"],)
         for file in file_list:
-            rows += ([file['sample'], file['platform'], file['pipeline'], file['datalevel'], file['filename']],)
+            rows += ([file['sample'], file['platform'], file['pipeline'], file['datalevel'], file['cloudstorage_location']],)
         pseudo_buffer = Echo()
         writer = csv.writer(pseudo_buffer)
         response = StreamingHttpResponse((writer.writerow(row) for row in rows),
