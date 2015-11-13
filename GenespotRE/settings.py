@@ -40,18 +40,18 @@ DEVELOPER_COHORT_TABLE_ID = secret_settings.get('DEVELOPER_COHORT_TABLE_ID')
 
 if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):  
     # or os.getenv('SETTINGS_MODE') == 'prod':
-    DATABASES = secret_settings.get('CLOUD_DATABASE')
+    DATABASES = secret_settings.get('DATABASE')
     BASE_URL = CLOUD_BASE_URL
     BASE_API_URL = CLOUD_API_URL
     SITE_ID = 4
     DEVELOPER_COHORT_TABLE_ID = secret_settings.get('CLOUD_COHORT_TABLE')
 elif os.getenv('SETTINGS_MODE') == 'dev':
-    DATABASES = secret_settings.get('CLOUD_DATABASE_LOCAL_CONNECTION')
+    DATABASES = secret_settings.get('DATABASE')
     BASE_URL = LOCAL_BASE_URL
     BASE_API_URL = LOCAL_BASE_URL
     SITE_ID = 3
 else:
-    DATABASES = secret_settings.get('LOCAL_DATABASE')
+    DATABASES = secret_settings.get('DATABASE')
     BASE_URL = LOCAL_BASE_URL
     BASE_API_URL = LOCAL_BASE_URL
     SITE_ID = 3
@@ -200,7 +200,6 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'GenespotRE',
     'visualizations',
-    'genome_browser',
     'seqpeek',
     'cohorts'
 )
@@ -317,3 +316,22 @@ ACL_GOOGLE_GROUP                    = secret_settings.get('ACL_GOOGLE_GROUP')
 ERA_LOGIN_URL                       = secret_settings.get('ERA_LOGIN_URL')
 IPV4                                = secret_settings.get('IPV4')
 
+
+
+##############################
+#   Start django-finalware   #
+##############################
+
+INSTALLED_APPS += (
+    'finalware',)
+TEMPLATE_CONTEXT_PROCESSORS += (
+    'finalware.context_processors.contextify',)
+
+SITE_SUPERUSER_USERNAME = secret_settings.get('SU_USER')
+SITE_SUPERUSER_EMAIL = ''
+SITE_SUPERUSER_PASSWORD = secret_settings.get('SU_PASS')
+
+
+############################
+#   End django-finalware   #
+############################
