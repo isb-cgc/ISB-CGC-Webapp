@@ -1,5 +1,6 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
+from lib.django.conf import settings
 
 import views
 
@@ -20,6 +21,8 @@ urlpatterns = patterns('',
     url(r'^bucket_test/$', views.bucket_access_test, name='bucket_test'),
     url(r'^bucket_object_list/$', views.bucket_object_list, name='bucket_object_list'),
     url(r'^igv/$', views.igv, name='igv'),
+    url(r'^igv/(?P<readgroupset_id>\w{0,50})/$', views.igv, name='igv'),
+    url(r'^help/$', views.help, name='help'),
 
     url(r'^cohorts/', include('cohorts.urls')),
     url(r'^genome/', include('genome_browser.urls')),
@@ -31,3 +34,6 @@ urlpatterns = patterns('',
     url(r'^tasks/', include('tasks.urls')),
     url(r'^_ah/health$', views.health_check),
 )
+
+if settings.LOAD_DEMO_URLS:
+    urlpatterns.append(url(r'^demo/', include('demo.urls')))

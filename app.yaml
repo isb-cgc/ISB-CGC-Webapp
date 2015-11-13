@@ -38,6 +38,6 @@ handlers:
   upload: static/robots.txt
 
 env_variables:
-  DJANGO_SETTINGS_MODULE: 'GenespotRE.settings' 
-  SETTINGS_VERSION: 'dev'
-  VERSION_NAME: 'default'
+  GAE_TMP_FORCE_REUSE_API_CONNECTION: true
+  DJANGO_SETTINGS_MODULE: 'GenespotRE.settings'
+  SETTINGS_VERSION: 'prod'

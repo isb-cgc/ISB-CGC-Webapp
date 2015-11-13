@@ -1,10 +1,10 @@
-from bq_data_access.feature_search.gexp import GEXPSearcher
-from bq_data_access.feature_search.clinical import ClinicalSearcher
-from bq_data_access.feature_search.methylation import METHSearcher
-from bq_data_access.feature_search.copynumber import CNVRSearcher
+from bq_data_access.feature_search.gexp_searcher import GEXPSearcher
+from bq_data_access.feature_search.clinical_searcher import ClinicalSearcher
+from bq_data_access.feature_search.methylation_searcher import METHSearcher
+from bq_data_access.feature_search.copynumber_search import CNVRSearcher
 from bq_data_access.feature_search.protein import RPPASearcher
-from bq_data_access.feature_search.microrna import MIRNSearcher
-from bq_data_access.feature_search.mutation import GNABSearcher
+from bq_data_access.feature_search.microrna_searcher import MIRNSearcher
+from bq_data_access.feature_search.gnab_searcher import GNABSearcher
 
 class SearchableFieldHelper(object):
     datatype_handlers = [

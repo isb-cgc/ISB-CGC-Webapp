@@ -278,18 +278,6 @@ class FeatureDataEndpoints(remote.Service):
                                 cohort_set=cohort_info_obj_array,
                                 counts=count_message, pairwise_result=pairwise_result)
 
-    @endpoints_method(DataRequest, DataPointList,
-                      path='feature_data', http_method='GET', name='feature_access.getFeatureData')
-    def data_access_by_feature(self, request):
-        try:
-            feature_id = request.feature_id
-            cohort_id_array = [request.cohort_id]
-            vector_type, vector = get_feature_vector(feature_id, cohort_id_array)
-            return DataPointList(type=vector_type, items=vector)
-        except Exception as e:
-            logging.exception(e)
-            raise NotFoundException()
-
     @endpoints_method(PlotDataRequest, PlotDataResponse,
                       path='feature_data_plot', http_method='GET', name='feature_access.getFeatureDataForPlot')
     def data_access_for_plot(self, request):

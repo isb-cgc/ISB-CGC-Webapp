@@ -8,5 +8,6 @@ urlpatterns = patterns('',
     url(r'^check_users_sweeper', views.check_users_sweeper, name='check_users_sweeper'),
     url(r'^CloudSQL_logging', views.CloudSQL_logging, name='CloudSQL_logging'),
     url(r'^IAM_logging', views.IAM_logging, name='IAM_logging'),
-    url(r'^remove_user_from_ACL/(?P<nih_username>\w+)/$', views.remove_user_from_ACL, name="remove_user_from_ACL")
+    url(r'^remove_user_from_ACL/(?P<nih_username>\w+)/$', views.remove_user_from_ACL, name="remove_user_from_ACL"),
+    url(r'^create_and_log_reports', views.create_and_log_reports, name="create_and_log_reports")
     )
