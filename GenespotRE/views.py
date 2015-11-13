@@ -22,6 +22,7 @@ from google_helpers.genomics_service import get_genomics_resource
 from visualizations.models import SavedViz, Viz_Perms
 from cohorts.models import Cohort, Cohort_Perms
 from accounts.models import NIH_User
+from scripts.clusterTest import run_cluster
 
 
 debug = settings.DEBUG

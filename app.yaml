@@ -41,6 +41,3 @@ env_variables:
   DJANGO_SETTINGS_MODULE: 'GenespotRE.settings' 
   SETTINGS_VERSION: 'dev'
   VERSION_NAME: 'default'
-
-skip_files:
-- python-su.sh
