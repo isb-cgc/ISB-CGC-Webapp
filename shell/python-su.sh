@@ -1,1 +1,1 @@
-sudo -E /usr/bin/python "$@"
+sudo PYTHONPATH="$PYTHONPATH" /usr/bin/python "$@"

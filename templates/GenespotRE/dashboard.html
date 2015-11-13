@@ -1,5 +1,95 @@
 {% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+{#{% load tz %}#}
+{% block header %}
+{% endblock %}
+
+{% block link_page_name %}dashboard{% endblock %}
+{% block page_name %}dashboard{% endblock %}
 
 {% block content %}
-    <h1>This is the dashboard page</h1>
+<div class="container">
+    <div class="page-header">
+        <h1 class="page-title">Your Dashboard</h1>
+    </div>
+
+    <section class="panel panel-default">
+        <div class="panel-heading">
+            <p>Sample Analyses can be customized with the specific data you want to analyze.</p>
+        </div>
+        <div class="panel-body">
+            <ul class="card-list">
+                <li>
+                    <img src="">
+                    <p>Analysis Name</p>
+                </li>
+            </ul>
+        </div>
+    </section>
+    <section class="panel panel-primary">
+        <div class="panel-heading">
+            <h3 class="panel-title">Saved Workbooks(0)</h3>
+        </div>
+        <div class="panel-body">
+            <p>Workbooks store the Analyses you create -- and their related data.</p>
+        </div>
+        <div class="panel-footer">
+            <button class="btn btn-default"><i class="fa fa-plus"></i>Create a New Workbook</button>
+            <a class="btn btn-plain" href="{% url 'workbooks' %}">Sample Workbooks</a>
+        </div>
+    </section>
+    <div class="row">
+        <div class="col-sm-6">
+            <section class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Gene Favorites(0)</h3>
+                </div>
+            </section>
+            <section class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Variable Favorites(0)</h3>
+                </div>
+            </section>
+            <section class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        <a href="{% url 'cohort_list' %}">Saved Cohorts(0)</a></h3>
+                </div>
+            </section>
+            <section class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Data Type Preference</h3>
+                </div>
+                <div class="panel-body">
+                    <p>In this event you have data generated from different platforms of pipelines, you may: <br> set default data type preferece</p>
+                </div>
+            </section>
+        </div>
+        <div class="col-sm-6">
+            <section class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Saved Project Data(0)</h3>
+                </div>
+                <div class="panel-body">
+                    <p>You can upload from your own research projects.</p>
+                </div>
+                <div class="panel-footer">
+                    <button class="btn btn-default"><i class="fa fa-upload"></i>Upload Project Data</button>
+                </div>
+            </section>
+            <section class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Public Data(25)</h3>
+                </div>
+                <div class="panel-body">
+                    <p>Browse publicly-available studies and data</p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+</div>
 {% endblock %}
+
+{% block js_file %}{% static 'js/dashboard.js' %}{% endblock %}

@@ -21,6 +21,7 @@ urlpatterns = patterns('',
     url(r'^bucket_object_list/$', views.bucket_object_list, name='bucket_object_list'),
     url(r'^igv/$', views.igv, name='igv'),
 
+    url(r'^workbooks/', include('workbooks.urls')),
     url(r'^cohorts/', include('cohorts.urls')),
     url(r'^visualizations/', include('visualizations.urls')),
     url(r'^admin/', include(admin.site.urls)),
