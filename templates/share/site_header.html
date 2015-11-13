@@ -190,7 +190,7 @@
                         </ul>
                     </li>
                     {% endif %}
-                    <li class="menu-item"><a href="{% url 'cohort' %}">Manage Saved Cohorts ({{ user.cohort_perms_set.all|cohort_owner_permission|length }})</a></li>
+                    <li class="menu-item"><a href="{% url 'cohort_list' %}">Manage Saved Cohorts ({{ user.cohort_perms_set.all|cohort_owner_permission|length }})</a></li>
                     <li class="menu-item"><a>Public Cohorts (1)</a></li>
                     <li class="menu-item"><a>Select Cohort for a New Workbook</a></li>
                 </ul>
