@@ -7,7 +7,9 @@ import secret_settings
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + os.sep
 DEBUG = secret_settings.get('DEBUG')
 TEMPLATE_DEBUG = DEBUG
-
+ALLOWED_HOSTS = [
+    secret_settings.get('ALLOWED_HOST')
+]
 
 ### added for connecting to CloudSQL with SSL certs on MVM platform
 SSL_DIR = os.path.abspath(os.path.dirname(__file__))+os.sep
