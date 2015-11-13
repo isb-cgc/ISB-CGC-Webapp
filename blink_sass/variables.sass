@@ -10,15 +10,16 @@ $screen-lg: 1200px
 // Colors
 // --------------------------------------------
 $white: #fff
-$base_dark: #000
+$base-dark: #000
 
 // Brand color
-$isb_primary: #0c4fba
-$isb_info:    #64B5F6
-$isb_success: #89D889
-$isb_warning: #F78E1B
-$isb_danger:  #D32F2F
+$isb-primary: #2A537A
+$isb-info:    #49AFCD
+$isb-success: #C9DD03
+$isb-warning: #F7991B
+$isb-danger:  #BB00BB
 
+// Additional color choices
 $nav-bg: $white
 
 $bg-color: #F8F8F8
@@ -45,18 +46,62 @@ $warning-bgcolor-dark: #FFA000
 $danger-bgcolor: #FFEBEE
 $danger-bgcolor-dark: #D32F2F
 
-$text-shadow: 1px 1px 1px rgb(216, 216, 216)
-
-$box-shadow: 0px 1px 2px $border-color
 $border: 1px solid $border-color
 
 // --------------------------------------------
-// Custom variables for ISB-cgc project
 // Typography
 // --------------------------------------------
-$font_size: 14px
+$font-size: 14px
 
-$default_font_family: 'Proxima Nova-Regular', Arial, sans-serif
+$default-font-family: 'proxima-nova', Arial, sans-serif
 
-$font-color: darken($base_dark, 10%)
-$link-color: $isb_info
+$regular-font-weight: 400
+$medium-font-weight: 500
+$bold-font-weight: 700
+
+$heading-font-weight: $bold-font-weight
+
+$font-color: darken($base-dark, 10%)
+$link-color: $isb-info
+
+// --------------------------------------------
+// Components
+// --------------------------------------------
+$text-shadow: 1px 1px 1px rgb(216, 216, 216)
+$box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.15)
+
+$padding-base-vertical:     6px
+$padding-base-horizontal:   12px
+
+$padding-large-vertical:    10px
+$padding-large-horizontal:  16px
+
+$padding-small-vertical:    5px
+$padding-small-horizontal:  10px
+
+$padding-xs-vertical:       1px
+$padding-xs-horizontal:     5px
+
+$line-height-large:         1.3333333
+$line-height-small:         1.5
+
+$border-radius-base:        2px
+
+// --------------------------------------------
+// Buttons
+// --------------------------------------------
+$btn-font-weight: $medium-font-weight
+
+$btn-default-bg: transparent
+$btn-default-color:  $isb-warning
+$btn-default-border: $isb-warning
+
+// --------------------------------------------
+// Panel
+// --------------------------------------------
+$panel-inner-border:          transparent
+$panel-footer-bg:             $white
+
+$panel-default-text:          $isb-primary
+$panel-default-border:        transparent
+$panel-default-heading-bg:    $white

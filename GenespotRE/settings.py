@@ -261,7 +261,7 @@ LOGGING = {
 #  Start django-allauth  #
 ##########################
 
-LOGIN_REDIRECT_URL = '/user_landing/'
+LOGIN_REDIRECT_URL = '/dashboard/'
 
 INSTALLED_APPS += (
     'accounts',

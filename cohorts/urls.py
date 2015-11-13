@@ -2,7 +2,8 @@ from django.conf.urls import patterns, url
 import views
 
 urlpatterns = patterns('',
-    url(r'^$', views.cohorts_list, name='cohort'),
+    url(r'^$', views.cohorts_list, name='cohort_list'),
+    url(r'^new_cohort/', views.cohort_detail, name='cohort'),
     url(r'^(?P<cohort_id>\d+)/$', views.cohort_detail, name='cohort_details'),
     url(r'^filelist/(?P<cohort_id>\d+)/$', views.cohort_filelist, name='cohort_filelist'),
     url(r'^save_cohort/', views.save_cohort, name='save_cohort'),
