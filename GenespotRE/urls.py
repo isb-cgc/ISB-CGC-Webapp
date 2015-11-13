@@ -22,7 +22,6 @@ urlpatterns = patterns('',
     url(r'^igv/$', views.igv, name='igv'),
 
     url(r'^cohorts/', include('cohorts.urls')),
-    url(r'^genome/', include('genome_browser.urls')),
     url(r'^visualizations/', include('visualizations.urls')),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^accounts/', include('accounts.urls')),

@@ -3,102 +3,78 @@ ISB-CGC UI prototyping
 
 This project uses Google App Engine, Python 2.7, Django 1.7.1, and MySQL 5.6
 
-This app is set up to run and deploy on various Google Cloud Projects. It uses a zip version of Django instead of the natively supported version.
+This app is set up to run and deploy on various Google Cloud Projects.
 
-These are the required libraries that are not included (this should be zipped and placed in a /lib/ directory in the root of this project) Some of these libraries have been modified to work with Google App Engine. Please ask a developer at the ISB for the libraries or more information.
-- allauth
-- apiclient
-- cloudstorage
-- django==1.7.1
-- ecdsa
-- googleapiclient
-- httplib2
-- identitytoolkit
-- endpoints==1.0
-- oauth2client
-- openid
-- pyasn1
-- pyasn1_modules
-- requests==2.3 (in order to work with django-allauth)
-- requests_oauthlib
-- rsa
-- simplejson
-- six
-- uritemplate
-- zoneinfo
+# Installation Instructions For Local Development
 
-This project also includes the Endpoints API that the django application is running off of. Different versions of the application can access different version of the api as described [here](https://cloud.google.com/appengine/docs/python/endpoints/test_deploy#accessing_backend_api_versions_deployed_to_non-default_application_versions)
+The system uses [Vagrant](https://www.vagrantup.com/) to setup a consistent, platform independent development environment. To setup your development environment to run locally, you will need to install the following:
 
-# Installation Instructions For Local Development (OSX, Linux Distributions)
+ * [Vagrant](https://www.vagrantup.com/downloads.html)
+ * [Oracle VirtualBox](https://www.virtualbox.org/wiki/Downloads)<br>*If you are on Windows 8 or above, you will need to make sure you have version 5.0.9 or above to support the network interface. This may involve downloading a [test build](https://www.virtualbox.org/wiki/Testbuilds)*
+ * [PyCharm Pro](https://www.jetbrains.com/pycharm/) (Recommended)
 
-1. Download [Google App Engine SDK for Python](https://cloud.google.com/appengine/downloads#Google_App_Engine_SDK_for_Python) and install. Be sure to add the google_appengine directory to your PATH.
-`export PATH=$PATH:/path/to/google_appengine`
-2. Download [Google Cloud SDK](https://cloud.google.com/sdk/) and install. Make sure that the edited .bash_profile or .bashrc file is pointing to the right location of google-cloud-sdk directory.
-3. Authenticate the Google Cloud Platform by running
-`gcloud auth login`
-4. If you are using isb-cgc as your Google Cloud Project, you will need access to the ISB-CGC Google Drive directory (please ask project members for this information) to download the following:
-  - privatekey.pem (This was generated from a .p12 file downloaded from within the isb-cgc project)
-  - privatekey.json
-  - lib.zip 
-  - client_secrets.json
-  - google_api_key.txt (This should be placed in the genome_browser directory.)
-  - client_cert.pem, client_key.pem, server_ca.pem, all in GenespotRE/
-  - local-sqldump_10-22-2015.sql.gz
-  Otherwise, please refer to Deploying to New Cloud Project for instructions on how to generate private keys and client secrets.
-5. Set up python virtual environment with Python 2.7, Django 1.7.1, MySQL 5.6:
-6. `pip install django==1.7.1`
-7. `pip install MySQL-python` - You may need to install MySQL if it is not already installed. It is recommended to use [homebrew](http://brew.sh/) if you are on OS X.
-8. You should probably be okay importing the MySQL dump from drive:
-   'mysql -uroot -p < local-sqldump_10-22-2015.sql'
-9. `pip install pycrypto` - Needed as previously noted
-10. In GenespotRE/secret_settings.py change the local database settings to match your local settings. You will also need to change other settings if not using isb-cgc as your Google Cloud Project (Pointing to correct .pem and .json files, and DEVELOPER_COHORT_TABLE_ID should be set to a unique table in a dataset in Big Query). You may need to change the name of the user, and password to match your local settings. Do not commit these changes.  Do similarly for scripts/add_site_ids.py and scripts/add_alldata_cohort.py. You can add additionaly sets of settings to the secret settings file if you like. Use an environment variable set in app.yaml and manage.py to switch between settings.
-11. run `python manage.py makemigrations` - Setting up Django models
-12. run `python manage.py migrate` - Setting up Django models.  If you get errors from mysql being unwilling to create things that already exist, or delete things that don't exist, you can try using the --fake at the end. 
-13. If you did not use a sql dump, and have not done so before, run `python manage.py createsuperuser` and leave the superuser's email blank.  Running this more than once will create multiple superusers which will produce a bug.
-14. If you did no use a sql dump, enter a mysql shell and run `CREATE USER 'django'@'localhost' IDENTIFIED BY 'PASSWORD'` and `GRANT SELECT, INSERT, UPDATE, DELETE ON <DATABASE NAME>.* TO 'django'@'localhost'`. Remember to set the password appropriately.
+From there simply perform these steps.
 
-LOCAL TEST:
+ 1. Copy the `sample.env` file to a file named `.env` in the root directory
+ 2. Fill out the `.env` file with the proper values
+   * For most development environments, `MYSQL_ROOT_PASSWORD` and `DATABASE_PASSWORD` can be the same, and `DATABASE_USER` can be `root`
+   * `GCLOUD_PROJECT_ID` is available after creating a project in the [Google Cloud Dashboard](https://console.developers.google.com/)
+   * `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` can also be obtained in the Google Cloud Dashboard by going to API & Auth > Credentials > Add New > OAuth 2.0 Client > Web Application
+   * Be sure when developing locally that you have 127.0.0.1 in the list of allowed domains for the OAuth 2.0 key
 
-L1. For a local test, run 'gcloud preview app run ./app.yaml' and go
-to [http://localhost:8080/](http://localhost:8080), hoping for the
-best!
+## Configuring PyCharm
 
-L2. If the site works, go to [http://localhost:8080/admin](http://localhost:8080/admin) and enter the superuser name and password you created.
-  - Open the Social Applications table in admin to add a new Social Application. Make the provider Google, name it whatever you want ('Google' is fine), copy and paste the client_id and client_secret from our client_secrets.json file into the Social Application's Client id and Secret key fields. Leave the Key field blank.
-  - Then select isb-cgc.appspot.com, localhost:8000, and localhost:8080 in the Available sites field and move them to the Chosen sites field.
+PyCharm Pro can be used to run your server through Vagrant and the Google App Engine.
 
-L3. When app is running, api is also running at the same time. It is currently set up to look at local MySQL database if running locally, so make sure you have MySQL running. You can explore your local api [here](http://localhost:8080/_ah/api/explorer).
+### Setup
 
-CLOUD TEST:
+ 1. Go to your PyCharm Settings (On Mac, Go to Preferences; `CMD+,`)
+ 2. Select **Project: ISB-CGC-Webapp > Project Interpreter**
+ 3. Click the icon next to the Project Interpreter drop down at the top of the main area
+ 4. Click Add Remote
+ 5. Select Vagrant (if it asks to start the machine, say yes)
+ 6. Set the Python interpreter path to `/home/vagrant/www/shell/python-su.sh` and click Ok
+ 7. Select **Languages & Frameworks > Google App Engine**
+ 8. Change the SDK directory to `/home/vagrant/google_appengine/`
+ 9. Click Ok to save
+ 10. Go to **Run > Edit Configurations**
+ 11. If there is not an App Engine server Configuartion, add one
+ 12. Set the host to `0.0.0.0`
+ 13. Set Additional Options to `--skip_sdk_update_check --use_mtime_file_watcher=True --admin_host 0.0.0.0 /home/vagrant/www`
+   * Optionally set PyCharm to run a browser at url `http://127.0.0.1:8080/`
+ 14. Set the Python Interpreter to the Vagrant Machine (if it is not set to that already)
+ 15. Set the working directory to `\home\vagrant\www`
+ 16. Click ok to save
 
-C1. For a cloud test, set your own module in app.yaml, ensuring that 'module: MOD' and " 'VERSION_NAME': 'MOD' " are consistent.  MOD will be used below in the URIs, etc.
+You will also need to set the *shell/python-su.sh* file to be executable. You can do this in the vagrant machines command line with the command `chmod +x /home/vagrant/www/shell/python-su.sh`
 
-C2. Check in the Developer's Console, and ensure that the following URLs are in the Redirect URIs:
-- https://MOD-dot-isb-cgc.appspot.com
-- http://MOD-dot-isb-cgc.appspot.com
-- https://MOD-dot-isb-cgc.appspot.com/accounts/google/login/callback/
-- http://MOD-dot-isb-cgc.appspot.com/accounts/google/login/callback/
+### Running
 
-C3. From the shell, run 'gcloud preview app deploy ./app.yaml --set-default' and go
-to https://MOD-dot-isb-cgc.appspot.com.
+To run your server in PyCharm:
 
-C4. The main api endpoints can be explored at https://MOD-dot-isb-cgc.appspot.com/_ah/api/explorer
+ 1. Make sure your Vagrant machine is running by going to **Tools > Vagrant > Up**
+ 2. Click on the Run or Debug icons in the toolbar
+ 3. Click Run or Debug button on the configuration dialog
+ 4. Click Continue Anyway to run the machine
 
-C5 When you are finished working with instances, and no longer need them, please delete the version, through the Developers Console: 
-  - (along the left hand side) Dev Console > Compute > App Engine > Versions
-  - Select the MOD Module (top left of main panel: whichever ne you used)
-  - Put a checkmark by each and choose delete.  Once all non-defaults
-    are deleted, you will be allowed to delete the default Version.
-  - We get charged $$ for having lots of zombie vm's running, so clean up!
+Your server will start and the PyCharm console should show all the logs and output from the system. If you are running in debug, you can also use breakpoints to stop the execution and examine variables and code as it runs.
 
+## Adding Python Dependencies
 
-# Working on front-end html and css
-Make sure SASS is installed. SASS files are compiled from sass/ into the static/css/ directory.
+To add Python Libraries or Dependencies, you should add them to the requirements.txt file and they will automatically be pulled down when a new developer starts the system.
 
-For SASS: run this from root directory
-```
-sass --watch sass/main.sass:static/css/main.css
-```
+To update your existing python dependencies because of a change or to pull down additional libraries you need, SSH into the virtual machine and run `pip install`. Through PyCharm, you can take the following steps.
+
+ 1. Click **Tools > Start SSH session...**
+ 2. Select the Vagrant VM Connection you set up
+ 3. Type `cd www; pip install -r requirements.txt --upgrade -t lib/`
+
+Or from the command line, you can do this by doing the following
+
+ 1. Open a terminal in the project directory
+ 2. Type `vagrant ssh` to login to the virtual machine
+ 3. Change directory to the `www` directory (`/home/vagrant/www/` is the full path)
+ 4. Run `pip install -r requirements.txt --upgrade -t lib/`
 
 # Deploying to a new Google Cloud Project
 
