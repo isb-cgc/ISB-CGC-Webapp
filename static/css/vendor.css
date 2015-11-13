@@ -1070,10 +1070,10 @@ textarea {
   line-height: inherit; }
 
 a {
-  color: #616161;
+  color: #64B5F6;
   text-decoration: none; }
   a:hover, a:focus {
-    color: #3b3b3b;
+    color: #1c92f2;
     text-decoration: underline; }
   a:focus {
     outline: thin dotted;
@@ -3067,7 +3067,7 @@ fieldset[disabled] a.btn {
     background-color: #fff; }
 
 .btn-link {
-  color: #616161;
+  color: #64B5F6;
   font-weight: normal;
   border-radius: 0; }
   .btn-link, .btn-link:active, .btn-link.active, .btn-link[disabled],
@@ -3078,7 +3078,7 @@ fieldset[disabled] a.btn {
   .btn-link, .btn-link:hover, .btn-link:focus, .btn-link:active {
     border-color: transparent; }
   .btn-link:hover, .btn-link:focus {
-    color: #3b3b3b;
+    color: #1c92f2;
     text-decoration: underline;
     background-color: transparent; }
   .btn-link[disabled]:hover, .btn-link[disabled]:focus,
@@ -3575,7 +3575,7 @@ tbody.collapse.in {
         cursor: not-allowed; }
   .nav .open > a, .nav .open > a:hover, .nav .open > a:focus {
     background-color: #eeeeee;
-    border-color: #616161; }
+    border-color: #64B5F6; }
   .nav .nav-divider {
     height: 1px;
     margin: 9px 0;
@@ -4095,7 +4095,7 @@ tbody.collapse.in {
       padding: 6px 12px;
       line-height: 1.42857;
       text-decoration: none;
-      color: #616161;
+      color: #64B5F6;
       background-color: #fff;
       border: 1px solid #ddd;
       margin-left: -1px; }
@@ -4112,7 +4112,7 @@ tbody.collapse.in {
   .pagination > li > span:hover,
   .pagination > li > span:focus {
     z-index: 3;
-    color: #3b3b3b;
+    color: #1c92f2;
     background-color: #eeeeee;
     border-color: #ddd; }
   .pagination > .active > a, .pagination > .active > a:hover, .pagination > .active > a:focus,
@@ -4280,7 +4280,7 @@ a.label:hover, a.label:focus {
     padding: 1px 5px; }
   .list-group-item.active > .badge,
   .nav-pills > .active > a > .badge {
-    color: #616161;
+    color: #64B5F6;
     background-color: #fff; }
   .list-group-item > .badge {
     float: right; }
@@ -4351,7 +4351,7 @@ a.badge:hover, a.badge:focus {
 a.thumbnail:hover,
 a.thumbnail:focus,
 a.thumbnail.active {
-  border-color: #616161; }
+  border-color: #64B5F6; }
 
 .alert {
   padding: 15px;

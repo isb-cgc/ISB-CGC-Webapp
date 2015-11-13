@@ -1,5 +1,5 @@
 // --------------------------------------------
-// Variables from ISB
+// Viewport sizes
 // --------------------------------------------
 
 $screen-sm: 768px;
@@ -10,10 +10,17 @@ $screen-lg: 1200px;
 // Colors
 // --------------------------------------------
 $white: #fff;
+$base_dark: #000;
+
+// Brand color
+$isb_primary: #0c4fba;
+$isb_info: #64B5F6;
+$isb_success: #89D889;
+$isb_warning: #F78E1B;
+$isb_danger: #D32F2F;
 
 $nav-bg: $white;
-$font-color: #000;
-$link-color: #616161;
+
 $bg-color: #F8F8F8;
 $border-color: #D5D5D5;
 
@@ -50,3 +57,6 @@ $border: 1px solid $border-color;
 $font_size: 14px;
 
 $default_font_family: "Proxima Nova-Regular", Arial, sans-serif;
+
+$font-color: darken($base_dark, 10%);
+$link-color: $isb_info;
