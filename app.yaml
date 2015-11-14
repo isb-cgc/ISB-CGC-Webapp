@@ -38,9 +38,9 @@ handlers:
   upload: static/robots.txt
 
 env_variables:
+  GAE_TMP_FORCE_REUSE_API_CONNECTION: true
   DJANGO_SETTINGS_MODULE: 'GenespotRE.settings' 
-  SETTINGS_VERSION: 'dev'
-  VERSION_NAME: 'default'
+  SETTINGS_VERSION: 'prod'
 
 skip_files:
 - python-su.sh

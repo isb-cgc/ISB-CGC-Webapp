@@ -1,24 +1,23 @@
 import endpoints
 
-from api.users import User_Endpoints
-from api.maf import MAFEndpointsAPI
-from api.feature_access_v2 import FeatureAccessEndpoints
+from api.feature_access import FeatureAccessEndpoints
+from api.single_feature_access import SingleFeatureDataAccess
 from api.data_access import FeatureDataEndpoints
-from api.big_query import BQ_Endpoints
 from api.Cohort import Cohort_Endpoints
 from api.metadata import Meta_Endpoints
 from api.pairwise_api import Pairwise_Endpoints
+from api.seqpeek_view_api import SeqPeekViewDataAccessAPI
+
 package = 'isb-cgc-api'
 
 
 APPLICATION = endpoints.api_server([
-    MAFEndpointsAPI,
     Cohort_Endpoints,
-    BQ_Endpoints,
     FeatureAccessEndpoints,
     Meta_Endpoints,
     FeatureDataEndpoints,
+    SingleFeatureDataAccess,
     Pairwise_Endpoints,
-    User_Endpoints
+    SeqPeekViewDataAccessAPI
 ])
 

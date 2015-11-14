@@ -17,7 +17,5 @@ urlpatterns = patterns('',
     url(r'^stackviz/(?P<id>\d+)/$', views.stackviz, name='stackviz_id'),
     url(r'^circviz/$', views.circviz, name='circviz'),
     url(r'^circviz/(?P<id>\d+)/$', views.circviz, name='circviz_id'),
-    url(r'^genecentric/$', views.genecentric, name='genecentric'),
-    url(r'^genecentric/(?P<id>\d+)/$', views.genecentric, name='genecentric_id'),
     url(r'^save_comment/$', views.save_comment, name='save_comment')
 )

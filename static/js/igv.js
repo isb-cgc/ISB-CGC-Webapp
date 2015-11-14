@@ -73,4 +73,12 @@ require([
         $('#rgselector-'+id).show();
         $('.generate-btn').show();
     });
+
+    if (selected_dataset != '') {
+        $('.rgselector').hide();
+        $('#rgselector-'+selected_dataset).show();
+        $('.generate-btn').show();
+        $('.generate-btn').click();
+    }
+
 });

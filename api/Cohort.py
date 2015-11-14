@@ -5,7 +5,6 @@ import endpoints
 from google.appengine.ext import ndb
 from protorpc import messages, message_types
 from protorpc import remote
-from oauth2client.client import AccessTokenCredentials
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.contrib.auth.models import User as Django_User
 import django
@@ -186,18 +185,6 @@ class SavedCohort(messages.Message):
     filter_name = messages.StringField(6)  # for cohorts_filters.name
     filter_value = messages.StringField(7)  # for cohorts_filters.value. Not shown: cohorts_filters.resulting_cohort_id
     last_date_saved_alt = message_types.DateTimeField(8)
-
-
-def get_user_email_from_token(access_token):
-    print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
-    user_email = None
-    credentials = AccessTokenCredentials(access_token, 'test-user')
-    http = credentials.authorize(httplib2.Http())
-    user_info_service = build('oauth2', 'v2', http=http)
-    user_info = user_info_service.userinfo().get().execute()
-    if 'email' in user_info:
-        user_email = user_info['email']
-    return user_email
 
 
 Cohort_Endpoints = endpoints.api(name='cohort_api', version='v1', description="Get information about cohorts",

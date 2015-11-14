@@ -17,11 +17,12 @@ MVM_ON = True
 #ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 #)
-ADMINS = (('Eric', 'edownes@systemsbiology.org'))
+ADMINS = ()
 MANAGERS = ADMINS
 
 PROJECT_ID = secret_settings.get('PROJECT_ID')
 BQ_PROJECT_ID = secret_settings.get('BQ_PROJECT_ID')
+IGV_PROJECT_ID = secret_settings.get('IGV_PROJECT_ID')
 
 CLOUD_BASE_URL = secret_settings.get('CLOUD_BASE_URL')
 CLOUD_API_URL = secret_settings.get('CLOUD_API_URL')
@@ -38,6 +39,8 @@ CONTROLLED_DATA_BUCKET = secret_settings.get('CONTROLLED_DATA_BUCKET')
 COHORT_DATASET_ID = secret_settings.get('COHORT_DATASET_ID')
 DEVELOPER_COHORT_TABLE_ID = secret_settings.get('DEVELOPER_COHORT_TABLE_ID')
 
+LOAD_DEMO_URLS = False
+
 if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):  
     # or os.getenv('SETTINGS_MODE') == 'prod':
     DATABASES = secret_settings.get('DATABASE')
@@ -45,6 +48,7 @@ if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):
     BASE_API_URL = CLOUD_API_URL
     SITE_ID = 4
     DEVELOPER_COHORT_TABLE_ID = secret_settings.get('CLOUD_COHORT_TABLE')
+    LOAD_DEMO_URLS = True
 elif os.getenv('SETTINGS_MODE') == 'dev':
     DATABASES = secret_settings.get('DATABASE')
     BASE_URL = LOCAL_BASE_URL
@@ -313,8 +317,10 @@ LOGIN_EXPIRATION_HOURS = 24
 DBGAP_AUTHENTICATION_LIST_FILENAME  = secret_settings.get('DBGAP_AUTHENTICATION_LIST_FILENAME')
 DBGAP_AUTHENTICATION_LIST_BUCKET    = secret_settings.get('DBGAP_AUTHENTICATION_LIST_BUCKET')
 ACL_GOOGLE_GROUP                    = secret_settings.get('ACL_GOOGLE_GROUP')
+OPEN_ACL_GOOGLE_GROUP               = secret_settings.get('OPEN_ACL_GOOGLE_GROUP')
 ERA_LOGIN_URL                       = secret_settings.get('ERA_LOGIN_URL')
 IPV4                                = secret_settings.get('IPV4')
+SAML_FOLDER                         = secret_settings.get('SAML_FOLDER')
 
 
 

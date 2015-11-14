@@ -16,6 +16,7 @@
             border: $border
             border-top-color: transparent
             box-shadow: $box-shadow
+
         ul.nav-tabs
             li
                 border: none
@@ -24,6 +25,7 @@
                 width: (100% / 2)
                 &:first-child a
                     border-top-left-radius: 3px
+                    border-right: $border
                 &:last-child a
                     border-top-right-radius: 3px
 
@@ -301,10 +303,19 @@
             table-layout: fixed
             word-break: break-all
             word-wrap: break-word
-            .col-barcode, .col-pipeline
+            .col-barcode, .col-pipeline, .col-datatype
                 width: 150px
             .col-datalevel
                 width: 90px
+            .col-igv
+                width: 100px
+            a
+                i
+                    font-size: 17px
+                    color: $success-bgcolor
+                &:hover i
+                    color: $success-bgcolor-dark
+
 
 .parsets-tooltip
     background-color: rgba($tooltip-color, 0.8)

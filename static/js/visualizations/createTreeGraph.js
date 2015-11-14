@@ -69,7 +69,7 @@ function($, d3, d3tip, vis_helpers) {
 
             $('#tree-graph-clinical').empty();
             var clin_attr = [
-                'Disease_Code',
+                'Study',
                 'vital_status',
                 'SampleTypeCode',  //todo: make readable names out of numeric codes
                 'tumor_tissue_site',
@@ -78,7 +78,7 @@ function($, d3, d3tip, vis_helpers) {
             ];
 
             var clin_attr_titles = [
-                'Disease Code',
+                'Study',
                 'Vital Status',
                 'Sample Type',
                 'Tumor Tissue Site',
