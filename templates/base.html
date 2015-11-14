@@ -1,3 +1,21 @@
+<!--
+
+ Copyright 2015, Institute for Systems Biology
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+
+-->
+
 {% load l10n %}
 {% load staticfiles %}
 <!DOCTYPE html
@@ -50,15 +68,10 @@
                             </form>
                         </li>
                     {% endif %}
-{#                    <li {% if '/search/' in request.path %}class="active"{% endif %}><a href="{% url 'search' %}">Search</a></li>#}
-{#                    <li {% if '/visualizations/' in request.path %}class="active"{% endif %}><a href="{% url 'vizlist' %}">Visualizations</a></li>#}
-{#                    <li {% if '/users/' in request.path %}class="active"{% endif %}><a href="{% url 'users' %}">Users</a></li>#}
-{#                    <li {% if '/genome/' in request.path %}class="active"{% endif %}><a href="/genome" target="_blank">Genome Browser</a></li>#}
 
                 {% else %}
                     <a href="/"><img class="navbar-brand" src="{% static 'img/isblogo.png' %}" alt="ISB Logo"/></a>
                     <li><a href="/">ISB-CGC</a></li>
-{#                    <li {% if request.path == '/' %}class="active"{% endif %}><a href="/">Home</a></li>#}
                 {% endif %}
             </ul>
         </div>
@@ -80,13 +93,10 @@
                             <li role="menuitem"><a href="#logout-modal" data-toggle="modal" data-target="#logout-modal" title="Sign Out"><i class="fa fa-sign-out"></i> Sign Out</a></li>
                         </ul>
                     </div>
-{#                    <a href="#logout-modal" data-toggle="modal" data-target="#logout-modal" title="Sign Out"><i class="fa fa-sign-out"></i>Sign Out</a>#}
                 {% else %}
                     <!--same thing as /accounts/login-->
                     <a class="login-link" href="{% url 'account_login' %}" title="Sign In"><i class="fa fa-sign-in"></i> Sign In</a>
-
                 {% endif %}
-{#                <div id="signin"></div>#}
             </div>
         </div>
         </div>
