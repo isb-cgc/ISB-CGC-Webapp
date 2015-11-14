@@ -56,30 +56,30 @@
     {% endif %}
     <div class="row">{% block content %}{% endblock %}</div>
     <!-- Logout Modal -->
-    <div class="modal fade" id="logout-modal" tabindex="-1" role="dialog" aria-labelledby="logoutModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="logoutModalLabel">Logout</h4>
-                </div>
-                <form method="post" action="{% url 'account_logout' %}">
-                    <div class="modal-body">
-                        <p>Are you sure you want to sign out?</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                        {% csrf_token %}
-                        {% if redirect_field_value %}
-                            <input type="hidden" name="{{redirect_field_name}}" value="{{redirect_field_value}}"/>
-                        {% endif %}
-                        <button type="submit" class="btn btn-primary">Sign Out</button>
-                    </div>
-                </form>
+</main>
+<div class="modal fade" id="logout-modal" tabindex="-1" role="dialog" aria-labelledby="logoutModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="logoutModalLabel">Logout</h4>
             </div>
+            <form method="post" action="{% url 'account_logout' %}">
+                <div class="modal-body">
+                    <p>Are you sure you want to sign out?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    {% csrf_token %}
+                    {% if redirect_field_value %}
+                        <input type="hidden" name="{{redirect_field_name}}" value="{{redirect_field_value}}"/>
+                    {% endif %}
+                    <button type="submit" class="btn btn-primary">Sign Out</button>
+                </div>
+            </form>
         </div>
     </div>
-</main>
+</div>
 {% load session_security_tags %}
 {% load i18n l10n %}
 {% load url from future %}
