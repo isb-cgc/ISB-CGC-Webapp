@@ -7,7 +7,12 @@
             <div class="col-lg-12">
             <div class="nav navbar-left">
                  <ul class="">
-                    <li class="navbar-item"> <a href="{% url 'dashboard' %}"><img class="navbar-brand" src="{% static 'img/isblogo.png' %}" alt="ISB Logo"/><span class="navbar-item">ISB-CGC</span></a></li>
+                     {% if user.is_authenticated %}
+                        <li class="navbar-item"> <a href="{% url 'dashboard' %}"><img class="navbar-brand" src="{% static 'img/isblogo.png' %}" alt="ISB Logo"/><span class="navbar-item">ISB-CGC</span></a></li>
+                     {% else %}
+                        <li class="navbar-item"> <a href="{% url 'landing_page' %}"><img class="navbar-brand" src="{% static 'img/isblogo.png' %}" alt="ISB Logo"/><span class="navbar-item">ISB-CGC</span></a></li>
+                     {% endif %}
+
                     <li class="navbar-link navbar-item"><a href="{% url 'about_page' %}">About</a></li>
                     <li class="navbar-link navbar-item"><a href="{% url 'help_page' %}">Help</a></li>
                 </ul>
