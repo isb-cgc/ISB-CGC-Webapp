@@ -9,6 +9,7 @@ from django.conf import settings
 
 def workbook_list(request):
     template = 'workbooks/workbook_list.html'
+    context = {}
     return render(request, template, context);
 
 @login_required
