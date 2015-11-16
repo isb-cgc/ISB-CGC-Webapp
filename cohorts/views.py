@@ -233,6 +233,8 @@ def cohort_detail(request, cohort_id=0):
                 messages.error(request, 'You do not have permission to view that cohort.')
                 return redirect('user_landing')
 
+            cohort.mark_viewed(request)
+
             shared_with_ids = Cohort_Perms.objects.filter(cohort=cohort, perm=Cohort_Perms.READER).values_list('user', flat=True)
             shared_with_users = User.objects.filter(id__in=shared_with_ids)
             template = 'cohorts/cohort_details.html'
