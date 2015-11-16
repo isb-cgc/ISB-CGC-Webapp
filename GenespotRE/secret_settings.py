@@ -6,7 +6,7 @@ dotenv.read_dotenv(join(dirname(__file__), '../.env'))
 
 SETTINGS = {
     'SECRET_KEY': os.environ.get('DJANGO_SECRET_KEY'), # Django SECRET_KEY
-    'DEBUG': True,
+    'DEBUG': os.environ.get('DEBUG', False),
     'PROJECT_ID': os.environ.get('GCLOUD_PROJECT_ID'), # Google Cloud Project ID #
     'BQ_PROJECT_ID': os.environ.get('BIGQUERY_PROJECT_ID', os.environ.get('GCLOUD_PROJECT_ID')), # Google Cloud Project ID #
 
@@ -17,7 +17,7 @@ SETTINGS = {
 
     'BASE_URL': os.environ.get('BASE_URL', 'http://localhost:8000'), # Localhost url
     'API_URL': os.environ.get('API_URL', 'http://localhost:8000'), # Localhost api url
-
+    'ALLOWED_HOST': os.environ.get('ALLOWED_HOST', 'localhost'),
 
     # BigQuery cohort storage settings
     # TODO: Should be deleted at some point in favor of merged settings
@@ -108,6 +108,15 @@ SETTINGS = {
     'SU_USER': os.environ.get('SUPERUSER_USERNAME', 'isb'),
     'SU_PASS': os.environ.get('SUPERUSER_PASSWORD'),
 }
+
+if os.environ.has_key('DB_SSL_CERT'):
+    SETTINGS['DATABASE']['default']['OPTIONS'] = {
+        'ssl': {
+            'ca': os.environ.get('DB_SSL_CA'),
+            'cert': os.environ.get('DB_SSL_CERT'),
+            'key': os.environ.get('DB_SSL_KEY')
+        }
+    }
 
 def get(setting):
     #TODO: This should throw an exception

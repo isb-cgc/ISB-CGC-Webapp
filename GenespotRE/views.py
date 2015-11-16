@@ -17,6 +17,7 @@ from django.db.models import Count
 from django.utils import formats
 from django.contrib.auth.models import User
 from django.conf import settings
+from django.template import RequestContext
 
 from google_helpers.genomics_service import get_genomics_resource
 from visualizations.models import SavedViz, Viz_Perms
@@ -360,3 +361,17 @@ def igv(request):
 def health_check(request):
 #    print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     return HttpResponse('')
+
+#------------------------------------
+# Blink Views -----------------------
+#------------------------------------
+def help_page(request):
+    print request.user
+    return render(request, 'GenespotRE/help.html')
+
+def about_page(request):
+    return render(request, 'GenespotRE/about.html', {'request': request, 'data': 'data'})
+
+@login_required
+def dashboard_page(request):
+    return render(request, 'GenespotRE/dashboard.html', {'request': request, 'data': 'data'})

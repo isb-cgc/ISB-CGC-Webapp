@@ -94,6 +94,10 @@ def get_mysql_connection():
     env = os.getenv('SERVER_SOFTWARE')
     db_settings = secret_settings.get('DATABASE')['default']
     db = None
+    ssl = None
+    if 'OPTIONS' in db_settings and 'ssl' in db_settings['OPTIONS']:
+        ssl = db_settings['OPTIONS']['ssl']
+
     if env and env.startswith('Google App Engine/'):  # or os.getenv('SETTINGS_MODE') == 'prod':
         # Connecting from App Engine
         db = connect(
@@ -102,7 +106,7 @@ def get_mysql_connection():
             user='',
         )
     else:
-        db = connect(host=db_settings['HOST'], port=db_settings['PORT'], db=db_settings['NAME'], user=db_settings['USER'], passwd=db_settings['PASSWORD'])
+        db = connect(host=db_settings['HOST'], port=db_settings['PORT'], db=db_settings['NAME'], user=db_settings['USER'], passwd=db_settings['PASSWORD'], ssl=ssl)
 
     return db
 

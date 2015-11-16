@@ -7,7 +7,9 @@ import secret_settings
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + os.sep
 DEBUG = secret_settings.get('DEBUG')
 TEMPLATE_DEBUG = DEBUG
-
+ALLOWED_HOSTS = [
+    secret_settings.get('ALLOWED_HOST')
+]
 
 ### added for connecting to CloudSQL with SSL certs on MVM platform
 SSL_DIR = os.path.abspath(os.path.dirname(__file__))+os.sep
@@ -40,18 +42,18 @@ DEVELOPER_COHORT_TABLE_ID = secret_settings.get('DEVELOPER_COHORT_TABLE_ID')
 
 if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):  
     # or os.getenv('SETTINGS_MODE') == 'prod':
-    DATABASES = secret_settings.get('CLOUD_DATABASE')
+    DATABASES = secret_settings.get('DATABASE')
     BASE_URL = CLOUD_BASE_URL
     BASE_API_URL = CLOUD_API_URL
     SITE_ID = 4
     DEVELOPER_COHORT_TABLE_ID = secret_settings.get('CLOUD_COHORT_TABLE')
 elif os.getenv('SETTINGS_MODE') == 'dev':
-    DATABASES = secret_settings.get('CLOUD_DATABASE_LOCAL_CONNECTION')
+    DATABASES = secret_settings.get('DATABASE')
     BASE_URL = LOCAL_BASE_URL
     BASE_API_URL = LOCAL_BASE_URL
     SITE_ID = 3
 else:
-    DATABASES = secret_settings.get('LOCAL_DATABASE')
+    DATABASES = secret_settings.get('DATABASE')
     BASE_URL = LOCAL_BASE_URL
     BASE_API_URL = LOCAL_BASE_URL
     SITE_ID = 3
@@ -202,6 +204,10 @@ INSTALLED_APPS = (
     'visualizations',
     'seqpeek',
     'cohorts',
+    'projects',
+    'genes',
+    'variables',
+    'workbooks'
 )
 
 #############################
@@ -257,7 +263,7 @@ LOGGING = {
 #  Start django-allauth  #
 ##########################
 
-LOGIN_REDIRECT_URL = '/user_landing/'
+LOGIN_REDIRECT_URL = '/dashboard/'
 
 INSTALLED_APPS += (
     'accounts',

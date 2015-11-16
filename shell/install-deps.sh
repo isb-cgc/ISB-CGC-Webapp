@@ -10,9 +10,6 @@ fi
 # Install and update apt-get info
 echo "Preparing System..."
 apt-get -y install software-properties-common
-export CLOUD_SDK_REPO=cloud-sdk-`lsb_release -c -s`
-echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list
-curl --silent https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
 if [ -n "$CI" ]; then
 # CI Takes care of Python update
 apt-get update -qq
@@ -48,5 +45,8 @@ echo "Google App Engine Installed"
 
 # Install Google Cloud SDK
 echo "Installing Google Cloud SDK..."
-apt-get -qq install google-cloud-sdk
+export CLOUDSDK_CORE_DISABLE_PROMPTS=1
+curl https://sdk.cloud.google.com | bash
+export PATH=$PATH:${HOME}/google-cloud-sdk/bin
+echo 'export PATH=$PATH:${HOME}/google-cloud-sdk/bin' | tee -a ${HOME}/.bash_profile
 echo "Google Cloud SDK Installed"
