@@ -40,4 +40,5 @@ urlpatterns = patterns('',
     url(r'^dashboard/', views.dashboard_page, name='dashboard'),
 
     url(r'^projects/', include('projects.urls')),
+    url(r'^genes/', include('genes.urls')),
 )
