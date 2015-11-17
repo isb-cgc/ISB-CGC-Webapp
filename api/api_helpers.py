@@ -287,8 +287,8 @@ def authorize_credentials_with_Google():
     if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     # documentation: https://developers.google.com/accounts/docs/application-default-credentials
     SCOPES = ['https://www.googleapis.com/auth/bigquery']
-    credentials = GoogleCredentials.get_application_default().create_scoped(SCOPES)
-#    credentials = GoogleCredentials.from_stream(settings.GOOGLE_APPLICATION_CREDENTIALS).create_scoped(SCOPES)
+    # credentials = GoogleCredentials.get_application_default().create_scoped(SCOPES)
+    credentials = GoogleCredentials.from_stream(settings.GOOGLE_APPLICATION_CREDENTIALS).create_scoped(SCOPES)
     http = httplib2.Http()
     http = credentials.authorize(http)
     service = build('bigquery', 'v2', http=http)

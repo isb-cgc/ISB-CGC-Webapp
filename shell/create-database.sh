@@ -9,8 +9,8 @@ fi
 
 # MySQL Install
 echo "Installing MySQL..."
-sudo debconf-set-selections <<< "mysql-server-5.1 mysql-server/root_password password $MYSQL_ROOT_PASSWORD"
-sudo debconf-set-selections <<< "mysql-server-5.1 mysql-server/root_password_again password $MYSQL_ROOT_PASSWORD"
+sudo debconf-set-selections <<< "mysql-server-5.5 mysql-server/root_password password $MYSQL_ROOT_PASSWORD"
+sudo debconf-set-selections <<< "mysql-server-5.5 mysql-server/root_password_again password $MYSQL_ROOT_PASSWORD"
 sudo apt-get -qq -y install mysql-server
 
 echo "Creating Databases..."

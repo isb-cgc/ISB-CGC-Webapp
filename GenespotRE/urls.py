@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
-from lib.django.conf import settings
+from django.conf import settings
 
 import views
 

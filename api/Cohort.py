@@ -1,10 +1,12 @@
 import logging
+import sys
 from datetime import datetime
 
 import endpoints
 from google.appengine.ext import ndb
 from protorpc import messages, message_types
 from protorpc import remote
+from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.contrib.auth.models import User as Django_User
 import django
