@@ -9,7 +9,32 @@
 {% block page_name %}project_detail{% endblock %}
 
 {% block content %}
-    <h1 class="page-header">Project Detail</h1>
+    <div class="container">
+        <section class="project-header">
+            <h1 class="project-title">Lorem Ipsum Project</h1>
+            <p class="project-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi faucibus placerat porttitor. Sed ac accumsan neque, dignissim blandit diam. </p>
+            <div>
+                <button class="btn btn-primary">New Workbook</button>
+                <button class="btn btn-default"><i class="fa fa-upload"></i>Upload Data</button>
+                <button class="btn btn-default">Edit Details</button>
+                <button class="btn btn-default">Delete</button>
+                <button class="btn btn-default">Share</button>
+                <button class="btn btn-plain">Shared with (2)</button>
+            </div>
+        </section>
+        {# % for study in studies % #}
+        <section class="project-study panel panel-default">
+            <div class="panel-heading">
+                <h5 class="panel-title">Lorem Ipsum Study</h5>
+            </div>
+            <div class="panel-body">
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi faucibus placerat porttitor. Sed ac accumsan neque, dignissim blandit diam.</p>
+                <a href=""> data matadata </a>
+            </div>
+        </section>
+        {# % endfor % #}
+
+    </div>
 {% endblock %}
 
 {% block js_file %}{% static 'dashboard.js' %}{% endblock %}

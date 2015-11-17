@@ -11,11 +11,11 @@ from django.conf import settings
 def project_list(request):
     template = 'projects/project_list.html'
     context = {}
-    return render(request, template, context);
+    return render(request, template, context)
 
 @login_required
 def project_detail(request, project_id=0):
-    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+    # """ if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name """
     template = 'projects/project_detail.html'
     context = {}
     return render(request, template, context)
