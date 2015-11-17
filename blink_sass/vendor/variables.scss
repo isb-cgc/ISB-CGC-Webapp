@@ -54,6 +54,11 @@ $border: 1px solid $border-color;
 // --------------------------------------------
 $font-size: 14px;
 
+$font-size-large: ceil($font-size * 1.25) !default;
+$font-size-small: ceil($font-size * 0.85) !default;
+
+$font-size-h3: 24px;
+
 $default-font-family: "proxima-nova", Arial, sans-serif;
 
 $regular-font-weight: 400;

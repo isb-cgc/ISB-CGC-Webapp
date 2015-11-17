@@ -99,9 +99,9 @@
                         </ul>
                     </li>
                     {% endif %}
-                    <li class="menu-item"><a href="/">Saved Projects (0)</a></li>
-                    <li class="menu-item"><a href="/">Upload Project Data</a></li>
-                    <li class="menu-item"><a href="/">Public Projects (0)</a></li>
+                    <li class="menu-item"><a href="{% url 'project_list' %}">Saved Projects (0)</a></li>
+                    <li class="menu-item"><a href="{% url 'project_upload' %}">Upload Project Data</a></li>
+                    <li class="menu-item"><a href="{% url 'project_list' %}">Public Projects (0)</a></li>
                 </ul>
             </li>
             <li class="menu-item has-drop-down">
