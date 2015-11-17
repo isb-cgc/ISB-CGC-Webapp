@@ -1,24 +1,38 @@
-from google_helpers.bigquery_service import get_bigquery_service
-from google_helpers.storage_service import get_storage_resource
-from oauth2client.client import GoogleCredentials
-from googleapiclient.discovery import build
-from googleapiclient import http
-from datetime import datetime
+"""
+
+Copyright 2015, Institute for Systems Biology
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+"""
+
 from urllib2 import HTTPError
-from django.conf import settings
-import subprocess
-import pexpect
 import pprint
-import MySQLdb
 import logging
-import time
-from httplib2 import Http
-import json
-import uuid
 import os
 import io
-import sys
 import csv
+
+from googleapiclient import http
+from django.conf import settings
+import MySQLdb
+
+from google_helpers.bigquery_service import get_bigquery_service
+from google_helpers.storage_service import get_storage_resource
+import pexpect
+import time
+import sys
+
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'GenespotRE.settings'
 
