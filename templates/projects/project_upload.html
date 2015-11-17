@@ -10,8 +10,37 @@
 
 {% block content %}
 <div class="container">
-    <h1 class="page-header">Project Upload</h1>
+    <h1 class="page-header">Data Upload</h1>
+    <menu class="action-group">
+        <button class="btn btn-default"><i class="fa fa-cloud-upload"></i>Upload Data</button>
+    </menu>
+    <section>
+        <input type="radio" name="new-project"> <label for="new-project">New Project</label>
+        <input type="radio" name="new-study"><label for="new-study">New Study for an Existing Project</label>
+    </section>
+    <section>
+        <label for="project-name">Project Name</label>
+        <input type="text" name="project-name" required>
+        <label for="project-description">Project Description (Optional)</label>
+        <textarea name="project-description" id="" cols="30" rows="10"></textarea>
+    </section>
+    <section>
+        <label for="study-name">Study Name</label>
+        <input type="text" name="study-name" required>
+        <label for="study-description">Study Description (Optional)</label>
+        <textarea name="study-description" id="" cols="30" rows="10"></textarea>
+
+        <p>The system accepts the following file formats:</p>
+        <a href="">specify formats</a>
+        <button class="btn btn-primary"><i class="fa fa-folder-open"></i>Select File</button>
+        <input type="file" name="upload">
+
+        <label for="data-type">Data type</label>
+        <select name="data-type" id="">
+            <option value="">Select Data Type</option>
+        </select>
+    </section>
 </div>
 {% endblock %}
 
-{% block js_file %}{% status 'dashboard.js' %}{% endblock %}
+{% block js_file %}{% static 'js/base.js' %}{% endblock %}
