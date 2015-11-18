@@ -6,7 +6,7 @@ dotenv.read_dotenv(join(dirname(__file__), '../.env'))
 
 SETTINGS = {
     'SECRET_KEY': os.environ.get('DJANGO_SECRET_KEY', ''), # Django SECRET_KEY
-    'DEBUG': True,
+    'DEBUG': os.environ.get('DEBUG', False),
     'PROJECT_ID': os.environ.get('GCLOUD_PROJECT_ID'), # Google Cloud Project ID #
     'BQ_PROJECT_ID': os.environ.get('BIGQUERY_PROJECT_ID', os.environ.get('GCLOUD_PROJECT_ID')), # Google Cloud Project ID #
 
@@ -17,6 +17,7 @@ SETTINGS = {
 
     'BASE_URL': os.environ.get('BASE_URL', 'http://localhost:8000'), # Localhost url
     'API_URL': os.environ.get('API_URL', 'http://localhost:8000'), # Localhost api url
+    'ALLOWED_HOST': os.environ.get('ALLOWED_HOST', 'localhost'),
 
 
     # BigQuery cohort storage settings
