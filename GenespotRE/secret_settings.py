@@ -5,7 +5,7 @@ dotenv.read_dotenv(join(dirname(__file__), '../.env'))
 
 
 SETTINGS = {
-    'SECRET_KEY': os.environ.get('DJANGO_SECRET_KEY'), # Django SECRET_KEY
+    'SECRET_KEY': os.environ.get('DJANGO_SECRET_KEY', ''), # Django SECRET_KEY
     'DEBUG': True,
     'PROJECT_ID': os.environ.get('GCLOUD_PROJECT_ID'), # Google Cloud Project ID #
     'BQ_PROJECT_ID': os.environ.get('BIGQUERY_PROJECT_ID', os.environ.get('GCLOUD_PROJECT_ID')), # Google Cloud Project ID #
