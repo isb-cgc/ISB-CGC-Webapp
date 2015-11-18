@@ -62,3 +62,10 @@ env_variables:
 
 skip_files:
 - python-su.sh
+- ^(.*/)?#.*#$
+- ^(.*/)?.*~$
+- ^(.*/)?.*\.py[co]$
+- ^(.*/)?.*/RCS/.*$
+- ^(.*/)?\.(?!env).*$
+- ^google_appengine/.*$
+- ^google-cloud-sdk/.*$
