@@ -14,7 +14,7 @@ def genes_list(request):
     return render(request, template, context)
 
 @login_required
-def genes_detail(request, genes_id=0):
+def genes_detail(request, genes_id):
     # """ if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name """
     template = 'genes/genes_detail.html'
     context = {}
@@ -33,7 +33,13 @@ def create_genes_list(request):
     return render(request, template, context)
 
 @login_required
-def edit_genes_list(request):
+def edit_genes_list(request, genes_id):
     template = 'genes/genes_edit.html'
-    context = {}
+    gene_list = {
+        'name': 'ATK Pathway',
+        'genelist': 'PTEN, PIK3CA, AKT, MTOR'
+    }
+    context = {
+        'gene': gene_list
+    }
     return render(request, template, context)

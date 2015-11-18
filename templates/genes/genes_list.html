@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+{% block title %}Saved Genes Favorites | ISB-CGC{% endblock %}}
+{% block extra_css_libs %}{% endblock %}
+{% block header %}{% endblock %}
+
+{% block link_page_name %}genes_list{% endblock %}
+{% block page_name %}genes_list{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="page-header">Saved Gene Favorites</h1>
+    <menu class="page-action-group">
+        <menuitem class="btn btn-default"><i class="fa fa-plus"></i>Create New Favorite</menuitem>
+    </menu>
+    <div class="panel penel-default">
+        <div class="panel-body">
+            <table class="table table-striped tablesorter">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Name</th>
+                        <th># of Genes</th>
+                        <th>Last Updated</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><i class="fa fa-caret-down"></i></td>
+                        <td><a href="{% url 'genes_detail' 0 %}">BRCA1</a></td>
+                        <td>1</td>
+                        <td>10/15/2015</td>
+                    </tr>
+                    <tr>
+                        <td><i class="fa fa-caret-down"></i></td>
+                        <td>ATK Pathway</td>
+                        <td>4</td>
+                        <td>10/15/2015</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js_file %}{% static 'js/base.js' %}{% endblock %}

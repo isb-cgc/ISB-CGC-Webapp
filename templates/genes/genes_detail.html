@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+{% block title %}Genes Favorite Details | ISB-CGC{% endblock %}}
+{% block extra_css_libs %}{% endblock %}
+{% block header %}{% endblock %}
+
+{% block link_page_name %}genes_detail{% endblock %}
+{% block page_name %}genes_detail{% endblock %}
+
+{% block content %}
+<div class="container">
+   <h1 class="page-header">Gene Favorite Details</h1>
+    <section class="panel panel-default">
+        <div class="panel-heading">
+            <menu class="page-action-group">
+                <menuitem class="btn btn-primary"><a href="{% url 'edit_genes_list' 0 %}">Edit</a></menuitem>
+                <menuitem class="btn btn-primary">Delete</menuitem>
+                <span class="seperator"></span>
+                <menuitem class="btn btn-default">Start New Workbook</menuitem>
+                <menuitem class="btn btn-plain pull-right"><a href="">View System Gene Identifier</a></menuitem>
+            </menu>
+        </div>
+        <div class="panel-body">
+            <p>Name of Favorite</p>
+            <h5>AKT Pathway</h5>
+            <p>Selected Genes</p>
+            <h5>PTEN PIK3CA AKT MTOR</h5>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block js_file %}{% static 'js/base.js' %}{% endblock %}

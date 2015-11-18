@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+{% block title %}Upload Genes Favorites | ISB-CGC{% endblock %}}
+{% block extra_css_libs %}{% endblock %}
+{% block header %}{% endblock %}
+
+{% block link_page_name %}genes_upload{% endblock %}
+{% block page_name %}genes_upload{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="page-header">
+        Upload Gene List
+    </h1>
+    <section class="panel panel-default">
+        <div class="panel-body">
+            <label><input type="radio"> Upload a gene list from a plain text (ascii) file -- items either space or tab separated or NEW LINE</label>
+            <button class="btn btn-primary"><i class="fa fa-folder-open"></i>Select File</button>
+            <input type="file" name="upload">
+            <label><input type="radio"> Paste in a gene list -items either space or tab separated</label>
+            <input type="text" id="geneListField">
+        </div>
+    </section>
+</div>
+<div class="modal">
+    error modal
+</div>
+{% endblock %}
+
+{% block js_file %}{% static 'js/genes.js' %}{% endblock %}

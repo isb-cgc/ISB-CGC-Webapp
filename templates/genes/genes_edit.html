@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+{% block title %}Gene Favorite Edit | ISB-CGC{% endblock %}}
+{% block extra_css_libs %}{% endblock %}
+{% block header %}{% endblock %}
+
+{% block link_page_name %}genes_edit{% endblock %}
+{% block page_name %}genes_edit{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="page-header">Edit Gene Favorite</h1>
+    <section class="panel panel-defaul">
+        <div class="panel-heading">
+            <menu class="page-action-group">
+                {% if '/create/' in request.path %}
+                    <menuitem class="btn btn-default">Save as Favorite</menuitem>
+                {% else %}
+                    <menuitem class="btn btn-default">Save Changes</menuitem>
+                {% endif %}
+
+                <menuitem class="btn btn-plain"><a href="{% url 'genes_detail' 0 %}">Cancel</a></menuitem>
+                <menuitem class="btn btn-plain pull-right"><a href="">View System Gene Identifiers</a></menuitem>
+            </menu>
+        </div>
+        <div class="panel-body">
+            <form action="">
+                <label for="genes-name">Name of Favorite (Required)</label>
+                <input type="text" value="{% if 'gene' %}{{gene.name}}{% endif %} " name="genes-name" required>
+                <div>
+                    <label for="genes">Selected Genes (required)</label>
+                    <button class="btn btn-link">Clear All</button>
+                    <span class="separator"></span>
+                    <a href="{% url 'genes_upload' %}" class="btn btn-link">Upload Gene List</a>
+                    <input type="text" class="form-control" id="geneListField" value="{% if 'gene' %}{{gene.genelist}}{% endif %}">
+                </div>
+            </form>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block js_file %}{% static 'js/genes.js' %}{% endblock %}
