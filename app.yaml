@@ -69,3 +69,6 @@ skip_files:
 - ^(.*/)?\.(?!env).*$
 - ^google_appengine/.*$
 - ^google-cloud-sdk/.*$
+- ^google_appengine\.zip$
+- ^(.*/)?.*\.sql$
+- ^venv/.*$
