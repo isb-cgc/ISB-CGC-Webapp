@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+{% block title %}Variables Favorites | ISB-CGC{% endblock %}}
+{% block extra_css_libs %}{% endblock %}
+{% block header %}{% endblock %}
+
+{% block link_page_name %}variable_list{% endblock %}
+{% block page_name %}variable_list{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="page-header">Saved Variables Favorites</h1>
+    <section class="panel panel-default">
+        <div class="panel-heading">
+            <menu class="page-actiono-group">
+                <menuitem class="btn btn-default"><i class="fa fa-plus"></i>Create New Favorite</menuitem>
+            </menu>
+        </div>
+        <div class="panel-body">
+            <table class="table table-stripe">
+                <thead>
+                    <tr>
+                        <td></td>
+                        <td>Name</td>
+                        <td># of Variables</td>
+                        <td>Last Updated</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><i class="fa fa-caret-down"></i></td>
+                        <td><a href="{% url 'variable_fav_detail' 0 %}">My Favorite Variables 1</a></td>
+                        <td>1</td>
+                        <td>10/15/2015</td>
+                    </tr>
+                    <tr>
+                        <td><i class="fa fa-caret-down"></i></td>
+                        <td><a href="{% url 'variable_fav_detail' 0 %}">My Favorite Variables 2</a></td>
+                        <td>15</td>
+                        <td>10/15/2015</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block js_file %}{% static 'js/base.js' %}{% endblock %}

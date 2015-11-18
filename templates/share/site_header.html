@@ -167,8 +167,8 @@
                         </ul>
                     </li>
                     {% endif %}
-                    <li class="menu-item"><a href="/">Manage Variables Favorite (0)</a></li>
-                    <li class="menu-item"><a href="/">Create Favorite Variable(s)</a></li>
+                    <li class="menu-item"><a href="{% url 'variables' %}">Manage Variables Favorite (0)</a></li>
+                    <li class="menu-item"><a href="{% url 'variable_fav_create' %}">Create Favorite Variable(s)</a></li>
                     <li class="menu-item"><a href="/">Select Variabless for a New Workbook</a></li>
                 </ul>
             </li>

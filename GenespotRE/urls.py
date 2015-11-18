@@ -41,4 +41,5 @@ urlpatterns = patterns('',
 
     url(r'^projects/', include('projects.urls')),
     url(r'^genes/', include('genes.urls')),
+    url(r'^variables/', include('variables.urls')),
 )
