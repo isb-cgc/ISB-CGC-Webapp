@@ -71,6 +71,9 @@ $font-color: darken($base-dark, 10%);
 $link-color: $isb-info;
 
 // --------------------------------------------
+// Custom Bootstrap variables
+// --------------------------------------------
+// --------------------------------------------
 // Components
 // --------------------------------------------
 $text-shadow: 1px 1px 1px rgb(216, 216, 216);
@@ -111,3 +114,17 @@ $panel-footer-bg: $white;
 $panel-default-text: $isb-primary;
 $panel-default-border: transparent;
 $panel-default-heading-bg: $white;
+
+// --------------------------------------------
+// Breadcrumb
+// --------------------------------------------
+$breadcrumb-padding-horizontal: 0;
+
+//** Breadcrumb background color
+$breadcrumb-bg: #fff;
+
+//** Breadcrumb text color
+$breadcrumb-color: $isb-info;
+
+//** Text color of current page in the breadcrumb
+$breadcrumb-separator: ">";

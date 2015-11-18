@@ -11,6 +11,52 @@
 {% block content %}
 <div class="container">
     <h1 class="page-header">Edit Variable Favorite</h1>
+    <section class="panel panel-default">
+        <div class="panel-heading">
+            <menu class="page-action-group">
+                <menuitem class="btn btn-default">Save Changes</menuitem>
+                <menuitem class="btn btn-link">Cancel</menuitem>
+            </menu>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-lg-5">
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li role="presentation" class="active"><a href="#common" aria-controls="common" role="tab" data-toggle="tab">Common (N)</a></li>
+                        <li role="presentation"><a href="#favorites" aria-controls="favorites" role="tab" data-toggle="tab">Favorites (N)</a></li>
+                        <li role="presentation"><a href="#search" aria-controls="search" role="tab" data-toggle="tab">Search</a></li>
+                      </ul>
+
+                      <!-- Tab panes -->
+                      <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="common">
+                            
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="favorites">
+                            <label for="">Select from Favorites</label>
+                            <a href="{% url 'variables' %}">Manage Save Favorites (3)</a>
+                            <br>
+                            <select name="" id="">
+                                <option value="">--</option>
+                            </select>
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="search">
+                            <input type="text">
+                            <button class="btn"><i class="fa fa-close"></i></button>
+                        </div>
+                      </div>
+
+                </div>
+                <div class="col-lg-7">
+                    <label for="">Selected Variables</label>
+                    <button class="btn btn-link">Cancel</button>
+                    <br>
+                    <input type="text" id="variablesField">
+                    <button class="btn btn-link">Save Selection as Favorite</button>
+                </div>
+            </div>
+        </div>
+    </section>
 </div>
 {% endblock %}
 

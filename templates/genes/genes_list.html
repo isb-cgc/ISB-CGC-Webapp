@@ -8,12 +8,19 @@
 {% block link_page_name %}genes_list{% endblock %}
 {% block page_name %}genes_list{% endblock %}
 
+{% block page_header %}
+    <ol class="breadcrumb">
+        <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+    </ol>
+    <h1 class="page-header">Saved Gene Favorites</h1>
+    <ul class="page-action-group">
+        <li> <a class="btn btn-default"><i class="fa fa-plus"></i>Create New Favorite</a></li>
+    </ul>
+{% endblock %}
 {% block content %}
 <div class="container">
-    <h1 class="page-header">Saved Gene Favorites</h1>
-    <menu class="page-action-group">
-        <menuitem class="btn btn-default"><i class="fa fa-plus"></i>Create New Favorite</menuitem>
-    </menu>
+
+
     <div class="panel penel-default">
         <div class="panel-body">
             <table class="table table-striped tablesorter">
@@ -27,14 +34,32 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td><i class="fa fa-caret-down"></i></td>
-                        <td><a href="{% url 'genes_detail' 0 %}">BRCA1</a></td>
+                        <td class="control-col">
+                            <div class="dropdown">
+                                <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="{% url 'edit_genes_list' 0 %}">Edit</a> </li>
+                                    <li><a role="button">Delete</a></li>
+                                    <li><a href="">New Workbook</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                        <td class="name-col"><a href="{% url 'genes_detail' 0 %}">BRCA1</a></td>
                         <td>1</td>
                         <td>10/15/2015</td>
                     </tr>
                     <tr>
-                        <td><i class="fa fa-caret-down"></i></td>
-                        <td>ATK Pathway</td>
+                        <td class="control-col">
+                            <div class="dropdown">
+                                <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="{% url 'edit_genes_list' 0 %}">Edit</a> </li>
+                                    <li><a role="button">Delete</a></li>
+                                    <li><a href="">New Workbook</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                        <td class="name-col"><a href="{% url 'genes_detail' 0 %}">ATK Pathway</a> </td>
                         <td>4</td>
                         <td>10/15/2015</td>
                     </tr>

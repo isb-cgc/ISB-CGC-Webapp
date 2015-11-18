@@ -1,15 +1,5 @@
 .main-content
-    margin-top: 80px
-
-.page-header
-    font-size: $font-size-h3
-    margin-top: 1em
-
-.page-action-group
-    padding: 5px 15px
-    border-radius: $border-radius-base
-    background-color: $white
-
+    margin-top: 55px
 
 // TODO: Refactor this into our styles
 /********************************************
@@ -60,7 +50,6 @@ nav
     background-color: #FFF
 
 .navbar
-    border-bottom-color: $border-color
     margin-bottom: 0px
     padding-bottom: 0px
     height: 56px
@@ -94,31 +83,7 @@ nav
 // *******************************************/
 //
 
-.dropdown
 
-    &.open > .dropdown-toggle.btn-primary
-        background-color: $primary-color-dark
-        border-color: $primary-color-dark
-
-    &.dropdown-menu-right
-        text-align: right
-
-    .dropdown-toggle:hover
-        background-color: #EEE
-        &.btn-primary
-            background-color: $primary-color-dark
-
-    .dropdown-menu
-        border-radius: 1px
-        margin: 0px
-        > li > a
-            padding: 3px 10px
-        i
-            text-align: center
-            width: 20px
-        &.dropdown-menu-right
-            > li > a
-                text-align: right
 .nav-tabs
     background-color: #fff
     border: none
@@ -169,11 +134,15 @@ nav
     background-color: #FFF
     padding: 5px 10px
 
+
 .breadcrumb
-    background-color: $bg-color
-    border-radius: 0px
-    margin-bottom: 10px
-    padding: 5px 15px
+    font-size: $font-size-small
+    li:before
+      display: none
+    li:after
+      content: $breadcrumb-separator
+      padding: 0 10px
+      color: $breadcrumb-color
 
 .alert
     border-radius: 1px

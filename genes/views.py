@@ -27,13 +27,13 @@ def genes_upload(request):
     return render(request, template, context)
 
 @login_required
-def create_genes_list(request):
+def genes_list_create(request):
     template = 'genes/genes_edit.html'
     context = {}
     return render(request, template, context)
 
 @login_required
-def edit_genes_list(request, genes_id):
+def genes_list_edit(request, genes_id):
     template = 'genes/genes_edit.html'
     gene_list = {
         'name': 'ATK Pathway',
