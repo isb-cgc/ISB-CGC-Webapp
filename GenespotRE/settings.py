@@ -57,7 +57,7 @@ CONTROLLED_DATA_BUCKET = secret_settings.get('CONTROLLED_DATA_BUCKET')
 COHORT_DATASET_ID = secret_settings.get('COHORT_DATASET_ID')
 DEVELOPER_COHORT_TABLE_ID = secret_settings.get('DEVELOPER_COHORT_TABLE_ID')
 
-LOAD_DEMO_URLS = False
+NIH_AUTH_ON = True
 
 if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):  
     # or os.getenv('SETTINGS_MODE') == 'prod':
@@ -66,7 +66,7 @@ if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):
     BASE_API_URL = CLOUD_API_URL
     SITE_ID = 4
     DEVELOPER_COHORT_TABLE_ID = secret_settings.get('CLOUD_COHORT_TABLE')
-    LOAD_DEMO_URLS = True
+    NIH_AUTH_ON = True
 elif os.getenv('SETTINGS_MODE') == 'dev':
     DATABASES = secret_settings.get('CLOUD_DATABASE_LOCAL_CONNECTION')
     BASE_URL = LOCAL_BASE_URL

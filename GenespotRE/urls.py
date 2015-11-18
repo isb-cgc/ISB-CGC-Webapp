@@ -22,7 +22,6 @@ from lib.django.conf import settings
 
 import views
 
-
 admin.autodiscover()
 
 urlpatterns = patterns('',
@@ -48,5 +47,5 @@ urlpatterns = patterns('',
     url(r'^_ah/health$', views.health_check),
 )
 
-if settings.LOAD_DEMO_URLS:
-    urlpatterns.append(url(r'^demo/', include('demo.urls')))
+if settings.NIH_AUTH_ON:
+    urlpatterns.append(url(r'^demo/', include('demo.urls', namespace='demo')))
