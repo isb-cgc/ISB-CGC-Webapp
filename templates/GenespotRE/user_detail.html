@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% extends 'user_detail_saml.html' %}
+
 {% comment %}
 
    Copyright 2015, Institute for Systems Biology
@@ -68,11 +68,22 @@
             </div>
         </div>
 
-        {% if NIH_AUTH_ON %}
-
-            {% block saml_content %}
-            {% endblock %}
-        {% endif %}
+        <div class="panel panel-default data-panel">
+            <div class="panel-heading">
+                <h5>
+                    Data Access
+                </h5>
+            </div>
+            <div class="panel-body">
+                {% if NIH_AUTH_ON %}
+                    {% include 'GenespotRE/user_detail_saml.html' %}
+                    {% block saml_content %}
+                    {% endblock %}
+                {% else %}
+                    <p>NIH Authorization currently disabled.</p>
+                {% endif %}
+            </div>
+        </div>
 
         <div class="panel panel-default gcp-panel">
             <div class="panel-heading">

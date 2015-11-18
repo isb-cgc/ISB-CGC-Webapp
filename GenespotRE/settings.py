@@ -57,7 +57,7 @@ CONTROLLED_DATA_BUCKET = secret_settings.get('CONTROLLED_DATA_BUCKET')
 COHORT_DATASET_ID = secret_settings.get('COHORT_DATASET_ID')
 DEVELOPER_COHORT_TABLE_ID = secret_settings.get('DEVELOPER_COHORT_TABLE_ID')
 
-NIH_AUTH_ON = True
+NIH_AUTH_ON = False
 
 if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):  
     # or os.getenv('SETTINGS_MODE') == 'prod':
