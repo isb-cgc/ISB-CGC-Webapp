@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+
+{% block header %}
+    <script type="text/javascript" src="{% static 'js/libs/jquery-1.11.1.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/libs/bootstrap.min.js' %}"></script>
+{% endblock %}
+{% block content %}
+
+    <div class="col-sm-12" style="margin-top: 70px;">
+        <!-- breadcrumb -->
+        <div><a href="/dashboard/">Your dashboard</a> > <a href="/workbooks/list">Saved Workbooks</a></div>
+
+        <!-- workbook header -->
+        <div style="margin:15px; margin-left:0px; margin-right:0px; padding:15px; background-color:#CECECE;">
+            <h1>{{ workbook.name }}</h1>
+            <p>{{ workbook.description }}</p>
+            <div>
+                <button onclick="javascript()">Edit Details</button>
+                <button onclick="javascript()">Duplicate</button>
+                <button onclick="javascript()">Delete</button> |
+                <button onclick="javascript()">Share</button>
+                <a href="">Shared with ({{ workbook.share_count }})</a>
+            </div>
+        </div>
+
+        <!-- tabs of worksheets -->
+        <ul class="nav nav-tabs" data-tabs="tablist" id="worksheets">
+            <!-- for each worksheet in workbook -->
+            {% for worksheet in workbook.worksheet_list %}
+                 <li class="{% if worksheet.id == 1 %} active{% endif %}"><a href="#{{ worksheet.id }}" data-toggle="tab">{{ worksheet.name }}</a></li>
+            {% endfor %}
+{#            <li ><a href="#default" data-toggle="tab">Current Worksheet</a></li>#}
+            <li><a href=""><i class="fa fa-plus"></i></a> </li>
+        </ul>
+        <div class="tab-content">
+            <!-- for each worksheet in workbook -->
+             {% for worksheet in workbook.worksheet_list %}
+                 <div class="tab-pane fade {% if worksheet.id == 1 %} in active{% endif %}" id="{{ worksheet.id }}" >
+                     <!-- worksheet description -->
+                     <div style="padding:5px; height:50px">
+                        {{ worksheet.description }}
+                        <button>comments ({{ worksheet.comment_list.length }})</button>
+                    </div>
+
+                    <div style="height:600px">
+                        <!-- worksheet comment pane -->
+                        <div id="comments_pane" style="border-left-style:solid; height:100%; border-left-width:1px; padding:5px; width:200px; float:right">
+                            <h4><i class="fa fa-arrow-right" style="float:left; cursor:pointer;"></i><center>Comment</center> </h4>
+                            {% for comment in worksheet.comment_list %}
+                                <div>{{ comment.text }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- worksheet data source pane -->
+                        <div id="source_pane" style="border-right-style:solid; float: left; height:100%; border-right-width:1px; padding:5px; width:200px; display:inline-block">
+                            <h4>Source Data <i class="fa fa-arrow-left" style="float:right; cursor:pointer;"></i></h4>
+                            <div style="padding:5px; background-color:#CECECE; margin-bottom:5px">
+                                <h4>Genes</h4>
+                                {% for gene in worksheet.gene_list %}
+                                    <div>{{ gene.name }}</div>
+                                {% endfor %}
+                            </div>
+                            <div style="padding:5px; background-color:#CECECE;">
+                                <h4>Variables</h4>
+                                {% for variable in worksheet.variable_list %}
+                                    <div>{{ variable.name }}</div>
+                                {% endfor %}
+                            </div>
+                            <div style="padding:5px; background-color:#CECECE;">
+                                <h4>Cohorts</h4>
+                                {% for cohort in worksheet.cohort_list %}
+                                    <div>{{ cohort.name }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- worksheet analysis pane -->
+                        <div>
+                            <center>whole bunch of stuff</center>
+                        </div>
+                    </div>
+                </div>
+             {% endfor %}
+        </div><!-- end content -->
+    </div>
+
+{% endblock content %}
