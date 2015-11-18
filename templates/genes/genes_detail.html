@@ -8,24 +8,34 @@
 {% block link_page_name %}genes_detail{% endblock %}
 {% block page_name %}genes_detail{% endblock %}
 
+{% block page_header %}
+    <ol class="breadcrumb">
+        <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+        <li><a href="{% url 'genes' %}">Saved Gene Favorites</a></li>
+    </ol>
+    <h1 class="page-header">Gene Favorite Details</h1>
+{% endblock %}
 {% block content %}
 <div class="container">
-   <h1 class="page-header">Gene Favorite Details</h1>
+
     <section class="panel panel-default">
         <div class="panel-heading">
-            <menu class="page-action-group">
-                <menuitem class="btn btn-primary"><a href="{% url 'edit_genes_list' 0 %}">Edit</a></menuitem>
-                <menuitem class="btn btn-primary">Delete</menuitem>
-                <span class="seperator"></span>
-                <menuitem class="btn btn-default">Start New Workbook</menuitem>
-                <menuitem class="btn btn-plain pull-right"><a href="">View System Gene Identifier</a></menuitem>
-            </menu>
+
         </div>
         <div class="panel-body">
-            <p>Name of Favorite</p>
-            <h5>AKT Pathway</h5>
+            <!--<p>Name of Favorite</p>-->
+            <h4>AKT Pathway</h4>
             <p>Selected Genes</p>
             <h5>PTEN PIK3CA AKT MTOR</h5>
+        </div>
+        <div class="panel-footer">
+            <menu class="page-action-group">
+                <a class="btn btn-primary" href="{% url 'edit_genes_list' 0 %}"><i class="fa fa-pencil"></i> Edit</a>
+                <menuitem class="btn btn-primary"><i class="fa fa-trash"></i> Delete</menuitem>
+                <span class="separator"></span>
+                <menuitem class="btn btn-default"><i class="fa fa-plus"></i> Start New Workbook</menuitem>
+                <a class="btn btn-link pull-right">View System Gene Identifier</a>
+            </menu>
         </div>
     </section>
 </div>
