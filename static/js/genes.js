@@ -41,11 +41,31 @@ require([
     // - Validate genes list field before submit
     // - hook up source to existing genes list
 
+    // Valid gene list
+    var genelist = ['PTEN', 'PIK3CA', 'AKT', 'MTOR', 'BRCA1'];
+
     $('#geneListField').tokenfield({
         autocomplete: {
-            source: ['PTEN', 'PIK3CA', 'AKT', 'MTOR', 'BRCA1'],
-            delay: 100
+            source: genelist,
+            delay: 100,
+            appendTo: "#tokenfield-holder",
         },
         showAutocompleteOnFocus: true
     })
+    $('#geneListField').on('tokenfield:createtoken', function (event) {
+        //  check whether user enter a valid gene name
+        var isValid = true;
+        if(_.indexOf(genelist, event.attrs.value.toUpperCase()) < 0) {
+            isValid = false
+            event.preventDefault();
+            alert('the value is not correct')
+        }
+    })
+
+    // Clear all entered genes list on click
+    $('#clearAll').click(function (event) {
+        $('#geneListField').tokenfield('setTokens', ' ');
+        alert('Your list of gene favorites has been cleared');
+    })
+
 })
