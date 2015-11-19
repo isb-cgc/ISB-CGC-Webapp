@@ -17,7 +17,7 @@
 ###
 
 runtime: custom
-module: default
+module: logtest
 api_version: 1
 threadsafe: true
 vm: true
