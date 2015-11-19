@@ -6,3 +6,6 @@
 ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET}/dev-files/dev-ssl/demo01-client-cert.pem" ./client-cert.pem
 ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET}/dev-files/dev-ssl/demo01-client-key.pem" ./client-key.pem
 ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET}/dev-files/dev-ssl/demo01-server-ca.pem" ./server-ca.pem
+./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET}/dev-files/client_secrets.json" ./client_secrets.json
+./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET}/dev-files/privatekey.json" ./privatekey.json
+./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET}/dev-files/privatekey.pem" ./privatekey.pem
