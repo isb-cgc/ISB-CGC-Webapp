@@ -85,6 +85,7 @@ saml/
 *.key
 *.crt
 *.pem
+tmp*
 
 # Emacs
 \#*\#
