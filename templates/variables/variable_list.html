@@ -8,34 +8,58 @@
 {% block link_page_name %}variable_list{% endblock %}
 {% block page_name %}variable_list{% endblock %}
 
+{% block page_header %}
+    <ol class="breadcrumb">
+        <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+    </ol>
+    <h1 class="page-header">Saved Variables Favorites</h1>
+    <ul class="page-actiono-group">
+        <a class="btn btn-default" href="{% url 'variable_fav_create' %}"><i class="fa fa-plus"></i>Create New Favorite</a>
+    </ul>
+{% endblock %}
 {% block content %}
 <div class="container">
-    <h1 class="page-header">Saved Variables Favorites</h1>
     <section class="panel panel-default">
         <div class="panel-heading">
-            <menu class="page-actiono-group">
-                <menuitem class="btn btn-default"><i class="fa fa-plus"></i>Create New Favorite</menuitem>
-            </menu>
+            
         </div>
         <div class="panel-body">
             <table class="table table-stripe">
                 <thead>
                     <tr>
-                        <td></td>
-                        <td>Name</td>
-                        <td># of Variables</td>
-                        <td>Last Updated</td>
+                        <th></th>
+                        <th>Name</th>
+                        <th># of Variables</th>
+                        <th>Last Updated</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td><i class="fa fa-caret-down"></i></td>
+                        <td class="control-col">
+                            <div class="dropdown">
+                                <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="{% url 'variable_fav_edit' 0 %}">Edit</a> </li>
+                                    <li><a role="button">Delete</a></li>
+                                    <li><a href="">New Workbook</a></li>
+                                </ul>
+                            </div>
+                        </td>
                         <td><a href="{% url 'variable_fav_detail' 0 %}">My Favorite Variables 1</a></td>
                         <td>1</td>
                         <td>10/15/2015</td>
                     </tr>
                     <tr>
-                        <td><i class="fa fa-caret-down"></i></td>
+                        <td class="control-col">
+                            <div class="dropdown">
+                                <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="{% url 'variable_fav_edit' 0 %}">Edit</a> </li>
+                                    <li><a role="button">Delete</a></li>
+                                    <li><a href="">New Workbook</a></li>
+                                </ul>
+                            </div>
+                        </td>
                         <td><a href="{% url 'variable_fav_detail' 0 %}">My Favorite Variables 2</a></td>
                         <td>15</td>
                         <td>10/15/2015</td>
