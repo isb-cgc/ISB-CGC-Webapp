@@ -8,18 +8,29 @@
 {% block link_page_name %}genes_upload{% endblock %}
 {% block page_name %}genes_upload{% endblock %}
 
+{% block page_header %}
+    <ol class="breadcrumb">
+        <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+        <li><a href="{% url 'genes' %}">Saved Gene Favorites</a></li>
+    </ol>
+    <h1 class="page-header">Upload Gene List</h1>
+    <ul>
+        <li><input type="radio" name="upload" checked> <label>Upload a gene list from a plain text (ascii) file -- items either space or tab separated or NEW LINE</label> </li>
+        <li><input type="radio" name="upload"> <label>Paste in a gene list -items either space or tab separated</label> </li>
+    </ul>
+
+{% endblock %}
 {% block content %}
 <div class="container">
-    <h1 class="page-header">
-        Upload Gene List
-    </h1>
+
     <section class="panel panel-default">
         <div class="panel-body">
-            <label><input type="radio"> Upload a gene list from a plain text (ascii) file -- items either space or tab separated or NEW LINE</label>
+
             <button class="btn btn-primary"><i class="fa fa-folder-open"></i>Select File</button>
             <input type="file" name="upload">
-            <label><input type="radio"> Paste in a gene list -items either space or tab separated</label>
-            <input type="text" id="geneListField">
+            <div id="tokenfield-holder">
+                <input type="text" id="geneListField">
+            </div>
         </div>
     </section>
 </div>

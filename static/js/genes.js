@@ -43,29 +43,46 @@ require([
 
     // Valid gene list
     var genelist = ['PTEN', 'PIK3CA', 'AKT', 'MTOR', 'BRCA1'];
+    var geneListField = $('#geneListField');
 
-    $('#geneListField').tokenfield({
+    geneListField.tokenfield({
         autocomplete: {
             source: genelist,
             delay: 100,
-            appendTo: "#tokenfield-holder",
+            appendTo: "#tokenfield-holder"
         },
-        showAutocompleteOnFocus: true
-    })
-    $('#geneListField').on('tokenfield:createtoken', function (event) {
+        showAutocompleteOnFocus: true,
+        minLength: 2
+    }).on('tokenfield:createdtoken', function (event) {
+        //  Check whether the user enter a repetitive token
+        //  If it is a repetitive token, show a message instead
+       console.log(event);
+        var existingGenes = $(this).tokenfield('getTokens');
+        $.each(existingGenes, function (index, gene) {
+            if(gene.value === event.attrs.value.toUpperCase()){
+
+                $(event.relatedTarget).addClass('invalid repeat');
+                // TODO: Add validation message
+            }
+        });
+
         //  check whether user enter a valid gene name
         var isValid = true;
         if(_.indexOf(genelist, event.attrs.value.toUpperCase()) < 0) {
-            isValid = false
-            event.preventDefault();
-            alert('the value is not correct')
+            $(event.relatedTarget).addClass('invalid');
+            //    TODO: Add validation message at the end
         }
-    })
+    });
 
     // Clear all entered genes list on click
-    $('#clearAll').click(function (event) {
-        $('#geneListField').tokenfield('setTokens', ' ');
-        alert('Your list of gene favorites has been cleared');
-    })
+    $('#clearAll').on('click', function (event) {
+        if($('.tokenfield').hasClass('focus')){
+            // the tokenfield takes enter key and click evnet, and it will trigger the clear all method,
+            // this code checks whether tokenfield is on focus, if yes, it preventDefault and do nothing
+            event.preventDefault();
+        }else{
+            geneListField.tokenfield('setTokens', ' ');
+        }
+    });
 
-})
+});

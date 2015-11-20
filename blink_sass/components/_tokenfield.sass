@@ -8,9 +8,16 @@
     background: $isb-primary
     color: $white
     text-transform: uppercase
+    &.invalid
+      color: $isb-primary
+      .close
+        color: $isb-primary
+      &.repeat
+        background: $isb-success
+        border: none
     .close
       color: $white
-      opacity: 0.8
+      opacity: 0.4
       vertical-align: middle
       line-height: 1
 
