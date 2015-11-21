@@ -16,8 +16,8 @@
 #
 ###
 
-runtime: python27
-module: default
+runtime: custom
+module: mvm
 api_version: 1
 threadsafe: true
 vm: true
@@ -59,3 +59,16 @@ env_variables:
   GAE_TMP_FORCE_REUSE_API_CONNECTION: true
   DJANGO_SETTINGS_MODULE: 'GenespotRE.settings'
   SETTINGS_VERSION: 'prod'
+
+skip_files:
+- python-su.sh
+- ^(.*/)?#.*#$
+- ^(.*/)?.*~$
+- ^(.*/)?.*\.py[co]$
+- ^(.*/)?.*/RCS/.*$
+- ^(.*/)?\.(?!env).*$
+- ^google_appengine/.*$
+- ^google-cloud-sdk/.*$
+- ^google_appengine\.zip$
+- ^(.*/)?.*\.sql$
+- ^venv/.*$

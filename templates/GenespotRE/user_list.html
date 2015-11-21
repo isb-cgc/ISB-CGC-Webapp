@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+{% load staticfiles %}
+
 {% comment %}
 
    Copyright 2015, Institute for Systems Biology
@@ -17,8 +19,6 @@
 
 {% endcomment %}
 
-
-{% load staticfiles %}
 {% block header %}
     <script type="text/javascript" src="{% static 'js/libs/jquery.tablesorter.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/user_details.js' %}"></script>

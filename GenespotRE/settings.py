@@ -25,6 +25,9 @@ import secret_settings
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + os.sep
 DEBUG = secret_settings.get('DEBUG')
 TEMPLATE_DEBUG = DEBUG
+ALLOWED_HOSTS = [
+    secret_settings.get('ALLOWED_HOST')
+]
 
 
 ### added for connecting to CloudSQL with SSL certs on MVM platform
@@ -61,19 +64,19 @@ NIH_AUTH_ON = False
 
 if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):  
     # or os.getenv('SETTINGS_MODE') == 'prod':
-    DATABASES = secret_settings.get('CLOUD_DATABASE')
+    DATABASES = secret_settings.get('DATABASE')
     BASE_URL = CLOUD_BASE_URL
     BASE_API_URL = CLOUD_API_URL
     SITE_ID = 4
     DEVELOPER_COHORT_TABLE_ID = secret_settings.get('CLOUD_COHORT_TABLE')
     NIH_AUTH_ON = True
 elif os.getenv('SETTINGS_MODE') == 'dev':
-    DATABASES = secret_settings.get('CLOUD_DATABASE_LOCAL_CONNECTION')
+    DATABASES = secret_settings.get('DATABASE')
     BASE_URL = LOCAL_BASE_URL
     BASE_API_URL = LOCAL_BASE_URL
     SITE_ID = 3
 else:
-    DATABASES = secret_settings.get('LOCAL_DATABASE')
+    DATABASES = secret_settings.get('DATABASE')
     BASE_URL = LOCAL_BASE_URL
     BASE_API_URL = LOCAL_BASE_URL
     SITE_ID = 3
@@ -340,3 +343,22 @@ ERA_LOGIN_URL                       = secret_settings.get('ERA_LOGIN_URL')
 IPV4                                = secret_settings.get('IPV4')
 SAML_FOLDER                         = secret_settings.get('SAML_FOLDER')
 
+
+
+##############################
+#   Start django-finalware   #
+##############################
+
+INSTALLED_APPS += (
+    'finalware',)
+TEMPLATE_CONTEXT_PROCESSORS += (
+    'finalware.context_processors.contextify',)
+
+SITE_SUPERUSER_USERNAME = secret_settings.get('SU_USER')
+SITE_SUPERUSER_EMAIL = ''
+SITE_SUPERUSER_PASSWORD = secret_settings.get('SU_PASS')
+
+
+############################
+#   End django-finalware   #
+############################
