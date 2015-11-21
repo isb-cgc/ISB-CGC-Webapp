@@ -87,7 +87,7 @@ node_modules
 node_modules/*
 
 certs/*
-saml/
+saml/*
 *.key
 *.crt
 *.pem
