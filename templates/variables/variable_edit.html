@@ -14,13 +14,18 @@
     </ol>
     {% if '/create/' in request.path %}
         <h1 class="page-header pull-left">Create Variable Favorite</h1>
+        <menu class="page-action-group pull-right">
+            <menuitem class="btn btn-default" data-toggle="modal" data-target="#create-cohort-modal">Save As Favorite</menuitem>
+            <menuitem class="btn btn-link" data-toggle="modal" data-target="#create-cohort-modal">Cancel</menuitem>
+        </menu>
     {% else  %}
         <h1 class="page-header">Edit Variable Favorite</h1>
+        <menu class="page-action-group pull-right">
+            <menuitem class="btn btn-default">Save Changes</menuitem>
+            <menuitem class="btn btn-link">Cancel</menuitem>
+        </menu>
     {% endif %}
-    <menu class="page-action-group pull-right">
-        <menuitem class="btn btn-default">Save Changes</menuitem>
-        <menuitem class="btn btn-link">Cancel</menuitem>
-    </menu>
+
 {% endblock %}
 {% block content %}
     <div class="col-lg-4" id="filter-panel">
@@ -47,7 +52,7 @@
                                                     </a>
                                                 </div>
 
-                                                <div id="collapse-{{ attr }}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-{{ attr }}">
+                                                <div id="collapse-{{ attr }}" class="list-group-item__body collapse" role="tabpanel" aria-labelledby="heading-{{ attr }}">
                                                     <ul class="search-checkbox-list" id="{{ attr }}">
                                                         {% with attr_list_count|get_item:attr|how_many_more:6 as num_more %}
                                                             {% for v in attr_list_count|get_item:attr %}
@@ -111,10 +116,39 @@
 
             </div>
             <div class="panel-footer">
-                <a href="" class="btn-link">Save Selection as Favorite</a>
+                <a href="" class="btn-link" data-toggle="modal" data-target="#create-cohort-modal">Save Selection as Favorite</a>
             </div>
         </section>
     </div>
+
+<!-- Create variable Modal -->
+    <div class="modal fade" id="create-cohort-modal" tabindex="-1" role="dialog" aria-labelledby="createCohortModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="createCohortModal">Create Variable Favorite</h4>
+                </div>
+                <form id="create-cohort-form" method="POST" action="{% url 'save_cohort' %}">
+                    <div class="modal-body form-horizontal">
+                        <div class="form-group">
+                            <label class="col-md-2" for="cohort-name">Name:</label>
+                            <div class="col-md-10"><input type="text" id="cohort-name" name="name" /></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-2" for="filters">Selected Filters:</label>
+                            <div class="col-md-10"><p class="form-control-static"></p></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        {% csrf_token %}
+                        <input type="submit" value="Create Cohort" class="btn btn-primary" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script type="text/javascript">
     var attr_list = {{ attr_list|safe }};
     var total_samples = {{ total_samples|safe }};
