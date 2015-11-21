@@ -45,7 +45,6 @@ from googleapiclient.errors import HttpError
 from visualizations.models import SavedViz, Viz_Perms
 from cohorts.models import Cohort, Cohort_Perms
 from accounts.models import NIH_User
-from scripts.clusterTest import run_cluster
 
 
 debug = settings.DEBUG
@@ -178,7 +177,6 @@ def user_detail(request, user_id):
         }
         try:
             nih_user = NIH_User.objects.get(user_id=user_id)
-            print nih_user
             user_details['NIH_username'] = nih_user.NIH_username
             user_details['NIH_assertion_expiration'] = nih_user.NIH_assertion_expiration
             user_details['dbGaP_authorized'] = nih_user.dbGaP_authorized
@@ -189,14 +187,10 @@ def user_detail(request, user_id):
                 logger.warn("Error when retrieving nih_user with user_id {}. {}".format(str(user_id), str(e)))
                 # todo: add code to unlink all accounts?
 
-        # nih_login_redirect_url = settings.BASE_URL + '/accounts/nih_login/'
-        #
-        # eRA_login_url = ERA_LOGIN_URL.strip('/') + '/?sso&redirect_url=' + nih_login_redirect_url
-
         return render(request, 'GenespotRE/user_detail.html',
                       {'request': request,
                        'user_details': user_details,
-                       # 'eRA_login_url': eRA_login_url
+                       'NIH_AUTH_ON': settings.NIH_AUTH_ON
                        })
     else:
         return render(request, '500.html')

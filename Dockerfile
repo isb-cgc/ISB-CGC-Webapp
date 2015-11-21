@@ -21,10 +21,7 @@
 FROM gcr.io/google_appengine/python-compat
 
 RUN apt-get update
-#RUN DEBIAN_FRONTEND=noninteractive apt-get -y install mysql-server mysql-client mysql-common python-mysqldb
-
 ENV DEBIAN_FRONTEND=noninteractive
-
 RUN apt-get install -y wget
 RUN wget "http://dev.mysql.com/get/mysql-apt-config_0.5.3-1_all.deb" -P /tmp
 
@@ -51,4 +48,21 @@ RUN apt-get -y install --reinstall python-crypto python-m2crypto python3-crypto
 RUN apt-get -y install libxml2-dev libxmlsec1-dev swig
 RUN pip install python-saml==2.1.4
 RUN pip install pexpect
-ADD . /app/
+
+
+RUN apt-get -y install libffi-dev libssl-dev libmysqlclient-dev python2.7-dev curl
+RUN apt-get -y install git
+RUN easy_install -U distribute
+
+
+ADD . /app
+
+# We need to recompile some of the items because of differences in compiler versions
+RUN pip install -r /app/requirements.txt -t /app/lib/ --upgrade
+RUN mkdir /app/lib/endpoints/
+RUN cp /app/google_appengine/lib/endpoints-1.0/endpoints/* /app/lib/endpoints/
+
+ENV PYTHONPATH=/app:/app/lib
+
+RUN /app/manage.py makemigrations
+RUN /app/manage.py migrate

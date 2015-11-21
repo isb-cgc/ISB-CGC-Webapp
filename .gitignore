@@ -61,18 +61,24 @@ target/
 # Project ignorable files
 .DS_Store
 *.p12
+*.pem
 .sass-cache
 #*
 *.json
 *.patch
-GenespotRE/secret_settings.py
-GenespotRE/*.pem
+migrations/
+.env
+*.env
+scripts/metadata_featdef_tables.sql
 
 # dummy datasets
 *.tsv
 *.csv
 *.xls
 *.txt
+
+# Vagrant Files
+.vagrant/
 
 # NodeJS dev-dependencies etc
 bower_components
@@ -81,7 +87,7 @@ node_modules
 node_modules/*
 
 certs/*
-saml/
+saml/*
 *.key
 *.crt
 *.pem

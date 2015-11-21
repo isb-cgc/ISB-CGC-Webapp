@@ -18,10 +18,9 @@ limitations under the License.
 
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
-from lib.django.conf import settings
+from django.conf import settings
 
 import views
-
 
 admin.autodiscover()
 
@@ -48,5 +47,5 @@ urlpatterns = patterns('',
     url(r'^_ah/health$', views.health_check),
 )
 
-if settings.LOAD_DEMO_URLS:
-    urlpatterns.append(url(r'^demo/', include('demo.urls')))
+if settings.NIH_AUTH_ON:
+    urlpatterns.append(url(r'^demo/', include('demo.urls', namespace='demo')))
