@@ -8,56 +8,120 @@
 {% block link_page_name %}variable_edit{% endblock %}
 {% block page_name %}variable_edit{% endblock %}
 
+{% block page_header %}
+    <ol class="breadcrumb">
+        <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+    </ol>
+    {% if '/create/' in request.path %}
+        <h1 class="page-header pull-left">Create Variable Favorite</h1>
+    {% else  %}
+        <h1 class="page-header">Edit Variable Favorite</h1>
+    {% endif %}
+    <menu class="page-action-group pull-right">
+        <menuitem class="btn btn-default">Save Changes</menuitem>
+        <menuitem class="btn btn-link">Cancel</menuitem>
+    </menu>
+{% endblock %}
 {% block content %}
-<div class="container">
-    <h1 class="page-header">Edit Variable Favorite</h1>
-    <section class="panel panel-default">
-        <div class="panel-heading">
-            <menu class="page-action-group">
-                <menuitem class="btn btn-default">Save Changes</menuitem>
-                <menuitem class="btn btn-link">Cancel</menuitem>
-            </menu>
-        </div>
-        <div class="panel-body">
-            <div class="row">
-                <div class="col-lg-5">
-                    <ul class="nav nav-tabs" role="tablist">
-                        <li role="presentation" class="active"><a href="#common" aria-controls="common" role="tab" data-toggle="tab">Common (N)</a></li>
-                        <li role="presentation"><a href="#favorites" aria-controls="favorites" role="tab" data-toggle="tab">Favorites (N)</a></li>
-                        <li role="presentation"><a href="#search" aria-controls="search" role="tab" data-toggle="tab">Search</a></li>
-                      </ul>
+    <div class="col-lg-4" id="filter-panel">
+        <section class="panel panel-default">
+            <div class="panel-body">
+                <div class="row">
+                    <div class="tabpanel" role="tabpanel">
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li role="presentation" class="active"><a href="#common" aria-controls="common" role="tab" data-toggle="tab">Common (N)</a></li>
+                            <li role="presentation"><a href="#favorites" aria-controls="favorites" role="tab" data-toggle="tab">Favorites (N)</a></li>
+                            <li role="presentation"><a href="#search" aria-controls="search" role="tab" data-toggle="tab">Search</a></li>
+                        </ul>
 
-                      <!-- Tab panes -->
-                      <div class="tab-content">
-                        <div role="tabpanel" class="tab-pane active" id="common">
-                            
-                        </div>
-                        <div role="tabpanel" class="tab-pane" id="favorites">
-                            <label for="">Select from Favorites</label>
-                            <a href="{% url 'variables' %}">Manage Save Favorites (3)</a>
-                            <br>
-                            <select name="" id="">
-                                <option value="">--</option>
-                            </select>
-                        </div>
-                        <div role="tabpanel" class="tab-pane" id="search">
-                            <input type="text">
-                            <button class="btn"><i class="fa fa-close"></i></button>
-                        </div>
-                      </div>
+                        <!-- Tab panes -->
+                        <div class="tab-content">
+                            <div role="tabpanel" class="tab-pane active filter-panel" id="common">
+                                <ul class="list-group" id="clin-accordion" role="tablist" aria-multiselectable="true">
+                                    {% for attr in clin_attr %}
+                                        {% if attr in attr_list_count %}
+                                            <li class="list-group-item">
+                                                <div id="heading-{{ attr }}" class="list-group-item__heading">
+                                                    <a role="button"  data-toggle="collapse" data-parent="#clin-accordion" href="#collapse-{{ attr }}" aria-expanded="false" aria-controls="collapse-{{ attr }}">
+                                                        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ attr|get_readable_name }}
+                                                    </a>
+                                                </div>
 
-                </div>
-                <div class="col-lg-7">
-                    <label for="">Selected Variables</label>
-                    <button class="btn btn-link">Cancel</button>
-                    <br>
-                    <input type="text" id="variablesField">
-                    <button class="btn btn-link">Save Selection as Favorite</button>
+                                                <div id="collapse-{{ attr }}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-{{ attr }}">
+                                                    <ul class="search-checkbox-list" id="{{ attr }}">
+                                                        {% with attr_list_count|get_item:attr|how_many_more:6 as num_more %}
+                                                            {% for v in attr_list_count|get_item:attr %}
+                                                            {% if forloop.counter0 < 6 %}
+                                                            <li>
+                                                                <input type="checkbox" name="elements-selected" id="{{ attr }}-{{ v.value|replace_whitespace:'_' }}" >
+                                                                <label for="{{ attr }}-{{ v.value|replace_whitespace:'_' }}">{{ v.value }}</label>
+                                                                <span class="count">({{ v.count }})</span>
+                                                            </li>
+                                                            {% elif forloop.counter0 == 6 and num_more > 0 %}
+                                                            <a class="show-more">{{ num_more }} more</a>
+                                                                <li class="extra-values" style="display:none;">
+                                                                    <input type="checkbox" name="elements-selected" id="{{ attr }}-{{ v.value|replace_whitespace:'_' }}" >
+                                                                    <label for="{{ attr }}-{{ v.value|replace_whitespace:'_' }}">{{ v.value }}</label>
+                                                                    <span class="count">({{ v.count }})</span>
+                                                                </li>
+                                                            {% else %}
+                                                            <li class="extra-values" style="display:none;">
+                                                                <input type="checkbox" name="elements-selected" id="{{ attr }}-{{ v.value|replace_whitespace:'_' }}" >
+                                                                <label for="{{ attr }}-{{ v.value|replace_whitespace:'_' }}">{{ v.value }}</label>
+                                                                <span class="count">({{ v.count }})</span>
+                                                            </li>
+                                                            {% endif %}
+                                                            {% endfor %}
+                                                        {% if num_more > 0 %}
+                                                            <a class="show-less" style="display:none;">less</a>
+                                                        {% endif %}
+                                                        {% endwith %}
+                                                    </ul>
+                                                </div>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            <div role="tabpanel" class="tab-pane" id="favorites">
+                                <label for="">Select from Favorites</label>
+                                <a href="{% url 'variables' %}">Manage Save Favorites (3)</a>
+                                <br>
+                                <select name="" id="">
+                                    <option value="">--</option>
+                                </select>
+                            </div>
+                            <div role="tabpanel" class="tab-pane" id="search">
+                                <input type="text">
+                                <button class="btn"><i class="fa fa-close"></i></button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
-</div>
+        </section>
+    </div>
+    <div class="col-lg-8">
+        <section class="panel panel-default selected-filters">
+            <div class="panel-heading clearfix">
+                <h2 class="panel-title pull-left">Seleted Variables </h2>
+                <p class="pull-right"><a role="button" id="clear-filters">Clear All</a></p>
+            </div>
+            <div class="panel-body">
+
+            </div>
+            <div class="panel-footer">
+                <a href="" class="btn-link">Save Selection as Favorite</a>
+            </div>
+        </section>
+    </div>
+    <script type="text/javascript">
+    var attr_list = {{ attr_list|safe }};
+    var total_samples = {{ total_samples|safe }};
+    var attr_counts = {{ attr_list_count|safe }};
+    var base_api_url = '{{ base_api_url|safe }}';
+    var cohort_id = undefined;
+    </script>
 {% endblock %}
 
-{% block js_file %}{% static 'js/base.js' %}{% endblock %}
+{% block js_file %}{% static 'js/variables.js' %}{% endblock %}

@@ -1,0 +1,21 @@
+.list-group
+
+  .list-group-item
+    border: 1px solid transparent
+    border-top: 1px solid darken($white, 15%)
+    border-bottom: 1px solid darken($white, 15%)
+    padding: 0 15px
+
+    &:first-child
+      border-top: none
+
+    &__heading
+      color: $isb-primary
+      font-weight: $medium-font-weight
+      padding: 10px 0
+      text-transform: uppercase
+      a
+        color: $isb-primary
+        font-weight: $medium-font-weight
+        &:hover, &:focus, &:active, &:visited
+          text-decoration: none
