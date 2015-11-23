@@ -89,16 +89,23 @@
                                 </ul>
                             </div>
                             <div role="tabpanel" class="tab-pane" id="favorites">
-                                <label for="">Select from Favorites</label>
-                                <a href="{% url 'variables' %}">Manage Save Favorites (3)</a>
                                 <br>
-                                <select name="" id="">
-                                    <option value="">--</option>
-                                </select>
+                                <div class="form-group">
+                                    <label for="" class="control-label">Select from Favorites</label>
+                                    <select name="" id="" class="form-control">
+                                        <option value="">--</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <a href="{% url 'variables' %}">Manage Save Favorites (3)</a>
+                                </div>
                             </div>
                             <div role="tabpanel" class="tab-pane" id="search">
-                                <input type="text">
-                                <button class="btn"><i class="fa fa-close"></i></button>
+                                <br>
+                                <div class="form-group">
+                                    <input type="text" class="form-control" placeholder="Search">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -107,17 +114,29 @@
         </section>
     </div>
     <div class="col-lg-8">
-        <section class="panel panel-default selected-filters">
-            <div class="panel-heading clearfix">
-                <h2 class="panel-title pull-left">Seleted Variables </h2>
-                <p class="pull-right"><a role="button" id="clear-filters">Clear All</a></p>
-            </div>
-            <div class="panel-body">
-
-            </div>
-            <div class="panel-footer">
-                <a href="" class="btn-link" data-toggle="modal" data-target="#create-cohort-modal">Save Selection as Favorite</a>
-            </div>
+        <section class="panel">
+            <form action="">
+                <div class="form-group panel-default">
+                    <div class="panel-heading">
+                        <label for="variable-name" class="panel-title">Name of Favorite (Required)</label>
+                    </div>
+                    <div class="panel-body">
+                        <input type="text" class="form-control" value="" required>
+                    </div>
+                </div>
+                <div class="form-group selected-filters panel-default">
+                    <div class="panel-heading clearfix">
+                        <label class="panel-title pull-left">Selected Variables</label>
+                        <p class="pull-right"><a role="button" id="clear-filters">Clear All</a></p>
+                    </div>
+                    <div class="panel-body">
+                        <p class="help-block">Select your favorite variables from the left panel.</p>
+                    </div>
+                </div>
+                 <div class="panel-footer">
+                    <a href="" class="btn-link" data-toggle="modal" data-target="#create-cohort-modal">Save Selection as Favorite</a>
+                 </div>
+            </form>
         </section>
     </div>
 
@@ -133,16 +152,17 @@
                     <div class="modal-body form-horizontal">
                         <div class="form-group">
                             <label class="col-md-2" for="cohort-name">Name:</label>
-                            <div class="col-md-10"><input type="text" id="cohort-name" name="name" /></div>
+                            <div class="col-md-10"><input type="text" id="cohort-name" name="name" required/></div>
                         </div>
                         <div class="form-group">
-                            <label class="col-md-2" for="filters">Selected Filters:</label>
+                            <label class="col-md-2" for="filters">Selected Variables:</label>
                             <div class="col-md-10"><p class="form-control-static"></p></div>
                         </div>
                     </div>
                     <div class="modal-footer">
                         {% csrf_token %}
-                        <input type="submit" value="Create Cohort" class="btn btn-primary" />
+                        <input type="submit" value="Save As Favorite" class="btn btn-default" />
+                        <button class="btn btn-link" data-dismiss="modal" aria-label="Close">Cancel</button>
                     </div>
                 </form>
             </div>

@@ -1,14 +1,23 @@
-.modal-dialog
-  z-index: 2000
+.modal
+  &-dialog
+    z-index: 2000
 
-.modal-content
+  &-content
     border-radius: $border-radius-base
-    .modal-header
-        padding: 10px
-        .close
-            margin-top: 0px
-            opacity: 0.5
-    .modal-body
-        padding: 10px
-    .modal-footer
-        padding: 10px
+    box-shadow: $box-shadow
+    border: transparent
+
+  &-header
+    padding: 24px 24px 20px 24px
+    border-bottom: 0
+    .close
+      margin-top: 0px
+      opacity: 0.5
+  &-title
+    font-size: 16px
+    color: $isb-primary
+  &-body
+    padding: 0 24px
+  &-footer
+    padding: 10px 24px
+    border-top: none
