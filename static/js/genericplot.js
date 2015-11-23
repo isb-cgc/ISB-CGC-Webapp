@@ -137,12 +137,26 @@ require([
                             '<th class="feature2">Feature 2</th>' +
                             '<th class="logp">logp</th>' +
                             '<th class="n">n</th>' +
+                            '<th class="na">n_A</th>' +
+                            '<th class="nb">n_B</th>' +
+                            '<th class="pa">p_A</th>' +
+                            '<th class="pb">p_B</th>' +
+                            '<th class="comparison-type">Comparison Type</th>' +
+                            '<th class="correlation-coeff">Correlation Coefficient</th>' +
+                            '<th class="exclusion-rules">Exclusion Rules</th>' +
                             '</tr></thead><tbody></tbody></table>');
                         for (var i = 0; i < vectors.length; i++) {
                             var tr = '<tr><td>' + vectors[i]['feature_1'] + '</td>' +
                                 '<td>' + vectors[i]['feature_2'] + '</td>' +
                                 '<td>' + vectors[i]['_logp'] + '</td>' +
-                                '<td>' + vectors[i]['n'] + '</td></tr>';
+                                '<td>' + vectors[i]['n'] + '</td>' +
+                                '<td>' + vectors[i]['n_A'] + '</td>' +
+                                '<td>' + vectors[i]['n_B'] + '</td>' +
+                                '<td>' + vectors[i]['p_A'] + '</td>' +
+                                '<td>' + vectors[i]['p_B'] + '</td>' +
+                                '<td>' + vectors[i]['comparison_type'] + '</td>' +
+                                '<td>' + vectors[i]['correlation_coefficient'] + '</td>' +
+                                '<td>' + vectors[i]['exclusion_rules'] + '</td></tr>';
                             output.find('tbody').append(tr);
                         }
                         pairwise_div.html(output);

@@ -137,9 +137,7 @@ def index(request):
             nih_usernames_already_linked_to_google_identity = NIH_User.objects.filter(user_id=request.user.id)
             for nih_user in nih_usernames_already_linked_to_google_identity:
                 if nih_user.NIH_username != NIH_username:
-                    logger.warn("User {} is already linked to the eRA commons identity {} and attempted authentication"
-                                " with the eRA commons identity {}."
-                                .format(user_email, nih_user.NIH_username, NIH_username))
+                    logger.warn()
                     messages.warning(request, "User {} is already linked to the eRA commons identity {}. "
                                            "Please unlink these before authenticating with the eRA commons identity {}."
                                      .format(user_email, nih_user.NIH_username, NIH_username))

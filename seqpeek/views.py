@@ -105,7 +105,7 @@ def build_data_uri(hugo_symbol, cohort_id_array):
 def seqpeek(request, id=0):
     users = User.objects.filter(is_superuser=0)
     cohort_id_list = Cohort_Perms.objects.filter(user=request.user).values_list('cohort_id', flat=True)
-    cohort_list = Cohort.objects.filter(id__in=cohort_id_list, active=True)
+    cohort_list = Cohort.objects.filter(id__in=cohort_id_list)
 
     context = {
         'base_url': settings.BASE_URL,
