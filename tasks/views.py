@@ -26,7 +26,7 @@ import pytz
 
 import pysftp
 
-import pexpect  # comment this out when running in gae
+# import pexpect  # comment this out when running in gae
 from datetime import datetime
 
 from django.http import HttpResponse
@@ -309,7 +309,6 @@ def CloudSQL_logging(request):
 
     filenames = get_binary_log_filenames()
     yesterdays_binary_log_file = filenames[-2]
-    logger.info("Yesterday's binary log file: " + str(yesterdays_binary_log_file))
     arglist = ['mysqlbinlog',
                '--read-from-remote-server',
                yesterdays_binary_log_file,
@@ -320,30 +319,26 @@ def CloudSQL_logging(request):
                '--base64-output=DECODE-ROWS',
                '--verbose',
                '--password',
-               settings.DATABASES['default']['PASSWORD'],
-               '--ssl-ca=' + settings.DATABASES['default']['OPTIONS']['ssl']['ca'],
-               '--ssl-cert=' + settings.DATABASES['default']['OPTIONS']['ssl']['cert'],
-               '--ssl-key=' + settings.DATABASES['default']['OPTIONS']['ssl']['key']
+               settings.DATABASES['default']['PASSWORD']
                ]
+    # todo: add certs to this
+    # uncomment in managed VM -- pexpect is not allowed in GAE
 
-    child = pexpect.spawn(' '.join(arglist))
-    child.expect('Enter password:')
-    child.sendline(settings.DATABASES['default']['PASSWORD'])
-    i = child.expect(['Permission denied', 'Terminal type', '[#\$] '])
-    if i == 2:
-        output = child.read()
-        date_start_char = output.find('#1')
-        date_str = output[date_start_char+1:date_start_char+7]
-        storage_service = get_storage_resource()
-        media = http.MediaIoBaseUpload(io.BytesIO(output), 'text/plain')
-        filename = 'cloudsql_activity_log_' + date_str + '.txt'
-        storage_service.objects().insert(bucket='isb-cgc_logs',
-                                         name=filename,
-                                         media_body=media,
-                                         ).execute()
-    else:
-        logger.warn("Logs were not written to cloudstorage, i = " + str(i))
-        return HttpResponse("Logs were not written to cloudstorage, i = " + str(i))
+    # child = pexpect.spawn(' '.join(arglist))
+    # child.expect('Enter password:')
+    # child.sendline(settings.DATABASES['default']['PASSWORD'])
+    # i = child.expect(['Permission denied', 'Terminal type', '[#\$] '])
+    # if i == 2:
+    #     output = child.read()
+    #     date_start_char = output.find('#1')
+    #     date_str = output[date_start_char+1:date_start_char+7]
+    #     storage_service = get_storage_resource()
+    #     media = http.MediaIoBaseUpload(io.BytesIO(output), 'text/plain')
+    #     filename = 'cloudsql_activity_log_' + date_str + '.txt'
+    #     storage_service.objects().insert(bucket='isb-cgc_logs',
+    #                                      name=filename,
+    #                                      media_body=media,
+    #                                      ).execute()
 
     return HttpResponse('')
 
