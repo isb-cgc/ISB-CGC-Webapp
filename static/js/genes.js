@@ -57,12 +57,13 @@ require([
         //  Check whether the user enter a repetitive token
         //  If it is a repetitive token, show a message instead
        console.log(event);
-        var existingGenes = $(this).tokenfield('getTokens');
-        $.each(existingGenes, function (index, gene) {
-            if(gene.value === event.attrs.value.toUpperCase()){
+        var existingGenes = event.currentTarget.value.split(', ');
+        var parentHolder = $('#tokenfield-holder');
 
+        $.each(existingGenes, function (index, gene) {
+            if(gene.toUpperCase() === event.attrs.value.toUpperCase()){
                 $(event.relatedTarget).addClass('invalid repeat');
-                // TODO: Add validation message
+                $('.helper-text__repeat').show();
             }
         });
 
@@ -70,7 +71,7 @@ require([
         var isValid = true;
         if(_.indexOf(genelist, event.attrs.value.toUpperCase()) < 0) {
             $(event.relatedTarget).addClass('invalid');
-            //    TODO: Add validation message at the end
+            $('.helper-text__invalid').show();
         }
     });
 

@@ -43,4 +43,20 @@ require([
         });
     }
 
+    // Radio button controls bootstrap collapse
+    toggleRadio('upload');
+    function toggleRadio(groupname){
+        var radioButton =  $('.radio input[name=' + groupname + ']');
+        radioButton.on('change', function(event){
+            var collapseTarget = ($(this).data('target')) ? $(this).data('target') : $(this).href;
+            var collpaseHide = $(radioButton.not(this)[0]).data('target');
+            if($(this).is(':checked')){
+                $(collapseTarget).collapse('show');
+                $(collpaseHide).collapse('hide');
+            }else{
+                $(collapseTarget).collapse('hide');
+            }
+        })
+    }
+
 })

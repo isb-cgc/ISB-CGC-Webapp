@@ -12,13 +12,20 @@
     &__heading
       color: $isb-primary
       font-weight: $medium-font-weight
-      padding: 10px 0
+      padding: 10px 0 10px 15px
       text-transform: uppercase
+      position: relative
+
       a
         color: $isb-primary
         font-weight: $medium-font-weight
         &:hover, &:focus, &:active, &:visited
           text-decoration: none
+        & > .fa
+          position: absolute
+          left: 0
+          top: 50%
+          transform: translateY(-50%)
 
     &__body
       padding-bottom: 10px

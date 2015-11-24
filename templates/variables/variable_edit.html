@@ -57,22 +57,19 @@
                                                         {% with attr_list_count|get_item:attr|how_many_more:6 as num_more %}
                                                             {% for v in attr_list_count|get_item:attr %}
                                                             {% if forloop.counter0 < 6 %}
-                                                            <li>
-                                                                <input type="checkbox" name="elements-selected" id="{{ attr }}-{{ v.value|replace_whitespace:'_' }}" >
-                                                                <label for="{{ attr }}-{{ v.value|replace_whitespace:'_' }}">{{ v.value }}</label>
+                                                            <li class="checkbox">
+                                                                <label for="{{ attr }}-{{ v.value|replace_whitespace:'_' }}"><input type="checkbox" name="elements-selected" id="{{ attr }}-{{ v.value|replace_whitespace:'_' }}" > {{ v.value | title}}</label>
                                                                 <span class="count">({{ v.count }})</span>
                                                             </li>
                                                             {% elif forloop.counter0 == 6 and num_more > 0 %}
                                                             <a class="show-more">{{ num_more }} more</a>
-                                                                <li class="extra-values" style="display:none;">
-                                                                    <input type="checkbox" name="elements-selected" id="{{ attr }}-{{ v.value|replace_whitespace:'_' }}" >
-                                                                    <label for="{{ attr }}-{{ v.value|replace_whitespace:'_' }}">{{ v.value }}</label>
+                                                                <li class="extra-values checkbox" style="display:none;">
+                                                                    <label for="{{ attr }}-{{ v.value|replace_whitespace:'_' }}"><input type="checkbox" name="elements-selected" id="{{ attr }}-{{ v.value|replace_whitespace:'_' }}">  {{ v.value | title}}</label>
                                                                     <span class="count">({{ v.count }})</span>
                                                                 </li>
                                                             {% else %}
-                                                            <li class="extra-values" style="display:none;">
-                                                                <input type="checkbox" name="elements-selected" id="{{ attr }}-{{ v.value|replace_whitespace:'_' }}" >
-                                                                <label for="{{ attr }}-{{ v.value|replace_whitespace:'_' }}">{{ v.value }}</label>
+                                                            <li class="extra-values checkbox" style="display:none;">
+                                                                <label for="{{ attr }}-{{ v.value|replace_whitespace:'_' }}"><input type="checkbox" name="elements-selected" id="{{ attr }}-{{ v.value|replace_whitespace:'_' }}" > {{ v.value | title}}</label>
                                                                 <span class="count">({{ v.count }})</span>
                                                             </li>
                                                             {% endif %}
@@ -148,7 +145,8 @@
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <h4 class="modal-title" id="createCohortModal">Create Variable Favorite</h4>
                 </div>
-                <form id="create-cohort-form" method="POST" action="{% url 'save_cohort' %}">
+                <form id="create-cohort-form" method="POST" action="">
+                    <!--TODO: Refactor action-->
                     <div class="modal-body form-horizontal">
                         <div class="form-group">
                             <label class="col-md-2" for="cohort-name">Name:</label>
