@@ -3,15 +3,78 @@
  * Main File that gets compiled
  * New Sass files should be added here to be
  * compiled.
+ *
+ * Copyright 2015, Institute for Systems Biology
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
  ****************************************** */
 @import url("/static/css/bootstrap.min.css");
 @import url("/static/css/font-awesome.min.css");
 @import url("/static/css/jquery-ui.min.css");
 /********************************************
+ * Basic Mixins
+ *
+ * Copyright 2015, Institute for Systems Biology
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ ****************************************** */
+/********************************************
  * Style Variables
+ *
+ * Copyright 2015, Institute for Systems Biology
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
  ****************************************** */
 /********************************************
  * Main General Styles
+ *
+ * Copyright 2015, Institute for Systems Biology
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
  ****************************************** */
 body {
   background-color: #F8F8F8;
@@ -353,6 +416,12 @@ a.skip-nav {
   height: 1px;
   width: 1px;
   overflow: hidden; }
+  a.skip-nav:focus {
+    top: 0px;
+    left: 0px;
+    height: 15px;
+    width: 80px;
+    z-index: 10000; }
 
 .navbar-brand {
   height: 50px;
@@ -380,6 +449,21 @@ a.skip-nav {
 
 /********************************************
  * Landing Page Styles
+ *
+ * Copyright 2015, Institute for Systems Biology
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
  ****************************************** */
 #landing {
   padding-top: 15px;
@@ -410,6 +494,21 @@ a.skip-nav {
 
 /********************************************
  * Search Page Styles
+ *
+ * Copyright 2015, Institute for Systems Biology
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
  ****************************************** */
 #search .search-left-column {
   padding-right: 0px; }
@@ -607,6 +706,24 @@ a.skip-nav {
   position: absolute;
   padding: 5px; }
 
+/********************************************
+ * Cohort Pages Styles
+ *
+ * Copyright 2015, Institute for Systems Biology
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ ****************************************** */
 #cohort-details {
   padding-top: 15px;
   margin-top: 115px; }
@@ -628,7 +745,8 @@ a.skip-nav {
     text-align: center;
     width: 50%; }
     #cohort-details #filter-panel ul.nav-tabs li:first-child a {
-      border-top-left-radius: 3px; }
+      border-top-left-radius: 3px;
+      border-right: 1px solid #D5D5D5; }
     #cohort-details #filter-panel ul.nav-tabs li:last-child a {
       border-top-right-radius: 3px; }
   #cohort-details #filter-panel .tab-content {
@@ -873,10 +991,17 @@ a.skip-nav {
     table-layout: fixed;
     word-break: break-all;
     word-wrap: break-word; }
-    #cohort-filelist .filelist-panel table .col-barcode, #cohort-filelist .filelist-panel table .col-pipeline {
+    #cohort-filelist .filelist-panel table .col-barcode, #cohort-filelist .filelist-panel table .col-pipeline, #cohort-filelist .filelist-panel table .col-datatype {
       width: 150px; }
     #cohort-filelist .filelist-panel table .col-datalevel {
       width: 90px; }
+    #cohort-filelist .filelist-panel table .col-igv {
+      width: 100px; }
+    #cohort-filelist .filelist-panel table a i {
+      font-size: 17px;
+      color: #89D889; }
+    #cohort-filelist .filelist-panel table a:hover i {
+      color: #76b876; }
 
 .parsets-tooltip {
   background-color: rgba(1, 48, 127, 0.8);
@@ -894,61 +1019,76 @@ a.skip-nav {
 
 /********************************************
  * Visualizations Styles
+ *
+ * Copyright 2015, Institute for Systems Biology
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
  ****************************************** */
-#visualizations {
+#visualizations, #seqpeek {
   margin-top: 115px; }
-  #visualizations .data-holder {
+  #visualizations .data-holder, #seqpeek .data-holder {
     display: none; }
-  #visualizations .axis path, #visualizations .axis line {
+  #visualizations .axis path, #visualizations .axis line, #seqpeek .axis path, #seqpeek .axis line {
     fill: none;
     stroke: #000; }
-  #visualizations .grid .tick, #visualizations .axis .tick line {
+  #visualizations .grid .tick, #visualizations .axis .tick line, #seqpeek .grid .tick, #seqpeek .axis .tick line {
     stroke: lightgrey;
     stroke-opacity: 0.7; }
-  #visualizations .grid path {
+  #visualizations .grid path, #seqpeek .grid path {
     stroke-width: 0; }
-  #visualizations .plot {
+  #visualizations .plot, #seqpeek .plot {
     width: 100%;
     margin-top: 15px; }
-    #visualizations .plot .panel-heading .form-control {
+    #visualizations .plot .panel-heading .form-control, #seqpeek .plot .panel-heading .form-control {
       width: 80%;
       margin-bottom: 10px; }
-    #visualizations .plot .panel-heading .options-bar {
+    #visualizations .plot .panel-heading .options-bar, #seqpeek .plot .panel-heading .options-bar {
       float: right;
       font-size: 24px; }
-      #visualizations .plot .panel-heading .options-bar a {
+      #visualizations .plot .panel-heading .options-bar a, #seqpeek .plot .panel-heading .options-bar a {
         cursor: pointer; }
-      #visualizations .plot .panel-heading .options-bar i {
+      #visualizations .plot .panel-heading .options-bar i, #seqpeek .plot .panel-heading .options-bar i {
         margin-left: 5px; }
-      #visualizations .plot .panel-heading .options-bar .toggle-selection.active {
+      #visualizations .plot .panel-heading .options-bar .toggle-selection.active, #seqpeek .plot .panel-heading .options-bar .toggle-selection.active {
         color: #0c4fba; }
-      #visualizations .plot .panel-heading .options-bar .expected_fill.selected {
+      #visualizations .plot .panel-heading .options-bar .expected_fill.selected, #seqpeek .plot .panel-heading .options-bar .expected_fill.selected {
         stroke: #0c4fba;
         stroke-opacity: 1;
         stroke-width: 3px; }
-    #visualizations .plot .panel-heading h5 {
+    #visualizations .plot .panel-heading h5, #seqpeek .plot .panel-heading h5 {
       margin: 0px; }
-    #visualizations .plot .plot-div {
+    #visualizations .plot .plot-div, #seqpeek .plot .plot-div {
       display: inline-block;
       margin: 20px;
       max-width: 800px;
       height: 650px;
       vertical-align: top;
       overflow: hidden; }
-      #visualizations .plot .plot-div .extent {
+      #visualizations .plot .plot-div .extent, #seqpeek .plot .plot-div .extent {
         fill: #000;
         fill-opacity: 0.1;
         stroke: #fff; }
-      #visualizations .plot .plot-div .expected_fill.selected {
+      #visualizations .plot .plot-div .expected_fill.selected, #seqpeek .plot .plot-div .expected_fill.selected {
         stroke: #01307F;
         stroke-width: 5px; }
-      #visualizations .plot .plot-div .bar {
+      #visualizations .plot .plot-div .bar, #seqpeek .plot .plot-div .bar {
         fill: rgba(0, 0, 0, 0.5); }
-        #visualizations .plot .plot-div .bar:hover, #visualizations .plot .plot-div .bar.selected {
+        #visualizations .plot .plot-div .bar:hover, #visualizations .plot .plot-div .bar.selected, #seqpeek .plot .plot-div .bar:hover, #seqpeek .plot .plot-div .bar.selected {
           fill: rgba(0, 0, 225, 0.5); }
-    #visualizations .plot .show-flyout:hover {
+    #visualizations .plot .show-flyout:hover, #seqpeek .plot .show-flyout:hover {
       cursor: pointer; }
-    #visualizations .plot .fly-out {
+    #visualizations .plot .fly-out, #seqpeek .plot .fly-out {
       position: fixed;
       width: 300px;
       right: -300px;
@@ -958,95 +1098,117 @@ a.skip-nav {
       border: 1px solid #D5D5D5;
       margin-top: -16px;
       z-index: 1000; }
-      #visualizations .plot .fly-out .flyout-heading {
+      #visualizations .plot .fly-out .flyout-heading, #seqpeek .plot .fly-out .flyout-heading {
         border-bottom: 1px solid #D5D5D5;
         padding: 0px 10px; }
-      #visualizations .plot .fly-out .flyout-body {
+      #visualizations .plot .fly-out .flyout-body, #seqpeek .plot .fly-out .flyout-body {
         padding: 10px; }
-      #visualizations .plot .fly-out .flyout-footer {
+      #visualizations .plot .fly-out .flyout-footer, #seqpeek .plot .fly-out .flyout-footer {
         bottom: 0px;
         position: absolute;
         width: 100%;
         border-top: 1px solid #D5D5D5;
         padding: 10px; }
-      #visualizations .plot .fly-out .form-control {
+      #visualizations .plot .fly-out .form-control, #seqpeek .plot .fly-out .form-control {
         padding: 0px 10px; }
-      #visualizations .plot .fly-out .hide-flyout {
+      #visualizations .plot .fly-out .hide-flyout, #seqpeek .plot .fly-out .hide-flyout {
         float: right; }
-        #visualizations .plot .fly-out .hide-flyout:hover {
+        #visualizations .plot .fly-out .hide-flyout:hover, #seqpeek .plot .fly-out .hide-flyout:hover {
           cursor: pointer; }
-      #visualizations .plot .fly-out .cohort-listing div.filter-label {
+      #visualizations .plot .fly-out .filter-label, #seqpeek .plot .fly-out .filter-label {
         display: block;
-        text-align: left; }
-        #visualizations .plot .fly-out .cohort-listing div.filter-label a {
+        text-align: left;
+        padding: 5px 10px;
+        margin: 2px 0px; }
+        #visualizations .plot .fly-out .filter-label a, #seqpeek .plot .fly-out .filter-label a {
           cursor: pointer;
           float: right; }
-      #visualizations .plot .fly-out .add-cohort {
+      #visualizations .plot .fly-out .add-cohort, #seqpeek .plot .fly-out .add-cohort {
         cursor: pointer;
         font-size: 13px;
         font-weight: normal;
         margin-top: 2px; }
-      #visualizations .plot .fly-out .cohort-search .select-cohort {
+      #visualizations .plot .fly-out .cohort-search .select-cohort, #seqpeek .plot .fly-out .cohort-search .select-cohort {
         display: block;
         text-align: left; }
-      #visualizations .plot .fly-out .comment-username {
+      #visualizations .plot .fly-out .comment-username, #seqpeek .plot .fly-out .comment-username {
         font-weight: bold;
         font-size: 14px;
         margin: 0px; }
-      #visualizations .plot .fly-out .comment-date {
+      #visualizations .plot .fly-out .comment-date, #seqpeek .plot .fly-out .comment-date {
         font-size: 12px;
         color: #616161; }
-      #visualizations .plot .fly-out .comment-content {
+      #visualizations .plot .fly-out .comment-content, #seqpeek .plot .fly-out .comment-content {
         background-color: #F4F8FF;
         border-radius: 5px;
         padding: 5px 10px;
         color: #616161; }
-    #visualizations .plot .save-cohort-card {
+    #visualizations .plot .save-cohort-card, #seqpeek .plot .save-cohort-card {
       background-color: rgba(1, 48, 127, 0.8);
       border-radius: 3px;
       color: #fff;
       padding: 5px; }
-    #visualizations .plot .panel-body {
+    #visualizations .plot .panel-body, #seqpeek .plot .panel-body {
       position: relative;
       overflow: hidden; }
-    #visualizations .plot .pairwise-result .table th.logp, #visualizations .plot .pairwise-result .table th.n, #visualizations .plot .pairwise-result .table th.na, #visualizations .plot .pairwise-result .table th.nb, #visualizations .plot .pairwise-result .table th.pa, #visualizations .plot .pairwise-result .table th.pb {
+    #visualizations .plot .pairwise-result .table th.logp, #visualizations .plot .pairwise-result .table th.n, #visualizations .plot .pairwise-result .table th.na, #visualizations .plot .pairwise-result .table th.nb, #visualizations .plot .pairwise-result .table th.pa, #visualizations .plot .pairwise-result .table th.pb, #seqpeek .plot .pairwise-result .table th.logp, #seqpeek .plot .pairwise-result .table th.n, #seqpeek .plot .pairwise-result .table th.na, #seqpeek .plot .pairwise-result .table th.nb, #seqpeek .plot .pairwise-result .table th.pa, #seqpeek .plot .pairwise-result .table th.pb {
       width: 60px; }
-    #visualizations .plot .pairwise-result .table td {
+    #visualizations .plot .pairwise-result .table td, #seqpeek .plot .pairwise-result .table td {
       word-wrap: break-word;
       word-break: break-word; }
-  #visualizations .legend {
+  #visualizations .legend, #seqpeek .legend {
     display: inline-block;
     margin: 20px;
     overflow-y: auto;
     max-height: 650px;
     vertical-align: top; }
-    #visualizations .legend .unselected {
+    #visualizations .legend .unselected, #seqpeek .legend .unselected {
       fill-opacity: 0; }
-  #visualizations #search-details table {
+    #visualizations .legend td:last-child, #visualizations .legend th:last-child, #seqpeek .legend td:last-child, #seqpeek .legend th:last-child {
+      padding-left: 5px; }
+    #visualizations .legend td.nonsense-mutation, #seqpeek .legend td.nonsense-mutation {
+      background-color: #71C560;
+      width: 25px; }
+    #visualizations .legend td.silent, #seqpeek .legend td.silent {
+      background-color: #9768C4;
+      width: 25px; }
+    #visualizations .legend td.frame-shift-del, #seqpeek .legend td.frame-shift-del {
+      background-color: #98B8B8;
+      width: 25px; }
+    #visualizations .legend td.frame-shift-ins, #seqpeek .legend td.frame-shift-ins {
+      background-color: #98B8B8;
+      width: 25px; }
+    #visualizations .legend td.missense-mutation, #seqpeek .legend td.missense-mutation {
+      background-color: #4F473D;
+      width: 25px; }
+    #visualizations .legend td.in-frame-ins, #visualizations .legend td.in-frame-del, #seqpeek .legend td.in-frame-ins, #seqpeek .legend td.in-frame-del {
+      background-color: #C1B14C;
+      width: 25px; }
+  #visualizations #search-details table, #seqpeek #search-details table {
     display: inline-block;
     vertical-align: top; }
-    #visualizations #search-details table td {
+    #visualizations #search-details table td, #seqpeek #search-details table td {
       padding: 5px 10px; }
-      #visualizations #search-details table td.key {
+      #visualizations #search-details table td.key, #seqpeek #search-details table td.key {
         font-weight: bold;
         width: 100px; }
-      #visualizations #search-details table td.value {
+      #visualizations #search-details table td.value, #seqpeek #search-details table td.value {
         word-wrap: break-word;
         width: 200px; }
-  #visualizations #selected-points ol {
+  #visualizations #selected-points ol, #seqpeek #selected-points ol {
     list-style: decimal; }
-    #visualizations #selected-points ol li {
+    #visualizations #selected-points ol li, #seqpeek #selected-points ol li {
       margin-left: 20px; }
-  #visualizations .vis-config label {
+  #visualizations .vis-config label, #seqpeek .vis-config label {
     padding: 2px 10px 2px 0px; }
-  #visualizations .plot-loader {
+  #visualizations .plot-loader, #seqpeek .plot-loader {
     position: absolute;
     width: 1138px;
     height: 790px;
     background: rgba(0, 0, 0, 0.5);
     z-index: 100;
     margin: -15px 0px 0px -15px; }
-    #visualizations .plot-loader i {
+    #visualizations .plot-loader i, #seqpeek .plot-loader i {
       position: absolute;
       left: 43%;
       top: 40%;
@@ -1142,12 +1304,14 @@ a.skip-nav {
   #circviz i.icon-mirBase {
     content: url("/static/img/mirbase.png"); }
 
-#igv i.igv-app-icon {
-  background-color: transparent; }
-#igv .igvNavigationZoom {
-  font-size: 24px; }
-  #igv .igvNavigationZoom i:first-child {
-    margin-right: 5px; }
+#igv {
+  margin-top: 60px; }
+  #igv i.igv-app-icon {
+    background-color: transparent; }
+  #igv .igvNavigationZoom {
+    font-size: 24px; }
+    #igv .igvNavigationZoom i:first-child {
+      margin-right: 5px; }
 
 .hovercard {
   position: fixed;
@@ -1171,6 +1335,42 @@ a.skip-nav {
     .hovercard table td {
       padding: 0px 5px; }
 
+/********************************************
+ * Visualizations Styles
+ *
+ * Copyright 2015, Institute for Systems Biology
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ ****************************************** */
+/********************************************
+ * User Page Styles
+ *
+ * Copyright 2015, Institute for Systems Biology
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ ****************************************** */
 #user-landing {
   margin-top: 80px; }
   #user-landing .dropdown button {
@@ -1224,6 +1424,8 @@ a.skip-nav {
       vertical-align: top; }
       #user-details .row .panel:nth-child(2) {
         margin: 0px 15px; }
+    #user-details .row .gcp-panel .panel-body p a {
+      display: inline-block; }
     #user-details .row a {
       text-decoration: underline;
       display: block;
@@ -1245,5 +1447,29 @@ a.skip-nav {
       margin: 0px -15px 10px -15px; }
   #user-details .modal h4 {
     text-align: left; }
+
+/********************************************
+ * Help Page Styles
+ *
+ * Copyright 2015, Institute for Systems Biology
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ ****************************************** */
+#help {
+  margin-top: 60px;
+  margin-bottom: 30px; }
+  #help p {
+    margin: 0px; }
 
 /*# sourceMappingURL=main.css.map */

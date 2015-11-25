@@ -1,271 +1,283 @@
-# Updated from tcga_data_open.Clinical on 20150803
+"""
+
+Copyright 2015, Institute for Systems Biology
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+"""
+
+# Updated from
+# https://github.com/isb-cgc/data-prototyping/blob/537c5c24646f87bda804ca95dee6cf479f0b1fb9/tcga_etl_pipeline/schemas/clinical.json
+
 schema = [
     {
-      "name": "ParticipantBarcode",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "ParticipantBarcode"
     },
     {
-      "name": "Disease_Code",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "Study"
     },
     {
-      "name": "ParticipantUUID",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "Project"
     },
     {
-      "name": "TSSCode",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "ParticipantUUID"
     },
     {
-      "name": "adenocarcinoma_invasion",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "TSSCode"
     },
     {
-      "name": "age_at_initial_pathologic_diagnosis",
-      "type": "INTEGER"
+        "type": "INTEGER",
+        "name": "age_at_initial_pathologic_diagnosis"
     },
     {
-      "name": "anatomic_neoplasm_subdivision",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "anatomic_neoplasm_subdivision"
     },
     {
-      "name": "batch_number",
-      "type": "INTEGER"
+        "type": "INTEGER",
+        "name": "batch_number"
     },
     {
-      "name": "bcr",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "bcr"
     },
     {
-      "name": "clinical_M",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "clinical_M"
     },
     {
-      "name": "clinical_N",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "clinical_N"
     },
     {
-      "name": "clinical_T",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "clinical_T"
     },
     {
-      "name": "clinical_stage",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "clinical_stage"
     },
     {
-      "name": "colorectal_cancer",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "colorectal_cancer"
     },
     {
-      "name": "country",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "country"
     },
     {
-      "name": "country_of_procurement",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "vital_status"
     },
     {
-      "name": "days_to_birth",
-      "type": "INTEGER"
+        "type": "INTEGER",
+        "name": "days_to_birth"
     },
     {
-      "name": "days_to_death",
-      "type": "INTEGER"
+        "type": "INTEGER",
+        "name": "days_to_death"
     },
     {
-      "name": "days_to_initial_pathologic_diagnosis",
-      "type": "INTEGER"
+        "type": "INTEGER",
+        "name": "days_to_last_known_alive"
     },
     {
-      "name": "days_to_last_followup",
-      "type": "INTEGER"
+        "type": "INTEGER",
+        "name": "days_to_last_followup"
     },
     {
-      "name": "days_to_submitted_specimen_dx",
-      "type": "INTEGER"
+        "type": "INTEGER",
+        "name": "days_to_initial_pathologic_diagnosis"
     },
     {
-      "name": "ethnicity",
-      "type": "STRING"
+        "type": "INTEGER",
+        "name": "days_to_submitted_specimen_dx"
     },
     {
-      "name": "frozen_specimen_anatomic_site",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "ethnicity"
     },
     {
-      "name": "gender",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "frozen_specimen_anatomic_site"
     },
     {
-      "name": "gleason_score_combined",
-      "type": "FLOAT"
+        "type": "STRING",
+        "name": "gender"
     },
     {
-      "name": "height",
-      "type": "FLOAT"
+        "type": "FLOAT",
+        "name": "gleason_score_combined"
     },
     {
-      "name": "histological_type",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "histological_type"
     },
     {
-      "name": "history_of_colon_polyps",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "history_of_colon_polyps"
     },
     {
-      "name": "history_of_neoadjuvant_treatment",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "history_of_neoadjuvant_treatment"
     },
     {
-      "name": "history_of_prior_malignancy",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "hpv_calls"
     },
     {
-      "name": "hpv_calls",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "hpv_status"
     },
     {
-      "name": "hpv_status",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "icd_10"
     },
     {
-      "name": "icd_10",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "icd_o_3_histology"
     },
     {
-      "name": "icd_o_3_histology",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "icd_o_3_site"
     },
     {
-      "name": "icd_o_3_site",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "lymphatic_invasion"
     },
     {
-      "name": "lymph_node_examined_count",
-      "type": "FLOAT"
+        "type": "STRING",
+        "name": "lymphnodes_examined"
     },
     {
-      "name": "lymphatic_invasion",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "lymphovascular_invasion_present"
     },
     {
-      "name": "lymphnodes_examined",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "menopause_status"
     },
     {
-      "name": "lymphovascular_invasion_present",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "mononucleotide_and_dinucleotide_marker_panel_analysis_status"
     },
     {
-      "name": "menopause_status",
-      "type": "STRING"
+        "type": "FLOAT",
+        "name": "mononucleotide_marker_panel_analysis_status"
     },
     {
-      "name": "mononucleotide_and_dinucleotide_marker_panel_analysis_status",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "neoplasm_histologic_grade"
     },
     {
-      "name": "mononucleotide_marker_panel_analysis_status",
-      "type": "FLOAT"
+        "type": "STRING",
+        "name": "new_tumor_event_after_initial_treatment"
     },
     {
-      "name": "neoplasm_histologic_grade",
-      "type": "STRING"
+        "type": "FLOAT",
+        "name": "number_of_lymphnodes_examined"
     },
     {
-      "name": "new_tumor_event_after_initial_treatment",
-      "type": "STRING"
+        "type": "FLOAT",
+        "name": "number_of_lymphnodes_positive_by_he"
     },
     {
-      "name": "number_of_lymphnodes_examined",
-      "type": "FLOAT"
+        "type": "FLOAT",
+        "name": "number_pack_years_smoked"
     },
     {
-      "name": "number_of_lymphnodes_positive_by_he",
-      "type": "FLOAT"
+        "type": "INTEGER",
+        "name": "year_of_initial_pathologic_diagnosis"
     },
     {
-      "name": "number_pack_years_smoked",
-      "type": "FLOAT"
+        "type": "STRING",
+        "name": "pathologic_M"
     },
     {
-      "name": "pathologic_M",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "pathologic_N"
     },
     {
-      "name": "pathologic_N",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "pathologic_T"
     },
     {
-      "name": "pathologic_T",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "pathologic_stage"
     },
     {
-      "name": "pathologic_stage",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "person_neoplasm_cancer_status"
     },
     {
-      "name": "person_neoplasm_cancer_status",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "pregnancies"
     },
     {
-      "name": "pregnancies",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "primary_neoplasm_melanoma_dx"
     },
     {
-      "name": "primary_neoplasm_melanoma_dx",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "primary_therapy_outcome_success"
     },
     {
-      "name": "primary_therapy_outcome_success",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "prior_dx"
     },
     {
-      "name": "prior_dx",
-      "type": "STRING"
+        "type": "FLOAT",
+        "name": "psa_value"
     },
     {
-      "name": "psa_value",
-      "type": "FLOAT"
+        "type": "STRING",
+        "name": "race"
     },
     {
-      "name": "race",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "residual_tumor"
     },
     {
-      "name": "residual_tumor",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "tobacco_smoking_history"
     },
     {
-      "name": "tobacco_smoking_history",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "tumor_tissue_site"
     },
     {
-      "name": "total_number_of_pregnancies",
-      "type": "FLOAT"
+        "type": "STRING",
+        "name": "tumor_type"
     },
     {
-      "name": "tumor_tissue_site",
-      "type": "STRING"
+        "type": "STRING",
+        "name": "venous_invasion"
     },
     {
-      "name": "tumor_type",
-      "type": "STRING"
+        "type": "FLOAT",
+        "name": "weight"
     },
     {
-      "name": "weiss_venous_invasion",
-      "type": "STRING"
+        "type": "FLOAT",
+        "name": "height"
     },
     {
-      "name": "vital_status",
-      "type": "STRING"
-    },
-    {
-      "name": "weight",
-      "type": "FLOAT"
-    },
-    {
-      "name": "year_of_initial_pathologic_diagnosis",
-      "type": "INTEGER"
+        "type": "FLOAT",
+        "name": "BMI"
     }
-  ]
+]

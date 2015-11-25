@@ -1,3 +1,21 @@
+/**
+ *
+ * Copyright 2015, Institute for Systems Biology
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
 require.config({
     baseUrl: '/static/js/',
     paths: {
@@ -119,26 +137,12 @@ require([
                             '<th class="feature2">Feature 2</th>' +
                             '<th class="logp">logp</th>' +
                             '<th class="n">n</th>' +
-                            '<th class="na">n_A</th>' +
-                            '<th class="nb">n_B</th>' +
-                            '<th class="pa">p_A</th>' +
-                            '<th class="pb">p_B</th>' +
-                            '<th class="comparison-type">Comparison Type</th>' +
-                            '<th class="correlation-coeff">Correlation Coefficient</th>' +
-                            '<th class="exclusion-rules">Exclusion Rules</th>' +
                             '</tr></thead><tbody></tbody></table>');
                         for (var i = 0; i < vectors.length; i++) {
                             var tr = '<tr><td>' + vectors[i]['feature_1'] + '</td>' +
                                 '<td>' + vectors[i]['feature_2'] + '</td>' +
                                 '<td>' + vectors[i]['_logp'] + '</td>' +
-                                '<td>' + vectors[i]['n'] + '</td>' +
-                                '<td>' + vectors[i]['n_A'] + '</td>' +
-                                '<td>' + vectors[i]['n_B'] + '</td>' +
-                                '<td>' + vectors[i]['p_A'] + '</td>' +
-                                '<td>' + vectors[i]['p_B'] + '</td>' +
-                                '<td>' + vectors[i]['comparison_type'] + '</td>' +
-                                '<td>' + vectors[i]['correlation_coefficient'] + '</td>' +
-                                '<td>' + vectors[i]['exclusion_rules'] + '</td></tr>';
+                                '<td>' + vectors[i]['n'] + '</td></tr>';
                             output.find('tbody').append(tr);
                         }
                         pairwise_div.html(output);
