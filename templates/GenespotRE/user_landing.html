@@ -1,7 +1,25 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% load custom_tags %}
-{#{% load tz %}#}
+
+{% comment %}
+
+   Copyright 2015, Institute for Systems Biology
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+{% endcomment %}
+
 {% block header %}
 {% endblock %}
 
@@ -19,8 +37,8 @@
                     <ul class="dropdown-menu" role="menu" aria-labelledby="create-dropdown">
                         <li role="menuitem"><a href="{% url 'cohort' %}"><i class="fa fa-users"></i> New Cohort</a></li>
                         <li role="menuitem"><a href="" data-toggle="modal" data-target="#create-generic-viz-modal">
-                            <i class="fa fa-area-chart"></i> Plot</a></li>
-                        {#                <li><a href="{% url 'seqpeek' %}"><i class="fa fa-neuter"></i> Seq Peek</a></li>#}
+                            <i class="fa fa-area-chart"></i> Visualization</a></li>
+                        <li role="menuitem"><a href="{% url 'seqpeek' %}"><i class="fa fa-neuter"></i> Seq Peek Plot</a></li>
                         {#                <li><a href="" data-toggle="modal" data-target="#create-genecentric-viz-modal">#}
                         {#                    <i class="fa fa-cubes"></i> Gene-Centric</a></li>#}
                         {#                <li><a href="" data-toggle="modal" data-target="#create-stackviz-viz-modal">#}
@@ -34,6 +52,7 @@
                 <ul class="nav nav-tabs nav-stacked" role="tablist">
                     <li role="presentation" class="active"><a href="#cohorts-list" role="tab" data-toggle="tab" title="Cohort List">Cohorts</a></li>
                     <li role="presentation" class=""><a href="#vizualizations-list" role="tab" data-toggle="tab" title="Visualization List">Visualizations</a></li>
+                    <li role="presentation" class=""><a href="#seqpeek-list" role="tab" data-toggle="tab" title="SeqPeek List">SeqPeek Plots</a></li>
                 </ul>
 
             </div>
@@ -80,47 +99,84 @@
 
                     <!-- Visualization Panel -->
                     <div role="tabpanel" class="tab-pane" id="vizualizations-list">
+                        <button id="delete-viz-btn" type="submit" class="btn btn-primary space-top-5" data-toggle="modal" data-target="#delete-viz-modal" aria-label="delete-visualizations" role="button" aria-expanded="true">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                        <button id="share-viz-btn" type="button" class="btn btn-primary space-top-5" data-toggle="modal" data-target="#share-viz-modal" aria-label="share-visualizations" role="button" aria-expanded="true">
+                            <i class="fa fa-share-alt"></i>
+                        </button>
 
-
-
-                            <button id="delete-viz-btn" type="submit" class="btn btn-primary space-top-5" data-toggle="modal" data-target="#delete-viz-modal" aria-label="delete-visualizations" role="button" aria-expanded="true">
-                                <i class="fa fa-trash"></i>
-                            </button>
-                            <button id="share-viz-btn" type="button" class="btn btn-primary space-top-5" data-toggle="modal" data-target="#share-viz-modal" aria-label="share-visualizations" role="button" aria-expanded="true">
-                                <i class="fa fa-share-alt"></i>
-                            </button>
-
-                            {% if visualizations %}
-                                <table id="viz-table" class="table table-striped tablesorter">
-                                    <thead>
+                        {% if visualizations %}
+                            <table id="viz-table" class="table table-striped tablesorter">
+                                <thead>
+                                <tr>
+                                    <th class="checkbox-col"><input type="checkbox" class="select-all"/></th>
+                                    <th class="name-col">Visualization Name</th>
+                                    <th class="sample-col"># of Plots</th>
+                                    <th class="owner-col">Owner</th>
+                                    <th class="date-col">Last Modified</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for viz in visualizations %}
                                     <tr>
-                                        <th class="checkbox-col"><input type="checkbox" class="select-all"/></th>
-                                        <th class="name-col">Visualization Name</th>
-                                        <th class="sample-col"># of Plots</th>
-                                        <th class="owner-col">Owner</th>
-                                        <th class="date-col">Last Modified</th>
+                                        <td class="checkbox-col"><input type="checkbox" name="id" value="{{ viz.id }}" /></td>
+                                        <td class="name-col">
+                                            {% if viz.plots.0.plot_type == 'genecentric'%}
+                                                <a href="{% url 'genecentric_id' viz.id %}">{{ viz.name }}</a>
+                                            {% else %}
+                                                <a href="{% url 'genericplot_id' viz.id %}">{{ viz.name }}</a>
+                                            {% endif %}
+                                        </td>
+                                        <td class="sample-col">{{ viz.plot_set.all|length }}</td>
+                                        <td class="owner-col">{{ viz.get_owner.email }}</td>
+                                        <td class="date-col">{{ viz.last_date_saved|date:"SHORT_DATETIME_FORMAT" }}</td>
                                     </tr>
-                                    </thead>
-                                    <tbody>
-                                    {% for viz in visualizations %}
-                                        <tr>
-                                            <td class="checkbox-col"><input type="checkbox" name="id" value="{{ viz.id }}" /></td>
-                                            <td class="name-col">
-                                                {% if viz.plots.0.plot_type == 'genecentric'%}
-                                                    <a href="{% url 'genecentric_id' viz.id %}">{{ viz.name }}</a>
-                                                {% else %}
-                                                    <a href="{% url 'genericplot_id' viz.id %}">{{ viz.name }}</a>
-                                                {% endif %}
-                                            </td>
-                                            <td class="sample-col">{{ viz.plot_set.all|length }}</td>
-                                            <td class="owner-col">{{ viz.get_owner.email }}</td>
-                                            <td class="date-col">{{ viz.last_date_saved|date:"SHORT_DATETIME_FORMAT" }}</td>
-                                        </tr>
-                                    {% endfor %}
-                                    </tbody>
-                                </table>
-                            {% endif %}
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        {% endif %}
+                    </div>
 
+                    <!-- SeqPeek Panel -->
+                    <div role="tabpanel" class="tab-pane" id="seqpeek-list">
+                        <button id="delete-sp-btn" type="submit" class="btn btn-primary space-top-5" data-toggle="modal" data-target="#delete-viz-modal" aria-label="delete-visualizations" role="button" aria-expanded="true">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                        <button id="share-sp-btn" type="button" class="btn btn-primary space-top-5" data-toggle="modal" data-target="#share-viz-modal" aria-label="share-visualizations" role="button" aria-expanded="true">
+                            <i class="fa fa-share-alt"></i>
+                        </button>
+
+                        {% if seqpeek_list %}
+                            <table id="seqpeek-table" class="table table-striped tablesorter">
+                                <thead>
+                                <tr>
+                                    <th class="checkbox-col"><input type="checkbox" class="select-all"/></th>
+                                    <th class="name-col">Visualization Name</th>
+                                    <th class="sample-col"># of Plots</th>
+                                    <th class="owner-col">Owner</th>
+                                    <th class="date-col">Last Modified</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for viz in seqpeek_list %}
+                                    <tr>
+                                        <td class="checkbox-col"><input type="checkbox" name="id" value="{{ viz.id }}" /></td>
+                                        <td class="name-col">
+                                            {% if viz.plots.0.plot_type == 'genecentric'%}
+                                                <a href="{% url 'seqpeek' viz.id %}">{{ viz.name }}</a>
+                                            {% else %}
+                                                <a href="{% url 'seqpeek' viz.id %}">{{ viz.name }}</a>
+                                            {% endif %}
+                                        </td>
+                                        <td class="sample-col">{{ viz.plot_set.all|length }}</td>
+                                        <td class="owner-col">{{ viz.get_owner.email }}</td>
+                                        <td class="date-col">{{ viz.last_date_saved|date:"SHORT_DATETIME_FORMAT" }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        {% endif %}
                     </div>
 
                     <!-- Search Results Panel -->
@@ -216,7 +272,7 @@
                                 <select name="operation" id="operation" class="form-control">
                                     <option value="union">Union</option>
                                     <option value="intersect">Intersection</option>
-                                    <option value="complement">Complement</option>
+                                    <option value="complement">Set Minus</option>
                                 </select>
                             </div>
                         </div>

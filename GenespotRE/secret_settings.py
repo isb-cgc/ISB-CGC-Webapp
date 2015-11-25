@@ -5,7 +5,7 @@ dotenv.read_dotenv(join(dirname(__file__), '../.env'))
 
 
 SETTINGS = {
-    'SECRET_KEY': os.environ.get('DJANGO_SECRET_KEY'), # Django SECRET_KEY
+    'SECRET_KEY': os.environ.get('DJANGO_SECRET_KEY', ''), # Django SECRET_KEY
     'DEBUG': os.environ.get('DEBUG', False),
     'PROJECT_ID': os.environ.get('GCLOUD_PROJECT_ID'), # Google Cloud Project ID #
     'BQ_PROJECT_ID': os.environ.get('BIGQUERY_PROJECT_ID', os.environ.get('GCLOUD_PROJECT_ID')), # Google Cloud Project ID #
@@ -18,6 +18,7 @@ SETTINGS = {
     'BASE_URL': os.environ.get('BASE_URL', 'http://localhost:8000'), # Localhost url
     'API_URL': os.environ.get('API_URL', 'http://localhost:8000'), # Localhost api url
     'ALLOWED_HOST': os.environ.get('ALLOWED_HOST', 'localhost'),
+
 
     # BigQuery cohort storage settings
     # TODO: Should be deleted at some point in favor of merged settings
@@ -85,28 +86,35 @@ SETTINGS = {
     'BIGQUERY_DATASET2': 'tcga_data_open', # Name of BigQuery dataset containing open tcga data
     'BIGQUERY_PROJECT_NAME': 'isb-cgc', # Name of project that owns BigQuery datasets
 
-    'GOOGLE_APPLICATION_CREDENTIALS': '', # Path to privatekey.json
-    'CLIENT_SECRETS': '', # Path to client_secrets.json
-    'PEM_FILE': '', # Path to privatekey.pem
-    'CLIENT_EMAIL': 'example@developer.gserviceaccount.com', # Client email from client_secrets.json
-    'WEB_CLIENT_ID': 'example.apps.googleusercontent.com', # Client ID from client_secrest.json
-    'INSTALLED_APP_CLIENT_ID': 'example.apps.googleusercontent.com', # Native Client ID
+    'GOOGLE_APPLICATION_CREDENTIALS': os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')) if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS') else '', # Path to privatekey.json
+    'CLIENT_SECRETS': os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('CLIENT_SECRETS')) if os.environ.get('CLIENT_SECRETS') else '', # Path to client_secrets.json
+    'PEM_FILE': os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('PEM_FILE')) if os.environ.get('PEM_FILE') else '', # Path to privatekey.pem
+    'CLIENT_EMAIL': os.environ.get('CLIENT_EMAIL', ''), # Client email from client_secrets.json
+    'WEB_CLIENT_ID': os.environ.get('WEB_CLIENT_ID', ''), # Client ID from client_secrest.json
+    'INSTALLED_APP_CLIENT_ID': os.environ.get('INSTALLED_APP_CLIENT_ID', ''), # Native Client ID
 
-    'DBGAP_AUTHENTICATION_LIST_FILENAME': '', # Name of file containing dbGaP Authentication list
-    'DBGAP_AUTHENTICATION_LIST_BUCKET': '', # name of bucket containing dbGap Authentication list file
-    'ACL_GOOGLE_GROUP': '', # Google group used for ACL list
-    'ERA_LOGIN_URL': '', # Url to Python SAML virtul machine
-    'IPV4': '', # IP address of CloudSQL database
+    'DBGAP_AUTHENTICATION_LIST_FILENAME': os.environ.get('DBGAP_AUTHENTICATION_LIST_FILENAME', ''), # Name of file containing dbGaP Authentication list
+    'DBGAP_AUTHENTICATION_LIST_BUCKET': os.environ.get('DBGAP_AUTHENTICATION_LIST_BUCKET', ''), # name of bucket containing dbGap Authentication list file
+    'ACL_GOOGLE_GROUP': os.environ.get('ACL_GOOGLE_GROUP', ''), # Google group used for ACL list
+    'OPEN_ACL_GOOGLE_GROUP': os.environ.get('OPEN_ACL_GOOGLE_GROUP', ''), # Google group used for ACL list
+    'ERA_LOGIN_URL': os.environ.get('ERA_LOGIN_URL', ''), # Url to Python SAML virtul machine
+    'IPV4': os.environ.get('IPV4', ''), # IP address of CloudSQL database
 
     # Compute services
-    'PAIRWISE_SERVICE_URL': '',
+    'PAIRWISE_SERVICE_URL': os.environ.get('PAIRWISE_SERVICE_URL'),
 
     # Cloud Storage Buckets
-    'OPEN_DATA_BUCKET': '',
-    'CONTROLLED_DATA_BUCKET': '',
+    'OPEN_DATA_BUCKET': os.environ.get('OPEN_DATA_BUCKET'),
+    'CONTROLLED_DATA_BUCKET': os.environ.get('CONTROLLED_DATA_BUCKET'),
+
+    # IGV Project ID
+    'IGV_PROJECT_ID': os.environ.get('IGV_PROJECT_ID'),
+
+    # SAML setting
+    'SAML_FOLDER': os.environ.get('SAML_FOLDER'),
 
     'SU_USER': os.environ.get('SUPERUSER_USERNAME', 'isb'),
-    'SU_PASS': os.environ.get('SUPERUSER_PASSWORD'),
+    'SU_PASS': os.environ.get('SUPERUSER_PASSWORD', 'isbcgctest'),
 }
 
 if os.environ.has_key('DB_SSL_CERT'):

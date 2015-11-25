@@ -1,3 +1,21 @@
+"""
+
+Copyright 2015, Institute for Systems Biology
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+"""
+
 import json
 import collections
 import datetime
@@ -375,7 +393,7 @@ def genericplot(request, id=0):
                         'title': plot.title.encode('utf-8'),
                         'x_attr': str(plot.x_axis),
                         'y_attr': str(plot.y_axis),
-                        'color_by': str(plot.color_by) if plot.color_by else 'CLIN:Disease_Code',
+                        'color_by': str(plot.color_by) if plot.color_by else 'CLIN:Study',
                         'cohorts': cohort_list,
                         # 'cohort_name': str(cohort.name),
                         'patient_length': len(patient_set),
@@ -388,7 +406,7 @@ def genericplot(request, id=0):
                     'title': plot.title.encode('utf-8'),
                     'x_attr': str(plot.x_axis),
                     'y_attr': str(plot.y_axis),
-                    'color_by': str(plot.color_by) if plot.color_by else 'CLIN:Disease_Code',
+                    'color_by': str(plot.color_by) if plot.color_by else 'CLIN:Study',
                     'cohorts': cohort_list,
                     # 'cohort_name': str(cohort.name),
                     'patient_length': len(patient_set),
@@ -413,7 +431,7 @@ def genericplot(request, id=0):
                                    title='',
                                    x_axis='CLIN:age_at_initial_pathologic_diagnosis',
                                    y_axis='',
-                                   color_by='CLIN:Disease_Code')
+                                   color_by='CLIN:Study')
 
         plot.save()
         plot_cohort = Plot_Cohorts.objects.create(plot=plot, cohort=cohort)
@@ -468,90 +486,6 @@ def genericplot(request, id=0):
                                                               'data_types': datatypes,
                                                               'new_datatypes': new_datatypes})
 
-def genecentric(request, id=0):
-    # t0 = time.clock()
-    # viz = {}
-    # search = {}
-    # violin_data = {}
-    # plots_data = []
-    # API_URL = settings.BASE_API_URL + '/_ah/api/egfr_api/v1'
-    # initial_params = [
-    #     {'x_attr': 'CNVR_EGFR',
-    #      'y_attr': 'EGFR_chr7_55086714_55324313',
-    #      'color_by': 'disease_code'},
-    #     {'x_attr': 'EGFR_chr7_55086714_55324313',
-    #      'y_attr': 'EGFR_chr7_55086714_55324313_EGFR',
-    #      'color_by': 'disease_code'},
-    #     {'x_attr': 'methPlatform',
-    #      'y_attr': 'EGFR_chr7_55086890_cg14094960_5pUTR_Island',
-    #      'color_by': 'disease_code'},
-    # ]
-    #
-    # if id != 0:
-    #     viz = SavedViz.objects.get(id=id)
-    #     plots = Plot.objects.filter(visualization=id)
-    #
-    #     if viz:
-    #         index = 0
-    #         for plot in plots:
-    #             item = {
-    #                 'plot_index': index,
-    #                 'x_attr': str(plot.x_axis) if plot.x_axis else 'age_at_initial_pathologic_diagnosis',
-    #                 'y_attr': str(plot.y_axis) if plot.y_axis else '',
-    #                 'color_by': str(plot.color_by) if plot.color_by else 'disease_code',
-    #                 'cohort': int(plot.cohort.id),
-    #                 'cohort_name': str(plot.cohort.name),
-    #                 'cohort_length': len(plot.cohort.barcodes.split(','))}
-    #             plots_data.append(item)
-    #             index += 1
-    #
-    # if 'searchid' in request.POST.keys():
-    #     search = getsearch(request.POST['searchid'])
-    #     if search != False:
-    #         search = search[0]
-    #         index = 0
-    #         for plot in initial_params:
-    #             item = {
-    #                 'plot_index': index,
-    #                 'x_attr': plot['x_attr'],
-    #                 'y_attr': plot['y_attr'],
-    #                 'color_by': plot['color_by'],
-    #                 'cohort': search['id'],
-    #                 'cohort_name': search['name'],
-    #                 'cohort_length': len(search['barcodes'].split(','))}
-    #             plots_data.append(item)
-    #             index += 1
-    #
-    # if len(plots_data) == 0:
-    #     data_url = API_URL + '/plot1?selectors=disease_code'
-    #     data = urlfetch.fetch(data_url, deadline=60)
-    #     data_json = json.loads(data.content, object_hook=_decode_dict)
-    #
-    #     plot_data = data_json['items']
-    #     index = 0
-    #     for plot in initial_params:
-    #
-    #         item = {
-    #             'plot_index': index,
-    #             'x_attr': plot['x_attr'],
-    #             'y_attr': plot['y_attr'],
-    #             'color_by': plot['color_by'],
-    #             'cohort': '',
-    #             'cohort_name': 'All Data',
-    #             'cohort_length': len(plot_data)}
-    #         plots_data.append(item)
-    #         index += 1
-    #
-    # print time.clock() - t0, ' Seconds in genecentric view.'
-    return render(request, 'visualizations/genecentric.html', {'request': request,
-                                                              # 'search': search,
-                                                              # 'viz': viz,
-                                                              # 'plots_data': plots_data,
-                                                              # 'violin_data': violin_data,
-                                                              # 'numerical_attributes': numerical_attributes,
-                                                              # 'categorical_attributes': categorical_attributes,
-                                                              # 'friendly_name_map': friendly_name_map
-    })
 
 @csrf_protect
 def save_viz(request):
@@ -718,7 +652,7 @@ def add_plot(request):
                                    title='',
                                    x_axis='CLIN:age_at_initial_pathologic_diagnosis',
                                    y_axis='',
-                                   color_by='CLIN:Disease_Code')
+                                   color_by='CLIN:Study')
 
         plot.save()
         plot_cohort = Plot_Cohorts.objects.create(plot=plot, cohort=cohort)

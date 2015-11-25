@@ -6,16 +6,8 @@ $(document).on('ready', function() {
 
     $('#disease-types').tokenfield({
         autocomplete:{
-            source: disease_codes
+            source: track_id_list
         },
         showAutocompleteOnFocus: true
     });
-
-//    $('#genes').tokenfield({
-//        autocomplete:{
-//            source: gene_list
-//        },
-//        limit,
-//        showAutocompleteOnFocus: true
-//    })
 });

@@ -1,0 +1,46 @@
+{% load staticfiles %}
+{% load tz %}
+{% block saml_content %}
+
+    {% if not user_details.NIH_username or not user_details.NIH_active %} {# No eRA account, no dbGaP #}
+        <p>
+        Apply for dbGaP Authorized Access to access underlying Level 1 genomics data.
+        </p>
+
+        {% if not user_details.NIH_username %}
+           <a href="{% url 'demo:saml_index' %}?sso">Associate with eRA Commons Account</a>
+        {% else %}
+            <a href="{% url 'demo:saml_index' %}?sso">Log in with your eRA Commons Account {{ user_details.NIH_username }}</a>
+            <a href="{% url 'unlink_accounts' %}">Unlink {{ user_details.email }} from the NIH username {{ user_details.NIH_username }}</a>
+        {% endif %}
+       <a href="https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login" target="_blank">Learn More</a>
+
+    {% elif not user_details.dbGaP_authorized %} {# no dbGaP #}
+        <p><i class="fa fa-check-circle"></i> eRA Account Authenticated</p>
+        <hr>
+        <p>Congratulations, {{ user_details.NIH_username }}! Your eRA account has been authenticated. Now we need to verify if you have dbGaP authorization. This process may take up to 24 hours.</p>
+
+        <a href="#">How to Apply for dbGaP Access</a>
+    {% else %} {# Both authorized #}
+        <p><i class="fa fa-check-circle"></i> dbGaP Access Authorized</p>
+        <hr>
+        <p>
+            Congratulations, {{ user_details.NIH_username }}! You now have access to ISB-CGC controlled access TCGA data until
+            {{ user_details.NIH_assertion_expiration|localtime }}
+            {% if TIMEZONE != "" or TIMEZONE != None %}
+                in {{ TIME_ZONE }} time.
+            {% endif %}
+        </p>
+
+        <a href="#">How to Access Controlled-Access Data</a>
+        <a href="#">Data Use Certification Agreement</a>
+    {% endif %}
+    {% if membership %}
+        <hr>
+        <p>
+           You are a member of the group isb-cgc-cntl.
+            <a data-toggle="modal" data-target="#bucket-contents-modal">View bucket contents</a>
+        </p>
+    {% endif %}
+
+{%  endblock %}

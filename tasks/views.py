@@ -1,11 +1,32 @@
+"""
+
+Copyright 2015, Institute for Systems Biology
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+"""
+
 import io
-import pysftp
 import json
 import StringIO
 import csv
 import logging
-import os
+
 import pytz
+
+import pysftp
+
+import pexpect  # comment this out when running in gae
 from datetime import datetime
 
 from django.http import HttpResponse
@@ -86,7 +107,8 @@ def scrub_nih_users(dbGaP_authorized_list):
 
         directory_service, directory_http_auth = get_directory_resource()
         result = directory_service.members().list(groupKey=ACL_GOOGLE_GROUP).execute(http=directory_http_auth)
-        members = result['members']
+
+        members = [] if 'members' not in result else result['members']
         # loop through everyone in ACL_GOOGLE_GROUP
         for member in members:
             email = member['email']
@@ -104,7 +126,6 @@ def scrub_nih_users(dbGaP_authorized_list):
                     # remove from ACL_GOOGLE_GROUP
                     directory_service.members().delete(groupKey=ACL_GOOGLE_GROUP, memberKey=email).execute(http=directory_http_auth)
                     logger.warn("Deleted user {} from ACL_GOOGLE_GROUP because a matching entry was not found in the dbGaP authorized list.".format(email))
-                    # change dbGaP_authorized to False
                     nih_user.dbGaP_authorized = False
                     nih_user.save()
                     logger.warn("Changed NIH user {}'s dbGaP_authorized to False because a matching entry was not found in the dbGaP authorized list.".format(nih_username))
@@ -114,7 +135,14 @@ def scrub_nih_users(dbGaP_authorized_list):
                 logger.debug("Problem getting either {}'s user id or their NIH username: {}".format(email, str(e)))
                 # remove from ACL_GOOGLE_GROUP
                 directory_service.members().delete(groupKey=ACL_GOOGLE_GROUP, memberKey=email).execute(http=directory_http_auth)
-                continue  # ?
+                continue
+        # loop through everyone in NIH_User.objects.filter(dbGaP_authorized=True) out of paranoia
+        for nih_user in NIH_User.objects.filter(dbGaP_authorized=True):
+            logger.info("checking nih_user {}".format(nih_user.NIH_username))
+            if not matching_row_exists(rows, 'login', nih_user.NIH_username):
+                nih_user.dbGaP_authorized = False
+                nih_user.save()
+                logger.warn("Changed NIH user {}'s dbGaP_authorized to False because a matching entry was not found in the dbGaP authorized list.".format(nih_user.NIH_username))
 
 
 def IAM_logging(request):
@@ -213,6 +241,7 @@ def check_user_login(request):
                     logger.debug(user_email + ' was not removed from ACL_GOOGLE_GROUP: ' + str(e))
 
                 nih_user.active = 0
+                nih_user.dbGaP_authorized = 0
                 nih_user.save()
                 logger.info('User with NIH username ' + str(nih_user.NIH_username) + ' is deactivated in NIH_User table')
 
@@ -280,6 +309,7 @@ def CloudSQL_logging(request):
 
     filenames = get_binary_log_filenames()
     yesterdays_binary_log_file = filenames[-2]
+    logger.info("Yesterday's binary log file: " + str(yesterdays_binary_log_file))
     arglist = ['mysqlbinlog',
                '--read-from-remote-server',
                yesterdays_binary_log_file,
@@ -290,25 +320,30 @@ def CloudSQL_logging(request):
                '--base64-output=DECODE-ROWS',
                '--verbose',
                '--password',
-               settings.DATABASES['default']['PASSWORD']
+               settings.DATABASES['default']['PASSWORD'],
+               '--ssl-ca=' + settings.DATABASES['default']['OPTIONS']['ssl']['ca'],
+               '--ssl-cert=' + settings.DATABASES['default']['OPTIONS']['ssl']['cert'],
+               '--ssl-key=' + settings.DATABASES['default']['OPTIONS']['ssl']['key']
                ]
-    # uncomment in managed VM -- pexpect is not allowed in GAE
-    # import pexpect
-    # child = pexpect.spawn(' '.join(arglist))
-    # child.expect('Enter password:')
-    # child.sendline(settings.DATABASES['default']['PASSWORD'])
-    # i = child.expect(['Permission denied', 'Terminal type', '[#\$] '])
-    # if i == 2:
-    #     output = child.read()
-    #     date_start_char = output.find('#1')
-    #     date_str = output[date_start_char+1:date_start_char+7]
-    #     storage_service = get_storage_resource()
-    #     media = http.MediaIoBaseUpload(io.BytesIO(output), 'text/plain')
-    #     filename = 'cloudsql_activity_log_' + date_str + '.txt'
-    #     storage_service.objects().insert(bucket='isb-cgc_logs',
-    #                                      name=filename,
-    #                                      media_body=media,
-    #                                      ).execute()
+
+    child = pexpect.spawn(' '.join(arglist))
+    child.expect('Enter password:')
+    child.sendline(settings.DATABASES['default']['PASSWORD'])
+    i = child.expect(['Permission denied', 'Terminal type', '[#\$] '])
+    if i == 2:
+        output = child.read()
+        date_start_char = output.find('#1')
+        date_str = output[date_start_char+1:date_start_char+7]
+        storage_service = get_storage_resource()
+        media = http.MediaIoBaseUpload(io.BytesIO(output), 'text/plain')
+        filename = 'cloudsql_activity_log_' + date_str + '.txt'
+        storage_service.objects().insert(bucket='isb-cgc_logs',
+                                         name=filename,
+                                         media_body=media,
+                                         ).execute()
+    else:
+        logger.warn("Logs were not written to cloudstorage, i = " + str(i))
+        return HttpResponse("Logs were not written to cloudstorage, i = " + str(i))
 
     return HttpResponse('')
 
@@ -398,3 +433,41 @@ def edit_dbGaP_authentication_list(nih_username):
     req.execute()
     logger.info("NIH user {} removed from {}".format(
         nih_username, settings.DBGAP_AUTHENTICATION_LIST_FILENAME))
+
+
+def create_and_log_reports(request):
+    """
+    Returns:
+       Returns information on the various Admin console activities
+    """
+
+    # construct service.
+    service = get_directory_resource()
+
+    # get utc time and timedelta
+    utc_now = datetime.datetime.utcnow()
+    tdelta = utc_now + datetime.timedelta(days=-7)
+    start_datetime = tdelta.isoformat("T") + "Z" # collect last 7 days logs
+
+    #reports return account information about different types of administrator activity events.
+    admin_report = service.activities().list(userKey='all', applicationName='admin',
+                                             startTime=start_datetime).execute()
+
+    # reports return account information about different types of Login activity events.
+    login_report = service.activities().list(userKey='all', applicationName='login',
+                                             startTime=start_datetime).execute()
+
+    # reports return account information about different types of Token activity events.
+    token_report = service.activities().list(userKey='all', applicationName='token',
+                                             startTime=start_datetime).execute()
+
+    #reports return information about various Groups activity events.
+    groups_report = service.activities().list(userKey='all', applicationName='groups',
+                                              startTime=start_datetime).execute()
+
+    # log the reports using Cloud logging API
+    write_log_entry('apps_admin_activity_report', admin_report)
+    write_log_entry('apps_login_activity_report', login_report)
+    write_log_entry('apps_token_activity_report', token_report)
+    write_log_entry('apps_groups_activity_report', groups_report)
+    return HttpResponse('')
