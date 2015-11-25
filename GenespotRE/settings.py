@@ -1,3 +1,21 @@
+"""
+
+Copyright 2015, Institute for Systems Biology
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+"""
+
 # Django settings for GAE_Django17 project.
 import os
 
@@ -19,11 +37,12 @@ MVM_ON = True
 #ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 #)
-ADMINS = (('Eric', 'edownes@systemsbiology.org'))
+ADMINS = ()
 MANAGERS = ADMINS
 
 PROJECT_ID = secret_settings.get('PROJECT_ID')
 BQ_PROJECT_ID = secret_settings.get('BQ_PROJECT_ID')
+IGV_PROJECT_ID = secret_settings.get('IGV_PROJECT_ID')
 
 CLOUD_BASE_URL = secret_settings.get('CLOUD_BASE_URL')
 CLOUD_API_URL = secret_settings.get('CLOUD_API_URL')
@@ -42,6 +61,8 @@ GCLOUD_BUCKET = secret_settings.get('GCLOUD_BUCKET')
 COHORT_DATASET_ID = secret_settings.get('COHORT_DATASET_ID')
 DEVELOPER_COHORT_TABLE_ID = secret_settings.get('DEVELOPER_COHORT_TABLE_ID')
 
+NIH_AUTH_ON = False
+
 if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):  
     # or os.getenv('SETTINGS_MODE') == 'prod':
     DATABASES = secret_settings.get('DATABASE')
@@ -49,6 +70,7 @@ if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):
     BASE_API_URL = CLOUD_API_URL
     SITE_ID = 4
     DEVELOPER_COHORT_TABLE_ID = secret_settings.get('CLOUD_COHORT_TABLE')
+    NIH_AUTH_ON = True
 elif os.getenv('SETTINGS_MODE') == 'dev':
     DATABASES = secret_settings.get('DATABASE')
     BASE_URL = LOCAL_BASE_URL
@@ -325,8 +347,10 @@ LOGIN_EXPIRATION_HOURS = 24
 DBGAP_AUTHENTICATION_LIST_FILENAME  = secret_settings.get('DBGAP_AUTHENTICATION_LIST_FILENAME')
 DBGAP_AUTHENTICATION_LIST_BUCKET    = secret_settings.get('DBGAP_AUTHENTICATION_LIST_BUCKET')
 ACL_GOOGLE_GROUP                    = secret_settings.get('ACL_GOOGLE_GROUP')
+OPEN_ACL_GOOGLE_GROUP               = secret_settings.get('OPEN_ACL_GOOGLE_GROUP')
 ERA_LOGIN_URL                       = secret_settings.get('ERA_LOGIN_URL')
 IPV4                                = secret_settings.get('IPV4')
+SAML_FOLDER                         = secret_settings.get('SAML_FOLDER')
 
 
 
