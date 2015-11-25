@@ -25,8 +25,8 @@
 
             <div class="radio"> <label><input type="radio" name="upload" checked data-target="#uploadField" aria-expanded="true" area-controls="uploadField"> Upload a gene list from a plain text (ascii) file -- items either space or tab separated or NEW LINE</label> </div>
             <div class="collapse in" id="uploadField">
-                <button class="btn btn-primary"><i class="fa fa-folder-open"></i>Select File</button>
-                <input type="file" name="upload">
+                <button class="btn btn-primary" id="uploadBtn"><i class="fa fa-folder-open"></i>Select File</button>
+                <input type="file" name="upload" id="fileUploadField" style="display: none">
             </div>
 
             <div class="radio"> <label><input type="radio" name="upload" data-target="#tokenfield-holder" aria-expanded="false" area-controls="tokenfield-holder"> Paste in a gene list -items either space or tab separated</label> </div>
@@ -47,6 +47,9 @@
 <div class="modal">
     error modal
 </div>
+<script>
+    var genes_fav_detail;
+</script>
 {% endblock %}
 
 {% block js_file %}{% static 'js/genes.js' %}{% endblock %}

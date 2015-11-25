@@ -35,7 +35,7 @@ urlpatterns = patterns('',
     # Blink views
     # ------------------------------------------
 
-    url(r'^help/', views.help_page, name='help_page'),
+    url(r'^help/', views.help_page, name='help'),
     url(r'^about/', views.about_page, name='about_page'),
     url(r'^dashboard/', views.dashboard_page, name='dashboard'),
 

@@ -92,4 +92,39 @@ require([
         }
     });
 
+    // Genes upload page
+    // Check if the browser support formdata for file upload
+    var xhr2 = !! ( window.FormData && ("upload" in ($.ajaxSettings.xhr())  ));
+    if(!xhr2 || !window.File || !window.FileReader || !window.FileList || !window.Blob){
+        var errorMsg = 'Your browser doesn\'t support file upload. You can paste your gene list from the option below.';
+        $('#uploadBtn').attr('disabled', true).parent()
+                       .append('<p class="small">' + errorMsg + '</p>');
+    }else{
+        // If file upload is supported
+        var fileUploadField = $('#fileUploadField');
+        var validFileTypes = ['txt', 'csv'];
+
+        $('#uploadBtn').click(function(){
+            fileUploadField.click();
+        });
+        fileUploadField.on('change', function(event){
+            var file = this.files[0];
+            var ext = file.name.split(".").pop().toLowerCase();
+
+            // check file format against valid file types
+            if(validFileTypes.indexOf(ext) < 0){
+                alert('Please upload a .txt or .csv file');
+                return false;
+            }
+
+            if(event.target.files != undefined){
+                var fr = new FileReader();
+                var uploaded_gene_list;
+                fr.onload = function(event){
+                    uploaded_gene_list = fr.result.split(/[ \(,\)]+/);
+                }
+                fr.readAsText(event.target.files.item(0));
+            }
+        })
+    }
 });
