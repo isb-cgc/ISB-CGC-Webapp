@@ -2,6 +2,24 @@
 {% load staticfiles %}
 {% load tz %}
 
+{% comment %}
+
+   Copyright 2015, Institute for Systems Biology
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+{% endcomment %}
+
 {% block header %}
 {#    <script type="text/javascript" src="{% static 'js/user_details.js' %}"></script>#}
 {% endblock %}
@@ -22,7 +40,7 @@
                 </h5>
             </div>
             <div class="panel-body">
-                <table class="user-info">
+                <table class="user-info" role="presentation">
                     <tr>
                         <td>User ID</td>
                         <td>{{ user_details.id }}</td>
@@ -40,10 +58,10 @@
                         <td>Last Logged In</td>
                         <td>{{ user_details.last_login|localtime }}</td>
                     </tr>
-                    <tr>
-                        <td>Date Joined</td>
-                        <td>{{ user_details.date_joined|localtime }}</td>
-                    </tr>
+{#                    <tr>#}
+{#                        <td>Date Joined</td>#}
+{#                        <td>{{ user_details.date_joined|localtime }}</td>#}
+{#                    </tr>#}
                 </table>
             </div>
         </div>
@@ -55,50 +73,13 @@
                 </h5>
             </div>
             <div class="panel-body">
-                {% if not user_details.NIH_username or not user_details.NIH_active %} {# No eRA account, no dbGaP #}
-                    <p>
-                    Apply for dbGaP Authorized Access to access underlying Level 1 genomics data.
-                    </p>
-
-
-                    {% if not user_details.NIH_username %}
-                        <a href="{{ eRA_login_url }}">Associate with eRA Commons Account</a>
-                    {% else %}
-                        <a href="{{ eRA_login_url }}">Log in with your eRA Commons Account {{ user_details.NIH_username }}</a>
-                        <a href="{% url 'unlink_accounts' %}">Unlink {{ user_details.email }} from the NIH username {{ user_details.NIH_username }}</a>
-                    {% endif %}
-
-                    <a href="https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login" target="_blank">Learn More</a>
-
-                {% elif not user_details.dbGaP_authorized %} {# no dbGaP #}
-                    <p><i class="fa fa-check-circle"></i> eRA Account Authenticated</p>
-                    <hr>
-                    <p>Congratulations, {{ user_details.NIH_username }}! Your eRA account has been authenticated. Now we need to verify if you have dbGaP authorization. This process may take up to 24 hours.</p>
-
-                    <a href="#">How to Apply for dbGaP Access</a>
-                {% else %} {# Both authorized #}
-                    <p><i class="fa fa-check-circle"></i> dbGaP Access Authorized</p>
-                    <hr>
-                    <p>
-                        Congratulations, {{ user_details.NIH_username }}! You now have access to ISB-CGC controlled access TCGA data until
-                        {{ user_details.NIH_assertion_expiration|localtime }}
-                        {% if TIMEZONE != "" %}
-                            in {{ TIME_ZONE }} time.
-                        {% endif %}
-                    </p>
-
-                    <a href="#">How to Access Controlled-Access Data</a>
-                    <a href="#">Data Use Certification Agreement</a>
+                {% if NIH_AUTH_ON %}
+                    {% include 'GenespotRE/user_detail_saml.html' %}
+                    {% block saml_content %}
+                    {% endblock %}
+                {% else %}
+                    <p>NIH Authorization currently disabled.</p>
                 {% endif %}
-                {% if membership %}
-                    <hr>
-                    <p>
-                       You are a member of the group isb-cgc-cntl.
-                        <a data-toggle="modal" data-target="#bucket-contents-modal">View bucket contents</a>
-                    </p>
-                {% endif %}
-
-
             </div>
         </div>
 
@@ -109,11 +90,10 @@
                 </h5>
             </div>
             <div class="panel-body">
-                {% if False %}
+                {% if True %}
                     <p>
-                        Connect to Google Cloud Platform to start uploading your own datasets, setup your own virtual machines and run custom processing pipelines on TCGA.
+                        <a href="https://groups.google.com/a/isb-cgc.org/forum/#!newtopic/request-gcp" target="_blank">Request</a> a Google Cloud Project to start uploading your own datasets, setup your own virtual machines and run custom processing pipelines on TCGA data.
                     </p>
-                    <a href="#">Sign Up</a>
                 {% else %}
                     <p><i class="fa fa-check-circle"></i> Connected to Google Cloud Platform</p>
                     <hr>
@@ -122,12 +102,12 @@
                     </p>
 
                     <!-- Button trigger modal -->
-                    <a class="more-credits-modal" data-toggle="modal" data-target="#more-credits-modal">
-                        Request Credits
-                    </a>
+{#                    <a class="more-credits-modal" data-toggle="modal" data-target="#more-credits-modal">#}
+{#                        Request Credits#}
+{#                    </a>#}
 
                     <a href="#">Run a Custom Pipeline</a>
-                    <a href="#">Upload Your Own Datasets</a>
+{#                    <a href="#">Upload Your Own Datasets</a>#}
                 {% endif %}
             </div>
         </div>
@@ -135,54 +115,54 @@
 
 
     <!-- Modal -->
-    <div class="modal fade" id="more-credits-modal" tabindex="-1" role="dialog" aria-labelledby="MoreCreditLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="MoreCreditLabel">Request Additional Google Cloud Platform Credits</h4>
-                </div>
-                <form id="request-credits" method="POST" action="#" class="form-horizontal">
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <label for="name" class="col-sm-3 control-label">Name</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control" name="name" id="name" placeholder="Name" value="{{ user_details.first_name }} {{ user_details.last_name }}"/>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="email" class="col-sm-3 control-label">Email Address</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control" name="email" id="email" placeholder="email@example.com" value="{{ user_details.email }}"/>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="credits" class="col-sm-3 control-label">Credits Requested</label>
-                            <div class="col-sm-9">
-                                <div class="btn-group" role="group">
-                                    <button type="button" class="btn btn-default" value="1000">$1000</button>
-                                    <button type="button" class="btn btn-default" value="2000">$2000</button>
-                                    <button type="button" class="btn btn-default" value="5000">$5000</button>
-                                </div>
-                                <input type="hidden" name="credits" value=""/>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="project-details" class="col-sm-3 control-label">Project Details</label>
-                            <div class="col-sm-9">
-                                <textarea class="form-control" name="project-details" id="project-details" rows="3" placeholder="Explain your project and why you need additional Google Cloud Platform Credits..."></textarea>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                        {% csrf_token %}
-                        <input type="submit" value="Submit Request" class="btn btn-primary" />
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+{#    <div class="modal fade" id="more-credits-modal" tabindex="-1" role="dialog" aria-labelledby="MoreCreditLabel" aria-hidden="true">#}
+{#        <div class="modal-dialog">#}
+{#            <div class="modal-content">#}
+{#                <div class="modal-header">#}
+{#                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>#}
+{#                    <h4 class="modal-title" id="MoreCreditLabel">Request Additional Google Cloud Platform Credits</h4>#}
+{#                </div>#}
+{#                <form id="request-credits" method="POST" action="#" class="form-horizontal">#}
+{#                    <div class="modal-body">#}
+{#                        <div class="form-group">#}
+{#                            <label for="name" class="col-sm-3 control-label">Name</label>#}
+{#                            <div class="col-sm-9">#}
+{#                                <input type="text" class="form-control" name="name" id="name" placeholder="Name" value="{{ user_details.first_name }} {{ user_details.last_name }}"/>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                        <div class="form-group">#}
+{#                            <label for="email" class="col-sm-3 control-label">Email Address</label>#}
+{#                            <div class="col-sm-9">#}
+{#                                <input type="text" class="form-control" name="email" id="email" placeholder="email@example.com" value="{{ user_details.email }}"/>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                        <div class="form-group">#}
+{#                            <label for="credits" class="col-sm-3 control-label">Credits Requested</label>#}
+{#                            <div class="col-sm-9">#}
+{#                                <div class="btn-group" role="group">#}
+{#                                    <button type="button" class="btn btn-default" value="1000">$1000</button>#}
+{#                                    <button type="button" class="btn btn-default" value="2000">$2000</button>#}
+{#                                    <button type="button" class="btn btn-default" value="5000">$5000</button>#}
+{#                                </div>#}
+{#                                <input type="hidden" name="credits" value=""/>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                        <div class="form-group">#}
+{#                            <label for="project-details" class="col-sm-3 control-label">Project Details</label>#}
+{#                            <div class="col-sm-9">#}
+{#                                <textarea class="form-control" name="project-details" id="project-details" rows="3" placeholder="Explain your project and why you need additional Google Cloud Platform Credits..."></textarea>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    <div class="modal-footer">#}
+{#                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>#}
+{#                        {% csrf_token %}#}
+{#                        <input type="submit" value="Submit Request" class="btn btn-primary" />#}
+{#                    </div>#}
+{#                </form>#}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
 
 
     <!-- Modal -->

@@ -1,3 +1,21 @@
+/**
+ *
+ * Copyright 2015, Institute for Systems Biology
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
 require.config({
     baseUrl: '/static/js/',
     paths: {
@@ -68,7 +86,7 @@ require([
         $('#filter-panel input[type="checkbox"]:checked').each(function() {
             selector_list.push($(this).attr('id'));
         });
-        var url = base_api_url + '/_ah/api/meta_api/v1/cohort_files?cohort_id=' + cohort_id + '&page=' + page;
+        var url = ajax_update_url + '?page=' + page;
 
         if (selector_list.length) {
             for (selector in selector_list) {
@@ -81,12 +99,19 @@ require([
         $.ajax({
             url: url,
             success: function (data) {
+                data = JSON.parse(data);
                 total_files = data['total_file_count'];
                 $('.filelist-panel .panel-body .file-count').html(total_files);
                 $('.filelist-panel .panel-body .page-num').html(page);
                 var files = data['file_list'];
                 $('.filelist-panel table tbody').empty();
                 for (var i = 0; i < files.length; i++) {
+                    if (!('datatype' in files[i])) {
+                        files[i]['datatype'] = '';
+                    }
+                    if (files[i]['gg_readgroupset_id']) {
+                        files[i]['gg_readgroupset_id'] = '<a href="'+ base_url + '/' + files[i]['gg_readgroupset_id'] + '"><i class="fa fa-check"></i> Go to IGV</a>'
+                    }
                     $('.filelist-panel table tbody').append(
                         '<tr>' +
                         '<td>' + files[i]['sample'] + '</td>' +
@@ -94,6 +119,7 @@ require([
                         '<td>' + happy_name(files[i]['platform']) + '</td>' +
                         '<td>' + files[i]['datalevel'] + '</td>' +
                         '<td>' + files[i]['datatype'] + '</td>' +
+                        '<td>' + files[i]['gg_readgroupset_id'] + '</td>' +
                         '</tr>'
                     )
                 }

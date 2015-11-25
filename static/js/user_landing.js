@@ -1,3 +1,21 @@
+/**
+ *
+ * Copyright 2015, Institute for Systems Biology
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
 require.config({
     baseUrl: '/static/js/',
     paths: {
@@ -189,6 +207,34 @@ require([
         }
     });
 
+    $('#seqpeek-list input[type="checkbox"]').on('change', function() {
+        clear_viz_objects();
+        if ($('#seqpeek-list tr:not(:first) input[type="checkbox"]:checked').length == 0) {
+            $('#delete-sp-btn').prop('disabled', 'disabled');
+            $('#share-sp-btn').prop('disabled', 'disabled');
+            $('#seqpeek-list .select-all').prop('checked', false);
+        } else {
+            $('#delete-sp-btn').removeAttr('disabled');
+            $('#share-sp-btn').removeAttr('disabled');
+
+            $('#seqpeek-list input[type="checkbox"]').each(function() {
+                if ($(this).is(':checked') && $(this).val() != 'on') {
+                    var token_str = '<span class="cohort-label label label-default space-right-5" value="'
+                        + $(this).val() + '" name="viz-ids">'
+                        + $(this).parents('tr').find('.name-col a').html()
+                        + ' <a role="button" class="delete-x"><i class="fa fa-times"></a>'
+                        + '</span>';
+                    var cohort_token = $(token_str);
+                    $('.selected-viz').each(function() {
+                        $(this).append(cohort_token.clone());
+                    });
+                    $('.delete-x').on('click', delete_x_callback);
+                }
+            })
+
+        }
+    });
+
     $('#set-op-cohort').on('submit', function() {
         var form = $(this);
         $('#selected-ids').children().each(function() {
@@ -285,17 +331,10 @@ require([
         type: 'numeric'
     });
 
-    $('#cohort-table').tablesorter({
+    $('#cohort-table, #viz-table, #seqpeek-table').tablesorter({
         headers: {
             0: {sorter:false},
             4: {sorter:'customDate'}
-        },
-        sortList: [[4,1]]
-    });
-    $('#viz-table').tablesorter({
-        headers: {
-            0: {sorter:false},
-            4: {sorter: 'customDate'}
         },
         sortList: [[4,1]]
     });
@@ -305,7 +344,7 @@ require([
         var data = $(this).find('input[type="text"]').val();
         $.ajax({
             type: 'get',
-            url: base_api_url + '/search_cohorts_viz/?q=' + data,
+            url: base_url + '/search_cohorts_viz/?q=' + data,
             success: function(data) {
                 data = JSON.parse(data);
 
@@ -374,4 +413,6 @@ require([
     $('#delete-cohorts').prop('disabled', 'disabled');
     $('#delete-viz-btn').prop('disabled', 'disabled');
     $('#share-viz-btn').prop('disabled', 'disabled');
+    $('#delete-sp-btn').prop('disabled', 'disabled');
+    $('#share-sp-btn').prop('disabled', 'disabled');
 });

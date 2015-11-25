@@ -1,12 +1,20 @@
-import os
+"""
 
-### MVM STUFF
-SSL_DIR = os.path.abspath(os.path.dirname(__file__))+os.sep
-if 'VERSION_NAME' in os.environ:
-    VER = os.getenv('VERSION_NAME')
-else:
-    VER = 'DEV'
-###
+Copyright 2015, Institute for Systems Biology
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+"""
 
 SETTINGS = {
     'SECRET_KEY': '', # Django SECRET_KEY
@@ -14,8 +22,8 @@ SETTINGS = {
     'PROJECT_ID': '000000000000', # Google Cloud Project ID #
     'BQ_PROJECT_ID': '000000000000', # Google Cloud Project ID #
 
-    'CLOUD_BASE_URL': 'http://'+VER+'-dot-isb-cgc.appspot.com', # Deployed url
-    'CLOUD_API_URL': 'https://'+VER+'-dot-isb-cgc.appspot.com', # Deployed api url
+    'CLOUD_BASE_URL': 'http://example.appspot.com', # Deployed url
+    'CLOUD_API_URL': 'https://example.appspot.com', # Deployed api url
 
     'LOCAL_BASE_URL': 'http://localhost:8000', # Localhost url
 
@@ -29,18 +37,9 @@ SETTINGS = {
     'CLOUD_DATABASE': {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'HOST': '<ip-of-cloudsql-instance>',
+            'HOST': '/cloudsql/<your-database-instance>',
             'NAME': '<name-of-database-in-cloudsql>',
-            'USER': '<username>',
-            'PASSWORD': '<password>',
-            'PORT': 3306,
-            'OPTIONS': {
-                'ssl': {
-                    'ca': SSL_DIR + 'server-ca.pem',
-                    'cert': SSL_DIR + 'client-cert.pem',
-                    'key': SSL_DIR + 'client-key.pem'
-                }
-            }
+            'USER': '<username>'
         }
     },
     'CLOUD_DATABASE_LOCAL_CONNECTION': {
@@ -83,14 +82,7 @@ SETTINGS = {
     'DBGAP_AUTHENTICATION_LIST_BUCKET': '', # name of bucket containing dbGap Authentication list file
     'ACL_GOOGLE_GROUP': '', # Google group used for ACL list
     'ERA_LOGIN_URL': '', # Url to Python SAML virtul machine
-    'IPV4': '', # IP address of CloudSQL database
-
-    # Compute services
-    'PAIRWISE_SERVICE_URL': '',
-
-    # Cloud Storage Buckets
-    'OPEN_DATA_BUCKET': '',
-    'CONTROLLED_DATA_BUCKET': ''
+    'IPV4': '173.194.225.46', # ??? Who is using this ???
 }
 
 def get(setting):

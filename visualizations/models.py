@@ -1,3 +1,21 @@
+"""
+
+Copyright 2015, Institute for Systems Biology
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+"""
+
 import operator
 
 from django.db import models
@@ -20,6 +38,16 @@ class SavedVizManager(models.Manager):
 
         # Use operator's or_ to string together all of your Q objects.
         return qs.filter(reduce(operator.and_, [reduce(operator.or_, q_objects), Q(active=True)]))
+
+    def generic_viz_only(self, request):
+        viz_perms = Viz_Perms.objects.filter(user=request.user).values_list('visualization', flat=True)
+        plot_viz_ids = Plot.objects.filter(visualization__in=viz_perms).exclude(plot_type='seqpeek').values_list('visualization', flat=True)
+        return SavedViz.objects.filter(id__in=plot_viz_ids, active=True)
+
+    def seqpeek_only(self, request):
+        viz_perms = Viz_Perms.objects.filter(user=request.user).values_list('visualization', flat=True)
+        plot_viz_ids = Plot.objects.filter(visualization__in=viz_perms, plot_type='seqpeek').values_list('visualization', flat=True)
+        return SavedViz.objects.filter(id__in=plot_viz_ids, active=True)
 
 class SavedViz(models.Model):
     name = models.TextField(null=True)

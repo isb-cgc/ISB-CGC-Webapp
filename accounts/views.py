@@ -1,3 +1,21 @@
+"""
+
+Copyright 2015, Institute for Systems Biology
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+"""
+
 import datetime
 import logging
 import json
@@ -24,21 +42,19 @@ DBGAP_AUTHENTICATION_LIST_BUCKET = settings.DBGAP_AUTHENTICATION_LIST_BUCKET
 login_expiration_seconds = settings.LOGIN_EXPIRATION_HOURS * 60 * 60
 COUNTDOWN_SECONDS = login_expiration_seconds + (60 * 15)
 
-
-
 logger = logging.getLogger(__name__)
-ACL_GOOGLE_GROUP = settings.ACL_GOOGLE_GROUP
+ACL_GOOGLE_GROUP = settings.OPEN_ACL_GOOGLE_GROUP
 
 
 @login_required
 def extended_logout_view(request):
-    # delete NIH_username entry if exists
-    # todo: is filter better than get?
-    # todo: is
+    # deactivate NIH_username entry if exists
     try:
         nih_user = NIH_User.objects.get(user_id=request.user.id)
         nih_user.active = False
         nih_user.save()
+        logger.info("NIH user {} inactivated".format(nih_user.NIH_username))
+        # todo: is it advisable to set nih_user.dbGaP_authorized to False as well?
     except (ObjectDoesNotExist, MultipleObjectsReturned), e:
         if type(e) is MultipleObjectsReturned:
             logger.warn("Error %s on logout: more than one NIH User with user id %d" % (str(e), request.user.id))
@@ -48,6 +64,9 @@ def extended_logout_view(request):
     user_email = User.objects.get(id=request.user.id).email
     try:
         directory_service.members().delete(groupKey=ACL_GOOGLE_GROUP, memberKey=str(user_email)).execute(http=http_auth)
+        logger.info("Attempting to delete user {} from group {}. "
+                    "If an error message doesn't follow, they were successfully deleted"
+                    .format(str(user_email), ACL_GOOGLE_GROUP))
     except HttpError, e:
         logger.info(e)
 
@@ -75,8 +94,8 @@ def unlink_accounts(request):
     try:
         directory_service.members().delete(groupKey=ACL_GOOGLE_GROUP,
                                            memberKey=user_email).execute(http=http_auth)
-    except HttpError:
-        logger.info("%s could not be deleted from %s, probably because they were not a member." % (user_email, ACL_GOOGLE_GROUP))
+    except HttpError, e:
+        logger.info("%s could not be deleted from %s, probably because they were not a member: %s" % (user_email, ACL_GOOGLE_GROUP, e))
 
     # redirect to user detail page
     return redirect('/users/' + str(request.user.id))
@@ -164,11 +183,12 @@ def nih_login(request):
                         groupKey=ACL_GOOGLE_GROUP,
                         body=body
                     ).execute(http=http_auth)
+                    logger.info("User {} added to {}.".format(user_email, ACL_GOOGLE_GROUP))
 
-            # put task in queue to delete NIH_User entry after NIH_assertion_expiration has passed
+            # put task in queue to deactivate NIH_User entry after NIH_assertion_expiration has passed
             task = Task(url='/tasks/check_user_login', params={'user_id': request.user.id}, countdown=COUNTDOWN_SECONDS)
             task.add(queue_name='logout-worker')
-            print('enqueued check_login task for user, {}, for {} hours from now'.format(
+            logger.info('enqueued check_login task for user, {}, for {} hours from now'.format(
                 request.user.id, COUNTDOWN_SECONDS / (60*60)))
 
         else:
