@@ -1,3 +1,21 @@
+"""
+
+Copyright 2015, Institute for Systems Biology
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+"""
+
 import logging
 import time
 
@@ -277,18 +295,6 @@ class FeatureDataEndpoints(remote.Service):
         return PlotDataResponse(types=type_message, labels=label_message, items=items,
                                 cohort_set=cohort_info_obj_array,
                                 counts=count_message, pairwise_result=pairwise_result)
-
-    @endpoints_method(DataRequest, DataPointList,
-                      path='feature_data', http_method='GET', name='feature_access.getFeatureData')
-    def data_access_by_feature(self, request):
-        try:
-            feature_id = request.feature_id
-            cohort_id_array = [request.cohort_id]
-            vector_type, vector = get_feature_vector(feature_id, cohort_id_array)
-            return DataPointList(type=vector_type, items=vector)
-        except Exception as e:
-            logging.exception(e)
-            raise NotFoundException()
 
     @endpoints_method(PlotDataRequest, PlotDataResponse,
                       path='feature_data_plot', http_method='GET', name='feature_access.getFeatureDataForPlot')

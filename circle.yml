@@ -2,7 +2,7 @@ machine:
   timezone:
     America/Los_Angeles
   environment:
-    PYTHONPATH: /home/ubuntu/ISB-CGC-Webapp:/home/ubuntu/ISB-CGC-Webapp/lib
+    PYTHONPATH: /home/ubuntu/${CIRCLE_PROJECT_REPONAME}:/home/ubuntu/${CIRCLE_PROJECT_REPONAME}/lib
   python:
     version: 2.7.10
 dependencies:
@@ -14,9 +14,9 @@ database:
     - sudo -E /bin/sh ./shell/database-setup.sh
 deployment:
   staging:
-    branch: [master]
+    branch: [dev]
     commands:
       - sudo -E rm -rf ./lib
       - sudo -E /bin/sh ./shell/gcloud_authenticate.sh
       - sudo -E /bin/sh ./shell/gcloud-pull-staging-files.sh
-      - sudo -E ./google-cloud-sdk/bin/gcloud preview app deploy app.yaml --no-promote --version staging
+      - sudo -E ./google-cloud-sdk/bin/gcloud preview app deploy app.yaml --promote

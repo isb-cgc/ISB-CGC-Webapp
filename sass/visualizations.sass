@@ -1,8 +1,23 @@
 /********************************************
  * Visualizations Styles
+ *
+ * Copyright 2015, Institute for Systems Biology
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
  *******************************************/
 
-#visualizations
+#visualizations, #seqpeek
     margin-top: 115px
 
     .data-holder
@@ -98,13 +113,14 @@
                 float: right
                 &:hover
                     cursor: pointer
-            .cohort-listing
-                div.filter-label
-                    display: block
-                    text-align: left
-                    a
-                        cursor: pointer
-                        float: right
+            .filter-label
+                display: block
+                text-align: left
+                padding: 5px 10px
+                margin: 2px 0px
+                a
+                    cursor: pointer
+                    float: right
 
             .add-cohort
                 cursor: pointer
@@ -156,6 +172,26 @@
         vertical-align: top
         .unselected
             fill-opacity: 0
+        td:last-child, th:last-child
+            padding-left: 5px
+        td.nonsense-mutation
+            background-color: #71C560
+            width: 25px
+        td.silent
+            background-color: #9768C4
+            width: 25px
+        td.frame-shift-del
+            background-color: #98B8B8
+            width: 25px
+        td.frame-shift-ins
+            background-color: #98B8B8
+            width: 25px
+        td.missense-mutation
+            background-color: #4F473D
+            width: 25px
+        td.in-frame-ins, td.in-frame-del
+            background-color: #C1B14C
+            width: 25px
 
     #search-details
         table
@@ -275,9 +311,6 @@
         width: 100%
         cursor: pointer
 
-    .hovercard .data table
-
-
     .hovercard .links tr
         vertical-align: middle
 
@@ -325,6 +358,7 @@
         content: url('/static/img/mirbase.png')
 
 #igv
+    margin-top: 60px
     i.igv-app-icon
         background-color: transparent
     .igvNavigationZoom

@@ -1,0 +1,146 @@
+bi[
+    {"name": "id",            "type": "string"},
+    {"name": "kind",          "type": "string"},
+    {"name": "jobReference",  "type": "record", "fields": [
+        {"name": "projectId", "type": "string"},
+        {"name": "jobId",     "type": "string"}
+    ]},
+    {"name": "state", "type": "string"},
+    {"name": "errorResult", "type": "record", "fields": [
+        {"name": "reason", "type": "string"},
+        {"name": "location", "type": "string"},
+        {"name": "debugInfo", "type": "string"},
+        {"name": "message", "type": "string"}
+    ]},
+    {"name": "statistics", "type": "record", "fields": [
+        {"name": "creationTime",  "type": "integer"},
+        {"name": "startTime",     "type": "integer"},
+        {"name": "endTime",       "type": "integer"},
+        {"name": "totalBytesProcessed", "type": "integer"},
+        {"name": "query",         "type": "record", "fields": [
+            {"name": "totalBytesProcessed", "type": "integer"},
+            {"name": "cacheHit",  "type": "boolean"}
+        ]},
+        {"name": "load", "type": "record", "fields": [
+            {"name": "inputFiles", "type": "integer"},
+            {"name": "inputFileBytes", "type": "integer"},
+            {"name": "outputRows", "type": "integer"},
+            {"name": "outputBytes", "type": "integer"}
+        ]},
+        {"name": "extract", "type": "record", "mode": "repeated", "fields": [
+            {"name": "destinationUriFileCounts", "type": "integer", "mode": "repeated"}
+        ]}
+    ]},
+    {"name": "configuration", "type": "record", "fields": [
+        {"name": "query",     "type": "record", "fields": [
+            {"name": "query",  "type": "string"},
+            {"name": "destinationTable", "type": "record", "fields": [
+                {"name": "projectId", "type": "string"},
+                {"name": "datasetId", "type": "string"},
+                {"name": "tableId",   "type": "string"}
+            ]},
+            {"name": "createDisposition", "type": "string"},
+            {"name": "writeDisposition", "type": "string"},
+            {"name": "defaultDataset", "type": "record", "fields": [
+                {"name": "projectId", "type": "string"},
+                {"name": "datasetId", "type": "string"},
+            ]},
+            {"name": "priority", "type": "string"},
+            {"name": "preserveNulls", "type": "boolean"},
+            {"name": "allowLargeResults", "type": "boolean"},
+            {"name": "useQueryCache", "type": "boolean"},
+            {"name": "flattenResults", "type": "boolean"}
+        ]},
+        {"name": "load",  "type": "record",   "fields": [
+            {"name": "sourceUris", "type": "string", "mode": "repeated"},
+            {"name": "schema",    "type": "record", "fields": [
+                {"name": "fields",  "type": "record", "mode": "repeated", "fields": [
+                    {"name": "name", "type": "string"},
+                    {"name": "type", "type": "string"},
+                    {"name": "mode", "type": "string"},
+                    {"name": "fields", "type": "string", "mode": "repeated"},
+                    {"name": "description", "type": "string"}
+                ]}
+            ]},
+            {"name": "destinationTable", "type": "record", "fields": [
+                {"name": "projectId", "type": "string"},
+                {"name": "datasetId", "type": "string"},
+                {"name": "tableId",   "type": "string"}
+            ]},
+            {"name": "createDisposition", "type": "string"},
+            {"name": "writeDisposition", "type": "string"},
+            {"name": "fieldDelimiter", "type": "string"},
+            {"name": "skipLeadingRows",   "type": "integer"},
+            {"name": "encoding", "type": "string"},
+            {"name": "quote", "type": "string"},
+            {"name": "maxBadRecords",   "type": "integer"},
+            {"name": "schemaInlineFormat", "type": "string"},
+            {"name": "schemaInline", "type": "string"},
+            {"name": "allowQuotedNewlines", "type": "boolean"},
+            {"name": "sourceFormat", "type": "string"},
+            {"name": "allowJaggedRows", "type": "boolean"},
+            {"name": "ignoreUnknownValues", "type": "boolean"},
+            {"name": "projectionFields", "type": "string"}
+        ]},
+        {"name": "link", "type": "record", "fields": [
+            {"name": "sourceUri", "type": "string", "mode": "repeated"},
+            {"name": "destinationTable", "type": "record", "fields": [
+                {"name": "projectId", "type": "string"},
+                {"name": "datasetId", "type": "string"},
+                {"name": "tableId",   "type": "string"}
+            ]},
+            {"name": "createDisposition", "type": "string"},
+            {"name": "writeDisposition", "type": "string"}
+        ]},
+        {"name": "copy", "type": "record", "fields": [
+            {"name": "sourceTable", "type": "record", "fields": [
+                {"name": "projectId", "type": "string"},
+                {"name": "datasetId", "type": "string"},
+                {"name": "tableId",   "type": "string"}
+            ]},
+            {"name": "sourceTables", "type": "record", "mode": "repeated", "fields": [
+                {"name": "projectId", "type": "string"},
+                {"name": "datasetId", "type": "string"},
+                {"name": "tableId",   "type": "string"}
+            ]},
+            {"name": "destinationTable", "type": "record", "fields": [
+                {"name": "projectId", "type": "string"},
+                {"name": "datasetId", "type": "string"},
+                {"name": "tableId",   "type": "string"}
+            ]},
+            {"name": "createDisposition", "type": "string"},
+            {"name": "writeDisposition", "type": "string"}
+        ]},
+        {"name": "extract", "type": "record", "fields": [
+            {"name": "sourceTable", "type": "record", "fields": [
+                {"name": "projectId", "type": "string"},
+                {"name": "datasetId", "type": "string"},
+                {"name": "tableId",   "type": "string"}
+            ]},
+            {"name": "destinationUri", "type": "string"},
+            {"name": "destinationUris", "type": "string", "mode": "repeated"},
+            {"name": "printHeader", "type": "boolean"},
+            {"name": "fieldDelimiter", "type": "string"},
+            {"name": "destinationFormat", "type": "string"},
+            {"name": "compression", "type": "string"}
+        ]},
+        {"name": "dryRun", "type": "boolean"}
+    ]},
+    {"name": "status", "type": "record", "fields": [
+        {"name": "state", "type": "string"},
+        {"name": "errorResult", "type": "record", "fields": [
+            {"name": "reason", "type": "string"},
+            {"name": "location", "type": "string"},
+            {"name": "debugInfo", "type": "string"},
+            {"name": "message", "type": "string"}
+        ]},
+        {"name": "errors", "type": "record", "mode": "repeated", "fields": [
+            {"name": "reason", "type": "string"},
+            {"name": "location", "type": "string"},
+            {"name": "debugInfo", "type": "string"},
+            {"name": "message", "type": "string"}
+        ]}
+    ]},
+    {"name": "user_email", "type": "string"}
+]
+
