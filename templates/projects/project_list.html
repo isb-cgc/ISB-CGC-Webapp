@@ -8,9 +8,14 @@
 {% block link_page_name %}project_list{% endblock %}
 {% block page_name %}project_list{% endblock %}
 
+{% block page_header %}
+    <ol class="breadcrumb">
+        <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+    </ol>
+    <h1 class="page-header">Projects</h1>
+{% endblock %}
 {% block content %}
 <div class="container">
-    <h1 class="page-header">Projects</h1>
     <div>
         <div class="panel tab-content">
              <ul class="nav nav-tabs" role="tablist">
@@ -24,7 +29,7 @@
             <div role="tabpanel" class="tab-pane active" id="save-projects-list">
                 <table class="table table-striped tablesorter">
                     <thead>
-                        <th class="checkbox-col"></th>
+                        <th class="control-col"></th>
                         <th class="name-col">Name</th>
                         <th class="study-col">Studies</th>
                         <th>Ownership</th>
@@ -33,7 +38,16 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td class="checkbox-col"><i class="fa fa-caret-down"></i></td>
+                            <td class="control-col">
+                                <div class="dropdown">
+                                    <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="{% url 'project_detail' 0 %}">Edit</a> </li>
+                                        <li><a role="button">Delete</a></li>
+                                        <li><a href="">New Workbook</a></li>
+                                    </ul>
+                                </div>
+                            </td>
                             <td class="name-col">Name of Project</td>
                             <td>2</td>
                             <td>David Smith</td>
@@ -41,7 +55,16 @@
                             <td>10/15/2015</td>
                         </tr>
                         <tr>
-                            <td class="checkbox-col"><i class="fa fa-caret-down"></i></td>
+                            <td class="control-col">
+                                <div class="dropdown">
+                                    <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="{% url 'project_detail' 0 %}">Edit</a> </li>
+                                        <li><a role="button">Delete</a></li>
+                                        <li><a href="">New Workbook</a></li>
+                                    </ul>
+                                </div>
+                            </td>
                             <td class="name-col">Name of Project</td>
                             <td>2</td>
                             <td>You</td>
