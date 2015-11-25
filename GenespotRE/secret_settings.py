@@ -9,6 +9,7 @@ SETTINGS = {
     'DEBUG': os.environ.get('DEBUG', False),
     'PROJECT_ID': os.environ.get('GCLOUD_PROJECT_ID'), # Google Cloud Project ID #
     'BQ_PROJECT_ID': os.environ.get('BIGQUERY_PROJECT_ID', os.environ.get('GCLOUD_PROJECT_ID')), # Google Cloud Project ID #
+    'PROJECT_NAME': os.environ.get('GCLOUD_PROJECT_NAME'),
 
     # TODO: Should be deleted at some point in favor of merged settings
     'CLOUD_BASE_URL': os.environ.get('CLOUD_BASE_URL', 'http://isb-cgc.appspot.com/'), # Deployed url
@@ -85,7 +86,7 @@ SETTINGS = {
     'BIGQUERY_DATASET2': 'tcga_data_open', # Name of BigQuery dataset containing open tcga data
     'BIGQUERY_PROJECT_NAME': 'isb-cgc', # Name of project that owns BigQuery datasets
 
-    'GOOGLE_APPLICATION_CREDENTIALS': '', # Path to privatekey.json
+    'GOOGLE_APPLICATION_CREDENTIALS': os.environ.get('GOOGLE_APPLICATION_CREDENTIALS'), # Path to privatekey.json
     'CLIENT_SECRETS': '', # Path to client_secrets.json
     'PEM_FILE': '', # Path to privatekey.pem
     'CLIENT_EMAIL': 'example@developer.gserviceaccount.com', # Client email from client_secrets.json
@@ -104,6 +105,10 @@ SETTINGS = {
     # Cloud Storage Buckets
     'OPEN_DATA_BUCKET': '',
     'CONTROLLED_DATA_BUCKET': '',
+
+    'USE_CLOUD_STORAGE': os.environ.get('USE_CLOUD_STORAGE', 'False'),
+    'GCLOUD_BUCKET': os.environ.get('GOOGLE_STORAGE_BUCKET'),
+    'MEDIA_FOLDER': os.environ.get('MEDIA_FOLDER', 'uploads/'),
 
     'SU_USER': os.environ.get('SUPERUSER_USERNAME', 'isb'),
     'SU_PASS': os.environ.get('SUPERUSER_PASSWORD'),

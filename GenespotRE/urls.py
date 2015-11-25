@@ -29,6 +29,7 @@ urlpatterns = patterns('',
     url(r'^seqpeek/', include('seqpeek.urls')),
     url(r'session_security/', include('session_security.urls')),
     url(r'^tasks/', include('tasks.urls')),
+    url(r'^data/', include('data_upload.urls')),
     url(r'^_ah/health$', views.health_check),
 
     # ------------------------------------------

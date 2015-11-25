@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+
+{% block header %}
+{% endblock %}
+
+{% block link_page_name %}data-upload-test{% endblock %}
+{% block page_name %}data-upload-test{% endblock %}
+
+{% block content %}
+    <form action="{% url 'project_data_upload' %}" method="POST" enctype="multipart/form-data">
+        <input type="file" name="file_uploads" multiple>
+        {% csrf_token %}
+        <input type="submit" value="Upload" class="btn btn-primary">
+    </form>
+{% endblock %}

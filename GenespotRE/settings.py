@@ -36,6 +36,8 @@ PAIRWISE_SERVICE_URL = secret_settings.get('PAIRWISE_SERVICE_URL')
 OPEN_DATA_BUCKET = secret_settings.get('OPEN_DATA_BUCKET')
 CONTROLLED_DATA_BUCKET = secret_settings.get('CONTROLLED_DATA_BUCKET')
 
+GCLOUD_BUCKET = secret_settings.get('GCLOUD_BUCKET')
+
 # BigQuery cohort storage settings
 COHORT_DATASET_ID = secret_settings.get('COHORT_DATASET_ID')
 DEVELOPER_COHORT_TABLE_ID = secret_settings.get('DEVELOPER_COHORT_TABLE_ID')
@@ -91,6 +93,7 @@ class BigQueryCohortStorageSettings(object):
 def GET_BQ_COHORT_SETTINGS():
     return BigQueryCohortStorageSettings(COHORT_DATASET_ID, DEVELOPER_COHORT_TABLE_ID)
 
+USE_CLOUD_STORAGE = secret_settings.get('USE_CLOUD_STORAGE')
 
 
 # Local time zone for this installation. Choices can be found here:
@@ -119,7 +122,9 @@ USE_TZ = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = ''
+MEDIA_FOLDER = secret_settings.get('MEDIA_FOLDER')
+MEDIA_ROOT = os.path.join(os.path.dirname(__file__), '..', '..', secret_settings.get('MEDIA_FOLDER'))
+MEDIA_ROOT = os.path.normpath(MEDIA_ROOT)
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -207,7 +212,8 @@ INSTALLED_APPS = (
     'projects',
     'genes',
     'variables',
-    'workbooks'
+    'workbooks',
+    'data_upload'
 )
 
 #############################
