@@ -20,23 +20,20 @@
 
     <section class="panel panel-default">
         <div class="panel-heading">
-
+            <!--<p>Name of Favorite</p>-->
+            <h4 class="panel-title">{{genes_detail.name}}</h4>
         </div>
         <div class="panel-body">
-            <!--<p>Name of Favorite</p>-->
-            <h4>AKT Pathway</h4>
-
             <div>
                 <h5>Selected Genes</h5>
-                <span class="delete-x filter-label label label-default">PTEN</span>
-                <span class="delete-x filter-label label label-default">PIK3CA</span>
-                <span class="delete-x filter-label label label-default">AKT </span>
-                <span class="delete-x filter-label label label-default">MTOR</span>
+                {% for gene in genes_detail.genes  %}
+                    <span class="delete-x filter-label label label-default">{{gene}}</span>
+                {% endfor %}
             </div>
         </div>
         <div class="panel-footer">
             <menu class="page-action-group">
-                <a class="btn btn-primary" href="{% url 'edit_genes_list' 0 %}"><i class="fa fa-pencil"></i> Edit</a>
+                <a class="btn btn-primary" href="{% url 'edit_genes_list' genes_detail.id %}"><i class="fa fa-pencil"></i> Edit</a>
                 <menuitem class="btn btn-primary"><i class="fa fa-trash"></i> Delete</menuitem>
                 <span class="separator"></span>
                 <menuitem class="btn btn-default"><i class="fa fa-plus"></i> Start New Workbook</menuitem>

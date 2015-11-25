@@ -44,7 +44,7 @@ require([
     // Valid gene list
     var genelist = ['PTEN', 'PIK3CA', 'AKT', 'MTOR', 'BRCA1'];
     var geneListField = $('#geneListField');
-
+    var geneFavs = genes_fav_detail ? genes_fav_detail.genes : [];
     geneListField.tokenfield({
         autocomplete: {
             source: genelist,
@@ -52,14 +52,16 @@ require([
             appendTo: "#tokenfield-holder"
         },
         showAutocompleteOnFocus: true,
-        minLength: 2
+        minLength: 2,
+        tokens: geneFavs
     }).on('tokenfield:createdtoken', function (event) {
         //  Check whether the user enter a repetitive token
         //  If it is a repetitive token, show a message instead
        console.log(event);
+        console.log($(this).tokenfield('getTokens'));
         var existingGenes = event.currentTarget.value.split(', ');
         var parentHolder = $('#tokenfield-holder');
-
+        console.log(existingGenes);
         $.each(existingGenes, function (index, gene) {
             if(gene.toUpperCase() === event.attrs.value.toUpperCase()){
                 $(event.relatedTarget).addClass('invalid repeat');
@@ -73,6 +75,10 @@ require([
             $(event.relatedTarget).addClass('invalid');
             $('.helper-text__invalid').show();
         }
+    }).on('tokenfield:edittoken', function(event){
+
+    }).on('tokenfield:removetoken', function(event){
+
     });
 
     // Clear all entered genes list on click
