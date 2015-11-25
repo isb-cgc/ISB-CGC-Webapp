@@ -11,19 +11,18 @@ from django.core.files.storage import Storage
 from google_helpers import storage_service
 from googleapiclient import http
 
-storage = storage_service.get_storage_resource()
 
 class CloudFileStorage(Storage):
 
     def __init__(self):
-        pass
+        self.storage = storage_service.get_storage_resource()
 
     def _open(self, name, mode):
-        return storage.objects().get(bucket=settings.GCLOUD_BUCKET, object=name).execute()
+        return self.storage.objects().get(bucket=settings.GCLOUD_BUCKET, object=name).execute()
 
     def _save(self, name, content):
         media = http.MediaInMemoryUpload(content)
-        storage.objects().insert(
+        self.storage.objects().insert(
             bucket=settings.GCLOUD_BUCKET,
             name=name,
             media_body=media
