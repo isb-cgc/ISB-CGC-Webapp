@@ -43,6 +43,16 @@ require([
         });
     }
 
+    $('.btn').mousedown(function(event){
+       var $ripple = $('<span class="btn__ripple"></span>');
+        $ripple.appendTo(this).css({
+           top: (event.offsetY - 12) + 'px',
+           left: (event.offsetX - 12) + 'px'
+        }).on('animationend webkitAnimationEnd oanimationend MSAnimationEnd', function(e){
+            $(this).remove();
+        });
+        return false;
+    })
     // Radio button controls bootstrap collapse
     toggleRadio('upload');
     function toggleRadio(groupname){

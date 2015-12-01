@@ -1,13 +1,25 @@
 .btn
   text-transform: capitalize
+  overflow: hidden
+  position: relative
   i.fa
     padding-right: 5px
+    position: relative
+
+.btn__ripple
+  width: 24px
+  height: 24px
+  border-radius: 50%
+  background-color: rgba(255, 255, 255, 0.25)
+  display: inline-block
+  position: absolute
+  animation: ripple 0.45s ease-out
 
 .btn-default
     &:hover, &:active, &:focus
-        background-color: $isb-warning
-        color: $white
-        border: 1px solid $isb-warning
+        background-color: $isb-warning !important
+        color: $white !important
+        border: 1px solid $isb-warning !important
 
 .btn-link
   font-weight: $regular-font-weight

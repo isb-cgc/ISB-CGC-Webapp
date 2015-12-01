@@ -115,6 +115,15 @@ require([
             if(validFileTypes.indexOf(ext) < 0){
                 alert('Please upload a .txt or .csv file');
                 return false;
+            }else{
+                $('#uploadBtn').find('.fa-cloud-upload')
+                    .animate({
+                        top: "-30px",
+                        opacity: 0.1,
+                        position: "relative"
+                    }, 600, function(){
+                        $(this).parent().append("<i class='fa fa-circle-o-notch fa-spin'></i>")
+                    });
             }
 
             if(event.target.files != undefined){
@@ -122,9 +131,26 @@ require([
                 var uploaded_gene_list;
                 fr.onload = function(event){
                     uploaded_gene_list = fr.result.split(/[ \(,\)]+/);
+                    // Delete any repetitive gene
+                    uploaded_gene_list= truncateRepeatGenes(uploaded_gene_list);
+                    // Send the uploaded gene's list to the backend
+                    // TODO: refactored this validation code out when api is ready
+
                 }
                 fr.readAsText(event.target.files.item(0));
             }
         })
+    }
+
+    function truncateRepeatGenes(genes){
+        var genes_count_object = {};
+        genes.forEach(function(gene){
+            if(genes_count_object[gene]){
+                genes_count_object[gene] += 1;
+            }else{
+                genes_count_object[gene] = 1;
+            }
+        });
+        return Object.keys(genes_count_object);
     }
 });
