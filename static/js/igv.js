@@ -27,7 +27,7 @@ require.config({
         assetscore: 'libs/assets.core',
         assetsresponsive: 'libs/assets.responsive',
 
-        igvbeta: 'libs/igv-beta'
+        igvbeta: 'libs/igv'
     },
     shim: {
         'session_security': ['jquery'],
@@ -66,6 +66,12 @@ require([
                 referenceName: '7'
             })
         }
+        tracks.push({
+            sourceType: 'gcs',
+            type: 'bam',
+            url: 'gs://isb-cgc-mock-open/C836.ACC-MESO-1.2.bam',
+            name: 'GCS bam file'
+        });
         tracks.push({
             name: "Genes",
             url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
