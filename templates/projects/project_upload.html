@@ -8,39 +8,67 @@
 {% block link_page_name %}project_upload{% endblock %}
 {% block page_name %}project_upload{% endblock %}
 
-{% block content %}
-<div class="container">
+{% block page_header %}
     <h1 class="page-header">Data Upload</h1>
-    <menu class="page-action-group" type="list">
-        <menuitem class="btn btn-default"><i class="fa fa-cloud-upload"></i>Upload Data</menuitem>
-    </menu>
-    <section>
-        <input type="radio" name="new-project"> <label for="new-project">New Project</label>
-        <input type="radio" name="new-study"><label for="new-study">New Study for an Existing Project</label>
-    </section>
-    <section>
-        <label for="project-name">Project Name</label>
-        <input type="text" name="project-name" required>
-        <label for="project-description">Project Description (Optional)</label>
-        <textarea name="project-description" id="" cols="30" rows="10"></textarea>
-    </section>
-    <section>
-        <label for="study-name">Study Name</label>
-        <input type="text" name="study-name" required>
-        <label for="study-description">Study Description (Optional)</label>
-        <textarea name="study-description" id="" cols="30" rows="10"></textarea>
+{% endblock %}
+{% block content %}
 
-        <p>The system accepts the following file formats:</p>
-        <a href="">specify formats</a>
-        <button class="btn btn-primary"><i class="fa fa-folder-open"></i>Select File</button>
-        <input type="file" name="upload">
-
-        <label for="data-type">Data type</label>
-        <select name="data-type" id="">
-            <option value="">Select Data Type</option>
-        </select>
+    <!--Google cloud request section-->
+    <section class="panel panel-default" style="display: none">
+        <form action="">
+            <div class="panel-body">
+                <p>Data uploading requires that you have a Google Could project set up for your account. If you would like to upload your data, please write a description of your work in the space below and submit your request. Once we receive your request we will create the project and email you once the creation is complete.</p>
+                <textarea name="" id="" cols="30" rows="10"></textarea>
+            </div>
+            <div class="panel-footer">
+                <submit class="btn btn-primary">Request Project</submit>
+            </div>
+        </form>
     </section>
-</div>
+    <!--File upload section-->
+    <div class="col-lg-2">
+        <ul class="nav nav-tabs nav-stacked" role="tablist">
+            <li class="active" role="option">
+                <a href="">Create a New Project</a>
+            </li>
+            <li role="option">
+                <a href="">Create a New Study for an Existing Project</a>
+            </li>
+        </ul>
+    </div>
+    <div class="col-lg-10">
+        <section class="panel panel-default">
+            <div class="form-group panel-heading">
+                <label for="project-name">Project Name</label>
+                <input class="form-control" type="text" name="project-name" required>
+            </div>
+            <div class="form-group panel-body">
+                <label for="project-description">Project Description (Optional)</label>
+                <textarea class="form-control" name="project-description" id="" cols="30" rows="10"></textarea>
+            </div>
+        </section>
+        <section class="panel panel-default">
+            <div class="panel-body">
+                <div class="form-group">
+                    <label for="study-name">Study Name</label>
+                    <input class="form-control" type="text" name="study-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="study-description">Study Description (Optional)</label>
+                    <textarea name="study-description" id="" cols="30" rows="10"></textarea>
+                </div>
+            </div>
+        </section>
+        <section class="panel panel-default">
+            <div class="form-group panel-body">
+                <label for="">Data Upload</label>
+                <input type="radio">High level data files
+                <input type="radio">Low level files for API access
+                <input type="radio">High level data extending an existing project's study data
+            </div>
+        </section>
+    </div>
+
 {% endblock %}
 
 {% block js_file %}{% static 'js/base.js' %}{% endblock %}
