@@ -44,7 +44,7 @@ RUN apt-get -y install python-mysqldb
 RUN apt-get -y install python-pip
 RUN apt-get -y install build-essential
 RUN apt-get -y install python-dev
-
+RUN apt-get -y install --reinstall python-m2crypto python3-crypto
 RUN apt-get -y install libxml2-dev libxmlsec1-dev swig
 
 
