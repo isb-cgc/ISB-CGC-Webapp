@@ -116,14 +116,9 @@ require([
                 alert('Please upload a .txt or .csv file');
                 return false;
             }else{
-                $('#uploadBtn').find('.fa-cloud-upload')
-                    .animate({
-                        top: "-30px",
-                        opacity: 0.1,
-                        position: "relative"
-                    }, 600, function(){
-                        $(this).parent().append("<i class='fa fa-circle-o-notch fa-spin'></i>")
-                    });
+                var $uploadBtn = $('#uploadBtn');
+                var text = $uploadBtn.text();
+                $uploadBtn.addClass('active').prepend("<i class='fa fa-circle-o-notch fa-spin'></i>") ;
             }
 
             if(event.target.files != undefined){

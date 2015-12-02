@@ -5,6 +5,11 @@
   i.fa
     padding-right: 5px
     position: relative
+  &.active
+    .fa-cloud-upload
+      display: none
+    .fa
+      padding: 0
 
 .btn__ripple
   width: 24px
@@ -13,7 +18,7 @@
   background-color: rgba(255, 255, 255, 0.25)
   display: inline-block
   position: absolute
-  animation: ripple 0.45s ease-out
+  animation: ripple $transition ease-out
 
 .btn-default
     &:hover, &:active, &:focus
@@ -23,10 +28,6 @@
 
 .btn-link
   font-weight: $regular-font-weight
-
-
-$button-size : 2rem
-$transition: .3s
 
 .lines-button
   display: inline-block
