@@ -445,7 +445,7 @@ def create_and_log_reports(request):
     service = get_directory_resource()
 
     # get utc time and timedelta
-    utc_now = datetime.datetime.utcnow()
+    utc_now = datetime.utcnow()
     tdelta = utc_now + datetime.timedelta(days=-7)
     start_datetime = tdelta.isoformat("T") + "Z" # collect last 7 days logs
 
