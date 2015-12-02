@@ -9,41 +9,28 @@
 {% block page_name %}project_upload{% endblock %}
 
 {% block page_header %}
+    <ol class="breadcrumb">
+        <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+        <li><a href="{% url 'projects' %}">Saved Projects</a></li>
+    </ol>
     <h1 class="page-header">Data Upload</h1>
 {% endblock %}
 {% block content %}
 <div class="container">
-     <!--Google cloud request section-->
-    <section class="panel panel-default" style="display: none">
-        <form action="">
-            <div class="panel-body">
-                <p>Data uploading requires that you have a Google Could project set up for your account. If you would like to upload your data, please write a description of your work in the space below and submit your request. Once we receive your request we will create the project and email you once the creation is complete.</p>
-                <textarea name="" id="" cols="30" rows="10"></textarea>
-            </div>
-            <div class="panel-footer">
-                <submit class="btn btn-primary">Request Project</submit>
-            </div>
-        </form>
-    </section>
     <!--File upload section-->
     <section class="panel panel-default">
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="active" role="presentation">
+                <a data-target="#project-upload" aria-controls="project-upload" role="tab" data-toggle="collapse">A New Project</a>
+            </li>
+            <li role="presentation">
+                <a data-target="#project-upload" aria-controls="project-upload" role="tab" data-toggle="collapse">A New Study for an Existing Project</a>
+            </li>
+        </ul>
+        <div class="panel-heading"></div>
         <form action="">
-            <div class="panel-heading">
-                 <section>
-                   <div class="checkbox">
-                       <label for="">
-                           <input type="radio" name="upload-type"> A New Project
-                       </label>
-                   </div>
-                    <div class="checkbox">
-                       <label for="">
-                           <input type="radio" name="upload-type"> A New Study for an Existing Project
-                       </label>
-                   </div>
-                </section>
-            </div>
             <div class="panel-body">
-                <section>
+                <section id="project-upload" class="collapse in">
                     <div class="form-group">
                         <label for="project-name">Project Name</label>
                         <input class="form-control" type="text" name="project-name" required>
@@ -52,8 +39,8 @@
                         <label for="project-description">Project Description (Optional)</label>
                         <textarea class="form-control" name="project-description" id="" cols="30" rows="10"></textarea>
                     </div>
-                    </section>
-                    <section>
+                </section>
+                <section>
                     <div class="form-group">
                         <label for="study-name">Study Name</label>
                         <input class="form-control" type="text" name="study-name" required>
