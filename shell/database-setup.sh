@@ -1,6 +1,6 @@
 if [ -n "$CI" ]; then
-export HOME=/home/ubuntu/ISB-CGC-Webapp
-export HOMEROOT=/home/ubuntu/ISB-CGC-Webapp
+export HOME=/home/ubuntu/${CIRCLE_PROJECT_REPONAME}
+export HOMEROOT=/home/ubuntu/${CIRCLE_PROJECT_REPONAME}
 export MYSQL_ROOT_USER=ubuntu
 else
 export $(cat /home/vagrant/www/.env | grep -v ^# | xargs) 2> /dev/null
