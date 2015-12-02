@@ -12,8 +12,8 @@
     <h1 class="page-header">Data Upload</h1>
 {% endblock %}
 {% block content %}
-
-    <!--Google cloud request section-->
+<div class="container">
+     <!--Google cloud request section-->
     <section class="panel panel-default" style="display: none">
         <form action="">
             <div class="panel-body">
@@ -26,48 +26,81 @@
         </form>
     </section>
     <!--File upload section-->
-    <div class="col-lg-2">
-        <ul class="nav nav-tabs nav-stacked" role="tablist">
-            <li class="active" role="option">
-                <a href="">Create a New Project</a>
-            </li>
-            <li role="option">
-                <a href="">Create a New Study for an Existing Project</a>
-            </li>
-        </ul>
-    </div>
-    <div class="col-lg-10">
-        <section class="panel panel-default">
-            <div class="form-group panel-heading">
-                <label for="project-name">Project Name</label>
-                <input class="form-control" type="text" name="project-name" required>
+    <section class="panel panel-default">
+        <form action="">
+            <div class="panel-heading">
+                 <section>
+                   <div class="checkbox">
+                       <label for="">
+                           <input type="radio" name="upload-type"> A New Project
+                       </label>
+                   </div>
+                    <div class="checkbox">
+                       <label for="">
+                           <input type="radio" name="upload-type"> A New Study for an Existing Project
+                       </label>
+                   </div>
+                </section>
             </div>
-            <div class="form-group panel-body">
-                <label for="project-description">Project Description (Optional)</label>
-                <textarea class="form-control" name="project-description" id="" cols="30" rows="10"></textarea>
-            </div>
-        </section>
-        <section class="panel panel-default">
             <div class="panel-body">
-                <div class="form-group">
-                    <label for="study-name">Study Name</label>
-                    <input class="form-control" type="text" name="study-name" required>
-                </div>
-                <div class="form-group">
-                    <label for="study-description">Study Description (Optional)</label>
-                    <textarea name="study-description" id="" cols="30" rows="10"></textarea>
-                </div>
+                <section>
+                    <div class="form-group">
+                        <label for="project-name">Project Name</label>
+                        <input class="form-control" type="text" name="project-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="project-description">Project Description (Optional)</label>
+                        <textarea class="form-control" name="project-description" id="" cols="30" rows="10"></textarea>
+                    </div>
+                    </section>
+                    <section>
+                    <div class="form-group">
+                        <label for="study-name">Study Name</label>
+                        <input class="form-control" type="text" name="study-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="study-description">Study Description (Optional)</label>
+                        <textarea class="form-control" name="study-description" id="" cols="30" rows="10"></textarea>
+                    </div>
+                    </section>
+                    <section>
+                    <div class="form-group">
+                        <label for="">Data Upload</label>
+                        <div class="checkbox">
+                            <label for="">
+                                <input type="radio" name="data"> High level data files
+                            </label>
+                        </div>
+                        <div class="checkbox">
+                            <label for="">
+                                <input type="radio" name="data"> Low level files for API access
+                            </label>
+                        </div>
+                        <div class="checkbox">
+                            <label for="">
+                                <input type="radio" name="data"> High level data extending an existing project's study data
+                            </label>
+                        </div>
+                        <!--High level data files upload-->
+                        <div>
+                            <div class="form-group">
+                                <input type="file">
+                                <label for="">Data Type</label>
+                                <select name="" id="">
+                                    <option value="">--Select Data Type --</option>
+                                    <option value="Gene Expression">Gene Expression</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </div>
-        </section>
-        <section class="panel panel-default">
-            <div class="form-group panel-body">
-                <label for="">Data Upload</label>
-                <input type="radio">High level data files
-                <input type="radio">Low level files for API access
-                <input type="radio">High level data extending an existing project's study data
+            <div class="panel-footer">
+                <button class="btn btn-default" type="submit">Next</button>
             </div>
-        </section>
-    </div>
+        </form>
+    </section>
+</div>
 
 {% endblock %}
 
