@@ -28,6 +28,7 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.contrib.auth.models import User as Django_User
 import django
+import MySQLdb
 
 from metadata import MetadataItem, IncomingMetadataItem
 
@@ -698,11 +699,13 @@ class Cohort_Endpoints_API(remote.Service):
 
             datafilenamekeys=[]
             for row in cursor.fetchall():
-                if 'controlled' not in str(row['SecurityProtocol']).lower() or dbGaP_authorized:
+                if 'controlled' not in str(row['SecurityProtocol']).lower():
                     # todo: currently no DataFileNameKey entries exist for records where
                     # SecurityProtocol is 'dbGap controlled-access'. Test this when we upload
                     # controlled-access data
-                    datafilenamekeys.append(row['DataFileNameKey'])
+                    datafilenamekeys.append("{}{}".format(settings.OPEN_DATA_BUCKET, row['DataFileNameKey']))
+                if 'controlled' in str(row['SecurityProtocol']).lower() and dbGaP_authorized:
+                    datafilenamekeys.append("{}{}".format("gs://testbucket", row['DataFileNameKey']))
 
             return DataFileNameKeyList(datafilenamekeys=datafilenamekeys)
 
