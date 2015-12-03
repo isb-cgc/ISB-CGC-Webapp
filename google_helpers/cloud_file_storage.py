@@ -36,3 +36,6 @@ class CloudFileStorage(Storage):
         name = time + '-' + random_str + '-' + name
         name = settings.MEDIA_FOLDER + name
         return name
+
+    def deconstruct(self):
+        return ('google_helpers.cloud_file_storage.CloudFileStorage', [], {})
