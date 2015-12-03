@@ -9,3 +9,7 @@
 ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET}/dev-files/client_secrets.json" ./client_secrets.json
 ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET}/dev-files/privatekey.json" ./privatekey.json
 ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET}/dev-files/privatekey.pem" ./privatekey.pem
+./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET}/dev-files/saml/advanced_settings.json" ./saml/advanced_settings.json
+./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET}/dev-files/saml/settings.json" ./saml/settings.json
+./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET}/dev-files/saml/certs/cert.pem" ./saml/certs/cert.pem
+./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET}/dev-files/saml/certs/key.pem" ./saml/certs/key.pem
