@@ -27,7 +27,7 @@ resources:
   memory_gb: 2.2
 
 builtins:
-- django_wsgi: on
+#- django_wsgi: on
 - remote_api: on
 - appstats: on
 - deferred: on
