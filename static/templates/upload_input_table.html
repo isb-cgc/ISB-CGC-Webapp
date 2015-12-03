@@ -1,0 +1,20 @@
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Column Name</th>
+            <th>Type</th>
+            <th>Participant Barcode</th>
+            <th>Sample Barcode</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% _.each(columns, function (column) { %>
+            <tr>
+                <td><%- column.name %></td>
+                <td><%- column.type %></td>
+                <td><i class="fa <%- column.isParticipantBarcode ? 'fa-check' : 'fa-close' %>"></i></td>
+                <td><i class="fa <%- column.isSampleBarcode ? 'fa-check' : 'fa-close' %>"></i></td>
+            </tr>
+        <% }); %>
+    </tbody>
+</table>
