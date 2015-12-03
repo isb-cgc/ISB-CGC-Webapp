@@ -117,6 +117,11 @@ def GET_BQ_COHORT_SETTINGS():
 
 USE_CLOUD_STORAGE = secret_settings.get('USE_CLOUD_STORAGE')
 
+PROCESSING_ENABLED = secret_settings.get('PROCESSING_ENABLED')
+PROCESSING_JENKINS_URL = secret_settings.get('PROCESSING_JENKINS_URL')
+PROCESSING_JENKINS_PROJECT = secret_settings.get('PROCESSING_JENKINS_PROJECT')
+PROCESSING_JENKINS_USER = secret_settings.get('PROCESSING_JENKINS_USER')
+PROCESSING_JENKINS_PASSWORD = secret_settings.get('PROCESSING_JENKINS_PASSWORD')
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name

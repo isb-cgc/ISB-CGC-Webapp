@@ -115,6 +115,13 @@ SETTINGS = {
     # IGV Project ID
     'IGV_PROJECT_ID': os.environ.get('IGV_PROJECT_ID'),
 
+    # Processing
+    'PROCESSING_ENABLED': os.environ.get('PROCESSING_ENABLED', False),
+    'PROCESSING_JENKINS_URL': os.environ.get('PROCESSING_JENKINS_URL', 'http://localhost/jenkins'),
+    'PROCESSING_JENKINS_PROJECT': os.environ.get('PROCESSING_JENKINS_PROJECT', 'cgc-processing'),
+    'PROCESSING_JENKINS_USER': os.environ.get('PROCESSING_JENKINS_USER', 'user'),
+    'PROCESSING_JENKINS_PASSWORD': os.environ.get('PROCESSING_JENKINS_PASSWORD', ''),
+
     # SAML setting
     'SAML_FOLDER': os.environ.get('SAML_FOLDER'),
 

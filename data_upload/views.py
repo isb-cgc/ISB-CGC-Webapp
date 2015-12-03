@@ -1,7 +1,11 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.http import JsonResponse
+from django.conf import settings
 from data_upload.models import UserUpload, UserUploadedFile
+
+import json
+import requests
 
 @login_required
 def upload_file(request):
@@ -13,8 +17,23 @@ def upload_file(request):
             file_upload = UserUploadedFile(upload=upload, file=file)
             file_upload.save()
 
+    if settings.PROCESSING_ENABLED:
+        files = {'config.json': ('config.json',
+                                 json.dumps({
+                                     'foo': 'bar'
+                                 }))}
+        r = requests.post(settings.PROCESSING_JENKINS_URL + '/job/' + settings.PROCESSING_JENKINS_PROJECT + '/buildWithParameters',
+                          files=files, auth=(settings.PROCESSING_JENKINS_USER, settings.PROCESSING_JENKINS_PASSWORD))
 
-    return JsonResponse({'status':'succes'})
+        if r.status_code < 400:
+            upload.status = 'Processing'
+            upload.jobURL = r.headers['Location']
+        else:
+            upload.status = 'Error Initializing'
+
+        upload.save()
+
+    return JsonResponse({'status':'success'})
 
 @login_required
 def test_form(request):
