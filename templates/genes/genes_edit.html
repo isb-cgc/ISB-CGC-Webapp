@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+{% block title %}Gene Favorite Edit | ISB-CGC{% endblock %}}
+{% block header %}{% endblock %}
+
+{% block link_page_name %}genes_edit{% endblock %}
+{% block page_name %}genes_edit{% endblock %}
+
+{% block page_header %}
+    <ol class="breadcrumb">
+        <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+        <li><a href="{% url 'genes' %}">Saved Gene Favorites</a></li>
+    </ol>
+    <h1 class="page-header">Edit Gene Favorite</h1>
+{% endblock %}
+{% block content %}
+<div class="container">
+
+    <section class="panel panel-defaul">
+        <div class="panel-heading">
+
+        </div>
+        <div class="panel-body">
+            <form action="">
+                <div class="form-group">
+                    <label for="genes-name">Name of Favorite (Required)</label>
+                    <input class="form-control" type="text" value="{% if 'genes_detail' %}{{genes_detail.name}}{% endif %} " name="genes-name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="genes-list">Selected Genes (required)</label>
+                    <button class="btn btn-link" id="clearAll">Clear All</button>
+                    <span> | </span>
+                    <a href="{% url 'genes_upload' %}" class="btn btn-link">Upload Gene List</a>
+                    <div id="tokenfield-holder">
+                        <input type="text" name="genes-list" class="form-control tokenfield"  id="geneListField"  placeholder="Enter your favorite gene's name">
+                    </div>
+                </div>
+                <div>
+                    <p class="helper-text__repeat tokenfield" style="display: none;"><span class="token invalid repeat">Repetitive</span> Genes will be removed on submit </p>
+                    <p class="helper-text__invalid tokenfield" style="display: none;"><span class="token invalid">Invalid Genes</span> cannot be identified </p>
+                </div>
+            </form>
+        </div>
+        <div class="panel-footer">
+            <menu class="page-action-group">
+                {% if '/create/' in request.path %}
+                    <menuitem class="btn btn-default">Save as Favorite</menuitem>
+                {% else %}
+                    <menuitem class="btn btn-default">Save Changes</menuitem>
+                {% endif %}
+
+                <menuitem class="btn btn-link"><a href="{% url 'genes_detail' 0 %}">Cancel</a></menuitem>
+                <menuitem class="btn btn-link pull-right"><a href="">View System Gene Identifiers</a></menuitem>
+            </menu>
+        </div>
+    </section>
+</div>
+<script type="text/javascript">
+    var genes_fav_detail = {{ genes_detail|safe }};
+</script>
+{% endblock %}
+
+{% block js_file %}{% static 'js/genes.js' %}{% endblock %}

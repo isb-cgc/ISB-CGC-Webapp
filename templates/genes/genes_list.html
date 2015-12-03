@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+{% block title %}Saved Genes Favorites | ISB-CGC{% endblock %}}
+{% block extra_css_libs %}{% endblock %}
+{% block header %}{% endblock %}
+
+{% block link_page_name %}genes_list{% endblock %}
+{% block page_name %}genes_list{% endblock %}
+
+{% block page_header %}
+    <ol class="breadcrumb">
+        <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+    </ol>
+    <h1 class="page-header pull-left">Saved Gene Favorites</h1>
+    <a class="btn btn-default pull-right" href="{% url 'create_genes_list' %}"><i class="fa fa-plus"></i>Create New Favorite</a></li>
+{% endblock %}
+{% block content %}
+<div class="container">
+
+
+    <div class="panel penel-default">
+        <div class="panel-body">
+            <table class="table table-striped tablesorter">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Name</th>
+                        <th># of Genes</th>
+                        <th>Last Updated</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for genes_fav in genes_favs %}
+                        <tr>
+                            <td class="control-col">
+                                <div class="dropdown">
+                                    <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="{% url 'edit_genes_list' genes_fav.id %}">Edit</a> </li>
+                                        <li><a role="button">Delete</a></li>
+                                        <li><a href="">New Workbook</a></li>
+                                    </ul>
+                                </div>
+                            </td>
+                            <td class="name-col"><a href="{% url 'genes_detail' genes_fav.id %}">{{genes_fav.name}}</a></td>
+                            <td>{{genes_fav.genes | length}}</td>
+                            <td>{{genes_fav.last_updated}}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js_file %}{% static 'js/base.js' %}{% endblock %}

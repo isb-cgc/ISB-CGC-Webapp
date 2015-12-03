@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+{% block title %}Genes Favorite Details | ISB-CGC{% endblock %}}
+{% block extra_css_libs %}{% endblock %}
+{% block header %}{% endblock %}
+
+{% block link_page_name %}genes_detail{% endblock %}
+{% block page_name %}genes_detail{% endblock %}
+
+{% block page_header %}
+    <ol class="breadcrumb">
+        <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+        <li><a href="{% url 'genes' %}">Saved Gene Favorites</a></li>
+    </ol>
+    <h1 class="page-header">Gene Favorite Details</h1>
+{% endblock %}
+{% block content %}
+<div class="container">
+
+    <section class="panel panel-default">
+        <div class="panel-heading">
+            <!--<p>Name of Favorite</p>-->
+            <h4 class="panel-title">{{genes_detail.name}}</h4>
+        </div>
+        <div class="panel-body">
+            <div>
+                <h5>Selected Genes</h5>
+                {% for gene in genes_detail.genes  %}
+                    <span class="delete-x filter-label label label-default">{{gene}}</span>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="panel-footer">
+            <menu class="page-action-group">
+                <a class="btn btn-primary" href="{% url 'edit_genes_list' genes_detail.id %}"><i class="fa fa-pencil"></i> Edit</a>
+                <menuitem class="btn btn-primary"><i class="fa fa-trash"></i> Delete</menuitem>
+                <span class="separator"></span>
+                <menuitem class="btn btn-default"><i class="fa fa-plus"></i> Start New Workbook</menuitem>
+                <a class="btn btn-link pull-right">View System Gene Identifier</a>
+            </menu>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block js_file %}{% static 'js/base.js' %}{% endblock %}

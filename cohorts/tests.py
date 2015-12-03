@@ -19,10 +19,19 @@ when you run "manage.py test".
 
 Replace this with more appropriate tests for your application.
 """
+from django import http
 from django.test import TestCase
+from django.test.client import Client
 
 from models import *
 
+class CorhotsViewsTestCase(TestCase):
+    def setUp(self):
+        self.c = Client()
+
+    def test_index(self):
+        resp = self.c.get('/css_test/')
+        self.assertEqual(resp.status_code, 200)
 
 class ModelTest(TestCase):
     def setUp(self):
