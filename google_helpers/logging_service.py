@@ -16,11 +16,40 @@ limitations under the License.
 
 """
 
+from oauth2client.client import SignedJwtAssertionCredentials
 from oauth2client.client import GoogleCredentials
 from googleapiclient.discovery import build
+from httplib2 import Http
+from django.conf import settings
+
+
+PEM_FILE = settings.PEM_FILE
+CLIENT_EMAIL = settings.CLIENT_EMAIL
+
+LOGGING_SCOPES = [
+    'https://www.googleapis.com/auth/cloud-platform',
+    'https://www.googleapis.com/auth/logging.admin',
+    'https://www.googleapis.com/auth/logging.write'
+]
+# 'https://www.googleapis.com/auth/logging.read'
+# 'https://www.googleapis.com/auth/cloud-platform.read-only'
+
 
 def get_logging_resource():
     """Returns a Cloud Logging service client for calling the API.
     """
-    credentials = GoogleCredentials.get_application_default()
-    return build('logging', 'v1beta3', credentials=credentials)
+    # credentials = GoogleCredentials.get_application_default()
+
+    with open(PEM_FILE) as f:
+        private_key = f.read()
+
+    credentials = SignedJwtAssertionCredentials(
+        CLIENT_EMAIL,
+        private_key,
+        scope=LOGGING_SCOPES
+    )
+
+    http_auth = credentials.authorize(Http())
+
+    service = build('logging', 'v1beta3', http=http_auth)
+    return service, http_auth

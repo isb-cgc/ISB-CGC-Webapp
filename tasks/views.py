@@ -179,7 +179,7 @@ def write_log_entry(log_name, log_message):
         type log_message: json
         param log_message: The struct/json payload
     """
-    client = get_logging_resource()
+    client, http_auth = get_logging_resource()
 
     # write using logging API (metadata)
     entry_metadata = {
