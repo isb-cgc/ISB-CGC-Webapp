@@ -44,7 +44,7 @@ RUN apt-get -y install python-mysqldb
 RUN apt-get -y install python-pip
 RUN apt-get -y install build-essential
 RUN apt-get -y install python-dev
-RUN apt-get -y install --reinstall python-crypto python-m2crypto python3-crypto
+RUN apt-get -y install --reinstall python-m2crypto python3-crypto
 RUN apt-get -y install libxml2-dev libxmlsec1-dev swig
 RUN pip install python-saml==2.1.4
 RUN pip install pexpect
@@ -64,5 +64,5 @@ RUN cp /app/google_appengine/lib/endpoints-1.0/endpoints/* /app/lib/endpoints/
 
 ENV PYTHONPATH=/app:/app/lib
 
-RUN /app/manage.py makemigrations
-RUN /app/manage.py migrate
+RUN python /app/manage.py makemigrations
+RUN python /app/manage.py migrate
