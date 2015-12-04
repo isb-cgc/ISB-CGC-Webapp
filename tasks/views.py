@@ -27,7 +27,7 @@ import pytz
 import pysftp
 
 import pexpect  # comment this out when running in gae
-from datetime import datetime
+import datetime
 
 from django.http import HttpResponse
 from django.contrib.auth.models import User
@@ -182,7 +182,7 @@ def write_log_entry(log_name, log_message):
 
     # write using logging API (metadata)
     entry_metadata = {
-        "timestamp": datetime.utcnow().isoformat("T") + "Z",
+        "timestamp": datetime.datetime.utcnow().isoformat("T") + "Z",
         "serviceName": "compute.googleapis.com",
         "severity": "INFO",
         "labels": {}
@@ -225,7 +225,7 @@ def check_user_login(request):
 
             expire_time = nih_user.NIH_assertion_expiration
             expire_time = expire_time if expire_time.tzinfo is not None else pytz.utc.localize(expire_time)
-            now_in_utc = pytz.utc.localize(datetime.now())
+            now_in_utc = pytz.utc.localize(datetime.datetime.now())
 
             if (expire_time - now_in_utc).total_seconds() <= 0:
                 # take user off ACL_GOOGLE_GROUP, without bothering to check if user is dbGaP_authorized or not
@@ -269,7 +269,7 @@ def is_very_expired(login_datetime):
 
 
 def is_expired(login_datetime, expiry_padding_seconds=0):
-    return (pytz.utc.localize(datetime.now()) - login_datetime).total_seconds() >= (LOGIN_EXPIRATION_SECONDS + expiry_padding_seconds)
+    return (pytz.utc.localize(datetime.datetime.now()) - login_datetime).total_seconds() >= (LOGIN_EXPIRATION_SECONDS + expiry_padding_seconds)
 
 
 # given a list of CSV rows, test whether any of those rows contain the specified
@@ -445,7 +445,7 @@ def create_and_log_reports(request):
     service = get_directory_resource()
 
     # get utc time and timedelta
-    utc_now = datetime.utcnow()
+    utc_now = datetime.datetime.utcnow()
     tdelta = utc_now + datetime.timedelta(days=-7)
     start_datetime = tdelta.isoformat("T") + "Z" # collect last 7 days logs
 
