@@ -40,7 +40,13 @@
                         <textarea class="form-control" name="project-description" cols="30" rows="5"></textarea>
                     </div>
                 </section>
-                <section id="study-info">
+                <section>
+                    <div class="form-group collapse" id="study-info">
+                        <select class="form-control">
+                            <option value="">-- Select Project --</option>
+                            <option value="">Project 1</option>
+                        </select>
+                    </div>
                     <div class="form-group">
                         <label for="study-name">Study Name</label>
                         <input class="form-control" type="text" name="study-name" required>
@@ -52,32 +58,46 @@
                     </section>
                     <section>
                     <div class="form-group">
-                        <label for="">Data Upload</label>
+                        <label>Data Upload</label>
                         <div class="checkbox">
-                            <label for="">
-                                <input type="radio" name="data"> High level data files
+                            <label>
+                                <input type="radio" name="data" selected> High level data files
                             </label>
                         </div>
                         <div class="checkbox">
-                            <label for="">
+                            <label>
                                 <input type="radio" name="data"> Low level files for API access
                             </label>
                         </div>
                         <div class="checkbox">
-                            <label for="">
+                            <label>
                                 <input type="radio" name="data"> High lgit evel data extending an existing project's study data
                             </label>
                         </div>
                         <!--High level data files upload-->
-                        <div>
-                            <div class="form-group">
-                                <input type="file">
-                                <label for="">Data Type</label>
-                                <select name="" id="">
-                                    <option value="">--Select Data Type --</option>
-                                    <option value="Gene Expression">Gene Expression</option>
-                                </select>
-                            </div>
+                        <div class="form-group">
+                            <input type="file">
+                            <label>Data Type</label>
+                            <select class="form-control">
+                                <option value="">--Select Data Type --</option>
+                                <option value="Gene Expression">Gene Expression</option>
+                            </select>
+                        </div>
+                        <!--low level data upload-->
+                        <div class="form-group">
+                            <!--TODO: link to examples-->
+                            <p>Please select and upload a file that provides reference to the patient, sample and data files.
+                                <a href="">View example</a></p>
+                            <input type="file">
+                        </div>
+                        <div class="form-group" >
+
+                            <select class="form-control">
+                                <option value=""> -- Select a Project/Study --</option>
+                                <optgroup label="TCGA">
+                                    <option>All Data</option>
+                                </optgroup>
+                            </select>
                         </div>
                     </div>
                 </section>

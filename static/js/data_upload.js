@@ -37,9 +37,11 @@ require([
         var target = $(this).data('target')
 
         $(target).collapse('show');
+        $('#study-info').collapse('hide');
     }).on('hide.bs.tab', function(e){
         var target = $(this).data('target')
 
         $(target).collapse('hide');
+        $('#study-info').collapse('show');
     })
 })
