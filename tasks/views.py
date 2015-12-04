@@ -27,7 +27,7 @@ import pytz
 import pysftp
 
 import pexpect  # comment this out when running in gae
-from datetime import datetime
+import datetime
 
 from django.http import HttpResponse
 from django.contrib.auth.models import User
@@ -40,6 +40,7 @@ from django.conf import settings
 from googleapiclient import http
 from googleapiclient.errors import HttpError
 from google_helpers.directory_service import get_directory_resource
+from google_helpers.reports_service import get_reports_resource
 from google_helpers.storage_service import get_storage_resource
 from google_helpers.resourcemanager_service import get_crm_resource
 from google_helpers.logging_service import get_logging_resource
@@ -178,11 +179,11 @@ def write_log_entry(log_name, log_message):
         type log_message: json
         param log_message: The struct/json payload
     """
-    client = get_logging_resource()
+    client, http_auth = get_logging_resource()
 
     # write using logging API (metadata)
     entry_metadata = {
-        "timestamp": datetime.utcnow().isoformat("T") + "Z",
+        "timestamp": datetime.datetime.utcnow().isoformat("T") + "Z",
         "serviceName": "compute.googleapis.com",
         "severity": "INFO",
         "labels": {}
@@ -225,7 +226,7 @@ def check_user_login(request):
 
             expire_time = nih_user.NIH_assertion_expiration
             expire_time = expire_time if expire_time.tzinfo is not None else pytz.utc.localize(expire_time)
-            now_in_utc = pytz.utc.localize(datetime.now())
+            now_in_utc = pytz.utc.localize(datetime.datetime.now())
 
             if (expire_time - now_in_utc).total_seconds() <= 0:
                 # take user off ACL_GOOGLE_GROUP, without bothering to check if user is dbGaP_authorized or not
@@ -269,7 +270,7 @@ def is_very_expired(login_datetime):
 
 
 def is_expired(login_datetime, expiry_padding_seconds=0):
-    return (pytz.utc.localize(datetime.now()) - login_datetime).total_seconds() >= (LOGIN_EXPIRATION_SECONDS + expiry_padding_seconds)
+    return (pytz.utc.localize(datetime.datetime.now()) - login_datetime).total_seconds() >= (LOGIN_EXPIRATION_SECONDS + expiry_padding_seconds)
 
 
 # given a list of CSV rows, test whether any of those rows contain the specified
@@ -442,28 +443,28 @@ def create_and_log_reports(request):
     """
 
     # construct service.
-    service = get_directory_resource()
+    service, http_auth = get_reports_resource()
 
     # get utc time and timedelta
-    utc_now = datetime.utcnow()
+    utc_now = datetime.datetime.utcnow()
     tdelta = utc_now + datetime.timedelta(days=-7)
     start_datetime = tdelta.isoformat("T") + "Z" # collect last 7 days logs
 
     #reports return account information about different types of administrator activity events.
     admin_report = service.activities().list(userKey='all', applicationName='admin',
-                                             startTime=start_datetime).execute()
+                                             startTime=start_datetime).execute(http=http_auth)
 
     # reports return account information about different types of Login activity events.
     login_report = service.activities().list(userKey='all', applicationName='login',
-                                             startTime=start_datetime).execute()
+                                             startTime=start_datetime).execute(http=http_auth)
 
     # reports return account information about different types of Token activity events.
     token_report = service.activities().list(userKey='all', applicationName='token',
-                                             startTime=start_datetime).execute()
+                                             startTime=start_datetime).execute(http=http_auth)
 
     #reports return information about various Groups activity events.
     groups_report = service.activities().list(userKey='all', applicationName='groups',
-                                              startTime=start_datetime).execute()
+                                              startTime=start_datetime).execute(http=http_auth)
 
     # log the reports using Cloud logging API
     write_log_entry('apps_admin_activity_report', admin_report)
