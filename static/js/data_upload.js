@@ -44,4 +44,14 @@ require([
         $(target).collapse('hide');
         $('#study-info').collapse('show');
     })
+
+    // toggle upload ui on selected radio
+    $('#data-upload-group input[type="radio"]').on('change', function(e){
+        var target = $(this).data('target');
+        var collapseElems = $('#data-upload-group').find('.collapse');
+        if(this.checked){
+            $(target).collapse('show');
+            collapseElems.not(target).removeClass('in');
+        }
+    })
 })

@@ -24,7 +24,7 @@
                 <a aria-controls="project-upload" role="tab" data-toggle="tab" data-target="#project-info">A New Project</a>
             </li>
             <li role="presentation">
-                <a aria-controls="project-upload" role="tab" data-toggle="tab" data-target="#study-info">A New Study for an Existing Project</a>
+                <a class="disabled" aria-controls="project-upload" role="tab" data-toggle="tab" data-target="#study-info">A New Study for an Existing Project</a>
             </li>
         </ul>
         <div class="panel-heading"></div>
@@ -55,50 +55,50 @@
                         <label for="study-description">Study Description (Optional)</label>
                         <textarea class="form-control" name="study-description" cols="30" rows="5"></textarea>
                     </div>
-                    </section>
-                    <section>
+                </section>
+                <section id="data-upload-group">
                     <div class="form-group">
                         <label>Data Upload</label>
                         <div class="checkbox">
                             <label>
-                                <input type="radio" name="data" selected> High level data files
+                                <input type="radio" name="data" checked data-target="#high-level-upload"> High level data files
                             </label>
                         </div>
                         <div class="checkbox">
                             <label>
-                                <input type="radio" name="data"> Low level files for API access
+                                <input type="radio" name="data" data-target="#low-level-upload"> Low level files for API access
                             </label>
                         </div>
                         <div class="checkbox">
                             <label>
-                                <input type="radio" name="data"> High lgit evel data extending an existing project's study data
+                                <input type="radio" name="data" data-target="#high-level-extension"> High level data extending an existing project's study data
                             </label>
                         </div>
-                        <!--High level data files upload-->
-                        <div class="form-group">
-                            <input type="file">
-                            <label>Data Type</label>
-                            <select class="form-control">
-                                <option value="">--Select Data Type --</option>
-                                <option value="Gene Expression">Gene Expression</option>
-                            </select>
-                        </div>
-                        <!--low level data upload-->
-                        <div class="form-group">
-                            <!--TODO: link to examples-->
-                            <p>Please select and upload a file that provides reference to the patient, sample and data files.
-                                <a href="">View example</a></p>
-                            <input type="file">
-                        </div>
-                        <div class="form-group" >
+                    </div>
+                    <!--High level data files upload-->
+                    <div class="form-group upload-area collapse in" id="high-level-upload">
+                        <input type="file">
+                        <label>Data Type</label>
+                        <select class="form-control">
+                            <option value="">--Select Data Type --</option>
+                            <option value="Gene Expression">Gene Expression</option>
+                        </select>
+                    </div>
+                    <!--low level data upload-->
+                    <div class="form-group upload-area collapse" id="low-level-upload">
+                        <!--TODO: link to examples page-->
+                        <p>Please select and upload a file that provides reference to the patient, sample and data files.
+                            <a href="">View example</a></p>
+                        <input type="file">
+                    </div>
+                    <div class="form-group upload-area collapse" id="high-level-extension">
 
-                            <select class="form-control">
-                                <option value=""> -- Select a Project/Study --</option>
-                                <optgroup label="TCGA">
-                                    <option>All Data</option>
-                                </optgroup>
-                            </select>
-                        </div>
+                        <select class="form-control">
+                            <option value=""> -- Select a Project/Study --</option>
+                            <optgroup label="TCGA">
+                                <option>All Data</option>
+                            </optgroup>
+                        </select>
                     </div>
                 </section>
             </div>
