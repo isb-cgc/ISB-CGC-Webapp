@@ -17,7 +17,6 @@ limitations under the License.
 """
 
 from oauth2client.client import SignedJwtAssertionCredentials
-from oauth2client.client import GoogleCredentials
 from googleapiclient.discovery import build
 from httplib2 import Http
 from django.conf import settings
