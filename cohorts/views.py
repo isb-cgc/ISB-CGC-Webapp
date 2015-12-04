@@ -39,8 +39,9 @@ def convert(data):
 
 BIG_QUERY_API_URL = settings.BASE_API_URL + '/_ah/api/bq_api/v1'
 COHORT_API = settings.BASE_API_URL + '/_ah/api/cohort_api/v1'
-META_DISCOVERY_URL = settings.BASE_API_URL + '/_ah/api/discovery/v1/apis/meta_api/v1/rest'
 METADATA_API = settings.BASE_API_URL + '/_ah/api/meta_api/v1'
+# This URL is not used : META_DISCOVERY_URL = settings.BASE_API_URL + '/_ah/api/discovery/v1/apis/meta_api/v1/rest'
+
 
 
 def data_availability_sort(key, value, data_attr, attr_details):
@@ -232,6 +233,8 @@ def cohort_detail(request, cohort_id=0):
             if not cohort.perm:
                 messages.error(request, 'You do not have permission to view that cohort.')
                 return redirect('user_landing')
+
+            cohort.mark_viewed(request)
 
             shared_with_ids = Cohort_Perms.objects.filter(cohort=cohort, perm=Cohort_Perms.READER).values_list('user', flat=True)
             shared_with_users = User.objects.filter(id__in=shared_with_ids)

@@ -1,5 +1,5 @@
 {% load staticfiles%}
-
+{% load cohort_filters %}
 
 <header class="navbar navbar-fixed-top site-header" role="header">
     <nav class="container">
@@ -49,27 +49,26 @@
             <li class="menu-item has-drop-down">
                 <a>WORKBOOKS <i class="fa fa-caret-down"></i></a>
                 <ul class="sub-menu drop">
+                    {% if user.workbook_last_view_set.all|length > 0 %}
                     <li class="menu-item">
                         <strong>Recent</strong>
                         <ul class="item-list">
-                            <li class="menu-item"> Workbook A </li>
-                            <li class="menu-item"> Workbook B </li>
-                            <li class="menu-item"> Workbook C </li>
-                            <li class="menu-item"> Workbook D </li>
-                            <li class="menu-item"> Workbook E </li>
+                            {% for wlv in user.workbook_last_view_set.all|dictsortreversed:'last_view'|slice:':5' %}
+                            <li class="menu-item"><a href="{% url 'workbook_detail' wlv.workbook.id %}">{{ wlv.workbook.name }}</a></li>
+                            {% endfor %}
+                            {% if user.workbook_last_view_set.all|length > 5 %}
                             <li class="menu-item has-drop-down__more"> More
-                                <ul class="item-sublist drop">
-                                    <li class="menu-item">Workbook F</li>
-                                    <li class="menu-item">Workbook H</li>
-                                    <li class="menu-item">Workbook I</li>
-                                    <li class="menu-item">Workbook J</li>
-                                    <li class="menu-item">Workbook K</li>
-                                    <li class="menu-item">Workbook L</li>
+                                <ul class="drop">
+                                    {% for wlv in user.workbook_last_view_set.all|dictsortreversed:'last_view'|slice:'5:' %}
+                                    <li class="menu-item"><a href="{% url 'workbook_detail' wlv.workbook.id %}">{{ wlv.workbook.name }}</a></li>
+                                    {% endfor %}
                                 </ul>
                             </li>
+                            {% endif %}
                         </ul>
                     </li>
-                    <li class="menu-item"><a href="/">Saved Workbooks (10)</a></li>
+                    {% endif %}
+                    <li class="menu-item"><a href="{% url 'workbooks' %}">Saved Workbooks (0)</a></li>
                     <li class="menu-item"><a href="/">Create a New Workbook</a></li>
                     <li class="menu-item"><a href="/">Sample Workbooks</a></li>
                 </ul>
@@ -77,17 +76,28 @@
             <li class="menu-item has-drop-down">
                 <a>PROJECTS <i class="fa fa-caret-down"></i></a>
                 <ul class="sub-menu drop">
+                    {% if user.project_last_view_set.all|length > 0 %}
                     <li class="menu-item">
                         <strong>Start New Workbook With ...</strong>
                         <ul class="item-list">
-                            <li class="menu-item"> Projects A </li>
-                            <li class="menu-item"> Projects B </li>
-                            <li class="menu-item"> Projects C </li>
+                            {% for plv in user.project_last_view_set.all|dictsortreversed:'last_view'|slice:':5' %}
+                            <li class="menu-item">{{ plv.project.name }}</li>
+                            {% endfor %}
+                            {% if user.project_last_view_set.all|length > 5 %}
+                            <li class="menu-item has-drop-down__more"> More
+                                <ul class="drop">
+                                    {% for plv in user.project_last_view_set.all|dictsortreversed:'last_view'|slice:'5:' %}
+                                    <li class="menu-item">{{ plv.project.name }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                            {% endif %}
                         </ul>
                     </li>
-                    <li class="menu-item"><a href="/">Saved Projectss (10)</a></li>
+                    {% endif %}
+                    <li class="menu-item"><a href="/">Saved Projects (0)</a></li>
                     <li class="menu-item"><a href="/">Upload Project Data</a></li>
-                    <li class="menu-item"><a href="/">Public Projects (2)</a></li>
+                    <li class="menu-item"><a href="/">Public Projects (0)</a></li>
                 </ul>
             </li>
             <li class="menu-item has-drop-down">
@@ -107,15 +117,26 @@
             <li class="menu-item has-drop-down">
                 <a>GENES <i class="fa fa-caret-down"></i></a>
                 <ul class="sub-menu drop">
+                    {% if user.genefavorite_last_view_set.all|length > 0 %}
                     <li class="menu-item">
                         <strong>Start New Workbook With ...</strong>
                         <ul class="item-list">
-                            <li class="menu-item"> Gene Favorite A </li>
-                            <li class="menu-item"> Gene Favorite B </li>
-                            <li class="menu-item"> Gene Favorite C </li>
+                            {% for gflv in user.genefavorite_last_view_set.all|dictsortreversed:'last_view'|slice:':5' %}
+                            <li class="menu-item">{{ gflv.genefavorite.name }}</li>
+                            {% endfor %}
+                            {% if user.genefavorite_last_view_set.all|length > 5 %}
+                            <li class="menu-item has-drop-down__more"> More
+                                <ul class="drop">
+                                    {% for gflv in user.genefavorite_last_view_set.all|dictsortreversed:'last_view'|slice:'5:' %}
+                                    <li class="menu-item">{{ gflv.genefavorite.name }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                            {% endif %}
                         </ul>
                     </li>
-                    <li class="menu-item"><a href="/">Manage Gene Favorite (10)</a></li>
+                    {% endif %}
+                    <li class="menu-item"><a href="/">Manage Gene Favorite (0)</a></li>
                     <li class="menu-item"><a href="/">Create Gene Favorite(s)</a></li>
                     <li class="menu-item"><a href="/">Select Genes for a New Workbook</a></li>
                 </ul>
@@ -123,15 +144,26 @@
             <li class="menu-item has-drop-down">
                 <a>VARIABLES <i class="fa fa-caret-down"></i></a>
                 <ul class="sub-menu drop">
+                    {% if user.variablefavorite_last_view_set.all|length > 0 %}
                     <li class="menu-item">
                         <strong>Start New Workbook With ...</strong>
                         <ul class="item-list">
-                            <li class="menu-item"> Variables Favorite A </li>
-                            <li class="menu-item"> Variables Favorite B </li>
-                            <li class="menu-item"> Variables Favorite C </li>
+                            {% for vflv in user.variablefavorite_last_view_set.all|dictsortreversed:'last_view'|slice:':5' %}
+                            <li class="menu-item">{{ vflv.variablefavorite.name }}</li>
+                            {% endfor %}
+                            {% if user.variablefavorite_last_view_set.all|length > 5 %}
+                            <li class="menu-item has-drop-down__more"> More
+                                <ul class="drop">
+                                    {% for vflv in user.variablefavorite_last_view_set.all|dictsortreversed:'last_view'|slice:'5:' %}
+                                    <li class="menu-item">{{ vflv.variablefavorite.name }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                            {% endif %}
                         </ul>
                     </li>
-                    <li class="menu-item"><a href="/">Manage Variables Favorite (10)</a></li>
+                    {% endif %}
+                    <li class="menu-item"><a href="/">Manage Variables Favorite (0)</a></li>
                     <li class="menu-item"><a href="/">Create Favorite Variable(s)</a></li>
                     <li class="menu-item"><a href="/">Select Variabless for a New Workbook</a></li>
                 </ul>
@@ -139,28 +171,27 @@
             <li class="menu-item has-drop-down">
                 <a>COHORTS <i class="fa fa-caret-down"></i></a>
                 <ul class="sub-menu drop">
+                    {% if user.cohort_last_view_set.all|length > 0 %}
                     <li class="menu-item">
                         <strong>Start New Workbook With ...</strong>
                         <ul class="item-list">
-                            <li class="menu-item"> Cohorts A </li>
-                            <li class="menu-item"> Cohorts B </li>
-                            <li class="menu-item"> Cohorts C </li>
-                            <li class="menu-item"> Cohorts D </li>
-                            <li class="menu-item"> Cohorts E </li>
+                            {% for clv in user.cohort_last_view_set.all|dictsortreversed:'last_view'|slice:':5' %}
+                            <li class="menu-item"><a href="{% url 'cohort_details' clv.cohort.id %}">{{ clv.cohort.name }}</a></li>
+                            {% endfor %}
+                            {% if user.cohort_last_view_set.all|length > 5 %}
                             <li class="menu-item has-drop-down__more"> More
                                 <ul class="drop">
-                                    <li class="menu-item">Cohorts F</li>
-                                    <li class="menu-item">Cohorts H</li>
-                                    <li class="menu-item">Cohorts I</li>
-                                    <li class="menu-item">Cohorts J</li>
-                                    <li class="menu-item">Cohorts K</li>
-                                    <li class="menu-item">Cohorts L</li>
+                                    {% for clv in user.cohort_last_view_set.all|dictsortreversed:'last_view'|slice:'5:' %}
+                                    <li class="menu-item"><a href="{% url 'cohort_details' clv.cohort.id %}">{{ clv.cohort.name }}</a></li>
+                                    {% endfor %}
                                 </ul>
                             </li>
+                            {% endif %}
                         </ul>
                     </li>
-                    <li class="menu-item"><a>Manage Saved Cohorts (10)</a></li>
-                    <li class="menu-item"><a>Public Cohorts (25)</a></li>
+                    {% endif %}
+                    <li class="menu-item"><a href="{% url 'cohort_list' %}">Manage Saved Cohorts ({{ user.cohort_perms_set.all|cohort_owner_permission|length }})</a></li>
+                    <li class="menu-item"><a>Public Cohorts (1)</a></li>
                     <li class="menu-item"><a>Select Cohort for a New Workbook</a></li>
                 </ul>
             </li>

@@ -25,6 +25,9 @@
         ga('send', 'pageview');
     </script>
 
+    <!--Typekit-->
+    <script src="https://use.typekit.net/bkz6ame.js"></script>
+    <script>try{Typekit.load({ async: true });}catch(e){}</script>
 </head>
 <body id="body">
 <a href="#{% block link_page_name %}content{% endblock %}" class="skip-nav">Skip to main content</a>
@@ -38,7 +41,7 @@
     {% block secondary_nav %}{% endblock %}
 </div>
 
-<main id="{% block page_name %}content{% endblock %}" class="container">
+<main id="{% block page_name %}content{% endblock %}" class="container main-content">
     {% if messages %}
         <div class="row">
             <div class="col-lg-12">
