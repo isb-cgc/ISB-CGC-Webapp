@@ -28,7 +28,7 @@ require.config({
     }
 });
 
-require(['jquery', 'underscore', 'text!../templates/upload_input_table.html'], function ($, _, UploadInputTableTempl) {
+require(['jquery', 'underscore', 'text!../templates/upload_input_table.html', 'bootstrap'], function ($, _, UploadInputTableTempl) {
 
     var changeNumber = 0,
         restrictiveGauge = ['int', 'float', 'file', 'url', 'string', 'text'],
