@@ -29,7 +29,6 @@ from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.contrib.auth.models import User as Django_User
 import django
 import MySQLdb
-import pprint
 
 from metadata import MetadataItem, IncomingMetadataItem
 
@@ -204,8 +203,8 @@ class SavedCohort(messages.Message):
     active = messages.StringField(3)
     last_date_saved = messages.StringField(4)
     user_id = messages.StringField(5)  # for cohorts_cohort_perms. Not shown: perm (OWNER, READER)
-    filter_name = messages.StringField(6)  # for cohorts_filters.name
-    filter_value = messages.StringField(7)  # for cohorts_filters.value. Not shown: cohorts_filters.resulting_cohort_id
+    filter_name = messages.StringField(6, repeated=True)  # for cohorts_filters.name
+    filter_value = messages.StringField(7, repeated=True)  # for cohorts_filters.value. Not shown: cohorts_filters.resulting_cohort_id
     last_date_saved_alt = message_types.DateTimeField(8)
 
 
@@ -236,7 +235,6 @@ class Cohort_Endpoints_API(remote.Service):
         cohort_id = request.__getattribute__('cohort_id')
 
         if user_email:
-            # todo: see if this needs to be done with a MySQldb cursor
             django.setup()
             try:
                 user_id = Django_User.objects.get(email=user_email).id
@@ -302,7 +300,7 @@ class Cohort_Endpoints_API(remote.Service):
             except (IndexError, TypeError):
                 raise endpoints.NotFoundException("User %s's cohorts not found." % (request.id,))
         else:
-            return CohortsList(items=[], count=0)
+            raise endpoints.NotFoundException("Authentication failed.")
 
 
     GET_RESOURCE = endpoints.ResourceContainer(cohort_id=messages.StringField(1, required=True),
@@ -326,7 +324,6 @@ class Cohort_Endpoints_API(remote.Service):
         cohort_id = request.__getattribute__('cohort_id')
 
         if user_email:
-            # todo: see if this needs to be done with a MySQldb cursor
             django.setup()
             try:
                 user_id = Django_User.objects.get(email=user_email).id
@@ -375,7 +372,7 @@ class Cohort_Endpoints_API(remote.Service):
                 raise endpoints.NotFoundException("Cohort %s not found." % (request.cohort_id),)
 
         else:
-            return CohortPatientsSamplesList(patients=[], patient_count=0, samples=[], sample_count=0)
+            raise endpoints.NotFoundException("Authentication failed.")
 
 
 
@@ -700,7 +697,6 @@ class Cohort_Endpoints_API(remote.Service):
 
             datafilenamekeys = []
             for row in cursor.fetchall():
-                pprint.pprint(row)
                 if 'controlled' not in str(row['SecurityProtocol']).lower():
                     datafilenamekeys.append("gs://{}{}".format(settings.OPEN_DATA_BUCKET, row['DataFileNameKey']))
                 # currently this is mock-controlled-access data in another GC Project
@@ -793,7 +789,7 @@ class Cohort_Endpoints_API(remote.Service):
 
             # 1. create new cohorts_cohort with name, active=True, last_date_saved=now
             created_cohort = Django_Cohort.objects.create(name=cohort_name, active=True, last_date_saved=datetime.utcnow())
-            created_cohort.save()  # todo: redundant?
+            created_cohort.save()
 
             # 2. insert patients into cohort_patients
             patient_barcodes = list(set(patient_barcodes))
@@ -811,7 +807,7 @@ class Cohort_Endpoints_API(remote.Service):
 
             # 5. Create filters applied
             for key, val in query_dict.items():
-                Filters.objects.create(resulting_cohort=created_cohort, name=key, value=val).save()  # todo: save redundant with create?
+                Filters.objects.create(resulting_cohort=created_cohort, name=key, value=val).save()
 
             # 6. Store cohort to BigQuery
             project_id = settings.BQ_PROJECT_ID
@@ -823,8 +819,10 @@ class Cohort_Endpoints_API(remote.Service):
                                name=cohort_name,
                                active='True',
                                last_date_saved=str(datetime.utcnow()),
-                               user_id=str(user_id),
+                               user_id=str(user_id)
                                )
+        else:
+            raise endpoints.NotFoundException("Authentication failed.")
             # todo: make SavedCohort have num_patients and num_samples instead of filter_name, filter_value
         # id = messages.StringField(1)
         # name = messages.StringField(2)
