@@ -40,6 +40,7 @@ from django.conf import settings
 from googleapiclient import http
 from googleapiclient.errors import HttpError
 from google_helpers.directory_service import get_directory_resource
+from google_helpers.reports_service import get_reports_resource
 from google_helpers.storage_service import get_storage_resource
 from google_helpers.resourcemanager_service import get_crm_resource
 from google_helpers.logging_service import get_logging_resource
@@ -442,7 +443,7 @@ def create_and_log_reports(request):
     """
 
     # construct service.
-    service = get_directory_resource()
+    service, http_auth = get_reports_resource()
 
     # get utc time and timedelta
     utc_now = datetime.datetime.utcnow()
@@ -451,19 +452,19 @@ def create_and_log_reports(request):
 
     #reports return account information about different types of administrator activity events.
     admin_report = service.activities().list(userKey='all', applicationName='admin',
-                                             startTime=start_datetime).execute()
+                                             startTime=start_datetime).execute(http=http_auth)
 
     # reports return account information about different types of Login activity events.
     login_report = service.activities().list(userKey='all', applicationName='login',
-                                             startTime=start_datetime).execute()
+                                             startTime=start_datetime).execute(http=http_auth)
 
     # reports return account information about different types of Token activity events.
     token_report = service.activities().list(userKey='all', applicationName='token',
-                                             startTime=start_datetime).execute()
+                                             startTime=start_datetime).execute(http=http_auth)
 
     #reports return information about various Groups activity events.
     groups_report = service.activities().list(userKey='all', applicationName='groups',
-                                              startTime=start_datetime).execute()
+                                              startTime=start_datetime).execute(http=http_auth)
 
     # log the reports using Cloud logging API
     write_log_entry('apps_admin_activity_report', admin_report)
