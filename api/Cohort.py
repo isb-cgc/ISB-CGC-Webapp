@@ -29,6 +29,7 @@ from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.contrib.auth.models import User as Django_User
 import django
 import MySQLdb
+import pprint
 
 from metadata import MetadataItem, IncomingMetadataItem
 
@@ -699,8 +700,9 @@ class Cohort_Endpoints_API(remote.Service):
 
             datafilenamekeys = []
             for row in cursor.fetchall():
+                pprint.pprint(row)
                 if 'controlled' not in str(row['SecurityProtocol']).lower():
-                    datafilenamekeys.append("{}{}".format(settings.OPEN_DATA_BUCKET, row['DataFileNameKey']))
+                    datafilenamekeys.append("gs://{}{}".format(settings.OPEN_DATA_BUCKET, row['DataFileNameKey']))
                 # currently this is mock-controlled-access data in another GC Project
                 elif dbGaP_authorized:
                     if type(row['Repository'] == str):
