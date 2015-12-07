@@ -21,7 +21,7 @@ import json
 import StringIO
 import csv
 import logging
-
+import sys
 import pytz
 
 import pysftp
@@ -203,11 +203,17 @@ def write_log_entry(log_name, log_message):
             }
         ]
     }
+    try:
+        resp = client.projects().logs().entries().write(
+            projectsId=settings.BIGQUERY_PROJECT_NAME, logsId=log_name, body=body).execute()
+        print >> sys.stderr, resp
 
-    resp = client.projects().logs().entries().write(
-        projectsId=settings.BIGQUERY_PROJECT_NAME, logsId=log_name, body=body).execute()
+        return resp
+    except Exception as e:
+        print >> sys.stderr, e.message
+        return e
 
-    return resp
+
 
 
 @csrf_exempt
@@ -450,25 +456,32 @@ def create_and_log_reports(request):
     tdelta = utc_now + datetime.timedelta(days=-7)
     start_datetime = tdelta.isoformat("T") + "Z" # collect last 7 days logs
 
-    #reports return account information about different types of administrator activity events.
-    admin_report = service.activities().list(userKey='all', applicationName='admin',
-                                             startTime=start_datetime).execute(http=http_auth)
+    application_name_list = ['admin', 'login', 'token', 'groups']
+    reports_dict = {}
 
-    # reports return account information about different types of Login activity events.
-    login_report = service.activities().list(userKey='all', applicationName='login',
-                                             startTime=start_datetime).execute(http=http_auth)
-
-    # reports return account information about different types of Token activity events.
-    token_report = service.activities().list(userKey='all', applicationName='token',
-                                             startTime=start_datetime).execute(http=http_auth)
-
-    #reports return information about various Groups activity events.
-    groups_report = service.activities().list(userKey='all', applicationName='groups',
-                                              startTime=start_datetime).execute(http=http_auth)
+    for application_name in application_name_list:
+        # reports_dict has account information about administrator, login, token, and groups activity events
+        # for now, each key in reports_dict maps to a list of length 1.
+        # if there are more than maxResults=100 results, other results will be appended to the list
+        reports_dict[application_name] = [service.activities().list(userKey='all',
+                                                                    applicationName=application_name,
+                                                                    startTime=start_datetime,
+                                                                    maxResults=100).execute(http=http_auth)
+                                          ]
 
     # log the reports using Cloud logging API
-    write_log_entry('apps_admin_activity_report', admin_report)
-    write_log_entry('apps_login_activity_report', login_report)
-    write_log_entry('apps_token_activity_report', token_report)
-    write_log_entry('apps_groups_activity_report', groups_report)
+    for application_name, report_list in reports_dict.items():
+        # if there are more than maxResults=100 results, append other results to the list here
+        while 'nextPageToken' in report_list[0]['items']:
+            next_page_token = report_list[0]['items']['nextPageToken']
+            next_report = service.activities.list(userKey='all', applicationName=application_name,
+                                                  pageToken=next_page_token,
+                                                  startTime=start_datetime).execute(http=http_auth)
+            report_list.append(next_report)
+
+        for report in report_list:
+            #todo: how to not overwrite the next page results?
+            write_log_entry('apps_{}_activity_report'.format(application_name), report)
+
+
     return HttpResponse('')
