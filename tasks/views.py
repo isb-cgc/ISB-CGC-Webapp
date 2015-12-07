@@ -172,7 +172,6 @@ def write_log_entry(log_name, log_message):
         Writes a struct payload as the log message
         Also, the API writes the log to bucket and BigQuery
         Works only with the Compute Service
-        Returns http insert status
 
         type log_name: str
         param log_name: The name of the log entry
@@ -208,12 +207,12 @@ def write_log_entry(log_name, log_message):
             projectsId=settings.BIGQUERY_PROJECT_NAME, logsId=log_name, body=body).execute()
         print >> sys.stderr, resp
 
-        return resp
+        if resp:
+            # this would be an error
+            sys.stderr.write(resp + '\n')
+
     except Exception as e:
-        print >> sys.stderr, e.message
-        return e
-
-
+        sys.stderr.write(e.message + '\n')
 
 
 @csrf_exempt
@@ -463,24 +462,23 @@ def create_and_log_reports(request):
         # reports_dict has account information about administrator, login, token, and groups activity events
         # for now, each key in reports_dict maps to a list of length 1.
         # if there are more than maxResults=100 results, other results will be appended to the list
-        reports_dict[application_name] = [service.activities().list(userKey='all',
-                                                                    applicationName=application_name,
-                                                                    startTime=start_datetime,
-                                                                    maxResults=100).execute(http=http_auth)
-                                          ]
+        response_list = []
+        req = service.activities().list(userKey='all', applicationName=application_name,
+                                         startTime=start_datetime, maxResults=100)
+        resp = req.execute(http=http_auth)
+        response_list.append(resp)
+        while resp.get("nextPageToken"):
+            req = service.activities().list_next(previous_request=req, previous_response=resp)
+            resp = req.execute(http=http_auth)
+            response_list.append(resp)
+
+        reports_dict[application_name] = response_list
 
     # log the reports using Cloud logging API
     for application_name, report_list in reports_dict.items():
-        # if there are more than maxResults=100 results, append other results to the list here
-        while 'nextPageToken' in report_list[0]['items']:
-            next_page_token = report_list[0]['items']['nextPageToken']
-            next_report = service.activities.list(userKey='all', applicationName=application_name,
-                                                  pageToken=next_page_token,
-                                                  startTime=start_datetime).execute(http=http_auth)
-            report_list.append(next_report)
 
         for report in report_list:
-            #todo: how to not overwrite the next page results?
+            #todo: does this overwrite the next page results?
             write_log_entry('apps_{}_activity_report'.format(application_name), report)
 
 
