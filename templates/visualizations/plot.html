@@ -1,3 +1,21 @@
+{% comment %}
+
+   Copyright 2015, Institute for Systems Biology
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+{% endcomment %}
+
 <div class="plot panel" id="plot-{{ plot.id }}">
     <div class="panel-heading">
         <div class="options-bar">
@@ -13,7 +31,7 @@
             <input class="form-control" id="{{ plot.id }}-plot-title" type="text" name="name" value="{% if plot.title %}{{ plot.title }}{% else %}Untitled Plot{% endif %}" />
         </div>
 
-        <h5>{{ plot.cohort_name }} ({{ plot.sample_length }} Samples, {{ plot.patient_length }} Patients)</h5>
+{#        <h5>{{ plot.cohort_name }} ({{ plot.sample_length }} Samples, {{ plot.patient_length }} Patients)</h5>#}
     </div>
     <div class="panel-body">
         <div class="plot-loader" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>

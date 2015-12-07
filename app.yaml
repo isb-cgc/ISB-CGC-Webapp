@@ -17,6 +17,7 @@
 ###
 
 runtime: custom
+module: mvm
 api_version: 1
 threadsafe: true
 vm: true
@@ -26,7 +27,7 @@ resources:
   memory_gb: 2.2
 
 builtins:
-- django_wsgi: on
+#- django_wsgi: on
 - remote_api: on
 - appstats: on
 - deferred: on
@@ -56,7 +57,7 @@ handlers:
 
 env_variables:
   GAE_TMP_FORCE_REUSE_API_CONNECTION: true
-  DJANGO_SETTINGS_MODULE: 'GenespotRE.settings' 
+  DJANGO_SETTINGS_MODULE: 'GenespotRE.settings'
   SETTINGS_VERSION: 'prod'
 
 skip_files:

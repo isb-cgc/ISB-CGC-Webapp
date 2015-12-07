@@ -1,6 +1,6 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
-*.py[cod]
+*.py[~cod]
 
 # C extensions
 *.so
@@ -46,6 +46,7 @@ coverage.xml
 
 # Django stuff:
 *.log
+migrations/
 
 # Sphinx documentation
 docs/_build/
@@ -62,14 +63,8 @@ target/
 *.p12
 *.pem
 .sass-cache
-gitkit-server-config.json
-privatekey.json
-client_secrets.json
-client_secrets_native.json
-ISB-CGC-test-client-secrets.json
-ISB-CGC-test-private-key.json
-settings.json
-advanced_settings.json
+#*
+*.json
 *.patch
 migrations/
 .env
@@ -92,5 +87,11 @@ node_modules
 node_modules/*
 
 certs/*
+saml/*
 *.key
 *.crt
+*.pem
+tmp*
+
+# Emacs
+\#*\#

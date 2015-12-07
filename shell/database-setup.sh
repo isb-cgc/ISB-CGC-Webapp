@@ -1,6 +1,6 @@
 if [ -n "$CI" ]; then
-export HOME=/home/ubuntu/ISB-CGC-Webapp
-export HOMEROOT=/home/ubuntu/ISB-CGC-Webapp
+export HOME=/home/ubuntu/${CIRCLE_PROJECT_REPONAME}
+export HOMEROOT=/home/ubuntu/${CIRCLE_PROJECT_REPONAME}
 export MYSQL_ROOT_USER=ubuntu
 else
 export $(cat /home/vagrant/www/.env | grep -v ^# | xargs) 2> /dev/null
@@ -21,7 +21,7 @@ mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -e "GRANT SELECT, INSERT, UPDATE
 # This is legacy code until these tables can be refactored out of the system
 if [ ! -f ${HOMEROOT}/scripts/metadata_featdef_tables.sql ]; then
 echo "Downloading SQL Table File..."
-wget -q https://storage.googleapis.com/blink-uploads/metadata_featdef_tables.sql -O ${HOMEROOT}/scripts/metadata_featdef_tables.sql
+wget -q https://storage.googleapis.com/sql-table-dumps/metadata_feature_defs_dump.sql -O ${HOMEROOT}/scripts/metadata_featdef_tables.sql
 fi
 echo "Applying SQL Table File... (may take a while)"
 mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/metadata_featdef_tables.sql
