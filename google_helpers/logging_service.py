@@ -17,6 +17,7 @@ limitations under the License.
 """
 
 from oauth2client.client import SignedJwtAssertionCredentials
+import oauth2client.gce as gce_oauth2client
 from googleapiclient.discovery import build
 from httplib2 import Http
 from django.conf import settings
@@ -28,7 +29,7 @@ CLIENT_EMAIL = settings.CLIENT_EMAIL
 LOGGING_SCOPES = [
     'https://www.googleapis.com/auth/cloud-platform',
     'https://www.googleapis.com/auth/logging.admin',
-    'https://www.googleapis.com/auth/logging.write'
+    'https://www.googleapis.com/auth/logging.write' # not necessary?
 ]
 # 'https://www.googleapis.com/auth/logging.read'
 # 'https://www.googleapis.com/auth/cloud-platform.read-only'
@@ -37,7 +38,6 @@ LOGGING_SCOPES = [
 def get_logging_resource():
     """Returns a Cloud Logging service client for calling the API.
     """
-    # credentials = GoogleCredentials.get_application_default()
 
     with open(PEM_FILE) as f:
         private_key = f.read()
@@ -47,6 +47,7 @@ def get_logging_resource():
         private_key,
         scope=LOGGING_SCOPES
     )
+    # or credentials = gce_oauth2client.AppAssertionCredentials(scope=LOGGING_SCOPES)
 
     http_auth = credentials.authorize(Http())
 
