@@ -24,7 +24,7 @@ SETTINGS = {
     # TODO: Should be deleted at some point in favor of merged settings
     'COHORT_DATASET_ID': os.environ.get('COHORT_DATASET_ID', 'cohort_dataset'), # BigQuery dataset for storing cohorts
     'DEVELOPER_COHORT_TABLE_ID': os.environ.get('DEVELOPER_COHORT_TABLE_ID', 'developer_cohorts'), # For projects with multiple developers, set up a BQ table for each developer
-    'CLOUD_COHORT_TABLE': os.environ.get('COHORT_TABLE', 'cohorts_table'), # BigQuery table for deployed app cohorts. This should be created in the dataset for storing cohorts
+    'CLOUD_COHORT_TABLE': os.environ.get('CLOUD_COHORT_TABLE', 'cohorts_table'), # BigQuery table for deployed app cohorts. This should be created in the dataset for storing cohorts
 
     'COHORT_TABLE': os.environ.get('COHORT_TABLE', 'cohorts_table'), # BigQuery table for cohorts
 
