@@ -18,6 +18,7 @@ limitations under the License.
 
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib import admin
 
 
 class NIH_User(models.Model):
@@ -40,3 +41,9 @@ class Bucket(models.Model):
     user = models.ForeignKey(User, null=False)
     bucket_name = models.TextField(null=True)
     bucket_permissions = models.TextField(null=True)
+
+class GoogleProject(models.Model):
+    user = models.OneToOneField(User, null=False)
+    project_name = models.CharField(max_length=150)
+    project_id = models.CharField(max_length=150)
+    big_query_dataset = models.CharField(max_length=150)

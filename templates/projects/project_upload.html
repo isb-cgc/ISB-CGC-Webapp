@@ -17,43 +17,48 @@
 {% endblock %}
 {% block content %}
 <div class="container">
+    <div class="error-message-container"></div>
     <!--File upload section-->
-    <section class="panel panel-default">
+    <section class="panel panel-default" id="first-section">
         <ul class="nav nav-tabs" role="tablist">
             <li class="active" role="presentation">
-                <a aria-controls="project-upload" role="tab" data-toggle="tab" data-target="#project-info">A New Project</a>
+                <a aria-controls="project-upload" role="tab" data-toggle="tab" data-target="#project-info" data-value="new">A New Project</a>
             </li>
             <li role="presentation">
-                <a class="disabled" aria-controls="project-upload" role="tab" data-toggle="tab" data-target="#study-info">A New Study for an Existing Project</a>
+                <a class="{% if user.project_set.count == 0 %}disabled{% endif %}" aria-controls="project-upload" role="tab" data-value="existing" {% if user.project_set.count > 0 %}data-toggle="tab"{% endif %} data-target="#study-info">A New Study for an Existing Project</a>
             </li>
         </ul>
         <div class="panel-heading"></div>
-        <form action="">
+        <form action="{% url 'project_file_upload' %}" id="base-data-form">
+            {% csrf_token %}
+            <input type="hidden" id="project-tab" value="new">
             <div class="panel-body">
                 <section id="project-info" class="collapse in">
                     <div class="form-group">
                         <label for="project-name">Project Name</label>
-                        <input class="form-control" type="text" name="project-name" required>
+                        <input class="form-control" type="text" name="project-name" id="project-name">
                     </div>
                     <div class="form-group">
                         <label for="project-description">Project Description (Optional)</label>
-                        <textarea class="form-control" name="project-description" cols="30" rows="5"></textarea>
+                        <textarea class="form-control" name="project-description" id="project-description" cols="30" rows="5"></textarea>
                     </div>
                 </section>
                 <section>
                     <div class="form-group collapse" id="study-info">
-                        <select class="form-control" required>
-                            <option value="">-- Select Project --</option>
-                            <option value="">Project 1</option>
+                        <select class="form-control" required id="project-selection">
+                            <option value="" disabled selected hidden>-- Select Project --</option>
+                            {% for project in user.project_set.all %}
+                            <option value="{{ project.id }}">{{ project.name }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="study-name">Study Name</label>
-                        <input class="form-control" type="text" name="study-name" required>
+                        <input class="form-control" type="text" name="study-name" id="study-name" required>
                     </div>
                     <div class="form-group">
                         <label for="study-description">Study Description (Optional)</label>
-                        <textarea class="form-control" name="study-description" cols="30" rows="5"></textarea>
+                        <textarea class="form-control" name="study-description" id="study-description" cols="30" rows="5"></textarea>
                     </div>
                 </section>
                 <section id="data-upload-group">
@@ -61,63 +66,70 @@
                         <label>Data Upload</label>
                         <div class="checkbox">
                             <label>
-                                <input type="radio" name="data" checked data-target="#high-level-upload"> High level data files
+                                <input class="data-radio" type="radio" name="data" checked value="high"> High level data files
                             </label>
+                            <div class="checkbox sub-checkbox">
+                                <label>
+                                    <input type="checkbox" name="extend" id="high-level-extend"> Extends an existing project's study data
+                                </label>
+                                <select class="form-control inline-block input-sm" id="high-level-extend-study" disabled>
+                                    <option value="" disabled selected hidden>-- Select a Project/Study --</option>
+                                    <option>All TCGA Data</option>
+                                    {% for project in user.project_set.all %}
+                                    <optgroup label="{{ project.name }}">
+                                    {% for study in project.study_set.all %}
+                                        <option value="{{ study.id }}">{{ study.name }}</option>
+                                    {% endfor %}
+                                    </optgroup>
+                                    {% endfor %}
+                                </select>
+                            </div>
                         </div>
                         <div class="checkbox">
                             <label>
-                                <input type="radio" name="data" data-target="#low-level-upload"> Low level files for API access
-                            </label>
-                        </div>
-                        <div class="checkbox">
-                            <label>
-                                <input type="radio" name="data" data-target="#high-level-extension"> High level data extending an existing project's study data
+                                <input class="data-radio" type="radio" name="data" value="low"> Low level files for API access
                             </label>
                         </div>
                     </div>
-                    <!--High level data files upload-->
-                    <div class="form-group upload-area collapse in" id="high-level-upload">
-                        <input type="file">
-                        <label>Data Type</label>
-                        <select class="form-control">
-                            <option value="">--Select Data Type --</option>
-                            <option value="Gene Expression">Gene Expression</option>
-                        </select>
-                    </div>
-                    <!--low level data upload-->
-                    <div class="form-group upload-area collapse" id="low-level-upload">
-                        <!--TODO: link to examples page-->
+                    <div class="low-level-message hidden">
                         <p>Please select and upload a file that provides reference to the patient, sample and data files.
-                            <a href="">View example</a></p>
-                        <input type="file">
+                            <a href="#">View example</a></p>
                     </div>
-                    <div class="form-group upload-area collapse" id="high-level-extension">
-
-                        <select class="form-control">
-                            <option value=""> -- Select a Project/Study --</option>
-                            <optgroup label="TCGA">
-                                <option>All Data</option>
-                            </optgroup>
-                        </select>
+                    <div id="data-upload-forms">
+                        <button type="button" class="upload-file-button btn btn-default">Select File</button>
+                        <input type="file" class="hidden upload-file-field" multiple>
+                        <table class="table table-striped" id="file-list-table">
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th></th>
+                            </tr>
+                            <tr>
+                                <td colspan="3" class="table-message text-center">
+                                    No Files Added
+                                </td>
+                            </tr>
+                        </table>
                     </div>
                 </section>
             </div>
             <div class="panel-footer">
-                <button class="btn btn-default" type="submit">Next</button>
+                <button class="btn btn-default" id="next-btn">Next</button>
             </div>
         </form>
     </section>
-    <section class="panel panel-default">
+    <section class="panel panel-default hidden" id="second-section">
         <div class="panel-heading">
             <h3 class="panel-title">Review Data Fields</h3>
         </div>
-        <div class="panel-body">
+        <div class="panel-body" id="file-process-list">
             <p>Below are all the fields we detected for the selected files. Please verify the field names and data types are correct.</p>
             <p>Please refer to the <a href="">system data dictionary</a> for proper naming and data type conventions.</p>
 
         </div>
         <div class="panel-footer">
-            <button class="btn btn-default"><i class="fa fa-cloud-upload"></i> Upload Data</button>
+            <button class="btn btn-default" id="back-button"><i class="fa fa-arrow-left"></i> Back</button>
+            <button class="btn btn-primary" id="upload-button"><i class="fa fa-cloud-upload"></i> Upload Data</button>
         </div>
     </section>
 </div>
