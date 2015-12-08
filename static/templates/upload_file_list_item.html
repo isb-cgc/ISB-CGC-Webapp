@@ -1,0 +1,21 @@
+<tr class="form-group uploaded-file">
+    <td>
+        <span class="filename"><%- name %></span>
+    </td>
+    <td>
+        <select class="form-control">
+            <option value="" disabled selected hidden>-- Select Data Type --</option>
+            <option value="protein">Protein Expression</option>
+            <option value="methylation">DNA Methylation</option>
+            <option value="mirna_mirna">microRNA HiSeq</option>
+            <option value="mirna_isoform">microRNA Isoform HiSeq</option>
+            <option value="cnv">Copy Number Variation</option>
+            <option value="mrna_bcgsc">Gene Expression from BCGSC</option>
+            <option value="mrna_unc">Gene Expression from UNC</option>
+            <option value="user_gen">Other</option>
+        </select>
+    </td>
+    <td>
+        <a href="#" class="close-btn pull-right"><i class="fa fa-close"></i><span class="sr-only">Remove File</span></a>
+    </td>
+</tr>

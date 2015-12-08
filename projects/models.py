@@ -20,10 +20,11 @@ class ProjectManager(models.Manager):
 
 class Project(models.Model):
     id = models.AutoField(primary_key=True)
-    name = models.TextField(null=True)
+    name = models.CharField(max_length=255,null=True)
     active = models.BooleanField(default=True)
     last_date_saved = models.DateTimeField(auto_now_add=True)
     objects = ProjectManager()
+    owner = models.ForeignKey(User)
 
     '''
     Sets the last viewed time for a cohort
