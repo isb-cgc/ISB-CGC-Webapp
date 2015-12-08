@@ -18,6 +18,7 @@ $isb-info:    #49AFCD
 $isb-success: #C9DD03
 $isb-warning: #F7991B
 $isb-danger:  #BB00BB
+$isb-dark:    #676767
 
 // Additional color choices
 $nav-bg: $white
@@ -53,6 +54,11 @@ $border: 1px solid $border-color
 // --------------------------------------------
 $font-size: 14px
 
+$font-size-large:         ceil(($font-size * 1.25)) !default
+$font-size-small:         ceil(($font-size * 0.85)) !default
+
+$font-size-h3: 24px
+
 $default-font-family: 'proxima-nova', Arial, sans-serif
 
 $regular-font-weight: 400
@@ -64,6 +70,9 @@ $heading-font-weight: $bold-font-weight
 $font-color: darken($base-dark, 10%)
 $link-color: $isb-info
 
+// --------------------------------------------
+// Custom Bootstrap variables
+// --------------------------------------------
 // --------------------------------------------
 // Components
 // --------------------------------------------
@@ -96,6 +105,9 @@ $btn-default-bg: transparent
 $btn-default-color:  $isb-warning
 $btn-default-border: $isb-warning
 
+$button-size : 2rem
+$transition: .3s
+
 // --------------------------------------------
 // Panel
 // --------------------------------------------
@@ -105,3 +117,14 @@ $panel-footer-bg:             $white
 $panel-default-text:          $isb-primary
 $panel-default-border:        transparent
 $panel-default-heading-bg:    $white
+
+// --------------------------------------------
+// Breadcrumb
+// --------------------------------------------
+$breadcrumb-padding-horizontal: 0
+//** Breadcrumb background color
+$breadcrumb-bg:                 #fff
+//** Breadcrumb text color
+$breadcrumb-color:              $isb-info
+//** Text color of current page in the breadcrumb
+$breadcrumb-separator:          ">"

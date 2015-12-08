@@ -50,9 +50,13 @@ urlpatterns = patterns('',
     # Blink views
     # ------------------------------------------
 
-    url(r'^help/', views.help_page, name='help_page'),
+    url(r'^help/', views.help_page, name='help'),
     url(r'^about/', views.about_page, name='about_page'),
     url(r'^dashboard/', views.dashboard_page, name='dashboard'),
+
+    url(r'^projects/', include('projects.urls')),
+    url(r'^genes/', include('genes.urls')),
+    url(r'^variables/', include('variables.urls')),
 )
 
 if settings.NIH_AUTH_ON:

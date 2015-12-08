@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+{% block title %}Projects | ISB-CGC{% endblock %}}
+{% block extra_css_libs %}{% endblock %}
+{% block header %}{% endblock %}
+
+{% block link_page_name %}project_list{% endblock %}
+{% block page_name %}project_list{% endblock %}
+
+{% block page_header %}
+    <ol class="breadcrumb">
+        <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+    </ol>
+    <h1 class="page-header">Projects</h1>
+{% endblock %}
+{% block content %}
+<div class="container">
+    <div>
+        <div class="panel tab-content">
+             <ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active">
+                    <a href="#save-projects-list" aria-controls="save-projects-list" role="tab" data-toggle="tab">Saved Projects</a>
+                </li>
+                <li role="presentation">
+                    <a href="#public-projects-list" aria-controls="public-projects-list" role="tab" data-toggle="tab">Public Projects</a>
+                </li>
+            </ul>
+            <div role="tabpanel" class="tab-pane active" id="save-projects-list">
+                <table class="table table-striped tablesorter">
+                    <thead>
+                        <th class="control-col"></th>
+                        <th class="name-col">Name</th>
+                        <th class="study-col">Studies</th>
+                        <th>Ownership</th>
+                        <th>Shared with</th>
+                        <th>Last Updated</th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="control-col">
+                                <div class="dropdown">
+                                    <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="{% url 'project_detail' 0 %}">Edit</a> </li>
+                                        <li><a role="button">Delete</a></li>
+                                        <li><a href="">New Workbook</a></li>
+                                    </ul>
+                                </div>
+                            </td>
+                            <td class="name-col">Name of Project</td>
+                            <td>2</td>
+                            <td>David Smith</td>
+                            <td>(3)</td>
+                            <td>10/15/2015</td>
+                        </tr>
+                        <tr>
+                            <td class="control-col">
+                                <div class="dropdown">
+                                    <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="{% url 'project_detail' 0 %}">Edit</a> </li>
+                                        <li><a role="button">Delete</a></li>
+                                        <li><a href="">New Workbook</a></li>
+                                    </ul>
+                                </div>
+                            </td>
+                            <td class="name-col">Name of Project</td>
+                            <td>2</td>
+                            <td>You</td>
+                            <td>(3)</td>
+                            <td>10/15/2015</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <!--{% if projects %}-->
+                    <!--<table id="cohort-table" class="table table-striped tablesorter">-->
+                        <!--<thead><tr>-->
+                            <!--<th class="checkbox-col"><input type="checkbox" class="select-all" title="select-all"/></th>-->
+                            <!--<th class="name-col">Cohort Name</th>-->
+                            <!--<th class="sample-col"># of Samples</th>-->
+                            <!--<th class="owner-col">Owner</th>-->
+                            <!--<th class="date-col">Last Modified</th>-->
+                        <!--</tr></thead>-->
+                        <!--<tbody>-->
+                            <!--{% for project in cohorts %}-->
+                                <!--<tr>-->
+                                    <!--<td class="checkbox-col"><input type="checkbox" name="id" value="{{ cohort.id }}" title="{{ cohort.name }} Checkbox" aria-label="cohort-checkbox"/></td>-->
+                                    <!--<td class="name-col"><a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a></td>-->
+                                    <!--<td class="sample-col">{{ cohort.num_patients }}</td>-->
+                                    <!--<td class="owner-col">{{ cohort.owner.email }}</td>-->
+                                    <!--<td class="date-col">{{ cohort.last_date_saved|date:"SHORT_DATETIME_FORMAT" }}</td>-->
+                                <!--</tr>-->
+                            <!--{% endfor %}-->
+                        <!--</tbody>-->
+                    <!--</table>-->
+                <!--{% else %}-->
+                    <!--<p>You don't have any saved projects yet</p>-->
+                <!--{% endif %}-->
+            </div>
+            <div role="tabpanel" class="tab-pane" id="public-projects-list">
+                <table class="table table-striped tablesorter">
+                    <thead>
+                        <tr>
+                            <th class="checkbox-col"></th>
+                            <th class="name-col">Name</th>
+                            <th>Studies</th>
+                            <th>Ownership</th>
+                            <th>Last Updated</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="checkbox-col"><i class="fa fa-caret-down"></i></td>
+                            <td class="name-col">TCGA</td>
+                            <td>38</td>
+                            <td>TCGA</td>
+                            <td>10/15/2015</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block js_file %}{% static 'js/dashboard.js' %}{% endblock %}

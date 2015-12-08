@@ -245,10 +245,11 @@ def cohort_detail(request, cohort_id=0):
         try:
             cohort = Cohort.objects.get(id=cohort_id, active=True)
             cohort.perm = cohort.get_perm(request)
+            cohort.owner = cohort.get_owner()
 
             if not cohort.perm:
                 messages.error(request, 'You do not have permission to view that cohort.')
-                return redirect('user_landing')
+                return redirect('cohort_list')
 
             cohort.mark_viewed(request)
 
@@ -276,7 +277,7 @@ This save view only works coming from cohort editing or creation views.
 @csrf_protect
 def save_cohort(request):
     if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
-    redirect_url = reverse('user_landing')
+    redirect_url = reverse('cohort_list')
 
     samples = []
     patients = []
@@ -368,7 +369,7 @@ def save_cohort(request):
             redirect_url = reverse('cohort_details',args=[cohort.id])
             messages.info(request, 'Filters applied successfully.')
         else:
-            redirect_url = reverse('user_landing')
+            redirect_url = reverse('cohort_list')
             messages.info(request, 'Cohort, %s, created successfully.' % cohort.name)
 
     return redirect(redirect_url) # redirect to search/ with search parameters just saved

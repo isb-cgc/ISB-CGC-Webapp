@@ -431,19 +431,19 @@ $navbar-inverse-toggle-border-color:        #333 !default;
 
 //=== Shared nav styles
 $nav-link-padding:                          10px 15px !default;
-$nav-link-hover-bg:                         $gray-lighter !default;
+$nav-link-hover-bg:                         #fff !default;
 
 $nav-disabled-link-color:                   $gray-light !default;
 $nav-disabled-link-hover-color:             $gray-light !default;
 
 //== Tabs
-$nav-tabs-border-color:                     #ddd !default;
+$nav-tabs-border-color:                     transparent !default;
 
 $nav-tabs-link-hover-border-color:          $gray-lighter !default;
 
 $nav-tabs-active-link-hover-bg:             $body-bg !default;
 $nav-tabs-active-link-hover-color:          $gray !default;
-$nav-tabs-active-link-hover-border-color:   #ddd !default;
+$nav-tabs-active-link-hover-border-color:   transparent !default;
 
 $nav-tabs-justified-link-border-color:            #ddd !default;
 $nav-tabs-justified-active-link-border-color:     $body-bg !default;
@@ -799,15 +799,15 @@ $badge-border-radius:         10px !default;
 //##
 
 $breadcrumb-padding-vertical:   8px !default;
-$breadcrumb-padding-horizontal: 15px !default;
+$breadcrumb-padding-horizontal: 0 !default;
 //** Breadcrumb background color
-$breadcrumb-bg:                 #f5f5f5 !default;
+$breadcrumb-bg:                 #fff !default;
 //** Breadcrumb text color
-$breadcrumb-color:              #ccc !default;
+$breadcrumb-color:              $brand-info !default;
 //** Text color of current page in the breadcrumb
-$breadcrumb-active-color:       $gray-light !default;
+$breadcrumb-active-color:       $brand-info !default;
 //** Textual separator for between breadcrumb elements
-$breadcrumb-separator:          "/" !default;
+$breadcrumb-separator:          ">" !default;
 
 
 //== Carousel
