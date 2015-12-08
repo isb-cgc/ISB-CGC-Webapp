@@ -49,6 +49,8 @@ from google.appengine.api.taskqueue import Task, Queue
 from accounts.models import NIH_User
 from api.api_helpers import sql_connection
 
+import pprint
+
 debug = settings.DEBUG
 
 logger = logging.getLogger(__name__)
@@ -421,7 +423,7 @@ def edit_dbGaP_authentication_list(nih_username):
 
     # 2. remove the line with the offending nih_username
     for row in rows:
-        # todo: potential bug if nih_username for one row is part of someone else's email
+
         if nih_username in row:
             try:
                 rows.remove(row)
