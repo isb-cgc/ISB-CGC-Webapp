@@ -455,30 +455,20 @@ def create_and_log_reports(request):
     tdelta = utc_now + datetime.timedelta(days=-7)
     start_datetime = tdelta.isoformat("T") + "Z" # collect last 7 days logs
 
-    application_name_list = ['admin', 'login', 'token', 'groups']
-    reports_dict = {}
-
-    for application_name in application_name_list:
-        # reports_dict has account information about administrator, login, token, and groups activity events
-        # for now, each key in reports_dict maps to a list of length 1.
-        # if there are more than maxResults=100 results, other results will be appended to the list
-        response_list = []
+    for application_name in ['admin', 'login', 'token', 'groups']:
+        # If there is ever an HttpError 400 error "Log entry with size <x> bytes exceeds maximum size of 112640 bytes",
+        # then decrease maxResults value. For now, maxResults=100 works.
         req = service.activities().list(userKey='all', applicationName=application_name,
-                                         startTime=start_datetime, maxResults=100)
+                                        startTime=start_datetime, maxResults=100)
         resp = req.execute(http=http_auth)
-        response_list.append(resp)
+        # log the reports using Cloud logging API
+        write_log_entry('apps_{}_activity_report'.format(application_name), resp)
+
+        # if there are more than maxResults=100 results, other log results will be written with Cloud logging API
         while resp.get("nextPageToken"):
             req = service.activities().list_next(previous_request=req, previous_response=resp)
             resp = req.execute(http=http_auth)
-            response_list.append(resp)
-
-        reports_dict[application_name] = response_list
-
-    # log the reports using Cloud logging API
-    for application_name, report_list in reports_dict.items():
-
-        for report in report_list:
-            write_log_entry('apps_{}_activity_report'.format(application_name), report)
-
+            # log the reports using Cloud logging API
+            write_log_entry('apps_{}_activity_report'.format(application_name), resp)
 
     return HttpResponse('')
