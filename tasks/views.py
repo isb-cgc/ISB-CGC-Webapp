@@ -478,7 +478,6 @@ def create_and_log_reports(request):
     for application_name, report_list in reports_dict.items():
 
         for report in report_list:
-            #todo: does this overwrite the next page results?
             write_log_entry('apps_{}_activity_report'.format(application_name), report)
 
 
