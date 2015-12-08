@@ -21,33 +21,47 @@
 <div class="container">
 
     <section class="panel panel-default">
-        <div class="panel-body">
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="active" role="presentation">
+                <a href="#upload-gene-list" data-toggle="tab">Upload A Gene List</a>
+            </li>
+            <li role="presentation">
+                <a href="#paste-gene-list" data-toggle="tab">Paste in A Gene List</a>
+            </li>
+        </ul>
+        <div class="panel-body tab-content">
+            <div class="tab-pane active" id="upload-gene-list">
+                <h5>Upload a gene list from a plain text (ascii) file</h5>
+                <p>Items either space or comma separated</p>
 
-            <div class="radio"> <label><input type="radio" name="upload" checked data-target="#uploadField" aria-expanded="true" area-controls="uploadField"> Upload a gene list from a plain text (ascii) file -- items either space or tab separated or NEW LINE</label> </div>
-            <div class="collapse in" id="uploadField">
-                <button class="btn btn-primary" id="uploadBtn">
-                    <i class="fa fa-cloud-upload"></i> Select File
-                </button>
-                <input type="file" name="upload" id="fileUploadField" style="display: none">
+                <div id="uploadField">
+                    <button class="btn btn-primary" id="uploadBtn">
+                        <i class="fa fa-file"></i> Select File
+                    </button>
+                    <input type="file" name="upload" id="fileUploadField" style="display: none">
+                </div>
+                <br>
             </div>
-
-            <div class="radio"> <label><input type="radio" name="upload" data-target="#tokenfield-holder" aria-expanded="false" area-controls="tokenfield-holder"> Paste in a gene list -items either space or tab separated</label> </div>
-            <div id="tokenfield-holder" class="collapse">
-                <input type="text" id="geneListField">
-            </div>
-            <div>
-                <p class="helper-text__repeat tokenfield" style="display: none;"><span class="token invalid repeat">Repetitive</span> Genes will be removed on submit </p>
-                <p class="helper-text__invalid tokenfield" style="display: none;"><span class="token invalid">Invalid Genes</span> cannot be identified </p>
+            <div class="tab-pane" id="paste-gene-list">
+                <h5>Paste in a gene list</h5>
+                <p>strong Items either comma or tab separated</p>
+                <div id="tokenfield-holder">
+                    <input type="text" id="geneListField">
+                </div>
+                <div class="tokenfield">
+                    <p class="helper-text__repeat" style="display: none;"><i class="fa fa-exclamation-circle"></i> <span class="token invalid repeat">Repetitive</span>Genes will be removed on submit </p>
+                    <p class="helper-text__invalid" style="display: none;"><i class="fa fa-exclamation-circle"></i> The following <span class="token invalid">items</span>were not recognized as gene identifiers. You may either correct or delete these items -- or upload them as-is. For corrections, refer to the
+                <a href="">System Gene Identifiers</a>.</p>
+                </div>
             </div>
         </div>
         <!--<div class="panel-footer">-->
             <!--<button class="btn btn-default"><i class="fa fa-upload"></i> Upload Genes</button>-->
         <!--</div>-->
     </section>
-    <section class="panel panel-default">
+    <section class="panel panel-default collapse">
         <div class="panel-body">
-            <p><i class="fa fa-exclamation-circle"></i> The following items were not recognized as gene identifiers. You may either correct or delete these items -- or upload them as-is. For corrections, refer to the
-                <a href="">System Gene Identifiers</a>.</p>
+            <p><i class="fa fa-exclamation-circle"></i> The following items were not recognized as gene identifiers. You may either correct or delete these items -- or upload them as-is. </p>
             <div id="tokenfield-holder" class="collapse">
                 <input type="text" id="errorGeneListField">
             </div>

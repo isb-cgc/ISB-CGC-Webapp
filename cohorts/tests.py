@@ -25,14 +25,6 @@ from django.test.client import Client
 
 from models import *
 
-# class CorhotsViewsTestCase(TestCase):
-#     def setUp(self):
-#         self.c = Client()
-#
-#     def test_index(self):
-#         resp = self.c.get('/css_test/')
-#         self.assertEqual(resp.status_code, 200)
-
 class ModelTest(TestCase):
     def setUp(self):
         cohort1 = Cohort.objects.create(name='cohort 1')

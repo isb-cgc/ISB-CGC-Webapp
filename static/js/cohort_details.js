@@ -34,7 +34,8 @@ require.config({
         tree_graph: 'visualizations/createTreeGraph',
         stack_bar_chart: 'visualizations/createStackedBarchart',
         d3parsets: 'libs/d3.parsets',
-        draw_parsets: 'parallel_sets'
+        draw_parsets: 'parallel_sets',
+        base: 'base'
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -62,7 +63,8 @@ require([
     'stack_bar_chart',
 
     'assetscore',
-    'assetsresponsive'
+    'assetsresponsive',
+    'base'
 ], function ($, jqueryui, bootstrap, session_security, d3, d3tip, search_helpers, vis_helpers, parallel_sets, draw_parsets) {
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
@@ -77,7 +79,7 @@ require([
         if ($(this).is(':checked')) { // Checkbox checked
             var tmp = id.split('-');
             var name = tmp[0];
-            var value = $(this).siblings('label').html();
+            var value = $(this).closest('label').text();
             var token_str = '<span class="" value="'
                 + id + '" name="viz-ids">'
                 + ' <a href="" class="delete-x filter-label label label-default">'
@@ -139,21 +141,24 @@ require([
     });
 
     $('#add-filter-btn').on('click', function() {
-        $('#content-panel').toggleClass('col-md-offset-2');
+        $('#content-panel').removeClass('col-md-12').addClass('col-md-8');
         $('#filter-panel').show();
         $('.selected-filters').show();
-        $('.menu-bar a[data-target="#apply-filters-modal"]').show();
+        //$('.menu-bar a[data-target="#apply-filters-modal"]').show();
         $('#cancel-add-filter-btn').show();
-        $('.menu-bar .dropdown').hide();
+        //$('.menu-bar .dropdown').hide();
+        $('#default-cohort-menu').hide();
+        $('#edit-cohort-menu').show();
     });
 
     $('#cancel-add-filter-btn').on('click', function() {
-        $('#content-panel').toggleClass('col-md-offset-2');
+        $('#content-panel').removeClass('col-md-8').addClass('col-md-12');
         $('#filter-panel').hide();
         $('.selected-filters').hide();
-        $('.menu-bar a[data-target="#apply-filters-modal"]').hide();
-        $(this).hide();
-        $('.menu-bar .dropdown').show();
+        //$('.menu-bar a[data-target="#apply-filters-modal"]').hide();
+        $('#default-cohort-menu').show();
+        $('#edit-cohort-menu').hide();
+        //$('.menu-bar .dropdown').show();
     });
 
     $('#create-cohort-form, #apply-filters-form').on('submit', function() {

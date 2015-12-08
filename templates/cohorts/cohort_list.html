@@ -27,8 +27,17 @@
         <div class="page-action-group">
             <button class="btn btn-default">New Workbook</button>
             <span class="separator"></span>
-            <button class="btn btn-primary">Set Operations</button>
-            <button class="btn btn-primary">Share</button>
+            <button id='delete-cohorts' type="button" class="btn btn-primary" data-toggle="modal" data-target="#delete-cohorts-modal" aria-label="delete-cohorts" role="button" aria-expanded="true">
+                <i class="fa fa-trash"></i>
+                Delete
+            </button>
+            <button id="cohort-sets" type="button" class="btn btn-primary" data-toggle="modal" data-target="#union-modal" aria-label="set-logic" role="button" aria-expanded="true">
+                Set Operations
+            </button>
+            <button class="btn btn-primary" id="share-cohorts-btn" type="button" data-toggle="modal" data-target="#share-cohorts-modal" aria-label="share-cohorts" role="button" aria-expanded="true">
+                <i class="fa fa-share-alt"></i>
+                Share
+            </button>
         </div>
         {% if cohorts %}
             <table id="cohort-table" class="table table-striped tablesorter">
@@ -54,118 +63,6 @@
         {% endif %}
     </div>
 </div>
-
-<!-- TODO: refactor cohorts page view, take out visualizations -->
-    <div id="user-landing-tabs" role="tabpanel" class="col-lg-12">
-        <div class="row">
-            <div class="col-lg-2">
-                <div class="dropdown space-bottom-15">
-                    <button class="btn btn-primary dropdown-toggle " type="button" id="create-dropdown" data-toggle="dropdown" aria-label="create-item" role="button" aria-expanded="true">
-                        <i class="fa fa-plus"></i> Create
-                    </button>
-                    <ul class="dropdown-menu" role="menu" aria-labelledby="create-dropdown">
-                        <li role="menuitem"><a href="{% url 'cohort' %}"><i class="fa fa-users"></i> New Cohort</a></li>
-                        <li role="menuitem"><a href="" data-toggle="modal" data-target=<!-- TODO: refactor cohorts page view, take out visualizations -->
-    <div id="user-landing-tabs" role="tabpanel" class="col-lg-12">
-        <div class="row">
-            <div class="col-lg-2">
-                <div class="dropdown space-bottom-15">
-                    <button class="btn btn-primary dropdown-toggle " type="button" id="create-dropdown" data-toggle="dropdown" aria-label="create-item" role="button" aria-expanded="true">
-                        <i class="fa fa-plus"></i> Create
-                    </button>
-                    <ul class="dropdown-menu" role="menu" aria-labelledby="create-dropdown">
-                        <li role="menuitem"><a href="{% url 'cohort' %}"><i class="fa fa-users"></i> New Cohort</a></li>
-                        <li role="menuitem"><a href="" data-toggle="modal" data-target="#create-generic-viz-modal">
-                            <i class="fa fa-area-chart"></i> Plot</a></li>
-                        {#                <li><a href="{% url 'seqpeek' %}"><i class="fa fa-neuter"></i> Seq Peek</a></li>#}
-                        {#                <li><a href="" data-toggle="modal" data-target="#create-genecentric-viz-modal">#}
-                        {#                    <i class="fa fa-cubes"></i> Gene-Centric</a></li>#}
-                        {#                <li><a href="" data-toggle="modal" data-target="#create-stackviz-viz-modal">#}
-                        {#                    <i class="fa fa-barcode"></i> Stackviz</a></li>#}
-                        {#                <li><a href="" data-toggle="modal" data-target="#create-circviz-viz-modal">#}
-                        {#                    <div id="circviz-icons">#}
-                        {#                        <i class="fa fa-circle-o"></i><i class="fa fa-dribbble fa-rotate-90"></i>#}
-                        {#                    </div> Circviz</a></li>#}
-                    </ul>
-                </div>
-                <ul class="nav nav-tabs nav-stacked" role="tablist">
-                    <li role="presentation" class="active"><a href="#cohorts-list" role="tab" data-toggle="tab" title="Cohort List">Cohorts</a></li>
-                    <li role="presentation" class=""><a href="#vizualizations-list" role="tab" data-toggle="tab" title="Visualization List">Visualizations</a></li>
-                </ul>
-
-            </div>
-
-            <div class="col-lg-10">
-                <div class="tab-content panel">
-
-                    <!-- Cohorts Panel -->
-                    <div role="tabpanel" class="tab-pane active" id="cohorts-list">
-                        <button id='delete-cohorts' type="button" class="btn btn-primary space-top-5" data-toggle="modal" data-target="#delete-cohorts-modal" aria-label="delete-cohorts" role="button" aria-expanded="true">
-                            <i class="fa fa-trash"></i>
-                        </button>
-                        <button id="cohort-sets" type="button" class="btn btn-primary space-top-5" data-toggle="modal" data-target="#union-modal" aria-label="set-logic" role="button" aria-expanded="true">
-                            <i class="fa fa-circle-o"></i>
-                            <i class="fa fa-circle-o"></i>
-                        </button>
-                        <button id="share-cohorts-btn" type="button" class="btn btn-primary space-top-5" data-toggle="modal" data-target="#share-cohorts-modal" aria-label="share-cohorts" role="button" aria-expanded="true">
-                            <i class="fa fa-share-alt"></i>
-                        </button>
-
-                        {% if cohorts %}
-                            <table id="cohort-table" class="table table-striped tablesorter">
-                                <thead><tr>
-                                    <th class="checkbox-col"><input type="checkbox" class="select-all" title="select-all"/></th>
-                                    <th class="name-col">Cohort Name</th>
-                                    <th class="sample-col"># of Samples</th>
-                                    <th class="owner-col">Owner</th>
-                                    <th class="date-col">Last Modified</th>
-                                </tr></thead>
-                                <tbody>
-                                {% for cohort in cohorts %}
-                                    <tr>
-                                        <td class="checkbox-col"><input type="checkbox" name="id" value="{{ cohort.id }}" title="{{ cohort.name }} Checkbox" aria-label="cohort-checkbox"/></td>
-                                        <td class="name-col"><a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a></td>
-                                        <td class="sample-col">{{ cohort.num_patients }}</td>
-                                        <td class="owner-col">{{ cohort.owner.email }}</td>
-                                        <td class="date-col">{{ cohort.last_date_saved|date:"SHORT_DATETIME_FORMAT" }}</td>
-                                    </tr>
-                                {% endfor %}
-                                </tbody>
-                            </table>
-                        {% endif %}
-                    </div>
-
-                    <!-- Search Results Panel -->
-                    <div role="tabpanel" class="tab-pane" id="results-list">
-                        <h4>Search Results for "<span class="search-term"></span>"</h4>
-                        <p class="no-results" style="display:none;"></p>
-                        <table id="search-cohort-table" class="table table-striped tablesorter" style="display:none;">
-                            <thead><tr>
-                                <th class="checkbox-col"></th>
-                                <th class="name-col">Cohort Name</th>
-                                <th class="sample-col"># of Samples</th>
-                                <th class="owner-col">Owner</th>
-                                <th class="date-col">Last Modified</th>
-                            </tr></thead>
-                            <tbody>
-                            </tbody>
-                        </table>
-                        <table id="search-viz-table" class="table table-striped tablesorter" style="display:none;">
-                            <thead><tr>
-                                <th class="checkbox-col"></th>
-                                <th class="name-col">Visualization Name</th>
-                                <th class="sample-col"># of Plots</th>
-                                <th class="owner-col">Owner</th>
-                                <th class="date-col">Last Modified</th>
-                            </tr></thead>
-                            <tbody>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Create Plot Modal -->
     <div class="modal fade" id="create-generic-viz-modal" tabindex="-1" role="dialog" aria-labelledby="create-generic-viz-header" aria-hidden="true">
@@ -326,145 +223,6 @@
         </div>
     </div>
 
-    <!-- Delete Visualizations Modal -->
-    <div class="modal fade" id="delete-viz-modal" tabindex="-1" role="dialog" aria-labelledby="delete-viz-header" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="delete-viz-header">Share Cohort</h4>
-                </div>
-                <form id="delete-viz-form" method="POST" action="{% url 'deleteviz' %}">
-                    <div class="modal-body">
-                        <label>Are you sure you want to delete visualizations?</label>
-                        <p class="form-control-static selected-viz"></p>
-                    </div>
-                    <div class="modal-footer">
-                        {% csrf_token %}
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                        <input type="submit" value="Delete Visualization" class="btn btn-primary" />
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Share Visualizations Modal -->
-    <div class="modal fade" id="share-viz-modal" tabindex="-1" role="dialog" aria-labelledby="share-viz-header" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="share-viz-header">Share Cohort</h4>
-                </div>
-                <form id="share-viz-form" method="POST" action="{% url 'share_viz' %}">
-                    <div class="modal-body">
-                        <p class="form-control-static selected-viz"></p>
-                        <label for="share-viz-users">Please select the users you would like to share these cohorts with:</label>
-                        <select id="share-viz-users" name="users" multiple="multiple">
-                            {% for user in user_list %}
-                            <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }} ({{ user.email }})</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="modal-footer">
-                        {% csrf_token %}
-                        <input type="submit" value="Share Visualization" class="btn btn-primary" />
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>"#create-generic-viz-modal">
-                            <i class="fa fa-area-chart"></i> Plot</a></li>
-                        {#                <li><a href="{% url 'seqpeek' %}"><i class="fa fa-neuter"></i> Seq Peek</a></li>#}
-                        {#                <li><a href="" data-toggle="modal" data-target="#create-genecentric-viz-modal">#}
-                        {#                    <i class="fa fa-cubes"></i> Gene-Centric</a></li>#}
-                        {#                <li><a href="" data-toggle="modal" data-target="#create-stackviz-viz-modal">#}
-                        {#                    <i class="fa fa-barcode"></i> Stackviz</a></li>#}
-                        {#                <li><a href="" data-toggle="modal" data-target="#create-circviz-viz-modal">#}
-                        {#                    <div id="circviz-icons">#}
-                        {#                        <i class="fa fa-circle-o"></i><i class="fa fa-dribbble fa-rotate-90"></i>#}
-                        {#                    </div> Circviz</a></li>#}
-                    </ul>
-                </div>
-                <ul class="nav nav-tabs nav-stacked" role="tablist">
-                    <li role="presentation" class="active"><a href="#cohorts-list" role="tab" data-toggle="tab" title="Cohort List">Cohorts</a></li>
-                    <li role="presentation" class=""><a href="#vizualizations-list" role="tab" data-toggle="tab" title="Visualization List">Visualizations</a></li>
-                </ul>
-
-            </div>
-
-            <div class="col-lg-10">
-                <div class="tab-content panel">
-
-                    <!-- Cohorts Panel -->
-                    <div role="tabpanel" class="tab-pane active" id="cohorts-list">
-                        <button id='delete-cohorts' type="button" class="btn btn-primary space-top-5" data-toggle="modal" data-target="#delete-cohorts-modal" aria-label="delete-cohorts" role="button" aria-expanded="true">
-                            <i class="fa fa-trash"></i>
-                        </button>
-                        <button id="cohort-sets" type="button" class="btn btn-primary space-top-5" data-toggle="modal" data-target="#union-modal" aria-label="set-logic" role="button" aria-expanded="true">
-                            <i class="fa fa-circle-o"></i>
-                            <i class="fa fa-circle-o"></i>
-                        </button>
-                        <button id="share-cohorts-btn" type="button" class="btn btn-primary space-top-5" data-toggle="modal" data-target="#share-cohorts-modal" aria-label="share-cohorts" role="button" aria-expanded="true">
-                            <i class="fa fa-share-alt"></i>
-                        </button>
-
-                        {% if cohorts %}
-                            <table id="cohort-table" class="table table-striped tablesorter">
-                                <thead><tr>
-                                    <th class="checkbox-col"><input type="checkbox" class="select-all" title="select-all"/></th>
-                                    <th class="name-col">Cohort Name</th>
-                                    <th class="sample-col"># of Samples</th>
-                                    <th class="owner-col">Owner</th>
-                                    <th class="date-col">Last Modified</th>
-                                </tr></thead>
-                                <tbody>
-                                {% for cohort in cohorts %}
-                                    <tr>
-                                        <td class="checkbox-col"><input type="checkbox" name="id" value="{{ cohort.id }}" title="{{ cohort.name }} Checkbox" aria-label="cohort-checkbox"/></td>
-                                        <td class="name-col"><a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a></td>
-                                        <td class="sample-col">{{ cohort.num_patients }}</td>
-                                        <td class="owner-col">{{ cohort.owner.email }}</td>
-                                        <td class="date-col">{{ cohort.last_date_saved|date:"SHORT_DATETIME_FORMAT" }}</td>
-                                    </tr>
-                                {% endfor %}
-                                </tbody>
-                            </table>
-                        {% endif %}
-                    </div>
-
-                    <!-- Search Results Panel -->
-                    <div role="tabpanel" class="tab-pane" id="results-list">
-                        <h4>Search Results for "<span class="search-term"></span>"</h4>
-                        <p class="no-results" style="display:none;"></p>
-                        <table id="search-cohort-table" class="table table-striped tablesorter" style="display:none;">
-                            <thead><tr>
-                                <th class="checkbox-col"></th>
-                                <th class="name-col">Cohort Name</th>
-                                <th class="sample-col"># of Samples</th>
-                                <th class="owner-col">Owner</th>
-                                <th class="date-col">Last Modified</th>
-                            </tr></thead>
-                            <tbody>
-                            </tbody>
-                        </table>
-                        <table id="search-viz-table" class="table table-striped tablesorter" style="display:none;">
-                            <thead><tr>
-                                <th class="checkbox-col"></th>
-                                <th class="name-col">Visualization Name</th>
-                                <th class="sample-col"># of Plots</th>
-                                <th class="owner-col">Owner</th>
-                                <th class="date-col">Last Modified</th>
-                            </tr></thead>
-                            <tbody>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Create Plot Modal -->
     <div class="modal fade" id="create-generic-viz-modal" tabindex="-1" role="dialog" aria-labelledby="create-generic-viz-header" aria-hidden="true">
