@@ -18,7 +18,10 @@ limitations under the License.
 
 import os
 import MySQLdb
+import logging
 from GenespotRE import secret_settings
+
+logging.basicConfig(level=logging.INFO)
 
 db_settings = secret_settings.get('DATABASE')['default']
 ssl = None
@@ -36,3 +39,5 @@ cursor = db.cursor()
 cursor.execute(delete_str)
 cursor.execute(insert_str, insert_tuple)
 db.commit()
+
+cursor.close()
