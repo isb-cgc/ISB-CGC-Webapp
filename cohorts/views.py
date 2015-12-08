@@ -263,7 +263,7 @@ def cohort_detail(request, cohort_id=0):
         except ObjectDoesNotExist:
             # Cohort doesn't exist, return to user landing with error.
             messages.error(request, 'The cohort you were looking for does not exist.')
-            return redirect('user_landing')
+            return redirect('cohort_list')
 
     return render(request, template, template_values)
 
@@ -378,7 +378,7 @@ def save_cohort(request):
 @csrf_protect
 def delete_cohort(request):
     if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
-    redirect_url = 'user_landing'
+    redirect_url = 'cohort_list'
     cohort_ids = request.POST.getlist('id')
     Cohort.objects.filter(id__in=cohort_ids).update(active=False)
     return redirect(reverse(redirect_url))
@@ -391,7 +391,7 @@ def share_cohort(request, cohort_id=0):
     users = User.objects.filter(id__in=user_ids)
 
     if cohort_id == 0:
-        redirect_url = '/user_landing/'
+        redirect_url = '/cohort_list/'
         cohort_ids = request.POST.getlist('cohort-ids')
         cohorts = Cohort.objects.filter(id__in=cohort_ids)
     else:
@@ -449,7 +449,7 @@ def clone_cohort(request, cohort_id):
 @csrf_protect
 def set_operation(request):
     if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
-    redirect_url = '/user_landing/'
+    redirect_url = '/cohorts/'
 
     if request.POST:
         name = request.POST.get('name').encode('utf8')
@@ -557,7 +557,7 @@ def set_operation(request):
         else:
             message = 'Operation resulted in empty set of samples and patients. Cohort not created.'
             messages.warning(request, message)
-            return redirect('user_landing')
+            return redirect('cohort_list')
 
     return redirect(redirect_url)
 

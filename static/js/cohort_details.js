@@ -149,6 +149,7 @@ require([
         //$('.menu-bar .dropdown').hide();
         $('#default-cohort-menu').hide();
         $('#edit-cohort-menu').show();
+        showHideMoreGraphButton();
     });
 
     $('#cancel-add-filter-btn').on('click', function() {
@@ -196,7 +197,18 @@ require([
         $(this).siblings('.show-more').show();
         $(this).hide();
     });
+    showHideMoreGraphButton();
+    // Show hide more graph button based on whether there is more tree graph
+    function showHideMoreGraphButton(){
+        var containerHeight = $('#cohort-details .clinical-trees .panel-body').outerHeight();
+        var treeGraphActualHeight = $('#tree-graph-clinical').height();
 
+        if(containerHeight >= treeGraphActualHeight){
+            $('#more-graphs').hide();
+        }else{
+            $('#more-graphs').show();
+        }
+    }
     $('#more-graphs button').on('click', function() {
         $('#more-graphs').hide();
         $('#less-graphs').show();
