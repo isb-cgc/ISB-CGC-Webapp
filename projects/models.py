@@ -20,14 +20,11 @@ class ProjectManager(models.Manager):
 
 class Project(models.Model):
     id = models.AutoField(primary_key=True)
-    name = models.TextField(null=True,  blank=False)
-    description = models.CharField(max_length=2024, null=False)
-    owner = models.ForeignKey(User, null=False, blank=False)
+    name = models.CharField(max_length=255,null=True)
     active = models.BooleanField(default=True)
-    date_created = models.DateTimeField(auto_now_add=True)
     last_date_saved = models.DateTimeField(auto_now_add=True)
     objects = ProjectManager()
-
+    owner = models.ForeignKey(User)
 
     '''
     Sets the last viewed time for a cohort
@@ -50,11 +47,3 @@ class Project_Last_View(models.Model):
     project = models.ForeignKey(Project, blank=False)
     user = models.ForeignKey(User, null=False, blank=False)
     last_view = models.DateTimeField(auto_now_add=True, auto_now=True)
-
-class Study(models.Model):
-    id = models.AutoField(primary_key=True)
-    name = models.TextField(null=False, blank=False)
-    description = models.CharField(max_length=2024, null=False)
-    project = models.ForeignKey(Project, null=False, blank=False)
-    date_created = models.DateTimeField(auto_now_add=True)
-    modified_date = models.DateTimeField(auto_now=True)

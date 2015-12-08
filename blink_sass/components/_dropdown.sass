@@ -1,0 +1,33 @@
+*[data-toggle="collapse"][aria-expanded="false"]
+    .fa-caret-down
+        display: none
+*[data-toggle="collapse"][aria-expanded="true"]
+    .fa-caret-right
+        display: none
+.dropdown
+    &.open > .dropdown-toggle.btn-primary
+        background-color: $primary-color-dark
+        border-color: $primary-color-dark
+
+    &.dropdown-menu-right
+        text-align: right
+
+    .dropdown-toggle:hover
+        background-color: #EEE
+        &.btn-primary
+            background-color: $primary-color-dark
+
+    .dropdown-menu
+        border-radius: $border-radius-base
+        border: none
+        box-shadow: $box-shadow
+        margin: 0px
+
+        > li > a
+            padding: 3px 10px
+        i
+            text-align: center
+            width: 20px
+        &.dropdown-menu-right
+            > li > a
+                text-align: right
