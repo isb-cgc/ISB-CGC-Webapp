@@ -29,7 +29,6 @@ from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.contrib.auth.models import User as Django_User
 import django
 import MySQLdb
-import pprint
 
 from metadata import MetadataItem, IncomingMetadataItem
 
@@ -134,6 +133,11 @@ class IdList(messages.Message):
     user_id = messages.IntegerField(4)              # User Id
 
 
+class FilterDetails(messages.Message):
+    name = messages.StringField(1)
+    value = messages.StringField(2)
+
+
 class Cohort(messages.Message):
     id = messages.StringField(1)
     name = messages.StringField(2)
@@ -146,7 +150,7 @@ class Cohort(messages.Message):
     source_type = messages.StringField(9)
     source_notes = messages.StringField(10)
     parent_id = messages.IntegerField(11)
-
+    filters = messages.MessageField(FilterDetails, 12, repeated=True)
 
 class CohortsList(messages.Message):
     items = messages.MessageField(Cohort, 1, repeated=True)
@@ -204,9 +208,10 @@ class SavedCohort(messages.Message):
     active = messages.StringField(3)
     last_date_saved = messages.StringField(4)
     user_id = messages.StringField(5)  # for cohorts_cohort_perms. Not shown: perm (OWNER, READER)
-    filter_name = messages.StringField(6)  # for cohorts_filters.name
-    filter_value = messages.StringField(7)  # for cohorts_filters.value. Not shown: cohorts_filters.resulting_cohort_id
+    filter_name = messages.StringField(6, repeated=True)  # for cohorts_filters.name
+    filter_value = messages.StringField(7, repeated=True)  # for cohorts_filters.value. Not shown: cohorts_filters.resulting_cohort_id
     last_date_saved_alt = message_types.DateTimeField(8)
+    filters = messages.MessageField(FilterDetails, 9, repeated=True)
 
 
 Cohort_Endpoints = endpoints.api(name='cohort_api', version='v1', description="Get information about cohorts",
@@ -236,7 +241,6 @@ class Cohort_Endpoints_API(remote.Service):
         cohort_id = request.__getattribute__('cohort_id')
 
         if user_email:
-            # todo: see if this needs to be done with a MySQldb cursor
             django.setup()
             try:
                 user_id = Django_User.objects.get(email=user_email).id
@@ -255,8 +259,6 @@ class Cohort_Endpoints_API(remote.Service):
                         'cohorts_cohort_perms.perm, ' \
                         'auth_user.email, ' \
                         'cohorts_cohort_comments.content as comments, ' \
-                        'cohorts_filters.name as filter_name, ' \
-                        'cohorts_filters.value as filter_value, ' \
                         'cohorts_source.type as source_type, ' \
                         'cohorts_source.notes as source_notes, ' \
                         'cohorts_source.parent_id ' \
@@ -267,8 +269,6 @@ class Cohort_Endpoints_API(remote.Service):
                         'on auth_user.id=cohorts_cohort_perms.user_id ' \
                         'left join cohorts_cohort_comments ' \
                         'on cohorts_cohort_comments.user_id=cohorts_cohort_perms.user_id ' \
-                        'left join cohorts_filters ' \
-                        'on cohorts_filters.resulting_cohort_id=cohorts_cohort_perms.cohort_id ' \
                         'left join cohorts_source ' \
                         'on cohorts_source.cohort_id=cohorts_cohort_perms.cohort_id '
 
@@ -283,6 +283,18 @@ class Cohort_Endpoints_API(remote.Service):
                 cursor.execute(query_str, query_tuple)
                 data = []
                 for row in cursor.fetchall():
+                    filter_query_str = 'select name, value ' \
+                                       'from cohorts_filters ' \
+                                       'where cohorts_filters.resulting_cohort_id=%s'
+                    filter_cursor = db.cursor(MySQLdb.cursors.DictCursor)
+                    filter_cursor.execute(filter_query_str, str(row['id']))
+                    filter_data = []
+                    for filter_row in filter_cursor.fetchall():
+                        filter_data.append(FilterDetails(
+                            name=str(filter_row['name']),
+                            value=str(filter_row['value'])
+                        ))
+
                     data.append(Cohort(
                         id=str(row['id']),
                         name=str(row['name']),
@@ -290,11 +302,12 @@ class Cohort_Endpoints_API(remote.Service):
                         perm=str(row['perm']),
                         email=str(row['email']),
                         comments=str(row['comments']),
-                        filter_name=str(row['filter_name']),
-                        filter_value=str(row['filter_value']),
+                        # filter_name=str(row['filter_name']),
+                        # filter_value=str(row['filter_value']),
                         source_type=None if row['source_type'] is None else str(row['source_type']),
                         source_notes=None if row['source_notes'] is None else str(row['source_notes']),
-                        parent_id=None if row['parent_id'] is None else int(row['parent_id'])
+                        parent_id=None if row['parent_id'] is None else int(row['parent_id']),
+                        filters=filter_data
                     ))
                 cursor.close()
                 db.close()
@@ -302,7 +315,7 @@ class Cohort_Endpoints_API(remote.Service):
             except (IndexError, TypeError):
                 raise endpoints.NotFoundException("User %s's cohorts not found." % (request.id,))
         else:
-            return CohortsList(items=[], count=0)
+            raise endpoints.NotFoundException("Authentication failed.")
 
 
     GET_RESOURCE = endpoints.ResourceContainer(cohort_id=messages.StringField(1, required=True),
@@ -326,7 +339,6 @@ class Cohort_Endpoints_API(remote.Service):
         cohort_id = request.__getattribute__('cohort_id')
 
         if user_email:
-            # todo: see if this needs to be done with a MySQldb cursor
             django.setup()
             try:
                 user_id = Django_User.objects.get(email=user_email).id
@@ -375,7 +387,7 @@ class Cohort_Endpoints_API(remote.Service):
                 raise endpoints.NotFoundException("Cohort %s not found." % (request.cohort_id),)
 
         else:
-            return CohortPatientsSamplesList(patients=[], patient_count=0, samples=[], sample_count=0)
+            raise endpoints.NotFoundException("Authentication failed.")
 
 
 
@@ -700,7 +712,6 @@ class Cohort_Endpoints_API(remote.Service):
 
             datafilenamekeys = []
             for row in cursor.fetchall():
-                pprint.pprint(row)
                 if 'controlled' not in str(row['SecurityProtocol']).lower():
                     datafilenamekeys.append("gs://{}{}".format(settings.OPEN_DATA_BUCKET, row['DataFileNameKey']))
                 # currently this is mock-controlled-access data in another GC Project
@@ -793,7 +804,7 @@ class Cohort_Endpoints_API(remote.Service):
 
             # 1. create new cohorts_cohort with name, active=True, last_date_saved=now
             created_cohort = Django_Cohort.objects.create(name=cohort_name, active=True, last_date_saved=datetime.utcnow())
-            created_cohort.save()  # todo: redundant?
+            created_cohort.save()
 
             # 2. insert patients into cohort_patients
             patient_barcodes = list(set(patient_barcodes))
@@ -811,7 +822,7 @@ class Cohort_Endpoints_API(remote.Service):
 
             # 5. Create filters applied
             for key, val in query_dict.items():
-                Filters.objects.create(resulting_cohort=created_cohort, name=key, value=val).save()  # todo: save redundant with create?
+                Filters.objects.create(resulting_cohort=created_cohort, name=key, value=val).save()
 
             # 6. Store cohort to BigQuery
             project_id = settings.BQ_PROJECT_ID
@@ -823,8 +834,10 @@ class Cohort_Endpoints_API(remote.Service):
                                name=cohort_name,
                                active='True',
                                last_date_saved=str(datetime.utcnow()),
-                               user_id=str(user_id),
+                               user_id=str(user_id)
                                )
+        else:
+            raise endpoints.NotFoundException("Authentication failed.")
             # todo: make SavedCohort have num_patients and num_samples instead of filter_name, filter_value
         # id = messages.StringField(1)
         # name = messages.StringField(2)
@@ -887,470 +900,3 @@ class Cohort_Endpoints_API(remote.Service):
             return_message = "Unsuccessful authentication."
 
         return ReturnJSON(msg=return_message)
-
-
-
-
-    # GET_RESOURCE = endpoints.ResourceContainer(SavedSearch)
-    # @endpoints.method(GET_RESOURCE, SavedSearchList,
-    #                   path='savedsearches', http_method='GET', name='search.list')
-    # def saved_searches_list(self, request):
-    #     query_dict = {}
-    #     value_tuple = ()
-    #     for key, value in SavedSearch.__dict__.items():
-    #         if not key.startswith('_'):
-    #             if request.__getattribute__(key) is not None:
-    #                 query_dict[key] = request.__getattribute__(key)
-    #
-    #     query_str = 'SELECT * FROM search_savedsearch'
-    #     if len(query_dict) > 0:
-    #         query_str += ' where '
-    #         where_clause = build_where_clause(query_dict)
-    #         query_str += where_clause['query_str'] + ' ORDER BY last_date_saved DESC'
-    #         value_tuple = where_clause['value_tuple']
-    #
-    #     try:
-    #         db = sql_connection()
-    #         cursor = db.cursor(MySQLdb.cursors.DictCursor)
-    #         cursor.execute(query_str, value_tuple)
-    #         data = []
-    #         for row in cursor.fetchall():
-    #              data.append(SavedSearch(
-    #                  id                 =str(row['id']),
-    #                  search_url         =str(row['search_url']),
-    #                  barcodes           =str(row['barcodes']),
-    #                  datatypes          =str(row['datatypes']),
-    #                  last_date_saved    =str(row['last_date_saved']),
-    #                  user_id            =str(row['user_id']),
-    #                  name               =str(row['name']),
-    #                  active             =str(row['active'])
-    #                  ))
-    #         cursor.close()
-    #         db.close()
-    #         return SavedSearchList(items=data)
-    #     except (IndexError, TypeError):
-    #         raise endpoints.NotFoundException('Saved Search %s not found.' % (request.id,))
-    #
-    #
-    # POST_RESOURCE = endpoints.ResourceContainer(
-    #     SavedSearch)
-    # @endpoints.method(POST_RESOURCE, SavedSearchList,
-    #                   path='savedsearch', http_method='POST', name='search.save')
-    # def save_search(self, request):
-    #     search_url = request.search_url
-    #     datatypes = request.datatypes
-    #     search_name = request.name
-    #     barcodes = request.barcodes
-    #     last_inserted = []
-    #     user_id = request.user_id
-    #     parent_id = request.parent_id
-    #
-    #     db = sql_connection()
-    #     query_dict = {}
-    #     value_tuple = ()
-    #     query_str = ''
-    #     query_select_str = 'SELECT sample'
-    #     if not barcodes:
-    #         # get barcodes based on search_url
-    #
-    #         if search_url:
-    #             tmp = search_url.replace('#', '')[:-1]
-    #             key_vals = tmp.split('&')
-    #             for item in key_vals:
-    #                 key, vals = item.split('=')
-    #                 query_dict[key] = vals
-    #
-    #             # Build SQL statement
-    #             if len(query_dict) == 0:                        # If there are no parameters passed in selected everything
-    #                 query_str = ' FROM fmdata'
-    #
-    #             else:                                           # If there are parameters passed in
-    #                 query_str = ' FROM fmdata where'
-    #                 where_clause = build_where_clause(query_dict)
-    #                 query_str += where_clause['query_str']
-    #                 value_tuple = where_clause['value_tuple']
-    #
-    #         if parent_id:
-    #             search_str = 'SELECT barcodes FROM search_savedsearch WHERE id=%s;'
-    #             try:
-    #
-    #                 cursor = db.cursor(MySQLdb.cursors.DictCursor)
-    #                 cursor.execute(search_str, (parent_id,))
-    #                 row = cursor.fetchone()
-    #                 if row['barcodes']:
-    #                     barcodes = row['barcodes'].replace('[', '').replace(']', '').replace('\'', '').replace(' ', '').split(',')
-    #                     if query_str.rfind('where') >= 0:
-    #                         query_str += ' and sample in ('
-    #                     else:
-    #                         query_str += ' FROM fmdata where sample in ('
-    #                     first = True
-    #                     for code in barcodes:
-    #                         if first:
-    #                             first = False
-    #                             query_str += '%s'
-    #                         else:
-    #                             query_str += ',%s'
-    #                         value_tuple += (code,)
-    #                     query_str += ')'
-    #             except:
-    #                 pass
-    #
-    #         # print query_select_str, query_str
-    #
-    #         try:
-    #             query_str = query_select_str + query_str
-    #             cursor = db.cursor(MySQLdb.cursors.DictCursor)
-    #             cursor.execute(query_str, value_tuple)
-    #             barcodes = []
-    #             for row in cursor.fetchall():
-    #                 barcodes.append(row['sample'])
-    #
-    #         except (IndexError):
-    #             pass
-    #     if not parent_id:
-    #         parent_id = None
-    #     insert_str = 'INSERT INTO search_savedsearch (barcodes, name, datatypes, last_date_saved, search_url, user_id, parent_id, active) VALUES(%s,%s,%s,now(),%s,%s, %s, 1);'
-    #     value_tuple = (str(barcodes), str(search_name), str(datatypes), str(search_url), str(user_id), parent_id)
-    #     query_str = "SELECT * FROM search_savedsearch ORDER BY last_date_saved DESC;"
-    #     try:
-    #         cursor = db.cursor(MySQLdb.cursors.DictCursor)
-    #         cursor.execute(insert_str, value_tuple)
-    #
-    #         db.commit()
-    #         cursor.execute(query_str)
-    #         row = cursor.fetchone()
-    #         last_inserted.append(SavedSearch(
-    #             id              = str(row['id']),
-    #             search_url      = str(row['search_url']),
-    #             barcodes        = str(row['barcodes']),
-    #             datatypes       = str(row['datatypes']),
-    #             last_date_saved = str(row['last_date_saved']),
-    #             user_id         = str(row['user_id']),
-    #             name            = str(row['name']),
-    #             parent_id       = str(row['parent_id'])
-    #         ))
-    #         cursor.close()
-    #         db.close()
-    #         return SavedSearchList(items=last_inserted)
-    #     except (IndexError, TypeError):
-    #         db.rollback()
-    #         db.close()
-    #         raise endpoints.NotFoundException('\n\nnot found')
-    #
-    # POST_RESOURCE = endpoints.ResourceContainer(
-    #     IdList)
-    # @endpoints.method(POST_RESOURCE, message_types.VoidMessage,
-    #                   path='deletesearch', http_method='POST', name='search.delete')
-    # def delete_search(self, request):
-    #     ids = request.ids
-    #     update_str = 'UPDATE search_savedsearch SET active=0 WHERE id in ('
-    #     first = True
-    #     tuple = ()
-    #     for id in ids:
-    #         tuple += (id,)
-    #         if first:
-    #             update_str += '%s'
-    #             first = False
-    #         else:
-    #             update_str +=',%s'
-    #     update_str += ');'
-    #     # print update_str
-    #     # print tuple
-    #     db = sql_connection()
-    #     try:
-    #         cursor = db.cursor(MySQLdb.cursors.DictCursor)
-    #         cursor.execute(update_str, tuple)
-    #         db.commit()
-    #         cursor.close()
-    #         db.close()
-    #     except (IndexError, TypeError):
-    #         db.rollback()
-    #         db.close()
-    #         raise endpoints.NotFoundException('Deletion error')
-    #     return message_types.VoidMessage()
-    #
-    # POST_RESOURCE = endpoints.ResourceContainer(IdList)
-    # @endpoints.method(POST_RESOURCE, SavedSearch,
-    #                   path='union', http_method='POST', name='cohort.union')
-    # def union_cohorts(self, request):
-    #     parent_id = None
-    #     user_id = request.user_id
-    #     parent = None
-    #     name = None
-    #     datatype = ''
-    #     search_url = ''
-    #
-    #     ids = request.ids
-    #
-    #     # Check for given name
-    #     if request.__getattribute__('name'):
-    #         name = request.name
-    #
-    #     db = sql_connection()
-    #     if request.__getattribute__('update'):
-    #         # Update the given cohort with new cohort --> deactivate and set parent id of new cohort to update
-    #         parent_id = request.update
-    #         deactivate_str = 'UPDATE search_savedsearch SET active=0 WHERE id=%s;'
-    #         parent_query = 'SELECT * FROM search_savedsearch where id=%s;'
-    #         try:
-    #             cursor = db.cursor(MySQLdb.cursors.DictCursor)
-    #             cursor.execute(deactivate_str, (parent_id,))
-    #             db.commit()
-    #
-    #             cursor.execute(parent_query, (parent_id,))
-    #             parent = cursor.fetchone()
-    #
-    #             cursor.close()
-    #         except (IndexError, TypeError):
-    #             db.rollback()
-    #             db.close()
-    #             raise endpoints.NotFoundException('Deactivation Error')
-    #
-    #     barcodes = []
-    #     tuple = ()
-    #     query_str = 'SELECT barcodes from search_savedsearch where id in ('
-    #     first = True
-    #     for id in ids:
-    #         tuple += (id,)
-    #         if first:
-    #             query_str += '%s'
-    #             first = False
-    #         else:
-    #             query_str += ',%s'
-    #     query_str += ');'
-    #
-    #     # If no name given and parent id given, use parent name
-    #     if parent and not name:
-    #         name = parent['name']
-    #
-    #     # if no name given, and no parent id given, use default name
-    #     if not parent and not name:
-    #         name = DEFAULT_COHORT_NAME
-    #
-    #     try:
-    #         cursor = db.cursor(MySQLdb.cursors.DictCursor)
-    #         cursor.execute(query_str, tuple)
-    #         for row in cursor.fetchall():
-    #             codes = row['barcodes'].replace('[', '').replace(']', '').replace('\'', '').replace(' ', '').split(',')
-    #             barcodes = set(barcodes).union(codes)
-    #         barcodes = list(barcodes)
-    #
-    #         insert_str = 'INSERT INTO search_savedsearch (barcodes, name, datatypes, last_date_saved, search_url, user_id, parent_id, active) VALUES(%s,%s,%s,now(),%s,%s, %s, 1);'
-    #         value_tuple = (str(barcodes), name, datatype, search_url, str(user_id), parent_id)
-    #         query_str = "SELECT * FROM search_savedsearch ORDER BY last_date_saved DESC;"
-    #
-    #         cursor.execute(insert_str, value_tuple)
-    #         db.commit()
-    #         cursor.execute(query_str)
-    #         row = cursor.fetchone()
-    #         return SavedSearch(
-    #             id              = str(row['id']),
-    #             search_url      = str(row['search_url']),
-    #             barcodes        = str(row['barcodes']),
-    #             datatypes       = str(row['datatypes']),
-    #             last_date_saved = str(row['last_date_saved']),
-    #             user_id         = str(row['user_id']),
-    #             name            = str(row['name']),
-    #             parent_id       = str(row['parent_id']))
-    #
-    #
-    #     except (IndexError, TypeError):
-    #         db.close()
-    #         raise endpoints.NotFoundException('Get Barcodes Error')
-    #
-    # POST_RESOURCE = endpoints.ResourceContainer(IdList)
-    # @endpoints.method(POST_RESOURCE, SavedSearch,
-    #                   path='intersect', http_method='POST', name='cohort.intersect')
-    # def intersect_cohorts(self, request):
-    #     parent_id = None
-    #     user_id = request.user_id
-    #     parent = None
-    #     name = None
-    #     datatype = ''
-    #     search_url = ''
-    #
-    #     ids = request.ids
-    #
-    #     # Check for given name
-    #     if request.__getattribute__('name'):
-    #         name = request.name
-    #
-    #     db = sql_connection()
-    #     if request.__getattribute__('update'):
-    #         # Update the given cohort with new cohort --> deactivate and set parent id of new cohort to update
-    #         parent_id = request.update
-    #         deactivate_str = 'UPDATE search_savedsearch SET active=0 WHERE id=%s;'
-    #         parent_query = 'SELECT * FROM search_savedsearch where id=%s;'
-    #         try:
-    #             cursor = db.cursor(MySQLdb.cursors.DictCursor)
-    #             cursor.execute(deactivate_str, (parent_id,))
-    #             db.commit()
-    #
-    #             cursor.execute(parent_query, (parent_id,))
-    #             parent = cursor.fetchone()
-    #
-    #             cursor.close()
-    #         except (IndexError, TypeError):
-    #             db.rollback()
-    #             db.close()
-    #             raise endpoints.NotFoundException('Deactivation Error')
-    #
-    #     barcodes = []
-    #     tuple = ()
-    #     query_str = 'SELECT barcodes from search_savedsearch where id in ('
-    #     first = True
-    #     for id in ids:
-    #         tuple += (id,)
-    #         if first:
-    #             query_str += '%s'
-    #             first = False
-    #         else:
-    #             query_str += ',%s'
-    #     query_str += ');'
-    #
-    #     # If no name given and parent id given, use parent name
-    #     if parent and not name:
-    #         name = parent['name']
-    #
-    #     # if no name given, and no parent id given, use default name
-    #     if not parent and not name:
-    #         name = DEFAULT_COHORT_NAME
-    #
-    #     try:
-    #         cursor = db.cursor(MySQLdb.cursors.DictCursor)
-    #         cursor.execute(query_str, tuple)
-    #         first = True
-    #         for row in cursor.fetchall():
-    #             if first:
-    #                 barcodes = row['barcodes'].replace('[', '').replace(']', '').replace('\'', '').replace(' ', '').split(',')
-    #                 first = False
-    #             else:
-    #                 codes = row['barcodes'].replace('[', '').replace(']', '').replace('\'', '').replace(' ', '').split(',')
-    #                 barcodes = set(barcodes).intersection(codes)
-    #
-    #         barcodes = list(barcodes)
-    #
-    #         insert_str = 'INSERT INTO search_savedsearch (barcodes, name, datatypes, last_date_saved, search_url, user_id, parent_id, active) VALUES(%s,%s,%s,now(),%s,%s, %s, 1);'
-    #         value_tuple = (str(barcodes), name, datatype, search_url, str(user_id), parent_id)
-    #         query_str = "SELECT * FROM search_savedsearch ORDER BY last_date_saved DESC;"
-    #
-    #         cursor.execute(insert_str, value_tuple)
-    #         db.commit()
-    #         cursor.execute(query_str)
-    #         row = cursor.fetchone()
-    #         return SavedSearch(
-    #             id              = str(row['id']),
-    #             search_url      = str(row['search_url']),
-    #             barcodes        = str(row['barcodes']),
-    #             datatypes       = str(row['datatypes']),
-    #             last_date_saved = str(row['last_date_saved']),
-    #             user_id         = str(row['user_id']),
-    #             name            = str(row['name']),
-    #             parent_id       = str(row['parent_id']))
-    #
-    #
-    #     except (IndexError, TypeError):
-    #         db.close()
-    #         raise endpoints.NotFoundException('Get Barcodes Error')
-    #
-    # POST_RESOURCE = endpoints.ResourceContainer(IdList)
-    # @endpoints.method(POST_RESOURCE, SavedSearch,
-    #                   path='set_minus', http_method='POST', name='cohort.set_minus')
-    # def set_minus_cohorts(self, request):
-    #     parent_id = None
-    #     user_id = request.user_id
-    #     parent = None
-    #     name = None
-    #     datatype = ''
-    #     search_url = ''
-    #
-    #     ids = request.ids
-    #     if len(ids) < 2:
-    #         raise endpoints.BadRequestException('Set Minus requires at least 2 cohort ids.')
-    #
-    #     # Check for given name
-    #     if request.__getattribute__('name'):
-    #         name = request.name
-    #
-    #     db = sql_connection()
-    #     if request.__getattribute__('update'):
-    #         # Update the given cohort with new cohort --> deactivate and set parent id of new cohort to update
-    #         parent_id = request.update
-    #         deactivate_str = 'UPDATE search_savedsearch SET active=0 WHERE id=%s;'
-    #         parent_query = 'SELECT * FROM search_savedsearch where id=%s;'
-    #         try:
-    #             cursor = db.cursor(MySQLdb.cursors.DictCursor)
-    #             cursor.execute(deactivate_str, (parent_id,))
-    #             db.commit()
-    #
-    #             cursor.execute(parent_query, (parent_id,))
-    #             parent = cursor.fetchone()
-    #
-    #             cursor.close()
-    #         except (IndexError, TypeError):
-    #             db.rollback()
-    #             db.close()
-    #             raise endpoints.NotFoundException('Deactivation Error')
-    #
-    #     barcodes = []
-    #     tuple = ()
-    #     query_str = 'SELECT barcodes from search_savedsearch where id in ('
-    #     first = True
-    #     for id in ids:
-    #         tuple += (id,)
-    #         if first:
-    #             query_str += '%s'
-    #             first = False
-    #         else:
-    #             query_str += ',%s'
-    #     query_str += ');'
-    #
-    #     # If no name given and parent id given, use parent name
-    #     if parent and not name:
-    #         name = parent['name']
-    #
-    #     # if no name given, and no parent id given, use default name
-    #     if not parent and not name:
-    #         name = DEFAULT_COHORT_NAME
-    #
-    #     try:
-    #         cursor = db.cursor(MySQLdb.cursors.DictCursor)
-    #         cursor.execute(query_str, tuple)
-    #         first = True
-    #         second = False
-    #         for row in cursor.fetchall():
-    #             if first:
-    #                 barcodes = row['barcodes'].replace('[', '').replace(']', '').replace('\'', '').replace(' ', '').split(',')
-    #                 first = False
-    #                 second = True
-    #             elif second:
-    #                 codes = row['barcodes'].replace('[', '').replace(']', '').replace('\'', '').replace(' ', '').split(',')
-    #                 barcodes = set(barcodes).difference(codes)
-    #
-    #         barcodes = list(barcodes)
-    #
-    #         insert_str = 'INSERT INTO search_savedsearch (barcodes, name, datatypes, last_date_saved, search_url, user_id, parent_id, active) VALUES(%s,%s,%s,now(),%s,%s, %s, 1);'
-    #         value_tuple = (str(barcodes), name, datatype, search_url, str(user_id), parent_id)
-    #         query_str = "SELECT * FROM search_savedsearch ORDER BY last_date_saved DESC;"
-    #
-    #         cursor.execute(insert_str, value_tuple)
-    #         db.commit()
-    #         cursor.execute(query_str)
-    #         row = cursor.fetchone()
-    #         return SavedSearch(
-    #             id              = str(row['id']),
-    #             search_url      = str(row['search_url']),
-    #             barcodes        = str(row['barcodes']),
-    #             datatypes       = str(row['datatypes']),
-    #             last_date_saved = str(row['last_date_saved']),
-    #             user_id         = str(row['user_id']),
-    #             name            = str(row['name']),
-    #             parent_id       = str(row['parent_id']))
-    #
-    #
-    #     except (IndexError, TypeError):
-    #         db.close()
-    #         raise endpoints.NotFoundException('Get Barcodes Error')
-    #
-    #     return SavedSearch()
-    #
