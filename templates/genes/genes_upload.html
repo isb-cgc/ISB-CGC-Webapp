@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+{% block title %}Upload Genes Favorites | ISB-CGC{% endblock %}}
+{% block extra_css_libs %}{% endblock %}
+{% block header %}{% endblock %}
+
+{% block link_page_name %}genes_upload{% endblock %}
+{% block page_name %}genes_upload{% endblock %}
+
+{% block page_header %}
+    <ol class="breadcrumb">
+        <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+        <li><a href="{% url 'genes' %}">Saved Gene Favorites</a></li>
+    </ol>
+    <h1 class="page-header">Upload Gene List</h1>
+
+
+{% endblock %}
+{% block content %}
+<div class="container">
+
+    <section class="panel panel-default">
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="active" role="presentation">
+                <a href="#upload-gene-list" data-toggle="tab">Upload A Gene List</a>
+            </li>
+            <li role="presentation">
+                <a href="#paste-gene-list" data-toggle="tab">Paste in A Gene List</a>
+            </li>
+        </ul>
+        <div class="panel-body tab-content">
+            <div class="tab-pane active" id="upload-gene-list">
+                <h5>Upload a gene list from a plain text (ascii) file</h5>
+                <p>Items either space or comma separated</p>
+
+                <div id="uploadField">
+                    <button class="btn btn-primary" id="uploadBtn">
+                        <i class="fa fa-file"></i> Select File
+                    </button>
+                    <input type="file" name="upload" id="fileUploadField" style="display: none">
+                </div>
+                <br>
+            </div>
+            <div class="tab-pane" id="paste-gene-list">
+                <h5>Paste in a gene list</h5>
+                <p>strong Items either comma or tab separated</p>
+                <div id="tokenfield-holder">
+                    <input type="text" id="geneListField">
+                </div>
+                <div class="tokenfield">
+                    <p class="helper-text__repeat" style="display: none;"><i class="fa fa-exclamation-circle"></i> <span class="token invalid repeat">Repetitive</span>Genes will be removed on submit </p>
+                    <p class="helper-text__invalid" style="display: none;"><i class="fa fa-exclamation-circle"></i> The following <span class="token invalid">items</span>were not recognized as gene identifiers. You may either correct or delete these items -- or upload them as-is. For corrections, refer to the
+                <a href="">System Gene Identifiers</a>.</p>
+                </div>
+            </div>
+        </div>
+        <!--<div class="panel-footer">-->
+            <!--<button class="btn btn-default"><i class="fa fa-upload"></i> Upload Genes</button>-->
+        <!--</div>-->
+    </section>
+    <section class="panel panel-default collapse">
+        <div class="panel-body">
+            <p><i class="fa fa-exclamation-circle"></i> The following items were not recognized as gene identifiers. You may either correct or delete these items -- or upload them as-is. </p>
+            <div id="tokenfield-holder" class="collapse">
+                <input type="text" id="errorGeneListField">
+            </div>
+        </div>
+        <div class="panel-footer">
+            <button class="btn btn-default">Upload Genes</button>
+            <button class="btn btn-link">Delete items and Continue</button>
+        </div>
+    </section>
+</div>
+<div class="modal">
+    error modal
+</div>
+<script>
+    var genes_fav_detail;
+</script>
+{% endblock %}
+
+{% block js_file %}{% static 'js/genes.js' %}{% endblock %}

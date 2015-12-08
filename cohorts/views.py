@@ -31,6 +31,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.conf import settings
+from django.db.models import Count
 
 from django.http import StreamingHttpResponse
 from google.appengine.api import urlfetch
@@ -107,6 +108,43 @@ def data_availability_sort(key, value, data_attr, attr_details):
             'value': 'BCGSC Illumina GA',
             'count': [v['count'] for v in value if v['value'] == 'True'][0]
         })
+
+@login_required
+def cohorts_list(request):
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+    # check to see if user has read access to 'All TCGA Data' cohort
+    isb_superuser = User.objects.get(username='isb')
+    superuser_perm = Cohort_Perms.objects.get(user=isb_superuser)
+    user_all_data_perm = Cohort_Perms.objects.filter(user=request.user, cohort=superuser_perm.cohort)
+    if not user_all_data_perm:
+        Cohort_Perms.objects.create(user=request.user, cohort=superuser_perm.cohort, perm=Cohort_Perms.READER)
+
+    # add_data_cohort = Cohort.objects.filter(name='All TCGA Data')
+
+    users = User.objects.filter(is_superuser=0)
+    cohort_perms = Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True)
+    cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved').annotate(num_patients=Count('samples'))
+
+    for item in cohorts:
+        item.perm = item.get_perm(request).get_perm_display()
+        item.owner = item.get_owner()
+        # print local_zone.localize(item.last_date_saved)
+
+    # Used for autocomplete listing
+    cohort_listing = Cohort.objects.filter(id__in=cohort_perms, active=True).values('id', 'name')
+    for cohort in cohort_listing:
+        cohort['value'] = int(cohort['id'])
+        cohort['label'] = cohort['name'].encode('utf8')
+        del cohort['id']
+        del cohort['name']
+
+    return render(request, 'cohorts/cohort_list.html', {'request': request,
+                                                            'cohorts': cohorts,
+                                                            'user_list': users,
+                                                            'cohorts_listing': cohort_listing,
+                                                            'base_url': settings.BASE_URL,
+                                                            'base_api_url': settings.BASE_API_URL
+                                                            })
 
 @login_required
 def cohort_detail(request, cohort_id=0):
@@ -207,10 +245,13 @@ def cohort_detail(request, cohort_id=0):
         try:
             cohort = Cohort.objects.get(id=cohort_id, active=True)
             cohort.perm = cohort.get_perm(request)
+            cohort.owner = cohort.get_owner()
 
             if not cohort.perm:
                 messages.error(request, 'You do not have permission to view that cohort.')
-                return redirect('user_landing')
+                return redirect('cohort_list')
+
+            cohort.mark_viewed(request)
 
             shared_with_ids = Cohort_Perms.objects.filter(cohort=cohort, perm=Cohort_Perms.READER).values_list('user', flat=True)
             shared_with_users = User.objects.filter(id__in=shared_with_ids)
@@ -236,7 +277,7 @@ This save view only works coming from cohort editing or creation views.
 @csrf_protect
 def save_cohort(request):
     if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
-    redirect_url = reverse('user_landing')
+    redirect_url = reverse('cohort_list')
 
     samples = []
     patients = []
@@ -328,7 +369,7 @@ def save_cohort(request):
             redirect_url = reverse('cohort_details',args=[cohort.id])
             messages.info(request, 'Filters applied successfully.')
         else:
-            redirect_url = reverse('user_landing')
+            redirect_url = reverse('cohort_list')
             messages.info(request, 'Cohort, %s, created successfully.' % cohort.name)
 
     return redirect(redirect_url) # redirect to search/ with search parameters just saved

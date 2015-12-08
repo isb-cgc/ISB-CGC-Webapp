@@ -1,0 +1,56 @@
+.tab-pane.filter-panel
+    margin-left: -10px
+    margin-right: -10px
+
+.nav-tabs
+    background-color: #fff
+    border-bottom: 1px solid darken($white, 15%)
+    border-radius: 0px
+    margin-left: 0px
+    text-transform: uppercase
+
+    > li > a
+        @extend .nav-tabs
+        margin-right: 0px
+        color: $isb-dark
+        font-weight: $medium-font-weight
+    > li.active > a, li.active > a:focus
+        @extend .nav-tabs
+        border: none
+        border-bottom: 2px $isb-warning solid
+        color: $isb-warning
+    > li.active:hover > a
+        @extend .nav-tabs
+        border: none
+        border-bottom: 2px $isb-warning solid
+        color: $isb-warning
+    > li:hover > a
+        @extend .nav-tabs
+        border: none
+
+    .navbar-right
+        margin-top: 0px
+        margin-right: -2px
+
+    &.nav-stacked
+        > li:first-child > a
+            border-top-left-radius: 3px
+        > li:last-child > a
+            border-bottom-left-radius: 3px
+        > li.active > a, li.active > a:focus
+            @extend .nav-tabs
+            border: none
+            border-right: 2px $primary-color solid
+        > li.active:hover > a
+            @extend .nav-tabs
+            border-right: 2px $primary-color solid
+        > li:hover > a
+            @extend .nav-tabs
+            background-color: $primary-color-light
+            border-right: 2px transparent solid
+
+.tab-content
+    background-color: #FFF
+    padding: 5px 10px
+
+.collpase.active

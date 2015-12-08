@@ -16,7 +16,7 @@
 #
 ###
 
-runtime: custom
+runtime: python27 #custom
 module: mvm
 api_version: 1
 threadsafe: true

@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+{% block title %}Project Upload | ISB-CGC{% endblock %}}
+{% block extra_css_libs %}{% endblock %}
+{% block header %}{% endblock %}
+
+{% block link_page_name %}project_upload{% endblock %}
+{% block page_name %}project_upload{% endblock %}
+
+{% block page_header %}
+    <ol class="breadcrumb">
+        <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+        <li><a href="{% url 'projects' %}">Saved Projects</a></li>
+    </ol>
+    <h1 class="page-header">Data Upload</h1>
+{% endblock %}
+{% block content %}
+<div class="container">
+    <!--File upload section-->
+    <section class="panel panel-default">
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="active" role="presentation">
+                <a aria-controls="project-upload" role="tab" data-toggle="tab" data-target="#project-info">A New Project</a>
+            </li>
+            <li role="presentation">
+                <a class="disabled" aria-controls="project-upload" role="tab" data-toggle="tab" data-target="#study-info">A New Study for an Existing Project</a>
+            </li>
+        </ul>
+        <div class="panel-heading"></div>
+        <form action="">
+            <div class="panel-body">
+                <section id="project-info" class="collapse in">
+                    <div class="form-group">
+                        <label for="project-name">Project Name</label>
+                        <input class="form-control" type="text" name="project-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="project-description">Project Description (Optional)</label>
+                        <textarea class="form-control" name="project-description" cols="30" rows="5"></textarea>
+                    </div>
+                </section>
+                <section>
+                    <div class="form-group collapse" id="study-info">
+                        <select class="form-control" required>
+                            <option value="">-- Select Project --</option>
+                            <option value="">Project 1</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="study-name">Study Name</label>
+                        <input class="form-control" type="text" name="study-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="study-description">Study Description (Optional)</label>
+                        <textarea class="form-control" name="study-description" cols="30" rows="5"></textarea>
+                    </div>
+                </section>
+                <section id="data-upload-group">
+                    <div class="form-group">
+                        <label>Data Upload</label>
+                        <div class="checkbox">
+                            <label>
+                                <input type="radio" name="data" checked data-target="#high-level-upload"> High level data files
+                            </label>
+                        </div>
+                        <div class="checkbox">
+                            <label>
+                                <input type="radio" name="data" data-target="#low-level-upload"> Low level files for API access
+                            </label>
+                        </div>
+                        <div class="checkbox">
+                            <label>
+                                <input type="radio" name="data" data-target="#high-level-extension"> High level data extending an existing project's study data
+                            </label>
+                        </div>
+                    </div>
+                    <!--High level data files upload-->
+                    <div class="form-group upload-area collapse in" id="high-level-upload">
+                        <input type="file">
+                        <label>Data Type</label>
+                        <select class="form-control">
+                            <option value="">--Select Data Type --</option>
+                            <option value="Gene Expression">Gene Expression</option>
+                        </select>
+                    </div>
+                    <!--low level data upload-->
+                    <div class="form-group upload-area collapse" id="low-level-upload">
+                        <!--TODO: link to examples page-->
+                        <p>Please select and upload a file that provides reference to the patient, sample and data files.
+                            <a href="">View example</a></p>
+                        <input type="file">
+                    </div>
+                    <div class="form-group upload-area collapse" id="high-level-extension">
+
+                        <select class="form-control">
+                            <option value=""> -- Select a Project/Study --</option>
+                            <optgroup label="TCGA">
+                                <option>All Data</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                </section>
+            </div>
+            <div class="panel-footer">
+                <button class="btn btn-default" type="submit">Next</button>
+            </div>
+        </form>
+    </section>
+    <section class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Review Data Fields</h3>
+        </div>
+        <div class="panel-body">
+            <p>Below are all the fields we detected for the selected files. Please verify the field names and data types are correct.</p>
+            <p>Please refer to the <a href="">system data dictionary</a> for proper naming and data type conventions.</p>
+
+        </div>
+        <div class="panel-footer">
+            <button class="btn btn-default"><i class="fa fa-cloud-upload"></i> Upload Data</button>
+        </div>
+    </section>
+</div>
+
+{% endblock %}
+
+{% block js_file %}{% static 'js/data_upload.js' %}{% endblock %}
