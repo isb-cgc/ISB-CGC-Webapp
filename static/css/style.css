@@ -1279,6 +1279,27 @@ nav {
     .hovercard table td {
       padding: 0px 5px; }
 
+#data-upload-group .checkbox .sub-checkbox {
+  margin-left: 45px; }
+  #data-upload-group .checkbox .sub-checkbox select {
+    width: auto;
+    vertical-align: middle; }
+
+#data-upload-forms .filename {
+  font-weight: 700; }
+
+#data-upload-forms .uploaded-file {
+  margin: 10px; }
+  #data-upload-forms .uploaded-file select {
+    width: auto;
+    display: inline-block; }
+
+#data-upload-forms #file-list-table {
+  margin-top: 10px; }
+
+.file-column-edit-table td:nth-child(2) {
+  width: 100%; }
+
 body {
   -webkit-transition: all 0.4s ease-in;
   transition: all 0.4s ease-in; }

@@ -1,19 +1,39 @@
-<table class="table table-striped">
+<table class="table table-striped file-column-edit-table">
     <thead>
         <tr>
+            <th></th>
             <th>Column Name</th>
             <th>Type</th>
-            <th>Participant Barcode</th>
-            <th>Sample Barcode</th>
+            <!--<th>Participant Barcode</th>
+            <th>Sample Barcode</th>-->
         </tr>
     </thead>
     <tbody>
         <% _.each(columns, function (column) { %>
             <tr>
+                <td><i class="fa fa-close ignore-row-btn"></i></td>
                 <td><%- column.name %></td>
-                <td><%- column.type %></td>
-                <td><i class="fa <%- column.isParticipantBarcode ? 'fa-check' : 'fa-close' %>"></i></td>
-                <td><i class="fa <%- column.isSampleBarcode ? 'fa-check' : 'fa-close' %>"></i></td>
+                <td>
+                    <select>
+                        <option value="int" <%- column.type == 'int' ? 'selected' : '' %>>Integer</option>
+                        <option value="float" <%- column.type == 'float' ? 'selected' : '' %>>Decimal</option>
+                        <option value="string" <%- column.type == 'int' || column.type == 'float' ? '' : 'selected' %>>Categorical</option>
+                        <optgroup label="Dictionary Datatypes">
+                            <option value="age">Age</option>
+                            <option value="gender">Gender</option>
+                            <option value="gene">Gene</option>
+                            <option value="hist">Histological Grade</option>
+                            <option value="stage">Pathological Stage</option>
+                            <option value="resid">Residual Tumor</option>
+                            <option value="sample">Sample Type</option>
+                            <option value="smoking">Smoking History</option>
+                            <option value="tumor">Tumor Status</option>
+                            <option value="site">Tumor Tissue Site</option>
+                        </optgroup>
+                    </select>
+                </td>
+               <!-- <td><i class="fa <%- column.isParticipantBarcode ? 'fa-check' : 'fa-close' %>"></i></td>
+                <td><i class="fa <%- column.isSampleBarcode ? 'fa-check' : 'fa-close' %>"></i></td>-->
             </tr>
         <% }); %>
     </tbody>
