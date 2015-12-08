@@ -21,7 +21,7 @@ import json
 import StringIO
 import csv
 import logging
-
+import sys
 import pytz
 
 import pysftp
@@ -174,7 +174,6 @@ def write_log_entry(log_name, log_message):
         Writes a struct payload as the log message
         Also, the API writes the log to bucket and BigQuery
         Works only with the Compute Service
-        Returns http insert status
 
         type log_name: str
         param log_name: The name of the log entry
@@ -205,11 +204,17 @@ def write_log_entry(log_name, log_message):
             }
         ]
     }
+    try:
+        resp = client.projects().logs().entries().write(
+            projectsId=settings.BIGQUERY_PROJECT_NAME, logsId=log_name, body=body).execute()
+        print >> sys.stderr, resp
 
-    resp = client.projects().logs().entries().write(
-        projectsId=settings.BIGQUERY_PROJECT_NAME, logsId=log_name, body=body).execute()
+        if resp:
+            # this would be an error
+            sys.stderr.write(resp + '\n')
 
-    return resp
+    except Exception as e:
+        sys.stderr.write(e.message + '\n')
 
 
 @csrf_exempt
@@ -452,25 +457,20 @@ def create_and_log_reports(request):
     tdelta = utc_now + datetime.timedelta(days=-7)
     start_datetime = tdelta.isoformat("T") + "Z" # collect last 7 days logs
 
-    #reports return account information about different types of administrator activity events.
-    admin_report = service.activities().list(userKey='all', applicationName='admin',
-                                             startTime=start_datetime).execute(http=http_auth)
+    for application_name in ['admin', 'login', 'token', 'groups']:
+        # If there is ever an HttpError 400 error "Log entry with size <x> bytes exceeds maximum size of 112640 bytes",
+        # then decrease maxResults value. For now, maxResults=100 works.
+        req = service.activities().list(userKey='all', applicationName=application_name,
+                                        startTime=start_datetime, maxResults=100)
+        resp = req.execute(http=http_auth)
+        # log the reports using Cloud logging API
+        write_log_entry('apps_{}_activity_report'.format(application_name), resp)
 
-    # reports return account information about different types of Login activity events.
-    login_report = service.activities().list(userKey='all', applicationName='login',
-                                             startTime=start_datetime).execute(http=http_auth)
+        # if there are more than maxResults=100 results, other log results will be written with Cloud logging API
+        while resp.get("nextPageToken"):
+            req = service.activities().list_next(previous_request=req, previous_response=resp)
+            resp = req.execute(http=http_auth)
+            # log the reports using Cloud logging API
+            write_log_entry('apps_{}_activity_report'.format(application_name), resp)
 
-    # reports return account information about different types of Token activity events.
-    token_report = service.activities().list(userKey='all', applicationName='token',
-                                             startTime=start_datetime).execute(http=http_auth)
-
-    #reports return information about various Groups activity events.
-    groups_report = service.activities().list(userKey='all', applicationName='groups',
-                                              startTime=start_datetime).execute(http=http_auth)
-
-    # log the reports using Cloud logging API
-    write_log_entry('apps_admin_activity_report', admin_report)
-    write_log_entry('apps_login_activity_report', login_report)
-    write_log_entry('apps_token_activity_report', token_report)
-    write_log_entry('apps_groups_activity_report', groups_report)
     return HttpResponse('')
