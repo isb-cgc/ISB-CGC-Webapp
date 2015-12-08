@@ -10,7 +10,7 @@
 
     <div class="col-sm-12" style="margin-top: 70px;">
         <!-- breadcrumb -->
-        <div><a href="/dashboard/">Your dashboard</a> > <a href="/workbooks/list">Saved Workbooks</a></div>
+        <div><a href="/dashboard/">Your dashboard</a> > <a href="/workbooks">Saved Workbooks</a></div>
 
         <!-- workbook header -->
         <div style="margin:15px; margin-left:0px; margin-right:0px; padding:15px; background-color:#CECECE;">
@@ -35,7 +35,7 @@
             <li><a href=""><i class="fa fa-plus"></i></a> </li>
         </ul>
         <div class="tab-content">
-            <!-- for each worksheet in workbook -->
+             <!-- for each worksheet in workbook -->
              {% for worksheet in workbook.worksheet_list %}
                  <div class="tab-pane fade {% if worksheet.id == 1 %} in active{% endif %}" id="{{ worksheet.id }}" >
                      <!-- worksheet description -->
@@ -47,7 +47,7 @@
                     <div style="height:600px">
                         <!-- worksheet comment pane -->
                         <div id="comments_pane" style="border-left-style:solid; height:100%; border-left-width:1px; padding:5px; width:200px; float:right">
-                            <h4><i class="fa fa-arrow-right" style="float:left; cursor:pointer;"></i><center>Comment</center> </h4>
+                            <h4><i class="fa fa-arrow-right" style="float:left; cursor:pointer;"></i><center>Comments</center> </h4>
                             {% for comment in worksheet.comment_list %}
                                 <div>{{ comment.text }}</div>
                             {% endfor %}
@@ -57,19 +57,19 @@
                         <div id="source_pane" style="border-right-style:solid; float: left; height:100%; border-right-width:1px; padding:5px; width:200px; display:inline-block">
                             <h4>Source Data <i class="fa fa-arrow-left" style="float:right; cursor:pointer;"></i></h4>
                             <div style="padding:5px; background-color:#CECECE; margin-bottom:5px">
-                                <h4>Genes</h4>
+                                <h4> <a href="{% url 'genes' workbook.id %}"> Genes</h4>
                                 {% for gene in worksheet.gene_list %}
                                     <div>{{ gene.name }}</div>
                                 {% endfor %}
                             </div>
                             <div style="padding:5px; background-color:#CECECE;">
-                                <h4>Variables</h4>
+                                <h4><a href="{% url 'variables' workbook.id %}">Variables</h4>
                                 {% for variable in worksheet.variable_list %}
                                     <div>{{ variable.name }}</div>
                                 {% endfor %}
                             </div>
                             <div style="padding:5px; background-color:#CECECE;">
-                                <h4>Cohorts</h4>
+                                <h4><a href="{% url 'cohorts' workbook.id %}">Cohorts</h4>
                                 {% for cohort in worksheet.cohort_list %}
                                     <div>{{ cohort.name }}</div>
                                 {% endfor %}
@@ -77,8 +77,16 @@
                         </div>
 
                         <!-- worksheet analysis pane -->
-                        <div>
-                            <center>whole bunch of stuff</center>
+                        <div style="margin-right:200px; margin-left:200px; padding:5px">
+                            Analysis Type
+                            <div class="dropdown" style="margin:5px; margin-left:0px; margin-right:0px; padding:10px; background-color:#CECECE;">
+                                <select class="form-control">
+                                    <option>-- select one --</option>
+                                    <option>Mutations</option>
+                                    <option>SeqPeek</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>

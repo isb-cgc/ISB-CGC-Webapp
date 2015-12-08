@@ -1,7 +1,68 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% load custom_tags %}
+{% block title %}Workbooks | ISB-CGC{% endblock %}}
+{% block extra_css_libs %}{% endblock %}
+{% block header %}{% endblock %}
 
-{% block header %}
+{% block link_page_name %}workbook_list{% endblock %}
+{% block page_name %}workbook_list{% endblock %}
+
+{% block page_header %}
+    <ol class="breadcrumb">
+        <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+    </ol>
+    <h1 class="page-header">Saved Workbooks</h1>
 {% endblock %}
 
+{% block content %}
+<div class="container">
+    <div>
+        <h1 class="page-header">Saved Workbooks</h1>
+        <div class="panel tab-content">
+            <a href="{% url 'workbook_detail' 0 %}">
+                <button onclick="createjavascript()">Create Workbook</button>
+            </a>
+        </div>
+        {% if workbooks %}
+            <table class="table table-striped tablesorter">
+                <thead>
+                    <th class=""></th>
+                    <th class="name-col">Name</th>
+                    <th class="study-col">Worksheets</th>
+                    <th>Ownership</th>
+                    <th>Shared with</th>
+                    <th>Last Updated</th>
+                </thead>
+                <tbody>
+                    {% for workbook in workbooks %}
+                        <tr>
+                            <td class="control-col">
+                                <div class="dropdown">
+                                    <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="{% url 'workbook_detail' workbook.id %}">Edit</a> </li>
+                                        <li><a href="">Duplicate</a> </li>
+                                        <li><a role="button">Delete</a></li>
+                                        <hr>
+                                        <li><a href="">New Workbook</a></li>
+                                    </ul>
+                                </div>
+                            </td>
+                            <td class="name-col"><a href="{% url 'workbook_detail' workbook.id %}">{{ workbook.name }}</a></td>
+                            <td> {{ workbook.worksheet_list|length }}</td>
+                            <td> {{ workbook.owner.name }}</td>
+                            <td>({{ workbook.share_count }})</td>
+                            <td> {{ workbook.last_date_saved}}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>You don't have any saved workbooks yet</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block js_file %}{% static 'js/dashboard.js' %}{% endblock %}
