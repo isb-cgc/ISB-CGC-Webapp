@@ -8,5 +8,5 @@ admin.autodiscover()
 urlpatterns = patterns('',
 
     url(r'^upload$', views.upload_file, name='project_data_upload'),
-    url(r'^test$', views.test_form, name='data_upload_test'),
+    #url(r'^test$', views.test_form, name='data_upload_test'),
 )
