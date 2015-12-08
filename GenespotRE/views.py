@@ -116,21 +116,9 @@ def landing_page(request):
             print >> sys.stderr,'App BACKEND_ID: '+os.getenv('BACKEND_ID')
         except:
             print >> sys.stderr,"Printing os.getenv('BACKEND_ID') Failed"
-    ## CURRENT_VERSION_ID unavailable in mvm...
-    ## can use "BACKEND_ID"? e.g. 'mvm:20151016t222058'
-    ## Below uses the current local time, not deployment time PT,...
-    version = { 'version': modules.get_current_version_name(),
-                'date': time.strftime("%d/%m/%y %X")}
-    return render(request, 'GenespotRE/landing.html',
-                  {'request': request,
-                   'version': version})
-    # version = {}
-    #version['version'] = request.environ["CURRENT_VERSION_ID"].split('.')[0]
-    #version_id = request.environ["CURRENT_VERSION_ID"].split('.')[1]
-    # timestamp = long(version_id) / pow(2,28)
-    # update_time = datetime.fromtimestamp(timestamp) - timedelta(hours=7)
-    # version['date'] = update_time.strftime("%d/%m/%y %X")
 
+    return render(request, 'GenespotRE/landing.html',
+                  {'request': request})
 
 '''
 Returns css_test page used to test css for general ui elements
