@@ -23,44 +23,73 @@
 {% endblock %}
 {% block content %}
 <div class="container">
-    <div class="panel tab-content">
-        <div class="page-action-group">
-            <button class="btn btn-default">New Workbook</button>
-            <span class="separator"></span>
-            <button id='delete-cohorts' type="button" class="btn btn-primary" data-toggle="modal" data-target="#delete-cohorts-modal" aria-label="delete-cohorts" role="button" aria-expanded="true">
-                <i class="fa fa-trash"></i>
-                Delete
-            </button>
-            <button id="cohort-sets" type="button" class="btn btn-primary" data-toggle="modal" data-target="#union-modal" aria-label="set-logic" role="button" aria-expanded="true">
-                Set Operations
-            </button>
-            <button class="btn btn-primary" id="share-cohorts-btn" type="button" data-toggle="modal" data-target="#share-cohorts-modal" aria-label="share-cohorts" role="button" aria-expanded="true">
-                <i class="fa fa-share-alt"></i>
-                Share
-            </button>
+    <div class="panel panel-default">
+        <ul class="nav nav-tabs" role="tablist">
+            <li role="presentation" class="active">
+                <a href="#save-cohorts-list" aria-controls="save-cohorts-list" role="tab" data-toggle="tab">Saved Cohorts</a>
+            </li>
+            <li role="presentation">
+                <a href="#public-cohorts-list" aria-controls="public-cohorts-list" role="tab" data-toggle="tab">Public Cohorts</a>
+            </li>
+        </ul>
+        <div class="tab-content panel-body ">
+            <div role="tabpanel" class="tab-pane active" id="save-cohorts-list">
+                <div class="page-action-group">
+                    <button class="btn btn-default">New Workbook</button>
+                    <span class="separator"></span>
+                    <button id='delete-cohorts' type="button" class="btn btn-info" data-toggle="modal" data-target="#delete-cohorts-modal" aria-label="delete-cohorts" role="button" aria-expanded="true">
+                        <i class="fa fa-trash"></i>
+                        Delete
+                    </button>
+                    <button id="cohort-sets" type="button" class="btn btn-info" data-toggle="modal" data-target="#union-modal" aria-label="set-logic" role="button" aria-expanded="true">
+                        Set Operations
+                    </button>
+                    <button class="btn btn-info" id="share-cohorts-btn" type="button" data-toggle="modal" data-target="#share-cohorts-modal" aria-label="share-cohorts" role="button" aria-expanded="true">
+                        <i class="fa fa-share-alt"></i>
+                        Share
+                    </button>
+                </div>
+                {% if cohorts %}
+                    <table id="cohort-table" class="table table-striped tablesorter">
+                        <thead><tr>
+                            <th class="checkbox-col"><input type="checkbox" class="select-all" title="select-all"/></th>
+                            <th class="name-col">Cohort Name</th>
+                            <th class="sample-col"># of Samples</th>
+                            <th class="owner-col">Owner</th>
+                            <th class="date-col">Last Modified</th>
+                        </tr></thead>
+                        <tbody>
+                        {% for cohort in cohorts %}
+                            <tr>
+                                <td class="checkbox-col"><input type="checkbox" name="id" value="{{ cohort.id }}" title="{{ cohort.name }} Checkbox" aria-label="cohort-checkbox"/></td>
+                                <td class="name-col"><a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a></td>
+                                <td class="sample-col">{{ cohort.num_patients }}</td>
+                                <td class="owner-col">{{ cohort.owner.email }}</td>
+                                <td class="date-col">{{ cohort.last_date_saved|date:"SHORT_DATETIME_FORMAT" }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+            </div>
+            <div role="tabpanel" class="tab-pane" id="public-cohorts-list">
+                <div class="page-action-group">
+                    <button class="btn btn-default">New Workbook</button>
+                    <span class="separator"></span>
+                    <button id='delete-cohorts' type="button" class="btn btn-info" data-toggle="modal" data-target="#delete-cohorts-modal" aria-label="delete-cohorts" role="button" aria-expanded="true">
+                        <i class="fa fa-trash"></i>
+                        Delete
+                    </button>
+                    <button id="cohort-sets" type="button" class="btn btn-info" data-toggle="modal" data-target="#union-modal" aria-label="set-logic" role="button" aria-expanded="true">
+                        Set Operations
+                    </button>
+                    <button class="btn btn-info" id="share-cohorts-btn" type="button" data-toggle="modal" data-target="#share-cohorts-modal" aria-label="share-cohorts" role="button" aria-expanded="true">
+                        <i class="fa fa-share-alt"></i>
+                        Share
+                    </button>
+                </div>
+            </div>
         </div>
-        {% if cohorts %}
-            <table id="cohort-table" class="table table-striped tablesorter">
-                <thead><tr>
-                    <th class="checkbox-col"><input type="checkbox" class="select-all" title="select-all"/></th>
-                    <th class="name-col">Cohort Name</th>
-                    <th class="sample-col"># of Samples</th>
-                    <th class="owner-col">Owner</th>
-                    <th class="date-col">Last Modified</th>
-                </tr></thead>
-                <tbody>
-                {% for cohort in cohorts %}
-                    <tr>
-                        <td class="checkbox-col"><input type="checkbox" name="id" value="{{ cohort.id }}" title="{{ cohort.name }} Checkbox" aria-label="cohort-checkbox"/></td>
-                        <td class="name-col"><a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a></td>
-                        <td class="sample-col">{{ cohort.num_patients }}</td>
-                        <td class="owner-col">{{ cohort.owner.email }}</td>
-                        <td class="date-col">{{ cohort.last_date_saved|date:"SHORT_DATETIME_FORMAT" }}</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        {% endif %}
     </div>
 </div>
 
@@ -208,7 +237,7 @@
                     <div class="modal-body">
                         <p class="form-control-static selected-cohorts"></p>
                         <label for="share-cohort-users">Please select the users you would like to share these cohorts with:</label>
-                        <select id="share-cohort-users" name="users" multiple="multiple">
+                        <select id="share-cohort-users" name="users" multiple="multiple" class="form-control">
                             {% for user in user_list %}
                             <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }} ({{ user.email }})</option>
                             {% endfor %}

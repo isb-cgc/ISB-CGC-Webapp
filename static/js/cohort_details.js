@@ -69,7 +69,10 @@ require([
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function() {
-        $(this).find('form')[0].reset();
+        var form = $(this).find('form')[0];
+        if(form){
+            form.reset();
+        }
     });
 
     var search_helper_obj = Object.create(search_helpers, {});
@@ -263,4 +266,10 @@ require([
 
     search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id);
     search_helper_obj.update_parsets(base_api_url, 'metadata_platform_list', cohort_id);
+
+    $('#shared-with-btn').on('click', function(e){
+        var target = $(this).data('target');
+
+        $(target + ' a[data-target="#shared-pane"]').tab('show');
+    })
 });
