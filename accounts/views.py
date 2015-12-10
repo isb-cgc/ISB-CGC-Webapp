@@ -43,8 +43,8 @@ login_expiration_seconds = settings.LOGIN_EXPIRATION_HOURS * 60 * 60
 COUNTDOWN_SECONDS = login_expiration_seconds + (60 * 15)
 
 logger = logging.getLogger(__name__)
-ACL_GOOGLE_GROUP = settings.OPEN_ACL_GOOGLE_GROUP
-
+OPEN_ACL_GOOGLE_GROUP = settings.OPEN_ACL_GOOGLE_GROUP
+CONTROLLED_ACL_GOOGLE_GROUP = settings.ACL_GOOGLE_GROUP
 
 @login_required
 def extended_logout_view(request):
@@ -54,23 +54,30 @@ def extended_logout_view(request):
         nih_user.active = False
         nih_user.save()
         logger.info("NIH user {} inactivated".format(nih_user.NIH_username))
-        # todo: is it advisable to set nih_user.dbGaP_authorized to False as well?
     except (ObjectDoesNotExist, MultipleObjectsReturned), e:
         if type(e) is MultipleObjectsReturned:
             logger.warn("Error %s on logout: more than one NIH User with user id %d" % (str(e), request.user.id))
 
-    # remove from isb-cgc-cntl if exists
+    # remove from CONTROLLED_ACL_GOOGLE_GROUP if exists
     directory_service, http_auth = get_directory_resource()
     user_email = User.objects.get(id=request.user.id).email
     try:
-        directory_service.members().delete(groupKey=ACL_GOOGLE_GROUP, memberKey=str(user_email)).execute(http=http_auth)
+        directory_service.members().delete(groupKey=CONTROLLED_ACL_GOOGLE_GROUP, memberKey=str(user_email)).execute(http=http_auth)
         logger.info("Attempting to delete user {} from group {}. "
                     "If an error message doesn't follow, they were successfully deleted"
-                    .format(str(user_email), ACL_GOOGLE_GROUP))
+                    .format(str(user_email), CONTROLLED_ACL_GOOGLE_GROUP))
     except HttpError, e:
         logger.info(e)
 
-    # log out of NIH?
+    # add user to OPEN_ACL_GOOGLE_GROUP if they are not yet on it
+    try:
+        body = {"email": user_email, "role": "MEMBER"}
+        directory_service.members().insert(groupKey=OPEN_ACL_GOOGLE_GROUP, body=body).execute(http=http_auth)
+        logger.info("Attempting to insert user {} into group {}. "
+                    "If an error message doesn't follow, they were successfully added."
+                    .format(str(user_email), OPEN_ACL_GOOGLE_GROUP))
+    except HttpError, e:
+        logger.info(e)
 
     response = account_views.logout(request)
     return response
