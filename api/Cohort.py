@@ -35,6 +35,7 @@ from metadata import MetadataItem, IncomingMetadataItem
 from accounts.models import NIH_User
 from cohorts.models import Cohort as Django_Cohort, Cohort_Perms, Patients, Samples, Filters
 from bq_data_access.cohort_bigquery import BigQueryCohortSupport
+from google_helpers.directory_service import get_directory_resource
 from api_helpers import *
 
 
@@ -900,3 +901,45 @@ class Cohort_Endpoints_API(remote.Service):
             return_message = "Unsuccessful authentication."
 
         return ReturnJSON(msg=return_message)
+
+
+
+
+
+    @endpoints.method(endpoints.VoidMessage, ReturnJSON,
+                      path='am_i_dbgap_authorized', http_method='GET', name='cohort.amiauthorized')
+    def am_i_dbgap_authorized(self, request):
+        print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+        user_email = None
+        user_id = None
+        result_message = None
+
+        if endpoints.get_current_user() is not None:
+            user_email = endpoints.get_current_user().email()
+
+        # users have the option of pasting the access token in the query string
+        # or in the 'token' field in the api explorer
+        # but this is not required
+        access_token = request.__getattribute__('token')
+        if access_token:
+            user_email = get_user_email_from_token(access_token)
+
+        if user_email:
+            django.setup()
+            try:
+                django_user = Django_User.objects.get(email=user_email)
+                user_id = django_user.id
+
+            except (ObjectDoesNotExist, MultipleObjectsReturned), e:
+                logger.warn(e)
+                raise endpoints.NotFoundException("%s does not have an entry in the user database." % user_email)
+
+            if user_id:
+                try:
+                    nih_user = NIH_User.objects.get(user_id=user_id)
+                except (ObjectDoesNotExist, MultipleObjectsReturned), e:
+                    logger.warn(e)
+                    raise endpoints.NotFoundException("%s does not have an entry in the nih_user database." % user_email)
+
+                directory_service, http_auth = get_directory_resource()
+
