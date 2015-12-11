@@ -22,7 +22,37 @@
   #file-list-table
     margin-top: 10px
 
-.file-column-edit-table
+.column-definitions
+  margin: 25px 15px
+  padding-top: 10px
+  border-top: 1px solid #CCCCCC
 
-  td:nth-child(2)
-    width: 100%
+  .file-column-edit-table
+
+    td
+      vertical-align: middle
+      transition: opacity 0.3s
+
+      .fa
+        transition: transform 0.3s, color 0.3s
+        cursor: pointer
+
+      &:nth-child(2)
+        width: 80%
+
+      &:nth-child(3)
+        width: 20%
+
+    .ignored
+
+      .fa
+        transform: rotate(45deg)
+
+      td
+        opacity: 0.35
+
+        &:nth-child(1)
+          opacity: 1
+
+        &:nth-child(2)
+          text-decoration: line-through

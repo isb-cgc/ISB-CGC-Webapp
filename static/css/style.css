@@ -1297,8 +1297,33 @@ nav {
 #data-upload-forms #file-list-table {
   margin-top: 10px; }
 
-.file-column-edit-table td:nth-child(2) {
-  width: 100%; }
+.column-definitions {
+  margin: 25px 15px;
+  padding-top: 10px;
+  border-top: 1px solid #CCCCCC; }
+  .column-definitions .file-column-edit-table td {
+    vertical-align: middle;
+    -webkit-transition: opacity 0.3s;
+    transition: opacity 0.3s; }
+    .column-definitions .file-column-edit-table td .fa {
+      -webkit-transition: color 0.3s, -webkit-transform 0.3s;
+      transition: color 0.3s, -webkit-transform 0.3s;
+      transition: transform 0.3s, color 0.3s;
+      transition: transform 0.3s, color 0.3s, -webkit-transform 0.3s;
+      cursor: pointer; }
+    .column-definitions .file-column-edit-table td:nth-child(2) {
+      width: 80%; }
+    .column-definitions .file-column-edit-table td:nth-child(3) {
+      width: 20%; }
+  .column-definitions .file-column-edit-table .ignored .fa {
+    -webkit-transform: rotate(45deg);
+            transform: rotate(45deg); }
+  .column-definitions .file-column-edit-table .ignored td {
+    opacity: 0.35; }
+    .column-definitions .file-column-edit-table .ignored td:nth-child(1) {
+      opacity: 1; }
+    .column-definitions .file-column-edit-table .ignored td:nth-child(2) {
+      text-decoration: line-through; }
 
 body {
   -webkit-transition: all 0.4s ease-in;

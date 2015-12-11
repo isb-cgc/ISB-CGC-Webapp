@@ -46,4 +46,4 @@ class GoogleProject(models.Model):
     user = models.OneToOneField(User, null=False)
     project_name = models.CharField(max_length=150)
     project_id = models.CharField(max_length=150)
-    big_query_dataset = models.CharField(max_length=150)
+    big_query_dataset = models.CharField(max_length=150,null=True)

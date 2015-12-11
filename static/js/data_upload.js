@@ -36,6 +36,7 @@ require([
     'use strict';
 
     var uploadFileListItemTemplate = _.template(UploadFileListItemTemplate),
+        uploadInputTableTemplate = _.template(UploadInputTableTemplate),
         uploadGroup = $('#data-upload-group'),
         inputGroup = uploadGroup.find('input:radio'),
         formGroup = $('#data-upload-forms'),
@@ -99,7 +100,20 @@ require([
                     test: function (val) { return true; }
                 },
             },
-            'Controlled': []
+            'Controlled': {
+                'sample': {
+                    'displayName': 'Sample Barcode',
+                    test: function (col) { return !!(col.name.match(/barcode/i) && !col.name.match(/participant/i)); },
+                    type: 'string',
+                    key: 'sample',
+                },
+                'participant': {
+                    'displayName': 'Participant Barcode',
+                    test: function (col) { return !!(col.name.match(/barcode/i) && col.name.match(/participant/i)); },
+                    type: 'string',
+                    key: 'participant',
+                },
+            }
         };
 
     function adjustCellType(curr, cellVal) {
@@ -136,13 +150,10 @@ require([
                     fileObj.columns.push({
                         name: headers[h],
                         type: null,
-                        isParticipantBarcode: !!(headers[h].match(/barcode/i) && headers[h].match(/participant/i)),
-                        isSampleBarcode: !!(headers[h].match(/barcode/i) && !headers[h].match(/participant/i)),
                         colMatch: false
                     });
                 }
 
-                fileObj.rows = [];
                 for (var i = 1, l = lines.length; i < l; i++) {
                     var row = lines[i].split('\t');
                     if (row.length != len) {
@@ -158,8 +169,16 @@ require([
                     for (var c = 0; c < len; c++) {
                         fileObj.columns[c].type = adjustCellType(fileObj.columns[c].type, row[c]);
                     }
-                    fileObj.rows.push(row);
                 }
+
+                _.each(fileObj.columns, function (col) {
+                    col.controlled = _.find(types.Controlled, function (type) {
+                        return type.test(col) && restrictiveGauge.indexOf(type.type) >= restrictiveGauge.indexOf(col.type);
+                    });
+                    if(col.controlled) {
+                        col.type = col.controlled.type;
+                    }
+                });
 
                 deferred.resolve(fileObj);
             }, false);
@@ -169,9 +188,10 @@ require([
     }
 
     function buildInputTable(fileObj, parentEl) {
-        var t = _.template(UploadInputTableTemplate);
+        var $el = $(uploadInputTableTemplate(fileObj));
+        parentEl.append( $el );
 
-        parentEl.append( t(fileObj) );
+        return $el;
     }
 
     /**
@@ -186,7 +206,7 @@ require([
         }
         var target = $(this).data('target');
 
-        $('#project-tab').val($(this).data('value'))
+        $('#project-tab').val('new');
         $(target).collapse('show');
         $('#study-info').collapse('hide');
     }).on('hide.bs.tab', function(e){
@@ -194,8 +214,12 @@ require([
 
         $(target).collapse('hide');
         $('#study-info').collapse('show');
+        $('#project-tab').val('existing');
     });
 
+    /**
+     * Remove files on click of the X button next to each file
+     */
     formGroup.on('click', '.close-btn', function (e) {
         e.preventDefault();
         e.stopPropagation();
@@ -222,6 +246,7 @@ require([
 
     hleCheckbox.on('change', changeExtendSelectBox);
 
+    var uidCounter = 0;
     $('#data-upload-group')
         .on('click', '.upload-file-button', function (e) {
             e.stopPropagation();
@@ -237,7 +262,8 @@ require([
                     tr.data('fileObj', this.files[f]);
                     addedFiles.push({
                         file: this.files[f],
-                        $el : tr
+                        $el : tr,
+                        uid: uidCounter++,
                     });
                     table.append(tr);
                 }
@@ -255,24 +281,28 @@ require([
             .appendTo($('.error-message-container'));
     }
 
-    $('#next-btn').on('click', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        var $next = $(this);
-        if($next.hasClass('disabled')) {
-            return;
-        }
+    function validateSectionOne() {
         clearErrors();
         // Validate form fields selected
         var hasErrors = false,
             tabSet = $('#project-tab').val();
 
+        var fileDataTypes = {};
+        _.each(addedFiles, function (addedFile) {
+            var type = addedFile.$el.find('select').val();
+            type = type || 'NOT SELECTED';
+
+            if(!fileDataTypes[type])
+                fileDataTypes[type] = 0;
+
+            fileDataTypes[type]++;
+        });
+
         if( (tabSet == 'new' && !$.trim( $('#project-name').val() )) ||
-            (tabSet == 'existing' && !$.trim( $('project-selection').val() )) ) {
+            (tabSet == 'existing' && !$.trim( $('#project-selection').val() )) ) {
 
             hasErrors = true;
-            errorMessage('Invalid project. Please select an existing project or insert a name for a new project');
+            errorMessage('Please select an existing project or insert a name for a new project');
         }
 
         if( !$.trim($('#study-name').val()) ) {
@@ -290,34 +320,77 @@ require([
 
         if(!addedFiles.length) {
             hasErrors = true;
-            errorMessage('No files added. Must add at least 1 file to upload for processing');
+            errorMessage('You must add at least 1 file to upload for processing');
         }
 
-        if(hasErrors) {
+        if(fileDataTypes['NOT SELECTED']) {
+            hasErrors = true;
+            errorMessage('You must select a file data type for every file');
+        }
+
+        return !hasErrors;
+    }
+
+    function validateSectionTwo() {
+        var hasErrors = validateSectionOne();
+
+        var hasSampleBarcode = _.every(addedFiles, function (file) {
+            if(!file.processed)
+                return true;
+
+            return 1 === _.reduce(file.processed.columns, function (n, col) {
+                    return !col.ignored && col.controlled && col.controlled.key == 'sample' ? n + 1 : n;
+                }, 0);
+        });
+
+        if(!hasSampleBarcode) {
+            hasErrors = true;
+            errorMessage('All files must have a Sample Barcode column');
+        }
+
+        return hasErrors;
+    }
+
+    var processListEl = $('#file-process-list');
+    $('#next-btn').on('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var $next = $(this);
+        if($next.hasClass('disabled')) {
+            return;
+        }
+
+        if(!validateSectionOne()) {
             window.scroll(0,135);
             return;
         }
 
+        _.each(addedFiles, function (addedFile) {
+            addedFile.datatype = addedFile.$el.find('select').val();
+        });
+
         // Process Files
-        $next.text('Processing...').addClass('disabled');
-        var processing = [];
-        for(var a = 0, l = addedFiles.length; a < l; a++) {
-            processing.push( readFile(addedFiles[a].file) );
-        }
+        $next.addClass('disabled')
+            .siblings('.progress-message').removeClass('hidden');
+        var processing = _.map(addedFiles, function (addedFile) {
+            if(addedFile.datatype === 'user_gen') {
+                var p = readFile(addedFile.file);
+                p.then(function (result) {
+                    addedFile.processed = result;
+                });
+                return p;
+            }
+            addedFile.processed = false;
+        });
 
         // Show fields
-        var processListEl = $('#file-process-list');
         $.when.apply($, processing).then(function () {
-            var args = Array.prototype.slice.call(arguments);
-            for(var a = 0, l = args.length; a < l; a++) {
-                // There is a one to one mapping and it should remain in order between the two
-                var result = args[a],
-                    added = addedFiles[a];
+            processListEl.find('.column-definitions').remove();
 
-                added.processed = result;
-                processListEl.append( $('<h3>').text('File: ' + added.file.name) );
-                buildInputTable(added.processed, processListEl);
-            }
+            _.each(addedFiles, function (file) {
+                file.$columnsEl = buildInputTable(file, processListEl);
+            });
 
             $('#first-section').addClass('hidden');
             $('#second-section').removeClass('hidden');
@@ -325,9 +398,38 @@ require([
             errorMessage('There was an error processing the files. ' + err.message);
         }).always(function () {
             window.scroll(0,135);
-            $next.text('Next').removeClass('disabled');
+            $next.removeClass('disabled')
+                .siblings('.progress-message').addClass('hidden');
         });
     });
+
+    processListEl
+        .on('click', '.ignore-row-btn', function (e) {
+            var $this = $(this),
+                row = $this.closest('tr').toggleClass('ignored');
+
+            $this.toggleClass('text-danger text-success');
+            var i = $this.closest('[data-index]').data('index'),
+                fileUID = $this.closest('[data-file]').data('file'),
+                ignoreCol = _.findWhere(addedFiles, {uid: fileUID}).processed.columns[i];
+            ignoreCol.ignored = !ignoreCol.ignored;
+
+            row.data('ignored', !row.data('ignored'));
+            row.find('select').attr('disabled', row.data('ignored'));
+        })
+        .on('change', '.type-selection', function (e) {
+            var $this = $(this),
+                i = $this.closest('[data-index]').data('index'),
+                fileUID = $this.closest('[data-file]').data('file'),
+                col = _.findWhere(addedFiles, {uid: fileUID}).processed.columns[i],
+                newVal = $this.val();
+
+            if(types.Controlled[newVal]) {
+                col.controlled = types.Controlled[newVal];
+            } else {
+                col.type = newVal;
+            }
+        });
 
     $('#back-button').on('click', function (e) {
         if($(this).hasClass('disabled'))
@@ -340,7 +442,11 @@ require([
         if($(this).hasClass('disabled'))
             return;
 
-        $('#upload-button, #back-button').addClass('disabled');
+        if(!validateSectionTwo())
+            return;
+
+        $('#upload-button, #back-button').addClass('disabled')
+            .siblings('.progress-message').removeClass('hidden');
 
         var form = new FormData(),
             tabSet = $('#project-tab').val();
@@ -363,10 +469,12 @@ require([
         }
         form.append('data-type', uploadDataType);
 
-        for(var a = 0, l = addedFiles.length; a < l; a++) {
-            form.append('files', addedFiles[a].file, addedFiles[a].file.name);
-            form.append('file_proc_objects', JSON.stringify(addedFiles[a].processed));
-        }
+        _.each(addedFiles, function (added) {
+            form.append('file_'+added.uid, added.file, added.file.name);
+            form.append('file_' + added.uid + '_type', added.datatype);
+            if(added.processed)
+                form.append('file_' + added.uid + '_desc', JSON.stringify(added.processed));
+        });
 
         var csrv = $('#base-data-form').find('input')[0];
         form.append(csrv.name, csrv.value);
@@ -386,7 +494,8 @@ require([
                 errorMessage('Error submitting response' + res.message);
             }
         }).always(function () {
-            $('#upload-button, #back-button').removeClass('disabled');
+            $('#upload-button, #back-button').removeClass('disabled')
+                .siblings('.progress-message').addClass('hidden');
         });
     });
 
