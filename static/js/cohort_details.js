@@ -200,7 +200,9 @@ require([
         $(this).siblings('.show-more').show();
         $(this).hide();
     });
-    showHideMoreGraphButton();
+    if($('.col-lg-8').length == 0){
+        showHideMoreGraphButton();
+    }
     // Show hide more graph button based on whether there is more tree graph
     function showHideMoreGraphButton(){
         var containerHeight = $('#cohort-details .clinical-trees .panel-body').outerHeight();

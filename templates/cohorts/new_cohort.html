@@ -31,7 +31,7 @@
         <li><a href="{% url 'cohort_list' %}">Cohorts</a></li>
     </ol>
     <h1 class="page-header pull-left">Create Cohort</h1>
-    <button class="btn btn-default pull-right" data-toggle="modal" data-target="#create-cohort-modal">Save As New Cohort</button>
+    <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal">Save As New Cohort</button>
 {% endblock %}
 
 {% block content %}
@@ -50,7 +50,7 @@
                             {% if attr in attr_list_count %}
                                 <li class="list-group-item">
                                     <div id="heading-{{attr}}" class="list-group-item__heading">
-                                        <a role="button" data-toggle="collapse" data-parent="#clin-accordion" href="#collapse-{{ attr }}" aria-expanded="true" aria-controls="collapse-{{ attr }}">
+                                        <a role="button" data-toggle="collapse" data-parent="#clin-accordion" href="#collapse-{{ attr }}" aria-expanded="false" aria-controls="collapse-{{ attr }}">
                                             <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr|get_readable_name }}
                                         </a>
                                     </div>
@@ -102,7 +102,7 @@
                         {% for attr in data_attr %}
                             <li class="list-group-item">
                                 <div class="list-group-item__heading" role="tab" id="heading-{{ attr }}">
-                                    <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-{{ attr }}" aria-expanded="true" aria-controls="collapse-{{ attr }}">
+                                    <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-{{ attr }}" aria-expanded="false" aria-controls="collapse-{{ attr }}">
                                         <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ attr|get_readable_name }}
                                     </a>
                                 </div>
@@ -167,29 +167,30 @@
     </div>
 
     <div class="col-lg-8">
-        <div class="selected-filters panel">
-            <div class="panel-heading">
-                <h4>Selected Filters <a role="button" id="clear-filters">Clear All</a></h4>
+        <div class="selected-filters panel panel-default">
+            <div class="panel-heading clearfix">
+                <h4 class="panel-title pull-left">Selected Filters</h4>
+                <a class="pull-right" role="button" id="clear-filters">Clear All</a>
             </div>
             <div class="panel-body">
 
             </div>
         </div>
 
-        <div class="clinical-trees panel">
+        <div class="clinical-trees panel panel-default">
             <div class="panel-heading">
-                <h4>Clinical Features</h4>
+                <h4 class="panel-title">Clinical Features</h4>
             </div>
             <div class="panel-body">
                 <div id="tree-graph-clinical"></div>
             </div>
-            <div id="more-graphs"><button class="btn btn-default" role="button">Show More</button></div>
-            <div id="less-graphs" style="display: none;"><button class="btn btn-default" role="button">Show Less</button></div>
+            <div id="more-graphs"><button class="btn btn-link" role="button">Show More</button></div>
+            <div id="less-graphs" style="display: none;"><button class="btn btn-link" role="button">Show Less</button></div>
         </div>
 
-        <div class="parallel-sets panel">
+        <div class="parallel-sets panel panel-default">
             <div class="panel-heading">
-                <h4>Data Availability</h4>
+                <h4 class="panel-title">Data Availability</h4>
             </div>
             <div class="panel-body">
                 <div id="multi-categorical"></div>
@@ -206,14 +207,14 @@
                     <h4 class="modal-title" id="createCohortModal">Create Cohort</h4>
                 </div>
                 <form id="create-cohort-form" method="POST" action="{% url 'save_cohort' %}">
-                    <div class="modal-body form-horizontal">
+                    <div class="modal-body">
                         <div class="form-group">
-                            <label class="col-md-2" for="cohort-name">Name:</label>
-                            <div class="col-md-10"><input type="text" id="cohort-name" name="name" /></div>
+                            <label for="cohort-name">Name:</label>
+                            <input class="form-control" type="text" id="cohort-name" name="name" />
                         </div>
                         <div class="form-group">
-                            <label class="col-md-2" for="filters">Selected Filters:</label>
-                            <div class="col-md-10"><p class="form-control-static"></p></div>
+                            <label for="filters">Selected Filters:</label>
+                            <p class="form-control-static"></p>
                         </div>
                     </div>
                     <div class="modal-footer">
