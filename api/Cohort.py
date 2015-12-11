@@ -338,6 +338,9 @@ class Cohort_Endpoints_API(remote.Service):
 
         cohort_id = request.__getattribute__('cohort_id')
 
+        if not cohort_id.isdigit():
+            raise endpoints.NotFoundException("Cohort_id must be an integer. You entered {}.".format(cohort_id))
+
         if user_email:
             django.setup()
             try:
