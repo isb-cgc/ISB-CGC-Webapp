@@ -93,6 +93,7 @@ SETTINGS = {
     'WEB_CLIENT_ID': os.environ.get('WEB_CLIENT_ID', ''), # Client ID from client_secrest.json
     'INSTALLED_APP_CLIENT_ID': os.environ.get('INSTALLED_APP_CLIENT_ID', ''), # Native Client ID
 
+    'FAKE_DBGAP_AUTHENTICATION_LIST_FILENAME': os.environ.get('FAKE_DBGAP_AUTHENTICATION_LIST_FILENAME', ''),
     'DBGAP_AUTHENTICATION_LIST_FILENAME': os.environ.get('DBGAP_AUTHENTICATION_LIST_FILENAME', ''), # Name of file containing dbGaP Authentication list
     'DBGAP_AUTHENTICATION_LIST_BUCKET': os.environ.get('DBGAP_AUTHENTICATION_LIST_BUCKET', ''), # name of bucket containing dbGap Authentication list file
     'ACL_GOOGLE_GROUP': os.environ.get('ACL_GOOGLE_GROUP', ''), # Google group used for ACL list
