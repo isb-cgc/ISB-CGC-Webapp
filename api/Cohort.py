@@ -349,33 +349,59 @@ class Cohort_Endpoints_API(remote.Service):
                 logger.warn(e)
                 raise endpoints.NotFoundException("%s does not have an entry in the user database." % user_email)
 
-            query_dict = {'cohorts_cohort_perms.user_id': user_id, 'cohorts_cohort.active': unicode('1')}
+            try:
+                db = sql_connection()
+                cursor = db.cursor(MySQLdb.cursors.DictCursor)
+                cursor.execute("select count(*) from cohorts_cohort_perms where user_id=%s and cohort_id=%s", (user_id, cohort_id))
+                result = cursor.fetchone()
+                if int(result['count(*)']) == 0:
+                    raise endpoints.NotFoundException("{} does not have owner or reader permissions on cohort {}."
+                                                      .format(user_email, cohort_id))
+                cursor.execute("select count(*) from cohorts_cohort where id=%s and active=%s", (cohort_id, unicode('0')))
+                result = cursor.fetchone()
+                if int(result['count(*)']) > 0:
+                    raise endpoints.NotFoundException("Cohort {} was deleted.".format(cohort_id))
+                cursor.close()
+                db.close()
+            except (IndexError, TypeError):
+                raise endpoints.NotFoundException("Cohort {} not found.".format(cohort_id))
 
-            if cohort_id and cohort_id.isdigit():
-                query_dict['cohorts_cohort.id'] = cohort_id
-
-            patient_query_str = 'select patient_id ' \
+            patient_query_str = 'select cohorts_patients.patient_id ' \
                         'from cohorts_patients ' \
-                        'where cohort_id=%s ' \
-                        'group by patient_id'
+                        'inner join cohorts_cohort_perms ' \
+                        'on cohorts_cohort_perms.cohort_id=cohorts_patients.cohort_id ' \
+                        'inner join cohorts_cohort ' \
+                        'on cohorts_patients.cohort_id=cohorts_cohort.id ' \
+                        'where cohorts_patients.cohort_id=%s ' \
+                        'and cohorts_cohort_perms.user_id=%s ' \
+                        'and cohorts_cohort.active=%s ' \
+                        'group by cohorts_patients.patient_id '
 
-            sample_query_str = 'select sample_id ' \
+            patient_query_tuple = (cohort_id, user_id, unicode('1'))
+
+            sample_query_str = 'select cohorts_samples.sample_id ' \
                         'from cohorts_samples ' \
-                        'where cohort_id=%s ' \
-                        'group by sample_id'
+                        'inner join cohorts_cohort_perms ' \
+                        'on cohorts_cohort_perms.cohort_id=cohorts_samples.cohort_id ' \
+                        'inner join cohorts_cohort ' \
+                        'on cohorts_samples.cohort_id=cohorts_cohort.id ' \
+                        'where cohorts_samples.cohort_id=%s ' \
+                        'and cohorts_cohort_perms.user_id=%s ' \
+                        'and cohorts_cohort.active=%s ' \
+                        'group by cohorts_samples.sample_id '
 
-            query_tuple = (cohort_id,)
+            sample_query_tuple = (cohort_id, user_id, unicode('1'))
 
             try:
                 db = sql_connection()
 
                 cursor = db.cursor(MySQLdb.cursors.DictCursor)
-                cursor.execute(patient_query_str, query_tuple)
+                cursor.execute(patient_query_str, patient_query_tuple)
                 patient_data = []
                 for row in cursor.fetchall():
                     patient_data.append(row['patient_id'])
 
-                cursor.execute(sample_query_str, query_tuple)
+                cursor.execute(sample_query_str, sample_query_tuple)
                 sample_data = []
                 for row in cursor.fetchall():
                     sample_data.append(row['sample_id'])
