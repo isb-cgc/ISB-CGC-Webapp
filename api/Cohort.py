@@ -389,8 +389,6 @@ class Cohort_Endpoints_API(remote.Service):
 
             sample_query_tuple = (cohort_id, user_id, unicode('1'))
 
-            # todo: if user does not have permissions on this cohort, return informative message
-
             try:
                 db = sql_connection()
 
