@@ -346,6 +346,23 @@ class Cohort_Endpoints_API(remote.Service):
                 logger.warn(e)
                 raise endpoints.NotFoundException("%s does not have an entry in the user database." % user_email)
 
+            try:
+                db = sql_connection()
+                cursor = db.cursor(MySQLdb.cursors.DictCursor)
+                cursor.execute("select count(*) from cohorts_cohort_perms where user_id=%s and cohort_id=%s", (user_id, cohort_id))
+                result = cursor.fetchone()
+                if int(result['count(*)']) == 0:
+                    raise endpoints.NotFoundException("{} does not have owner or reader permissions on cohort {}."
+                                                      .format(user_email, cohort_id))
+                cursor.execute("select count(*) from cohorts_cohort where id=%s and active=%s", (cohort_id, unicode('0')))
+                result = cursor.fetchone()
+                if int(result['count(*)']) > 0:
+                    raise endpoints.NotFoundException("Cohort {} was deleted.".format(cohort_id))
+                cursor.close()
+                db.close()
+            except (IndexError, TypeError):
+                raise endpoints.NotFoundException("Cohort {} not found.".format(cohort_id))
+
             patient_query_str = 'select cohorts_patients.patient_id ' \
                         'from cohorts_patients ' \
                         'inner join cohorts_cohort_perms ' \
