@@ -34,6 +34,7 @@ from django.conf import settings
 from django.db.models import Count
 
 from django.http import StreamingHttpResponse
+from django.core import serializers
 from google.appengine.api import urlfetch
 from allauth.socialaccount.models import SocialToken
 
@@ -124,10 +125,21 @@ def cohorts_list(request):
     users = User.objects.filter(is_superuser=0)
     cohort_perms = Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True)
     cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved').annotate(num_patients=Count('samples'))
+    cohorts.has_private_cohorts = False
+    shared_users = {}
 
     for item in cohorts:
         item.perm = item.get_perm(request).get_perm_display()
         item.owner = item.get_owner()
+        shared_with_ids = Cohort_Perms.objects.filter(cohort=item, perm=Cohort_Perms.READER).values_list('user', flat=True)
+        item.shared_with_users = User.objects.filter(id__in=shared_with_ids)
+        if not item.owner.is_superuser:
+            cohorts.has_private_cohorts = True
+            # if it is not a public cohort and it has been shared with other users
+            # append the list of shared users to the shared_users array
+            if item.shared_with_users:
+                shared_users[int(item.id)] = serializers.serialize('json', item.shared_with_users, fields=('last_name', 'first_name', 'email'))
+
         # print local_zone.localize(item.last_date_saved)
 
     # Used for autocomplete listing
@@ -139,12 +151,13 @@ def cohorts_list(request):
         del cohort['name']
 
     return render(request, 'cohorts/cohort_list.html', {'request': request,
-                                                            'cohorts': cohorts,
-                                                            'user_list': users,
-                                                            'cohorts_listing': cohort_listing,
-                                                            'base_url': settings.BASE_URL,
-                                                            'base_api_url': settings.BASE_API_URL
-                                                            })
+                                                        'cohorts': cohorts,
+                                                        'user_list': users,
+                                                        'cohorts_listing': cohort_listing,
+                                                        'shared_users':  json.dumps(shared_users),
+                                                        'base_url': settings.BASE_URL,
+                                                        'base_api_url': settings.BASE_API_URL
+                                                        })
 
 @login_required
 def cohort_detail(request, cohort_id=0):
@@ -391,7 +404,7 @@ def share_cohort(request, cohort_id=0):
     users = User.objects.filter(id__in=user_ids)
 
     if cohort_id == 0:
-        redirect_url = '/cohort_list/'
+        redirect_url = '/cohorts/'
         cohort_ids = request.POST.getlist('cohort-ids')
         cohorts = Cohort.objects.filter(id__in=cohort_ids)
     else:
