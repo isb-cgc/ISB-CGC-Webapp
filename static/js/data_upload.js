@@ -150,7 +150,9 @@ require([
                     fileObj.columns.push({
                         name: headers[h],
                         type: null,
-                        colMatch: false
+                        colMatch: false,
+                        index: h,
+                        ignored: false,
                     });
                 }
 
@@ -472,8 +474,11 @@ require([
         _.each(addedFiles, function (added) {
             form.append('file_'+added.uid, added.file, added.file.name);
             form.append('file_' + added.uid + '_type', added.datatype);
-            if(added.processed)
-                form.append('file_' + added.uid + '_desc', JSON.stringify(added.processed));
+            if(!added.processed)
+                added.processed = {};
+            added.processed.platform = added.$columnsEl.find('.platform-field').val();
+            added.processed.pipeline = added.$columnsEl.find('.pipeline-field').val();
+            form.append('file_' + added.uid + '_desc', JSON.stringify(added.processed));
         });
 
         var csrv = $('#base-data-form').find('input')[0];
