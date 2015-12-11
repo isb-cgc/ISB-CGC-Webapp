@@ -35,6 +35,7 @@ logger = logging.getLogger(__name__)
 
 CONTROLLED_ACL_GOOGLE_GROUP = settings.ACL_GOOGLE_GROUP
 
+
 class ReturnJSON(messages.Message):
     msg = messages.StringField(1)
 

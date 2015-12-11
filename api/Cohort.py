@@ -17,11 +17,9 @@ limitations under the License.
 """
 
 import logging
-import sys
 from datetime import datetime
 
 import endpoints
-from google.appengine.ext import ndb
 from protorpc import messages, message_types
 from protorpc import remote
 from django.conf import settings
@@ -35,8 +33,6 @@ from metadata import MetadataItem, IncomingMetadataItem
 from accounts.models import NIH_User
 from cohorts.models import Cohort as Django_Cohort, Cohort_Perms, Patients, Samples, Filters
 from bq_data_access.cohort_bigquery import BigQueryCohortSupport
-from google_helpers.directory_service import get_directory_resource
-from googleapiclient.errors import HttpError
 from api_helpers import *
 
 
@@ -205,18 +201,6 @@ class SavedCohort(messages.Message):
     filter_value = messages.StringField(7, repeated=True)  # for cohorts_filters.value. Not shown: cohorts_filters.resulting_cohort_id
     last_date_saved_alt = message_types.DateTimeField(8)
     filters = messages.MessageField(FilterDetails, 9, repeated=True)
-
-
-def is_dbgap_authorized(user_email):
-    directory_service, http_auth = get_directory_resource()
-    try:
-        directory_service.members().get(groupKey=CONTROLLED_ACL_GOOGLE_GROUP,
-                                             memberKey=user_email).execute(http=http_auth)
-        return True
-    except HttpError, e:
-        logger.info("{} checked their membership in {} and saw they were not in that group.".format(user_email,
-                                                                                                    CONTROLLED_ACL_GOOGLE_GROUP))
-        return False
 
 
 Cohort_Endpoints = endpoints.api(name='cohort_api', version='v1', description="Get information about cohorts",
@@ -905,71 +889,3 @@ class Cohort_Endpoints_API(remote.Service):
             return_message = "Unsuccessful authentication."
 
         return ReturnJSON(msg=return_message)
-
-
-    GET_RESOURCE = endpoints.ResourceContainer(token=messages.StringField(1, required=False))
-    @endpoints.method(GET_RESOURCE, ReturnJSON,
-                      path='am_i_dbgap_authorized', http_method='GET', name='cohort.amiauthorized')
-    def am_i_dbgap_authorized(self, request):
-        print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
-        user_email = None
-
-        if endpoints.get_current_user() is not None:
-            user_email = endpoints.get_current_user().email()
-
-        # users have the option of pasting the access token in the query string
-        # or in the 'token' field in the api explorer
-        # but this is not required
-        access_token = request.__getattribute__('token')
-        if access_token:
-            user_email = get_user_email_from_token(access_token)
-
-        if user_email:
-            am_dbgap_authorized = is_dbgap_authorized(user_email)
-
-            if not am_dbgap_authorized:
-                return ReturnJSON(msg="You are not on the controlled-access google group.")
-
-            # all the following situations should never happen
-            django.setup()
-            try:
-                django_user = Django_User.objects.get(email=user_email)
-            except (ObjectDoesNotExist, MultipleObjectsReturned), e:
-                logger.error("Email {} is in {} group but did not have a unique entry in auth_user table. Error: {}"
-                             .format(user_email, CONTROLLED_ACL_GOOGLE_GROUP, e))
-                raise endpoints.NotFoundException("{} is in the controlled-access google group "
-                                                  "but does not have an entry in the user database."
-                                                  .format(user_email))
-
-            try:
-                nih_user = NIH_User.objects.get(user_id=django_user.id)
-            except (ObjectDoesNotExist, MultipleObjectsReturned), e:
-                logger.error("Email {} is in {} group but did not have a unique entry in "
-                             "accounts_nih_user table. Error: {}"
-                             .format(user_email, CONTROLLED_ACL_GOOGLE_GROUP, e))
-                raise endpoints.NotFoundException("{} is in the controlled-access google group "
-                                                  "but does not have an entry in the nih_user database."
-                                                  .format(user_email))
-
-            if not nih_user.active:
-                logger.error("Email {} is in {} group but their entry in accounts_nih_user table is inactive."
-                             .format(user_email, CONTROLLED_ACL_GOOGLE_GROUP))
-                raise endpoints.NotFoundException("{} is in the controlled-access google group "
-                                                  "but has an inactive entry in the nih_user database."
-                                                  .format(user_email))
-
-            if not nih_user.dbGaP_authorized:
-                logger.error("Email {} is in {} group but their entry in accounts_nih_user table "
-                             "is not dbGaP_authorized."
-                             .format(user_email, CONTROLLED_ACL_GOOGLE_GROUP))
-                raise endpoints.NotFoundException("{} is in the controlled-access google group "
-                                                  "but their entry in the nih_user database is not dbGaP_authorized."
-                                                  .format(user_email))
-
-            return ReturnJSON(msg="{} has dbGaP authorization and is a member of the controlled-access google group."
-                              .format(user_email))
-        else:
-            raise endpoints.NotFoundException("Authentication unsuccessful.")
-
-
-
