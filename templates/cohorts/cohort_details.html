@@ -84,7 +84,7 @@
                             {% if attr in attr_list_count %}
                                 <li class="list-group-item">
                                     <div id="heading-{{attr}}" class="list-group-item__heading">
-                                        <a role="button" data-toggle="collapse" data-parent="#clin-accordion" href="#collapse-{{ attr }}" aria-expanded="true" aria-controls="collapse-{{ attr }}">
+                                        <a role="button" data-toggle="collapse" data-parent="#clin-accordion" href="#collapse-{{ attr }}" aria-expanded="false" aria-controls="collapse-{{ attr }}">
                                             <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr|get_readable_name }}
                                         </a>
                                     </div>
@@ -132,31 +132,32 @@
                 </div>
                 <!-- data filters tab -->
                 <div role="tabpanel" class="tab-pane" id="data-filters">
-                    <div class="panel-group" id="data-type-accordion" role="tablist" aria-multiselectable="true">
+                    <ul class="list-group" id="data-type-accordion" role="tablist" aria-multiselectable="true">
                         {% for attr in data_attr %}
-                            <div class="panel panel-default">
-                                <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-{{ attr }}" aria-expanded="true" aria-controls="collapse-{{ attr }}">
-                                    <div class="panel-heading" role="tab" id="heading-{{ attr }}"><i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ attr|get_readable_name }}</div>
-                                </a>
-                                <div id="collapse-{{ attr }}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-{{ attr }}">
-                                    <div class="panel-body">
-                                        <ul class="search-checkbox-list" id="{{ attr }}">
-                                            {% if attr in attr_list_count %}
-                                                {% for v in attr_list_count|get_item:attr %}
-                                                    <li>
-                                                        <!-- todo: make a custom tag for the id for data_attr attributes-->
-                                                        <input type="checkbox" name="elements-selected" id="{{ v.value|get_data_attr_id:attr }}" >
-                                                        <label for="{{ v.value|get_data_attr_id:attr }}">{{ v.value }}</label>
-                                                        <span class="count">({{ v.count }})</span>
-                                                    </li>
-                                                {% endfor %}
-                                            {% endif %}
-                                        </ul>
-                                    </div>
+                            <li class="list-group-item">
+                                <div id="heading-{{attr}}" class="list-group-item__heading">
+                                    <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-{{ attr }}" aria-expanded="false" aria-controls="collapse-{{ attr }}">
+                                        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr|get_readable_name }}
+                                    </a>
                                 </div>
-                            </div>
+
+                                <div id="collapse-{{ attr }}" class="list-group-item__body collapse" role="tabpanel" aria-labelledby="heading-{{ attr }}">
+                                    <ul class="search-checkbox-list" id="{{ attr }}">
+                                        {% if attr in attr_list_count %}
+                                            {% for v in attr_list_count|get_item:attr %}
+                                                <li>
+                                                    <!-- todo: make a custom tag for the id for data_attr attributes-->
+                                                    <input type="checkbox" name="elements-selected" id="{{ v.value|get_data_attr_id:attr }}" >
+                                                    <label for="{{ v.value|get_data_attr_id:attr }}">{{ v.value }}</label>
+                                                    <span class="count">({{ v.count }})</span>
+                                                </li>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </li>
                         {% endfor %}
-                    </div>
+                    </ul>
                 </div>
 {#                <div role="tabpanel" class="tab-pane" id="molecular-filters">#}
 {#                    molecular filters#}
@@ -300,6 +301,7 @@
                     {% endif %}
                     <div role="tabpanel" class="tab-pane" id="shared-pane">
                         <div class="modal-body">
+                            {% if shared_with_users|length > 0 %}
                             <table class="table table-striped">
                                 <thead>
                                     <tr>
@@ -316,6 +318,10 @@
                                 {% endfor %}
                                 </tbody>
                             </table>
+                            {% else %}
+                            <p class="center">This list is empty.</p>
+                            {% endif %}
+
                         </div>
                     </div>
                 </div>
@@ -363,8 +369,8 @@
                     </div>
                     <div class="modal-footer">
                         {% csrf_token %}
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                         <input type="submit" value="Apply Filters" class="btn btn-primary" />
+                        <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
                     </div>
                 </form>
             </div>
@@ -386,8 +392,8 @@
                     </div>
                     <div class="modal-footer">
                         {% csrf_token %}
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                         <input type="submit" value="Delete" class="btn btn-primary" />
+                        <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
                     </div>
                 </form>
             </div>
