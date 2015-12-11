@@ -19,6 +19,8 @@ limitations under the License.
 import endpoints
 import logging
 import django
+import pytz
+import datetime
 from protorpc import messages
 from protorpc import remote
 from django.conf import settings
@@ -81,6 +83,8 @@ class User_Endpoints_API(remote.Service):
 
             # all the following situations should never happen
             django.setup()
+
+            # 1. check to make sure they have an entry in auth_user
             try:
                 django_user = Django_User.objects.get(email=user_email)
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
@@ -90,6 +94,7 @@ class User_Endpoints_API(remote.Service):
                                                   "but does not have an entry in the user database."
                                                   .format(user_email))
 
+            # 2. check to make sure they have an entry in accounts_nih_user
             try:
                 nih_user = NIH_User.objects.get(user_id=django_user.id)
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
@@ -100,6 +105,7 @@ class User_Endpoints_API(remote.Service):
                                                   "but does not have an entry in the nih_user database."
                                                   .format(user_email))
 
+            # 3. check if their entry in accounts_nih_user is currently active
             if not nih_user.active:
                 logger.error("Email {} is in {} group but their entry in accounts_nih_user table is inactive."
                              .format(user_email, CONTROLLED_ACL_GOOGLE_GROUP))
@@ -107,6 +113,7 @@ class User_Endpoints_API(remote.Service):
                                                   "but has an inactive entry in the nih_user database."
                                                   .format(user_email))
 
+            # 4. check if their entry in accounts_nih_user is dbGaP_authorized
             if not nih_user.dbGaP_authorized:
                 logger.error("Email {} is in {} group but their entry in accounts_nih_user table "
                              "is not dbGaP_authorized."
@@ -115,6 +122,20 @@ class User_Endpoints_API(remote.Service):
                                                   "but their entry in the nih_user database is not dbGaP_authorized."
                                                   .format(user_email))
 
+            # 5. check if their dbgap authorization has expired
+            expire_time = nih_user.NIH_assertion_expiration
+            expire_time = expire_time if expire_time.tzinfo is not None else pytz.utc.localize(expire_time)
+            now_in_utc = pytz.utc.localize(datetime.datetime.now())
+
+            if (expire_time - now_in_utc).total_seconds() <= 0:
+                logger.error("Email {} is in {} group but their entry in accounts_nih_user table "
+                             "is expired."
+                             .format(user_email, CONTROLLED_ACL_GOOGLE_GROUP))
+                raise endpoints.NotFoundException("{} is in the controlled-access google group "
+                                                  "but their entry in the nih_user database is expired."
+                                                  .format(user_email))
+
+            # all checks have passed
             return ReturnJSON(msg="{} has dbGaP authorization and is a member of the controlled-access google group."
                               .format(user_email))
         else:
