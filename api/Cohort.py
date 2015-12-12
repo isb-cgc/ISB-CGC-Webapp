@@ -719,8 +719,7 @@ class Cohort_Endpoints_API(remote.Service):
 
         query_str = 'SELECT DataFileNameKey, SecurityProtocol, Repository ' \
                     'FROM metadata_data ' \
-                    'WHERE SampleBarcode=%s ' \
-                    'AND DataFileNameKey != "" and DataFileNameKey is not null '
+                    'WHERE SampleBarcode=%s '
 
         query_tuple = (sample_barcode,)
 
@@ -741,18 +740,17 @@ class Cohort_Endpoints_API(remote.Service):
 
             datafilenamekeys = []
             for row in cursor.fetchall():
+                file_path = row.get('DataFileNameKey') if len(row.get('DataFileNameKey', '')) else '/file-path-currently-unavailable'
                 if 'controlled' not in str(row['SecurityProtocol']).lower():
-                    datafilenamekeys.append("gs://{}{}".format(settings.OPEN_DATA_BUCKET, row['DataFileNameKey']))
-                # currently this is mock-controlled-access data in another GC Project
+                    datafilenamekeys.append("gs://{}{}".format(settings.OPEN_DATA_BUCKET, file_path))
                 elif dbGaP_authorized:
-                    if type(row['Repository'] == str):
-                        bucket_name = ''
-                        # hard-coding mock bucket names for now --testing purposes only
-                        if row['Repository'].lower() == 'dcc':
-                            bucket_name = 'gs://62f2c827-mock-mock-mock-1cde698a4f77'
-                        elif row['Repository'].lower() == 'cghub':
-                            bucket_name = 'gs://360ee3ad-mock-mock-mock-52f9a5e7f99a'
-                        datafilenamekeys.append("{}{}".format(bucket_name, row['DataFileNameKey']))
+                    bucket_name = ''
+                    # hard-coding mock bucket names for now --testing purposes only
+                    if row['Repository'].lower() == 'dcc':
+                        bucket_name = 'gs://62f2c827-mock-mock-mock-1cde698a4f77'
+                    elif row['Repository'].lower() == 'cghub':
+                        bucket_name = 'gs://360ee3ad-mock-mock-mock-52f9a5e7f99a'
+                    datafilenamekeys.append("{}{}".format(bucket_name, file_path))
 
             return DataFileNameKeyList(datafilenamekeys=datafilenamekeys)
 
