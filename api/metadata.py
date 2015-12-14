@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 debug = settings.DEBUG
 
 OPEN_DATA_BUCKET = settings.OPEN_DATA_BUCKET
-CONTROLLED_DATA_BUCKET = settings.CONTROLLED_DATA_BUCKET
+#CONTROLLED_DATA_BUCKET = settings.CONTROLLED_DATA_BUCKET
 
 METADATA_SHORTLIST = [
     # 'adenocarcinoma_invasion',
@@ -1480,7 +1480,6 @@ class Meta_Endpoints_API(remote.Service):
 
             if cursor.rowcount > 0:
                 for item in cursor.fetchall():
-                    print item
                     file_list.append(FileDetails(sample=item['SampleBarcode'], cloudstorage_location=item['DatafileNameKey'], filename=item['DatafileName'], pipeline=item['Pipeline'], platform=item['Platform'], datalevel=item['DataLevel'], datatype=item['Datatype'], gg_readgroupset_id=item['GG_readgroupset_id']))
             else:
                 file_list.append(FileDetails(sample='None', filename='', pipeline='', platform='', datalevel=''))
@@ -1507,7 +1506,12 @@ class Meta_Endpoints_API(remote.Service):
         sample_id = request.sample_id
         dbGaP_authorized = False
 
-        query = 'select SampleBarcode, DatafileName, Pipeline, Platform, IF(SecurityProtocol LIKE "%%open%%", DatafileNameKey, "Restricted") as DatafileNameKey from metadata_data where SampleBarcode=%s;'
+        query = 'select SampleBarcode, ' \
+                'DatafileName, ' \
+                'Pipeline, ' \
+                'Platform, ' \
+                'IF(SecurityProtocol LIKE "%%open%%", DatafileNameKey, "Restricted") as DatafileNameKey ' \
+                'from metadata_data where SampleBarcode=%s;'
 
         if endpoints.get_current_user():
             user_email = endpoints.get_current_user()
@@ -1531,9 +1535,9 @@ class Meta_Endpoints_API(remote.Service):
             platform_list = []
             for item in cursor.fetchall():
                 if dbGaP_authorized:
-                    cloudstorage_location = 'None' if item['DatafileNameKey'] == '' else 'gs://{}/{}'.format(OPEN_DATA_BUCKET if 'open' in item['SecurityProtocol'] else CONTROLLED_DATA_BUCKET, item['DatafileNameKey'])
+                    cloudstorage_location = 'None' if item.get('DatafileNameKey', '') == '' else 'gs://{}{}'.format(OPEN_DATA_BUCKET if 'open' in item['SecurityProtocol'] else CONTROLLED_DATA_BUCKET, item['DatafileNameKey'])
                 else:
-                    cloudstorage_location = 'None' if item['DatafileNameKey'] == '' or item['DatafileNameKey'] == 'Restricted' else 'gs://{}/{}'.format(OPEN_DATA_BUCKET, item['DatafileNameKey'])
+                    cloudstorage_location = 'None' if item.get('DatafileNameKey', '') == '' or item['DatafileNameKey'] == 'Restricted' else 'gs://{}{}'.format(OPEN_DATA_BUCKET, item['DatafileNameKey'])
                 file_list.append(FileDetails(filename=item['DatafileName'], pipeline=item['Pipeline'], platform=item['Platform'], cloudstorage_location=cloudstorage_location))
             cursor.execute(platform_query, (sample_id,))
             for item in cursor.fetchall():
