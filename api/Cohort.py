@@ -739,6 +739,9 @@ class Cohort_Endpoints_API(remote.Service):
                         bucket_name = 'gs://360ee3ad-mock-mock-mock-52f9a5e7f99a'
                     datafilenamekeys.append("{}{}".format(bucket_name, file_path))
 
+            if not len(datafilenamekeys):
+                datafilenamekeys.append("No files found.")
+
             return DataFileNameKeyList(datafilenamekeys=datafilenamekeys)
 
         except (IndexError, TypeError), e:
