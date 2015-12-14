@@ -15,33 +15,100 @@
     </ol>
     <h1 class="page-header">Lorem Ipsum Project</h1>
     <p class="project-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi faucibus placerat porttitor. Sed ac accumsan neque, dignissim blandit diam. </p>
-    <div class="panel-footer">
-        <div class="row">
-            <button class="btn btn-default">New Workbook</button>
-            <span class="separator"></span>
-            <button class="btn btn-primary"><i class="fa fa-upload"></i>Upload Data</button>
-            <button class="btn btn-primary">Edit Details</button>
-            <button class="btn btn-primary">Delete</button>
-            <button class="btn btn-primary">Share</button>
-            <button class="btn btn-link">Shared with (2)</button>
-        </div>
-    </div>
+    <ul class="page-action-group">
+        <li role="menuitem"><button class="btn btn-default">New Workbook</button></li>
+        <li class="separator"></li>
+        <li role="menuitem"><button class="btn btn-info"><i class="fa fa-cloud-upload"></i>Upload Data</button></li>
+        <li role="menuitem"><button class="btn btn-info">Edit Details</button></li>
+        <li role="menuitem"><button class="btn btn-info">Delete</button></li>
+        <li class="separator"></li>
+        <li role="menuitem"><button class="btn btn-info">Share</button></li>
+        <li role="menuitem"><button class="btn btn-link">Shared with (2)</button></li>
+    </ul>
 {% endblock %}
 {% block content %}
     <div class="container">
+        <section class="project-study panel panel-primary">
+            <div class="panel-heading clearfix">
+                <h4 class="panel-title pull-left">Lorem Ipsum Study</h4>
+                <div class="dropdown pull-right">
+                    <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-gear"></i></a>
+                    <ul class="dropdown-menu">
+                        <li role="menuitem"><a href="">New Workbook</a></li>
+                        <li role="menuitem"><a href="">Edit Details</a></li>
+                        <li role="menuitem"><a href="" role="button">Delete</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="message message-info alert alert-dismissible fade in">
+                    <p>Study Data is currently being processed.</p>
+                    <a class="close" data-dismiss="alert" aria-label="Close"><i class="fa fa-times" aria-hidden="true"></i></a>
+                </div>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi faucibus placerat porttitor. Sed ac accumsan neque, dignissim blandit diam.</p>
+                <a class="label label-default" href=""> data metadata </a>
+            </div>
+        </section>
+        <section class="project-study panel panel-primary">
+            <div class="panel-heading clearfix">
+                <h4 class="panel-title pull-left">Lorem Ipsum Study</h4>
+                <div class="dropdown pull-right">
+                    <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-gear"></i></a>
+                    <ul class="dropdown-menu">
+                        <li role="menuitem"><a href="">New Workbook</a></li>
+                        <li role="menuitem"><a href="">Edit Details</a></li>
+                        <li role="menuitem"><a href="" role="button">Delete</a></li>
+                    </ul>
+                </div>
 
-        {# % for study in studies % #}
-        <section class="project-study panel panel-default">
-            <div class="panel-heading">
-                <h4 class="panel-title">Lorem Ipsum Study</h4>
+            </div>
+            <div class="panel-body">
+                <div class="message message-error alert alert-dismissible fade in">
+                    <p>Upload of study data has an error. Please delete the study and re-upload.</p>
+                    <a class="close" data-dismiss="alert" aria-label="Close"><i class="fa fa-times" aria-hidden="true"></i></a>
+                </div>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi faucibus placerat porttitor. Sed ac accumsan neque, dignissim blandit diam.</p>
+                <a class="label label-default" href=""> data metadata </a>
+            </div>
+        </section>
+        <section class="project-study panel panel-primary">
+            <div class="panel-heading clearfix">
+                <h4 class="panel-title pull-left">Lorem Ipsum Study</h4>
+                <div class="dropdown pull-right">
+                    <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-gear"></i></a>
+                    <ul class="dropdown-menu">
+                        <li role="menuitem"><a href="">New Workbook</a></li>
+                        <li role="menuitem"><a href="">Edit Details</a></li>
+                        <li role="menuitem"><a href="" role="button">Delete</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="message message-success alert alert-dismissible fade in">
+                    Upload of study data is complete.
+                    <a class="close" data-dismiss="alert" aria-label="Close"><i class="fa fa-times" aria-hidden="true"></i></a>
+                </div>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi faucibus placerat porttitor. Sed ac accumsan neque, dignissim blandit diam.</p>
+                <a class="label label-default" href=""> data metadata </a>
+            </div>
+        </section>
+        <section class="project-study panel panel-primary">
+            <div class="panel-heading clearfix">
+                <h4 class="panel-title pull-left">Lorem Ipsum Study</h4>
+                <div class="dropdown pull-right">
+                    <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-gear"></i></a>
+                    <ul class="dropdown-menu">
+                        <li role="menuitem"><a href="">New Workbook</a></li>
+                        <li role="menuitem"><a href="">Edit Details</a></li>
+                        <li role="menuitem"><a href="" role="button">Delete</a></li>
+                    </ul>
+                </div>
             </div>
             <div class="panel-body">
                 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi faucibus placerat porttitor. Sed ac accumsan neque, dignissim blandit diam.</p>
-                <a href=""> data matadata </a>
+                <a class="label label-default" href=""> data metadata </a>
             </div>
         </section>
-        {# % endfor % #}
-
     </div>
 {% endblock %}
 
