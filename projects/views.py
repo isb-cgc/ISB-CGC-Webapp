@@ -23,7 +23,13 @@ def project_list(request):
 def project_detail(request, project_id=0):
     # """ if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name """
     template = 'projects/project_detail.html'
-    context = {}
+
+    # TODO Handle sharing
+    proj = request.user.project_set.all().filter(id=project_id)[0]
+
+    context = {
+        'project': proj,
+    }
     return render(request, template, context)
 
 @login_required

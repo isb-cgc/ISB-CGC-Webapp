@@ -13,8 +13,8 @@
         <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
         <li><a href="{% url 'projects' %}">Projects</a></li>
     </ol>
-    <h1 class="page-header">Lorem Ipsum Project</h1>
-    <p class="project-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi faucibus placerat porttitor. Sed ac accumsan neque, dignissim blandit diam. </p>
+    <h1 class="page-header">{{ project.name }}</h1>
+    <p class="project-description">{{ project.description }}</p>
     <div class="panel-footer">
         <div class="row">
             <button class="btn btn-default">New Workbook</button>
@@ -30,17 +30,31 @@
 {% block content %}
     <div class="container">
 
-        {# % for study in studies % #}
+        {% for study in project.study_set.all %}
         <section class="project-study panel panel-default">
             <div class="panel-heading">
-                <h4 class="panel-title">Lorem Ipsum Study</h4>
+                <h4 class="panel-title">{{ study.name }}</h4>
             </div>
             <div class="panel-body">
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi faucibus placerat porttitor. Sed ac accumsan neque, dignissim blandit diam.</p>
-                <a href=""> data matadata </a>
+                {% if study.get_status == 'Processing' %}
+                <p class="alert alert-info">
+                    <i class="fa fa-info-circle"></i> Data is still being processed
+                </p>
+                {% elif study.get_status == 'Error' %}
+                <p class="alert alert-danger">
+                    <i class="fa fa-exclamation-triangle"></i> There was an error processing your data
+                </p>
+                {% endif %}
+                <p>{{ study.description }}</p>
+                <dl>
+                    <dt>Created</dt>
+                    <dd>{{ study.last_date_saved }}</dd>
+                    <dt>Number of Files</dt>
+                    <dd>{{ study.get_file_count }}</dd>
+                </dl>
             </div>
         </section>
-        {# % endfor % #}
+        {% endfor %}
 
     </div>
 {% endblock %}
