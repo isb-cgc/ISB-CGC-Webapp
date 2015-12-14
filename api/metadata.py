@@ -1413,7 +1413,8 @@ class Meta_Endpoints_API(remote.Service):
                 raise endpoints.NotFoundException("%s does not have permission to view cohort %d." % (user_email, cohort_id))
 
             try:
-                is_dbGaP_authorized = bool(NIH_User.objects.get(user_id=user_id).dbGaP_authorized)
+                nih_user = NIH_User.objects.get(user_id=user_id)
+                is_dbGaP_authorized = nih_user.dbGaP_authorized and nih_user.active
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
                 logger.info("%s does not have an entry in NIH_User: %s" % (user_email, str(e)))
         else:

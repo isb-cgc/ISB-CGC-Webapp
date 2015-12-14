@@ -693,7 +693,8 @@ class Cohort_Endpoints_API(remote.Service):
             django.setup()
             try:
                 user_id = Django_User.objects.get(email=user_email).id
-                dbGaP_authorized = NIH_User.objects.get(user_id=user_id).dbGaP_authorized
+                nih_user = NIH_User.objects.get(user_id=user_id)
+                dbGaP_authorized = nih_user.dbGaP_authorized and nih_user.active
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
                 logger.warn(e)
                 # raise endpoints.NotFoundException("%s does not have an entry in the user database." % user_email)
