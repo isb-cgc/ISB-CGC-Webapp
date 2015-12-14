@@ -17,11 +17,9 @@ limitations under the License.
 """
 
 import logging
-import sys
 from datetime import datetime
 
 import endpoints
-from google.appengine.ext import ndb
 from protorpc import messages, message_types
 from protorpc import remote
 from django.conf import settings
@@ -41,12 +39,8 @@ from api_helpers import *
 logger = logging.getLogger(__name__)
 
 INSTALLED_APP_CLIENT_ID = settings.INSTALLED_APP_CLIENT_ID
+CONTROLLED_ACL_GOOGLE_GROUP = settings.ACL_GOOGLE_GROUP
 
-
-
-#################################################################
-#  BEGINNING OF FEATURE MATRIX ENDPOINTS
-#################################################################
 DEFAULT_COHORT_NAME = 'Untitled Cohort'
 
 IMPORTANT_FEATURES = [
@@ -88,11 +82,6 @@ class ReturnJSON(messages.Message):
     msg = messages.StringField(1)
 
 
-class tcga_data_file(ndb.Expando):
-    pass
-
-
-# todo: refactor to from users import User (from users api)
 class User(messages.Message):
     id = messages.StringField(1)
     last_login = messages.StringField(2)
@@ -221,7 +210,7 @@ Cohort_Endpoints = endpoints.api(name='cohort_api', version='v1', description="G
 class Cohort_Endpoints_API(remote.Service):
 
 
-    GET_RESOURCE = endpoints.ResourceContainer(token=messages.StringField(1), cohort_id=messages.StringField(2))
+    GET_RESOURCE = endpoints.ResourceContainer(token=messages.StringField(1), cohort_id=messages.IntegerField(2))
     @endpoints.method(GET_RESOURCE, CohortsList,
                       path='cohorts_list', http_method='GET', name='cohorts.list')
     def cohorts_list(self, request):
@@ -318,7 +307,7 @@ class Cohort_Endpoints_API(remote.Service):
             raise endpoints.NotFoundException("Authentication failed.")
 
 
-    GET_RESOURCE = endpoints.ResourceContainer(cohort_id=messages.StringField(1, required=True),
+    GET_RESOURCE = endpoints.ResourceContainer(cohort_id=messages.IntegerField(1, required=True),
                                                token=messages.StringField(2))
     @endpoints.method(GET_RESOURCE, CohortPatientsSamplesList,
                       path='cohort_patients_samples_list', http_method='GET', name='cohorts.cohort_patients_samples_list')
@@ -337,9 +326,6 @@ class Cohort_Endpoints_API(remote.Service):
             user_email = get_user_email_from_token(access_token)
 
         cohort_id = request.__getattribute__('cohort_id')
-
-        if not cohort_id.isdigit():
-            raise endpoints.NotFoundException("Cohort_id must be an integer. You entered {}.".format(cohort_id))
 
         if user_email:
             django.setup()
