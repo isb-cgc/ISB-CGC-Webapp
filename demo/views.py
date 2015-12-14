@@ -162,7 +162,7 @@ def index(request):
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
                 # only redirect if there is a MultipleObjectsReturned error
                 if type(e) is MultipleObjectsReturned:
-                    logger.warn("Error %s on NIH login: more than one NIH User with NIH_username %s" % (str(e), NIH_username))
+                    logger.error("Error %s on NIH login: more than one NIH User with NIH_username %s" % (str(e), NIH_username))
                     return redirect('/users/' + str(request.user.id))
 
 
