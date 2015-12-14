@@ -69,7 +69,7 @@ if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):
     BASE_API_URL = CLOUD_API_URL
     SITE_ID = 4
     DEVELOPER_COHORT_TABLE_ID = secret_settings.get('CLOUD_COHORT_TABLE')
-    NIH_AUTH_ON = True
+    NIH_AUTH_ON = False
 elif os.getenv('SETTINGS_MODE') == 'dev':
     DATABASES = secret_settings.get('DATABASE')
     BASE_URL = LOCAL_BASE_URL
