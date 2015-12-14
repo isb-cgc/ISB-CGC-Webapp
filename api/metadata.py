@@ -1522,7 +1522,9 @@ class Meta_Endpoints_API(remote.Service):
                 if dbGaP_authorized:
                     query = 'select SampleBarcode, DatafileName, Pipeline, Platform, DatafileNameKey, SecurityProtocol from metadata_data where SampleBarcode=%s;'
             except (ObjectDoesNotExist, MultipleObjectsReturned) as e:
-                logger.warn("Tried accessing sample_files endpoint with user {}: {}".format(user_email, str(e)))
+                # todo:
+                if type(e) is MultipleObjectsReturned:
+                    logger.error("Tried accessing sample_files endpoint with user {}: {}".format(user_email, str(e)))
 
         platform_query = 'select Platform, count(Platform) as platform_count from metadata_data where SampleBarcode=%s group by Platform;'
 
