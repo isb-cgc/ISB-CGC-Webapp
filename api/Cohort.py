@@ -17,11 +17,9 @@ limitations under the License.
 """
 
 import logging
-import sys
 from datetime import datetime
 
 import endpoints
-from google.appengine.ext import ndb
 from protorpc import messages, message_types
 from protorpc import remote
 from django.conf import settings
@@ -41,12 +39,8 @@ from api_helpers import *
 logger = logging.getLogger(__name__)
 
 INSTALLED_APP_CLIENT_ID = settings.INSTALLED_APP_CLIENT_ID
+CONTROLLED_ACL_GOOGLE_GROUP = settings.ACL_GOOGLE_GROUP
 
-
-
-#################################################################
-#  BEGINNING OF FEATURE MATRIX ENDPOINTS
-#################################################################
 DEFAULT_COHORT_NAME = 'Untitled Cohort'
 
 IMPORTANT_FEATURES = [
@@ -88,11 +82,6 @@ class ReturnJSON(messages.Message):
     msg = messages.StringField(1)
 
 
-class tcga_data_file(ndb.Expando):
-    pass
-
-
-# todo: refactor to from users import User (from users api)
 class User(messages.Message):
     id = messages.StringField(1)
     last_login = messages.StringField(2)
