@@ -105,13 +105,13 @@ require([
                     'displayName': 'Sample Barcode',
                     test: function (col) { return !!(col.name.match(/barcode/i) && !col.name.match(/participant/i)); },
                     type: 'string',
-                    key: 'sample',
+                    key: 'SampleBarcode',
                 },
                 'participant': {
                     'displayName': 'Participant Barcode',
                     test: function (col) { return !!(col.name.match(/barcode/i) && col.name.match(/participant/i)); },
                     type: 'string',
-                    key: 'participant',
+                    key: 'ParticipantBarcode',
                 },
             }
         };
@@ -156,6 +156,7 @@ require([
                     });
                 }
 
+                //fileObj.rows = [];
                 for (var i = 1, l = lines.length; i < l; i++) {
                     var row = lines[i].split('\t');
                     if (row.length != len) {
@@ -171,6 +172,7 @@ require([
                     for (var c = 0; c < len; c++) {
                         fileObj.columns[c].type = adjustCellType(fileObj.columns[c].type, row[c]);
                     }
+                    //fileObj.rows.push(row);
                 }
 
                 _.each(fileObj.columns, function (col) {
@@ -298,6 +300,7 @@ require([
                 fileDataTypes[type] = 0;
 
             fileDataTypes[type]++;
+            //addedFile.datatype = type;
         });
 
         if( (tabSet == 'new' && !$.trim( $('#project-name').val() )) ||
@@ -341,7 +344,7 @@ require([
                 return true;
 
             return 1 === _.reduce(file.processed.columns, function (n, col) {
-                    return !col.ignored && col.controlled && col.controlled.key == 'sample' ? n + 1 : n;
+                    return !col.ignored && col.controlled && col.controlled.key == 'SampleBarcode' ? n + 1 : n;
                 }, 0);
         });
 
