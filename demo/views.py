@@ -75,7 +75,7 @@ def prepare_django_request(request):
 # has a value equal to $nameid; otherwise, return False
 def check_NIH_authorization_list(nameid, storage_client):
     req = storage_client.objects().get_media(
-        bucket=DBGAP_AUTHENTICATION_LIST_BUCKET, object=FAKE_DBGAP_AUTHENTICATION_LIST_FILENAME)
+        bucket=DBGAP_AUTHENTICATION_LIST_BUCKET, object=DBGAP_AUTHENTICATION_LIST_FILENAME)
 
     rows = [row.strip() for row in req.execute().split('\n') if row.strip()]
     return csv_scanner.matching_row_exists(rows, 'login', nameid)
