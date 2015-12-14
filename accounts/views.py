@@ -43,7 +43,7 @@ login_expiration_seconds = settings.LOGIN_EXPIRATION_HOURS * 60 * 60
 COUNTDOWN_SECONDS = login_expiration_seconds + (60 * 15)
 
 logger = logging.getLogger(__name__)
-# ACL_GOOGLE_GROUP = settings.OPEN_ACL_GOOGLE_GROUP
+ACL_GOOGLE_GROUP = settings.OPEN_ACL_GOOGLE_GROUP
 
 
 @login_required

@@ -1,0 +1,39 @@
+%message-icon
+  left: 10px
+  @include vertical-align(absolute)
+
+.message
+  margin: 0 -15px 10px -15px
+  padding: 5px 15px 5px 30px
+  background: darken($white, 5%)
+  position: relative
+  font-weight: $medium-font-weight
+
+  .close
+    right: 10px
+    @include vertical-align(absolute)
+    font-size: 14px
+    font-weight: $regular-font-weight
+
+  &-error
+    //background: #f2dede
+
+    &:before
+      @extend %fa
+      content: "\f071"
+      color: #a94442
+      @extend %message-icon
+
+  &-success:before
+    @extend %fa
+    content: "\f00c"
+    color: $isb-success
+    @extend %message-icon
+
+  &-info:before
+    @extend %fa
+    @extend %message-icon
+    color: $isb-info
+    content: "\f06a"
+  p
+    margin: 0
