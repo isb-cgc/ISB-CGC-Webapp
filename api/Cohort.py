@@ -189,6 +189,7 @@ class SampleDetails(messages.Message):
 
 class DataFileNameKeyList(messages.Message):
     datafilenamekeys = messages.StringField(1, repeated=True)
+    count = messages.IntegerField(2)
 
 
 class SavedCohort(messages.Message):
@@ -739,10 +740,10 @@ class Cohort_Endpoints_API(remote.Service):
                         bucket_name = 'gs://360ee3ad-mock-mock-mock-52f9a5e7f99a'
                     datafilenamekeys.append("{}{}".format(bucket_name, file_path))
 
-            if not len(datafilenamekeys):
-                datafilenamekeys.append("No files found.")
+            # if not len(datafilenamekeys):
+            #     datafilenamekeys = ['']
 
-            return DataFileNameKeyList(datafilenamekeys=datafilenamekeys)
+            return DataFileNameKeyList(datafilenamekeys=datafilenamekeys, count=len(datafilenamekeys))
 
         except (IndexError, TypeError), e:
             logger.warn(e)

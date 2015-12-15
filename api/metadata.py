@@ -34,6 +34,7 @@ logger = logging.getLogger(__name__)
 
 debug = settings.DEBUG
 
+INSTALLED_APP_CLIENT_ID = settings.INSTALLED_APP_CLIENT_ID
 OPEN_DATA_BUCKET = settings.OPEN_DATA_BUCKET
 #CONTROLLED_DATA_BUCKET = settings.CONTROLLED_DATA_BUCKET
 
@@ -818,7 +819,8 @@ class IncomingPlatformSelection(messages.Message):
     RocheGSFLX_DNASeq                   = messages.StringField(30)
 
 
-Meta_Endpoints = endpoints.api(name='meta_api', version='v1')
+Meta_Endpoints = endpoints.api(name='meta_api', version='v1',
+                               allowed_client_ids=[INSTALLED_APP_CLIENT_ID, endpoints.API_EXPLORER_CLIENT_ID])
 
 @Meta_Endpoints.api_class(resource_name='meta_endpoints')
 class Meta_Endpoints_API(remote.Service):
@@ -1125,10 +1127,13 @@ class Meta_Endpoints_API(remote.Service):
 
                 attr_values_list = MetaAttrValuesList(Study=data)
 
+                cursor.close()
+                db.close()
+
                 return MetadataItemList(count=attr_values_list)
 
             except (IndexError, TypeError) as e:
-                print e
+
                 raise endpoints.NotFoundException('Error in getting landing data.')
 
         # Check for passed in saved search id
@@ -1228,16 +1233,15 @@ class Meta_Endpoints_API(remote.Service):
 
                 if key == 'age_at_initial_pathologic_diagnosis':
                     value_list['age_at_initial_pathologic_diagnosis'] = normalize_metadata_ages(value_list['age_at_initial_pathologic_diagnosis'])
-
+                cursor.close()
+                db.close()
             except (KeyError, TypeError) as e:
-                print e
+
                 raise endpoints.NotFoundException('Error in getting value counts.')
 
         value_list_item = MetaAttrValuesList()
         for key in METADATA_SHORTLIST:
             value_list_item.__setattr__(key, None if key not in value_list else value_list[key])
-
-        # pprint.pprint(value_list_item)
 
         return MetadataItemList(count=value_list_item, total=total)
 
@@ -1504,30 +1508,44 @@ class Meta_Endpoints_API(remote.Service):
         as well as counts for the number of files for each platform.
         '''
 
+        global cloudstorage_location
         sample_id = request.sample_id
         dbGaP_authorized = False
 
-        query = 'select SampleBarcode, ' \
-                'DatafileName, ' \
-                'Pipeline, ' \
-                'Platform, ' \
-                'IF(SecurityProtocol LIKE "%%open%%", DatafileNameKey, "Restricted") as DatafileNameKey ' \
-                'from metadata_data where SampleBarcode=%s;'
+        query = "select SampleBarcode, " \
+                "DatafileName, " \
+                "Pipeline, " \
+                "Platform, " \
+                "IF(SecurityProtocol LIKE '%%open%%', DatafileNameKey, 'Restricted') as DatafileNameKey, " \
+                "SecurityProtocol " \
+                "from metadata_data " \
+                "where SampleBarcode=%s;"
 
         if endpoints.get_current_user():
-            user_email = endpoints.get_current_user()
+            user_email = endpoints.get_current_user().email()
             try:
                 user_id = Django_User.objects.get(email=user_email)
                 nih_user = NIH_User.objects.get(user_id=user_id)
                 dbGaP_authorized = nih_user.dbGaP_authorized and nih_user.active
                 if dbGaP_authorized:
-                    query = 'select SampleBarcode, DatafileName, Pipeline, Platform, DatafileNameKey, SecurityProtocol from metadata_data where SampleBarcode=%s;'
+                    query = "select SampleBarcode, " \
+                            "DatafileName, " \
+                            "Pipeline, " \
+                            "Platform, " \
+                            "DatafileNameKey, " \
+                            "SecurityProtocol, " \
+                            "Repository " \
+                            "from metadata_data " \
+                            "where SampleBarcode=%s;"
             except (ObjectDoesNotExist, MultipleObjectsReturned) as e:
-                # todo:
                 if type(e) is MultipleObjectsReturned:
-                    logger.error("Tried accessing sample_files endpoint with user {}: {}".format(user_email, str(e)))
+                    logger.error("Meta.sample_files endpoint with user {} gave error: {}".format(user_email, str(e)))
 
-        platform_query = 'select Platform, count(Platform) as platform_count from metadata_data where SampleBarcode=%s group by Platform;'
+        platform_query = "select Platform, " \
+                         "count(Platform) as platform_count " \
+                         "from metadata_data " \
+                         "where SampleBarcode=%s " \
+                         "group by Platform;"
 
         db = sql_connection()
         cursor = db.cursor(MySQLdb.cursors.DictCursor)
@@ -1537,11 +1555,29 @@ class Meta_Endpoints_API(remote.Service):
             file_list = []
             platform_list = []
             for item in cursor.fetchall():
-                if dbGaP_authorized:
-                    cloudstorage_location = 'None' if item.get('DatafileNameKey', '') == '' else 'gs://{}{}'.format(OPEN_DATA_BUCKET if 'open' in item['SecurityProtocol'] else CONTROLLED_DATA_BUCKET, item['DatafileNameKey'])
+                if len(item.get('DatafileNameKey', '')) == 0:
+                    cloudstorage_location = 'File location not found.'
+                elif 'open' in item['SecurityProtocol']:
+                    cloudstorage_location = 'gs://{}{}'.format(OPEN_DATA_BUCKET, item['DatafileNameKey'])
+                elif dbGaP_authorized:
+                    # hard-coding mock bucket names for now --testing purposes only
+                    if item['Repository'].lower() == 'dcc':
+                        cloudstorage_location = 'gs://{}{}'.format(
+                            'gs://62f2c827-mock-mock-mock-1cde698a4f77', item['DatafileNameKey'])
+                    elif item['Repository'].lower() == 'cghub':
+                        cloudstorage_location = 'gs://{}{}'.format(
+                            'gs://360ee3ad-mock-mock-mock-52f9a5e7f99a', item['DatafileNameKey'])
                 else:
-                    cloudstorage_location = 'None' if item.get('DatafileNameKey', '') == '' or item['DatafileNameKey'] == 'Restricted' else 'gs://{}{}'.format(OPEN_DATA_BUCKET, item['DatafileNameKey'])
-                file_list.append(FileDetails(filename=item['DatafileName'], pipeline=item['Pipeline'], platform=item['Platform'], cloudstorage_location=cloudstorage_location))
+                    cloudstorage_location = item.get('DatafileNameKey')  # this will return "Restricted"
+
+                file_list.append(
+                    FileDetails(
+                        filename=item['DatafileName'],
+                        pipeline=item['Pipeline'],
+                        platform=item['Platform'],
+                        cloudstorage_location=cloudstorage_location
+                    )
+                )
             cursor.execute(platform_query, (sample_id,))
             for item in cursor.fetchall():
                 platform_list.append(PlatformCount(platform=item['Platform'], count=item['platform_count']))
