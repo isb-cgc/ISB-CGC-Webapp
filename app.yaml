@@ -17,7 +17,7 @@
 ###
 
 runtime: custom
-module: prodapi
+module: default
 api_version: 1
 threadsafe: true
 vm: true
