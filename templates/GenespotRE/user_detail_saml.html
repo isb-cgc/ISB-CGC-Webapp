@@ -1,5 +1,6 @@
 {% load staticfiles %}
 {% load tz %}
+{% get_current_timezone as TIME_ZONE %}
 {% block saml_content %}
 
     {% if not user_details.NIH_username or not user_details.NIH_active %} {# No eRA account, no dbGaP #}
@@ -27,7 +28,7 @@
         <p>
             Congratulations, {{ user_details.NIH_username }}! You now have access to ISB-CGC controlled access TCGA data until
             {{ user_details.NIH_assertion_expiration|localtime }}
-            {% if TIMEZONE != "" or TIMEZONE != None %}
+            {% if TIMEZONE != "" and TIMEZONE != None %}
                 in {{ TIME_ZONE }} time.
             {% endif %}
         </p>

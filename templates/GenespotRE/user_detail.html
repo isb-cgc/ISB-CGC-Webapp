@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% load tz %}
+{% get_current_timezone as TIME_ZONE %}
 
 {% comment %}
 
@@ -56,7 +57,7 @@
 
                     <tr>
                         <td>Last Logged In</td>
-                        <td>{{ user_details.last_login|localtime }}</td>
+                        <td>{{ user_details.last_login|localtime }} in {{ TIME_ZONE }}</td>
                     </tr>
 {#                    <tr>#}
 {#                        <td>Date Joined</td>#}
@@ -79,6 +80,7 @@
                     {% endblock %}
                 {% else %}
                     <p>NIH Authorization currently disabled.</p>
+                    <p>{{ TIME_ZONE }}</p>
                 {% endif %}
             </div>
         </div>
