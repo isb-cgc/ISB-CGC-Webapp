@@ -16,7 +16,11 @@ import requests
 @login_required
 def project_list(request):
     template = 'projects/project_list.html'
-    context = {}
+
+    # TODO Handle sharing
+    context = {
+        'projects': request.user.project_set.all()
+    }
     return render(request, template, context)
 
 @login_required

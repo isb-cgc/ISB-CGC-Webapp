@@ -28,7 +28,9 @@
         </ul>
         <div class="tab-content">
             <div role="tabpanel" class="tab-pane active" id="save-projects-list">
-                <table class="table table-striped tablesorter">
+                {% if projects %}
+
+                <table class="table tablesorter">
                     <thead>
                         <th class="control-col"></th>
                         <th class="name-col">Name</th>
@@ -38,92 +40,115 @@
                         <th>Last Updated</th>
                     </thead>
                     <tbody>
-                        <tr>
+                        {% for project in projects %}
+                        <tr class="row-{% if forloop.counter|divisibleby:2 %}even{% else %}odd{% endif %}" data-project-id="{{ project.id }}">
                             <td class="control-col">
                                 <div class="dropdown">
-                                    <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
+                                    <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" class="dropdown-arrow"><i class="fa fa-caret-down"></i></a>
                                     <ul class="dropdown-menu">
-                                        <li><a href="{% url 'project_detail' 0 %}">Edit</a> </li>
+                                        <li><a href="{% url 'project_detail' project.id %}">Edit</a> </li>
                                         <li><a role="button">Delete</a></li>
+                                        <li><a href="">New Workbook</a></li>
+                                    </ul>
+                                    <span class="row-expand-button"><i class="fa fa-plus"></i></span>
+                                </div>
+                            </td>
+                            <td class="name-col"><a href="{% url 'project_detail' project.id %}">{{ project.name }}</a></td>
+                            <td>{{ project.study_set.count }}</td>
+                            <td>{% if project.owner.id == user.id %}
+                                You
+                            {% else %}
+                                {{ project.owner.first_name }} {{ project.owner.last_name }}
+                            {% endif %}</td>
+                            <td>(0)</td>
+                            <td>{{ project.last_date_saved|date:"SHORT_DATETIME_FORMAT" }}</td>
+                        {% for study in project.study_set.all %}
+                        </tr>
+                        <tr class="study hidden" data-project-id="{{ project.id }}">
+                            <td class="control-col">
+                            </td>
+                            <td class="name-col">
+                                <div class="dropdown">
+                                    <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
+                                    {{ study.name }}
+                                    <ul class="dropdown-menu">
                                         <li><a href="">New Workbook</a></li>
                                     </ul>
                                 </div>
                             </td>
-                            <td class="name-col"><a href="{% url 'project_detail' 0 %}">Name of Project</a> </td>
-                            <td>2</td>
-                            <td>David Smith</td>
-                            <td>(3)</td>
-                            <td>10/15/2015</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td>{{ study.last_date_saved|date:"SHORT_DATETIME_FORMAT" }}</td>
+                        {% endfor %}
                         </tr>
-                        <tr>
-                            <td class="control-col">
-                                <div class="dropdown">
-                                    <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="{% url 'project_detail' 0 %}">Edit</a> </li>
-                                        <li><a role="button">Delete</a></li>
-                                        <li><a href="">New Workbook</a></li>
-                                    </ul>
-                                </div>
-                            </td>
-                            <td class="name-col">Name of Project</td>
-                            <td>2</td>
-                            <td>You</td>
-                            <td>(3)</td>
-                            <td>10/15/2015</td>
-                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
-                <!--{% if projects %}-->
-                    <!--<table id="cohort-table" class="table table-striped tablesorter">-->
-                        <!--<thead><tr>-->
-                            <!--<th class="checkbox-col"><input type="checkbox" class="select-all" title="select-all"/></th>-->
-                            <!--<th class="name-col">Cohort Name</th>-->
-                            <!--<th class="sample-col"># of Samples</th>-->
-                            <!--<th class="owner-col">Owner</th>-->
-                            <!--<th class="date-col">Last Modified</th>-->
-                        <!--</tr></thead>-->
-                        <!--<tbody>-->
-                            <!--{% for project in cohorts %}-->
-                                <!--<tr>-->
-                                    <!--<td class="checkbox-col"><input type="checkbox" name="id" value="{{ cohort.id }}" title="{{ cohort.name }} Checkbox" aria-label="cohort-checkbox"/></td>-->
-                                    <!--<td class="name-col"><a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a></td>-->
-                                    <!--<td class="sample-col">{{ cohort.num_patients }}</td>-->
-                                    <!--<td class="owner-col">{{ cohort.owner.email }}</td>-->
-                                    <!--<td class="date-col">{{ cohort.last_date_saved|date:"SHORT_DATETIME_FORMAT" }}</td>-->
-                                <!--</tr>-->
-                            <!--{% endfor %}-->
-                        <!--</tbody>-->
-                    <!--</table>-->
-                <!--{% else %}-->
-                    <!--<p>You don't have any saved projects yet</p>-->
-                <!--{% endif %}-->
+                {% else %}
+                <p>You don't have any saved projects yet</p>
+                {% endif %}
             </div>
             <div role="tabpanel" class="tab-pane" id="public-projects-list">
-                <table class="table table-striped tablesorter">
+                {% if projects %}
+
+                <table class="table tablesorter">
                     <thead>
-                        <tr>
-                            <th class="checkbox-col"></th>
-                            <th class="name-col">Name</th>
-                            <th>Studies</th>
-                            <th>Ownership</th>
-                            <th>Last Updated</th>
-                        </tr>
+                        <th class="control-col"></th>
+                        <th class="name-col">Name</th>
+                        <th class="study-col">Studies</th>
+                        <th>Ownership</th>
+                        <th>Last Updated</th>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td class="checkbox-col"><i class="fa fa-caret-down"></i></td>
-                            <td class="name-col">TCGA</td>
-                            <td>38</td>
-                            <td>TCGA</td>
-                            <td>10/15/2015</td>
+                        {% for project in projects %}
+                        <tr class="row-{% if forloop.counter|divisibleby:2 %}even{% else %}odd{% endif %}" data-project-id="{{ project.id }}">
+                            <td class="control-col">
+                                <div class="dropdown">
+                                    <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" class="dropdown-arrow"><i class="fa fa-caret-down"></i></a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="">New Workbook</a></li>
+                                    </ul>
+                                    <span class="row-expand-button"><i class="fa fa-plus"></i></span>
+                                </div>
+                            </td>
+                            <td class="name-col"><a href="{% url 'project_detail' project.id %}">{{ project.name }}</a></td>
+                            <td>{{ project.study_set.count }}</td>
+                            <td>{% if project.owner.id == user.id %}
+                                You
+                            {% else %}
+                                {{ project.owner.first_name }} {{ project.owner.last_name }}
+                            {% endif %}</td>
+                            <td>{{ project.last_date_saved|date:"SHORT_DATETIME_FORMAT" }}</td>
+                        {% for study in project.study_set.all %}
                         </tr>
+                        <tr class="study hidden" data-project-id="{{ project.id }}">
+                            <td class="control-col">
+                            </td>
+                            <td class="name-col">
+                                <div class="dropdown">
+                                    <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
+                                    {{ study.name }}
+                                    <ul class="dropdown-menu">
+                                        <li><a href="">New Workbook</a></li>
+                                    </ul>
+                                </div>
+                            </td>
+                            <td></td>
+                            <td></td>
+                            <td>{{ study.last_date_saved|date:"SHORT_DATETIME_FORMAT" }}</td>
+                        {% endfor %}
+                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
+                {% else %}
+                <p>You don't have any saved projects yet</p>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
 
-{% block js_file %}{% static 'js/dashboard.js' %}{% endblock %}
+{% block js_file %}{% static 'js/project_list.js' %}{% endblock %}

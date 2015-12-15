@@ -1312,6 +1312,26 @@ nav {
     .column-definitions .file-column-edit-table .ignored td:nth-child(2) {
       text-decoration: line-through; }
 
+#save-projects-list .table .row-odd, #public-projects-list .table .row-odd {
+  background-color: #EFEFEF; }
+
+#save-projects-list .table .row-expand-button, #save-projects-list .table .dropdown-arrow, #public-projects-list .table .row-expand-button, #public-projects-list .table .dropdown-arrow {
+  cursor: pointer; }
+
+#save-projects-list .table .name-col, #public-projects-list .table .name-col {
+  width: 30%; }
+
+#save-projects-list .table .dropdown-arrow, #public-projects-list .table .dropdown-arrow {
+  margin-right: 12px; }
+
+#save-projects-list .table .study td, #public-projects-list .table .study td {
+  border-color: #EFEFEF; }
+
+#save-projects-list .table .study .name-col, #public-projects-list .table .study .name-col {
+  padding-left: 15px; }
+  #save-projects-list .table .study .name-col .fa, #public-projects-list .table .study .name-col .fa {
+    padding-right: 8px; }
+
 body {
   -webkit-transition: all 0.4s ease-in;
   transition: all 0.4s ease-in; }
