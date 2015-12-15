@@ -189,6 +189,7 @@ class SampleDetails(messages.Message):
 
 class DataFileNameKeyList(messages.Message):
     datafilenamekeys = messages.StringField(1, repeated=True)
+    count = messages.IntegerField(2)
 
 
 class SavedCohort(messages.Message):
@@ -693,7 +694,8 @@ class Cohort_Endpoints_API(remote.Service):
             django.setup()
             try:
                 user_id = Django_User.objects.get(email=user_email).id
-                dbGaP_authorized = NIH_User.objects.get(user_id=user_id).dbGaP_authorized
+                nih_user = NIH_User.objects.get(user_id=user_id)
+                dbGaP_authorized = nih_user.dbGaP_authorized and nih_user.active
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
                 logger.warn(e)
                 # raise endpoints.NotFoundException("%s does not have an entry in the user database." % user_email)
@@ -738,7 +740,7 @@ class Cohort_Endpoints_API(remote.Service):
                         bucket_name = 'gs://360ee3ad-mock-mock-mock-52f9a5e7f99a'
                     datafilenamekeys.append("{}{}".format(bucket_name, file_path))
 
-            return DataFileNameKeyList(datafilenamekeys=datafilenamekeys)
+            return DataFileNameKeyList(datafilenamekeys=datafilenamekeys, count=len(datafilenamekeys))
 
         except (IndexError, TypeError), e:
             logger.warn(e)

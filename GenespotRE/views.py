@@ -167,7 +167,7 @@ def user_detail(request, user_id):
             nih_user = NIH_User.objects.get(user_id=user_id)
             user_details['NIH_username'] = nih_user.NIH_username
             user_details['NIH_assertion_expiration'] = nih_user.NIH_assertion_expiration
-            user_details['dbGaP_authorized'] = nih_user.dbGaP_authorized
+            user_details['dbGaP_authorized'] = nih_user.dbGaP_authorized and nih_user.active
             user_details['NIH_active'] = nih_user.active
         except (MultipleObjectsReturned, ObjectDoesNotExist), e:
             if type(e) is MultipleObjectsReturned:
