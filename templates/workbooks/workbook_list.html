@@ -18,11 +18,11 @@
 {% block content %}
 <div class="container">
     <div>
-        <h1 class="page-header">Saved Workbooks</h1>
         <div class="panel tab-content">
-            <a href="{% url 'workbook_detail' 0 %}">
-                <button onclick="createjavascript()">Create Workbook</button>
-            </a>
+            <form id="create-workbook" method="POST" action="{% url 'workbook_create' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary" >Create Workbook</button>
+            </form>
         </div>
         {% if workbooks %}
             <table class="table table-striped tablesorter">
@@ -41,18 +41,23 @@
                                 <div class="dropdown">
                                     <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
                                     <ul class="dropdown-menu">
-                                        <li><a href="{% url 'workbook_detail' workbook.id %}">Edit</a> </li>
-                                        <li><a href="">Duplicate</a> </li>
-                                        <li><a role="button">Delete</a></li>
-                                        <hr>
-                                        <li><a href="">New Workbook</a></li>
+                                        {% if workbook.owner.id == user.id %}
+                                            <li><a href="{% url 'workbook_detail' workbook.id %}">Edit</a> </li>
+                                            <li><a href="">Duplicate</a> </li>
+                                            <li><a role="button">Delete</a></li>
+                                            <hr>
+                                            <li><a href="">Share</a></li>
+                                        {% else  %}
+                                            <li><a href="{% url 'workbook_detail' workbook.id %}">Duplicate</a> </li>
+                                            <li><a href="">Remove</a> </li>
+                                        {% endif %}
                                     </ul>
                                 </div>
                             </td>
                             <td class="name-col"><a href="{% url 'workbook_detail' workbook.id %}">{{ workbook.name }}</a></td>
-                            <td> {{ workbook.worksheet_list|length }}</td>
-                            <td> {{ workbook.owner.name }}</td>
-                            <td>({{ workbook.share_count }})</td>
+                            <td> {{ workbook.worksheets|length }}</td>
+                            <td> {{ workbook.owner.first_name }} {{ workbook.owner.last_name }}</td>
+                            <td>({{ workbook.shares | length }})</td>
                             <td> {{ workbook.last_date_saved}}</td>
                         </tr>
                     {% endfor %}
@@ -65,4 +70,7 @@
 </div>
 {% endblock %}
 
+⇥
 {% block js_file %}{% static 'js/dashboard.js' %}{% endblock %}
+
+
