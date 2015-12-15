@@ -90,7 +90,7 @@
                 {% endif %}
             </div>
             <div role="tabpanel" class="tab-pane" id="public-projects-list">
-                {% if projects %}
+                {% if public_projects %}
 
                 <table class="table tablesorter">
                     <thead>
@@ -101,7 +101,7 @@
                         <th>Last Updated</th>
                     </thead>
                     <tbody>
-                        {% for project in projects %}
+                        {% for project in public_projects %}
                         <tr class="row-{% if forloop.counter|divisibleby:2 %}even{% else %}odd{% endif %}" data-project-id="{{ project.id }}">
                             <td class="control-col">
                                 <div class="dropdown">
@@ -143,7 +143,7 @@
                     </tbody>
                 </table>
                 {% else %}
-                <p>You don't have any saved projects yet</p>
+                <p>There are no public projects available at the moment</p>
                 {% endif %}
             </div>
         </div>

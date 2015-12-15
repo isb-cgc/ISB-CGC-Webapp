@@ -39,11 +39,17 @@ class NIH_User(models.Model):
 
 class Bucket(models.Model):
     user = models.ForeignKey(User, null=False)
-    bucket_name = models.TextField(null=True)
+    bucket_name = models.CharField(null=True,max_length=155)
     bucket_permissions = models.TextField(null=True)
+
+    def __str__(self):
+        return self.bucket_name
 
 class GoogleProject(models.Model):
     user = models.OneToOneField(User, null=False)
     project_name = models.CharField(max_length=150)
     project_id = models.CharField(max_length=150)
     big_query_dataset = models.CharField(max_length=150,null=True)
+
+    def __str__(self):
+        return self.project_name

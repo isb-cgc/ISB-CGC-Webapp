@@ -22,11 +22,12 @@ class ProjectManager(models.Manager):
 class Project(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255,null=True)
-    description = models.TextField(null=True)
+    description = models.TextField(null=True, blank=True)
     active = models.BooleanField(default=True)
     last_date_saved = models.DateTimeField(auto_now_add=True)
     objects = ProjectManager()
     owner = models.ForeignKey(User)
+    is_public = models.BooleanField(default=False)
 
     '''
     Sets the last viewed time for a cohort
@@ -45,6 +46,9 @@ class Project(models.Model):
 
         return last_view
 
+    def __str__(self):
+        return self.name
+
 class Project_Last_View(models.Model):
     project = models.ForeignKey(Project, blank=False)
     user = models.ForeignKey(User, null=False, blank=False)
@@ -52,11 +56,12 @@ class Project_Last_View(models.Model):
 
 class Study(models.Model):
     name = models.CharField(max_length=255)
-    description = models.TextField(null=True)
+    description = models.TextField(null=True, blank=True)
     active = models.BooleanField(default=True)
     last_date_saved = models.DateTimeField(auto_now_add=True)
     owner = models.ForeignKey(User)
     project = models.ForeignKey(Project)
+    extends = models.ForeignKey("self", null=True, blank=True)
 
     '''
     Sets the last viewed time for a cohort
@@ -78,15 +83,19 @@ class Study(models.Model):
     def get_status (self):
         status = 'Complete'
         for datatable in self.user_data_tables_set.all():
-            if datatable.data_upload.status is not 'Complete':
+            if datatable.data_upload is not None and datatable.data_upload.status is not 'Complete':
                 status = datatable.data_upload.status
         return status
 
     def get_file_count(self):
         count = 0
         for datatable in self.user_data_tables_set.all():
-            count += datatable.data_upload.useruploadedfile_set.count()
+            if datatable.data_upload is not None:
+                count += datatable.data_upload.useruploadedfile_set.count()
         return count
+
+    def __str__(self):
+        return self.name
 
 class Study_Last_View(models.Model):
     study = models.ForeignKey(Study, blank=False)
@@ -98,7 +107,7 @@ class User_Data_Tables(models.Model):
     metadata_samples_table = models.CharField(max_length=200)
     user = models.ForeignKey(User, null=False)
     study = models.ForeignKey(Study, null=False)
-    data_upload = models.ForeignKey(UserUpload, null=False)
+    data_upload = models.ForeignKey(UserUpload, null=True, blank=True)
     google_project = models.ForeignKey(GoogleProject)
     google_bucket = models.ForeignKey(Bucket)
 

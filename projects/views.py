@@ -4,11 +4,11 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.conf import settings
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseNotFound
 from django.conf import settings
 from django.db import connection
 from data_upload.models import UserUpload, UserUploadedFile
-from projects.models import User_Feature_Definitions
+from projects.models import User_Feature_Definitions, Project
 
 import json
 import requests
@@ -19,7 +19,8 @@ def project_list(request):
 
     # TODO Handle sharing
     context = {
-        'projects': request.user.project_set.all()
+        'projects': request.user.project_set.all().filter(active=True),
+        'public_projects': Project.objects.all().filter(is_public=True,active=True)
     }
     return render(request, template, context)
 
@@ -29,10 +30,15 @@ def project_detail(request, project_id=0):
     template = 'projects/project_detail.html'
 
     # TODO Handle sharing
-    proj = request.user.project_set.all().filter(id=project_id)[0]
+    proj = Project.objects.get(id=project_id,active=True)
+
+    if proj.owner_id != request.user.id and not proj.is_public:
+        # Project is not the user's and is not public, return 404
+        return HttpResponseNotFound('Project Not Found');
+
 
     context = {
-        'project': proj,
+        'project': proj
     }
     return render(request, template, context)
 
@@ -105,6 +111,11 @@ def upload_files(request):
             description=request.POST['study-description'],
             owner=request.user
         )
+
+        if request.POST['data-type'] == 'extend':
+            # TODO Does this need a share check??
+            study.extends_id = request.POST['extend-study-id']
+
         study.save()
 
         upload = UserUpload(owner=request.user)
