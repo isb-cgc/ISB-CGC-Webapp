@@ -2,6 +2,10 @@
     margin-left: -10px
     margin-right: -10px
 
+.disabled
+    pointer-events: none
+    opacity: 0.85
+
 .nav-tabs
     background-color: #fff
     border-bottom: 1px solid darken($white, 15%)
@@ -11,22 +15,38 @@
 
     > li > a
         @extend .nav-tabs
+        border: none
+        border-bottom: 1px solid darken($white, 15%)
         margin-right: 0px
         color: $isb-dark
         font-weight: $medium-font-weight
+        &:after
+            content: ''
+            height: 2px
+            background: $isb-warning
+            width: 100%
+            position: absolute
+            left: 0
+            bottom: -1px
+            transform: scale(0)
     > li.active > a, li.active > a:focus
         @extend .nav-tabs
         border: none
-        border-bottom: 2px $isb-warning solid
         color: $isb-warning
+        &:after
+            transform: scale(1)
+            transform-origin: left
+            transition: transform 0.25s ease-in-out
     > li.active:hover > a
         @extend .nav-tabs
         border: none
-        border-bottom: 2px $isb-warning solid
+        border-bottom: 1px solid darken($white, 15%)
         color: $isb-warning
     > li:hover > a
         @extend .nav-tabs
         border: none
+        border-bottom: 1px solid darken($white, 15%)
+        color: $isb-warning
 
     .navbar-right
         margin-top: 0px
