@@ -275,5 +275,3 @@ require([
         $(target + ' a[data-target="#shared-pane"]').tab('show');
     })
 });
-
-{% block js_file %}{% static 'js/cohort_details.js' %}{% endblock %}
