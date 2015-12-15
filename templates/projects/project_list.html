@@ -114,11 +114,7 @@
                             </td>
                             <td class="name-col"><a href="{% url 'project_detail' project.id %}">{{ project.name }}</a></td>
                             <td>{{ project.study_set.count }}</td>
-                            <td>{% if project.owner.id == user.id %}
-                                You
-                            {% else %}
-                                {{ project.owner.first_name }} {{ project.owner.last_name }}
-                            {% endif %}</td>
+                            <td>ISB</td>
                             <td>{{ project.last_date_saved|date:"SHORT_DATETIME_FORMAT" }}</td>
                         {% for study in project.study_set.all %}
                         </tr>
