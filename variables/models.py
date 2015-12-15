@@ -3,6 +3,7 @@ import operator
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Q
+from projects.models import Project
 
 
 class VariableFavoriteManager(models.Manager):
@@ -46,3 +47,10 @@ class VariableFavorite_Last_View(models.Model):
     variablefavorite = models.ForeignKey(VariableFavorite, blank=False)
     user = models.ForeignKey(User, null=False, blank=False)
     last_view = models.DateTimeField(auto_now_add=True, auto_now=True)
+
+class Variable(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.TextField(null=False, blank=False)
+    project = models.ForeignKey(Project, null=False, blank=False)
+    feature_col_name = models.TextField(null=False, blank=False)
+    feature_table_name = models.TextField(null=False, blank=False)

@@ -35,7 +35,7 @@
             <p>Workbooks store the Analyses you create -- and their related data.</p>
         </div>
         <div class="panel-footer">
-            <button class="btn btn-default"><i class="fa fa-plus"></i>Create a New Workbook</button>
+            <a href="{% url 'workbook_detail' 0 %}"><button class="btn btn-default"><i class="fa fa-plus"></i>Create a New Workbook</button></a>
             <a class="btn btn-plain" href="{% url 'workbooks' %}">Sample Workbooks</a>
         </div>
     </section>
