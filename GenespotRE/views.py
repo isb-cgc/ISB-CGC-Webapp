@@ -154,6 +154,7 @@ def user_detail(request, user_id):
 
         user = User.objects.get(id=user_id)
         social_account = SocialAccount.objects.get(user_id=user_id)
+
         user_details = {
             'date_joined': user.date_joined,
             'email': user.email,
