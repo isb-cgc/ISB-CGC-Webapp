@@ -454,7 +454,7 @@ def create_and_log_reports(request):
 
     # get utc time and timedelta
     utc_now = datetime.datetime.utcnow()
-    tdelta = utc_now + datetime.timedelta(days=-7)
+    tdelta = utc_now + datetime.timedelta(days=-1)
     start_datetime = tdelta.isoformat("T") + "Z" # collect last 7 days logs
 
     for application_name in ['admin', 'login', 'token', 'groups']:
