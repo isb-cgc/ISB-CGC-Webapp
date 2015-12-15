@@ -36,10 +36,6 @@ require([
     'use strict';
 
     // This file is used for genes creation page
-    // TODO:
-    // - Probably need to change name later
-    // - Validate genes list field before submit
-    // - hook up source to existing genes list
 
     // Valid gene list
     var genelist = ['PTEN', 'PIK3CA', 'AKT', 'MTOR', 'BRCA1'];
@@ -90,6 +86,7 @@ require([
         }else{
             geneListField.tokenfield('setTokens', ' ');
         }
+        return false;
     });
 
     // Genes upload page

@@ -4070,7 +4070,7 @@ tbody.collapse.in {
   padding: 8px 0;
   margin-bottom: 20px;
   list-style: none;
-  background-color: #fff;
+  background-color: transparent;
   border-radius: 2px; }
   .breadcrumb > li {
     display: inline-block; }
