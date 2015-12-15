@@ -14,7 +14,7 @@ database:
     - sudo -E /bin/sh ./shell/database-setup.sh
 deployment:
   staging:
-    branch: [isb-cgc-prod]
+    branch: [isb-cgc-prod-api]
     commands:
       - sudo -E rm -rf ./lib
       - sudo -E /bin/sh ./shell/gcloud_authenticate.sh
