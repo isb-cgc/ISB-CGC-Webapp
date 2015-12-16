@@ -2,6 +2,26 @@
   left: 10px
   @include vertical-align(absolute)
 
+.alert
+  border-radius: 1px
+  border: 5px solid transparent
+  padding: 10px
+  .close
+      right: 0px
+  &.alert-success
+      background-color: $bg-color
+      border-color: $success-bgcolor-dark
+  &.alert-info
+      color: $info-color
+      background-color: $bg-color
+      border-color: $info-bgcolor-dark
+  &.alert-warning
+      background-color: $bg-color
+      border-color: $warning-bgcolor-dark
+  &.alert-error
+      background-color: $bg-color
+      border-color: $danger-bgcolor-dark
+
 .message
   margin: 0 -15px 10px -15px
   padding: 5px 15px 5px 30px
@@ -37,3 +57,4 @@
     content: "\f06a"
   p
     margin: 0
+

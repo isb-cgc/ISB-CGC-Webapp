@@ -40,7 +40,7 @@ def workbook(request, workbook_id=0):
 
     if request.method == "POST" :
         if command == "create" :
-            workbook_model = Workbook.createDefault(name="default name", description="this is the default description", user=request.user)
+            workbook_model = Workbook.createDefault(name="Untitled Workbook", description="this is an untitled workbook. Click Edit Details to change your workbook title and description.", user=request.user)
         elif command == "edit" :
             workbook_model = Workbook.edit(id=workbook_id, name=request.POST.get('name'), description=request.POST.get('description'))
         elif command == "share" :
@@ -59,6 +59,7 @@ def workbook(request, workbook_id=0):
 
     elif request.method   == "GET" :
         workbook            = Workbook.objects.get(id=workbook_id)
+        workbook.owner       = workbook.get_owner()
         workbook.worksheets = workbook.get_worksheets();
         workbook.shares     = workbook.get_shares()
 

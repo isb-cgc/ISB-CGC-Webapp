@@ -119,6 +119,7 @@ class Workbook(models.Model):
     def get_shares(self):
         return self.workbook_perms_set.filter(perm=Workbook_Perms.READER)
 
+
 class Workbook_Last_View(models.Model):
     workbook = models.ForeignKey(Workbook, blank=False)
     user = models.ForeignKey(User, null=False, blank=False)

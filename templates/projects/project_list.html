@@ -86,7 +86,8 @@
                     </tbody>
                 </table>
                 {% else %}
-                <p>You don't have any saved projects yet</p>
+                <p class="center space-top-10">You don't have any saved projects yet</p>
+                <p class="center"><a href="{% url 'project_upload' %}" class="btn btn-default"><i class="fa fa-cloud-upload"></i>Upload Project Data</a></p>
                 {% endif %}
             </div>
             <div role="tabpanel" class="tab-pane" id="public-projects-list">
@@ -139,7 +140,7 @@
                     </tbody>
                 </table>
                 {% else %}
-                <p>There are no public projects available at the moment</p>
+                <p class="center space-top-10">There are no public projects available at the moment</p>
                 {% endif %}
             </div>
         </div>
