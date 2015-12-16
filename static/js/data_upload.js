@@ -620,6 +620,8 @@ require([
             } else {
                 errorMessage('Error submitting response' + res.message);
             }
+        }).fail(function () {
+            errorMessage('We had an error submitting the response. Please try again later');
         }).always(function () {
             $('#upload-button, #back-button').removeClass('disabled')
                 .siblings('.progress-message').addClass('hidden');
