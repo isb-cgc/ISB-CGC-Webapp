@@ -452,17 +452,25 @@ require([
         var hasErrors = validateSectionOne();
 
         var hasSampleBarcode = _.every(addedFiles, function (file) {
-            if(!file.processed)
-                return true;
+                if(!file.processed || !file.processed.columns)
+                    return true;
 
-            return 1 === _.reduce(file.processed.columns, function (n, col) {
-                    return !col.ignored && col.controlled && col.controlled.key == 'SampleBarcode' ? n + 1 : n;
-                }, 0);
-        });
+                return 1 === _.reduce(file.processed.columns, function (n, col) {
+                        return !col.ignored && col.controlled && col.controlled.key == 'SampleBarcode' ? n + 1 : n;
+                    }, 0);
+            }),
+            platformPipelineValid = _.every(addedFiles, function (file) {
+                return file.$columnsEl.find('.platform-field').val() && file.$columnsEl.find('.pipeline-field').val();
+            });
 
         if(!hasSampleBarcode) {
             hasErrors = true;
             errorMessage('All files must have a Sample Barcode column');
+        }
+
+        if(!platformPipelineValid) {
+            hasErrors = true;
+            errorMessage('All files must have a platform and a pipeline filled in');
         }
 
         return hasErrors;
