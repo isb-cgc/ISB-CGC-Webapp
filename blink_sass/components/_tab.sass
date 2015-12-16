@@ -73,4 +73,64 @@
     background-color: #FFF
     padding: 5px 10px
 
-.collpase.active
+.nav-tabs_excel
+    background-color: #fff
+    border-bottom: 1px solid darken($white, 15%)
+    border-radius: 0px
+    margin-left: 0px
+    text-transform: capitalize
+    height: 42px
+
+    > li
+        display: inline-block
+        border: 1px solid darken($white, 15%)
+        border-bottom: none
+        border-radius: 2px
+        height: 100%
+        position: relative
+        clear: both
+        vertical-align: top
+
+        &:after
+            content: ''
+            height: 3px
+            background: $isb-warning
+            width: 100%
+            position: absolute
+            left: 0
+            top: -1px
+            display: none
+
+        &:first-child
+            border-left: none
+
+        &.active
+            border-bottom: none
+            background: $white
+            height: 102%
+            border-top: 0
+            
+            &:after
+                display: block
+            > a
+                border-bottom: none
+                color: $isb-warning
+                background: $white
+            .dropdown-container > a
+                color: $isb-warning
+        
+        > a
+            color: $font-color
+            display: inline-block
+
+
+        .dropdown-container
+            display: inline-block
+            margin-right: 10px
+
+            > a
+                color: $font-color
+
+        .btn
+            background: transparent
+            margin-top: 3px

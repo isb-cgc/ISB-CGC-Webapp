@@ -2,141 +2,152 @@
 {% load staticfiles %}
 {% load custom_tags %}
 
-{% block header %}
-    <script type="text/javascript" src="{% static 'js/libs/jquery-1.11.1.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/libs/bootstrap.min.js' %}"></script>
-{% endblock %}
+{% block title %}Workbooks | ISB-CGC{% endblock %}}
+{% block extra_css_libs %}{% endblock %}
+{% block header %}{% endblock %}
+
+{% block link_page_name %}workbook_detail{% endblock %}
+{% block page_name %}workbook_detail{% endblock %}
 
 {% block page_header %}
+    <!--Workbook header-->
     <ol class="breadcrumb">
         <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
         <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
     </ol>
+    <h1 class="page-header">{{ workbook.name }}</h1>
+    <p>{{ workbook.description }}</p>
+    <ul class="page-action-group">
+        <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#edit-workbook-details-modal">Edit Details</button></li>
+        <li role="menuiem"><button class="btn btn-info" data-toggle="modal" data-target="#copy-workbook-modal">Duplicate</button></li>
+        <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#delete-workbook-modal">Delete</button></li>
+        <li class="separator"></li>
+        <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#share-workbook-modal">Share</button></li>
+        <li role="menuitem"><button class="btn btn-link" data-toggle="modal" data-target="#share-workbook-modal">Shared with ({{ workbook.shares | length }})</button></li>
+    </ul>
 {% endblock %}
 {% block content %}
 
-<div class="col-sm-12">
-    <!-- workbook header -->
-    <div style="margin:15px; margin-left:0px; margin-right:0px; padding:15px; background-color:#CECECE;">
-        <h1>{{ workbook.name }}</h1>
-        <p>{{ workbook.description }}</p>
-        <div>
-            <button class="btn btn-primary" data-toggle="modal" data-target="#edit-workbook-details-modal">Edit Details</button>
-            <button class="btn btn-primary" data-toggle="modal" data-target="#copy-workbook-modal">Duplicate</button>
-            <button class="btn btn-primary" data-toggle="modal" data-target="#delete-workbook-modal">Delete</button> |
-            <button class="btn btn-primary" data-toggle="modal" data-target="#share-workbook-modal">Share</button>
-            <a href="">Shared with ({{ workbook.shares | length }})</a>
-        </div>
-    </div>
+<div class="container">
+    <div class="panel panel-default">
+         <!-- tabs of worksheets -->
+        <ul class="nav nav-tabs_excel" id="worksheets">
+            <!-- for each worksheet in workbook -->
+            {% for worksheet in workbook.worksheets %}
+                 <li class="{% if forloop.counter == 1 %} active {% endif %} dropdown">
+                     <a href="#{{ worksheet.id }}" data-toggle="tab">{{ worksheet.name }}</a>
+                     <div class="dropdown-container">
+                         <a class="dropdown-toggle worksheet-drop" role="button" data-toggle="dropdown"><i class="fa fa-caret-down" ></i></a>
 
-    <!-- tabs of worksheets -->
-    <ul class="nav nav-tabs" id="worksheets">
-        <!-- for each worksheet in workbook -->
-        {% for worksheet in workbook.worksheets %}
-             <li class="{% if worksheet.id == 1 %} active {% endif %}">
-                 <a href="#{{ worksheet.id }}" data-toggle="tab">{{ worksheet.name }}</a>
-                 <span class="dropdown" style="float: right; margin-top: -30px;">
-                     <i class="dropdown-toggle worksheet-drop fa fa-caret-down" role="button" data-toggle="dropdown"></i>
-                     <ul class="dropdown-menu">
-                        {% if workbook.owner.id != user.id %}
-                            <li data-toggle="modal" role="button" data-target="#edit-worksheet-details-modal-{{ worksheet.id }}">Edit details</li>
-                            <li data-toggle="modal" role="button" data-target="#copy-worksheet-modal-{{ worksheet.id }}">Duplicate</li>
-                            {% if workbook.worksheet_list|length > 1 %}
-                                <li data-toggle="modal" role="button" data-target="#delete-worksheet-modal-{{ worksheet.id }}">Delete</li>
+                         <ul class="dropdown-menu">
+                            {% if workbook.owner.id != request.user.id %}
+                                <li data-toggle="modal" role="button" data-target="#edit-worksheet-details-modal-{{ worksheet.id }}">Edit details</li>
+                                <li data-toggle="modal" role="button" data-target="#copy-worksheet-modal-{{ worksheet.id }}">Duplicate</li>
+                                {% if workbook.worksheets|length > 1 %}
+                                    <li data-toggle="modal" role="button" data-target="#delete-worksheet-modal-{{ worksheet.id }}">Delete</li>
+                                {% endif %}
                             {% endif %}
-                        {% endif %}
-                     </ul>
-                 </span>
-             </li>
-        {% endfor %}
-        <li>
-            <form id="worksheet_create_form" method="POST" action="{% url 'worksheet_create' workbook_id=workbook.id %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-default">
-                    <i class="fa fa-plus"></i>
-                </button>
-            </form>
-        </li>
-    </ul>
-    <div class="tab-content">
-         <!-- for each worksheet in workbook -->
-         {% for worksheet in workbook.worksheets %}
-             <div class="tab-pane fade {% if worksheet.id == 1 %} in active{% endif %}" id="{{ worksheet.id }}" >
-                 <!-- worksheet description -->
-                 <div style="padding:5px; height:50px">
-                    {{ worksheet.description }}
-                    <button class="show-flyout btn btn-primary" title="Show Comments">comments ({{ worksheet.comments | length }})</button>
-                 </div>
-
-                 <div style="height:600px">
-                    <!-- worksheet data source pane -->
-                    <div id="source_pane" style="border-right-style:solid; float: left; height:100%; border-right-width:1px; padding:5px; width:200px; display:inline-block">
-                        <h4>Source Data <i class="fa fa-arrow-left" style="float:right; cursor:pointer;"></i></h4>
-                        <div style="padding:5px; background-color:#CECECE; margin-bottom:5px">
-                            <h4> <a href="{% url 'genes' %}"> Genes</a></h4>
-                            {% for gene in worksheet.gene_list %}
-                                <div>{{ gene.name }}</div>
-                            {% endfor %}
-                        </div>
-                        <div style="padding:5px; background-color:#CECECE;">
-                            <h4><a href="{% url 'variables'  %}">Variables</a></h4>
-                            {% for variable in worksheet.variable_list %}
-                                <div>{{ variable.name }}</div>
-                            {% endfor %}
-                        </div>
-                        <div style="padding:5px; background-color:#CECECE;">
-                            <h4><a href="{% url 'cohort_list'  %}">Cohorts</a></h4>
-                            {% for cohort in worksheet.cohort_list %}
-                                <div>{{ cohort.name }}</div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <!-- end worksheet data source section -->
-
-                    <!-- worksheet analysis section -->
-                    <div style="margin-right:200px; margin-left:200px; padding:5px">
-                        Analysis Type
-                        <div class="dropdown" style="margin:5px; margin-left:0px; margin-right:0px; padding:10px; background-color:#CECECE;">
-                            <select class="form-control">
-                                <option>-- select one --</option>
-                                <option>Mutations</option>
-                                <option>SeqPeek</option>
-                                <option>Other</option>
-                            </select>
-                        </div>
-                    </div>
-                    <!-- end worksheet analysis section -->
-
-                    <!-- worksheet comment section -->
-                    <div style="border-left-style:solid; height:100%; border-left-width:1px; padding:5px; width:200px; float:right" class="fly-out comment-flyout comments">
-                        <div class="flyout-heading">
-                            <h4>Comments <a role="button" class="hide-flyout" aria-label="Hide Flyout"><i class="fa fa-times"></i></a></h4>
-                        </div>
-                        <div class="flyout-body">
-                            {% for comment in worksheet.comments %}
-                                <h5 class="comment-username">{{ comment.user.first_name }} {{ comment.user.last_name }}</h5>
-                                <p class="comment-date">{{ comment.date_created }}</p>
-                                <p class="comment-content">{{ comment.content }}</p>
-                            {% endfor %}
-                        </div>
-                        <div class="flyout-footer">
-                            <form class="add_worksheet_comment_form">
-                                {% csrf_token %}
-                                <label for="content">Add Comment</label>
-                                <textarea id="content" class="form-control space-bottom-10" name="content"></textarea>
-                                <button class="btn btn-primary save-comment-btn" type="submit">Comment</button>
-                                <input type="hidden" id="workbook_id_input" value="{{ workbook.id }}"/>
-                                <input type="hidden" id="worksheet_id_input" value="{{ worksheet.id }}"/>
-                            </form>
-                        </div>
+                         </ul>
                      </div>
-                     <!-- end worksheet comment section -->
-                 </div>
+                 </li>
+            {% endfor %}
+            <li>
+                <form id="worksheet_create_form" method="POST" action="{% url 'worksheet_create' workbook_id=workbook.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-symbol">
+                        <i class="fa fa-plus"></i>
+                    </button>
+                </form>
+            </li>
+        </ul>
+        <div class="tab-content">
+             <!-- for each worksheet in workbook -->
+             {% for worksheet in workbook.worksheets %}
+                 <div class="tab-pane fade {% if forloop.counter == 1 %} in active{% endif %}" id="{{ worksheet.id }}" >
+                     <!-- worksheet description -->
+                     <div style="padding:5px; height:50px">
+                        <button class="show-flyout btn btn-info pull-right" title="Show Comments">comments ({{ worksheet.comments | length }})</button>
+                     </div>
 
-                 {% include "workbooks/worksheet_modals.html" with worksheet=worksheet %}
-            </div>
-         {% endfor %}
-    </div><!-- end content -->
+                     <div style="height:600px">
+                        <!-- worksheet data source pane -->
+                        <div id="source_pane" style="border-right-style:solid; float: left; height:100%; border-right-width:1px; padding:5px; width:200px; display:inline-block">
+                            <h4>Source Data <i class="fa fa-arrow-left" style="float:right; cursor:pointer;"></i></h4>
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <div class="list-group-item__heading">
+                                        <a href="{% url 'genes' %}"> Genes</a>
+                                    </div>
+                                    {% if worksheet.gene_list %}
+                                    <div class="list-group-item__body">
+                                        {% for gene in worksheet.gene_list %}
+                                            <li class="list-group-item">{{ gene.name }}</li>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </li>
+                            </ul>
+
+                            <div>
+                                <h4><a href="{% url 'variables'  %}">Variables</a></h4>
+                                {% for variable in worksheet.variable_list %}
+                                    <div>{{ variable.name }}</div>
+                                {% endfor %}
+                            </div>
+                            <div>
+                                <h4><a href="{% url 'cohort_list'  %}">Cohorts</a></h4>
+                                {% for cohort in worksheet.cohort_list %}
+                                    <div>{{ cohort.name }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <!-- end worksheet data source section -->
+
+                        <!-- worksheet analysis section -->
+                        <div style="margin-right:200px; margin-left:200px; padding:5px">
+                            Analysis Type
+                            <div class="dropdown" style="margin:5px; margin-left:0px; margin-right:0px; padding:10px; background-color:#CECECE;">
+                                <select class="form-control">
+                                    <option>-- select one --</option>
+                                    <option>Mutations</option>
+                                    <option>SeqPeek</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <!-- end worksheet analysis section -->
+
+                        <!-- worksheet comment section -->
+                        <div style="border-left-style:solid; height:100%; border-left-width:1px; padding:5px; width:200px; float:right" class="fly-out comment-flyout comments">
+                            <div class="flyout-heading">
+                                <h4>Comments <a role="button" class="hide-flyout" aria-label="Hide Flyout"><i class="fa fa-times"></i></a></h4>
+                            </div>
+                            <div class="flyout-body">
+                                {% for comment in worksheet.comments %}
+                                    <h5 class="comment-username">{{ comment.user.first_name }} {{ comment.user.last_name }}</h5>
+                                    <p class="comment-date">{{ comment.date_created }}</p>
+                                    <p class="comment-content">{{ comment.content }}</p>
+                                {% endfor %}
+                            </div>
+                            <div class="flyout-footer">
+                                <form class="add_worksheet_comment_form">
+                                    {% csrf_token %}
+                                    <label for="content">Add Comment</label>
+                                    <textarea id="content" class="form-control space-bottom-10" name="content"></textarea>
+                                    <button class="btn btn-primary save-comment-btn" type="submit">Comment</button>
+                                    <input type="hidden" id="workbook_id_input" value="{{ workbook.id }}"/>
+                                    <input type="hidden" id="worksheet_id_input" value="{{ worksheet.id }}"/>
+                                </form>
+                            </div>
+                         </div>
+                         <!-- end worksheet comment section -->
+                     </div>
+
+                     {% include "workbooks/worksheet_modals.html" with worksheet=worksheet %}
+                </div>
+             {% endfor %}
+        </div><!-- end content -->
+    </div>
 </div>
 
 {% include "workbooks/workbook_modals.html" %}
