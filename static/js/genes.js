@@ -53,11 +53,8 @@ require([
     }).on('tokenfield:createdtoken', function (event) {
         //  Check whether the user enter a repetitive token
         //  If it is a repetitive token, show a message instead
-       console.log(event);
-        console.log($(this).tokenfield('getTokens'));
         var existingGenes = event.currentTarget.value.split(', ');
         var parentHolder = $('#tokenfield-holder');
-        console.log(existingGenes);
         $.each(existingGenes, function (index, gene) {
             if(gene.toUpperCase() === event.attrs.value.toUpperCase()){
                 $(event.relatedTarget).addClass('invalid repeat');
@@ -68,13 +65,23 @@ require([
         //  check whether user enter a valid gene name
         var isValid = true;
         if(_.indexOf(genelist, event.attrs.value.toUpperCase()) < 0) {
-            $(event.relatedTarget).addClass('invalid');
+            $(event.relatedTarget).addClass('invalid error');
             $('.helper-text__invalid').show();
         }
-    }).on('tokenfield:edittoken', function(event){
 
-    }).on('tokenfield:removetoken', function(event){
-
+        if($('div.token.invalid.error').length < 1){
+            $('.helper-text__invalid').hide();
+        }
+        if($('div.token.invalid.repeat').length < 1){
+            $('.helper-text__repeat').hide();
+        }
+    }).on('tokenfield:removedtoken', function(event){
+        if($('div.token.invalid.error').length < 1){
+            $('.helper-text__invalid').hide();
+        }
+        if($('div.token.invalid.repeat').length < 1){
+            $('.helper-text__repeat').hide();
+        }
     });
 
     // Clear all entered genes list on click

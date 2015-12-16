@@ -1,13 +1,13 @@
 .tokenfield
   padding: 10px
   .token
-    border-radius: $border-radius-base
+    @extend .label
+    @extend .label-default
     margin: -1px 5px 3px 0px
-    padding: 2px
+    padding: 3px 8px
     border: none
-    background: $isb-primary
-    color: $white
     text-transform: uppercase
+    height: auto
     &.invalid
       color: $isb-primary
       .close
@@ -15,8 +15,9 @@
       &.repeat
         background: $isb-success
         border: none
+        border-radius: 15px
     .close
-      color: $white
+      color: $isb-info
       opacity: 0.4
       vertical-align: middle
       line-height: 1
