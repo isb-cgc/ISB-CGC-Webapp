@@ -150,7 +150,6 @@ Returns page that has user details
 @login_required
 def user_detail(request, user_id):
     if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
-    print >> sys.stderr, '\nremote_addr: ' + str(request.META['REMOTE_ADDR']) + '\n\n'
 
     if int(request.user.id) == int(user_id):
 

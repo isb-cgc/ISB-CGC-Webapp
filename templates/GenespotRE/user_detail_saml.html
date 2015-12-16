@@ -27,10 +27,7 @@
         <hr>
         <p>
             Congratulations, {{ user_details.NIH_username }}! You now have access to ISB-CGC controlled access TCGA data until
-            {{ user_details.NIH_assertion_expiration|localtime }}
-            {% if TIMEZONE != "" and TIMEZONE != None %}
-                in {{ TIME_ZONE }} time.
-            {% endif %}
+            <p id="NIH_expiration">{{ user_details.NIH_assertion_expiration|safe }} GMT</p>
         </p>
 
         <a href="#">How to Access Controlled-Access Data</a>
@@ -43,5 +40,16 @@
             <a data-toggle="modal" data-target="#bucket-contents-modal">View bucket contents</a>
         </p>
     {% endif %}
-
+    <script type="text/javascript">
+        var x = new Date();
+        var currentTimeZoneOffsetInHours = x.getTimezoneOffset() / 60;
+        var NIH_expiration_client_time = new Date("{{ user_details.NIH_assertion_expiration }}",
+                "{{ user_details.last_login.month }}",
+                "{{ user_details.last_login.day }}",
+                "{{ user_details.last_login.hour }}" - currentTimeZoneOffsetInHours,
+                "{{ user_details.last_login.minute }}",
+                "{{ user_details.last_login.second }}"
+        );
+        document.getElementById('NIH_expiration').innerHTML = NIH_expiration_client_time;
+    </script>
 {%  endblock %}

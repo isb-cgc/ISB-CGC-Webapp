@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
+{% load custom_tags %}
 {% load tz %}
-{% get_current_timezone as TIME_ZONE %}
 
 {% comment %}
 
@@ -22,7 +22,7 @@
 {% endcomment %}
 
 {% block header %}
-{#    <script type="text/javascript" src="{% static 'js/user_details.js' %}"></script>#}
+
 {% endblock %}
 
 {% block link_page_name %}user-details{% endblock %}
@@ -57,12 +57,9 @@
 
                     <tr>
                         <td>Last Logged In</td>
-                        <td>{{ user_details.last_login|localtime }} in {{ TIME_ZONE }} time.</td>
+                        <td id="last_login">{{ user_details.last_login|safe }} GMT</td>
                     </tr>
-{#                    <tr>#}
-{#                        <td>Date Joined</td>#}
-{#                        <td>{{ user_details.date_joined|localtime }}</td>#}
-{#                    </tr>#}
+
                 </table>
             </div>
         </div>
@@ -184,7 +181,18 @@
             </div>
         </div>
     </div>
-
+    <script type="text/javascript">
+        var x = new Date();
+        var currentTimeZoneOffsetInHours = x.getTimezoneOffset() / 60;
+        var last_login_client_time = new Date("{{ user_details.last_login.year }}",
+                "{{ user_details.last_login.month }}",
+                "{{ user_details.last_login.day }}",
+                "{{ user_details.last_login.hour }}" - currentTimeZoneOffsetInHours,
+                "{{ user_details.last_login.minute }}",
+                "{{ user_details.last_login.second }}"
+        );
+        document.getElementById('last_login').innerHTML = last_login_client_time;
+    </script>
 {% endblock %}
 
 {% block js_file %}{% static 'js/user_details.js' %}{% endblock %}
