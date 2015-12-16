@@ -303,6 +303,8 @@ class Cohort_Endpoints_API(remote.Service):
                 db.close()
                 return CohortsList(items=data, count=len(data))
             except (IndexError, TypeError):
+                if cursor: cursor.close()
+                if db: db.close()
                 raise endpoints.NotFoundException("User %s's cohorts not found." % (request.id,))
         else:
             raise endpoints.NotFoundException("Authentication failed.")
@@ -351,6 +353,8 @@ class Cohort_Endpoints_API(remote.Service):
                 cursor.close()
                 db.close()
             except (IndexError, TypeError):
+                if cursor: cursor.close()
+                if db: db.close()
                 raise endpoints.NotFoundException("Cohort {} not found.".format(cohort_id))
 
             patient_query_str = 'select cohorts_patients.patient_id ' \
@@ -400,6 +404,8 @@ class Cohort_Endpoints_API(remote.Service):
                                                  sample_count=len(sample_data),
                                                  cohort_id=int(cohort_id))
             except (IndexError, TypeError):
+                if cursor: cursor.close()
+                if db: db.close()
                 raise endpoints.NotFoundException("Cohort %s not found." % (request.cohort_id),)
 
         else:
@@ -517,6 +523,10 @@ class Cohort_Endpoints_API(remote.Service):
             db.close()
             return PatientDetails(clinical_data=item, samples=sample_data, aliquots=aliquot_data)
         except (IndexError, TypeError), e:
+            if clinical_cursor: clinical_cursor.close()
+            if sample_cursor: sample_cursor.close()
+            if aliquot_cursor: aliquot_cursor.close()
+            if db: db.close()
             raise endpoints.NotFoundException("Patient %s not found." % (str(request.patient_barcode),))
 
 
@@ -666,6 +676,11 @@ class Cohort_Endpoints_API(remote.Service):
 
         except (IndexError, TypeError), e:
             logger.warn(e)
+            if biospecimen_cursor: biospecimen_cursor.close()
+            if aliquot_cursor: aliquot_cursor.close()
+            if patient_cursor: patient_cursor.close()
+            if data_cursor: data_cursor.close()
+            if db: db.close()
             raise endpoints.NotFoundException("Sample %s not found." % (str(request.sample_barcode),))
 
 
@@ -740,10 +755,14 @@ class Cohort_Endpoints_API(remote.Service):
                         bucket_name = 'gs://360ee3ad-mock-mock-mock-52f9a5e7f99a'
                     datafilenamekeys.append("{}{}".format(bucket_name, file_path))
 
+            cursor.close()
+            db.close()
             return DataFileNameKeyList(datafilenamekeys=datafilenamekeys, count=len(datafilenamekeys))
 
         except (IndexError, TypeError), e:
             logger.warn(e)
+            if cursor: cursor.close()
+            if db: db.close()
             raise endpoints.NotFoundException("Sample %s not found." % (str(request.sample_barcode),))
 
 
@@ -811,6 +830,9 @@ class Cohort_Endpoints_API(remote.Service):
                     sample_barcodes.append(row['SampleBarcode'])
 
             except (IndexError, TypeError), e:
+                if patient_cursor: patient_cursor.close()
+                if sample_cursor: sample_cursor.close()
+                if db: db.close()
                 logger.warn(e)
                 # todo: more informative message
                 raise endpoints.NotFoundException("Error retrieving samples or patients")
