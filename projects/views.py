@@ -7,6 +7,7 @@ from django.conf import settings
 from django.http import JsonResponse, HttpResponseNotFound
 from django.conf import settings
 from django.db import connection
+from django.core.mail import send_mail
 from data_upload.models import UserUpload, UserUploadedFile
 from projects.models import User_Feature_Definitions, Project
 
@@ -43,9 +44,28 @@ def project_detail(request, project_id=0):
     return render(request, template, context)
 
 @login_required
+def request_project(request):
+    send_mail('User has requested a Google Project', '''
+The user %s has requested a new Google Project be created. Here is their message:
+
+%s
+    ''' % (request.user.email, request.POST['message']), request.user.email, [settings.REQUEST_PROJECT_EMAIL])
+
+    template = 'projects/project_request.html'
+    context = {
+        'requested': True
+    }
+    return render(request, template, context)
+
+@login_required
 def project_upload(request):
-    template = 'projects/project_upload.html'
-    context = {}
+    if not hasattr(request.user, 'googleproject'):
+        template = 'projects/project_request.html'
+    else:
+        template = 'projects/project_upload.html'
+    context = {
+        'requested': False
+    }
     return render(request, template, context)
 
 def filter_column_name(original):
@@ -171,6 +191,8 @@ def upload_files(request):
                     controlled = None
                     if 'controlled' in column:
                         controlled = column['controlled']['key']
+                    else:
+                        controlled = filter_column_name(column['name'])
 
                     fileJSON['COLUMNS'].append({
                         "NAME"   : column['name'],
