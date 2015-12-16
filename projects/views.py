@@ -171,6 +171,8 @@ def upload_files(request):
                     controlled = None
                     if 'controlled' in column:
                         controlled = column['controlled']['key']
+                    else:
+                        controlled = filter_column_name(column['name'])
 
                     fileJSON['COLUMNS'].append({
                         "NAME"   : column['name'],
