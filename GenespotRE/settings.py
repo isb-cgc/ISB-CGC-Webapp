@@ -40,6 +40,8 @@ MVM_ON = True
 ADMINS = ()
 MANAGERS = ADMINS
 
+REQUEST_PROJECT_EMAIL = secret_settings.get('REQUEST_PROJECT_EMAIL')
+
 PROJECT_ID = secret_settings.get('PROJECT_ID')
 BQ_PROJECT_ID = secret_settings.get('BQ_PROJECT_ID')
 IGV_PROJECT_ID = secret_settings.get('IGV_PROJECT_ID')
