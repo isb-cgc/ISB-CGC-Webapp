@@ -96,12 +96,13 @@
                             <a href="#">View example</a></p>
                     </div>
                     <div id="data-upload-forms">
+                        <p>Please refer to the <a href="">system data dictionary</a> for proper naming and data type conventions.</p>
                         <button type="button" class="upload-file-button btn btn-default">Select File</button>
                         <input type="file" class="hidden upload-file-field" multiple>
                         <table class="table table-striped" id="file-list-table">
                             <tr>
                                 <th>Name</th>
-                                <th>Type</th>
+                                <th class="low-level-hide">Type</th>
                                 <th></th>
                             </tr>
                             <tr>
@@ -114,22 +115,22 @@
                 </section>
             </div>
             <div class="panel-footer">
-                <button class="btn btn-default" id="next-btn">Next</button>
+                <button class="btn btn-primary text-right" id="next-btn">Next <i class="fa fa-chevron-right"></i></button>
+                <span class="hidden progress-message"><i class="fa fa-spin fa-circle-o-notch"></i> Processing</span>
             </div>
         </form>
     </section>
     <section class="panel panel-default hidden" id="second-section">
         <div class="panel-heading">
-            <h3 class="panel-title">Review Data Fields</h3>
+            <h3 class="panel-title">Review Files</h3>
         </div>
         <div class="panel-body" id="file-process-list">
-            <p>Below are all the fields we detected for the selected files. Please verify the field names and data types are correct.</p>
             <p>Please refer to the <a href="">system data dictionary</a> for proper naming and data type conventions.</p>
-
         </div>
         <div class="panel-footer">
-            <button class="btn btn-default" id="back-button"><i class="fa fa-arrow-left"></i> Back</button>
+            <button class="btn btn-default" id="back-button"><i class="fa fa-chevron-left"></i> Back</button>
             <button class="btn btn-primary" id="upload-button"><i class="fa fa-cloud-upload"></i> Upload Data</button>
+            <span class="hidden progress-message"><i class="fa fa-spin fa-circle-o-notch"></i> Uploading</span>
         </div>
     </section>
 </div>

@@ -10,6 +10,17 @@ storage_system = FileSystemStorage()
 if settings.USE_CLOUD_STORAGE is not 'False':
     storage_system = cloud_file_storage.CloudFileStorage()
 
+def get_user_bucket(instance, filename):
+    bucket = ''
+    if settings.USE_CLOUD_STORAGE is not 'False':
+        if not instance.bucket:
+            bucket = settings.GCLOUD_BUCKET
+        else:
+            bucket = instance.bucket
+        bucket += '/'
+
+    return bucket + filename
+
 class UserUpload(models.Model):
     id = models.AutoField(primary_key=True)
     owner = models.ForeignKey(User, null=False, blank=False)
@@ -19,7 +30,8 @@ class UserUpload(models.Model):
 class UserUploadedFile(models.Model):
     id = models.AutoField(primary_key=True)
     upload = models.ForeignKey(UserUpload)
-    file = models.FileField(storage=storage_system)
+    bucket = models.CharField(max_length=155, null=True)
+    file = models.FileField(storage=storage_system, upload_to=get_user_bucket)
 
 class FieldDataType(models.Model):
     id = models.AutoField(primary_key=True)

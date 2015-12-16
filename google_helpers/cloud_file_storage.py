@@ -18,24 +18,33 @@ class CloudFileStorage(Storage):
         self.storage = storage_service.get_storage_resource()
 
     def _open(self, name, mode):
-        return self.storage.objects().get(bucket=settings.GCLOUD_BUCKET, object=name).execute()
+        filepath = name.split('/')
+        bucket = filepath.pop(0)
+        name = '/'.join(filepath)
+        return self.storage.objects().get(bucket=bucket, object=name).execute()
 
     def _save(self, name, content):
         media = http.MediaInMemoryUpload(content)
+        filepath = name.split('/')
+        bucket = filepath.pop(0)
+        name = '/'.join(filepath)
         self.storage.objects().insert(
-            bucket=settings.GCLOUD_BUCKET,
+            bucket=bucket,
             name=name,
             media_body=media
         ).execute()
-        return name
+        return bucket + '/' + name
 
     def get_available_name(self, name):
         name = name.replace("./", "")
+        filepath = name.split('/')
+        bucket = filepath.pop(0)
+        name = '/'.join(filepath)
         time = datetime.now().strftime('%Y%m%d-%H%M%S%f')
         random_str = ''.join(random.SystemRandom().choice(string.ascii_letters) for _ in range(8))
         name = time + '-' + random_str + '-' + name
         name = settings.MEDIA_FOLDER + name
-        return name
+        return bucket + '/' + name
 
     def deconstruct(self):
         return ('google_helpers.cloud_file_storage.CloudFileStorage', [], {})
