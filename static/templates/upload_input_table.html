@@ -27,20 +27,13 @@
                             <option value="float" <%- !column.controlled && column.type == 'float' ? 'selected' : '' %>>Decimal</option>
                             <option value="string" <%- !column.controlled && (column.type == 'int' || column.type == 'float') ? '' : 'selected' %>>Categorical</option>
                             <optgroup label="Barcodes">
-                                <option value="sample" <%- column.controlled && column.controlled.key == 'sample' ? 'selected' : '' %>>Sample Barcode</option>
-                                <option value="participant" <%- column.controlled && column.controlled.key == 'participant' ? 'selected' : '' %>>Participant Barcode</option>
+                                <option value="sample" <%- column.controlled && column.controlled.key == 'SampleBarcode' ? 'selected' : '' %>>Sample Barcode</option>
+                                <option value="participant" <%- column.controlled && column.controlled.key == 'ParticipantBarcode' ? 'selected' : '' %>>Participant Barcode</option>
                             </optgroup>
-                            <optgroup label="Dictionary Datatypes" disabled>
-                                <option value="age">Age</option>
-                                <option value="gender">Gender</option>
-                                <option value="gene">Gene</option>
-                                <option value="hist">Histological Grade</option>
-                                <option value="stage">Pathological Stage</option>
-                                <option value="resid">Residual Tumor</option>
-                                <option value="sample">Sample Type</option>
-                                <option value="smoking">Smoking History</option>
-                                <option value="tumor">Tumor Status</option>
-                                <option value="site">Tumor Tissue Site</option>
+                            <optgroup label="Dictionary Datatypes">
+                                <% _.each(dictionary, function (item) { %>
+                                <option value="<%- item.key %>"><%- item.displayName %></option>
+                                <% }) %>
                             </optgroup>
                         </select>
                     </td>
