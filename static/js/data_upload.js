@@ -45,15 +45,18 @@ require([
         addedFiles = [];
 
     function changeUploadGroup() {
-        var val = inputGroup.filter(':checked').val();
+        var val = inputGroup.filter(':checked').val(),
+            flt = $('#file-list-table');
 
         if (val === 'high') {
             hleCheckbox.removeAttr('disabled').closest('.checkbox').removeClass('disabled');
             changeExtendSelectBox();
             $('.low-level-message').addClass('hidden');
+            flt.removeClass('low-level-data');
         } else {
             hleCheckbox.closest('.checkbox').addClass('disabled').find('input, select').attr('disabled', true);
             $('.low-level-message').removeClass('hidden');
+            flt.addClass('low-level-data');
         }
     }
 
@@ -300,7 +303,6 @@ require([
                 fileDataTypes[type] = 0;
 
             fileDataTypes[type]++;
-            //addedFile.datatype = type;
         });
 
         if( (tabSet == 'new' && !$.trim( $('#project-name').val() )) ||
@@ -328,9 +330,9 @@ require([
             errorMessage('You must add at least 1 file to upload for processing');
         }
 
-        if(fileDataTypes['NOT SELECTED']) {
+        if(fileDataTypes['NOT SELECTED'] && $('.data-radio:checked').val() === 'high') {
             hasErrors = true;
-            errorMessage('You must select a file data type for every file');
+            errorMessage('You must select a file data type for every file when uploading high level data');
         }
 
         return !hasErrors;
@@ -371,8 +373,13 @@ require([
             return;
         }
 
+        var fileGroupType = inputGroup.filter(':checked').val();
         _.each(addedFiles, function (addedFile) {
-            addedFile.datatype = addedFile.$el.find('select').val();
+            if(fileGroupType === 'high') {
+                addedFile.datatype = addedFile.$el.find('select').val();
+            } else {
+                addedFile.datatype = 'low_level';
+            }
         });
 
         // Process Files

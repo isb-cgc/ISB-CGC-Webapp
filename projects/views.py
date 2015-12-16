@@ -51,7 +51,7 @@ def project_upload(request):
 def filter_column_name(original):
     return re.sub(r"[^a-zA-Z]+", "_", original.lower())
 
-def create_metadata_tables(user, study, columns):
+def create_metadata_tables(user, study, columns, skipSamples=False):
     cursor = connection.cursor()
 
     cursor.execute("""
@@ -66,6 +66,9 @@ def create_metadata_tables(user, study, columns):
           platform VARCHAR(200)
         )
     """, [user.id, study.id])
+
+    if skipSamples:
+        return
 
     feature_table_sql = """
         CREATE TABLE IF NOT EXISTS user_metadata_samples_%s_%s (
@@ -183,7 +186,9 @@ def upload_files(request):
 
             config['FILES'].append(fileJSON)
 
-        create_metadata_tables(request.user, study, all_columns)
+        # Skip *_samples table for low level data
+        create_metadata_tables(request.user, study, all_columns, request.POST['data-type'] == 'low')
+
         request.user.user_data_tables_set.create(
             study=study,
             metadata_data_table=config['USER_METADATA_TABLES']['METADATA_DATA'],

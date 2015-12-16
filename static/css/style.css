@@ -1283,6 +1283,8 @@ nav {
 
 #data-upload-forms #file-list-table {
   margin-top: 10px; }
+  #data-upload-forms #file-list-table.low-level-data .low-level-hide {
+    display: none; }
 
 .column-definitions {
   margin: 25px 15px;
