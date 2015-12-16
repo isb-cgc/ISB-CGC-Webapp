@@ -1,10 +1,10 @@
 <div class="column-definitions" data-file="<%- uid %>">
     <h4>File <%- file.name %></h4>
     <label>
-        Platform <input type="text" name="platform" class="form-control platform-field" placeholder="Platform Name" required>
+        Platform <input type="text" name="platform" class="form-control platform-field" required>
     </label>
     <label>
-        Pipeline <input type="text" name="pipline" class="form-control pipeline-field" placeholder="Pipeline Used" required>
+        Pipeline <input type="text" name="pipline" class="form-control pipeline-field" required>
     </label>
     <% if(processed) { %>
     <p>Below are all the fields we detected for the selected file. Please verify the field names and data types are correct.</p>
