@@ -72,41 +72,38 @@ def filter_column_name(original):
     return re.sub(r"[^a-zA-Z]+", "_", original.lower())
 
 def create_metadata_tables(user, study, columns, skipSamples=False):
-    cursor = connection.cursor()
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS user_metadata_%s_%s (
+              id INTEGER UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+              study_id INTEGER UNSIGNED,
+              sample_barcode VARCHAR(200),
+              file_path VARCHAR(200),
+              file_name VARCHAR(200),
+              data_type VARCHAR(200),
+              pipeline VARCHAR(200),
+              platform VARCHAR(200)
+            )
+        """, [user.id, study.id])
 
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS user_metadata_%s_%s (
-          id INTEGER UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-          study_id INTEGER UNSIGNED,
-          sample_barcode VARCHAR(200),
-          file_path VARCHAR(200),
-          file_name VARCHAR(200),
-          data_type VARCHAR(200),
-          pipeline VARCHAR(200),
-          platform VARCHAR(200)
-        )
-    """, [user.id, study.id])
+        if not skipSamples:
+            feature_table_sql = """
+                CREATE TABLE IF NOT EXISTS user_metadata_samples_%s_%s (
+                  id INTEGER UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                  participant_barcode VARCHAR(200),
+                  sample_barcode VARCHAR(200),
+                  has_mrna BOOLEAN,
+                  has_mirna BOOLEAN,
+                  has_protein BOOLEAN,
+                  has_meth BOOLEAN
+            """
+            feature_table_args = [user.id, study.id]
 
-    if skipSamples:
-        return
+            for column in columns:
+                feature_table_sql += ", " + filter_column_name(column['name']) + " " + column['type']
 
-    feature_table_sql = """
-        CREATE TABLE IF NOT EXISTS user_metadata_samples_%s_%s (
-          id INTEGER UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-          participant_barcode VARCHAR(200),
-          sample_barcode VARCHAR(200),
-          has_mrna BOOLEAN,
-          has_mirna BOOLEAN,
-          has_protein BOOLEAN,
-          has_meth BOOLEAN
-    """
-    feature_table_args = [user.id, study.id]
-
-    for column in columns:
-        feature_table_sql += ", " + filter_column_name(column['name']) + " " + column['type']
-
-    feature_table_sql += ")"
-    cursor.execute(feature_table_sql, feature_table_args)
+            feature_table_sql += ")"
+            cursor.execute(feature_table_sql, feature_table_args)
 
 
 
