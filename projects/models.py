@@ -102,18 +102,19 @@ class Study_Last_View(models.Model):
     user = models.ForeignKey(User, null=False, blank=False)
     last_view = models.DateTimeField(auto_now_add=True, auto_now=True)
 
-class User_Data_Tables(models.Model):
-    metadata_data_table = models.CharField(max_length=200)
-    metadata_samples_table = models.CharField(max_length=200)
-    user = models.ForeignKey(User, null=False)
-    study = models.ForeignKey(Study, null=False)
-    data_upload = models.ForeignKey(UserUpload, null=True, blank=True)
-    google_project = models.ForeignKey(GoogleProject)
-    google_bucket = models.ForeignKey(Bucket)
-
 
 class User_Feature_Definitions(models.Model):
     study = models.ForeignKey(Study, null=False)
     feature_name = models.CharField(max_length=200)
     bq_map_id = models.CharField(max_length=200)
     is_numeric = models.BooleanField(default=False)
+
+class User_Data_Tables(models.Model):
+    metadata_data_table = models.CharField(max_length=200)
+    metadata_samples_table = models.CharField(max_length=200)
+    feature_definition_table = models.CharField(max_length=200,default=User_Feature_Definitions._meta.db_table)
+    user = models.ForeignKey(User, null=False)
+    study = models.ForeignKey(Study, null=False)
+    data_upload = models.ForeignKey(UserUpload, null=True, blank=True)
+    google_project = models.ForeignKey(GoogleProject)
+    google_bucket = models.ForeignKey(Bucket)
