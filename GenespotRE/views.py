@@ -46,6 +46,9 @@ from visualizations.models import SavedViz, Viz_Perms
 from cohorts.models import Cohort, Cohort_Perms
 from accounts.models import NIH_User
 
+from allauth.socialaccount.models import SocialAccount
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
+
 
 debug = settings.DEBUG
 logger = logging.getLogger(__name__)
@@ -140,8 +143,6 @@ def user_list(request):
     return render(request, 'GenespotRE/user_list.html', {'request': request,
                                                           'users': users})
 
-from allauth.socialaccount.models import SocialAccount
-from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 
 '''
 Returns page that has user details
@@ -149,6 +150,7 @@ Returns page that has user details
 @login_required
 def user_detail(request, user_id):
     if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+
     if int(request.user.id) == int(user_id):
 
         user = User.objects.get(id=user_id)
@@ -181,7 +183,7 @@ def user_detail(request, user_id):
                        'NIH_AUTH_ON': settings.NIH_AUTH_ON
                        })
     else:
-        return render(request, '500.html')
+        return render(request, '403.html')
 
 
 @login_required
