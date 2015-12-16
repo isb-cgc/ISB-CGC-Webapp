@@ -1414,7 +1414,7 @@ class Meta_Endpoints_API(remote.Service):
                 cohort_perm = Cohort_Perms.objects.get(cohort_id=cohort_id, user_id=user_id)
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
                 logger.warn(e)
-                raise endpoints.NotFoundException("%s does not have permission to view cohort %d." % (user_email, cohort_id))
+                raise endpoints.UnauthorizedException("%s does not have permission to view cohort %d." % (user_email, cohort_id))
 
             try:
                 nih_user = NIH_User.objects.get(user_id=user_id)
@@ -1423,7 +1423,7 @@ class Meta_Endpoints_API(remote.Service):
                 logger.info("%s does not have an entry in NIH_User: %s" % (user_email, str(e)))
         else:
             logger.warn("Authentication required for cohort_files endpoint.")
-            raise endpoints.NotFoundException("No user email found.")
+            raise endpoints.UnauthorizedException("No user email found.")
 
         if request.__getattribute__('page') is not None:
             page = request.page

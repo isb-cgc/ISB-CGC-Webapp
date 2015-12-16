@@ -134,12 +134,12 @@ class Cohort(messages.Message):
     perm = messages.StringField(4)
     email = messages.StringField(5)
     comments = messages.StringField(6)
-    filter_name = messages.StringField(7)
-    filter_value = messages.StringField(8)
-    source_type = messages.StringField(9)
-    source_notes = messages.StringField(10)
-    parent_id = messages.IntegerField(11)
-    filters = messages.MessageField(FilterDetails, 12, repeated=True)
+    # filter_name = messages.StringField(7)
+    # filter_value = messages.StringField(8)
+    source_type = messages.StringField(7)
+    source_notes = messages.StringField(8)
+    parent_id = messages.IntegerField(9)
+    filters = messages.MessageField(FilterDetails, 10, repeated=True)
 
 class CohortsList(messages.Message):
     items = messages.MessageField(Cohort, 1, repeated=True)
@@ -197,11 +197,10 @@ class SavedCohort(messages.Message):
     name = messages.StringField(2)
     active = messages.StringField(3)
     last_date_saved = messages.StringField(4)
-    user_id = messages.StringField(5)  # for cohorts_cohort_perms. Not shown: perm (OWNER, READER)
-    filter_name = messages.StringField(6, repeated=True)  # for cohorts_filters.name
-    filter_value = messages.StringField(7, repeated=True)  # for cohorts_filters.value. Not shown: cohorts_filters.resulting_cohort_id
-    last_date_saved_alt = message_types.DateTimeField(8)
-    filters = messages.MessageField(FilterDetails, 9, repeated=True)
+    user_id = messages.StringField(5)
+    filters = messages.MessageField(FilterDetails, 6, repeated=True)
+    num_patients = messages.StringField(7)
+    num_samples = messages.StringField(8)
 
 
 Cohort_Endpoints = endpoints.api(name='cohort_api', version='v1', description="Get information about cohorts",
@@ -305,7 +304,7 @@ class Cohort_Endpoints_API(remote.Service):
             except (IndexError, TypeError):
                 raise endpoints.NotFoundException("User %s's cohorts not found." % (request.id,))
         else:
-            raise endpoints.NotFoundException("Authentication failed.")
+            raise endpoints.UnauthorizedException("Authentication failed.")
 
 
     GET_RESOURCE = endpoints.ResourceContainer(cohort_id=messages.IntegerField(1, required=True),
@@ -403,7 +402,7 @@ class Cohort_Endpoints_API(remote.Service):
                 raise endpoints.NotFoundException("Cohort %s not found." % (request.cohort_id),)
 
         else:
-            raise endpoints.NotFoundException("Authentication failed.")
+            raise endpoints.UnauthorizedException("Authentication failed.")
 
 
 
@@ -849,19 +848,12 @@ class Cohort_Endpoints_API(remote.Service):
                                name=cohort_name,
                                active='True',
                                last_date_saved=str(datetime.utcnow()),
-                               user_id=str(user_id)
+                               user_id=str(user_id),
+                               num_patients=str(len(patient_barcodes)),
+                               num_samples=str(len(sample_barcodes))
                                )
         else:
-            raise endpoints.NotFoundException("Authentication failed.")
-            # todo: make SavedCohort have num_patients and num_samples instead of filter_name, filter_value
-        # id = messages.StringField(1)
-        # name = messages.StringField(2)
-        # active = messages.StringField(3)
-        # last_date_saved = messages.StringField(4)
-        # user_id = messages.StringField(5)  # for cohorts_cohort_perms. Not shown: perm (OWNER, READER)
-        # filter_name = messages.StringField(6)  # for cohorts_filters.name
-        # filter_value = messages.StringField(7)  # for cohorts_filters.value. Not shown: cohorts_filters.resulting_cohort_id
-        # last_date_saved_alt = message_types.DateTimeField(8)
+            raise endpoints.UnauthorizedException("Authentication failed.")
 
 
     DELETE_RESOURCE = endpoints.ResourceContainer(cohort_id=messages.IntegerField(1, required=True),
