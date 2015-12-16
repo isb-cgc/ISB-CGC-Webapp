@@ -40,16 +40,5 @@
             <a data-toggle="modal" data-target="#bucket-contents-modal">View bucket contents</a>
         </p>
     {% endif %}
-    <script type="text/javascript">
-        var x = new Date();
-        var currentTimeZoneOffsetInHours = x.getTimezoneOffset() / 60;
-        var NIH_expiration_client_time = new Date("{{ user_details.NIH_assertion_expiration }}",
-                "{{ user_details.last_login.month }}",
-                "{{ user_details.last_login.day }}",
-                "{{ user_details.last_login.hour }}" - currentTimeZoneOffsetInHours,
-                "{{ user_details.last_login.minute }}",
-                "{{ user_details.last_login.second }}"
-        );
-        document.getElementById('NIH_expiration').innerHTML = NIH_expiration_client_time;
-    </script>
+
 {%  endblock %}
