@@ -27,6 +27,7 @@
 {% block page_name %}cohort-details{% endblock %}
 
 {% block page_header %}
+<div class="container">
     <ol class="breadcrumb">
         <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
         <li><a href="{% url 'cohort_list' %}">Saved Cohorts</a></li>
@@ -67,6 +68,7 @@
             {% endif %}
         </ul>
     </div>
+</div>
 {% endblock %}
 
 {% block content %}

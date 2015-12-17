@@ -10,6 +10,7 @@
 {% block page_name %}workbook_detail{% endblock %}
 
 {% block page_header %}
+<div class="container">
     <!--Workbook header-->
     <ol class="breadcrumb">
         <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
@@ -25,6 +26,7 @@
         <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#share-workbook-modal">Share</button></li>
         <li role="menuitem"><button class="btn btn-link" data-toggle="modal" data-target="#share-workbook-modal">Shared with ({{ workbook.shares | length }})</button></li>
     </ul>
+</div>
 {% endblock %}
 {% block content %}
 
@@ -40,11 +42,11 @@
                          <a class="dropdown-toggle worksheet-drop" role="button" data-toggle="dropdown"><i class="fa fa-caret-down" ></i></a>
 
                          <ul class="dropdown-menu">
-                            {% if workbook.owner.id != request.user.id %}
-                                <li data-toggle="modal" role="button" data-target="#edit-worksheet-details-modal-{{ worksheet.id }}">Edit details</li>
-                                <li data-toggle="modal" role="button" data-target="#copy-worksheet-modal-{{ worksheet.id }}">Duplicate</li>
+                            {% if workbook.owner.id == request.user.id %}
+                                <li role="menuitem"><a data-toggle="modal" role="button" data-target="#edit-worksheet-details-modal-{{ worksheet.id }}">Edit details</a></li>
+                                <li role="menuitem"><a data-toggle="modal" role="button" data-target="#copy-worksheet-modal-{{ worksheet.id }}">Duplicate</a></li>
                                 {% if workbook.worksheets|length > 1 %}
-                                    <li data-toggle="modal" role="button" data-target="#delete-worksheet-modal-{{ worksheet.id }}">Delete</li>
+                                    <li role="menuitem"><a data-toggle="modal" role="button" data-target="#delete-worksheet-modal-{{ worksheet.id }}">Delete</a></li>
                                 {% endif %}
                             {% endif %}
                          </ul>
@@ -63,50 +65,75 @@
         <div class="tab-content">
              <!-- for each worksheet in workbook -->
              {% for worksheet in workbook.worksheets %}
-                 <div class="tab-pane fade {% if forloop.counter == 1 %} in active{% endif %}" id="{{ worksheet.id }}" >
+                 <div class="worksheet tab-pane fade {% if forloop.counter == 1 %} in active{% endif %}" id="{{ worksheet.id }}" >
                      <!-- worksheet description -->
-                     <div style="padding:5px; height:50px">
-                        <button class="show-flyout btn btn-info pull-right" title="Show Comments">comments ({{ worksheet.comments | length }})</button>
+                     <div class="worksheet-header">
+                         <p>{{worksheet.description}}</p>
+                        <button class="show-flyout btn btn-default btn-sm pull-right" title="Show Comments">comments ({{ worksheet.comments | length }})</button>
                      </div>
 
-                     <div style="height:600px">
+                     <div class="worksheet-body">
                         <!-- worksheet data source pane -->
-                        <div id="source_pane" style="border-right-style:solid; float: left; height:100%; border-right-width:1px; padding:5px; width:200px; display:inline-block">
-                            <h4>Source Data <i class="fa fa-arrow-left" style="float:right; cursor:pointer;"></i></h4>
-                            <ul class="list-group">
-                                <li class="list-group-item">
-                                    <div class="list-group-item__heading">
-                                        <a href="{% url 'genes' %}"> Genes</a>
+                        <div id="source_pane" class="worksheet-nav">
+
+                            <h5>Source Data</h5>
+                            <ul class="list">
+                                <li class="list-item">
+                                    <div class="list-item__heading">
+                                        <a href="{% url 'genes' %}"> Genes <i class="fa fa-plus pull-right"></i></a>
                                     </div>
+                                    <ul class="list-item__body">
+                                        <li class="sublist-item">
+                                            BRCA1
+                                        </li>
+                                        <li class="sublist-item">
+                                            PTEN
+                                        </li>
+                                    </ul>
                                     {% if worksheet.gene_list %}
-                                    <div class="list-group-item__body">
+                                    <ul class="list-item__body">
                                         {% for gene in worksheet.gene_list %}
-                                            <li class="list-group-item">{{ gene.name }}</li>
+                                            <li class="sublist-item">{{ gene.name|upper }}</li>
                                         {% endfor %}
+                                    </ul>
+                                    {% endif %}
+                                </li>
+                                <li class="list-item">
+                                    <div class="list-item__heading">
+                                        <a href="{% url 'variables' %}">Variables <i class="fa fa-plus pull-right"></i></a>
                                     </div>
+                                    {% if worksheet.variable_list %}
+                                    <ul class="list-item__body">
+                                        {% for variable in worksheet.variable_list %}
+                                            <li class="sublist-item">{{ variable.name }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                    {% endif %}
+                                </li>
+                                <li class="list-item">
+                                    <div class="list-item__heading">
+                                        <a href="{% url 'cohort_list'  %}">Cohorts <i class="fa fa-plus pull-right"></i></a>
+                                    </div>
+                                    {% if worksheet.cohort_list %}
+                                    <ul class="list-item__body">
+                                        {% for cohort in worksheet.cohort_list %}
+                                            <li class="sublist-item">{{ cohort.name }}</li>
+                                        {% endfor %}
+                                    </ul>
                                     {% endif %}
                                 </li>
                             </ul>
-
-                            <div>
-                                <h4><a href="{% url 'variables'  %}">Variables</a></h4>
-                                {% for variable in worksheet.variable_list %}
-                                    <div>{{ variable.name }}</div>
-                                {% endfor %}
-                            </div>
-                            <div>
-                                <h4><a href="{% url 'cohort_list'  %}">Cohorts</a></h4>
-                                {% for cohort in worksheet.cohort_list %}
-                                    <div>{{ cohort.name }}</div>
-                                {% endfor %}
-                            </div>
                         </div>
                         <!-- end worksheet data source section -->
 
                         <!-- worksheet analysis section -->
-                        <div style="margin-right:200px; margin-left:200px; padding:5px">
-                            Analysis Type
-                            <div class="dropdown" style="margin:5px; margin-left:0px; margin-right:0px; padding:10px; background-color:#CECECE;">
+                        <div class="worksheet-content">
+                            <div class="worksheet-nav-toggle">
+                                <a class="fa fa-caret-left"></a>
+                                <a class="fa fa-caret-right"></a>
+                            </div>
+                            <h5>Analysis Type</h5>
+                            <div class="form-group gray-area">
                                 <select class="form-control">
                                     <option>-- select one --</option>
                                     <option>Mutations</option>
@@ -114,11 +141,19 @@
                                     <option>Other</option>
                                 </select>
                             </div>
+                            <div class="worksheet-instruction">
+                                <p><i class="fa fa-exclamation-circle"></i> To Complete this Analysis: </p>
+                                <ul class="ul">
+                                    <li>You must select an Analysis Type (above)</li>
+                                    <li>You must select <a href="{% url 'genes' %}">Genes</a> or <a href="{% url 'variables' %}">Variables</a> (or, optionally, both)</li>
+                                    <li>You must select a <a href="{% url 'cohort_list' %}">Cohorts</a></li>
+                                </ul>
+                            </div>
                         </div>
                         <!-- end worksheet analysis section -->
-
-                        <!-- worksheet comment section -->
-                        <div style="border-left-style:solid; height:100%; border-left-width:1px; padding:5px; width:200px; float:right" class="fly-out comment-flyout comments">
+                     </div>
+                     <!-- worksheet comment section -->
+                        <div class="fly-out comment-flyout comments">
                             <div class="flyout-heading">
                                 <h4>Comments <a role="button" class="hide-flyout" aria-label="Hide Flyout"><i class="fa fa-times"></i></a></h4>
                             </div>
@@ -141,8 +176,6 @@
                             </div>
                          </div>
                          <!-- end worksheet comment section -->
-                     </div>
-
                      {% include "workbooks/worksheet_modals.html" with worksheet=worksheet %}
                 </div>
              {% endfor %}

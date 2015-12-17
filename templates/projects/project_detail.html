@@ -9,6 +9,7 @@
 {% block page_name %}project_detail{% endblock %}
 
 {% block page_header %}
+<div class="container">
     <ol class="breadcrumb">
         <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
         <li><a href="{% url 'projects' %}">Projects</a></li>
@@ -25,6 +26,7 @@
         <li role="menuitem"><button class="btn btn-info">Share</button></li>
         <li role="menuitem"><button class="btn btn-link">Shared with (2)</button></li>
     </ul>
+</div>
 {% endblock %}
 {% block content %}
     <div class="container">

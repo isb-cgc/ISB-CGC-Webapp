@@ -9,11 +9,13 @@
 {% block page_name %}project_upload{% endblock %}
 
 {% block page_header %}
-    <ol class="breadcrumb">
-        <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
-        <li><a href="{% url 'projects' %}">Saved Projects</a></li>
-    </ol>
-    <h1 class="page-header">Data Upload</h1>
+    <div class="container">
+        <ol class="breadcrumb">
+            <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+            <li><a href="{% url 'projects' %}">Saved Projects</a></li>
+        </ol>
+        <h1 class="page-header">Data Upload</h1>
+    </div>
 {% endblock %}
 {% block content %}
 <div class="container">

@@ -13,13 +13,13 @@
 {% block page_name %}cohorts-list{% endblock %}
 
 {% block page_header %}
+<div class="container">
     <ol class="breadcrumb">
         <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
     </ol>
     <h1 class="page-header pull-left">Cohorts</h1>
     <a href="{% url 'cohort' %}" class="btn btn-default pull-right"><i class="fa fa-plus"></i> Create New Cohort</a>
-
-
+</div>
 {% endblock %}
 {% block content %}
 <div class="container">

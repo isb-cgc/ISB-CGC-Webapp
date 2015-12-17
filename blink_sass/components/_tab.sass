@@ -79,17 +79,22 @@
     border-radius: 0px
     margin-left: 0px
     text-transform: capitalize
-    height: 42px
+    height: 38px
 
     > li
         display: inline-block
-        border: 1px solid darken($white, 15%)
+        border-left: 1px solid darken($white, 5%)
         border-bottom: none
         border-radius: 2px
         height: 100%
         position: relative
         clear: both
         vertical-align: top
+        background: darken($white, 5%)
+        
+        &:hover
+            &:after
+                display: block
 
         &:after
             content: ''
@@ -105,11 +110,11 @@
             border-left: none
 
         &.active
-            border-bottom: none
             background: $white
             height: 102%
             border-top: 0
-            
+            border-left: 1px solid darken($white, 5%)
+            border-right: 1px solid darken($white, 5%)
             &:after
                 display: block
             > a
@@ -118,18 +123,23 @@
                 background: $white
             .dropdown-container > a
                 color: $isb-warning
+                pointer-events: auto
         
         > a
             color: $font-color
             display: inline-block
 
+            &:hover, &:focus
+                background-color: transparent
+
+
 
         .dropdown-container
             display: inline-block
             margin-right: 10px
-
             > a
                 color: $font-color
+                pointer-events: none
 
         .btn
             background: transparent

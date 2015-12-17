@@ -9,6 +9,7 @@
 {% block page_name %}workbook_list{% endblock %}
 
 {% block page_header %}
+<div class="container">
     <ol class="breadcrumb">
         <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
     </ol>
@@ -17,6 +18,7 @@
         {% csrf_token %}
         <button type="submit" class="btn btn-primary pull-right" ><i class="fa fa-plus"></i>Create Workbook</button>
     </form>
+</div>
 {% endblock %}
 
 {% block content %}

@@ -26,12 +26,14 @@
 {% block page_name %}cohort-details{% endblock %}
 
 {% block page_header %}
+<div class="container">
     <ol class="breadcrumb">
         <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
         <li><a href="{% url 'cohort_list' %}">Cohorts</a></li>
     </ol>
     <h1 class="page-header pull-left">Create Cohort</h1>
     <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal">Save As New Cohort</button>
+</div>
 {% endblock %}
 
 {% block content %}

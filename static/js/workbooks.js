@@ -99,6 +99,7 @@ require([
 
     // comments interactions
     $('.show-flyout').on('click', function() {
+        $('.comment-flyout').toggleClass('open');
         $('.comment-flyout').animate({
             right: '-1px'
         }, 800);
@@ -109,15 +110,6 @@ require([
         }, 800);
     });
 
-    //script to perform dropdowns on worksheet tabs
-    $('.dropdown-toggle.worksheet-drop').click(function(){
-        if($(this).next().css("display") == "block") {
-           $(this).next().css("display", "none");
-        } else {
-            $(this).next().css("display", "block");
-        }
-    })
-
     $('.dropdown-menu').find("[data-toggle='modal']").click(function(){
         //$(this.getAttribute("data-target")).modal();
         console.log($(this.getAttribute("data-target")));
@@ -125,34 +117,40 @@ require([
 
 
     ////Model communications
-    //$('.add_worksheet_comment_form').on('submit', function(event) {
-    //    event.preventDefault();
-    //    var form        = this;
-    //    var workbookId  = $(form).find("#workbook_id_input").val();
-    //    var worksheetId = $(form).find("#worksheet_id_input").val();
-    //    var url         = base_url + '/workbooks/' + workbookId + '/worksheets/' + worksheetId + '/comments/create';
-    //
-    //    $.ajax({
-    //        type : 'POST',
-    //        url  : url,
-    //        data : $(this).serialize(),
-    //        success: function(data) {
-    //            data = JSON.parse(data);
-    //            $('.comment-flyout .flyout-body').append('<h5 class="comment-username">' + data['first_name'] + ' ' + data['last_name'] + '</h5>');
-    //            $('.comment-flyout .flyout-body').append('<p class="comment-date">' + data['date_created'] + '</p>');
-    //            $('.comment-flyout .flyout-body').append('<p class="comment-content">' + data['content'] + '</p>')
-    //            form.reset();
-    //        },
-    //        error: function() {
-    //            console.log('Failed to save comment.');
-    //            form.reset()
-    //        }
-    //
-    //    });
-    //
-    //    return false;
-    //});
+    $('.add_worksheet_comment_form').on('submit', function(event) {
+        event.preventDefault();
+        var form        = this;
+        var workbookId  = $(form).find("#workbook_id_input").val();
+        var worksheetId = $(form).find("#worksheet_id_input").val();
+        var url         = base_url + '/workbooks/' + workbookId + '/worksheets/' + worksheetId + '/comments/create';
 
+        $.ajax({
+            type : 'POST',
+            url  : url,
+            data : $(this).serialize(),
+            success: function(data) {
+                data = JSON.parse(data);
+                $('.comment-flyout .flyout-body').append('<h5 class="comment-username">' + data['first_name'] + ' ' + data['last_name'] + '</h5>');
+                $('.comment-flyout .flyout-body').append('<p class="comment-date">' + data['date_created'] + '</p>');
+                $('.comment-flyout .flyout-body').append('<p class="comment-content">' + data['content'] + '</p>')
+                form.reset();
+            },
+            error: function() {
+                console.log('Failed to save comment.');
+                form.reset()
+            }
+
+        });
+
+        return false;
+    });
+
+    $('.worksheet-nav-toggle').on('click', function(e){
+        e.preventDefault();
+        $(this).parent().toggleClass('open');
+        $(this).toggleClass('open');
+        $(this).parent().prev('.worksheet-nav').toggleClass('closed');
+    })
     //search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id);
     //search_helper_obj.update_parsets(base_api_url, 'metadata_platform_list', cohort_id);
 });
