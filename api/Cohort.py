@@ -17,11 +17,9 @@ limitations under the License.
 """
 
 import logging
-import sys
 from datetime import datetime
 
 import endpoints
-from google.appengine.ext import ndb
 from protorpc import messages, message_types
 from protorpc import remote
 from django.conf import settings
@@ -41,12 +39,8 @@ from api_helpers import *
 logger = logging.getLogger(__name__)
 
 INSTALLED_APP_CLIENT_ID = settings.INSTALLED_APP_CLIENT_ID
+CONTROLLED_ACL_GOOGLE_GROUP = settings.ACL_GOOGLE_GROUP
 
-
-
-#################################################################
-#  BEGINNING OF FEATURE MATRIX ENDPOINTS
-#################################################################
 DEFAULT_COHORT_NAME = 'Untitled Cohort'
 
 IMPORTANT_FEATURES = [
@@ -88,11 +82,6 @@ class ReturnJSON(messages.Message):
     msg = messages.StringField(1)
 
 
-class tcga_data_file(ndb.Expando):
-    pass
-
-
-# todo: refactor to from users import User (from users api)
 class User(messages.Message):
     id = messages.StringField(1)
     last_login = messages.StringField(2)
@@ -200,6 +189,7 @@ class SampleDetails(messages.Message):
 
 class DataFileNameKeyList(messages.Message):
     datafilenamekeys = messages.StringField(1, repeated=True)
+    count = messages.IntegerField(2)
 
 
 class SavedCohort(messages.Message):
@@ -221,7 +211,7 @@ Cohort_Endpoints = endpoints.api(name='cohort_api', version='v1', description="G
 class Cohort_Endpoints_API(remote.Service):
 
 
-    GET_RESOURCE = endpoints.ResourceContainer(token=messages.StringField(1), cohort_id=messages.StringField(2))
+    GET_RESOURCE = endpoints.ResourceContainer(token=messages.StringField(1), cohort_id=messages.IntegerField(2))
     @endpoints.method(GET_RESOURCE, CohortsList,
                       path='cohorts_list', http_method='GET', name='cohorts.list')
     def cohorts_list(self, request):
@@ -313,12 +303,14 @@ class Cohort_Endpoints_API(remote.Service):
                 db.close()
                 return CohortsList(items=data, count=len(data))
             except (IndexError, TypeError):
+                if cursor: cursor.close()
+                if db: db.close()
                 raise endpoints.NotFoundException("User %s's cohorts not found." % (request.id,))
         else:
             raise endpoints.NotFoundException("Authentication failed.")
 
 
-    GET_RESOURCE = endpoints.ResourceContainer(cohort_id=messages.StringField(1, required=True),
+    GET_RESOURCE = endpoints.ResourceContainer(cohort_id=messages.IntegerField(1, required=True),
                                                token=messages.StringField(2))
     @endpoints.method(GET_RESOURCE, CohortPatientsSamplesList,
                       path='cohort_patients_samples_list', http_method='GET', name='cohorts.cohort_patients_samples_list')
@@ -346,33 +338,61 @@ class Cohort_Endpoints_API(remote.Service):
                 logger.warn(e)
                 raise endpoints.NotFoundException("%s does not have an entry in the user database." % user_email)
 
-            query_dict = {'cohorts_cohort_perms.user_id': user_id, 'cohorts_cohort.active': unicode('1')}
+            try:
+                db = sql_connection()
+                cursor = db.cursor(MySQLdb.cursors.DictCursor)
+                cursor.execute("select count(*) from cohorts_cohort_perms where user_id=%s and cohort_id=%s", (user_id, cohort_id))
+                result = cursor.fetchone()
+                if int(result['count(*)']) == 0:
+                    raise endpoints.NotFoundException("{} does not have owner or reader permissions on cohort {}."
+                                                      .format(user_email, cohort_id))
+                cursor.execute("select count(*) from cohorts_cohort where id=%s and active=%s", (cohort_id, unicode('0')))
+                result = cursor.fetchone()
+                if int(result['count(*)']) > 0:
+                    raise endpoints.NotFoundException("Cohort {} was deleted.".format(cohort_id))
+                cursor.close()
+                db.close()
+            except (IndexError, TypeError):
+                if cursor: cursor.close()
+                if db: db.close()
+                raise endpoints.NotFoundException("Cohort {} not found.".format(cohort_id))
 
-            if cohort_id and cohort_id.isdigit():
-                query_dict['cohorts_cohort.id'] = cohort_id
-
-            patient_query_str = 'select patient_id ' \
+            patient_query_str = 'select cohorts_patients.patient_id ' \
                         'from cohorts_patients ' \
-                        'where cohort_id=%s ' \
-                        'group by patient_id'
+                        'inner join cohorts_cohort_perms ' \
+                        'on cohorts_cohort_perms.cohort_id=cohorts_patients.cohort_id ' \
+                        'inner join cohorts_cohort ' \
+                        'on cohorts_patients.cohort_id=cohorts_cohort.id ' \
+                        'where cohorts_patients.cohort_id=%s ' \
+                        'and cohorts_cohort_perms.user_id=%s ' \
+                        'and cohorts_cohort.active=%s ' \
+                        'group by cohorts_patients.patient_id '
 
-            sample_query_str = 'select sample_id ' \
+            patient_query_tuple = (cohort_id, user_id, unicode('1'))
+
+            sample_query_str = 'select cohorts_samples.sample_id ' \
                         'from cohorts_samples ' \
-                        'where cohort_id=%s ' \
-                        'group by sample_id'
+                        'inner join cohorts_cohort_perms ' \
+                        'on cohorts_cohort_perms.cohort_id=cohorts_samples.cohort_id ' \
+                        'inner join cohorts_cohort ' \
+                        'on cohorts_samples.cohort_id=cohorts_cohort.id ' \
+                        'where cohorts_samples.cohort_id=%s ' \
+                        'and cohorts_cohort_perms.user_id=%s ' \
+                        'and cohorts_cohort.active=%s ' \
+                        'group by cohorts_samples.sample_id '
 
-            query_tuple = (cohort_id,)
+            sample_query_tuple = (cohort_id, user_id, unicode('1'))
 
             try:
                 db = sql_connection()
 
                 cursor = db.cursor(MySQLdb.cursors.DictCursor)
-                cursor.execute(patient_query_str, query_tuple)
+                cursor.execute(patient_query_str, patient_query_tuple)
                 patient_data = []
                 for row in cursor.fetchall():
                     patient_data.append(row['patient_id'])
 
-                cursor.execute(sample_query_str, query_tuple)
+                cursor.execute(sample_query_str, sample_query_tuple)
                 sample_data = []
                 for row in cursor.fetchall():
                     sample_data.append(row['sample_id'])
@@ -384,6 +404,8 @@ class Cohort_Endpoints_API(remote.Service):
                                                  sample_count=len(sample_data),
                                                  cohort_id=int(cohort_id))
             except (IndexError, TypeError):
+                if cursor: cursor.close()
+                if db: db.close()
                 raise endpoints.NotFoundException("Cohort %s not found." % (request.cohort_id),)
 
         else:
@@ -501,6 +523,10 @@ class Cohort_Endpoints_API(remote.Service):
             db.close()
             return PatientDetails(clinical_data=item, samples=sample_data, aliquots=aliquot_data)
         except (IndexError, TypeError), e:
+            if clinical_cursor: clinical_cursor.close()
+            if sample_cursor: sample_cursor.close()
+            if aliquot_cursor: aliquot_cursor.close()
+            if db: db.close()
             raise endpoints.NotFoundException("Patient %s not found." % (str(request.patient_barcode),))
 
 
@@ -650,6 +676,11 @@ class Cohort_Endpoints_API(remote.Service):
 
         except (IndexError, TypeError), e:
             logger.warn(e)
+            if biospecimen_cursor: biospecimen_cursor.close()
+            if aliquot_cursor: aliquot_cursor.close()
+            if patient_cursor: patient_cursor.close()
+            if data_cursor: data_cursor.close()
+            if db: db.close()
             raise endpoints.NotFoundException("Sample %s not found." % (str(request.sample_barcode),))
 
 
@@ -678,7 +709,8 @@ class Cohort_Endpoints_API(remote.Service):
             django.setup()
             try:
                 user_id = Django_User.objects.get(email=user_email).id
-                dbGaP_authorized = NIH_User.objects.get(user_id=user_id).dbGaP_authorized
+                nih_user = NIH_User.objects.get(user_id=user_id)
+                dbGaP_authorized = nih_user.dbGaP_authorized and nih_user.active
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
                 logger.warn(e)
                 # raise endpoints.NotFoundException("%s does not have an entry in the user database." % user_email)
@@ -690,8 +722,7 @@ class Cohort_Endpoints_API(remote.Service):
 
         query_str = 'SELECT DataFileNameKey, SecurityProtocol, Repository ' \
                     'FROM metadata_data ' \
-                    'WHERE SampleBarcode=%s ' \
-                    'AND DataFileNameKey != "" and DataFileNameKey is not null '
+                    'WHERE SampleBarcode=%s '
 
         query_tuple = (sample_barcode,)
 
@@ -712,23 +743,26 @@ class Cohort_Endpoints_API(remote.Service):
 
             datafilenamekeys = []
             for row in cursor.fetchall():
+                file_path = row.get('DataFileNameKey') if len(row.get('DataFileNameKey', '')) else '/file-path-currently-unavailable'
                 if 'controlled' not in str(row['SecurityProtocol']).lower():
-                    datafilenamekeys.append("gs://{}{}".format(settings.OPEN_DATA_BUCKET, row['DataFileNameKey']))
-                # currently this is mock-controlled-access data in another GC Project
+                    datafilenamekeys.append("gs://{}{}".format(settings.OPEN_DATA_BUCKET, file_path))
                 elif dbGaP_authorized:
-                    if type(row['Repository'] == str):
-                        bucket_name = ''
-                        # hard-coding mock bucket names for now --testing purposes only
-                        if row['Repository'].lower() == 'dcc':
-                            bucket_name = 'gs://62f2c827-mock-mock-mock-1cde698a4f77'
-                        elif row['Repository'].lower() == 'cghub':
-                            bucket_name = 'gs://360ee3ad-mock-mock-mock-52f9a5e7f99a'
-                        datafilenamekeys.append("{}{}".format(bucket_name, row['DataFileNameKey']))
+                    bucket_name = ''
+                    # hard-coding mock bucket names for now --testing purposes only
+                    if row['Repository'].lower() == 'dcc':
+                        bucket_name = 'gs://62f2c827-mock-mock-mock-1cde698a4f77'
+                    elif row['Repository'].lower() == 'cghub':
+                        bucket_name = 'gs://360ee3ad-mock-mock-mock-52f9a5e7f99a'
+                    datafilenamekeys.append("{}{}".format(bucket_name, file_path))
 
-            return DataFileNameKeyList(datafilenamekeys=datafilenamekeys)
+            cursor.close()
+            db.close()
+            return DataFileNameKeyList(datafilenamekeys=datafilenamekeys, count=len(datafilenamekeys))
 
         except (IndexError, TypeError), e:
             logger.warn(e)
+            if cursor: cursor.close()
+            if db: db.close()
             raise endpoints.NotFoundException("Sample %s not found." % (str(request.sample_barcode),))
 
 
@@ -796,6 +830,9 @@ class Cohort_Endpoints_API(remote.Service):
                     sample_barcodes.append(row['SampleBarcode'])
 
             except (IndexError, TypeError), e:
+                if patient_cursor: patient_cursor.close()
+                if sample_cursor: sample_cursor.close()
+                if db: db.close()
                 logger.warn(e)
                 # todo: more informative message
                 raise endpoints.NotFoundException("Error retrieving samples or patients")

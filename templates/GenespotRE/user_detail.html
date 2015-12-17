@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
+{% load custom_tags %}
 {% load tz %}
 
 {% comment %}
@@ -21,7 +22,7 @@
 {% endcomment %}
 
 {% block header %}
-{#    <script type="text/javascript" src="{% static 'js/user_details.js' %}"></script>#}
+
 {% endblock %}
 
 {% block link_page_name %}user-details{% endblock %}
@@ -56,12 +57,9 @@
 
                     <tr>
                         <td>Last Logged In</td>
-                        <td>{{ user_details.last_login|localtime }}</td>
+                        <td id="last_login">{{ user_details.last_login|safe }} GMT</td>
                     </tr>
-{#                    <tr>#}
-{#                        <td>Date Joined</td>#}
-{#                        <td>{{ user_details.date_joined|localtime }}</td>#}
-{#                    </tr>#}
+
                 </table>
             </div>
         </div>

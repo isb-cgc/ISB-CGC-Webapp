@@ -1,5 +1,6 @@
 {% load staticfiles %}
 {% load tz %}
+{% get_current_timezone as TIME_ZONE %}
 {% block saml_content %}
 
     {% if not user_details.NIH_username or not user_details.NIH_active %} {# No eRA account, no dbGaP #}
@@ -20,16 +21,13 @@
         <hr>
         <p>Congratulations, {{ user_details.NIH_username }}! Your eRA account has been authenticated. Now we need to verify if you have dbGaP authorization. This process may take up to 24 hours.</p>
 
-        <a href="#">How to Apply for dbGaP Access</a>
+        <a href="https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login" target="_blank">How to Apply for dbGaP Access</a>
     {% else %} {# Both authorized #}
         <p><i class="fa fa-check-circle"></i> dbGaP Access Authorized</p>
         <hr>
         <p>
             Congratulations, {{ user_details.NIH_username }}! You now have access to ISB-CGC controlled access TCGA data until
-            {{ user_details.NIH_assertion_expiration|localtime }}
-            {% if TIMEZONE != "" or TIMEZONE != None %}
-                in {{ TIME_ZONE }} time.
-            {% endif %}
+            <p id="NIH_expiration">{{ user_details.NIH_assertion_expiration|safe }} GMT</p>
         </p>
 
         <a href="#">How to Access Controlled-Access Data</a>
