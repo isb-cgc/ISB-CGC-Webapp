@@ -239,7 +239,7 @@ class Cohort_Endpoints_API(remote.Service):
 
             query_dict = {'cohorts_cohort_perms.user_id': user_id, 'cohorts_cohort.active': unicode('1')}
 
-            if cohort_id and cohort_id.isdigit():
+            if cohort_id:
                 query_dict['cohorts_cohort.id'] = cohort_id
 
             query_str = 'select cohorts_cohort.id, ' \
@@ -272,11 +272,13 @@ class Cohort_Endpoints_API(remote.Service):
                 cursor.execute(query_str, query_tuple)
                 data = []
                 for row in cursor.fetchall():
-                    filter_query_str = 'select name, value ' \
-                                       'from cohorts_filters ' \
-                                       'where cohorts_filters.resulting_cohort_id=%s'
+                    print >> sys.stderr, '\n\n' + str(row['id'])
+                    filter_query_str = 'SELECT name, value ' \
+                                       'FROM cohorts_filters ' \
+                                       'WHERE cohorts_filters.resulting_cohort_id=%s'
+
                     filter_cursor = db.cursor(MySQLdb.cursors.DictCursor)
-                    filter_cursor.execute(filter_query_str, str(row['id']))
+                    filter_cursor.execute(filter_query_str, (str(row['id']),))
                     filter_data = []
                     for filter_row in filter_cursor.fetchall():
                         filter_data.append(FilterDetails(
@@ -291,20 +293,22 @@ class Cohort_Endpoints_API(remote.Service):
                         perm=str(row['perm']),
                         email=str(row['email']),
                         comments=str(row['comments']),
-                        # filter_name=str(row['filter_name']),
-                        # filter_value=str(row['filter_value']),
                         source_type=None if row['source_type'] is None else str(row['source_type']),
                         source_notes=None if row['source_notes'] is None else str(row['source_notes']),
                         parent_id=None if row['parent_id'] is None else int(row['parent_id']),
                         filters=filter_data
                     ))
                 cursor.close()
+                if filter_cursor: filter_cursor.close()
                 db.close()
                 return CohortsList(items=data, count=len(data))
-            except (IndexError, TypeError):
+            except (IndexError, TypeError) as e:
                 if cursor: cursor.close()
+                if filter_cursor: filter_cursor.close()
                 if db: db.close()
-                raise endpoints.NotFoundException("User %s's cohorts not found." % (request.id,))
+
+                raise endpoints.NotFoundException(
+                    "User {}'s cohorts not found. {}: {}".format(user_email, type(e), e))
         else:
             raise endpoints.UnauthorizedException("Authentication failed.")
 
@@ -312,7 +316,8 @@ class Cohort_Endpoints_API(remote.Service):
     GET_RESOURCE = endpoints.ResourceContainer(cohort_id=messages.IntegerField(1, required=True),
                                                token=messages.StringField(2))
     @endpoints.method(GET_RESOURCE, CohortPatientsSamplesList,
-                      path='cohort_patients_samples_list', http_method='GET', name='cohorts.cohort_patients_samples_list')
+                      path='cohort_patients_samples_list', http_method='GET',
+                      name='cohorts.cohort_patients_samples_list')
     def cohort_patients_samples_list(self, request):
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         user_email = None
