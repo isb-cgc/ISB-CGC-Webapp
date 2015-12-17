@@ -833,7 +833,6 @@ class Cohort_Endpoints_API(remote.Service):
                 if sample_cursor: sample_cursor.close()
                 if db: db.close()
                 logger.warn(e)
-                # todo: more informative message
                 raise endpoints.NotFoundException("Error retrieving samples or patients")
 
             cohort_name = request.__getattribute__('name')
