@@ -11,6 +11,8 @@ SETTINGS = {
     'BQ_PROJECT_ID': os.environ.get('BIGQUERY_PROJECT_ID', os.environ.get('GCLOUD_PROJECT_ID')), # Google Cloud Project ID #
     'PROJECT_NAME': os.environ.get('GCLOUD_PROJECT_NAME'),
 
+    'REQUEST_PROJECT_EMAIL': os.environ.get('REQUEST_PROJECT_EMAIL', 'request@example.com'),
+
     # TODO: Should be deleted at some point in favor of merged settings
     'CLOUD_BASE_URL': os.environ.get('CLOUD_BASE_URL', 'http://isb-cgc.appspot.com/'), # Deployed url
     'CLOUD_API_URL': os.environ.get('CLOUD_API_URL', 'https://api-dot-isb-cgc.appspot.com/'), # Deployed api url

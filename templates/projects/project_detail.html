@@ -19,9 +19,9 @@
     <ul class="page-action-group">
         <li role="menuitem"><button class="btn btn-default">New Workbook</button></li>
         <li class="separator"></li>
-        <li role="menuitem"><button class="btn btn-info"><i class="fa fa-cloud-upload"></i>Upload Data</button></li>
+        <li role="menuitem"><a href="{% url 'project_upload' %}" class="btn btn-info"><i class="fa fa-cloud-upload"></i>Upload Data</a></li>
         <li role="menuitem"><button class="btn btn-info">Edit Details</button></li>
-        <li role="menuitem"><button class="btn btn-info">Delete</button></li>
+        <li role="menuitem"><button class="btn btn-info project-delete" data-url="{% url 'project_delete' project.id %}" data-redirect="{% url 'projects' %}">Delete</button></li>
         <li class="separator"></li>
         <li role="menuitem"><button class="btn btn-info">Share</button></li>
         <li role="menuitem"><button class="btn btn-link">Shared with (2)</button></li>
@@ -30,7 +30,8 @@
 {% endblock %}
 {% block content %}
     <div class="container">
-        {% for study in project.study_set.all %}
+        <div class="error-messages"></div>
+        {% for study in studies %}
         <section class="project-study panel panel-primary">
             <div class="panel-heading clearfix">
                 <h4 class="panel-title pull-left">{{ study.name }}</h4>
@@ -39,7 +40,7 @@
                     <ul class="dropdown-menu">
                         <li role="menuitem"><a href="">New Workbook</a></li>
                         <li role="menuitem"><a href="">Edit Details</a></li>
-                        <li role="menuitem"><a href="" role="button">Delete</a></li>
+                        <li role="menuitem"><a data-url="{% url 'study_delete' project_id=project.id study_id=study.id %}" class="study-delete" role="button">Delete</a></li>
                     </ul>
                 </div>
             </div>
@@ -75,4 +76,4 @@
     </div>
 {% endblock %}
 
-{% block js_file %}{% static 'js/base.js' %}{% endblock %}
+{% block js_file %}{% static 'js/project_details.js' %}{% endblock %}

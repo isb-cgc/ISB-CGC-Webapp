@@ -24,7 +24,7 @@ class CloudFileStorage(Storage):
         return self.storage.objects().get(bucket=bucket, object=name).execute()
 
     def _save(self, name, content):
-        media = http.MediaInMemoryUpload(content)
+        media = http.MediaInMemoryUpload(content.read())
         filepath = name.split('/')
         bucket = filepath.pop(0)
         name = '/'.join(filepath)

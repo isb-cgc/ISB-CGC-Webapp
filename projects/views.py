@@ -7,6 +7,7 @@ from django.conf import settings
 from django.http import JsonResponse, HttpResponseNotFound
 from django.conf import settings
 from django.db import connection
+from django.core.mail import send_mail
 from data_upload.models import UserUpload, UserUploadedFile
 from projects.models import User_Feature_Definitions, Project
 
@@ -38,57 +39,72 @@ def project_detail(request, project_id=0):
 
 
     context = {
-        'project': proj
+        'project': proj,
+        'studies': proj.study_set.all().filter(active=True)
+    }
+    return render(request, template, context)
+
+@login_required
+def request_project(request):
+    send_mail('User has requested a Google Project', '''
+The user %s has requested a new Google Project be created. Here is their message:
+
+%s
+    ''' % (request.user.email, request.POST['message']), request.user.email, [settings.REQUEST_PROJECT_EMAIL])
+
+    template = 'projects/project_request.html'
+    context = {
+        'requested': True
     }
     return render(request, template, context)
 
 @login_required
 def project_upload(request):
-    template = 'projects/project_upload.html'
-    context = {}
+    if not hasattr(request.user, 'googleproject'):
+        template = 'projects/project_request.html'
+    else:
+        template = 'projects/project_upload.html'
+    context = {
+        'requested': False
+    }
     return render(request, template, context)
 
 def filter_column_name(original):
     return re.sub(r"[^a-zA-Z]+", "_", original.lower())
 
 def create_metadata_tables(user, study, columns, skipSamples=False):
-    cursor = connection.cursor()
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS user_metadata_%s_%s (
+              id INTEGER UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+              study_id INTEGER UNSIGNED,
+              sample_barcode VARCHAR(200),
+              file_path VARCHAR(200),
+              file_name VARCHAR(200),
+              data_type VARCHAR(200),
+              pipeline VARCHAR(200),
+              platform VARCHAR(200)
+            )
+        """, [user.id, study.id])
 
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS user_metadata_%s_%s (
-          id INTEGER UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-          study_id INTEGER UNSIGNED,
-          sample_barcode VARCHAR(200),
-          file_path VARCHAR(200),
-          file_name VARCHAR(200),
-          data_type VARCHAR(200),
-          pipeline VARCHAR(200),
-          platform VARCHAR(200)
-        )
-    """, [user.id, study.id])
+        if not skipSamples:
+            feature_table_sql = """
+                CREATE TABLE IF NOT EXISTS user_metadata_samples_%s_%s (
+                  id INTEGER UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                  participant_barcode VARCHAR(200),
+                  sample_barcode VARCHAR(200),
+                  has_mrna BOOLEAN,
+                  has_mirna BOOLEAN,
+                  has_protein BOOLEAN,
+                  has_meth BOOLEAN
+            """
+            feature_table_args = [user.id, study.id]
 
-    if skipSamples:
-        return
+            for column in columns:
+                feature_table_sql += ", " + filter_column_name(column['name']) + " " + column['type']
 
-    feature_table_sql = """
-        CREATE TABLE IF NOT EXISTS user_metadata_samples_%s_%s (
-          id INTEGER UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-          participant_barcode VARCHAR(200),
-          sample_barcode VARCHAR(200),
-          has_mrna BOOLEAN,
-          has_mirna BOOLEAN,
-          has_protein BOOLEAN,
-          has_meth BOOLEAN
-    """
-    feature_table_args = [user.id, study.id]
-
-    for column in columns:
-        feature_table_sql += ", " + filter_column_name(column['name']) + " " + column['type']
-
-    feature_table_sql += ")"
-    cursor.execute(feature_table_sql, feature_table_args)
-
-
+            feature_table_sql += ")"
+            cursor.execute(feature_table_sql, feature_table_args)
 
 @login_required
 def upload_files(request):
@@ -171,6 +187,8 @@ def upload_files(request):
                     controlled = None
                     if 'controlled' in column:
                         controlled = column['controlled']['key']
+                    else:
+                        controlled = filter_column_name(column['name'])
 
                     fileJSON['COLUMNS'].append({
                         "NAME"   : column['name'],
@@ -219,3 +237,24 @@ def upload_files(request):
         resp['redirect_url'] = '/projects/' + str(proj.id) + '/'
 
     return JsonResponse(resp)
+
+@login_required
+def project_delete(request, project_id=0):
+    proj = request.user.project_set.get(id=project_id)
+    proj.active = False
+    proj.save()
+
+    return JsonResponse({
+        'status': 'success'
+    })
+
+@login_required
+def study_delete(request, project_id=0, study_id=0):
+    proj = request.user.project_set.get(id=project_id)
+    study = proj.study_set.get(id=study_id)
+    study.active = False
+    study.save()
+
+    return JsonResponse({
+        'status': 'success'
+    })
