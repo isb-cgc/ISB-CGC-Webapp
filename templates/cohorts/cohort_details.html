@@ -99,7 +99,8 @@
                                                         <li class="checkbox">
                                                             <label for="{{ attr }}-{{ v.value|replace_whitespace:'_' }}">
                                                                 <input type="checkbox" name="elements-selected" id="{{ attr }}-{{ v.value|replace_whitespace:'_' }}" >
-                                                                {{ v.value }}</label>
+                                                                {% if v.value == 'None' %}NA{% else %}{{ v.value|get_readable_name }}{% endif %}
+                                                            </label>
                                                             <span class="count">({{ v.count }})</span>
                                                         </li>
                                                     {% elif forloop.counter0 == 6 and num_more > 0 %}
@@ -107,7 +108,7 @@
                                                         <li class="extra-values checkbox" style="display:none;">
                                                             <label for="{{ attr }}-{{ v.value|replace_whitespace:'_' }}">
                                                                 <input type="checkbox" name="elements-selected" id="{{ attr }}-{{ v.value|replace_whitespace:'_' }}" >
-                                                                {{ v.value }}
+                                                                {% if v.value == 'None' %}NA{% else %}{{ v.value|get_readable_name }}{% endif %}
                                                             </label>
                                                             <span class="count">({{ v.count }})</span>
                                                         </li>
@@ -115,7 +116,7 @@
                                                         <li class="extra-values checkbox" style="display:none;">
                                                             <label for="{{ attr }}-{{ v.value|replace_whitespace:'_' }}">
                                                                 <input type="checkbox" name="elements-selected" id="{{ attr }}-{{ v.value|replace_whitespace:'_' }}" >
-                                                                {{ v.value }}
+                                                                {% if v.value == 'None' %}NA{% else %}{{ v.value|get_readable_name }}{% endif %}
                                                             </label>
                                                             <span class="count">({{ v.count }})</span>
                                                         </li>
@@ -276,7 +277,7 @@
                     <ul class="nav nav-tabs" role="tablist">
                         {% if cohort.perm.perm == 'OWNER' %}
                             <li role="presentation" class="active"><a data-target="#share-cohort-pane" data-toggle="tab" aria-controls="home" role="tab" id="shareCohortModal">Share Cohort</a></li>
-                        {% endif %} 
+                        {% endif %}
                         <li role="presentation"><a data-target="#shared-pane" data-toggle="tab" aria-controls="home" role="tab">Shared With ({{shared_with_users|length}})</a></li>
                     </ul>
                 </div>

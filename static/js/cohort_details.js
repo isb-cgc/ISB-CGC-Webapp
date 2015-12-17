@@ -140,6 +140,7 @@ require([
         $('#filter-panel input:checked').each(function() {
             $(this).prop('checked', false);
         });
+        $('#create-cohort-form .form-control-static').empty();
         search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id);
     });
 

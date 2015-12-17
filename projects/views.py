@@ -8,6 +8,7 @@ from django.http import JsonResponse, HttpResponseNotFound
 from django.conf import settings
 from django.db import connection
 from django.core.mail import send_mail
+from django.core.urlresolvers import reverse
 from data_upload.models import UserUpload, UserUploadedFile
 from projects.models import User_Feature_Definitions, Project
 
@@ -64,8 +65,12 @@ def project_upload(request):
         template = 'projects/project_request.html'
     else:
         template = 'projects/project_upload.html'
+
+    projects = request.user.project_set.all().filter(active=True)
+
     context = {
-        'requested': False
+        'requested': False,
+        'projects': projects,
     }
     return render(request, template, context)
 
@@ -207,7 +212,7 @@ def upload_files(request):
         # Skip *_samples table for low level data
         create_metadata_tables(request.user, study, all_columns, request.POST['data-type'] == 'low')
 
-        request.user.user_data_tables_set.create(
+        dataset = request.user.user_data_tables_set.create(
             study=study,
             metadata_data_table=config['USER_METADATA_TABLES']['METADATA_DATA'],
             metadata_samples_table=config['USER_METADATA_TABLES']['METADATA_SAMPLES'],
@@ -218,8 +223,20 @@ def upload_files(request):
 
         if settings.PROCESSING_ENABLED:
             files = {'config.json': ('config.json', json.dumps(config))}
+            post_args = {
+                'project_id':proj.id,
+                'study_id':study.id,
+                'dataset_id':dataset.id
+            }
+            success_url = reverse('study_data_success', kwargs=post_args) + '?key=' + upload.key
+            failure_url = reverse('study_data_error', kwargs=post_args) + '?key=' + upload.key
+            parameters = {
+                'SUCCESS_POST_URL': request.build_absolute_uri( success_url ),
+                'FAILURE_POST_URL': request.build_absolute_uri( failure_url )
+            }
             r = requests.post(settings.PROCESSING_JENKINS_URL + '/job/' + settings.PROCESSING_JENKINS_PROJECT + '/buildWithParameters',
-                              files=files, auth=(settings.PROCESSING_JENKINS_USER, settings.PROCESSING_JENKINS_PASSWORD))
+                              files=files, params=parameters,
+                              auth=(settings.PROCESSING_JENKINS_USER, settings.PROCESSING_JENKINS_PASSWORD))
 
             if r.status_code < 400:
                 upload.status = 'Processing'
@@ -254,6 +271,36 @@ def study_delete(request, project_id=0, study_id=0):
     study = proj.study_set.get(id=study_id)
     study.active = False
     study.save()
+
+    return JsonResponse({
+        'status': 'success'
+    })
+
+def study_data_success(request, project_id=0, study_id=0, dataset_id=0):
+    proj = Project.objects.get(id=project_id)
+    study = proj.study_set.get(id=study_id)
+    datatables = study.user_data_tables_set.get(id=dataset_id)
+
+    if not datatables.data_upload.key == request.GET.get('key'):
+        raise Exception("Invalid data key when marking data success")
+
+    datatables.data_upload.status = 'Complete'
+    datatables.data_upload.save()
+
+    return JsonResponse({
+        'status': 'success'
+    })
+
+def study_data_error(request, project_id=0, study_id=0, dataset_id=0):
+    proj = Project.objects.get(id=project_id)
+    study = proj.study_set.get(id=study_id)
+    datatables = study.user_data_tables_set.get(id=dataset_id)
+
+    if not datatables.data_upload.key == request.GET.get('key'):
+        raise Exception("Invalid data key when marking data success")
+
+    datatables.data_upload.status = 'Error'
+    datatables.data_upload.save()
 
     return JsonResponse({
         'status': 'success'
