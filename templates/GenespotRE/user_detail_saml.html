@@ -1,6 +1,6 @@
 {% load staticfiles %}
 {% load tz %}
-{% get_current_timezone as TIME_ZONE %}
+
 {% block saml_content %}
 
     {% if not user_details.NIH_username or not user_details.NIH_active %} {# No eRA account, no dbGaP #}
