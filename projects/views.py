@@ -235,7 +235,7 @@ def upload_files(request):
                 'FAILURE_POST_URL': request.build_absolute_uri( failure_url )
             }
             r = requests.post(settings.PROCESSING_JENKINS_URL + '/job/' + settings.PROCESSING_JENKINS_PROJECT + '/buildWithParameters',
-                              files=files, data=parameters,
+                              files=files, params=parameters,
                               auth=(settings.PROCESSING_JENKINS_USER, settings.PROCESSING_JENKINS_PASSWORD))
 
             if r.status_code < 400:
