@@ -64,8 +64,12 @@ def project_upload(request):
         template = 'projects/project_request.html'
     else:
         template = 'projects/project_upload.html'
+
+    projects = request.user.project_set.all().filter(active=True)
+
     context = {
-        'requested': False
+        'requested': False,
+        'projects': projects,
     }
     return render(request, template, context)
 
