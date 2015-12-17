@@ -216,6 +216,9 @@ class Cohort_Endpoints_API(remote.Service):
     def cohorts_list(self, request):
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         user_email = None
+        cursor = None
+        filter_cursor = None
+        db = None
 
         if endpoints.get_current_user() is not None:
             user_email = endpoints.get_current_user().email()
@@ -320,6 +323,9 @@ class Cohort_Endpoints_API(remote.Service):
                       name='cohorts.cohort_patients_samples_list')
     def cohort_patients_samples_list(self, request):
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+
+        db = None
+        cursor = None
         user_email = None
 
         if endpoints.get_current_user() is not None:
@@ -422,6 +428,11 @@ class Cohort_Endpoints_API(remote.Service):
                       path='patient_details', http_method='GET', name='cohorts.patient_details')
     def patient_details(self, request):
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+
+        clinical_cursor = None
+        sample_cursor = None
+        aliquot_cursor = None
+        db = None
 
         patient_barcode = request.__getattribute__('patient_barcode')
 
@@ -541,6 +552,13 @@ class Cohort_Endpoints_API(remote.Service):
                       path='sample_details', http_method='GET', name='cohorts.sample_details')
     def sample_details(self, request):
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+
+        biospecimen_cursor = None
+        aliquot_cursor = None
+        patient_cursor = None
+        data_cursor = None
+        db = None
+
         sample_barcode = request.__getattribute__('sample_barcode')
         biospecimen_query_str = 'select * ' \
                                 'from metadata_biospecimen ' \
@@ -697,6 +715,8 @@ class Cohort_Endpoints_API(remote.Service):
     def datafilenamekey_list(self, request):
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         user_email = None
+        cursor = None
+        db = None
         dbGaP_authorized = False
 
         if endpoints.get_current_user() is not None:
@@ -779,6 +799,9 @@ class Cohort_Endpoints_API(remote.Service):
     def save_cohort(self, request):
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         user_email = None
+        patient_cursor = None
+        sample_cursor = None
+        db = None
 
         if endpoints.get_current_user() is not None:
             user_email = endpoints.get_current_user().email()
@@ -890,7 +913,7 @@ class Cohort_Endpoints_API(remote.Service):
     def delete_cohort(self, request):
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         user_email = None
-        result_message = None
+        return_message = None
 
         if endpoints.get_current_user() is not None:
             user_email = endpoints.get_current_user().email()
