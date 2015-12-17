@@ -160,8 +160,8 @@
                             <div class="flyout-body">
                                 {% for comment in worksheet.comments %}
                                     <h5 class="comment-username">{{ comment.user.first_name }} {{ comment.user.last_name }}</h5>
-                                    <p class="comment-date">{{ comment.date_created }}</p>
                                     <p class="comment-content">{{ comment.content }}</p>
+                                    <p class="comment-date">{{ comment.date_created }}</p>
                                 {% endfor %}
                             </div>
                             <div class="flyout-footer">

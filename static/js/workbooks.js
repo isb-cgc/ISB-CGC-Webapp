@@ -99,15 +99,16 @@ require([
 
     // comments interactions
     $('.show-flyout').on('click', function() {
-        $('.comment-flyout').toggleClass('open');
         $('.comment-flyout').animate({
             right: '-1px'
-        }, 800);
+        }, 800).toggleClass('open');
     });
     $('.hide-flyout').on('click', function() {
         $(this).parents('.fly-out').animate({
             right: '-300px'
-        }, 800);
+        }, 800, function(){
+            $(this).removeClass('open');
+        })
     });
 
     $('.dropdown-menu').find("[data-toggle='modal']").click(function(){
@@ -131,8 +132,8 @@ require([
             success: function(data) {
                 data = JSON.parse(data);
                 $('.comment-flyout .flyout-body').append('<h5 class="comment-username">' + data['first_name'] + ' ' + data['last_name'] + '</h5>');
-                $('.comment-flyout .flyout-body').append('<p class="comment-date">' + data['date_created'] + '</p>');
                 $('.comment-flyout .flyout-body').append('<p class="comment-content">' + data['content'] + '</p>')
+                $('.comment-flyout .flyout-body').append('<p class="comment-date">' + data['date_created'] + '</p>');
                 form.reset();
             },
             error: function() {
