@@ -6,9 +6,15 @@ from django.core.files.storage import FileSystemStorage
 from django.core.exceptions import ValidationError
 from django.conf import settings
 
+import random
+import string
+
 storage_system = FileSystemStorage()
 if settings.USE_CLOUD_STORAGE is not 'False':
     storage_system = cloud_file_storage.CloudFileStorage()
+
+def generate_upload_key():
+    return ''.join(random.SystemRandom().choice(string.hexdigits) for _ in range(16))
 
 def get_user_bucket(instance, filename):
     bucket = ''
@@ -26,6 +32,7 @@ class UserUpload(models.Model):
     owner = models.ForeignKey(User, null=False, blank=False)
     status = models.CharField(max_length=50,default="Pending")
     jobURL = models.CharField(max_length=250,null=True)
+    key = models.CharField(max_length=64,default=generate_upload_key)
 
 class UserUploadedFile(models.Model):
     id = models.AutoField(primary_key=True)
