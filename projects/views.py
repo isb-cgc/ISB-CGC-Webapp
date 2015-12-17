@@ -39,7 +39,8 @@ def project_detail(request, project_id=0):
 
 
     context = {
-        'project': proj
+        'project': proj,
+        'studies': proj.study_set.all().filter(active=True)
     }
     return render(request, template, context)
 
@@ -104,8 +105,6 @@ def create_metadata_tables(user, study, columns, skipSamples=False):
 
             feature_table_sql += ")"
             cursor.execute(feature_table_sql, feature_table_args)
-
-
 
 @login_required
 def upload_files(request):
@@ -238,3 +237,24 @@ def upload_files(request):
         resp['redirect_url'] = '/projects/' + str(proj.id) + '/'
 
     return JsonResponse(resp)
+
+@login_required
+def project_delete(request, project_id=0):
+    proj = request.user.project_set.get(id=project_id)
+    proj.active = False
+    proj.save()
+
+    return JsonResponse({
+        'status': 'success'
+    })
+
+@login_required
+def study_delete(request, project_id=0, study_id=0):
+    proj = request.user.project_set.get(id=project_id)
+    study = proj.study_set.get(id=study_id)
+    study.active = False
+    study.save()
+
+    return JsonResponse({
+        'status': 'success'
+    })
