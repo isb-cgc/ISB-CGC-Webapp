@@ -950,7 +950,8 @@ class Meta_Endpoints_API(remote.Service):
             return MetadataPlatformItemList(items=data)
 
         except (IndexError, TypeError) as e:
-            print e
+            if cursor: cursor.close()
+            if db: db.close()
             raise endpoints.NotFoundException('Sample not found.')
 
 
@@ -1093,7 +1094,8 @@ class Meta_Endpoints_API(remote.Service):
             return MetadataItemList(items=data, total=len(data))
 
         except (IndexError, TypeError) as e:
-            print e
+            if cursor: cursor.close()
+            if db: db.close()
             raise endpoints.NotFoundException('Sample not found.')
 
 
@@ -1108,13 +1110,14 @@ class Meta_Endpoints_API(remote.Service):
         query_dict = {}
         sample_ids = None
         is_landing = False
-        db = sql_connection()
+
 
         if request.__getattribute__('is_landing') is not None:
             is_landing = request.__getattribute__('is_landing')
 
         if is_landing:
             try:
+                db = sql_connection()
                 cursor = db.cursor()
                 cursor.execute('SELECT Study, COUNT(Study) as disease_count FROM metadata_samples GROUP BY Study;')
                 data = []
@@ -1142,12 +1145,15 @@ class Meta_Endpoints_API(remote.Service):
             sample_query_str = 'SELECT sample_id FROM cohorts_samples WHERE cohort_id=%s;'
 
             try:
+                db = sql_connection()
                 cursor = db.cursor(MySQLdb.cursors.DictCursor)
                 cursor.execute(sample_query_str, (cohort_id,))
                 sample_ids = ()
 
                 for row in cursor.fetchall():
                     sample_ids += (row['sample_id'],)
+                cursor.close()
+                db.close()
 
             except (TypeError, IndexError) as e:
                 print e
@@ -1187,6 +1193,7 @@ class Meta_Endpoints_API(remote.Service):
             value_count_query_str += ' GROUP BY %s;' % key
 
             try:
+                db = sql_connection()
                 cursor = db.cursor()
                 cursor.execute(value_count_query_str, value_count_tuple)
 
@@ -1236,7 +1243,8 @@ class Meta_Endpoints_API(remote.Service):
                 cursor.close()
                 db.close()
             except (KeyError, TypeError) as e:
-
+                if cursor: cursor.close()
+                if db: db.close()
                 raise endpoints.NotFoundException('Error in getting value counts.')
 
         value_list_item = MetaAttrValuesList()
@@ -1285,6 +1293,8 @@ class Meta_Endpoints_API(remote.Service):
             return MetadataAttrList(items=data, count=len(data))
 
         except (IndexError, TypeError):
+            if cursor: cursor.close()
+            if db: db.close()
             raise endpoints.NotFoundException('Sample %s not found.' % (request.id,))
 
 
@@ -1340,7 +1350,8 @@ class Meta_Endpoints_API(remote.Service):
                             item_list.append(str(item[0]))
                     items[feature] = item_list
             items['age_at_initial_pathologic_diagnosis'] = ['10 to 39', '40 to 49', '50 to 59', '60 to 69', '70 to 79', 'Over 80', 'None']
-
+            cursor.close()
+            db.close()
             return MetaDomainsList(
                 gender                               = items['gender'],
                 history_of_neoadjuvant_treatment     = items['history_of_neoadjuvant_treatment'],
@@ -1373,6 +1384,8 @@ class Meta_Endpoints_API(remote.Service):
                 )
 
         except (IndexError, TypeError):
+            if cursor: cursor.close()
+            if db: db.close()
             raise endpoints.NotFoundException('Error in meta_domains')
 
 
@@ -1488,9 +1501,13 @@ class Meta_Endpoints_API(remote.Service):
                     file_list.append(FileDetails(sample=item['SampleBarcode'], cloudstorage_location=item['DatafileNameKey'], filename=item['DatafileName'], pipeline=item['Pipeline'], platform=item['Platform'], datalevel=item['DataLevel'], datatype=item['Datatype'], gg_readgroupset_id=item['GG_readgroupset_id']))
             else:
                 file_list.append(FileDetails(sample='None', filename='', pipeline='', platform='', datalevel=''))
+            cursor.close()
+            db.close()
             return SampleFiles(total_file_count=count, page=page, platform_count_list=platform_count_list, file_list=file_list)
 
         except (IndexError, TypeError):
+            if cursor: cursor.close()
+            if db: db.close()
             raise endpoints.ServiceException('Error getting counts')
 
 
@@ -1581,6 +1598,10 @@ class Meta_Endpoints_API(remote.Service):
             cursor.execute(platform_query, (sample_id,))
             for item in cursor.fetchall():
                 platform_list.append(PlatformCount(platform=item['Platform'], count=item['platform_count']))
+            cursor.close()
+            db.close()
             return SampleFiles(total_file_count=len(file_list), page=1, platform_count_list=platform_list, file_list=file_list)
         except Exception as e:
+            if cursor: cursor.close()
+            if db: db.close()
             raise endpoints.NotFoundException('Error getting file details: {}'.format(str(e)))

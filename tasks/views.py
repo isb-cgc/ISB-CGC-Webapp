@@ -423,7 +423,8 @@ def edit_dbGaP_authentication_list(nih_username):
 
     # 2. remove the line with the offending nih_username
     for row in rows:
-
+        # this will remove not only the user with the nih_username
+        # but also everyone who is a downloader for that user
         if nih_username in row:
             try:
                 rows.remove(row)
