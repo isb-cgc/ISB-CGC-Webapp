@@ -134,12 +134,12 @@ class Cohort(messages.Message):
     perm = messages.StringField(4)
     email = messages.StringField(5)
     comments = messages.StringField(6)
-    filter_name = messages.StringField(7)
-    filter_value = messages.StringField(8)
-    source_type = messages.StringField(9)
-    source_notes = messages.StringField(10)
-    parent_id = messages.IntegerField(11)
-    filters = messages.MessageField(FilterDetails, 12, repeated=True)
+    # filter_name = messages.StringField(7)
+    # filter_value = messages.StringField(8)
+    source_type = messages.StringField(7)
+    source_notes = messages.StringField(8)
+    parent_id = messages.IntegerField(9)
+    filters = messages.MessageField(FilterDetails, 10, repeated=True)
 
 class CohortsList(messages.Message):
     items = messages.MessageField(Cohort, 1, repeated=True)
@@ -197,11 +197,10 @@ class SavedCohort(messages.Message):
     name = messages.StringField(2)
     active = messages.StringField(3)
     last_date_saved = messages.StringField(4)
-    user_id = messages.StringField(5)  # for cohorts_cohort_perms. Not shown: perm (OWNER, READER)
-    filter_name = messages.StringField(6, repeated=True)  # for cohorts_filters.name
-    filter_value = messages.StringField(7, repeated=True)  # for cohorts_filters.value. Not shown: cohorts_filters.resulting_cohort_id
-    last_date_saved_alt = message_types.DateTimeField(8)
-    filters = messages.MessageField(FilterDetails, 9, repeated=True)
+    user_id = messages.StringField(5)
+    filters = messages.MessageField(FilterDetails, 6, repeated=True)
+    num_patients = messages.StringField(7)
+    num_samples = messages.StringField(8)
 
 
 Cohort_Endpoints = endpoints.api(name='cohort_api', version='v1', description="Get information about cohorts",
@@ -217,6 +216,9 @@ class Cohort_Endpoints_API(remote.Service):
     def cohorts_list(self, request):
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         user_email = None
+        cursor = None
+        filter_cursor = None
+        db = None
 
         if endpoints.get_current_user() is not None:
             user_email = endpoints.get_current_user().email()
@@ -240,7 +242,7 @@ class Cohort_Endpoints_API(remote.Service):
 
             query_dict = {'cohorts_cohort_perms.user_id': user_id, 'cohorts_cohort.active': unicode('1')}
 
-            if cohort_id and cohort_id.isdigit():
+            if cohort_id:
                 query_dict['cohorts_cohort.id'] = cohort_id
 
             query_str = 'select cohorts_cohort.id, ' \
@@ -273,11 +275,12 @@ class Cohort_Endpoints_API(remote.Service):
                 cursor.execute(query_str, query_tuple)
                 data = []
                 for row in cursor.fetchall():
-                    filter_query_str = 'select name, value ' \
-                                       'from cohorts_filters ' \
-                                       'where cohorts_filters.resulting_cohort_id=%s'
+                    filter_query_str = 'SELECT name, value ' \
+                                       'FROM cohorts_filters ' \
+                                       'WHERE cohorts_filters.resulting_cohort_id=%s'
+
                     filter_cursor = db.cursor(MySQLdb.cursors.DictCursor)
-                    filter_cursor.execute(filter_query_str, str(row['id']))
+                    filter_cursor.execute(filter_query_str, (str(row['id']),))
                     filter_data = []
                     for filter_row in filter_cursor.fetchall():
                         filter_data.append(FilterDetails(
@@ -292,30 +295,36 @@ class Cohort_Endpoints_API(remote.Service):
                         perm=str(row['perm']),
                         email=str(row['email']),
                         comments=str(row['comments']),
-                        # filter_name=str(row['filter_name']),
-                        # filter_value=str(row['filter_value']),
                         source_type=None if row['source_type'] is None else str(row['source_type']),
                         source_notes=None if row['source_notes'] is None else str(row['source_notes']),
                         parent_id=None if row['parent_id'] is None else int(row['parent_id']),
                         filters=filter_data
                     ))
                 cursor.close()
+                if filter_cursor: filter_cursor.close()
                 db.close()
                 return CohortsList(items=data, count=len(data))
-            except (IndexError, TypeError):
+            except (IndexError, TypeError) as e:
                 if cursor: cursor.close()
+                if filter_cursor: filter_cursor.close()
                 if db: db.close()
-                raise endpoints.NotFoundException("User %s's cohorts not found." % (request.id,))
+
+                raise endpoints.NotFoundException(
+                    "User {}'s cohorts not found. {}: {}".format(user_email, type(e), e))
         else:
-            raise endpoints.NotFoundException("Authentication failed.")
+            raise endpoints.UnauthorizedException("Authentication failed.")
 
 
     GET_RESOURCE = endpoints.ResourceContainer(cohort_id=messages.IntegerField(1, required=True),
                                                token=messages.StringField(2))
     @endpoints.method(GET_RESOURCE, CohortPatientsSamplesList,
-                      path='cohort_patients_samples_list', http_method='GET', name='cohorts.cohort_patients_samples_list')
+                      path='cohort_patients_samples_list', http_method='GET',
+                      name='cohorts.cohort_patients_samples_list')
     def cohort_patients_samples_list(self, request):
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+
+        db = None
+        cursor = None
         user_email = None
 
         if endpoints.get_current_user() is not None:
@@ -409,7 +418,7 @@ class Cohort_Endpoints_API(remote.Service):
                 raise endpoints.NotFoundException("Cohort %s not found." % (request.cohort_id),)
 
         else:
-            raise endpoints.NotFoundException("Authentication failed.")
+            raise endpoints.UnauthorizedException("Authentication failed.")
 
 
 
@@ -418,6 +427,11 @@ class Cohort_Endpoints_API(remote.Service):
                       path='patient_details', http_method='GET', name='cohorts.patient_details')
     def patient_details(self, request):
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+
+        clinical_cursor = None
+        sample_cursor = None
+        aliquot_cursor = None
+        db = None
 
         patient_barcode = request.__getattribute__('patient_barcode')
 
@@ -537,6 +551,13 @@ class Cohort_Endpoints_API(remote.Service):
                       path='sample_details', http_method='GET', name='cohorts.sample_details')
     def sample_details(self, request):
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+
+        biospecimen_cursor = None
+        aliquot_cursor = None
+        patient_cursor = None
+        data_cursor = None
+        db = None
+
         sample_barcode = request.__getattribute__('sample_barcode')
         biospecimen_query_str = 'select * ' \
                                 'from metadata_biospecimen ' \
@@ -693,6 +714,8 @@ class Cohort_Endpoints_API(remote.Service):
     def datafilenamekey_list(self, request):
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         user_email = None
+        cursor = None
+        db = None
         dbGaP_authorized = False
 
         if endpoints.get_current_user() is not None:
@@ -775,6 +798,9 @@ class Cohort_Endpoints_API(remote.Service):
     def save_cohort(self, request):
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         user_email = None
+        patient_cursor = None
+        sample_cursor = None
+        db = None
 
         if endpoints.get_current_user() is not None:
             user_email = endpoints.get_current_user().email()
@@ -834,7 +860,6 @@ class Cohort_Endpoints_API(remote.Service):
                 if sample_cursor: sample_cursor.close()
                 if db: db.close()
                 logger.warn(e)
-                # todo: more informative message
                 raise endpoints.NotFoundException("Error retrieving samples or patients")
 
             cohort_name = request.__getattribute__('name')
@@ -871,19 +896,12 @@ class Cohort_Endpoints_API(remote.Service):
                                name=cohort_name,
                                active='True',
                                last_date_saved=str(datetime.utcnow()),
-                               user_id=str(user_id)
+                               user_id=str(user_id),
+                               num_patients=str(len(patient_barcodes)),
+                               num_samples=str(len(sample_barcodes))
                                )
         else:
-            raise endpoints.NotFoundException("Authentication failed.")
-            # todo: make SavedCohort have num_patients and num_samples instead of filter_name, filter_value
-        # id = messages.StringField(1)
-        # name = messages.StringField(2)
-        # active = messages.StringField(3)
-        # last_date_saved = messages.StringField(4)
-        # user_id = messages.StringField(5)  # for cohorts_cohort_perms. Not shown: perm (OWNER, READER)
-        # filter_name = messages.StringField(6)  # for cohorts_filters.name
-        # filter_value = messages.StringField(7)  # for cohorts_filters.value. Not shown: cohorts_filters.resulting_cohort_id
-        # last_date_saved_alt = message_types.DateTimeField(8)
+            raise endpoints.UnauthorizedException("Authentication failed.")
 
 
     DELETE_RESOURCE = endpoints.ResourceContainer(cohort_id=messages.IntegerField(1, required=True),
@@ -894,7 +912,7 @@ class Cohort_Endpoints_API(remote.Service):
     def delete_cohort(self, request):
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         user_email = None
-        result_message = None
+        return_message = None
 
         if endpoints.get_current_user() is not None:
             user_email = endpoints.get_current_user().email()
