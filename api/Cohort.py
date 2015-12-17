@@ -275,7 +275,6 @@ class Cohort_Endpoints_API(remote.Service):
                 cursor.execute(query_str, query_tuple)
                 data = []
                 for row in cursor.fetchall():
-                    print >> sys.stderr, '\n\n' + str(row['id'])
                     filter_query_str = 'SELECT name, value ' \
                                        'FROM cohorts_filters ' \
                                        'WHERE cohorts_filters.resulting_cohort_id=%s'
