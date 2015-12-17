@@ -108,13 +108,13 @@ require([
                     'displayName': 'Sample Barcode',
                     test: function (col) { return !!(col.name.match(/barcode/i) && !col.name.match(/participant/i)); },
                     type: 'string',
-                    key: 'SampleBarcode',
+                    key: 'sample_barcode',
                 },
                 'participant': {
                     'displayName': 'Participant Barcode',
                     test: function (col) { return !!(col.name.match(/barcode/i) && col.name.match(/participant/i)); },
                     type: 'string',
-                    key: 'ParticipantBarcode',
+                    key: 'participant_barcode',
                 },
             },
             'Dictionary': {
@@ -456,7 +456,7 @@ require([
                     return true;
 
                 return 1 === _.reduce(file.processed.columns, function (n, col) {
-                        return !col.ignored && col.controlled && col.controlled.key == 'SampleBarcode' ? n + 1 : n;
+                        return !col.ignored && col.controlled && col.controlled.key == 'sample_barcode' ? n + 1 : n;
                     }, 0);
             }),
             platformPipelineValid = _.every(addedFiles, function (file) {
