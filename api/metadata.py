@@ -1110,13 +1110,14 @@ class Meta_Endpoints_API(remote.Service):
         query_dict = {}
         sample_ids = None
         is_landing = False
-        db = sql_connection()
+
 
         if request.__getattribute__('is_landing') is not None:
             is_landing = request.__getattribute__('is_landing')
 
         if is_landing:
             try:
+                db = sql_connection()
                 cursor = db.cursor()
                 cursor.execute('SELECT Study, COUNT(Study) as disease_count FROM metadata_samples GROUP BY Study;')
                 data = []
@@ -1144,12 +1145,15 @@ class Meta_Endpoints_API(remote.Service):
             sample_query_str = 'SELECT sample_id FROM cohorts_samples WHERE cohort_id=%s;'
 
             try:
+                db = sql_connection()
                 cursor = db.cursor(MySQLdb.cursors.DictCursor)
                 cursor.execute(sample_query_str, (cohort_id,))
                 sample_ids = ()
 
                 for row in cursor.fetchall():
                     sample_ids += (row['sample_id'],)
+                cursor.close()
+                db.close()
 
             except (TypeError, IndexError) as e:
                 print e
@@ -1189,6 +1193,7 @@ class Meta_Endpoints_API(remote.Service):
             value_count_query_str += ' GROUP BY %s;' % key
 
             try:
+                db = sql_connection()
                 cursor = db.cursor()
                 cursor.execute(value_count_query_str, value_count_tuple)
 
