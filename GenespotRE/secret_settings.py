@@ -9,6 +9,9 @@ SETTINGS = {
     'DEBUG': os.environ.get('DEBUG', False),
     'PROJECT_ID': os.environ.get('GCLOUD_PROJECT_ID'), # Google Cloud Project ID #
     'BQ_PROJECT_ID': os.environ.get('BIGQUERY_PROJECT_ID', os.environ.get('GCLOUD_PROJECT_ID')), # Google Cloud Project ID #
+    'PROJECT_NAME': os.environ.get('GCLOUD_PROJECT_NAME'),
+
+    'REQUEST_PROJECT_EMAIL': os.environ.get('REQUEST_PROJECT_EMAIL', 'request@example.com'),
 
     # TODO: Should be deleted at some point in favor of merged settings
     'CLOUD_BASE_URL': os.environ.get('CLOUD_BASE_URL', 'http://isb-cgc.appspot.com/'), # Deployed url
@@ -108,8 +111,19 @@ SETTINGS = {
     'OPEN_DATA_BUCKET': os.environ.get('OPEN_DATA_BUCKET'),
     'CONTROLLED_DATA_BUCKET': os.environ.get('CONTROLLED_DATA_BUCKET'),
 
+    'USE_CLOUD_STORAGE': os.environ.get('USE_CLOUD_STORAGE', 'False'),
+    'GCLOUD_BUCKET': os.environ.get('GOOGLE_STORAGE_BUCKET'),
+    'MEDIA_FOLDER': os.environ.get('MEDIA_FOLDER', 'uploads/'),
+
     # IGV Project ID
     'IGV_PROJECT_ID': os.environ.get('IGV_PROJECT_ID'),
+
+    # Processing
+    'PROCESSING_ENABLED': os.environ.get('PROCESSING_ENABLED', False),
+    'PROCESSING_JENKINS_URL': os.environ.get('PROCESSING_JENKINS_URL', 'http://localhost/jenkins'),
+    'PROCESSING_JENKINS_PROJECT': os.environ.get('PROCESSING_JENKINS_PROJECT', 'cgc-processing'),
+    'PROCESSING_JENKINS_USER': os.environ.get('PROCESSING_JENKINS_USER', 'user'),
+    'PROCESSING_JENKINS_PASSWORD': os.environ.get('PROCESSING_JENKINS_PASSWORD', ''),
 
     # SAML setting
     'SAML_FOLDER': os.environ.get('SAML_FOLDER'),

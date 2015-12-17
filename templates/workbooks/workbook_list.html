@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+{% block title %}Workbooks | ISB-CGC{% endblock %}}
+{% block extra_css_libs %}{% endblock %}
+{% block header %}{% endblock %}
+
+{% block link_page_name %}workbook_list{% endblock %}
+{% block page_name %}workbook_list{% endblock %}
+
+{% block page_header %}
+    <ol class="breadcrumb">
+        <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+    </ol>
+    <h1 class="page-header pull-left">Saved Workbooks</h1>
+    <form id="create-workbook" method="POST" action="{% url 'workbook_create' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary pull-right" ><i class="fa fa-plus"></i>Create Workbook</button>
+    </form>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="panel panel-default">
+        <div class="panel-body">
+             {% if workbooks %}
+                <table class="table table-striped tablesorter">
+                    <thead>
+                        <th class=""></th>
+                        <th class="name-col">Name</th>
+                        <th class="study-col">Worksheets</th>
+                        <th>Ownership</th>
+                        <th>Shared with</th>
+                        <th>Last Updated</th>
+                    </thead>
+                    <tbody>
+                        {% for workbook in workbooks %}
+                            <tr>
+                                <td class="control-col">
+                                    <div class="dropdown">
+                                        <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
+                                        <ul class="dropdown-menu">
+                                            {% if workbook.owner.id == user.id %}
+                                                <li><a href="{% url 'workbook_detail' workbook.id %}">Edit</a> </li>
+                                                <li><a href="">Duplicate</a> </li>
+                                                <li><a role="button">Delete</a></li>
+                                                <hr>
+                                                <li><a href="">Share</a></li>
+                                            {% else  %}
+                                                <li><a href="{% url 'workbook_detail' workbook.id %}">Duplicate</a> </li>
+                                                <li><a href="">Remove</a> </li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                </td>
+                                <td class="name-col"><a href="{% url 'workbook_detail' workbook.id %}">{{ workbook.name }}</a></td>
+                                <td> {{ workbook.worksheets|length }}</td>
+                                <td> {{ workbook.owner.first_name }} {{ workbook.owner.last_name }}</td>
+                                <td>({{ workbook.shares | length }})</td>
+                                <td> {{ workbook.last_date_saved}}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="center space-top-10">You don't have any saved workbooks yet <br>
+                <form method="POST" action="{% url 'workbook_create' %}" class="center">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-default" ><i class="fa fa-plus"></i>Create Workbook</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
+
+⇥
+{% block js_file %}{% static 'js/dashboard.js' %}{% endblock %}
+
+

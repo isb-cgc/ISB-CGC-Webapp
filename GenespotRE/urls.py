@@ -22,6 +22,7 @@ from django.conf import settings
 
 import views
 
+
 admin.autodiscover()
 
 urlpatterns = patterns('',
@@ -29,14 +30,13 @@ urlpatterns = patterns('',
     url(r'^$', views.landing_page, name='landing_page'),
     url(r'^user_landing/$', views.user_landing, name='user_landing'),
     url(r'^search_cohorts_viz/$', views.search_cohorts_viz, name='search_cohorts_viz'),
-    url(r'^css_test/', views.css_test),
+    url(r'^style_guide/', views.css_test),
     url(r'^users/$', views.user_list, name='users'),
     url(r'^users/(?P<user_id>\d+)/$', views.user_detail, name='user_detail'),
     url(r'^bucket_object_list/$', views.bucket_object_list, name='bucket_object_list'),
     url(r'^igv/$', views.igv, name='igv'),
-    url(r'^igv/(?P<readgroupset_id>\w{0,50})/$', views.igv, name='igv'),
-    url(r'^help/$', views.help, name='help'),
 
+    url(r'^workbooks/', include('workbooks.urls')),
     url(r'^cohorts/', include('cohorts.urls')),
     url(r'^visualizations/', include('visualizations.urls')),
     url(r'^admin/', include(admin.site.urls)),
@@ -44,7 +44,20 @@ urlpatterns = patterns('',
     url(r'^seqpeek/', include('seqpeek.urls')),
     url(r'session_security/', include('session_security.urls')),
     url(r'^tasks/', include('tasks.urls')),
+    url(r'^data/', include('data_upload.urls')),
     url(r'^_ah/health$', views.health_check),
+
+    # ------------------------------------------
+    # Blink views
+    # ------------------------------------------
+
+    url(r'^help/', views.help_page, name='help'),
+    url(r'^about/', views.about_page, name='about_page'),
+    url(r'^dashboard/', views.dashboard_page, name='dashboard'),
+
+    url(r'^projects/', include('projects.urls')),
+    url(r'^genes/', include('genes.urls')),
+    url(r'^variables/', include('variables.urls')),
 )
 
 if settings.NIH_AUTH_ON:

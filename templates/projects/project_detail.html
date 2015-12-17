@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+{% block title %}Project | ISB-CGC{% endblock %}}
+{% block extra_css_libs %}{% endblock %}
+{% block header %}{% endblock %}
+
+{% block link_page_name %}project_detail{% endblock %}
+{% block page_name %}project_detail{% endblock %}
+
+{% block page_header %}
+    <ol class="breadcrumb">
+        <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+        <li><a href="{% url 'projects' %}">Projects</a></li>
+    </ol>
+    <h1 class="page-header">{{ project.name }}</h1>
+    <p class="project-description">{{ project.description }}</p>
+    <ul class="page-action-group">
+        <li role="menuitem"><button class="btn btn-default">New Workbook</button></li>
+        <li class="separator"></li>
+        <li role="menuitem"><a href="{% url 'project_upload' %}" class="btn btn-info"><i class="fa fa-cloud-upload"></i>Upload Data</a></li>
+        <li role="menuitem"><button class="btn btn-info">Edit Details</button></li>
+        <li role="menuitem"><button class="btn btn-info project-delete" data-url="{% url 'project_delete' project.id %}" data-redirect="{% url 'projects' %}">Delete</button></li>
+        <li class="separator"></li>
+        <li role="menuitem"><button class="btn btn-info">Share</button></li>
+        <li role="menuitem"><button class="btn btn-link">Shared with (2)</button></li>
+    </ul>
+{% endblock %}
+{% block content %}
+    <div class="container">
+        <div class="error-messages"></div>
+        {% for study in studies %}
+        <section class="project-study panel panel-primary">
+            <div class="panel-heading clearfix">
+                <h4 class="panel-title pull-left">{{ study.name }}</h4>
+                <div class="dropdown pull-right">
+                    <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-gear"></i></a>
+                    <ul class="dropdown-menu">
+                        <li role="menuitem"><a href="">New Workbook</a></li>
+                        <li role="menuitem"><a href="">Edit Details</a></li>
+                        <li role="menuitem"><a data-url="{% url 'study_delete' project_id=project.id study_id=study.id %}" class="study-delete" role="button">Delete</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="panel-body">
+                {% if study.get_status == 'Processing' %}
+                <div class="message message-info alert alert-dismissible fade in">
+                    <p>Study Data is currently being processed.</p>
+                    <a class="close" data-dismiss="alert" aria-label="Close"><i class="fa fa-times" aria-hidden="true"></i></a>
+                </div>
+                {% elif study.get_status == 'Error' %}
+                <div class="message message-error alert alert-dismissible fade in">
+                    <p>Upload of study data has an error. Please delete the study and re-upload.</p>
+                    <a class="close" data-dismiss="alert" aria-label="Close"><i class="fa fa-times" aria-hidden="true"></i></a>
+                </div>
+                {% comment "Success message does not yet have technical implementation" %}
+                <div class="message message-success alert alert-dismissible fade in">
+                    Upload of study data is complete.
+                    <a class="close" data-dismiss="alert" aria-label="Close"><i class="fa fa-times" aria-hidden="true"></i></a>
+                </div>
+                {% endcomment %}
+                {% endif %}
+                <p>{{ study.description }}</p>
+                <dl>
+                    <dt>Created</dt>
+                    <dd>{{ study.last_date_saved }}</dd>
+                    <dt>Number of Files</dt>
+                    <dd>{{ study.get_file_count }}</dd>
+                </dl>
+            </div>
+        </section>
+        {% endfor %}
+
+    </div>
+{% endblock %}
+
+{% block js_file %}{% static 'js/project_details.js' %}{% endblock %}

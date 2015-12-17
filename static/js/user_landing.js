@@ -26,7 +26,8 @@ require.config({
         underscore: 'libs/underscore-min',
         assetscore: 'libs/assets.core',
         assetsresponsive: 'libs/assets.responsive',
-        tablesorter:'libs/jquery.tablesorter.min'
+        tablesorter:'libs/jquery.tablesorter.min',
+        base: 'base'
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -34,7 +35,8 @@ require.config({
         'session_security': ['jquery'],
         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
         'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
-        'tablesorter': ['jquery']
+        'tablesorter': ['jquery'],
+        'base': ['jquery'],
     }
 });
 
@@ -45,7 +47,8 @@ require([
     'session_security',
     'assetscore',
     'assetsresponsive',
-    'tablesorter'
+    'tablesorter',
+    'base'
 ], function($) {
     A11y.Core();
 
@@ -140,13 +143,14 @@ require([
             $('#share-cohorts-btn').prop('disabled', 'disabled');
             $('#delete-cohorts').prop('disabled', 'disabled');
             $('#cohorts-list .select-all').prop('checked', false);
-
+            //$('#cohorts-table').parent().find('.page-action-group .btn').prop('disabled', 'disabled');
             repopulate_cohort_selects();
 
         } else {
             $('#cohort-sets').removeAttr('disabled');
             $('#share-cohorts-btn').removeAttr('disabled');
             $('#delete-cohorts').removeAttr('disabled');
+            //$('#cohorts-table').parent().find('.page-action-group .btn').removeAttr('disabled');
             $('#cohorts-list input[type="checkbox"]').each(function() {
                 if ($(this).is(':checked') && $(this).val() != 'on') {
 
@@ -302,7 +306,8 @@ require([
             $(this).val('');
             $(this).hide();
             return false;
-        }
+        },
+        appendTo: '.cohort-search-div'
     }).hide();
 
     $.tablesorter.addParser({
@@ -329,6 +334,13 @@ require([
     });
 
     $('#cohort-table, #viz-table, #seqpeek-table').tablesorter({
+        headers: {
+            0: {sorter:false},
+            6: {sorter:'customDate'}
+        },
+        sortList: [[6,1]]
+    });
+    $('#public-cohort-table').tablesorter({
         headers: {
             0: {sorter:false},
             4: {sorter:'customDate'}

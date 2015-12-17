@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+
+{% block link_page_name %}data-upload-test{% endblock %}
+{% block page_name %}data-upload-test{% endblock %}
+
+{% block content %}
+    <form action="{% url 'project_data_upload' %}" method="POST" enctype="multipart/form-data">
+        <button type="button" class="upload-file-button btn btn-default">Select File(s)</button>
+        <ul class="upload-file-list"></ul>
+        <input class="upload-file-field hidden" type="file" name="file_uploads" multiple accept="text/tab-separated-values,.tsv">
+        {% csrf_token %}
+        <input type="submit" value="Upload" class="btn btn-primary">
+    </form>
+{% endblock %}
+
+{% block js_file %}{% static 'js/data_upload/upload.js' %}{% endblock %}
