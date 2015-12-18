@@ -1445,12 +1445,10 @@ class Meta_Endpoints_API(remote.Service):
             limit = request.limit
 
         platform_count_query = 'select Platform, count(Platform) as platform_count from metadata_data where SampleBarcode in (select sample_id from cohorts_samples where cohort_id=%s) and DatafileUploaded="true" '
-        count_query = 'select count(*) as row_count from metadata_data where SampleBarcode in (select sample_id from cohorts_samples where cohort_id=%s) and DatafileUploaded="true" '
         query = 'select SampleBarcode, DatafileName, DatafileNameKey, Pipeline, Platform, DataLevel, Datatype, GG_readgroupset_id from metadata_data where SampleBarcode in (select sample_id from cohorts_samples where cohort_id=%s) and DatafileUploaded="true" '
 
         if not is_dbGaP_authorized:
             platform_count_query += ' and SecurityProtocol="dbGap open-access" group by Platform;'
-            count_query += ' and SecurityProtocol="dbGap open-access" '
             query += ' and SecurityProtocol="dbGap open-access" '
         else:
             platform_count_query += ' group by Platform;'
@@ -1463,11 +1461,7 @@ class Meta_Endpoints_API(remote.Service):
                     platform_selector_list.append(key)
 
         if len(platform_selector_list):
-            count_query += ' and Platform in ("' + '","'.join(platform_selector_list) + '");'
             query += ' and Platform in ("' + '","'.join(platform_selector_list) + '")'
-
-        else:
-            count_query += ';'
 
         query_tuple = (cohort_id,)
         if limit != -1:
@@ -1478,17 +1472,17 @@ class Meta_Endpoints_API(remote.Service):
             query += ' offset %s'
             query_tuple += (offset,)
         query += ';'
-        db = sql_connection()
-        cursor = db.cursor(MySQLdb.cursors.DictCursor)
 
         try:
-            cursor.execute(count_query, (cohort_id,))
-            count = cursor.fetchone()['row_count']
+            db = sql_connection()
+            cursor = db.cursor(MySQLdb.cursors.DictCursor)
             cursor.execute(platform_count_query, (cohort_id,))
 
             platform_count_list = []
+            count = 0
             if cursor.rowcount > 0:
                 for row in cursor.fetchall():
+                    count += int(row['platform_count'])
                     platform_count_list.append(PlatformCount(platform=row['Platform'], count=row['platform_count']))
             else:
                 platform_count_list.append(PlatformCount(platform='None', count=0))
