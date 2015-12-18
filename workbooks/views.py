@@ -66,6 +66,7 @@ def workbook(request, workbook_id=0):
         for worksheet in workbook.worksheets:
             worksheet.comments = worksheet.get_comments();
 
+    workbook.mark_viewed(request)
     return render(request, template, {'workbook' : workbook})
 
 @login_required
