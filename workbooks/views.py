@@ -60,21 +60,23 @@ def workbook(request, workbook_id=0):
     elif request.method   == "GET" :
         workbook            = Workbook.objects.get(id=workbook_id)
         workbook.owner       = workbook.get_owner()
-        workbook.worksheets = workbook.get_worksheets();
+        workbook.worksheets = workbook.get_worksheets()
         workbook.shares     = workbook.get_shares()
 
         for worksheet in workbook.worksheets:
-            worksheet.comments = worksheet.get_comments();
+            worksheet.comments = worksheet.get_comments()
 
     return render(request, template, {'workbook' : workbook})
 
 @login_required
 def worksheet(request, workbook_id=0, worksheet_id=0):
-    command  = request.path.rsplit('/',1)[1];
+    command  = request.path.rsplit('/',1)[1]
+    query = ''
 
     if request.method == "POST" :
         if command == "create" :
-            Worksheet.create(workbook_id=workbook_id, name="new", description="add a description")
+            Worksheet.create(workbook_id=workbook_id, name=request.POST.get('name'), description=request.POST.get('description'))
+            query = '?q=new'
         elif command == "edit" :
             Worksheet.edit(id=worksheet_id, name=request.POST.get('name'), description=request.POST.get('description'))
         elif command == "copy" :
@@ -82,7 +84,7 @@ def worksheet(request, workbook_id=0, worksheet_id=0):
         elif command == "delete" :
             Worksheet.destroy(id=worksheet_id)
 
-    redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_id})
+    redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_id}) + query
     return redirect(redirect_url)
 
 

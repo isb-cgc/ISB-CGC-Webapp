@@ -74,8 +74,7 @@
     padding: 5px 10px
 
 .nav-tabs_excel
-    background-color: #fff
-    border-bottom: 1px solid darken($white, 15%)
+    background-color: $bg-color
     border-radius: 0px
     margin-left: 0px
     text-transform: capitalize
@@ -83,14 +82,13 @@
 
     > li
         display: inline-block
-        border-left: 1px solid darken($white, 5%)
         border-bottom: none
         border-radius: 2px
         height: 100%
         position: relative
         clear: both
         vertical-align: top
-        background: darken($white, 5%)
+        background: darken($white, 8%)
         
         &:hover
             &:after
@@ -113,8 +111,6 @@
             background: $white
             height: 102%
             border-top: 0
-            border-left: 1px solid darken($white, 5%)
-            border-right: 1px solid darken($white, 5%)
             &:after
                 display: block
             > a

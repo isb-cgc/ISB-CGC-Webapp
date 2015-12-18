@@ -155,6 +155,29 @@ require([
         $(this).toggleClass('open');
         $(this).parent().prev('.worksheet-nav').toggleClass('closed');
     })
+
+    // tabs interaction on dropdown selected
+    var moreTabs = $('#more-tabs');
+    var tabsList = $('#worksheets-tabs a[data-toggle="tab"]');
+    if(moreTabs.length > 0){
+        tabsList.on('show.bs.tab', function(e){
+            var targetTab = $(this).parent();
+
+            if($(this).closest('#more-tabs').length > 0){
+                console.log($(this).attr('href'));
+                openTabsfromDropdown(targetTab);
+            }
+        })
+    }
+
+    function openTabsfromDropdown(target){
+        var lastTabNum = 5;
+        var lastTab = tabsList[lastTabNum-1];
+
+        moreTabs.find('.dropdown-menu').prepend($(lastTab).parent().removeClass('active'));
+        moreTabs.before($(target));
+        moreTabs.removeClass('active');
+    }
     //search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id);
     //search_helper_obj.update_parsets(base_api_url, 'metadata_platform_list', cohort_id);
 });

@@ -41,12 +41,12 @@
 {% block content %}
 
 <div class="container">
-    <div class="panel panel-default">
+    <div class="panel-invisible" id="worksheets">
          <!-- tabs of worksheets -->
-        <ul class="nav nav-tabs_excel" id="worksheets">
+        <ul class="nav nav-tabs_excel" id="worksheets-tabs">
             <!-- for each worksheet in workbook -->
             {% for worksheet in workbook.worksheets %}
-                {% if forloop.counter < 4 %}
+                {% if forloop.counter < 6 %}
                     <li class="{% if forloop.counter == 1 %} active {% endif %}">
                          <a href="#{{ worksheet.id }}" data-toggle="tab">{{ worksheet.name }}</a>
                          {% if workbook.owner.id == request.user.id %}
@@ -63,23 +63,41 @@
                          </div>
                          {% endif %}
                     </li>
-                {% elif forloop.counter == 4  %}
-                    <li class="dropdown">
-                        <button class="btn btn-symbol" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-ellipsis-h"></i></button>
-                        <ul class="dropdown-menu">
-                            <li><a href="#{{ worksheet.id }}" data-toggle="tab">{{ worksheet.name }}</a></li>
-                        </ul>
-                    </li>
                 {% endif %}
             {% endfor %}
+            {% if workbook.worksheets|length > 5 %}
+                <li class="dropdown" id="more-tabs">
+                    <button class="btn btn-symbol" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-ellipsis-h"></i></button>
+                    <ul class="dropdown-menu">
+                    {% for worksheet in workbook.worksheets  %}
+                        {% if forloop.counter > 5 %}
+                        <li>
+                            <a href="#{{ worksheet.id }}" data-toggle="tab">{{ worksheet.name }}</a>
+                            <div class="dropdown">
+                                <a class="dropdown-toggle worksheet-drop" role="button" data-toggle="dropdown"><i class="fa fa-caret-down" ></i></a>
+                                <ul class="dropdown-menu">
+                                    <li role="menuitem"><a data-toggle="modal" role="button" data-target="#edit-worksheet-details-modal-{{ worksheet.id }}">Edit details</a></li>
+                                    <li role="menuitem"><a data-toggle="modal" role="button" data-target="#copy-worksheet-modal-{{ worksheet.id }}">Duplicate</a></li>
+                                    {% if workbook.worksheets|length > 1 %}
+                                    <li role="menuitem"><a data-toggle="modal" role="button" data-target="#delete-worksheet-modal-{{ worksheet.id }}">Delete</a></li>
+                                    {% endif %}
+                                </ul>
+                             </div>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    </ul>
+                </li>
+            {% endif %}
 
             <li>
-                <form id="worksheet_create_form" method="POST" action="{% url 'worksheet_create' workbook_id=workbook.id %}">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-symbol">
-                        <i class="fa fa-plus"></i>
-                    </button>
-                </form>
+                <a data-target="#create-worksheet-modal" data-toggle="modal"><i class="fa fa-plus"></i></a>
+                <!--<form id="worksheet_create_form" method="POST" action="{% url 'worksheet_create' workbook_id=workbook.id %}">-->
+                    <!--{% csrf_token %}-->
+                    <!--<button type="submit" class="btn btn-symbol">-->
+                        <!--<i class="fa fa-plus"></i>-->
+                    <!--</button>-->
+                <!--</form>-->
             </li>
         </ul>
         <div class="tab-content">
