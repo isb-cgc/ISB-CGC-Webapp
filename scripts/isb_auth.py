@@ -61,8 +61,9 @@ def maybe_print(msg):
 
 
 def get_credentials(storage=None, oauth_flow_args=[]):
-    if __name__ != '__main__':
-        oauth_flow_args = list( set(oauth_flow_args).add('--noauth_local_webserver') )
+    noweb = '--noauth_local_webserver'
+    if __name__ != '__main__' and noweb not in oauth_flow_args:
+        oauth_flow_args.append(noweb)
     if storage is None:
         storage = Storage(DEFAULT_STORAGE_FILE)
     credentials = storage.get()
