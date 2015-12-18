@@ -71,6 +71,36 @@
     .row-expand-button, .dropdown-arrow
       cursor: pointer
 
+    .row-expand-button
+      display: inline-block
+      height: 12px
+      width: 12px
+      position: relative
+
+      &:before
+        content: ""
+        display: block
+        height: 4px
+        width: 12px
+        margin-top: -2px
+        background-color: $font-color
+        position: absolute
+        top: 50%
+
+      &:after
+        transition: height $transition ease-in, margin $transition ease-in
+        display: block
+        height: 12px
+        margin: 0px auto 0px
+        width: 4px
+        background-color: $font-color
+        content: ""
+
+      &.is-expanded
+        &:after
+          height: 0px
+          margin-top: 6px
+
     .name-col
       width: 30%
 
@@ -86,3 +116,9 @@
 
         .fa
           padding-right: 8px
+
+.project-study
+  .dropdown
+    margin-right: 12px
+  h4
+    margin-top: 2px

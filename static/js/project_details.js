@@ -33,56 +33,37 @@ require([
 ], function($, jqueryui, bootstrap, session_security, _) {
     'use strict';
 
-    $('.study-delete').on('click', function () {
+    // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
+    $('.modal').on('hide.bs.modal', function() {
+        $(this).find('form')[0].reset();
+    }).find('form').on('submit', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
         var $this = $(this),
-            $study = $this.closest('.project-study');
+            fields = $this.serialize();
 
-        $study.addClass('panel-danger');
-        if(!window.confirm('Are you sure you want to delete this study?')) {
-            $study.removeClass('panel-danger');
-            return;
-        }
-
-        $study.fadeOut({ queue:false }).slideUp(function () {
-            $study.remove();
-        });
-
+        $this.find('.btn').addClass('btn-disabled').attr('disabled', true);
         $.ajax({
-            url: $this.data('url'),
-            method: 'DELETE'
-        }).fail(function () {
-            $('.error-messages').append(
+            url: $this.attr('action'),
+            data: fields,
+            method: 'POST'
+        }).then(function () {
+            $this.closest('.modal').modal('hide');
+            if($this.data('redirect')) {
+                window.location = $this.data('redirect');
+            } else {
+                window.location.reload();
+            }
+        }, function () {
+            $this.find('.error-messages').append(
                 $('<p>')
                     .addClass('alert alert-danger')
                     .text('There was an error deleting that study. Please reload and try again, or try again later.')
             );
         })
         .always(function () {
-            $study.removeClass('deleting');
-        });
-    });
-
-    $('.project-delete').on('click', function () {
-        var $this = $(this);
-
-        if(!window.confirm('Are you sure you want to delete this project?')) {
-            return;
-        }
-
-        $.ajax({
-            url: $this.data('url'),
-            method: 'DELETE'
-        }).then(function () {
-            window.location = $this.data('redirect');
-        }, function () {
-                $('.error-messages').append(
-                    $('<p>')
-                        .addClass('alert alert-danger')
-                        .text('We encountered an error, please try again later.')
-                );
-        })
-        .always(function () {
-            $study.removeClass('deleting');
+            $this.find('.btn').removeClass('btn-disabled').attr('disabled', false);
         });
     });
 });

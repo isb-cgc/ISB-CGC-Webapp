@@ -1267,6 +1267,33 @@ nav {
 #save-projects-list .table .row-expand-button, #save-projects-list .table .dropdown-arrow, #public-projects-list .table .row-expand-button, #public-projects-list .table .dropdown-arrow {
   cursor: pointer; }
 
+#save-projects-list .table .row-expand-button, #public-projects-list .table .row-expand-button {
+  display: inline-block;
+  height: 12px;
+  width: 12px;
+  position: relative; }
+  #save-projects-list .table .row-expand-button:before, #public-projects-list .table .row-expand-button:before {
+    content: "";
+    display: block;
+    height: 4px;
+    width: 12px;
+    margin-top: -2px;
+    background-color: black;
+    position: absolute;
+    top: 50%; }
+  #save-projects-list .table .row-expand-button:after, #public-projects-list .table .row-expand-button:after {
+    -webkit-transition: height 0.3s ease-in, margin 0.3s ease-in;
+    transition: height 0.3s ease-in, margin 0.3s ease-in;
+    display: block;
+    height: 12px;
+    margin: 0px auto 0px;
+    width: 4px;
+    background-color: black;
+    content: ""; }
+  #save-projects-list .table .row-expand-button.is-expanded:after, #public-projects-list .table .row-expand-button.is-expanded:after {
+    height: 0px;
+    margin-top: 6px; }
+
 #save-projects-list .table .name-col, #public-projects-list .table .name-col {
   width: 30%; }
 
@@ -1280,6 +1307,12 @@ nav {
   padding-left: 15px; }
   #save-projects-list .table .study .name-col .fa, #public-projects-list .table .study .name-col .fa {
     padding-right: 8px; }
+
+.project-study .dropdown {
+  margin-right: 12px; }
+
+.project-study h4 {
+  margin-top: 2px; }
 
 body {
   -webkit-transition: all 0.4s ease-in;

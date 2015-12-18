@@ -33,17 +33,14 @@ require([
 ], function($, jqueryui, bootstrap, session_security, _) {
     'use strict';
 
+    $('.study').css('display', 'none').removeClass('hidden');
     $('.row-expand-button').on('click', function (e) {
         var $this = $(this),
             studies = $this.closest('table').find('.study');
 
-        $this.data('expanded', !$this.data('expanded'));
+        $this.toggleClass('is-expanded');
+        studies.filter('[data-project-id="' + $this.closest('tr').data('project-id') + '"]')
+            .fadeToggle(300);
 
-        if($this.data('expanded')) {
-            studies.addClass('hidden');
-            studies.filter('[data-project-id="' + $this.closest('tr').data('project-id') + '"]').removeClass('hidden');
-        } else {
-            studies.addClass('hidden');
-        }
     })
 });
