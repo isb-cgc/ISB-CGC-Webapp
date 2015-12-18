@@ -61,9 +61,7 @@
 
 <main id="{% block page_name %}content{% endblock %}" class="main-content">
     <div class="page-heading">
-        <div class="container">
-            {% block page_header %}{% endblock %}
-        </div>
+        {% block page_header %}{% endblock %}
     </div>
     <div class="container">
         {% if messages %}

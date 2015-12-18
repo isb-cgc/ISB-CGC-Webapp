@@ -8,11 +8,13 @@
 {% block page_name %}genes_edit{% endblock %}
 
 {% block page_header %}
+<div class="container">
     <ol class="breadcrumb">
         <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
         <li><a href="{% url 'genes' %}">Saved Gene Favorites</a></li>
     </ol>
     <h1 class="page-header">Edit Gene Favorite</h1>
+</div>
 {% endblock %}
 {% block content %}
 <div class="container">
@@ -43,10 +45,10 @@
                 </div>
                 <ul class="page-action-group">
                     {% if '/create/' in request.path %}
-                        <li role="menuitem"><submit class="btn btn-default">Save as Favorite</submit></li>
+                        <li role="menuitem"><submit class="btn btn-primary">Save as Favorite</submit></li>
                         <li role="menuitem"><a href="{% url 'genes' %}">Cancel</a></li>
                     {% else %}
-                        <li role="menuitem"><submit class="btn btn-default">Save Changes</submit></li>
+                        <li role="menuitem"><submit class="btn btn-primary">Save Changes</submit></li>
                         <li role="menuitem"><menuitem class="btn btn-link"><a href="{% url 'genes_detail' 0 %}">Cancel</a></menuitem></li>
                     {% endif %}
                     <menuitem class="btn btn-link pull-right"><a href="">View System Gene Identifiers</a></menuitem>

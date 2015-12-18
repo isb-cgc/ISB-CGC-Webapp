@@ -1,6 +1,16 @@
 .main-content
     margin-top: 55px
 
+%clearfix
+    &:after
+        visibility: hidden
+        display: block
+        font-size: 0
+        content: " "
+        clear: both
+        height: 0
+
+
 // TODO: Refactor this into our styles
 /********************************************
  * Main General Styles
@@ -84,7 +94,8 @@ nav
 
 .breadcrumb
     font-size: $font-size-small
-    margin: 15px 0
+    margin: 0
+    padding: 8px 0 0 0
     li:before
       display: none
     li:after
