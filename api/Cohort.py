@@ -415,7 +415,7 @@ class Cohort_Endpoints_API(remote.Service):
             except (IndexError, TypeError):
                 if cursor: cursor.close()
                 if db: db.close()
-                raise endpoints.NotFoundException("Cohort %s not found." % (request.cohort_id),)
+                raise endpoints.NotFoundException("Cohort {} not found.".format(cohort_id))
 
         else:
             raise endpoints.UnauthorizedException("Authentication failed.")
@@ -543,7 +543,7 @@ class Cohort_Endpoints_API(remote.Service):
             if sample_cursor: sample_cursor.close()
             if aliquot_cursor: aliquot_cursor.close()
             if db: db.close()
-            raise endpoints.NotFoundException("Patient %s not found." % (str(request.patient_barcode),))
+            raise endpoints.NotFoundException("Patient {} not found.".format(patient_barcode))
 
 
     GET_RESOURCE = endpoints.ResourceContainer(sample_barcode=messages.StringField(1, required=True),
@@ -708,7 +708,7 @@ class Cohort_Endpoints_API(remote.Service):
             if patient_cursor: patient_cursor.close()
             if data_cursor: data_cursor.close()
             if db: db.close()
-            raise endpoints.NotFoundException("Sample %s not found." % (str(request.sample_barcode),))
+            raise endpoints.NotFoundException("Sample {} not found.".format(sample_barcode))
 
 
     GET_RESOURCE = endpoints.ResourceContainer(sample_barcode=messages.StringField(1, required=True),
@@ -741,7 +741,9 @@ class Cohort_Endpoints_API(remote.Service):
                 nih_user = NIH_User.objects.get(user_id=user_id)
                 dbGaP_authorized = nih_user.dbGaP_authorized and nih_user.active
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
-                logger.warn(e)
+                if type(e) is MultipleObjectsReturned:
+                    logger.warn(e)
+
                 # raise endpoints.NotFoundException("%s does not have an entry in the user database." % user_email)
 
 
@@ -788,11 +790,11 @@ class Cohort_Endpoints_API(remote.Service):
             db.close()
             return DataFileNameKeyList(datafilenamekeys=datafilenamekeys, count=len(datafilenamekeys))
 
-        except (IndexError, TypeError), e:
+        except (IndexError, TypeError, Exception) as e:
             logger.warn(e)
             if cursor: cursor.close()
             if db: db.close()
-            raise endpoints.NotFoundException("Sample %s not found." % (str(request.sample_barcode),))
+            raise endpoints.NotFoundException("Sample {} not found.".format(sample_barcode))
 
 
     POST_RESOURCE = endpoints.ResourceContainer(IncomingMetadataItem,
