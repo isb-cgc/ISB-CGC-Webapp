@@ -1393,7 +1393,7 @@ class Meta_Endpoints_API(remote.Service):
                                                page=messages.IntegerField(2),
                                                limit=messages.IntegerField(3),
                                                token=messages.StringField(4),
-                                               platform_count_only=messages.BooleanField(5)
+                                               platform_count_only=messages.StringField(5)
                                                )
     @endpoints.method(GET_RESOURCE, SampleFiles,
                       path='cohort_files', http_method='GET',
