@@ -1299,6 +1299,12 @@ nav {
   #save-projects-list .table .study .name-col .fa, #public-projects-list .table .study .name-col .fa {
     padding-right: 8px; }
 
+.project-study .dropdown {
+  margin-right: 12px; }
+
+.project-study h4 {
+  margin-top: 2px; }
+
 body {
   -webkit-transition: all 0.4s ease-in;
   transition: all 0.4s ease-in; }

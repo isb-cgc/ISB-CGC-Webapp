@@ -266,12 +266,61 @@ def project_delete(request, project_id=0):
     })
 
 @login_required
+def project_edit(request, project_id=0):
+    name = request.POST['name']
+    description = request.POST['description']
+
+    if not name:
+        raise Exception("Projects cannot have an empty name")
+
+    proj = request.user.project_set.get(id=project_id)
+    proj.name = name
+    proj.description = description
+    proj.save()
+
+    return JsonResponse({
+        'status': 'success'
+    })
+
+@login_required
+def project_share(request):
+    # TODO
+    return JsonResponse({
+        'status': 'success'
+    })
+
+@login_required
 def study_delete(request, project_id=0, study_id=0):
     proj = request.user.project_set.get(id=project_id)
     study = proj.study_set.get(id=study_id)
     study.active = False
     study.save()
 
+    return JsonResponse({
+        'status': 'success'
+    })
+
+@login_required
+def study_edit(request, project_id=0, study_id=0):
+    name = request.POST['name']
+    description = request.POST['description']
+
+    if not name:
+        raise Exception("Projects cannot have an empty name")
+
+    proj = request.user.project_set.get(id=project_id)
+    study = proj.study_set.get(id=study_id)
+    study.name = name
+    study.description = description
+    study.save()
+
+    return JsonResponse({
+        'status': 'success'
+    })
+
+@login_required
+def study_share(request, project_id=0, study_id=0):
+    # TODO
     return JsonResponse({
         'status': 'success'
     })
