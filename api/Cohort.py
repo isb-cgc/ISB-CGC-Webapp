@@ -703,11 +703,21 @@ class Cohort_Endpoints_API(remote.Service):
 
         except (IndexError, TypeError, Exception) as e:
             logger.warn(e)
-            if biospecimen_cursor: biospecimen_cursor.close()
-            if aliquot_cursor: aliquot_cursor.close()
-            if patient_cursor: patient_cursor.close()
-            if data_cursor: data_cursor.close()
-            if db: db.close()
+            if biospecimen_cursor:
+                biospecimen_cursor.close()
+                logger.info("biospecimen_cursor closed")
+            if aliquot_cursor:
+                aliquot_cursor.close()
+                logger.info("aliquot_cursor closed")
+            if patient_cursor:
+                patient_cursor.close()
+                logger.info("patient_cursor closed")
+            if data_cursor:
+                data_cursor.close()
+                logger.info("data_cursor closed")
+            if db:
+                db.close()
+                logger.info("db connection closed")
             raise endpoints.NotFoundException("Sample {} not found.".format(sample_barcode))
 
 
