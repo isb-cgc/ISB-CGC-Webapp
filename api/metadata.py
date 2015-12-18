@@ -1156,7 +1156,6 @@ class Meta_Endpoints_API(remote.Service):
                 db.close()
 
             except (TypeError, IndexError) as e:
-                print e
                 raise endpoints.NotFoundException('Error in retrieving barcodes.')
 
 
