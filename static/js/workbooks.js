@@ -99,13 +99,14 @@ require([
 
     // comments interactions
     $('.show-flyout').on('click', function() {
-        $('.comment-flyout').animate({
+        var target = $(this).closest('.worksheet').find('.comment-flyout');
+        $(target).animate({
             right: '-1px'
         }, 800).toggleClass('open');
     });
     $('.hide-flyout').on('click', function() {
         $(this).parents('.fly-out').animate({
-            right: '-300px'
+            right: '-400px'
         }, 800, function(){
             $(this).removeClass('open');
         })
@@ -134,10 +135,12 @@ require([
                 $('.comment-flyout .flyout-body').append('<h5 class="comment-username">' + data['first_name'] + ' ' + data['last_name'] + '</h5>');
                 $('.comment-flyout .flyout-body').append('<p class="comment-content">' + data['content'] + '</p>')
                 $('.comment-flyout .flyout-body').append('<p class="comment-date">' + data['date_created'] + '</p>');
+
                 form.reset();
             },
             error: function() {
                 console.log('Failed to save comment.');
+                $('.comment-flyout .flyout-body').append('<p class="comment-content error">Fail to save comment. Please try back later.</p>')
                 form.reset()
             }
 

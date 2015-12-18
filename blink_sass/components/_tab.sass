@@ -121,9 +121,11 @@
                 border-bottom: none
                 color: $isb-warning
                 background: $white
-            .dropdown-container > a
+            .dropdown > a
                 color: $isb-warning
                 display: inline-block
+                &[aria-expanded="true"]
+                    background-color: darken($white, 10%)
         
         > a
             color: $font-color
@@ -132,10 +134,10 @@
             &:hover, &:focus
                 background-color: transparent
 
-
-
-        .dropdown-container
+        .dropdown
             display: inline-block
+            .dropdown-menu
+                background: darken($white, 10%)
             > a
                 color: $font-color
                 padding: 5px

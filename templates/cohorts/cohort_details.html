@@ -38,7 +38,7 @@
 
         <ul id="default-cohort-menu">
             {% if cohort.perm.perm != 'OWNER' %}
-                <li class="menu-item"><h4>Owner: {{ cohort.owner }}</h4></li>
+                <li class="menu-item"><h4>Owner: {{ cohort.owner.first_name|title}} {{ cohort.owner.last_name|title }}</h4></li>
                 <li class="separator"></li>
             {% endif %}
             <li class="menu-item"><a href="" class="btn btn-default">New Workbook</a></li>
@@ -72,7 +72,7 @@
 {% endblock %}
 
 {% block content %}
-    <div id="filter-panel" class="col-lg-4" style="display:none;">
+    <div id="filter-panel" class="col-lg-4 col-md-4" style="display:none;">
         <div class="tabpanel" role="tabpanel">
             <ul class="nav nav-tabs" role="tablist">
                 <li role="presentation" class="active"><a href="#clinical-filters" role="tab" data-toggle="tab" title="Donor Filters">Donor</a></li>

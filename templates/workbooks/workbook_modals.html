@@ -59,11 +59,11 @@
                 </ul>
             </div>
             <div class="tab-content">
-                {% if workbook.owner == request.user %}
+                {% if workbook.owner.id == request.user.id %}
                 <form class="tab-pane fade in active" id="share" method="POST" action="{% url 'workbook_share' workbook.id %}">
                     {% csrf_token %}
                     <div class="modal-body">
-                        <label for="share-users">Enter email addresses separated by a comma</label>
+                        <label for="share_users">Enter email addresses separated by a comma</label>
                         <textarea class="form-control" name="share_users"></textarea>
                     </div>
                     <div class="modal-footer">
