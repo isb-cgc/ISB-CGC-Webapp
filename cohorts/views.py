@@ -632,7 +632,8 @@ def cohort_filelist(request, cohort_id=0):
 
     token = SocialToken.objects.filter(account__user=request.user, account__provider='Google')[0].token
     data_url = METADATA_API + ('/cohort_files?cohort_id=%s&token=%s' % (cohort_id, token))
-    result = urlfetch.fetch(data_url, deadline=60)
+    print data_url
+    result = urlfetch.fetch(data_url, deadline=120)
     items = json.loads(result.content)
     file_list = []
     if 'file_list' in items:
