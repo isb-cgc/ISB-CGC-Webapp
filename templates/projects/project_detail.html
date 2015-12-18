@@ -23,8 +23,10 @@
         <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#edit-project-details-modal">Edit Details</button></li>
         <li role="menuitem"><button class="btn btn-info project-delete" data-toggle="modal" data-target="#delete-project-modal">Delete</button></li>
         <li class="separator"></li>
+        {% if project.owner.id == user.id %}
         <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#share-project-modal">Share</button></li>
-        <li role="menuitem"><button class="btn btn-link" data-toggle="modal" data-target="#share-project-modal">Shared with (2)</button></li>
+        {% endif %}
+        <li role="menuitem"><button class="btn btn-link" data-toggle="modal" data-target="#share-project-modal">Shared with ({{ project.shared.count }})</button></li>
     </ul>
 </div>
 {% endblock %}

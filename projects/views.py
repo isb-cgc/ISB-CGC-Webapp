@@ -4,6 +4,7 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.conf import settings
+from django.db.models import Q
 from django.http import JsonResponse, HttpResponseNotFound
 from django.conf import settings
 from django.db import connection
@@ -19,9 +20,12 @@ import requests
 def project_list(request):
     template = 'projects/project_list.html'
 
+    projects = Project.objects.all().filter(Q(owner=request.user) | Q(shared__matched_user=request.user, shared__active=True)
+                                            ,active=True)
+
     # TODO Handle sharing
     context = {
-        'projects': request.user.project_set.all().filter(active=True),
+        'projects': projects,
         'public_projects': Project.objects.all().filter(is_public=True,active=True)
     }
     return render(request, template, context)
@@ -31,13 +35,8 @@ def project_detail(request, project_id=0):
     # """ if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name """
     template = 'projects/project_detail.html'
 
-    # TODO Handle sharing
-    proj = Project.objects.get(id=project_id,active=True)
-
-    if proj.owner_id != request.user.id and not proj.is_public:
-        # Project is not the user's and is not public, return 404
-        return HttpResponseNotFound('Project Not Found');
-
+    proj = Project.objects.get(Q(owner=request.user) | Q(shared__matched_user=request.user, shared__active=True)
+                                            ,active=True,id=project_id)
 
     context = {
         'project': proj,
