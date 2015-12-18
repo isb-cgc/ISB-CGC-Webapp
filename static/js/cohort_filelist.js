@@ -96,6 +96,10 @@ require([
         } else {
             $('.menu-items-right ul li a').attr('href', download_url)
         }
+
+        $('#prev-page').addClass('disabled');
+        $('#next-page').addClass('disabled');
+        $('#content-panel .spinner i').removeClass('hidden');
         $.ajax({
             url: url,
             success: function (data) {
@@ -131,9 +135,11 @@ require([
                 if (parseInt(page) * 20 > total_files) {
                     $('#next-page').addClass('disabled');
                 }
+                $('#content-panel .spinner i').addClass('hidden');
             },
             error: function(e) {
                 console.log(e);
+                $('#content-panel .spinner i').addClass('hidden');
             }
         })
     };
