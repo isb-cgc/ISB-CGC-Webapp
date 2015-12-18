@@ -68,7 +68,7 @@
             {% if workbook.worksheets|length > 5 %}
                 <li class="dropdown" id="more-tabs">
                     <button class="btn btn-symbol" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-ellipsis-h"></i></button>
-                    <ul class="dropdown-menu">
+                    <ul class="dropdown-menu" id="worksheets-dropdown-menu">
                     {% for worksheet in workbook.worksheets  %}
                         {% if forloop.counter > 5 %}
                         <li>
