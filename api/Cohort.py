@@ -718,7 +718,8 @@ class Cohort_Endpoints_API(remote.Service):
             if db:
                 db.close()
                 logger.info("db connection closed")
-            raise endpoints.NotFoundException("Sample {} not found.".format(sample_barcode))
+            logger.info(sample_barcode)
+            raise endpoints.NotFoundException("Sample not found.")
 
 
     GET_RESOURCE = endpoints.ResourceContainer(sample_barcode=messages.StringField(1, required=True),
