@@ -701,7 +701,7 @@ class Cohort_Endpoints_API(remote.Service):
                                  patient=patient_barcode, data_details=data_data,
                                  data_details_count=len(data_data))
 
-        except (IndexError, TypeError), e:
+        except (IndexError, TypeError, Exception) as e:
             logger.warn(e)
             if biospecimen_cursor: biospecimen_cursor.close()
             if aliquot_cursor: aliquot_cursor.close()

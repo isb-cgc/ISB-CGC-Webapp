@@ -69,7 +69,9 @@ def main():
     args = sys.argv[1:]
     check(args, 'usage: isb_curl.py <curl arguments>')
     access_token = get_access_token()
+
     curl_args = ['curl', '-H', 'Authorization: Bearer ' + access_token] + args
+    # possibly append '?token=' + access_token or '&token=' + access_token instead??
     os.execvp('curl', curl_args)
 
 
