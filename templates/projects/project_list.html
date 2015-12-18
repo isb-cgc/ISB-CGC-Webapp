@@ -63,6 +63,7 @@
                             <td>(0)</td>
                             <td>{{ project.last_date_saved|date:"SHORT_DATETIME_FORMAT" }}</td>
                         {% for study in project.study_set.all %}
+                        {% if study.active %}
                         </tr>
                         <tr class="study hidden" data-project-id="{{ project.id }}">
                             <td class="control-col">
@@ -80,6 +81,7 @@
                             <td></td>
                             <td></td>
                             <td>{{ study.last_date_saved|date:"SHORT_DATETIME_FORMAT" }}</td>
+                        {% endif %}
                         {% endfor %}
                         </tr>
                         {% endfor %}
