@@ -456,6 +456,8 @@ class Cohort_Endpoints_API(remote.Service):
             clinical_cursor = db.cursor(MySQLdb.cursors.DictCursor)
             clinical_cursor.execute(clinical_query_str, query_tuple)
             row = clinical_cursor.fetchone()
+            if row is None:
+                raise endpoints.NotFoundException("Patient barcode {} not found in metadata_clinical table.".format(patient_barcode))
             item = MetadataItem(
                 age_at_initial_pathologic_diagnosis=None if "age_at_initial_pathologic_diagnosis" not in row or row["age_at_initial_pathologic_diagnosis"] is None else int(row["age_at_initial_pathologic_diagnosis"]),
                 anatomic_neoplasm_subdivision=str(row["anatomic_neoplasm_subdivision"]),
@@ -617,6 +619,8 @@ class Cohort_Endpoints_API(remote.Service):
             biospecimen_cursor = db.cursor(MySQLdb.cursors.DictCursor)
             biospecimen_cursor.execute(biospecimen_query_str, query_tuple)
             row = biospecimen_cursor.fetchone()
+            if row is None:
+                raise endpoints.NotFoundException("Sample barcode {} not found in metadata_biospecimen table.".format(sample_barcode))
             item = MetadataItem(
                 avg_percent_lymphocyte_infiltration=None if "avg_percent_lymphocyte_infiltration" not in row or row["avg_percent_lymphocyte_infiltration"] is None else float(row["avg_percent_lymphocyte_infiltration"]),
                 avg_percent_monocyte_infiltration=None if "avg_percent_monocyte_infiltration" not in row or row["avg_percent_monocyte_infiltration"] is None else float(row["avg_percent_monocyte_infiltration"]),
@@ -659,6 +663,8 @@ class Cohort_Endpoints_API(remote.Service):
             patient_cursor = db.cursor(MySQLdb.cursors.DictCursor)
             patient_cursor.execute(patient_query_str, query_tuple)
             row = patient_cursor.fetchone()
+            if row is None:
+                raise endpoints.NotFoundException("Sample barcode {} not found in metadata_biospecimen table.".format(sample_barcode))
             patient_barcode = str(row["ParticipantBarcode"])
 
             data_cursor = db.cursor(MySQLdb.cursors.DictCursor)
