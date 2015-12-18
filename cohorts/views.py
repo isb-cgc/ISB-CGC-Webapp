@@ -665,7 +665,7 @@ def cohort_filelist_ajax(request, cohort_id=0):
     for key in request.GET:
         data_url += '&' + key + '=' + request.GET[key]
 
-    result = urlfetch.fetch(data_url, deadline=60)
+    result = urlfetch.fetch(data_url, deadline=120)
 
     return HttpResponse(result.content, status=200)
 
