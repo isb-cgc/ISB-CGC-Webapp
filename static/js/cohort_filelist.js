@@ -89,7 +89,7 @@ require([
         var url = ajax_update_url + '?page=' + page;
 
         if (selector_list.length) {
-            for (selector in selector_list) {
+            for (var selector in selector_list) {
                 url += '&' + selector_list[selector] + '=True';
             }
             $('.menu-items-right ul li a').attr('href', download_url + '?params=' + selector_list.join(','))
@@ -104,7 +104,7 @@ require([
             url: url,
             success: function (data) {
                 data = JSON.parse(data);
-                total_files = data['total_file_count'];
+                var total_files = data['total_file_count'];
                 $('.filelist-panel .panel-body .file-count').html(total_files);
                 $('.filelist-panel .panel-body .page-num').html(page);
                 var files = data['file_list'];
@@ -161,6 +161,7 @@ require([
 
         //TODO: update download url
         update_table();
-    })
+    });
 
+    update_table();
 });
