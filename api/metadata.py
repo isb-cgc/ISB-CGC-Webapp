@@ -1392,7 +1392,8 @@ class Meta_Endpoints_API(remote.Service):
                                                cohort_id=messages.IntegerField(1, required=True),
                                                page=messages.IntegerField(2),
                                                limit=messages.IntegerField(3),
-                                               token=messages.StringField(4)
+                                               token=messages.StringField(4),
+                                               platform_count_only=messages.BooleanField(5)
                                                )
     @endpoints.method(GET_RESOURCE, SampleFiles,
                       path='cohort_files', http_method='GET',
@@ -1403,11 +1404,13 @@ class Meta_Endpoints_API(remote.Service):
         offset = 0
         cohort_id = request.cohort_id
 
+        platform_count_only = request.__getattribute__('platform_count_only')
         is_dbGaP_authorized = False
         user_email = None
         user_id = None
         if endpoints.get_current_user() is not None:
             user_email = endpoints.get_current_user().email()
+
         # users have the option of pasting the access token in the query string
         # or in the 'token' field in the api explorer
         # but this is not required
@@ -1485,15 +1488,15 @@ class Meta_Endpoints_API(remote.Service):
                     platform_count_list.append(PlatformCount(platform=row['Platform'], count=row['platform_count']))
             else:
                 platform_count_list.append(PlatformCount(platform='None', count=0))
-            cursor.execute(query, query_tuple)
 
             file_list = []
-
-            if cursor.rowcount > 0:
-                for item in cursor.fetchall():
-                    file_list.append(FileDetails(sample=item['SampleBarcode'], cloudstorage_location=item['DatafileNameKey'], filename=item['DatafileName'], pipeline=item['Pipeline'], platform=item['Platform'], datalevel=item['DataLevel'], datatype=item['Datatype'], gg_readgroupset_id=item['GG_readgroupset_id']))
-            else:
-                file_list.append(FileDetails(sample='None', filename='', pipeline='', platform='', datalevel=''))
+            if not platform_count_only:
+                cursor.execute(query, query_tuple)
+                if cursor.rowcount > 0:
+                    for item in cursor.fetchall():
+                        file_list.append(FileDetails(sample=item['SampleBarcode'], cloudstorage_location=item['DatafileNameKey'], filename=item['DatafileName'], pipeline=item['Pipeline'], platform=item['Platform'], datalevel=item['DataLevel'], datatype=item['Datatype'], gg_readgroupset_id=item['GG_readgroupset_id']))
+                else:
+                    file_list.append(FileDetails(sample='None', filename='', pipeline='', platform='', datalevel=''))
             cursor.close()
             db.close()
             return SampleFiles(total_file_count=count, page=page, platform_count_list=platform_count_list, file_list=file_list)
