@@ -33,8 +33,6 @@
                     <h3><a href="{% url 'cohort_details' cohort.id %}" aria-label="Back to Cohort"><i class="fa fa-chevron-left"></i> {{ cohort.name }}</a></h3>
                 </div>
                 <div class="menu-items-right col-md-4">
-{#                    <a class="btn btn-default space-top-5" id="cancel-add-filter-btn" style="display:none;">Cancel</a>#}
-{#                    <a class="btn btn-primary space-top-5" data-toggle="modal" data-target="#apply-filters-modal" style="display:none;">Apply New Filters</a>#}
                     <div class="dropdown dropdown-menu-right space-top-5">
                         <a role="button" class="dropdown-toggle " type="button" id="create-dropdown" data-toggle="dropdown" aria-label="Dropdown Menu" aria-expanded="true">
                             <i class="fa fa-bars"></i>
@@ -73,9 +71,12 @@
                 <h4>File Listing</h4>
             </div>
             <div class="panel-body">
-                <p>Showing 20 files of <span class="file-count">{{ file_count }}</span>. Page: <span class="page-num">{{ page }}</span></p>
-                <a role="button" id="prev-page" class="btn btn-default disabled">Previous Page</a>
-                <a role="button" id="next-page" class="btn btn-default">Next Page</a>
+                <p>Showing 20 files of <span class="file-count">unknown</span>. Page: <span class="page-num">1</span></p>
+                <div>
+                    <a role="button" id="prev-page" class="btn btn-default disabled">Previous Page</a>
+                    <a role="button" id="next-page" class="btn btn-default">Next Page</a>
+                    <span class="spinner"><i class="fa fa-spin fa-spinner hidden"></i></span>
+                </div>
                 <table class="table table-striped" aria-label="File Listing Table">
                     <thead>
                     <tr>
@@ -88,22 +89,6 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for file in filelist %}
-                        <tr>
-                        <td>{{ file.sample }}</td>
-                        <td>{{ file.pipeline }}</td>
-                        <td>{{ file.platform|get_readable_name }}</td>
-                        <td>{{ file.datalevel }}</td>
-                        <td>{{ file.datatype }}</td>
-                        <td>
-                            {% if file.gg_readgroupset_id %}
-                                <a href="{% url 'igv' file.gg_readgroupset_id %}"><i class="fa fa-check"></i> Go to IGV</a>
-                            {% endif %}
-                        </td>
-                        </tr>
-                    {% empty %}
-                        <p>There were no files found for this cohort.</p>
-                    {% endfor %}
                     </tbody>
                 </table>
             </div>
@@ -136,8 +121,8 @@
     var base_url = '{{ base_url|safe }}';
     var base_api_url = '{{ base_api_url|safe }}';
     var cohort_id = {{ cohort.id }};
-    var page = {{ page }};
-    var total_files = {{ file_count }};
+    var page = 1;
+    var total_files = 0;
     var download_url = '{{ download_url }}';
     var ajax_update_url = '{% url 'cohort_filelist_ajax' cohort.id %}';
     </script>
