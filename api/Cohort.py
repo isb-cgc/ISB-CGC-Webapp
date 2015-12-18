@@ -440,7 +440,7 @@ class Cohort_Endpoints_API(remote.Service):
                     'where ParticipantBarcode=%s' \
                     # % patient_barcode
 
-        query_tuple = [str(patient_barcode)]
+        query_tuple = (str(patient_barcode),)
 
 
         sample_query_str = 'select SampleBarcode ' \
