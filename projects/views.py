@@ -317,13 +317,6 @@ def study_edit(request, project_id=0, study_id=0):
         'status': 'success'
     })
 
-@login_required
-def study_share(request, project_id=0, study_id=0):
-    # TODO
-    return JsonResponse({
-        'status': 'success'
-    })
-
 def study_data_success(request, project_id=0, study_id=0, dataset_id=0):
     proj = Project.objects.get(id=project_id)
     study = proj.study_set.get(id=study_id)
