@@ -703,23 +703,19 @@ class Cohort_Endpoints_API(remote.Service):
 
         except (IndexError, TypeError, Exception) as e:
             logger.warn(e)
-            if biospecimen_cursor:
-                biospecimen_cursor.close()
-                logger.info("biospecimen_cursor closed")
-            if aliquot_cursor:
-                aliquot_cursor.close()
-                logger.info("aliquot_cursor closed")
-            if patient_cursor:
-                patient_cursor.close()
-                logger.info("patient_cursor closed")
-            if data_cursor:
-                data_cursor.close()
-                logger.info("data_cursor closed")
-            if db:
-                db.close()
-                logger.info("db connection closed")
-            logger.info(sample_barcode)
-            raise endpoints.NotFoundException("Sample not found.")
+            if biospecimen_cursor: biospecimen_cursor.close()
+            if aliquot_cursor: aliquot_cursor.close()
+            if patient_cursor: patient_cursor.close()
+            if data_cursor: data_cursor.close()
+            if db: db.close()
+            # this keeps getting returned as 503, when it should be 404
+            # all 5xx codes are converted to 503
+            # 405 (method not allowed) is returned as 501
+            # 408 (request timeout) is returned as 503
+            # endpoints.InternalServerErrorException is 500
+            # could just try raise e?
+            raise e
+
 
 
     GET_RESOURCE = endpoints.ResourceContainer(sample_barcode=messages.StringField(1, required=True),
