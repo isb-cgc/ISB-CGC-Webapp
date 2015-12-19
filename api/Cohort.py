@@ -152,7 +152,7 @@ class CohortPatientsSamplesList(messages.Message):
     samples = messages.StringField(3, repeated=True)
     sample_count = messages.IntegerField(4)
     cohort_id = messages.IntegerField(5)
-    error = messages.StringField(5)
+    error = messages.StringField(6)
 
 
 class PatientDetails(messages.Message):
@@ -311,7 +311,6 @@ class Cohort_Endpoints_API(remote.Service):
                 if cursor: cursor.close()
                 if filter_cursor: filter_cursor.close()
                 if db: db.close()
-
                 raise endpoints.NotFoundException(
                     "User {}'s cohorts not found. {}: {}".format(user_email, type(e), e))
         else:
@@ -768,8 +767,7 @@ class Cohort_Endpoints_API(remote.Service):
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
                 if type(e) is MultipleObjectsReturned:
                     logger.warn(e)
-
-                # raise endpoints.NotFoundException("%s does not have an entry in the user database." % user_email)
+                    raise endpoints.NotFoundException("%s has multiple entries in the user database." % user_email)
 
 
         sample_barcode = request.__getattribute__('sample_barcode')
@@ -815,7 +813,7 @@ class Cohort_Endpoints_API(remote.Service):
             db.close()
             return DataFileNameKeyList(datafilenamekeys=datafilenamekeys, count=len(datafilenamekeys))
 
-        except (IndexError, TypeError, Exception) as e:
+        except (IndexError, TypeError) as e:
             logger.warn(e)
             if cursor: cursor.close()
             if db: db.close()
