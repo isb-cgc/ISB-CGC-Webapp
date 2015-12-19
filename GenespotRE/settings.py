@@ -40,6 +40,8 @@ MVM_ON = True
 ADMINS = ()
 MANAGERS = ADMINS
 
+REQUEST_PROJECT_EMAIL = secret_settings.get('REQUEST_PROJECT_EMAIL')
+
 PROJECT_ID = secret_settings.get('PROJECT_ID')
 BQ_PROJECT_ID = secret_settings.get('BQ_PROJECT_ID')
 IGV_PROJECT_ID = secret_settings.get('IGV_PROJECT_ID')
@@ -182,7 +184,7 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
-    'django.core.context_processors.tz'
+#    'django.core.context_processors.tz' # moved this to template_context_processors
 )
 
 # Make this unique, and don't share it with anybody.
@@ -310,7 +312,8 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     # 'allauth.account.context_processors.account', # deprecated in django-allauth
     'django.core.context_processors.request',
     'django.contrib.auth.context_processors.auth',
-    'django.contrib.messages.context_processors.messages'
+    'django.contrib.messages.context_processors.messages',
+    'django.core.context_processors.tz'
 )
 
 TEMPLATE_DIRS += (
@@ -349,6 +352,7 @@ INSTALLED_APP_CLIENT_ID         = secret_settings.get('INSTALLED_APP_CLIENT_ID')
 #################################
 
 LOGIN_EXPIRATION_HOURS = 24
+FAKE_DBGAP_AUTHENTICATION_LIST_FILENAME  = secret_settings.get('FAKE_DBGAP_AUTHENTICATION_LIST_FILENAME')
 DBGAP_AUTHENTICATION_LIST_FILENAME  = secret_settings.get('DBGAP_AUTHENTICATION_LIST_FILENAME')
 DBGAP_AUTHENTICATION_LIST_BUCKET    = secret_settings.get('DBGAP_AUTHENTICATION_LIST_BUCKET')
 ACL_GOOGLE_GROUP                    = secret_settings.get('ACL_GOOGLE_GROUP')

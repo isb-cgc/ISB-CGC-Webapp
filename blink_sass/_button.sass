@@ -28,7 +28,18 @@
 
 .btn-link
   font-weight: $regular-font-weight
+  &:focus, &:active, &:focus:active, &.active
+    outline: transparent
 
+.btn-oval
+  border-radius: 50%
+  width: 36px
+  height: 36px
+
+.btn-symbol
+  i.fa
+    padding-right: 0
+// hamburger button on the menu
 .lines-button
   display: inline-block
   padding: $button-size/2 $button-size/4

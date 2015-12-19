@@ -1,6 +1,16 @@
 .main-content
     margin-top: 55px
 
+%clearfix
+    &:after
+        visibility: hidden
+        display: block
+        font-size: 0
+        content: " "
+        clear: both
+        height: 0
+
+
 // TODO: Refactor this into our styles
 /********************************************
  * Main General Styles
@@ -37,7 +47,6 @@ form table td
         font-size: 200px
 
 h1, h2, h3, h4, h5, h6
-    color: $font-color
     font-weight: $heading-font-weight
     margin-top: 10px
     margin-bottom: 10px
@@ -85,6 +94,8 @@ nav
 
 .breadcrumb
     font-size: $font-size-small
+    margin: 0
+    padding: 8px 0 0 0
     li:before
       display: none
     li:after
@@ -92,32 +103,12 @@ nav
       padding: 0 10px
       color: $breadcrumb-color
 
-.alert
-    border-radius: 1px
-    border: 5px solid transparent
-    padding: 10px
-    .close
-        right: 0px
-    &.alert-success
-        background-color: $bg-color
-        border-color: $success-bgcolor-dark
-    &.alert-info
-        color: $info-color
-        background-color: $bg-color
-        border-color: $info-bgcolor-dark
-    &.alert-warning
-        background-color: $bg-color
-        border-color: $warning-bgcolor-dark
-    &.alert-error
-        background-color: $bg-color
-        border-color: $danger-bgcolor-dark
+
 
 .container-fluid
     padding-bottom: 15px
 
-.form-control
-    border-radius: 1px
-    padding: 5px 10px
+
 
 
 
@@ -145,6 +136,9 @@ nav
 /********************************************
  * Handy Classes
  *******************************************/
+
+.center
+    text-align: center
 
 .inline-block
     display: inline-block

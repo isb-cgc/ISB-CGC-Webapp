@@ -1,5 +1,4 @@
 .list-group
-
   .list-group-item
     border: 1px solid transparent
     border-top: 1px solid darken($white, 15%)
@@ -29,3 +28,27 @@
 
     &__body
       padding-bottom: 10px
+      
+.list
+  &-item
+    background: transparent
+    border-bottom: 1px solid darken($white, 15%)
+    padding: 5px 0
+
+    &__heading
+      font-size: $font-size * 1.1
+      font-weight: $bold-font-weight
+      color: $isb-primary
+
+      a
+        color: $isb-primary
+
+  .sublist-item
+    padding: 5px 0 2px 0
+
+.ul
+  list-style: disc
+  padding-left: 2.5em
+  
+.extra-values
+  display: none

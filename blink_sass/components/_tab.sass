@@ -2,6 +2,10 @@
     margin-left: -10px
     margin-right: -10px
 
+.disabled
+    pointer-events: none
+    opacity: 0.85
+
 .nav-tabs
     background-color: #fff
     border-bottom: 1px solid darken($white, 15%)
@@ -11,22 +15,38 @@
 
     > li > a
         @extend .nav-tabs
+        border: none
+        border-bottom: 1px solid darken($white, 15%)
         margin-right: 0px
         color: $isb-dark
         font-weight: $medium-font-weight
+        &:after
+            content: ''
+            height: 2px
+            background: $isb-warning
+            width: 100%
+            position: absolute
+            left: 0
+            bottom: -1px
+            transform: scale(0)
     > li.active > a, li.active > a:focus
         @extend .nav-tabs
         border: none
-        border-bottom: 2px $isb-warning solid
         color: $isb-warning
+        &:after
+            transform: scale(1)
+            transform-origin: left
+            transition: transform 0.25s ease-in-out
     > li.active:hover > a
         @extend .nav-tabs
         border: none
-        border-bottom: 2px $isb-warning solid
+        border-bottom: 1px solid darken($white, 15%)
         color: $isb-warning
     > li:hover > a
         @extend .nav-tabs
         border: none
+        border-bottom: 1px solid darken($white, 15%)
+        color: $isb-warning
 
     .navbar-right
         margin-top: 0px
@@ -53,4 +73,76 @@
     background-color: #FFF
     padding: 5px 10px
 
-.collpase.active
+.nav-tabs_excel
+    background-color: #fff
+    border-bottom: 1px solid darken($white, 15%)
+    border-radius: 0px
+    margin-left: 0px
+    text-transform: capitalize
+    height: 38px
+
+    > li
+        display: inline-block
+        border-left: 1px solid darken($white, 5%)
+        border-bottom: none
+        border-radius: 2px
+        height: 100%
+        position: relative
+        clear: both
+        vertical-align: top
+        background: darken($white, 5%)
+        
+        &:hover
+            &:after
+                display: block
+
+        &:after
+            content: ''
+            height: 3px
+            background: $isb-warning
+            width: 100%
+            position: absolute
+            left: 0
+            top: -1px
+            display: none
+
+        &:first-child
+            border-left: none
+
+        &.active
+            background: $white
+            height: 102%
+            border-top: 0
+            border-left: 1px solid darken($white, 5%)
+            border-right: 1px solid darken($white, 5%)
+            &:after
+                display: block
+            > a
+                border-bottom: none
+                color: $isb-warning
+                background: $white
+            .dropdown > a
+                color: $isb-warning
+                display: inline-block
+                &[aria-expanded="true"]
+                    background-color: darken($white, 10%)
+        
+        > a
+            color: $font-color
+            display: inline-block
+
+            &:hover, &:focus
+                background-color: transparent
+
+        .dropdown
+            display: inline-block
+            .dropdown-menu
+                background: darken($white, 10%)
+            > a
+                color: $font-color
+                padding: 5px
+                display: none
+
+        .btn
+            background: transparent
+            margin-top: 3px

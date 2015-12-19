@@ -45,7 +45,9 @@ import pytz
 debug = settings.DEBUG
 logger = logging.getLogger(__name__)
 DBGAP_AUTHENTICATION_LIST_BUCKET = settings.DBGAP_AUTHENTICATION_LIST_BUCKET
+FAKE_DBGAP_AUTHENTICATION_LIST_FILENAME = settings.FAKE_DBGAP_AUTHENTICATION_LIST_FILENAME
 DBGAP_AUTHENTICATION_LIST_FILENAME = settings.DBGAP_AUTHENTICATION_LIST_FILENAME
+FAKE_DBGAP_AUTHENTICATION_LIST_FILENAME = settings.FAKE_DBGAP_AUTHENTICATION_LIST_FILENAME
 ACL_GOOGLE_GROUP = settings.ACL_GOOGLE_GROUP
 login_expiration_seconds = settings.LOGIN_EXPIRATION_HOURS * 60 * 60
 COUNTDOWN_SECONDS = login_expiration_seconds + (60 * 15)
@@ -74,7 +76,7 @@ def prepare_django_request(request):
 # has a value equal to $nameid; otherwise, return False
 def check_NIH_authorization_list(nameid, storage_client):
     req = storage_client.objects().get_media(
-        bucket=DBGAP_AUTHENTICATION_LIST_BUCKET, object=DBGAP_AUTHENTICATION_LIST_FILENAME)
+        bucket=DBGAP_AUTHENTICATION_LIST_BUCKET, object=FAKE_DBGAP_AUTHENTICATION_LIST_FILENAME)
 
     rows = [row.strip() for row in req.execute().split('\n') if row.strip()]
     return csv_scanner.matching_row_exists(rows, 'login', nameid)
@@ -160,7 +162,7 @@ def index(request):
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
                 # only redirect if there is a MultipleObjectsReturned error
                 if type(e) is MultipleObjectsReturned:
-                    logger.warn("Error %s on NIH login: more than one NIH User with NIH_username %s" % (str(e), NIH_username))
+                    logger.error("Error %s on NIH login: more than one NIH User with NIH_username %s" % (str(e), NIH_username))
                     return redirect('/users/' + str(request.user.id))
 
 
@@ -194,6 +196,19 @@ def index(request):
 
             # add or remove user from ACL_GOOGLE_GROUP if they are or are not dbGaP authorized
             directory_client, http_auth = get_directory_resource()
+            # default warn message is for eRA Commons users who are not dbGaP authorized
+            warn_message = '''
+            WARNING NOTICE
+            You are accessing a US Government web site which may contain information that must be protected under the US Privacy Act or other sensitive information and is intended for Government authorized use only.
+
+            Unauthorized attempts to upload information, change information, or use of this web site may result in disciplinary action, civil, and/or criminal penalties. Unauthorized users of this website should have no expectation of privacy regarding any communications or data processed by this website.
+
+            Anyone accessing this website expressly consents to monitoring of their actions and all communications or data transiting or stored on related to this website and is advised that if such monitoring reveals possible evidence of criminal activity, NIH may provide that evidence to law enforcement officials.
+            '''
+
+            if is_dbGaP_authorized:
+                # if user is dbGaP authorized, warn message is different
+                warn_message = 'You are reminded that when accessing controlled access information you are bound by the dbGaP TCGA DATA USE CERTIFICATION AGREEMENT (DUCA).' + warn_message
             try:
                 result = directory_client.members().get(groupKey=ACL_GOOGLE_GROUP,
                                                          memberKey=user_email).execute(http=http_auth)
@@ -216,18 +231,9 @@ def index(request):
                     ).execute(http=http_auth)
                     logger.info(result)
                     logger.info("User {} added to {}.".format(user_email, ACL_GOOGLE_GROUP))
-                    warn_message = '''
-                    WARNING NOTICE
-                    You are reminded that when accessing controlled access information you are bound by the dbGaP TCGA DATA USE CERTIFICATION AGREEMENT (DUCA).
 
-                    You are accessing a US Government web site which may contain information that must be protected under the US Privacy Act or other sensitive information and is intended for Government authorized use only.
 
-                    Unauthorized attempts to upload information, change information, or use of this web site may result in disciplinary action, civil, and/or criminal penalties. Unauthorized users of this website should have no expectation of privacy regarding any communications or data processed by this website.
-
-                    Anyone accessing this website expressly consents to monitoring of their actions and all communications or data transiting or stored on related to this website and is advised that if such monitoring reveals possible evidence of criminal activity, NIH may provide that evidence to law enforcement officials.
-                    '''
-                    messages.info(request, warn_message)
-
+            messages.info(request, warn_message)
             return HttpResponseRedirect(auth.redirect_to('https://{}'.format(req['http_host'])))
 
     elif 'sls' in req['get_data']:

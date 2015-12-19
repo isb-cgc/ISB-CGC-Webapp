@@ -99,24 +99,18 @@ require([
 
     // comments interactions
     $('.show-flyout').on('click', function() {
-        $('.comment-flyout').animate({
+        var target = $(this).closest('.worksheet').find('.comment-flyout');
+        $(target).animate({
             right: '-1px'
-        }, 800);
+        }, 800).toggleClass('open');
     });
     $('.hide-flyout').on('click', function() {
         $(this).parents('.fly-out').animate({
-            right: '-300px'
-        }, 800);
+            right: '-400px'
+        }, 800, function(){
+            $(this).removeClass('open');
+        })
     });
-
-    //script to perform dropdowns on worksheet tabs
-    $('.dropdown-toggle.worksheet-drop').click(function(){
-        if($(this).next().css("display") == "block") {
-           $(this).next().css("display", "none");
-        } else {
-            $(this).next().css("display", "block");
-        }
-    })
 
     $('.dropdown-menu').find("[data-toggle='modal']").click(function(){
         //$(this.getAttribute("data-target")).modal();
@@ -124,7 +118,7 @@ require([
     })
 
 
-    //Model communications
+    ////Model communications
     $('.add_worksheet_comment_form').on('submit', function(event) {
         event.preventDefault();
         var form        = this;
@@ -139,12 +133,14 @@ require([
             success: function(data) {
                 data = JSON.parse(data);
                 $('.comment-flyout .flyout-body').append('<h5 class="comment-username">' + data['first_name'] + ' ' + data['last_name'] + '</h5>');
-                $('.comment-flyout .flyout-body').append('<p class="comment-date">' + data['date_created'] + '</p>');
                 $('.comment-flyout .flyout-body').append('<p class="comment-content">' + data['content'] + '</p>')
+                $('.comment-flyout .flyout-body').append('<p class="comment-date">' + data['date_created'] + '</p>');
+
                 form.reset();
             },
             error: function() {
                 console.log('Failed to save comment.');
+                $('.comment-flyout .flyout-body').append('<p class="comment-content error">Fail to save comment. Please try back later.</p>')
                 form.reset()
             }
 
@@ -153,6 +149,12 @@ require([
         return false;
     });
 
+    $('.worksheet-nav-toggle').on('click', function(e){
+        e.preventDefault();
+        $(this).parent().toggleClass('open');
+        $(this).toggleClass('open');
+        $(this).parent().prev('.worksheet-nav').toggleClass('closed');
+    })
     //search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id);
     //search_helper_obj.update_parsets(base_api_url, 'metadata_platform_list', cohort_id);
 });

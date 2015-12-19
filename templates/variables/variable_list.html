@@ -9,13 +9,14 @@
 {% block page_name %}variable_list{% endblock %}
 
 {% block page_header %}
+<div class="container">
     <ol class="breadcrumb">
         <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
     </ol>
-    <h1 class="page-header">Saved Variables Favorites</h1>
-    <ul class="page-actiono-group">
-        <a class="btn btn-default" href="{% url 'variable_fav_create' %}"><i class="fa fa-plus"></i>Create New Favorite</a>
-    </ul>
+    <h1 class="page-header pull-left">Saved Variables Favorites</h1>
+
+    <a class="btn btn-primary pull-right" href="{% url 'variable_fav_create' %}"><i class="fa fa-plus"></i>Create New Favorite</a>
+</div>
 {% endblock %}
 {% block content %}
 <div class="container">

@@ -9,16 +9,25 @@
 {% block page_name %}variable_edit{% endblock %}
 
 {% block page_header %}
+<div class="container">
     <ol class="breadcrumb">
         <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
         <li><a href="{% url 'variables' %}">Saved Variable Favorites</a></li>
     </ol>
     {% if '/create/' in request.path %}
         <h1 class="page-header pull-left">Create Variable Favorite</h1>
+        <menu class="page-action-group pull-right">
+            <menuitem class="btn btn-primary" data-toggle="modal" data-target="#create-cohort-modal">Save As Favorite</menuitem>
+            <menuitem class="btn btn-link" data-toggle="modal" data-target="#create-cohort-modal">Cancel</menuitem>
+        </menu>
     {% else  %}
-        <h1 class="page-header">Edit Variable Favorite</h1>
+        <h1 class="page-header pull-left">Edit Variable Favorite</h1>
+        <menu class="page-action-group pull-right">
+            <menuitem class="btn btn-primary">Save Changes</menuitem>
+            <menuitem class="btn btn-link">Cancel</menuitem>
+        </menu>
     {% endif %}
-
+</div>
 {% endblock %}
 {% block content %}
     <section class="col-lg-12">
