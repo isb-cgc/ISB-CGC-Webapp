@@ -40,7 +40,7 @@ def workbook(request, workbook_id=0):
 
     if request.method == "POST" :
         if command == "create" :
-            workbook_model = Workbook.createDefault(name="Untitled Workbook", description="this is an untitled workbook. Click Edit Details to change your workbook title and description.", user=request.user)
+            workbook_model = Workbook.createDefault(name="Untitled Workbook", description="", user=request.user)
         elif command == "edit" :
             workbook_model = Workbook.edit(id=workbook_id, name=request.POST.get('name'), description=request.POST.get('description'))
         elif command == "share" :
@@ -66,6 +66,7 @@ def workbook(request, workbook_id=0):
         for worksheet in workbook.worksheets:
             worksheet.comments = worksheet.get_comments()
 
+    print request
     return render(request, template, {'workbook' : workbook})
 
 @login_required
@@ -75,12 +76,13 @@ def worksheet(request, workbook_id=0, worksheet_id=0):
 
     if request.method == "POST" :
         if command == "create" :
-            Worksheet.create(workbook_id=workbook_id, name=request.POST.get('name'), description=request.POST.get('description'))
-            query = '?q=new'
+            worksheet = Worksheet.create(workbook_id=workbook_id, name=request.POST.get('name'), description=request.POST.get('description'))
+            query = '#'+ str(worksheet.id)
         elif command == "edit" :
             Worksheet.edit(id=worksheet_id, name=request.POST.get('name'), description=request.POST.get('description'))
         elif command == "copy" :
-            Worksheet.copy(id=worksheet_id)
+            worksheet = Worksheet.copy(id=worksheet_id)
+            query = '#'+ str(worksheet.id)
         elif command == "delete" :
             Worksheet.destroy(id=worksheet_id)
 

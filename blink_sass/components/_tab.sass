@@ -118,11 +118,13 @@
                 border-bottom: none
                 color: $isb-warning
                 background: $white
-            .dropdown > a
-                color: $isb-warning
+            .dropdown
                 display: inline-block
-                &[aria-expanded="true"]
-                    background-color: darken($white, 10%)
+                &> a
+                    color: $isb-warning
+                    display: inline-block
+                    &[aria-expanded="true"]
+                        background-color: darken($white, 10%)
         
         > a
             color: $font-color
@@ -132,7 +134,7 @@
                 background-color: transparent
 
         .dropdown
-            display: inline-block
+            display: none
             .dropdown-menu
                 background: darken($white, 10%)
             > a

@@ -161,11 +161,18 @@ require([
 
     tabsList.on('shown.bs.tab', function(e){
         var targetTab = $(this).parent();
+        var targetWorksheetNumber = $(this).attr('href');
+
+        if(history.pushState){
+            history.pushState(null, null, targetWorksheetNumber);
+        }else{
+            window.location.hash = targetWorksheetNumber;
+        }
 
         if($(this).closest('#more-tabs').length > 0){
-            console.log($(this).attr('href'));
             openTabsfromDropdown(targetTab);
         }
+        e.preventDefault();
     })
 
     function openTabsfromDropdown(target){
@@ -180,6 +187,23 @@ require([
         dropdown.prepend(lastTab);
         tabsList = $('#worksheets-tabs a[data-toggle="tab"]');
     }
+
+
+    // Activate the recent added tab
+    if(window.location.hash){
+        var recentWorksheetTab = $('#worksheets-tabs a[href="' + window.location.hash + '"');
+        var recentWorksheetTarget = recentWorksheetTab.parent();
+        $(tabsList[0]).parent().removeClass('active');
+        if(recentWorksheetTarget.closest('#more-tabs').length > 0){
+            openTabsfromDropdown(recentWorksheetTarget);
+            recentWorksheetTab.tab('show');
+        }else{
+            recentWorksheetTarget.addClass('active');
+        }
+    }
+
+    console.log(window.location.hash);
+
     //search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id);
     //search_helper_obj.update_parsets(base_api_url, 'metadata_platform_list', cohort_id);
 });

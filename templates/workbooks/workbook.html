@@ -46,7 +46,7 @@
         <ul class="nav nav-tabs_excel" id="worksheets-tabs">
             <!-- for each worksheet in workbook -->
             {% for worksheet in workbook.worksheets %}
-                {% if forloop.counter < 6 %}
+                {% if forloop.counter <= 5 %}
                     <li class="{% if forloop.counter == 1 %} active {% endif %}">
                          <a href="#{{ worksheet.id }}" data-toggle="tab">{{ worksheet.name }}</a>
                          {% if workbook.owner.id == request.user.id %}
@@ -92,12 +92,6 @@
 
             <li>
                 <a data-target="#create-worksheet-modal" data-toggle="modal"><i class="fa fa-plus"></i></a>
-                <!--<form id="worksheet_create_form" method="POST" action="{% url 'worksheet_create' workbook_id=workbook.id %}">-->
-                    <!--{% csrf_token %}-->
-                    <!--<button type="submit" class="btn btn-symbol">-->
-                        <!--<i class="fa fa-plus"></i>-->
-                    <!--</button>-->
-                <!--</form>-->
             </li>
         </ul>
         <div class="tab-content">
@@ -247,6 +241,7 @@
 <script type="text/javascript">
     var base_api_url = '{{ base_api_url|safe }}';
     var base_url = '{{ base_url|safe }}';
+    var param = '{{ request.META.QUERY_STRING|safe }}';
 </script>
 
 {% endblock content %}
