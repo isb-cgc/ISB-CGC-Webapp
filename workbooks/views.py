@@ -65,7 +65,7 @@ def workbook(request, workbook_id=0):
         for worksheet in workbook.worksheets:
             worksheet.comments = worksheet.get_comments();
 
-    return render(request, template, {'workbook' : workbook})
+        return render(request, template, {'workbook' : workbook})
 
 @login_required
 def worksheet(request, workbook_id=0, worksheet_id=0):

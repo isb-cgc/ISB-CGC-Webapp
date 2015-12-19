@@ -43,13 +43,13 @@
                                     <ul class="dropdown-menu">
                                         {% if workbook.owner.id == user.id %}
                                             <li><a href="{% url 'workbook_detail' workbook.id %}">Edit</a> </li>
-                                            <li><a href="">Duplicate</a> </li>
-                                            <li><a role="button">Delete</a></li>
+                                            <li><a href="">Duplicate</a> </li> <!-- make me into a modal -->
+                                            <li><a role="button">Delete</a></li> <!-- make me into a modal -->
                                             <hr>
-                                            <li><a href="">Share</a></li>
+                                            <li><a href="">Share</a></li> <!-- make me into a modal -->
                                         {% else  %}
                                             <li><a href="{% url 'workbook_detail' workbook.id %}">Duplicate</a> </li>
-                                            <li><a href="">Remove</a> </li>
+                                            <li><a href="">Remove</a> </li> <!-- make me into a modal -->
                                         {% endif %}
                                     </ul>
                                 </div>

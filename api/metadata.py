@@ -642,12 +642,10 @@ class MetadataPlatformItem(messages.Message):
     mirnPlatform = messages.StringField(5)
     rppaPlatform = messages.StringField(6)
 
-
 class MetadataPlatformItemList(messages.Message):
     items = messages.MessageField(MetadataPlatformItem, 1, repeated=True)
 
 def createDataItem(data, selectors):
-
     if len(selectors):
         item = MetadataItem()
         for attr in selectors:

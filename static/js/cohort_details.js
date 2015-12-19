@@ -252,5 +252,3 @@ require([
     search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id);
     search_helper_obj.update_parsets(base_api_url, 'metadata_platform_list', cohort_id);
 });
-
-{% block js_file %}{% static 'js/cohort_details.js' %}{% endblock %}
