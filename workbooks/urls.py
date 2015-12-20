@@ -13,12 +13,22 @@ urlpatterns = patterns('',
     url(r'^(?P<workbook_id>\d+)/share$',    views.workbook, name='workbook_share'),
     url(r'^(?P<workbook_id>\d+)/copy$',     views.workbook, name='workbook_copy'),
 
-    url(r'^(?P<workbook_id>\d+)/worksheets/create$',                          views.worksheet, name='worksheet_create'),
-    url(r'^(?P<workbook_id>\d+)/worksheets/(?P<worksheet_id>\d+)/copy$',      views.worksheet, name='worksheet_copy'),
-    url(r'^(?P<workbook_id>\d+)/worksheets/(?P<worksheet_id>\d+)/delete',     views.worksheet, name='worksheet_delete'),
-    url(r'^(?P<workbook_id>\d+)/worksheets/(?P<worksheet_id>\d+)/edit$',      views.worksheet, name='worksheet_edit'),
+    url(r'^(?P<workbook_id>\d+)/worksheets/create$',                        views.worksheet, name='worksheet_create'),
+    url(r'^(?P<workbook_id>\d+)/worksheets/(?P<worksheet_id>\d+)/$',        views.worksheet_display, name='worksheet_display'),
+    url(r'^(?P<workbook_id>\d+)/worksheets/(?P<worksheet_id>\d+)/copy$',    views.worksheet, name='worksheet_copy'),
+    url(r'^(?P<workbook_id>\d+)/worksheets/(?P<worksheet_id>\d+)/delete$',  views.worksheet, name='worksheet_delete'),
+    url(r'^(?P<workbook_id>\d+)/worksheets/(?P<worksheet_id>\d+)/edit$',    views.worksheet, name='worksheet_edit'),
 
-    url(r'^(?P<workbook_id>\d+)/worksheets/(?P<worksheet_id>\d+)/comments/create$',                       views.worksheet_comment, name='worksheet_comment_create'),
-    url(r'^(?P<workbook_id>\d+)/worksheets/(?P<worksheet_id>\d+)/comments/(?P<comment_id>\d+)/edit$',     views.worksheet_comment, name='worksheet_comment_edit'),
-    url(r'^(?P<workbook_id>\d+)/worksheets/(?P<worksheet_id>\d+)/comments/(?P<comment_id>\d+)/delete$',   views.worksheet_comment, name='worksheet_comment_delete')
+    url(r'^(?P<workbook_id>\d+)/worksheets/(?P<worksheet_id>\d+)/variables/edit',                         views.worksheet_variables, name='worksheet_variables_edit'),
+    url(r'^(?P<workbook_id>\d+)/worksheets/(?P<worksheet_id>\d+)/variables/(?P<variable_id>\d+)/delete',  views.worksheet_variables, name='worksheet_variables_delete'),
+
+    url(r'^(?P<workbook_id>\d+)/worksheets/(?P<worksheet_id>\d+)/genes/edit',                           views.worksheet_genes, name='worksheet_genes_edit'),
+    url(r'^(?P<workbook_id>\d+)/worksheets/(?P<worksheet_id>\d+)/genes/(?P<genes_id>\d+)/delete',       views.worksheet_genes, name='worksheet_genes_delete'),
+
+    url(r'^(?P<workbook_id>\d+)/worksheets/(?P<worksheet_id>\d+)/cohorts/edit',                         views.worksheet_variables, name='worksheet_cohorts_edit'),
+    url(r'^(?P<workbook_id>\d+)/worksheets/(?P<worksheet_id>\d+)/cohorts/(?P<cohorts_id>\d+)/delete',   views.worksheet_variables, name='worksheet_cohorts_delete'),
+
+    url(r'^(?P<workbook_id>\d+)/worksheets/(?P<worksheet_id>\d+)/comments/create$',                     views.worksheet_comment, name='worksheet_comment_create'),
+    url(r'^(?P<workbook_id>\d+)/worksheets/(?P<worksheet_id>\d+)/comments/(?P<comment_id>\d+)/edit$',   views.worksheet_comment, name='worksheet_comment_edit'),
+    url(r'^(?P<workbook_id>\d+)/worksheets/(?P<worksheet_id>\d+)/comments/(?P<comment_id>\d+)/delete$', views.worksheet_comment, name='worksheet_comment_delete')
 )

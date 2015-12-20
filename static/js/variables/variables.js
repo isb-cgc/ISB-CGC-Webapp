@@ -219,6 +219,21 @@ require([
     });
 
     /*
+        convenience function for gathering selected variables from the ui pill list
+     */
+    function get_variable_list(){
+        var variable_list = [];
+        $(".selected-variable").each(function (index) {
+            var variable_name = this.getAttribute('variable');
+            var project_id = this.getAttribute('project');
+            var study_id = this.getAttribute('study');
+            variable_list.push({name: variable_name, project_id: project_id, study_id: study_id});
+        });
+
+        return variable_list;
+    }
+
+    /*
         Creates a favorite_list then redirects to the favorite list
      */
     $("#create_favorite_list").on('click', function(event){
@@ -226,15 +241,8 @@ require([
         if(name==""){
             //TODO Create fail ui indicator
         } else {
-            var variable_list = [];
-            $(".selected-variable").each(function (index) {
-                var variable_name = this.getAttribute('variable');
-                var project_id = this.getAttribute('project');
-                var study_id = this.getAttribute('study');
-                variable_list.push({name: variable_name, project_id: project_id, study_id: study_id});
-            });
-
-            var csrftoken = getCookie('csrftoken');
+            var variable_list = get_variable_list();
+            var csrftoken = get_cookie('csrftoken');
             $.ajax({
                 type: 'POST',
                 url : base_api_url + '/variables/save',
@@ -259,7 +267,39 @@ require([
         console.log("on-edit-click");
     });
 
-    function getCookie(name) {
+    /*
+        Add a variable list to an existing worksheet
+     */
+    $("#apply_to_worksheet").on('click', function(event){
+        var workbook_id  = this.getAttribute("workbook_id");
+        var worksheet_id = this.getAttribute("worksheet_id");
+        var variable_list = get_variable_list();
+        if(variable_list.length>0){
+            var csrftoken = get_cookie('csrftoken');
+            $.ajax({
+                type : 'POST',
+                url  : base_api_url + '/workbooks/' + workbook_id + '/worksheets/' + worksheet_id + '/variables/edit',
+                data : JSON.stringify({variables : variable_list}),
+                beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+                success: function (data) {
+                    window.location = base_api_url + '/workbooks/' + workbook_id + '/worksheets/' + worksheet_id + '/';
+                },
+                error: function () {
+                    //TODO Create fail ui indicator
+                    console.log('Failed to save variable_list.');
+                }
+
+            });
+        } else {
+            //TODO Create fail ui indicator that they need to select one or more variables
+        }
+
+    });
+
+    /*
+        Used for getting the CORS token for submitting data
+     */
+    function get_cookie(name) {
         var cookieValue = null;
         if (document.cookie && document.cookie != '') {
             var cookies = document.cookie.split(';');

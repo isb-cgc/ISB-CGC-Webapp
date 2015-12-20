@@ -4,12 +4,13 @@ import sys
 # import pexpect
 
 from django.shortcuts import render, redirect
+from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.conf import settings
 from bq_data_access.feature_search.util import SearchableFieldHelper
-from models import Variable, VariableFavorite
-from django.core.urlresolvers import reverse
+from models import VariableFavorite
+from workbooks.models import Workbook, Worksheet
+
 from google.appengine.api import urlfetch
 from django.conf import settings
 debug = settings.DEBUG
@@ -87,7 +88,6 @@ def data_availability_sort(key, value, data_attr, attr_details):
 
 @login_required
 def variable_fav_detail(request, variable_fav_id):
-    # """ if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name """
     template = 'variables/variable_detail.html'
     context = {
         'variables': {
@@ -102,8 +102,35 @@ def variable_fav_detail(request, variable_fav_id):
     }
     return render(request, template, context)
 
+#called via workbooks for the selected variables to be added to a workbook
 @login_required
+# USECASE 1: ADD VAR LIST TO EXISTING WORKBOOK
+def variable_select_for_existing_workbook(request, workbook_id, worksheet_id):
+    #TODO validate user has access to the workbook
+    return initialize_variable_selection_page(request, workbook_id=workbook_id, worksheet_id=worksheet_id)
+
+@login_required
+# USECASE 2: CREATE VAR LIST THEN CREATE WORKBOOK WITH VAR LIST
+def variable_select_for_new_workbook(request):
+    return initialize_variable_selection_page(request, new_workbook=True)
+
+@login_required
+# USECASE 3: EDIT EXISTING VAR LIST
+def variable_fav_edit(request, variable_list_id):
+    #TODO validate user has access to the list
+    return initialize_variable_selection_page(request, variable_list_id=variable_list_id)
+
+@login_required
+# USECASE 4: CREATE VAR FAVORITE
 def variable_fav_create(request):
+    return initialize_variable_selection_page(request)
+
+@login_required
+def initialize_variable_selection_page(request,
+                                       workbook_id=None,
+                                       worksheet_id=None,
+                                       new_workbook=False,
+                                       variable_list_id=None):
     template = 'variables/variable_edit.html'
 
     if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
@@ -212,7 +239,7 @@ def variable_fav_create(request):
         else:
             variable_list[key] = sorted(value, key=lambda k: int(k['count']), reverse=True)
 
-    template_values = {
+    context = {
         'variable_names'        : variable_list.keys(),
         'variable_list_count'   : variable_list,
         'datatype_list'         : datatype_list,
@@ -225,12 +252,30 @@ def variable_fav_create(request):
         'base_url'              : settings.BASE_URL,
         'base_api_url'          : settings.BASE_API_URL,
         'TCGA_project'          : TCGA_project,
-        'common_project'        : common_project
+        'common_project'        : common_project,
     }
 
-    if debug: print >> sys.stderr, ' attrs ' + json.dumps(datatype_list)
+    # USECASE 1: ADD VAR LIST TO EXISTING WORKBOOK
+    context['workbook'] = {'id' : "3", 'name' : "asdfasdf"}
+    if workbook_id is not None and worksheet_id is not None :
+        workbook = Workbook.objects.get(id=workbook_id)
+        worksheet = Worksheet.objects.get(id=worksheet_id)
+        context['workbook'] = workbook
+        context['worksheet'] = worksheet
 
-    return render(request, template, template_values)
+    # USECASE 2: CREATE VAR LIST THEN CREATE WORKBOOK WITH VAR LIST
+    elif new_workbook :
+        context['newWorkbook'] = True
+
+    # USECASE 3: EDIT EXISTING VAR LIST
+    elif variable_list_id is not None :
+        existing_variable_list = VariableFavorite.get_deep(variable_list_id)
+        context['existing_variable_list'] = existing_variable_list
+
+    # USECASE 4: CREATE VAR FAVORITE #
+        # nothin
+
+    return render(request, template, context)
 
 @login_required
 def variable_fav_list(request):
@@ -240,25 +285,17 @@ def variable_fav_list(request):
     return render(request, template, {'variable_list' : variable_list})
 
 @login_required
-def variable_fav_edit(request, variable_fav_id):
-    template = 'variables/variable_edit.html'
-    context = {}
-    return render(request, template, context)
+#TODO
+def variable_fav_delete(request, variable_fav_id):
+    return HttpResponse(json.dumps({}), status=200)
 
 @login_required
-def variable_delete(request, variable_fav_id):
-    return render(request, template, context)
+#TODO
+def variable_fav_copy(request, variable_fav_id):
+    return HttpResponse(json.dumps({}), status=200)
 
 @login_required
-def variable_share(request, variable_fav_id):
-    return render(request, template, context)
-
-@login_required
-def variable_copy(request, variable_fav_id):
-    return render(request, template, context)
-
-@login_required
-def variable_save(request):
+def variable_fav_save(request):
     data = json.loads(request.body)
     variable_model = VariableFavorite.create(name       =data['name'],
                                             variables   =data['variables'],

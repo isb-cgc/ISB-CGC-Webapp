@@ -9,23 +9,50 @@
 {% block page_name %}variable_edit{% endblock %}
 
 {% block page_header %}
+{# TODO if page is access via adding a list to a workbook, attach a warning if the user navigates from this page without applying the workbook list #}
 <div class="container">
     <ol class="breadcrumb">
-        <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
-        <li><a href="{% url 'variables' %}">Saved Variable Favorites</a></li>
+        {% if workbook %}
+            {# USECASE 1: ADD VAR LIST TO EXISTING WORKBOOK #}
+            <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+            <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
+            <li><a href="{% url 'workbook_detail' workbook.id %}">{{ workbook.name }}</a></li>
+        {% elif newWorkbook %}
+            {# USECASE 2: CREATE VAR LIST THEN CREATE WORKBOOK WITH VAR LIST #}
+            <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+        {% else %}
+            {# USECASE 3: EDIT EXISTING VAR LIST #}
+            {# USECASE 4: CREATE VAR FAVORITE #}
+            <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+            <li><a href="{% url 'variables' %}">Saved Variable Favorites</a></li>
+        {% endif %}
     </ol>
-    {% if '/create/' in request.path %}
-        <h1 class="page-header pull-left">Create Variable Favorite</h1>
-        <menu class="page-action-group pull-right">
-            <menuitem class="btn btn-primary" data-toggle="modal" data-target="#create-cohort-modal">Save As Favorite</menuitem>
-            <menuitem class="btn btn-link" data-toggle="modal" data-target="#create-cohort-modal">Cancel</menuitem>
-        </menu>
+    {% if workbook %}
+        {# USECASE 1: ADD VAR LIST TO EXISTING WORKBOOK #}
+        <h1 class="page-header pull-left">Data Source | Variables</h1>
     {% else  %}
-        <h1 class="page-header pull-left">Edit Variable Favorite</h1>
-        <menu class="page-action-group pull-right">
-            <menuitem class="btn btn-primary">Save Changes</menuitem>
-            <menuitem class="btn btn-link">Cancel</menuitem>
-        </menu>
+        {% if existing_variable_list %}
+            {# USECASE 3: EDIT EXISTING VAR LIST #}
+            <h1 class="page-header pull-left">Edit Variable Favorite</h1>
+            <menu class="page-action-group pull-right">
+                <menuitem class="btn btn-primary">Save Changes</menuitem>
+                <menuitem class="btn btn-link">Cancel</menuitem>
+            </menu>
+        {% elif newWorkbook %}
+            {# USECASE 2: CREATE VAR LIST THEN CREATE WORKBOOK WITH VAR LIST #}
+            <h1 class="page-header pull-left">Create Variable Favorite</h1>
+            <menu class="page-action-group pull-right">
+                <menuitem class="btn btn-primary" data-toggle="modal" data-target="#create-cohort-modal">Save As Favorite</menuitem>
+                <menuitem class="btn btn-link" data-toggle="modal" data-target="#create-cohort-modal">Cancel</menuitem>
+            </menu>
+        {% else %}
+            {# USECASE 4: CREATE VAR FAVORITE #}
+            <h1 class="page-header pull-left">Create Variable Favorite</h1>
+            <menu class="page-action-group pull-right">
+                <menuitem class="btn btn-primary" data-toggle="modal" data-target="#create-cohort-modal">Save As Favorite</menuitem>
+                <menuitem class="btn btn-link" data-toggle="modal" data-target="#create-cohort-modal">Cancel</menuitem>
+            </menu>
+        {% endif %}
     {% endif %}
 </div>
 {% endblock %}
@@ -33,23 +60,49 @@
     <section class="col-lg-12">
          <div class="panel form-group panel-default">
             {% csrf_token %}
-            <div class="panel-heading">
-                <label for="variable-name" class="panel-title">Name of Favorite (Required)</label>
-            </div>
-            <div class="panel-body">
-                <input type="text" id="variable_list_name_input" placeholder="my new favorite variable list" class="form-control" value="" required>
-                {% if '/create/' in request.path %}
+            {% if workbook %}
+                {# USECASE 1: ADD VAR LIST TO EXISTING WORKBOOK #}
+                <div class="panel-heading"></div>
+                <div class="panel-body">
                     <div class="page-action-group">
-                        <button id="create_favorite_list" class="btn btn-primary">Save As Favorite</button>
+                        <button id="apply_to_worksheet" workbook_id="{{ workbook.id }}" worksheet_id="{{ worksheet.id }}" class="btn btn-primary">Apply to Worksheet : {{ workbook.name }} | {{ worksheet.name }}</button>
+                        <a href="{% url 'workbook_detail' workbook.id %}" class="btn btn-link">Back to Workbook</a>
+                    </div>
+                </div>
+            {% else %}
+                {% if existing_variable_list %}
+                    {# USECASE 3: EDIT EXISTING VAR LIST #}
+                    <div class="panel-heading">
+                        <label for="variable-name" class="panel-title">Name of Favorite (Required)</label>
+                    </div>
+                    <div class="panel-body">
+                        <input type="text" id="variable_list_name_input" placeholder="my new favorite variable list" class="form-control" value={{ existing_variable_list.name }} required>
+                        <div class="page-action-group">
+                            <button id="edit_favorite_list" class="btn btn-primary">Save Changes</button>
+                            <a href="{% url 'variables' %}" class="btn btn-link">Cancel</a>
+                        </div>
+                    </div>
+                {% elif newWorkbook %}
+                    {# USECASE 2: CREATE VAR LIST THEN CREATE WORKBOOK WITH VAR LIST #}
+                    <div class="panel-heading"></div>
+                    <div class="panel-body">
+                        <button id="select_then_create_new_workbook" class="btn btn-primary">Create New Workbook with Selected Variables</button>
                         <a href="{% url 'variables' %}" class="btn btn-link">Cancel</a>
                     </div>
-                {% else  %}
-                    <div class="page-action-group">
-                        <button id="edit_favorite_list" class="btn btn-primary">Save Changes</button>
-                        <a href="{% url 'variables' %}" class="btn btn-link">Cancel</a>
+                {% else %}
+                    {# USECASE 4: CREATE VAR FAVORITE #}
+                    <div class="panel-heading">
+                        <label for="variable-name" class="panel-title">Name of Favorite (Required)</label>
+                    </div>
+                    <div class="panel-body">
+                        <input type="text" id="variable_list_name_input" placeholder="my new favorite variable list" class="form-control" value="" required>
+                        <div class="page-action-group">
+                            <button id="create_favorite_list" class="btn btn-primary">Save As Favorite</button>
+                            <a href="{% url 'variables' %}" class="btn btn-link">Cancel</a>
+                        </div>
                     </div>
                 {% endif %}
-            </div>
+            {% endif %}
          </div>
     </section>
     <div class="col-lg-6" id="filter-panel">
@@ -70,7 +123,7 @@
                             <div role="tabpanel" class="tab-pane active filter-panel" id="common">
                                 <ul class="list-group" id="clin-accordion" role="tablist" aria-multiselectable="true">
                                     {% for attr in common_project.variables %}
-                                        <li class="list-group-item extra-values checkbox">
+                                        <li class="list-group-item checkbox">
                                             <div id="heading-{{ attr }}" class="list-group-item__heading">
                                                 <label for="{{ attr }}">
                                                     <input type="checkbox" value="{{ attr }}" name="elements-selected" variable_name="{{ attr }}" project_name="{{ common_project.name }}" project="{{ common_project.id }}" study_name="{{ common_project.study.name }} "study="{{ common_project.study.id }}">

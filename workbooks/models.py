@@ -6,23 +6,18 @@ from django.contrib import admin
 from cohorts.models import Cohort
 from variables.models import Variable
 from genes.models import Gene
-from projects.models import Project
+from projects.models import Project, Study
 from cohorts.models import Cohort
 from django.utils import formats
 
+from django.conf import settings
+debug = settings.DEBUG
+if settings.DEBUG :
+    import sys
+
 # Create your models here.
 class WorkbookManager(models.Manager):
-    def search(self, search_terms):
-        terms = [term.strip() for term in search_terms.split()]
-        q_objects = []
-        for term in terms:
-            q_objects.append(Q(name__icontains=term))
-
-        # Start with a bare QuerySet
-        qs = self.get_queryset()
-
-        # Use operator's or_ to string together all of your Q objects.
-        return qs.filter(reduce(operator.and_, [reduce(operator.or_, q_objects), Q(active=True)]))
+    content = None
 
 class Workbook(models.Model):
     id = models.AutoField(primary_key=True)
@@ -92,6 +87,10 @@ class Workbook(models.Model):
         #if the user does nto exist then send an email
         return workbook_model
 
+    @classmethod
+    def get_owner(cls, id):
+        workbook_model = cls.objects.get(id=id)
+        return workbook_model.get_owner()
 
     '''
     Sets the last viewed time for a workbook
@@ -119,7 +118,6 @@ class Workbook(models.Model):
     def get_shares(self):
         return self.workbook_perms_set.filter(perm=Workbook_Perms.READER)
 
-
 class Workbook_Last_View(models.Model):
     workbook = models.ForeignKey(Workbook, blank=False)
     user = models.ForeignKey(User, null=False, blank=False)
@@ -139,18 +137,7 @@ class Workbook_Perms(models.Model):
     perm = models.CharField(max_length=10, choices=PERMISSIONS, default=READER)
 
 class WorksheetManager(models.Manager):
-    def search(self, search_terms):
-        terms = [term.strip() for term in search_terms.split()]
-        q_objects = []
-        for term in terms:
-            q_objects.append(Q(name__icontains=term))
-
-        # Start with a bare QuerySet
-        qs = self.get_queryset()
-
-        # Use operator's or_ to string together all of your Q objects.
-        return qs.filter(reduce(operator.and_, [reduce(operator.or_, q_objects), Q(active=True)]))
-
+    content = None
 
 class Worksheet(models.Model):
     id              = models.AutoField(primary_key=True)
@@ -193,98 +180,207 @@ class Worksheet(models.Model):
     def get_comments(self):
         return self.worksheet_comment_set.filter(worksheet=self)
 
+    def get_variables(self):
+        return self.worksheet_variable_set.filter(worksheet=self)
+
+    def get_genes(self):
+        return self.worksheet_gene_set.filter(worksheet=self)
+
+    def get_cohorts(self):
+        return self.worksheet_cohort_set.filter(worksheet=self)
+
     def destroy(self):
         self.delete()
 
-    # '''
-    # add a gene_list to a workbook
-    # '''
-    # def add_gene_list(self, request, user=None):
-    #     if user is None:
-    #         user = request.user
-    #     if request.worksheet_name and request.worksheet_description:
-    #          worksheet = Worksheet(name=request.worksheet_name, description=request.worksheet_description)
-    #
-    # '''
-    # remove a gene_list from a workbook
-    # '''
-    # def remove_gene_list(self, request, user=None):
-    #     if user is None:
-    #         user = request.user
-    #     if request.worksheet_name and request.worksheet_description:
-    #          worksheet = Worksheet(name=request.worksheet_name, description=request.worksheet_description)
-    #
-    # '''
-    # add a variable_list to a workbook
-    # '''
-    # def add_variable_list(self, request, user=None):
-    #     if user is None:
-    #         user = request.user
-    #     if request.worksheet_name and request.worksheet_description:
-    #          worksheet = Worksheet(name=request.worksheet_name, description=request.worksheet_description)
-    #
-    # '''
-    # remove a variable_list from a workbook
-    # '''
-    # def remove_variable_list(self, request, user=None):
-    #     if user is None:
-    #         user = request.user
-    #     if request.worksheet_name and request.worksheet_description:
-    #          worksheet = Worksheet(name=request.worksheet_name, description=request.worksheet_description)
-    #
-    # '''
-    # add a cohort to a workbook
-    # '''
-    # def add_cohort(self, request, user=None):
-    #     if user is None:
-    #         user = request.user
-    #     if request.worksheet_name and request.worksheet_description:
-    #          worksheet = Worksheet(name=request.worksheet_name, description=request.worksheet_description)
-    #
-    # '''
-    # remove a cohort from a workbook
-    # '''
-    # def remove_cohort(self, request, user=None):
-    #     if user is None:
-    #         user = request.user
-    #     if request.worksheet_name and request.worksheet_description:
-    #          worksheet = Worksheet(name=request.worksheet_name, description=request.worksheet_description)
-
-
-class Worksheet_cohorts(models.Model):
-    worksheet       = models.ForeignKey(Worksheet, null=False, blank=False)
-    date_created    = models.DateTimeField(auto_now_add=True)
-    modified_date   = models.DateTimeField(auto_now=True)
-    cohort          = models.ForeignKey(Cohort, null=False, blank=False)
-
-class Worksheet_gene_list(models.Model):
+class Worksheet_cohort(models.Model):
     id              = models.AutoField(primary_key=True)
-    name            = models.TextField(null=False, blank=False)
+    worksheet       = models.ForeignKey(Worksheet, null=False, blank=False)
     date_created    = models.DateTimeField(auto_now_add=True)
     modified_date   = models.DateTimeField(auto_now=True)
-    worksheet       = models.ForeignKey(Worksheet, null=False, blank=False)
-    genes           = models.ManyToManyField(Gene)
+    cohort          = models.ForeignKey(Cohort)
 
-class Worksheet_variable_list(models.Model):
+    @classmethod
+    def edit_list(cls, worksheet_id, cohort_list, user):
+        worksheet_model = Worksheet.objects.get(id=worksheet_id)
+        if worksheet_model.owner.id == user.id :
+            #TODO delete all then resave not the most efficient
+            cohorts = Worksheet_cohort.objects.filter(worksheet=worksheet_model)
+            for co in cohorts :
+                co.destroy();
+
+            results = []
+            for co in cohort_list :
+                results.append(Worksheet_cohort.create(worksheet_id, co))
+
+            return_obj = {
+                'variables' : results,
+            }
+        else :
+            return_obj = {
+                'error'     : "you do not have access to update this worksheet",
+            }
+        return return_obj
+
+    @classmethod
+    def create(cls, worksheet_id, cohort):
+        model = cls.objects.create(worksheet_id = worksheet_id, cohort = cohort)
+        model.save()
+
+        return_obj = {
+            'id'            : model.id,
+            'cohort_id'     : model.cohort.id,
+            'date_created'  : formats.date_format(model.date_created, 'DATETIME_FORMAT')
+        }
+        return return_obj
+
+    @classmethod
+    #TODO
+    def destroy(cls, id):
+        worksheet_model = cls.objects.get(id=id)
+        worksheet_model.destroy()
+        return worksheet_model
+
+    def destroy(self):
+        self.delete()
+
+class Worksheet_gene(models.Model):
     id              = models.AutoField(primary_key=True)
-    name            = models.TextField(null=False, blank=False)
+    worksheet       = models.ForeignKey(Worksheet, null=False, blank=False)
+    date_created    = models.DateTimeField(auto_now_add=True)
+    modified_date   = models.DateTimeField(auto_now=True)
+    gene            = models.CharField(max_length=2024, blank=False)
+
+    @classmethod
+    def edit_list(cls, worksheet_id, gene_list, user):
+        worksheet_model = Worksheet.objects.get(id=worksheet_id)
+        if worksheet_model.owner.id == user.id :
+            #TODO delete all then resave not the most efficient
+            genes = Worksheet_variable.objects.filter(worksheet=worksheet_model)
+            for gene in genes :
+                gene.destroy();
+
+            results = []
+            for gene in gene_list :
+                results.append(Worksheet_gene.create(worksheet_id, gene))
+
+            return_obj = {
+                'variables' : results,
+            }
+        else :
+            return_obj = {
+                'error'     : "you do not have access to update this worksheet",
+            }
+        return return_obj
+
+    @classmethod
+    def create(cls, worksheet_id, gene):
+        worksheet_gene_model = cls.objects.create(worksheet_id = worksheet_id, gene = gene)
+        worksheet_gene_model.save()
+
+        return_obj = {
+            'id'            : worksheet_gene_model.id,
+            'gene'          : worksheet_gene_model.gene,
+            'date_created'  : formats.date_format(worksheet_gene_model.date_created, 'DATETIME_FORMAT')
+        }
+        return return_obj
+
+    @classmethod
+    def destroy(cls, id):
+        model = cls.objects.get(id=id)
+        model.destroy()
+        return model
+
+    def destroy(self):
+        self.delete()
+
+class Worksheet_Variable_Manager(models.Manager):
+    content = None
+
+class Worksheet_variable(models.Model):
+    id              = models.AutoField(primary_key=True)
     date_created    = models.DateTimeField(auto_now_add=True)
     modified_date   = models.DateTimeField(auto_now=True)
     worksheet       = models.ForeignKey(Worksheet, null=False, blank=False)
-    variables       = models.ManyToManyField(Variable)
+    name            = models.CharField(max_length=2024, blank=False)
+    project         = models.ForeignKey(Project, null=True, blank=True)
+    study           = models.ForeignKey(Study, null=True, blank=True)
+    objects         = Worksheet_Variable_Manager()
+
+    @classmethod
+    def edit_list(cls, workbook_id, worksheet_id, variable_list, user):
+        workbook_owner = Workbook.objects.get(id=workbook_id).get_owner()
+        if workbook_owner.id == user.id :
+            worksheet_model = Worksheet.objects.get(id=worksheet_id
+                                                    )
+            #TODO delete all then resave not the most efficient
+            variables = Worksheet_variable.objects.filter(worksheet=worksheet_model)
+            for var in variables :
+                var.destroy();
+
+            results = []
+            for variable in variable_list :
+                results.append(Worksheet_variable.create(worksheet=worksheet_model, variable=variable))
+
+            return_obj = {
+                'variables' : results,
+            }
+        else :
+            return_obj = {
+                'error'     : "you do not have access to update this worksheet",
+            }
+        return return_obj
+
+    @classmethod
+    def create(cls, worksheet, variable):
+        if variable['project_id'] == '-1' and variable['study_id'] == '-1' :
+            worksheet_variable_model = cls.objects.create(worksheet_id = worksheet.id,
+                                                          name = variable['name'])
+            worksheet_variable_model.save()
+
+            return_obj = {
+                'id'            : worksheet_variable_model.id,
+                'name'          : worksheet_variable_model.name,
+                'date_created'  : formats.date_format(worksheet_variable_model.date_created, 'DATETIME_FORMAT')
+            }
+        else:
+            project_model = Project.objects.get(id=variable['project_id'])
+            study_model = Study.objects.get(id=variable['study_id'])
+            worksheet_variable_model = cls.objects.create(worksheet_id = worksheet.id,
+                                                      name          = variable.name,
+                                                      project       = project_model,
+                                                      study         = study_model)
+            worksheet_variable_model.save()
+
+            return_obj = {
+                'id'            : worksheet_variable_model.id,
+                'name'          : worksheet_variable_model.name,
+                'project'       : worksheet_variable_model.project.id,
+                'study'         : worksheet_variable_model.study.id,
+                'date_created'  : formats.date_format(worksheet_variable_model.date_created, 'DATETIME_FORMAT')
+            }
+
+        return return_obj
+
+    @classmethod
+    def destroy(cls, workbook_id, worksheet_id, id, user):
+        workbook_owner = Workbook.get_owner(id)
+        if workbook_owner.id == user.id :
+            model = cls.objects.get(id=id)
+            model.destroy()
+            return_obj = {
+                'result'     : "Success",
+            }
+        else :
+            return_obj = {
+                'error'     : "you do not have access to update this worksheet",
+            }
+        return return_obj
+
+    def destroy(self):
+        self.delete()
 
 class Worksheet_Comment_Manager(models.Manager):
-    def search(self, search_terms):
-        terms = [term.strip() for term in search_terms.split()]
-        q_objects = []
-        for term in terms:
-            q_objects.append(Q(name__icontains=term))
-
-        # Start with a bare QuerySet
-        qs = self.get_queryset()
-
-        # Use operator's or_ to string together all of your Q objects.
-        return qs.filter(reduce(operator.and_, [reduce(operator.or_, q_objects), Q(active=True)]))
+    content = None
 
 class Worksheet_comment(models.Model):
     id              = models.AutoField(primary_key=True)

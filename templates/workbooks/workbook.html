@@ -47,7 +47,7 @@
             <!-- for each worksheet in workbook -->
             {% for worksheet in workbook.worksheets %}
                 {% if forloop.counter < 4 %}
-                    <li class="{% if forloop.counter == 1 %} active {% endif %}">
+                    <li class="{% if display_worksheet and display_worksheet.id == worksheet.id %} active {% elif not display_worksheet and forloop.counter == 1 %} active {% endif %}">
                          <a href="#{{ worksheet.id }}" data-toggle="tab">{{ worksheet.name }}</a>
                          {% if workbook.owner.id == request.user.id %}
                          <div class="dropdown">
@@ -103,6 +103,7 @@
                                         <a href="{% url 'genes' %}"> Genes <i class="fa fa-plus pull-right"></i></a>
                                     </div>
                                     <ul class="list-item__body">
+
                                         <li class="sublist-item">
                                             THIS
                                         </li>
@@ -121,10 +122,10 @@
                                         <li class="extra-values sublist-item">ABCD1</li>
                                         <a class="show-less" style="display:none;">Show Less</a>
                                     </ul>
-                                    {% if worksheet.gene_list %}
+                                    {% if worksheet.genes %}
                                     <ul class="list-item__body">
                                         {% with worksheet.gene_list|how_many_more:6 as num_more  %}
-                                            {% for gene in worksheet.gene_list %}
+                                            {% for gene in worksheet.genes %}
                                                 {% if forlook.counter0 < 6 %}
                                                     <li class="sublist-item">{{ gene.name|upper }}</li>
                                                 {% elif forloop.counter0 == 6 and num_more > 0 %}
@@ -141,15 +142,13 @@
                                 </li>
                                 <li class="list-item">
                                     <div class="list-item__heading">
-                                        <a href="{% url 'variables' %}">Variables <i class="fa fa-plus pull-right"></i></a>
+                                        <a href="{% url 'variable_select_for_existing_workbook' workbook.id worksheet.id %}">Variables <i class="fa fa-plus pull-right"></i></a>
                                     </div>
-                                    {% if worksheet.variable_list %}
                                     <ul class="list-item__body">
-                                        {% for variable in worksheet.variable_list %}
+                                        {% for variable in worksheet.variables %}
                                             <li class="sublist-item">{{ variable.name }}</li>
                                         {% endfor %}
                                     </ul>
-                                    {% endif %}
                                 </li>
                                 <li class="list-item">
                                     <div class="list-item__heading">
