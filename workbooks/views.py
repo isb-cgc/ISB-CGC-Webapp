@@ -7,11 +7,12 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 
-from django.conf import settings
 from django.http import StreamingHttpResponse
 from django.http import HttpResponse
-from models import Cohort, Workbook, Worksheet, Worksheet_comment, Workbook_Perms
+from models import Cohort, Workbook, Worksheet, Worksheet_comment, Workbook_Perms, Worksheet_variable, Worksheet_gene, Worksheet_cohort
 
+from django.conf import settings
+debug = settings.DEBUG
 if settings.DEBUG :
     import sys
 
@@ -50,24 +51,56 @@ def workbook(request, workbook_id=0):
         elif command == "delete" :
             Workbook.destroy(id=workbook_id)
 
-        if(command == "delete"):
+        if command == "delete":
             redirect_url = reverse('workbooks')
             return redirect(redirect_url)
         else :
             redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_model.id})
             return redirect(redirect_url)
 
-    elif request.method   == "GET" :
-        workbook            = Workbook.objects.get(id=workbook_id)
-        workbook.owner       = workbook.get_owner()
-        workbook.worksheets = workbook.get_worksheets()
-        workbook.shares     = workbook.get_shares()
+    elif request.method == "GET" :
+        if workbook_id:
+            workbook            = Workbook.objects.get(id=workbook_id)
+            workbook.owner      = workbook.get_owner()
+            workbook.worksheets = workbook.get_worksheets()
+            workbook.shares     = workbook.get_shares()
 
-        for worksheet in workbook.worksheets:
-            worksheet.comments = worksheet.get_comments()
+            for worksheet in workbook.worksheets:
+                worksheet.comments  = worksheet.get_comments()
+                worksheet.variables = worksheet.get_variables()
+                worksheet.genes     = worksheet.get_genes()
+                worksheet.cohorts   = worksheet.get_cohorts()
+                worksheet.plot      = {'title' : "default title",
+                                       'type'  : "default type",
+                                       'dimensions' : [{'name' : "x-axis",
+                                                        'variable' : "variables"},
+                                                       {'name' : "y-axis",
+                                                        'variable' : "variables"}]
+                                       }
 
-    print request
-    return render(request, template, {'workbook' : workbook})
+            return render(request, template, {'workbook' : workbook})
+        else :
+            redirect_url = reverse('workbooks')
+            return redirect(redirect_url)
+
+@login_required
+#used to display a particular worksheet on page load
+def worksheet_display(request, workbook_id=0, worksheet_id=0):
+    template            = 'workbooks/workbook.html'
+    workbook            = Workbook.objects.get(id=workbook_id)
+    workbook.owner      = workbook.get_owner()
+    workbook.worksheets = workbook.get_worksheets();
+    workbook.shares     = workbook.get_shares()
+
+    for worksheet in workbook.worksheets:
+        if str(worksheet.id) == worksheet_id :
+            display_worksheet = worksheet
+        worksheet.comments  = worksheet.get_comments()
+        worksheet.variables = worksheet.get_variables()
+        worksheet.genes     = worksheet.get_genes()
+        worksheet.cohorts   = worksheet.get_cohorts()
+
+    return render(request, template, {'workbook' : workbook, 'display_worksheet' : display_worksheet})
 
 @login_required
 def worksheet(request, workbook_id=0, worksheet_id=0):
@@ -89,6 +122,47 @@ def worksheet(request, workbook_id=0, worksheet_id=0):
     redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_id}) + query
     return redirect(redirect_url)
 
+@login_required
+def worksheet_variables(request, workbook_id=0, worksheet_id=0, variable_id=0):
+    command  = request.path.rsplit('/',1)[1];
+
+    variables = json.loads(request.body)['variables']
+    if request.method == "POST" :
+        if command == "edit" :
+            Worksheet_variable.edit_list(workbook_id=workbook_id, worksheet_id=worksheet_id, variable_list=variables, user=request.user)
+        elif command == "delete" :
+            Worksheet_variable.destroy(workbook_id=workbook_id, worksheet_id=worksheet_id, id=variable_id, user=request.user)
+
+    redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet_id})
+    return redirect(redirect_url)
+
+@login_required
+def worksheet_genes(request, workbook_id=0, worksheet_id=0, genes_id=0):
+    command  = request.path.rsplit('/',1)[1];
+
+    genes = json.loads(request.body)['genes']
+    if request.method == "POST" :
+        if command == "edit" :
+            Worksheet_gene.edit_list(worksheet_id=worksheet_id, genes=genes, user=request.user)
+        elif command == "delete" :
+            Worksheet_gene.destroy(worksheet_id=worksheet_id, id=genes_id, user=request.user)
+
+    redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet_id})
+    return redirect(redirect_url)
+
+@login_required
+def worksheet_cohorts(request, workbook_id=0, worksheet_id=0, cohort_id=0):
+    command  = request.path.rsplit('/',1)[1];
+
+    cohorts = json.loads(request.body)['cohorts']
+    if request.method == "POST" :
+        if command == "edit" :
+            Worksheet_cohort.edit_list(worksheet_id=worksheet_id, id=cohort_id, cohort_ids=cohorts, user=request.user)
+        elif command == "delete" :
+            Worksheet_cohort.destroy(worksheet_id=worksheet_id, id=cohort_id, user=request.user)
+
+    redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet_id})
+    return redirect(redirect_url)
 
 @login_required
 def worksheet_comment(request, workbook_id=0, worksheet_id=0, comment_id=0):
@@ -105,88 +179,3 @@ def worksheet_comment(request, workbook_id=0, worksheet_id=0, comment_id=0):
             return HttpResponse(json.dumps(result), status=200)
 
 
-
-#if workbook_id != '0':
-        # workbook_data = \
-        #     {'name': 'Test Workbook',
-        #      'id' : 1,
-        #      'description': "This is a test workbook and is not attached to any database structure",
-        #      'share_count': 2,
-        #      'owner' : {'name' : 'billy'},
-        #      'worksheet_list' : [
-        #          {'name' : 'test worksheet one',
-        #           'id' : 1,
-        #           'owner' : {'name' : 'billy'},
-        #           'description' : 'this is a test worksheet and is not attached to any database structure',
-        #           'gene_list' : [
-        #               {'name' : 'gene one'},
-        #               {'name' : 'gene two'},
-        #               {'name' : 'gene three'},
-        #               {'name' : 'gene four'}],
-        #           'variable_list' : [
-        #               {'name' : 'variable one'},
-        #               {'name' : 'variable two'},
-        #               {'name' : 'variable three'},
-        #               {'name' : 'variable four'}],
-        #          'cohort_list' : [
-        #               {'name' : 'cohort one'},
-        #               {'name' : 'cohort two'},
-        #               {'name' : 'cohort three'},
-        #               {'name' : 'cohort four'}],
-        #          'comment_list' : [
-        #               {'text' : 'this is a test comment 1'},
-        #               {'text' : 'this is a test comment 2'},
-        #               {'text' : 'this is a test comment 3'},
-        #               {'name' : 'this is a test comment 4'}]
-        #          },
-        #          {'name' : 'test worksheet two',
-        #           'id' : 2,
-        #           'description' : 'this is a test worksheet and is not attached to any database structure',
-        #           'owner' : {'name' : 'billy'},
-        #           'gene_list' : [
-        #               {'name' : 'gene one'},
-        #               {'name' : 'gene two'},
-        #               {'name' : 'gene three'},
-        #               {'name' : 'gene four'}],
-        #           'variable_list' : [
-        #               {'name' : 'variable one'},
-        #               {'name' : 'variable two'},
-        #               {'name' : 'variable three'},
-        #               {'name' : 'variable four'}],
-        #          'cohort_list' : [
-        #               {'name' : 'cohort one'},
-        #               {'name' : 'cohort two'},
-        #               {'name' : 'cohort three'},
-        #               {'name' : 'cohort four'}],
-        #          'comment_list' : [
-        #               {'text' : 'this is a test comment 1'},
-        #               {'text' : 'this is a test comment 2'},
-        #               {'text' : 'this is a test comment 3'},
-        #               {'name' : 'this is a test comment 4'}]
-        #          },
-        #          {'name' : 'test worksheet three',
-        #           'id' : 3,
-        #           'description' : 'this is a test worksheet and is not attached to any database structure',
-        #           'owner' : {'name' : 'billy'},
-        #           'gene_list' : [
-        #               {'name' : 'gene one'},
-        #               {'name' : 'gene two'},
-        #               {'name' : 'gene three'},
-        #               {'name' : 'gene four'}],
-        #           'variable_list' : [
-        #               {'name' : 'variable one'},
-        #               {'name' : 'variable two'},
-        #               {'name' : 'variable three'},
-        #               {'name' : 'variable four'}],
-        #          'cohort_list' : [
-        #               {'name' : 'cohort one'},
-        #               {'name' : 'cohort two'},
-        #               {'name' : 'cohort three'},
-        #               {'name' : 'cohort four'}],
-        #          'comment_list' : [
-        #               {'text' : 'this is a test comment 1'},
-        #               {'text' : 'this is a test comment 2'},
-        #               {'text' : 'this is a test comment 3'},
-        #               {'name' : 'this is a test comment 4'}]
-        #           }
-        #      ]};
