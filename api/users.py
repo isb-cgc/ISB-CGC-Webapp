@@ -65,8 +65,6 @@ class User_Endpoints_API(remote.Service):
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         user_email = None
 
-        print >> sys.stderr, endpoints.get_current_user()
-
         if endpoints.get_current_user() is not None:
             user_email = endpoints.get_current_user().email()
 
