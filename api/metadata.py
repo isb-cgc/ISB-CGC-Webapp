@@ -1502,10 +1502,10 @@ class Meta_Endpoints_API(remote.Service):
             return SampleFiles(total_file_count=count, page=page, platform_count_list=platform_count_list, file_list=file_list)
 
         except (IndexError, TypeError):
+            raise endpoints.ServiceException('Error getting counts')
+        finally:
             if cursor: cursor.close()
             if db: db.close()
-            raise endpoints.ServiceException('Error getting counts')
-
 
     GET_RESOURCE = endpoints.ResourceContainer(sample_id=messages.StringField(1, required=True))
     @endpoints.method(GET_RESOURCE, SampleFiles,
