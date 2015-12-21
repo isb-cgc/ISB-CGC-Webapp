@@ -49,8 +49,8 @@ def sharing_add(request, sharing_id=0):
         return render(request, template, context)
 
 @login_required
-def sharing_remove(request, shared_id=0):
-    resc = request.user.shared_resource_set.get(id=shared_id)
+def sharing_remove(request, sharing_id=0):
+    resc = request.user.shared_resource_set.get(id=sharing_id)
     resc.active = False
     resc.save()
 

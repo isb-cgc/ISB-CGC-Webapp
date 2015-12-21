@@ -43,6 +43,27 @@
     </div>
 </div>
 
+{% if project.owner.id != user.id %}
+<!-- Remove Project Modal -->
+<div class="modal fade" id="remove-project-modal" tabindex="-1" role="dialog" aria-labelledby="remove-project-header" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Remove Yourself from this Project?</h4>
+            </div>
+            <form id="remove-project" method="POST" action="{% url 'sharing_remove' shared.id %}" data-redirect="{% url 'projects' %}">
+                {% csrf_token %}
+                <div class="modal-footer">
+                    <input type="submit" value="Remove" class="btn btn-primary" />
+                    <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <!-- Share Project Modal -->
 <div class="modal fade" id="share-project-modal" tabindex="-1" role="dialog" aria-labelledby="delete-project-header" aria-hidden="true">
     <div class="modal-dialog">
@@ -108,4 +129,3 @@
         </div>
     </div>
 </div>
-

@@ -38,9 +38,14 @@ def project_detail(request, project_id=0):
     proj = Project.objects.get(Q(owner=request.user) | Q(shared__matched_user=request.user, shared__active=True)
                                             ,active=True,id=project_id)
 
+    shared = None
+    if proj.owner.id != request.user.id:
+        shared = request.user.shared_resource_set.get(project__id=project_id)
+
     context = {
         'project': proj,
-        'studies': proj.study_set.all().filter(active=True)
+        'studies': proj.study_set.all().filter(active=True),
+        'shared': shared
     }
     return render(request, template, context)
 
