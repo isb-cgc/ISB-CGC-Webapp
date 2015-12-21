@@ -248,8 +248,8 @@ def check_user_login(request):
                 except HttpError, e:
                     logger.debug(user_email + ' was not removed from ACL_GOOGLE_GROUP: ' + str(e))
 
-                nih_user.active = 0
-                nih_user.dbGaP_authorized = 0
+                nih_user.active = False
+                nih_user.dbGaP_authorized = False
                 nih_user.save()
                 logger.info('User with NIH username ' + str(nih_user.NIH_username) + ' is deactivated in NIH_User table')
 
@@ -396,8 +396,8 @@ def remove_user_from_ACL(request, nih_username):
         logger.warn("Successfully emergency removed user with NIH username {nih_username} and email {email} from ACL.".format(
             nih_username=nih_username, email=email))
         # also deactivate NIH user in NIH_User table
-        nih_user.active = 0
-        nih_user.dbGaP_authorized = 0
+        nih_user.active = False
+        nih_user.dbGaP_authorized = False
         nih_user.save()
         logger.warn("Successfully emergency deactivated user with NIH username {nih_username} and email {email} from NIH_User table.".format(
             nih_username=nih_username, email=email))
@@ -423,7 +423,8 @@ def edit_dbGaP_authentication_list(nih_username):
 
     # 2. remove the line with the offending nih_username
     for row in rows:
-
+        # this will remove not only the user with the nih_username
+        # but also everyone who is a downloader for that user
         if nih_username in row:
             try:
                 rows.remove(row)
@@ -454,7 +455,7 @@ def create_and_log_reports(request):
 
     # get utc time and timedelta
     utc_now = datetime.datetime.utcnow()
-    tdelta = utc_now + datetime.timedelta(days=-7)
+    tdelta = utc_now + datetime.timedelta(days=-1)
     start_datetime = tdelta.isoformat("T") + "Z" # collect last 7 days logs
 
     for application_name in ['admin', 'login', 'token', 'groups']:
