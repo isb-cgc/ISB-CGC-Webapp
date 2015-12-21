@@ -13,8 +13,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-
-
 Authenticates user for accessing the ISB-CGC Endpoint APIs.
 
 May be run from the command line or in scripts/ipython.
