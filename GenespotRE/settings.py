@@ -29,7 +29,6 @@ ALLOWED_HOSTS = [
     secret_settings.get('ALLOWED_HOST')
 ]
 
-
 ### added for connecting to CloudSQL with SSL certs on MVM platform
 SSL_DIR = os.path.abspath(os.path.dirname(__file__))+os.sep
 MVM_ON = True
@@ -60,7 +59,7 @@ CONTROLLED_DATA_BUCKET = secret_settings.get('CONTROLLED_DATA_BUCKET')
 COHORT_DATASET_ID = secret_settings.get('COHORT_DATASET_ID')
 DEVELOPER_COHORT_TABLE_ID = secret_settings.get('DEVELOPER_COHORT_TABLE_ID')
 
-NIH_AUTH_ON = False
+NIH_AUTH_ON = os.environ.get('NIH_AUTH_ON', False)
 
 if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):  
     # or os.getenv('SETTINGS_MODE') == 'prod':
@@ -226,7 +225,11 @@ INSTALLED_APPS = (
     'GenespotRE',
     'visualizations',
     'seqpeek',
-    'cohorts'
+    'cohorts',
+    'projects',
+    'genes',
+    'variables',
+    'workbooks'
 )
 
 #############################
@@ -282,7 +285,7 @@ LOGGING = {
 #  Start django-allauth  #
 ##########################
 
-LOGIN_REDIRECT_URL = '/user_landing/'
+LOGIN_REDIRECT_URL = '/dashboard/'
 
 INSTALLED_APPS += (
     'accounts',

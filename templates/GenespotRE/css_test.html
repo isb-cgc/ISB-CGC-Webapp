@@ -19,28 +19,58 @@
 {% endcomment %}
 
 {% block content %}
-
-    <h1>This page is for testing overall base css</h1>
-
-    <h1>The quick brown fox jumped over the lazy dog</h1>
-    <h2>The quick brown fox jumped over the lazy dog</h2>
-    <h3>The quick brown fox jumped over the lazy dog</h3>
-    <h4>The quick brown fox jumped over the lazy dog</h4>
-    <h5>The quick brown fox jumped over the lazy dog</h5>
-
-    <button type="button" class="btn btn-default">Default</button>
-    <button type="button" class="btn btn-primary">Primary</button>
-    <button type="button" class="btn btn-success">Success</button>
-    <button type="button" class="btn btn-info">Info</button>
-    <button type="button" class="btn btn-warning">Warning</button>
-    <button type="button" class="btn btn-danger">Danger</button>
-
-    <div class="btn-group">
-        <button type="button" class="btn btn-default">Left</button>
-        <button type="button" class="btn btn-default">Middle</button>
-        <button type="button" class="btn btn-default">Right</button>
+    <div>
+        <h2 class="page-header">Typography</h2>
+        <div>
+            <h1>The quick brown fox jumped over the lazy dog</h1>
+            <h2>The quick brown fox jumped over the lazy dog</h2>
+            <h3>The quick brown fox jumped over the lazy dog</h3>
+            <h4>The quick brown fox jumped over the lazy dog</h4>
+            <h5>The quick brown fox jumped over the lazy dog</h5>
+            <p>Lorem ipsum dolor sit amet, __consectetur__ adipiscing elit. Cras imperdiet nec erat ac condimentum. Nulla vel rutrum ligula. Sed hendrerit interdum orci a posuere. Vivamus ut velit aliquet, mollis purus eget, iaculis nisl. Proin posuere malesuada ante. Proin auctor orci eros, ac molestie lorem dictum nec. Vestibulum sit amet erat est. Morbi luctus sed elit ac luctus. </p>
+        </div>
     </div>
 
+    <div>
+        <h2 class="page-header">Buttons</h2>
+        <div>
+            <button type="button" class="btn btn-default">Default</button>
+            <button type="button" class="btn btn-primary">Primary</button>
+            <button type="button" class="btn btn-info">Info</button>
+            <button type="button" class="btn btn-warning">Warning</button>
+            <button type="button" class="btn btn-success">Success</button>
+            <button type="button" class="btn btn-danger">Danger</button>
+        </div>
+        <h3>Button Group</h3>
+        <div class="btn-group">
+            <button type="button" class="btn btn-default">Left</button>
+            <button type="button" class="btn btn-default">Middle</button>
+            <button type="button" class="btn btn-default">Right</button>
+        </div>
+    </div>
+
+    <div>
+        <h2 class="page-header">Panels</h2>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h5 class="panel-title">Default panel with heading</h5>
+            </div>
+            <div class="panel-body">
+                <p>Lorem ipsum dolor sit amet, __consectetur__ adipiscing elit. Cras imperdiet nec erat ac condimentum.</p>
+            </div>
+        </div>
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h5 class="panel-title">Primary panel with heading and footer</h5>
+            </div>
+            <div class="panel-body">
+                <p>Lorem ipsum dolor sit amet, __consectetur__ adipiscing elit. Cras imperdiet nec erat ac condimentum.</p>
+            </div>
+            <div class="panel-footer">
+                <button class="btn btn-default">Do Something</button>
+            </div>
+        </div>
+    </div>
     <table class="table table-striped space-top-10">
         <tr>
             <th>#</th>

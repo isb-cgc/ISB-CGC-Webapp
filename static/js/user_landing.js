@@ -26,7 +26,8 @@ require.config({
         underscore: 'libs/underscore-min',
         assetscore: 'libs/assets.core',
         assetsresponsive: 'libs/assets.responsive',
-        tablesorter:'libs/jquery.tablesorter.min'
+        tablesorter:'libs/jquery.tablesorter.min',
+        base: 'base'
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -34,7 +35,8 @@ require.config({
         'session_security': ['jquery'],
         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
         'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
-        'tablesorter': ['jquery']
+        'tablesorter': ['jquery'],
+        'base': ['jquery'],
     }
 });
 
@@ -45,7 +47,8 @@ require([
     'session_security',
     'assetscore',
     'assetsresponsive',
-    'tablesorter'
+    'tablesorter',
+    'base'
 ], function($) {
     A11y.Core();
 
