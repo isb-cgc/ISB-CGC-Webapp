@@ -507,7 +507,7 @@ def get_bucket_defacl(client, bucket_name):
     resp = req.execute()
     return resp
 
-def log_acls():
+def log_acls(request):
     """log acls"""
     client = get_storage_resource()
     all_projects = ['isb-cgc', 'isb-cgc-data-01', 'isb-cgc-data-02', 'isb-cgc-test']
@@ -523,3 +523,5 @@ def log_acls():
     # write log entry
     write_log_entry('bucket_acls', acls)
     write_log_entry('bucket_defacls', defacls)
+
+    return HttpResponse('')
