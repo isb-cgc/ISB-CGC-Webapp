@@ -152,12 +152,14 @@ class CohortPatientsSamplesList(messages.Message):
     samples = messages.StringField(3, repeated=True)
     sample_count = messages.IntegerField(4)
     cohort_id = messages.IntegerField(5)
+    error = messages.StringField(6)
 
 
 class PatientDetails(messages.Message):
     clinical_data = messages.MessageField(MetadataItem, 1)
     samples = messages.StringField(2, repeated=True)
     aliquots = messages.StringField(3, repeated=True)
+    error = messages.StringField(4)
 
 
 class DataDetails(messages.Message):
@@ -185,6 +187,7 @@ class SampleDetails(messages.Message):
     patient = messages.StringField(3)
     data_details = messages.MessageField(DataDetails, 4, repeated=True)
     data_details_count = messages.IntegerField(5)
+    error = messages.StringField(6)
 
 
 class DataFileNameKeyList(messages.Message):
@@ -308,7 +311,6 @@ class Cohort_Endpoints_API(remote.Service):
                 if cursor: cursor.close()
                 if filter_cursor: filter_cursor.close()
                 if db: db.close()
-
                 raise endpoints.NotFoundException(
                     "User {}'s cohorts not found. {}: {}".format(user_email, type(e), e))
         else:
@@ -353,15 +355,22 @@ class Cohort_Endpoints_API(remote.Service):
                 cursor.execute("select count(*) from cohorts_cohort_perms where user_id=%s and cohort_id=%s", (user_id, cohort_id))
                 result = cursor.fetchone()
                 if int(result['count(*)']) == 0:
-                    raise endpoints.NotFoundException("{} does not have owner or reader permissions on cohort {}."
-                                                      .format(user_email, cohort_id))
+                    error_message = "{} does not have owner or reader permissions on cohort {}.".format(user_email, cohort_id)
+                    return CohortPatientsSamplesList(error=error_message, patients=[],
+                                                     patient_count=None, samples=[],
+                                                     sample_count=None, cohort_id=None)
+
                 cursor.execute("select count(*) from cohorts_cohort where id=%s and active=%s", (cohort_id, unicode('0')))
                 result = cursor.fetchone()
                 if int(result['count(*)']) > 0:
-                    raise endpoints.NotFoundException("Cohort {} was deleted.".format(cohort_id))
+                    error_message = "Cohort {} was deleted.".format(cohort_id)
+                    return CohortPatientsSamplesList(error=error_message, patients=[],
+                                                     patient_count=None, samples=[],
+                                                     sample_count=None, cohort_id=None)
                 cursor.close()
                 db.close()
-            except (IndexError, TypeError):
+            except (IndexError, TypeError) as e:
+                logger.warn(e)
                 if cursor: cursor.close()
                 if db: db.close()
                 raise endpoints.NotFoundException("Cohort {} not found.".format(cohort_id))
@@ -412,10 +421,11 @@ class Cohort_Endpoints_API(remote.Service):
                                                  samples=sample_data,
                                                  sample_count=len(sample_data),
                                                  cohort_id=int(cohort_id))
-            except (IndexError, TypeError):
+            except (IndexError, TypeError) as e:
+                logger.warn(e)
                 if cursor: cursor.close()
                 if db: db.close()
-                raise endpoints.NotFoundException("Cohort %s not found." % (request.cohort_id),)
+                raise endpoints.NotFoundException("Cohort {} not found.".format(cohort_id))
 
         else:
             raise endpoints.UnauthorizedException("Authentication failed.")
@@ -457,7 +467,10 @@ class Cohort_Endpoints_API(remote.Service):
             clinical_cursor.execute(clinical_query_str, query_tuple)
             row = clinical_cursor.fetchone()
             if row is None:
-                raise endpoints.NotFoundException("Patient barcode {} not found in metadata_clinical table.".format(patient_barcode))
+                clinical_cursor.close()
+                db.close()
+                error_message = "Patient barcode {} not found in metadata_clinical table.".format(patient_barcode)
+                return PatientDetails(error=error_message, clinical_data=None, samples=[], aliquots=[])
             item = MetadataItem(
                 age_at_initial_pathologic_diagnosis=None if "age_at_initial_pathologic_diagnosis" not in row or row["age_at_initial_pathologic_diagnosis"] is None else int(row["age_at_initial_pathologic_diagnosis"]),
                 anatomic_neoplasm_subdivision=str(row["anatomic_neoplasm_subdivision"]),
@@ -543,7 +556,7 @@ class Cohort_Endpoints_API(remote.Service):
             if sample_cursor: sample_cursor.close()
             if aliquot_cursor: aliquot_cursor.close()
             if db: db.close()
-            raise endpoints.NotFoundException("Patient %s not found." % (str(request.patient_barcode),))
+            raise endpoints.NotFoundException("Patient {} not found.".format(patient_barcode))
 
 
     GET_RESOURCE = endpoints.ResourceContainer(sample_barcode=messages.StringField(1, required=True),
@@ -620,7 +633,11 @@ class Cohort_Endpoints_API(remote.Service):
             biospecimen_cursor.execute(biospecimen_query_str, query_tuple)
             row = biospecimen_cursor.fetchone()
             if row is None:
-                raise endpoints.NotFoundException("Sample barcode {} not found in metadata_biospecimen table.".format(sample_barcode))
+                biospecimen_cursor.close()
+                db.close()
+                error_message = "Sample barcode {} not found in metadata_biospecimen table.".format(sample_barcode)
+                return SampleDetails(biospecimen_data=None, aliquots=[], patient=None, data_details=[],
+                                     data_details_count=None, error=error_message)
             item = MetadataItem(
                 avg_percent_lymphocyte_infiltration=None if "avg_percent_lymphocyte_infiltration" not in row or row["avg_percent_lymphocyte_infiltration"] is None else float(row["avg_percent_lymphocyte_infiltration"]),
                 avg_percent_monocyte_infiltration=None if "avg_percent_monocyte_infiltration" not in row or row["avg_percent_monocyte_infiltration"] is None else float(row["avg_percent_monocyte_infiltration"]),
@@ -664,7 +681,13 @@ class Cohort_Endpoints_API(remote.Service):
             patient_cursor.execute(patient_query_str, query_tuple)
             row = patient_cursor.fetchone()
             if row is None:
-                raise endpoints.NotFoundException("Sample barcode {} not found in metadata_biospecimen table.".format(sample_barcode))
+                aliquot_cursor.close()
+                patient_cursor.close()
+                biospecimen_cursor.close()
+                db.close()
+                error_message = "Sample barcode {} not found in metadata_biospecimen table.".format(sample_barcode)
+                return SampleDetails(biospecimen_data=None, aliquots=[], patient=None, data_details=[],
+                                     data_details_count=None, error=error_message)
             patient_barcode = str(row["ParticipantBarcode"])
 
             data_cursor = db.cursor(MySQLdb.cursors.DictCursor)
@@ -701,14 +724,15 @@ class Cohort_Endpoints_API(remote.Service):
                                  patient=patient_barcode, data_details=data_data,
                                  data_details_count=len(data_data))
 
-        except (IndexError, TypeError, Exception) as e:
+        except (IndexError, TypeError) as e:
             logger.warn(e)
             if biospecimen_cursor: biospecimen_cursor.close()
             if aliquot_cursor: aliquot_cursor.close()
             if patient_cursor: patient_cursor.close()
             if data_cursor: data_cursor.close()
             if db: db.close()
-            raise endpoints.NotFoundException("Sample %s not found." % (str(request.sample_barcode),))
+            raise endpoints.NotFoundException("Sample details for barcode {} not found".format(sample_barcode))
+
 
 
     GET_RESOURCE = endpoints.ResourceContainer(sample_barcode=messages.StringField(1, required=True),
@@ -741,8 +765,9 @@ class Cohort_Endpoints_API(remote.Service):
                 nih_user = NIH_User.objects.get(user_id=user_id)
                 dbGaP_authorized = nih_user.dbGaP_authorized and nih_user.active
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
-                logger.warn(e)
-                # raise endpoints.NotFoundException("%s does not have an entry in the user database." % user_email)
+                if type(e) is MultipleObjectsReturned:
+                    logger.warn(e)
+                    raise endpoints.NotFoundException("%s has multiple entries in the user database." % user_email)
 
 
         sample_barcode = request.__getattribute__('sample_barcode')
@@ -788,11 +813,11 @@ class Cohort_Endpoints_API(remote.Service):
             db.close()
             return DataFileNameKeyList(datafilenamekeys=datafilenamekeys, count=len(datafilenamekeys))
 
-        except (IndexError, TypeError), e:
+        except (IndexError, TypeError) as e:
             logger.warn(e)
             if cursor: cursor.close()
             if db: db.close()
-            raise endpoints.NotFoundException("Sample %s not found." % (str(request.sample_barcode),))
+            raise endpoints.NotFoundException("Sample {} not found.".format(sample_barcode))
 
 
     POST_RESOURCE = endpoints.ResourceContainer(IncomingMetadataItem,

@@ -987,6 +987,10 @@ a.skip-nav {
       padding-left: 10px; }
   #cohort-filelist .filelist-panel .page-num, #cohort-filelist .filelist-panel .file-count {
     display: inline-block; }
+  #cohort-filelist .filelist-panel .spinner {
+    font-size: 24px;
+    margin-left: 5px;
+    vertical-align: middle; }
   #cohort-filelist .filelist-panel table {
     table-layout: fixed;
     word-break: break-all;
