@@ -58,6 +58,7 @@ urlpatterns = patterns('',
     url(r'^projects/', include('projects.urls')),
     url(r'^genes/', include('genes.urls')),
     url(r'^variables/', include('variables.urls')),
+    url(r'^share/', include('sharing.urls')),
 )
 
 if settings.NIH_AUTH_ON:
