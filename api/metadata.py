@@ -1110,13 +1110,14 @@ class Meta_Endpoints_API(remote.Service):
         query_dict = {}
         sample_ids = None
         is_landing = False
-        db = sql_connection()
+
 
         if request.__getattribute__('is_landing') is not None:
             is_landing = request.__getattribute__('is_landing')
 
         if is_landing:
             try:
+                db = sql_connection()
                 cursor = db.cursor()
                 cursor.execute('SELECT Study, COUNT(Study) as disease_count FROM metadata_samples GROUP BY Study;')
                 data = []
@@ -1144,15 +1145,17 @@ class Meta_Endpoints_API(remote.Service):
             sample_query_str = 'SELECT sample_id FROM cohorts_samples WHERE cohort_id=%s;'
 
             try:
+                db = sql_connection()
                 cursor = db.cursor(MySQLdb.cursors.DictCursor)
                 cursor.execute(sample_query_str, (cohort_id,))
                 sample_ids = ()
 
                 for row in cursor.fetchall():
                     sample_ids += (row['sample_id'],)
+                cursor.close()
+                db.close()
 
             except (TypeError, IndexError) as e:
-                print e
                 raise endpoints.NotFoundException('Error in retrieving barcodes.')
 
 
@@ -1189,6 +1192,7 @@ class Meta_Endpoints_API(remote.Service):
             value_count_query_str += ' GROUP BY %s;' % key
 
             try:
+                db = sql_connection()
                 cursor = db.cursor()
                 cursor.execute(value_count_query_str, value_count_tuple)
 
@@ -1388,7 +1392,8 @@ class Meta_Endpoints_API(remote.Service):
                                                cohort_id=messages.IntegerField(1, required=True),
                                                page=messages.IntegerField(2),
                                                limit=messages.IntegerField(3),
-                                               token=messages.StringField(4)
+                                               token=messages.StringField(4),
+                                               platform_count_only=messages.StringField(5)
                                                )
     @endpoints.method(GET_RESOURCE, SampleFiles,
                       path='cohort_files', http_method='GET',
@@ -1399,11 +1404,13 @@ class Meta_Endpoints_API(remote.Service):
         offset = 0
         cohort_id = request.cohort_id
 
+        platform_count_only = request.__getattribute__('platform_count_only')
         is_dbGaP_authorized = False
         user_email = None
         user_id = None
         if endpoints.get_current_user() is not None:
             user_email = endpoints.get_current_user().email()
+
         # users have the option of pasting the access token in the query string
         # or in the 'token' field in the api explorer
         # but this is not required
@@ -1422,7 +1429,7 @@ class Meta_Endpoints_API(remote.Service):
                 cohort_perm = Cohort_Perms.objects.get(cohort_id=cohort_id, user_id=user_id)
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
                 logger.warn(e)
-                raise endpoints.NotFoundException("%s does not have permission to view cohort %d." % (user_email, cohort_id))
+                raise endpoints.UnauthorizedException("%s does not have permission to view cohort %d." % (user_email, cohort_id))
 
             try:
                 nih_user = NIH_User.objects.get(user_id=user_id)
@@ -1431,7 +1438,7 @@ class Meta_Endpoints_API(remote.Service):
                 logger.info("%s does not have an entry in NIH_User: %s" % (user_email, str(e)))
         else:
             logger.warn("Authentication required for cohort_files endpoint.")
-            raise endpoints.NotFoundException("No user email found.")
+            raise endpoints.UnauthorizedException("No user email found.")
 
         if request.__getattribute__('page') is not None:
             page = request.page
@@ -1440,12 +1447,10 @@ class Meta_Endpoints_API(remote.Service):
             limit = request.limit
 
         platform_count_query = 'select Platform, count(Platform) as platform_count from metadata_data where SampleBarcode in (select sample_id from cohorts_samples where cohort_id=%s) and DatafileUploaded="true" '
-        count_query = 'select count(*) as row_count from metadata_data where SampleBarcode in (select sample_id from cohorts_samples where cohort_id=%s) and DatafileUploaded="true" '
         query = 'select SampleBarcode, DatafileName, DatafileNameKey, Pipeline, Platform, DataLevel, Datatype, GG_readgroupset_id from metadata_data where SampleBarcode in (select sample_id from cohorts_samples where cohort_id=%s) and DatafileUploaded="true" '
 
         if not is_dbGaP_authorized:
             platform_count_query += ' and SecurityProtocol="dbGap open-access" group by Platform;'
-            count_query += ' and SecurityProtocol="dbGap open-access" '
             query += ' and SecurityProtocol="dbGap open-access" '
         else:
             platform_count_query += ' group by Platform;'
@@ -1458,11 +1463,7 @@ class Meta_Endpoints_API(remote.Service):
                     platform_selector_list.append(key)
 
         if len(platform_selector_list):
-            count_query += ' and Platform in ("' + '","'.join(platform_selector_list) + '");'
             query += ' and Platform in ("' + '","'.join(platform_selector_list) + '")'
-
-        else:
-            count_query += ';'
 
         query_tuple = (cohort_id,)
         if limit != -1:
@@ -1473,29 +1474,29 @@ class Meta_Endpoints_API(remote.Service):
             query += ' offset %s'
             query_tuple += (offset,)
         query += ';'
-        db = sql_connection()
-        cursor = db.cursor(MySQLdb.cursors.DictCursor)
 
         try:
-            cursor.execute(count_query, (cohort_id,))
-            count = cursor.fetchone()['row_count']
+            db = sql_connection()
+            cursor = db.cursor(MySQLdb.cursors.DictCursor)
             cursor.execute(platform_count_query, (cohort_id,))
 
             platform_count_list = []
+            count = 0
             if cursor.rowcount > 0:
                 for row in cursor.fetchall():
+                    count += int(row['platform_count'])
                     platform_count_list.append(PlatformCount(platform=row['Platform'], count=row['platform_count']))
             else:
                 platform_count_list.append(PlatformCount(platform='None', count=0))
-            cursor.execute(query, query_tuple)
 
             file_list = []
-
-            if cursor.rowcount > 0:
-                for item in cursor.fetchall():
-                    file_list.append(FileDetails(sample=item['SampleBarcode'], cloudstorage_location=item['DatafileNameKey'], filename=item['DatafileName'], pipeline=item['Pipeline'], platform=item['Platform'], datalevel=item['DataLevel'], datatype=item['Datatype'], gg_readgroupset_id=item['GG_readgroupset_id']))
-            else:
-                file_list.append(FileDetails(sample='None', filename='', pipeline='', platform='', datalevel=''))
+            if not platform_count_only:
+                cursor.execute(query, query_tuple)
+                if cursor.rowcount > 0:
+                    for item in cursor.fetchall():
+                        file_list.append(FileDetails(sample=item['SampleBarcode'], cloudstorage_location=item['DatafileNameKey'], filename=item['DatafileName'], pipeline=item['Pipeline'], platform=item['Platform'], datalevel=item['DataLevel'], datatype=item['Datatype'], gg_readgroupset_id=item['GG_readgroupset_id']))
+                else:
+                    file_list.append(FileDetails(sample='None', filename='', pipeline='', platform='', datalevel=''))
             cursor.close()
             db.close()
             return SampleFiles(total_file_count=count, page=page, platform_count_list=platform_count_list, file_list=file_list)
