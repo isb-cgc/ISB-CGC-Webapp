@@ -51,11 +51,6 @@ require([
     'd3',
     'd3tip',
     'vizhelpers',
-    'visualizations/createScatterPlot',
-    'visualizations/createCubbyPlot',
-    'visualizations/createViolinPlot',
-    'visualizations/createHistogram',
-    'visualizations/createBarGraph',
     'select2',
     'assetscore',
     'assetsresponsive'

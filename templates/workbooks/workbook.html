@@ -102,26 +102,6 @@
                                     <div class="list-item__heading">
                                         <a href="{% url 'genes' %}"> Genes <i class="fa fa-plus pull-right"></i></a>
                                     </div>
-                                    <ul class="list-item__body">
-
-                                        <li class="sublist-item">
-                                            THIS
-                                        </li>
-                                        <li class="sublist-item">IS</li>
-                                        <li class="sublist-item">AN</li>
-                                        <li class="sublist-item">
-                                            EXAMPLE
-                                        </li>
-                                        <li class="sublist-item">
-                                            BRCA1
-                                        </li>
-                                        <li class="sublist-item">
-                                            PTEN
-                                        </li>
-                                        <a class="show-more">Show More</a>
-                                        <li class="extra-values sublist-item">ABCD1</li>
-                                        <a class="show-less" style="display:none;">Show Less</a>
-                                    </ul>
                                     {% if worksheet.genes %}
                                     <ul class="list-item__body">
                                         {% with worksheet.gene_list|how_many_more:6 as num_more  %}
@@ -154,9 +134,9 @@
                                     <div class="list-item__heading">
                                         <a href="{% url 'cohort_list'  %}">Cohorts <i class="fa fa-plus pull-right"></i></a>
                                     </div>
-                                    {% if worksheet.cohort_list %}
+                                    {% if worksheet.cohorts %}
                                     <ul class="list-item__body">
-                                        {% for cohort in worksheet.cohort_list %}
+                                        {% for cohort in worksheet.cohorts %}
                                             <li class="sublist-item">{{ cohort.name }}</li>
                                         {% endfor %}
                                     </ul>
@@ -174,12 +154,17 @@
                             </div>
                             <h5>Analysis Type</h5>
                             <div class="form-group gray-area">
-                                <select class="form-control">
+                                <select id="plot_selection" class="form-control">
                                     <option>-- select one --</option>
                                     <option>Mutations</option>
                                     <option>SeqPeek</option>
                                     <option>Other</option>
                                 </select>
+                            </div>
+                            <div class="plot-container">
+                                {% include 'workbooks/workbook_plot.html' with plot=worksheet.plot variables=worksheet.variables cohorts=worksheet.cohorts %}
+                                <!-- plot needs to indicate saved plot data such as selected variables, cohorts, title, etc -->
+                                <!-- workbook_plot also needs to have reference to all worksheet cohorts, variables and genes -->
                             </div>
                             <div class="worksheet-instruction">
                                 <p><i class="fa fa-exclamation-circle"></i> To Complete this Analysis: </p>
@@ -228,7 +213,15 @@
 <script type="text/javascript">
     var base_api_url = '{{ base_api_url|safe }}';
     var base_url = '{{ base_url|safe }}';
+
+    //plot specific variables
+{#    var plots_data = {{ plots_data|safe }};#}
+{#    var x_attr = '{% if viz|length %}{{ viz.plots.0.x_axis }}{% else %}country{% endif %}';#}
+{#    var y_attr = '{% if viz|length %}{{ viz.plots.0.y_axis }}{% else %}{% endif %}';#}
+{#    var color_by = '{% if viz|length and viz.plots.0.color_by != 'None' %}{{ viz.plots.0.color_by }}{% else %}disease_code{% endif %}';#}
+{#    var cohort_list = {{ cohorts|safe }};#}
 </script>
 
 {% endblock content %}
 {% block js_file %}{% static 'js/workbooks.js' %}{% endblock %}
+{% block js_file2 %}{% static 'js/workbook_plot.js' %}{% endblock %}

@@ -51,7 +51,7 @@ def workbook(request, workbook_id=0):
         elif command == "delete" :
             Workbook.destroy(id=workbook_id)
 
-        if(command == "delete"):
+        if command == "delete":
             redirect_url = reverse('workbooks')
             return redirect(redirect_url)
         else :
@@ -59,18 +59,29 @@ def workbook(request, workbook_id=0):
             return redirect(redirect_url)
 
     elif request.method == "GET" :
-        workbook            = Workbook.objects.get(id=workbook_id)
-        workbook.owner      = workbook.get_owner()
-        workbook.worksheets = workbook.get_worksheets()
-        workbook.shares     = workbook.get_shares()
+        if workbook_id:
+            workbook            = Workbook.objects.get(id=workbook_id)
+            workbook.owner      = workbook.get_owner()
+            workbook.worksheets = workbook.get_worksheets()
+            workbook.shares     = workbook.get_shares()
 
-        for worksheet in workbook.worksheets:
-            worksheet.comments  = worksheet.get_comments()
-            worksheet.variables = worksheet.get_variables()
-            worksheet.genes     = worksheet.get_genes()
-            worksheet.cohorts   = worksheet.get_cohorts()
+            for worksheet in workbook.worksheets:
+                worksheet.comments  = worksheet.get_comments()
+                worksheet.variables = worksheet.get_variables()
+                worksheet.genes     = worksheet.get_genes()
+                worksheet.cohorts   = worksheet.get_cohorts()
+                worksheet.plot      = {'title' : "default title",
+                                       'type'  : "default type",
+                                       'dimensions' : [{'name' : "x-axis",
+                                                        'variable' : "variables"},
+                                                       {'name' : "y-axis",
+                                                        'variable' : "variables"}]
+                                       }
 
-        return render(request, template, {'workbook' : workbook})
+            return render(request, template, {'workbook' : workbook})
+        else :
+            redirect_url = reverse('workbooks')
+            return redirect(redirect_url)
 
 @login_required
 #used to display a particular worksheet on page load
@@ -163,3 +174,5 @@ def worksheet_comment(request, workbook_id=0, worksheet_id=0, comment_id=0):
         elif command == "delete" :
             result = Worksheet_comment.destroy(comment_id = comment_id)
             return HttpResponse(json.dumps(result), status=200)
+
+

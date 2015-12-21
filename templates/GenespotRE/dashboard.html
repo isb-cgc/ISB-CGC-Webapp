@@ -37,7 +37,10 @@
             <p>Workbooks store the Analyses you create -- and their related data.</p>
         </div>
         <div class="panel-footer">
-            <a href="{% url 'workbook_detail' 0 %}"><button class="btn btn-default"><i class="fa fa-plus"></i>Create a New Workbook</button></a>
+             <form id="create-workbook" method="POST" action="{% url 'workbook_create' %}">
+                {% csrf_token %}
+                 <button type="submit" class="btn btn-primary" ><i class="fa fa-plus"></i>Create a New Workbook</button>
+             </form>
             <a class="btn btn-plain" href="{% url 'workbooks' %}">Sample Workbooks</a>
         </div>
     </section>

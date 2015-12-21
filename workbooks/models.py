@@ -187,7 +187,8 @@ class Worksheet(models.Model):
         return self.worksheet_gene_set.filter(worksheet=self)
 
     def get_cohorts(self):
-        return self.worksheet_cohort_set.filter(worksheet=self)
+        return  [Cohort.objects.get_all_tcga_cohort()]
+        #return self.worksheet_cohort_set.filter(worksheet=self)
 
     def destroy(self):
         self.delete()
@@ -405,6 +406,35 @@ class Worksheet_comment(models.Model):
             'content'       : comment_model.content
         }
         return return_obj
+
+# DESIGN COMMENTARY :
+# visualizations are currently coupled to worksheets via 1:many.  This could be incorrect as there is potential for useing
+# plots eventually outside worksheets. For the current design, this is not possible as worksheets contain the variables,
+# genes, and cohorts for the plot.  A future design might be to refactor the variables, genes and plots to be coupled to
+# plot instances rather than worksheets
+class Worksheet_Plot_Manager(models.Manager):
+    content = None
+
+class Worksheet_plot(models.Model):
+    id              = models.AutoField(primary_key=True)
+    worksheet       = models.ForeignKey(Worksheet, blank=False)
+    date_created    = models.DateTimeField(auto_now_add=True)
+    modified_date   = models.DateTimeField(auto_now=True)
+    title           = models.CharField(max_length=100, null=False)
+    color_by        = models.CharField(max_length=1024, null=True)
+    plot_type       = models.CharField(max_length=1024, null=True)
+    objects         = Worksheet_Plot_Manager()
+
+# This is storage of variable selection on dimensions of a plot.  A plot can have N number of dimensions
+# However only certain variable types can be added to specific plots
+class Plot_dimension(models.Model):
+    id              = models.AutoField(primary_key=True)
+    name            = models.CharField(max_length=100, null=False)
+    plot            = models.ForeignKey(Worksheet_plot, blank=False)
+    variable        = models.ForeignKey(Worksheet_variable, blank=False)
+    date_created    = models.DateTimeField(auto_now_add=True)
+    modified_date   = models.DateTimeField(auto_now=True)
+
 
 @admin.register(Workbook)
 class WorkbookAdmin(admin.ModelAdmin):

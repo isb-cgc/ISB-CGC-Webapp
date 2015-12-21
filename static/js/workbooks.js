@@ -112,6 +112,21 @@ require([
         })
     });
 
+    // settings flyout interactions
+    $('.show-settings-flyout').on('click', function() {
+        var target = $(document).find('.settings-flyout');
+        $(target).animate({
+            right: '-1px'
+        }, 800).toggleClass('open');
+    });
+    $('.hide-settings-flyout').on('click', function() {
+        $(this).parents('.fly-out.settings-flyout').animate({
+            right: '-400px'
+        }, 800, function(){
+            $(this).removeClass('open');
+        })
+    });
+
     $('.dropdown-menu').find("[data-toggle='modal']").click(function(){
         //$(this.getAttribute("data-target")).modal();
         console.log($(this.getAttribute("data-target")));
@@ -155,7 +170,11 @@ require([
         $(this).toggleClass('open');
         $(this).parent().prev('.worksheet-nav').toggleClass('closed');
     })
-    //search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id);
-    //search_helper_obj.update_parsets(base_api_url, 'metadata_platform_list', cohort_id);
+
+
+    $("#plot_selection").on("change", function(event){
+        console.log("changed");
+        PlotFactory.generateDefaultPlot();
+    })
 });
 
