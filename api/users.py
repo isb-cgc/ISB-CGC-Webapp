@@ -139,7 +139,7 @@ class User_Endpoints_API(remote.Service):
             return ReturnJSON(msg="{} has dbGaP authorization and is a member of the controlled-access google group."
                               .format(user_email))
         else:
-            raise endpoints.NotFoundException("Authentication unsuccessful.")
+            raise endpoints.UnauthorizedException("Authentication unsuccessful.")
 
 
 
