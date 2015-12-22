@@ -248,8 +248,8 @@ def check_user_login(request):
                 except HttpError, e:
                     logger.debug(user_email + ' was not removed from ACL_GOOGLE_GROUP: ' + str(e))
 
-                nih_user.active = 0
-                nih_user.dbGaP_authorized = 0
+                nih_user.active = False
+                nih_user.dbGaP_authorized = False
                 nih_user.save()
                 logger.info('User with NIH username ' + str(nih_user.NIH_username) + ' is deactivated in NIH_User table')
 
@@ -396,8 +396,8 @@ def remove_user_from_ACL(request, nih_username):
         logger.warn("Successfully emergency removed user with NIH username {nih_username} and email {email} from ACL.".format(
             nih_username=nih_username, email=email))
         # also deactivate NIH user in NIH_User table
-        nih_user.active = 0
-        nih_user.dbGaP_authorized = 0
+        nih_user.active = False
+        nih_user.dbGaP_authorized = False
         nih_user.save()
         logger.warn("Successfully emergency deactivated user with NIH username {nih_username} and email {email} from NIH_User table.".format(
             nih_username=nih_username, email=email))
@@ -423,7 +423,8 @@ def edit_dbGaP_authentication_list(nih_username):
 
     # 2. remove the line with the offending nih_username
     for row in rows:
-
+        # this will remove not only the user with the nih_username
+        # but also everyone who is a downloader for that user
         if nih_username in row:
             try:
                 rows.remove(row)
@@ -454,7 +455,7 @@ def create_and_log_reports(request):
 
     # get utc time and timedelta
     utc_now = datetime.datetime.utcnow()
-    tdelta = utc_now + datetime.timedelta(days=-7)
+    tdelta = utc_now + datetime.timedelta(days=-1)
     start_datetime = tdelta.isoformat("T") + "Z" # collect last 7 days logs
 
     for application_name in ['admin', 'login', 'token', 'groups']:
@@ -472,5 +473,55 @@ def create_and_log_reports(request):
             resp = req.execute(http=http_auth)
             # log the reports using Cloud logging API
             write_log_entry('apps_{}_activity_report'.format(application_name), resp)
+
+    return HttpResponse('')
+
+
+# list_buckets, get_bucket_acl, and get_bucket_defacl are all used by log_acls
+def list_buckets(client, project_id):
+    """gets all buckets in the project"""
+    req = client.buckets().list(
+        project=project_id,
+        maxResults=42)
+    bucket_info = []
+    while req is not None:
+        resp = req.execute()
+        for bucket in resp['items']:
+            bucket_info.append(bucket)
+        req = client.buckets().list_next(req, resp)
+    return bucket_info
+
+def get_bucket_acl(client, bucket_name):
+    """get the bucket acl"""
+    req = client.bucketAccessControls().list(
+        bucket=bucket_name,
+    )
+    resp = req.execute()
+    return resp
+
+def get_bucket_defacl(client, bucket_name):
+    """get the bucket defacl"""
+    req = client.defaultObjectAccessControls().list(
+        bucket=bucket_name,
+    )
+    resp = req.execute()
+    return resp
+
+def log_acls(request):
+    """log acls"""
+    client = get_storage_resource()
+    all_projects = ['isb-cgc', 'isb-cgc-data-01', 'isb-cgc-data-02', 'isb-cgc-test']
+    acls = {}
+    defacls = {}
+    # Iterate through projects and buckets and get acls
+    for project in all_projects:
+        for bucket in list_buckets(client, project):
+            acl = get_bucket_acl(client, bucket['name'])
+            defacl = get_bucket_defacl(client, bucket['name'])
+            acls[bucket['name']] = acl
+            defacls[bucket['name']] = defacl
+    # write log entry
+    write_log_entry('bucket_acls', acls)
+    write_log_entry('bucket_defacls', defacls)
 
     return HttpResponse('')

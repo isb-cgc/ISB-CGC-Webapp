@@ -62,7 +62,28 @@ def get_readable_name(csv_name):
         'neoplasm_histologic_grade': 'Histological Grade',
         'icd_10': 'ICD-10',
         'icd_o_3_histology': 'ICD-O-3 Histology',
-        'icd_o_3_site': 'ICD-O-3 Site'
+        'icd_o_3_site': 'ICD-O-3 Site',
+
+        # Sample Type Codes
+        '01': 'Primary solid Tumor',
+        '02': 'Recurrent Solid Tumor',
+        '03': 'Primary Blood Derived Cancer - Peripheral Blood',
+        '04': 'Recurrent Blood Derived Cancer - Bone Marrow',
+        '05': 'Additional - New Primary',
+        '06': 'Metastatic',
+        '07': 'Additional Metastatic',
+        '08': 'Human Tumor Original Cells',
+        '09': 'Primary Blood Derived Cancer - Bone Marrow',
+        '10': 'Blood Derived Normal',
+        '11': 'Solid Tissue Normal',
+        '12': 'Buccal Cell Normal',
+        '13': 'EBV Immortalized Normal',
+        '14': 'Bone Marrow Normal',
+        '20': 'Control Analyte',
+        '40': 'Recurrent Blood Derived Cancer - Peripheral Blood',
+        '50': 'Cell Lines',
+        '60': 'Primary Xenograft Tissue',
+        '61': 'Cell Line Derived Xenograft Tissue'
     }
     if translation_dictionary.get(csv_name):
         return translation_dictionary.get(csv_name)
