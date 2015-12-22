@@ -29,9 +29,9 @@
             </ul>
         </div>
     </section>
-    <section class="panel panel-primary">
+    <section class="panel panel-default">
         <div class="panel-heading">
-            <h3 class="panel-title">Saved Workbooks(0)</h3>
+            <h3 class="panel-title">Saved Workbooks ({{ user.workbook_last_view_set.all|length }})</h3>
         </div>
         <div class="panel-body">
             <p>Workbooks store the Analyses you create -- and their related data.</p>
@@ -50,24 +50,25 @@
                 <div class="panel-heading">
                     <h3 class="panel-title">Gene Favorites(0)</h3>
                 </div>
+                <div class="panel-body">
+                    You don't have any Gene Favorites yet.
+                </div>
             </section>
             <section class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">Variable Favorites(0)</h3>
                 </div>
+                <div class="panel-body">
+                    You don't have any Variable Favorites yet.
+                </div>
             </section>
             <section class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">
-                        <a href="{% url 'cohort_list' %}">Saved Cohorts(0)</a></h3>
-                </div>
-            </section>
-            <section class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Data Type Preference</h3>
+                    <a href="{% url 'cohort_list' %}">Saved Cohorts(0)</a></h3>
                 </div>
                 <div class="panel-body">
-                    <p>In this event you have data generated from different platforms of pipelines, you may: <br> set default data type preferece</p>
+                    You don't have any Cohorts yet.
                 </div>
             </section>
         </div>
