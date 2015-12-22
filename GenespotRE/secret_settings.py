@@ -87,7 +87,8 @@ SETTINGS = {
 
     'BIGQUERY_DATASET': 'isb_cgc', # ??? Who is using this ???
     'BIGQUERY_DATASET2': 'tcga_data_open', # Name of BigQuery dataset containing open tcga data
-    'BIGQUERY_PROJECT_NAME': 'isb-cgc', # Name of project that owns BigQuery datasets
+    #'BIGQUERY_PROJECT_NAME': 'isb-cgc', # Name of project that owns BigQuery datasets
+    'BIGQUERY_PROJECT_NAME': os.environ.get('GCLOUD_PROJECT_NAME'),
 
     'GOOGLE_APPLICATION_CREDENTIALS': os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')) if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS') else '', # Path to privatekey.json
     'CLIENT_SECRETS': os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('CLIENT_SECRETS')) if os.environ.get('CLIENT_SECRETS') else '', # Path to client_secrets.json

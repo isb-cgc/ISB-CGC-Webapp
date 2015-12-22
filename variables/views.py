@@ -213,11 +213,9 @@ def initialize_variable_selection_page(request,
                 del type['fields'][index]
 
     #stub
-    study_name_list = {
-        "Project 1 : study 1" : ["variable1", "variable2"],
-        "Project 2 : study 2" : ["variable1", "variable2"],
-        "Project 3 : study 3" : ["variable1", "variable2"],
-    }
+    projects = []#request.user.project_set.all().filter(active=True)
+    for proj in projects :
+        proj.studies = proj.study_set.all().filter(active=True)
 
     #stubbed data for populating the variable list model
     TCGA_project    = {"id" : -1, "study" : {"id" :-1, "name" : ""}, "name" : "TCGA"};
@@ -243,7 +241,7 @@ def initialize_variable_selection_page(request,
         'variable_names'        : variable_list.keys(),
         'variable_list_count'   : variable_list,
         'datatype_list'         : datatype_list,
-        'study_name_list'       : study_name_list,
+        'projects'              : projects,
 
         # 'clinical_variables'    : clin_attr,
         'data_attr'             : data_attr,
@@ -256,7 +254,6 @@ def initialize_variable_selection_page(request,
     }
 
     # USECASE 1: ADD VAR LIST TO EXISTING WORKBOOK
-    context['workbook'] = {'id' : "3", 'name' : "asdfasdf"}
     if workbook_id is not None and worksheet_id is not None :
         workbook = Workbook.objects.get(id=workbook_id)
         worksheet = Worksheet.objects.get(id=worksheet_id)
