@@ -4,6 +4,7 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.conf import settings
+from django.db.models import Q
 from django.http import JsonResponse, HttpResponseNotFound
 from django.conf import settings
 from django.db import connection
@@ -11,6 +12,7 @@ from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from data_upload.models import UserUpload, UserUploadedFile
 from projects.models import User_Feature_Definitions, Project
+from sharing.service import create_share
 
 import json
 import requests
@@ -19,9 +21,14 @@ import requests
 def project_list(request):
     template = 'projects/project_list.html'
 
-    # TODO Handle sharing
+    ownedProjects = request.user.project_set.all().filter(active=True)
+    sharedProjects = Project.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
+
+    projects = ownedProjects | sharedProjects
+    projects = projects.distinct()
+
     context = {
-        'projects': request.user.project_set.all().filter(active=True),
+        'projects': projects,
         'public_projects': Project.objects.all().filter(is_public=True,active=True)
     }
     return render(request, template, context)
@@ -31,17 +38,23 @@ def project_detail(request, project_id=0):
     # """ if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name """
     template = 'projects/project_detail.html'
 
-    # TODO Handle sharing
-    proj = Project.objects.get(id=project_id,active=True)
+    ownedProjects = request.user.project_set.all().filter(active=True)
+    sharedProjects = Project.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
 
-    if proj.owner_id != request.user.id and not proj.is_public:
-        # Project is not the user's and is not public, return 404
-        return HttpResponseNotFound('Project Not Found');
+    projects = ownedProjects | sharedProjects
+    projects = projects.distinct()
 
+    proj = projects.get(id=project_id)
 
+    shared = None
+    if proj.owner.id != request.user.id:
+        shared = request.user.shared_resource_set.get(project__id=project_id)
+
+    proj.mark_viewed(request)
     context = {
         'project': proj,
-        'studies': proj.study_set.all().filter(active=True)
+        'studies': proj.study_set.all().filter(active=True),
+        'shared': shared
     }
     return render(request, template, context)
 
@@ -283,8 +296,12 @@ def project_edit(request, project_id=0):
     })
 
 @login_required
-def project_share(request):
-    # TODO
+def project_share(request, project_id=0):
+    proj = request.user.project_set.get(id=project_id)
+    emails = re.split('\s*,\s*', request.POST['share_users'].strip())
+
+    create_share(request, proj, emails, 'Project')
+
     return JsonResponse({
         'status': 'success'
     })
@@ -314,13 +331,6 @@ def study_edit(request, project_id=0, study_id=0):
     study.description = description
     study.save()
 
-    return JsonResponse({
-        'status': 'success'
-    })
-
-@login_required
-def study_share(request, project_id=0, study_id=0):
-    # TODO
     return JsonResponse({
         'status': 'success'
     })

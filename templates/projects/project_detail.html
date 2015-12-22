@@ -19,12 +19,17 @@
     <ul class="page-action-group">
         <li role="menuitem"><button class="btn btn-default">New Workbook</button></li>
         <li class="separator"></li>
+        {% if project.owner.id == user.id %}
         <li role="menuitem"><a href="{% url 'project_upload' %}" class="btn btn-info"><i class="fa fa-cloud-upload"></i>Upload Data</a></li>
         <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#edit-project-details-modal">Edit Details</button></li>
         <li role="menuitem"><button class="btn btn-info project-delete" data-toggle="modal" data-target="#delete-project-modal">Delete</button></li>
         <li class="separator"></li>
         <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#share-project-modal">Share</button></li>
-        <li role="menuitem"><button class="btn btn-link" data-toggle="modal" data-target="#share-project-modal">Shared with (2)</button></li>
+        {% else %}
+        <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#remove-project-modal">Remove</button></li>
+        <li class="separator"></li>
+        {% endif %}
+        <li role="menuitem"><button class="btn btn-link" data-toggle="modal" data-target="#share-project-modal">Shared with ({{ project.shared.count }})</button></li>
     </ul>
 </div>
 {% endblock %}
