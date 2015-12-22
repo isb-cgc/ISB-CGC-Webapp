@@ -17,7 +17,6 @@ from sharing.service import create_share
 import json
 import requests
 
-
 @login_required
 def project_list(request):
     template = 'projects/project_list.html'
@@ -51,6 +50,7 @@ def project_detail(request, project_id=0):
     if proj.owner.id != request.user.id:
         shared = request.user.shared_resource_set.get(project__id=project_id)
 
+    proj.mark_viewed(request)
     context = {
         'project': proj,
         'studies': proj.study_set.all().filter(active=True),

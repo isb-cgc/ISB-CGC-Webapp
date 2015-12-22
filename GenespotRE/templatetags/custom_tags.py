@@ -180,3 +180,10 @@ def get_barcodes_length(barcodes):
 @register.filter
 def how_many_more(attr_list, num):
     return len(attr_list) - num
+
+@register.filter
+def active(list, key=None):
+    print key
+    if not key:
+        return list.filter(active=True)
+    return list.filter(**{key + '__active':True})
