@@ -36,7 +36,8 @@ debug = settings.DEBUG
 
 INSTALLED_APP_CLIENT_ID = settings.INSTALLED_APP_CLIENT_ID
 OPEN_DATA_BUCKET = settings.OPEN_DATA_BUCKET
-#CONTROLLED_DATA_BUCKET = settings.CONTROLLED_DATA_BUCKET
+DCC_CONTROLLED_DATA_BUCKET = settings.DCC_CONTROLLED_DATA_BUCKET
+CGHUB_CONTROLLED_DATA_BUCKET = settings.CGHUB_CONTROLLED_DATA_BUCKET
 
 METADATA_SHORTLIST = [
     # 'adenocarcinoma_invasion',
@@ -1578,10 +1579,10 @@ class Meta_Endpoints_API(remote.Service):
                     # hard-coding mock bucket names for now --testing purposes only
                     if item['Repository'].lower() == 'dcc':
                         cloudstorage_location = 'gs://{}{}'.format(
-                            'gs://62f2c827-mock-mock-mock-1cde698a4f77', item['DatafileNameKey'])
+                            DCC_CONTROLLED_DATA_BUCKET, item['DatafileNameKey'])
                     elif item['Repository'].lower() == 'cghub':
                         cloudstorage_location = 'gs://{}{}'.format(
-                            'gs://360ee3ad-mock-mock-mock-52f9a5e7f99a', item['DatafileNameKey'])
+                            CGHUB_CONTROLLED_DATA_BUCKET, item['DatafileNameKey'])
                 else:
                     cloudstorage_location = item.get('DatafileNameKey')  # this will return "Restricted"
 
