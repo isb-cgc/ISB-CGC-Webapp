@@ -55,6 +55,8 @@ PAIRWISE_SERVICE_URL = secret_settings.get('PAIRWISE_SERVICE_URL')
 # Data Buckets
 OPEN_DATA_BUCKET = secret_settings.get('OPEN_DATA_BUCKET')
 CONTROLLED_DATA_BUCKET = secret_settings.get('CONTROLLED_DATA_BUCKET')
+DCC_CONTROLLED_DATA_BUCKET = secret_settings.get('DCC_CONTROLLED_DATA_BUCKET')
+CGHUB_CONTROLLED_DATA_BUCKET = secret_settings.get('CGHUB_CONTROLLED_DATA_BUCKET')
 
 # BigQuery cohort storage settings
 COHORT_DATASET_ID = secret_settings.get('COHORT_DATASET_ID')
