@@ -9,34 +9,113 @@
 {% block page_name %}variable_edit{% endblock %}
 
 {% block page_header %}
+{# TODO if page is access via adding a list to a workbook, attach a warning if the user navigates from this page without applying the workbook list #}
 <div class="container">
     <ol class="breadcrumb">
-        <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+        {% if workbook %}
+            {# USECASE 1: ADD VAR LIST TO EXISTING WORKBOOK #}
+            <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+            <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
+            <li><a href="{% url 'workbook_detail' workbook.id %}">{{ workbook.name }}</a></li>
+        {% elif newWorkbook %}
+            {# USECASE 2: CREATE VAR LIST THEN CREATE WORKBOOK WITH VAR LIST #}
+            <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+        {% else %}
+            {# USECASE 3: EDIT EXISTING VAR LIST #}
+            {# USECASE 4: CREATE VAR FAVORITE #}
+            <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+            <li><a href="{% url 'variables' %}">Saved Variable Favorites</a></li>
+        {% endif %}
     </ol>
-    {% if '/create/' in request.path %}
-        <h1 class="page-header pull-left">Create Variable Favorite</h1>
-        <menu class="page-action-group pull-right">
-            <menuitem class="btn btn-primary" data-toggle="modal" data-target="#create-cohort-modal">Save As Favorite</menuitem>
-            <menuitem class="btn btn-link" data-toggle="modal" data-target="#create-cohort-modal">Cancel</menuitem>
-        </menu>
+    {% if workbook %}
+        {# USECASE 1: ADD VAR LIST TO EXISTING WORKBOOK #}
+        <h1 class="page-header pull-left">Data Source | Variables</h1>
     {% else  %}
-        <h1 class="page-header pull-left">Edit Variable Favorite</h1>
-        <menu class="page-action-group pull-right">
-            <menuitem class="btn btn-primary">Save Changes</menuitem>
-            <menuitem class="btn btn-link">Cancel</menuitem>
-        </menu>
+        {% if existing_variable_list %}
+            {# USECASE 3: EDIT EXISTING VAR LIST #}
+            <h1 class="page-header pull-left">Edit Variable Favorite</h1>
+            <menu class="page-action-group pull-right">
+                <menuitem class="btn btn-primary">Save Changes</menuitem>
+                <menuitem class="btn btn-link">Cancel</menuitem>
+            </menu>
+        {% elif newWorkbook %}
+            {# USECASE 2: CREATE VAR LIST THEN CREATE WORKBOOK WITH VAR LIST #}
+            <h1 class="page-header pull-left">Create Variable Favorite</h1>
+            <menu class="page-action-group pull-right">
+                <menuitem class="btn btn-primary" data-toggle="modal" data-target="#create-cohort-modal">Save As Favorite</menuitem>
+                <menuitem class="btn btn-link" data-toggle="modal" data-target="#create-cohort-modal">Cancel</menuitem>
+            </menu>
+        {% else %}
+            {# USECASE 4: CREATE VAR FAVORITE #}
+            <h1 class="page-header pull-left">Create Variable Favorite</h1>
+            <menu class="page-action-group pull-right">
+                <menuitem class="btn btn-primary" data-toggle="modal" data-target="#create-cohort-modal">Save As Favorite</menuitem>
+                <menuitem class="btn btn-link" data-toggle="modal" data-target="#create-cohort-modal">Cancel</menuitem>
+            </menu>
+        {% endif %}
     {% endif %}
 </div>
 {% endblock %}
 {% block content %}
-    <div class="col-lg-4" id="filter-panel">
+    <section class="col-lg-12">
+         <div class="panel form-group panel-default">
+            {% csrf_token %}
+            {{ workbook }}
+            {% if workbook %}
+                {# USECASE 1: ADD VAR LIST TO EXISTING WORKBOOK #}
+                <div class="panel-heading"></div>
+                <div class="panel-body">
+                    <div class="page-action-group">
+                        <button id="apply_to_worksheet" workbook_id="{{ workbook.id }}" worksheet_id="{{ worksheet.id }}" class="btn btn-primary">Apply to Worksheet</button>
+                        <a href="{% url 'worksheet_display' workbook.id worksheet.id %}" class="btn btn-link">Back to Worksheet</a>
+                    </div>
+                </div>
+            {% else %}
+                {% if existing_variable_list %}
+                    {# USECASE 3: EDIT EXISTING VAR LIST #}
+                    <div class="panel-heading">
+                        <label for="variable-name" class="panel-title">Name of Favorite (Required)</label>
+                    </div>
+                    <div class="panel-body">
+                        <input type="text" id="variable_list_name_input" placeholder="my new favorite variable list" class="form-control" value={{ existing_variable_list.name }} required>
+                        <div class="page-action-group">
+                            <button id="edit_favorite_list" class="btn btn-primary">Save Changes</button>
+                            <a href="{% url 'variables' %}" class="btn btn-link">Cancel</a>
+                        </div>
+                    </div>
+                {% elif newWorkbook %}
+                    {# USECASE 2: CREATE VAR LIST THEN CREATE WORKBOOK WITH VAR LIST #}
+                    <div class="panel-heading"></div>
+                    <div class="panel-body">
+                        <button id="select_then_create_new_workbook" class="btn btn-primary">Create New Workbook with Selected Variables</button>
+                        <a href="{% url 'variables' %}" class="btn btn-link">Cancel</a>
+                    </div>
+                {% else %}
+                    {# USECASE 4: CREATE VAR FAVORITE #}
+                    <div class="panel-heading">
+                        <label for="variable-name" class="panel-title">Name of Favorite (Required)</label>
+                    </div>
+                    <div class="panel-body">
+                        <input type="text" id="variable_list_name_input" placeholder="my new favorite variable list" class="form-control" value="" required>
+                        <div class="page-action-group">
+                            <button id="create_favorite_list" class="btn btn-primary">Save As Favorite</button>
+                            <a href="{% url 'variables' %}" class="btn btn-link">Cancel</a>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endif %}
+         </div>
+    </section>
+    <div class="col-lg-6" id="filter-panel">
         <section class="panel panel-default">
             <div class="panel-body">
                 <div class="row">
                     <div class="tabpanel" role="tabpanel">
                         <ul class="nav nav-tabs" role="tablist">
-                            <li role="presentation" class="active"><a href="#common" aria-controls="common" role="tab" data-toggle="tab">Common (N)</a></li>
+                            <li role="presentation" class="active"><a href="#common" aria-controls="common" role="tab" data-toggle="tab">Common</a></li>
                             <li role="presentation"><a href="#favorites" aria-controls="favorites" role="tab" data-toggle="tab">Favorites (N)</a></li>
+                            <li role="presentation"><a href="#datatypes" aria-controls="datatypes" role="tab" data-toggle="tab">Data Types</a></li>
+                            <li role="presentation"><a href="#uploaded" aria-controls="Uploaded" role="tab" data-toggle="tab">Projects</a></li>
                             <li role="presentation"><a href="#search" aria-controls="search" role="tab" data-toggle="tab">Search</a></li>
                         </ul>
 
@@ -44,45 +123,15 @@
                         <div class="tab-content">
                             <div role="tabpanel" class="tab-pane active filter-panel" id="common">
                                 <ul class="list-group" id="clin-accordion" role="tablist" aria-multiselectable="true">
-                                    {% for attr in clin_attr %}
-                                        {% if attr in attr_list_count %}
-                                            <li class="list-group-item">
-                                                <div id="heading-{{ attr }}" class="list-group-item__heading">
-                                                    <a role="button"  data-toggle="collapse" data-parent="#clin-accordion" href="#collapse-{{ attr }}" aria-expanded="false" aria-controls="collapse-{{ attr }}">
-                                                        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ attr|get_readable_name }}
-                                                    </a>
-                                                </div>
-
-                                                <div id="collapse-{{ attr }}" class="list-group-item__body collapse" role="tabpanel" aria-labelledby="heading-{{ attr }}">
-                                                    <ul class="search-checkbox-list" id="{{ attr }}">
-                                                        {% with attr_list_count|get_item:attr|how_many_more:6 as num_more %}
-                                                            {% for v in attr_list_count|get_item:attr %}
-                                                            {% if forloop.counter0 < 6 %}
-                                                            <li class="checkbox">
-                                                                <label for="{{ attr }}-{{ v.value|replace_whitespace:'_' }}"><input type="checkbox" name="elements-selected" id="{{ attr }}-{{ v.value|replace_whitespace:'_' }}" > {{ v.value | title}}</label>
-                                                                <span class="count">({{ v.count }})</span>
-                                                            </li>
-                                                            {% elif forloop.counter0 == 6 and num_more > 0 %}
-                                                            <a class="show-more">{{ num_more }} more</a>
-                                                                <li class="extra-values checkbox" style="display:none;">
-                                                                    <label for="{{ attr }}-{{ v.value|replace_whitespace:'_' }}"><input type="checkbox" name="elements-selected" id="{{ attr }}-{{ v.value|replace_whitespace:'_' }}">  {{ v.value | title}}</label>
-                                                                    <span class="count">({{ v.count }})</span>
-                                                                </li>
-                                                            {% else %}
-                                                            <li class="extra-values checkbox" style="display:none;">
-                                                                <label for="{{ attr }}-{{ v.value|replace_whitespace:'_' }}"><input type="checkbox" name="elements-selected" id="{{ attr }}-{{ v.value|replace_whitespace:'_' }}" > {{ v.value | title}}</label>
-                                                                <span class="count">({{ v.count }})</span>
-                                                            </li>
-                                                            {% endif %}
-                                                            {% endfor %}
-                                                        {% if num_more > 0 %}
-                                                            <a class="show-less" style="display:none;">less</a>
-                                                        {% endif %}
-                                                        {% endwith %}
-                                                    </ul>
-                                                </div>
-                                            </li>
-                                        {% endif %}
+                                    {% for attr in common_project.variables %}
+                                        <li class="list-group-item checkbox">
+                                            <div id="heading-{{ attr }}" class="list-group-item__heading">
+                                                <label for="{{ attr }}">
+                                                    <input type="checkbox" value="{{ attr }}" name="elements-selected" variable_name="{{ attr }}" project_name="{{ common_project.name }}" project="{{ common_project.id }}" study_name="{{ common_project.study.name }} "study="{{ common_project.study.id }}">
+                                                    {{ attr }}
+                                                </label>
+                                            </div>
+                                        </li>
                                     {% endfor %}
                                 </ul>
                             </div>
@@ -90,14 +139,112 @@
                                 <br>
                                 <div class="form-group">
                                     <label for="" class="control-label">Select from Favorites</label>
-                                    <select name="" id="" class="form-control">
-                                        <option value="">--</option>
-                                    </select>
+                                    {% for attr in favorites %}
+                                        <li class="list-group-item extra-values checkbox">
+                                            <div id="heading-{{ attr }}" class="list-group-item__heading">
+                                                <label for="{{ attr }}">
+                                                    <input type="checkbox" name="elements-selected" id="{{ attr }}">
+                                                    {{ attr| get_readable_name }}
+                                                </label>
+                                            </div>
+                                        </li>
+                                    {% endfor %}
                                 </div>
 
                                 <div>
                                     <a href="{% url 'variables' %}">Manage Save Favorites (3)</a>
                                 </div>
+                            </div>
+                            <div role="tabpanel" class="tab-pane" id="datatypes">
+                                <ul class="list-group" id="clin-accordion" role="tablist" aria-multiselectable="true">
+                                    {% for type in datatype_list %}
+                                        <li class="list-group-item">
+                                            <div id="heading-{{ type.datatype }}" data-field="{{ type.datatype }}" class="list-group-item__heading datatype-selector">
+                                                <a role="button" data-toggle="collapse" data-parent="#clin-accordion" href="#collapse-{{ type.datatype }}" aria-expanded="false" aria-controls="collapse-{{ type.datatype }}">
+                                                    <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ type.label }}
+                                                </a>
+                                            </div>
+
+                                            <div id="collapse-{{ type.datatype }}" class="list-group-item__body collapse" role="tabpanel" aria-labelledby="heading-{{ type.datatype }}">
+                                                {% if type.datatype == 'CLIN' %}
+                                                    <div class="form-group search-field {{ type.datatype }}-options ">
+                                                        <div class="search-term feature-search">
+                                                            <label for="{{ type.datatype }}-search-term-select">Feature Search</label>
+                                                            <select id="{{ type.datatype }}-search-term-select" class="search-term-field"></select>
+                                                        </div>
+                                                    </div>
+                                                {% else %}
+                                                    <div class="form-group search-field {{ type.datatype }}">
+                                                        <div class="search-term" data-field="{{ type.datatype }}">
+                                                            {% for field in type.fields %}
+                                                                <label for="{{ type.datatype }}-{{ field.name }}">{{ field.label }} Filter</label>
+                                                                <select id="{{ plot.id }}-{{ type.datatype }}-{{ field.name }}-search-term-select" class="form-control field-options {{ field.name }}-options {% if not field.static %}select2{% endif %}" data-field="{{ field.name }}">
+                                                                    {% if field.static %}
+                                                                        <option value="" disabled selected>Please select an option</option>
+                                                                        {% for value in field.values %}
+                                                                            <option value="{{ value }}">{{ value }}</option>
+                                                                        {% endfor %}
+                                                                    {% endif %}
+                                                                </select>
+                                                            {% endfor %}
+                                                        </div>
+                                                        <div class="search-term feature-search space-top-15">
+                                                            <label for="{{ type.datatype }}-search-term-select">Select Feature</label>
+                                                            <select id="{{ type.datatype }}-search-term-select" project="{{ TCGA_project.id }}" project_name="{{ TCGA_project.name }}" study="{{ TCGA_project.study.id }}" study_name="{{ TCGA_project.study.name}}" class="search-term-field form-control"></select>
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            <div role="tabpanel" class="tab-pane" id="uploaded">
+                                <ul class="list-group" id="clin-accordion" role="tablist" aria-multiselectable="true">
+                                    {% for project in projects %}
+                                        {% for study in project.study_list %}
+                                            <li class="list-group-item">
+                                                <div id="heading-{{ data_type_name }}" class="list-group-item__heading">
+                                                    <a role="button"  data-toggle="collapse" data-parent="#clin-accordion" href="#collapse-{{ project.id }}-{{ study.id }}" aria-expanded="false" aria-controls="collapse-{{ attr }}">
+                                                        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ project.name }} | {{ study.name }}
+                                                    </a>
+                                                </div>
+
+                                                <div id="collapse-{{ project.id }}-{{ study.id }}" class="list-group-item__body collapse" role="tabpanel" aria-labelledby="heading-{{ project.id }}-{{ study.id }}">
+                                                    <ul class="search-checkbox-list" id="{{ data_type_name }}">
+{#                                                        {% with variable_list_count|get_item:attr|how_many_more:6 as num_more %}#}
+                                                            {% for variable in study.variables %} {#|get_item:attr %}#}
+                                                                {% if forloop.counter0 < 6 %}
+                                                                    <li class="checkbox">
+                                                                        <label for="{{ variable.name }}">
+                                                                            <input type="checkbox" name="elements-selected" id="{{ variable.name }}" > {{ variable.name }}
+                                                                        </label>
+                                                                    </li>
+                                                                {% elif forloop.counter0 == 6 and num_more > 0 %}
+                                                                    <a class="show-more">{{ num_more }} more</a>
+                                                                    <li class="extra-values checkbox" style="display:none;">
+                                                                        <label for="{{ variable.name }}">
+                                                                            <input type="checkbox" name="elements-selected" id="{{ variable.name }}">  {{ variable.name }}
+                                                                        </label>
+                                                                    </li>
+                                                                {% else %}
+                                                                    <li class="extra-values checkbox" style="display:none;">
+                                                                        <label for="{{ variable.name }}">
+                                                                            <input type="checkbox" name="elements-selected" id="{{ variable.name }}">  {{ variable.name }}
+                                                                        </label>
+                                                                    </li>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                            {% if num_more > 0 %}
+                                                                <a class="show-less" style="display:none;">less</a>
+                                                            {% endif %}
+{#                                                        {% endwith %}#}
+                                                    </ul>
+                                                </div>
+                                            </li>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </ul>
                             </div>
                             <div role="tabpanel" class="tab-pane" id="search">
                                 <br>
@@ -111,17 +258,9 @@
             </div>
         </section>
     </div>
-    <div class="col-lg-8">
+    <div class="col-lg-6">
         <section class="panel">
             <form action="">
-                <div class="form-group panel-default">
-                    <div class="panel-heading">
-                        <label for="variable-name" class="panel-title">Name of Favorite (Required)</label>
-                    </div>
-                    <div class="panel-body">
-                        <input type="text" class="form-control" value="" required>
-                    </div>
-                </div>
                 <div class="form-group selected-filters panel-default">
                     <div class="panel-heading clearfix">
                         <label class="panel-title pull-left">Selected Variables</label>
@@ -131,50 +270,17 @@
                         <p class="help-block">Select your favorite variables from the left panel.</p>
                     </div>
                 </div>
-                 <div class="panel-footer">
-                    <a href="" class="btn-link" data-toggle="modal" data-target="#create-cohort-modal">Save Selection as Favorite</a>
-                 </div>
             </form>
         </section>
     </div>
 
-<!-- Create variable Modal -->
-    <div class="modal fade" id="create-cohort-modal" tabindex="-1" role="dialog" aria-labelledby="createCohortModal" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="createCohortModal">Create Variable Favorite</h4>
-                </div>
-                <form id="create-cohort-form" method="POST" action="">
-                    <!--TODO: Refactor action-->
-                    <div class="modal-body form-horizontal">
-                        <div class="form-group">
-                            <label class="col-md-2" for="cohort-name">Name:</label>
-                            <div class="col-md-10"><input type="text" id="cohort-name" name="name" required/></div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-md-2" for="filters">Selected Variables:</label>
-                            <div class="col-md-10"><p class="form-control-static"></p></div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        {% csrf_token %}
-                        <input type="submit" value="Save As Favorite" class="btn btn-default" />
-                        <button class="btn btn-link" data-dismiss="modal" aria-label="Close">Cancel</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
     <script type="text/javascript">
-    var attr_list = {{ attr_list|safe }};
-    var total_samples = {{ total_samples|safe }};
-    var attr_counts = {{ attr_list_count|safe }};
-    var base_api_url = '{{ base_api_url|safe }}';
-    var cohort_id = undefined;
+    var attr_list       = {{ variable_names | safe }};
+    var attr_counts     = {{ variable_list_count | safe }};
+    var total_samples   = {{ total_samples|safe }};
+    var base_api_url    = '{{ base_api_url|safe }}';
+    var cohort_id       = undefined;
     </script>
 {% endblock %}
 
-{% block js_file %}{% static 'js/variables.js' %}{% endblock %}
+{% block js_file %}{% static 'js/variables/variables.js' %}{% endblock %}

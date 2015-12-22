@@ -26,7 +26,7 @@ from django.conf import settings
 
 from bq_data_access.errors import FeatureNotFoundException
 from bq_data_access.feature_value_types import DataTypes, BigQuerySchemaToValueTypeConverter
-
+import sys
 
 CLINICAL_FEATURE_TYPE = 'CLIN'
 
@@ -140,6 +140,7 @@ class ClinicalFeatureProvider(object):
             'query': query
         }
 
+        print >> sys.stderr, "RUNNING QUERY: " + str(query)
         table_data = bigquery_service.jobs()
         query_response = table_data.query(projectId=project_id, body=query_body).execute()
 

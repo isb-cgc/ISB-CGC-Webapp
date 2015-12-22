@@ -276,3 +276,4 @@ require([
         $(target + ' a[data-target="#shared-pane"]').tab('show');
     })
 });
+

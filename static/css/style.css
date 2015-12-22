@@ -1086,8 +1086,28 @@ nav {
     background: rgba(0, 0, 0, 0.5);
     z-index: 100;
     margin: -15px 0px 0px -15px; }
-    #visualizations .plot-loader i {
+  #visualizations .plot-loader i {
       position: absolute;
+      left: 43%;
+      top: 40%;
+      margin: auto;
+      font-size: 200px; }
+
+  .worksheet-plot-loader {
+    height: 600px;
+    width: 825px;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    margin: -6px -15px 0px -15px;
+  }
+  .worksheet-plot-loader div {
+    margin-right : auto;
+    margin-left : auto;
+    width:180px;
+    padding-top:180px;
+  }
+  .worksheet-plot-loader i {
+      /*position: absolute;*/
       left: 43%;
       top: 40%;
       margin: auto;

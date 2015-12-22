@@ -47,7 +47,7 @@
             <!-- for each worksheet in workbook -->
             {% for worksheet in workbook.worksheets %}
                 {% if forloop.counter < 4 %}
-                    <li class="{% if forloop.counter == 1 %} active {% endif %}">
+                    <li class="{% if display_worksheet and display_worksheet.id == worksheet.id %} active {% elif not display_worksheet and forloop.counter == 1 %} active {% endif %}">
                          <a href="#{{ worksheet.id }}" data-toggle="tab">{{ worksheet.name }}</a>
                          {% if workbook.owner.id == request.user.id %}
                          <div class="dropdown">
@@ -102,29 +102,10 @@
                                     <div class="list-item__heading">
                                         <a href="{% url 'genes' %}"> Genes <i class="fa fa-plus pull-right"></i></a>
                                     </div>
-                                    <ul class="list-item__body">
-                                        <li class="sublist-item">
-                                            THIS
-                                        </li>
-                                        <li class="sublist-item">IS</li>
-                                        <li class="sublist-item">AN</li>
-                                        <li class="sublist-item">
-                                            EXAMPLE
-                                        </li>
-                                        <li class="sublist-item">
-                                            BRCA1
-                                        </li>
-                                        <li class="sublist-item">
-                                            PTEN
-                                        </li>
-                                        <a class="show-more">Show More</a>
-                                        <li class="extra-values sublist-item">ABCD1</li>
-                                        <a class="show-less" style="display:none;">Show Less</a>
-                                    </ul>
-                                    {% if worksheet.gene_list %}
+                                    {% if worksheet.genes %}
                                     <ul class="list-item__body">
                                         {% with worksheet.gene_list|how_many_more:6 as num_more  %}
-                                            {% for gene in worksheet.gene_list %}
+                                            {% for gene in worksheet.genes %}
                                                 {% if forlook.counter0 < 6 %}
                                                     <li class="sublist-item">{{ gene.name|upper }}</li>
                                                 {% elif forloop.counter0 == 6 and num_more > 0 %}
@@ -141,23 +122,21 @@
                                 </li>
                                 <li class="list-item">
                                     <div class="list-item__heading">
-                                        <a href="{% url 'variables' %}">Variables <i class="fa fa-plus pull-right"></i></a>
+                                        <a href="{% url 'variable_select_for_existing_workbook' workbook.id worksheet.id %}">Variables <i class="fa fa-plus pull-right"></i></a>
                                     </div>
-                                    {% if worksheet.variable_list %}
                                     <ul class="list-item__body">
-                                        {% for variable in worksheet.variable_list %}
+                                        {% for variable in worksheet.variables %}
                                             <li class="sublist-item">{{ variable.name }}</li>
                                         {% endfor %}
                                     </ul>
-                                    {% endif %}
                                 </li>
                                 <li class="list-item">
                                     <div class="list-item__heading">
                                         <a href="{% url 'cohort_list'  %}">Cohorts <i class="fa fa-plus pull-right"></i></a>
                                     </div>
-                                    {% if worksheet.cohort_list %}
+                                    {% if worksheet.cohorts %}
                                     <ul class="list-item__body">
-                                        {% for cohort in worksheet.cohort_list %}
+                                        {% for cohort in worksheet.cohorts %}
                                             <li class="sublist-item">{{ cohort.name }}</li>
                                         {% endfor %}
                                     </ul>
@@ -175,20 +154,21 @@
                             </div>
                             <h5>Analysis Type</h5>
                             <div class="form-group gray-area">
-                                <select class="form-control">
-                                    <option>-- select one --</option>
-                                    <option>Mutations</option>
-                                    <option>SeqPeek</option>
-                                    <option>Other</option>
+                                <select id="plot_selection" class="form-control">
+                                    {% if worksheet.selected_plot %}
+                                        <option value="{{ worksheet.selected_plot }}" selected >{{ worksheet.selected_plot }}</option>
+                                    {% else %}
+                                        <option disabled selected >-- select an analysis --</option>
+                                    {% endif %}
+                                    {% for graph in plot_types %}
+                                        <option value="{{ graph.name }}">{{ graph.name }}</option>
+                                    {% endfor %}
                                 </select>
                             </div>
-                            <div class="worksheet-instruction">
-                                <p><i class="fa fa-exclamation-circle"></i> To Complete this Analysis: </p>
-                                <ul class="ul">
-                                    <li>You must select an Analysis Type (above)</li>
-                                    <li>You must select <a href="{% url 'genes' %}">Genes</a> or <a href="{% url 'variables' %}">Variables</a> (or, optionally, both)</li>
-                                    <li>You must select a <a href="{% url 'cohort_list' %}">Cohorts</a></li>
-                                </ul>
+                            <div class="plot-container">
+                                {% include 'workbooks/workbook_plot.html' with plot=worksheet.plot variables=worksheet.variables cohorts=worksheet.cohorts %}
+                                <!-- plot needs to indicate saved plot data such as selected variables, cohorts, title, etc -->
+                                <!-- workbook_plot also needs to have reference to all worksheet cohorts, variables and genes -->
                             </div>
                         </div>
                         <!-- end worksheet analysis section -->
@@ -229,6 +209,13 @@
 <script type="text/javascript">
     var base_api_url = '{{ base_api_url|safe }}';
     var base_url = '{{ base_url|safe }}';
+
+    //plot specific variables
+{#    var plots_data = {{ plots_data|safe }};#}
+{#    var x_attr = '{% if viz|length %}{{ viz.plots.0.x_axis }}{% else %}country{% endif %}';#}
+{#    var y_attr = '{% if viz|length %}{{ viz.plots.0.y_axis }}{% else %}{% endif %}';#}
+{#    var color_by = '{% if viz|length and viz.plots.0.color_by != 'None' %}{{ viz.plots.0.color_by }}{% else %}disease_code{% endif %}';#}
+{#    var cohort_list = {{ cohorts|safe }};#}
 </script>
 
 {% endblock content %}
