@@ -1478,20 +1478,22 @@ class Meta_Endpoints_API(remote.Service):
         try:
             db = sql_connection()
             cursor = db.cursor(MySQLdb.cursors.DictCursor)
-            print platform_count_query
             cursor.execute(platform_count_query, (cohort_id,))
 
             platform_count_list = []
             count = 0
             if cursor.rowcount > 0:
                 for row in cursor.fetchall():
-                    count += int(row['platform_count'])
+                    if len(platform_selector_list):
+                        if row['Platform'] in platform_selector_list:
+                            count += int(row['platform_count'])
+                    else:
+                        count += int(row['platform_count'])
                     platform_count_list.append(PlatformCount(platform=row['Platform'], count=row['platform_count']))
             else:
                 platform_count_list.append(PlatformCount(platform='None', count=0))
 
             file_list = []
-            print platform_count_only
             if not platform_count_only:
                 cursor.execute(query, query_tuple)
                 if cursor.rowcount > 0:
