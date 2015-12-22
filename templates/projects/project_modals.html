@@ -43,6 +43,27 @@
     </div>
 </div>
 
+{% if project.owner.id != user.id %}
+<!-- Remove Project Modal -->
+<div class="modal fade" id="remove-project-modal" tabindex="-1" role="dialog" aria-labelledby="remove-project-header" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Remove Yourself from this Project?</h4>
+            </div>
+            <form id="remove-project" method="POST" action="{% url 'sharing_remove' shared.id %}" data-redirect="{% url 'projects' %}">
+                {% csrf_token %}
+                <div class="modal-footer">
+                    <input type="submit" value="Remove" class="btn btn-primary" />
+                    <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <!-- Share Project Modal -->
 <div class="modal fade" id="share-project-modal" tabindex="-1" role="dialog" aria-labelledby="delete-project-header" aria-hidden="true">
     <div class="modal-dialog">
@@ -54,7 +75,7 @@
                     {% if project.owner == request.user %}
                         <li class="active"><a href="#share" data-toggle="tab">Share</a></li>
                     {% endif %}
-                    <li ><a href="#shared-with" data-toggle="tab">Shared With</a></li>
+                    <li class="{% if not project.owner == request.user %}active{% endif %}"><a href="#shared-with" data-toggle="tab">Shared With</a></li>
                 </ul>
             </div>
             <div class="tab-content">
@@ -71,9 +92,9 @@
                     </div>
                 </form>
                 {% endif %}
-                <div class="tab-pane fade" id="shared-with">
+                <div class="tab-pane fade {% if not project.owner == request.user %}active in{% endif %}" id="shared-with">
                     <div class="modal-body">
-                        {% if project.shares|length > 0 %}
+                        {% if project.shared.count > 0 %}
                         <table class="table table-striped">
                             <thead>
                                 <tr>
@@ -82,10 +103,16 @@
                                 </tr>
                             </thead>
                             <tbody>
-                            {% for user in shared_with_users %}
+                            {% for shared in project.shared.all %}
                                 <tr>
-                                    <td>{{user.first_name}} {{user.last_name}}</td>
-                                    <td>{{user.email}}</td>
+                                    <td>
+                                        {% if shared.matched_user %}
+                                        {{shared.matched_user.first_name}} {{shared.matched_user.last_name}}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {{shared.email}}
+                                    </td>
                                 </tr>
                             {% endfor %}
                             </tbody>
@@ -102,4 +129,3 @@
         </div>
     </div>
 </div>
-

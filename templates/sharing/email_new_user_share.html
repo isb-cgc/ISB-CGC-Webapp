@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ shared_by.first_name }} {{ shared_by.last_name }} Has Shared a {{ type }}</title>
+</head>
+<body style="background-color:#F8F8F8;height:100%">
+    <table style="width:100%">
+        <tr>
+            <td colspan="3" style="height:15px"></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td style="min-width:280px;max-width:920px;width:80%;background-color:#FFFFFF;border:1px solid #EFEFEF">
+                <h1>{{ shared_by.first_name }} {{ shared_by.last_name }} Invited You</h1>
+                <p style="padding:0px 15px">
+                    Hello,
+                </p>
+                <p style="padding:0px 15px;text-indent:1.2em">
+                    {{ shared_by.first_name }} {{ shared_by.last_name }} wanted to share a {{ type|lower }} with you and
+                    has invited you to join them on the ISB Cancer Genomics Cloud site. There, you can check out the
+                    {{ item.name }} {{ type|lower }} and much more.
+                </p>
+                <p style="padding:0px 15px;font-weight:bold">
+                    To view the {{ type|lower }}, simply <a href="{{ shared_url }}">click here</a> or copy the following
+                    url into your browser: <br> {{ shared_url }}
+                </p>
+                {% if item.description %}
+                <p style="padding:0px 15px;text-indent:1.2em">
+                    Here's a quick description of {{ item.name }}
+                </p>
+                <blockquote style="padding:10px;background-color:#F0F0F0;font-style:italic">{{ item.description|escape }}</blockquote>
+                {% endif %}
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td style="font-size:11px;text-align:center;color:#666666">
+                <p>&copy;2015 Institute of Systems Biology.</p>
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td colspan="3" style="height:15px"></td>
+        </tr>
+    </table>
+</body>
+</html>

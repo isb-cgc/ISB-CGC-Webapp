@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ shared_by.first_name }} {{ shared_by.last_name }} Has Shared a {{ type }}</title>
+</head>
+<body style="background-color:#F8F8F8;height:100%">
+    <table style="width:100%">
+        <tr>
+            <td colspan="3" style="height:15px"></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td style="min-width:280px;max-width:920px;width:80%;background-color:#FFFFFF;border:1px solid #EFEFEF">
+                <h1>{{ shared_by.first_name }} {{ shared_by.last_name }} Shared a {{ type|title }}</h1>
+                <p style="padding:0px 15px">
+                    Hello {{ user.first_name }},
+                </p>
+                <p style="padding:0px 15px;text-indent:1.2em">
+                    {{ shared_by.first_name }} {{ shared_by.last_name }} wanted to share a {{ type|lower }} with you.
+                    You've been added to the <a href="{% url detail_page item.id %}" style="font-weight:bold">{{ item.name }}</a>
+                    {{ type|lower }}. You can now view this {{ type|lower }} on the site from your {{ type|lower }} page
+                    or by clicking the link.
+                </p>
+                {% if item.description %}
+                <p style="padding:0px 15px;text-indent:1.2em">
+                    Here's a quick description of the {{ type|lower }}
+                </p>
+                <blockquote style="padding:10px;background-color:#F0F0F0;font-style:italic">{{ item.description|escape }}</blockquote>
+                {% endif %}
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td style="font-size:11px;text-align:center;color:#666666">
+                <p>&copy;2015 Institute of Systems Biology.</p>
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td colspan="3" style="height:15px"></td>
+        </tr>
+    </table>
+</body>
+</html>

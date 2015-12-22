@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from data_upload.models import UserUpload
 from accounts.models import GoogleProject, Bucket
+from sharing.models import Shared_Resource
 
 class ProjectManager(models.Manager):
     def search(self, search_terms):
@@ -28,6 +29,7 @@ class Project(models.Model):
     objects = ProjectManager()
     owner = models.ForeignKey(User)
     is_public = models.BooleanField(default=False)
+    shared = models.ManyToManyField(Shared_Resource)
 
     '''
     Sets the last viewed time for a cohort
