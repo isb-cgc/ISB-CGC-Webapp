@@ -38,7 +38,7 @@ def project_detail(request, project_id=0):
         # Project is not the user's and is not public, return 404
         return HttpResponseNotFound('Project Not Found');
 
-
+    proj.mark_viewed(request)
     context = {
         'project': proj,
         'studies': proj.study_set.all().filter(active=True)
