@@ -1,4 +1,5 @@
 from django.core.mail import send_mail
+from google.appengine.api import mail
 from django.core.validators import validate_email
 from django.template.loader import get_template
 from django.contrib.auth.models import User
@@ -59,14 +60,13 @@ def create_share(request, item, emails, type, share_user=None):
                         'sharing_id': sharedResource.id
                     })) + '?' + urlencode({'key':sharedResource.share_key}),
         })
-        templateRender = email_template.render(ctx)
-        templateTextRender = email_text_template.render(ctx)
 
-        send_mail(
-                'You Were Added on a ' + type,
-                templateTextRender,
-                settings.DEFAULT_FROM_EMAIL,
-                [email],
-                fail_silently=False,
-                html_message=templateRender
-        )
+        message = mail.EmailMessage()
+
+        message.subject = 'You Were Added on a ' + type
+        message.body = email_text_template.render(ctx)
+        message.html = email_template.render(ctx)
+        message.sender = 'noreply@' + settings.PROJECT_NAME + '.appspotmail.com'
+        message.to = email
+
+        message.send()
