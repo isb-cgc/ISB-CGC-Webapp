@@ -12,9 +12,11 @@ from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from data_upload.models import UserUpload, UserUploadedFile
 from projects.models import User_Feature_Definitions, Project
+from sharing.service import create_share
 
 import json
 import requests
+
 
 @login_required
 def project_list(request):
@@ -294,8 +296,12 @@ def project_edit(request, project_id=0):
     })
 
 @login_required
-def project_share(request):
-    # TODO
+def project_share(request, project_id=0):
+    proj = request.user.project_set.get(id=project_id)
+    emails = re.split('\s*,\s*', request.POST['share_users'].strip())
+
+    create_share(request, proj, emails, 'Project')
+
     return JsonResponse({
         'status': 'success'
     })
