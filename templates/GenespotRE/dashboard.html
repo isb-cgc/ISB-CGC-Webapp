@@ -35,6 +35,13 @@
         </div>
         <div class="panel-body">
             <p>Workbooks store the Analyses you create -- and their related data.</p>
+            <ul>
+            {% if user.workbook_last_view_set.all|length > 0 %}
+                {% for wlv in user.workbook_last_view_set.all  %}
+                    <li><a href="{% url 'workbook_detail' wlv.workbook.id %}">{{ wlv.workbook.name }}</a></li>
+                {% endfor %}
+            {% endif %}
+            </ul>
         </div>
         <div class="panel-footer">
              <form id="create-workbook" method="POST" action="{% url 'workbook_create' %}" class="pull-left">
@@ -48,37 +55,69 @@
         <div class="col-sm-6">
             <section class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Gene Favorites(0)</h3>
+                    <h3 class="panel-title">Gene Favorites ({{ user.genefavorite_last_view_set.all|active:'genefavorite'|length }})</h3>
                 </div>
                 <div class="panel-body">
-                    You don't have any Gene Favorites yet.
+                    {% if user.genefavorite_last_view_set.all|active:'genefavorite'|length > 0 %}
+                        {% for glv in user.genefavorite_last_view_set.all|active:'genefavorite' %}
+                            {{ glv.genefavorite.name }}
+                        {% endfor %}
+                    {% else %}
+                    <p>You don't have any saved Gene Favorites.</p>
+                    <a href="{% url 'create_genes_list' %}">Create Gene Favorites</a>
+                    {% endif %}
                 </div>
             </section>
             <section class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Variable Favorites(0)</h3>
+                    <h3 class="panel-title">Variable Favorites ({{ user.variablefavorite_last_view_set.all|active:'variablefavorite'|length }})</h3>
                 </div>
                 <div class="panel-body">
-                    You don't have any Variable Favorites yet.
+                    {% if user.variablefavorite_last_view_set.all|active:'variablefavorite'|length > 0 %}
+                    <ul>
+                        {% for vlv in user.variablefavorite_last_view_set.all|active:'variablefavorite' %}
+                           <li><a href="{% url 'variable_fav_detail' vlv.variablefavorite.id %}">{{ vlv.variablefavorite.name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p>You don't have any saved Variable Favorites.</p>
+                    <a href="{% url 'variable_fav_create' %}">Create Variable Favorites</a>
+                    {% endif %}
                 </div>
             </section>
             <section class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">
-                    <a href="{% url 'cohort_list' %}">Saved Cohorts(0)</a></h3>
+                    <a href="{% url 'cohort_list' %}">Saved Cohorts ({{ user.cohort_last_view_set.all|active:'cohort'|length }})</a></h3>
                 </div>
                 <div class="panel-body">
-                    You don't have any Cohorts yet.
+                    {% if user.cohort_last_view_set.all|active:'cohort'|length > 0 %}
+                    <ul>
+                        {% for clv in user.cohort_last_view_set.all|active:'cohort' %}
+                           <li><a href="{% url 'cohort_details' clv.cohort.id %}">{{ clv.cohort.name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p>You don't have any saved Cohorts.</p>
+                    <a href="{% url 'cohort_create' %}">Create Cohort</a>
+                    {% endif %}
                 </div>
             </section>
         </div>
         <div class="col-sm-6">
             <section class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Saved Project Data(0)</h3>
+                    <h3 class="panel-title">Saved Projects ({{ user.project_last_view_set.all|active:'project'|length }})</h3>
                 </div>
                 <div class="panel-body">
                     <p>You can upload from your own research projects.</p>
+                    {% if user.project_last_view_set.all|active:'project'|length > 0 %}
+                    <ul>
+                        {% for plv in user.project_last_view_set.all|active:'project' %}
+                           <li><a href="{% url 'project_detail' plv.project.id %}">{{ plv.project.name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
                 </div>
                 <div class="panel-footer">
                     <button class="btn btn-default"><i class="fa fa-upload"></i>Upload Project Data</button>
