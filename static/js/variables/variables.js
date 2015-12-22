@@ -56,7 +56,8 @@ require([
     'assetscore',
     'assetsresponsive',
     'base'
-], function($, jqueryui, bootstrap, session_security, d3, d3tip, vizhelpers, scatter_plot, cubby_plot, violin_plot, histogram, bar_graph) {
+], function($, jqueryui, bootstrap, session_security, d3, d3tip, vizhelpers, histogram) {
+
     A11y.Core();
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
@@ -71,7 +72,6 @@ require([
     $('.datatype-selector').on('click', function() {
         vizhelpers.get_datatype_search_interfaces(this, this.getAttribute("data-field"));
     });
-    //$('.field-options').on('change', function() { vizhelpers.field_option_change_callback(this); });
     $('.close-field-search').on('click', function() { vizhelpers.close_field_search_callback(this); });
 
     $('.field-options').on('change', function(event) {
@@ -101,10 +101,10 @@ require([
     /*
         Creates a ui pill representing a user selected variable
      */
-    var add_variable_pill = function(variable_name, project_id, study_id, project_name, study_name) {
-        var token_str = '<span class="selected-variable" variable="' + variable_name + '" project="' + project_id + '" study="' + study_id + '" name="viz-ids">'
+    function add_variable_pill(name, code, project_id, study_id, project_name, study_name) {
+        var token_str = '<span class="selected-variable" variable="' + name + '" code="' + code + '" project="' + project_id + '" study="' + study_id + '" name="viz-ids">'
             + ' <a href="" class="delete-x filter-label label label-default">'
-            + project_name + ' : ' + study_name + ' : ' + variable_name
+            + project_name + ' : ' + study_name + ' : ' + name
             + ' <i class="fa fa-times"></a>'
             + '</span>';
 
@@ -125,8 +125,8 @@ require([
     /*
         Removes a ui pill representing a user selected variable
     */
-    remove_variable_pill = function(variable_name, project, study){
-        $(".selected-variable[variable='" + variable_name + "'][project='" + project + "'][study='" + study + "']").remove();
+    function remove_variable_pill(name, project, study){
+        $(".selected-variable[variable='" + name + "'][project='" + project + "'][study='" + study + "']").remove();
         $('#create-cohort-form .form-control-static [variable="' + variable_name + '"] [project="' + project + '"] [study="' + study + '"]').remove();
     }
 
@@ -135,15 +135,16 @@ require([
      */
     $('input[type="checkbox"]').on('change', function(event){
         var id = $(this).prop('id');
-        var variable_name   = $(this).attr('variable_name');
+        var name            = $(this).attr('variable_name');
+        var code            = $(this).attr('code');
         var project         = $(this).attr('project');
         var study           = $(this).attr('study');
         var project_name    = $(this).attr('project_name');
         var study_name      = $(this).attr('study_name');
         if ($(this).is(':checked')) { // Checkbox checked
-            add_variable_pill(variable_name, project, study, project_name, study_name);
+            add_variable_pill(name, code, project, study, project_name, study_name);
         } else {
-            remove_variable_pill(variable_name, project, study);
+            remove_variable_pill(name, project, study);
         }
     });
 
@@ -155,8 +156,9 @@ require([
         var study           = $(this).attr('study');
         var project_name    = $(this).attr('project_name');
         var study_name      = $(this).attr('study_name');
-        var variable_name   = $(this).find(":selected").text();
-        add_variable_pill(variable_name, project, study, project_name, study_name);
+        var name            = $(this).find(":selected").text();
+        var code            = $(this).find(":selected").val();
+        add_variable_pill(name, code, project, study, project_name, study_name);
     });
 
     /*
@@ -221,10 +223,11 @@ require([
     function get_variable_list(){
         var variable_list = [];
         $(".selected-variable").each(function (index) {
-            var variable_name = this.getAttribute('variable');
-            var project_id = this.getAttribute('project');
-            var study_id = this.getAttribute('study');
-            variable_list.push({name: variable_name, project_id: project_id, study_id: study_id});
+            var variable_name   = this.getAttribute('variable');
+            var code            = this.getAttribute('code');
+            var project_id      = this.getAttribute('project');
+            var study_id        = this.getAttribute('study');
+            variable_list.push({name: variable_name, code : code, project_id: project_id, study_id: study_id});
         });
 
         return variable_list;

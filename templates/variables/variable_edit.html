@@ -31,10 +31,10 @@
     {% if workbook %}
         {# USECASE 1: ADD VAR LIST TO EXISTING WORKBOOK #}
         <h1 class="page-header">Data Source | Variables</h1>
-        <div class="page-action-group">
-            <button id="apply_to_worksheet" workbook_id="{{ workbook.id }}" worksheet_id="{{ worksheet.id }}" class="btn btn-primary">Apply to Worksheet : {{ workbook.name }} | {{ worksheet.name }}</button>
-            <a href="{% url 'workbook_detail' workbook.id %}" class="btn btn-link">Back to Workbook</a>
-        </div>
+        <!--<div class="page-action-group">-->
+            <!--<button id="apply_to_worksheet" workbook_id="{{ workbook.id }}" worksheet_id="{{ worksheet.id }}" class="btn btn-primary">Apply to Worksheet : {{ workbook.name }} | {{ worksheet.name }}</button>-->
+            <!--<a href="{% url 'workbook_detail' workbook.id %}" class="btn btn-link">Back to Workbook</a>-->
+        <!--</div>-->
     {% else  %}
         {% if existing_variable_list %}
             {# USECASE 3: EDIT EXISTING VAR LIST #}
@@ -62,14 +62,19 @@
 </div>
 {% endblock %}
 {% block content %}
-{% if workbook %}
-    {# USECASE 1: ADD VAR LIST TO EXISTING WORKBOOK #}
-
-{% else %}
     <section class="col-lg-12">
          <div class="panel form-group panel-default">
-
-
+            {% csrf_token %}
+            {% if workbook %}
+                {# USECASE 1: ADD VAR LIST TO EXISTING WORKBOOK #}
+                <div class="panel-heading"></div>
+                <div class="panel-body">
+                    <div class="page-action-group">
+                        <button id="apply_to_worksheet" workbook_id="{{ workbook.id }}" worksheet_id="{{ worksheet.id }}" class="btn btn-primary">Apply to Worksheet</button>
+                        <a href="{% url 'worksheet_display' workbook.id worksheet.id %}" class="btn btn-link">Back to Worksheet</a>
+                    </div>
+                </div>
+            {% else %}
                 {% if existing_variable_list %}
                     {# USECASE 3: EDIT EXISTING VAR LIST #}
                     <div class="panel-heading">
@@ -102,9 +107,10 @@
                         <!--</div>-->
                     </div>
                 {% endif %}
+             {% endif %}
          </div>
     </section>
-{% endif %}
+
     <div class="col-lg-6" id="filter-panel">
         <section class="panel panel-default">
             <div class="panel-body">
@@ -113,8 +119,8 @@
                         <ul class="nav nav-tabs" role="tablist">
                             <li role="presentation" class="active"><a href="#common" aria-controls="common" role="tab" data-toggle="tab">Common</a></li>
                             <li role="presentation"><a href="#favorites" aria-controls="favorites" role="tab" data-toggle="tab">Favorites (N)</a></li>
-                            <li role="presentation"><a href="#datatypes" aria-controls="datatypes" role="tab" data-toggle="tab">TCGA</a></li>
-                            <li role="presentation"><a href="#uploaded" aria-controls="Uploaded" role="tab" data-toggle="tab">Uploaded</a></li>
+                            <li role="presentation"><a href="#datatypes" aria-controls="datatypes" role="tab" data-toggle="tab">Data Types</a></li>
+                            <li role="presentation"><a href="#uploaded" aria-controls="Uploaded" role="tab" data-toggle="tab">Projects</a></li>
                             <li role="presentation"><a href="#search" aria-controls="search" role="tab" data-toggle="tab">Search</a></li>
                         </ul>
 
@@ -200,43 +206,48 @@
                             </div>
                             <div role="tabpanel" class="tab-pane" id="uploaded">
                                 <ul class="list-group" id="clin-accordion" role="tablist" aria-multiselectable="true">
-                                    {% for study_name in study_name_list %}
-{#                                        <li class="list-group-item">#}
-{#                                            <div id="heading-{{ data_type_name }}" class="list-group-item__heading">#}
-{#                                                <a role="button"  data-toggle="collapse" data-parent="#clin-accordion" href="#collapse-{{ data_type_name }}" aria-expanded="false" aria-controls="collapse-{{ attr }}">#}
-{#                                                    <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ data_type_name |get_readable_name }}#}
-{#                                                </a>#}
-{#                                            </div>#}
-{##}
-{#                                            <div id="collapse-{{ attr }}" class="list-group-item__body collapse" role="tabpanel" aria-labelledby="heading-{{ data_type_name }}">#}
-{#                                                <ul class="search-checkbox-list" id="{{ data_type_name }}">#}
-{#                                                    {% with variable_list_count|get_item:attr|how_many_more:6 as num_more %}#}
-{#                                                        {% for v in variable_list_count|get_item:attr %}#}
-{#                                                            {% if forloop.counter0 < 6 %}#}
-{#                                                                <li class="checkbox">#}
-{#                                                                    <label for="{{ attr }}-{{ v.value|replace_whitespace:'_' }}"><input type="checkbox" name="elements-selected" id="{{ attr }}-{{ v.value|replace_whitespace:'_' }}" > {{ v.value | title}}</label>#}
-{#                                                                    <span class="count">({{ v.count }})</span>#}
-{#                                                                </li>#}
-{#                                                            {% elif forloop.counter0 == 6 and num_more > 0 %}#}
-{#                                                                <a class="show-more">{{ num_more }} more</a>#}
-{#                                                                <li class="extra-values checkbox" style="display:none;">#}
-{#                                                                    <label for="{{ attr }}-{{ v.value|replace_whitespace:'_' }}"><input type="checkbox" name="elements-selected" id="{{ attr }}-{{ v.value|replace_whitespace:'_' }}">  {{ v.value | title}}</label>#}
-{#                                                                    <span class="count">({{ v.count }})</span>#}
-{#                                                                </li>#}
-{#                                                            {% else %}#}
-{#                                                                <li class="extra-values checkbox" style="display:none;">#}
-{#                                                                    <label for="{{ attr }}-{{ v.value|replace_whitespace:'_' }}"><input type="checkbox" name="elements-selected" id="{{ attr }}-{{ v.value|replace_whitespace:'_' }}" > {{ v.value | title}}</label>#}
-{#                                                                    <span class="count">({{ v.count }})</span>#}
-{#                                                                </li>#}
-{#                                                            {% endif %}#}
-{#                                                        {% endfor %}#}
-{#                                                        {% if num_more > 0 %}#}
-{#                                                            <a class="show-less" style="display:none;">less</a>#}
-{#                                                        {% endif %}#}
-{#                                                    {% endwith %}#}
-{#                                                </ul>#}
-{#                                            </div>#}
-{#                                        </li>#}
+                                    {% for project in projects %}
+                                        {% for study in project.study_list %}
+                                            <li class="list-group-item">
+                                                <div id="heading-{{ data_type_name }}" class="list-group-item__heading">
+                                                    <a role="button"  data-toggle="collapse" data-parent="#clin-accordion" href="#collapse-{{ project.id }}-{{ study.id }}" aria-expanded="false" aria-controls="collapse-{{ attr }}">
+                                                        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ project.name }} | {{ study.name }}
+                                                    </a>
+                                                </div>
+
+                                                <div id="collapse-{{ project.id }}-{{ study.id }}" class="list-group-item__body collapse" role="tabpanel" aria-labelledby="heading-{{ project.id }}-{{ study.id }}">
+                                                    <ul class="search-checkbox-list" id="{{ data_type_name }}">
+{#                                                        {% with variable_list_count|get_item:attr|how_many_more:6 as num_more %}#}
+                                                            {% for variable in study.variables %} {#|get_item:attr %}#}
+                                                                {% if forloop.counter0 < 6 %}
+                                                                    <li class="checkbox">
+                                                                        <label for="{{ variable.name }}">
+                                                                            <input type="checkbox" name="elements-selected" id="{{ variable.name }}" > {{ variable.name }}
+                                                                        </label>
+                                                                    </li>
+                                                                {% elif forloop.counter0 == 6 and num_more > 0 %}
+                                                                    <a class="show-more">{{ num_more }} more</a>
+                                                                    <li class="extra-values checkbox" style="display:none;">
+                                                                        <label for="{{ variable.name }}">
+                                                                            <input type="checkbox" name="elements-selected" id="{{ variable.name }}">  {{ variable.name }}
+                                                                        </label>
+                                                                    </li>
+                                                                {% else %}
+                                                                    <li class="extra-values checkbox" style="display:none;">
+                                                                        <label for="{{ variable.name }}">
+                                                                            <input type="checkbox" name="elements-selected" id="{{ variable.name }}">  {{ variable.name }}
+                                                                        </label>
+                                                                    </li>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                            {% if num_more > 0 %}
+                                                                <a class="show-less" style="display:none;">less</a>
+                                                            {% endif %}
+{#                                                        {% endwith %}#}
+                                                    </ul>
+                                                </div>
+                                            </li>
+                                        {% endfor %}
                                     {% endfor %}
                                 </ul>
                             </div>

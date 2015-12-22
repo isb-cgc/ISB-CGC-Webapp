@@ -7,13 +7,9 @@ from cohorts.models import Cohort
 from variables.models import Variable
 from genes.models import Gene
 from projects.models import Project, Study
-from cohorts.models import Cohort
+from cohorts.models import Cohort, Cohort_Perms
 from django.utils import formats
-
-from django.conf import settings
-debug = settings.DEBUG
-if settings.DEBUG :
-    import sys
+from django.db.models import Count
 
 # Create your models here.
 class WorkbookManager(models.Manager):
@@ -26,6 +22,15 @@ class Workbook(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     last_date_saved = models.DateTimeField(auto_now_add=True)
     objects = WorkbookManager()
+
+    @classmethod
+    def deep_get(cls, id):
+        workbook_model            = cls.objects.get(id=id)
+        workbook_model.owner      = workbook_model.get_owner()
+        workbook_model.worksheets = workbook_model.get_deep_worksheets()
+        workbook_model.shares     = workbook_model.get_shares()
+
+        return workbook_model
 
     @classmethod
     def create(cls, name, description, user):
@@ -115,6 +120,23 @@ class Workbook(models.Model):
     def get_worksheets(self):
         return self.worksheet_set.filter(workbook=self)
 
+    def get_deep_worksheets(self):
+        worksheets =  self.worksheet_set.filter(workbook=self)
+        for worksheet in worksheets:
+            worksheet.comments  = worksheet.get_comments()
+            worksheet.variables = worksheet.get_variables()
+            worksheet.genes     = worksheet.get_genes()
+            worksheet.cohorts   = worksheet.get_cohorts()
+            worksheet.plot      = {'title'  : "default title",
+                                   'type'   : "default type",
+                                   'xaxis'  : {'selected'   : None,
+                                               'type'       : "numerical"},
+                                   'yaxis'  : {'selected'   : None,
+                                               'type'       : 'categorical'},
+                                   'cohort' : {'selected'   : None}
+                                   }
+        return worksheets
+
     def get_shares(self):
         return self.workbook_perms_set.filter(perm=Workbook_Perms.READER)
 
@@ -187,7 +209,9 @@ class Worksheet(models.Model):
         return self.worksheet_gene_set.filter(worksheet=self)
 
     def get_cohorts(self):
-        return  [Cohort.objects.get_all_tcga_cohort()]
+        cohort_perms = Cohort_Perms.objects.filter(user=self.workbook.get_owner()).values_list('cohort', flat=True)
+        cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved').annotate(num_patients=Count('samples'))
+        return cohorts
         #return self.worksheet_cohort_set.filter(worksheet=self)
 
     def destroy(self):
@@ -303,6 +327,7 @@ class Worksheet_variable(models.Model):
     modified_date   = models.DateTimeField(auto_now=True)
     worksheet       = models.ForeignKey(Worksheet, null=False, blank=False)
     name            = models.CharField(max_length=2024, blank=False)
+    url_code        = models.CharField(max_length=2024, blank=False)
     project         = models.ForeignKey(Project, null=True, blank=True)
     study           = models.ForeignKey(Study, null=True, blank=True)
     objects         = Worksheet_Variable_Manager()
@@ -335,19 +360,22 @@ class Worksheet_variable(models.Model):
     def create(cls, worksheet, variable):
         if variable['project_id'] == '-1' and variable['study_id'] == '-1' :
             worksheet_variable_model = cls.objects.create(worksheet_id = worksheet.id,
-                                                          name = variable['name'])
+                                                          name = variable['name'],
+                                                          url_code = variable['code'])
             worksheet_variable_model.save()
 
             return_obj = {
                 'id'            : worksheet_variable_model.id,
                 'name'          : worksheet_variable_model.name,
+                'code'          : worksheet_variable_model.url_code,
                 'date_created'  : formats.date_format(worksheet_variable_model.date_created, 'DATETIME_FORMAT')
             }
         else:
             project_model = Project.objects.get(id=variable['project_id'])
             study_model = Study.objects.get(id=variable['study_id'])
             worksheet_variable_model = cls.objects.create(worksheet_id = worksheet.id,
-                                                      name          = variable.name,
+                                                      name          = variable['name'],
+                                                      code          = variable['code'],
                                                       project       = project_model,
                                                       study         = study_model)
             worksheet_variable_model.save()

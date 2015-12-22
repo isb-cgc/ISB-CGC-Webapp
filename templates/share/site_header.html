@@ -1,5 +1,6 @@
 {% load staticfiles %}
 {% load cohort_filters %}
+{% load custom_tags %}
 
 <header class="navbar navbar-fixed-top site-header" role="header">
     <nav class="container">
@@ -75,7 +76,7 @@
                         </ul>
                     </li>
                     {% endif %}
-                    <li class="menu-item"><a href="{% url 'workbooks' %}">Saved Workbooks (0)</a></li>
+                    <li class="menu-item"><a href="{% url 'workbooks' %}">Saved Workbooks ({{ user.workbook_last_view_set.count }})</a></li>
                     <li class="menu-item"><a href="/">Create a New Workbook</a></li>
                     <li class="menu-item"><a href="/">Sample Workbooks</a></li>
                 </ul>
@@ -83,25 +84,18 @@
             <li class="menu-item has-drop-down">
                 <a>PROJECTS <i class="fa fa-caret-down"></i></a>
                 <ul class="sub-menu drop">
-                    <!--Temporary code to showcase recent project items -->
-                    <li class="menu-item">
-                        <strong>Start New Workbook With ...</strong>
-                        <ul class="item-list">
-                            <li class="menu-item"><a href="">Project 1</a></li>
-                        </ul>
-                    </li>
                     {% if user.project_last_view_set.all|length > 0 %}
                     <li class="menu-item">
                         <strong>Start New Workbook With ...</strong>
                         <ul class="item-list">
-                            {% for plv in user.project_last_view_set.all|dictsortreversed:'last_view'|slice:':5' %}
-                            <li class="menu-item">{{ plv.project.name }}</li>
+                            {% for plv in user.project_last_view_set.all|active:'project'|dictsortreversed:'last_view'|slice:':5' %}
+                            <li class="menu-item"><a href="{% url 'project_detail' plv.project.id %}">{{ plv.project.name }}</a></li>
                             {% endfor %}
                             {% if user.project_last_view_set.all|length > 5 %}
                             <li class="menu-item has-drop-down__more"> More
                                 <ul class="drop">
-                                    {% for plv in user.project_last_view_set.all|dictsortreversed:'last_view'|slice:'5:' %}
-                                    <li class="menu-item">{{ plv.project.name }}</li>
+                                    {% for plv in user.project_last_view_set.all|active:'project'|dictsortreversed:'last_view'|slice:'5:' %}
+                                    <li class="menu-item"><a href="{% url 'project_detail' plv.project.id %}">{{ plv.project.name }}</a></li>
                                     {% endfor %}
                                 </ul>
                             </li>
@@ -109,9 +103,9 @@
                         </ul>
                     </li>
                     {% endif %}
-                    <li class="menu-item"><a href="{% url 'projects' %}">Saved Projects (0)</a></li>
+                    <li class="menu-item"><a href="{% url 'projects' %}">Saved Projects ({{ user.project_last_view_set.all|active:'project'|length }})</a></li>
                     <li class="menu-item"><a href="{% url 'project_upload' %}">Upload Project Data</a></li>
-                    <li class="menu-item"><a href="{% url 'projects' %}">Public Projects (0)</a></li>
+                    <li class="menu-item"><a href="{% url 'projects' %}">Public Projects (1)</a></li>
                 </ul>
             </li>
             <li class="menu-item has-drop-down">
@@ -222,7 +216,7 @@
                     </li>
                     {% endif %}
                     <li class="menu-item"><a href="{% url 'cohort_list' %}">Manage Saved Cohorts ({{ user.cohort_perms_set.all|cohort_owner_permission|length }})</a></li>
-                    <li class="menu-item"><a>Public Cohorts (1)</a></li>
+                    <li class="menu-item"><a href="{% url 'cohort_list' %}">Public Cohorts (1)</a></li>
                     <li class="menu-item"><a>Select Cohort for a New Workbook</a></li>
                 </ul>
             </li>

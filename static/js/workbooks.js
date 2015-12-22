@@ -30,13 +30,10 @@ require.config({
         assetsresponsive: 'libs/assets.responsive',
         d3: 'libs/d3.min',
         d3tip: 'libs/d3-tip',
-
-        search_helpers: 'helpers/search_helpers',
-        vis_helpers: 'helpers/vis_helpers',
-        tree_graph: 'visualizations/createTreeGraph',
-        stack_bar_chart: 'visualizations/createStackedBarchart',
-        d3parsets: 'libs/d3.parsets',
-        draw_parsets: 'parallel_sets',
+        science: 'libs/science.min',
+        stats: 'libs/science.stats.min',
+        vizhelpers: 'helpers/vis_helpers',
+        select2: 'libs/select2.min',
         base: 'base'
     },
     shim: {
@@ -44,35 +41,37 @@ require.config({
         'jqueryui': ['jquery'],
         'session_security': ['jquery'],
         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
-        'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui']
+        'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
+        'select2': ['jquery']
     }
 });
 
 require([
     'jquery',
+    'visualizations/plotFactory',
+    'science',
+    'stats',
+    'session_security',
     'jqueryui',
     'bootstrap',
-    'session_security',
-
     'd3',
     'd3tip',
-    'search_helpers',
-    'vis_helpers',
-
-    'tree_graph',
-    'stack_bar_chart',
-
+    'vizhelpers',
+    'visualizations/createScatterPlot',
+    'visualizations/createCubbyPlot',
+    'visualizations/createViolinPlot',
+    'visualizations/createHistogram',
+    'visualizations/createBarGraph',
+    'select2',
     'assetscore',
     'assetsresponsive',
     'base'
-], function ($, jqueryui, bootstrap, session_security, d3, d3tip, search_helpers, vis_helpers, parallel_sets, draw_parsets) {
+], function ($, plot_factory, science, stats, session_security) {
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function() {
         $(this).find('form')[0].reset();
     });
-
-    var search_helper_obj = Object.create(search_helpers, {});
 
     $('#clin-accordion').on('show.bs.collapse', function (e) {
         $(e.target).siblings('a').find('i.fa-caret-down').show();
@@ -131,7 +130,6 @@ require([
         //$(this.getAttribute("data-target")).modal();
         console.log($(this.getAttribute("data-target")));
     })
-
 
     ////Model communications
     $('.add_worksheet_comment_form').on('submit', function(event) {
@@ -212,9 +210,29 @@ require([
     //search_helper_obj.update_parsets(base_api_url, 'metadata_platform_list', cohort_id);
 
 
+    function generatePlot(){
+        var plot_element = $('.plot');
+        var plot_type = $("#plot_selection").find(":selected").text();
+        var x_attr = plot_element.find('#x-axis-select')[0].selectedIndex > 0 ? plot_element.find('#x-axis-select').find(":selected").val() : "";
+        var y_attr = plot_element.find('#y-axis-select')[0].selectedIndex > 0 ? plot_element.find('#y-axis-select').find(":selected").val() : "";
+        var cohort = plot_element.find('#cohort-select')[0].selectedIndex > 0 ? plot_element.find('#cohort-select').find(":selected").val() : "";
+        var plotFactory = Object.create(plot_factory, {});
+        plotFactory.generate_plot(plot_element, x_attr, y_attr, 'CLIN:Study', cohort, false);
+    }
+
+    //generate plot based on user change
+    $('.update-plot').on('click', function(event){
+        generatePlot();
+        $('.hide-settings-flyout').parents('.fly-out.settings-flyout').animate({
+            right: '-400px'
+        }, 800, function(){
+            $(this).removeClass('open');
+        })
+    });
+
+    //generate plot type selection
     $("#plot_selection").on("change", function(event){
-        console.log("changed");
-        PlotFactory.generateDefaultPlot();
+        generatePlot();
     })
 });
 

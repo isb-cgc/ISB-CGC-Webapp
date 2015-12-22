@@ -60,25 +60,17 @@ def workbook(request, workbook_id=0):
 
     elif request.method == "GET" :
         if workbook_id:
-            workbook            = Workbook.objects.get(id=workbook_id)
-            workbook.owner      = workbook.get_owner()
-            workbook.worksheets = workbook.get_worksheets()
-            workbook.shares     = workbook.get_shares()
+            workbook_model = Workbook.deep_get(id=workbook_id)
 
-            for worksheet in workbook.worksheets:
-                worksheet.comments  = worksheet.get_comments()
-                worksheet.variables = worksheet.get_variables()
-                worksheet.genes     = worksheet.get_genes()
-                worksheet.cohorts   = worksheet.get_cohorts()
-                worksheet.plot      = {'title' : "default title",
-                                       'type'  : "default type",
-                                       'dimensions' : [{'name' : "x-axis",
-                                                        'variable' : "variables"},
-                                                       {'name' : "y-axis",
-                                                        'variable' : "variables"}]
-                                       }
-
-            return render(request, template, {'workbook' : workbook})
+            plot_types = [{'name' : 'Bar Chart'},
+                          {'name' : 'Histogram'},
+                          {'name' : 'Scatter Plot'},
+                          {'name' : 'Violin Plot'},
+                          {'name' : 'Violin Plot 2'},
+                          {'name' : 'Cubby Hole'},
+                          {'name' : 'SeqPeak'}]
+            return render(request, template, {'workbook'    : workbook_model,
+                                              'plot_types'  : plot_types})
         else :
             redirect_url = reverse('workbooks')
             return redirect(redirect_url)
@@ -86,21 +78,23 @@ def workbook(request, workbook_id=0):
 @login_required
 #used to display a particular worksheet on page load
 def worksheet_display(request, workbook_id=0, worksheet_id=0):
-    template            = 'workbooks/workbook.html'
-    workbook            = Workbook.objects.get(id=workbook_id)
-    workbook.owner      = workbook.get_owner()
-    workbook.worksheets = workbook.get_worksheets();
-    workbook.shares     = workbook.get_shares()
+    template = 'workbooks/workbook.html'
+    workbook_model = Workbook.deep_get(workbook_id)
 
-    for worksheet in workbook.worksheets:
+    for worksheet in workbook_model.worksheets:
         if str(worksheet.id) == worksheet_id :
             display_worksheet = worksheet
-        worksheet.comments  = worksheet.get_comments()
-        worksheet.variables = worksheet.get_variables()
-        worksheet.genes     = worksheet.get_genes()
-        worksheet.cohorts   = worksheet.get_cohorts()
 
-    return render(request, template, {'workbook' : workbook, 'display_worksheet' : display_worksheet})
+        plot_types = [{'name' : 'Bar Chart'},
+                          {'name' : 'Histogram'},
+                          {'name' : 'Scatter Plot'},
+                          {'name' : 'Violin Plot'},
+                          {'name' : 'Violin Plot 2'},
+                          {'name' : 'Cubby Hole'},
+                          {'name' : 'SeqPeak'}]
+    return render(request, template, {'workbook'            : workbook_model,
+                                      'display_worksheet'   : display_worksheet,
+                                      'plot_types'          : plot_types})
 
 @login_required
 def worksheet(request, workbook_id=0, worksheet_id=0):

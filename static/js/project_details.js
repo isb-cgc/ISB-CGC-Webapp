@@ -35,7 +35,11 @@ require([
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function() {
-        $(this).find('form')[0].reset();
+        var forms = $(this).find('form');
+        if(forms.length)
+            _.each(forms, function (form) {
+                form.reset();
+            });
     }).find('form').on('submit', function (e) {
         e.preventDefault();
         e.stopPropagation();

@@ -25,31 +25,55 @@
             <a role="button" class="toggle-selection" aria-label="Toggle Sample Selection"><i class="fa fa-crosshairs"></i></a>
             <a role="button" class="show-settings-flyout" data-target=".setting-flyout" aria-label="Show Plot Settings"><i class="fa fa-pencil"></i></a>
         </div>
-        <div class="form-group">
-            <input class="form-control" id="{{ plot.id }}-plot-title" type="text" name="name" value="{% if plot.title %}{{ plot.title }}{% else %}Untitled Plot{% endif %}" />
-        </div>
+{#        <div class="form-group">#}
+{#            <input class="form-control" id="{{ plot.id }}-plot-title" type="text" name="name" value="{% if plot.title %}{{ plot.title }}{% else %}Untitled Plot{% endif %}" />#}
+{#        </div>#}
     </div>
     <div class="panel-body">
-        <div class="plot-loader" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
+
+        <div class="worksheet-plot-loader plot-loader" style="display:none;">
+            <div style="">
+                <i class="fa fa-spinner fa-spin"></i>
+            </div>
+        </div>
 
         <!-- Settings Flyout -->
         <div class="fly-out settings-flyout plot-config" id="plot-{{ plot.id }}-settings">
             <div class="flyout-heading">
                 <h4>Plot Settings <a role="button" class="hide-settings-flyout" aria-label="Hide Settings Flyout"><i class="fa fa-times"></i></a></h4>
             </div>
-            <div class="flyout-body" style="bottom: inherit">
+            <div class="flyout-body" style="bottom: inherit; overflow-y:inherit;">
                 <div class="main-settings">
-
                     <div class="form-group">
-                        <label for="{{ plot.id }}-x-select">X Axis Feature <a role="button" class="x-edit-field" data-attribute="x-selector" aria-label="X Field Editor"><i class="fa fa-pencil"></i></a></label>
-                         <!-- TODO: listing of the variables in this plot, as a dropdown selection from the worksheet variables-->
+                        <label for="{{ plot.id }}-x-select">X Axis Variable <a role="button" class="x-edit-field" data-attribute="x-selector" aria-label="X Field Editor"></a></label>
+                        <select id="x-axis-select" plot="{{ plot.id }}" class="search-term-field" style="width: 230px;">
+                            {% if plot.xaxis.selected %}
+                                <option value="{{ plot.xaxis.selected }}" selected >{{ plot.xaxis.selected }}</option>
+                            {% else %}
+                                <option disabled selected >-- select a variable--</option>
+                            {% endif %}
+                            {% for var in variables %}
+{#                                {% if var.type == plot.xaxis.type  %}#}
+                                    <option value="{{ var.url_code }}">{{ var.name }}</option>
+{#                                {% endif %}#}
+                            {% endfor %}
+                        </select>
                     </div>
-                
                     <button class="swap btn btn-default inline-block space-bottom-10"><i class="fa fa-exchange fa-rotate-90"></i> Swap Values</button>
-
                     <div class="form-group">
-                        <label for="{{ plot.id }}-y-select">Y Axis Feature <a role="button" class="y-edit-field" data-attribute="y-selector" aria-label="Y Field Editor"><i class="fa fa-pencil"></i></a></label>
-                        <!-- TODO: listing of the variables in this plot, as a dropdown selection from the worksheet variables-->
+                        <label for="{{ plot.id }}-y-select">Y Axis Variable <a role="button" class="y-edit-field" data-attribute="y-selector" aria-label="Y Field Editor"></a></label>
+                        <select id="y-axis-select" plot="{{ plot.id }}" class="search-term-field" style="width: 230px;">
+                            {% if plot.yaxis.selected %}
+                                <option value="{{ plot.yaxis.selected }}" selected >{{ plot.yaxis.selected }}</option>
+                            {% else %}
+                                <option disabled selected >-- select a variable--</option>
+                            {% endif %}
+                            {% for var in variables %}
+{#                                {% if var.type == plot.yaxis.type  %}#}
+                                    <option value="{{ var.url_code }}">{{ var.name }}</option>
+{#                                {% endif %}#}
+                            {% endfor %}
+                        </select>
                     </div>
                     <div class="form-group">
                         <label for="{{ plot.id }}-color-select">Color By Feature <a role="button" class="color-edit-field" data-attribute="color-selector" aria-label="Color Field Editor"><i class="fa fa-pencil"></i></a></label></label>
@@ -57,23 +81,36 @@
                         <input type="checkbox" class="color-by-cohort" id="{{ plot.id }}-color-by-cohort" />
                         <label for="{{ plot.id }}-color-by-cohort">Color By Cohort</label>
                     </div>
-
                     <div class="form-group">
                         <label>Cohorts</label>
                         <div class="cohort-listing space-top-5">
-                            {% for cohort in plot.cohorts %}
-                                <!-- TODO: listing of the variables in this plot, as a dropdown selection from the worksheet variables-->
-                            {% endfor %}
+                            <select id="cohort-select" plot="{{ plot.id }}" class="search-term-field" style="width: 230px;">
+                                {% if plot.cohort.selected %}
+                                    <option value="{{ plot.cohort.selected }}" selected >{{ plot.cohort.selected }}</option>
+                                {% else %}
+                                    <option disabled selected >-- select a cohort--</option>
+                                {% endif %}
+                                {% for cohort in cohorts %}
+                                    <option value="{{ cohort.id }}">{{ cohort.name }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
-                        <a role="button" class="add-cohort space-top-10"><i class="fa fa-plus"></i> Cohort</a>
                     </div>
-
                     <button class="update-plot btn btn-primary">Update Plot</button>
                 </div>
             </div>
         </div>
 
-        <div class="plot-div"></div>
+        <div class="plot-div">
+            <div class="worksheet-instruction">
+                <p><i class="fa fa-exclamation-circle"></i> To Complete this Analysis: </p>
+                <ul class="ul">
+                    <li>You must select an Analysis Type (above)</li>
+                    <li>You must select <a href="{% url 'genes' %}">Genes</a> or <a href="{% url 'variables' %}">Variables</a> (or, optionally, both)</li>
+                    <li>You must select a <a href="{% url 'cohort_list' %}">Cohorts</a></li>
+                </ul>
+            </div>
+        </div>
         <div class="legend"></div>
         <div class="pairwise-result"></div>
         <div class="save-cohort-card" style="display:none;">
