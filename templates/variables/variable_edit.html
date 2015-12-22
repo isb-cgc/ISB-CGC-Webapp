@@ -31,10 +31,10 @@
     {% if workbook %}
         {# USECASE 1: ADD VAR LIST TO EXISTING WORKBOOK #}
         <h1 class="page-header">Data Source | Variables</h1>
-        <!--<div class="page-action-group">-->
-            <!--<button id="apply_to_worksheet" workbook_id="{{ workbook.id }}" worksheet_id="{{ worksheet.id }}" class="btn btn-primary">Apply to Worksheet : {{ workbook.name }} | {{ worksheet.name }}</button>-->
-            <!--<a href="{% url 'workbook_detail' workbook.id %}" class="btn btn-link">Back to Workbook</a>-->
-        <!--</div>-->
+        <div class="page-action-group">
+            <button id="apply_to_worksheet" workbook_id="{{ workbook.id }}" worksheet_id="{{ worksheet.id }}" class="btn btn-primary">Apply to Worksheet</button>
+            <a href="{% url 'workbook_detail' workbook.id %}" class="btn btn-link">Back to Workbook</a>
+        </div>
     {% else  %}
         {% if existing_variable_list %}
             {# USECASE 3: EDIT EXISTING VAR LIST #}
@@ -62,55 +62,45 @@
 </div>
 {% endblock %}
 {% block content %}
+{% csrf_token %}
+{% if not workbook %}
     <section class="col-lg-12">
          <div class="panel form-group panel-default">
-            {% csrf_token %}
-            {% if workbook %}
-                {# USECASE 1: ADD VAR LIST TO EXISTING WORKBOOK #}
-                <div class="panel-heading"></div>
-                <div class="panel-body">
-                    <div class="page-action-group">
-                        <button id="apply_to_worksheet" workbook_id="{{ workbook.id }}" worksheet_id="{{ worksheet.id }}" class="btn btn-primary">Apply to Worksheet</button>
-                        <a href="{% url 'worksheet_display' workbook.id worksheet.id %}" class="btn btn-link">Back to Worksheet</a>
-                    </div>
+            {% if existing_variable_list %}
+                {# USECASE 3: EDIT EXISTING VAR LIST #}
+                <div class="panel-heading">
+                    <label for="variable-name" class="panel-title">Name of Favorite (Required)</label>
                 </div>
-            {% else %}
-                {% if existing_variable_list %}
-                    {# USECASE 3: EDIT EXISTING VAR LIST #}
-                    <div class="panel-heading">
-                        <label for="variable-name" class="panel-title">Name of Favorite (Required)</label>
-                    </div>
-                    <div class="panel-body">
-                        <input type="text" id="variable_list_name_input" placeholder="my new favorite variable list" class="form-control" value={{ existing_variable_list.name }} required>
-                        <div class="page-action-group">
-                            <button id="edit_favorite_list" class="btn btn-primary">Save Changes</button>
-                            <a href="{% url 'variables' %}" class="btn btn-link">Cancel</a>
-                        </div>
-                    </div>
-                {% elif newWorkbook %}
-                    {# USECASE 2: CREATE VAR LIST THEN CREATE WORKBOOK WITH VAR LIST #}
-                    <div class="panel-heading"></div>
-                    <div class="panel-body">
-                        <button id="select_then_create_new_workbook" class="btn btn-primary">Create New Workbook with Selected Variables</button>
+                <div class="panel-body">
+                    <input type="text" id="variable_list_name_input" placeholder="my new favorite variable list" class="form-control" value={{ existing_variable_list.name }} required>
+                    <div class="page-action-group">
+                        <button id="edit_favorite_list" class="btn btn-primary">Save Changes</button>
                         <a href="{% url 'variables' %}" class="btn btn-link">Cancel</a>
                     </div>
-                {% else %}
-                    {# USECASE 4: CREATE VAR FAVORITE #}
-                    <div class="panel-heading">
-                        <label for="variable-name" class="panel-title">Name of Favorite (Required)</label>
-                    </div>
-                    <div class="panel-body">
-                        <input type="text" id="variable_list_name_input" placeholder="my new favorite variable list" class="form-control" value="" required>
-                        <!--<div class="page-action-group">-->
-                            <!--<button id="create_favorite_list" class="btn btn-primary">Save As Favorite</button>-->
-                            <!--<a href="{% url 'variables' %}" class="btn btn-link">Cancel</a>-->
-                        <!--</div>-->
-                    </div>
-                {% endif %}
-             {% endif %}
+                </div>
+            {% elif newWorkbook %}
+                {# USECASE 2: CREATE VAR LIST THEN CREATE WORKBOOK WITH VAR LIST #}
+                <div class="panel-heading"></div>
+                <div class="panel-body">
+                    <button id="select_then_create_new_workbook" class="btn btn-primary">Create New Workbook with Selected Variables</button>
+                    <a href="{% url 'variables' %}" class="btn btn-link">Cancel</a>
+                </div>
+            {% else %}
+                {# USECASE 4: CREATE VAR FAVORITE #}
+                <div class="panel-heading">
+                    <label for="variable-name" class="panel-title">Name of Favorite (Required)</label>
+                </div>
+                <div class="panel-body">
+                    <input type="text" id="variable_list_name_input" placeholder="my new favorite variable list" class="form-control" value="" required>
+                    <!--<div class="page-action-group">-->
+                        <!--<button id="create_favorite_list" class="btn btn-primary">Save As Favorite</button>-->
+                        <!--<a href="{% url 'variables' %}" class="btn btn-link">Cancel</a>-->
+                    <!--</div>-->
+                </div>
+            {% endif %}
          </div>
     </section>
-
+{% endif %}
     <div class="col-lg-6" id="filter-panel">
         <section class="panel panel-default">
             <div class="panel-body">
