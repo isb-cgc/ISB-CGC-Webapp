@@ -311,7 +311,7 @@ class Cohort_Endpoints_API(remote.Service):
             finally:
                 if cursor: cursor.close()
                 if filter_cursor: filter_cursor.close()
-                if db: db.close()
+                if db and db.open: db.close()
         else:
             raise endpoints.UnauthorizedException("Authentication failed.")
 
@@ -372,7 +372,7 @@ class Cohort_Endpoints_API(remote.Service):
                 raise endpoints.NotFoundException("Cohort {} not found.".format(cohort_id))
             finally:
                 if cursor: cursor.close()
-                if db: db.close()
+                if db and db.open: db.close()
 
             patient_query_str = 'select cohorts_patients.patient_id ' \
                         'from cohorts_patients ' \
@@ -424,7 +424,7 @@ class Cohort_Endpoints_API(remote.Service):
                 raise endpoints.NotFoundException("Cohort {} not found.".format(cohort_id))
             finally:
                 if cursor: cursor.close()
-                if db: db.close()
+                if db and db.open: db.close()
 
         else:
             raise endpoints.UnauthorizedException("Authentication failed.")
@@ -552,7 +552,7 @@ class Cohort_Endpoints_API(remote.Service):
             if clinical_cursor: clinical_cursor.close()
             if sample_cursor: sample_cursor.close()
             if aliquot_cursor: aliquot_cursor.close()
-            if db: db.close()
+            if db and db.open: db.close()
 
 
     GET_RESOURCE = endpoints.ResourceContainer(sample_barcode=messages.StringField(1, required=True),
@@ -722,7 +722,7 @@ class Cohort_Endpoints_API(remote.Service):
             if aliquot_cursor: aliquot_cursor.close()
             if patient_cursor: patient_cursor.close()
             if data_cursor: data_cursor.close()
-            if db: db.close()
+            if db and db.open: db.close()
 
 
 
@@ -829,7 +829,7 @@ class Cohort_Endpoints_API(remote.Service):
                 raise endpoints.NotFoundException("Sample {} not found.".format(sample_barcode))
             finally:
                 if cursor: cursor.close()
-                if db: db.close()
+                if db and db.open: db.close()
 
         else:
             raise endpoints.UnauthorizedException("Authentication failed.")
@@ -902,11 +902,12 @@ class Cohort_Endpoints_API(remote.Service):
                     sample_barcodes.append(row['SampleBarcode'])
 
             except (IndexError, TypeError), e:
-                if patient_cursor: patient_cursor.close()
-                if sample_cursor: sample_cursor.close()
-                if db: db.close()
                 logger.warn(e)
                 raise endpoints.NotFoundException("Error retrieving samples or patients")
+            finally:
+                if patient_cursor: patient_cursor.close()
+                if sample_cursor: sample_cursor.close()
+                if db and db.open: db.close()
 
             cohort_name = request.__getattribute__('name')
 
@@ -1055,7 +1056,7 @@ class Cohort_Endpoints_API(remote.Service):
             logger.warn(e)
         finally:
             if user_cursor: user_cursor.close()
-            if db: db.close()
+            if db and db.open: db.close()
             if row is None:
                 raise endpoints.UnauthorizedException("Authentication of {} failed.".format(user_email))
 
@@ -1082,7 +1083,7 @@ class Cohort_Endpoints_API(remote.Service):
                     "Error retrieving cohort {} for user {}.".format(cohort_id, user_email))
             finally:
                 if user_cursor: user_cursor.close()
-                if db: db.close()
+                if db and db.open: db.close()
 
             query_str += 'WHERE SampleBarcode IN (SELECT SampleBarcode FROM cohorts_samples WHERE cohort_id=%s) '
             query_tuple = (cohort_id,)
@@ -1127,4 +1128,4 @@ class Cohort_Endpoints_API(remote.Service):
             raise endpoints.NotFoundException("Sample {} not found.".format(sample_barcode))
         finally:
             if cursor: cursor.close()
-            if db: db.close()
+            if db and db.open: db.close()
