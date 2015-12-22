@@ -20,10 +20,12 @@ import requests
 def project_list(request):
     template = 'projects/project_list.html'
 
-    projects = Project.objects.all().filter(Q(owner=request.user) | Q(shared__matched_user=request.user, shared__active=True)
-                                            ,active=True)
+    ownedProjects = request.user.project_set.all().filter(active=True)
+    sharedProjects = Project.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
 
-    # TODO Handle sharing
+    projects = ownedProjects | sharedProjects
+    projects = projects.distinct()
+
     context = {
         'projects': projects,
         'public_projects': Project.objects.all().filter(is_public=True,active=True)
@@ -35,8 +37,13 @@ def project_detail(request, project_id=0):
     # """ if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name """
     template = 'projects/project_detail.html'
 
-    proj = Project.objects.get(Q(owner=request.user) | Q(shared__matched_user=request.user, shared__active=True)
-                                            ,active=True,id=project_id)
+    ownedProjects = request.user.project_set.all().filter(active=True)
+    sharedProjects = Project.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
+
+    projects = ownedProjects | sharedProjects
+    projects = projects.distinct()
+
+    proj = projects.get(id=project_id)
 
     shared = None
     if proj.owner.id != request.user.id:
