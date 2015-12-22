@@ -256,7 +256,7 @@ def initialize_variable_selection_page(request,
     }
 
     # USECASE 1: ADD VAR LIST TO EXISTING WORKBOOK
-    context['workbook'] = {'id' : "3", 'name' : "asdfasdf"}
+    # context['workbook'] = {'id' : "3", 'name' : "asdfasdf"}
     if workbook_id is not None and worksheet_id is not None :
         workbook = Workbook.objects.get(id=workbook_id)
         worksheet = Worksheet.objects.get(id=worksheet_id)

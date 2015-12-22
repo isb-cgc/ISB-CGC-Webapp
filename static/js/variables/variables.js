@@ -31,7 +31,8 @@ require.config({
         science: 'libs/science.min',
         stats: 'libs/science.stats.min',
         vizhelpers: 'helpers/vis_helpers',
-        select2: 'libs/select2.min'
+        select2: 'libs/select2.min',
+        base: 'base'
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -53,7 +54,8 @@ require([
     'vizhelpers',
     'select2',
     'assetscore',
-    'assetsresponsive'
+    'assetsresponsive',
+    'base'
 ], function($, jqueryui, bootstrap, session_security, d3, d3tip, vizhelpers, scatter_plot, cubby_plot, violin_plot, histogram, bar_graph) {
     A11y.Core();
 

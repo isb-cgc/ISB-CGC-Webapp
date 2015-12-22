@@ -30,7 +30,7 @@ def genes_list(request):
     context = {
         'genes_favs': GENES_FAVS
     }
-    return render(request, template, context)
+    return render(request, template, {'genes_favs': GENES_FAVS})
 
 @login_required
 def genes_detail(request, genes_id):
@@ -50,17 +50,15 @@ def genes_detail(request, genes_id):
     return render(request, template, context)
 
 @login_required
-def genes_upload(request):
-    template = 'genes/genes_upload.html'
-    context = {}
-    return render(request, template, context)
-
-@login_required
 def genes_list_edit(request, genes_id=0):
     template = 'genes/genes_edit.html'
     context = {
-        'genes_detail': []
+        'genes_id': genes_id,
+        'genes_detail': [],
+        # 'uploaded_genes': json.dumps(request.session['uploaded_genes'])
     }
+    # print request.session['uploaded_genes']
+
     if(genes_id != 0):
         try:
             # Find the gene favorite objects
@@ -72,3 +70,20 @@ def genes_list_edit(request, genes_id=0):
             messages.error(request, 'The genes favorite you were looking for does not exist.')
             return redirect('genes_list')
     return render(request, template, context)
+
+@login_required
+def genes_upload(request, genes_id=0):
+    template = 'genes/genes_upload.html'
+    context = {}
+
+    # Use request.session to pass uploaded genes back to genes
+    request.session['uploaded_genes'] = []
+
+    print request.session['uploaded_genes']
+
+    if request.method == "POST" :
+        print request.POST
+        request.session['uploaded_genes'] = request.POST.getlist('genes[]')
+        return redirect(reverse('edit_genes_list', kwargs={'genes_id': 0}))
+    else:
+        return render(request, template, context)

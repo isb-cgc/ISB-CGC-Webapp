@@ -110,16 +110,19 @@ def worksheet(request, workbook_id=0, worksheet_id=0):
     if request.method == "POST" :
         if command == "create" :
             worksheet = Worksheet.create(workbook_id=workbook_id, name=request.POST.get('name'), description=request.POST.get('description'))
-            query = '#'+ str(worksheet.id)
+            # query = '#'+ str(worksheet.id)
+            redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet.id})
         elif command == "edit" :
-            Worksheet.edit(id=worksheet_id, name=request.POST.get('name'), description=request.POST.get('description'))
+            worksheet = Worksheet.edit(id=worksheet_id, name=request.POST.get('name'), description=request.POST.get('description'))
+            redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet.id})
         elif command == "copy" :
             worksheet = Worksheet.copy(id=worksheet_id)
-            query = '#'+ str(worksheet.id)
+            redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet.id})
         elif command == "delete" :
             Worksheet.destroy(id=worksheet_id)
+            redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_id})
 
-    redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_id}) + query
+    # redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_id}) + query
     return redirect(redirect_url)
 
 @login_required

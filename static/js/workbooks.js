@@ -178,12 +178,6 @@ require([
         var targetTab = $(this).parent();
         var targetWorksheetNumber = $(this).attr('href');
 
-        if(history.pushState){
-            history.pushState(null, null, targetWorksheetNumber);
-        }else{
-            window.location.hash = targetWorksheetNumber;
-        }
-
         if($(this).closest('#more-tabs').length > 0){
             openTabsfromDropdown(targetTab);
         }
@@ -191,7 +185,7 @@ require([
     })
 
     function openTabsfromDropdown(target){
-        var lastTabNum = 5;
+        var lastTabNum = 3;
         var lastTab = $(tabsList[lastTabNum-1]).parent();
         var moreTabs = $('#more-tabs');
         var dropdown = $('#worksheets-dropdown-menu');
@@ -205,15 +199,12 @@ require([
 
 
     // Activate the recent added tab
-    if(window.location.hash){
-        var recentWorksheetTab = $('#worksheets-tabs a[href="' + window.location.hash + '"');
+    if(display_worksheet){
+        var recentWorksheetTab = $("a[href='#"+ display_worksheet +"']");
         var recentWorksheetTarget = recentWorksheetTab.parent();
-        $(tabsList[0]).parent().removeClass('active');
+        //$(tabsList[0]).parent().removeClass('active');
         if(recentWorksheetTarget.closest('#more-tabs').length > 0){
             openTabsfromDropdown(recentWorksheetTarget);
-            recentWorksheetTab.tab('show');
-        }else{
-            recentWorksheetTarget.addClass('active');
         }
     }
 

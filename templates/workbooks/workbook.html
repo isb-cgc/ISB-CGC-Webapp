@@ -46,13 +46,8 @@
         <ul class="nav nav-tabs_excel" id="worksheets-tabs">
             <!-- for each worksheet in workbook -->
             {% for worksheet in workbook.worksheets %}
-<<<<<<< HEAD
-                {% if forloop.counter <= 5 %}
-                    <li class="{% if forloop.counter == 1 %} active {% endif %}">
-=======
                 {% if forloop.counter < 4 %}
                     <li class="{% if display_worksheet and display_worksheet.id == worksheet.id %} active {% elif not display_worksheet and forloop.counter == 1 %} active {% endif %}">
->>>>>>> a460d1c23378823bc8f7eed823cda120ff0636be
                          <a href="#{{ worksheet.id }}" data-toggle="tab">{{ worksheet.name }}</a>
                          {% if workbook.owner.id == request.user.id %}
                          <div class="dropdown">
@@ -70,13 +65,13 @@
                     </li>
                 {% endif %}
             {% endfor %}
-            {% if workbook.worksheets|length > 5 %}
+            {% if workbook.worksheets|length > 3 %}
                 <li class="dropdown" id="more-tabs">
                     <button class="btn btn-symbol" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-ellipsis-h"></i></button>
                     <ul class="dropdown-menu" id="worksheets-dropdown-menu">
                     {% for worksheet in workbook.worksheets  %}
-                        {% if forloop.counter > 5 %}
-                        <li>
+                        {% if forloop.counter >= 4 %}
+                        <li class="{% if display_worksheet and display_worksheet.id == worksheet.id %} active {% endif %}">
                             <a href="#{{ worksheet.id }}" data-toggle="tab">{{ worksheet.name }}</a>
                             <div class="dropdown">
                                 <a class="dropdown-toggle worksheet-drop" role="button" data-toggle="dropdown"><i class="fa fa-caret-down" ></i></a>
@@ -102,7 +97,7 @@
         <div class="tab-content">
              <!-- for each worksheet in workbook -->
              {% for worksheet in workbook.worksheets %}
-                 <div class="worksheet tab-pane fade {% if forloop.counter == 1 %} in active{% endif %}" id="{{ worksheet.id }}" >
+                 <div class="worksheet tab-pane fade {% if not display_worksheet and forloop.counter == 1 %} in active{% elif display_worksheet and display_worksheet.id == worksheet.id %} in active {% endif %}" id="{{ worksheet.id }}" >
                      <!-- worksheet description -->
                      <div class="worksheet-header">
                          <p>{{worksheet.description}}</p>
@@ -230,6 +225,7 @@
 <script type="text/javascript">
     var base_api_url = '{{ base_api_url|safe }}';
     var base_url = '{{ base_url|safe }}';
+    var display_worksheet = {{ display_worksheet.id|safe }};
 
     //plot specific variables
 {#    var plots_data = {{ plots_data|safe }};#}
