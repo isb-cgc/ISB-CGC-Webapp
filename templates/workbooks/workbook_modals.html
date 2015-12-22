@@ -126,3 +126,28 @@
     </div>
 </div>
 
+<!-- Create Worksheet modal-->
+<div class="modal fade" id="create-worksheet-modal" tabindex="-1" aria-labelledby="create-worksheet-header" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="create-worksheet-header">Create New Worksheet</h4>
+            </div>
+            <form id="worksheet_create_form" method="POST" action="{% url 'worksheet_create' workbook_id=workbook.id %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <label for="name">Name (required)</label>
+                    <input class="form-control" type="text" name="name" value="New Worksheet"/>
+                    <br>
+                    <label for="description">Description (optional)</label>
+                    <textarea class="form-control" name="description" placeholder="Add a description"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" value="Create" class="btn btn-primary" />
+                    <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

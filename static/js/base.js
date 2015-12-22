@@ -36,10 +36,10 @@ require([
     // Menu toggle
     if($(window).scrollTop() < 10){
         $('#subnav').on('hide.bs.collapse', function () {
-            $('#body').toggleClass('menu-open');
+            $('#body').removeClass('menu-open');
         });
         $('#subnav').on('show.bs.collapse', function(){
-            $('#body').toggleClass('menu-open');
+            $('#body').addClass('menu-open');
         });
     }
 

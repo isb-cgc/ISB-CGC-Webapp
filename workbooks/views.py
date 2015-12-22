@@ -41,7 +41,7 @@ def workbook(request, workbook_id=0):
 
     if request.method == "POST" :
         if command == "create" :
-            workbook_model = Workbook.createDefault(name="Untitled Workbook", description="this is an untitled workbook. Click Edit Details to change your workbook title and description.", user=request.user)
+            workbook_model = Workbook.createDefault(name="Untitled Workbook", description="", user=request.user)
         elif command == "edit" :
             workbook_model = Workbook.edit(id=workbook_id, name=request.POST.get('name'), description=request.POST.get('description'))
         elif command == "share" :
@@ -98,19 +98,25 @@ def worksheet_display(request, workbook_id=0, worksheet_id=0):
 
 @login_required
 def worksheet(request, workbook_id=0, worksheet_id=0):
-    command  = request.path.rsplit('/',1)[1];
+    command  = request.path.rsplit('/',1)[1]
+    query = ''
 
     if request.method == "POST" :
         if command == "create" :
-            Worksheet.create(workbook_id=workbook_id, name="new", description="add a description")
+            worksheet = Worksheet.create(workbook_id=workbook_id, name=request.POST.get('name'), description=request.POST.get('description'))
+            # query = '#'+ str(worksheet.id)
+            redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet.id})
         elif command == "edit" :
-            Worksheet.edit(id=worksheet_id, name=request.POST.get('name'), description=request.POST.get('description'))
+            worksheet = Worksheet.edit(id=worksheet_id, name=request.POST.get('name'), description=request.POST.get('description'))
+            redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet.id})
         elif command == "copy" :
-            Worksheet.copy(id=worksheet_id)
+            worksheet = Worksheet.copy(id=worksheet_id)
+            redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet.id})
         elif command == "delete" :
             Worksheet.destroy(id=worksheet_id)
+            redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_id})
 
-    redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_id})
+    # redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_id}) + query
     return redirect(redirect_url)
 
 @login_required
