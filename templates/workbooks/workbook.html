@@ -41,9 +41,9 @@
 {% block content %}
 
 <div class="container">
-    <div class="panel panel-default">
+    <div class="panel-invisible" id="worksheets">
          <!-- tabs of worksheets -->
-        <ul class="nav nav-tabs_excel" id="worksheets">
+        <ul class="nav nav-tabs_excel" id="worksheets-tabs">
             <!-- for each worksheet in workbook -->
             {% for worksheet in workbook.worksheets %}
                 {% if forloop.counter < 4 %}
@@ -63,29 +63,41 @@
                          </div>
                          {% endif %}
                     </li>
-                {% elif forloop.counter == 4  %}
-                    <li class="dropdown">
-                        <button class="btn btn-symbol" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-ellipsis-h"></i></button>
-                        <ul class="dropdown-menu">
-                            <li><a href="#{{ worksheet.id }}" data-toggle="tab">{{ worksheet.name }}</a></li>
-                        </ul>
-                    </li>
                 {% endif %}
             {% endfor %}
+            {% if workbook.worksheets|length > 3 %}
+                <li class="dropdown" id="more-tabs">
+                    <button class="btn btn-symbol" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-ellipsis-h"></i></button>
+                    <ul class="dropdown-menu" id="worksheets-dropdown-menu">
+                    {% for worksheet in workbook.worksheets  %}
+                        {% if forloop.counter >= 4 %}
+                        <li class="{% if display_worksheet and display_worksheet.id == worksheet.id %} active {% endif %}">
+                            <a href="#{{ worksheet.id }}" data-toggle="tab">{{ worksheet.name }}</a>
+                            <div class="dropdown">
+                                <a class="dropdown-toggle worksheet-drop" role="button" data-toggle="dropdown"><i class="fa fa-caret-down" ></i></a>
+                                <ul class="dropdown-menu">
+                                    <li role="menuitem"><a data-toggle="modal" role="button" data-target="#edit-worksheet-details-modal-{{ worksheet.id }}">Edit details</a></li>
+                                    <li role="menuitem"><a data-toggle="modal" role="button" data-target="#copy-worksheet-modal-{{ worksheet.id }}">Duplicate</a></li>
+                                    {% if workbook.worksheets|length > 1 %}
+                                    <li role="menuitem"><a data-toggle="modal" role="button" data-target="#delete-worksheet-modal-{{ worksheet.id }}">Delete</a></li>
+                                    {% endif %}
+                                </ul>
+                             </div>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    </ul>
+                </li>
+            {% endif %}
 
             <li>
-                <form id="worksheet_create_form" method="POST" action="{% url 'worksheet_create' workbook_id=workbook.id %}">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-symbol">
-                        <i class="fa fa-plus"></i>
-                    </button>
-                </form>
+                <a data-target="#create-worksheet-modal" data-toggle="modal"><i class="fa fa-plus"></i></a>
             </li>
         </ul>
         <div class="tab-content">
              <!-- for each worksheet in workbook -->
              {% for worksheet in workbook.worksheets %}
-                 <div class="worksheet tab-pane fade {% if forloop.counter == 1 %} in active{% endif %}" id="{{ worksheet.id }}" >
+                 <div class="worksheet tab-pane fade {% if not display_worksheet and forloop.counter == 1 %} in active{% elif display_worksheet and display_worksheet.id == worksheet.id %} in active {% endif %}" id="{{ worksheet.id }}" >
                      <!-- worksheet description -->
                      <div class="worksheet-header">
                          <p>{{worksheet.description}}</p>
@@ -209,6 +221,7 @@
 <script type="text/javascript">
     var base_api_url = '{{ base_api_url|safe }}';
     var base_url = '{{ base_url|safe }}';
+    var display_worksheet = {{ display_worksheet.id|safe }};
 
     //plot specific variables
 {#    var plots_data = {{ plots_data|safe }};#}

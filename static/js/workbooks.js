@@ -33,7 +33,8 @@ require.config({
         science: 'libs/science.min',
         stats: 'libs/science.stats.min',
         vizhelpers: 'helpers/vis_helpers',
-        select2: 'libs/select2.min'
+        select2: 'libs/select2.min',
+        base: 'base'
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -63,7 +64,8 @@ require([
     'visualizations/createBarGraph',
     'select2',
     'assetscore',
-    'assetsresponsive'
+    'assetsresponsive',
+    'base'
 ], function ($, plot_factory, science, stats, session_security) {
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
@@ -166,6 +168,46 @@ require([
         $(this).toggleClass('open');
         $(this).parent().prev('.worksheet-nav').toggleClass('closed');
     })
+
+    // tabs interaction on dropdown selected
+    var tabsList = $('#worksheets-tabs a[data-toggle="tab"]');
+
+    tabsList.on('shown.bs.tab', function(e){
+        var targetTab = $(this).parent();
+        var targetWorksheetNumber = $(this).attr('href');
+
+        if($(this).closest('#more-tabs').length > 0){
+            openTabsfromDropdown(targetTab);
+        }
+        e.preventDefault();
+    })
+
+    function openTabsfromDropdown(target){
+        var lastTabNum = 3;
+        var lastTab = $(tabsList[lastTabNum-1]).parent();
+        var moreTabs = $('#more-tabs');
+        var dropdown = $('#worksheets-dropdown-menu');
+
+        moreTabs.before(target);
+        moreTabs.removeClass('active');
+        lastTab.removeClass('active');
+        dropdown.prepend(lastTab);
+        tabsList = $('#worksheets-tabs a[data-toggle="tab"]');
+    }
+
+
+    // Activate the recent added tab
+    if(display_worksheet){
+        var recentWorksheetTab = $("a[href='#"+ display_worksheet +"']");
+        var recentWorksheetTarget = recentWorksheetTab.parent();
+        //$(tabsList[0]).parent().removeClass('active');
+        if(recentWorksheetTarget.closest('#more-tabs').length > 0){
+            openTabsfromDropdown(recentWorksheetTarget);
+        }
+    }
+
+    //search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id);
+    //search_helper_obj.update_parsets(base_api_url, 'metadata_platform_list', cohort_id);
 
 
     function generatePlot(){

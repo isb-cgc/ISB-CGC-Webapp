@@ -31,7 +31,8 @@ require.config({
         science: 'libs/science.min',
         stats: 'libs/science.stats.min',
         vizhelpers: 'helpers/vis_helpers',
-        select2: 'libs/select2.min'
+        select2: 'libs/select2.min',
+        base: 'base'
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -53,8 +54,10 @@ require([
     'vizhelpers',
     'select2',
     'assetscore',
-    'assetsresponsive'
+    'assetsresponsive',
+    'base'
 ], function($, jqueryui, bootstrap, session_security, d3, d3tip, vizhelpers, histogram) {
+
     A11y.Core();
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms

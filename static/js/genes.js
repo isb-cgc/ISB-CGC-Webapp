@@ -40,7 +40,13 @@ require([
     // Valid gene list
     var genelist = ['PTEN', 'PIK3CA', 'AKT', 'MTOR', 'BRCA1'];
     var geneListField = $('#geneListField');
-    var geneFavs = genes_fav_detail ? genes_fav_detail.genes : [];
+
+    var geneFavs = (genes_fav_detail.length) ? genes_fav_detail.genes : [];
+
+    if(typeof(uploaded_genes)!== 'undefined' && uploaded_genes.length > 0 ){
+        geneFavs = geneFavs.concat(uploaded_list);
+    }
+
     geneListField.tokenfield({
         autocomplete: {
             source: genelist,
@@ -87,7 +93,7 @@ require([
     // Clear all entered genes list on click
     $('#clearAll').on('click', function (event) {
         if($('.tokenfield').hasClass('focus')){
-            // the tokenfield takes enter key and click evnet, and it will trigger the clear all method,
+            // the tokenfield takes enter key and click event, and it will trigger the clear all method,
             // this code checks whether tokenfield is on focus, if yes, it preventDefault and do nothing
             event.preventDefault();
         }else{
@@ -99,16 +105,17 @@ require([
     // Genes upload page
     // Check if the browser support formdata for file upload
     var xhr2 = !! ( window.FormData && ("upload" in ($.ajaxSettings.xhr())  ));
+    var uploaded_list;
     if(!xhr2 || !window.File || !window.FileReader || !window.FileList || !window.Blob){
         var errorMsg = 'Your browser doesn\'t support file upload. You can paste your gene list from the option below.';
-        $('#uploadBtn').attr('disabled', true).parent()
-                       .append('<p class="small">' + errorMsg + '</p>');
+        $('#file-upload-btn').attr('disabled', true).parent()
+                             .append('<p class="small">' + errorMsg + '</p>');
     }else{
         // If file upload is supported
-        var fileUploadField = $('#fileUploadField');
+        var fileUploadField = $('#file-upload-field');
         var validFileTypes = ['txt', 'csv'];
 
-        $('#uploadBtn').click(function(){
+        $('#file-upload-btn').click(function(){
             fileUploadField.click();
         });
         fileUploadField.on('change', function(event){
@@ -117,12 +124,13 @@ require([
 
             // check file format against valid file types
             if(validFileTypes.indexOf(ext) < 0){
+                // If file type is not correct
                 alert('Please upload a .txt or .csv file');
                 return false;
             }else{
-                var $uploadBtn = $('#uploadBtn');
-                var text = $uploadBtn.text();
-                $uploadBtn.addClass('active').prepend("<i class='fa fa-circle-o-notch fa-spin'></i>") ;
+                $('#selected-file-name').text(file.name);
+                $('#uploading').addClass('in');
+                $('#uploadBtn').hide();
             }
 
             if(event.target.files != undefined){
@@ -130,10 +138,9 @@ require([
                 var uploaded_gene_list;
                 fr.onload = function(event){
                     uploaded_gene_list = fr.result.split(/[ \(,\)]+/);
-                    // Delete any repetitive gene
-                    uploaded_gene_list= truncateRepeatGenes(uploaded_gene_list);
+
                     // Send the uploaded gene's list to the backend
-                    // TODO: refactored this validation code out when api is ready
+                    uploaded_list = checkUploadedGeneListAgainstGeneIdentifier(uploaded_gene_list);
 
                 }
                 fr.readAsText(event.target.files.item(0));
@@ -141,6 +148,78 @@ require([
         })
     }
 
+    $('#paste-upload').on('click', function(){
+        var pasted_genes = $($(this).data('target')).val().split(/[ ,]+/);
+
+        uploaded_list = checkUploadedGeneListAgainstGeneIdentifier(pasted_genes);
+        console.log(pasted_genes);
+    })
+    $('#upload-without-error-genes').on('click', function(){
+        genes_upload(uploaded_list.valid);
+    })
+    $('#upload-with-error-genes').on('click', function(){
+        var newlist = $($(this).data('target')).val().split(/[ ,]+/);
+        newlist = uploaded_list.valid.concat(newlist);
+        genes_upload(newlist);
+    })
+    function genes_upload(genes){
+        var csrftoken = get_cookie('csrftoken');
+        $.ajax({
+            type: 'POST',
+            url : base_api_url + '/genes/0/upload/',
+            data: {genes: genes},
+            beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+            success: function (data) {
+
+                window.location = base_api_url + '/genes/0/edit';
+            },
+            error: function(data){
+                console.log(data)
+            }
+        })
+    }
+    /*
+        Used for getting the CORS token for submitting data
+     */
+    function get_cookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    function checkUploadedGeneListAgainstGeneIdentifier(gene_list){
+        // Delete any repetitive genes
+        var genes = truncateRepeatGenes(gene_list);
+        var invalid_genes = [];
+        var valid_genes = [];
+
+        genes.forEach(function(gene){
+            if(genelist.indexOf(gene.toUpperCase()) < 0){
+                invalid_genes.push(gene);
+            }else{
+                valid_genes.push(gene);
+            }
+        })
+        if(invalid_genes.length > 0){
+            //If some genes cannot be identified
+            //hide default upload panel and show error panel
+            $('#error-panel').addClass('in');
+            $('#upload-panel').addClass('collapse');
+            $('#error-genes').text(invalid_genes.join(' '));
+        }else{
+            genes_upload(valid_genes);
+        }
+        return {invalid: invalid_genes, valid: valid_genes}
+    }
     function truncateRepeatGenes(genes){
         var genes_count_object = {};
         genes.forEach(function(gene){

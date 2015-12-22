@@ -20,63 +20,63 @@
 {% block content %}
 <div class="container">
 
-    <section class="panel panel-default">
+    <section class="panel panel-default" id="upload-panel">
         <ul class="nav nav-tabs" role="tablist">
             <li class="active" role="presentation">
-                <a href="#upload-gene-list" data-toggle="tab">Upload A Gene List</a>
-            </li>
-            <li role="presentation">
                 <a href="#paste-gene-list" data-toggle="tab">Paste in A Gene List</a>
             </li>
+            <li role="presentation">
+                <a href="#upload-gene-list" data-toggle="tab">Upload A Gene List</a>
+            </li>
         </ul>
-        <div class="panel-body tab-content">
-            <div class="tab-pane active" id="upload-gene-list">
-                <h4>Upload a gene list from a plain text (ascii) file</h4>
-                <p>Items either space or comma separated</p>
+        <div class="tab-content">
+            <div class="tab-pane panel-body active" id="paste-gene-list">
+                <h4>Paste in a gene list</h4>
+                <p>Items either comma or space separated</p>
 
-                <div id="uploadField">
-                    <button class="btn btn-primary" id="uploadBtn">
+                <div class="form-group">
+                    <textarea name="genes-list" id="paste-in-genes" cols="30" rows="5" class="form-control"></textarea>
+                </div>
+                <div class="page-action-group">
+                    <button class="btn btn-primary" id="paste-upload" data-target="#paste-in-genes">Upload Genes</button>
+                    <button class="btn btn-link" id="clear" data-target="#paste-in-genes">Clear All</button>
+                </div>
+            </div>
+            <div class="tab-pane panel-body" id="upload-gene-list">
+                <h4 class="center">Upload a gene list from a plain text (ascii) file</h4>
+                <p class="center">Items either space or comma separated</p>
+
+                <div id="uploadField" class="center">
+                    <button class="btn btn-primary" id="file-upload-btn">
                         <i class="fa fa-file"></i> Select File
                     </button>
-                    <input type="file" name="upload" id="fileUploadField" style="display: none">
+                    <input type="file" name="upload" id="file-upload-field" style="display: none">
+                    <div id="uploading" class="collapse">
+                        <i class="fa fa-circle-o-notch fa-spin"></i>  <span id="selected-file-name"></span>
+                    </div>
                 </div>
                 <br>
-            </div>
-            <div class="tab-pane" id="paste-gene-list">
-                <h4>Paste in a gene list</h4>
-                <p>strong Items either comma or tab separated</p>
-                <div id="tokenfield-holder">
-                    <input type="text" id="geneListField">
-                </div>
-                <div class="tokenfield">
-                    <p class="helper-text__repeat" style="display: none;"><i class="fa fa-exclamation-circle"></i> <span class="token invalid repeat">Repetitive</span>Genes will be removed on submit </p>
-                    <p class="helper-text__invalid" style="display: none;"><i class="fa fa-exclamation-circle"></i> The following <span class="token invalid">items</span>were not recognized as gene identifiers. You may either correct or delete these items -- or upload them as-is. For corrections, refer to the
-                <a href="">System Gene Identifiers</a>.</p>
-                </div>
             </div>
         </div>
         <!--<div class="panel-footer">-->
             <!--<button class="btn btn-default"><i class="fa fa-upload"></i> Upload Genes</button>-->
         <!--</div>-->
     </section>
-    <section class="panel panel-default collapse">
+    <section class="panel panel-default collapse" id="error-panel">
         <div class="panel-body">
-            <p><i class="fa fa-exclamation-circle"></i> The following items were not recognized as gene identifiers. You may either correct or delete these items -- or upload them as-is. </p>
-            <div id="tokenfield-holder" class="collapse">
-                <input type="text" id="errorGeneListField">
-            </div>
+            <p class="message message-error">The following items were not recognized as gene identifiers. You may either correct or delete these items -- or upload them as-is. For Corrections,
+                <a href="">refer to the System Gene Identifiers</a>.</p>
+            <textarea name="error-genes-list" id="error-genes" cols="30" rows="5" class="form-control"></textarea>
         </div>
         <div class="panel-footer">
-            <button class="btn btn-default">Upload Genes</button>
-            <button class="btn btn-link">Delete items and Continue</button>
+            <button class="btn btn-primary" id="upload-with-error-genes" data-target="#error-genes">Upload Genes</button>
+            <button class="btn btn-link" id="upload-without-error-genes">Delete items and Continue</button>
         </div>
     </section>
 </div>
-<div class="modal">
-    error modal
-</div>
 <script>
     var genes_fav_detail;
+    var base_api_url    = '{{ base_api_url|safe }}';
 </script>
 {% endblock %}
 

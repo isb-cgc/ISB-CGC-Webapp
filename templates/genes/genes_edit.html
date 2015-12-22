@@ -34,7 +34,7 @@
                     <label for="genes-list">Selected Genes (required)</label>
                     <button class="btn btn-link" id="clearAll">Clear All</button>
                     <span> | </span>
-                    <a href="{% url 'genes_upload' %}" class="btn btn-link">Upload Gene List</a>
+                    <a href="{% url 'genes_upload' genes_id %}" class="btn btn-link">Upload Gene List</a>
                     <div id="tokenfield-holder">
                         <input type="text" name="genes-list" class="form-control tokenfield"  id="geneListField"  placeholder="Enter your favorite gene's name" required>
                     </div>
@@ -59,6 +59,7 @@
 </div>
 <script type="text/javascript">
     var genes_fav_detail = {{ genes_detail|safe }};
+//    var uploaded_genes = {{ uploaded_genes|safe }};
 </script>
 {% endblock %}
 
