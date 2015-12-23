@@ -34,14 +34,13 @@ require([
     A11y.Core();
 
     // Menu toggle
-    if($(window).scrollTop() < 10){
-        $('#subnav').on('hide.bs.collapse', function () {
-            $('#body').removeClass('menu-open');
-        });
-        $('#subnav').on('show.bs.collapse', function(){
-            $('#body').addClass('menu-open');
-        });
-    }
+
+    $('#subnav').on('hide.bs.collapse', function () {
+        $('#body').removeClass('menu-open');
+    });
+    $('#subnav').on('show.bs.collapse', function(){
+        $('#body').addClass('menu-open');
+    });
 
     $('.btn').click(function(event){
        var $ripple = $('<span class="btn__ripple"></span>');

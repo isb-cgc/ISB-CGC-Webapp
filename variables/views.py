@@ -100,6 +100,9 @@ def variable_fav_detail(request, variable_fav_id):
             }]
         }
     }
+    variable_fav = VariableFavorite.get_deep(variable_fav_id)
+
+    variable_fav.mark_viewed(request)
     return render(request, template, context)
 
 #called via workbooks for the selected variables to be added to a workbook
