@@ -378,3 +378,7 @@ def about_page(request):
 @login_required
 def dashboard_page(request):
     return render(request, 'GenespotRE/dashboard.html', {'request': request, 'data': 'data'})
+
+@login_required
+def sample_analyses(request):
+    return render(request, 'GenespotRE/sample_analyses.html', {})

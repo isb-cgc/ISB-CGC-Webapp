@@ -18,13 +18,43 @@
 
     <section class="panel panel-default">
         <div class="panel-heading">
-            <p>Sample Analyses can be customized with the specific data you want to analyze.</p>
+            <p><a href="{% url 'sample_analyses' %}">Sample Analyses</a> can be customized with the specific data you want to analyze. Start a new workbook with an analysis below.</p>
         </div>
         <div class="panel-body">
-            <ul class="card-list">
-                <li>
-                    <img src="">
-                    <p>Analysis Name</p>
+            <ul class="analysis-list">
+                <li class="analysis">
+                    <!--TODO: get bar chart-->
+                    <img src="{% static 'img/histogram.png' %}">
+                    <p>Bar Chart</p>
+                </li>
+                <li class="analysis">
+                    <!--TODO: get bar chart-->
+                    <img src="{% static 'img/histogram.png' %}">
+                    <p>Histogram</p>
+                </li>
+                <li class="analysis">
+                    <!--TODO: get bar chart-->
+                    <img src="{% static 'img/histogram.png' %}">
+                    <p>Scatter Plot</p>
+                </li>
+                <li class="analysis">
+                    <!--TODO: get bar chart-->
+                    <img src="{% static 'img/histogram.png' %}">
+                    <p>Violin Plot</p>
+                </li>
+                <li class="analysis">
+                    <!--TODO: get bar chart-->
+                    <img src="{% static 'img/histogram.png' %}">
+                    <p>Violin Plot 2</p>
+                </li>
+                <li class="analysis">
+                    <!--TODO: get bar chart-->
+                    <img src="{% static 'img/histogram.png' %}">
+                    <p>Cubby Hole</p>
+                </li>
+                <li class="analysis">
+                    <img src="{% static 'img/histogram.png' %}" alt="">
+                    <p>SeqPeak</p>
                 </li>
             </ul>
         </div>
