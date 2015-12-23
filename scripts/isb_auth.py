@@ -1,5 +1,4 @@
-"""
-
+'''
 Copyright 2015, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,12 +13,43 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-Script to authenticate users accessing endpoint APIs from the command line.
-Step 1: user runs $ ./isb_auth.py which saves the user's credentials to their root directory
-Step 2: user runs $ ./isb_curl.py https://isb-cgc.appspot.com/_ah/api/{endpoint api name e.g. cohort_api}/{endpoint version e.g. v1}/{endpoint name e.g. cohorts_list}
-Code from William Forson wdf@google.com
+Authenticates user for accessing the ISB-CGC Endpoint APIs.
 
-"""
+May be run from the command line or in scripts/ipython.
+
+The credentials file can be copied to any machine from which you want
+to access the API.  The token can also be used directly.
+
+1. cmd line -- saves FILE                                   
+   python ./isb_auth.py          saves the user's credentials;
+                      OPTIONAL:
+                         -v       for verbose (returns token!)
+                         -s FILE  sets credentials file [default: ~/.isb_credentials]
+                         -u       URL-only: for use over terminal connections;
+                                  gives user a URL to paste into their browser,
+                                  and asks for an auth code in return
+
+
+2. script/ipython -- returns a credentials object; token can be used as an
+                     argument to some endpoints URLs in the CGC APIs.
+   import isb_auth
+   token = isb_auth.get_credentials().access_token
+
+
+3. Google Cloud Datalab -- run locally, on your home machine:
+   python ./isb_auth.py -v
+
+   Generates something like:
+   --verbose: printing extra information
+   credentials stored in /path/to/.isb_credentials
+   access_token: ya29.IAPODVRzyo1ew9T...    >------+-- Copy & Paste this into datalab
+   ...                                             |
+                                                   |
+   datalab> token = 'ya29.IAPODVRzyo1ew9T...'  <---+
+
+
+   See isb_curl.py help header for more information.
+'''
 
 from argparse import ArgumentParser
 import os
@@ -44,7 +74,12 @@ def maybe_print(msg):
         print msg
 
 
-def get_credentials(storage, oauth_flow_args=[]):
+def get_credentials(storage=None, oauth_flow_args=[]):
+    noweb = '--noauth_local_webserver'
+    if __name__ != '__main__' and noweb not in oauth_flow_args:
+        oauth_flow_args.append(noweb)
+    if storage is None:
+        storage = Storage(DEFAULT_STORAGE_FILE)
     credentials = storage.get()
     if not credentials or credentials.invalid:
         maybe_print('credentials missing/invalid, kicking off OAuth flow')
@@ -61,21 +96,19 @@ def main():
     VERBOSE = args.verbose
     maybe_print('--verbose: printing extra information')
     storage = Storage(args.storage_file)
-    credentials = get_credentials(storage, oauth_flow_args=oauth_flow_args)
+    credentials = get_credentials(storage, oauth_flow_args)
     maybe_print('credentials stored in ' + args.storage_file)
     maybe_print('access_token: ' + credentials.access_token)
     maybe_print('refresh_token: ' + credentials.refresh_token)
-
+    return credentials
 
 def parse_args():
     parser = ArgumentParser()
     parser.add_argument('--storage_file', '-s', default=DEFAULT_STORAGE_FILE, help='storage file to use for the credentials (default is {})'.format(DEFAULT_STORAGE_FILE))
     parser.add_argument('--verbose', '-v', dest='verbose', action='store_true', help='display credentials storage location, access token, and refresh token')
     parser.set_defaults(verbose=False)
-    parser.add_argument('--noauth_local_webserver', action='store_const', const='--noauth_local_webserver')
-
+    parser.add_argument('--noauth_local_webserver','-u', action='store_const', const='--noauth_local_webserver')
     return parser.parse_args()
 
-
 if __name__ == '__main__':
-  main()
+  credentials = main()
