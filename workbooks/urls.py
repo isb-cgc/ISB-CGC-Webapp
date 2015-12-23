@@ -13,6 +13,12 @@ urlpatterns = patterns('',
     url(r'^(?P<workbook_id>\d+)/share$',    views.workbook, name='workbook_share'),
     url(r'^(?P<workbook_id>\d+)/copy$',     views.workbook, name='workbook_copy'),
 
+    url(r'^(?P<workbook_id>\d+)/worksheets/create_with_project$',           views. workbook_create_with_project,    name='worksheet_create_with_variables'),
+    url(r'^(?P<workbook_id>\d+)/worksheets/create_with_genes$',             views. workbook_create_with_genes,      name='worksheet_create_with_genes'),
+    url(r'^(?P<workbook_id>\d+)/worksheets/create_with_variables$',         views. workbook_create_with_variables,  name='worksheet_create_with_variables'),
+    url(r'^(?P<workbook_id>\d+)/worksheets/create_with_cohort$',            views. workbook_create_with_cohort,     name='worksheet_create_with_cohort'),
+    url(r'^(?P<workbook_id>\d+)/worksheets/create_with_analysis$',          views. workbook_create_with_analysis,   name='worksheet_create_with_analysis'),
+
     url(r'^(?P<workbook_id>\d+)/worksheets/create$',                        views.worksheet, name='worksheet_create'),
     url(r'^(?P<workbook_id>\d+)/worksheets/(?P<worksheet_id>\d+)/$',        views.worksheet_display, name='worksheet_display'),
     url(r'^(?P<workbook_id>\d+)/worksheets/(?P<worksheet_id>\d+)/copy$',    views.worksheet, name='worksheet_copy'),
