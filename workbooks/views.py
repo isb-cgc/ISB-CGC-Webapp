@@ -89,6 +89,8 @@ def workbook(request, workbook_id=0):
             workbook_model = Workbook.deep_get(id=workbook_id)
             workbook_model.mark_viewed(request)
 
+            workbook_model.mark_viewed(request)
+
             plot_types = [{'name' : 'Bar Chart'},
                           {'name' : 'Histogram'},
                           {'name' : 'Scatter Plot'},

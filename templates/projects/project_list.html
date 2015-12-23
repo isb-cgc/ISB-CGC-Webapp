@@ -56,7 +56,7 @@
                                 </div>
                             </td>
                             <td class="name-col"><a href="{% url 'project_detail' project.id %}">{{ project.name }}</a></td>
-                            <td>{{ project.study_set.count }}</td>
+                            <td>{{ project.study_set.all|active|length }}</td>
                             <td>{% if project.owner.id == user.id %}
                                 You
                             {% else %}
@@ -64,8 +64,7 @@
                             {% endif %}</td>
                             <td>({{ project.shared.count }})</td>
                             <td>{{ project.last_date_saved|date:"SHORT_DATETIME_FORMAT" }}</td>
-                        {% for study in project.study_set.all %}
-                        {% if study.active %}
+                        {% for study in project.study_set.all|active %}
                         </tr>
                         <tr class="study hidden" data-project-id="{{ project.id }}">
                             <td class="control-col">
@@ -83,7 +82,6 @@
                             <td></td>
                             <td></td>
                             <td>{{ study.last_date_saved|date:"SHORT_DATETIME_FORMAT" }}</td>
-                        {% endif %}
                         {% endfor %}
                         </tr>
                         {% endfor %}

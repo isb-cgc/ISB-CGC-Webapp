@@ -10,7 +10,7 @@ urlpatterns = patterns('',
     url(r'^(?P<workbook_id>\d+)/$',         views.workbook, name='workbook_detail'),
     url(r'^(?P<workbook_id>\d+)/edit$',     views.workbook, name='workbook_edit'),
     url(r'^(?P<workbook_id>\d+)/delete$',   views.workbook, name='workbook_delete'),
-    url(r'^(?P<workbook_id>\d+)/share$',    views.workbook, name='workbook_share'),
+    #url(r'^(?P<workbook_id>\d+)/share$',    views.workbook, name='workbook_share'),
     url(r'^(?P<workbook_id>\d+)/copy$',     views.workbook, name='workbook_copy'),
 
     url(r'^(?P<workbook_id>\d+)/worksheets/create_with_project$',           views. workbook_create_with_project,    name='worksheet_create_with_projects'),

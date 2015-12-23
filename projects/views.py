@@ -40,14 +40,15 @@ def project_detail(request, project_id=0):
 
     ownedProjects = request.user.project_set.all().filter(active=True)
     sharedProjects = Project.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
+    publicProjects = Project.objects.all().filter(is_public=True,active=True)
 
-    projects = ownedProjects | sharedProjects
+    projects = ownedProjects | sharedProjects | publicProjects
     projects = projects.distinct()
 
     proj = projects.get(id=project_id)
 
     shared = None
-    if proj.owner.id != request.user.id:
+    if proj.owner.id != request.user.id and not proj.is_public:
         shared = request.user.shared_resource_set.get(project__id=project_id)
 
     proj.mark_viewed(request)

@@ -20,19 +20,14 @@
     <p>{{ workbook.description }}</p>
     <ul class="page-action-group">
         {% if workbook.owner.id == request.user.id %}
-        <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#edit-workbook-details-modal">Edit Details</button></li>
-        <li role="menuiem"><button class="btn btn-info" data-toggle="modal" data-target="#copy-workbook-modal">Duplicate</button></li>
-        <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#delete-workbook-modal">Delete</button></li>
-        <li class="separator"></li>
-        <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#share-workbook-modal">Share</button></li>
-        <li role="menuitem"><button class="btn btn-link" data-toggle="modal" data-target="#share-workbook-modal">Shared with ({{ workbook.shares | length }})</button></li>
+        <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#edit-workbook-details-modal-{{ workbook.id }}">Edit Details</button></li>
+        <li role="menuiem"><button class="btn btn-info" data-toggle="modal" data-target="#copy-workbook-modal-{{ workbook.id }}">Duplicate</button></li>
+        <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#delete-workbook-modal-{{ workbook.id }}">Delete</button></li>
         {% else %}
-        <li><h5>Owner: {{ workbook.owner.first_name|title }} {{ workbook.owner.last_name|title }}</h5></li>
+        {# Is a public workbook #}
+        <li><em>Public Workbook</em></li>
         <li class="separator"></li>
-        <li role="menuiem"><button class="btn btn-info" data-toggle="modal" data-target="#copy-workbook-modal">Duplicate</button></li>
-        <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#delete-workbook-modal">Remove</button></li>
-        <li class="separator"></li>
-        <li role="menuitem"><button class="btn btn-link" data-toggle="modal" data-target="#share-workbook-modal">Shared with ({{ workbook.shares | length }})</button></li>
+        <li role="menuiem"><button class="btn btn-info" data-toggle="modal" data-target="#copy-workbook-modal-{{ workbook.id }}">Duplicate</button></li>
         {% endif %}
 
     </ul>

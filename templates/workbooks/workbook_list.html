@@ -43,14 +43,11 @@
                                     <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
                                     <ul class="dropdown-menu">
                                         {% if workbook.owner.id == user.id %}
-                                            <li><a href="{% url 'workbook_detail' workbook.id %}">Edit</a> </li>
-                                            <li><a href="">Duplicate</a> </li> <!-- make me into a modal -->
-                                            <li><a role="button">Delete</a></li> <!-- make me into a modal -->
-                                            <hr>
-                                            <li><a href="">Share</a></li> <!-- make me into a modal -->
+                                            <li><a data-toggle="modal" data-target="#edit-workbook-details-modal-{{ workbook.id }}">Edit</a> </li>
+                                            <li><a data-toggle="modal" data-target="#copy-workbook-modal-{{ workbook.id }}">Duplicate</a> </li>
+                                            <li><a data-toggle="modal" data-target="#delete-workbook-modal-{{ workbook.id }}">Delete</a></li>
                                         {% else  %}
-                                            <li><a href="{% url 'workbook_detail' workbook.id %}">Duplicate</a> </li>
-                                            <li><a href="">Remove</a> </li> <!-- make me into a modal -->
+                                            <li><a data-toggle="modal" data-target="#copy-workbook-modal-{{ workbook.id }}">Duplicate</a> </li>
                                         {% endif %}
                                     </ul>
                                 </div>
@@ -64,6 +61,9 @@
                     {% endfor %}
                 </tbody>
             </table>
+            {% for workbook in workbooks %}
+                {% include 'workbooks/workbook_modals.html' %}
+            {% endfor %}
             {% else %}
                 <p>You don't have any saved workbooks yet</p>
             {% endif %}
@@ -73,7 +73,7 @@
 
 {% endblock %}
 
-{% block js_file %}{% static 'js/dashboard.js' %}{% endblock %}
+{% block js_file %}{% static 'js/workbooks_list.js' %}{% endblock %}
 
 
 
