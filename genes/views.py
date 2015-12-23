@@ -54,10 +54,8 @@ def genes_list_edit(request, genes_id=0):
     template = 'genes/genes_edit.html'
     context = {
         'genes_id': genes_id,
-        'genes_detail': [],
-        # 'uploaded_genes': json.dumps(request.session['uploaded_genes'])
+        'genes_detail': '',
     }
-    # print request.session['uploaded_genes']
 
     if(genes_id != 0):
         try:
@@ -74,16 +72,10 @@ def genes_list_edit(request, genes_id=0):
 @login_required
 def genes_upload(request, genes_id=0):
     template = 'genes/genes_upload.html'
-    context = {}
+    context = {
+        'genes_id': genes_id,
+        'genes_detail': '',
+    }
 
-    # Use request.session to pass uploaded genes back to genes
-    request.session['uploaded_genes'] = []
 
-    print request.session['uploaded_genes']
-
-    if request.method == "POST" :
-        print request.POST
-        request.session['uploaded_genes'] = request.POST.getlist('genes[]')
-        return redirect(reverse('edit_genes_list', kwargs={'genes_id': 0}))
-    else:
-        return render(request, template, context)
+    return render(request, template, context)

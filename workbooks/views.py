@@ -87,6 +87,7 @@ def workbook(request, workbook_id=0):
     elif request.method == "GET" :
         if workbook_id:
             workbook_model = Workbook.deep_get(id=workbook_id)
+            workbook_model.mark_viewed(request)
 
             workbook_model.mark_viewed(request)
 
@@ -108,6 +109,7 @@ def workbook(request, workbook_id=0):
 def worksheet_display(request, workbook_id=0, worksheet_id=0):
     template = 'workbooks/workbook.html'
     workbook_model = Workbook.deep_get(workbook_id)
+    workbook_model.mark_viewed(request)
 
     for worksheet in workbook_model.worksheets:
         if str(worksheet.id) == worksheet_id :
