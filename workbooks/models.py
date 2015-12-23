@@ -22,6 +22,7 @@ class Workbook(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     last_date_saved = models.DateTimeField(auto_now_add=True)
     objects = WorkbookManager()
+    is_public = models.BooleanField(default=False)
 
     @classmethod
     def deep_get(cls, id):
