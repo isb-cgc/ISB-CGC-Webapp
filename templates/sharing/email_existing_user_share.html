@@ -18,7 +18,7 @@
                 </p>
                 <p style="padding:0px 15px;text-indent:1.2em">
                     {{ shared_by.first_name }} {{ shared_by.last_name }} wanted to share a {{ type|lower }} with you.
-                    You've been added to the <a href="{% url detail_page item.id %}" style="font-weight:bold">{{ item.name }}</a>
+                    You've been added to the <a href="{{ shared_url }}" style="font-weight:bold">{{ item.name }}</a>
                     {{ type|lower }}. You can now view this {{ type|lower }} on the site from your {{ type|lower }} page
                     or by clicking the link.
                 </p>

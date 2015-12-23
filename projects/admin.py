@@ -29,6 +29,7 @@ class Project_Admin(admin.ModelAdmin):
         'owner',
         'is_public'
     )
+    exclude = ('shared',)
 
 class Study_Admin(admin.ModelAdmin):
     list_display = (
