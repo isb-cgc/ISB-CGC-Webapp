@@ -41,7 +41,7 @@ require([
     var genelist = ['PTEN', 'PIK3CA', 'AKT', 'MTOR', 'BRCA1'];
     var geneListField = $('#geneListField');
 
-    var geneFavs = (genes_fav_detail.length) ? genes_fav_detail.genes : [];
+    var geneFavs = (genes_fav_detail) ? genes_fav_detail.genes : [];
 
     if(typeof(uploaded_genes)!== 'undefined' && uploaded_genes.length > 0 ){
         geneFavs = geneFavs.concat(uploaded_list);
@@ -102,7 +102,7 @@ require([
         return false;
     });
 
-    // Genes upload page
+    // Genes upload page, file upload button onclick
     // Check if the browser support formdata for file upload
     var xhr2 = !! ( window.FormData && ("upload" in ($.ajaxSettings.xhr())  ));
     var uploaded_list;
@@ -137,7 +137,7 @@ require([
                 var fr = new FileReader();
                 var uploaded_gene_list;
                 fr.onload = function(event){
-                    uploaded_gene_list = fr.result.split(/[ \(,\)]+/);
+                    uploaded_gene_list = fr.result.split(/[ \(,\)]+/).filter(Boolean);
 
                     // Send the uploaded gene's list to the backend
                     uploaded_list = checkUploadedGeneListAgainstGeneIdentifier(uploaded_gene_list);
@@ -149,35 +149,28 @@ require([
     }
 
     $('#paste-upload').on('click', function(){
-        var pasted_genes = $($(this).data('target')).val().split(/[ ,]+/);
+        var pasted_genes = $($(this).data('target')).val().split(/[ ,]+/).filter(Boolean);
 
         uploaded_list = checkUploadedGeneListAgainstGeneIdentifier(pasted_genes);
         console.log(pasted_genes);
     })
+
+    $('#clear-paste-upload').on('click', function(){
+        $('#paste-in-genes').val('');
+    })
     $('#upload-without-error-genes').on('click', function(){
-        genes_upload(uploaded_list.valid);
+        // upload valid gene list
+        // uploaded_list.valid
+        console.log(uploaded_list.valid);
     })
     $('#upload-with-error-genes').on('click', function(){
-        var newlist = $($(this).data('target')).val().split(/[ ,]+/);
+        var newlist = $($(this).data('target')).val().split(/[ ,]+/).filter(Boolean);
         newlist = uploaded_list.valid.concat(newlist);
-        genes_upload(newlist);
-    })
-    function genes_upload(genes){
-        var csrftoken = get_cookie('csrftoken');
-        $.ajax({
-            type: 'POST',
-            url : base_api_url + '/genes/0/upload/',
-            data: {genes: genes},
-            beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
-            success: function (data) {
 
-                window.location = base_api_url + '/genes/0/edit';
-            },
-            error: function(data){
-                console.log(data)
-            }
-        })
-    }
+        // Upload newlist
+        console.log(uploaded_list.valid);
+    })
+
     /*
         Used for getting the CORS token for submitting data
      */

@@ -113,10 +113,13 @@
                     <p>You can upload from your own research projects.</p>
                     {% if user.project_last_view_set.all|active:'project'|length > 0 %}
                     <ul>
-                        {% for plv in user.project_last_view_set.all|active:'project' %}
+                        {% for plv in user.project_last_view_set.all|active:'project'|slice:'6' %}
                            <li><a href="{% url 'project_detail' plv.project.id %}">{{ plv.project.name }}</a></li>
                         {% endfor %}
                     </ul>
+                    {% endif %}
+                    {% if user.project_last_view_set.all|active:'project'|length > 6 %}
+                        <a href="{% url 'project_list' %}">View All</a>
                     {% endif %}
                 </div>
                 <div class="panel-footer">
