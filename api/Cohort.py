@@ -40,6 +40,8 @@ logger = logging.getLogger(__name__)
 
 INSTALLED_APP_CLIENT_ID = settings.INSTALLED_APP_CLIENT_ID
 CONTROLLED_ACL_GOOGLE_GROUP = settings.ACL_GOOGLE_GROUP
+DCC_CONTROLLED_DATA_BUCKET = settings.DCC_CONTROLLED_DATA_BUCKET
+CGHUB_CONTROLLED_DATA_BUCKET = settings.CGHUB_CONTROLLED_DATA_BUCKET
 
 DEFAULT_COHORT_NAME = 'Untitled Cohort'
 
@@ -815,11 +817,10 @@ class Cohort_Endpoints_API(remote.Service):
                         datafilenamekeys.append("gs://{}{}".format(settings.OPEN_DATA_BUCKET, file_path))
                     elif dbGaP_authorized:
                         bucket_name = ''
-                        # hard-coding mock bucket names for now --testing purposes only
                         if row['Repository'].lower() == 'dcc':
-                            bucket_name = 'gs://62f2c827-mock-mock-mock-1cde698a4f77'
+                            bucket_name = 'gs://{}'.format(DCC_CONTROLLED_DATA_BUCKET)
                         elif row['Repository'].lower() == 'cghub':
-                            bucket_name = 'gs://360ee3ad-mock-mock-mock-52f9a5e7f99a'
+                            bucket_name = 'gs://{}'.format(CGHUB_CONTROLLED_DATA_BUCKET)
                         datafilenamekeys.append("{}{}".format(bucket_name, file_path))
 
                 return DataFileNameKeyList(datafilenamekeys=datafilenamekeys, count=len(datafilenamekeys))
@@ -1114,11 +1115,11 @@ class Cohort_Endpoints_API(remote.Service):
                     datafilenamekeys.append("gs://{}{}".format(settings.OPEN_DATA_BUCKET, file_path))
                 elif dbGaP_authorized:
                     bucket_name = ''
-                    # hard-coding mock bucket names for now --testing purposes only
+
                     if row['Repository'].lower() == 'dcc':
-                        bucket_name = 'gs://62f2c827-mock-mock-mock-1cde698a4f77'
+                        bucket_name = 'gs://{}'.format(DCC_CONTROLLED_DATA_BUCKET)
                     elif row['Repository'].lower() == 'cghub':
-                        bucket_name = 'gs://360ee3ad-mock-mock-mock-52f9a5e7f99a'
+                        bucket_name = 'gs://{}'.format(CGHUB_CONTROLLED_DATA_BUCKET)
                     datafilenamekeys.append("{}{}".format(bucket_name, file_path))
 
             return DataFileNameKeyList(datafilenamekeys=datafilenamekeys, count=len(datafilenamekeys))
