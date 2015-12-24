@@ -25,26 +25,30 @@
         </div>
         <div class="panel-body collapse in" id="analysis-body">
             <ul>
-                <li class="item">
+                <div class="clearfix">
+                    <li class="item">
                     <!--TODO: get bar chart-->
-                    <img class="img-fluid" src="{% static 'img/histogram.png' %}">
-                    <p>Bar Chart</p>
-                </li>
-                <li class="item">
-                    <img class="img-fluid" src="{% static 'img/histogram.png' %}">
-                    <p>Histogram</p>
-                </li>
-                <li class="item">
-                    <!--TODO: get bar chart-->
-                    <img class="img-fluid" src="{% static 'img/scatter-plot.png' %}">
-                    <p>Scatter Plot</p>
-                </li>
-                <li class="item">
-                    <!--TODO: get bar chart-->
-                    <img class="img-fluid" src="{% static 'img/violin-plot.png' %}">
-                    <p>Violin Plot</p>
-                </li>
-                <div class="more">
+                        <img class="img-fluid" src="{% static 'img/histogram.png' %}">
+                        <p>Bar Chart</p>
+                    </li>
+                    <li class="item">
+                        <img class="img-fluid" src="{% static 'img/histogram.png' %}">
+                        <p>Histogram</p>
+                    </li>
+                    <li class="item">
+                        <!--TODO: get bar chart-->
+                        <img class="img-fluid" src="{% static 'img/scatter-plot.png' %}">
+                        <p>Scatter Plot</p>
+                    </li>
+                    <li class="item">
+                        <!--TODO: get bar chart-->
+                        <img class="img-fluid" src="{% static 'img/violin-plot.png' %}">
+                        <p>Violin Plot</p>
+                    </li>
+                </div>
+
+
+                <div class="collapse clearfix" id="more-analysis">
                     <li class="item">
                         <!--TODO: get bar chart-->
                         <img class="img-fluid" src="{% static 'img/histogram.png' %}">
@@ -60,6 +64,7 @@
                         <p>SeqPeak</p>
                     </li>
                 </div>
+                <p class="center"><a class="btn btn-link" data-target="#more-analysis" data-toggle="collapse">Show More</a></p>
             </ul>
         </div>
     </section>

@@ -40,4 +40,10 @@ require([
     $('.modal').on('hide.bs.modal', function() {
         $(this).find('form')[0].reset();
     });
+
+    $('#more-analysis').on('show.bs.collapse', function(){
+        $('a[data-target="#more-analysis"]').text('Show Less');
+    }).on('hide.bs.collapse', function(){
+        $('a[data-target="#more-analysis"]').text('Show More');
+    })
 });
