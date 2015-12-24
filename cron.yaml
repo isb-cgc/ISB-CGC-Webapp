@@ -32,3 +32,6 @@ cron:
 - description: Admin Directory API logging
   url: /tasks/create_and_log_reports
   schedule: every 24 hours
+- description: log ACL changes on buckets
+  url: /tasks/log_acls
+  schedule: every 1 minutes

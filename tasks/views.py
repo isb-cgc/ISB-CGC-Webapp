@@ -475,3 +475,53 @@ def create_and_log_reports(request):
             write_log_entry('apps_{}_activity_report'.format(application_name), resp)
 
     return HttpResponse('')
+
+
+# list_buckets, get_bucket_acl, and get_bucket_defacl are all used by log_acls
+def list_buckets(client, project_id):
+    """gets all buckets in the project"""
+    req = client.buckets().list(
+        project=project_id,
+        maxResults=42)
+    bucket_info = []
+    while req is not None:
+        resp = req.execute()
+        for bucket in resp['items']:
+            bucket_info.append(bucket)
+        req = client.buckets().list_next(req, resp)
+    return bucket_info
+
+def get_bucket_acl(client, bucket_name):
+    """get the bucket acl"""
+    req = client.bucketAccessControls().list(
+        bucket=bucket_name,
+    )
+    resp = req.execute()
+    return resp
+
+def get_bucket_defacl(client, bucket_name):
+    """get the bucket defacl"""
+    req = client.defaultObjectAccessControls().list(
+        bucket=bucket_name,
+    )
+    resp = req.execute()
+    return resp
+
+def log_acls(request):
+    """log acls"""
+    client = get_storage_resource()
+    all_projects = ['isb-cgc', 'isb-cgc-data-01', 'isb-cgc-data-02', 'isb-cgc-test']
+    acls = {}
+    defacls = {}
+    # Iterate through projects and buckets and get acls
+    for project in all_projects:
+        for bucket in list_buckets(client, project):
+            acl = get_bucket_acl(client, bucket['name'])
+            defacl = get_bucket_defacl(client, bucket['name'])
+            acls[bucket['name']] = acl
+            defacls[bucket['name']] = defacl
+    # write log entry
+    write_log_entry('bucket_acls', acls)
+    write_log_entry('bucket_defacls', defacls)
+
+    return HttpResponse('')

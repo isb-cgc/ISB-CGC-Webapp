@@ -1446,14 +1446,14 @@ class Meta_Endpoints_API(remote.Service):
         if request.__getattribute__('limit') is not None:
             limit = request.limit
 
-        platform_count_query = 'select Platform, count(Platform) as platform_count from metadata_data where SampleBarcode in (select sample_id from cohorts_samples where cohort_id=%s) and DatafileUploaded="true" '
-        query = 'select SampleBarcode, DatafileName, DatafileNameKey, Pipeline, Platform, DataLevel, Datatype, GG_readgroupset_id from metadata_data where SampleBarcode in (select sample_id from cohorts_samples where cohort_id=%s) and DatafileUploaded="true" '
+        platform_count_query = 'select Platform, count(Platform) as platform_count from cohorts_samples cs join metadata_data md on md.SampleBarcode = cs.sample_id where cohort_id=%s and DatafileUploaded="true" '
+        query = 'select SampleBarcode, DatafileName, DatafileNameKey, Pipeline, Platform, DataLevel, Datatype, GG_readgroupset_id from metadata_data md join cohorts_samples cs on md.SampleBarcode = cs.sample_id where cohort_id=%s and DatafileUploaded="true" '
 
         if not is_dbGaP_authorized:
-            platform_count_query += ' and SecurityProtocol="dbGap open-access" group by Platform;'
+            platform_count_query += ' and SecurityProtocol="dbGap open-access" group by Platform order by cs.sample_id;'
             query += ' and SecurityProtocol="dbGap open-access" '
         else:
-            platform_count_query += ' group by Platform;'
+            platform_count_query += ' group by Platform order by cs.sample_id;'
 
         # Check for incoming platform selectors
         platform_selector_list = []
@@ -1484,7 +1484,11 @@ class Meta_Endpoints_API(remote.Service):
             count = 0
             if cursor.rowcount > 0:
                 for row in cursor.fetchall():
-                    count += int(row['platform_count'])
+                    if len(platform_selector_list):
+                        if row['Platform'] in platform_selector_list:
+                            count += int(row['platform_count'])
+                    else:
+                        count += int(row['platform_count'])
                     platform_count_list.append(PlatformCount(platform=row['Platform'], count=row['platform_count']))
             else:
                 platform_count_list.append(PlatformCount(platform='None', count=0))
@@ -1497,15 +1501,13 @@ class Meta_Endpoints_API(remote.Service):
                         file_list.append(FileDetails(sample=item['SampleBarcode'], cloudstorage_location=item['DatafileNameKey'], filename=item['DatafileName'], pipeline=item['Pipeline'], platform=item['Platform'], datalevel=item['DataLevel'], datatype=item['Datatype'], gg_readgroupset_id=item['GG_readgroupset_id']))
                 else:
                     file_list.append(FileDetails(sample='None', filename='', pipeline='', platform='', datalevel=''))
-            cursor.close()
-            db.close()
             return SampleFiles(total_file_count=count, page=page, platform_count_list=platform_count_list, file_list=file_list)
 
         except (IndexError, TypeError):
+            raise endpoints.ServiceException('Error getting counts')
+        finally:
             if cursor: cursor.close()
             if db: db.close()
-            raise endpoints.ServiceException('Error getting counts')
-
 
     GET_RESOURCE = endpoints.ResourceContainer(sample_id=messages.StringField(1, required=True))
     @endpoints.method(GET_RESOURCE, SampleFiles,

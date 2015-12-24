@@ -303,16 +303,15 @@ class Cohort_Endpoints_API(remote.Service):
                         parent_id=None if row['parent_id'] is None else int(row['parent_id']),
                         filters=filter_data
                     ))
-                cursor.close()
-                if filter_cursor: filter_cursor.close()
-                db.close()
+
                 return CohortsList(items=data, count=len(data))
             except (IndexError, TypeError) as e:
-                if cursor: cursor.close()
-                if filter_cursor: filter_cursor.close()
-                if db: db.close()
                 raise endpoints.NotFoundException(
                     "User {}'s cohorts not found. {}: {}".format(user_email, type(e), e))
+            finally:
+                if cursor: cursor.close()
+                if filter_cursor: filter_cursor.close()
+                if db and db.open: db.close()
         else:
             raise endpoints.UnauthorizedException("Authentication failed.")
 
@@ -367,13 +366,13 @@ class Cohort_Endpoints_API(remote.Service):
                     return CohortPatientsSamplesList(error=error_message, patients=[],
                                                      patient_count=None, samples=[],
                                                      sample_count=None, cohort_id=None)
-                cursor.close()
-                db.close()
+
             except (IndexError, TypeError) as e:
                 logger.warn(e)
-                if cursor: cursor.close()
-                if db: db.close()
                 raise endpoints.NotFoundException("Cohort {} not found.".format(cohort_id))
+            finally:
+                if cursor: cursor.close()
+                if db and db.open: db.close()
 
             patient_query_str = 'select cohorts_patients.patient_id ' \
                         'from cohorts_patients ' \
@@ -414,8 +413,7 @@ class Cohort_Endpoints_API(remote.Service):
                 sample_data = []
                 for row in cursor.fetchall():
                     sample_data.append(row['sample_id'])
-                cursor.close()
-                db.close()
+
                 return CohortPatientsSamplesList(patients=patient_data,
                                                  patient_count=len(patient_data),
                                                  samples=sample_data,
@@ -423,9 +421,10 @@ class Cohort_Endpoints_API(remote.Service):
                                                  cohort_id=int(cohort_id))
             except (IndexError, TypeError) as e:
                 logger.warn(e)
-                if cursor: cursor.close()
-                if db: db.close()
                 raise endpoints.NotFoundException("Cohort {} not found.".format(cohort_id))
+            finally:
+                if cursor: cursor.close()
+                if db and db.open: db.close()
 
         else:
             raise endpoints.UnauthorizedException("Authentication failed.")
@@ -546,17 +545,14 @@ class Cohort_Endpoints_API(remote.Service):
             for row in aliquot_cursor.fetchall():
                 aliquot_data.append(row['AliquotBarcode'])
 
-            clinical_cursor.close()
-            sample_cursor.close()
-            aliquot_cursor.close()
-            db.close()
             return PatientDetails(clinical_data=item, samples=sample_data, aliquots=aliquot_data)
         except (IndexError, TypeError), e:
+            raise endpoints.NotFoundException("Patient {} not found.".format(patient_barcode))
+        finally:
             if clinical_cursor: clinical_cursor.close()
             if sample_cursor: sample_cursor.close()
             if aliquot_cursor: aliquot_cursor.close()
-            if db: db.close()
-            raise endpoints.NotFoundException("Patient {} not found.".format(patient_barcode))
+            if db and db.open: db.close()
 
 
     GET_RESOURCE = endpoints.ResourceContainer(sample_barcode=messages.StringField(1, required=True),
@@ -714,31 +710,27 @@ class Cohort_Endpoints_API(remote.Service):
                 )
                 data_data.append(data_item)
 
-            biospecimen_cursor.close()
-            aliquot_cursor.close()
-            patient_cursor.close()
-            data_cursor.close()
-            db.close()
-
             return SampleDetails(biospecimen_data=item, aliquots=aliquot_data,
                                  patient=patient_barcode, data_details=data_data,
                                  data_details_count=len(data_data))
 
         except (IndexError, TypeError) as e:
             logger.warn(e)
+            raise endpoints.NotFoundException("Sample details for barcode {} not found".format(sample_barcode))
+        finally:
             if biospecimen_cursor: biospecimen_cursor.close()
             if aliquot_cursor: aliquot_cursor.close()
             if patient_cursor: patient_cursor.close()
             if data_cursor: data_cursor.close()
-            if db: db.close()
-            raise endpoints.NotFoundException("Sample details for barcode {} not found".format(sample_barcode))
+            if db and db.open: db.close()
 
 
 
-    GET_RESOURCE = endpoints.ResourceContainer(sample_barcode=messages.StringField(1, required=True),
+    GET_RESOURCE = endpoints.ResourceContainer(sample_barcode=messages.StringField(1),
                                                platform=messages.StringField(2),
                                                pipeline=messages.StringField(3),
-                                               token=messages.StringField(4))
+                                               token=messages.StringField(4),
+                                               cohort_id=messages.IntegerField(5))
     @endpoints.method(GET_RESOURCE, DataFileNameKeyList,
                       path='datafilenamekey_list', http_method='GET', name='cohorts.datafilenamekey_list')
     def datafilenamekey_list(self, request):
@@ -747,6 +739,15 @@ class Cohort_Endpoints_API(remote.Service):
         cursor = None
         db = None
         dbGaP_authorized = False
+        cohort_id = None
+
+        sample_barcode = request.__getattribute__('sample_barcode')
+        platform = request.__getattribute__('platform')
+        pipeline = request.__getattribute__('pipeline')
+        cohort_id = request.__getattribute__('cohort_id')
+
+        if not sample_barcode and not cohort_id:
+            raise endpoints.NotFoundException("You must enter a sample barcode or a cohort id.")
 
         if endpoints.get_current_user() is not None:
             user_email = endpoints.get_current_user().email()
@@ -770,54 +771,68 @@ class Cohort_Endpoints_API(remote.Service):
                     raise endpoints.NotFoundException("%s has multiple entries in the user database." % user_email)
 
 
-        sample_barcode = request.__getattribute__('sample_barcode')
-        platform = request.__getattribute__('platform')
-        pipeline = request.__getattribute__('pipeline')
+            query_str = 'SELECT DataFileNameKey, SecurityProtocol, Repository ' \
+                        'FROM metadata_data '
 
-        query_str = 'SELECT DataFileNameKey, SecurityProtocol, Repository ' \
-                    'FROM metadata_data ' \
-                    'WHERE SampleBarcode=%s '
+            if cohort_id:
+                try:
+                    user_id = Django_User.objects.get(email=user_email).id
+                    django_cohort = Django_Cohort.objects.get(id=cohort_id)
+                    cohort_perm = Cohort_Perms.objects.get(cohort_id=cohort_id, user_id=user_id)
+                except (ObjectDoesNotExist, MultipleObjectsReturned), e:
+                    logger.info(e)
+                    err_msg = "Error retrieving cohort {} for user {}: {}.".format(cohort_id, user_email, e)
+                    if 'Cohort_Perms' in e.message:
+                        err_msg = "User {} does not have permissions on cohort {}. Error: {}"\
+                            .format(user_email, cohort_id, e)
+                    raise endpoints.UnauthorizedException(err_msg)
+                query_str += 'WHERE SampleBarcode IN (SELECT SampleBarcode FROM cohorts_samples WHERE cohort_id=%s) '
+                query_tuple = (cohort_id,)
+            elif sample_barcode:
+                query_str += 'WHERE SampleBarcode=%s '
+                query_tuple = (sample_barcode,)
 
-        query_tuple = (sample_barcode,)
+            if platform:
+                query_str += ' and Platform=%s '
+                query_tuple += (platform,)
 
-        if platform:
-            query_str += ' and Platform=%s '
-            query_tuple += (platform,)
+            if pipeline:
+                query_str += ' and Pipeline=%s '
+                query_tuple += (pipeline,)
 
-        if pipeline:
-            query_str += ' and Pipeline=%s '
-            query_tuple += (pipeline,)
+            query_str += ' GROUP BY DataFileNameKey'
 
-        query_str += ' GROUP BY DataFileNameKey'
 
-        try:
-            db = sql_connection()
-            cursor = db.cursor(MySQLdb.cursors.DictCursor)
-            cursor.execute(query_str, query_tuple)
+            try:
+                db = sql_connection()
+                cursor = db.cursor(MySQLdb.cursors.DictCursor)
+                cursor.execute(query_str, query_tuple)
 
-            datafilenamekeys = []
-            for row in cursor.fetchall():
-                file_path = row.get('DataFileNameKey') if len(row.get('DataFileNameKey', '')) else '/file-path-currently-unavailable'
-                if 'controlled' not in str(row['SecurityProtocol']).lower():
-                    datafilenamekeys.append("gs://{}{}".format(settings.OPEN_DATA_BUCKET, file_path))
-                elif dbGaP_authorized:
-                    bucket_name = ''
-                    # hard-coding mock bucket names for now --testing purposes only
-                    if row['Repository'].lower() == 'dcc':
-                        bucket_name = 'gs://62f2c827-mock-mock-mock-1cde698a4f77'
-                    elif row['Repository'].lower() == 'cghub':
-                        bucket_name = 'gs://360ee3ad-mock-mock-mock-52f9a5e7f99a'
-                    datafilenamekeys.append("{}{}".format(bucket_name, file_path))
+                datafilenamekeys = []
+                for row in cursor.fetchall():
+                    file_path = row.get('DataFileNameKey') if len(row.get('DataFileNameKey', '')) else '/file-path-currently-unavailable'
+                    if 'controlled' not in str(row['SecurityProtocol']).lower():
+                        datafilenamekeys.append("gs://{}{}".format(settings.OPEN_DATA_BUCKET, file_path))
+                    elif dbGaP_authorized:
+                        bucket_name = ''
+                        # hard-coding mock bucket names for now --testing purposes only
+                        if row['Repository'].lower() == 'dcc':
+                            bucket_name = 'gs://62f2c827-mock-mock-mock-1cde698a4f77'
+                        elif row['Repository'].lower() == 'cghub':
+                            bucket_name = 'gs://360ee3ad-mock-mock-mock-52f9a5e7f99a'
+                        datafilenamekeys.append("{}{}".format(bucket_name, file_path))
 
-            cursor.close()
-            db.close()
-            return DataFileNameKeyList(datafilenamekeys=datafilenamekeys, count=len(datafilenamekeys))
+                return DataFileNameKeyList(datafilenamekeys=datafilenamekeys, count=len(datafilenamekeys))
 
-        except (IndexError, TypeError) as e:
-            logger.warn(e)
-            if cursor: cursor.close()
-            if db: db.close()
-            raise endpoints.NotFoundException("Sample {} not found.".format(sample_barcode))
+            except (IndexError, TypeError) as e:
+                logger.warn(e)
+                raise endpoints.NotFoundException("Sample {} not found.".format(sample_barcode))
+            finally:
+                if cursor: cursor.close()
+                if db and db.open: db.close()
+
+        else:
+            raise endpoints.UnauthorizedException("Authentication failed.")
 
 
     POST_RESOURCE = endpoints.ResourceContainer(IncomingMetadataItem,
@@ -887,11 +902,12 @@ class Cohort_Endpoints_API(remote.Service):
                     sample_barcodes.append(row['SampleBarcode'])
 
             except (IndexError, TypeError), e:
-                if patient_cursor: patient_cursor.close()
-                if sample_cursor: sample_cursor.close()
-                if db: db.close()
                 logger.warn(e)
                 raise endpoints.NotFoundException("Error retrieving samples or patients")
+            finally:
+                if patient_cursor: patient_cursor.close()
+                if sample_cursor: sample_cursor.close()
+                if db and db.open: db.close()
 
             cohort_name = request.__getattribute__('name')
 
@@ -986,3 +1002,130 @@ class Cohort_Endpoints_API(remote.Service):
             return_message = "Unsuccessful authentication."
 
         return ReturnJSON(msg=return_message)
+
+
+    GET_RESOURCE = endpoints.ResourceContainer(sample_barcode=messages.StringField(1),
+                                               platform=messages.StringField(2),
+                                               pipeline=messages.StringField(3),
+                                               token=messages.StringField(4),
+                                               cohort_id=messages.IntegerField(5))
+    @endpoints.method(GET_RESOURCE, DataFileNameKeyList,
+                      path='alt_datafilenamekey_list', http_method='GET', name='cohorts.alt_datafilenamekey_list')
+    def alt_datafilenamekey_list(self, request):
+        print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+        user_email = None
+        cursor = None
+        user_cursor = None
+        db = None
+        dbGaP_authorized = False
+        cohort_id = None
+        row = None
+
+        sample_barcode = request.__getattribute__('sample_barcode')
+        platform = request.__getattribute__('platform')
+        pipeline = request.__getattribute__('pipeline')
+        cohort_id = request.__getattribute__('cohort_id')
+
+        if not sample_barcode and not cohort_id:
+            raise endpoints.NotFoundException("You must enter a sample barcode or a cohort id.")
+
+        if endpoints.get_current_user() is not None:
+            user_email = endpoints.get_current_user().email()
+
+        # users have the option of pasting the access token in the query string
+        # or in the 'token' field in the api explorer
+        # but this is not required
+        access_token = request.__getattribute__('token')
+        if access_token:
+            user_email = get_user_email_from_token(access_token)
+
+        if not user_email:
+            raise endpoints.UnauthorizedException("Authentication failed.")
+        try:
+            db = sql_connection()
+            user_cursor = db.cursor(MySQLdb.cursors.DictCursor)
+            user_query_str = 'SELECT * ' \
+                             'FROM auth_user ' \
+                             'LEFT JOIN accounts_nih_user ' \
+                             'ON auth_user.id=accounts_nih_user.user_id ' \
+                             'WHERE auth_user.email=%s '
+            user_cursor.execute(user_query_str, (user_email,))
+            row = user_cursor.fetchone()
+            dbGaP_authorized = row['dbGaP_authorized'] and row['active']
+        except (IndexError, TypeError), e:
+            logger.warn(e)
+        finally:
+            if user_cursor: user_cursor.close()
+            if db and db.open: db.close()
+            if row is None:
+                raise endpoints.UnauthorizedException("Authentication of {} failed.".format(user_email))
+
+        query_str = 'SELECT DataFileNameKey, SecurityProtocol, Repository ' \
+                    'FROM metadata_data '
+
+        if cohort_id:
+            try:
+                db = sql_connection()
+                user_cursor = db.cursor(MySQLdb.cursors.DictCursor)
+                user_cohort_query_str = "select * from cohorts_cohort_perms " \
+                                        "where cohort_id=%s " \
+                                        "and user_id = " \
+                                        "(select id from auth_user " \
+                                        "where email=%s) "
+                user_cursor.execute(user_cohort_query_str, (cohort_id, user_email))
+                row = user_cursor.fetchone()
+                perm = row['perm']
+                # note: we are not doing anything with the 'perm' variable for now
+                # but it will throw a TypeError if row is None
+            except (IndexError, TypeError), e:
+                logger.info(e)
+                raise endpoints.NotFoundException(
+                    "Error retrieving cohort {} for user {}.".format(cohort_id, user_email))
+            finally:
+                if user_cursor: user_cursor.close()
+                if db and db.open: db.close()
+
+            query_str += 'WHERE SampleBarcode IN (SELECT SampleBarcode FROM cohorts_samples WHERE cohort_id=%s) '
+            query_tuple = (cohort_id,)
+        elif sample_barcode:
+            query_str += 'WHERE SampleBarcode=%s '
+            query_tuple = (sample_barcode,)
+
+        if platform:
+            query_str += ' and Platform=%s '
+            query_tuple += (platform,)
+
+        if pipeline:
+            query_str += ' and Pipeline=%s '
+            query_tuple += (pipeline,)
+
+        query_str += ' GROUP BY DataFileNameKey'
+
+
+        try:
+            db = sql_connection()
+            cursor = db.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute(query_str, query_tuple)
+
+            datafilenamekeys = []
+            for row in cursor.fetchall():
+                file_path = row.get('DataFileNameKey') if len(row.get('DataFileNameKey', '')) else '/file-path-currently-unavailable'
+                if 'controlled' not in str(row['SecurityProtocol']).lower():
+                    datafilenamekeys.append("gs://{}{}".format(settings.OPEN_DATA_BUCKET, file_path))
+                elif dbGaP_authorized:
+                    bucket_name = ''
+                    # hard-coding mock bucket names for now --testing purposes only
+                    if row['Repository'].lower() == 'dcc':
+                        bucket_name = 'gs://62f2c827-mock-mock-mock-1cde698a4f77'
+                    elif row['Repository'].lower() == 'cghub':
+                        bucket_name = 'gs://360ee3ad-mock-mock-mock-52f9a5e7f99a'
+                    datafilenamekeys.append("{}{}".format(bucket_name, file_path))
+
+            return DataFileNameKeyList(datafilenamekeys=datafilenamekeys, count=len(datafilenamekeys))
+
+        except (IndexError, TypeError) as e:
+            logger.warn(e)
+            raise endpoints.NotFoundException("Sample {} not found.".format(sample_barcode))
+        finally:
+            if cursor: cursor.close()
+            if db and db.open: db.close()
