@@ -109,17 +109,38 @@ class VectorMergeSupport(object):
 
 
 class DurationLogged(object):
+    """
+    Decorator for logging duration of a function. By default, the messages are logged by calling
+    "logging.info". The messages have the following format:
+    "<datatype> <operation> TIME <duration>"
+
+    For example, if datatype is CLIN and operation is BQ_QUERY and duration was 1.5 seconds, the message would be
+    "CLIN BQ_QUERY TIME 1.5".
+    """
     def __init__(self, datatype, operation):
+        """
+        Constructor.
+
+        Args:
+            datatype: "Datatype" field for the logged message
+            operation: "Operation" field for the logged message
+        """
         self.datatype = datatype
         self.operation = operation
+
+    def log(self, msg):
+        logging.info(msg)
 
     def __call__(self, f):
         def wrapped_function(*args, **kwargs):
             time_start = time()
             result = f(*args, **kwargs)
             time_end = time()
+            time_elapsed = time_end - time_start
 
-            logging.info("{dt} {op} TIME {t}".format(dt=self.datatype, op=self.operation, t=str(time_end - time_start)))
+            self.log("{dt} {op} TIME {t}".format(dt=self.datatype,
+                                                 op=self.operation,
+                                                 t=str(time_elapsed)))
             return result
 
         return wrapped_function
