@@ -683,7 +683,8 @@ def streaming_csv_view(request, cohort_id=0):
         messages.error('Cohort provided does not exist.')
         return redirect('/user_landing')
 
-    data_url = METADATA_API + ('/cohort_files?cohort_id=%s&user_id=%s&limit=-1' % (cohort_id, request.user.id))
+    token = SocialToken.objects.filter(account__user=request.user, account__provider='Google')[0].token
+    data_url = METADATA_API + ('/cohort_files?cohort_id=%s&token=%s&limit=-1' % (cohort_id, token))
     if 'params' in request.GET:
         params = request.GET.get('params').split(',')
 
