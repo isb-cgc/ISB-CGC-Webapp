@@ -32,7 +32,6 @@
                     <th class="name-col">Name</th>
                     <th class="study-col">Worksheets</th>
                     <th>Ownership</th>
-                    <th>Shared with</th>
                     <th>Last Updated</th>
                 </thead>
                 <tbody>
@@ -55,7 +54,6 @@
                             <td class="name-col"><a href="{% url 'workbook_detail' workbook.id %}">{{ workbook.name }}</a></td>
                             <td> {{ workbook.worksheets|length }}</td>
                             <td> {{ workbook.owner.first_name }} {{ workbook.owner.last_name }}</td>
-                            <td>({{ workbook.shares | length }})</td>
                             <td> {{ workbook.last_date_saved}}</td>
                         </tr>
                     {% endfor %}

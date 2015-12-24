@@ -54,6 +54,7 @@ urlpatterns = patterns('',
     url(r'^help/', views.help_page, name='help'),
     url(r'^about/', views.about_page, name='about_page'),
     url(r'^dashboard/', views.dashboard_page, name='dashboard'),
+    url(r'^analyses/', views.sample_analyses, name='sample_analyses'),
 
     url(r'^projects/', include('projects.urls')),
     url(r'^genes/', include('genes.urls')),

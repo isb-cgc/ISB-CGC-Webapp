@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+{% block title %}Analyses | ISB-CGC{% endblock %}}
+{% block extra_css_libs %}{% endblock %}
+{% block header %}{% endblock %}
+
+{% block link_page_name %}sample_analyses{% endblock %}
+{% block page_name %}sample_analyses{% endblock %}
+
+{% block page_header %}
+<div class="container">
+    <ol class="breadcrumb">
+        <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+    </ol>
+    <h1 class="page-header">Analyses</h1>
+</div>
+{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="analysis panel panel-default">
+                <div class="panel-body">
+                    <img class="img-fluid" src="{% static 'img/histogram.png' %}" alt="Bar Chart">
+                    <h5>Bar Chart</h5>
+                    <p>Short Description</p>
+                </div>
+                <div class="panel-footer">
+                    <form action="{% url 'worksheet_create_with_analysis' 0 %}" method="POST" class="center">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-link">Start A New Workbook Bar Chart</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="analysis panel panel-default">
+                <div class="panel-body">
+                    <img class="img-fluid" src="{% static 'img/histogram.png' %}" alt="Histogram">
+                    <h5>Histogram</h5>
+                    <p>Short Description</p>
+                </div>
+                <div class="panel-footer">
+                    <form action="{% url 'worksheet_create_with_analysis' 0 %}" method="POST" class="center">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-link">Start A New Workbook with Histogram</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="analysis panel panel-default">
+                <div class="panel-body">
+                    <img class="img-fluid" src="{% static 'img/histogram.png' %}" alt="Scatter Plot">
+                    <h5>Scatter Plot</h5>
+                    <p>Short Description</p>
+                </div>
+                <div class="panel-footer">
+                    <form action="{% url 'worksheet_create_with_analysis' 0 %}" method="POST" class="center">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-link">Start A New Workbook with Scatter Plot</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="analysis panel panel-default">
+                <div class="panel-body">
+                    <img class="img-fluid" src="{% static 'img/histogram.png' %}" alt="Violin Plot">
+                    <h5>Violin Plot</h5>
+                    <p>Short Description</p>
+                </div>
+                <div class="panel-footer">
+                    <form action="{% url 'worksheet_create_with_analysis' 0 %}" method="POST" class="center">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-link">Start A New Workbook with Violin Plot</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="analysis panel panel-default">
+                <div class="panel-body">
+                    <img class="img-fluid" src="{% static 'img/histogram.png' %}" alt="Violin Plot 2">
+                    <h5>Violin Plot 2</h5>
+                    <p>Short Description</p>
+                </div>
+                <div class="panel-footer">
+                    <form action="{% url 'worksheet_create_with_analysis' 0 %}" method="POST" class="center">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-link">Start A New Workbook with Violin Plot 2</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="analysis panel panel-default">
+                <div class="panel-body">
+                    <img class="img-fluid" src="{% static 'img/histogram.png' %}" alt="Cubby Hole">
+                    <h5>Cubby Hole</h5>
+                    <p>Short Description</p>
+                </div>
+                <div class="panel-footer">
+                    <form action="{% url 'worksheet_create_with_analysis' 0 %}" method="POST" class="center">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-link">Start A New Workbook with Cubby Hole</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="analysis panel panel-default">
+                <div class="panel-body">
+                    <img class="img-fluid" src="{% static 'img/seqpeak.png' %}" alt="SeqPeak">
+                    <h5>SeqPeak</h5>
+                    <p>This visualization shows where somatic mutations have been observed on a linear representation of a specific protein.  Each horizontal strip represents the protein, with data from different tumor types (aka cohorts or studies) shown stacked one on top of the other. </p>
+                </div>
+                <div class="panel-footer">
+                    <form action="{% url 'worksheet_create_with_analysis' 0 %}" method="POST" class="center">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-link">Start A New Workbook with SeqPeak</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js_file %}{% static 'js/dashboard.js' %}{% endblock %}

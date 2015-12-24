@@ -76,9 +76,14 @@
                         </ul>
                     </li>
                     {% endif %}
-                    <li class="menu-item"><a href="{% url 'workbooks' %}">Saved Workbooks ( {{ user.workbook_perms_set.count }} )</a></li>
-                    <li class="menu-item"><a href="/">Create a New Workbook</a></li>
-                    <li class="menu-item"><a href="/">Sample Workbooks</a></li>
+                    <li class="menu-item"><a href="{% url 'workbooks' %}">Saved Workbooks ( {{ user.workbook_last_view_set.all|length }} )</a></li>
+                    <li class="menu-item">
+                        <form action="{% url 'workbook_create' %}" method="POST">
+                            {% csrf_token %}
+                            <button type="submit">Create a New Workbook</button>
+                        </form>
+                    </li>
+                    <li class="menu-item"><a href="{% url 'workbook_samples' %}">Sample Workbooks</a></li>
                 </ul>
             </li>
             <li class="menu-item has-drop-down">
@@ -89,13 +94,23 @@
                         <strong>Start New Workbook With ...</strong>
                         <ul class="item-list">
                             {% for plv in user.project_last_view_set.all|active:'project'|dictsortreversed:'last_view'|slice:':5' %}
-                            <li class="menu-item"><a href="{% url 'project_detail' plv.project.id %}">{{ plv.project.name }}</a></li>
+                            <li class="menu-item">
+                                <form action="{% url 'worksheet_create_with_projects' plv.project.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <button type="submit">{{ plv.project.name }}</button>
+                                </form>
+                            </li>
                             {% endfor %}
                             {% if user.project_last_view_set.all|length > 5 %}
                             <li class="menu-item has-drop-down__more"> More
                                 <ul class="drop">
                                     {% for plv in user.project_last_view_set.all|active:'project'|dictsortreversed:'last_view'|slice:'5:' %}
-                                    <li class="menu-item"><a href="{% url 'project_detail' plv.project.id %}">{{ plv.project.name }}</a></li>
+                                    <li class="menu-item">
+                                        <form action="{% url 'worksheet_create_with_projects' plv.project.id %}">
+                                            {% csrf_token %}
+                                            <button type="submit">{{ plv.project.name }}</button>
+                                        </form>
+                                    </li>
                                     {% endfor %}
                                 </ul>
                             </li>
@@ -105,7 +120,7 @@
                     {% endif %}
                     <li class="menu-item"><a href="{% url 'projects' %}">Saved Projects ( {{ user.project_last_view_set.all|active:'project'|length }}  )</a></li>
                     <li class="menu-item"><a href="{% url 'project_upload' %}">Upload Project Data</a></li>
-                    <li class="menu-item"><a href="{% url 'projects' %}">Public Projects (1)</a></li>
+                    <li class="menu-item"><a href="{% url 'projects' %}">Public Projects ({{ user.project_last_view_set.all|active:'project'|is_public:'project'|length}})</a></li>
                 </ul>
             </li>
             <li class="menu-item has-drop-down">
@@ -114,37 +129,77 @@
                     <li class="menu-item">
                         <strong>Start New Workbook With ...</strong>
                         <ul class="item-list">
-                            <li class="menu-item"> Analysis A </li>
-                            <li class="menu-item"> Analysis B </li>
-                            <li class="menu-item"> Analysis C </li>
+                            <li class="menu-item">
+                                <form action="{% url 'worksheet_create_with_analysis' 0 %}" method="POST">
+                                    {% csrf_token %}
+                                    <button type="submit">Bar Chart</button>
+                                </form>
+                            </li>
+                            <li class="menu-item">
+                                <form action="{% url 'worksheet_create_with_analysis' 0 %}" method="POST">
+                                    {% csrf_token %}
+                                    <button type="submit">Histogram </button>
+                                </form>
+                            </li>
+                            <li class="menu-item">
+                                <form action="{% url 'worksheet_create_with_analysis' 0 %}" method="POST">
+                                    {% csrf_token %}
+                                    <button type="submit">Scatter Plot</button>
+                                </form>
+                            </li>
+                            <li class="menu-item">
+                                <form action="{% url 'worksheet_create_with_analysis' 0 %}" method="POST">
+                                    {% csrf_token %}
+                                    <button type="submit">Violin Plot</button>
+                                </form>
+                            </li>
+                            <li class="menu-item">
+                                <form action="{% url 'worksheet_create_with_analysis' 0 %}" method="POST">
+                                    {% csrf_token %}
+                                    <button type="submit">Violin Plot 2</button>
+                                </form>
+                            </li>
+                            <li class="menu-item">
+                                <form action="{% url 'worksheet_create_with_analysis' 0 %}" method="POST">
+                                    {% csrf_token %}
+                                    <button type="submit">Cubby Hole</button>
+                                </form>
+                            </li>
+                            <li class="menu-item">
+                                <form action="{% url 'worksheet_create_with_analysis' 0 %}" method="POST">
+                                    {% csrf_token %}
+                                    <button type="submit">SeqPeak</button>
+                                </form>
+                            </li>
                         </ul>
                     </li>
-                    <li class="menu-item"><a href="/">Browse All Analyses</a></li>
+                    <li class="menu-item"><a href="{% url 'sample_analyses' %}">Browse All Analyses</a></li>
                 </ul>
             </li>
             <li class="menu-item has-drop-down">
                 <a>GENES <i class="fa fa-caret-down"></i></a>
                 <ul class="sub-menu drop">
-                    <!--Temporary code to showcase recent genes item-->
-                    <li class="menu-item">
-                        <strong>Start New Workbook With ...</strong>
-                        <ul class="item-list">
-                            <li class="menu-item"><a href="">BRCA1</a></li>
-                            <li class="menu-item"><a href="">ATK Pathway</a></li>
-                        </ul>
-                    </li>
                     {% if user.genefavorite_last_view_set.all|active:'genefavorite'|length > 0 %}
                     <li class="menu-item">
                         <strong>Start New Workbook With ...</strong>
                         <ul class="item-list">
                             {% for gflv in user.genefavorite_last_view_set.all|active:'genefavorite'|dictsortreversed:'last_view'|slice:':5' %}
-                            <li class="menu-item">{{ gflv.genefavorite.name }}</li>
+                            <li class="menu-item">
+                                <form action="{% url 'worksheet_create_with_genes' gflv.genefavorite.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <button type="submit">{{ gflv.genefavorite.name }}</button>
+                                </form>
+                            </li>
                             {% endfor %}
                             {% if user.genefavorite_last_view_set.all|active:'genefavorite'|length > 5 %}
                             <li class="menu-item has-drop-down__more"> More
                                 <ul class="drop">
                                     {% for gflv in user.genefavorite_last_view_set.all|active:'genefavorite'|dictsortreversed:'last_view'|slice:'5:' %}
-                                    <li class="menu-item">{{ gflv.genefavorite.name }}</li>
+                                    <li class="menu-item">
+                                        <form action="{% url 'worksheet_create_with_genes' gflv.genefavorite.id %}">
+                                            {% csrf_token %}
+                                            <button type="submit">{{ gflv.genefavorite.name }}</button>
+                                        </form>
                                     {% endfor %}
                                 </ul>
                             </li>
@@ -166,13 +221,23 @@
                         <strong>Start New Workbook With ...</strong>
                         <ul class="item-list">
                             {% for vflv in user.variablefavorite_last_view_set.all|active:'variablefavorite'|dictsortreversed:'last_view'|slice:':5' %}
-                            <li class="menu-item">{{ vflv.variablefavorite.name }}</li>
+                            <li class="menu-item">
+                                <form action="{% url 'worksheet_create_with_variables' vflv.variablefavorite.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <button type="submit">{{ vflv.variablefavorite.name }}</button>
+                                </form>
+                            </li>
                             {% endfor %}
                             {% if user.variablefavorite_last_view_set.all|active:'variablefavorite'|length > 5 %}
                             <li class="menu-item has-drop-down__more"> More
                                 <ul class="drop">
                                     {% for vflv in user.variablefavorite_last_view_set.all|active:'variablefavorite'|dictsortreversed:'last_view'|slice:'5:' %}
-                                    <li class="menu-item">{{ vflv.variablefavorite.name }}</li>
+                                    <li class="menu-item">
+                                        <form action="{% url 'worksheet_create_with_variables' vflv.variablefavorite.id %}" method="POST">
+                                            {% csrf_token %}
+                                            <button type="submit">{{ vflv.variablefavorite.name }}</button>
+                                        </form>
+                                    </li>
                                     {% endfor %}
                                 </ul>
                             </li>
@@ -193,13 +258,23 @@
                         <strong>Start New Workbook With ...</strong>
                         <ul class="item-list">
                             {% for clv in user.cohort_last_view_set.all|active:'cohort'|dictsortreversed:'last_view'|slice:':5' %}
-                            <li class="menu-item"><a href="{% url 'cohort_details' clv.cohort.id %}">{{ clv.cohort.name }}</a></li>
+                            <li class="menu-item">
+                                <form action="{% url 'worksheet_create_with_cohort' clv.cohort.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <button type="submit">{{ clv.cohort.name }}</button>
+                                </form>
+                            </li>
                             {% endfor %}
                             {% if user.cohort_last_view_set.all|active:'cohort'|length > 5 %}
                             <li class="menu-item has-drop-down__more"> More
                                 <ul class="drop">
                                     {% for clv in user.cohort_last_view_set.all|active:'cohort'|dictsortreversed:'last_view'|slice:'5:' %}
-                                    <li class="menu-item"><a href="{% url 'cohort_details' clv.cohort.id %}">{{ clv.cohort.name }}</a></li>
+                                    <li class="menu-item">
+                                        <form action="{% url 'worksheet_create_with_cohort' clv.cohort.id %}" method="POST">
+                                            {% csrf_token %}
+                                            <button type="submit">{{ clv.cohort.name }}</button>
+                                        </form>
+                                    </li>
                                     {% endfor %}
                                 </ul>
                             </li>
