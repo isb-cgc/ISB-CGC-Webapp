@@ -76,7 +76,7 @@
             <p>Workbooks store the Analyses you create -- and their related data.</p>
             <ul class="table-list">
             {% if user.workbook_last_view_set.all|length > 0 %}
-                {% for wlv in user.workbook_last_view_set.all|dictsortreversed:'last_view'  %}
+                {% for wlv in user.workbook_last_view_set.all|dictsortreversed:'last_view'|slice:':6'  %}
                     <li>
                         <a href="{% url 'workbook_detail' wlv.workbook.id %}">
                             <div class="list-main">
@@ -89,6 +89,9 @@
                         </a>
                     </li>
                 {% endfor %}
+                {% if user.workbook_last_view_set.all|length > 6 %}
+                <a class="btn btn-link" href="{% url 'workbooks' %}">View All</a>
+                {% endif %}
             {% endif %}
             </ul>
         </div>
@@ -109,15 +112,17 @@
                 <div class="panel-body">
                     {% if user.genefavorite_last_view_set.all|active:'genefavorite'|length > 0 %}
                     <ul class="table-list">
-                        {% for glv in user.genefavorite_last_view_set.all|active:'genefavorite' %}
+                        {% for glv in user.genefavorite_last_view_set.all|active:'genefavorite'|slice:':6' %}
                         <li>
                             <a href="{% url 'genes_detail' glv.genefavorite.id %}">
-                               <span class="list-title">{{ glv.genefavorite.name }}</span>
+                               <p class="list-title">{{ glv.genefavorite.name }}</p>
                             </a>
                         </li>
-
                         {% endfor %}
                     </ul>
+                        {% if user.genefavorite_last_view_set.all|active:'genefavorite'|length > 6 %}
+                        <a href="{% url 'genes' %}" class="btn btn-link">View All</a>
+                        {% endif %}
                     {% else %}
                     <p>You don't have any saved Gene Favorites.</p>
                     <a href="{% url 'create_genes_list' %}">Create Gene Favorites</a>
@@ -131,15 +136,18 @@
                 <div class="panel-body">
                     {% if user.variablefavorite_last_view_set.all|active:'variablefavorite'|length > 0 %}
                     <ul class="table-list">
-                        {% for vlv in user.variablefavorite_last_view_set.all|active:'variablefavorite' %}
+                        {% for vlv in user.variablefavorite_last_view_set.all|active:'variablefavorite'|slice:':6' %}
                            <li>
                                <a href="{% url 'variable_fav_detail' vlv.variablefavorite.id %}">
-                                   <span class="list-title">
+                                   <p class="list-title">
                                        {{ vlv.variablefavorite.name }}
-                                   </span>
+                                   </p>
                                </a>
                            </li>
                         {% endfor %}
+                        {% if user.variablefavorite_last_view_set.all|active:'variablefavorite'|length > 6 %}
+                        <a href="{% url 'genes' %}" class="btn btn-link">View All</a>
+                        {% endif %}
                     </ul>
                     {% else %}
                     <p>You don't have any saved Variable Favorites.</p>
@@ -155,7 +163,7 @@
                 <div class="panel-body">
                     {% if user.cohort_last_view_set.all|active:'cohort'|length > 0 %}
                     <ul class="table-list">
-                        {% for clv in user.cohort_last_view_set.all|active:'cohort'|dictsortreversed:'last_view'|slice:':5' %}
+                        {% for clv in user.cohort_last_view_set.all|active:'cohort'|dictsortreversed:'last_view'|slice:':6' %}
                            <li>
                                <a href="{% url 'cohort_details' clv.cohort.id %}">
                                    <div class="list-main">
@@ -168,8 +176,8 @@
                                </a>
                            </li>
                         {% endfor %}
-                        {% if user.cohort_last_view_set.all|active:'cohort'|length > 5 %}
-                            <li><a href="{% url 'cohort_list' %}">View all</a></li>
+                        {% if user.cohort_last_view_set.all|active:'cohort'|length > 6 %}
+                            <a class="btn btn-link" href="{% url 'cohort_list' %}">View all</a>
                         {% endif %}
                     </ul>
                     {% else %}
@@ -188,21 +196,20 @@
                     <p>You can upload from your own research projects.</p>
                     {% if user.project_last_view_set.all|active:'project'|length > 0 %}
                     <ul class="table-list">
-                        {% for plv in user.project_last_view_set.all|active:'project'|slice:'6' %}
+                        {% for plv in user.project_last_view_set.all|active:'project'|slice:':6' %}
                            <li>
                                <a href="{% url 'project_detail' plv.project.id %}">
-                                   <span class="list-title">{{ plv.project.name }}</span>
+                                   <p class="list-title">{{ plv.project.name }}</p>
                                    {% if plv.project.description %}
                                     <p>{{ plv.project.description }}</p>
                                    {% endif %}
                                </a>
-
                            </li>
                         {% endfor %}
+                        {% if user.project_last_view_set.all|active:'project'|length > 6 %}
+                            <a class="btn btn-link" href="{% url 'projects' %}">View all</a>
+                        {% endif %}
                     </ul>
-                    {% endif %}
-                    {% if user.project_last_view_set.all|active:'project'|length > 6 %}
-                        <a href="{% url 'project_list' %}">View All</a>
                     {% endif %}
                 </div>
                 <div class="panel-footer">

@@ -60,12 +60,14 @@
 .extra-values
   display: none
 
-.table-list
+.table-list, .table-list_warning
+  a:hover, a:active
+    text-decoration: none
   .list-title
     font-size: $font-size
     font-weight: $bold-font-weight
     margin-bottom: 0
-    color: $isb-info
+    color: $isb-dark
   .list-main
     display: inline-block
     vertical-align: middle
@@ -83,6 +85,6 @@
     padding: 5px 15px
     background: lighten($isb-dark, 55%)
     margin-bottom: 1px
-    border-left: 3px solid $isb-info
+    border-left: 3px solid $isb-warning
     &:hover
       background: $info-bgcolor
