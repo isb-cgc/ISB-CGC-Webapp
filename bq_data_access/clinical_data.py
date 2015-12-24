@@ -145,19 +145,22 @@ class ClinicalFeatureProvider(object):
         query_response = table_data.query(projectId=project_id, body=query_body).execute()
         return query_response
 
-    def do_query(self, project_id, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array):
-        bigquery_service = self.get_bq_service()
+    @DurationLogged('CLIN', 'UNPACK')
+    def unpack_query_response(self, query_response):
+        """
+        Unpacks values from a BigQuery response object into a flat array. The array will contain dicts with
+        the following fields:
+        - 'patient_id': Patient barcode
+        - 'sample_id': Sample barcode
+        - 'aliquot_id': Always None
+        - 'value': Value of the selected column from the clinical data table
 
-        query = self.build_query(project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array)
+        Args:
+            query_response: A BigQuery query response object
 
-        query_body = {
-            'query': query
-        }
-
-        #table_data = bigquery_service.jobs()
-        #query_response = table_data.query(projectId=project_id, body=query_body).execute()
-        query_response = self.execute_bq_query(bigquery_service, project_id, query_body)
-
+        Returns:
+            Array of dict objects.
+        """
         result = []
         num_result_rows = int(query_response['totalRows'])
         if num_result_rows == 0:
@@ -171,6 +174,19 @@ class ClinicalFeatureProvider(object):
                 'value': row['f'][2]['v']
             })
 
+        return result
+
+    def do_query(self, project_id, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array):
+        bigquery_service = self.get_bq_service()
+
+        query = self.build_query(project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array)
+
+        query_body = {
+            'query': query
+        }
+
+        query_response = self.execute_bq_query(bigquery_service, project_id, query_body)
+        result = self.unpack_query_response(query_response)
         return result
 
     def get_data_from_bigquery(self, cohort_id_array, cohort_dataset, cohort_table):
