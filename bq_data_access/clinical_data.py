@@ -16,8 +16,10 @@ limitations under the License.
 
 """
 
+from functools import wraps
 import logging
 from re import compile as re_compile
+from time import time
 
 from api.api_helpers import authorize_credentials_with_Google
 from api.schema.tcga_clinical import schema as clinical_schema
@@ -26,7 +28,7 @@ from django.conf import settings
 
 from bq_data_access.errors import FeatureNotFoundException
 from bq_data_access.feature_value_types import DataTypes, BigQuerySchemaToValueTypeConverter
-
+from bq_data_access.utils import DurationLogged
 
 CLINICAL_FEATURE_TYPE = 'CLIN'
 
@@ -132,16 +134,29 @@ class ClinicalFeatureProvider(object):
         logging.debug("BQ_QUERY_CLIN: " + query)
         return query
 
-    def do_query(self, project_id, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array):
+    @DurationLogged('CLIN', 'AUTH')
+    def get_bq_service(self):
         bigquery_service = authorize_credentials_with_Google()
+        return bigquery_service
+
+    @DurationLogged('CLIN', 'BQ_QUERY')
+    def execute_bq_query(self, bigquery, project_id, query_body):
+        table_data = bigquery.jobs()
+        query_response = table_data.query(projectId=project_id, body=query_body).execute()
+        return query_response
+
+    def do_query(self, project_id, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array):
+        bigquery_service = self.get_bq_service()
+
         query = self.build_query(project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array)
 
         query_body = {
             'query': query
         }
 
-        table_data = bigquery_service.jobs()
-        query_response = table_data.query(projectId=project_id, body=query_body).execute()
+        #table_data = bigquery_service.jobs()
+        #query_response = table_data.query(projectId=project_id, body=query_body).execute()
+        query_response = self.execute_bq_query(bigquery_service, project_id, query_body)
 
         result = []
         num_result_rows = int(query_response['totalRows'])

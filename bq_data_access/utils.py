@@ -17,6 +17,9 @@ limitations under the License.
 """
 
 from collections import OrderedDict
+import logging
+from time import time
+
 
 def vector_to_dict(vector, id_key, value_key):
     result = {}
@@ -103,3 +106,21 @@ class VectorMergeSupport(object):
                 d[row_id] = value
 
         return result
+
+
+class DurationLogged(object):
+    def __init__(self, datatype, operation):
+        self.datatype = datatype
+        self.operation = operation
+
+    def __call__(self, f):
+        def wrapped_function(*args, **kwargs):
+            time_start = time()
+            result = f(*args, **kwargs)
+            time_end = time()
+
+            logging.info("{dt} {op} TIME {t}".format(dt=self.datatype, op=self.operation, t=str(time_end - time_start)))
+            return result
+
+        return wrapped_function
+
