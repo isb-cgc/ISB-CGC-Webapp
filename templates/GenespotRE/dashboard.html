@@ -24,27 +24,27 @@
             <a href="{% url 'sample_analyses' %}">Sample Analyses</a> can be customized with the specific data you want to analyze. Start a new workbook with an analysis below.
         </div>
         <div class="panel-body collapse in" id="analysis-body">
-            <div class="list-carousel">
-                <ul class="list-holder">
-                    <li class="item">
-                        <!--TODO: get bar chart-->
-                        <img class="img-fluid" src="{% static 'img/histogram.png' %}">
-                        <p>Bar Chart</p>
-                    </li>
-                    <li class="item">
-                        <img class="img-fluid" src="{% static 'img/histogram.png' %}">
-                        <p>Histogram</p>
-                    </li>
-                    <li class="item">
-                        <!--TODO: get bar chart-->
-                        <img class="img-fluid" src="{% static 'img/scatter-plot.png' %}">
-                        <p>Scatter Plot</p>
-                    </li>
-                    <li class="item">
-                        <!--TODO: get bar chart-->
-                        <img class="img-fluid" src="{% static 'img/violin-plot.png' %}">
-                        <p>Violin Plot</p>
-                    </li>
+            <ul>
+                <li class="item">
+                    <!--TODO: get bar chart-->
+                    <img class="img-fluid" src="{% static 'img/histogram.png' %}">
+                    <p>Bar Chart</p>
+                </li>
+                <li class="item">
+                    <img class="img-fluid" src="{% static 'img/histogram.png' %}">
+                    <p>Histogram</p>
+                </li>
+                <li class="item">
+                    <!--TODO: get bar chart-->
+                    <img class="img-fluid" src="{% static 'img/scatter-plot.png' %}">
+                    <p>Scatter Plot</p>
+                </li>
+                <li class="item">
+                    <!--TODO: get bar chart-->
+                    <img class="img-fluid" src="{% static 'img/violin-plot.png' %}">
+                    <p>Violin Plot</p>
+                </li>
+                <div class="more">
                     <li class="item">
                         <!--TODO: get bar chart-->
                         <img class="img-fluid" src="{% static 'img/histogram.png' %}">
@@ -59,10 +59,8 @@
                         <img class="img-fluid" src="{% static 'img/seqpeak.png' %}" alt="">
                         <p>SeqPeak</p>
                     </li>
-                </ul>
-                <div class="before"><i class="fa fa-angle-left fa-2x"></i></div>
-                <div class="after"><i class="fa fa-angle-right fa-2x"></i></div>
-            </div>
+                </div>
+            </ul>
         </div>
     </section>
     <section class="panel panel-default">
