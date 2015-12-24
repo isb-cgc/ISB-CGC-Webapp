@@ -1,10 +1,21 @@
-.analysis-list
-  text-align: center
+.list-carousel
+  width: calc(100% - 20px)
+  padding: 0 20px
+  overflow: hidden
+  position: relative
 
-  .analysis
-    width: 20%
+  .list-holder
+    width: 2000px
+
+  .item
+    width: 220px
+    margin: 0 20px
+    text-align: center
     display: inline-block
 
-.analysis
-  img
-    width: 100%
+  .before, .after
+    @include vertical-align(absolute)
+    color: $isb-info
+
+  .after
+    right: -10px

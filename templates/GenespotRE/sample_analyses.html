@@ -22,70 +22,91 @@
         <div class="col-md-4">
             <div class="analysis panel panel-default">
                 <div class="panel-body">
-                    <img src="{% static 'img/histogram.png' %}" alt="Bar Chart">
+                    <img class="img-fluid" src="{% static 'img/histogram.png' %}" alt="Bar Chart">
                     <h5>Bar Chart</h5>
                     <p>Short Description</p>
-                    <a href="">Start A New Workbook Bar Chart</a>
+                    <form action="{% url 'worksheet_create_with_analysis' 0 %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-default">Start A New Workbook Bar Chart</button>
+                    </form>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
             <div class="analysis panel panel-default">
                 <div class="panel-body">
-                    <img src="{% static 'img/histogram.png' %}" alt="Histogram">
+                    <img class="img-fluid" src="{% static 'img/histogram.png' %}" alt="Histogram">
                     <h5>Histogram</h5>
                     <p>Short Description</p>
-                    <a href="">Start A New Workbook with Histogram</a>
+                    <form action="{% url 'worksheet_create_with_analysis' 0 %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-default">Start A New Workbook with Histogram</button>
+                    </form>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
             <div class="analysis panel panel-default">
                 <div class="panel-body">
-                    <img src="{% static 'img/histogram.png' %}" alt="Scatter Plot">
+                    <img class="img-fluid" src="{% static 'img/histogram.png' %}" alt="Scatter Plot">
                     <h5>Scatter Plot</h5>
                     <p>Short Description</p>
-                    <a href="">Start A New Workbook with Scatter Plot</a>
+                    <form action="{% url 'worksheet_create_with_analysis' 0 %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-default">Start A New Workbook with Scatter Plot</button>
+                    </form>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
             <div class="analysis panel panel-default">
                 <div class="panel-body">
-                    <img src="{% static 'img/histogram.png' %}" alt="Violin Plot">
+                    <img class="img-fluid" src="{% static 'img/histogram.png' %}" alt="Violin Plot">
                     <h5>Violin Plot</h5>
                     <p>Short Description</p>
-                    <a href="">Start A New Workbook with Violin Plot</a>
+                    <form action="{% url 'worksheet_create_with_analysis' 0 %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-default">Start A New Workbook with Violin Plot</button>
+                    </form>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
             <div class="analysis panel panel-default">
                 <div class="panel-body">
-                    <img src="{% static 'img/histogram.png' %}" alt="Violin Plot 2">
+                    <img class="img-fluid" src="{% static 'img/histogram.png' %}" alt="Violin Plot 2">
                     <h5>Violin Plot 2</h5>
                     <p>Short Description</p>
-                    <a href="">Start A New Workbook with Violin Plot 2</a>
+                    <form action="{% url 'worksheet_create_with_analysis' 0 %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-default">Start A New Workbook with Violin Plot 2</button>
+                    </form>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
             <div class="analysis panel panel-default">
                 <div class="panel-body">
-                    <img src="{% static 'img/histogram.png' %}" alt="Cubby Hole">
+                    <img class="img-fluid" src="{% static 'img/histogram.png' %}" alt="Cubby Hole">
                     <h5>Cubby Hole</h5>
                     <p>Short Description</p>
-                    <a href="">Start A New Workbook with Cubby Hole</a>
+                    <form action="{% url 'worksheet_create_with_analysis' 0 %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-default">Start A New Workbook with Cubby Hole</button>
+                    </form>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
             <div class="analysis panel panel-default">
                 <div class="panel-body">
-                    <img src="{% static 'img/seqpeak.png' %}" alt="SeqPeak">
+                    <img class="img-fluid" src="{% static 'img/seqpeak.png' %}" alt="SeqPeak">
                     <h5>SeqPeak</h5>
                     <p>This visualization shows where somatic mutations have been observed on a linear representation of a specific protein.  Each horizontal strip represents the protein, with data from different tumor types (aka cohorts or studies) shown stacked one on top of the other. </p>
-                    <a href="">Start A New Workbook with SeqPeak</a>
+                    <form action="{% url 'worksheet_create_with_analysis' 0 %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-default">Start A New Workbook with SeqPeak</button>
+                    </form>
                 </div>
             </div>
         </div>

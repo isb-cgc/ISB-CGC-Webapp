@@ -187,3 +187,10 @@ def active(list, key=None):
     if not key:
         return list.filter(active=True)
     return list.filter(**{key + '__active':True})
+
+@register.filter
+def is_public(list, key=None):
+    print key
+    if not key:
+        return list.filter(is_public=True)
+    return list.filter(**{key + '__is_public':True})
