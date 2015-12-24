@@ -91,12 +91,14 @@ def variable_fav_detail(request, variable_fav_id):
     template = 'variables/variable_detail.html'
     context = {
         'variables': {
+            'id': 1,
             'name': 'My Favorite Variables',
             'list': [{
                 'parent': 'Gender',
                 'identifier': 'Female'
             },{
-                'parent': ''
+                'parent': 'Age',
+                'identifier':'50-59'
             }]
         }
     }

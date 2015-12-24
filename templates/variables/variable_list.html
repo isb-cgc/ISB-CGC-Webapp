@@ -43,8 +43,8 @@
                                         <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
                                         <ul class="dropdown-menu">
                                             <li><a href="{% url 'variable_fav_edit' favorite.id %}">Edit</a> </li>
-                                            <li data-toggle="modal" role="button" data-target="#delete-favorite-modal-{{ favorite.id }}" role="button">Delete</li>
-                                            <li data-toggle="modal" role="button" data-target="#new-favorite-workbook-modal-{{ favorite.id }}" role="button">Start New Workbook</a></li>
+                                            <li><a data-toggle="modal" role="button" data-target="#delete-favorite-modal-{{ favorite.id }}" >Delete</a></li>
+                                            <li><a data-toggle="modal" role="button" data-target="#new-favorite-workbook-modal-{{ favorite.id }}" >Start New Workbook</a></li>
                                         </ul>
                                     </div>
                                 </td>
