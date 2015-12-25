@@ -285,3 +285,15 @@ class METHFeatureProvider(object):
         self.feature_def = METHFeatureDef.from_feature_id(feature_id)
         self.table_name = self.get_table_name_from_feature_def(self.feature_def)
 
+    @classmethod
+    def is_valid_feature_id(cls, feature_id):
+        is_valid = False
+        try:
+            METHFeatureDef.from_feature_id(feature_id)
+            is_valid = True
+        except Exception:
+            # METHFeatureDef.from_feature_id raises Exception if the feature identifier
+            # is not valid. Nothing needs to be done here, since is_valid is already False.
+            pass
+        finally:
+            return is_valid

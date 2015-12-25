@@ -196,4 +196,15 @@ class GEXPFeatureProvider(object):
         table_info = self.get_table_info(self.feature_def.table_id)
         self.table_name = table_info['table_id']
 
-
+    @classmethod
+    def is_valid_feature_id(cls, feature_id):
+        is_valid = False
+        try:
+            GEXPFeatureDef.from_feature_id(feature_id)
+            is_valid = True
+        except Exception:
+            # GEXPFeatureDef.from_feature_id raises Exception if the feature identifier
+            # is not valid. Nothing needs to be done here, since is_valid is already False.
+            pass
+        finally:
+            return is_valid

@@ -143,3 +143,15 @@ class RPPAFeatureProvider(object):
         self.feature_def = RPPAFeatureDef.from_feature_id(feature_id)
         self.table_name = self.TABLES[0]['name']
 
+    @classmethod
+    def is_valid_feature_id(cls, feature_id):
+        is_valid = False
+        try:
+            RPPAFeatureDef.from_feature_id(feature_id)
+            is_valid = True
+        except Exception:
+            # RPPAFeatureDef.from_feature_id raises Exception if the feature identifier
+            # is not valid. Nothing needs to be done here, since is_valid is already False.
+            pass
+        finally:
+            return is_valid

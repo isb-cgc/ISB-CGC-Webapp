@@ -92,6 +92,7 @@ class ClinicalFeatureProvider(object):
 
     def __init__(self, feature_id):
         self.table_name = ''
+        self.feature_def = None
         self.parse_internal_feature_id(feature_id)
 
     def get_value_type(self):
@@ -206,3 +207,16 @@ class ClinicalFeatureProvider(object):
     def parse_internal_feature_id(self, feature_id):
         self.feature_def = ClinicalFeatureDef.from_feature_id(feature_id)
         self.table_name = self.get_table_name()
+
+    @classmethod
+    def is_valid_feature_id(cls, feature_id):
+        is_valid = False
+        try:
+            ClinicalFeatureDef.from_feature_id(feature_id)
+            is_valid = True
+        except Exception:
+            # ClinicalFeatureDef.from_feature_id raises Exception if the feature identifier
+            # is not valid. Nothing needs to be done here, since is_valid is already False.
+            pass
+        finally:
+            return is_valid

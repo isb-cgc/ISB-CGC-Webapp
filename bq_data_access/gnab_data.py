@@ -165,3 +165,16 @@ class GNABFeatureProvider(object):
             raise FeatureNotFoundException(feature_id)
 
         self.table_name = self.table_info['name']
+
+    @classmethod
+    def is_valid_feature_id(cls, feature_id):
+        is_valid = False
+        try:
+            GNABFeatureDef.from_feature_id(feature_id)
+            is_valid = True
+        except Exception:
+            # GNABFeatureDef.from_feature_id raises Exception if the feature identifier
+            # is not valid. Nothing needs to be done here, since is_valid is already False.
+            pass
+        finally:
+            return is_valid

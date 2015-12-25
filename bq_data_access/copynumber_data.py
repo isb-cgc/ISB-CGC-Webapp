@@ -167,3 +167,16 @@ class CNVRFeatureProvider(object):
     def parse_internal_feature_id(self, feature_id):
         self.feature_def = CNVRFeatureDef.from_feature_id(feature_id)
         self.table_name = self.get_table_name()
+
+    @classmethod
+    def is_valid_feature_id(cls, feature_id):
+        is_valid = False
+        try:
+            CNVRFeatureDef.from_feature_id(feature_id)
+            is_valid = True
+        except Exception:
+            # CNVRFeatureDef.from_feature_id raises Exception if the feature identifier
+            # is not valid. Nothing needs to be done here, since is_valid is already False.
+            pass
+        finally:
+            return is_valid
