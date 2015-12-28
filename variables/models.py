@@ -7,7 +7,7 @@ from projects.models import Project, Study
 
 from django.conf import settings
 
-class VariableFavoriteManager(models.Manager):
+class FavoriteManager(models.Manager):
     content = "null"
 
 class VariableFavorite(models.Model):
@@ -16,10 +16,10 @@ class VariableFavorite(models.Model):
     user = models.ForeignKey(User, null=False, blank=False)
     active = models.BooleanField(default=True)
     last_date_saved = models.DateTimeField(auto_now_add=True)
-    objects = VariableFavoriteManager()
+    objects = FavoriteManager()
 
     '''
-    Sets the last viewed time for a cohort
+    Sets the last viewed time for a variable
     '''
     def mark_viewed (self, request, user=None):
         if user is None:

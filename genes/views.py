@@ -9,6 +9,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.views.decorators.csrf import csrf_protect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from models import GeneFavorite
 from django.contrib.auth.models import User
 from django.conf import settings
 
@@ -25,22 +26,22 @@ GENES_FAVS = [{
         }]
 
 @login_required
-def genes_list(request):
+def gene_fav_list(request):
     template = 'genes/genes_list.html'
-    context = {
-        'genes_favs': GENES_FAVS
-    }
-    return render(request, template, {'genes_favs': GENES_FAVS})
+
+    gene_list = GeneFavorite.get_list(request.user)
+
+    return render(request, template, {'genes_favs': gene_list})
 
 @login_required
-def genes_detail(request, genes_id):
+def gene_fav_detail(request, gene_fav_id):
     template = 'genes/genes_detail.html'
     context = {}
 
     try:
         # Find the gene favorite objects
         for genes_fav in GENES_FAVS:
-            if genes_fav['id'] == int(genes_id):
+            if genes_fav['id'] == int(gene_fav_id):
                 context['genes_detail'] = genes_fav
     except ObjectDoesNotExist:
         # Cohort doesn't exist, return to user landing with error.
@@ -50,27 +51,69 @@ def genes_detail(request, genes_id):
     return render(request, template, context)
 
 @login_required
-def genes_list_edit(request, genes_id=0):
+def gene_fav_edit(request, gene_fav_id=0):
     template = 'genes/genes_edit.html'
+    context = {
+        'genes_id': gene_fav_id,
+        'genes_detail': '',
+    }
+
+    if(gene_fav_id != 0):
+        try:
+            # Find the gene favorite objects
+            for genes_fav in GENES_FAVS:
+                if genes_fav['id'] == int(gene_fav_id):
+                    context['genes_detail'] = genes_fav
+        except ObjectDoesNotExist:
+            messages.error(request, 'The genes favorite you were looking for does not exist.')
+            return redirect('genes_list')
+    return render(request, template, context)
+
+def gene_fav_delete(request, gene_fav_id):
+    template = 'genes/genes_upload.html'
+    context = {
+        'genes_id': gene_fav_id,
+        'genes_detail': '',
+    }
+
+
+    return render(request, template, context)
+
+@login_required
+def gene_fav_save(request, genes_id=0):
+    template = 'genes/genes_upload.html'
+    context = {
+        'genes_id': gene_fav_id,
+        'genes_detail': '',
+    }
+
+
+    return render(request, template, context)
+
+@login_required
+def gene_fav_upload(request, genes_id=0):
+    template = 'genes/genes_upload.html'
     context = {
         'genes_id': genes_id,
         'genes_detail': '',
     }
 
-    if(genes_id != 0):
-        try:
-            # Find the gene favorite objects
-            for genes_fav in GENES_FAVS:
-                if genes_fav['id'] == int(genes_id):
-                    context['genes_detail'] = genes_fav
-        except ObjectDoesNotExist:
-            # Cohort doesn't exist, return to user landing with error.
-            messages.error(request, 'The genes favorite you were looking for does not exist.')
-            return redirect('genes_list')
+
     return render(request, template, context)
 
 @login_required
-def genes_upload(request, genes_id=0):
+def gene_select_for_existing_workbook(request, workbook_id=0, worksheet_id=0):
+    template = 'genes/genes_upload.html'
+    context = {
+        'genes_id': genes_id,
+        'genes_detail': '',
+    }
+
+
+    return render(request, template, context)
+
+@login_required
+def gene_select_for_new_workbook(request):
     template = 'genes/genes_upload.html'
     context = {
         'genes_id': genes_id,
