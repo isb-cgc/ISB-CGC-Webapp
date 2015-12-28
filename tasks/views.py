@@ -341,7 +341,11 @@ def CloudSQL_logging(request):
     if i == 2:
         output = child.read()
         date_start_char = output.find('#1')
-        date_str = output[date_start_char+1:date_start_char+7]
+        if date_start_char:  # if date_star_char is not zero
+            date_str = output[date_start_char+1:date_start_char+7]
+        else:
+            utc_now = datetime.datetime.utcnow()
+            date_str = str(utc_now.year)[2:] + str(utc_now.month) + str(utc_now.day-1) + '?'
         storage_service = get_storage_resource()
         media = http.MediaIoBaseUpload(io.BytesIO(output), 'text/plain')
         filename = 'cloudsql_activity_log_' + date_str + '.txt'

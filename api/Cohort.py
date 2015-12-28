@@ -786,7 +786,9 @@ class Cohort_Endpoints_API(remote.Service):
                         err_msg = "User {} does not have permissions on cohort {}. Error: {}"\
                             .format(user_email, cohort_id, e)
                     raise endpoints.UnauthorizedException(err_msg)
-                query_str += 'WHERE SampleBarcode IN (SELECT SampleBarcode FROM cohorts_samples WHERE cohort_id=%s) '
+                # query_str += 'WHERE SampleBarcode IN (SELECT sample_id FROM cohorts_samples WHERE cohort_id=%s) '
+                query_str += 'JOIN cohorts_samples ON metadata_data.SampleBarcode=cohorts_samples.sample_id ' \
+                             'WHERE cohorts_samples.cohort_id=%s '
                 query_tuple = (cohort_id,)
             elif sample_barcode:
                 query_str += 'WHERE SampleBarcode=%s '
@@ -1085,7 +1087,9 @@ class Cohort_Endpoints_API(remote.Service):
                 if user_cursor: user_cursor.close()
                 if db and db.open: db.close()
 
-            query_str += 'WHERE SampleBarcode IN (SELECT SampleBarcode FROM cohorts_samples WHERE cohort_id=%s) '
+            # query_str += 'WHERE SampleBarcode IN (SELECT sample_id FROM cohorts_samples WHERE cohort_id=%s) '
+            query_str += 'JOIN cohorts_samples ON metadata_data.SampleBarcode=cohorts_samples.sample_id ' \
+                         'WHERE cohorts_samples.cohort_id=%s '
             query_tuple = (cohort_id,)
         elif sample_barcode:
             query_str += 'WHERE SampleBarcode=%s '
