@@ -26,7 +26,6 @@
             <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
             <li><a href="{% url 'variables' %}">Saved Variable Favorites</a></li>
         {% endif %}
-    </ol>
     {% csrf_token %}
     {% if workbook %}
         {# USECASE 1: ADD VAR LIST TO EXISTING WORKBOOK #}

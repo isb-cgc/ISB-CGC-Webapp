@@ -1,4 +1,11 @@
 .list-group
+  *[data-toggle="collapse"][aria-expanded="false"]
+    .fa-caret-down
+        display: none
+  *[data-toggle="collapse"][aria-expanded="true"]
+    .fa-caret-right
+        display: none
+
   .list-group-item
     border: 1px solid transparent
     border-top: 1px solid darken($white, 15%)
@@ -52,3 +59,32 @@
   
 .extra-values
   display: none
+
+.table-list, .table-list_warning
+  a:hover, a:active
+    text-decoration: none
+  .list-title
+    font-size: $font-size
+    font-weight: $bold-font-weight
+    margin-bottom: 0
+    color: $isb-dark
+  .list-main
+    display: inline-block
+    vertical-align: middle
+    width: 70%
+    p
+      color: $font-color
+  .list-info
+    display: inline-block
+    vertical-align: middle
+    width: 29%
+    color: $isb-dark
+    font-size: $font-size-small
+  li
+    @extend %clearfix
+    padding: 5px 15px
+    background: lighten($isb-dark, 55%)
+    margin-bottom: 1px
+    border-left: 3px solid $isb-warning
+    &:hover
+      background: lighten($info-bgcolor, 3%)

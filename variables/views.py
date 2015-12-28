@@ -92,15 +92,20 @@ def variable_fav_detail(request, variable_fav_id):
     template = 'variables/variable_detail.html'
     context = {
         'variables': {
+            'id': 1,
             'name': 'My Favorite Variables',
             'list': [{
                 'parent': 'Gender',
                 'identifier': 'Female'
             },{
-                'parent': ''
+                'parent': 'Age',
+                'identifier':'50-59'
             }]
         }
     }
+    variable_fav = VariableFavorite.get_deep(variable_fav_id)
+
+    variable_fav.mark_viewed(request)
     return render(request, template, context)
 
 #called via workbooks for the selected variables to be added to a workbook
@@ -213,13 +218,16 @@ def initialize_variable_selection_page(request,
             if field['label'] == "Gene":
                 del type['fields'][index]
 
-    #get user projects
+    #get user projects and variables
     ownedProjects = request.user.project_set.all().filter(active=True)
     sharedProjects = Project.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
     projects = ownedProjects | sharedProjects
     projects = projects.distinct()
     for project in projects:
-	    project.studies = project.study_set.all().filter(active=True)
+        project.studies = project.study_set.all().filter(active=True)
+        for study in project.studies:
+            study.variables = study.user_feature_definitions_set.all()
+            #TODO need to list feature_name and not name
 
     #get user favorites
     favorite_list = VariableFavorite.get_list(user=request.user)

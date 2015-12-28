@@ -8,11 +8,11 @@ from django.db.models import Q
 from django.http import JsonResponse, HttpResponseNotFound
 from django.conf import settings
 from django.db import connection
-from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from data_upload.models import UserUpload, UserUploadedFile
 from projects.models import User_Feature_Definitions, Project
 from sharing.service import create_share
+from google.appengine.api.mail import send_mail
 
 import json
 import requests
@@ -40,14 +40,15 @@ def project_detail(request, project_id=0):
 
     ownedProjects = request.user.project_set.all().filter(active=True)
     sharedProjects = Project.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
+    publicProjects = Project.objects.all().filter(is_public=True,active=True)
 
-    projects = ownedProjects | sharedProjects
+    projects = ownedProjects | sharedProjects | publicProjects
     projects = projects.distinct()
 
     proj = projects.get(id=project_id)
 
     shared = None
-    if proj.owner.id != request.user.id:
+    if proj.owner.id != request.user.id and not proj.is_public:
         shared = request.user.shared_resource_set.get(project__id=project_id)
 
     proj.mark_viewed(request)
@@ -60,11 +61,15 @@ def project_detail(request, project_id=0):
 
 @login_required
 def request_project(request):
-    send_mail('User has requested a Google Project', '''
+    send_mail(
+            'request@' + settings.PROJECT_NAME + '.appspotmail.com',
+            settings.REQUEST_PROJECT_EMAIL,
+            'User has requested a Google Project',
+            '''
 The user %s has requested a new Google Project be created. Here is their message:
 
 %s
-    ''' % (request.user.email, request.POST['message']), request.user.email, [settings.REQUEST_PROJECT_EMAIL])
+    ''' % (request.user.email, request.POST['message']))
 
     template = 'projects/project_request.html'
     context = {
