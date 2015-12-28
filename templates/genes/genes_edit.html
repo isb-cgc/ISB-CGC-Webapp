@@ -27,14 +27,14 @@
             <form action="">
                 <div class="form-group">
                     <label for="genes-name">Name of Favorite (Required)</label>
-                    <input class="form-control" type="text" value="{% if 'genes_detail' %}{{genes_detail.name}}{% endif %} " name="genes-name" required>
+                    <input class="form-control" type="text" value="{% if 'gene_fav_detail' %}{{genes_detail.name}}{% endif %} " name="genes-name" required>
                 </div>
 
                 <div class="form-group">
                     <label for="genes-list">Selected Genes (required)</label>
                     <button class="btn btn-link" id="clearAll">Clear All</button>
                     <span> | </span>
-                    <a href="{% url 'genes_upload' genes_id %}" class="btn btn-link">Upload Gene List</a>
+                    <a href="{% url 'gene_fav_upload' %}" class="btn btn-link">Upload Gene List</a>
                     <div id="tokenfield-holder">
                         <input type="text" name="genes-list" class="form-control tokenfield"  id="geneListField"  placeholder="Enter your favorite gene's name" required>
                     </div>
@@ -49,7 +49,7 @@
                         <li role="menuitem"><a href="{% url 'genes' %}">Cancel</a></li>
                     {% else %}
                         <li role="menuitem"><submit class="btn btn-primary">Save Changes</submit></li>
-                        <li role="menuitem"><menuitem class="btn btn-link"><a href="{% url 'genes_detail' 0 %}">Cancel</a></menuitem></li>
+                        <li role="menuitem"><menuitem class="btn btn-link"><a href="{% url 'gene_fav_detail' 0 %}">Cancel</a></menuitem></li>
                     {% endif %}
                     <menuitem class="btn btn-link pull-right"><a href="">View System Gene Identifiers</a></menuitem>
                 </ul>
