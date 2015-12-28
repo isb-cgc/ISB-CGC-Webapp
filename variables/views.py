@@ -238,6 +238,8 @@ def initialize_variable_selection_page(request,
         else:
             variable_list[key] = sorted(value, key=lambda k: int(k['count']), reverse=True)
 
+    # users can select from their saved variable favorites
+    variable_favorites = VariableFavorite.get_list(request.user)
     context = {
         'variable_names'        : variable_list.keys(),
         'variable_list_count'   : variable_list,
@@ -252,6 +254,7 @@ def initialize_variable_selection_page(request,
         'base_api_url'          : settings.BASE_API_URL,
         'TCGA_project'          : TCGA_project,
         'common_project'        : common_project,
+        'variable_favorites'    : variable_favorites
     }
 
     # USECASE 1: ADD VAR LIST TO EXISTING WORKBOOK
