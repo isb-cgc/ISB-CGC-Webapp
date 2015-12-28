@@ -27,12 +27,27 @@
 
 {% block page_header %}
 <div class="container">
-    <ol class="breadcrumb">
-        <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
-        <li><a href="{% url 'cohort_list' %}">Cohorts</a></li>
-    </ol>
+    {% if workbook %}
+        <ol class="breadcrumb">
+            <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+            <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
+            <li><a href="{% url 'worksheet_display' workbook.id worksheet.id%}">{{ workbook.name }}</a></li>
+        </ol>
+    {% else %}
+        <ol class="breadcrumb">
+            <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+            <li><a href="{% url 'cohort_list' %}">Cohorts</a></li>
+        </ol>
+    {% endif %}
     <h1 class="page-header pull-left">Create Cohort</h1>
-    <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal">Save As New Cohort</button>
+    {% if workbook %}
+        <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal">Apply to Worksheet</button>
+    {% elif create_workbook %}
+        <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal">Apply to new Worksheet</button>
+    {% else %}
+        <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal">Save As New Cohort</button>
+    {% endif %}
+
 </div>
 {% endblock %}
 
@@ -209,7 +224,15 @@
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <h4 class="modal-title" id="createCohortModal">Create Cohort</h4>
                 </div>
-                <form id="create-cohort-form" method="POST" action="{% url 'save_cohort' %}">
+                {% if workbook and worksheet %}
+                    <form id="create-cohort-form" method="POST" action="{% url 'save_cohort_for_existing_workbook' %}" >
+                    <input type="hidden" value="{{ worksheet.id }}" name="worksheet_id" />
+                    <input type="hidden" value="{{ workbook.id }}" name="workbook_id" />
+                {% elif create_workbook %}
+                    <form id="create-cohort-form" method="POST" action="{% url 'save_cohort_for_new_workbook' %}" >
+                {% else %}
+                    <form id="create-cohort-form" method="POST" action="{% url 'save_cohort' %}">
+                {% endif %}
                     <div class="modal-body">
                         <div class="form-group">
                             <label for="cohort-name">Name:</label>

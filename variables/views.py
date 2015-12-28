@@ -10,6 +10,7 @@ from django.contrib.auth.models import User
 from bq_data_access.feature_search.util import SearchableFieldHelper
 from models import VariableFavorite
 from workbooks.models import Workbook, Worksheet
+from projects.models import Project, Study
 
 from google.appengine.api import urlfetch
 from django.conf import settings
@@ -217,14 +218,40 @@ def initialize_variable_selection_page(request,
             if field['label'] == "Gene":
                 del type['fields'][index]
 
-    #stub
-    projects = []#request.user.project_set.all().filter(active=True)
-    for proj in projects :
-        proj.studies = proj.study_set.all().filter(active=True)
+    #get user projects and variables
+    ownedProjects = request.user.project_set.all().filter(active=True)
+    sharedProjects = Project.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
+    projects = ownedProjects | sharedProjects
+    projects = projects.distinct()
+    for project in projects:
+        project.studies = project.study_set.all().filter(active=True)
+        for study in project.studies:
+            study.variables = study.user_feature_definitions_set.all()
+            #TODO need to list feature_name and not name
+
+    #get user favorites
+    favorite_list = VariableFavorite.get_list(user=request.user)
+    for fav in favorite_list :
+        fav.variables = fav.get_variables()
 
     #stubbed data for populating the variable list model
-    TCGA_project    = {"id" : -1, "study" : {"id" :-1, "name" : ""}, "name" : "TCGA"};
-    common_project  = {"id" : -1, "study" : {"id" :-1, "name" : ""}, "variables" : ["Gender", "Sex", "Height", "Weight"], "name" : "Common"};
+    TCGA_project    = {"id" : -1, "study" : {"id" :-1, "name" : ""}, "name" : "TCGA"}
+    common_project  = {"id" : -1, "study" : {"id" :-1, "name" : ""}, "name" : "Common", "variables" : [
+        "Vital Status",
+        "Gender",
+        "Age at Diagnosis",
+        "Sample Type Code",
+        "Tumor Tissue Site",
+        "Histological Type",
+        "Prior Diagnosis",
+        "Tumor Status",
+        "New Tumor Event After Initial Treatment",
+        "Histological Grade",
+        "Residual Tumor",
+        "Tobacco Smoking History",
+        "ICD-10",
+        "ICD-O-3 Site",
+        "ICD-O-3 Histology"]}
 
     data_url = METADATA_API + '/metadata_counts?'
     results = urlfetch.fetch(data_url, deadline=60)
@@ -236,15 +263,16 @@ def initialize_variable_selection_page(request,
     variable_list['RNA_sequencing'] = []
     variable_list['miRNA_sequencing'] = []
     variable_list['DNA_methylation'] = []
-    for key, value in variable_list.items():
-        if key.startswith('has_'):
-            data_availability_sort(key, value, data_attr, variable_list)
-        else:
-            variable_list[key] = sorted(value, key=lambda k: int(k['count']), reverse=True)
+    # for key, value in variable_list.items():
+    #     if key.startswith('has_'):
+    #         data_availability_sort(key, value, data_attr, variable_list)
+    #     else:
+    #         variable_list[key] = sorted(value, key=lambda k: int(k['count']), reverse=True)
 
     context = {
         'variable_names'        : variable_list.keys(),
         'variable_list_count'   : variable_list,
+        'favorite_list'         : favorite_list,
         'datatype_list'         : datatype_list,
         'projects'              : projects,
 

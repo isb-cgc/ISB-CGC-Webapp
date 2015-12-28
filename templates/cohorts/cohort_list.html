@@ -36,7 +36,8 @@
             <div role="tabpanel" class="tab-pane active" id="save-cohorts-list">
                 {% if cohorts.has_private_cohorts %}
                     <div class="page-action-group">
-                        <li role="menuitem"><button class="btn btn-default">New Workbook</button></li>
+                        <li role="menuitem">
+                            <button id="createWorkbookWithCohort" class="btn btn-primary">New Workbook</button>
                         <li class="separator"></li>
                         <li role="menuitem">
                             <button id='delete-cohorts' type="button" class="btn btn-info" data-toggle="modal" data-target="#delete-cohorts-modal" aria-label="delete-cohorts" role="button" aria-expanded="true">

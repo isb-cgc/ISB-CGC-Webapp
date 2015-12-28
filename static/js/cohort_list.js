@@ -387,5 +387,51 @@ require([
         return false;
     });
 
+    $("#createWorkbookWithCohort").on("click", function(){
+        //get the selected cohort
+        var cohorts = [];
+        $('#cohorts-list input[type="checkbox"]').each(function() {
+            if ($(this).is(':checked') && $(this).val() != 'on') {
+                cohorts.push($(this).val());
+            }
+        });
 
+        if(cohorts.length > 0){
+            var csrftoken = get_cookie('csrftoken');
+            $.ajax({
+                type: 'POST',
+                dataType :'json',
+                url : base_url + '/workbooks/create_with_cohort_list',
+                data: JSON.stringify({cohorts : cohorts}),
+                beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+                success: function (data) {
+                    if(!data.error) {
+                        window.location = base_url + '/workbooks/' + data.workbook_id + '/worksheets/' + data.worksheet_id + '/';
+                    } else {
+                        console.log('Failed to create workbook with cohorts.');
+                    }
+                },
+                error: function () {
+                    console.log('Failed to create workbook with cohorts.');
+                }
+            });
+        }
+    })
+
+    //TODO this should be moved to a shared library
+    function get_cookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
 });
