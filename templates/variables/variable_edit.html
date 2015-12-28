@@ -127,7 +127,7 @@
                                     {% endfor %}
                                 </ul>
                             </div>
-                            <div role="tabpanel" class="tab-pane" id="favorites">
+                            <div role="tabpanel" class="tab-pane filter-panel" id="favorites">
                                 <ul class="list-group" id="clin-accordion" role="tablist" aria-multiselectable="true">
                                     {% for fav in favorite_list %}
                                         <li class="list-group-item">
@@ -138,10 +138,10 @@
                                             </div>
 
                                             <div id="collapse-{{ fav.id }}" class="list-group-item__body collapse" role="tabpanel" aria-labelledby="heading-{{ fav.id }}">
-                                                <ul class="list-group" id="clin-accordion" role="tablist" aria-multiselectable="true">
+                                                <ul class="search-checkbox-list" id="clin-accordion" role="tablist" aria-multiselectable="true">
                                                     {% for var in fav.variables %}
-                                                        <li class="list-group-item checkbox">
-                                                            <div id="heading-{{ var.id }}" class="list-group-item__heading">
+                                                        <li class="checkbox">
+                                                            <div id="heading-{{ var.id }}">
                                                                 <label for="{{ var.name }}">
                                                                     <input type="checkbox" value="{{ var.name }}" name="elements-selected" variable_name="{{ var.name }}" project_name="{{ var.project.name }}" project="{{ var.project.id }}" study_name="{{ var.study.name }} "study="{{ var.study.id }}">
                                                                     {{ var.name }}
@@ -155,11 +155,11 @@
                                     {% endfor %}
                                 </ul>
 
-                                <div>
+                                <div class="tab-content">
                                     <a href="{% url 'variables' %}">Manage Saved Favorites ({{ favorite_list | length }})</a>
                                 </div>
                             </div>
-                            <div role="tabpanel" class="tab-pane" id="datatypes">
+                            <div role="tabpanel" class="tab-pane filter-panel" id="datatypes">
                                 <ul class="list-group" id="clin-accordion" role="tablist" aria-multiselectable="true">
                                     {% for type in datatype_list %}
                                         <li class="list-group-item">
