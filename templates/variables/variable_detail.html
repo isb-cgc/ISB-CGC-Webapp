@@ -41,8 +41,9 @@
                     <li role="menuitem"><a data-toggle="modal" data-target="#delete-favorite-modal" class="btn btn-info">Delete</a></li>
                     <li class="separator"></li>
                     <li role="menuitem">
-                        <form action="{% url 'worksheet_create_with_variables' variables.id %}">
+                        <form action="{% url 'worksheet_create_with_variables' %}">
                             {% csrf_token %}
+                            <input type="hidden" name="variable_id" value="{{ variable.id }}">
                             <button class="btn btn-default" type="submit">Start New Workbook</button>
                         </form>
                     </li>

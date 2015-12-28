@@ -39,6 +39,7 @@ from google.appengine.api import urlfetch
 from allauth.socialaccount.models import SocialToken
 
 from models import Cohort, Patients, Samples, Cohort_Perms, Source, Filters, Cohort_Comments
+from workbooks.models import Workbook, Worksheet
 from visualizations.models import Plot_Cohorts, Plot
 from bq_data_access.cohort_bigquery import BigQueryCohortSupport
 
@@ -161,7 +162,15 @@ def cohorts_list(request):
                                                         })
 
 @login_required
-def cohort_detail(request, cohort_id=0):
+def cohort_select_for_new_workbook(request):
+    return cohort_detail(request=request, cohort_id=0, workbook_id=0, worksheet_id=0, create_workbook=True)
+
+@login_required
+def cohort_select_for_existing_workbook(request, workbook_id, worksheet_id):
+    return cohort_detail(request=request, cohort_id=0, workbook_id=workbook_id, worksheet_id=worksheet_id)
+
+@login_required
+def cohort_detail(request, cohort_id=0, workbook_id=0, worksheet_id=0, create_workbook=False):
     if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     users = User.objects.filter(is_superuser=0)
     cohort = None
@@ -253,6 +262,12 @@ def cohort_detail(request, cohort_id=0):
         'base_url': settings.BASE_URL,
         'base_api_url': settings.BASE_API_URL
     }
+    if workbook_id and worksheet_id :
+        template_values['workbook']  = Workbook.objects.get(id=workbook_id)
+        template_values['worksheet'] = Worksheet.objects.get(id=worksheet_id)
+    elif create_workbook:
+        template_values['create_workbook'] = True
+
     template = 'cohorts/new_cohort.html'
 
     if cohort_id != 0:
@@ -282,6 +297,21 @@ def cohort_detail(request, cohort_id=0):
     return render(request, template, template_values)
 
 '''
+Saves a cohort, adds the new cohort to an existing worksheet, then redirected back to the worksheet display
+'''
+@login_required
+def save_cohort_for_existing_workbook(request):
+    return save_cohort(request=request, workbook_id=request.POST.get('workbook_id'), worksheet_id=request.POST.get("worksheet_id"))
+
+'''
+Saves a cohort, adds the new cohort to a new worksheet, then redirected back to the worksheet display
+'''
+@login_required
+def save_cohort_for_new_workbook(request):
+    return save_cohort(request=request, workbook_id=None, worksheet_id=None, create_workbook=True)
+
+
+'''
 This save view only works coming from cohort editing or creation views.
 - only ever one source coming in
 - filters optional
@@ -289,8 +319,9 @@ This save view only works coming from cohort editing or creation views.
 # TODO: Create new view to save cohorts from visualizations
 @login_required
 @csrf_protect
-def save_cohort(request):
+def save_cohort(request, workbook_id, worksheet_id, create_workbook=False):
     if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+
     redirect_url = reverse('cohort_list')
 
     samples = []
@@ -385,6 +416,15 @@ def save_cohort(request):
         else:
             redirect_url = reverse('cohort_list')
             messages.info(request, 'Cohort, %s, created successfully.' % cohort.name)
+
+        if workbook_id and worksheet_id :
+            Worksheet.objects.get(id=worksheet_id).add_cohort(cohort)
+            redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id' : worksheet_id})
+        elif create_workbook :
+            workbook_model  = Workbook.create("default name", "This is a default workbook description", request.user)
+            worksheet_model = Worksheet.create(workbook_model.id, "worksheet 1","This is a default description")
+            worksheet_model.add_cohort(cohort)
+            redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_model.id, 'worksheet_id' : worksheet_model.id})
 
     return redirect(redirect_url) # redirect to search/ with search parameters just saved
 

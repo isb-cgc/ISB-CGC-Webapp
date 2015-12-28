@@ -131,21 +131,43 @@
                                     <div class="list-item__heading">
                                         <a href="{% url 'variable_select_for_existing_workbook' workbook.id worksheet.id %}">Variables <i class="fa fa-plus pull-right"></i></a>
                                     </div>
+                                    {% if worksheet.variables %}
                                     <ul class="list-item__body">
-                                        {% for variable in worksheet.variables %}
-                                            <li class="sublist-item">{{ variable.name }}</li>
-                                        {% endfor %}
+                                        {% with worksheet.variables|how_many_more:6 as num_more  %}
+                                            {% for variable in worksheet.variables %}
+                                                {% if forlook.counter0 < 6 %}
+                                                    <li class="sublist-item">{{ variable.name|upper }}</li>
+                                                {% elif forloop.counter0 == 6 and num_more > 0 %}
+                                                    <a class="show-more">{{num_more}} more</a>
+                                                    <li class="extra-values sublist-item">{{ variable.name|upper }}</li>
+                                                {% endif %}
+                                            {% endfor %}
+                                            {% if num_more > 0 %}
+                                                <a class="show-less" style="display:none;">Show Less</a>
+                                            {% endif %}
+                                        {% endwith %}
                                     </ul>
+                                    {% endif %}
                                 </li>
                                 <li class="list-item">
                                     <div class="list-item__heading">
-                                        <a href="{% url 'cohort_list'  %}">Cohorts <i class="fa fa-plus pull-right"></i></a>
+                                        <a href="{% url 'cohort_select_for_existing_workbook' workbook.id worksheet.id %}"">Cohorts <i class="fa fa-plus pull-right"></i></a>
                                     </div>
                                     {% if worksheet.cohorts %}
                                     <ul class="list-item__body">
-                                        {% for cohort in worksheet.cohorts %}
-                                            <li class="sublist-item">{{ cohort.name }}</li>
-                                        {% endfor %}
+                                        {% with worksheet.cohorts|how_many_more:6 as num_more  %}
+                                            {% for cohort in worksheet.cohorts %}
+                                                {% if forlook.counter0 < 6 %}
+                                                    <li class="sublist-item">{{ cohort.name|upper }}</li>
+                                                {% elif forloop.counter0 == 6 and num_more > 0 %}
+                                                    <a class="show-more">{{num_more}} more</a>
+                                                    <li class="extra-values sublist-item">{{ cohort.name|upper }}</li>
+                                                {% endif %}
+                                            {% endfor %}
+                                            {% if num_more > 0 %}
+                                                <a class="show-less" style="display:none;">Show Less</a>
+                                            {% endif %}
+                                        {% endwith %}
                                     </ul>
                                     {% endif %}
                                 </li>
@@ -216,7 +238,7 @@
 <script type="text/javascript">
     var base_api_url = '{{ base_api_url|safe }}';
     var base_url = '{{ base_url|safe }}';
-    var display_worksheet =  '{{ display_worksheet.id|safe }}';
+    var display_worksheet = '{{ display_worksheet.id|safe }}';
 
     //plot specific variables
 {#    var plots_data = {{ plots_data|safe }};#}

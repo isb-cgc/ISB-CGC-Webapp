@@ -21,7 +21,6 @@ import os
 
 import secret_settings
 
-
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + os.sep
 DEBUG = secret_settings.get('DEBUG')
 TEMPLATE_DEBUG = DEBUG

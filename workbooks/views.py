@@ -10,7 +10,9 @@ from django.contrib.auth.models import User
 from django.http import StreamingHttpResponse
 from django.http import HttpResponse
 from models import Cohort, Workbook, Worksheet, Worksheet_comment, Workbook_Perms, Worksheet_variable, Worksheet_gene, Worksheet_cohort
-
+from variables.models import VariableFavorite
+from genes.models import GeneFavorite
+from projects.models import Project
 from django.conf import settings
 debug = settings.DEBUG
 if settings.DEBUG :
@@ -35,28 +37,83 @@ def workbook_samples(request):
     return render(request, template, {});
 
 @login_required
-def workbook_create_with_variables(request, variable_list_id=None):
-    workbook_model = Workbook.createDefault(name="Untitled Workbook", description="this is an untitled workbook. Click Edit Details to change your workbook title and description.", user=request.user)
+#TODO secure this url
+def workbook_create_with_variables(request):
+    variable_id     = request.POST.get('variable_list_id')
+    variable_list   = VariableFavorite.get(id=variable_id)
+    workbook_model  = Workbook.create(name="Untitled Workbook", description="This workbook was created with variable list \"" + variable_list.name + "\" added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
+    worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
+    Worksheet_variable.edit_list(workbook_id=workbook_model.id, worksheet_id=worksheet_model.id, variable_list=variable_list,user=request.user)
+
     redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_model.id})
     return redirect(redirect_url)
 
-def workbook_create_with_project(request, project_id=None):
-    workbook_model = Workbook.createDefault(name="Untitled Workbook", description="this is an untitled workbook. Click Edit Details to change your workbook title and description.", user=request.user)
+#TODO secure this url
+def workbook_create_with_genes(request):
+    gene_id         = request.POST.get('gene_list_id')
+    gene_list       = GeneFavorite.get(id=gene_id)
+    workbook_model  = Workbook.create(name="Untitled Workbook", description="This workbook was created with gene list \"" + gene_list.name + "\" added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
+    worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
+    Worksheet_gene.edit_list(workbook_id=workbook_model.id, worksheet_id=worksheet_model.id, gene_list=gene_list,user=request.user)
+
     redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_model.id})
     return redirect(redirect_url)
 
-def workbook_create_with_genes(request, gene_list_id=None):
-    workbook_model = Workbook.createDefault(name="Untitled Workbook", description="this is an untitled workbook. Click Edit Details to change your workbook title and description.", user=request.user)
+#TODO secure this url
+def workbook_create_with_cohort(request):
+    cohort_id       = request.POST.get('cohort_id')
+    cohort          = Cohort.objects.get(id=cohort_id)
+    workbook_model  = Workbook.create(name="Untitled Workbook", description="This workbook was created with cohort \"" + cohort.name + "\" added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
+    worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
+    worksheet_model.add_cohort(cohort=cohort)
+
     redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_model.id})
     return redirect(redirect_url)
 
-def workbook_create_with_cohort(request, cohort_id=None):
-    workbook_model = Workbook.createDefault(name="Untitled Workbook", description="this is an untitled workbook. Click Edit Details to change your workbook title and description.", user=request.user)
+def workbook_create_with_cohort_list(request):
+    cohort_ids = json.loads(request.body)['cohorts']
+    if len(cohort_ids) > 0 :
+        workbook_model  = Workbook.create(name="Untitled Workbook", description="This is a workbook created with cohorts added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
+        worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
+        for id in cohort_ids :
+            cohort = Cohort.objects.get(id=id)
+            worksheet_model.add_cohort(cohort=cohort)
+
+        result = {'workbook_id'  : workbook_model.id,
+                  'worksheet_id' : worksheet_model.id}
+    else :
+        result = {'error' : 'parameters are not correct'}
+
+    return HttpResponse(json.dumps(result), status=200)
+
+#TODO secure this url
+def workbook_create_with_project(request):
+    project_id = request.POST.get('project_id')
+    project_model = Project.get(id=project_id)
+
+    workbook_model = Workbook.create(name="Untitled Workbook", description="this is an untitled workbook with all variables of project \"" + project_model.name + "\" added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
+    worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
+
+    #add every variable within the model
+    for study in project_model.study_set.all().filter(active=True) :
+        for var in study.user_feature_definitions_set.all() :
+            Worksheet_variable.objects.create(worksheet_id = worksheet_model.id,
+                                              name         = var.feature_name,
+                                              code         = var.bq_map_id,
+                                              project      = project_model,
+                                              study        = study)
+            Worksheet_variable.save()
+
     redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_model.id})
     return redirect(redirect_url)
 
-def workbook_create_with_analysis(request, analysis_type=None):
-    workbook_model = Workbook.createDefault(name="Untitled Workbook", description="this is an untitled workbook. Click Edit Details to change your workbook title and description.", user=request.user)
+#TODO secure this url
+def workbook_create_with_analysis(request):
+    analysis_type   = request.POST.get('analysis')
+    workbook_model  = Workbook.create(name="Untitled Workbook", description="this is an untitled workbook with a \"" + analysis_type + "\" plot added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
+    worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
+    worksheet_model.set_plot(title="missing a title", type=analysis_type)
+
     redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_model.id})
     return redirect(redirect_url)
 
@@ -87,8 +144,6 @@ def workbook(request, workbook_id=0):
     elif request.method == "GET" :
         if workbook_id:
             workbook_model = Workbook.deep_get(id=workbook_id)
-            workbook_model.mark_viewed(request)
-
             workbook_model.mark_viewed(request)
 
             plot_types = [{'name' : 'Bar Chart'},
@@ -134,7 +189,6 @@ def worksheet(request, workbook_id=0, worksheet_id=0):
     if request.method == "POST" :
         if command == "create" :
             worksheet = Worksheet.create(workbook_id=workbook_id, name=request.POST.get('name'), description=request.POST.get('description'))
-            # query = '#'+ str(worksheet.id)
             redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet.id})
         elif command == "edit" :
             worksheet = Worksheet.edit(id=worksheet_id, name=request.POST.get('name'), description=request.POST.get('description'))
@@ -146,7 +200,7 @@ def worksheet(request, workbook_id=0, worksheet_id=0):
             Worksheet.destroy(id=worksheet_id)
             redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_id})
 
-    # redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_id}) + query
+    #redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_id}) + query
     return redirect(redirect_url)
 
 @login_required
