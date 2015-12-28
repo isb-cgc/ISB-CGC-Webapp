@@ -16,6 +16,8 @@ from django.conf import settings
 debug = settings.DEBUG
 from django.http import HttpResponse
 
+from django.core import serializers
+
 urlfetch.set_default_fetch_deadline(60)
 BIG_QUERY_API_URL   = settings.BASE_API_URL + '/_ah/api/bq_api/v1'
 COHORT_API          = settings.BASE_API_URL + '/_ah/api/cohort_api/v1'
@@ -89,20 +91,14 @@ def data_availability_sort(key, value, data_attr, attr_details):
 @login_required
 def variable_fav_detail(request, variable_fav_id):
     template = 'variables/variable_detail.html'
-    context = {
-        'variables': {
-            'id': 1,
-            'name': 'My Favorite Variables',
-            'list': [{
-                'parent': 'Gender',
-                'identifier': 'Female'
-            },{
-                'parent': 'Age',
-                'identifier':'50-59'
-            }]
-        }
-    }
+
     variable_fav = VariableFavorite.get_deep(variable_fav_id)
+
+    context = {
+        'variables': variable_fav,
+    }
+
+    print variable_fav
 
     variable_fav.mark_viewed(request)
     return render(request, template, context)
@@ -121,9 +117,9 @@ def variable_select_for_new_workbook(request):
 
 @login_required
 # USECASE 3: EDIT EXISTING VAR LIST
-def variable_fav_edit(request, variable_list_id):
+def variable_fav_edit(request, variable_fav_id):
     #TODO validate user has access to the list
-    return initialize_variable_selection_page(request, variable_list_id=variable_list_id)
+    return initialize_variable_selection_page(request, variable_list_id=variable_fav_id)
 
 @login_required
 # USECASE 4: CREATE VAR FAVORITE

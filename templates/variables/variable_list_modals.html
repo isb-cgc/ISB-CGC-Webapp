@@ -1,4 +1,4 @@
-<!-- Delete Worksheet Modal -->
+<!-- Delete Variable Favorite Modal -->
 <div class="modal fade" id="delete-favorite-modal-{{ favorite.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-workbook-header" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -6,7 +6,7 @@
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title">Delete this variable favorite "{{ favorite.name|title }}"?</h4>
             </div>
-            <form id="delete-workbook" method="POST" action="{% url variable_fav_delete' favorite.id %}">
+            <form id="delete-workbook" method="POST" action="{% url 'variable_fav_delete' favorite.id %}">
                 {% csrf_token %}
                 <div class="modal-footer">
                     <input type="submit" value="Delete" class="btn btn-primary" />

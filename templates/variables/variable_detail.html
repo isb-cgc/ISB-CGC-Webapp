@@ -31,14 +31,13 @@
             <ul>
                 {% for variable in variables.list  %}
                 <li class="delete-x filter-label label label-default">
-                    {{ variable.parent }}: {{ variable.identifier }}
+                    {{ variable.name }}: {{ variable.identifier }}
                 </li>
                 {% endfor %}
             </ul>
             <div>
                 <ul class="page-action-group">
-                    <!-- TODO:refactore variables link -->
-                    <li role="menuitem"><a href="{% url 'variables' %}" class="btn btn-info">Edit</a></li>
+                    <li role="menuitem"><a href="{% url 'variable_fav_edit' variables.id %}" class="btn btn-info">Edit</a></li>
                     <li role="menuitem"><a data-toggle="modal" data-target="#delete-favorite-modal" class="btn btn-info">Delete</a></li>
                     <li class="separator"></li>
                     <li role="menuitem">
