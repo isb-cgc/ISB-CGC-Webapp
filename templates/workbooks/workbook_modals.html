@@ -1,0 +1,95 @@
+{% if workbook.owner.id == user.id %}
+<!-- Edit Details Modal -->
+<div class="modal fade" id="edit-workbook-details-modal-{{ workbook.id }}" tabindex="-1" role="dialog" aria-labelledby="edit-workbook-header" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Workbook Details</h4>
+            </div>
+            <form id="edit-workbook" method="POST" action="{% url 'workbook_edit' workbook.id %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <label for="share-viz-users">Name (required)</label>
+                    <input class="form-control" type="text" name="name" value="{{ workbook.name }}" required/>
+                    <br>
+                    <label for="share-viz-users">Description (optional)</label>
+                    <textarea class="form-control" name="description">{{workbook.description }}</textarea>
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" value="Update" class="btn btn-primary" />
+                    <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Workbook Modal -->
+<div class="modal fade" id="delete-workbook-modal-{{ workbook.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-workbook-header" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title"></h4>
+            </div>
+            <div class="modal-body">Delete this Workbook?</div>
+            <form id="delete-workbook" method="POST" action="{% url 'workbook_delete' workbook.id %}">
+                {% csrf_token %}
+                <div class="modal-footer">
+                    <input type="submit" value="Delete" class="btn btn-primary" />
+                    <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Create Worksheet modal-->
+<div class="modal fade" id="create-worksheet-modal-{{ workbook.id }}" tabindex="-1" aria-labelledby="create-worksheet-header" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="create-worksheet-header">Create New Worksheet</h4>
+            </div>
+            <form id="worksheet_create_form" method="POST" action="{% url 'worksheet_create' workbook_id=workbook.id %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <label for="name">Name (required)</label>
+                    <input class="form-control" type="text" name="name" value="New Worksheet"/>
+                    <br>
+                    <label for="description">Description (optional)</label>
+                    <textarea class="form-control" name="description" placeholder="Add a description"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" value="Create" class="btn btn-primary" />
+                    <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Duplicate Workbook Modal -->
+<div class="modal fade" id="copy-workbook-modal-{{ workbook.id }}" tabindex="-1" role="dialog" aria-labelledby="copy-workbook-header" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title"></h4>
+            </div>
+            <div class="modal-body">
+                Duplicate this Workbook?
+            </div>
+            <form id="copy-workbook" method="POST" action="{% url 'workbook_copy' workbook.id %}">
+                {% csrf_token %}
+                <div class="modal-footer">
+                    <input type="submit" value="Duplicate" class="btn btn-primary" />
+                    <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

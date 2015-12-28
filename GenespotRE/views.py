@@ -112,7 +112,7 @@ Handles login and user creation for new users.
 Returns user to landing page.
 '''
 def landing_page(request):
-    if debug: 
+    if debug:
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         print >> sys.stderr,'App Version: '+modules.get_current_version_name()
         try:
@@ -368,5 +368,17 @@ def health_check(request):
 #    print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     return HttpResponse('')
 
-def help(request):
+def help_page(request):
+    print request.user
     return render(request, 'GenespotRE/help.html')
+
+def about_page(request):
+    return render(request, 'GenespotRE/about.html', {'request': request, 'data': 'data'})
+
+@login_required
+def dashboard_page(request):
+    return render(request, 'GenespotRE/dashboard.html', {'request': request, 'data': 'data'})
+
+@login_required
+def sample_analyses(request):
+    return render(request, 'GenespotRE/sample_analyses.html', {})

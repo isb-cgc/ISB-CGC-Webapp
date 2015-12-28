@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+{% block title %}Genes Favorite Details | ISB-CGC{% endblock %}}
+{% block extra_css_libs %}{% endblock %}
+{% block header %}{% endblock %}
+
+{% block link_page_name %}genes_detail{% endblock %}
+{% block page_name %}genes_detail{% endblock %}
+
+{% block page_header %}
+<div class="container">
+    <ol class="breadcrumb">
+        <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+        <li><a href="{% url 'genes' %}">Saved Gene Favorites</a></li>
+    </ol>
+    <h1 class="page-header">Gene Favorite Details</h1>
+</div>
+{% endblock %}
+{% block content %}
+<div class="container">
+
+    <section class="panel panel-default">
+        <div class="panel-heading">
+            <!--<p>Name of Favorite</p>-->
+            <h4 class="panel-title">{{genes_detail.name}}</h4>
+        </div>
+        <div class="panel-body">
+            <div>
+                <h5>Selected Genes</h5>
+                <ul>
+                    {% for gene in genes_detail.genes  %}
+                        <li class="delete-x filter-label label label-default">{{gene}}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div>
+                <ul class="page-action-group">
+                    <li><a class="btn btn-info" href="{% url 'edit_genes_list' genes_detail.id %}"><i class="fa fa-pencil"></i> Edit</a></li>
+                    <li><button class="btn btn-info"><i class="fa fa-trash"></i> Delete</button></li>
+                    <li class="separator"></li>
+                    <li>
+                        <form action="{% url 'worksheet_create_with_genes' genes_detail.id %}" method="POST">
+                            {% csrf_token %}
+                            <button class="btn btn-default" type="submit"><i class="fa fa-plus"></i> Start New Workbook</button>
+                        </form>
+                    </li>
+                    <li class="pull-right"><a class="btn btn-link>View System Gene Identifier</a></li>
+                </ul>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block js_file %}{% static 'js/base.js' %}{% endblock %}
