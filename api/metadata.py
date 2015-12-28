@@ -819,7 +819,7 @@ class IncomingPlatformSelection(messages.Message):
     RocheGSFLX_DNASeq                   = messages.StringField(30)
 
 
-Meta_Endpoints = endpoints.api(name='meta_api', version='v1',
+Meta_Endpoints = endpoints.api(name='meta_api', version='v1', description='Metadata endpoints used by the web application.',
                                allowed_client_ids=[INSTALLED_APP_CLIENT_ID, endpoints.API_EXPLORER_CLIENT_ID])
 
 @Meta_Endpoints.api_class(resource_name='meta_endpoints')

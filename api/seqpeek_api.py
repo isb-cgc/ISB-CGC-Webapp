@@ -53,7 +53,8 @@ class MAFRecordList(Message):
     items = MessageField(MAFRecord, 1, repeated=True)
     cohort_set = MessageField(PlotDataCohortInfo, 2, repeated=True)
 
-SeqPeekDataEndpointsAPI = endpoints_api(name='seqpeek_data_api', version='v1')
+SeqPeekDataEndpointsAPI = endpoints_api(name='seqpeek_data_api', version='v1',
+                                        description='Endpoints used by the seqpeek visualization in the web application.')
 
 
 def maf_array_to_record(maf_array):

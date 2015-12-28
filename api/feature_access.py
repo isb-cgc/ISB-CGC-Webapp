@@ -103,7 +103,7 @@ class FeatureDefinitionSearcherFactory(object):
             return GNABSearcher()
         raise InvalidDataTypeException("Invalid datatype '{datatype}'".format(datatype=datatype))
 
-FeatureAccessEndpointsAPI = endpoints_api(name='feature_type_api', version='v1')
+FeatureAccessEndpointsAPI = endpoints_api(name='feature_type_api', version='v1', description='Endpoints used by ')
 @FeatureAccessEndpointsAPI.api_class(resource_name='feature_type_endpoints')
 class FeatureAccessEndpoints(remote.Service):
     @endpoints_method(FeatureTypeSearchRequest, FeatureTypeList,

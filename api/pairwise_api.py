@@ -76,7 +76,7 @@ class CircvizOutput(messages.Message):
     items = messages.MessageField(Association, 1, repeated=True)
 
 
-Pairwise_Endpoints = endpoints.api(name='pairwise', version='v1')
+Pairwise_Endpoints = endpoints.api(name='pairwise', version='v1', description='')
 
 
 @Pairwise_Endpoints.api_class(resource_name='pairwise_api')
