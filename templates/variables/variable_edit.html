@@ -107,7 +107,7 @@
                     <div class="tabpanel" role="tabpanel">
                         <ul class="nav nav-tabs" role="tablist">
                             <li role="presentation" class="active"><a href="#common" aria-controls="common" role="tab" data-toggle="tab">Common</a></li>
-                            <li role="presentation"><a href="#favorites" aria-controls="favorites" role="tab" data-toggle="tab">Favorites (N)</a></li>
+                            <li role="presentation"><a href="#favorites" aria-controls="favorites" role="tab" data-toggle="tab">Favorites ({{ favorite_list | length }})</a></li>
                             <li role="presentation"><a href="#datatypes" aria-controls="datatypes" role="tab" data-toggle="tab">Data Types</a></li>
                             <li role="presentation"><a href="#uploaded" aria-controls="Uploaded" role="tab" data-toggle="tab">Projects</a></li>
                             <li role="presentation"><a href="#search" aria-controls="search" role="tab" data-toggle="tab">Search</a></li>
@@ -130,23 +130,35 @@
                                 </ul>
                             </div>
                             <div role="tabpanel" class="tab-pane" id="favorites">
-                                <br>
-                                <div class="form-group">
-                                    <label for="" class="control-label">Select from Favorites</label>
-                                    {% for attr in favorites %}
-                                        <li class="list-group-item extra-values checkbox">
-                                            <div id="heading-{{ attr }}" class="list-group-item__heading">
-                                                <label for="{{ attr }}">
-                                                    <input type="checkbox" name="elements-selected" id="{{ attr }}">
-                                                    {{ attr| get_readable_name }}
-                                                </label>
+                                <ul class="list-group" id="clin-accordion" role="tablist" aria-multiselectable="true">
+                                    {% for fav in favorite_list %}
+                                        <li class="list-group-item">
+                                            <div id="heading-{{ fav.name }}" data-field="{{ fav.name }}" class="list-group-item__heading">
+                                                <a role="button" data-toggle="collapse" data-parent="#clin-accordion" href="#collapse-{{ fav.id }}" aria-expanded="false" aria-controls="collapse-{{ fav.id }}">
+                                                    <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ fav.name }}
+                                                </a>
+                                            </div>
+
+                                            <div id="collapse-{{ fav.id }}" class="list-group-item__body collapse" role="tabpanel" aria-labelledby="heading-{{ fav.id }}">
+                                                <ul class="list-group" id="clin-accordion" role="tablist" aria-multiselectable="true">
+                                                    {% for var in fav.variables %}
+                                                        <li class="list-group-item checkbox">
+                                                            <div id="heading-{{ var.id }}" class="list-group-item__heading">
+                                                                <label for="{{ var.name }}">
+                                                                    <input type="checkbox" value="{{ var.name }}" name="elements-selected" variable_name="{{ var.name }}" project_name="{{ var.project.name }}" project="{{ var.project.id }}" study_name="{{ var.study.name }} "study="{{ var.study.id }}">
+                                                                    {{ var.name }}
+                                                                </label>
+                                                            </div>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
                                             </div>
                                         </li>
                                     {% endfor %}
-                                </div>
+                                </ul>
 
                                 <div>
-                                    <a href="{% url 'variables' %}">Manage Save Favorites (3)</a>
+                                    <a href="{% url 'variables' %}">Manage Saved Favorites ({{ favorite_list | length }})</a>
                                 </div>
                             </div>
                             <div role="tabpanel" class="tab-pane" id="datatypes">

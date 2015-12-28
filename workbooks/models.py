@@ -9,7 +9,6 @@ from genes.models import Gene
 from projects.models import Project, Study
 from cohorts.models import Cohort, Cohort_Perms
 from django.utils import formats
-from django.db.models import Count
 
 # Create your models here.
 class WorkbookManager(models.Manager):
@@ -128,14 +127,14 @@ class Workbook(models.Model):
             worksheet.variables = worksheet.get_variables()
             worksheet.genes     = worksheet.get_genes()
             worksheet.cohorts   = worksheet.get_cohorts()
-            worksheet.plot      = {'title'  : "default title",
-                                   'type'   : "default type",
-                                   'xaxis'  : {'selected'   : None,
-                                               'type'       : "numerical"},
-                                   'yaxis'  : {'selected'   : None,
-                                               'type'       : 'categorical'},
-                                   'cohort' : {'selected'   : None}
-                                   }
+            # worksheet.plot      = {'title'  : "default title",
+            #                        'type'   : "default type",
+            #                        'xaxis'  : {'selected'   : None,
+            #                                    'type'       : "numerical"},
+            #                        'yaxis'  : {'selected'   : None,
+            #                                    'type'       : 'categorical'},
+            #                        'cohort' : {'selected'   : None}
+            #                        }
         return worksheets
 
     def get_shares(self):
@@ -167,6 +166,7 @@ class Worksheet(models.Model):
     name            = models.CharField(max_length=2024, blank=False)
     description     = models.CharField(max_length=2024, null=False)
     workbook        = models.ForeignKey(Workbook, null=False, blank=False)
+    plot            = models.ForeignKey('Worksheet_plot', null=True, blank=True)
     last_date_saved = models.DateTimeField(auto_now_add=True)
     date_created    = models.DateTimeField(auto_now_add=True)
     objects         = WorksheetManager()
@@ -210,13 +210,35 @@ class Worksheet(models.Model):
         return self.worksheet_gene_set.filter(worksheet=self)
 
     def get_cohorts(self):
-        cohort_perms = Cohort_Perms.objects.filter(user=self.workbook.get_owner()).values_list('cohort', flat=True)
-        cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved').annotate(num_patients=Count('samples'))
+        work_cohorts = self.worksheet_cohort_set.filter(worksheet=self)
+        cohorts = []
+        for co in work_cohorts :
+            cohorts.append(co.cohort)
+
         return cohorts
-        #return self.worksheet_cohort_set.filter(worksheet=self)
+
+    def add_cohort(self, cohort):
+        Worksheet_cohort.create(self.id, cohort)
+
+    def remove_cohort(self, cohort):
+        Worksheet_cohort.object.get(cohort = cohort)
+        Worksheet_cohort.destroy()
+
+    def set_plot(self, title, type):
+        if self.plot :
+            self.plot.delete()
+
+        plot = Worksheet_plot(title=title, type=type)
+        plot.save()
+        self.plot = plot
+        self.save();
+
 
     def destroy(self):
         self.delete()
+
+class Worksheet_Cohort_Manager(models.Manager):
+    content = None
 
 class Worksheet_cohort(models.Model):
     id              = models.AutoField(primary_key=True)
@@ -224,11 +246,13 @@ class Worksheet_cohort(models.Model):
     date_created    = models.DateTimeField(auto_now_add=True)
     modified_date   = models.DateTimeField(auto_now=True)
     cohort          = models.ForeignKey(Cohort)
+    objects         = Worksheet_Cohort_Manager()
 
     @classmethod
-    def edit_list(cls, worksheet_id, cohort_list, user):
-        worksheet_model = Worksheet.objects.get(id=worksheet_id)
-        if worksheet_model.owner.id == user.id :
+    def edit_list(cls, workbook_id, worksheet_id, cohort_list, user):
+        workbook_owner = Workbook.objects.get(id=workbook_id).get_owner()
+        if workbook_owner.id == user.id :
+            worksheet_model = Worksheet.objects.get(id=worksheet_id)
             #TODO delete all then resave not the most efficient
             cohorts = Worksheet_cohort.objects.filter(worksheet=worksheet_model)
             for co in cohorts :
@@ -260,14 +284,25 @@ class Worksheet_cohort(models.Model):
         return return_obj
 
     @classmethod
-    #TODO
-    def destroy(cls, id):
-        worksheet_model = cls.objects.get(id=id)
-        worksheet_model.destroy()
-        return worksheet_model
+    def destroy(cls, workbook_id, worksheet_id, id, user):
+        workbook_owner = Workbook.get_owner(id)
+        if workbook_owner.id == user.id :
+            model = cls.objects.get(id=id)
+            model.destroy()
+            return_obj = {
+                'result'     : "Success",
+            }
+        else :
+            return_obj = {
+                'error'     : "you do not have access to update this worksheet",
+            }
+        return return_obj
 
     def destroy(self):
         self.delete()
+
+class Worksheet_Gene_Manager(models.Manager):
+    content = None
 
 class Worksheet_gene(models.Model):
     id              = models.AutoField(primary_key=True)
@@ -275,13 +310,15 @@ class Worksheet_gene(models.Model):
     date_created    = models.DateTimeField(auto_now_add=True)
     modified_date   = models.DateTimeField(auto_now=True)
     gene            = models.CharField(max_length=2024, blank=False)
+    objects         = Worksheet_Gene_Manager()
 
     @classmethod
-    def edit_list(cls, worksheet_id, gene_list, user):
-        worksheet_model = Worksheet.objects.get(id=worksheet_id)
-        if worksheet_model.owner.id == user.id :
+    def edit_list(cls, workbook_id, worksheet_id, gene_list, user):
+        workbook_owner = Workbook.objects.get(id=workbook_id).get_owner()
+        if workbook_owner.id == user.id :
+            worksheet_model = Worksheet.objects.get(id=worksheet_id)
             #TODO delete all then resave not the most efficient
-            genes = Worksheet_variable.objects.filter(worksheet=worksheet_model)
+            genes = Worksheet_gene.objects.filter(worksheet=worksheet_model)
             for gene in genes :
                 gene.destroy();
 
@@ -311,10 +348,19 @@ class Worksheet_gene(models.Model):
         return return_obj
 
     @classmethod
-    def destroy(cls, id):
-        model = cls.objects.get(id=id)
-        model.destroy()
-        return model
+    def destroy(cls, workbook_id, worksheet_id, id, user):
+        workbook_owner = Workbook.get_owner(id)
+        if workbook_owner.id == user.id :
+            model = cls.objects.get(id=id)
+            model.destroy()
+            return_obj = {
+                'result'     : "Success",
+            }
+        else :
+            return_obj = {
+                'error'     : "you do not have access to update this worksheet",
+            }
+        return return_obj
 
     def destroy(self):
         self.delete()
@@ -436,34 +482,19 @@ class Worksheet_comment(models.Model):
         }
         return return_obj
 
-# DESIGN COMMENTARY :
-# visualizations are currently coupled to worksheets via 1:many.  This could be incorrect as there is potential for useing
-# plots eventually outside worksheets. For the current design, this is not possible as worksheets contain the variables,
-# genes, and cohorts for the plot.  A future design might be to refactor the variables, genes and plots to be coupled to
-# plot instances rather than worksheets
 class Worksheet_Plot_Manager(models.Manager):
     content = None
 
 class Worksheet_plot(models.Model):
     id              = models.AutoField(primary_key=True)
-    worksheet       = models.ForeignKey(Worksheet, blank=False)
     date_created    = models.DateTimeField(auto_now_add=True)
     modified_date   = models.DateTimeField(auto_now=True)
-    title           = models.CharField(max_length=100, null=False)
+    title           = models.CharField(max_length=100,  null=False)
     color_by        = models.CharField(max_length=1024, null=True)
-    plot_type       = models.CharField(max_length=1024, null=True)
+    type            = models.CharField(max_length=1024, null=True)
+    x_axis          = models.ForeignKey(Worksheet_variable, blank=True, null=True, related_name="worksheet_plot.x_axis")
+    y_axis          = models.ForeignKey(Worksheet_variable, blank=True, null=True, related_name="worksheet_plot.y_axis")
     objects         = Worksheet_Plot_Manager()
-
-# This is storage of variable selection on dimensions of a plot.  A plot can have N number of dimensions
-# However only certain variable types can be added to specific plots
-class Plot_dimension(models.Model):
-    id              = models.AutoField(primary_key=True)
-    name            = models.CharField(max_length=100, null=False)
-    plot            = models.ForeignKey(Worksheet_plot, blank=False)
-    variable        = models.ForeignKey(Worksheet_variable, blank=False)
-    date_created    = models.DateTimeField(auto_now_add=True)
-    modified_date   = models.DateTimeField(auto_now=True)
-
 
 @admin.register(Workbook)
 class WorkbookAdmin(admin.ModelAdmin):
