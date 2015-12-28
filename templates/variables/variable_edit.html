@@ -119,7 +119,7 @@
                                         <li class="list-group-item checkbox">
                                             <div id="heading-{{ attr }}" class="list-group-item__heading">
                                                 <label for="{{ attr }}">
-                                                    <input type="checkbox" value="{{ attr }}" name="elements-selected" variable_name="{{ attr }}" project_name="{{ common_project.name }}" project="{{ common_project.id }}" study_name="{{ common_project.study.name }} "study="{{ common_project.study.id }}">
+                                                    <input type="checkbox" value="{{ attr }}" name="elements-selected" variable_name="{{ attr }}" project_name="{{ common_project.name }}" project="{{ common_project.id }}" study_name="{{ common_project.study.name }} "study="{{ common_project.study.id }}" >
                                                     {{ attr }}
                                                 </label>
                                             </div>
@@ -274,7 +274,7 @@
                         {% if existing_variable_list %}
                             {# USECASE 3: EDIT EXISTING VAR LIST #}
                             {% for variable in existing_variable_list.list %}
-                            <span class="selected-variable">
+                            <span class="selected-variable" >
                                 <a class="delete-x filter-label label label-default">
                                     {{ variable.name }}
                                     <i class="fa fa-times"></i>

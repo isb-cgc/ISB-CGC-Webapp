@@ -220,7 +220,7 @@
                     {% endif %}
                     <li class="menu-item"><a href="{% url 'genes' %}">Manage Gene Favorite ( {{ user.genefavorite_last_view_set.all|active:'genefavorite'|length }} )</a></li>
                     <li class="menu-item"><a href="{% url 'gene_fav_create' %}">Create Gene Favorite(s)</a></li>
-                    <li class="menu-item"><a href="{% url 'genes' %}">Select Genes for a New Workbook</a></li>
+                    <li class="menu-item"><a href="{% url 'gene_select_and_create_workbook' %}">Select Genes for a New Workbook</a></li>
                 </ul>
             </li>
             <li class="menu-item has-drop-down">

@@ -127,7 +127,7 @@ require([
     */
     function remove_variable_pill(name, project, study){
         $(".selected-variable[variable='" + name + "'][project='" + project + "'][study='" + study + "']").remove();
-        $('#create-cohort-form .form-control-static [variable="' + variable_name + '"] [project="' + project + '"] [study="' + study + '"]').remove();
+        $('#create-cohort-form .form-control-static [variable="' + name + '"] [project="' + project + '"] [study="' + study + '"]').remove();
     }
 
     /*
