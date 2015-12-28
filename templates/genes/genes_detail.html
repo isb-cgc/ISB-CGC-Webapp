@@ -36,16 +36,17 @@
             </div>
             <div>
                 <ul class="page-action-group">
-                    <li><a class="btn btn-info" href="{% url 'edit_genes_list' genes_detail.id %}"><i class="fa fa-pencil"></i> Edit</a></li>
+                    <li><a class="btn btn-info" href="{% url 'gene_fav_edit' genes_detail.id %}"><i class="fa fa-pencil"></i> Edit</a></li>
                     <li><button class="btn btn-info"><i class="fa fa-trash"></i> Delete</button></li>
                     <li class="separator"></li>
                     <li>
-                        <form action="{% url 'worksheet_create_with_genes' genes_detail.id %}" method="POST">
+                        <form action="{% url 'worksheet_create_with_genes' %}" method="POST">
                             {% csrf_token %}
+                            <input type="hidden" name="gene_list_id" value="{{ genes_detail.id }}">
                             <button class="btn btn-default" type="submit"><i class="fa fa-plus"></i> Start New Workbook</button>
                         </form>
                     </li>
-                    <li class="pull-right"><a class="btn btn-link>View System Gene Identifier</a></li>
+                    <li class="pull-right"><a class="btn btn-link">View System Gene Identifier</a></li>
                 </ul>
             </div>
         </div>

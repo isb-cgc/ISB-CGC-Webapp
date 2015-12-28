@@ -3,9 +3,15 @@ from django.conf.urls import patterns, url
 import views
 
 urlpatterns = patterns('',
-    url(r'^$', views.genes_list, name='genes'),
-    url(r'^(?P<genes_id>\d+)/$', views.genes_detail, name='genes_detail'),
-    url(r'^(?P<genes_id>\d+)/edit', views.genes_list_edit, name="edit_genes_list"),
-    url(r'^(?P<genes_id>\d+)/upload/$', views.genes_upload, name="genes_upload"),
-    url(r'^create/$', views.genes_list_edit, name="create_genes_list"),
+    url(r'^$',                                  views.gene_fav_list,        name='genes'),
+    url(r'^create/$',                           views.gene_fav_edit,        name="gene_fav_create"),
+    url(r'^(?P<gene_fav_id>\d+)/$',             views.gene_fav_detail,      name='gene_fav_detail'),
+    url(r'^(?P<gene_fav_id>\d+)/edit',          views.gene_fav_edit,        name="gene_fav_edit"),
+    url(r'^(?P<gene_fav_id>\d+)/delete',        views.gene_fav_delete,      name="gene_fav_delete"),
+    url(r'^/upload/$',                          views.gene_fav_upload,      name="gene_fav_upload"),
+    url(r'^save/$',                             views.gene_fav_save,        name="gene_fav_save"),
+
+    # USECASE 1: ADD VAR LIST TO EXISTING WORKBOOK :: called from workbook variable header
+    url(r'^select/workbook/(?P<workbook_id>\d+)/worksheet/(?P<worksheet_id>\d+)$', views.gene_select_for_existing_workbook,  name="gene_select_for_existing_workbook"),
+    url(r'^select_create/$', views.gene_select_for_new_workbook, name="select_and_create_workbook")
 )

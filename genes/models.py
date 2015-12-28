@@ -6,22 +6,13 @@ from django.db.models import Q
 
 
 class GeneFavoriteManager(models.Manager):
-    def search(self, search_terms):
-        terms = [term.strip() for term in search_terms.split()]
-        q_objects = []
-        for term in terms:
-            q_objects.append(Q(name__icontains=term))
-
-        # Start with a bare QuerySet
-        qs = self.get_queryset()
-
-        # Use operator's or_ to string together all of your Q objects.
-        return qs.filter(reduce(operator.and_, [reduce(operator.or_, q_objects), Q(active=True)]))
+    content = None
 
 class GeneFavorite(models.Model):
-    id = models.AutoField(primary_key=True)
-    name = models.TextField(null=True)
-    active = models.BooleanField(default=True)
+    id      = models.AutoField(primary_key=True)
+    name    = models.TextField(null=True)
+    active  = models.BooleanField(default=True)
+    user    = models.ForeignKey(User, null=False, blank=False)
     last_date_saved = models.DateTimeField(auto_now_add=True)
     objects = GeneFavoriteManager()
 
@@ -42,11 +33,39 @@ class GeneFavorite(models.Model):
 
         return last_view
 
+    @classmethod
+    def create(cls, name, gene_list, user):
+        gene_favorite_model = cls.objects.create(name=name, user=user)
+        gene_favorite_model.save()
+
+        for gene in gene_list :
+            gene(name=gene['name'])
+
+        return_obj = {
+            'name'          : gene_favorite_model.name,
+            'id'            : gene_favorite_model.id
+        }
+        return return_obj
+
+    @classmethod
+    def get_list(cls, user):
+        list = cls.objects.filter(user=user).order_by('-last_date_saved')
+
+        for fav in list:
+            fav.genes = fav.get_genes()
+
+        return list
+
+    def get_genes(self):
+        return self.gene_set.filter(variable_favorite=self)
+
+    def destroy(self):
+        self.active = False
+
 class GeneFavorite_Last_View(models.Model):
     genefavorite = models.ForeignKey(GeneFavorite, blank=False)
     user = models.ForeignKey(User, null=False, blank=False)
     last_view = models.DateTimeField(auto_now_add=True, auto_now=True)
-
 
 class Gene(models.Model):
     id = models.AutoField(primary_key=True)

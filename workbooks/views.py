@@ -36,8 +36,9 @@ def workbook_samples(request):
     template = 'workbooks/workbook_samples.html'
     return render(request, template, {});
 
-@login_required
+
 #TODO secure this url
+@login_required
 def workbook_create_with_variables(request):
     variable_id     = request.POST.get('variable_list_id')
     variable_list   = VariableFavorite.get(id=variable_id)
@@ -49,9 +50,10 @@ def workbook_create_with_variables(request):
     return redirect(redirect_url)
 
 #TODO secure this url
+@login_required
 def workbook_create_with_genes(request):
     gene_id         = request.POST.get('gene_list_id')
-    gene_list       = GeneFavorite.get(id=gene_id)
+    gene_list       = GeneFavorite.objects.get(id=gene_id)
     workbook_model  = Workbook.create(name="Untitled Workbook", description="This workbook was created with gene list \"" + gene_list.name + "\" added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
     worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
     Worksheet_gene.edit_list(workbook_id=workbook_model.id, worksheet_id=worksheet_model.id, gene_list=gene_list,user=request.user)
@@ -60,6 +62,7 @@ def workbook_create_with_genes(request):
     return redirect(redirect_url)
 
 #TODO secure this url
+@login_required
 def workbook_create_with_cohort(request):
     cohort_id       = request.POST.get('cohort_id')
     cohort          = Cohort.objects.get(id=cohort_id)
@@ -70,6 +73,7 @@ def workbook_create_with_cohort(request):
     redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_model.id})
     return redirect(redirect_url)
 
+@login_required
 def workbook_create_with_cohort_list(request):
     cohort_ids = json.loads(request.body)['cohorts']
     if len(cohort_ids) > 0 :
@@ -87,6 +91,7 @@ def workbook_create_with_cohort_list(request):
     return HttpResponse(json.dumps(result), status=200)
 
 #TODO secure this url
+@login_required
 def workbook_create_with_project(request):
     project_id = request.POST.get('project_id')
     project_model = Project.get(id=project_id)
@@ -108,6 +113,7 @@ def workbook_create_with_project(request):
     return redirect(redirect_url)
 
 #TODO secure this url
+@login_required
 def workbook_create_with_analysis(request):
     analysis_type   = request.POST.get('analysis')
     workbook_model  = Workbook.create(name="Untitled Workbook", description="this is an untitled workbook with a \"" + analysis_type + "\" plot added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
