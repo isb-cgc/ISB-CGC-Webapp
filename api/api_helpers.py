@@ -30,21 +30,14 @@ debug = settings.DEBUG
 
 # Database connection
 def sql_connection():
-    if debug:
-        print >> sys.stderr, "      ****** sql_connection() Called. *******"
-        env = os.getenv('SERVER_SOFTWARE')
-        print >> sys.stderr, "Printing Environment."
-        print >> sys.stderr, env
-        database = settings.DATABASES['default']
-        print >> sys.stderr, "Printing Database."
-        print >> sys.stderr, database
+    env = os.getenv('SERVER_SOFTWARE')
+    database = settings.DATABASES['default']
     if env.startswith('Google App Engine/'):
         # Connecting from App Engine
-        if debug: print >> sys.stderr, "PASSED env.startswith('Google App Engine/')"
         try:
             db = MySQLdb.connect(
                 host = database['HOST'],
-                port = 3306, #database['PORT'],
+                port = 3306,
                 db = database['NAME'],
                 user = database['USER'],
                 passwd = database['PASSWORD'],
@@ -54,7 +47,6 @@ def sql_connection():
             #return HttpResponse( traceback.format_exc() ) 
             raise # if you want to soldier bravely on despite the exception, but comment to stderr
     else:
-        if debug: print >> sys.stderr, "FAILED env.startswith('Google App Engine/')"
         # Connecting to localhost
         try:
             db = MySQLdb.connect(
@@ -64,10 +56,9 @@ def sql_connection():
                 passwd=database['PASSWORD'])
         except:
             print >> sys.stderr, "Unexpected ERROR in sql_connection(): ", sys.exc_info()[0]
-            #return HttpResponse( traceback.format_exc() ) 
+            #return HttpResponse( traceback.format_exc() )
             raise # if you want to soldier bravely on despite the exception, but comment to stderr
 
-    if debug: print >> sys.stderr, "Made it to the end of sql_connection()."
     return db
 
 

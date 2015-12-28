@@ -631,23 +631,18 @@ def cohort_filelist(request, cohort_id=0):
         return redirect('/user_landing')
 
     token = SocialToken.objects.filter(account__user=request.user, account__provider='Google')[0].token
-    data_url = METADATA_API + ('/cohort_files?cohort_id=%s&token=%s' % (cohort_id, token))
-    result = urlfetch.fetch(data_url, deadline=60)
+    data_url = METADATA_API + ('/cohort_files?platform_count_only=True&cohort_id=%s&token=%s' % (cohort_id, token))
+    result = urlfetch.fetch(data_url, deadline=120)
     items = json.loads(result.content)
     file_list = []
-    if 'file_list' in items:
-        file_list = items['file_list']
     cohort = Cohort.objects.get(id=cohort_id, active=True)
-
-    if int(items['total_file_count']) == 0:
-        messages.info(request, 'There were no files found for this cohort.')
 
     return render(request, 'cohorts/cohort_filelist.html', {'request': request,
                                                             'cohort': cohort,
                                                             'base_url': settings.BASE_URL,
                                                             'base_api_url': settings.BASE_API_URL,
-                                                            'file_count': items['total_file_count'],
-                                                            'page': items['page'],
+                                                            # 'file_count': items['total_file_count'],
+                                                            # 'page': items['page'],
                                                             'download_url': reverse('download_filelist', kwargs={'cohort_id': cohort_id}),
                                                             'platform_counts': items['platform_count_list'],
                                                             'filelist': file_list})
@@ -670,7 +665,7 @@ def cohort_filelist_ajax(request, cohort_id=0):
     for key in request.GET:
         data_url += '&' + key + '=' + request.GET[key]
 
-    result = urlfetch.fetch(data_url, deadline=60)
+    result = urlfetch.fetch(data_url, deadline=120)
 
     return HttpResponse(result.content, status=200)
 
@@ -688,7 +683,8 @@ def streaming_csv_view(request, cohort_id=0):
         messages.error('Cohort provided does not exist.')
         return redirect('/user_landing')
 
-    data_url = METADATA_API + ('/cohort_files?cohort_id=%s&user_id=%s&limit=-1' % (cohort_id, request.user.id))
+    token = SocialToken.objects.filter(account__user=request.user, account__provider='Google')[0].token
+    data_url = METADATA_API + ('/cohort_files?cohort_id=%s&token=%s&limit=-1' % (cohort_id, token))
     if 'params' in request.GET:
         params = request.GET.get('params').split(',')
 

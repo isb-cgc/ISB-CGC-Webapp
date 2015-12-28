@@ -25,6 +25,7 @@ from api.Cohort import Cohort_Endpoints
 from api.metadata import Meta_Endpoints
 from api.pairwise_api import Pairwise_Endpoints
 from api.seqpeek_view_api import SeqPeekViewDataAccessAPI
+from api.users import User_Endpoints
 
 package = 'isb-cgc-api'
 
@@ -36,6 +37,7 @@ APPLICATION = endpoints.api_server([
     FeatureDataEndpoints,
     SingleFeatureDataAccess,
     Pairwise_Endpoints,
-    SeqPeekViewDataAccessAPI
+    SeqPeekViewDataAccessAPI,
+    User_Endpoints
 ])
 

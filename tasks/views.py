@@ -21,13 +21,13 @@ import json
 import StringIO
 import csv
 import logging
-
+import sys
 import pytz
 
 import pysftp
 
-# import pexpect  # comment this out when running in gae
-from datetime import datetime
+import pexpect  # comment this out when running in gae
+import datetime
 
 from django.http import HttpResponse
 from django.contrib.auth.models import User
@@ -40,6 +40,7 @@ from django.conf import settings
 from googleapiclient import http
 from googleapiclient.errors import HttpError
 from google_helpers.directory_service import get_directory_resource
+from google_helpers.reports_service import get_reports_resource
 from google_helpers.storage_service import get_storage_resource
 from google_helpers.resourcemanager_service import get_crm_resource
 from google_helpers.logging_service import get_logging_resource
@@ -47,6 +48,8 @@ from google.appengine.api.taskqueue import Task, Queue
 
 from accounts.models import NIH_User
 from api.api_helpers import sql_connection
+
+import pprint
 
 debug = settings.DEBUG
 
@@ -171,18 +174,17 @@ def write_log_entry(log_name, log_message):
         Writes a struct payload as the log message
         Also, the API writes the log to bucket and BigQuery
         Works only with the Compute Service
-        Returns http insert status
 
         type log_name: str
         param log_name: The name of the log entry
         type log_message: json
         param log_message: The struct/json payload
     """
-    client = get_logging_resource()
+    client, http_auth = get_logging_resource()
 
     # write using logging API (metadata)
     entry_metadata = {
-        "timestamp": datetime.utcnow().isoformat("T") + "Z",
+        "timestamp": datetime.datetime.utcnow().isoformat("T") + "Z",
         "serviceName": "compute.googleapis.com",
         "severity": "INFO",
         "labels": {}
@@ -202,11 +204,17 @@ def write_log_entry(log_name, log_message):
             }
         ]
     }
+    try:
+        resp = client.projects().logs().entries().write(
+            projectsId=settings.BIGQUERY_PROJECT_NAME, logsId=log_name, body=body).execute()
+        print >> sys.stderr, resp
 
-    resp = client.projects().logs().entries().write(
-        projectsId=settings.BIGQUERY_PROJECT_NAME, logsId=log_name, body=body).execute()
+        if resp:
+            # this would be an error
+            sys.stderr.write(resp + '\n')
 
-    return resp
+    except Exception as e:
+        sys.stderr.write(e.message + '\n')
 
 
 @csrf_exempt
@@ -225,7 +233,7 @@ def check_user_login(request):
 
             expire_time = nih_user.NIH_assertion_expiration
             expire_time = expire_time if expire_time.tzinfo is not None else pytz.utc.localize(expire_time)
-            now_in_utc = pytz.utc.localize(datetime.now())
+            now_in_utc = pytz.utc.localize(datetime.datetime.now())
 
             if (expire_time - now_in_utc).total_seconds() <= 0:
                 # take user off ACL_GOOGLE_GROUP, without bothering to check if user is dbGaP_authorized or not
@@ -240,8 +248,8 @@ def check_user_login(request):
                 except HttpError, e:
                     logger.debug(user_email + ' was not removed from ACL_GOOGLE_GROUP: ' + str(e))
 
-                nih_user.active = 0
-                nih_user.dbGaP_authorized = 0
+                nih_user.active = False
+                nih_user.dbGaP_authorized = False
                 nih_user.save()
                 logger.info('User with NIH username ' + str(nih_user.NIH_username) + ' is deactivated in NIH_User table')
 
@@ -269,7 +277,7 @@ def is_very_expired(login_datetime):
 
 
 def is_expired(login_datetime, expiry_padding_seconds=0):
-    return (pytz.utc.localize(datetime.now()) - login_datetime).total_seconds() >= (LOGIN_EXPIRATION_SECONDS + expiry_padding_seconds)
+    return (pytz.utc.localize(datetime.datetime.now()) - login_datetime).total_seconds() >= (LOGIN_EXPIRATION_SECONDS + expiry_padding_seconds)
 
 
 # given a list of CSV rows, test whether any of those rows contain the specified
@@ -388,8 +396,8 @@ def remove_user_from_ACL(request, nih_username):
         logger.warn("Successfully emergency removed user with NIH username {nih_username} and email {email} from ACL.".format(
             nih_username=nih_username, email=email))
         # also deactivate NIH user in NIH_User table
-        nih_user.active = 0
-        nih_user.dbGaP_authorized = 0
+        nih_user.active = False
+        nih_user.dbGaP_authorized = False
         nih_user.save()
         logger.warn("Successfully emergency deactivated user with NIH username {nih_username} and email {email} from NIH_User table.".format(
             nih_username=nih_username, email=email))
@@ -415,7 +423,8 @@ def edit_dbGaP_authentication_list(nih_username):
 
     # 2. remove the line with the offending nih_username
     for row in rows:
-        # todo: potential bug if nih_username for one row is part of someone else's email
+        # this will remove not only the user with the nih_username
+        # but also everyone who is a downloader for that user
         if nih_username in row:
             try:
                 rows.remove(row)
@@ -442,32 +451,77 @@ def create_and_log_reports(request):
     """
 
     # construct service.
-    service = get_directory_resource()
+    service, http_auth = get_reports_resource()
 
     # get utc time and timedelta
     utc_now = datetime.datetime.utcnow()
-    tdelta = utc_now + datetime.timedelta(days=-7)
+    tdelta = utc_now + datetime.timedelta(days=-1)
     start_datetime = tdelta.isoformat("T") + "Z" # collect last 7 days logs
 
-    #reports return account information about different types of administrator activity events.
-    admin_report = service.activities().list(userKey='all', applicationName='admin',
-                                             startTime=start_datetime).execute()
+    for application_name in ['admin', 'login', 'token', 'groups']:
+        # If there is ever an HttpError 400 error "Log entry with size <x> bytes exceeds maximum size of 112640 bytes",
+        # then decrease maxResults value. For now, maxResults=100 works.
+        req = service.activities().list(userKey='all', applicationName=application_name,
+                                        startTime=start_datetime, maxResults=100)
+        resp = req.execute(http=http_auth)
+        # log the reports using Cloud logging API
+        write_log_entry('apps_{}_activity_report'.format(application_name), resp)
 
-    # reports return account information about different types of Login activity events.
-    login_report = service.activities().list(userKey='all', applicationName='login',
-                                             startTime=start_datetime).execute()
+        # if there are more than maxResults=100 results, other log results will be written with Cloud logging API
+        while resp.get("nextPageToken"):
+            req = service.activities().list_next(previous_request=req, previous_response=resp)
+            resp = req.execute(http=http_auth)
+            # log the reports using Cloud logging API
+            write_log_entry('apps_{}_activity_report'.format(application_name), resp)
 
-    # reports return account information about different types of Token activity events.
-    token_report = service.activities().list(userKey='all', applicationName='token',
-                                             startTime=start_datetime).execute()
+    return HttpResponse('')
 
-    #reports return information about various Groups activity events.
-    groups_report = service.activities().list(userKey='all', applicationName='groups',
-                                              startTime=start_datetime).execute()
 
-    # log the reports using Cloud logging API
-    write_log_entry('apps_admin_activity_report', admin_report)
-    write_log_entry('apps_login_activity_report', login_report)
-    write_log_entry('apps_token_activity_report', token_report)
-    write_log_entry('apps_groups_activity_report', groups_report)
+# list_buckets, get_bucket_acl, and get_bucket_defacl are all used by log_acls
+def list_buckets(client, project_id):
+    """gets all buckets in the project"""
+    req = client.buckets().list(
+        project=project_id,
+        maxResults=42)
+    bucket_info = []
+    while req is not None:
+        resp = req.execute()
+        for bucket in resp['items']:
+            bucket_info.append(bucket)
+        req = client.buckets().list_next(req, resp)
+    return bucket_info
+
+def get_bucket_acl(client, bucket_name):
+    """get the bucket acl"""
+    req = client.bucketAccessControls().list(
+        bucket=bucket_name,
+    )
+    resp = req.execute()
+    return resp
+
+def get_bucket_defacl(client, bucket_name):
+    """get the bucket defacl"""
+    req = client.defaultObjectAccessControls().list(
+        bucket=bucket_name,
+    )
+    resp = req.execute()
+    return resp
+
+def log_acls(request):
+    """log acls"""
+    client = get_storage_resource()
+    all_projects = ['isb-cgc', 'isb-cgc-data-01', 'isb-cgc-data-02', 'isb-cgc-test']
+    acls = {}
+    defacls = {}
+    # Iterate through projects and buckets and get acls
+    for project in all_projects:
+        for bucket in list_buckets(client, project):
+            acl = get_bucket_acl(client, bucket['name'])
+            defacl = get_bucket_defacl(client, bucket['name'])
+            acls[bucket['name']] = acl
+            defacls[bucket['name']] = defacl
+    # write log entry
+    write_log_entry('bucket_acls', acls)
+    write_log_entry('bucket_defacls', defacls)
+
     return HttpResponse('')

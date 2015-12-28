@@ -17,17 +17,16 @@ limitations under the License.
 """
 
 import logging
-import sys
 from datetime import datetime
 
 import endpoints
-from google.appengine.ext import ndb
 from protorpc import messages, message_types
 from protorpc import remote
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.contrib.auth.models import User as Django_User
 import django
+import MySQLdb
 
 from metadata import MetadataItem, IncomingMetadataItem
 
@@ -40,12 +39,8 @@ from api_helpers import *
 logger = logging.getLogger(__name__)
 
 INSTALLED_APP_CLIENT_ID = settings.INSTALLED_APP_CLIENT_ID
+CONTROLLED_ACL_GOOGLE_GROUP = settings.ACL_GOOGLE_GROUP
 
-
-
-#################################################################
-#  BEGINNING OF FEATURE MATRIX ENDPOINTS
-#################################################################
 DEFAULT_COHORT_NAME = 'Untitled Cohort'
 
 IMPORTANT_FEATURES = [
@@ -87,11 +82,6 @@ class ReturnJSON(messages.Message):
     msg = messages.StringField(1)
 
 
-class tcga_data_file(ndb.Expando):
-    pass
-
-
-# todo: refactor to from users import User (from users api)
 class User(messages.Message):
     id = messages.StringField(1)
     last_login = messages.StringField(2)
@@ -132,6 +122,11 @@ class IdList(messages.Message):
     user_id = messages.IntegerField(4)              # User Id
 
 
+class FilterDetails(messages.Message):
+    name = messages.StringField(1)
+    value = messages.StringField(2)
+
+
 class Cohort(messages.Message):
     id = messages.StringField(1)
     name = messages.StringField(2)
@@ -139,12 +134,12 @@ class Cohort(messages.Message):
     perm = messages.StringField(4)
     email = messages.StringField(5)
     comments = messages.StringField(6)
-    filter_name = messages.StringField(7)
-    filter_value = messages.StringField(8)
-    source_type = messages.StringField(9)
-    source_notes = messages.StringField(10)
-    parent_id = messages.IntegerField(11)
-
+    # filter_name = messages.StringField(7)
+    # filter_value = messages.StringField(8)
+    source_type = messages.StringField(7)
+    source_notes = messages.StringField(8)
+    parent_id = messages.IntegerField(9)
+    filters = messages.MessageField(FilterDetails, 10, repeated=True)
 
 class CohortsList(messages.Message):
     items = messages.MessageField(Cohort, 1, repeated=True)
@@ -157,12 +152,14 @@ class CohortPatientsSamplesList(messages.Message):
     samples = messages.StringField(3, repeated=True)
     sample_count = messages.IntegerField(4)
     cohort_id = messages.IntegerField(5)
+    error = messages.StringField(6)
 
 
 class PatientDetails(messages.Message):
     clinical_data = messages.MessageField(MetadataItem, 1)
     samples = messages.StringField(2, repeated=True)
     aliquots = messages.StringField(3, repeated=True)
+    error = messages.StringField(4)
 
 
 class DataDetails(messages.Message):
@@ -190,10 +187,12 @@ class SampleDetails(messages.Message):
     patient = messages.StringField(3)
     data_details = messages.MessageField(DataDetails, 4, repeated=True)
     data_details_count = messages.IntegerField(5)
+    error = messages.StringField(6)
 
 
 class DataFileNameKeyList(messages.Message):
     datafilenamekeys = messages.StringField(1, repeated=True)
+    count = messages.IntegerField(2)
 
 
 class SavedCohort(messages.Message):
@@ -201,10 +200,10 @@ class SavedCohort(messages.Message):
     name = messages.StringField(2)
     active = messages.StringField(3)
     last_date_saved = messages.StringField(4)
-    user_id = messages.StringField(5)  # for cohorts_cohort_perms. Not shown: perm (OWNER, READER)
-    filter_name = messages.StringField(6)  # for cohorts_filters.name
-    filter_value = messages.StringField(7)  # for cohorts_filters.value. Not shown: cohorts_filters.resulting_cohort_id
-    last_date_saved_alt = message_types.DateTimeField(8)
+    user_id = messages.StringField(5)
+    filters = messages.MessageField(FilterDetails, 6, repeated=True)
+    num_patients = messages.StringField(7)
+    num_samples = messages.StringField(8)
 
 
 Cohort_Endpoints = endpoints.api(name='cohort_api', version='v1', description="Get information about cohorts",
@@ -214,12 +213,15 @@ Cohort_Endpoints = endpoints.api(name='cohort_api', version='v1', description="G
 class Cohort_Endpoints_API(remote.Service):
 
 
-    GET_RESOURCE = endpoints.ResourceContainer(token=messages.StringField(1), cohort_id=messages.StringField(2))
+    GET_RESOURCE = endpoints.ResourceContainer(token=messages.StringField(1), cohort_id=messages.IntegerField(2))
     @endpoints.method(GET_RESOURCE, CohortsList,
                       path='cohorts_list', http_method='GET', name='cohorts.list')
     def cohorts_list(self, request):
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         user_email = None
+        cursor = None
+        filter_cursor = None
+        db = None
 
         if endpoints.get_current_user() is not None:
             user_email = endpoints.get_current_user().email()
@@ -234,7 +236,6 @@ class Cohort_Endpoints_API(remote.Service):
         cohort_id = request.__getattribute__('cohort_id')
 
         if user_email:
-            # todo: see if this needs to be done with a MySQldb cursor
             django.setup()
             try:
                 user_id = Django_User.objects.get(email=user_email).id
@@ -244,7 +245,7 @@ class Cohort_Endpoints_API(remote.Service):
 
             query_dict = {'cohorts_cohort_perms.user_id': user_id, 'cohorts_cohort.active': unicode('1')}
 
-            if cohort_id and cohort_id.isdigit():
+            if cohort_id:
                 query_dict['cohorts_cohort.id'] = cohort_id
 
             query_str = 'select cohorts_cohort.id, ' \
@@ -253,8 +254,6 @@ class Cohort_Endpoints_API(remote.Service):
                         'cohorts_cohort_perms.perm, ' \
                         'auth_user.email, ' \
                         'cohorts_cohort_comments.content as comments, ' \
-                        'cohorts_filters.name as filter_name, ' \
-                        'cohorts_filters.value as filter_value, ' \
                         'cohorts_source.type as source_type, ' \
                         'cohorts_source.notes as source_notes, ' \
                         'cohorts_source.parent_id ' \
@@ -265,8 +264,6 @@ class Cohort_Endpoints_API(remote.Service):
                         'on auth_user.id=cohorts_cohort_perms.user_id ' \
                         'left join cohorts_cohort_comments ' \
                         'on cohorts_cohort_comments.user_id=cohorts_cohort_perms.user_id ' \
-                        'left join cohorts_filters ' \
-                        'on cohorts_filters.resulting_cohort_id=cohorts_cohort_perms.cohort_id ' \
                         'left join cohorts_source ' \
                         'on cohorts_source.cohort_id=cohorts_cohort_perms.cohort_id '
 
@@ -281,6 +278,19 @@ class Cohort_Endpoints_API(remote.Service):
                 cursor.execute(query_str, query_tuple)
                 data = []
                 for row in cursor.fetchall():
+                    filter_query_str = 'SELECT name, value ' \
+                                       'FROM cohorts_filters ' \
+                                       'WHERE cohorts_filters.resulting_cohort_id=%s'
+
+                    filter_cursor = db.cursor(MySQLdb.cursors.DictCursor)
+                    filter_cursor.execute(filter_query_str, (str(row['id']),))
+                    filter_data = []
+                    for filter_row in filter_cursor.fetchall():
+                        filter_data.append(FilterDetails(
+                            name=str(filter_row['name']),
+                            value=str(filter_row['value'])
+                        ))
+
                     data.append(Cohort(
                         id=str(row['id']),
                         name=str(row['name']),
@@ -288,27 +298,34 @@ class Cohort_Endpoints_API(remote.Service):
                         perm=str(row['perm']),
                         email=str(row['email']),
                         comments=str(row['comments']),
-                        filter_name=str(row['filter_name']),
-                        filter_value=str(row['filter_value']),
                         source_type=None if row['source_type'] is None else str(row['source_type']),
                         source_notes=None if row['source_notes'] is None else str(row['source_notes']),
-                        parent_id=None if row['parent_id'] is None else int(row['parent_id'])
+                        parent_id=None if row['parent_id'] is None else int(row['parent_id']),
+                        filters=filter_data
                     ))
-                cursor.close()
-                db.close()
+
                 return CohortsList(items=data, count=len(data))
-            except (IndexError, TypeError):
-                raise endpoints.NotFoundException("User %s's cohorts not found." % (request.id,))
+            except (IndexError, TypeError) as e:
+                raise endpoints.NotFoundException(
+                    "User {}'s cohorts not found. {}: {}".format(user_email, type(e), e))
+            finally:
+                if cursor: cursor.close()
+                if filter_cursor: filter_cursor.close()
+                if db and db.open: db.close()
         else:
-            return CohortsList(items=[], count=0)
+            raise endpoints.UnauthorizedException("Authentication failed.")
 
 
-    GET_RESOURCE = endpoints.ResourceContainer(cohort_id=messages.StringField(1, required=True),
+    GET_RESOURCE = endpoints.ResourceContainer(cohort_id=messages.IntegerField(1, required=True),
                                                token=messages.StringField(2))
     @endpoints.method(GET_RESOURCE, CohortPatientsSamplesList,
-                      path='cohort_patients_samples_list', http_method='GET', name='cohorts.cohort_patients_samples_list')
+                      path='cohort_patients_samples_list', http_method='GET',
+                      name='cohorts.cohort_patients_samples_list')
     def cohort_patients_samples_list(self, request):
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+
+        db = None
+        cursor = None
         user_email = None
 
         if endpoints.get_current_user() is not None:
@@ -324,7 +341,6 @@ class Cohort_Endpoints_API(remote.Service):
         cohort_id = request.__getattribute__('cohort_id')
 
         if user_email:
-            # todo: see if this needs to be done with a MySQldb cursor
             django.setup()
             try:
                 user_id = Django_User.objects.get(email=user_email).id
@@ -332,48 +348,86 @@ class Cohort_Endpoints_API(remote.Service):
                 logger.warn(e)
                 raise endpoints.NotFoundException("%s does not have an entry in the user database." % user_email)
 
-            query_dict = {'cohorts_cohort_perms.user_id': user_id, 'cohorts_cohort.active': unicode('1')}
+            try:
+                db = sql_connection()
+                cursor = db.cursor(MySQLdb.cursors.DictCursor)
+                cursor.execute("select count(*) from cohorts_cohort_perms where user_id=%s and cohort_id=%s", (user_id, cohort_id))
+                result = cursor.fetchone()
+                if int(result['count(*)']) == 0:
+                    error_message = "{} does not have owner or reader permissions on cohort {}.".format(user_email, cohort_id)
+                    return CohortPatientsSamplesList(error=error_message, patients=[],
+                                                     patient_count=None, samples=[],
+                                                     sample_count=None, cohort_id=None)
 
-            if cohort_id and cohort_id.isdigit():
-                query_dict['cohorts_cohort.id'] = cohort_id
+                cursor.execute("select count(*) from cohorts_cohort where id=%s and active=%s", (cohort_id, unicode('0')))
+                result = cursor.fetchone()
+                if int(result['count(*)']) > 0:
+                    error_message = "Cohort {} was deleted.".format(cohort_id)
+                    return CohortPatientsSamplesList(error=error_message, patients=[],
+                                                     patient_count=None, samples=[],
+                                                     sample_count=None, cohort_id=None)
 
-            patient_query_str = 'select patient_id ' \
+            except (IndexError, TypeError) as e:
+                logger.warn(e)
+                raise endpoints.NotFoundException("Cohort {} not found.".format(cohort_id))
+            finally:
+                if cursor: cursor.close()
+                if db and db.open: db.close()
+
+            patient_query_str = 'select cohorts_patients.patient_id ' \
                         'from cohorts_patients ' \
-                        'where cohort_id=%s ' \
-                        'group by patient_id'
+                        'inner join cohorts_cohort_perms ' \
+                        'on cohorts_cohort_perms.cohort_id=cohorts_patients.cohort_id ' \
+                        'inner join cohorts_cohort ' \
+                        'on cohorts_patients.cohort_id=cohorts_cohort.id ' \
+                        'where cohorts_patients.cohort_id=%s ' \
+                        'and cohorts_cohort_perms.user_id=%s ' \
+                        'and cohorts_cohort.active=%s ' \
+                        'group by cohorts_patients.patient_id '
 
-            sample_query_str = 'select sample_id ' \
+            patient_query_tuple = (cohort_id, user_id, unicode('1'))
+
+            sample_query_str = 'select cohorts_samples.sample_id ' \
                         'from cohorts_samples ' \
-                        'where cohort_id=%s ' \
-                        'group by sample_id'
+                        'inner join cohorts_cohort_perms ' \
+                        'on cohorts_cohort_perms.cohort_id=cohorts_samples.cohort_id ' \
+                        'inner join cohorts_cohort ' \
+                        'on cohorts_samples.cohort_id=cohorts_cohort.id ' \
+                        'where cohorts_samples.cohort_id=%s ' \
+                        'and cohorts_cohort_perms.user_id=%s ' \
+                        'and cohorts_cohort.active=%s ' \
+                        'group by cohorts_samples.sample_id '
 
-            query_tuple = (cohort_id,)
+            sample_query_tuple = (cohort_id, user_id, unicode('1'))
 
             try:
                 db = sql_connection()
 
                 cursor = db.cursor(MySQLdb.cursors.DictCursor)
-                cursor.execute(patient_query_str, query_tuple)
+                cursor.execute(patient_query_str, patient_query_tuple)
                 patient_data = []
                 for row in cursor.fetchall():
                     patient_data.append(row['patient_id'])
 
-                cursor.execute(sample_query_str, query_tuple)
+                cursor.execute(sample_query_str, sample_query_tuple)
                 sample_data = []
                 for row in cursor.fetchall():
                     sample_data.append(row['sample_id'])
-                cursor.close()
-                db.close()
+
                 return CohortPatientsSamplesList(patients=patient_data,
                                                  patient_count=len(patient_data),
                                                  samples=sample_data,
                                                  sample_count=len(sample_data),
                                                  cohort_id=int(cohort_id))
-            except (IndexError, TypeError):
-                raise endpoints.NotFoundException("Cohort %s not found." % (request.cohort_id),)
+            except (IndexError, TypeError) as e:
+                logger.warn(e)
+                raise endpoints.NotFoundException("Cohort {} not found.".format(cohort_id))
+            finally:
+                if cursor: cursor.close()
+                if db and db.open: db.close()
 
         else:
-            return CohortPatientsSamplesList(patients=[], patient_count=0, samples=[], sample_count=0)
+            raise endpoints.UnauthorizedException("Authentication failed.")
 
 
 
@@ -383,6 +437,11 @@ class Cohort_Endpoints_API(remote.Service):
     def patient_details(self, request):
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
 
+        clinical_cursor = None
+        sample_cursor = None
+        aliquot_cursor = None
+        db = None
+
         patient_barcode = request.__getattribute__('patient_barcode')
 
         clinical_query_str = 'select * ' \
@@ -390,7 +449,7 @@ class Cohort_Endpoints_API(remote.Service):
                     'where ParticipantBarcode=%s' \
                     # % patient_barcode
 
-        query_tuple = [str(patient_barcode)]
+        query_tuple = (str(patient_barcode),)
 
 
         sample_query_str = 'select SampleBarcode ' \
@@ -406,6 +465,11 @@ class Cohort_Endpoints_API(remote.Service):
             clinical_cursor = db.cursor(MySQLdb.cursors.DictCursor)
             clinical_cursor.execute(clinical_query_str, query_tuple)
             row = clinical_cursor.fetchone()
+            if row is None:
+                clinical_cursor.close()
+                db.close()
+                error_message = "Patient barcode {} not found in metadata_clinical table.".format(patient_barcode)
+                return PatientDetails(error=error_message, clinical_data=None, samples=[], aliquots=[])
             item = MetadataItem(
                 age_at_initial_pathologic_diagnosis=None if "age_at_initial_pathologic_diagnosis" not in row or row["age_at_initial_pathologic_diagnosis"] is None else int(row["age_at_initial_pathologic_diagnosis"]),
                 anatomic_neoplasm_subdivision=str(row["anatomic_neoplasm_subdivision"]),
@@ -481,13 +545,14 @@ class Cohort_Endpoints_API(remote.Service):
             for row in aliquot_cursor.fetchall():
                 aliquot_data.append(row['AliquotBarcode'])
 
-            clinical_cursor.close()
-            sample_cursor.close()
-            aliquot_cursor.close()
-            db.close()
             return PatientDetails(clinical_data=item, samples=sample_data, aliquots=aliquot_data)
         except (IndexError, TypeError), e:
-            raise endpoints.NotFoundException("Patient %s not found." % (str(request.patient_barcode),))
+            raise endpoints.NotFoundException("Patient {} not found.".format(patient_barcode))
+        finally:
+            if clinical_cursor: clinical_cursor.close()
+            if sample_cursor: sample_cursor.close()
+            if aliquot_cursor: aliquot_cursor.close()
+            if db and db.open: db.close()
 
 
     GET_RESOURCE = endpoints.ResourceContainer(sample_barcode=messages.StringField(1, required=True),
@@ -497,6 +562,13 @@ class Cohort_Endpoints_API(remote.Service):
                       path='sample_details', http_method='GET', name='cohorts.sample_details')
     def sample_details(self, request):
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+
+        biospecimen_cursor = None
+        aliquot_cursor = None
+        patient_cursor = None
+        data_cursor = None
+        db = None
+
         sample_barcode = request.__getattribute__('sample_barcode')
         biospecimen_query_str = 'select * ' \
                                 'from metadata_biospecimen ' \
@@ -556,6 +628,12 @@ class Cohort_Endpoints_API(remote.Service):
             biospecimen_cursor = db.cursor(MySQLdb.cursors.DictCursor)
             biospecimen_cursor.execute(biospecimen_query_str, query_tuple)
             row = biospecimen_cursor.fetchone()
+            if row is None:
+                biospecimen_cursor.close()
+                db.close()
+                error_message = "Sample barcode {} not found in metadata_biospecimen table.".format(sample_barcode)
+                return SampleDetails(biospecimen_data=None, aliquots=[], patient=None, data_details=[],
+                                     data_details_count=None, error=error_message)
             item = MetadataItem(
                 avg_percent_lymphocyte_infiltration=None if "avg_percent_lymphocyte_infiltration" not in row or row["avg_percent_lymphocyte_infiltration"] is None else float(row["avg_percent_lymphocyte_infiltration"]),
                 avg_percent_monocyte_infiltration=None if "avg_percent_monocyte_infiltration" not in row or row["avg_percent_monocyte_infiltration"] is None else float(row["avg_percent_monocyte_infiltration"]),
@@ -598,6 +676,14 @@ class Cohort_Endpoints_API(remote.Service):
             patient_cursor = db.cursor(MySQLdb.cursors.DictCursor)
             patient_cursor.execute(patient_query_str, query_tuple)
             row = patient_cursor.fetchone()
+            if row is None:
+                aliquot_cursor.close()
+                patient_cursor.close()
+                biospecimen_cursor.close()
+                db.close()
+                error_message = "Sample barcode {} not found in metadata_biospecimen table.".format(sample_barcode)
+                return SampleDetails(biospecimen_data=None, aliquots=[], patient=None, data_details=[],
+                                     data_details_count=None, error=error_message)
             patient_barcode = str(row["ParticipantBarcode"])
 
             data_cursor = db.cursor(MySQLdb.cursors.DictCursor)
@@ -624,31 +710,44 @@ class Cohort_Endpoints_API(remote.Service):
                 )
                 data_data.append(data_item)
 
-            biospecimen_cursor.close()
-            aliquot_cursor.close()
-            patient_cursor.close()
-            data_cursor.close()
-            db.close()
-
             return SampleDetails(biospecimen_data=item, aliquots=aliquot_data,
                                  patient=patient_barcode, data_details=data_data,
                                  data_details_count=len(data_data))
 
-        except (IndexError, TypeError), e:
+        except (IndexError, TypeError) as e:
             logger.warn(e)
-            raise endpoints.NotFoundException("Sample %s not found." % (str(request.sample_barcode),))
+            raise endpoints.NotFoundException("Sample details for barcode {} not found".format(sample_barcode))
+        finally:
+            if biospecimen_cursor: biospecimen_cursor.close()
+            if aliquot_cursor: aliquot_cursor.close()
+            if patient_cursor: patient_cursor.close()
+            if data_cursor: data_cursor.close()
+            if db and db.open: db.close()
 
 
-    GET_RESOURCE = endpoints.ResourceContainer(sample_barcode=messages.StringField(1, required=True),
+
+    GET_RESOURCE = endpoints.ResourceContainer(sample_barcode=messages.StringField(1),
                                                platform=messages.StringField(2),
                                                pipeline=messages.StringField(3),
-                                               token=messages.StringField(4))
+                                               token=messages.StringField(4),
+                                               cohort_id=messages.IntegerField(5))
     @endpoints.method(GET_RESOURCE, DataFileNameKeyList,
                       path='datafilenamekey_list', http_method='GET', name='cohorts.datafilenamekey_list')
     def datafilenamekey_list(self, request):
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         user_email = None
+        cursor = None
+        db = None
         dbGaP_authorized = False
+        cohort_id = None
+
+        sample_barcode = request.__getattribute__('sample_barcode')
+        platform = request.__getattribute__('platform')
+        pipeline = request.__getattribute__('pipeline')
+        cohort_id = request.__getattribute__('cohort_id')
+
+        if not sample_barcode and not cohort_id:
+            raise endpoints.NotFoundException("You must enter a sample barcode or a cohort id.")
 
         if endpoints.get_current_user() is not None:
             user_email = endpoints.get_current_user().email()
@@ -664,51 +763,76 @@ class Cohort_Endpoints_API(remote.Service):
             django.setup()
             try:
                 user_id = Django_User.objects.get(email=user_email).id
-                dbGaP_authorized = NIH_User.objects.get(user_id=user_id).dbGaP_authorized
+                nih_user = NIH_User.objects.get(user_id=user_id)
+                dbGaP_authorized = nih_user.dbGaP_authorized and nih_user.active
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
+                if type(e) is MultipleObjectsReturned:
+                    logger.warn(e)
+                    raise endpoints.NotFoundException("%s has multiple entries in the user database." % user_email)
+
+
+            query_str = 'SELECT DataFileNameKey, SecurityProtocol, Repository ' \
+                        'FROM metadata_data '
+
+            if cohort_id:
+                try:
+                    user_id = Django_User.objects.get(email=user_email).id
+                    django_cohort = Django_Cohort.objects.get(id=cohort_id)
+                    cohort_perm = Cohort_Perms.objects.get(cohort_id=cohort_id, user_id=user_id)
+                except (ObjectDoesNotExist, MultipleObjectsReturned), e:
+                    logger.info(e)
+                    err_msg = "Error retrieving cohort {} for user {}: {}.".format(cohort_id, user_email, e)
+                    if 'Cohort_Perms' in e.message:
+                        err_msg = "User {} does not have permissions on cohort {}. Error: {}"\
+                            .format(user_email, cohort_id, e)
+                    raise endpoints.UnauthorizedException(err_msg)
+                query_str += 'WHERE SampleBarcode IN (SELECT SampleBarcode FROM cohorts_samples WHERE cohort_id=%s) '
+                query_tuple = (cohort_id,)
+            elif sample_barcode:
+                query_str += 'WHERE SampleBarcode=%s '
+                query_tuple = (sample_barcode,)
+
+            if platform:
+                query_str += ' and Platform=%s '
+                query_tuple += (platform,)
+
+            if pipeline:
+                query_str += ' and Pipeline=%s '
+                query_tuple += (pipeline,)
+
+            query_str += ' GROUP BY DataFileNameKey'
+
+
+            try:
+                db = sql_connection()
+                cursor = db.cursor(MySQLdb.cursors.DictCursor)
+                cursor.execute(query_str, query_tuple)
+
+                datafilenamekeys = []
+                for row in cursor.fetchall():
+                    file_path = row.get('DataFileNameKey') if len(row.get('DataFileNameKey', '')) else '/file-path-currently-unavailable'
+                    if 'controlled' not in str(row['SecurityProtocol']).lower():
+                        datafilenamekeys.append("gs://{}{}".format(settings.OPEN_DATA_BUCKET, file_path))
+                    elif dbGaP_authorized:
+                        bucket_name = ''
+                        # hard-coding mock bucket names for now --testing purposes only
+                        if row['Repository'].lower() == 'dcc':
+                            bucket_name = 'gs://62f2c827-mock-mock-mock-1cde698a4f77'
+                        elif row['Repository'].lower() == 'cghub':
+                            bucket_name = 'gs://360ee3ad-mock-mock-mock-52f9a5e7f99a'
+                        datafilenamekeys.append("{}{}".format(bucket_name, file_path))
+
+                return DataFileNameKeyList(datafilenamekeys=datafilenamekeys, count=len(datafilenamekeys))
+
+            except (IndexError, TypeError) as e:
                 logger.warn(e)
-                # raise endpoints.NotFoundException("%s does not have an entry in the user database." % user_email)
+                raise endpoints.NotFoundException("Sample {} not found.".format(sample_barcode))
+            finally:
+                if cursor: cursor.close()
+                if db and db.open: db.close()
 
-
-        sample_barcode = request.__getattribute__('sample_barcode')
-        platform = request.__getattribute__('platform')
-        pipeline = request.__getattribute__('pipeline')
-
-        query_str = 'SELECT DataFileNameKey, SecurityProtocol ' \
-                    'FROM metadata_data ' \
-                    'WHERE SampleBarcode=%s ' \
-                    'AND DataFileNameKey != "" '
-
-        query_tuple = (sample_barcode,)
-
-        if platform:
-            query_str += ' and Platform=%s '
-            query_tuple += (platform,)
-
-        if pipeline:
-            query_str += ' and Pipeline=%s '
-            query_tuple += (pipeline,)
-
-        query_str += ' GROUP BY DataFileNameKey'
-
-        try:
-            db = sql_connection()
-            cursor = db.cursor(MySQLdb.cursors.DictCursor)
-            cursor.execute(query_str, query_tuple)
-
-            datafilenamekeys=[]
-            for row in cursor.fetchall():
-                if 'controlled' not in str(row['SecurityProtocol']).lower() or dbGaP_authorized:
-                    # todo: currently no DataFileNameKey entries exist for records where
-                    # SecurityProtocol is 'dbGap controlled-access'. Test this when we upload
-                    # controlled-access data
-                    datafilenamekeys.append(row['DataFileNameKey'])
-
-            return DataFileNameKeyList(datafilenamekeys=datafilenamekeys)
-
-        except (IndexError, TypeError), e:
-            logger.warn(e)
-            raise endpoints.NotFoundException("Sample %s not found." % (str(request.sample_barcode),))
+        else:
+            raise endpoints.UnauthorizedException("Authentication failed.")
 
 
     POST_RESOURCE = endpoints.ResourceContainer(IncomingMetadataItem,
@@ -720,6 +844,9 @@ class Cohort_Endpoints_API(remote.Service):
     def save_cohort(self, request):
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         user_email = None
+        patient_cursor = None
+        sample_cursor = None
+        db = None
 
         if endpoints.get_current_user() is not None:
             user_email = endpoints.get_current_user().email()
@@ -776,14 +903,17 @@ class Cohort_Endpoints_API(remote.Service):
 
             except (IndexError, TypeError), e:
                 logger.warn(e)
-                # todo: more informative message
                 raise endpoints.NotFoundException("Error retrieving samples or patients")
+            finally:
+                if patient_cursor: patient_cursor.close()
+                if sample_cursor: sample_cursor.close()
+                if db and db.open: db.close()
 
             cohort_name = request.__getattribute__('name')
 
             # 1. create new cohorts_cohort with name, active=True, last_date_saved=now
             created_cohort = Django_Cohort.objects.create(name=cohort_name, active=True, last_date_saved=datetime.utcnow())
-            created_cohort.save()  # todo: redundant?
+            created_cohort.save()
 
             # 2. insert patients into cohort_patients
             patient_barcodes = list(set(patient_barcodes))
@@ -801,7 +931,7 @@ class Cohort_Endpoints_API(remote.Service):
 
             # 5. Create filters applied
             for key, val in query_dict.items():
-                Filters.objects.create(resulting_cohort=created_cohort, name=key, value=val).save()  # todo: save redundant with create?
+                Filters.objects.create(resulting_cohort=created_cohort, name=key, value=val).save()
 
             # 6. Store cohort to BigQuery
             project_id = settings.BQ_PROJECT_ID
@@ -814,16 +944,11 @@ class Cohort_Endpoints_API(remote.Service):
                                active='True',
                                last_date_saved=str(datetime.utcnow()),
                                user_id=str(user_id),
+                               num_patients=str(len(patient_barcodes)),
+                               num_samples=str(len(sample_barcodes))
                                )
-            # todo: make SavedCohort have num_patients and num_samples instead of filter_name, filter_value
-        # id = messages.StringField(1)
-        # name = messages.StringField(2)
-        # active = messages.StringField(3)
-        # last_date_saved = messages.StringField(4)
-        # user_id = messages.StringField(5)  # for cohorts_cohort_perms. Not shown: perm (OWNER, READER)
-        # filter_name = messages.StringField(6)  # for cohorts_filters.name
-        # filter_value = messages.StringField(7)  # for cohorts_filters.value. Not shown: cohorts_filters.resulting_cohort_id
-        # last_date_saved_alt = message_types.DateTimeField(8)
+        else:
+            raise endpoints.UnauthorizedException("Authentication failed.")
 
 
     DELETE_RESOURCE = endpoints.ResourceContainer(cohort_id=messages.IntegerField(1, required=True),
@@ -834,7 +959,7 @@ class Cohort_Endpoints_API(remote.Service):
     def delete_cohort(self, request):
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         user_email = None
-        result_message = None
+        return_message = None
 
         if endpoints.get_current_user() is not None:
             user_email = endpoints.get_current_user().email()
@@ -879,468 +1004,128 @@ class Cohort_Endpoints_API(remote.Service):
         return ReturnJSON(msg=return_message)
 
 
+    GET_RESOURCE = endpoints.ResourceContainer(sample_barcode=messages.StringField(1),
+                                               platform=messages.StringField(2),
+                                               pipeline=messages.StringField(3),
+                                               token=messages.StringField(4),
+                                               cohort_id=messages.IntegerField(5))
+    @endpoints.method(GET_RESOURCE, DataFileNameKeyList,
+                      path='alt_datafilenamekey_list', http_method='GET', name='cohorts.alt_datafilenamekey_list')
+    def alt_datafilenamekey_list(self, request):
+        print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+        user_email = None
+        cursor = None
+        user_cursor = None
+        db = None
+        dbGaP_authorized = False
+        cohort_id = None
+        row = None
+
+        sample_barcode = request.__getattribute__('sample_barcode')
+        platform = request.__getattribute__('platform')
+        pipeline = request.__getattribute__('pipeline')
+        cohort_id = request.__getattribute__('cohort_id')
+
+        if not sample_barcode and not cohort_id:
+            raise endpoints.NotFoundException("You must enter a sample barcode or a cohort id.")
+
+        if endpoints.get_current_user() is not None:
+            user_email = endpoints.get_current_user().email()
+
+        # users have the option of pasting the access token in the query string
+        # or in the 'token' field in the api explorer
+        # but this is not required
+        access_token = request.__getattribute__('token')
+        if access_token:
+            user_email = get_user_email_from_token(access_token)
+
+        if not user_email:
+            raise endpoints.UnauthorizedException("Authentication failed.")
+        try:
+            db = sql_connection()
+            user_cursor = db.cursor(MySQLdb.cursors.DictCursor)
+            user_query_str = 'SELECT * ' \
+                             'FROM auth_user ' \
+                             'LEFT JOIN accounts_nih_user ' \
+                             'ON auth_user.id=accounts_nih_user.user_id ' \
+                             'WHERE auth_user.email=%s '
+            user_cursor.execute(user_query_str, (user_email,))
+            row = user_cursor.fetchone()
+            dbGaP_authorized = row['dbGaP_authorized'] and row['active']
+        except (IndexError, TypeError), e:
+            logger.warn(e)
+        finally:
+            if user_cursor: user_cursor.close()
+            if db and db.open: db.close()
+            if row is None:
+                raise endpoints.UnauthorizedException("Authentication of {} failed.".format(user_email))
+
+        query_str = 'SELECT DataFileNameKey, SecurityProtocol, Repository ' \
+                    'FROM metadata_data '
+
+        if cohort_id:
+            try:
+                db = sql_connection()
+                user_cursor = db.cursor(MySQLdb.cursors.DictCursor)
+                user_cohort_query_str = "select * from cohorts_cohort_perms " \
+                                        "where cohort_id=%s " \
+                                        "and user_id = " \
+                                        "(select id from auth_user " \
+                                        "where email=%s) "
+                user_cursor.execute(user_cohort_query_str, (cohort_id, user_email))
+                row = user_cursor.fetchone()
+                perm = row['perm']
+                # note: we are not doing anything with the 'perm' variable for now
+                # but it will throw a TypeError if row is None
+            except (IndexError, TypeError), e:
+                logger.info(e)
+                raise endpoints.NotFoundException(
+                    "Error retrieving cohort {} for user {}.".format(cohort_id, user_email))
+            finally:
+                if user_cursor: user_cursor.close()
+                if db and db.open: db.close()
+
+            query_str += 'WHERE SampleBarcode IN (SELECT SampleBarcode FROM cohorts_samples WHERE cohort_id=%s) '
+            query_tuple = (cohort_id,)
+        elif sample_barcode:
+            query_str += 'WHERE SampleBarcode=%s '
+            query_tuple = (sample_barcode,)
+
+        if platform:
+            query_str += ' and Platform=%s '
+            query_tuple += (platform,)
+
+        if pipeline:
+            query_str += ' and Pipeline=%s '
+            query_tuple += (pipeline,)
+
+        query_str += ' GROUP BY DataFileNameKey'
 
 
-    # GET_RESOURCE = endpoints.ResourceContainer(SavedSearch)
-    # @endpoints.method(GET_RESOURCE, SavedSearchList,
-    #                   path='savedsearches', http_method='GET', name='search.list')
-    # def saved_searches_list(self, request):
-    #     query_dict = {}
-    #     value_tuple = ()
-    #     for key, value in SavedSearch.__dict__.items():
-    #         if not key.startswith('_'):
-    #             if request.__getattribute__(key) is not None:
-    #                 query_dict[key] = request.__getattribute__(key)
-    #
-    #     query_str = 'SELECT * FROM search_savedsearch'
-    #     if len(query_dict) > 0:
-    #         query_str += ' where '
-    #         where_clause = build_where_clause(query_dict)
-    #         query_str += where_clause['query_str'] + ' ORDER BY last_date_saved DESC'
-    #         value_tuple = where_clause['value_tuple']
-    #
-    #     try:
-    #         db = sql_connection()
-    #         cursor = db.cursor(MySQLdb.cursors.DictCursor)
-    #         cursor.execute(query_str, value_tuple)
-    #         data = []
-    #         for row in cursor.fetchall():
-    #              data.append(SavedSearch(
-    #                  id                 =str(row['id']),
-    #                  search_url         =str(row['search_url']),
-    #                  barcodes           =str(row['barcodes']),
-    #                  datatypes          =str(row['datatypes']),
-    #                  last_date_saved    =str(row['last_date_saved']),
-    #                  user_id            =str(row['user_id']),
-    #                  name               =str(row['name']),
-    #                  active             =str(row['active'])
-    #                  ))
-    #         cursor.close()
-    #         db.close()
-    #         return SavedSearchList(items=data)
-    #     except (IndexError, TypeError):
-    #         raise endpoints.NotFoundException('Saved Search %s not found.' % (request.id,))
-    #
-    #
-    # POST_RESOURCE = endpoints.ResourceContainer(
-    #     SavedSearch)
-    # @endpoints.method(POST_RESOURCE, SavedSearchList,
-    #                   path='savedsearch', http_method='POST', name='search.save')
-    # def save_search(self, request):
-    #     search_url = request.search_url
-    #     datatypes = request.datatypes
-    #     search_name = request.name
-    #     barcodes = request.barcodes
-    #     last_inserted = []
-    #     user_id = request.user_id
-    #     parent_id = request.parent_id
-    #
-    #     db = sql_connection()
-    #     query_dict = {}
-    #     value_tuple = ()
-    #     query_str = ''
-    #     query_select_str = 'SELECT sample'
-    #     if not barcodes:
-    #         # get barcodes based on search_url
-    #
-    #         if search_url:
-    #             tmp = search_url.replace('#', '')[:-1]
-    #             key_vals = tmp.split('&')
-    #             for item in key_vals:
-    #                 key, vals = item.split('=')
-    #                 query_dict[key] = vals
-    #
-    #             # Build SQL statement
-    #             if len(query_dict) == 0:                        # If there are no parameters passed in selected everything
-    #                 query_str = ' FROM fmdata'
-    #
-    #             else:                                           # If there are parameters passed in
-    #                 query_str = ' FROM fmdata where'
-    #                 where_clause = build_where_clause(query_dict)
-    #                 query_str += where_clause['query_str']
-    #                 value_tuple = where_clause['value_tuple']
-    #
-    #         if parent_id:
-    #             search_str = 'SELECT barcodes FROM search_savedsearch WHERE id=%s;'
-    #             try:
-    #
-    #                 cursor = db.cursor(MySQLdb.cursors.DictCursor)
-    #                 cursor.execute(search_str, (parent_id,))
-    #                 row = cursor.fetchone()
-    #                 if row['barcodes']:
-    #                     barcodes = row['barcodes'].replace('[', '').replace(']', '').replace('\'', '').replace(' ', '').split(',')
-    #                     if query_str.rfind('where') >= 0:
-    #                         query_str += ' and sample in ('
-    #                     else:
-    #                         query_str += ' FROM fmdata where sample in ('
-    #                     first = True
-    #                     for code in barcodes:
-    #                         if first:
-    #                             first = False
-    #                             query_str += '%s'
-    #                         else:
-    #                             query_str += ',%s'
-    #                         value_tuple += (code,)
-    #                     query_str += ')'
-    #             except:
-    #                 pass
-    #
-    #         # print query_select_str, query_str
-    #
-    #         try:
-    #             query_str = query_select_str + query_str
-    #             cursor = db.cursor(MySQLdb.cursors.DictCursor)
-    #             cursor.execute(query_str, value_tuple)
-    #             barcodes = []
-    #             for row in cursor.fetchall():
-    #                 barcodes.append(row['sample'])
-    #
-    #         except (IndexError):
-    #             pass
-    #     if not parent_id:
-    #         parent_id = None
-    #     insert_str = 'INSERT INTO search_savedsearch (barcodes, name, datatypes, last_date_saved, search_url, user_id, parent_id, active) VALUES(%s,%s,%s,now(),%s,%s, %s, 1);'
-    #     value_tuple = (str(barcodes), str(search_name), str(datatypes), str(search_url), str(user_id), parent_id)
-    #     query_str = "SELECT * FROM search_savedsearch ORDER BY last_date_saved DESC;"
-    #     try:
-    #         cursor = db.cursor(MySQLdb.cursors.DictCursor)
-    #         cursor.execute(insert_str, value_tuple)
-    #
-    #         db.commit()
-    #         cursor.execute(query_str)
-    #         row = cursor.fetchone()
-    #         last_inserted.append(SavedSearch(
-    #             id              = str(row['id']),
-    #             search_url      = str(row['search_url']),
-    #             barcodes        = str(row['barcodes']),
-    #             datatypes       = str(row['datatypes']),
-    #             last_date_saved = str(row['last_date_saved']),
-    #             user_id         = str(row['user_id']),
-    #             name            = str(row['name']),
-    #             parent_id       = str(row['parent_id'])
-    #         ))
-    #         cursor.close()
-    #         db.close()
-    #         return SavedSearchList(items=last_inserted)
-    #     except (IndexError, TypeError):
-    #         db.rollback()
-    #         db.close()
-    #         raise endpoints.NotFoundException('\n\nnot found')
-    #
-    # POST_RESOURCE = endpoints.ResourceContainer(
-    #     IdList)
-    # @endpoints.method(POST_RESOURCE, message_types.VoidMessage,
-    #                   path='deletesearch', http_method='POST', name='search.delete')
-    # def delete_search(self, request):
-    #     ids = request.ids
-    #     update_str = 'UPDATE search_savedsearch SET active=0 WHERE id in ('
-    #     first = True
-    #     tuple = ()
-    #     for id in ids:
-    #         tuple += (id,)
-    #         if first:
-    #             update_str += '%s'
-    #             first = False
-    #         else:
-    #             update_str +=',%s'
-    #     update_str += ');'
-    #     # print update_str
-    #     # print tuple
-    #     db = sql_connection()
-    #     try:
-    #         cursor = db.cursor(MySQLdb.cursors.DictCursor)
-    #         cursor.execute(update_str, tuple)
-    #         db.commit()
-    #         cursor.close()
-    #         db.close()
-    #     except (IndexError, TypeError):
-    #         db.rollback()
-    #         db.close()
-    #         raise endpoints.NotFoundException('Deletion error')
-    #     return message_types.VoidMessage()
-    #
-    # POST_RESOURCE = endpoints.ResourceContainer(IdList)
-    # @endpoints.method(POST_RESOURCE, SavedSearch,
-    #                   path='union', http_method='POST', name='cohort.union')
-    # def union_cohorts(self, request):
-    #     parent_id = None
-    #     user_id = request.user_id
-    #     parent = None
-    #     name = None
-    #     datatype = ''
-    #     search_url = ''
-    #
-    #     ids = request.ids
-    #
-    #     # Check for given name
-    #     if request.__getattribute__('name'):
-    #         name = request.name
-    #
-    #     db = sql_connection()
-    #     if request.__getattribute__('update'):
-    #         # Update the given cohort with new cohort --> deactivate and set parent id of new cohort to update
-    #         parent_id = request.update
-    #         deactivate_str = 'UPDATE search_savedsearch SET active=0 WHERE id=%s;'
-    #         parent_query = 'SELECT * FROM search_savedsearch where id=%s;'
-    #         try:
-    #             cursor = db.cursor(MySQLdb.cursors.DictCursor)
-    #             cursor.execute(deactivate_str, (parent_id,))
-    #             db.commit()
-    #
-    #             cursor.execute(parent_query, (parent_id,))
-    #             parent = cursor.fetchone()
-    #
-    #             cursor.close()
-    #         except (IndexError, TypeError):
-    #             db.rollback()
-    #             db.close()
-    #             raise endpoints.NotFoundException('Deactivation Error')
-    #
-    #     barcodes = []
-    #     tuple = ()
-    #     query_str = 'SELECT barcodes from search_savedsearch where id in ('
-    #     first = True
-    #     for id in ids:
-    #         tuple += (id,)
-    #         if first:
-    #             query_str += '%s'
-    #             first = False
-    #         else:
-    #             query_str += ',%s'
-    #     query_str += ');'
-    #
-    #     # If no name given and parent id given, use parent name
-    #     if parent and not name:
-    #         name = parent['name']
-    #
-    #     # if no name given, and no parent id given, use default name
-    #     if not parent and not name:
-    #         name = DEFAULT_COHORT_NAME
-    #
-    #     try:
-    #         cursor = db.cursor(MySQLdb.cursors.DictCursor)
-    #         cursor.execute(query_str, tuple)
-    #         for row in cursor.fetchall():
-    #             codes = row['barcodes'].replace('[', '').replace(']', '').replace('\'', '').replace(' ', '').split(',')
-    #             barcodes = set(barcodes).union(codes)
-    #         barcodes = list(barcodes)
-    #
-    #         insert_str = 'INSERT INTO search_savedsearch (barcodes, name, datatypes, last_date_saved, search_url, user_id, parent_id, active) VALUES(%s,%s,%s,now(),%s,%s, %s, 1);'
-    #         value_tuple = (str(barcodes), name, datatype, search_url, str(user_id), parent_id)
-    #         query_str = "SELECT * FROM search_savedsearch ORDER BY last_date_saved DESC;"
-    #
-    #         cursor.execute(insert_str, value_tuple)
-    #         db.commit()
-    #         cursor.execute(query_str)
-    #         row = cursor.fetchone()
-    #         return SavedSearch(
-    #             id              = str(row['id']),
-    #             search_url      = str(row['search_url']),
-    #             barcodes        = str(row['barcodes']),
-    #             datatypes       = str(row['datatypes']),
-    #             last_date_saved = str(row['last_date_saved']),
-    #             user_id         = str(row['user_id']),
-    #             name            = str(row['name']),
-    #             parent_id       = str(row['parent_id']))
-    #
-    #
-    #     except (IndexError, TypeError):
-    #         db.close()
-    #         raise endpoints.NotFoundException('Get Barcodes Error')
-    #
-    # POST_RESOURCE = endpoints.ResourceContainer(IdList)
-    # @endpoints.method(POST_RESOURCE, SavedSearch,
-    #                   path='intersect', http_method='POST', name='cohort.intersect')
-    # def intersect_cohorts(self, request):
-    #     parent_id = None
-    #     user_id = request.user_id
-    #     parent = None
-    #     name = None
-    #     datatype = ''
-    #     search_url = ''
-    #
-    #     ids = request.ids
-    #
-    #     # Check for given name
-    #     if request.__getattribute__('name'):
-    #         name = request.name
-    #
-    #     db = sql_connection()
-    #     if request.__getattribute__('update'):
-    #         # Update the given cohort with new cohort --> deactivate and set parent id of new cohort to update
-    #         parent_id = request.update
-    #         deactivate_str = 'UPDATE search_savedsearch SET active=0 WHERE id=%s;'
-    #         parent_query = 'SELECT * FROM search_savedsearch where id=%s;'
-    #         try:
-    #             cursor = db.cursor(MySQLdb.cursors.DictCursor)
-    #             cursor.execute(deactivate_str, (parent_id,))
-    #             db.commit()
-    #
-    #             cursor.execute(parent_query, (parent_id,))
-    #             parent = cursor.fetchone()
-    #
-    #             cursor.close()
-    #         except (IndexError, TypeError):
-    #             db.rollback()
-    #             db.close()
-    #             raise endpoints.NotFoundException('Deactivation Error')
-    #
-    #     barcodes = []
-    #     tuple = ()
-    #     query_str = 'SELECT barcodes from search_savedsearch where id in ('
-    #     first = True
-    #     for id in ids:
-    #         tuple += (id,)
-    #         if first:
-    #             query_str += '%s'
-    #             first = False
-    #         else:
-    #             query_str += ',%s'
-    #     query_str += ');'
-    #
-    #     # If no name given and parent id given, use parent name
-    #     if parent and not name:
-    #         name = parent['name']
-    #
-    #     # if no name given, and no parent id given, use default name
-    #     if not parent and not name:
-    #         name = DEFAULT_COHORT_NAME
-    #
-    #     try:
-    #         cursor = db.cursor(MySQLdb.cursors.DictCursor)
-    #         cursor.execute(query_str, tuple)
-    #         first = True
-    #         for row in cursor.fetchall():
-    #             if first:
-    #                 barcodes = row['barcodes'].replace('[', '').replace(']', '').replace('\'', '').replace(' ', '').split(',')
-    #                 first = False
-    #             else:
-    #                 codes = row['barcodes'].replace('[', '').replace(']', '').replace('\'', '').replace(' ', '').split(',')
-    #                 barcodes = set(barcodes).intersection(codes)
-    #
-    #         barcodes = list(barcodes)
-    #
-    #         insert_str = 'INSERT INTO search_savedsearch (barcodes, name, datatypes, last_date_saved, search_url, user_id, parent_id, active) VALUES(%s,%s,%s,now(),%s,%s, %s, 1);'
-    #         value_tuple = (str(barcodes), name, datatype, search_url, str(user_id), parent_id)
-    #         query_str = "SELECT * FROM search_savedsearch ORDER BY last_date_saved DESC;"
-    #
-    #         cursor.execute(insert_str, value_tuple)
-    #         db.commit()
-    #         cursor.execute(query_str)
-    #         row = cursor.fetchone()
-    #         return SavedSearch(
-    #             id              = str(row['id']),
-    #             search_url      = str(row['search_url']),
-    #             barcodes        = str(row['barcodes']),
-    #             datatypes       = str(row['datatypes']),
-    #             last_date_saved = str(row['last_date_saved']),
-    #             user_id         = str(row['user_id']),
-    #             name            = str(row['name']),
-    #             parent_id       = str(row['parent_id']))
-    #
-    #
-    #     except (IndexError, TypeError):
-    #         db.close()
-    #         raise endpoints.NotFoundException('Get Barcodes Error')
-    #
-    # POST_RESOURCE = endpoints.ResourceContainer(IdList)
-    # @endpoints.method(POST_RESOURCE, SavedSearch,
-    #                   path='set_minus', http_method='POST', name='cohort.set_minus')
-    # def set_minus_cohorts(self, request):
-    #     parent_id = None
-    #     user_id = request.user_id
-    #     parent = None
-    #     name = None
-    #     datatype = ''
-    #     search_url = ''
-    #
-    #     ids = request.ids
-    #     if len(ids) < 2:
-    #         raise endpoints.BadRequestException('Set Minus requires at least 2 cohort ids.')
-    #
-    #     # Check for given name
-    #     if request.__getattribute__('name'):
-    #         name = request.name
-    #
-    #     db = sql_connection()
-    #     if request.__getattribute__('update'):
-    #         # Update the given cohort with new cohort --> deactivate and set parent id of new cohort to update
-    #         parent_id = request.update
-    #         deactivate_str = 'UPDATE search_savedsearch SET active=0 WHERE id=%s;'
-    #         parent_query = 'SELECT * FROM search_savedsearch where id=%s;'
-    #         try:
-    #             cursor = db.cursor(MySQLdb.cursors.DictCursor)
-    #             cursor.execute(deactivate_str, (parent_id,))
-    #             db.commit()
-    #
-    #             cursor.execute(parent_query, (parent_id,))
-    #             parent = cursor.fetchone()
-    #
-    #             cursor.close()
-    #         except (IndexError, TypeError):
-    #             db.rollback()
-    #             db.close()
-    #             raise endpoints.NotFoundException('Deactivation Error')
-    #
-    #     barcodes = []
-    #     tuple = ()
-    #     query_str = 'SELECT barcodes from search_savedsearch where id in ('
-    #     first = True
-    #     for id in ids:
-    #         tuple += (id,)
-    #         if first:
-    #             query_str += '%s'
-    #             first = False
-    #         else:
-    #             query_str += ',%s'
-    #     query_str += ');'
-    #
-    #     # If no name given and parent id given, use parent name
-    #     if parent and not name:
-    #         name = parent['name']
-    #
-    #     # if no name given, and no parent id given, use default name
-    #     if not parent and not name:
-    #         name = DEFAULT_COHORT_NAME
-    #
-    #     try:
-    #         cursor = db.cursor(MySQLdb.cursors.DictCursor)
-    #         cursor.execute(query_str, tuple)
-    #         first = True
-    #         second = False
-    #         for row in cursor.fetchall():
-    #             if first:
-    #                 barcodes = row['barcodes'].replace('[', '').replace(']', '').replace('\'', '').replace(' ', '').split(',')
-    #                 first = False
-    #                 second = True
-    #             elif second:
-    #                 codes = row['barcodes'].replace('[', '').replace(']', '').replace('\'', '').replace(' ', '').split(',')
-    #                 barcodes = set(barcodes).difference(codes)
-    #
-    #         barcodes = list(barcodes)
-    #
-    #         insert_str = 'INSERT INTO search_savedsearch (barcodes, name, datatypes, last_date_saved, search_url, user_id, parent_id, active) VALUES(%s,%s,%s,now(),%s,%s, %s, 1);'
-    #         value_tuple = (str(barcodes), name, datatype, search_url, str(user_id), parent_id)
-    #         query_str = "SELECT * FROM search_savedsearch ORDER BY last_date_saved DESC;"
-    #
-    #         cursor.execute(insert_str, value_tuple)
-    #         db.commit()
-    #         cursor.execute(query_str)
-    #         row = cursor.fetchone()
-    #         return SavedSearch(
-    #             id              = str(row['id']),
-    #             search_url      = str(row['search_url']),
-    #             barcodes        = str(row['barcodes']),
-    #             datatypes       = str(row['datatypes']),
-    #             last_date_saved = str(row['last_date_saved']),
-    #             user_id         = str(row['user_id']),
-    #             name            = str(row['name']),
-    #             parent_id       = str(row['parent_id']))
-    #
-    #
-    #     except (IndexError, TypeError):
-    #         db.close()
-    #         raise endpoints.NotFoundException('Get Barcodes Error')
-    #
-    #     return SavedSearch()
-    #
+        try:
+            db = sql_connection()
+            cursor = db.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute(query_str, query_tuple)
+
+            datafilenamekeys = []
+            for row in cursor.fetchall():
+                file_path = row.get('DataFileNameKey') if len(row.get('DataFileNameKey', '')) else '/file-path-currently-unavailable'
+                if 'controlled' not in str(row['SecurityProtocol']).lower():
+                    datafilenamekeys.append("gs://{}{}".format(settings.OPEN_DATA_BUCKET, file_path))
+                elif dbGaP_authorized:
+                    bucket_name = ''
+                    # hard-coding mock bucket names for now --testing purposes only
+                    if row['Repository'].lower() == 'dcc':
+                        bucket_name = 'gs://62f2c827-mock-mock-mock-1cde698a4f77'
+                    elif row['Repository'].lower() == 'cghub':
+                        bucket_name = 'gs://360ee3ad-mock-mock-mock-52f9a5e7f99a'
+                    datafilenamekeys.append("{}{}".format(bucket_name, file_path))
+
+            return DataFileNameKeyList(datafilenamekeys=datafilenamekeys, count=len(datafilenamekeys))
+
+        except (IndexError, TypeError) as e:
+            logger.warn(e)
+            raise endpoints.NotFoundException("Sample {} not found.".format(sample_barcode))
+        finally:
+            if cursor: cursor.close()
+            if db and db.open: db.close()

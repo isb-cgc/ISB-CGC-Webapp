@@ -46,6 +46,9 @@ from visualizations.models import SavedViz, Viz_Perms
 from cohorts.models import Cohort, Cohort_Perms
 from accounts.models import NIH_User
 
+from allauth.socialaccount.models import SocialAccount
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
+
 
 debug = settings.DEBUG
 logger = logging.getLogger(__name__)
@@ -116,21 +119,9 @@ def landing_page(request):
             print >> sys.stderr,'App BACKEND_ID: '+os.getenv('BACKEND_ID')
         except:
             print >> sys.stderr,"Printing os.getenv('BACKEND_ID') Failed"
-    ## CURRENT_VERSION_ID unavailable in mvm...
-    ## can use "BACKEND_ID"? e.g. 'mvm:20151016t222058'
-    ## Below uses the current local time, not deployment time PT,...
-    version = { 'version': modules.get_current_version_name(),
-                'date': time.strftime("%d/%m/%y %X")}
-    return render(request, 'GenespotRE/landing.html',
-                  {'request': request,
-                   'version': version})
-    # version = {}
-    #version['version'] = request.environ["CURRENT_VERSION_ID"].split('.')[0]
-    #version_id = request.environ["CURRENT_VERSION_ID"].split('.')[1]
-    # timestamp = long(version_id) / pow(2,28)
-    # update_time = datetime.fromtimestamp(timestamp) - timedelta(hours=7)
-    # version['date'] = update_time.strftime("%d/%m/%y %X")
 
+    return render(request, 'GenespotRE/landing.html',
+                  {'request': request})
 
 '''
 Returns css_test page used to test css for general ui elements
@@ -152,8 +143,6 @@ def user_list(request):
     return render(request, 'GenespotRE/user_list.html', {'request': request,
                                                           'users': users})
 
-from allauth.socialaccount.models import SocialAccount
-from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 
 '''
 Returns page that has user details
@@ -161,6 +150,7 @@ Returns page that has user details
 @login_required
 def user_detail(request, user_id):
     if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+
     if int(request.user.id) == int(user_id):
 
         user = User.objects.get(id=user_id)
@@ -179,7 +169,7 @@ def user_detail(request, user_id):
             nih_user = NIH_User.objects.get(user_id=user_id)
             user_details['NIH_username'] = nih_user.NIH_username
             user_details['NIH_assertion_expiration'] = nih_user.NIH_assertion_expiration
-            user_details['dbGaP_authorized'] = nih_user.dbGaP_authorized
+            user_details['dbGaP_authorized'] = nih_user.dbGaP_authorized and nih_user.active
             user_details['NIH_active'] = nih_user.active
         except (MultipleObjectsReturned, ObjectDoesNotExist), e:
             if type(e) is MultipleObjectsReturned:
@@ -193,7 +183,7 @@ def user_detail(request, user_id):
                        'NIH_AUTH_ON': settings.NIH_AUTH_ON
                        })
     else:
-        return render(request, '500.html')
+        return render(request, '403.html')
 
 
 @login_required

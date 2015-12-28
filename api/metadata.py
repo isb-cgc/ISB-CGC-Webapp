@@ -34,8 +34,9 @@ logger = logging.getLogger(__name__)
 
 debug = settings.DEBUG
 
+INSTALLED_APP_CLIENT_ID = settings.INSTALLED_APP_CLIENT_ID
 OPEN_DATA_BUCKET = settings.OPEN_DATA_BUCKET
-CONTROLLED_DATA_BUCKET = settings.CONTROLLED_DATA_BUCKET
+#CONTROLLED_DATA_BUCKET = settings.CONTROLLED_DATA_BUCKET
 
 METADATA_SHORTLIST = [
     # 'adenocarcinoma_invasion',
@@ -818,7 +819,8 @@ class IncomingPlatformSelection(messages.Message):
     RocheGSFLX_DNASeq                   = messages.StringField(30)
 
 
-Meta_Endpoints = endpoints.api(name='meta_api', version='v1')
+Meta_Endpoints = endpoints.api(name='meta_api', version='v1',
+                               allowed_client_ids=[INSTALLED_APP_CLIENT_ID, endpoints.API_EXPLORER_CLIENT_ID])
 
 @Meta_Endpoints.api_class(resource_name='meta_endpoints')
 class Meta_Endpoints_API(remote.Service):
@@ -948,7 +950,8 @@ class Meta_Endpoints_API(remote.Service):
             return MetadataPlatformItemList(items=data)
 
         except (IndexError, TypeError) as e:
-            print e
+            if cursor: cursor.close()
+            if db: db.close()
             raise endpoints.NotFoundException('Sample not found.')
 
 
@@ -1091,7 +1094,8 @@ class Meta_Endpoints_API(remote.Service):
             return MetadataItemList(items=data, total=len(data))
 
         except (IndexError, TypeError) as e:
-            print e
+            if cursor: cursor.close()
+            if db: db.close()
             raise endpoints.NotFoundException('Sample not found.')
 
 
@@ -1106,13 +1110,14 @@ class Meta_Endpoints_API(remote.Service):
         query_dict = {}
         sample_ids = None
         is_landing = False
-        db = sql_connection()
+
 
         if request.__getattribute__('is_landing') is not None:
             is_landing = request.__getattribute__('is_landing')
 
         if is_landing:
             try:
+                db = sql_connection()
                 cursor = db.cursor()
                 cursor.execute('SELECT Study, COUNT(Study) as disease_count FROM metadata_samples GROUP BY Study;')
                 data = []
@@ -1125,10 +1130,13 @@ class Meta_Endpoints_API(remote.Service):
 
                 attr_values_list = MetaAttrValuesList(Study=data)
 
+                cursor.close()
+                db.close()
+
                 return MetadataItemList(count=attr_values_list)
 
             except (IndexError, TypeError) as e:
-                print e
+
                 raise endpoints.NotFoundException('Error in getting landing data.')
 
         # Check for passed in saved search id
@@ -1137,15 +1145,17 @@ class Meta_Endpoints_API(remote.Service):
             sample_query_str = 'SELECT sample_id FROM cohorts_samples WHERE cohort_id=%s;'
 
             try:
+                db = sql_connection()
                 cursor = db.cursor(MySQLdb.cursors.DictCursor)
                 cursor.execute(sample_query_str, (cohort_id,))
                 sample_ids = ()
 
                 for row in cursor.fetchall():
                     sample_ids += (row['sample_id'],)
+                cursor.close()
+                db.close()
 
             except (TypeError, IndexError) as e:
-                print e
                 raise endpoints.NotFoundException('Error in retrieving barcodes.')
 
 
@@ -1182,6 +1192,7 @@ class Meta_Endpoints_API(remote.Service):
             value_count_query_str += ' GROUP BY %s;' % key
 
             try:
+                db = sql_connection()
                 cursor = db.cursor()
                 cursor.execute(value_count_query_str, value_count_tuple)
 
@@ -1228,16 +1239,16 @@ class Meta_Endpoints_API(remote.Service):
 
                 if key == 'age_at_initial_pathologic_diagnosis':
                     value_list['age_at_initial_pathologic_diagnosis'] = normalize_metadata_ages(value_list['age_at_initial_pathologic_diagnosis'])
-
+                cursor.close()
+                db.close()
             except (KeyError, TypeError) as e:
-                print e
+                if cursor: cursor.close()
+                if db: db.close()
                 raise endpoints.NotFoundException('Error in getting value counts.')
 
         value_list_item = MetaAttrValuesList()
         for key in METADATA_SHORTLIST:
             value_list_item.__setattr__(key, None if key not in value_list else value_list[key])
-
-        # pprint.pprint(value_list_item)
 
         return MetadataItemList(count=value_list_item, total=total)
 
@@ -1281,6 +1292,8 @@ class Meta_Endpoints_API(remote.Service):
             return MetadataAttrList(items=data, count=len(data))
 
         except (IndexError, TypeError):
+            if cursor: cursor.close()
+            if db: db.close()
             raise endpoints.NotFoundException('Sample %s not found.' % (request.id,))
 
 
@@ -1336,7 +1349,8 @@ class Meta_Endpoints_API(remote.Service):
                             item_list.append(str(item[0]))
                     items[feature] = item_list
             items['age_at_initial_pathologic_diagnosis'] = ['10 to 39', '40 to 49', '50 to 59', '60 to 69', '70 to 79', 'Over 80', 'None']
-
+            cursor.close()
+            db.close()
             return MetaDomainsList(
                 gender                               = items['gender'],
                 history_of_neoadjuvant_treatment     = items['history_of_neoadjuvant_treatment'],
@@ -1369,6 +1383,8 @@ class Meta_Endpoints_API(remote.Service):
                 )
 
         except (IndexError, TypeError):
+            if cursor: cursor.close()
+            if db: db.close()
             raise endpoints.NotFoundException('Error in meta_domains')
 
 
@@ -1376,7 +1392,8 @@ class Meta_Endpoints_API(remote.Service):
                                                cohort_id=messages.IntegerField(1, required=True),
                                                page=messages.IntegerField(2),
                                                limit=messages.IntegerField(3),
-                                               token=messages.StringField(4)
+                                               token=messages.StringField(4),
+                                               platform_count_only=messages.StringField(5)
                                                )
     @endpoints.method(GET_RESOURCE, SampleFiles,
                       path='cohort_files', http_method='GET',
@@ -1387,11 +1404,13 @@ class Meta_Endpoints_API(remote.Service):
         offset = 0
         cohort_id = request.cohort_id
 
+        platform_count_only = request.__getattribute__('platform_count_only')
         is_dbGaP_authorized = False
         user_email = None
         user_id = None
         if endpoints.get_current_user() is not None:
             user_email = endpoints.get_current_user().email()
+
         # users have the option of pasting the access token in the query string
         # or in the 'token' field in the api explorer
         # but this is not required
@@ -1410,15 +1429,16 @@ class Meta_Endpoints_API(remote.Service):
                 cohort_perm = Cohort_Perms.objects.get(cohort_id=cohort_id, user_id=user_id)
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
                 logger.warn(e)
-                raise endpoints.NotFoundException("%s does not have permission to view cohort %d." % (user_email, cohort_id))
+                raise endpoints.UnauthorizedException("%s does not have permission to view cohort %d." % (user_email, cohort_id))
 
             try:
-                is_dbGaP_authorized = bool(NIH_User.objects.get(user_id=user_id).dbGaP_authorized)
+                nih_user = NIH_User.objects.get(user_id=user_id)
+                is_dbGaP_authorized = nih_user.dbGaP_authorized and nih_user.active
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
                 logger.info("%s does not have an entry in NIH_User: %s" % (user_email, str(e)))
         else:
             logger.warn("Authentication required for cohort_files endpoint.")
-            raise endpoints.NotFoundException("No user email found.")
+            raise endpoints.UnauthorizedException("No user email found.")
 
         if request.__getattribute__('page') is not None:
             page = request.page
@@ -1426,16 +1446,14 @@ class Meta_Endpoints_API(remote.Service):
         if request.__getattribute__('limit') is not None:
             limit = request.limit
 
-        platform_count_query = 'select Platform, count(Platform) as platform_count from metadata_data where SampleBarcode in (select sample_id from cohorts_samples where cohort_id=%s) and DatafileUploaded="true" '
-        count_query = 'select count(*) as row_count from metadata_data where SampleBarcode in (select sample_id from cohorts_samples where cohort_id=%s) and DatafileUploaded="true" '
-        query = 'select SampleBarcode, DatafileName, DatafileNameKey, Pipeline, Platform, DataLevel, Datatype, GG_readgroupset_id from metadata_data where SampleBarcode in (select sample_id from cohorts_samples where cohort_id=%s) and DatafileUploaded="true" '
+        platform_count_query = 'select Platform, count(Platform) as platform_count from cohorts_samples cs join metadata_data md on md.SampleBarcode = cs.sample_id where cohort_id=%s and DatafileUploaded="true" '
+        query = 'select SampleBarcode, DatafileName, DatafileNameKey, Pipeline, Platform, DataLevel, Datatype, GG_readgroupset_id from metadata_data md join cohorts_samples cs on md.SampleBarcode = cs.sample_id where cohort_id=%s and DatafileUploaded="true" '
 
         if not is_dbGaP_authorized:
-            platform_count_query += ' and SecurityProtocol="dbGap open-access" group by Platform;'
-            count_query += ' and SecurityProtocol="dbGap open-access" '
+            platform_count_query += ' and SecurityProtocol="dbGap open-access" group by Platform order by cs.sample_id;'
             query += ' and SecurityProtocol="dbGap open-access" '
         else:
-            platform_count_query += ' group by Platform;'
+            platform_count_query += ' group by Platform order by cs.sample_id;'
 
         # Check for incoming platform selectors
         platform_selector_list = []
@@ -1445,11 +1463,7 @@ class Meta_Endpoints_API(remote.Service):
                     platform_selector_list.append(key)
 
         if len(platform_selector_list):
-            count_query += ' and Platform in ("' + '","'.join(platform_selector_list) + '");'
             query += ' and Platform in ("' + '","'.join(platform_selector_list) + '")'
-
-        else:
-            count_query += ';'
 
         query_tuple = (cohort_id,)
         if limit != -1:
@@ -1460,35 +1474,40 @@ class Meta_Endpoints_API(remote.Service):
             query += ' offset %s'
             query_tuple += (offset,)
         query += ';'
-        db = sql_connection()
-        cursor = db.cursor(MySQLdb.cursors.DictCursor)
 
         try:
-            cursor.execute(count_query, (cohort_id,))
-            count = cursor.fetchone()['row_count']
+            db = sql_connection()
+            cursor = db.cursor(MySQLdb.cursors.DictCursor)
             cursor.execute(platform_count_query, (cohort_id,))
 
             platform_count_list = []
+            count = 0
             if cursor.rowcount > 0:
                 for row in cursor.fetchall():
+                    if len(platform_selector_list):
+                        if row['Platform'] in platform_selector_list:
+                            count += int(row['platform_count'])
+                    else:
+                        count += int(row['platform_count'])
                     platform_count_list.append(PlatformCount(platform=row['Platform'], count=row['platform_count']))
             else:
                 platform_count_list.append(PlatformCount(platform='None', count=0))
-            cursor.execute(query, query_tuple)
 
             file_list = []
-
-            if cursor.rowcount > 0:
-                for item in cursor.fetchall():
-                    print item
-                    file_list.append(FileDetails(sample=item['SampleBarcode'], cloudstorage_location=item['DatafileNameKey'], filename=item['DatafileName'], pipeline=item['Pipeline'], platform=item['Platform'], datalevel=item['DataLevel'], datatype=item['Datatype'], gg_readgroupset_id=item['GG_readgroupset_id']))
-            else:
-                file_list.append(FileDetails(sample='None', filename='', pipeline='', platform='', datalevel=''))
+            if not platform_count_only:
+                cursor.execute(query, query_tuple)
+                if cursor.rowcount > 0:
+                    for item in cursor.fetchall():
+                        file_list.append(FileDetails(sample=item['SampleBarcode'], cloudstorage_location=item['DatafileNameKey'], filename=item['DatafileName'], pipeline=item['Pipeline'], platform=item['Platform'], datalevel=item['DataLevel'], datatype=item['Datatype'], gg_readgroupset_id=item['GG_readgroupset_id']))
+                else:
+                    file_list.append(FileDetails(sample='None', filename='', pipeline='', platform='', datalevel=''))
             return SampleFiles(total_file_count=count, page=page, platform_count_list=platform_count_list, file_list=file_list)
 
         except (IndexError, TypeError):
             raise endpoints.ServiceException('Error getting counts')
-
+        finally:
+            if cursor: cursor.close()
+            if db: db.close()
 
     GET_RESOURCE = endpoints.ResourceContainer(sample_id=messages.StringField(1, required=True))
     @endpoints.method(GET_RESOURCE, SampleFiles,
@@ -1504,23 +1523,44 @@ class Meta_Endpoints_API(remote.Service):
         as well as counts for the number of files for each platform.
         '''
 
+        global cloudstorage_location
         sample_id = request.sample_id
         dbGaP_authorized = False
 
-        query = 'select SampleBarcode, DatafileName, Pipeline, Platform, IF(SecurityProtocol LIKE "%%open%%", DatafileNameKey, "Restricted") as DatafileNameKey from metadata_data where SampleBarcode=%s;'
+        query = "select SampleBarcode, " \
+                "DatafileName, " \
+                "Pipeline, " \
+                "Platform, " \
+                "IF(SecurityProtocol LIKE '%%open%%', DatafileNameKey, 'Restricted') as DatafileNameKey, " \
+                "SecurityProtocol " \
+                "from metadata_data " \
+                "where SampleBarcode=%s;"
 
         if endpoints.get_current_user():
-            user_email = endpoints.get_current_user()
+            user_email = endpoints.get_current_user().email()
             try:
                 user_id = Django_User.objects.get(email=user_email)
                 nih_user = NIH_User.objects.get(user_id=user_id)
                 dbGaP_authorized = nih_user.dbGaP_authorized and nih_user.active
                 if dbGaP_authorized:
-                    query = 'select SampleBarcode, DatafileName, Pipeline, Platform, DatafileNameKey, SecurityProtocol from metadata_data where SampleBarcode=%s;'
+                    query = "select SampleBarcode, " \
+                            "DatafileName, " \
+                            "Pipeline, " \
+                            "Platform, " \
+                            "DatafileNameKey, " \
+                            "SecurityProtocol, " \
+                            "Repository " \
+                            "from metadata_data " \
+                            "where SampleBarcode=%s;"
             except (ObjectDoesNotExist, MultipleObjectsReturned) as e:
-                logger.warn("Tried accessing sample_files endpoint with user {}: {}".format(user_email, str(e)))
+                if type(e) is MultipleObjectsReturned:
+                    logger.error("Meta.sample_files endpoint with user {} gave error: {}".format(user_email, str(e)))
 
-        platform_query = 'select Platform, count(Platform) as platform_count from metadata_data where SampleBarcode=%s group by Platform;'
+        platform_query = "select Platform, " \
+                         "count(Platform) as platform_count " \
+                         "from metadata_data " \
+                         "where SampleBarcode=%s " \
+                         "group by Platform;"
 
         db = sql_connection()
         cursor = db.cursor(MySQLdb.cursors.DictCursor)
@@ -1530,14 +1570,36 @@ class Meta_Endpoints_API(remote.Service):
             file_list = []
             platform_list = []
             for item in cursor.fetchall():
-                if dbGaP_authorized:
-                    cloudstorage_location = 'None' if item['DatafileNameKey'] == '' else 'gs://{}/{}'.format(OPEN_DATA_BUCKET if 'open' in item['SecurityProtocol'] else CONTROLLED_DATA_BUCKET, item['DatafileNameKey'])
+                if len(item.get('DatafileNameKey', '')) == 0:
+                    cloudstorage_location = 'File location not found.'
+                elif 'open' in item['SecurityProtocol']:
+                    cloudstorage_location = 'gs://{}{}'.format(OPEN_DATA_BUCKET, item['DatafileNameKey'])
+                elif dbGaP_authorized:
+                    # hard-coding mock bucket names for now --testing purposes only
+                    if item['Repository'].lower() == 'dcc':
+                        cloudstorage_location = 'gs://{}{}'.format(
+                            'gs://62f2c827-mock-mock-mock-1cde698a4f77', item['DatafileNameKey'])
+                    elif item['Repository'].lower() == 'cghub':
+                        cloudstorage_location = 'gs://{}{}'.format(
+                            'gs://360ee3ad-mock-mock-mock-52f9a5e7f99a', item['DatafileNameKey'])
                 else:
-                    cloudstorage_location = 'None' if item['DatafileNameKey'] == '' or item['DatafileNameKey'] == 'Restricted' else 'gs://{}/{}'.format(OPEN_DATA_BUCKET, item['DatafileNameKey'])
-                file_list.append(FileDetails(filename=item['DatafileName'], pipeline=item['Pipeline'], platform=item['Platform'], cloudstorage_location=cloudstorage_location))
+                    cloudstorage_location = item.get('DatafileNameKey')  # this will return "Restricted"
+
+                file_list.append(
+                    FileDetails(
+                        filename=item['DatafileName'],
+                        pipeline=item['Pipeline'],
+                        platform=item['Platform'],
+                        cloudstorage_location=cloudstorage_location
+                    )
+                )
             cursor.execute(platform_query, (sample_id,))
             for item in cursor.fetchall():
                 platform_list.append(PlatformCount(platform=item['Platform'], count=item['platform_count']))
+            cursor.close()
+            db.close()
             return SampleFiles(total_file_count=len(file_list), page=1, platform_count_list=platform_list, file_list=file_list)
         except Exception as e:
+            if cursor: cursor.close()
+            if db: db.close()
             raise endpoints.NotFoundException('Error getting file details: {}'.format(str(e)))
