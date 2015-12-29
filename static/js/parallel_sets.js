@@ -33,7 +33,7 @@ define(['d3', 'd3parsets'], function(d3, d3parsets) {
             vis.datum(data['items']).call(chart);
 
             vis[0][0]['children'][0].setAttribute("transform", "translate(0,550)rotate(270)"); // ribbons
-            vis[0][0]['children'][1].setAttribute("transform", "translate(60,550)rotate(270)"); // ??
+            vis[0][0]['children'][1].setAttribute("transform", "translate(0,550)rotate(270)"); // ??
 
         }
     }
