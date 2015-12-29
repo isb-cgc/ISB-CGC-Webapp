@@ -26,6 +26,7 @@
             <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
             <li><a href="{% url 'variables' %}">Saved Variable Favorites</a></li>
         {% endif %}
+    </ol>
     {% csrf_token %}
     {% if workbook %}
         {# USECASE 1: ADD VAR LIST TO EXISTING WORKBOOK #}
@@ -37,18 +38,20 @@
     {% else  %}
         {% if existing_variable_list %}
             {# USECASE 3: EDIT EXISTING VAR LIST #}
-            <h1 class="page-header pull-left">Edit Variable Favorite</h1>
-            <menu class="page-action-group pull-right">
-                <menuitem class="btn btn-primary">Save Changes</menuitem>
-                <menuitem class="btn btn-link">Cancel</menuitem>
-            </menu>
+            <div class="clearfix">
+                <h1 class="page-header pull-left">Edit Variable Favorite</h1>
+                <ul class="page-action-group pull-right">
+                    <li role="menuitem"><button class="btn btn-primary" id="edit_favorite_list" >Save Changes</button></li>
+                    <li role="menuitem"><a class="btn btn-link" href="{% url 'variable_fav_detail' existing_variable_list.id %}">Cancel</a></li>
+                </ul>
+            </div>
         {% elif newWorkbook %}
             {# USECASE 2: CREATE VAR LIST THEN CREATE WORKBOOK WITH VAR LIST #}
-            <h1 class="page-header pull-left">Create Variable Favorite</h1>
-            <menu class="page-action-group pull-right">
-                <menuitem class="btn btn-primary" data-toggle="modal" data-target="#create-cohort-modal">Save As Favorite</menuitem>
-                <menuitem class="btn btn-link" data-toggle="modal" data-target="#create-cohort-modal">Cancel</menuitem>
-            </menu>
+            <h1 class="page-header">Data Source | Variables</h1>
+            <ul class="page-action-group">
+                <button id="select_then_create_new_workbook" class="btn btn-primary">Create New Workbook with Selected Variables</button>
+                <a href="{% url 'variables' %}" class="btn btn-link">Cancel</a>
+            </ul>
         {% else %}
             {# USECASE 4: CREATE VAR FAVORITE #}
             <h1 class="page-header pull-left">Create Variable Favorite</h1>
@@ -71,26 +74,21 @@
                     <label for="variable-name" class="panel-title">Name of Favorite (Required)</label>
                 </div>
                 <div class="panel-body">
-                    <input type="text" id="variable_list_name_input" placeholder="my new favorite variable list" class="form-control" value={{ existing_variable_list.name }} required>
-                    <div class="page-action-group">
-                        <button id="edit_favorite_list" class="btn btn-primary">Save Changes</button>
-                        <a href="{% url 'variables' %}" class="btn btn-link">Cancel</a>
-                    </div>
+                    <input type="text" id="variable_list_name_input" placeholder="My new favorite variable" class="form-control" value="{{ existing_variable_list.name }}" required>
+                    <!--<div class="page-action-group">-->
+                        <!--<button id="edit_favorite_list" class="btn btn-primary">Save Changes</button>-->
+                        <!--<a href="{% url 'variables' %}" class="btn btn-link">Cancel</a>-->
+                    <!--</div>-->
                 </div>
             {% elif newWorkbook %}
                 {# USECASE 2: CREATE VAR LIST THEN CREATE WORKBOOK WITH VAR LIST #}
-                <div class="panel-heading"></div>
-                <div class="panel-body">
-                    <button id="select_then_create_new_workbook" class="btn btn-primary">Create New Workbook with Selected Variables</button>
-                    <a href="{% url 'variables' %}" class="btn btn-link">Cancel</a>
-                </div>
             {% else %}
                 {# USECASE 4: CREATE VAR FAVORITE #}
                 <div class="panel-heading">
                     <label for="variable-name" class="panel-title">Name of Favorite (Required)</label>
                 </div>
                 <div class="panel-body">
-                    <input type="text" id="variable_list_name_input" placeholder="my new favorite variable list" class="form-control" value="" required>
+                    <input type="text" id="variable_list_name_input" placeholder="My new favorite variable" class="form-control" value="" required>
                     <!--<div class="page-action-group">-->
                         <!--<button id="create_favorite_list" class="btn btn-primary">Save As Favorite</button>-->
                         <!--<a href="{% url 'variables' %}" class="btn btn-link">Cancel</a>-->
@@ -121,7 +119,7 @@
                                         <li class="list-group-item checkbox">
                                             <div id="heading-{{ attr }}" class="list-group-item__heading">
                                                 <label for="{{ attr }}">
-                                                    <input type="checkbox" value="{{ attr }}" name="elements-selected" variable_name="{{ attr }}" project_name="{{ common_project.name }}" project="{{ common_project.id }}" study_name="{{ common_project.study.name }} "study="{{ common_project.study.id }}">
+                                                    <input type="checkbox" value="{{ attr }}" name="elements-selected" variable_name="{{ attr }}" project_name="{{ common_project.name }}" project="{{ common_project.id }}" study_name="{{ common_project.study.name }} "study="{{ common_project.study.id }}" >
                                                     {{ attr }}
                                                 </label>
                                             </div>
@@ -129,7 +127,7 @@
                                     {% endfor %}
                                 </ul>
                             </div>
-                            <div role="tabpanel" class="tab-pane" id="favorites">
+                            <div role="tabpanel" class="tab-pane filter-panel" id="favorites">
                                 <ul class="list-group" id="clin-accordion" role="tablist" aria-multiselectable="true">
                                     {% for fav in favorite_list %}
                                         <li class="list-group-item">
@@ -140,10 +138,10 @@
                                             </div>
 
                                             <div id="collapse-{{ fav.id }}" class="list-group-item__body collapse" role="tabpanel" aria-labelledby="heading-{{ fav.id }}">
-                                                <ul class="list-group" id="clin-accordion" role="tablist" aria-multiselectable="true">
+                                                <ul class="search-checkbox-list" id="clin-accordion" role="tablist" aria-multiselectable="true">
                                                     {% for var in fav.variables %}
-                                                        <li class="list-group-item checkbox">
-                                                            <div id="heading-{{ var.id }}" class="list-group-item__heading">
+                                                        <li class="checkbox">
+                                                            <div id="heading-{{ var.id }}">
                                                                 <label for="{{ var.name }}">
                                                                     <input type="checkbox" value="{{ var.name }}" name="elements-selected" variable_name="{{ var.name }}" project_name="{{ var.project.name }}" project="{{ var.project.id }}" study_name="{{ var.study.name }} "study="{{ var.study.id }}">
                                                                     {{ var.name }}
@@ -157,11 +155,11 @@
                                     {% endfor %}
                                 </ul>
 
-                                <div>
+                                <div class="tab-content">
                                     <a href="{% url 'variables' %}">Manage Saved Favorites ({{ favorite_list | length }})</a>
                                 </div>
                             </div>
-                            <div role="tabpanel" class="tab-pane" id="datatypes">
+                            <div role="tabpanel" class="tab-pane filter-panel" id="datatypes">
                                 <ul class="list-group" id="clin-accordion" role="tablist" aria-multiselectable="true">
                                     {% for type in datatype_list %}
                                         <li class="list-group-item">
@@ -273,7 +271,19 @@
                         <p class="pull-right"><a role="button" id="clear-filters">Clear All</a></p>
                     </div>
                     <div class="panel-body">
-                        <p class="help-block">Select your favorite variables from the left panel.</p>
+                        {% if existing_variable_list %}
+                            {# USECASE 3: EDIT EXISTING VAR LIST #}
+                            {% for variable in existing_variable_list.list %}
+                            <span class="selected-variable" >
+                                <a class="delete-x filter-label label label-default">
+                                    {{ variable.name }}
+                                    <i class="fa fa-times"></i>
+                                </a>
+                            </span>
+                            {% endfor %}
+                        {% else %}
+                            <p class="help-block">Select your favorite variables from the left panel.</p>
+                        {% endif %}
                     </div>
                 </div>
             </form>

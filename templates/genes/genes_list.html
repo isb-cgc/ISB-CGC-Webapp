@@ -21,6 +21,7 @@
 <div class="container">
     <div class="panel penel-default">
         <div class="panel-body">
+            {% if genes_favs %}
             <table class="table table-striped tablesorter">
                 <thead>
                     <tr>
@@ -50,6 +51,11 @@
                     {% endfor %}
                 </tbody>
             </table>
+            {% else %}
+            <p class="center">You don't have any Gene Favorites yet.</p>
+            <p class="center"><a href="{% url 'gene_fav_create' %}" class="btn btn-default">Create Gene Favorite</a></p>
+            {% endif %}
+
         </div>
     </div>
 </div>

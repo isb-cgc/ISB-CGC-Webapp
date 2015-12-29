@@ -61,7 +61,7 @@ class VariableFavorite(models.Model):
     @classmethod
     def get_deep(cls, id):
         variable_favorite_list = cls.objects.get(id=id)
-        variable_favorite_list.get_variables()
+        variable_favorite_list.list = variable_favorite_list.get_variables()
         return variable_favorite_list
 
     def get_variables(self):
