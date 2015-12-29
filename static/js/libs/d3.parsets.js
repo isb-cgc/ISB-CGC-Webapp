@@ -760,8 +760,7 @@
 
     function identity(d) { return d; }
 
-    function translateY(d) { return "translate(" + (d.y+60) + ",550)rotate(270)";
-    } //return "translate(0," + d.y + ")"; }
+    function translateY(d) { return "translate(" + (d.y+0) + ",550)rotate(270)";}
 
     function defaultTooltip(d) {
         var count = d.count,

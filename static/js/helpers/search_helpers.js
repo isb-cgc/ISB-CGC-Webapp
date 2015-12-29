@@ -51,14 +51,6 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                 url: api_url,
                 success: function(results, status, xhr) {
                     if (results.hasOwnProperty('items')) {
-                        //var features = [
-                        //        'DNAseq_data',
-                        //        'mirnPlatform',
-                        //        'cnvrPlatform',
-                        //        'methPlatform',
-                        //        'gexpPlatform',
-                        //        'rppaPlatform'
-                        //    ];
                         var features = [
                                 'cnvrPlatform',
                                 'DNAseq_data',
