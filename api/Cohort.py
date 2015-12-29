@@ -587,7 +587,7 @@ class Cohort_Endpoints_API(remote.Service):
         :param platform: Optional. Filter results by a particular platform.
         :param pipeline: Optional. Filter results by a particular pipeline.
         :return: Biospecimen data about the sample, a list of aliquots associated with the sample barcode,
-        a list of details about each aliquot,
+        and a list of details about each aliquot.
         """
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
 
@@ -762,6 +762,17 @@ class Cohort_Endpoints_API(remote.Service):
     @endpoints.method(GET_RESOURCE, DataFileNameKeyList,
                       path='datafilenamekey_list', http_method='GET', name='cohorts.datafilenamekey_list')
     def datafilenamekey_list(self, request):
+        """
+        Returns a list of cloud storage paths for files associated with either a sample barcode or
+        all the samples in a specified cohort.
+        :param sample_barcode: Required if cohort_id is absent, else optional.
+        :param cohort_id: Required if sample_barcode is absent, else optional.
+        :param platform: Optional. Filter results by platform.
+        :param pipeline: Optional. Filter results by pipeline.
+        :param token: Optional. Access token with email scope to verify user's google identity.
+        :return: List of cloud storage file paths. If the user is dbGaP authorized, controlled-access file paths
+        will appear in the list.
+        """
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         user_email = None
         cursor = None
@@ -872,6 +883,13 @@ class Cohort_Endpoints_API(remote.Service):
     @endpoints.method(POST_RESOURCE, SavedCohort,
                       path='save_cohort', http_method='POST', name='cohort.save')
     def save_cohort(self, request):
+        """
+        Creates and saves a cohort. Takes a JSON object in the request body to use as the cohort's filters.
+        :param name: Required. Name of cohort to be saved.
+        :param token: Optional. Access token with email scope to verify user's google identity.
+        :return: Information about the saved cohort, including the number of patients and the number
+        of samples in that cohort.
+        """
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         user_email = None
         patient_cursor = None
@@ -987,6 +1005,12 @@ class Cohort_Endpoints_API(remote.Service):
     @endpoints.method(DELETE_RESOURCE, ReturnJSON,
                       path='delete_cohort', http_method='POST', name='cohort.delete')
     def delete_cohort(self, request):
+        """
+        Deletes a cohort. User must have owner permissions on the cohort.
+        :param cohort_id: Required. Id of cohort to delete.
+        :param token: Optional. Access token with email scope to verify user's google identity.
+        :return: Message indicating whether the cohort was deleted or not.
+        """
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         user_email = None
         return_message = None
@@ -1042,6 +1066,18 @@ class Cohort_Endpoints_API(remote.Service):
     @endpoints.method(GET_RESOURCE, DataFileNameKeyList,
                       path='alt_datafilenamekey_list', http_method='GET', name='cohorts.alt_datafilenamekey_list')
     def alt_datafilenamekey_list(self, request):
+        """
+        Same endpoint as datafilenamekey_list using a different method. This was written to test performance.
+        Returns a list of cloud storage paths for files associated with either a sample barcode or
+        all the samples in a specified cohort.
+        :param sample_barcode: Required if cohort_id is absent, else optional.
+        :param cohort_id: Required if sample_barcode is absent, else optional.
+        :param platform: Optional. Filter results by platform.
+        :param pipeline: Optional. Filter results by pipeline.
+        :param token: Optional. Access token with email scope to verify user's google identity.
+        :return: List of cloud storage file paths. If the user is dbGaP authorized, controlled-access file paths
+        will appear in the list.
+        """
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         user_email = None
         cursor = None
