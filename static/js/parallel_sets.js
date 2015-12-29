@@ -25,7 +25,7 @@ define(['d3', 'd3parsets'], function(d3, d3parsets) {
             d3.select("#multi-categorical").html(""); // do checkbox transitions later
 
             var vis = d3.select("#multi-categorical").append("svg")
-                .attr("width", 1000) //chart.width())
+                .attr("width", 740) //chart.width())
                 .attr("height", 600) //chart.height());
                 .attr("style", "display:block");
 
