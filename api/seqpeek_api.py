@@ -69,12 +69,7 @@ def maf_array_to_record(maf_array):
 class SeqPeekDataAccessAPI(remote.Service):
 
     def create_response(self, maf_with_cohorts):
-        """
-        Converts a SeqPeekMAFWithCohorts instance to a protorpc Message.
 
-        :param maf_with_cohorts: SeqPeekMAFWithCohorts instance
-        :return: MAFRecordList response.
-        """
         data_points = maf_array_to_record(maf_with_cohorts.maf_vector)
 
         cohort_info_obj_array = []
@@ -86,6 +81,7 @@ class SeqPeekDataAccessAPI(remote.Service):
     @endpoints_method(DataRequest, MAFRecordList,
                       path='by_gnab_feature', http_method='GET', name='seqpeek.getMAFDataWithCohorts')
     def data_access_by_gnab_feature(self, request):
+        """ Used by the web application."""
         try:
             feature_id = request.feature_id
             cohort_id_array = request.cohort_id
