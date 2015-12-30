@@ -873,6 +873,9 @@ class Cohort_Endpoints_API(remote.Service):
             values = (request.__getattribute__(k) for k in keys)
             query_dict = dict(zip(keys, values))
 
+            if not query_dict:
+                raise endpoints.BadRequestException("You must specify at least one filter in the request body to save a cohort.")
+
             patient_query_str = 'SELECT DISTINCT(IF(ParticipantBarcode="", LEFT(SampleBarcode,12), ParticipantBarcode)) AS ParticipantBarcode ' \
                                 'FROM metadata_samples '
 
