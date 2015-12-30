@@ -122,7 +122,7 @@
                     {% endif %}
                     <li class="menu-item"><a href="{% url 'projects' %}">Saved Projects ( {{ user.project_last_view_set.all|active:'project'|length }}  )</a></li>
                     <li class="menu-item"><a href="{% url 'project_upload' %}">Upload Project Data</a></li>
-                    <li class="menu-item"><a href="{% url 'projects' %}">Public Projects ({{ user.project_last_view_set.all|active:'project'|is_public:'project'|length}})</a></li>
+                    <li class="menu-item"><a href="{% url 'projects' %}#public">Public Projects ({{ user.project_last_view_set.all|active:'project'|is_public:'project'|length}})</a></li>
                 </ul>
             </li>
             <li class="menu-item has-drop-down">
@@ -298,7 +298,7 @@
                     </li>
                     {% endif %}
                     <li class="menu-item"><a href="{% url 'cohort_list' %}">Manage Saved Cohorts ({{ user.cohort_perms_set.all|active:'cohort'|cohort_owner_permission|length }})</a></li>
-                    <li class="menu-item"><a href="{% url 'cohort_list' %}">Public Cohorts (1)</a></li>
+                    <li class="menu-item"><a href="{% url 'cohort_list' %}#public">Public Cohorts (1)</a></li>
                     <li class="menu-item"><a href="{% url 'cohort_select_for_new_workbook' %}">Select Cohort for a New Workbook</a></li>
                 </ul>
             </li>
