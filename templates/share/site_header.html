@@ -1,6 +1,7 @@
 {% load staticfiles %}
 {% load cohort_filters %}
 {% load custom_tags %}
+{% load project_custom_tags %}
 
 <header class="navbar navbar-fixed-top site-header" role="header">
     <nav class="container">
@@ -120,9 +121,9 @@
                         </ul>
                     </li>
                     {% endif %}
-                    <li class="menu-item"><a href="{% url 'projects' %}">Saved Projects ( {{ user.project_last_view_set.all|active:'project'|length }}  )</a></li>
+                    <li class="menu-item"><a href="{% url 'projects' %}">Saved Projects ( {{ user.project_set.all|active|length }} )</a></li>
                     <li class="menu-item"><a href="{% url 'project_upload' %}">Upload Project Data</a></li>
-                    <li class="menu-item"><a href="{% url 'projects' %}">Public Projects ({{ user.project_last_view_set.all|active:'project'|is_public:'project'|length}})</a></li>
+                    <li class="menu-item"><a href="{% url 'projects' %}">Public Projects ( {% public_project_count %} )</a></li>
                 </ul>
             </li>
             <li class="menu-item has-drop-down">
