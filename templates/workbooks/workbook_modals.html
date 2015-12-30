@@ -81,12 +81,41 @@
                 <h4 class="modal-title"></h4>
             </div>
             <div class="modal-body">
+                <p>
+                    This will create a copy of the worksheet and reference the cohorts and projects used in the workbook
+                    This will not make duplicates of the cohort and projects used in the workbook
+                </p>
                 Duplicate this Workbook?
             </div>
             <form id="copy-workbook" method="POST" action="{% url 'workbook_copy' workbook.id %}">
                 {% csrf_token %}
                 <div class="modal-footer">
                     <input type="submit" value="Duplicate" class="btn btn-primary" />
+                    <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Duplicate Workbook Modal -->
+<div class="modal fade" id="share-workbook-modal-{{ workbook.id }}" tabindex="-1" role="dialog" aria-labelledby="copy-workbook-header" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title"></h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    This will share the web view of workbooks.
+                </p>
+                Share this Workbook?
+            </div>
+            <form id="copy-workbook" method="POST" action="{% url 'workbook_share' workbook.id %}">
+                {% csrf_token %}
+                <div class="modal-footer">
+                    <input type="submit" value="Share" class="btn btn-primary" />
                     <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
                 </div>
             </form>
