@@ -55,7 +55,11 @@
                             </td>
                             <td class="name-col"><a href="{% url 'workbook_detail' workbook.id %}">{{ workbook.name }}</a></td>
                             <td> {{ workbook.worksheet_set.count }}</td>
-                            <td> {{ workbook.owner.first_name }} {{ workbook.owner.last_name }}</td>
+                            <td>{% if workbook.owner.id == user.id %}
+                                You
+                            {% else %}
+                                {{ workbook.owner.first_name }} {{ workbook.owner.last_name }}
+                            {% endif %}</td>
                             <td> {{ workbook.last_date_saved}}</td>
                         </tr>
                     {% endfor %}
