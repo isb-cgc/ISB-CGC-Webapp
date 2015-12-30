@@ -60,6 +60,8 @@ require([
         }
     });
 
+
+
     var delete_x_callback = function () {
         $(this).parent('.cohort-label').remove();
         return false;

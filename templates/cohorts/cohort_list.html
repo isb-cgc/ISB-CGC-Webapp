@@ -18,26 +18,26 @@
         <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
     </ol>
     <h1 class="page-header pull-left">Cohorts</h1>
-    <a href="{% url 'cohort' %}" class="btn btn-default pull-right"><i class="fa fa-plus"></i> Create New Cohort</a>
+    <a href="{% url 'cohort' %}" class="btn btn-primary pull-right"><i class="fa fa-plus"></i> Create New Cohort</a>
 </div>
 {% endblock %}
 {% block content %}
 <div class="container">
     <div class="panel panel-default">
         <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation" class="active">
+            <li role="presentation" {% if not is_public %} class="active" {% endif %} >
                 <a href="#save-cohorts-list" aria-controls="save-cohorts-list" role="tab" data-toggle="tab">Saved Cohorts</a>
             </li>
-            <li role="presentation">
+            <li role="presentation" {% if is_public %} class="active" {% endif %} >
                 <a href="#public-cohorts-list" aria-controls="public-cohorts-list" role="tab" data-toggle="tab">Public Cohorts</a>
             </li>
         </ul>
         <div class="tab-content panel-body ">
-            <div role="tabpanel" class="tab-pane active" id="save-cohorts-list">
+            <div role="tabpanel" class="tab-pane {% if not is_public %} active {% endif %} " id="save-cohorts-list">
                 {% if cohorts.has_private_cohorts %}
                     <div class="page-action-group">
                         <li role="menuitem">
-                            <button id="createWorkbookWithCohort" class="btn btn-primary">New Workbook</button>
+                            <button id="createWorkbookWithCohort" class="btn btn-default">New Workbook</button>
                         <li class="separator"></li>
                         <li role="menuitem">
                             <button id='delete-cohorts' type="button" class="btn btn-info" data-toggle="modal" data-target="#delete-cohorts-modal" aria-label="delete-cohorts" role="button" aria-expanded="true">
@@ -104,7 +104,7 @@
                     </div>
                 {% endif %}
             </div>
-            <div role="tabpanel" class="tab-pane" id="public-cohorts-list">
+            <div role="tabpanel" class="tab-pane {% if is_public %} active {% endif %} " id="public-cohorts-list">
                 <div class="page-action-group">
                     <li role="menuitem"><button class="btn btn-default">New Workbook</button></li>
                     <li class="separator"></li>

@@ -253,8 +253,8 @@ require([
             success: function(data) {
                 data = JSON.parse(data);
                 $('.comment-flyout .flyout-body').append('<h5 class="comment-username">' + data['first_name'] + ' ' + data['last_name'] + '</h5>');
+                $('.comment-flyout .flyout-body').append('<p class="comment-content">' + data['content'] + '</p>');
                 $('.comment-flyout .flyout-body').append('<p class="comment-date">' + data['date_created'] + '</p>');
-                $('.comment-flyout .flyout-body').append('<p class="comment-content">' + data['content'] + '</p>')
                 form.reset();
             },
             error: function() {
