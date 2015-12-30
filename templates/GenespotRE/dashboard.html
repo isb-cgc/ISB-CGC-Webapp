@@ -111,20 +111,20 @@
             <section class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">
-                        <a href="{% url 'genes' %}">Gene Favorites ({{ user.genefavorite_last_view_set.all|active:'genefavorite'|length }})</a></h3>
+                        <a href="{% url 'genes' %}">Gene Favorites ({{ user.genefavorite_set.all|active|length }})</a></h3>
                 </div>
                 <div class="panel-body">
-                    {% if user.genefavorite_last_view_set.all|active:'genefavorite'|length > 0 %}
+                    {% if user.genefavorite_set.all|active|length > 0 %}
                     <ul class="table-list">
-                        {% for glv in user.genefavorite_last_view_set.all|active:'genefavorite'|slice:':6' %}
+                        {% for genefavorite in user.genefavorite_set.all|active|sort_last_view:'genefavorite'|slice:':6' %}
                         <li>
-                            <a href="{% url 'genes_detail' glv.genefavorite.id %}">
-                               <p class="list-title">{{ glv.genefavorite.name }}</p>
+                            <a href="{% url 'genes_detail' genefavorite.id %}">
+                               <p class="list-title">{{ genefavorite.name }}</p>
                             </a>
                         </li>
                         {% endfor %}
                     </ul>
-                        {% if user.genefavorite_last_view_set.all|active:'genefavorite'|length > 6 %}
+                        {% if user.genefavorite_set.all|active|length > 6 %}
                         <a href="{% url 'genes' %}" class="btn btn-link">View All</a>
                         {% endif %}
                     {% else %}
@@ -136,21 +136,21 @@
             <section class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">
-                        <a href="{% url 'variables' %}">Variable Favorites ({{ user.variablefavorite_last_view_set.all|active:'variablefavorite'|length }})</a></h3>
+                        <a href="{% url 'variables' %}">Variable Favorites ({{ user.variablefavorite_set.all|active|length }})</a></h3>
                 </div>
                 <div class="panel-body">
-                    {% if user.variablefavorite_last_view_set.all|active:'variablefavorite'|length > 0 %}
+                    {% if user.variablefavorite_set.all|active|length > 0 %}
                     <ul class="table-list">
-                        {% for vlv in user.variablefavorite_last_view_set.all|active:'variablefavorite'|slice:':6' %}
+                        {% for variablefavorite in user.variablefavorite_set.all|active|sort_last_view:'variablefavorite'|slice:':6' %}
                            <li>
-                               <a href="{% url 'variable_fav_detail' vlv.variablefavorite.id %}">
+                               <a href="{% url 'variable_fav_detail' variablefavorite.id %}">
                                    <p class="list-title">
-                                       {{ vlv.variablefavorite.name }}
+                                       {{ variablefavorite.name }}
                                    </p>
                                </a>
                            </li>
                         {% endfor %}
-                        {% if user.variablefavorite_last_view_set.all|active:'variablefavorite'|length > 6 %}
+                        {% if user.variablefavorite_set.all|active|length > 6 %}
                         <a href="{% url 'genes' %}" class="btn btn-link">View All</a>
                         {% endif %}
                     </ul>
