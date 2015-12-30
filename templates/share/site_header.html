@@ -76,7 +76,7 @@
                         </ul>
                     </li>
                     {% endif %}
-                    <li class="menu-item"><a href="{% url 'workbooks' %}">Saved Workbooks ( {{ user.workbook_last_view_set.all|length }} )</a></li>
+                    <li class="menu-item"><a href="{% url 'workbooks' %}">Saved Workbooks ( {{ user.workbook_set.all|active|length }} )</a></li>
                     <li class="menu-item">
                         <form action="{% url 'workbook_create' %}" method="POST">
                             {% csrf_token %}
