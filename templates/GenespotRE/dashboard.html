@@ -70,26 +70,26 @@
     </section>
     <section class="panel panel-default">
         <div class="panel-heading">
-            <h3 class="panel-title">Saved Workbooks ({{ user.workbook_last_view_set.all|length }})</h3>
+            <h3 class="panel-title">Saved Workbooks ({{ user.workbook_set.all|active|length }})</h3>
         </div>
         <div class="panel-body">
             <p>Workbooks store the Analyses you create -- and their related data.</p>
             <ul class="table-list">
-            {% if user.workbook_last_view_set.all|length > 0 %}
-                {% for wlv in user.workbook_last_view_set.all|dictsortreversed:'last_view'|slice:':6'  %}
+            {% if user.workbook_set.all|active|length > 0 %}
+                {% for workbook in user.workbook_set.all|active|dictsortreversed:'last_date_saved'|slice:':6'  %}
                     <li>
-                        <a href="{% url 'workbook_detail' wlv.workbook.id %}">
+                        <a href="{% url 'workbook_detail' workbook.id %}">
                             <div class="list-main">
-                                <h5 class="list-title">{{ wlv.workbook.name|title }}</h5>
-                                <p>{{ wlv.workbook.description }}</p>
+                                <h5 class="list-title">{{ workbook.name|title }}</h5>
+                                <p>{{ workbook.description }}</p>
                             </div>
                             <div class="list-info">
-                               {{ wlv.workbook.last_date_saved }}
+                               {{ workbook.last_date_saved }}
                             </div>
                         </a>
                     </li>
                 {% endfor %}
-                {% if user.workbook_last_view_set.all|length > 6 %}
+                {% if user.workbook_set.all|active|length > 6 %}
                 <a class="btn btn-link" href="{% url 'workbooks' %}">View All</a>
                 {% endif %}
             {% endif %}
@@ -100,7 +100,7 @@
                 {% csrf_token %}
                  <button type="submit" class="btn btn-primary" ><i class="fa fa-plus"></i>Create a New Workbook</button>
              </form>
-            <a class="btn btn-link" href="{% url 'workbooks' %}">Sample Workbooks</a>
+            <a class="btn btn-link" href="{% url 'workbook_samples' %}">Sample Workbooks</a>
         </div>
     </section>
     <div class="row">
