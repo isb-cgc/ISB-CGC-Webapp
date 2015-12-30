@@ -35,60 +35,60 @@ require([
 ], function($, jqueryui, bootstrap, session_security, _) {
     'use strict';
 
-    // This file is used for genes creation page
-
-    // Valid gene list
+    // Temp valid gene list
     var genelist = ['PTEN', 'PIK3CA', 'AKT', 'MTOR', 'BRCA1'];
-    var geneListField = $('#geneListField');
-
-    var geneFavs = (genes_fav_detail) ? genes_fav_detail.genes : [];
+    var geneListField = $('#paste-in-genes');
+    var geneFavs = (gene_fav) ? gene_fav.genes : [];
 
     if(typeof(uploaded_genes)!== 'undefined' && uploaded_genes.length > 0 ){
-        geneFavs = geneFavs.concat(uploaded_list);
+        geneFavs = geneFavs.concat(uploaded_genes);
     }
 
-    geneListField.tokenfield({
-        autocomplete: {
-            source: genelist,
-            delay: 100,
-            appendTo: "#tokenfield-holder"
-        },
-        showAutocompleteOnFocus: true,
-        minLength: 2,
-        tokens: geneFavs
-    }).on('tokenfield:createdtoken', function (event) {
-        //  Check whether the user enter a repetitive token
-        //  If it is a repetitive token, show a message instead
-        var existingGenes = event.currentTarget.value.split(', ');
-        var parentHolder = $('#tokenfield-holder');
-        $.each(existingGenes, function (index, gene) {
-            if(gene.toUpperCase() === event.attrs.value.toUpperCase()){
-                $(event.relatedTarget).addClass('invalid repeat');
-                $('.helper-text__repeat').show();
+    function createTokenizer() {
+        geneListField.tokenfield({
+            autocomplete: {
+                source: genelist,
+                delay: 100,
+                appendTo: "#tokenfield-holder"
+            },
+            showAutocompleteOnFocus: true,
+            minLength: 2,
+            tokens: geneFavs
+        }).on('tokenfield:createdtoken', function (event) {
+            //  Check whether the user enter a repetitive token
+            //  If it is a repetitive token, show a message instead
+            var existingGenes = event.currentTarget.value.split(', ');
+            var parentHolder = $('#tokenfield-holder');
+            $.each(existingGenes, function (index, gene) {
+                if (gene.toUpperCase() === event.attrs.value.toUpperCase()) {
+                    $(event.relatedTarget).addClass('invalid repeat');
+                    $('.helper-text__repeat').show();
+                }
+            });
+
+            //  check whether user enter a valid gene name
+            var isValid = true;
+            if (_.indexOf(genelist, event.attrs.value.toUpperCase()) < 0) {
+                $(event.relatedTarget).addClass('invalid error');
+                $('.helper-text__invalid').show();
+            }
+
+            if ($('div.token.invalid.error').length < 1) {
+                $('.helper-text__invalid').hide();
+            }
+            if ($('div.token.invalid.repeat').length < 1) {
+                $('.helper-text__repeat').hide();
+            }
+        }).on('tokenfield:removedtoken', function (event) {
+            if ($('div.token.invalid.error').length < 1) {
+                $('.helper-text__invalid').hide();
+            }
+            if ($('div.token.invalid.repeat').length < 1) {
+                $('.helper-text__repeat').hide();
             }
         });
-
-        //  check whether user enter a valid gene name
-        var isValid = true;
-        if(_.indexOf(genelist, event.attrs.value.toUpperCase()) < 0) {
-            $(event.relatedTarget).addClass('invalid error');
-            $('.helper-text__invalid').show();
-        }
-
-        if($('div.token.invalid.error').length < 1){
-            $('.helper-text__invalid').hide();
-        }
-        if($('div.token.invalid.repeat').length < 1){
-            $('.helper-text__repeat').hide();
-        }
-    }).on('tokenfield:removedtoken', function(event){
-        if($('div.token.invalid.error').length < 1){
-            $('.helper-text__invalid').hide();
-        }
-        if($('div.token.invalid.repeat').length < 1){
-            $('.helper-text__repeat').hide();
-        }
-    });
+    }
+    createTokenizer();
 
     // Clear all entered genes list on click
     $('#clearAll').on('click', function (event) {
@@ -97,7 +97,10 @@ require([
             // this code checks whether tokenfield is on focus, if yes, it preventDefault and do nothing
             event.preventDefault();
         }else{
-            geneListField.tokenfield('setTokens', ' ');
+            geneFavs = [];
+            geneListField.tokenfield('setTokens', []);
+            geneListField.tokenfield('createToken' , 'this is an arbitrary token to get bootstrap to clear the existing tokens');
+            geneListField.tokenfield('setTokens', []);
         }
         return false;
     });
@@ -115,7 +118,8 @@ require([
         var fileUploadField = $('#file-upload-field');
         var validFileTypes = ['txt', 'csv'];
 
-        $('#file-upload-btn').click(function(){
+        $('#file-upload-btn').click(function(event){
+            event.preventDefault()
             fileUploadField.click();
         });
         fileUploadField.on('change', function(event){
@@ -127,10 +131,10 @@ require([
                 // If file type is not correct
                 alert('Please upload a .txt or .csv file');
                 return false;
-            }else{
+            } else{
                 $('#selected-file-name').text(file.name);
                 $('#uploading').addClass('in');
-                $('#uploadBtn').hide();
+                $('#file-upload-btn').hide();
             }
 
             if(event.target.files != undefined){
@@ -141,35 +145,43 @@ require([
 
                     // Send the uploaded gene's list to the backend
                     uploaded_list = checkUploadedGeneListAgainstGeneIdentifier(uploaded_gene_list);
+                    for(var i in uploaded_list.valid){
+                         geneListField.tokenfield('createToken', uploaded_list.valid[i]);
+                    }
+                    for(var i in uploaded_list.invalid){
+                         geneListField.tokenfield('createToken', uploaded_list.invalid[i]);
+                    }
 
+                    $('#uploading').removeClass('in');
+                    $('#file-upload-btn').show();
                 }
                 fr.readAsText(event.target.files.item(0));
             }
         })
     }
 
-    $('#paste-upload').on('click', function(){
-        var pasted_genes = $($(this).data('target')).val().split(/[ ,]+/).filter(Boolean);
+    //$('#paste-upload').on('click', function(){
+    //    var pasted_genes = $($(this).data('target')).val().split(/[ ,]+/).filter(Boolean);
+    //
+    //    uploaded_list = checkUploadedGeneListAgainstGeneIdentifier(pasted_genes);
+    //    console.log(pasted_genes);
+    //})
 
-        uploaded_list = checkUploadedGeneListAgainstGeneIdentifier(pasted_genes);
-        console.log(pasted_genes);
-    })
-
-    $('#clear-paste-upload').on('click', function(){
-        $('#paste-in-genes').val('');
-    })
-    $('#upload-without-error-genes').on('click', function(){
-        // upload valid gene list
-        // uploaded_list.valid
-        console.log(uploaded_list.valid);
-    })
-    $('#upload-with-error-genes').on('click', function(){
-        var newlist = $($(this).data('target')).val().split(/[ ,]+/).filter(Boolean);
-        newlist = uploaded_list.valid.concat(newlist);
-
-        // Upload newlist
-        console.log(uploaded_list.valid);
-    })
+    //$('#clearAll').on('click', function(){
+    //    $('#paste-in-genes').val('');
+    //})
+    //$('#upload-without-error-genes').on('click', function(){
+    //    // upload valid gene list
+    //    // uploaded_list.valid
+    //    console.log(uploaded_list.valid);
+    //})
+    //$('#upload-with-error-genes').on('click', function(){
+    //    var newlist = $($(this).data('target')).val().split(/[ ,]+/).filter(Boolean);
+    //    newlist = uploaded_list.valid.concat(newlist);
+    //
+    //    // Upload newlist
+    //    console.log(uploaded_list.valid);
+    //})
 
     /*
         Used for getting the CORS token for submitting data
@@ -189,6 +201,7 @@ require([
         }
         return cookieValue;
     }
+
     function checkUploadedGeneListAgainstGeneIdentifier(gene_list){
         // Delete any repetitive genes
         var genes = truncateRepeatGenes(gene_list);
@@ -208,11 +221,12 @@ require([
             $('#error-panel').addClass('in');
             $('#upload-panel').addClass('collapse');
             $('#error-genes').text(invalid_genes.join(' '));
-        }else{
-            genes_upload(valid_genes);
+        } else{
+            //genes_upload(valid_genes);
         }
         return {invalid: invalid_genes, valid: valid_genes}
     }
+
     function truncateRepeatGenes(genes){
         var genes_count_object = {};
         genes.forEach(function(gene){

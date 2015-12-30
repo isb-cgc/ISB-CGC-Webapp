@@ -1,37 +1,31 @@
 from copy import deepcopy
 import json
 import re
+import sys
 from google.appengine.api import urlfetch
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
+from django.utils.safestring import mark_safe
+from django.core import serializers
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.decorators.csrf import csrf_protect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from models import GeneFavorite
+from workbooks.models import Workbook, Worksheet
 from django.contrib.auth.models import User
 from django.conf import settings
-
-GENES_FAVS = [{
-            'id': 1,
-            'name': 'BRCA1',
-            'genes': ['BRCA1'],
-            'last_updated': '10/15/2015'
-        }, {
-            'id': 2,
-            'name': 'ATK Pathway',
-            'genes': ['PTEN', 'PIK3CA', 'AKT', 'MTOR'],
-            'last_updated': '10/15/2015'
-        }]
 
 @login_required
 def gene_fav_list(request):
     template = 'genes/genes_list.html'
 
     gene_list = GeneFavorite.get_list(request.user)
+    if len(gene_list) == 0 :
+        gene_list = None
 
-    return render(request, template, {'genes_favs': gene_list})
+    return render(request, template, {'gene_fav_list' : gene_list})
 
 @login_required
 def gene_fav_detail(request, gene_fav_id):
@@ -39,12 +33,10 @@ def gene_fav_detail(request, gene_fav_id):
     context = {}
 
     try:
-        # Find the gene favorite objects
-        for genes_fav in GENES_FAVS:
-            if genes_fav['id'] == int(gene_fav_id):
-                context['genes_detail'] = genes_fav
+        gene_favorite_model = GeneFavorite.objects.get(id=gene_fav_id)
+        gene_favorite_model.genes = gene_favorite_model.get_genes()
+        context['gene_favorite'] = gene_favorite_model
     except ObjectDoesNotExist:
-        # Cohort doesn't exist, return to user landing with error.
         messages.error(request, 'The genes favorite you were looking for does not exist.')
         return redirect('genes_list')
 
@@ -53,57 +45,87 @@ def gene_fav_detail(request, gene_fav_id):
 @login_required
 def gene_fav_edit(request, gene_fav_id=0):
     template = 'genes/genes_edit.html'
-    context = {
-        'genes_id': gene_fav_id,
-        'genes_detail': '',
-    }
+    context = {'genes' : [] }
 
     if(gene_fav_id != 0):
         try:
-            # Find the gene favorite objects
-            for genes_fav in GENES_FAVS:
-                if genes_fav['id'] == int(gene_fav_id):
-                    context['genes_detail'] = genes_fav
+            gene_favorite_model = GeneFavorite.objects.get(id=gene_fav_id)
+            context['gene_favorite'] = gene_favorite_model
+            gene_list = gene_favorite_model.get_genes()
+            gene_names = []
+            for g in gene_list :
+                gene_names.append(g.name)
+            context['genes'] = mark_safe(json.dumps(gene_names))
         except ObjectDoesNotExist:
             messages.error(request, 'The genes favorite you were looking for does not exist.')
-            return redirect('genes_list')
+            return redirect('genes')
+
     return render(request, template, context)
 
 def gene_fav_delete(request, gene_fav_id):
-    template = 'genes/genes_upload.html'
-    context = {
-        'genes_id': gene_fav_id,
-        'genes_detail': '',
-    }
+    redirect_url = reverse('genes')
+    if gene_fav_id :
+        try:
+            gene_fav_model = GeneFavorite.objects.get(id=gene_fav_id)
+            if gene_fav_model.user == request.user :
+                gene_fav_model.destroy()
+                messages.info(request, 'the gene favorite has been deleted')
+            else :
+                messages.error(request, 'You do not have permission to update this gene favorite list')
+        except ObjectDoesNotExist:
+            messages.error(request, 'The gene list you want does not exist.')
 
-
-    return render(request, template, context)
-
-@login_required
-def gene_fav_save(request, genes_id=0):
-    template = 'genes/genes_upload.html'
-    context = {
-        'genes_id': gene_fav_id,
-        'genes_detail': '',
-    }
-
-
-    return render(request, template, context)
+    return redirect(redirect_url)
 
 @login_required
-def gene_fav_upload(request, genes_id=0):
-    template = 'genes/genes_upload.html'
-    context = {
-        'genes_id': genes_id,
-        'genes_detail': '',
-    }
+def gene_fav_save(request, gene_fav_id=0):
+    name = request.POST.get("genes-name")
+    gene_list = request.POST.get("genes-list")
+    gene_list = [x.strip() for x in gene_list.split(',')]
+    gene_list = list(set(gene_list))
+
+    if gene_fav_id :
+        try:
+            gene_fav_model = GeneFavorite.objects.get(id=gene_fav_id)
+            if gene_fav_model.user == request.user :
+                gene_fav_model.name = name
+                gene_fav_model.save()
+                gene_fav_model.edit_list(gene_list, request.user)
+                redirect_url = reverse('gene_fav_detail', kwargs={'gene_fav_id':gene_fav_id})
+            else :
+                messages.error(request, 'You do not have permission to update this gene favorite list')
+                redirect_url = reverse('genes')
+        except ObjectDoesNotExist:
+            messages.error(request, 'The gene list you want does not exist.')
+            redirect_url = reverse('genes')
+    else :
+        GeneFavorite.create(name=name, gene_list=gene_list, user=request.user)
+        redirect_url = reverse('genes')
+
+    return redirect(redirect_url)
 
 
-    return render(request, template, context)
+    # if(workbook_id != 0):
+    #     try:
+    #         workbook_model = Workbook.objects.get(id=workbook_id)
+    #         context['workbook'] = workbook_model
+    #         worksheet_model = Worksheet.objects.get(id=worksheet_id)
+    #         context['worksheet'] = worksheet_model
+    #     except ObjectDoesNotExist:
+    #         messages.error(request, 'The workbook and worksheet you were referencing does not exist.')
+    #         return redirect('genes_list')
+    #
+    # if(gene_fav_id != 0):
+    #     try:
+    #         gene_favorite_model = GeneFavorite.objects.get(id=gene_fav_id)
+    #         context['gene_favorite'] = gene_favorite_model
+    #     except ObjectDoesNotExist:
+    #         messages.error(request, 'The genes favorite you were looking for does not exist.')
+    #         return redirect('genes_list')
+
 
 @login_required
 def gene_select_for_existing_workbook(request, workbook_id=0, worksheet_id=0):
-    template = 'genes/genes_upload.html'
     context = {
         'genes_id': genes_id,
         'genes_detail': '',
@@ -114,7 +136,6 @@ def gene_select_for_existing_workbook(request, workbook_id=0, worksheet_id=0):
 
 @login_required
 def gene_select_for_new_workbook(request):
-    template = 'genes/genes_upload.html'
     context = {
         'genes_id': genes_id,
         'genes_detail': '',
@@ -122,3 +143,8 @@ def gene_select_for_new_workbook(request):
 
 
     return render(request, template, context)
+
+
+@login_required
+def get_gene_list(request):
+    gene_list = []
