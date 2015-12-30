@@ -162,8 +162,15 @@ def workbook(request, workbook_id=0):
 
             if is_shareable:
                 for worksheet in workbook_model.get_deep_worksheets():
+                    # Check all cohorts are owned by the user
                     for cohort in worksheet.cohorts:
                         if cohort.get_owner().id != request.user.id:
+                            is_shareable = False
+                            break
+
+                    # Check all variables are from projects owned by the user
+                    for variable in worksheet.get_variables():
+                        if variable.project.owner_id != request.user.id:
                             is_shareable = False
                             break
 
