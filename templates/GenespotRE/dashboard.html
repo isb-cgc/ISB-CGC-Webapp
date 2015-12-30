@@ -2,6 +2,7 @@
 {% load staticfiles %}
 {% load custom_tags %}
 {% load cohort_filters %}
+{% load project_custom_tags %}
 {#{% load tz %}#}
 {% block header %}
 {% endblock %}
@@ -223,7 +224,8 @@
             </section>
             <section class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Public Data ({{ user.project_last_view_set.all|active:'project'|is_public:'project'|length }})</h3>
+                    <h3 class="panel-title">
+                        <a href="{% url 'public_projects' %}">Public Data ({% public_project_count %})</a></h3>
                 </div>
                 <div class="panel-body">
                     <p>Browse publicly-available studies and data</p>
