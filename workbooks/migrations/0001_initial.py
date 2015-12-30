@@ -9,8 +9,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('projects', '0013_project_shared'),
-        ('cohorts', '__first__'),
     ]
 
     operations = [
