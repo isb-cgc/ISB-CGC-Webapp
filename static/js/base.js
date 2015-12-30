@@ -98,13 +98,13 @@ require([
         }
     });
 
-    function openPublicTabOnUrlHash(targetTabID){
-         // Open public tabs based on url hash
-        if(window.location.hash && window.location.hash.slice(1) == 'public') {
-          // If url hash exist
-            var target = $("a[href='" + targetTabID + "']") || $("a[data-target='" + targetTabID + "']");
-            target.tab('show');
-        }
-    }
-    openPublicTabOnUrlHash('#public-cohorts-list');
+    //function openPublicTabOnUrlHash(targetTabID){
+    //     // Open public tabs based on url hash
+    //    if(window.location.hash && window.location.hash.slice(1) == 'public') {
+    //      // If url hash exist
+    //        var target = $("a[href='" + targetTabID + "']") || $("a[data-target='" + targetTabID + "']");
+    //        target.tab('show');
+    //    }
+    //}
+    //openPublicTabOnUrlHash('#public-cohorts-list');
 });

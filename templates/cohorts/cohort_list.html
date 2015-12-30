@@ -25,15 +25,15 @@
 <div class="container">
     <div class="panel panel-default">
         <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation" class="active">
+            <li role="presentation" {% if not is_public %} class="active" {% endif %} >
                 <a href="#save-cohorts-list" aria-controls="save-cohorts-list" role="tab" data-toggle="tab">Saved Cohorts</a>
             </li>
-            <li role="presentation">
+            <li role="presentation" {% if is_public %} class="active" {% endif %} >
                 <a href="#public-cohorts-list" aria-controls="public-cohorts-list" role="tab" data-toggle="tab">Public Cohorts</a>
             </li>
         </ul>
         <div class="tab-content panel-body ">
-            <div role="tabpanel" class="tab-pane active" id="save-cohorts-list">
+            <div role="tabpanel" class="tab-pane {% if not is_public %} active {% endif %} " id="save-cohorts-list">
                 {% if cohorts.has_private_cohorts %}
                     <div class="page-action-group">
                         <li role="menuitem">
@@ -104,7 +104,7 @@
                     </div>
                 {% endif %}
             </div>
-            <div role="tabpanel" class="tab-pane" id="public-cohorts-list">
+            <div role="tabpanel" class="tab-pane {% if is_public %} active {% endif %} " id="public-cohorts-list">
                 <div class="page-action-group">
                     <li role="menuitem"><button class="btn btn-default">New Workbook</button></li>
                     <li class="separator"></li>
