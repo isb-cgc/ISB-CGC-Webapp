@@ -52,11 +52,11 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                 success: function(results, status, xhr) {
                     if (results.hasOwnProperty('items')) {
                         var features = [
-                                'DNAseq_data',
-                                'mirnPlatform',
                                 'cnvrPlatform',
+                                'DNAseq_data',
                                 'methPlatform',
                                 'gexpPlatform',
+                                'mirnPlatform',
                                 'rppaPlatform'
                             ];
                         var plot_features = [
