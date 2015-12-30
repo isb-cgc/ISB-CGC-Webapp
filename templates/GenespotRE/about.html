@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load staticfiles %}  
 
 {% block title %}
     ISB-CGC|About
@@ -8,6 +9,17 @@
     About ISB-CGC
 {% endblock %}
 
-{% block content %}
-    <h1>This is a about page</h1>
+{% block page_header %}
+<div class="container">
+    <ol class="breadcrumb">
+        <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+    </ol>
+    <h1 class="page-header">About</h1>
+</div>
 {% endblock %}
+
+{% block content %}
+    <h4>This is a about page</h4>
+{% endblock %}
+
+{% block js_file %}{% static 'js/dashboard.js' %}{% endblock %}
