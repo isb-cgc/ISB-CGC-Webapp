@@ -33,7 +33,9 @@ def workbook_list(request):
 
 def workbook_samples(request):
     template = 'workbooks/workbook_samples.html'
-    return render(request, template, {});
+    return render(request, template, {
+        'workbooks': Workbook.objects.all().filter(is_public=True, active=True)
+    })
 
 
 #TODO secure this url
