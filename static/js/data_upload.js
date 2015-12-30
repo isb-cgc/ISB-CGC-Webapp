@@ -560,6 +560,7 @@ require([
                 col.controlled = types.Dictionary[newVal];
             } else {
                 col.type = newVal;
+                col.controlled = null;
             }
         });
 
