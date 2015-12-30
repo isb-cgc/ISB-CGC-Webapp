@@ -393,7 +393,7 @@ def dashboard_page(request):
     projects = projects.distinct().order_by('-last_date_saved')
 
     # Workbook List
-    userWorkbooks = request.user.workbook_set.all()
+    userWorkbooks = request.user.workbook_set.all().filter(active=True)
     sharedWorkbooks = Workbook.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
     workbooks = userWorkbooks | sharedWorkbooks
     workbooks = workbooks.distinct().order_by('-last_date_saved')
