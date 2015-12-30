@@ -192,3 +192,7 @@ def is_public(list, key=None):
     if not key:
         return list.filter(is_public=True)
     return list.filter(**{key + '__is_public':True})
+
+@register.filter
+def sort_last_view(list, key=''):
+    return list.order_by('-' + key + '_last_view__last_view')
