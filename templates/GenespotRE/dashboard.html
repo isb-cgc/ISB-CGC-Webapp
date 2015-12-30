@@ -190,23 +190,23 @@
         <div class="col-md-6">
             <section class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Saved Projects ({{ user.project_last_view_set.all|active:'project'|length }})</h3>
+                    <h3 class="panel-title">Saved Projects ({{ user.project_set.all|active|length }})</h3>
                 </div>
                 <div class="panel-body">
                     <p>You can upload from your own research projects.</p>
-                    {% if user.project_last_view_set.all|active:'project'|length > 0 %}
+                    {% if user.project_set.all|active|length > 0 %}
                     <ul class="table-list">
-                        {% for plv in user.project_last_view_set.all|active:'project'|slice:':6' %}
+                        {% for project in user.project_set.all|active|dictsortreversed:'last_date_saved'|slice:':6' %}
                            <li>
-                               <a href="{% url 'project_detail' plv.project.id %}">
-                                   <p class="list-title">{{ plv.project.name }}</p>
-                                   {% if plv.project.description %}
-                                    <p>{{ plv.project.description }}</p>
+                               <a href="{% url 'project_detail' project.id %}">
+                                   <p class="list-title">{{ project.name }}</p>
+                                   {% if project.description %}
+                                    <p>{{ project.description|slice:':65' }}{% if project.description|length > 65 %}&hellip;{% endif %}</p>
                                    {% endif %}
                                </a>
                            </li>
                         {% endfor %}
-                        {% if user.project_last_view_set.all|active:'project'|length > 6 %}
+                        {% if user.project_set.all|active|length > 6 %}
                             <a class="btn btn-link" href="{% url 'projects' %}">View all</a>
                         {% endif %}
                     </ul>
