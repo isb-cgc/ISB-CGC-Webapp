@@ -42,7 +42,7 @@
         <!-- Settings Flyout -->
         <div class="fly-out settings-flyout plot-config" id="plot-{{ plot.id }}-settings">
             <div class="flyout-heading">
-                <h4>Plot Settings <a role="button" class="hide-settings-flyout" aria-label="Hide Settings Flyout"><i class="fa fa-times"></i></a></h4>
+                <h5>Plot Settings <a role="button" class="hide-settings-flyout pull-right" aria-label="Hide Settings Flyout"><i class="fa fa-times"></i></a></h5>
             </div>
             <div class="flyout-body" style="bottom: inherit; overflow-y:inherit;">
                 <div class="main-settings">
@@ -62,7 +62,7 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <button class="swap btn btn-default inline-block space-bottom-10"><i class="fa fa-exchange fa-rotate-90"></i> Swap Values</button>
+                    <button class="swap btn btn-default btn-sm inline-block space-bottom-10"><i class="fa fa-exchange fa-rotate-90"></i> Swap Values</button>
                     <div class="form-group">
                         <label for="{{ plot.id }}-y-select">Y Axis Variable <a role="button" class="y-edit-field" data-attribute="y-selector" aria-label="Y Field Editor"></a></label>
                         <select id="y-axis-select" plot="{{ plot.id }}" class="search-term-field" style="width: 230px;">
@@ -81,8 +81,10 @@
                     <div class="form-group">
                         <label for="{{ plot.id }}-color-select">Color By Feature <a role="button" class="color-edit-field" data-attribute="color-selector" aria-label="Color Field Editor"><i class="fa fa-pencil"></i></a></label></label>
                         <div class="color-selector filter-label label label-default" type="text" id="{{ plot.id }}-color-select" name="color-attr" value="{{ plot.color_by }}">{{ plot.color_by }}</div>
-                        <input type="checkbox" class="color-by-cohort" id="{{ plot.id }}-color-by-cohort" />
+                    </div>
+                    <div class="form-group">
                         <label for="{{ plot.id }}-color-by-cohort">Color By Cohort</label>
+                        <input type="checkbox" class="color-by-cohort" id="{{ plot.id }}-color-by-cohort" />
                     </div>
                     <div class="form-group">
                         <label>Cohorts</label>

@@ -96,7 +96,7 @@
 
             {% if workbook.owner.id == request.user.id %}
             <li>
-                <a data-target="#create-worksheet-modal" data-toggle="modal"><i class="fa fa-plus"></i></a>
+                <a data-target="#create-worksheet-modal-{{ workbook.id }}" data-toggle="modal"><i class="fa fa-plus"></i></a>
             </li>
             {% endif %}
         </ul>

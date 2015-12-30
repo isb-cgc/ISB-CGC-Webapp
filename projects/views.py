@@ -18,7 +18,11 @@ import json
 import requests
 
 @login_required
-def project_list(request):
+def public_project_list(request):
+    return project_list(request, is_public=True)
+
+@login_required
+def project_list(request, is_public=False):
     template = 'projects/project_list.html'
 
     ownedProjects = request.user.project_set.all().filter(active=True)
@@ -29,7 +33,8 @@ def project_list(request):
 
     context = {
         'projects': projects,
-        'public_projects': Project.objects.all().filter(is_public=True,active=True)
+        'public_projects': Project.objects.all().filter(is_public=True,active=True),
+        'is_public': is_public
     }
     return render(request, template, context)
 
