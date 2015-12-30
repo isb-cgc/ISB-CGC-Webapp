@@ -8,6 +8,7 @@ from variables.models import Variable
 from genes.models import Gene
 from projects.models import Project, Study
 from cohorts.models import Cohort, Cohort_Perms
+from sharing.models import Shared_Resource
 from django.utils import formats
 
 # Create your models here.
@@ -22,26 +23,25 @@ class Workbook(models.Model):
     last_date_saved = models.DateTimeField(auto_now_add=True)
     objects = WorkbookManager()
     is_public = models.BooleanField(default=False)
+    owner = models.ForeignKey(User)
+    active = models.BooleanField(default=True)
+    shared = models.ManyToManyField(Shared_Resource)
+    is_public = models.BooleanField(default=False)
 
     @classmethod
     def deep_get(cls, id):
         workbook_model            = cls.objects.get(id=id)
         workbook_model.owner      = workbook_model.get_owner()
         workbook_model.worksheets = workbook_model.get_deep_worksheets()
-        workbook_model.shares     = workbook_model.get_shares()
+        workbook_model.shares     = workbook_model.shared
 
         return workbook_model
 
     @classmethod
     def create(cls, name, description, user):
-        workbook_model = cls.objects.create(name=name, description=description)
+        workbook_model = cls.objects.create(name=name, description=description, owner=user)
         workbook_model.save()
 
-        #create permissions for that workbook
-        workbook_perm_model = Workbook_Perms.objects.create(workbook = workbook_model,
-                                                      user = user,
-                                                      perm = Workbook_Perms.OWNER)
-        workbook_perm_model.save()
         return workbook_model
 
     @classmethod
@@ -86,16 +86,9 @@ class Workbook(models.Model):
         return workbook_model
 
     @classmethod
-    def share(cls, id, user_array):
-        workbook_model = cls.objects.get(id=id)
-        #validate user array
-        #if the user does nto exist then send an email
-        return workbook_model
-
-    @classmethod
     def get_owner(cls, id):
         workbook_model = cls.objects.get(id=id)
-        return workbook_model.get_owner()
+        return workbook_model.owner
 
     '''
     Sets the last viewed time for a workbook
@@ -115,7 +108,7 @@ class Workbook(models.Model):
         return last_view
 
     def get_owner(self):
-        return self.workbook_perms_set.filter(perm=Workbook_Perms.OWNER)[0].user
+        return self.owner
 
     def get_worksheets(self):
         return self.worksheet_set.filter(workbook=self)
@@ -137,15 +130,13 @@ class Workbook(models.Model):
             #                        }
         return worksheets
 
-    def get_shares(self):
-        return self.workbook_perms_set.filter(perm=Workbook_Perms.READER)
-
 class Workbook_Last_View(models.Model):
     workbook = models.ForeignKey(Workbook, blank=False)
     user = models.ForeignKey(User, null=False, blank=False)
     test = models.DateTimeField(auto_now_add=True, null=True)
     last_view = models.DateTimeField(auto_now_add=True, auto_now=True)
 
+# Deprecated. Left in for the conversion
 class Workbook_Perms(models.Model):
     READER = 'READER'
     OWNER = 'OWNER'
@@ -499,10 +490,7 @@ class Worksheet_plot(models.Model):
 @admin.register(Workbook)
 class WorkbookAdmin(admin.ModelAdmin):
     list_display = ('id','name','description','date_created','last_date_saved')
-
-@admin.register(Workbook_Perms)
-class WorkbookPermAdmin(admin.ModelAdmin):
-    list_display = ('id','workbook', 'perm','user')
+    exclude = ('shared',)
 
 @admin.register(Worksheet)
 class WorksheetAdmin(admin.ModelAdmin):
