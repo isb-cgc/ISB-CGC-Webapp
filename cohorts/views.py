@@ -111,9 +111,12 @@ def data_availability_sort(key, value, data_attr, attr_details):
             'value': 'BCGSC Illumina GA',
             'count': [v['count'] for v in value if v['value'] == 'True'][0]
         })
+@login_required
+def public_cohort_list(request):
+    return cohorts_list(request, is_public=True)
 
 @login_required
-def cohorts_list(request):
+def cohorts_list(request, is_public=False):
     if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     # check to see if user has read access to 'All TCGA Data' cohort
     isb_superuser = User.objects.get(username='isb')
@@ -158,7 +161,8 @@ def cohorts_list(request):
                                                         'cohorts_listing': cohort_listing,
                                                         'shared_users':  json.dumps(shared_users),
                                                         'base_url': settings.BASE_URL,
-                                                        'base_api_url': settings.BASE_API_URL
+                                                        'base_api_url': settings.BASE_API_URL,
+                                                        'is_public': is_public
                                                         })
 
 @login_required
