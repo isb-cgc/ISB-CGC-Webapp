@@ -14,10 +14,12 @@
         {% if workbook %}
             <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
             <li><a href="{% url 'worksheet_display' workbook.id worksheet.id %}">{{ workbook.name }}</a></li>
+            <li><a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Saved Gene Favorites</a></li>
         {% elif new_workbook %}
+            <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
             <li><a href="{% url 'gene_select_for_new_workbook' %}">Saved Gene Favorites</a></li>
         {% else %}
-            <li><a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Saved Gene Favorites</a></li>
+            <li><a href="{% url 'genes' %}">Saved Gene Favorites</a></li>
         {% endif %}
     </ol>
     {% if workbook %}

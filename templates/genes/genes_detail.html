@@ -15,10 +15,12 @@
         {% if workbook %}
             <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
             <li><a href="{% url 'worksheet_display' workbook.id worksheet.id %}">{{ workbook.name }}</a></li>
+            <li><a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Saved Gene Favorites</a></li>
         {% elif new_workbook %}
+            <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
             <li><a href="{% url 'gene_select_for_new_workbook' %}">Saved Gene Favorites</a></li>
         {% else %}
-            <li><a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Saved Gene Favorites</a></li>
+            <li><a href="{% url 'genes' %}">Saved Gene Favorites</a></li>
         {% endif %}
     </ol>
     <h1 class="page-header">Gene Favorite Details</h1>
@@ -59,7 +61,7 @@
                                 <button class="btn btn-default" type="submit"><i class="fa fa-plus"></i>Apply to New Workbook</button>
                             </form>
                         {% else %}
-                            <form action="{% url 'worksheet_genes_edit' %}" method="POST">
+                            <form action="{% url 'worksheet_genes_edit' workbook.id worksheet.id %}" method="POST">
                                 {% csrf_token %}
                                 <input type="hidden" name="gene_list_id" value="{{ gene_favorite.id }}">
                                 <button class="btn btn-default" type="submit"><i class="fa fa-plus"></i>Apply to Analysis</button>
