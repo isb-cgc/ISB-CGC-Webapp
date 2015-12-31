@@ -323,7 +323,7 @@ This save view only works coming from cohort editing or creation views.
 # TODO: Create new view to save cohorts from visualizations
 @login_required
 @csrf_protect
-def save_cohort(request, workbook_id, worksheet_id, create_workbook=False):
+def save_cohort(request, workbook_id=None, worksheet_id=None, create_workbook=False):
     if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
 
     redirect_url = reverse('cohort_list')

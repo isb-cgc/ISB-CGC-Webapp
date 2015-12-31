@@ -317,14 +317,14 @@ class Worksheet_gene(models.Model):
         workbook_owner = Workbook.objects.get(id=workbook_id).get_owner()
         if workbook_owner.id == user.id :
             worksheet_model = Worksheet.objects.get(id=worksheet_id)
-            #TODO delete all then resave not the most efficient
+
             genes = Worksheet_gene.objects.filter(worksheet=worksheet_model)
             for gene in genes :
                 gene.destroy();
 
             results = []
             for gene in gene_list :
-                results.append(Worksheet_gene.create(worksheet_id, gene))
+                results.append(Worksheet_gene.create(worksheet_id=worksheet_model.id, gene=gene))
 
             return_obj = {
                 'variables' : results,

@@ -107,14 +107,16 @@
         <div class="col-md-6">
             <section class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Gene Favorites ({{ user.genefavorite_last_view_set.all|active:'genefavorite'|length }})</h3>
+                    <h3 class="panel-title">
+                    <a href="{% url 'genes' %}">Gene Favorites ({{ user.genefavorite_last_view_set.all|active:'genefavorite'|length }})</a>
+                    </h3>
                 </div>
                 <div class="panel-body">
                     {% if user.genefavorite_last_view_set.all|active:'genefavorite'|length > 0 %}
                     <ul class="table-list">
                         {% for glv in user.genefavorite_last_view_set.all|active:'genefavorite'|slice:':6' %}
                         <li>
-                            <a href="{% url 'genes_detail' glv.genefavorite.id %}">
+                            <a href="{% url 'gene_fav_detail' glv.genefavorite.id %}">
                                <p class="list-title">{{ glv.genefavorite.name }}</p>
                             </a>
                         </li>
@@ -131,7 +133,9 @@
             </section>
             <section class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Variable Favorites ({{ user.variablefavorite_last_view_set.all|active:'variablefavorite'|length }})</h3>
+                    <h3 class="panel-title">
+                    <a href="{% url 'variables' %}">Variable Favorites ({{ user.variablefavorite_last_view_set.all|active:'variablefavorite'|length }})</a>
+                    </h3>
                 </div>
                 <div class="panel-body">
                     {% if user.variablefavorite_last_view_set.all|active:'variablefavorite'|length > 0 %}
@@ -146,7 +150,7 @@
                            </li>
                         {% endfor %}
                         {% if user.variablefavorite_last_view_set.all|active:'variablefavorite'|length > 6 %}
-                        <a href="{% url 'genes' %}" class="btn btn-link">View All</a>
+                        <a href="{% url 'variables' %}" class="btn btn-link">View All</a>
                         {% endif %}
                     </ul>
                     {% else %}
