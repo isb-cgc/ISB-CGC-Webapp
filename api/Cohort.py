@@ -781,11 +781,14 @@ class Cohort_Endpoints_API(remote.Service):
                     cohort_perm = Cohort_Perms.objects.get(cohort_id=cohort_id, user_id=user_id)
                 except (ObjectDoesNotExist, MultipleObjectsReturned), e:
                     logger.info(e)
-                    err_msg = "Error retrieving cohort {} for user {}: {}.".format(cohort_id, user_email, e)
+                    logger.exception(e)
+                    err_msg = "Error retrieving cohort {} for user {}: {}".format(cohort_id, user_email, e)
                     if 'Cohort_Perms' in e.message:
                         err_msg = "User {} does not have permissions on cohort {}. Error: {}"\
                             .format(user_email, cohort_id, e)
-                    raise endpoints.UnauthorizedException(err_msg)
+                    raise RuntimeError(err_msg) # endpoints.UnauthorizedException(err_msg)
+
+                logger.info("Made it past the except block.")
                 # query_str += 'WHERE SampleBarcode IN (SELECT sample_id FROM cohorts_samples WHERE cohort_id=%s) '
                 query_str += 'JOIN cohorts_samples ON metadata_data.SampleBarcode=cohorts_samples.sample_id ' \
                              'WHERE cohorts_samples.cohort_id=%s '
@@ -826,9 +829,14 @@ class Cohort_Endpoints_API(remote.Service):
 
                 return DataFileNameKeyList(datafilenamekeys=datafilenamekeys, count=len(datafilenamekeys))
 
-            except (IndexError, TypeError) as e:
+            except (IndexError, TypeError), e:
                 logger.warn(e)
-                raise endpoints.NotFoundException("Sample {} not found.".format(sample_barcode))
+                if sample_barcode:
+                    raise endpoints.NotFoundException("Sample {} not found.".format(sample_barcode))
+                elif cohort_id:
+                    raise endpoints.NotFoundException("Cohort {} not found.".format(cohort_id))
+                else:
+                    raise endpoints.NotFoundException("Error retrieving files.")
             finally:
                 if cursor: cursor.close()
                 if db and db.open: db.close()
