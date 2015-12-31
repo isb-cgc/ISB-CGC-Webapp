@@ -151,7 +151,7 @@
                            </li>
                         {% endfor %}
                         {% if user.variablefavorite_set.all|active|length > 6 %}
-                        <a href="{% url 'genes' %}" class="btn btn-link">View All</a>
+                        <a href="{% url 'variables' %}" class="btn btn-link">View All</a>
                         {% endif %}
                     </ul>
                     {% else %}

@@ -556,10 +556,13 @@ require([
 
             if(types.Controlled[newVal]) {
                 col.controlled = types.Controlled[newVal];
+                col.type = col.controlled.type;
             } else if (types.Dictionary[newVal]) {
                 col.controlled = types.Dictionary[newVal];
+                col.type = col.controlled.type;
             } else {
                 col.type = newVal;
+                col.controlled = null;
             }
         });
 

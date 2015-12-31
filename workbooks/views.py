@@ -6,7 +6,7 @@ from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-
+from django.contrib import messages
 from django.http import StreamingHttpResponse
 from django.http import HttpResponse, JsonResponse
 from models import Cohort, Workbook, Worksheet, Worksheet_comment, Worksheet_variable, Worksheet_gene, Worksheet_cohort
@@ -15,6 +15,7 @@ from genes.models import GeneFavorite
 from projects.models import Project
 from sharing.service import create_share
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 debug = settings.DEBUG
 if settings.DEBUG :
     import sys
@@ -50,17 +51,62 @@ def workbook_create_with_variables(request):
     redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_model.id})
     return redirect(redirect_url)
 
-#TODO secure this url
+'''
+    NOTE: this function is very similar to the workbook gene functions below
+'''
 @login_required
 def workbook_create_with_genes(request):
-    gene_id         = request.POST.get('gene_list_id')
-    gene_list       = GeneFavorite.objects.get(id=gene_id)
-    workbook_model  = Workbook.create(name="Untitled Workbook", description="This workbook was created with gene list \"" + gene_list.name + "\" added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
-    worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
-    Worksheet_gene.edit_list(workbook_id=workbook_model.id, worksheet_id=worksheet_model.id, gene_list=gene_list,user=request.user)
+    result = {}
+    if request.method == "POST" :
+        genes = []
+        #from Gene Edit Page
+        if request.POST.get("genes-list") :
+            gene_list = request.POST.get("genes-list")
+            gene_list = [x.strip() for x in gene_list.split(',')]
+            gene_list = list(set(gene_list))
+            for g in gene_list:
+                genes.append(g)
 
-    redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_model.id})
-    return redirect(redirect_url)
+        #from Gene Details Page
+        if request.POST.get("gene_list_id") :
+            gene_id = request.POST.get("gene_list_id")
+            try :
+                gene_fav = GeneFavorite.objects.get(id=gene_id)
+                names = gene_fav.get_gene_name_list()
+                for g in names:
+                    genes.append(g)
+            except ObjectDoesNotExist:
+                    None
+
+        #from Gene List Page, yay all three are different!
+        if "gene_fav_list" in request.body :
+            gene_fav_list = json.loads(request.body)['gene_fav_list']
+            for id in gene_fav_list:
+                try:
+                    fav = GeneFavorite.objects.get(id=id)
+                    names = fav.get_gene_name_list()
+                    for g in names:
+                        genes.append(g)
+                except ObjectDoesNotExist:
+                    None
+        if len(genes) > 0:
+            workbook_model  = Workbook.create(name="Untitled Workbook", description="This workbook was created with gene lists added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
+            worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
+            Worksheet_gene.edit_list(workbook_id=workbook_model.id, worksheet_id=worksheet_model.id, gene_list=genes, user=request.user)
+            result['genes'] = genes
+            result['workbook_id'] = workbook_model.id
+            result['worksheet_id'] = worksheet_model.id
+        else :
+            result['error'] = "no genes to add"
+    else :
+        result['error'] = "method not correct"
+
+    if request.POST.get("genes-list") or request.POST.get("gene_list_id"):
+        redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_model.id, 'worksheet_id': worksheet_model.id})
+        return redirect(redirect_url)
+    else :
+        return HttpResponse(json.dumps(result), status=200)
+
 
 #TODO secure this url
 @login_required
@@ -264,19 +310,64 @@ def worksheet_variables(request, workbook_id=0, worksheet_id=0, variable_id=0):
     redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet_id})
     return redirect(redirect_url)
 
+'''
+    TODO revisit function as there are too many different parameters possible
+'''
 @login_required
 def worksheet_genes(request, workbook_id=0, worksheet_id=0, genes_id=0):
     command  = request.path.rsplit('/',1)[1];
+    result = {}
 
-    genes = json.loads(request.body)['genes']
     if request.method == "POST" :
         if command == "edit" :
-            Worksheet_gene.edit_list(worksheet_id=worksheet_id, genes=genes, user=request.user)
-        elif command == "delete" :
-            Worksheet_gene.destroy(worksheet_id=worksheet_id, id=genes_id, user=request.user)
+            genes = []
+            #from Gene Edit Page
+            if request.POST.get("genes-list") :
+                #name = request.POST.get("genes-name") #ignored for now
+                gene_list = request.POST.get("genes-list")
+                gene_list = [x.strip() for x in gene_list.split(',')]
+                gene_list = list(set(gene_list))
+                for g in gene_list:
+                    genes.append(g)
 
-    redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet_id})
-    return redirect(redirect_url)
+            #from Gene Details Page
+            if request.POST.get("gene_list_id") :
+                gene_id = request.POST.get("gene_list_id")
+                try :
+                    gene_fav = GeneFavorite.objects.get(id=gene_id)
+                    names = gene_fav.get_gene_name_list()
+                    for g in names:
+                        genes.append(g)
+                except ObjectDoesNotExist:
+                        None
+
+            #from Gene List Page, yay all three are different!
+            if "gene_fav_list" in request.body :
+                gene_fav_list = json.loads(request.body)['gene_fav_list']
+                for id in gene_fav_list:
+                    try:
+                        fav = GeneFavorite.objects.get(id=id)
+                        names = fav.get_gene_name_list()
+                        for g in names:
+                            genes.append(g)
+                    except ObjectDoesNotExist:
+                        None
+            if len(genes) > 0:
+                Worksheet_gene.edit_list(workbook_id=workbook_id, worksheet_id=worksheet_id, gene_list=genes, user=request.user)
+                result['genes'] = genes
+            else :
+                result['error'] = "no genes to add"
+        elif command == "delete" :
+            Worksheet_gene.destroy(workbook_id=workbook_id, worksheet_id=worksheet_id, id=genes_id, user=request.user)
+            result['message'] = "genes have been deleted from workbook"
+    else :
+        result['error'] = "method not correct"
+
+    if request.POST.get("genes-list") or request.POST.get("gene_list_id"):
+        redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet_id})
+        return redirect(redirect_url)
+    else :
+        return HttpResponse(json.dumps(result), status=200)
 
 @login_required
 def worksheet_cohorts(request, workbook_id=0, worksheet_id=0, cohort_id=0):

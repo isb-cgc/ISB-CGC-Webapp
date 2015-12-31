@@ -80,6 +80,10 @@
                 <h4 class="modal-title"></h4>
             </div>
             <div class="modal-body">
+                <p>
+                    This will create a copy of the worksheet and reference the cohorts and projects used in the workbook
+                    This will not make duplicates of the cohort and projects used in the workbook
+                </p>
                 Duplicate this Workbook?
             </div>
             <form id="copy-workbook-{{ workbook.id }}" method="POST" action="{% url 'workbook_copy' workbook.id %}">
@@ -134,6 +138,9 @@
                 <form class="tab-pane fade in active" id="share-{{ workbook.id }}" method="POST" action="{% url 'workbook_share' workbook.id %}">
                     {% csrf_token %}
                     <div class="modal-body">
+                        <p>
+                            This will share the web view of workbooks.
+                        </p>
                         <label for="share_users">Enter email addresses separated by a comma</label>
                         <textarea class="form-control" name="share_users"></textarea>
                     </div>

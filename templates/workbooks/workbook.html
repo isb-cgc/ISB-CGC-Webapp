@@ -119,17 +119,17 @@
                                 <li class="list-item">
                                     <div class="list-item__heading">
                                         {% if workbook.owner.id == request.user.id %}
-                                        <a href="{% url 'genes' %}">Genes <i class="fa fa-plus pull-right"></i></a>
+                                        <a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Genes <i class="fa fa-plus pull-right"></i></a>
                                         {% else %}
                                         <span>Genes </span>
                                         {% endif %}
                                     </div>
                                     {% if worksheet.genes %}
                                     <ul class="list-item__body">
-                                        {% with worksheet.gene_list|how_many_more:6 as num_more  %}
+                                        {% with worksheet.genes|how_many_more:6 as num_more  %}
                                             {% for gene in worksheet.genes %}
                                                 {% if forlook.counter0 < 6 %}
-                                                    <li class="sublist-item">{{ gene.name|upper }}</li>
+                                                    <li class="sublist-item">{{ gene.gene|upper }}</li>
                                                 {% elif forloop.counter0 == 6 and num_more > 0 %}
                                                     <a class="show-more">{{num_more}} more</a>
                                                     <li class="extra-values sublist-item">{{ gene.name|upper }}</li>
