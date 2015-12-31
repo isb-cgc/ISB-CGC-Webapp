@@ -212,8 +212,7 @@ class Worksheet(models.Model):
         Worksheet_cohort.create(self.id, cohort)
 
     def remove_cohort(self, cohort):
-        Worksheet_cohort.object.get(cohort = cohort)
-        Worksheet_cohort.destroy()
+        self.worksheet_cohort_set.get(cohort=cohort).destroy()
 
     def set_plot(self, title, type):
         if self.plot :

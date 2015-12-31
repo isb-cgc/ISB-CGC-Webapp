@@ -176,16 +176,34 @@
                                         <span>Cohorts </span>
                                         {% endif %}
                                     </div>
-                                    {% if worksheet.cohorts %}
+                                    {% if worksheet.worksheet_cohort_set.count > 0 %}
                                     <ul class="list-item__body">
-                                        {% with worksheet.cohorts|how_many_more:6 as num_more  %}
-                                            {% for cohort in worksheet.cohorts %}
+                                        {% with worksheet.worksheet_cohort_set.all|active:'cohort'|how_many_more:6 as num_more  %}
+                                            {% for wsch in worksheet.worksheet_cohort_set.all|active:'cohort' %}
+                                                {% with wsch.cohort as cohort %}
                                                 {% if forlook.counter0 < 6 %}
-                                                    <li class="sublist-item">{{ cohort.name|upper }}</li>
+                                                    <li class="sublist-item">
+                                                        {% if shared %}
+                                                            {{ cohort.name|title }}
+                                                        {% else %}
+                                                            <form action="{% url 'remove_cohort_from_worksheet' workbook_id=workbook.id worksheet_id=worksheet.id cohort_id=cohort.id %}" method="POST">
+                                                                {% csrf_token %}
+                                                                <button type="submit" class="text-danger workbook-remove-item"><i class="fa fa-close"></i></button>
+                                                                <a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name|title }}</a>
+                                                            </form>
+                                                        {% endif %}
+                                                    </li>
                                                 {% elif forloop.counter0 == 6 and num_more > 0 %}
                                                     <a class="show-more">{{num_more}} more</a>
-                                                    <li class="extra-values sublist-item">{{ cohort.name|upper }}</li>
+                                                    <li class="extra-values sublist-item">
+                                                        {% if shared %}
+                                                            {{ cohort.name|title }}
+                                                        {% else %}
+                                                            <a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name|title }}</a>
+                                                        {% endif %}
+                                                    </li>
                                                 {% endif %}
+                                                {% endwith %}
                                             {% endfor %}
                                             {% if num_more > 0 %}
                                                 <a class="show-less" style="display:none;">Show Less</a>

@@ -16,9 +16,21 @@
 <div class="container">
     <ol class="breadcrumb">
         <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+        {% if workbook %}
+        <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
+        <li><a href="{% url 'workbook_detail' workbook_id=workbook.id %}">{{ workbook.name|title }}</a></li>
+        {% endif %}
     </ol>
-    <h1 class="page-header pull-left">Cohorts</h1>
+    <h1 class="page-header pull-left">{% if from_workbook %}Data Source | {% endif %}Cohorts</h1>
+    {% if from_workbook %}
+    <a href="{% if workbook %}{% url 'cohort_create_for_existing_workbook' workbook_id=workbook.id worksheet_id=worksheet.id %}{% else %}{% url 'cohort_create_for_new_workbook' %}{% endif %}" class="btn btn-primary pull-right"><i class="fa fa-plus"></i> Create New Cohort</a>
+    <form id="cohort-apply-to-workbook" action="{% url 'add_cohorts_to_worksheet' workbook_id=workbook.id worksheet_id=worksheet.id %}" method="POST">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary pull-right" disabled="disabled">{% if create_workbook %}Create Workbook{% else %}Apply to Worksheet{% endif %}</button>
+    </form>
+    {% else %}
     <a href="{% url 'cohort' %}" class="btn btn-primary pull-right"><i class="fa fa-plus"></i> Create New Cohort</a>
+    {% endif %}
 </div>
 {% endblock %}
 {% block content %}
@@ -35,6 +47,7 @@
         <div class="tab-content panel-body ">
             <div role="tabpanel" class="tab-pane {% if not is_public %} active {% endif %} " id="save-cohorts-list">
                 {% if cohorts.has_private_cohorts %}
+                    {% if not from_workbook %}
                     <div class="page-action-group">
                         <li role="menuitem">
                             <button id="createWorkbookWithCohort" class="btn btn-default">New Workbook</button>
@@ -58,6 +71,7 @@
                             </button>
                         </li>
                     </div>
+                    {% endif %}
 
                     <table id="cohort-table" class="table table-striped tablesorter">
                         <thead><tr>
@@ -106,11 +120,13 @@
                 {% endif %}
             </div>
             <div role="tabpanel" class="tab-pane {% if is_public %} active {% endif %} " id="public-cohorts-list">
+                {% if not from_workbook %}
                 <div class="page-action-group">
                     <li role="menuitem"><button class="btn btn-default">New Workbook</button></li>
                     <li class="separator"></li>
                     <li role="menuitem"><button class="btn btn-info">Set Operations</button></li>
                 </div>
+                {% endif %}
                 {% if cohorts %}
                     <table id="public-cohort-table" class="table table-striped tablesorter">
                         <thead><tr>
@@ -525,6 +541,7 @@
     var shared_users = {{ shared_users|safe }};
     var base_api_url = '{{ base_api_url|safe }}';
     var base_url = '{{ base_url|safe }}';
+    var from_workbook = {{ from_workbook|lower }};
     </script>
 {% endblock %}
 

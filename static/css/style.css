@@ -1393,6 +1393,11 @@ a.skip-nav {
       font-weight: 400;
       opacity: 0.8;
       margin-top: 5px; }
+    .worksheet-nav .workbook-remove-item {
+      border: none;
+      padding: 2px;
+      margin-right: 4px;
+      background: none; }
   .worksheet-content {
     float: left;
     width: 75%;
@@ -1656,6 +1661,9 @@ a.skip-nav {
   color: #fff;
   font-family: sans-serif;
   padding: 3px 7px; }
+
+#cohort-apply-to-workbook .btn {
+  margin-right: 10px; }
 
 #data-upload-group .checkbox .sub-checkbox {
   margin-left: 45px; }
