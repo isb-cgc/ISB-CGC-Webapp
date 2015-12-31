@@ -16,10 +16,10 @@ limitations under the License.
 
 """
 
-from functools import wraps
 import logging
 from re import compile as re_compile
-from time import time
+from uuid import uuid4
+from time import sleep
 
 from api.api_helpers import authorize_credentials_with_Google
 from api.schema.tcga_clinical import schema as clinical_schema
@@ -140,14 +140,66 @@ class ClinicalFeatureProvider(object):
         bigquery_service = authorize_credentials_with_Google()
         return bigquery_service
 
-    @DurationLogged('CLIN', 'BQ_QUERY')
-    def execute_bq_query(self, bigquery, project_id, query_body):
-        table_data = bigquery.jobs()
-        query_response = table_data.query(projectId=project_id, body=query_body).execute()
-        return query_response
+    @DurationLogged('CLIN', 'BQ_SUBMIT')
+    def submit_bigquery_job(self, bigquery, project_id, query_body, batch=False):
+        job_data = {
+            'jobReference': {
+                'projectId': project_id,
+                'job_id': str(uuid4())
+            },
+            'configuration': {
+                'query': {
+                    'query': query_body,
+                    'priority': 'BATCH' if batch else 'INTERACTIVE'
+                }
+            }
+        }
+
+        return bigquery.jobs().insert(
+            projectId=project_id,
+            body=job_data).execute(num_retries=5)
+
+    @DurationLogged('CLIN', 'BQ_POLL')
+    def poll_async_job(self, bigquery_service, project_id, job_id, poll_interval=5):
+        job_collection = bigquery_service.jobs()
+
+        poll = True
+
+        while poll:
+            sleep(poll_interval)
+            job = job_collection.get(projectId=project_id,
+                                     jobId=job_id).execute()
+
+            if job['status']['state'] == 'DONE':
+                poll = False
+
+            if 'errorResult' in job['status']:
+                raise Exception(job['status'])
+
+    def download_query_result(self, bigquery, query_job):
+        result = []
+        page_token = None
+        total_rows = 0
+
+        while True:
+            page = bigquery.jobs().getQueryResults(
+                    pageToken=page_token,
+                    **query_job['jobReference']).execute(num_retries=2)
+
+            rows = page['rows']
+            result.extend(rows)
+
+            total_rows += len(rows)
+            logging.debug(total_rows)
+
+            page_token = page.get('pageToken')
+            if not page_token:
+                break
+
+        return result
 
     @DurationLogged('CLIN', 'UNPACK')
-    def unpack_query_response(self, query_response):
+    def unpack_query_response(self, query_result_array):
         """
         Unpacks values from a BigQuery response object into a flat array. The array will contain dicts with
         the following fields:
@@ -157,17 +209,14 @@ class ClinicalFeatureProvider(object):
         - 'value': Value of the selected column from the clinical data table
 
         Args:
-            query_response: A BigQuery query response object
+            query_result_array: A BigQuery query response object
 
         Returns:
             Array of dict objects.
         """
         result = []
-        num_result_rows = int(query_response['totalRows'])
-        if num_result_rows == 0:
-            return result
 
-        for row in query_response['rows']:
+        for row in query_result_array:
             result.append({
                 'patient_id': row['f'][0]['v'],
                 'sample_id': row['f'][1]['v'],
@@ -180,14 +229,17 @@ class ClinicalFeatureProvider(object):
     def do_query(self, project_id, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array):
         bigquery_service = self.get_bq_service()
 
-        query = self.build_query(project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array)
+        query_body = self.build_query(project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array)
+        query_job = self.submit_bigquery_job(bigquery_service, project_id, query_body)
 
-        query_body = {
-            'query': query
-        }
+        # Poll for completion of the query
+        job_id = query_job['jobReference']['jobId']
+        logging.debug("JOBID {id}".format(id=job_id))
 
-        query_response = self.execute_bq_query(bigquery_service, project_id, query_body)
-        result = self.unpack_query_response(query_response)
+        self.poll_async_job(bigquery_service, project_id, job_id)
+        query_result_array = self.download_query_result(bigquery_service, query_job)
+
+        result = self.unpack_query_response(query_result_array)
         return result
 
     def get_data_from_bigquery(self, cohort_id_array, cohort_dataset, cohort_table):
