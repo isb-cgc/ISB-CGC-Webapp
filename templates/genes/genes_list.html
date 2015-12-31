@@ -38,9 +38,22 @@
                                     <div class="dropdown">
                                         <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
                                         <ul class="dropdown-menu">
-                                            <li><a href="{% url 'gene_fav_edit' genes_fav.id %}">Edit</a> </li>
-                                            <li><a role="button">Delete</a></li>
-                                            <li><a href="">New Workbook</a></li>
+                                            <li>
+                                                <a style="color: #49AFCD; padding-left: 13px;" href="{% url 'gene_fav_edit' genes_fav.id %}">Edit</a>
+                                            </li>
+                                            <li>
+                                                <form action="{% url 'gene_fav_delete' genes_fav.id %}" method="POST">
+                                                    {% csrf_token %}
+                                                    <input class="btn btn-link" type="submit" value="Delete">
+                                                </form>
+                                            </li>
+                                            <li>
+                                                <form action="{% url 'worksheet_create_with_genes' %}" method="POST">
+                                                    {% csrf_token %}
+                                                    <button class="btn btn-link" type="submit"> Start New Workbook</button>
+                                                    <input type="hidden" name="gene_list_id" value="{{ genes_fav.id }}">
+                                                </form>
+                                            </li>
                                         </ul>
                                     </div>
                                 </td>

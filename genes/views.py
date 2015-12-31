@@ -18,36 +18,96 @@ from django.contrib.auth.models import User
 from django.conf import settings
 
 @login_required
-def gene_fav_list(request):
+def gene_fav_list_for_new_workbook(request):
+    return gene_fav_list(request=request, new_workbook=True)
+
+@login_required
+def gene_fav_list(request, workbook_id=0, worksheet_id=0, new_workbook=0):
     template = 'genes/genes_list.html'
+    context  = {}
 
     gene_list = GeneFavorite.get_list(request.user)
     if len(gene_list) == 0 :
         gene_list = None
+    context['gene_fav_list']=gene_list
 
-    return render(request, template, {'gene_fav_list' : gene_list})
+    if gene_list :
+        template = 'genes/genes_select.html'
+    else :
+        template = 'genes/genes_edit.html'
+        context = {'genes' : [] }
 
-@login_required
-def gene_fav_detail(request, gene_fav_id):
-    template = 'genes/genes_detail.html'
-    context = {}
+    if workbook_id != 0 :
+        try:
+            workbook_model = Workbook.objects.get(id=workbook_id)
+            context['workbook'] = workbook_model
+            worksheet_model = Worksheet.objects.get(id=worksheet_id)
+            context['worksheet'] = worksheet_model
+            context['base_url']  = settings.BASE_URL
 
-    try:
-        gene_favorite_model = GeneFavorite.objects.get(id=gene_fav_id)
-        gene_favorite_model.genes = gene_favorite_model.get_genes()
-        context['gene_favorite'] = gene_favorite_model
-    except ObjectDoesNotExist:
-        messages.error(request, 'The genes favorite you were looking for does not exist.')
-        return redirect('genes_list')
+        except ObjectDoesNotExist:
+            messages.error(request, 'The workbook and worksheet you were referencing does not exist.')
+            return redirect('genes_list')
+    elif new_workbook :
+        context['new_workbook'] = True
 
     return render(request, template, context)
 
 @login_required
-def gene_fav_edit(request, gene_fav_id=0):
+def gene_fav_detail_for_new_workbook(request, gene_fav_id):
+    return gene_fav_detail(request=request, gene_fav_id=gene_fav_id, new_workbook=True)
+
+@login_required
+def gene_fav_detail(request, gene_fav_id, workbook_id=0, worksheet_id=0, new_workbook=0):
+    template = 'genes/genes_detail.html'
+    context = {}
+
+    if new_workbook :
+        context['new_workbook'] = True
+
+    if workbook_id :
+        try:
+            workbook_model = Workbook.objects.get(id=workbook_id)
+            context['workbook'] = workbook_model
+            worksheet_model = Worksheet.objects.get(id=worksheet_id)
+            context['worksheet'] = worksheet_model
+        except ObjectDoesNotExist:
+            messages.error(request, 'The workbook you were referencing does not exist.')
+            return redirect('genes')
+    try:
+        gene_favorite_model = GeneFavorite.objects.get(id=gene_fav_id)
+        gene_favorite_model.genes = gene_favorite_model.get_genes()
+        context['gene_favorite'] = gene_favorite_model
+        gene_favorite_model.mark_viewed(request)
+    except ObjectDoesNotExist:
+        messages.error(request, 'The genes favorite you were looking for does not exist.')
+        return redirect('genes')
+
+    return render(request, template, context)
+
+@login_required
+def gene_fav_edit_for_new_workbook(request):
+    return gene_fav_edit(request=request, new_workbook=True)
+
+@login_required
+def gene_fav_edit(request, gene_fav_id=0, workbook_id=0, worksheet_id=0, new_workbook=0):
     template = 'genes/genes_edit.html'
     context = {'genes' : [] }
 
-    if(gene_fav_id != 0):
+    if new_workbook :
+        context['new_workbook'] = True
+
+    if workbook_id != 0 :
+        try:
+            workbook_model = Workbook.objects.get(id=workbook_id)
+            context['workbook'] = workbook_model
+            worksheet_model = Worksheet.objects.get(id=worksheet_id)
+            context['worksheet'] = worksheet_model
+        except ObjectDoesNotExist:
+            messages.error(request, 'The workbook you were referencing does not exist.')
+            return redirect('genes')
+
+    if gene_fav_id != 0:
         try:
             gene_favorite_model = GeneFavorite.objects.get(id=gene_fav_id)
             context['gene_favorite'] = gene_favorite_model
@@ -68,8 +128,9 @@ def gene_fav_delete(request, gene_fav_id):
         try:
             gene_fav_model = GeneFavorite.objects.get(id=gene_fav_id)
             if gene_fav_model.user == request.user :
+                name = gene_fav_model.name
                 gene_fav_model.destroy()
-                messages.info(request, 'the gene favorite has been deleted')
+                messages.info(request, 'the gene favorite \"'+name+'\" has been deleted')
             else :
                 messages.error(request, 'You do not have permission to update this gene favorite list')
         except ObjectDoesNotExist:
@@ -103,48 +164,3 @@ def gene_fav_save(request, gene_fav_id=0):
         redirect_url = reverse('genes')
 
     return redirect(redirect_url)
-
-
-    # if(workbook_id != 0):
-    #     try:
-    #         workbook_model = Workbook.objects.get(id=workbook_id)
-    #         context['workbook'] = workbook_model
-    #         worksheet_model = Worksheet.objects.get(id=worksheet_id)
-    #         context['worksheet'] = worksheet_model
-    #     except ObjectDoesNotExist:
-    #         messages.error(request, 'The workbook and worksheet you were referencing does not exist.')
-    #         return redirect('genes_list')
-    #
-    # if(gene_fav_id != 0):
-    #     try:
-    #         gene_favorite_model = GeneFavorite.objects.get(id=gene_fav_id)
-    #         context['gene_favorite'] = gene_favorite_model
-    #     except ObjectDoesNotExist:
-    #         messages.error(request, 'The genes favorite you were looking for does not exist.')
-    #         return redirect('genes_list')
-
-
-@login_required
-def gene_select_for_existing_workbook(request, workbook_id=0, worksheet_id=0):
-    context = {
-        'genes_id': genes_id,
-        'genes_detail': '',
-    }
-
-
-    return render(request, template, context)
-
-@login_required
-def gene_select_for_new_workbook(request):
-    context = {
-        'genes_id': genes_id,
-        'genes_detail': '',
-    }
-
-
-    return render(request, template, context)
-
-
-@login_required
-def get_gene_list(request):
-    gene_list = []

@@ -80,6 +80,14 @@ class GeneFavorite(models.Model):
     def get_genes(self):
         return self.gene_set.filter(gene_favorite=self)
 
+    def get_gene_name_list(self):
+        names = []
+        genes = self.get_genes()
+        for g in genes:
+            names.append(g.name)
+
+        return names
+
     def destroy(self):
         self.active = False
         genes = Gene.objects.filter(gene_favorite=self)

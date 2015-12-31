@@ -1,14 +1,14 @@
 require.config({
-    baseUrl: '/static/js/',
+    baseUrl: '/static/',
     paths: {
-        jquery: 'libs/jquery-1.11.1.min',
-        bootstrap: 'libs/bootstrap.min',
-        jqueryui: 'libs/jquery-ui.min',
-        session_security: 'session_security',
-        underscore: 'libs/underscore-min',
-        assetscore: 'libs/assets.core',
-        assetsresponsive: 'libs/assets.responsive',
-        base: 'base',
+        jquery: 'js/libs/jquery-1.11.1.min',
+        bootstrap: 'js/libs/bootstrap.min',
+        jqueryui: 'js/libs/jquery-ui.min',
+        session_security: 'js/session_security',
+        underscore: 'js/libs/underscore-min',
+        assetscore: 'js/libs/assets.core',
+        assetsresponsive: 'js/libs/assets.responsive',
+        base: 'js/base',
         tokenfield: 'libs/bootstrap-tokenfield.min'
     },
     shim: {

@@ -13,31 +13,42 @@
         <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
         {% if workbook %}
             <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
-            <li><a href="{% url 'workbook_display' workbook.id worksheet.id %}">{{ workbook.name }}</a></li>
+            <li><a href="{% url 'worksheet_display' workbook.id worksheet.id %}">{{ workbook.name }}</a></li>
+        {% elif new_workbook %}
+            <li><a href="{% url 'gene_select_for_new_workbook' %}">Saved Gene Favorites</a></li>
         {% else %}
-            <li><a href="{% url 'genes' %}">Saved Gene Favorites</a></li>
+            <li><a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Saved Gene Favorites</a></li>
         {% endif %}
     </ol>
-    <h1 class="page-header">Edit Gene Favorite</h1>
+    {% if workbook %}
+        <h1 class="page-header">Create Gene List</h1>
+    {% else %}
+        <h1 class="page-header">Edit Gene Favorite</h1>
+    {% endif %}
 </div>
 {% endblock %}
 {% block content %}
 <div class="container">
-
     <section class="panel panel-defaul">
         <div class="panel-heading">
         </div>
         <div class="panel-body">
             {% if gene_favorite %}
                 <form method="POST" action="{% url 'gene_fav_update' gene_favorite.id %}">
+            {% elif workbook %}
+                <form method="POST" action="{% url 'worksheet_genes_edit' workbook.id worksheet.id %}">
+            {% elif new_workbook %}
+                <form method="POST" action="{% url 'worksheet_create_with_genes' %}">
             {% else %}
                 <form method="POST" action="{% url 'gene_fav_save' %}">
             {% endif %}
                 {% csrf_token %}
-                <div class="form-group">
-                    <label for="genes-name">Name of Favorite (Required)</label>
-                    <input class="form-control" type="text" value="{% if 'gene_fav_detail' %}{{gene_favorite.name}}{% endif %} " name="genes-name" required>
-                </div>
+                {% if not workbook and not new_workbook %}
+                    <div class="form-group">
+                        <label for="genes-name">Name of Favorite (Required)</label>
+                        <input class="form-control" type="text" value="{% if 'gene_fav_detail' %}{{gene_favorite.name}}{% endif %} " name="genes-name" required>
+                    </div>
+                {% endif %}
 
                 <div class="form-group">
                     <div>
@@ -69,6 +80,11 @@
                             <input type="submit" value="Save Changes" class="btn btn-primary"/>
                         </li>
                         <li role="menuitem"><menuitem class="btn btn-link"><a href="{% url 'gene_fav_detail' gene_favorite.id %}">Cancel</a></menuitem></li>
+                    {% elif workbook %}
+                        <li role="menuitem">
+                            <input type="submit" value="Apply to Worksheet" class="btn btn-primary"/>
+                        </li>
+                        <li role="menuitem"><a href="{% url 'genes' %}">Cancel</a></li>
                     {% else %}
                         <li role="menuitem">
                             <input type="submit" value="Save as Favorite" class="btn btn-primary"/>
@@ -90,4 +106,4 @@
 </script>
 {% endblock %}
 
-{% block js_file %}{% static 'js/genes.js' %}{% endblock %}
+{% block js_file %}{% static 'js/genes/genes.js' %}{% endblock %}
