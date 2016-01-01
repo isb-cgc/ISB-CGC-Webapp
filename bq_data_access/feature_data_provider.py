@@ -1,0 +1,128 @@
+"""
+
+Copyright 2015, Institute for Systems Biology
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+"""
+
+import logging
+from uuid import uuid4
+from time import sleep
+
+from django.conf import settings
+from api.api_helpers import authorize_credentials_with_Google
+from bq_data_access.utils import DurationLogged
+
+
+class FeatureDataProvider(object):
+    """
+    Class for building data access modules for different datatypes.
+
+    TODO: Document interface
+    """
+    def __init__(self):
+        pass
+
+    @DurationLogged('FEATURE', 'AUTH')
+    def get_bq_service(self):
+        bigquery_service = authorize_credentials_with_Google()
+        return bigquery_service
+
+    @DurationLogged('FEATURE', 'BQ_SUBMIT')
+    def submit_bigquery_job(self, bigquery, project_id, query_body, batch=False):
+        job_data = {
+            'jobReference': {
+                'projectId': project_id,
+                'job_id': str(uuid4())
+            },
+            'configuration': {
+                'query': {
+                    'query': query_body,
+                    'priority': 'BATCH' if batch else 'INTERACTIVE'
+                }
+            }
+        }
+
+        return bigquery.jobs().insert(
+                projectId=project_id,
+                body=job_data).execute(num_retries=5)
+
+    @DurationLogged('FEATURE', 'BQ_POLL')
+    def poll_async_job(self, bigquery_service, project_id, job_id, poll_interval=5):
+        job_collection = bigquery_service.jobs()
+
+        poll = True
+
+        while poll:
+            sleep(poll_interval)
+            job = job_collection.get(projectId=project_id,
+                                     jobId=job_id).execute()
+
+            if job['status']['state'] == 'DONE':
+                poll = False
+
+            if 'errorResult' in job['status']:
+                raise Exception(job['status'])
+
+    @DurationLogged('FEATURE', 'BQ_FETCH')
+    def download_query_result(self, bigquery, query_job):
+        result = []
+        page_token = None
+        total_rows = 0
+
+        while True:
+            page = bigquery.jobs().getQueryResults(
+                    pageToken=page_token,
+                    **query_job['jobReference']).execute(num_retries=2)
+
+            if int(page['totalRows']) == 0:
+                break
+
+            rows = page['rows']
+            result.extend(rows)
+            total_rows += len(rows)
+
+            page_token = page.get('pageToken')
+            if not page_token:
+                break
+
+        return result
+
+    def do_query(self, project_id, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array):
+        bigquery_service = self.get_bq_service()
+
+        query_body = self.build_query(project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array)
+        query_job = self.submit_bigquery_job(bigquery_service, project_id, query_body)
+
+        # Poll for completion of the query
+        job_id = query_job['jobReference']['jobId']
+        logging.debug("JOBID {id}".format(id=job_id))
+
+        self.poll_async_job(bigquery_service, project_id, job_id)
+        query_result_array = self.download_query_result(bigquery_service, query_job)
+
+        result = self.unpack_query_response(query_result_array)
+        return result
+
+    def get_data_from_bigquery(self, cohort_id_array, cohort_dataset, cohort_table):
+        project_id = settings.BQ_PROJECT_ID
+        project_name = settings.BIGQUERY_PROJECT_NAME
+        dataset_name = settings.BIGQUERY_DATASET2
+        result = self.do_query(project_id, project_name, dataset_name, self.table_name, self.feature_def,
+                               cohort_dataset, cohort_table, cohort_id_array)
+        return result
+
+    def get_data(self, cohort_id_array, cohort_dataset, cohort_table):
+        result = self.get_data_from_bigquery(cohort_id_array, cohort_dataset, cohort_table)
+        return result
