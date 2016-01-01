@@ -18,12 +18,11 @@ limitations under the License.
 
 import logging
 from re import compile as re_compile
-from api.api_helpers import authorize_credentials_with_Google
 
-from django.conf import settings
-
+from bq_data_access.feature_data_provider import FeatureDataProvider
 from bq_data_access.errors import FeatureNotFoundException
 from bq_data_access.feature_value_types import ValueType, DataTypes
+from bq_data_access.utils import DurationLogged
 
 TABLES = [
     {
@@ -103,13 +102,14 @@ class GEXPFeatureDef(object):
         return cls(gene_label, value_field, table_id)
 
 
-class GEXPFeatureProvider(object):
+class GEXPFeatureProvider(FeatureDataProvider):
     TABLES = TABLES
 
     def __init__(self, feature_id):
         self.feature_def = None
         self.table_name = ''
         self.parse_internal_feature_id(feature_id)
+        super(GEXPFeatureProvider, self).__init__()
 
     def get_value_type(self):
         return ValueType.FLOAT
@@ -142,24 +142,25 @@ class GEXPFeatureProvider(object):
         logging.debug("BQ_QUERY_GEXP: " + query)
         return query
 
-    def do_query(self, project_id, project_name, dataset_name, table_name, feature_def,
-                 cohort_dataset, cohort_table, cohort_id_array):
-        bigquery_service = authorize_credentials_with_Google()
+    @DurationLogged('GEXP', 'UNPACK')
+    def unpack_query_response(self, query_result_array):
+        """
+        Unpacks values from a BigQuery response object into a flat array. The array will contain dicts with
+        the following fields:
+        - 'patient_id': Patient barcode
+        - 'sample_id': Sample barcode
+        - 'aliquot_id': Aliquot barcode
+        - 'value': Value of the selected column from the clinical data table
 
-        query = self.build_query(project_name, dataset_name, table_name, feature_def,
-                                 cohort_dataset, cohort_table, cohort_id_array)
-        query_body = {
-            'query': query
-        }
+        Args:
+            query_result_array: A BigQuery query response object
 
-        table_data = bigquery_service.jobs()
-        query_response = table_data.query(projectId=project_id, body=query_body).execute()
+        Returns:
+            Array of dict objects.
+        """
         result = []
-        num_result_rows = int(query_response['totalRows'])
-        if num_result_rows == 0:
-            return result
 
-        for row in query_response['rows']:
+        for row in query_result_array:
             result.append({
                 'patient_id': row['f'][0]['v'],
                 'sample_id': row['f'][1]['v'],
@@ -167,18 +168,6 @@ class GEXPFeatureProvider(object):
                 'value': float(row['f'][3]['v'])
             })
 
-        return result
-
-    def get_data_from_bigquery(self, cohort_id_array, cohort_dataset, cohort_table):
-        project_id = settings.BQ_PROJECT_ID
-        project_name = settings.BIGQUERY_PROJECT_NAME
-        dataset_name = settings.BIGQUERY_DATASET2
-        result = self.do_query(project_id, project_name, dataset_name, self.table_name, self.feature_def,
-                          cohort_dataset, cohort_table, cohort_id_array)
-        return result
-
-    def get_data(self, cohort_id_array, cohort_dataset, cohort_table):
-        result = self.get_data_from_bigquery(cohort_id_array, cohort_dataset, cohort_table)
         return result
 
     # TODO refactor, duplicate code shared with GEXPFeatureDef
