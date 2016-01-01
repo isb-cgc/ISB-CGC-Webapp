@@ -37,6 +37,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.conf import settings
+from django.http import StreamingHttpResponse
 
 from googleapiclient import http
 from googleapiclient.errors import HttpError
@@ -533,14 +534,12 @@ def log_acls(request):
     return HttpResponse('')
 
 
-def metrics_cloudsql_new_users(request, start_date, end_date):
-    #
-    return HttpResponse('')
-
 @login_required
-def metrics_cloudsql_repeat_users(request, start_date, end_date):
+def metrics_cloudsql_users(request, start_date, end_date):
     if not request.user.is_superuser:
         return HttpResponse('You need to be logged in as a superuser.')
+
+
     print >> sys.stderr, start_date
     print >> sys.stderr, end_date
     # parse start date and end date 151204 has new user
@@ -553,6 +552,16 @@ def metrics_cloudsql_repeat_users(request, start_date, end_date):
     end_date = int(end_date)
 
     user_metrics_dict = {}
+
+    parse_cloudsql_logs(user_metrics_dict, start_date, end_date)
+
+    csv_response = write_user_metrics_csv_file(user_metrics_dict)
+    csv_response['Content-Disposition'] = 'attachment; filename="Users from {} to {}.csv"'.format(start_date, end_date)
+
+    # return HttpResponse('<pre>'+json.dumps(user_metrics_dict, indent=4)+'</pre>')
+    return csv_response
+
+def parse_cloudsql_logs(user_metrics_dict, start_date, end_date):
 
     storage_client = get_special_storage_resource()
 
@@ -572,8 +581,6 @@ def metrics_cloudsql_repeat_users(request, start_date, end_date):
             print >> sys.stderr, e
         else:
             write_user_activity(fh.getvalue(), user_metrics_dict[day])
-
-    return HttpResponse('<pre>'+json.dumps(user_metrics_dict, indent=4)+'</pre>')
 
 
 def write_user_activity(log_str, user_metrics_current_day):
@@ -600,3 +607,30 @@ def write_user_activity(log_str, user_metrics_current_day):
             old_user_last_login_end_index = log_str.find("\r\n", old_user_last_login_start_index)
             old_user_login_date = log_str[old_user_last_login_start_index:old_user_last_login_end_index]
             user_metrics_current_day['old_users'][old_user_email].append(old_user_login_date)
+
+
+def write_user_metrics_csv_file(user_metrics_dict):
+    rows = ()
+    rows = (["Date", "Number of New Users", "Number of Returning Users"],)
+    for date in user_metrics_dict.keys():
+        rows += ([
+                    str(date),
+                    str(len(user_metrics_dict[date].get('new_users', []))),
+                    str(len(user_metrics_dict[date].get('old_users', {}).keys()))
+                 ],)
+
+    pseudo_buffer = Echo()
+    writer = csv.writer(pseudo_buffer)
+    response = StreamingHttpResponse((writer.writerow(row) for row in rows),
+                                         content_type="text/csv")
+
+    return response
+
+
+class Echo(object):
+    """An object that implements just the write method of the file-like
+    interface.
+    """
+    def write(self, value):
+        """Write the value by returning it, instead of storing in a buffer."""
+        return value
