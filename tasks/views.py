@@ -571,7 +571,6 @@ def metrics_cloudsql_repeat_users(request, start_date, end_date):
         else:
             write_user_activity(fh.getvalue(), user_metrics_dict[day])
 
-
     return HttpResponse('<pre>'+json.dumps(user_metrics_dict, indent=4)+'</pre>')
 
 

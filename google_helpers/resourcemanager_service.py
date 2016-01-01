@@ -24,32 +24,3 @@ def get_crm_resource():
     """
     credentials = GoogleCredentials.get_application_default()
     return build('cloudresourcemanager', 'v1beta1', credentials=credentials)
-
-
-from oauth2client.client import SignedJwtAssertionCredentials
-from googleapiclient import discovery
-from django.conf import settings
-from httplib2 import Http
-
-PEM_FILE = settings.PEM_FILE
-CLIENT_EMAIL = settings.CLIENT_EMAIL
-CRM_SCOPES = ['https://www.googleapis.com/auth/cloud-platform']
-
-def get_special_crm_resource():
-
-
-    client_email = CLIENT_EMAIL
-    with open(PEM_FILE) as f:
-        private_key = f.read()
-
-    credentials = SignedJwtAssertionCredentials(
-        client_email,
-        private_key,
-        CRM_SCOPES,
-        sub='zrodebau@systemsbiology.org'
-        )
-
-    http_auth = credentials.authorize(Http())
-
-    service = discovery.build('cloudresourcemanager', 'v1beta1', http=http_auth)
-    return service, http_auth
