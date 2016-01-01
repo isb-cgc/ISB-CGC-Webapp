@@ -47,7 +47,7 @@ def gene_fav_list(request, workbook_id=0, worksheet_id=0, new_workbook=0):
 
         except ObjectDoesNotExist:
             messages.error(request, 'The workbook and worksheet you were referencing does not exist.')
-            return redirect('genes_list')
+            return redirect('genes')
     elif new_workbook :
         context['new_workbook'] = True
         if gene_list :

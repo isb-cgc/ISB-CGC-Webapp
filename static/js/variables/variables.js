@@ -118,8 +118,6 @@ require([
             $('#create-cohort-form .form-control-static').find('span[value="' + search_id + '"]').remove();
             return false;
         });
-        //search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id);
-        //search_helper_obj.update_parsets(base_api_url, 'metadata_platform_list', cohort_id);
     };
 
     /*
@@ -264,7 +262,28 @@ require([
         Edits an existing favorite_list then redirects to the favorite list, or other place
      */
     $("#edit_favorite_list").on('click', function(event){
-        console.log("on-edit-click");
+        var name = $("#variable_list_name_input").val();
+        var variable_list = get_variable_list();
+        var variable_id = this.getAttribute("variable_id");
+        if(variable_list.length>0){
+            var csrftoken = get_cookie('csrftoken');
+            $.ajax({
+                type : 'POST',
+                url  : base_api_url + '/variables/' + variable_id + '/update',
+                data : JSON.stringify({name : name, variables : variable_list}),
+                beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+                success: function (data) {
+                    window.location = base_api_url + '/variables/';
+                },
+                error: function () {
+                    //TODO Create fail ui indicator
+                    console.log('Failed to save variable_list.');
+                }
+
+            });
+        } else {
+            //TODO Create fail ui indicator that they need to select one or more variables
+        }
     });
 
     /*
@@ -293,7 +312,6 @@ require([
         } else {
             //TODO Create fail ui indicator that they need to select one or more variables
         }
-
     });
 
     /*

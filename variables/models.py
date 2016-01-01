@@ -36,22 +36,8 @@ class VariableFavorite(models.Model):
         return last_view
 
     @classmethod
-    def create(cls, name, variables, user):
-        variable_favorite_model = cls.objects.create(name=name, user=user)
-        variable_favorite_model.save()
-
-        for var in variables :
-            Variable.create(name=var['name'], project_id=var['project_id'], study_id = var['study_id'], favorite=variable_favorite_model)
-
-        return_obj = {
-            'name'          : variable_favorite_model.name,
-            'id'            : variable_favorite_model.id
-        }
-        return return_obj
-
-    @classmethod
     def get_list(cls, user):
-        list = cls.objects.filter(user=user).order_by('-last_date_saved')
+        list = cls.objects.filter(user=user, active=True).order_by('-last_date_saved')
 
         for fav in list:
             fav.variables = fav.get_variables()
@@ -64,8 +50,61 @@ class VariableFavorite(models.Model):
         variable_favorite_list.list = variable_favorite_list.get_variables()
         return variable_favorite_list
 
+    @classmethod
+    def create(cls, name, variables, user):
+        variable_favorite_model = cls.objects.create(name=name, user=user)
+        variable_favorite_model.save()
+
+        for var in variables :
+            Variable.create(name=var['name'], project_id=var['project_id'], study_id = var['study_id'], favorite=variable_favorite_model)
+
+        return_obj = {
+            'name' : variable_favorite_model.name,
+            'id'   : variable_favorite_model.id
+        }
+        return return_obj
+
+    def update(self, name, variables) :
+        self.name = name
+
+        existing_variables = self.variable_set.filter(variable_favorite=self)
+        for var in existing_variables :
+            var.delete()
+
+        for var in variables :
+            Variable.create(name=var['name'], project_id=var['project_id'], study_id = var['study_id'], favorite=self)
+
+        self.save()
+        return_obj = {
+            'name' : self.name,
+            'id'   : self.id
+        }
+        return return_obj
+
+    def copy(self):
+        model = self
+        model.id = None
+        model.name += " copy "
+        model.save()
+        variables = self.variable_set.filter(variable_favorite=self)
+        for v in variables :
+            v.variable_favorite = model
+            v.id = None
+            v.save()
+
+        return model;
+
     def get_variables(self):
         return self.variable_set.filter(variable_favorite=self)
+
+    def destroy(self):
+        self.active = False
+        self.save()
+        existing_variables = self.variable_set.filter(variable_favorite=self)
+        for var in existing_variables :
+            var.delete()
+
+        return {'message' : "variable favorite has been deleted"}
 
 class VariableFavorite_Last_View(models.Model):
     variablefavorite = models.ForeignKey(VariableFavorite, blank=False)
