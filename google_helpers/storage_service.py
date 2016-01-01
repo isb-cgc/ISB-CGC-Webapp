@@ -35,3 +35,10 @@ def get_storage_resource(perms=None):
     # credentials = GoogleCredentials.from_stream(
     #     settings.GOOGLE_APPLICATION_CREDENTIALS).create_scoped(STORAGE_SCOPES)
     return discovery.build('storage', 'v1', credentials=credentials)
+
+
+def get_special_storage_resource():
+
+    credentials = GoogleCredentials.from_stream(
+        settings.GOOGLE_APPLICATION_CREDENTIALS).create_scoped(STORAGE_SCOPES)
+    return discovery.build('storage', 'v1', credentials=credentials)
