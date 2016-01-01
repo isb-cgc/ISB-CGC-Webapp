@@ -17,6 +17,7 @@ limitations under the License.
 """
 
 import io
+import re
 import json
 import StringIO
 import csv
@@ -39,9 +40,10 @@ from django.conf import settings
 
 from googleapiclient import http
 from googleapiclient.errors import HttpError
+from googleapiclient.http import MediaIoBaseDownload
 from google_helpers.directory_service import get_directory_resource
 from google_helpers.reports_service import get_reports_resource
-from google_helpers.storage_service import get_storage_resource
+from google_helpers.storage_service import get_storage_resource, get_special_storage_resource
 from google_helpers.resourcemanager_service import get_crm_resource
 from google_helpers.logging_service import get_logging_resource
 from google.appengine.api.taskqueue import Task, Queue
@@ -529,3 +531,71 @@ def log_acls(request):
     write_log_entry('bucket_defacls', defacls)
 
     return HttpResponse('')
+
+
+def metrics_cloudsql_new_users(request, start_date, end_date):
+    #
+    return HttpResponse('')
+
+
+def metrics_cloudsql_repeat_users(request, start_date, end_date):
+    print >> sys.stderr, start_date
+    print >> sys.stderr, end_date
+    # parse start date and end date 151204 has new user
+    assert start_date.isdigit(), "{} is not a digit".format(start_date)
+    assert end_date.isdigit(), "{} is not a digit".format(end_date)
+    assert len(start_date) == 6, "start_date must be of the form yymmdd"
+    assert len(end_date) == 6, "end_date must be of the form yymmdd"
+
+    start_date = int(start_date)
+    end_date = int(end_date)
+
+    user_metrics_dict = {}
+
+    storage_client = get_special_storage_resource()
+
+    for day in range(start_date, end_date+1):
+        user_metrics_dict[day] = {}
+        req = storage_client.objects().get_media(bucket='isb-cgc_logs',
+                                           object='cloudsql_activity_log_{}.txt'.format(day))
+        try:
+            fh = io.BytesIO()
+            downloader = MediaIoBaseDownload(fh, req, chunksize=1024*1024)
+            done = False
+            while not done:
+                status, done = downloader.next_chunk()
+
+        # throws HttpError if this file is not found
+        except HttpError, e:
+            print >> sys.stderr, e
+        else:
+            write_user_activity(fh.getvalue(), user_metrics_dict[day])
+
+
+    return HttpResponse('<pre>'+json.dumps(user_metrics_dict, indent=4)+'</pre>')
+
+
+def write_user_activity(log_str, user_metrics_current_day):
+    user_metrics_current_day['new_users'] = []
+    new_user_index_list = [m.start() for m in re.finditer('### INSERT INTO `prod`.`auth_user`', log_str)]
+
+    for i in new_user_index_list:
+        new_user_email_start_index = log_str.find("@8='", i) + 4
+        new_user_email_end_index = log_str.find("'", new_user_email_start_index)
+        new_user_email = log_str[new_user_email_start_index:new_user_email_end_index]
+        user_metrics_current_day['new_users'].append(new_user_email)
+
+    user_metrics_current_day['old_users'] = {}
+    old_user_index_list = [m.start() for m in re.finditer('### UPDATE `prod`.`auth_user`', log_str)]
+
+    for i in old_user_index_list:
+        old_user_email_start_index = log_str.find("@8='", i) + 4
+        old_user_email_end_index = log_str.find("'", old_user_email_start_index)
+        old_user_email = log_str[old_user_email_start_index:old_user_email_end_index]
+        if old_user_email not in user_metrics_current_day['new_users']:
+            if old_user_email not in user_metrics_current_day['old_users'].keys():
+                user_metrics_current_day['old_users'][old_user_email] = []
+            old_user_last_login_start_index = log_str.find("@3=", old_user_email_end_index) + 3
+            old_user_last_login_end_index = log_str.find("\r\n", old_user_last_login_start_index)
+            old_user_login_date = log_str[old_user_last_login_start_index:old_user_last_login_end_index]
+            user_metrics_current_day['old_users'][old_user_email].append(old_user_login_date)
