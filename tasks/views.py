@@ -537,8 +537,10 @@ def metrics_cloudsql_new_users(request, start_date, end_date):
     #
     return HttpResponse('')
 
-
+@login_required
 def metrics_cloudsql_repeat_users(request, start_date, end_date):
+    if not request.user.is_superuser:
+        return HttpResponse('You need to be logged in as a superuser.')
     print >> sys.stderr, start_date
     print >> sys.stderr, end_date
     # parse start date and end date 151204 has new user
