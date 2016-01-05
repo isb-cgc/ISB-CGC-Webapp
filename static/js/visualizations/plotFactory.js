@@ -24,11 +24,11 @@ define([
     'd3',
     'd3tip',
     'vizhelpers',
-    'visualizations/createScatterPlot',
-    'visualizations/createCubbyPlot',
-    'visualizations/createViolinPlot',
-    'visualizations/createHistogram',
-    'visualizations/createBarGraph',
+    'scatter_plot',
+    'cubby_plot',
+    'violin_plot',
+    'histogram_plot',
+    'bar_plot',
     'select2',
     'assetscore',
     'assetsresponsive'
@@ -115,7 +115,7 @@ define([
         if (y_attr && y_attr != '') {
             api_url += '&y_id=' + y_attr
         }
-        console.log(api_url);
+
         var plot_selector = '#' + plot_element.prop('id') + ' .plot-div';
         var legend_selector = '#' + plot_element.prop('id') + ' .legend';
         plot_element.find('.plot-loader').show();
@@ -164,24 +164,7 @@ define([
                     }
                     if (x_type == 'STRING' && y_type == 'none') {
                         // Bar Chart
-                        console.log("generating bar chart");
                         generate_bar_chart(margin, plot_selector, height, width, x_attr);
-                        //margin = {top: 0, bottom: 100, left: 50, right: 10};
-                        //var svg = d3.select(plot_selector)
-                        //    .append('svg')
-                        //    .attr('width', width + 10)
-                        //    .attr('height', height);
-                        //var bar_width = 20;
-                        //bar_graph_obj.createBarGraph(
-                        //    svg,
-                        //    data,
-                        //    width,
-                        //    height,
-                        //    bar_width,
-                        //    'x',
-                        //    x_attr,
-                        //    cubby_tip,
-                        //    margin);
 
                     } else if ((x_type == 'INTEGER' || x_type == 'FLOAT') && y_type == 'none') {
                         // Histogram

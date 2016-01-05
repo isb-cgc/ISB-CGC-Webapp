@@ -94,6 +94,7 @@ class GeneFavorite(models.Model):
         for g in genes :
             g.delete()
         self.save()
+        return {'message' : "gene favorite has been deleted"}
 
 class GeneFavorite_Last_View(models.Model):
     genefavorite = models.ForeignKey(GeneFavorite, blank=False)

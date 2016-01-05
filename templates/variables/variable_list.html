@@ -57,7 +57,9 @@
                     </tbody>
                 </table>
             {% else %}
-                <p>You don't have any saved variable favorites yet</p>
+                <br>
+                <p class="center">You don't have any variable favorites created yet. <br><a href="{% url 'variable_fav_create' %}" class="btn btn-link">Create A Variable Favorite</a></p>
+                <br>
             {% endif %}
         </div>
     </section>

@@ -27,6 +27,7 @@ function($, d3, d3tip, helpers) {
                 .frequency(false)(values_only);
 
             var kde = science.stats.kde().sample(values_only);
+
             var tmp = helpers.get_min_max(raw_Data, x_attr);
             var min_n = tmp[0];
             var max_n = tmp[1];
