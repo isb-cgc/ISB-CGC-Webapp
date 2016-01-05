@@ -23,11 +23,20 @@
         <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#edit-workbook-details-modal-{{ workbook.id }}">Edit Details</button></li>
         <li role="menuiem"><button class="btn btn-info" data-toggle="modal" data-target="#copy-workbook-modal-{{ workbook.id }}">Duplicate</button></li>
         <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#delete-workbook-modal-{{ workbook.id }}">Delete</button></li>
-        {% else %}
+        {% if is_shareable %}
+        <li class="separator"></li>
+        <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#share-workbook-modal-{{ workbook.id }}">Share</button></li>
+        <li role="menuitem"><button class="btn btn-link" data-toggle="modal" data-target="#share-workbook-modal-{{ workbook.id }}">Shared with ({{ workbook.shared.count }})</button></li>
+        {% endif %}
+        {% elif workbook.is_public %}
         {# Is a public workbook #}
         <li><em>Public Workbook</em></li>
         <li class="separator"></li>
         <li role="menuiem"><button class="btn btn-info" data-toggle="modal" data-target="#copy-workbook-modal-{{ workbook.id }}">Duplicate</button></li>
+        {% else %}
+        {# Is a shared workbook #}
+        <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#remove-workbook-modal-{{ workbook.id }}">Remove</button></li>
+        <li role="menuitem"><button class="btn btn-link" data-toggle="modal" data-target="#share-workbook-modal-{{ workbook.id }}">Shared with ({{ workbook.shared.count }})</button></li>
         {% endif %}
 
     </ul>
@@ -40,7 +49,7 @@
          <!-- tabs of worksheets -->
         <ul class="nav nav-tabs_excel" id="worksheets-tabs">
             <!-- for each worksheet in workbook -->
-            {% for worksheet in workbook.worksheets %}
+            {% for worksheet in workbook.worksheet_set.all %}
                 {% if forloop.counter < 4 %}
                     <li class="{% if display_worksheet and display_worksheet.id == worksheet.id %} active {% elif not display_worksheet and forloop.counter == 1 %} active {% endif %}">
                          <a href="#{{ worksheet.id }}" data-toggle="tab">{{ worksheet.name }}</a>
@@ -51,7 +60,7 @@
                              <ul class="dropdown-menu">
                                 <li role="menuitem"><a data-toggle="modal" role="button" data-target="#edit-worksheet-details-modal-{{ worksheet.id }}">Edit details</a></li>
                                 <li role="menuitem"><a data-toggle="modal" role="button" data-target="#copy-worksheet-modal-{{ worksheet.id }}">Duplicate</a></li>
-                                {% if workbook.worksheets|length > 1 %}
+                                {% if workbook.worksheet_set.count > 1 %}
                                     <li role="menuitem"><a data-toggle="modal" role="button" data-target="#delete-worksheet-modal-{{ worksheet.id }}">Delete</a></li>
                                 {% endif %}
                              </ul>
@@ -60,11 +69,11 @@
                     </li>
                 {% endif %}
             {% endfor %}
-            {% if workbook.worksheets|length > 3 %}
+            {% if workbook.worksheet_set.all|length > 3 %}
                 <li class="dropdown" id="more-tabs">
                     <button class="btn btn-symbol" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-ellipsis-h"></i></button>
                     <ul class="dropdown-menu" id="worksheets-dropdown-menu">
-                    {% for worksheet in workbook.worksheets  %}
+                    {% for worksheet in workbook.worksheet_set.all  %}
                         {% if forloop.counter >= 4 %}
                         <li class="{% if display_worksheet and display_worksheet.id == worksheet.id %} active {% endif %}">
                             <a href="#{{ worksheet.id }}" data-toggle="tab">{{ worksheet.name }}</a>
@@ -73,7 +82,7 @@
                                 <ul class="dropdown-menu">
                                     <li role="menuitem"><a data-toggle="modal" role="button" data-target="#edit-worksheet-details-modal-{{ worksheet.id }}">Edit details</a></li>
                                     <li role="menuitem"><a data-toggle="modal" role="button" data-target="#copy-worksheet-modal-{{ worksheet.id }}">Duplicate</a></li>
-                                    {% if workbook.worksheets|length > 1 %}
+                                    {% if workbook.worksheet_set.count > 1 %}
                                     <li role="menuitem"><a data-toggle="modal" role="button" data-target="#delete-worksheet-modal-{{ worksheet.id }}">Delete</a></li>
                                     {% endif %}
                                 </ul>
@@ -85,13 +94,15 @@
                 </li>
             {% endif %}
 
+            {% if workbook.owner.id == request.user.id %}
             <li>
                 <a data-target="#create-worksheet-modal-{{ workbook.id }}" data-toggle="modal"><i class="fa fa-plus"></i></a>
             </li>
+            {% endif %}
         </ul>
         <div class="tab-content">
              <!-- for each worksheet in workbook -->
-             {% for worksheet in workbook.worksheets %}
+             {% for worksheet in workbook.worksheet_set.all %}
                  <div class="worksheet tab-pane fade {% if not display_worksheet and forloop.counter == 1 %} in active{% elif display_worksheet and display_worksheet.id == worksheet.id %} in active {% endif %}" id="{{ worksheet.id }}" >
                      <!-- worksheet description -->
                      <div class="worksheet-header">
@@ -107,7 +118,11 @@
                             <ul class="list">
                                 <li class="list-item">
                                     <div class="list-item__heading">
-                                        <a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}"> Genes <i class="fa fa-plus pull-right"></i></a>
+                                        {% if workbook.owner.id == request.user.id %}
+                                        <a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Genes <i class="fa fa-plus pull-right"></i></a>
+                                        {% else %}
+                                        <span>Genes </span>
+                                        {% endif %}
                                     </div>
                                     {% if worksheet.genes %}
                                     <ul class="list-item__body">
@@ -129,7 +144,11 @@
                                 </li>
                                 <li class="list-item">
                                     <div class="list-item__heading">
+                                        {% if workbook.owner.id == request.user.id %}
                                         <a href="{% url 'variable_select_for_existing_workbook' workbook.id worksheet.id %}">Variables <i class="fa fa-plus pull-right"></i></a>
+                                        {% else %}
+                                        <span>Variables </span>
+                                        {% endif %}
                                     </div>
                                     {% if worksheet.variables %}
                                     <ul class="list-item__body">
@@ -151,18 +170,40 @@
                                 </li>
                                 <li class="list-item">
                                     <div class="list-item__heading">
-                                        <a href="{% url 'cohort_select_for_existing_workbook' workbook.id worksheet.id %}"">Cohorts <i class="fa fa-plus pull-right"></i></a>
+                                        {% if workbook.owner.id == request.user.id %}
+                                        <a href="{% url 'cohort_select_for_existing_workbook' workbook.id worksheet.id %}">Cohorts <i class="fa fa-plus pull-right"></i></a>
+                                        {% else %}
+                                        <span>Cohorts </span>
+                                        {% endif %}
                                     </div>
-                                    {% if worksheet.cohorts %}
+                                    {% if worksheet.worksheet_cohort_set.count > 0 %}
                                     <ul class="list-item__body">
-                                        {% with worksheet.cohorts|how_many_more:6 as num_more  %}
-                                            {% for cohort in worksheet.cohorts %}
+                                        {% with worksheet.worksheet_cohort_set.all|active:'cohort'|how_many_more:6 as num_more  %}
+                                            {% for wsch in worksheet.worksheet_cohort_set.all|active:'cohort' %}
+                                                {% with wsch.cohort as cohort %}
                                                 {% if forlook.counter0 < 6 %}
-                                                    <li class="sublist-item">{{ cohort.name|upper }}</li>
+                                                    <li class="sublist-item">
+                                                        {% if shared %}
+                                                            {{ cohort.name|title }}
+                                                        {% else %}
+                                                            <form action="{% url 'remove_cohort_from_worksheet' workbook_id=workbook.id worksheet_id=worksheet.id cohort_id=cohort.id %}" method="POST">
+                                                                {% csrf_token %}
+                                                                <button type="submit" class="text-danger workbook-remove-item"><i class="fa fa-close"></i></button>
+                                                                <a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name|title }}</a>
+                                                            </form>
+                                                        {% endif %}
+                                                    </li>
                                                 {% elif forloop.counter0 == 6 and num_more > 0 %}
                                                     <a class="show-more">{{num_more}} more</a>
-                                                    <li class="extra-values sublist-item">{{ cohort.name|upper }}</li>
+                                                    <li class="extra-values sublist-item">
+                                                        {% if shared %}
+                                                            {{ cohort.name|title }}
+                                                        {% else %}
+                                                            <a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name|title }}</a>
+                                                        {% endif %}
+                                                    </li>
                                                 {% endif %}
+                                                {% endwith %}
                                             {% endfor %}
                                             {% if num_more > 0 %}
                                                 <a class="show-less" style="display:none;">Show Less</a>
@@ -181,13 +222,14 @@
                                 <a class="fa fa-caret-left"></a>
                                 <a class="fa fa-caret-right"></a>
                             </div>
+                            {% if workbook.owner.id == user.id %}
                             <h5>Analysis Type</h5>
                             <div class="form-group gray-area">
                                 <select id="plot_selection" class="form-control">
                                     {% if worksheet.selected_plot %}
                                         <option value="{{ worksheet.selected_plot }}" selected >{{ worksheet.selected_plot }}</option>
                                     {% else %}
-                                        <option disabled selected >-- select an analysis --</option>
+                                        <option disabled hidden selected >-- select an analysis --</option>
                                     {% endif %}
                                     {% for graph in plot_types %}
                                         <option value="{{ graph.name }}">{{ graph.name }}</option>
@@ -199,6 +241,20 @@
                                 <!-- plot needs to indicate saved plot data such as selected variables, cohorts, title, etc -->
                                 <!-- workbook_plot also needs to have reference to all worksheet cohorts, variables and genes -->
                             </div>
+                            {% elif worksheet.selected_plot %}
+                            <h5>Analysis Type: {{ worksheet.selected_plot }}</h5>
+                            <div class="plot-container">
+                                {% include 'workbooks/workbook_plot.html' with plot=worksheet.plot variables=worksheet.variables cohorts=worksheet.cohorts %}
+                                <!-- plot needs to indicate saved plot data such as selected variables, cohorts, title, etc -->
+                                <!-- workbook_plot also needs to have reference to all worksheet cohorts, variables and genes -->
+                            </div>
+                            {% else %}
+                            <div class="plot-container">
+                                <div class="message message-info alert fade in">
+                                    <p>No Analysis Available</p>
+                                </div>
+                            </div>
+                            {% endif %}
                         </div>
                         <!-- end worksheet analysis section -->
                      </div>

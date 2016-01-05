@@ -19,11 +19,13 @@
 <div class="plot panel" id="plot-{{ plot.id }}">
     <div class="panel-heading">
         <div class="options-bar">
-{#            {% if plot.viz_perm == 'OWNER' %}#}
-                <a role="button" class="delete-plot" data-toggle="modal" data-target="#delete-plot-{{ plot.id }}-modal" aria-label="Delete Plot"><i class="fa fa-trash"></i></a>
-{#            {% endif %}#}
+            {% if workbook.owner.id == user.id %}
+            <a role="button" class="delete-plot" data-toggle="modal" data-target="#delete-plot-{{ plot.id }}-modal" aria-label="Delete Plot"><i class="fa fa-trash"></i></a>
             <a role="button" class="toggle-selection" aria-label="Toggle Sample Selection"><i class="fa fa-crosshairs"></i></a>
             <a role="button" class="show-settings-flyout" data-target=".setting-flyout" aria-label="Show Plot Settings"><i class="fa fa-pencil"></i></a>
+            {% else %}
+            <a role="button" class="show-settings-flyout" data-target=".setting-flyout" aria-label="Show Plot Settings"><i class="fa fa-tasks"></i></a>
+            {% endif %}
         </div>
 {#        <div class="form-group">#}
 {#            <input class="form-control" id="{{ plot.id }}-plot-title" type="text" name="name" value="{% if plot.title %}{{ plot.title }}{% else %}Untitled Plot{% endif %}" />#}
@@ -44,6 +46,7 @@
             </div>
             <div class="flyout-body" style="bottom: inherit; overflow-y:inherit;">
                 <div class="main-settings">
+                    {% if workbook.owner.id == user.id %}
                     <div class="form-group">
                         <label for="{{ plot.id }}-x-select">X Axis Variable <a role="button" class="x-edit-field" data-attribute="x-selector" aria-label="X Field Editor"></a></label>
                         <select id="x-axis-select" plot="{{ plot.id }}" class="search-term-field" style="width: 230px;">
@@ -99,6 +102,29 @@
                         </div>
                     </div>
                     <button class="update-plot btn btn-primary">Update Plot</button>
+                    {% else %}
+                    <div class="form-group">
+                        <h6>X Axis Variable</h6>
+                        <p>{{ plot.xaxis.selected }}</p>
+                    </div>
+                    {% if plot.yaxis.selected %}
+                    <div class="form-group">
+                        <h6>Y Axis Variable</h6>
+                        <p>{{ plot.yaxis.selected }}</p>
+                    </div>
+                    {% endif %}
+                    <div class="form-group">
+                        {% if plot.color_by %}
+                        <h6>Color By Feature </h6>
+                        <p>{{ plot.color_by }}</p>
+                        {% endif %}
+                        <p>{% if plot.color_by_cohort %}<i class="fa fa-check text-success"></i>{% else %}<i class="fa fa-close text-danger"></i>{% endif %} Color By Cohort</p>
+                    </div>
+                    <div class="form-group">
+                        <h6>Cohort</h6>
+                        <p>{{ plot.cohort.selected }}</p>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>

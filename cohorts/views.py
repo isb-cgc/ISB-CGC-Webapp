@@ -116,7 +116,7 @@ def public_cohort_list(request):
     return cohorts_list(request, is_public=True)
 
 @login_required
-def cohorts_list(request, is_public=False):
+def cohorts_list(request, is_public=False, workbook_id=0, worksheet_id=0, create_workbook=False):
     if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     # check to see if user has read access to 'All TCGA Data' cohort
     isb_superuser = User.objects.get(username='isb')
@@ -155,6 +155,12 @@ def cohorts_list(request, is_public=False):
         del cohort['id']
         del cohort['name']
 
+    workbook = None
+    worksheet = None
+    if workbook_id != 0:
+        workbook = Workbook.objects.get(owner=request.user, id=workbook_id)
+        worksheet = workbook.worksheet_set.get(id=worksheet_id)
+
     return render(request, 'cohorts/cohort_list.html', {'request': request,
                                                         'cohorts': cohorts,
                                                         'user_list': users,
@@ -162,15 +168,27 @@ def cohorts_list(request, is_public=False):
                                                         'shared_users':  json.dumps(shared_users),
                                                         'base_url': settings.BASE_URL,
                                                         'base_api_url': settings.BASE_API_URL,
-                                                        'is_public': is_public
+                                                        'is_public': is_public,
+                                                        'workbook': workbook,
+                                                        'worksheet': worksheet,
+                                                        'create_workbook': create_workbook,
+                                                        'from_workbook': bool(create_workbook or workbook),
                                                         })
 
 @login_required
 def cohort_select_for_new_workbook(request):
-    return cohort_detail(request=request, cohort_id=0, workbook_id=0, worksheet_id=0, create_workbook=True)
+    return cohorts_list(request=request, is_public=False, workbook_id=0, worksheet_id=0, create_workbook=True)
 
 @login_required
 def cohort_select_for_existing_workbook(request, workbook_id, worksheet_id):
+    return cohorts_list(request=request, is_public=False, workbook_id=workbook_id, worksheet_id=worksheet_id)
+
+@login_required
+def cohort_create_for_new_workbook(request):
+    return cohort_detail(request=request, cohort_id=0, workbook_id=0, worksheet_id=0, create_workbook=True)
+
+@login_required
+def cohort_create_for_existing_workbook(request, workbook_id, worksheet_id):
     return cohort_detail(request=request, cohort_id=0, workbook_id=workbook_id, worksheet_id=worksheet_id)
 
 @login_required
@@ -314,6 +332,35 @@ Saves a cohort, adds the new cohort to a new worksheet, then redirected back to 
 def save_cohort_for_new_workbook(request):
     return save_cohort(request=request, workbook_id=None, worksheet_id=None, create_workbook=True)
 
+@login_required
+def add_cohorts_to_worksheet(request, workbook_id=0, worksheet_id=0):
+    if request.method == 'POST':
+        cohorts = request.POST.getlist('cohorts')
+        workbook = request.user.workbook_set.get(id=workbook_id)
+        worksheet = workbook.worksheet_set.get(id=worksheet_id)
+
+        cohort_perms = request.user.cohort_perms_set.filter(cohort__active=True)
+        for cohort in cohorts:
+            cohort_model = cohort_perms.get(cohort__id=cohort).cohort
+            worksheet.add_cohort(cohort_model)
+
+    redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet_id})
+    return redirect(redirect_url)
+
+@login_required
+def remove_cohort_from_worksheet(request, workbook_id=0, worksheet_id=0, cohort_id=0):
+    if request.method == 'POST':
+        workbook = request.user.workbook_set.get(id=workbook_id)
+        worksheet = workbook.worksheet_set.get(id=worksheet_id)
+
+        cohorts = request.user.cohort_perms_set.filter(cohort__active=True,cohort__id=cohort_id, perm=Cohort_Perms.OWNER)
+        if cohorts.count() > 0:
+            for cohort in cohorts:
+                cohort_model = cohort.cohort
+                worksheet.remove_cohort(cohort_model)
+
+    redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet_id})
+    return redirect(redirect_url)
 
 '''
 This save view only works coming from cohort editing or creation views.

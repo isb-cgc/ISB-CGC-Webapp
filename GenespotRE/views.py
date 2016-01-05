@@ -44,6 +44,8 @@ from google_helpers.directory_service import get_directory_resource
 from googleapiclient.errors import HttpError
 from visualizations.models import SavedViz, Viz_Perms
 from cohorts.models import Cohort, Cohort_Perms
+from projects.models import Project
+from workbooks.models import Workbook
 from accounts.models import NIH_User
 
 from allauth.socialaccount.models import SocialAccount
@@ -377,7 +379,31 @@ def about_page(request):
 
 @login_required
 def dashboard_page(request):
-    return render(request, 'GenespotRE/dashboard.html')
+
+    # Cohort List
+    isb_superuser = User.objects.get(username='isb')
+    public_cohorts = Cohort_Perms.objects.filter(user=isb_superuser,perm=Cohort_Perms.OWNER).values_list('cohort', flat=True)
+    cohort_perms = Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True).exclude(cohort__id__in=public_cohorts)
+    cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved')
+
+    # Project List
+    ownedProjects = request.user.project_set.all().filter(active=True)
+    sharedProjects = Project.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
+    projects = ownedProjects | sharedProjects
+    projects = projects.distinct().order_by('-last_date_saved')
+
+    # Workbook List
+    userWorkbooks = request.user.workbook_set.all().filter(active=True)
+    sharedWorkbooks = Workbook.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
+    workbooks = userWorkbooks | sharedWorkbooks
+    workbooks = workbooks.distinct().order_by('-last_date_saved')
+
+    return render(request, 'GenespotRE/dashboard.html', {
+        'request'  : request,
+        'cohorts'  : cohorts,
+        'projects' : projects,
+        'workbooks': workbooks,
+    })
 
 @login_required
 def sample_analyses(request):
