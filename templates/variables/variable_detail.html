@@ -37,15 +37,21 @@
             </ul>
             <div>
                 <ul class="page-action-group">
-                    <li role="menuitem"><a href="{% url 'variable_fav_edit' variables.id %}" class="btn btn-info">Edit</a></li>
-                    <li role="menuitem"><a data-toggle="modal" data-target="#delete-favorite-modal" class="btn btn-info">Delete</a></li>
-                    <li class="separator"></li>
+                    {% if not workbook and not new_workbook %}
+                        <li><a class="btn btn-info" href="{% url 'variable_fav_edit' variables.id %}"><i class="fa fa-pencil"></i> Edit</a></li>
+                        <li><a data-toggle="modal" data-target="#delete-favorite-modal" class="btn btn-info">Delete</a></li>
+                    {% endif %}
                     <li role="menuitem">
-                        <form action="{% url 'worksheet_create_with_variables' %}">
-                            {% csrf_token %}
-                            <input type="hidden" name="variable_id" value="{{ variable.id }}">
-                            <button class="btn btn-default" type="submit">Start New Workbook</button>
-                        </form>
+                        {% if not workbook %}
+                            <a data-toggle="modal" data-target="#new-favorite-workbook-modal" class="btn btn-default">Apply to New Workbook</a>
+                        {% else %}
+                            <form action="{% url 'worksheet_variables_edit' workbook.id worksheet.id %}" method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="variable_list_id" value="{{ variables.id }}">
+                                <button class="btn btn-default" type="submit"><i class="fa fa-plus"></i>Apply to Analysis</button>
+                                <a class="btn btn-info"  href="{% url 'variable_select_for_existing_workbook' workbook.id worksheet.id %}">Back</a>
+                            </form>
+                        {% endif %}
                     </li>
                 </ul>
             </div>
@@ -64,6 +70,30 @@
                 {% csrf_token %}
                 <div class="modal-footer">
                     <input type="submit" value="Delete" class="btn btn-primary" />
+                    <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Create new workbook using favorite Modal -->
+<div class="modal fade" id="new-favorite-workbook-modal" tabindex="-1" role="dialog" aria-labelledby="edit-workbook-header" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Create a new workbook using the variable favorite "{{ variables.name|title }}"</h4>
+            </div>
+            <form id="edit-workbook" method="POST" action="{% url 'worksheet_create_with_variables' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <label for="name">Name (required)</label>
+                    <input class="form-control" type="text" name="name" value="{{ variables.name }} workbook"/>
+                    <input type="hidden" name="variable_list_id" value="{{ variables.id }}" />
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" value="Create Workbook" class="btn btn-primary" />
                     <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
                 </div>
             </form>

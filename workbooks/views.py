@@ -191,69 +191,72 @@ def workbook_create_with_variables(request):
 @login_required
 def worksheet_variables(request, workbook_id=0, worksheet_id=0, variable_id=0):
     command  = request.path.rsplit('/',1)[1];
-    result = {}
+    json_response = False
+    workbook_name = "Untitled Workbook"
+    result        = {}
 
     if request.method == "POST" :
-        if command == "edit" :
+        if command == "delete" :
+            Worksheet_gene.destroy(workbook_id=workbook_id, worksheet_id=worksheet_id, id=variable_id, user=request.user)
+            result['message'] = "variables have been deleted from workbook"
+        else :
             variables = []
             #from Edit Page
             if "variables" in request.body :
+                json_response = True
                 name          = json.loads(request.body)['name']
                 variable_list = json.loads(request.body)['variables']
 
-                #create a variable favorite
-                variable_favorite_result = VariableFavorite.create(name        = name,
-                                                                  variables   = variable_list,
-                                                                  user        = request.user)
+                variable_favorite_result = VariableFavorite.create(name       = name,
+                                                                   variables  = variable_list,
+                                                                   user       = request.user)
 
                 model = VariableFavorite.objects.get(id=variable_favorite_result['id'])
                 messages.info(request, 'The variable favorite list \"' + model.name + '\" was created and added to your worksheet')
                 variables = model.get_variables()
 
-            #from Details Page
-            # if request.POST.get("variable_id") :
-            #     gene_id = request.POST.get("variables_id")
-            #     try :
-            #         gene_fav = GeneFavorite.objects.get(id=gene_id)
-            #         names = gene_fav.get_gene_name_list()
-            #         for g in names:
-            #             genes.append(g)
-            #     except ObjectDoesNotExist:
-            #             None
+            #from Details Page or list page
+            if request.POST.get("variable_list_id") :
+                workbook_name = request.POST.get("name")
+                variable_id   = request.POST.get("variable_list_id")
+                try :
+                    variable_fav = VariableFavorite.objects.get(id=variable_id)
+                    variables = variable_fav.get_variables()
+                except ObjectDoesNotExist:
+                    result['error'] = "variable favorite does not exist"
 
             #from Select Page
-            if "variables_favorites" in request.body :
-                variable_fav_list = json.loads(request.body)['variables_favorites']
+            if "var_favorites" in request.body : #{"variables_favorites":[{"id":"6"}]}
+                variable_fav_list = json.loads(request.body)['var_favorites']
+                json_response = True
                 for fav in variable_fav_list:
                     try:
                         fav = VariableFavorite.objects.get(id=fav['id'])
                         variables = fav.get_variables()
                     except ObjectDoesNotExist:
-                        None
+                        result['error'] = "variable favorite does not exist"
+
             if len(variables) > 0:
-                if workbook_id is 0:
-                    workbook_model  = Workbook.create(name="Untitled Workbook", description="This workbook was created with variables added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
+                if workbook_id == 0:
+                    workbook_model  = Workbook.create(name=workbook_name, description="This workbook was created with variables added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
                     worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
                 else :
-                    workbook_model = Workbook.objects.get(id=workbook_id)
+                    workbook_model  = Workbook.objects.get(id=workbook_id)
                     worksheet_model = Worksheet.objects.get(id=worksheet_id)
 
-                Worksheet_variable.edit_list(workbook_id=workbook_id, worksheet_id=worksheet_id, variable_list=variables, user=request.user)
+                Worksheet_variable.edit_list(workbook_id=workbook_model.id, worksheet_id=worksheet_model.id, variable_list=variables, user=request.user)
                 result['workbook_id'] = workbook_model.id
                 result['worksheet_id'] = worksheet_model.id
             else :
                 result['error'] = "no variables to add"
-        elif command == "delete" :
-            Worksheet_gene.destroy(workbook_id=workbook_id, worksheet_id=worksheet_id, id=variable_id, user=request.user)
-            result['message'] = "variables have been deleted from workbook"
     else :
         result['error'] = "method not correct"
 
-    if request.POST.get("variables") or request.POST.get("variable_id"):
-        redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet_id})
-        return redirect(redirect_url)
-    else :
+    if json_response :
         return HttpResponse(json.dumps(result), status=200)
+    else :
+        redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_model.id, 'worksheet_id': worksheet_model.id})
+        return redirect(redirect_url)
 
 
 @login_required
@@ -263,10 +266,14 @@ def workbook_create_with_genes(request):
 @login_required
 def worksheet_genes(request, workbook_id=0, worksheet_id=0, genes_id=0):
     command  = request.path.rsplit('/',1)[1];
+    json_response = False
     result = {}
 
     if request.method == "POST" :
-        if command == "edit" :
+        if command == "delete" :
+            Worksheet_gene.destroy(workbook_id=workbook_id, worksheet_id=worksheet_id, id=genes_id, user=request.user)
+            result['message'] = "genes have been deleted from workbook"
+        else :
             genes = []
             #from Gene Edit Page
             if request.POST.get("genes-list") :
@@ -274,7 +281,7 @@ def worksheet_genes(request, workbook_id=0, worksheet_id=0, genes_id=0):
                 gene_list = request.POST.get("genes-list")
                 gene_list = [x.strip() for x in gene_list.split(',')]
                 gene_list = list(set(gene_list))
-                model = GeneFavorite.create(name=name, gene_list=gene_list, user=request.user)
+                GeneFavorite.create(name=name, gene_list=gene_list, user=request.user)
                 messages.info(request, 'The gene favorite list \"' + name + '\" was created and added to your worksheet')
                 for g in gene_list:
                     genes.append(g)
@@ -290,8 +297,9 @@ def worksheet_genes(request, workbook_id=0, worksheet_id=0, genes_id=0):
                 except ObjectDoesNotExist:
                         None
 
-            #from Gene List Page, yay all three are different!
+            #from Gene List Page
             if "gene_fav_list" in request.body :
+                json_response = True
                 gene_fav_list = json.loads(request.body)['gene_fav_list']
                 for id in gene_fav_list:
                     try:
@@ -313,17 +321,15 @@ def worksheet_genes(request, workbook_id=0, worksheet_id=0, genes_id=0):
                 result['genes'] = genes
             else :
                 result['error'] = "no genes to add"
-        elif command == "delete" :
-            Worksheet_gene.destroy(workbook_id=workbook_id, worksheet_id=worksheet_id, id=genes_id, user=request.user)
-            result['message'] = "genes have been deleted from workbook"
+
     else :
         result['error'] = "method not correct"
 
-    if request.POST.get("genes-list") or request.POST.get("gene_list_id"):
-        redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet_id})
-        return redirect(redirect_url)
-    else :
+    if json_response :
         return HttpResponse(json.dumps(result), status=200)
+    else :
+        redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_model.id, 'worksheet_id': worksheet_model.id})
+        return redirect(redirect_url)
 
 @login_required
 def worksheet_cohorts(request, workbook_id=0, worksheet_id=0, cohort_id=0):
