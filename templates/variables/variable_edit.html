@@ -13,16 +13,13 @@
 <div class="container">
     <ol class="breadcrumb">
         {% if workbook %}
-            {# USECASE 1: ADD VAR LIST TO EXISTING WORKBOOK #}
             <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
             <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
             <li><a href="{% url 'workbook_detail' workbook.id %}">{{ workbook.name }}</a></li>
-        {% elif newWorkbook %}
-            {# USECASE 2: CREATE VAR LIST THEN CREATE WORKBOOK WITH VAR LIST #}
+            <li><a href="{% url 'variable_select_for_existing_workbook' workbook.id worksheet.id %}">Saved Variable Favorites</a></li>
+        {% elif new_workbook %}
             <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
         {% else %}
-            {# USECASE 3: EDIT EXISTING VAR LIST #}
-            {# USECASE 4: CREATE VAR FAVORITE #}
             <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
             <li><a href="{% url 'variables' %}">Saved Variable Favorites</a></li>
         {% endif %}
@@ -61,7 +58,6 @@
 {% endblock %}
 {% block content %}
 {% csrf_token %}
-{% if not workbook %}
     <section class="col-lg-12">
          <div class="panel form-group panel-default">
             {% if existing_variable_list %}
@@ -81,7 +77,6 @@
             {% endif %}
          </div>
     </section>
-{% endif %}
     <div class="col-lg-6" id="filter-panel">
         <section class="panel panel-default">
             <div class="panel-body">

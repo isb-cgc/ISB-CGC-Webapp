@@ -5,8 +5,8 @@
 {% block extra_css_libs %}{% endblock %}
 {% block header %}{% endblock %}
 
-{% block link_page_name %}genes_list{% endblock %}
-{% block page_name %}genes_list{% endblock %}
+{% block link_page_name %}genes{% endblock %}
+{% block page_name %}genes{% endblock %}
 
 {% block page_header %}
 <div class="container">
@@ -24,49 +24,62 @@
 <div class="container">
     <div class="panel penel-default">
         <div class="panel-body">
-            <div class="page-action-group">
-                <li role="menuitem">
-                    {% if workbook %}
-                        <button id="addToAnalysis" class="btn btn-default">Apply to Analysis</button>
-                    {% else %}
-                        <button id="addToNewAnalysis" class="btn btn-default">Apply to New Analysis</button>
-                    {% endif %}
-                </li>
-                <li role="menuitem">
+            {% if gene_fav_list %}
+                <div class="page-action-group">
+                    <li role="menuitem">
+                        {% if workbook %}
+                            <button id="addToAnalysis" class="btn btn-default">Apply to Analysis</button>
+                        {% else %}
+                            <button id="addToNewAnalysis" class="btn btn-default">Apply to New Analysis</button>
+                        {% endif %}
+                    </li>
+                    <li role="menuitem">
+                        {% if workbook %}
+                            <a class="btn btn-primary" href="{% url 'gene_create_for_existing_workbook' workbook.id worksheet.id %}"><i class="fa fa-plus"></i>Apply New Gene List</a>
+                        {% else %}
+                            <a class="btn btn-primary" href="{% url 'gene_create_for_new_workbook' %}"><i class="fa fa-plus"></i>Apply New Gene List</a>
+                        {% endif %}
+                    </li>
+                </div>
+            {% endif %}
+            {% if gene_fav_list %}
+                <table class="table table-striped tablesorter">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Name</th>
+                            <th># of Genes</th>
+                            <th>Last Updated</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for genes_fav in gene_fav_list %}
+                            <tr>
+                                <td class="checkbox-col"><input type="checkbox" name="id" value="{{ genes_fav.id }}" title="{{ genes_fav.name }} Checkbox" aria-label="gene-checkbox"/></td>
+                                {% if workbook %}
+                                    <td class="name-col"><a href="{% url 'gene_detail_for_existing_workbook' genes_fav.id workbook.id worksheet.id %}">{{genes_fav.name}}</a></td>
+                                {% else %}
+                                     <td class="name-col"><a href="{% url 'gene_detail_for_new_workbook' genes_fav.id %}">{{genes_fav.name}}</a></td>
+                                {% endif %}
+                                <td>{{genes_fav.genes | length}}</td>
+                                <td>{{genes_fav.last_date_saved}}</td>
+                            </tr>
+                        {% endfor %}
+                        <input type="hidden" id="workbook_id" value="{{ workbook.id }}"/>
+                        <input type="hidden" id="worksheet_id" value="{{ worksheet.id }}"/>
+                    </tbody>
+                </table>
+            {% else %}
+                <br>
+                <p class="center">You don't have any gene favorites created yet. <br><br>
                     {% if workbook %}
                         <a class="btn btn-primary" href="{% url 'gene_create_for_existing_workbook' workbook.id worksheet.id %}"><i class="fa fa-plus"></i>Apply New Gene List</a>
                     {% else %}
                         <a class="btn btn-primary" href="{% url 'gene_create_for_new_workbook' %}"><i class="fa fa-plus"></i>Apply New Gene List</a>
                     {% endif %}
-                </li>
-            </div>
-            <table class="table table-striped tablesorter">
-                <thead>
-                    <tr>
-                        <th></th>
-                        <th>Name</th>
-                        <th># of Genes</th>
-                        <th>Last Updated</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for genes_fav in gene_fav_list %}
-                        <tr>
-                            <td class="checkbox-col"><input type="checkbox" name="id" value="{{ genes_fav.id }}" title="{{ genes_fav.name }} Checkbox" aria-label="gene-checkbox"/></td>
-                            {% if workbook %}
-                                <td class="name-col"><a href="{% url 'gene_detail_for_existing_workbook' genes_fav.id workbook.id worksheet.id %}">{{genes_fav.name}}</a></td>
-                            {% else %}
-                                 <td class="name-col"><a href="{% url 'gene_detail_for_new_workbook' genes_fav.id %}">{{genes_fav.name}}</a></td>
-                            {% endif %}
-                            <td>{{genes_fav.genes | length}}</td>
-                            <td>{{genes_fav.last_date_saved}}</td>
-                            <td class="date-col">{{ cohort.last_date_saved|date:"SHORT_DATETIME_FORMAT" }}</td>
-                        </tr>
-                    {% endfor %}
-                    <input type="hidden" id="workbook_id" value="{{ workbook.id }}"/>
-                    <input type="hidden" id="worksheet_id" value="{{ worksheet.id }}"/>
-                </tbody>
-            </table>
+                </p>
+                <br>
+            {% endif %}
         </div>
     </div>
 </div>

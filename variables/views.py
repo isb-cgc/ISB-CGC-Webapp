@@ -134,13 +134,12 @@ def data_availability_sort(key, value, data_attr, attr_details):
 
 @login_required
 def variable_fav_detail_for_new_workbook(request, variable_fav_id):
-    variable_fav_detail(request=request, variable_fav_id=variable_fav_id, new_workbook=True)
+    return variable_fav_detail(request=request, variable_fav_id=variable_fav_id, new_workbook=True)
 
 @login_required
 def variable_fav_detail(request, variable_fav_id, workbook_id=0, worksheet_id=0, new_workbook=0):
     template = 'variables/variable_detail.html'
     context  = {}
-
     if new_workbook :
         context['new_workbook'] = True
 
@@ -168,8 +167,11 @@ def variable_fav_edit_for_new_workbook(request):
     return initialize_variable_selection_page(request, new_workbook=True)
 
 @login_required
+def variable_fav_edit_for_existing_workbook(request, workbook_id=0, worksheet_id=0, variable_fav_id=0):
+    return initialize_variable_selection_page(request, workbook_id=workbook_id, worksheet_id=worksheet_id)
+
+@login_required
 def variable_fav_edit(request, variable_fav_id=0):
-    #TODO validate user has access to the list
     return initialize_variable_selection_page(request, variable_list_id=variable_fav_id)
 
 @login_required
@@ -364,6 +366,6 @@ def variable_fav_save(request, variable_fav_id=0):
         variable_model = VariableFavorite.create(name        = data['name'],
                                                  variables   = data['variables'],
                                                  user        = request.user)
-        result['model'] = { 'id' : variable_model.id, 'name' : variable_model.name }
+        result['model'] = { 'id' : variable_model['id'], 'name' : variable_model['name'] }
 
     return HttpResponse(json.dumps(result), status=200)

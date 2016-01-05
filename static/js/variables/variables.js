@@ -65,6 +65,27 @@ require([
         $(this).find('form')[0].reset();
     });
 
+    function set_pill_deletes(){
+        $('a.delete-x').off('click');
+        $('a.delete-x').on('click', function() {
+            var search_id = $(this).parent('span').attr('value');
+            $('#' + search_id).prop('checked', false);
+            $(this).parent('span').remove();
+            $('#create-cohort-form .form-control-static').find('span[value="' + search_id + '"]').remove();
+            return false;
+        });
+    }
+    set_pill_deletes();
+
+    //removal of pills
+    $('a.delete-x').on('click', function() {
+        var search_id = $(this).parent('span').attr('value');
+        $('#' + search_id).prop('checked', false);
+        $(this).parent('span').remove();
+        $('#create-cohort-form .form-control-static').find('span[value="' + search_id + '"]').remove();
+        return false;
+    });
+
     // Field Editing
     $('.x-edit-field, .y-edit-field, .color-edit-field').on('click', function() { vizhelpers.show_field_search_panel(this); });
     $('.feature-search').on('change', function() { vizhelpers.field_search_change_callback(this); });
@@ -111,13 +132,8 @@ require([
         var token = $(token_str);
         $('.selected-filters .panel-body').append(token.clone());
         $('#create-cohort-form .form-control-static').append(token.clone());
-        $('a.delete-x').on('click', function() {
-            var search_id = $(this).parent('span').attr('value');
-            $('#' + search_id).prop('checked', false);
-            $(this).parent('span').remove();
-            $('#create-cohort-form .form-control-static').find('span[value="' + search_id + '"]').remove();
-            return false;
-        });
+
+        set_pill_deletes();
     };
 
     /*
@@ -191,7 +207,6 @@ require([
         $('#filter-panel input:checked').each(function() {
             $(this).prop('checked', false);
         });
-        search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id);
     });
 
     $('#add-filter-btn').on('click', function() {
@@ -290,6 +305,8 @@ require([
         Add a variable list to an existing worksheet
      */
     $("#apply_to_worksheet").on('click', function(event){
+        var name = $("#variable_list_name_input").val();
+        console.log("name", name);
         var workbook_id  = this.getAttribute("workbook_id");
         var worksheet_id = this.getAttribute("worksheet_id");
         var variable_list = get_variable_list();
@@ -298,7 +315,7 @@ require([
             $.ajax({
                 type : 'POST',
                 url  : base_api_url + '/workbooks/' + workbook_id + '/worksheets/' + worksheet_id + '/variables/edit',
-                data : JSON.stringify({variables : variable_list}),
+                data : JSON.stringify({name : name, variables : variable_list}),
                 beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                 success: function (data) {
                     window.location = base_api_url + '/workbooks/' + workbook_id + '/worksheets/' + worksheet_id + '/';

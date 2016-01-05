@@ -56,7 +56,7 @@ class VariableFavorite(models.Model):
         variable_favorite_model.save()
 
         for var in variables :
-            Variable.create(name=var['name'], project_id=var['project_id'], study_id = var['study_id'], favorite=variable_favorite_model)
+            Variable.create(name=var['name'], project_id=var['project_id'], study_id = var['study_id'], code=var['code'], favorite=variable_favorite_model)
 
         return_obj = {
             'name' : variable_favorite_model.name,
@@ -111,19 +111,24 @@ class VariableFavorite_Last_View(models.Model):
     user = models.ForeignKey(User, null=False, blank=False)
     last_view = models.DateTimeField(auto_now_add=True, auto_now=True)
 
+class VariableManager(models.Manager):
+    content = "null"
+
 class Variable(models.Model):
     id                 = models.AutoField(primary_key=True)
     name               = models.TextField(null=False, blank=False)
     variable_favorite  = models.ForeignKey(VariableFavorite, blank=False)
+    code               = models.CharField(max_length=2024, blank=False)
     project            = models.ForeignKey(Project, null=True, blank=True)
     study              = models.ForeignKey(Study, null=True, blank=True)
+    objects            = VariableManager()
 
     @classmethod
-    def create(cls, name, project_id, study_id, favorite):
+    def create(cls, name, project_id, study_id, code, favorite):
         if project_id != "-1" and study_id != "-1" :
             study   = Study.objects.get(id=study_id)
             project = Project.objects.get(id=project_id)
-            variable_model = cls.objects.create(name=name, project_id=project, study_id=study, variable_favorite=favorite)
+            variable_model = cls.objects.create(name=name, project_id=project, study_id=study, code=code, variable_favorite=favorite)
             variable_model.save()
         else :
             variable_model = cls.objects.create(name=name, variable_favorite=favorite)

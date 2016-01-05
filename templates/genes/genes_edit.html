@@ -45,12 +45,10 @@
                 <form method="POST" action="{% url 'gene_fav_save' %}">
             {% endif %}
                 {% csrf_token %}
-                {% if not workbook and not new_workbook %}
-                    <div class="form-group">
-                        <label for="genes-name">Name of Favorite (Required)</label>
-                        <input class="form-control" type="text" value="{% if 'gene_fav_detail' %}{{gene_favorite.name}}{% endif %} " name="genes-name" required>
-                    </div>
-                {% endif %}
+                <div class="form-group">
+                    <label for="genes-name">Name of Favorite (Required)</label>
+                    <input class="form-control" type="text" value="{% if 'gene_fav_detail' %}{{gene_favorite.name}}{% endif %} " name="genes-name" required>
+                </div>
 
                 <div class="form-group">
                     <div>

@@ -39,11 +39,9 @@ def gene_fav_list(request, workbook_id=0, worksheet_id=0, new_workbook=0):
             context['worksheet'] = worksheet_model
             context['base_url']  = settings.BASE_URL
 
-            if gene_list :
-                template = 'genes/genes_select.html'
-            else :
-                template = 'genes/genes_edit.html'
-                context = {'genes' : [] }
+            template = 'genes/genes_select.html'
+            if not gene_list :
+                context['genes'] = []
 
         except ObjectDoesNotExist:
             messages.error(request, 'The workbook and worksheet you were referencing does not exist.')
@@ -54,7 +52,7 @@ def gene_fav_list(request, workbook_id=0, worksheet_id=0, new_workbook=0):
             template = 'genes/genes_select.html'
         else :
             template = 'genes/genes_edit.html'
-            context = {'genes' : [] }
+            context['genes'] = []
 
     return render(request, template, context)
 
