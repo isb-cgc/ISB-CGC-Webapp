@@ -34,7 +34,13 @@ require.config({
         stats: 'libs/science.stats.min',
         vizhelpers: 'helpers/vis_helpers',
         select2: 'libs/select2.min',
-        base: 'base'
+        base: 'base',
+        plot_factory : 'visualizations/plotFactory',
+        histogram_plot : 'visualizations/createHistogram',
+        scatter_plot : 'visualizations/createScatterPlot',
+        cubby_plot : 'visualizations/createCubbyPlot',
+        violin_plot : 'visualizations/createViolinPlot',
+        bar_plot : 'visualizations/createBarGraph'
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -42,31 +48,27 @@ require.config({
         'session_security': ['jquery'],
         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
         'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
-        'select2': ['jquery']
+        'select2': ['jquery'],
+        'plot_factory':['vizhelpers', 'session_security'],
+        'stats':['science'],
+        'histogram_plot' : ['science','stats']
     }
 });
 
 require([
     'jquery',
-    'visualizations/plotFactory',
-    'science',
-    'stats',
+    'plot_factory',
     'session_security',
     'jqueryui',
     'bootstrap',
     'd3',
     'd3tip',
     'vizhelpers',
-    'visualizations/createScatterPlot',
-    'visualizations/createCubbyPlot',
-    'visualizations/createViolinPlot',
-    'visualizations/createHistogram',
-    'visualizations/createBarGraph',
     'select2',
     'assetscore',
     'assetsresponsive',
     'base'
-], function ($, plot_factory, science, stats, session_security) {
+], function ($, plot_factory) {
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function() {
@@ -80,7 +82,6 @@ require([
     $('#clin-accordion').on('show.bs.collapse', function (e) {
         $(e.target).siblings('a').find('i.fa-caret-down').show();
         $(e.target).siblings('a').find('i.fa-caret-right').hide();
-
     });
 
     $('#clin-accordion').on('hide.bs.collapse', function (e) {

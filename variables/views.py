@@ -11,7 +11,8 @@ from bq_data_access.feature_search.util import SearchableFieldHelper
 from models import VariableFavorite
 from workbooks.models import Workbook, Worksheet
 from projects.models import Project, Study
-
+from django.core.exceptions import ObjectDoesNotExist
+from django.contrib import messages
 from google.appengine.api import urlfetch
 from django.conf import settings
 debug = settings.DEBUG
@@ -24,6 +25,47 @@ BIG_QUERY_API_URL   = settings.BASE_API_URL + '/_ah/api/bq_api/v1'
 COHORT_API          = settings.BASE_API_URL + '/_ah/api/cohort_api/v1'
 META_DISCOVERY_URL  = settings.BASE_API_URL + '/_ah/api/discovery/v1/apis/meta_api/v1/rest'
 METADATA_API        = settings.BASE_API_URL + '/_ah/api/meta_api/v1'
+
+
+@login_required
+def variable_fav_list_for_new_workbook(request):
+    return variable_fav_list(request=request, new_workbook=True)
+
+@login_required
+def variable_fav_list(request, workbook_id=0, worksheet_id=0, new_workbook=0):
+    template = 'variables/variable_list.html'
+    context  = {}
+
+    variable_list = VariableFavorite.get_list(request.user)
+    if len(variable_list) == 0 :
+        variable_list = None
+    context['variable_list']=variable_list
+
+    if workbook_id != 0 :
+        try:
+            workbook_model       = Workbook.objects.get(id=workbook_id)
+            context['workbook']  = workbook_model
+            worksheet_model      = Worksheet.objects.get(id=worksheet_id)
+            context['worksheet'] = worksheet_model
+            context['base_url']  = settings.BASE_URL
+
+            if variable_list :
+                template = 'variables/variables_select.html'
+            else :
+                template = 'variables/variables_edit.html'
+
+        except ObjectDoesNotExist:
+            messages.error(request, 'The workbook and worksheet you were referencing does not exist.')
+            return redirect('variables')
+    elif new_workbook :
+        context['new_workbook'] = True
+        if variable_list :
+            template = 'variables/variables_select.html'
+        else :
+            template = 'variables/variables_edit.html'
+
+    return render(request, template, context)
+
 
 # tests whether parameter is a string, hash or iterable object
 # then returns base type data
@@ -89,91 +131,85 @@ def data_availability_sort(key, value, data_attr, attr_details):
             'count': [v['count'] for v in value if v['value'] == 'True'][0]
         })
 
+
 @login_required
-def variable_fav_detail(request, variable_fav_id):
+def variable_fav_detail_for_new_workbook(request, variable_fav_id):
+    return variable_fav_detail(request=request, variable_fav_id=variable_fav_id, new_workbook=True)
+
+@login_required
+def variable_fav_detail(request, variable_fav_id, workbook_id=0, worksheet_id=0, new_workbook=0):
     template = 'variables/variable_detail.html'
+    context  = {}
+    if new_workbook :
+        context['new_workbook'] = True
 
-    variable_fav = VariableFavorite.get_deep(variable_fav_id)
+    if workbook_id :
+        try:
+            workbook_model       = Workbook.objects.get(id=workbook_id)
+            context['workbook']  = workbook_model
+            worksheet_model      = Worksheet.objects.get(id=worksheet_id)
+            context['worksheet'] = worksheet_model
+        except ObjectDoesNotExist:
+            messages.error(request, 'The workbook you were referencing does not exist.')
+            return redirect('variables')
+    try:
+        variable_fav = VariableFavorite.get_deep(variable_fav_id)
+        context['variables'] = variable_fav
+        variable_fav.mark_viewed(request)
+    except ObjectDoesNotExist:
+        messages.error(request, 'The variable favorite you were looking for does not exist.')
+        return redirect('variables')
 
-    context = {
-        'variables': variable_fav,
-    }
-
-    print variable_fav
-
-    variable_fav.mark_viewed(request)
     return render(request, template, context)
 
-#called via workbooks for the selected variables to be added to a workbook
 @login_required
-# USECASE 1: ADD VAR LIST TO EXISTING WORKBOOK
-def variable_select_for_existing_workbook(request, workbook_id, worksheet_id):
-    #TODO validate user has access to the workbook
-    return initialize_variable_selection_page(request, workbook_id=workbook_id, worksheet_id=worksheet_id)
-
-@login_required
-# USECASE 2: CREATE VAR LIST THEN CREATE WORKBOOK WITH VAR LIST
-def variable_select_for_new_workbook(request):
+def variable_fav_edit_for_new_workbook(request):
     return initialize_variable_selection_page(request, new_workbook=True)
 
 @login_required
-# USECASE 3: EDIT EXISTING VAR LIST
-def variable_fav_edit(request, variable_fav_id):
-    #TODO validate user has access to the list
+def variable_fav_edit_for_existing_workbook(request, workbook_id=0, worksheet_id=0, variable_fav_id=0):
+    return initialize_variable_selection_page(request, workbook_id=workbook_id, worksheet_id=worksheet_id)
+
+@login_required
+def variable_fav_edit(request, variable_fav_id=0):
     return initialize_variable_selection_page(request, variable_list_id=variable_fav_id)
 
 @login_required
-# USECASE 4: CREATE VAR FAVORITE
-def variable_fav_create(request):
-    return initialize_variable_selection_page(request)
-
-@login_required
 def initialize_variable_selection_page(request,
-                                       workbook_id=None,
-                                       worksheet_id=None,
-                                       new_workbook=False,
-                                       variable_list_id=None):
+                                       variable_list_id=0,
+                                       workbook_id=0,
+                                       worksheet_id=0,
+                                       new_workbook=False):
     template = 'variables/variable_edit.html'
+    context = {'variables' : [] }
+    workbook_model = None
+    worksheet_model = None
+    existing_variable_list = None
 
-    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
-    users = User.objects.filter(is_superuser=0)
+    if workbook_id != 0 :
+        try:
+            workbook_model       = Workbook.objects.get(id=workbook_id)
+            context['workbook']  = workbook_model
+            worksheet_model      = Worksheet.objects.get(id=worksheet_id)
+            context['worksheet'] = worksheet_model
+        except ObjectDoesNotExist:
+            messages.error(request, 'The workbook you were referencing does not exist.')
+            return redirect('variables')
 
-    # service = build('meta', 'v1', discoveryServiceUrl=META_DISCOVERY_URL)
-    # clin_attr = [
-    #     'vital_status',
-    #     # 'survival_time',
-    #     'gender',
-    #     'age_at_initial_pathologic_diagnosis',
-    #     'SampleTypeCode',
-    #     'tumor_tissue_site',
-    #     'histological_type',
-    #     'prior_dx',
-    #     'pathologic_stage',
-    #     'person_neoplasm_cancer_status',
-    #     'new_tumor_event_after_initial_treatment',
-    #     'neoplasm_histologic_grade',
-    #     # 'bmi',
-    #     'residual_tumor',
-    #     # 'targeted_molecular_therapy', TODO: Add to metadata_samples
-    #     'tobacco_smoking_history',
-    #     'icd_10',
-    #     'icd_o_3_site',
-    #     'icd_o_3_histology'
-    # ]
+    if variable_list_id != 0:
+        try:
+            existing_variable_list = VariableFavorite.get_deep(variable_list_id)
+            for var in existing_variable_list.list :
+                if not var.project :
+                    var.project_id = -1
+                    var.study_id   = -1
+                else :
+                    var.project_id = var.project.id
+                    var.study_id = var.study.id
 
-    # data_attr = [
-    #     'has_Illumina_DNASeq',
-    #     'has_BCGSC_HiSeq_RNASeq',
-    #     'has_UNC_HiSeq_RNASeq',
-    #     'has_BCGSC_GA_RNASeq',
-    #     'has_UNC_GA_RNASeq',
-    #     'has_HiSeq_miRnaSeq',
-    #     'has_GA_miRNASeq',
-    #     'has_RPPA',
-    #     'has_SNP6',
-    #     'has_27k',
-    #     'has_450k'
-    # ]
+        except ObjectDoesNotExist:
+            messages.error(request, 'The variable favorite you were looking for does not exist.')
+            return redirect('variables')
 
     data_attr = [
         'DNA_sequencing',
@@ -183,15 +219,6 @@ def initialize_variable_selection_page(request,
         'SNP_CN',
         'DNA_methylation'
     ]
-    #
-    # molec_attr = [
-    #     'somatic_mutation_status',
-    #     'mRNA_expression',
-    #     'miRNA_expression',
-    #     'DNA_methylation',
-    #     'gene_copy_number',
-    #     'protein_quantification'
-    # ]
 
     # This is a list of specific data classifications which require additional filtering in order to
     # Gather categorical or numercial variables for use in the plot
@@ -259,74 +286,86 @@ def initialize_variable_selection_page(request,
     variable_list['RNA_sequencing'] = []
     variable_list['miRNA_sequencing'] = []
     variable_list['DNA_methylation'] = []
-    # for key, value in variable_list.items():
-    #     if key.startswith('has_'):
-    #         data_availability_sort(key, value, data_attr, variable_list)
-    #     else:
-    #         variable_list[key] = sorted(value, key=lambda k: int(k['count']), reverse=True)
 
     # users can select from their saved variable favorites
     variable_favorites = VariableFavorite.get_list(request.user)
+
     context = {
-        'variable_names'        : variable_list.keys(),
-        'variable_list_count'   : variable_list,
-        'favorite_list'         : favorite_list,
-        'datatype_list'         : datatype_list,
-        'projects'              : projects,
+        'variable_names' : variable_list.keys(),
+        'variable_list_count' : variable_list,
+        'favorite_list' : favorite_list,
+        'datatype_list' : datatype_list,
+        'projects' : projects,
 
-        # 'clinical_variables'    : clin_attr,
-        'data_attr'             : data_attr,
-        'total_samples'         : totals,
+        'data_attr' : data_attr,
+        'total_samples' : totals,
 
-        'base_url'              : settings.BASE_URL,
-        'base_api_url'          : settings.BASE_API_URL,
-        'TCGA_project'          : TCGA_project,
-        'common_project'        : common_project,
-        'variable_favorites'    : variable_favorites
+        'base_url' : settings.BASE_URL,
+        'base_api_url' : settings.BASE_API_URL,
+        'TCGA_project' : TCGA_project,
+        'common_project' : common_project,
+        'variable_favorites' : variable_favorites,
+        'workbook'                  : workbook_model,
+        'worksheet'                 : worksheet_model,
+        'existing_variable_list'    : existing_variable_list,
+        'new_workbook'              : new_workbook
     }
-
-    # USECASE 1: ADD VAR LIST TO EXISTING WORKBOOK
-    if workbook_id is not None and worksheet_id is not None :
-        workbook = Workbook.objects.get(id=workbook_id)
-        worksheet = Worksheet.objects.get(id=worksheet_id)
-        context['workbook'] = workbook
-        context['worksheet'] = worksheet
-
-    # USECASE 2: CREATE VAR LIST THEN CREATE WORKBOOK WITH VAR LIST
-    elif new_workbook :
-        context['newWorkbook'] = True
-
-    # USECASE 3: EDIT EXISTING VAR LIST
-    elif variable_list_id is not None :
-        existing_variable_list = VariableFavorite.get_deep(variable_list_id)
-        context['existing_variable_list'] = existing_variable_list
-
-    # USECASE 4: CREATE VAR FAVORITE #
-        # nothin
 
     return render(request, template, context)
 
 @login_required
-def variable_fav_list(request):
-    template = 'variables/variable_list.html'
-    variable_list = VariableFavorite.get_list(request.user)
-
-    return render(request, template, {'variable_list' : variable_list})
-
-@login_required
-#TODO
 def variable_fav_delete(request, variable_fav_id):
-    return HttpResponse(json.dumps({}), status=200)
+    redirect_url = reverse('variables')
+    if variable_fav_id :
+        try:
+            variable_fav_model = VariableFavorite.objects.get(id=variable_fav_id)
+            if variable_fav_model.user == request.user :
+                name = variable_fav_model.name
+                variable_fav_model.destroy()
+                messages.info(request, 'the variable favorite \"'+name+'\" has been deleted')
+            else :
+                messages.error(request, 'You do not have permission to update this variable favorite list')
+        except ObjectDoesNotExist:
+            messages.error(request, 'The variable list you want does not exist.')
+
+    return redirect(redirect_url)
 
 @login_required
-#TODO
 def variable_fav_copy(request, variable_fav_id):
-    return HttpResponse(json.dumps({}), status=200)
+    redirect_url = reverse('variables')
+    if variable_fav_id :
+        try:
+            variable_fav_model = VariableFavorite.objects.get(id=variable_fav_id)
+            if variable_fav_model.user == request.user :
+                new_model = variable_fav_model.copy()
+                messages.info(request, 'the variable favorite \"'+new_model.name+'\" has been created')
+            else :
+                messages.error(request, 'You do not have permission to update this variable favorite list')
+        except ObjectDoesNotExist:
+            messages.error(request, 'The variable list you want does not exist.')
+
+    return redirect(redirect_url)
 
 @login_required
-def variable_fav_save(request):
-    data = json.loads(request.body)
-    variable_model = VariableFavorite.create(name       =data['name'],
-                                            variables   =data['variables'],
-                                            user        =request.user)
-    return HttpResponse(json.dumps(variable_model), status=200)
+def variable_fav_save(request, variable_fav_id=0):
+    data   = json.loads(request.body)
+    result = {}
+    if variable_fav_id :
+        try:
+            variable_model = VariableFavorite.objects.get(id=variable_fav_id)
+            if variable_model.user == request.user :
+                variable_model.update(name = data['name'], variables = data['variables'])
+                result['model'] = { 'id' : variable_model.id, 'name' : variable_model.name }
+            else :
+                result['error'] = 'You do not have permission to update this gene favorite list'
+                messages.error(request, 'You do not have permission to update this gene favorite list')
+        except ObjectDoesNotExist:
+            messages.error(request, 'The gene list you want does not exist.')
+            result['error'] = 'You do not have permission to update this gene favorite list'
+    else :
+        variable_model = VariableFavorite.create(name        = data['name'],
+                                                 variables   = data['variables'],
+                                                 user        = request.user)
+        result['model'] = { 'id' : variable_model['id'], 'name' : variable_model['name'] }
+
+    return HttpResponse(json.dumps(result), status=200)
