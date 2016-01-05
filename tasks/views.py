@@ -539,19 +539,17 @@ def metrics_cloudsql_users(request, start_date, end_date):
     if not request.user.is_superuser:
         return HttpResponse('You need to be logged in as a superuser.')
 
-
-    print >> sys.stderr, start_date
-    print >> sys.stderr, end_date
-    # parse start date and end date 151204 has new user
     assert start_date.isdigit(), "{} is not a digit".format(start_date)
     assert end_date.isdigit(), "{} is not a digit".format(end_date)
     assert len(start_date) == 6, "start_date must be of the form yymmdd"
     assert len(end_date) == 6, "end_date must be of the form yymmdd"
-
-    start_date = int(start_date)
-    end_date = int(end_date)
+    assert int(end_date) > int(start_date), "end_date must be later than start_date"
 
     user_metrics_dict = {}
+
+    # convert to date
+    start_date = datetime.datetime.strptime("20" + start_date, "%Y%m%d")
+    end_date = datetime.datetime.strptime("20" + end_date, "%Y%m%d")
 
     parse_cloudsql_logs(user_metrics_dict, start_date, end_date)
 
@@ -565,10 +563,14 @@ def parse_cloudsql_logs(user_metrics_dict, start_date, end_date):
 
     storage_client = get_special_storage_resource()
 
-    for day in range(start_date, end_date+1):
+    date_range = (end_date - start_date).days
+
+    for day_delta in range(date_range+1):
+        day = start_date + datetime.timedelta(days=day_delta)
+        day = day.strftime("%y%m%d")
         user_metrics_dict[day] = {}
-        req = storage_client.objects().get_media(bucket='isb-cgc_logs',
-                                           object='cloudsql_activity_log_{}.txt'.format(day))
+        req = storage_client.objects().get_media(
+            bucket='isb-cgc_logs', object='cloudsql_activity_log_{}.txt'.format(day))
         try:
             fh = io.BytesIO()
             downloader = MediaIoBaseDownload(fh, req, chunksize=1024*1024)
