@@ -6,14 +6,16 @@ from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-
+from django.contrib import messages
 from django.http import StreamingHttpResponse
-from django.http import HttpResponse
-from models import Cohort, Workbook, Worksheet, Worksheet_comment, Workbook_Perms, Worksheet_variable, Worksheet_gene, Worksheet_cohort
-from variables.models import VariableFavorite
+from django.http import HttpResponse, JsonResponse
+from models import Cohort, Workbook, Worksheet, Worksheet_comment, Worksheet_variable, Worksheet_gene, Worksheet_cohort
+from variables.models import VariableFavorite, Variable
 from genes.models import GeneFavorite
 from projects.models import Project
+from sharing.service import create_share
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 debug = settings.DEBUG
 if settings.DEBUG :
     import sys
@@ -22,44 +24,20 @@ if settings.DEBUG :
 def workbook_list(request):
     template  = 'workbooks/workbook_list.html',
 
-    viewable_workbooks_ids = Workbook_Perms.objects.filter(user=request.user).values_list('workbook', flat=True)
-    workbooks = Workbook.objects.filter(id__in=viewable_workbooks_ids).order_by('-last_date_saved')
+    userWorkbooks = request.user.workbook_set.all()
+    sharedWorkbooks = Workbook.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
 
-    for workbook in workbooks:
-        workbook.owner      = workbook.get_owner()
-        workbook.worksheets = workbook.get_worksheets()
-        workbook.shares     = workbook.get_shares()
+    workbooks = userWorkbooks | sharedWorkbooks
+    workbooks = workbooks.distinct()
 
     return render(request, template, {'workbooks' : workbooks})
 
 def workbook_samples(request):
     template = 'workbooks/workbook_samples.html'
-    return render(request, template, {});
+    return render(request, template, {
+        'workbooks': Workbook.objects.all().filter(is_public=True, active=True)
+    })
 
-
-#TODO secure this url
-@login_required
-def workbook_create_with_variables(request):
-    variable_id     = request.POST.get('variable_list_id')
-    variable_list   = VariableFavorite.get(id=variable_id)
-    workbook_model  = Workbook.create(name="Untitled Workbook", description="This workbook was created with variable list \"" + variable_list.name + "\" added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
-    worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
-    Worksheet_variable.edit_list(workbook_id=workbook_model.id, worksheet_id=worksheet_model.id, variable_list=variable_list,user=request.user)
-
-    redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_model.id})
-    return redirect(redirect_url)
-
-#TODO secure this url
-@login_required
-def workbook_create_with_genes(request):
-    gene_id         = request.POST.get('gene_list_id')
-    gene_list       = GeneFavorite.objects.get(id=gene_id)
-    workbook_model  = Workbook.create(name="Untitled Workbook", description="This workbook was created with gene list \"" + gene_list.name + "\" added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
-    worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
-    Worksheet_gene.edit_list(workbook_id=workbook_model.id, worksheet_id=worksheet_model.id, gene_list=gene_list,user=request.user)
-
-    redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_model.id})
-    return redirect(redirect_url)
 
 #TODO secure this url
 @login_required
@@ -90,7 +68,7 @@ def workbook_create_with_cohort_list(request):
 
     return HttpResponse(json.dumps(result), status=200)
 
-#TODO secure this url
+#TODO not complete
 @login_required
 def workbook_create_with_project(request):
     project_id = request.POST.get('project_id')
@@ -112,7 +90,7 @@ def workbook_create_with_project(request):
     redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_model.id})
     return redirect(redirect_url)
 
-#TODO secure this url
+#TODO not complete
 @login_required
 def workbook_create_with_analysis(request):
     analysis_type   = request.POST.get('analysis')
@@ -126,15 +104,13 @@ def workbook_create_with_analysis(request):
 @login_required
 def workbook(request, workbook_id=0):
     template = 'workbooks/workbook.html'
-    command  = request.path.rsplit('/',1)[1];
+    command  = request.path.rsplit('/',1)[1]
 
     if request.method == "POST" :
         if command == "create" :
             workbook_model = Workbook.createDefault(name="Untitled Workbook", description="", user=request.user)
         elif command == "edit" :
             workbook_model = Workbook.edit(id=workbook_id, name=request.POST.get('name'), description=request.POST.get('description'))
-        elif command == "share" :
-            workbook_model = Workbook.share(id=workbook_id, user_array=request.POST.get('user_array'))
         elif command == "copy" :
             workbook_model = Workbook.copy(id=workbook_id, user=request.user)
         elif command == "delete" :
@@ -149,8 +125,38 @@ def workbook(request, workbook_id=0):
 
     elif request.method == "GET" :
         if workbook_id:
-            workbook_model = Workbook.deep_get(id=workbook_id)
-            workbook_model.mark_viewed(request)
+            ownedWorkbooks = request.user.workbook_set.all().filter(active=True)
+            sharedWorkbooks = Workbook.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
+            publicWorkbooks = Workbook.objects.all().filter(is_public=True,active=True)
+
+            workbooks = ownedWorkbooks | sharedWorkbooks | publicWorkbooks
+            workbooks = workbooks.distinct()
+
+            workbook_model = workbooks.get(id=workbook_id)
+            workbook_model.worksheets = workbook_model.get_deep_worksheets()
+
+            is_shareable = (workbook_model.owner.id == request.user.id)
+
+            if is_shareable:
+                for worksheet in workbook_model.get_deep_worksheets():
+                    # Check all cohorts are owned by the user
+                    for cohort in worksheet.cohorts:
+                        if cohort.get_owner().id != request.user.id and not cohort.is_public():
+                            is_shareable = False
+                            break
+
+                    # Check all variables are from projects owned by the user
+                    for variable in worksheet.get_variables():
+                        if variable.project.owner_id != request.user.id and not variable.project.is_public:
+                            is_shareable = False
+                            break
+
+                    if not is_shareable:
+                        break
+
+            shared = None
+            if workbook_model.owner.id != request.user.id and not workbook_model.is_public:
+                shared = request.user.shared_resource_set.get(workbook__id=workbook_id)
 
             plot_types = [{'name' : 'Bar Chart'},
                           {'name' : 'Histogram'},
@@ -160,10 +166,22 @@ def workbook(request, workbook_id=0):
                           {'name' : 'Cubby Hole'},
                           {'name' : 'SeqPeak'}]
             return render(request, template, {'workbook'    : workbook_model,
+                                              'is_shareable': is_shareable,
+                                              'shared'      : shared,
                                               'plot_types'  : plot_types})
         else :
             redirect_url = reverse('workbooks')
             return redirect(redirect_url)
+
+@login_required
+def workbook_share(request, workbook_id=0):
+    emails = re.split('\s*,\s*', request.POST['share_users'].strip())
+    workbook = request.user.workbook_set.get(id=workbook_id, active=True)
+    create_share(request, workbook, emails, 'Workbook')
+
+    return JsonResponse({
+        'status': 'success'
+    })
 
 @login_required
 #used to display a particular worksheet on page load
@@ -190,7 +208,6 @@ def worksheet_display(request, workbook_id=0, worksheet_id=0):
 @login_required
 def worksheet(request, workbook_id=0, worksheet_id=0):
     command  = request.path.rsplit('/',1)[1]
-    query = ''
 
     if request.method == "POST" :
         if command == "create" :
@@ -206,36 +223,148 @@ def worksheet(request, workbook_id=0, worksheet_id=0):
             Worksheet.destroy(id=worksheet_id)
             redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_id})
 
-    #redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_id}) + query
     return redirect(redirect_url)
+
+@login_required
+def workbook_create_with_variables(request):
+    return worksheet_variables(request=request)
 
 @login_required
 def worksheet_variables(request, workbook_id=0, worksheet_id=0, variable_id=0):
     command  = request.path.rsplit('/',1)[1];
+    result = {}
 
-    variables = json.loads(request.body)['variables']
     if request.method == "POST" :
         if command == "edit" :
-            Worksheet_variable.edit_list(workbook_id=workbook_id, worksheet_id=worksheet_id, variable_list=variables, user=request.user)
-        elif command == "delete" :
-            Worksheet_variable.destroy(workbook_id=workbook_id, worksheet_id=worksheet_id, id=variable_id, user=request.user)
+            variables = []
+            #from Edit Page
+            if "variables" in request.body :
+                name          = json.loads(request.body)['name']
+                variable_list = json.loads(request.body)['variables']
 
-    redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet_id})
-    return redirect(redirect_url)
+                #create a variable favorite
+                variable_favorite_result = VariableFavorite.create(name        = name,
+                                                                  variables   = variable_list,
+                                                                  user        = request.user)
+
+                model = VariableFavorite.objects.get(id=variable_favorite_result['id'])
+                messages.info(request, 'The variable favorite list \"' + model.name + '\" was created and added to your worksheet')
+                variables = model.get_variables()
+
+            #from Details Page
+            # if request.POST.get("variable_id") :
+            #     gene_id = request.POST.get("variables_id")
+            #     try :
+            #         gene_fav = GeneFavorite.objects.get(id=gene_id)
+            #         names = gene_fav.get_gene_name_list()
+            #         for g in names:
+            #             genes.append(g)
+            #     except ObjectDoesNotExist:
+            #             None
+
+            #from Select Page
+            if "variables_favorites" in request.body :
+                variable_fav_list = json.loads(request.body)['variables_favorites']
+                for fav in variable_fav_list:
+                    try:
+                        fav = VariableFavorite.objects.get(id=fav['id'])
+                        variables = fav.get_variables()
+                    except ObjectDoesNotExist:
+                        None
+            if len(variables) > 0:
+                if workbook_id is 0:
+                    workbook_model  = Workbook.create(name="Untitled Workbook", description="This workbook was created with variables added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
+                    worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
+                else :
+                    workbook_model = Workbook.objects.get(id=workbook_id)
+                    worksheet_model = Worksheet.objects.get(id=worksheet_id)
+
+                Worksheet_variable.edit_list(workbook_id=workbook_id, worksheet_id=worksheet_id, variable_list=variables, user=request.user)
+                result['workbook_id'] = workbook_model.id
+                result['worksheet_id'] = worksheet_model.id
+            else :
+                result['error'] = "no variables to add"
+        elif command == "delete" :
+            Worksheet_gene.destroy(workbook_id=workbook_id, worksheet_id=worksheet_id, id=variable_id, user=request.user)
+            result['message'] = "variables have been deleted from workbook"
+    else :
+        result['error'] = "method not correct"
+
+    if request.POST.get("variables") or request.POST.get("variable_id"):
+        redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet_id})
+        return redirect(redirect_url)
+    else :
+        return HttpResponse(json.dumps(result), status=200)
+
+
+@login_required
+def workbook_create_with_genes(request):
+    return worksheet_genes(request=request)
 
 @login_required
 def worksheet_genes(request, workbook_id=0, worksheet_id=0, genes_id=0):
     command  = request.path.rsplit('/',1)[1];
+    result = {}
 
-    genes = json.loads(request.body)['genes']
     if request.method == "POST" :
         if command == "edit" :
-            Worksheet_gene.edit_list(worksheet_id=worksheet_id, genes=genes, user=request.user)
-        elif command == "delete" :
-            Worksheet_gene.destroy(worksheet_id=worksheet_id, id=genes_id, user=request.user)
+            genes = []
+            #from Gene Edit Page
+            if request.POST.get("genes-list") :
+                name = request.POST.get("genes-name")
+                gene_list = request.POST.get("genes-list")
+                gene_list = [x.strip() for x in gene_list.split(',')]
+                gene_list = list(set(gene_list))
+                model = GeneFavorite.create(name=name, gene_list=gene_list, user=request.user)
+                messages.info(request, 'The gene favorite list \"' + name + '\" was created and added to your worksheet')
+                for g in gene_list:
+                    genes.append(g)
 
-    redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet_id})
-    return redirect(redirect_url)
+            #from Gene Details Page
+            if request.POST.get("gene_list_id") :
+                gene_id = request.POST.get("gene_list_id")
+                try :
+                    gene_fav = GeneFavorite.objects.get(id=gene_id)
+                    names = gene_fav.get_gene_name_list()
+                    for g in names:
+                        genes.append(g)
+                except ObjectDoesNotExist:
+                        None
+
+            #from Gene List Page, yay all three are different!
+            if "gene_fav_list" in request.body :
+                gene_fav_list = json.loads(request.body)['gene_fav_list']
+                for id in gene_fav_list:
+                    try:
+                        fav = GeneFavorite.objects.get(id=id)
+                        names = fav.get_gene_name_list()
+                        for g in names:
+                            genes.append(g)
+                    except ObjectDoesNotExist:
+                        None
+            if len(genes) > 0:
+                if workbook_id is 0:
+                    workbook_model  = Workbook.create(name="Untitled Workbook", description="This workbook was created with genes added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
+                    worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
+                else :
+                    workbook_model = Workbook.objects.get(id=workbook_id)
+                    worksheet_model = Worksheet.objects.get(id=worksheet_id)
+
+                Worksheet_gene.edit_list(workbook_id=workbook_model.id, worksheet_id=worksheet_model.id, gene_list=genes, user=request.user)
+                result['genes'] = genes
+            else :
+                result['error'] = "no genes to add"
+        elif command == "delete" :
+            Worksheet_gene.destroy(workbook_id=workbook_id, worksheet_id=worksheet_id, id=genes_id, user=request.user)
+            result['message'] = "genes have been deleted from workbook"
+    else :
+        result['error'] = "method not correct"
+
+    if request.POST.get("genes-list") or request.POST.get("gene_list_id"):
+        redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet_id})
+        return redirect(redirect_url)
+    else :
+        return HttpResponse(json.dumps(result), status=200)
 
 @login_required
 def worksheet_cohorts(request, workbook_id=0, worksheet_id=0, cohort_id=0):

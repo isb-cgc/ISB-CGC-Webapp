@@ -21,41 +21,54 @@
 <div class="container">
     <div class="panel penel-default">
         <div class="panel-body">
-            {% if genes_favs %}
-            <table class="table table-striped tablesorter">
-                <thead>
-                    <tr>
-                        <th></th>
-                        <th>Name</th>
-                        <th># of Genes</th>
-                        <th>Last Updated</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for genes_fav in genes_favs %}
+            {% if gene_fav_list %}
+                <table class="table table-striped tablesorter">
+                    <thead>
                         <tr>
-                            <td class="control-col">
-                                <div class="dropdown">
-                                    <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="{% url 'edit_genes_list' genes_fav.id %}">Edit</a> </li>
-                                        <li><a role="button">Delete</a></li>
-                                        <li><a href="">New Workbook</a></li>
-                                    </ul>
-                                </div>
-                            </td>
-                            <td class="name-col"><a href="{% url 'genes_detail' genes_fav.id %}">{{genes_fav.name}}</a></td>
-                            <td>{{genes_fav.genes | length}}</td>
-                            <td>{{genes_fav.last_updated}}</td>
+                            <th></th>
+                            <th>Name</th>
+                            <th># of Genes</th>
+                            <th>Last Updated</th>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {% for genes_fav in gene_fav_list %}
+                            <tr>
+                                <td class="control-col">
+                                    <div class="dropdown">
+                                        <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <a style="color: #49AFCD; padding-left: 13px;" href="{% url 'gene_fav_edit' genes_fav.id %}">Edit</a>
+                                            </li>
+                                            <li>
+                                                <form action="{% url 'gene_fav_delete' genes_fav.id %}" method="POST">
+                                                    {% csrf_token %}
+                                                    <input class="btn btn-link" type="submit" value="Delete">
+                                                </form>
+                                            </li>
+                                            <li>
+                                                <form action="{% url 'worksheet_create_with_genes' %}" method="POST">
+                                                    {% csrf_token %}
+                                                    <button class="btn btn-link" type="submit"> Start New Workbook</button>
+                                                    <input type="hidden" name="gene_list_id" value="{{ genes_fav.id }}">
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                                <td class="name-col"><a href="{% url 'gene_fav_detail' genes_fav.id %}">{{genes_fav.name}}</a></td>
+                                <td>{{genes_fav.genes | length}}</td>
+                                <td>{{genes_fav.last_date_saved}}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             {% else %}
-            <p class="center">You don't have any Gene Favorites yet.</p>
-            <p class="center"><a href="{% url 'gene_fav_create' %}" class="btn btn-default">Create Gene Favorite</a></p>
+                <br>
+                <p class="center">You don't have any gene favorites created yet. <br><a href="{% url 'gene_fav_create' %}" class="btn btn-link">Create A Gene Favorite</a></p>
+                <br>
             {% endif %}
-
         </div>
     </div>
 </div>

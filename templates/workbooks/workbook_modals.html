@@ -7,7 +7,7 @@
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title">Workbook Details</h4>
             </div>
-            <form id="edit-workbook" method="POST" action="{% url 'workbook_edit' workbook.id %}">
+            <form id="edit-workbook-{{ workbook.id }}" method="POST" action="{% url 'workbook_edit' workbook.id %}">
                 {% csrf_token %}
                 <div class="modal-body">
                     <label for="share-viz-users">Name (required)</label>
@@ -34,7 +34,7 @@
                 <h4 class="modal-title"></h4>
             </div>
             <div class="modal-body">Delete this Workbook?</div>
-            <form id="delete-workbook" method="POST" action="{% url 'workbook_delete' workbook.id %}">
+            <form id="delete-workbook-{{ workbook.id }}" method="POST" action="{% url 'workbook_delete' workbook.id %}">
                 {% csrf_token %}
                 <div class="modal-footer">
                     <input type="submit" value="Delete" class="btn btn-primary" />
@@ -46,14 +46,14 @@
 </div>
 
 <!-- Create Worksheet modal-->
-<div class="modal fade" id="create-worksheet-modal-{{ workbook.id }}" tabindex="-1" aria-labelledby="create-worksheet-header" aria-hidden="true">
+<div class="modal fade" id="create-worksheet-modal-{{ workbook.id }}" tabindex="-1" aria-labelledby="create-worksheet-header-{{ workbook.id }}" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="create-worksheet-header">Create New Worksheet</h4>
+                <h4 class="modal-title" id="create-worksheet-header-{{ workbook.id }}">Create New Worksheet</h4>
             </div>
-            <form id="worksheet_create_form" method="POST" action="{% url 'worksheet_create' workbook_id=workbook.id %}">
+            <form id="worksheet_create_form-{{ workbook.id }}" method="POST" action="{% url 'worksheet_create' workbook_id=workbook.id %}">
                 {% csrf_token %}
                 <div class="modal-body">
                     <label for="name">Name (required)</label>
@@ -70,7 +70,6 @@
         </div>
     </div>
 </div>
-{% endif %}
 
 <!-- Duplicate Workbook Modal -->
 <div class="modal fade" id="copy-workbook-modal-{{ workbook.id }}" tabindex="-1" role="dialog" aria-labelledby="copy-workbook-header" aria-hidden="true">
@@ -81,9 +80,13 @@
                 <h4 class="modal-title"></h4>
             </div>
             <div class="modal-body">
+                <p>
+                    This will create a copy of the worksheet and reference the cohorts and projects used in the workbook
+                    This will not make duplicates of the cohort and projects used in the workbook
+                </p>
                 Duplicate this Workbook?
             </div>
-            <form id="copy-workbook" method="POST" action="{% url 'workbook_copy' workbook.id %}">
+            <form id="copy-workbook-{{ workbook.id }}" method="POST" action="{% url 'workbook_copy' workbook.id %}">
                 {% csrf_token %}
                 <div class="modal-footer">
                     <input type="submit" value="Duplicate" class="btn btn-primary" />
@@ -93,3 +96,95 @@
         </div>
     </div>
 </div>
+{% elif shared %}
+
+<!-- Remove Workbook Modal -->
+<div class="ajax-form-modal modal fade" id="remove-workbook-modal-{{ workbook.id }}" tabindex="-1" role="dialog" aria-labelledby="remove-workbook-header" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Remove Yourself from this Workbook?</h4>
+            </div>
+            <form id="remove-workbook-{{ workbook.id }}" method="POST" action="{% url 'sharing_remove' shared.id %}" data-redirect="{% url 'workbooks' %}">
+                {% csrf_token %}
+                <div class="modal-footer">
+                    <input type="submit" value="Remove" class="btn btn-primary" />
+                    <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if is_shareable or shared %}
+<!-- Share Workbook Modal -->
+<div class="ajax-form-modal modal fade" id="share-workbook-modal-{{ workbook.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-workbook-header" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <!--<h4 class="modal-title">Workbook Sharing</h4>-->
+                <ul class="nav nav-tabs" data-tabs="tablist">
+                    {% if workbook.owner == request.user %}
+                        <li class="active"><a href="#share-{{ workbook.id }}" data-toggle="tab">Share</a></li>
+                    {% endif %}
+                    <li ><a href="#shared-with-{{ workbook.id }}" data-toggle="tab">Shared With</a></li>
+                </ul>
+            </div>
+            <div class="tab-content">
+                {% if workbook.owner.id == request.user.id %}
+                <form class="tab-pane fade in active" id="share-{{ workbook.id }}" method="POST" action="{% url 'workbook_share' workbook.id %}">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <p>
+                            This will share the web view of workbooks.
+                        </p>
+                        <label for="share_users">Enter email addresses separated by a comma</label>
+                        <textarea class="form-control" name="share_users"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <input type="submit" value="Send" class="btn btn-primary" />
+                        <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+                {% endif %}
+                <div class="tab-pane fade {% if not workbook.owner == request.user %}active in{% endif %}" id="shared-with-{{ workbook.id }}">
+                    <div class="modal-body">
+                        {% if workbook.shared.count > 0 %}
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for shared in workbook.shared.all|active %}
+                                <tr>
+                                    <td>
+                                        {% if shared.matched_user %}
+                                        {{shared.matched_user.first_name}} {{shared.matched_user.last_name}}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {{shared.email}}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                        {% else %}
+                        <p class="center">This list is empty.</p>
+                        {% endif %}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Ok</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}

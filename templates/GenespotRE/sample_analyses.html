@@ -27,8 +27,9 @@
                     <p>Short Description</p>
                 </div>
                 <div class="panel-footer">
-                    <form action="{% url 'worksheet_create_with_analysis' 0 %}" method="POST" class="center">
+                    <form action="{% url 'worksheet_create_with_analysis' %}" method="POST" class="center">
                         {% csrf_token %}
+                        <input type="hidden" name="analysis" value="barchart">
                         <button type="submit" class="btn btn-link">Start A New Workbook Bar Chart</button>
                     </form>
                 </div>
@@ -42,8 +43,9 @@
                     <p>Short Description</p>
                 </div>
                 <div class="panel-footer">
-                    <form action="{% url 'worksheet_create_with_analysis' 0 %}" method="POST" class="center">
+                    <form action="{% url 'worksheet_create_with_analysis' %}" method="POST" class="center">
                         {% csrf_token %}
+                        <input type="hidden" name="analysis" value="histogram">
                         <button type="submit" class="btn btn-link">Start A New Workbook with Histogram</button>
                     </form>
                 </div>
@@ -57,8 +59,9 @@
                     <p>Short Description</p>
                 </div>
                 <div class="panel-footer">
-                    <form action="{% url 'worksheet_create_with_analysis' 0 %}" method="POST" class="center">
+                    <form action="{% url 'worksheet_create_with_analysis' %}" method="POST" class="center">
                         {% csrf_token %}
+                        <input type="hidden" name="analysis" value="scatterplot">
                         <button type="submit" class="btn btn-link">Start A New Workbook with Scatter Plot</button>
                     </form>
                 </div>
@@ -72,8 +75,9 @@
                     <p>Short Description</p>
                 </div>
                 <div class="panel-footer">
-                    <form action="{% url 'worksheet_create_with_analysis' 0 %}" method="POST" class="center">
+                    <form action="{% url 'worksheet_create_with_analysis' %}" method="POST" class="center">
                         {% csrf_token %}
+                        <input type="hidden" name="analysis" value="violinplot">
                         <button type="submit" class="btn btn-link">Start A New Workbook with Violin Plot</button>
                     </form>
                 </div>
@@ -87,8 +91,9 @@
                     <p>Short Description</p>
                 </div>
                 <div class="panel-footer">
-                    <form action="{% url 'worksheet_create_with_analysis' 0 %}" method="POST" class="center">
+                    <form action="{% url 'worksheet_create_with_analysis' %}" method="POST" class="center">
                         {% csrf_token %}
+                        <input type="hidden" name="analysis" value="violinplot2">
                         <button type="submit" class="btn btn-link">Start A New Workbook with Violin Plot 2</button>
                     </form>
                 </div>
@@ -102,8 +107,9 @@
                     <p>Short Description</p>
                 </div>
                 <div class="panel-footer">
-                    <form action="{% url 'worksheet_create_with_analysis' 0 %}" method="POST" class="center">
+                    <form action="{% url 'worksheet_create_with_analysis' %}" method="POST" class="center">
                         {% csrf_token %}
+                        <input type="hidden" name="analysis" value="cubbyhole">
                         <button type="submit" class="btn btn-link">Start A New Workbook with Cubby Hole</button>
                     </form>
                 </div>
@@ -117,8 +123,9 @@
                     <p>This visualization shows where somatic mutations have been observed on a linear representation of a specific protein.  Each horizontal strip represents the protein, with data from different tumor types (aka cohorts or studies) shown stacked one on top of the other. </p>
                 </div>
                 <div class="panel-footer">
-                    <form action="{% url 'worksheet_create_with_analysis' 0 %}" method="POST" class="center">
+                    <form action="{% url 'worksheet_create_with_analysis' %}" method="POST" class="center">
                         {% csrf_token %}
+                        <input type="hidden" name="analysis" value="seqpeak">
                         <button type="submit" class="btn btn-link">Start A New Workbook with SeqPeak</button>
                     </form>
                 </div>

@@ -99,6 +99,7 @@ BIGQUERY_DATASET2 = secret_settings.get('BIGQUERY_DATASET2')
 def get_bigquery_dataset():
     return BIGQUERY_DATASET
 
+PROJECT_NAME = secret_settings.get('PROJECT_NAME')
 BIGQUERY_PROJECT_NAME = secret_settings.get('BIGQUERY_PROJECT_NAME')
 
 def get_bigquery_project_name():

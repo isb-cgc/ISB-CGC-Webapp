@@ -21,6 +21,7 @@ import views
 
 urlpatterns = patterns('',
     url(r'^$',                                      views.cohorts_list, name='cohort_list'),
+    url(r'^public',                                 views.public_cohort_list, name='public_cohort_list'),
     url(r'^new_cohort/',                            views.cohort_detail, name='cohort'),
     url(r'^(?P<cohort_id>\d+)/$',                   views.cohort_detail, name='cohort_details'),
     url(r'^filelist/(?P<cohort_id>\d+)/$',          views.cohort_filelist, name='cohort_filelist'),
@@ -36,8 +37,14 @@ urlpatterns = patterns('',
     url(r'^download_filelist/(?P<cohort_id>\d+)/',  views.streaming_csv_view, name='download_filelist'),
 
 
-    url(r'^workbook/(?P<workbook_id>\d+)/worksheet/(?P<worksheet_id>\d+)$', views.cohort_select_for_existing_workbook,  name="cohort_select_for_existing_workbook"),
-    url(r'^select_cohort_and_create_workbook/$',                            views.cohort_select_for_new_workbook,       name="cohort_select_for_new_workbook"),
-    url(r'^save_cohort_for_workbook/$',                                     views.save_cohort_for_existing_workbook,    name="save_cohort_for_existing_workbook"),
-    url(r'^save_cohort_and_workbook/$',                                     views.save_cohort_for_new_workbook,         name="save_cohort_for_new_workbook")
+    url(r'^workbook/(?P<workbook_id>\d+)/worksheet/(?P<worksheet_id>\d+)$',        views.cohort_select_for_existing_workbook,  name="cohort_select_for_existing_workbook"),
+    url(r'^workbook/(?P<workbook_id>\d+)/worksheet/(?P<worksheet_id>\d+)/create$', views.cohort_create_for_existing_workbook,  name="cohort_create_for_existing_workbook"),
+    url(r'^workbook/(?P<workbook_id>\d+)/worksheet/(?P<worksheet_id>\d+)/add$',    views.add_cohorts_to_worksheet,             name="add_cohorts_to_worksheet"),
+    url(r'^(?P<cohort_id>\d+)/workbook/(?P<workbook_id>\d+)/worksheet/(?P<worksheet_id>\d+)/remove$',
+                                                                                   views.remove_cohort_from_worksheet,         name="remove_cohort_from_worksheet"),
+
+    url(r'^select_cohort_and_create_workbook/$',                                   views.cohort_select_for_new_workbook,       name="cohort_select_for_new_workbook"),
+    url(r'^create_cohort_and_create_workbook/$',                                   views.cohort_create_for_new_workbook,       name="cohort_create_for_new_workbook"),
+    url(r'^save_cohort_for_workbook/$',                                            views.save_cohort_for_existing_workbook,    name="save_cohort_for_existing_workbook"),
+    url(r'^save_cohort_and_workbook/$',                                            views.save_cohort_for_new_workbook,         name="save_cohort_for_new_workbook")
 )

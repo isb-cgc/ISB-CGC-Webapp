@@ -21,15 +21,15 @@
 <div class="container">
     <div class="panel">
          <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation" class="active">
+            <li role="presentation" {% if not is_public %} class="active" {% endif %} >
                 <a href="#save-projects-list" aria-controls="save-projects-list" role="tab" data-toggle="tab">Saved Projects</a>
             </li>
-            <li role="presentation">
+            <li role="presentation" {% if is_public %} class="active" {% endif %} >
                 <a href="#public-projects-list" aria-controls="public-projects-list" role="tab" data-toggle="tab">Public Projects</a>
             </li>
         </ul>
         <div class="tab-content">
-            <div role="tabpanel" class="tab-pane active" id="save-projects-list">
+            <div role="tabpanel" class="tab-pane {% if not is_public %} active {% endif %}" id="save-projects-list">
                 {% if projects %}
 
                 <table class="table tablesorter">
@@ -92,7 +92,7 @@
                 <p class="center"><a href="{% url 'project_upload' %}" class="btn btn-default"><i class="fa fa-cloud-upload"></i>Upload Project Data</a></p>
                 {% endif %}
             </div>
-            <div role="tabpanel" class="tab-pane" id="public-projects-list">
+            <div role="tabpanel" class="tab-pane {% if is_public %} active {% endif %}" id="public-projects-list">
                 {% if public_projects %}
 
                 <table class="table tablesorter">

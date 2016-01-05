@@ -38,8 +38,9 @@ class GeneFavorite(models.Model):
         gene_favorite_model = cls.objects.create(name=name, user=user)
         gene_favorite_model.save()
 
-        for gene in gene_list :
-            gene(name=gene['name'])
+        for gene_name in gene_list :
+            gene_model = Gene(name=gene_name, gene_favorite=gene_favorite_model)
+            gene_model.save()
 
         return_obj = {
             'name'          : gene_favorite_model.name,
@@ -49,18 +50,51 @@ class GeneFavorite(models.Model):
 
     @classmethod
     def get_list(cls, user):
-        list = cls.objects.filter(user=user).order_by('-last_date_saved')
+        list = cls.objects.filter(user=user, active=True).order_by('-last_date_saved')
 
         for fav in list:
             fav.genes = fav.get_genes()
 
         return list
 
+    def edit_list(self, gene_list, user):
+        if self.user == user :
+            #TODO delete all then resave not the most efficient
+            genes = Gene.objects.filter(gene_favorite=self)
+            for g in genes :
+                g.delete()
+
+            for gene_name in gene_list :
+                gene_model = Gene(name=gene_name, gene_favorite=self)
+                gene_model.save()
+
+            return_obj = {
+                'genes' : gene_list,
+            }
+        else :
+            return_obj = {
+                'error'     : "you do not have access to update this list",
+            }
+        return return_obj
+
     def get_genes(self):
-        return self.gene_set.filter(variable_favorite=self)
+        return self.gene_set.filter(gene_favorite=self)
+
+    def get_gene_name_list(self):
+        names = []
+        genes = self.get_genes()
+        for g in genes:
+            names.append(g.name)
+
+        return names
 
     def destroy(self):
         self.active = False
+        genes = Gene.objects.filter(gene_favorite=self)
+        for g in genes :
+            g.delete()
+        self.save()
+        return {'message' : "gene favorite has been deleted"}
 
 class GeneFavorite_Last_View(models.Model):
     genefavorite = models.ForeignKey(GeneFavorite, blank=False)
@@ -68,5 +102,6 @@ class GeneFavorite_Last_View(models.Model):
     last_view = models.DateTimeField(auto_now_add=True, auto_now=True)
 
 class Gene(models.Model):
-    id = models.AutoField(primary_key=True)
-    name = models.TextField(null=False, blank=False)
+    id            = models.AutoField(primary_key=True)
+    name          = models.TextField(null=False, blank=False)
+    gene_favorite = models.ForeignKey(GeneFavorite, null=False, blank=False)

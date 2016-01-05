@@ -85,6 +85,11 @@ class Cohort(models.Model):
     def get_owner(self):
         return self.cohort_perms_set.filter(perm=Cohort_Perms.OWNER)[0].user
 
+    def is_public(self):
+        isbuser = User.objects.get(username='isb', is_superuser=True)
+        return (self.cohort_perms_set.filter(perm=Cohort_Perms.OWNER)[0].user_id == isbuser.id)
+
+
     '''
     Returns a list of filters used on this cohort and all of its parents that were created using a filters.
 

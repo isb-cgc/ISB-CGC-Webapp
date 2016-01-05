@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% load custom_tags %}
+{% load cohort_filters %}
+{% load project_custom_tags %}
 {#{% load tz %}#}
 {% block header %}
 {% endblock %}
@@ -70,26 +72,27 @@
     </section>
     <section class="panel panel-default">
         <div class="panel-heading">
-            <h3 class="panel-title">Saved Workbooks ({{ user.workbook_last_view_set.all|length }})</h3>
+            <h3 class="panel-title">
+                <a href="{% url 'workbooks' %}">Saved Workbooks ({{ workbooks.count }})</a></h3>
         </div>
         <div class="panel-body">
             <p>Workbooks store the Analyses you create -- and their related data.</p>
             <ul class="table-list">
-            {% if user.workbook_last_view_set.all|length > 0 %}
-                {% for wlv in user.workbook_last_view_set.all|dictsortreversed:'last_view'|slice:':6'  %}
+            {% if workbooks.count > 0 %}
+                {% for workbook in workbooks|sort_last_view:'workbook'|slice:':6'  %}
                     <li>
-                        <a href="{% url 'workbook_detail' wlv.workbook.id %}">
+                        <a href="{% url 'workbook_detail' workbook.id %}">
                             <div class="list-main">
-                                <h5 class="list-title">{{ wlv.workbook.name|title }}</h5>
-                                <p>{{ wlv.workbook.description }}</p>
+                                <h5 class="list-title">{{ workbook.name|title }}</h5>
+                                <p>{{ workbook.description }}</p>
                             </div>
                             <div class="list-info">
-                               {{ wlv.workbook.last_date_saved }}
+                               {{ workbook.last_date_saved }}
                             </div>
                         </a>
                     </li>
                 {% endfor %}
-                {% if user.workbook_last_view_set.all|length > 6 %}
+                {% if user.workbook_set.all|active|length > 6 %}
                 <a class="btn btn-link" href="{% url 'workbooks' %}">View All</a>
                 {% endif %}
             {% endif %}
@@ -100,27 +103,28 @@
                 {% csrf_token %}
                  <button type="submit" class="btn btn-primary" ><i class="fa fa-plus"></i>Create a New Workbook</button>
              </form>
-            <a class="btn btn-link" href="{% url 'workbooks' %}">Sample Workbooks</a>
+            <a class="btn btn-link" href="{% url 'workbook_samples' %}">Sample Workbooks</a>
         </div>
     </section>
     <div class="row">
         <div class="col-md-6">
             <section class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Gene Favorites ({{ user.genefavorite_last_view_set.all|active:'genefavorite'|length }})</h3>
+                    <h3 class="panel-title">
+                        <a href="{% url 'genes' %}">Gene Favorites ({{ user.genefavorite_set.all|active|length }})</a></h3>
                 </div>
                 <div class="panel-body">
-                    {% if user.genefavorite_last_view_set.all|active:'genefavorite'|length > 0 %}
+                    {% if user.genefavorite_set.all|active|length > 0 %}
                     <ul class="table-list">
-                        {% for glv in user.genefavorite_last_view_set.all|active:'genefavorite'|slice:':6' %}
+                        {% for genefavorite in user.genefavorite_set.all|active|sort_last_view:'genefavorite'|slice:':6' %}
                         <li>
-                            <a href="{% url 'genes_detail' glv.genefavorite.id %}">
-                               <p class="list-title">{{ glv.genefavorite.name }}</p>
+                            <a href="{% url 'genes_detail' genefavorite.id %}">
+                               <p class="list-title">{{ genefavorite.name }}</p>
                             </a>
                         </li>
                         {% endfor %}
                     </ul>
-                        {% if user.genefavorite_last_view_set.all|active:'genefavorite'|length > 6 %}
+                        {% if user.genefavorite_set.all|active|length > 6 %}
                         <a href="{% url 'genes' %}" class="btn btn-link">View All</a>
                         {% endif %}
                     {% else %}
@@ -131,22 +135,23 @@
             </section>
             <section class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Variable Favorites ({{ user.variablefavorite_last_view_set.all|active:'variablefavorite'|length }})</h3>
+                    <h3 class="panel-title">
+                        <a href="{% url 'variables' %}">Variable Favorites ({{ user.variablefavorite_set.all|active|length }})</a></h3>
                 </div>
                 <div class="panel-body">
-                    {% if user.variablefavorite_last_view_set.all|active:'variablefavorite'|length > 0 %}
+                    {% if user.variablefavorite_set.all|active|length > 0 %}
                     <ul class="table-list">
-                        {% for vlv in user.variablefavorite_last_view_set.all|active:'variablefavorite'|slice:':6' %}
+                        {% for variablefavorite in user.variablefavorite_set.all|active|sort_last_view:'variablefavorite'|slice:':6' %}
                            <li>
-                               <a href="{% url 'variable_fav_detail' vlv.variablefavorite.id %}">
+                               <a href="{% url 'variable_fav_detail' variablefavorite.id %}">
                                    <p class="list-title">
-                                       {{ vlv.variablefavorite.name }}
+                                       {{ variablefavorite.name }}
                                    </p>
                                </a>
                            </li>
                         {% endfor %}
-                        {% if user.variablefavorite_last_view_set.all|active:'variablefavorite'|length > 6 %}
-                        <a href="{% url 'genes' %}" class="btn btn-link">View All</a>
+                        {% if user.variablefavorite_set.all|active|length > 6 %}
+                        <a href="{% url 'variables' %}" class="btn btn-link">View All</a>
                         {% endif %}
                     </ul>
                     {% else %}
@@ -158,25 +163,25 @@
             <section class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">
-                    <a href="{% url 'cohort_list' %}">Saved Cohorts ({{ user.cohort_last_view_set.all|active:'cohort'|length }})</a></h3>
+                    <a href="{% url 'cohort_list' %}">Saved Cohorts ({{ cohorts.count }})</a></h3>
                 </div>
                 <div class="panel-body">
-                    {% if user.cohort_last_view_set.all|active:'cohort'|length > 0 %}
+                    {% if cohorts.count > 0 %}
                     <ul class="table-list">
-                        {% for clv in user.cohort_last_view_set.all|active:'cohort'|dictsortreversed:'last_view'|slice:':6' %}
+                        {% for cohort in cohorts|sort_last_view:'cohort'|slice:':6' %}
                            <li>
-                               <a href="{% url 'cohort_details' clv.cohort.id %}">
+                               <a href="{% url 'cohort_details' cohort.id %}">
                                    <div class="list-main">
-                                       <span class="list-title">{{ clv.cohort.name }}</span>
+                                       <span class="list-title">{{ cohort.name }}</span>
                                    </div>
 
                                    <div class="list-info">
-                                       <span>{{ clv.cohort.last_date_saved }}</span>
+                                       <span>{{ cohort.last_date_saved }}</span>
                                    </div>
                                </a>
                            </li>
                         {% endfor %}
-                        {% if user.cohort_last_view_set.all|active:'cohort'|length > 6 %}
+                        {% if cohorts.count > 6 %}
                             <a class="btn btn-link" href="{% url 'cohort_list' %}">View all</a>
                         {% endif %}
                     </ul>
@@ -190,35 +195,37 @@
         <div class="col-md-6">
             <section class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Saved Projects ({{ user.project_last_view_set.all|active:'project'|length }})</h3>
+                    <h3 class="panel-title">
+                        <a href="{% url 'projects' %}">Saved Projects ({{ projects.count }})</a></h3>
                 </div>
                 <div class="panel-body">
                     <p>You can upload from your own research projects.</p>
-                    {% if user.project_last_view_set.all|active:'project'|length > 0 %}
+                    {% if projects.count > 0 %}
                     <ul class="table-list">
-                        {% for plv in user.project_last_view_set.all|active:'project'|slice:':6' %}
+                        {% for project in projects|sort_last_view:'project'|slice:':6' %}
                            <li>
-                               <a href="{% url 'project_detail' plv.project.id %}">
-                                   <p class="list-title">{{ plv.project.name }}</p>
-                                   {% if plv.project.description %}
-                                    <p>{{ plv.project.description }}</p>
+                               <a href="{% url 'project_detail' project.id %}">
+                                   <p class="list-title">{{ project.name }}</p>
+                                   {% if project.description %}
+                                    <p>{{ project.description|slice:':65' }}{% if project.description|length > 65 %}&hellip;{% endif %}</p>
                                    {% endif %}
                                </a>
                            </li>
                         {% endfor %}
-                        {% if user.project_last_view_set.all|active:'project'|length > 6 %}
+                        {% if user.project_set.all|active|length > 6 %}
                             <a class="btn btn-link" href="{% url 'projects' %}">View all</a>
                         {% endif %}
                     </ul>
                     {% endif %}
                 </div>
                 <div class="panel-footer">
-                    <button class="btn btn-primary"><i class="fa fa-cloud-upload"></i>Upload Project Data</button>
+                    <a href="{% url 'project_upload' %}" class="btn btn-primary"><i class="fa fa-cloud-upload"></i>Upload Project Data</a>
                 </div>
             </section>
             <section class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Public Data ({{ user.project_last_view_set.all|active:'project'|is_public:'project'|length }})</h3>
+                    <h3 class="panel-title">
+                        <a href="{% url 'public_projects' %}">Public Data ({% public_project_count %})</a></h3>
                 </div>
                 <div class="panel-body">
                     <p>Browse publicly-available studies and data</p>

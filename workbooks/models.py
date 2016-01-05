@@ -8,6 +8,7 @@ from variables.models import Variable
 from genes.models import Gene
 from projects.models import Project, Study
 from cohorts.models import Cohort, Cohort_Perms
+from sharing.models import Shared_Resource
 from django.utils import formats
 
 # Create your models here.
@@ -22,26 +23,25 @@ class Workbook(models.Model):
     last_date_saved = models.DateTimeField(auto_now_add=True)
     objects = WorkbookManager()
     is_public = models.BooleanField(default=False)
+    owner = models.ForeignKey(User)
+    active = models.BooleanField(default=True)
+    shared = models.ManyToManyField(Shared_Resource)
+    is_public = models.BooleanField(default=False)
 
     @classmethod
     def deep_get(cls, id):
         workbook_model            = cls.objects.get(id=id)
         workbook_model.owner      = workbook_model.get_owner()
         workbook_model.worksheets = workbook_model.get_deep_worksheets()
-        workbook_model.shares     = workbook_model.get_shares()
+        workbook_model.shares     = workbook_model.shared
 
         return workbook_model
 
     @classmethod
     def create(cls, name, description, user):
-        workbook_model = cls.objects.create(name=name, description=description)
+        workbook_model = cls.objects.create(name=name, description=description, owner=user)
         workbook_model.save()
 
-        #create permissions for that workbook
-        workbook_perm_model = Workbook_Perms.objects.create(workbook = workbook_model,
-                                                      user = user,
-                                                      perm = Workbook_Perms.OWNER)
-        workbook_perm_model.save()
         return workbook_model
 
     @classmethod
@@ -86,16 +86,9 @@ class Workbook(models.Model):
         return workbook_model
 
     @classmethod
-    def share(cls, id, user_array):
-        workbook_model = cls.objects.get(id=id)
-        #validate user array
-        #if the user does nto exist then send an email
-        return workbook_model
-
-    @classmethod
     def get_owner(cls, id):
         workbook_model = cls.objects.get(id=id)
-        return workbook_model.get_owner()
+        return workbook_model.owner
 
     '''
     Sets the last viewed time for a workbook
@@ -115,7 +108,7 @@ class Workbook(models.Model):
         return last_view
 
     def get_owner(self):
-        return self.workbook_perms_set.filter(perm=Workbook_Perms.OWNER)[0].user
+        return self.owner
 
     def get_worksheets(self):
         return self.worksheet_set.filter(workbook=self)
@@ -137,15 +130,13 @@ class Workbook(models.Model):
             #                        }
         return worksheets
 
-    def get_shares(self):
-        return self.workbook_perms_set.filter(perm=Workbook_Perms.READER)
-
 class Workbook_Last_View(models.Model):
     workbook = models.ForeignKey(Workbook, blank=False)
     user = models.ForeignKey(User, null=False, blank=False)
     test = models.DateTimeField(auto_now_add=True, null=True)
     last_view = models.DateTimeField(auto_now_add=True, auto_now=True)
 
+# Deprecated. Left in for the conversion
 class Workbook_Perms(models.Model):
     READER = 'READER'
     OWNER = 'OWNER'
@@ -221,8 +212,7 @@ class Worksheet(models.Model):
         Worksheet_cohort.create(self.id, cohort)
 
     def remove_cohort(self, cohort):
-        Worksheet_cohort.object.get(cohort = cohort)
-        Worksheet_cohort.destroy()
+        self.worksheet_cohort_set.get(cohort=cohort).destroy()
 
     def set_plot(self, title, type):
         if self.plot :
@@ -317,14 +307,14 @@ class Worksheet_gene(models.Model):
         workbook_owner = Workbook.objects.get(id=workbook_id).get_owner()
         if workbook_owner.id == user.id :
             worksheet_model = Worksheet.objects.get(id=worksheet_id)
-            #TODO delete all then resave not the most efficient
+
             genes = Worksheet_gene.objects.filter(worksheet=worksheet_model)
             for gene in genes :
                 gene.destroy();
 
             results = []
             for gene in gene_list :
-                results.append(Worksheet_gene.create(worksheet_id, gene))
+                results.append(Worksheet_gene.create(worksheet_id=worksheet_model.id, gene=gene))
 
             return_obj = {
                 'variables' : results,
@@ -383,8 +373,8 @@ class Worksheet_variable(models.Model):
     def edit_list(cls, workbook_id, worksheet_id, variable_list, user):
         workbook_owner = Workbook.objects.get(id=workbook_id).get_owner()
         if workbook_owner.id == user.id :
-            worksheet_model = Worksheet.objects.get(id=worksheet_id
-                                                    )
+            worksheet_model = Worksheet.objects.get(id=worksheet_id)
+
             #TODO delete all then resave not the most efficient
             variables = Worksheet_variable.objects.filter(worksheet=worksheet_model)
             for var in variables :
@@ -405,6 +395,14 @@ class Worksheet_variable(models.Model):
 
     @classmethod
     def create(cls, worksheet, variable):
+        if type(variable) is not dict :
+            dict_variable = {'project_id' : '-1', 'study_id' : '-1', 'name' : variable.name, 'code' : variable.code}
+            if variable.project :
+                dict_variable['project_id'] = variable.project.id
+            if variable.project :
+                dict_variable['study_id'] = variable.study.id
+            variable = dict_variable
+
         if variable['project_id'] == '-1' and variable['study_id'] == '-1' :
             worksheet_variable_model = cls.objects.create(worksheet_id = worksheet.id,
                                                           name = variable['name'],
@@ -499,10 +497,7 @@ class Worksheet_plot(models.Model):
 @admin.register(Workbook)
 class WorkbookAdmin(admin.ModelAdmin):
     list_display = ('id','name','description','date_created','last_date_saved')
-
-@admin.register(Workbook_Perms)
-class WorkbookPermAdmin(admin.ModelAdmin):
-    list_display = ('id','workbook', 'perm','user')
+    exclude = ('shared',)
 
 @admin.register(Worksheet)
 class WorksheetAdmin(admin.ModelAdmin):

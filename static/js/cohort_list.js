@@ -60,6 +60,8 @@ require([
         }
     });
 
+
+
     var delete_x_callback = function () {
         $(this).parent('.cohort-label').remove();
         return false;
@@ -71,20 +73,23 @@ require([
         $('.selected-cohorts').empty();
 
         $('.viz-cohort-select').each(function() { $(this).empty(); });
+        $('#cohort-apply-to-workbook input[name=cohorts]').remove();
     };
 
     var disable_buttons = function(tablename){
         $(tablename).parent().find('.page-action-group .btn').prop('disabled', 'disabled');
+        $('#cohort-apply-to-workbook .btn').prop('disabled', 'disabled');
     };
     var enable_buttons = function(tablename){
         $(tablename).parent().find('.page-action-group .btn').removeAttr('disabled');
+        $('#cohort-apply-to-workbook .btn').removeAttr('disabled');
     };
     var repopulate_cohort_selects = function() {
         $('#cohorts-list tr:not(:first)').each(function() {
             var id = $(this).find('input').val();
             var name = $(this).find('.name-col a').html();
             var option = $('<option value="' + id + '">' + name + '</option>');
-            $('.viz-cohort-select').each(function() {
+            $('.viz-cohort-select').each(function () {
                 if ($(this).parent().find('.viz-cohort-select:first')[0] != this
                     && $(this).has('.none-value').length == 0) {
                     $(this).append($('<option class="none-value" value="">None</option>'));
@@ -141,9 +146,11 @@ require([
 
         } else {
             enable_buttons(tablename);
+            var formApply = $('#cohort-apply-to-workbook');
             $('#cohorts-list input[type="checkbox"]').each(function() {
                 if ($(this).is(':checked') && $(this).val() != 'on') {
 
+                    formApply.append($('<input>', {type: 'hidden', name: 'cohorts', value: $(this).val()}));
                     ids.push($(this).val());
                     var option = $('<option value="' + $(this).val() + '">' + $(this).parents('tr').find('.name-col a').html() + '</option>');
                     var token_str = '<span class="cohort-label label label-default space-right-5" value="'

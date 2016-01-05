@@ -1,6 +1,8 @@
 {% load staticfiles %}
 {% load cohort_filters %}
 {% load custom_tags %}
+{% load project_custom_tags %}
+{% load workbook_custom_tags %}
 
 <header class="navbar navbar-fixed-top site-header" role="header">
     <nav class="container">
@@ -76,7 +78,7 @@
                         </ul>
                     </li>
                     {% endif %}
-                    <li class="menu-item"><a href="{% url 'workbooks' %}">Saved Workbooks ( {{ user.workbook_last_view_set.all|length }} )</a></li>
+                    <li class="menu-item"><a href="{% url 'workbooks' %}">Saved Workbooks ( {% user_workbook_count %} )</a></li>
                     <li class="menu-item">
                         <form action="{% url 'workbook_create' %}" method="POST">
                             {% csrf_token %}
@@ -120,9 +122,9 @@
                         </ul>
                     </li>
                     {% endif %}
-                    <li class="menu-item"><a href="{% url 'projects' %}">Saved Projects ( {{ user.project_last_view_set.all|active:'project'|length }}  )</a></li>
+                    <li class="menu-item"><a href="{% url 'projects' %}">Saved Projects ( {% user_project_count %} )</a></li>
                     <li class="menu-item"><a href="{% url 'project_upload' %}">Upload Project Data</a></li>
-                    <li class="menu-item"><a href="{% url 'projects' %}">Public Projects ({{ user.project_last_view_set.all|active:'project'|is_public:'project'|length}})</a></li>
+                    <li class="menu-item"><a href="{% url 'public_projects' %}">Public Projects ( {% public_project_count %} )</a></li>
                 </ul>
             </li>
             <li class="menu-item has-drop-down">
@@ -220,7 +222,7 @@
                     {% endif %}
                     <li class="menu-item"><a href="{% url 'genes' %}">Manage Gene Favorite ( {{ user.genefavorite_last_view_set.all|active:'genefavorite'|length }} )</a></li>
                     <li class="menu-item"><a href="{% url 'gene_fav_create' %}">Create Gene Favorite(s)</a></li>
-                    <li class="menu-item"><a href="{% url 'gene_select_and_create_workbook' %}">Select Genes for a New Workbook</a></li>
+                    <li class="menu-item"><a href="{% url 'gene_select_for_new_workbook' %}">Select Genes for a New Workbook</a></li>
                 </ul>
             </li>
             <li class="menu-item has-drop-down">
@@ -260,7 +262,7 @@
                     {% endif %}
                     <li class="menu-item"><a href="{% url 'variables' %}">Manage Variables Favorite ( {{ user.variablefavorite_last_view_set.all|active:'variablefavorite'|length }} )</a></li>
                     <li class="menu-item"><a href="{% url 'variable_fav_create' %}">Create Favorite Variable(s)</a></li>
-                    <li class="menu-item"><a href="{% url 'select_and_create_workbook' %}">Select Variables for a New Workbook</a></li>
+                    <li class="menu-item"><a href="{% url 'variable_select_for_new_workbook' %}">Select Variables for a New Workbook</a></li>
                 </ul>
             </li>
             <li class="menu-item has-drop-down">
@@ -297,8 +299,8 @@
                         </ul>
                     </li>
                     {% endif %}
-                    <li class="menu-item"><a href="{% url 'cohort_list' %}">Manage Saved Cohorts ({{ user.cohort_perms_set.all|active:'cohort'|cohort_owner_permission|length }})</a></li>
-                    <li class="menu-item"><a href="{% url 'cohort_list' %}">Public Cohorts (1)</a></li>
+                    <li class="menu-item"><a href="{% url 'cohort_list' %}">Manage Saved Cohorts ( {{ user.cohort_perms_set.all|active:'cohort'|cohort_owner_permission|length }} )</a></li>
+                    <li class="menu-item"><a href="{% url 'public_cohort_list' %}">Public Cohorts ( {% public_cohort_count %} )</a></li>
                     <li class="menu-item"><a href="{% url 'cohort_select_for_new_workbook' %}">Select Cohort for a New Workbook</a></li>
                 </ul>
             </li>

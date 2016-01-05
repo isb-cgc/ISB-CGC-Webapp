@@ -38,6 +38,7 @@
                     {% for workbook in workbooks %}
                         <tr>
                             <td class="control-col">
+                                {% if workbook.owner.id == user.id %}
                                 <div class="dropdown">
                                     <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
                                     <ul class="dropdown-menu">
@@ -50,10 +51,15 @@
                                         {% endif %}
                                     </ul>
                                 </div>
+                                {% endif %}
                             </td>
                             <td class="name-col"><a href="{% url 'workbook_detail' workbook.id %}">{{ workbook.name }}</a></td>
-                            <td> {{ workbook.worksheets|length }}</td>
-                            <td> {{ workbook.owner.first_name }} {{ workbook.owner.last_name }}</td>
+                            <td> {{ workbook.worksheet_set.count }}</td>
+                            <td>{% if workbook.owner.id == user.id %}
+                                You
+                            {% else %}
+                                {{ workbook.owner.first_name }} {{ workbook.owner.last_name }}
+                            {% endif %}</td>
                             <td> {{ workbook.last_date_saved}}</td>
                         </tr>
                     {% endfor %}
