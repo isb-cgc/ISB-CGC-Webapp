@@ -17,6 +17,7 @@ limitations under the License.
 """
 
 import io
+import re
 import json
 import StringIO
 import csv
@@ -36,12 +37,14 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.conf import settings
+from django.http import StreamingHttpResponse
 
 from googleapiclient import http
 from googleapiclient.errors import HttpError
+from googleapiclient.http import MediaIoBaseDownload
 from google_helpers.directory_service import get_directory_resource
 from google_helpers.reports_service import get_reports_resource
-from google_helpers.storage_service import get_storage_resource
+from google_helpers.storage_service import get_storage_resource, get_special_storage_resource
 from google_helpers.resourcemanager_service import get_crm_resource
 from google_helpers.logging_service import get_logging_resource
 from google.appengine.api.taskqueue import Task, Queue
@@ -529,3 +532,107 @@ def log_acls(request):
     write_log_entry('bucket_defacls', defacls)
 
     return HttpResponse('')
+
+
+@login_required
+def metrics_cloudsql_users(request, start_date, end_date):
+    if not request.user.is_superuser:
+        return HttpResponse('You need to be logged in as a superuser.')
+
+    assert start_date.isdigit(), "{} is not a digit".format(start_date)
+    assert end_date.isdigit(), "{} is not a digit".format(end_date)
+    assert len(start_date) == 6, "start_date must be of the form yymmdd"
+    assert len(end_date) == 6, "end_date must be of the form yymmdd"
+    assert int(end_date) > int(start_date), "end_date must be later than start_date"
+
+    user_metrics_dict = {}
+
+    # convert to date
+    start_date = datetime.datetime.strptime("20" + start_date, "%Y%m%d")
+    end_date = datetime.datetime.strptime("20" + end_date, "%Y%m%d")
+
+    parse_cloudsql_logs(user_metrics_dict, start_date, end_date)
+
+    csv_response = write_user_metrics_csv_file(user_metrics_dict)
+    csv_response['Content-Disposition'] = 'attachment; filename="Users from {} to {}.csv"'.format(start_date, end_date)
+
+    # return HttpResponse('<pre>'+json.dumps(user_metrics_dict, indent=4)+'</pre>')
+    return csv_response
+
+def parse_cloudsql_logs(user_metrics_dict, start_date, end_date):
+
+    storage_client = get_special_storage_resource()
+
+    date_range = (end_date - start_date).days
+
+    for day_delta in range(date_range+1):
+        day = start_date + datetime.timedelta(days=day_delta)
+        day = day.strftime("%y%m%d")
+        user_metrics_dict[day] = {}
+        req = storage_client.objects().get_media(
+            bucket='isb-cgc_logs', object='cloudsql_activity_log_{}.txt'.format(day))
+        try:
+            fh = io.BytesIO()
+            downloader = MediaIoBaseDownload(fh, req, chunksize=1024*1024)
+            done = False
+            while not done:
+                status, done = downloader.next_chunk()
+
+        # throws HttpError if this file is not found
+        except HttpError, e:
+            print >> sys.stderr, e
+        else:
+            write_user_activity(fh.getvalue(), user_metrics_dict[day])
+
+
+def write_user_activity(log_str, user_metrics_current_day):
+    user_metrics_current_day['new_users'] = []
+    new_user_index_list = [m.start() for m in re.finditer('### INSERT INTO `prod`.`auth_user`', log_str)]
+
+    for i in new_user_index_list:
+        new_user_email_start_index = log_str.find("@8='", i) + 4
+        new_user_email_end_index = log_str.find("'", new_user_email_start_index)
+        new_user_email = log_str[new_user_email_start_index:new_user_email_end_index]
+        user_metrics_current_day['new_users'].append(new_user_email)
+
+    user_metrics_current_day['old_users'] = {}
+    old_user_index_list = [m.start() for m in re.finditer('### UPDATE `prod`.`auth_user`', log_str)]
+
+    for i in old_user_index_list:
+        old_user_email_start_index = log_str.find("@8='", i) + 4
+        old_user_email_end_index = log_str.find("'", old_user_email_start_index)
+        old_user_email = log_str[old_user_email_start_index:old_user_email_end_index]
+        if old_user_email not in user_metrics_current_day['new_users']:
+            if old_user_email not in user_metrics_current_day['old_users'].keys():
+                user_metrics_current_day['old_users'][old_user_email] = []
+            old_user_last_login_start_index = log_str.find("@3=", old_user_email_end_index) + 3
+            old_user_last_login_end_index = log_str.find("\r\n", old_user_last_login_start_index)
+            old_user_login_date = log_str[old_user_last_login_start_index:old_user_last_login_end_index]
+            user_metrics_current_day['old_users'][old_user_email].append(old_user_login_date)
+
+
+def write_user_metrics_csv_file(user_metrics_dict):
+    rows = ()
+    rows = (["Date", "Number of New Users", "Number of Returning Users"],)
+    for date in user_metrics_dict.keys():
+        rows += ([
+                    str(date),
+                    str(len(user_metrics_dict[date].get('new_users', []))),
+                    str(len(user_metrics_dict[date].get('old_users', {}).keys()))
+                 ],)
+
+    pseudo_buffer = Echo()
+    writer = csv.writer(pseudo_buffer)
+    response = StreamingHttpResponse((writer.writerow(row) for row in rows),
+                                         content_type="text/csv")
+
+    return response
+
+
+class Echo(object):
+    """An object that implements just the write method of the file-like
+    interface.
+    """
+    def write(self, value):
+        """Write the value by returning it, instead of storing in a buffer."""
+        return value

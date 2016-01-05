@@ -39,3 +39,10 @@ def get_storage_resource(perms=None):
     http = credentials.authorize(http)
     # print credentials.to_json()
     return discovery.build('storage', 'v1', http=http)
+
+
+def get_special_storage_resource():
+
+    credentials = GoogleCredentials.from_stream(
+        settings.GOOGLE_APPLICATION_CREDENTIALS).create_scoped(STORAGE_SCOPES)
+    return discovery.build('storage', 'v1', credentials=credentials)
