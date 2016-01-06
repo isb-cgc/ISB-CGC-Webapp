@@ -118,7 +118,7 @@
                     <ul class="table-list">
                         {% for genefavorite in user.genefavorite_set.all|active|sort_last_view:'genefavorite'|slice:':6' %}
                         <li>
-                            <a href="{% url 'genes_detail' genefavorite.id %}">
+                            <a href="{% url 'gene_fav_detail' genefavorite.id %}">
                                <p class="list-title">{{ genefavorite.name }}</p>
                             </a>
                         </li>
