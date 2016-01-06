@@ -84,12 +84,12 @@
                         <li role="menuitem">
                             <input type="submit" value="Apply to Worksheet" class="btn btn-primary"/>
                         </li>
-                        <li role="menuitem"><a href="{% url 'genes' %}">Cancel</a></li>
+                        <li role="menuitem"><a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Cancel</a></li>
                     {% else %}
                         <li role="menuitem">
                             <input type="submit" value="Save as Favorite" class="btn btn-primary"/>
                         </li>
-                        <li role="menuitem"><a href="{% url 'genes' %}">Cancel</a></li>
+                        <li role="menuitem"><a href="{% url 'gene_select_for_new_workbook' %}">Cancel</a></li>
                     {% endif %}
                     <menuitem class="btn btn-link pull-right"><a href="">View System Gene Identifiers</a></menuitem>
                 </ul>
