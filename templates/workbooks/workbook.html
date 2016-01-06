@@ -124,9 +124,9 @@
                                         <span>Genes </span>
                                         {% endif %}
                                     </div>
-                                    {% if worksheet.genes %}
+                                    {% if worksheet.worksheet_gene_set.count > 0 %}
                                     <ul class="list-item__body">
-                                        {% with worksheet.genes|how_many_more:6 as num_more  %}
+                                        {% with worksheet.worksheet_gene_set.all|how_many_more:6 as num_more  %}
                                             {% for gene in worksheet.genes %}
                                                 {% if forlook.counter0 < 6 %}
                                                     <li class="sublist-item">{{ gene.gene|upper }}</li>
@@ -150,9 +150,9 @@
                                         <span>Variables </span>
                                         {% endif %}
                                     </div>
-                                    {% if worksheet.variables %}
+                                    {% if worksheet.worksheet_variable_set.count > 0 %}
                                     <ul class="list-item__body">
-                                        {% with worksheet.variables|how_many_more:6 as num_more  %}
+                                        {% with worksheet.worksheet_variable_set.all|how_many_more:6 as num_more  %}
                                             {% for variable in worksheet.variables %}
                                                 {% if forlook.counter0 < 6 %}
                                                     <li class="sublist-item">{{ variable.name|upper }}</li>
