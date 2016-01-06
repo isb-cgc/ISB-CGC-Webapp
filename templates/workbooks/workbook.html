@@ -49,7 +49,7 @@
          <!-- tabs of worksheets -->
         <ul class="nav nav-tabs_excel" id="worksheets-tabs">
             <!-- for each worksheet in workbook -->
-            {% for worksheet in workbook.worksheet_set.all %}
+            {% for worksheet in workbook.worksheets %}
                 {% if forloop.counter < 4 %}
                     <li class="{% if display_worksheet and display_worksheet.id == worksheet.id %} active {% elif not display_worksheet and forloop.counter == 1 %} active {% endif %}">
                          <a href="#{{ worksheet.id }}" data-toggle="tab">{{ worksheet.name }}</a>
@@ -102,7 +102,7 @@
         </ul>
         <div class="tab-content">
              <!-- for each worksheet in workbook -->
-             {% for worksheet in workbook.worksheet_set.all %}
+             {% for worksheet in workbook.worksheets %}
                  <div class="worksheet tab-pane fade {% if not display_worksheet and forloop.counter == 1 %} in active{% elif display_worksheet and display_worksheet.id == worksheet.id %} in active {% endif %}" id="{{ worksheet.id }}" >
                      <!-- worksheet description -->
                      <div class="worksheet-header">
