@@ -107,6 +107,8 @@ SETTINGS = {
     # Cloud Storage Buckets
     'OPEN_DATA_BUCKET': os.environ.get('OPEN_DATA_BUCKET'),
     'CONTROLLED_DATA_BUCKET': os.environ.get('CONTROLLED_DATA_BUCKET'),
+    'DCC_CONTROLLED_DATA_BUCKET': os.environ.get('DCC_CONTROLLED_DATA_BUCKET'),
+    'CGHUB_CONTROLLED_DATA_BUCKET': os.environ.get('CGHUB_CONTROLLED_DATA_BUCKET'),
 
     # IGV Project ID
     'IGV_PROJECT_ID': os.environ.get('IGV_PROJECT_ID'),
