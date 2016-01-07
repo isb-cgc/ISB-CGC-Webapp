@@ -81,7 +81,7 @@ class Workbook(models.Model):
 
         worksheets = workbook_model.get_worksheets()
         for worksheet in worksheets:
-            worksheet.destroy()
+            Worksheet.destroy(id=worksheet.id)
 
         workbook_model.delete()
         return workbook_model
@@ -121,6 +121,8 @@ class Workbook(models.Model):
             worksheet.variables = worksheet.get_variables()
             worksheet.genes     = worksheet.get_genes()
             worksheet.cohorts   = worksheet.get_cohorts()
+
+            worksheet.active_plot = worksheet.worksheet_plot_set.filter(active=True)
             # worksheet.plot      = {'title'  : "default title",
             #                        'type'   : "default type",
             #                        'xaxis'  : {'selected'   : None,
@@ -158,7 +160,6 @@ class Worksheet(models.Model):
     name            = models.CharField(max_length=2024, blank=False)
     description     = models.CharField(max_length=2024, null=False)
     workbook        = models.ForeignKey(Workbook, null=False, blank=False)
-    plot            = models.ForeignKey('Worksheet_plot', null=True, blank=True)
     last_date_saved = models.DateTimeField(auto_now_add=True)
     date_created    = models.DateTimeField(auto_now_add=True)
     objects         = WorksheetManager()
@@ -170,7 +171,7 @@ class Worksheet(models.Model):
         worksheet_model.worksheet_comment_set.all().delete()
         worksheet_model.worksheet_variable_set.all().delete()
         worksheet_model.worksheet_gene_set.all().delete()
-        #worksheet_model.worksheet_plot_set.all().delete()
+        worksheet_model.worksheet_plot_set.all().delete()
         worksheet_model.delete()
         return worksheet_model
 
@@ -220,15 +221,20 @@ class Worksheet(models.Model):
     def remove_cohort(self, cohort):
         self.worksheet_cohort_set.get(cohort=cohort).destroy()
 
-    def set_plot(self, title, type):
-        if self.plot :
-            self.plot.delete()
+    def get_plot(self):
+        return self.worksheet_plot_set.filter(worksheet=self)[0]
 
-        plot = Worksheet_plot(title=title, type=type)
+    def set_plot(self, type):
+        #currently there is only of each plot type in a worksheet
+        for p in self.worksheet_plots_set.filter(worksheet=self, type=type) :
+            p.delete()
+
+        for p in self.worksheet_plots_set.filter(worksheet=self, active=True):
+            p.active = False
+            p.save()
+
+        plot = Worksheet_plot(type=type, worksheet=self, active=True)
         plot.save()
-        self.plot = plot
-        self.save();
-
 
 class Worksheet_Cohort_Manager(models.Manager):
     content = None
@@ -405,7 +411,6 @@ class Worksheet_variable(models.Model):
             if variable.project :
                 dict_variable['study_id'] = variable.study.id
             variable = dict_variable
-
         if variable['project_id'] == '-1' and variable['study_id'] == '-1' :
             worksheet_variable_model = cls.objects.create(worksheet_id = worksheet.id,
                                                           name = variable['name'],
@@ -490,10 +495,10 @@ class Worksheet_plot(models.Model):
     id              = models.AutoField(primary_key=True)
     date_created    = models.DateTimeField(auto_now_add=True)
     modified_date   = models.DateTimeField(auto_now=True)
-    title           = models.CharField(max_length=100,  null=False)
     color_by        = models.CharField(max_length=1024, null=True)
     type            = models.CharField(max_length=1024, null=True)
-    #worksheet       = models.ForeignKey(Worksheet, blank=False, null=False)
+    worksheet       = models.ForeignKey(Worksheet, blank=False, null=True)
+    active          = models.BooleanField(default=True)
     x_axis          = models.ForeignKey(Worksheet_variable, blank=True, null=True, related_name="worksheet_plot.x_axis")
     y_axis          = models.ForeignKey(Worksheet_variable, blank=True, null=True, related_name="worksheet_plot.y_axis")
     objects         = Worksheet_Plot_Manager()

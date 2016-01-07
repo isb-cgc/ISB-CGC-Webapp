@@ -9,13 +9,14 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.http import StreamingHttpResponse
 from django.http import HttpResponse, JsonResponse
-from models import Cohort, Workbook, Worksheet, Worksheet_comment, Worksheet_variable, Worksheet_gene, Worksheet_cohort
+from models import Cohort, Workbook, Worksheet, Worksheet_comment, Worksheet_variable, Worksheet_gene, Worksheet_cohort, Worksheet_plot
 from variables.models import VariableFavorite, Variable
 from genes.models import GeneFavorite
 from projects.models import Project
 from sharing.service import create_share
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from django.core import serializers
 debug = settings.DEBUG
 if settings.DEBUG :
     import sys
@@ -125,7 +126,7 @@ def workbook(request, workbook_id=0):
 
     elif request.method == "GET" :
         if workbook_id:
-            ownedWorkbooks = request.user.workbook_set.all().filter(active=True)
+            ownedWorkbooks  = request.user.workbook_set.all().filter(active=True)
             sharedWorkbooks = Workbook.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
             publicWorkbooks = Workbook.objects.all().filter(is_public=True,active=True)
 
@@ -138,7 +139,7 @@ def workbook(request, workbook_id=0):
             is_shareable = (workbook_model.owner.id == request.user.id)
 
             if is_shareable:
-                for worksheet in workbook_model.get_deep_worksheets():
+                for worksheet in workbook_model.worksheets:
                     # Check all cohorts are owned by the user
                     for cohort in worksheet.cohorts:
                         if cohort.get_owner().id != request.user.id and not cohort.is_public():
@@ -247,7 +248,6 @@ def worksheet_variables(request, workbook_id=0, worksheet_id=0, variable_id=0):
                 json_response = True
                 name          = json.loads(request.body)['name']
                 variable_list = json.loads(request.body)['variables']
-
                 variable_favorite_result = VariableFavorite.create(name       = name,
                                                                    variables  = variable_list,
                                                                    user       = request.user)
@@ -371,6 +371,101 @@ def worksheet_genes(request, workbook_id=0, worksheet_id=0, genes_id=0):
     else :
         redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_model.id, 'worksheet_id': worksheet_model.id})
         return redirect(redirect_url)
+
+@login_required
+def workbook_create_with_plot(request):
+    return worksheet_plots(request=request)
+
+@login_required
+def worksheet_plots(request, workbook_id=0, worksheet_id=0, plot_id=0):
+    command  = request.path.rsplit('/',1)[1];
+    json_response = False
+    default_name  = "Untitled Workbook"
+    result        = {}
+
+    if request.method == "POST" :
+        if command == "delete" :
+            #Worksheet_gene.destroy(workbook_id=workbook_id, worksheet_id=worksheet_id, id=variable_id, user=request.user)
+            result['message'] = "variables have been deleted from workbook"
+        else :
+            variables = []
+            #from Edit Page
+            if "variables" in request.body :
+                json_response = True
+                name          = json.loads(request.body)['name']
+                variable_list = json.loads(request.body)['variables']
+
+                variable_favorite_result = VariableFavorite.create(name       = name,
+                                                                   variables  = variable_list,
+                                                                   user       = request.user)
+
+                model = VariableFavorite.objects.get(id=variable_favorite_result['id'])
+                messages.info(request, 'The variable favorite list \"' + model.name + '\" was created and added to your worksheet')
+                variables = model.get_variables()
+
+            #from Details Page or list page
+            if request.POST.get("variable_list_id") :
+                workbook_name = request.POST.get("name")
+                variable_id   = request.POST.get("variable_list_id")
+                try :
+                    variable_fav = VariableFavorite.objects.get(id=variable_id)
+                    variables = variable_fav.get_variables()
+                except ObjectDoesNotExist:
+                    result['error'] = "variable favorite does not exist"
+
+            #from Select Page
+            if "var_favorites" in request.body : #{"variables_favorites":[{"id":"6"}]}
+                variable_fav_list = json.loads(request.body)['var_favorites']
+                json_response = True
+                for fav in variable_fav_list:
+                    try:
+                        fav = VariableFavorite.objects.get(id=fav['id'])
+                        variables = fav.get_variables()
+                    except ObjectDoesNotExist:
+                        result['error'] = "variable favorite does not exist"
+
+            if len(variables) > 0:
+                if workbook_id == 0:
+                    workbook_model  = Workbook.create(name=default_name, description="This workbook was created with variables added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
+                    worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
+                else :
+                    workbook_model  = Workbook.objects.get(id=workbook_id)
+                    worksheet_model = Worksheet.objects.get(id=worksheet_id)
+
+                Worksheet_variable.edit_list(workbook_id=workbook_model.id, worksheet_id=worksheet_model.id, variable_list=variables, user=request.user)
+                result['workbook_id'] = workbook_model.id
+                result['worksheet_id'] = worksheet_model.id
+            else :
+                result['error'] = "no variables to add"
+    elif request.method == "GET" :
+        json_response = True
+        plot_type = request.GET.get('type', 'default')
+
+        worksheet_model = Worksheet.objects.get(id=worksheet_id)
+        plots = worksheet_model.worksheet_plot_set.all()
+        for p in plots :
+            p.active = False
+            p.save()
+
+        plots = worksheet_model.worksheet_plot_set.filter(type=plot_type)
+        if len(plots) == 0:
+            model = Worksheet_plot(type=plot_type, worksheet=worksheet_model)
+            model.save()
+        else :
+            model = plots[0]
+            model.active = True
+            model.save()
+
+        result['data'] = serializers.serialize('json', [model])
+    else :
+        result['error'] = "method not correct"
+
+    if json_response :
+        return HttpResponse(json.dumps(result), status=200)
+    else :
+        redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_model.id, 'worksheet_id': worksheet_model.id})
+        return redirect(redirect_url)
+
 
 @login_required
 def worksheet_cohorts(request, workbook_id=0, worksheet_id=0, cohort_id=0):

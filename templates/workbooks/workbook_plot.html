@@ -27,9 +27,6 @@
             <a role="button" class="show-settings-flyout" data-target=".setting-flyout" aria-label="Show Plot Settings"><i class="fa fa-tasks"></i></a>
             {% endif %}
         </div>
-{#        <div class="form-group">#}
-{#            <input class="form-control" id="{{ plot.id }}-plot-title" type="text" name="name" value="{% if plot.title %}{{ plot.title }}{% else %}Untitled Plot{% endif %}" />#}
-{#        </div>#}
     </div>
     <div class="panel-body">
 
@@ -69,22 +66,22 @@
                             {% if plot.yaxis.selected %}
                                 <option value="{{ plot.yaxis.selected }}" selected >{{ plot.yaxis.selected }}</option>
                             {% else %}
-                                <option disabled selected >-- select a variable--</option>
+                                <option disabled selected>-- select a variable--</option>
                             {% endif %}
                             {% for var in variables %}
 {#                                {% if var.type == plot.yaxis.type  %}#}
-                                    <option value="{{ var.url_code }}">{{ var.name }}</option>
+                                    <option value="{{ var.code }}">{{ var.name }}</option>
 {#                                {% endif %}#}
                             {% endfor %}
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="{{ plot.id }}-color-select">Color By Feature <a role="button" class="color-edit-field" data-attribute="color-selector" aria-label="Color Field Editor"><i class="fa fa-pencil"></i></a></label></label>
-                        <div class="color-selector filter-label label label-default" type="text" id="{{ plot.id }}-color-select" name="color-attr" value="{{ plot.color_by }}">{{ plot.color_by }}</div>
+                        <div class="color-selector filter-label label label-default" type="text" id="color-select" name="color-attr" value="{{ plot.color_by }}">{{ plot.color_by }}</div>
                     </div>
                     <div class="form-group">
                         <label for="{{ plot.id }}-color-by-cohort">Color By Cohort</label>
-                        <input type="checkbox" class="color-by-cohort" id="{{ plot.id }}-color-by-cohort" />
+                        <input type="checkbox" class="color-by-cohort" id="color-by-cohort" />
                     </div>
                     <div class="form-group">
                         <label>Cohorts</label>
@@ -101,7 +98,7 @@
                             </select>
                         </div>
                     </div>
-                    <button class="update-plot btn btn-primary">Update Plot</button>
+                    <button class="update-plot btn btn-primary" worksheet_id="{{ worksheet.id }}" >Update Plot</button>
                     {% else %}
                     <div class="form-group">
                         <h6>X Axis Variable</h6>
