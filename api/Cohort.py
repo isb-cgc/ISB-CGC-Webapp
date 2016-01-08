@@ -850,7 +850,7 @@ class Cohort_Endpoints_API(remote.Service):
                                                 token=messages.StringField(3)
                                                 )
     @endpoints.method(POST_RESOURCE, SavedCohort,
-                      path='save_cohort', http_method='POST', name='cohort.save')
+                      path='save_cohort', http_method='GET', name='cohort.save')
     def save_cohort(self, request):
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         user_email = None
