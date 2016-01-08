@@ -105,7 +105,16 @@ def get(url,pdict={},method='GET'):
         r = requests.post(url,headers=head,data=pdict)
     return r.json()
 
+def main():
+  args = sys.argv[1:]
+  check(args, 'usage: isb_curl.py <curl arguments>')
+  access_token = get_access_token()
+  curl_args = ['curl', '-H', 'Authorization: Bearer ' + access_token] + args
+  os.execvp('curl', curl_args)
+
 # this allows us to call this from command line
 if __name__ == '__main__':
-    if len(sys.argv)!=2: sys.exit("Wrong # of arguments -- URL only")
-    print get(''.join(sys.argv[1]) , {})
+    if len(sys.argv) > 2:
+        main()
+    else:
+        print get(''.join(sys.argv[1]) , {})
