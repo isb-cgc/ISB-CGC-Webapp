@@ -900,6 +900,11 @@ class Cohort_Endpoints_API(remote.Service):
             # patient_query_str += ' GROUP BY ParticipantBarcode'
             sample_query_str += ' GROUP BY SampleBarcode'
 
+            print >> sys.stderr, '\n\npatient_query_str, sample_query_str'
+            print >> sys.stderr, patient_query_str
+            print >> sys.stderr, sample_query_str
+            print >> sys.stderr, value_tuple
+
             patient_barcodes = []
             sample_barcodes = []
             try:
