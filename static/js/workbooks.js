@@ -139,6 +139,7 @@ require([
         hide_plot_settings();
     });
 
+    //What is this for?
     $('.dropdown-menu').find("[data-toggle='modal']").click(function(){
         //$(this.getAttribute("data-target")).modal();
         console.log($(this.getAttribute("data-target")));
@@ -223,36 +224,30 @@ require([
         //});
     }
 
-    //search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id);
-    //search_helper_obj.update_parsets(base_api_url, 'metadata_platform_list', cohort_id);
-
     //generate plot based on user change
     $('.update-plot').on('click', function(event){
         if(valid_plot_settings()) {
-            var parent = $(this).parent();
+            var parent       = $(this).parent();
             var worksheet_id = $(this).attr("worksheet_id");
-            var plot_id = $(this).attr("plot_id");
+            var plot_id      = $(this).attr("plot_id");
             var attrs = {
-                type   : $(".plot_selection").find(":selected").text(),
-                x_attr : parent.find('#x-axis-select').val(),
-                y_attr : parent.find('#y-axis-select').val(),
-                cohort : parent.find('#cohort-select').val(),
+                type   : parent.parentsUntil(".worksheet-body").find(".plot_selection").find(":selected").text(),
+                x_axis : {id : parent.find('#x-axis-select').find(":selected").attr('var_id'), url_code : parent.find('#x-axis-select').find(":selected").val()},
+                y_axis : {id : parent.find('#y-axis-select').find(":selected").attr('var_id'), url_code : parent.find('#y-axis-select').find(":selected").val()},
+                cohort : {id : parent.find('#cohort-select').val()},
                 color_by_cohort : parent.find('#color-by-cohort').find(":selected").val(),
                 color_by : parent.find('#color-select').find(":selected").val()
             }
-            console.log(attrs);
-
-            //update_plot(workbook_id, worksheet_id, plot_id, attrs, function(result){
-            //    console.log(result);
-            //    //generate_plot(worksheet_id);
-            //    hide_plot_settings();
-            //});
+            update_plot_model(workbook_id, worksheet_id, plot_id, attrs, function(result){
+                generate_plot(worksheet_id, attrs.type, attrs.x_axis.url_code, attrs.y_axis.url_code, 'CLIN:Study', attrs.cohort.id);
+                hide_plot_settings();
+            });
         }
     });
 
-
     //generate plot type selection
     $(".plot_selection").on("change", function(event){
+        $(this).find(":disabled :selected").remove()
         var worksheet_id = $(this).attr("worksheet_id");
         var plot_type = $(this).find(":selected").text();
         get_plot(workbook_id, worksheet_id, plot_type, function(data){
@@ -260,8 +255,6 @@ require([
                 console.log("Display error");
             } else {
                 load_plot(workbook_id, data);
-
-                //show the settings for the plot
                 show_plot_settings();
             }
         });
@@ -271,34 +264,30 @@ require([
         return true;
     }
 
-    function generate_plot(worksheet_id){
+    function generate_plot(worksheet_id, type, x_var_code, y_var_code, color_by, cohort_id){
         var plot_element = $("[worksheet_id='"+worksheet_id+"']").parent().parent().find(".plot");
-        console.log(plot_element);
-        var plot_type = $("#plot_selection").find(":selected").text();
-        var x_attr = plot_element.find('#x-axis-select')[0].selectedIndex > 0 ? plot_element.find('#x-axis-select').find(":selected").val() : "";
-        var y_attr = plot_element.find('#y-axis-select')[0].selectedIndex > 0 ? plot_element.find('#y-axis-select').find(":selected").val() : "";
-        var cohort = plot_element.find('#cohort-select')[0].selectedIndex > 0 ? plot_element.find('#cohort-select').find(":selected").val() : "";
         var plotFactory = Object.create(plot_factory, {});
-        plotFactory.generate_plot(plot_element, x_attr, y_attr, 'CLIN:Study', cohort, false);
+        plotFactory.generate_plot(plot_element, type, x_var_code, y_var_code, color_by, cohort_id, false);
     }
 
     function load_plot(worksheet_id, plot_data){
         var plot_element = $("[worksheet_id='"+worksheet_id+"']").parent().parent().find(".plot");
-        plot_element.find('.update-plot').attr('plot_id', plot_data.pk).change();
-        if(plot_data.fields.x_axis) {
-            plot_element.find('#x-axis-select').val(plot_data.fields.x_axis.name).change();
+        plot_element.find('.update-plot').attr('plot_id', plot_data.id).change();
+        if(plot_data.x_axis) {
+            plot_element.find('#x-axis-select').val(plot_data.x_axis.url_code);
         }
-        if(plot_data.fields.y_axis) {
-            plot_element.find('#y-axis-select').val(plot_data.y_axis.name).change();
+        if(plot_data.y_axis) {
+            plot_element.find('#y-axis-select').val(plot_data.y_axis.url_code);
         }
-        if(plot_data.fields.cohort) {
-            plot_element.find('#cohort-select').val(plot_data.cohort.name).change();
+        if(plot_data.cohort) {
+            plot_element.find('#cohort-select').val(plot_data.cohort.id);
         }
-        if(plot_data.fields.color_by) {
-            plot_element.find('#color_by').val(plot_data.color_by.name).change();
+        if(plot_data.color_by) {
+            plot_element.find('#color_by').val(plot_data.color_by);
         }
     }
 
+    //the server side call made here will also change the active entry for the worksheet
     function get_plot(workbook_id, worksheet_id, type, callback){
         var csrftoken = get_cookie('csrftoken');
         $.ajax({
@@ -312,7 +301,7 @@ require([
                     callback({error: result.error});
                 }
                 if(result.data){
-                    callback(JSON.parse(result.data)[0]);
+                    callback(result.data);
                 }
             },
             error: function (result) {
@@ -321,12 +310,12 @@ require([
         });
     }
 
-    function update_plot(workbook_id, worksheet_id, plot_id, attrs, callback){
+    function update_plot_model(workbook_id, worksheet_id, plot_id, attrs, callback){
         var csrftoken = get_cookie('csrftoken');
         $.ajax({
             type        :'POST',
             dataType    :'json',
-            url         : base_url + '/workbooks/' + workbook_id + '/worksheets/' + worksheet_id + "/plots/" + plot_id,
+            url         : base_url + '/workbooks/' + workbook_id + '/worksheets/' + worksheet_id + "/plots/" + plot_id + "/edit",
             data        : JSON.stringify({attrs : attrs}),
             beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
             success : function (data) {

@@ -16,7 +16,6 @@ from projects.models import Project
 from sharing.service import create_share
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from django.core import serializers
 debug = settings.DEBUG
 if settings.DEBUG :
     import sys
@@ -142,15 +141,16 @@ def workbook(request, workbook_id=0):
                 for worksheet in workbook_model.worksheets:
                     # Check all cohorts are owned by the user
                     for cohort in worksheet.cohorts:
-                        if cohort.get_owner().id != request.user.id and not cohort.is_public():
+                        if cohort.cohort.get_owner().id != request.user.id and not cohort.cohort.is_public():
                             is_shareable = False
                             break
 
                     # Check all variables are from projects owned by the user
                     for variable in worksheet.get_variables():
-                        if variable.project.owner_id != request.user.id and not variable.project.is_public:
-                            is_shareable = False
-                            break
+                        if variable.project: #project will be null if the variable is from TCGA
+                            if variable.project.owner_id != request.user.id and not variable.project.is_public:
+                                is_shareable = False
+                                break
 
                     if not is_shareable:
                         break
@@ -163,9 +163,9 @@ def workbook(request, workbook_id=0):
                           {'name' : 'Histogram'},
                           {'name' : 'Scatter Plot'},
                           {'name' : 'Violin Plot'},
-                          {'name' : 'Violin Plot 2'},
-                          {'name' : 'Cubby Hole'},
-                          {'name' : 'SeqPeak'}]
+                          {'name' : 'Violin Plot with axis swap'},
+                          {'name' : 'Cubby Hole Plot'}]
+                         # Todo {'name' : 'SeqPeak'}]
             return render(request, template, {'workbook'    : workbook_model,
                                               'is_shareable': is_shareable,
                                               'shared'      : shared,
@@ -239,7 +239,7 @@ def worksheet_variables(request, workbook_id=0, worksheet_id=0, variable_id=0):
 
     if request.method == "POST" :
         if command == "delete" :
-            Worksheet_gene.destroy(workbook_id=workbook_id, worksheet_id=worksheet_id, id=variable_id, user=request.user)
+            Worksheet_variable.destroy(workbook_id=workbook_id, worksheet_id=worksheet_id, id=variable_id, user=request.user)
             result['message'] = "variables have been deleted from workbook"
         else :
             variables = []
@@ -385,58 +385,54 @@ def worksheet_plots(request, workbook_id=0, worksheet_id=0, plot_id=0):
 
     if request.method == "POST" :
         if command == "delete" :
-            #Worksheet_gene.destroy(workbook_id=workbook_id, worksheet_id=worksheet_id, id=variable_id, user=request.user)
-            result['message'] = "variables have been deleted from workbook"
+            var = Worksheet_plot.objects.get(id=plot_id).delete()
+            result['message'] = "the plot has been deleted from workbook"
         else :
-            variables = []
-            #from Edit Page
-            if "variables" in request.body :
+            #update
+            if "attrs" in request.body :
                 json_response = True
-                name          = json.loads(request.body)['name']
-                variable_list = json.loads(request.body)['variables']
+                attrs = json.loads(request.body)['attrs']
+                if plot_id :
+                    plot_model = Worksheet_plot.objects.get(id=plot_id)
+                    if attrs['x_axis'] :
+                        try :
+                            plot_model.x_axis = Worksheet_variable.objects.get(id=attrs['x_axis']['id'])
+                        except ObjectDoesNotExist:
+                            None
+                    if attrs['y_axis'] :
+                        try :
+                            plot_model.y_axis = Worksheet_variable.objects.get(id=attrs['y_axis']['id'])
+                        except ObjectDoesNotExist:
+                            None
+                    if attrs['cohort'] :
+                        try :
+                            plot_model.cohort = Worksheet_cohort.objects.get(id=attrs['cohort']['id'])
+                        except ObjectDoesNotExist:
+                            None
 
-                variable_favorite_result = VariableFavorite.create(name       = name,
-                                                                   variables  = variable_list,
-                                                                   user       = request.user)
-
-                model = VariableFavorite.objects.get(id=variable_favorite_result['id'])
-                messages.info(request, 'The variable favorite list \"' + model.name + '\" was created and added to your worksheet')
-                variables = model.get_variables()
+                    plot_model.save()
+                    result['updated'] = "success"
 
             #from Details Page or list page
-            if request.POST.get("variable_list_id") :
-                workbook_name = request.POST.get("name")
-                variable_id   = request.POST.get("variable_list_id")
-                try :
-                    variable_fav = VariableFavorite.objects.get(id=variable_id)
-                    variables = variable_fav.get_variables()
-                except ObjectDoesNotExist:
-                    result['error'] = "variable favorite does not exist"
-
-            #from Select Page
-            if "var_favorites" in request.body : #{"variables_favorites":[{"id":"6"}]}
-                variable_fav_list = json.loads(request.body)['var_favorites']
-                json_response = True
-                for fav in variable_fav_list:
-                    try:
-                        fav = VariableFavorite.objects.get(id=fav['id'])
-                        variables = fav.get_variables()
-                    except ObjectDoesNotExist:
-                        result['error'] = "variable favorite does not exist"
-
-            if len(variables) > 0:
-                if workbook_id == 0:
-                    workbook_model  = Workbook.create(name=default_name, description="This workbook was created with variables added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
-                    worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
-                else :
-                    workbook_model  = Workbook.objects.get(id=workbook_id)
-                    worksheet_model = Worksheet.objects.get(id=worksheet_id)
-
-                Worksheet_variable.edit_list(workbook_id=workbook_model.id, worksheet_id=worksheet_model.id, variable_list=variables, user=request.user)
-                result['workbook_id'] = workbook_model.id
-                result['worksheet_id'] = worksheet_model.id
-            else :
-                result['error'] = "no variables to add"
+            # if request.POST.get("variable_list_id") :
+            #     workbook_name = request.POST.get("name")
+            #     variable_id   = request.POST.get("variable_list_id")
+            #     try :
+            #         variable_fav = VariableFavorite.objects.get(id=variable_id)
+            #         variables = variable_fav.get_variables()
+            #     except ObjectDoesNotExist:
+            #         result['error'] = "variable favorite does not exist"
+            #
+            # #from Select Page
+            # if "var_favorites" in request.body : #{"variables_favorites":[{"id":"6"}]}
+            #     variable_fav_list = json.loads(request.body)['var_favorites']
+            #     json_response = True
+            #     for fav in variable_fav_list:
+            #         try:
+            #             fav = VariableFavorite.objects.get(id=fav['id'])
+            #             variables = fav.get_variables()
+            #         except ObjectDoesNotExist:
+            #             result['error'] = "variable favorite does not exist"
     elif request.method == "GET" :
         json_response = True
         plot_type = request.GET.get('type', 'default')
@@ -456,7 +452,7 @@ def worksheet_plots(request, workbook_id=0, worksheet_id=0, plot_id=0):
             model.active = True
             model.save()
 
-        result['data'] = serializers.serialize('json', [model])
+        result['data'] = model.toJSON()
     else :
         result['error'] = "method not correct"
 

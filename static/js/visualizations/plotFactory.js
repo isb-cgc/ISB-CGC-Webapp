@@ -54,7 +54,7 @@ define([
                 return '<span>Mean: ' + mean.toFixed(2) + '</span><br/><span>%: ' + (d.y * 100).toFixed(2) + '%</span>';
             });
 
-    function generate_bar_chart(margin, plot_selector, height, width, x_attr ){
+    function generate_bar_chart(margin, plot_selector, height, width, x_attr, data){
         // Bar Chart
         margin = {top: 0, bottom: 100, left: 50, right: 10};
         var svg = d3.select(plot_selector)
@@ -76,14 +76,14 @@ define([
 
     /* Parameters
         plot_element : html element to display the plot, this function requires a specific html structure of the plot element
+        type         :
         x_attr       :
         y_attr       :
         color_by     :
         cohorts      :
         cohorts_override : boolean on whether to override the color_by parameter
      */
-    function generate_plot(plot_element, x_attr, y_attr, color_by, cohorts, cohort_override) {
-        console.log(arguments);
+    function generate_plot(plot_element, type, x_attr, y_attr, color_by, cohorts, cohort_override) {
         var width  = 800,
             height = 600,
             margin = {top: 0, bottom: 50, left: 50, right: 10},
@@ -123,8 +123,6 @@ define([
             type: 'GET',
             url: api_url,
             success: function(data, status, xhr) {
-                console.log(data);
-
                 if (data.hasOwnProperty('pairwise_result')) {
                     var pairwise_div = plot_element.find('.pairwise-result');
                     if (data['pairwise_result'].hasOwnProperty('result_vectors')) {
@@ -162,159 +160,155 @@ define([
                     } else {
                         color_by = 'c';
                     }
-                    if (x_type == 'STRING' && y_type == 'none') {
-                        // Bar Chart
-                        generate_bar_chart(margin, plot_selector, height, width, x_attr);
 
-                    } else if ((x_type == 'INTEGER' || x_type == 'FLOAT') && y_type == 'none') {
-                        // Histogram
-                        var svg = d3.select(plot_selector)
-                            .append('svg')
-                            .attr('width', width + 10)
-                            .attr('height', height);
-                        var vals = helpers.values_only(data, 'x');
+                    switch (type){
+                        case "Bar Chart" : //x_type == 'STRING' && y_type == 'none'
+                            generate_bar_chart(margin, plot_selector, height, width, x_attr, data);
+                            break;
+                        case "Histogram" : //((x_type == 'INTEGER' || x_type == 'FLOAT') && y_type == 'none') {
+                            var svg = d3.select(plot_selector)
+                                .append('svg')
+                                .attr('width', width + 10)
+                                .attr('height', height);
+                            var vals = helpers.values_only(data, 'x');
 
-                        histogram_obj.createHistogramPlot(
-                            svg,
-                            data,
-                            vals,
-                            width,
-                            height,
-                            'x',
-                            x_attr,
-                            cubby_tip,
-                            margin);
+                            histogram_obj.createHistogramPlot(
+                                svg,
+                                data,
+                                vals,
+                                width,
+                                height,
+                                'x',
+                                x_attr,
+                                cubby_tip,
+                                margin);
+                            break;
+                        case 'Scatter Plot': //((x_type == 'INTEGER' || x_type == 'FLOAT') && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
+                            // Scatter plot
+                            var domain = helpers.get_min_max(data, 'x');
+                            var range = helpers.get_min_max(data, 'y');
 
-                    } else if ((x_type == 'INTEGER' || x_type == 'FLOAT') && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
-                        // Scatter plot
-                        var domain = helpers.get_min_max(data, 'x');
-                        var range = helpers.get_min_max(data, 'y');
+                            var legend = d3.select(legend_selector)
+                                .append('svg')
+                                .attr('width', 200);
+                            svg = d3.select(plot_selector)
+                                .append('svg')
+                                .attr('width', width + 10)
+                                .attr('height', height);
+                            scatter_plot_obj.create_scatterplot( svg,
+                                data,
+                                domain,
+                                range,
+                                x_attr,  // xLabel
+                                y_attr,  // yLabel
+                                'x',                     // xParam
+                                'y',                     // yParam
+                                color_by,
+                                legend,
+                                width,
+                                height,
+                                cohort_set
+                            );
+                            break;
+                        case "Violin Plot": //(x_type == 'STRING' && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
+                            var violin_width = 200;
+                            var tmp = helpers.get_min_max(data, 'y');
+                            var min_n = tmp[0];
+                            var max_n = tmp[1];
+                            var legend = d3.select(legend_selector)
+                                .append('svg')
+                                .attr('width', 200);
 
-                        var legend = d3.select(legend_selector)
-                            .append('svg')
-                            .attr('width', 200);
-                        svg = d3.select(plot_selector)
-                            .append('svg')
-                            .attr('width', width + 10)
-                            .attr('height', height);
-                        scatter_plot_obj.create_scatterplot( svg,
-                            data,
-                            domain,
-                            range,
-                            x_attr,  // xLabel
-                            y_attr,  // yLabel
-                            'x',                     // xParam
-                            'y',                     // yParam
-                            color_by,
-                            legend,
-                            width,
-                            height,
-                            cohort_set
-                        );
+                            svg = d3.select(plot_selector)
+                                .append('svg')
+                                .attr('width', width + 10)
+                                .attr('height', height);
+                            violin_plot_obj.createViolinPlot(svg,
+                                data,
+                                height,
+                                violin_width,
+                                max_n,
+                                min_n,
+                                x_attr,
+                                y_attr,
+                                'x',
+                                'y',
+                                color_by,
+                                legend,
+                                cohort_set
+                            );
+                            break;
+                        case 'Violin Plot with axis swap'://(y_type == 'STRING' && (x_type == 'INTEGER'|| x_type == 'FLOAT')) {
+                            var violin_width = 200;
+                            var tmp = helpers.get_min_max(data, 'x');
+                            var min_n = tmp[0];
+                            var max_n = tmp[1];
+                            var legend = d3.select(legend_selector)
+                                .append('svg')
+                                .attr('width', 200);
 
-                    } else if (x_type == 'STRING' && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
-                        // Violin plot
-                        var violin_width = 200;
-                        var tmp = helpers.get_min_max(data, 'y');
-                        var min_n = tmp[0];
-                        var max_n = tmp[1];
-                        var legend = d3.select(legend_selector)
-                            .append('svg')
-                            .attr('width', 200);
+                            svg = d3.select(plot_selector)
+                                .append('svg')
+                                .attr('width', width + 10)
+                                .attr('height', height);
 
-                        svg = d3.select(plot_selector)
-                            .append('svg')
-                            .attr('width', width + 10)
-                            .attr('height', height);
-                        violin_plot_obj.createViolinPlot(svg,
-                            data,
-                            height,
-                            violin_width,
-                            max_n,
-                            min_n,
-                            x_attr,
-                            y_attr,
-                            'x',
-                            'y',
-                            color_by,
-                            legend,
-                            cohort_set
-                        );
+                            violin_plot_obj.createViolinPlot(svg,
+                                data,
+                                height,
+                                violin_width,
+                                max_n,
+                                min_n,
+                                y_attr,
+                                x_attr,
+                                'y',
+                                'x',
+                                color_by,
+                                legend,
+                                cohort_set
+                            );
 
-                    } else if (y_type == 'STRING' && (x_type == 'INTEGER'|| x_type == 'FLOAT')) {
-                        // Violin plot - Requires Axis Swap
-                        var violin_width = 200;
-                        var tmp = helpers.get_min_max(data, 'x');
-                        var min_n = tmp[0];
-                        var max_n = tmp[1];
-                        var legend = d3.select(legend_selector)
-                            .append('svg')
-                            .attr('width', 200);
+                            plot_element.find('.swap').trigger('click');
+                            break;
+                        case 'Cubby Hole Plot' : //(x_type == 'STRING' && y_type == 'STRING') {
+                            var cubby_size = 100;
+                            var xdomain = vizhelpers.get_domain(data, 'x');
+                            var ydomain = vizhelpers.get_domain(data, 'y');
 
-                        svg = d3.select(plot_selector)
-                            .append('svg')
-                            .attr('width', width + 10)
-                            .attr('height', height);
+                            var cubby_width = xdomain.length * cubby_size + margin.left + margin.right;
+                            var cubby_height = ydomain.length * cubby_size + margin.top + margin.bottom;
 
-                        violin_plot_obj.createViolinPlot(svg,
-                            data,
-                            height,
-                            violin_width,
-                            max_n,
-                            min_n,
-                            y_attr,
-                            x_attr,
-                            'y',
-                            'x',
-                            color_by,
-                            legend,
-                            cohort_set
-                        );
+                            svg = d3.select(plot_selector)
+                                .append('svg')
+                                .attr('width', cubby_width + 10)
+                                .attr('height', cubby_height);
 
-                        plot_element.find('.swap').trigger('click');
-
-                    } else if (x_type == 'STRING' && y_type == 'STRING') {
-                        // Cubby hole plot
-                        var cubby_size = 100;
-                        var xdomain = vizhelpers.get_domain(data, 'x');
-                        var ydomain = vizhelpers.get_domain(data, 'y');
-
-                        var cubby_width = xdomain.length * cubby_size + margin.left + margin.right;
-                        var cubby_height = ydomain.length * cubby_size + margin.top + margin.bottom;
-
-                        svg = d3.select(plot_selector)
-                            .append('svg')
-                            .attr('width', cubby_width + 10)
-                            .attr('height', cubby_height);
-
-                        cubby_plot_obj.create_cubbyplot(
-                            svg,
-                            data,
-                            xdomain,
-                            ydomain,
-                            x_attr,
-                            y_attr,
-                            'x',
-                            'y',
-                            'c',
-                            legend,
-                            cubby_width,
-                            cubby_height,
-                            cubby_size
-                        );
-
-                    } else {
-                        // No plot type to fit
-                        d3.select(plot_selector)
-                            .append('svg')
-                            .attr('width', width)
-                            .attr('height', height)
-                            .append('text')
-                            .attr('fill', 'black')
-                            .style('font-size', 20)
-                            .attr('text-anchor', 'middle')
-                            .attr('transform', 'translate(' + (width/2) + ',' + (height/2) + ')')
-                            .text('There is no plot that fit the selected axes.');
+                            cubby_plot_obj.create_cubbyplot(
+                                svg,
+                                data,
+                                xdomain,
+                                ydomain,
+                                x_attr,
+                                y_attr,
+                                'x',
+                                'y',
+                                'c',
+                                legend,
+                                cubby_width,
+                                cubby_height,
+                                cubby_size
+                            );
+                            break;
+                        default :
+                            d3.select(plot_selector)
+                                .append('svg')
+                                .attr('width', width)
+                                .attr('height', height)
+                                .append('text')
+                                .attr('fill', 'black')
+                                .style('font-size', 20)
+                                .attr('text-anchor', 'middle')
+                                .attr('transform', 'translate(' + (width/2) + ',' + (height/2) + ')')
+                                .text('There is no plot that fit the selected axes.');
                     }
                 } else {
                     // No samples provided
@@ -386,98 +380,6 @@ define([
             return false;
         //});
     }
-
-    //// Add Plot
-    //$('#add-plot-btn').on('click', function() {
-    //    $.ajax({
-    //        type: 'GET',
-    //        url: '/visualizations/add_plot/?viz_id='+$(this).attr('data-value'),
-    //        success: function(data) {
-    //            var plot_id = $(data).attr('id').split('-')[1];
-    //            $('.plot-container').append(data);
-    //            var obj = $('#plot-'+plot_id);
-    //
-    //            // Show hide settings
-    //            obj.find('.show-flyout').on('click', function() { vizhelpers.show_flyout_callback(this); });
-    //            obj.find('.hide-flyout').on('click', function() { vizhelpers.hide_flyout_callback(this); });
-    //
-    //            // Cohort Editing
-    //            obj.find('.add-cohort').on('click', function() { vizhelpers.show_cohort_panel(this); });
-    //            obj.find('.close-cohort-search').on('click', function() { vizhelpers.hide_cohort_panel(this); });
-    //            obj.find('a.remove-cohort').on('click', function() { vizhelpers.remove_cohort_callback(this); });
-    //            obj.find('a.select-cohort').on('click', function() {
-    //                vizhelpers.select_cohort_callback(this, $(this).attr('value'), $(this).html());
-    //            });
-    //
-    //            // Delete Plot
-    //            obj.find('form[action="/visualizations/delete_plot/"]').on('submit', function(event) {
-    //                event.preventDefault();
-    //                vizhelpers.delete_plot_callback(this);
-    //                return false;
-    //            });
-    //
-    //            // Field Editing
-    //            obj.find('.x-edit-field, .y-edit-field, .color-edit-field').on('click', function() { vizhelpers.show_field_search_panel(this); });
-    //            obj.find('.datatype-selector').on('change', function() { vizhelpers.datatype_selector_change_callback(this); });
-    //            obj.find('.field-options').on('change', function() { vizhelpers.field_option_change_callback(this); });
-    //            obj.find('.feature-search').on('change', function() { vizhelpers.field_search_change_callback(this); });
-    //            obj.find('.select-field').on('click', function() { vizhelpers.select_field_callback(this); });
-    //            obj.find('.close-field-search').on('click', function() { vizhelpers.close_field_search_callback(this); });
-    //
-    //            // Swap Axes
-    //            obj.find('.swap').on('click', function() { vizhelpers.swap_axes_callback(this); });
-    //
-    //            // Create Comment
-    //            obj.find('.add-comment').on('submit', function(event) {
-    //                event.preventDefault();
-    //                vizhelpers.add_comment_callback(this);
-    //                return false;
-    //            });
-    //
-    //            // Saving cohorts from plot
-    //            obj.find('form[action="/cohorts/save_cohort_from_plot/"]').on('submit', function(event) {
-    //                event.preventDefault();
-    //                var form = this;
-    //                $.ajax({
-    //                    type: 'POST',
-    //                    url: base_url + '/cohorts/save_cohort_from_plot/',
-    //                    data: $(this).serialize(),
-    //                    success: function(data) {
-    //                        $('.modal').modal('hide');
-    //                        $('#visualizations').prepend(data);
-    //                        form.reset();
-    //                    },
-    //                    error: function(data) {
-    //                        $('#visualizations').prepend(data);
-    //                        form.reset();
-    //                    }
-    //                });
-    //                return false;
-    //            });
-    //
-    //            // Update Plot
-    //            obj.find('.update-plot').on('click', function() {
-    //                var plot = $(this).parents('.plot');
-    //                var x_attr = plot.find('.x-selector').attr('value');
-    //                var y_attr = plot.find('.y-selector').attr('value');
-    //                var color_by = plot.find('.color-selector').attr('value');
-    //                var cohort_override = false;
-    //                if (plot.find('.color-by-cohort').is(':checked')) {
-    //                    cohort_override = true;
-    //                }
-    //                var cohorts = $.map(plot.find('.cohort-listing div'), function(d) { return $(d).attr('value'); });
-    //                generate_plot(plot, x_attr, y_attr, color_by, cohorts, cohort_override);
-    //            });
-    //
-    //            obj.find('.update-plot').trigger('click');
-    //
-    //        },
-    //        error: function() {
-    //            console.log('failed create plot')
-    //        }
-    //
-    //    });
-    //});
 
     // Hijack and insert more values into to save visualization POST
     //$('#save-viz').on('submit', function() {
