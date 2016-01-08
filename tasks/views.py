@@ -27,7 +27,7 @@ import pytz
 
 import pysftp
 
-import pexpect  # comment this out when running in gae
+#import pexpect  # comment this out when running in gae
 import datetime
 
 from django.http import HttpResponse
