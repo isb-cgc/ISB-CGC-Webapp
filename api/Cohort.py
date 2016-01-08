@@ -1144,3 +1144,31 @@ class Cohort_Endpoints_API(remote.Service):
         finally:
             if cursor: cursor.close()
             if db and db.open: db.close()
+
+
+    GET_RESOURCE = endpoints.ResourceContainer(token=messages.StringField(4))
+    @endpoints.method(GET_RESOURCE, DataFileNameKeyList,
+                      path='test_datafilenamekey_list', http_method='GET', name='cohorts.test_datafilenamekey_list')
+    def datafilenamekey_list(self, request):
+        print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+        user_email = None
+        cursor = None
+        db = None
+        dbGaP_authorized = False
+        cohort_id = None
+
+        if endpoints.get_current_user() is not None:
+            user_email = endpoints.get_current_user().email()
+
+        # users have the option of pasting the access token in the query string
+        # or in the 'token' field in the api explorer
+        # but this is not required
+        access_token = request.__getattribute__('token')
+        if access_token:
+            user_email = get_user_email_from_token(access_token)
+
+        if user_email:
+            return DataFileNameKeyList(datafilenamekeys=[], count=0)
+        else:
+            raise endpoints.UnauthorizedException("Authentication failed.")
+
