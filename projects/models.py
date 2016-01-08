@@ -48,6 +48,16 @@ class Project(models.Model):
 
         return last_view
 
+    @classmethod
+    def get_user_projects(cls, user, includeShared=True):
+        projects = user.project_set.all().filter(active=True)
+        if includeShared:
+            sharedProjects = cls.objects.filter(shared__matched_user=user, shared__active=True, active=True)
+            projects = projects | sharedProjects
+            projects = projects.distinct()
+
+        return projects
+
     def __str__(self):
         return self.name
 
@@ -64,6 +74,16 @@ class Study(models.Model):
     owner = models.ForeignKey(User)
     project = models.ForeignKey(Project)
     extends = models.ForeignKey("self", null=True, blank=True)
+
+    @classmethod
+    def get_user_studies(cls, user, includeShared=True):
+        projects = user.project_set.all().filter(active=True)
+        if includeShared:
+            sharedProjects = Project.objects.filter(shared__matched_user=user, shared__active=True, active=True)
+            projects = projects | sharedProjects
+            projects = projects.distinct()
+
+        return cls.objects.filter(active=True, project__in=projects)
 
     '''
     Sets the last viewed time for a cohort
@@ -110,6 +130,12 @@ class User_Feature_Definitions(models.Model):
     feature_name = models.CharField(max_length=200)
     bq_map_id = models.CharField(max_length=200)
     is_numeric = models.BooleanField(default=False)
+    shared_map_id = models.CharField(max_length=128, null=True, blank=True)
+
+class User_Feature_Counts(models.Model):
+    feature = models.ForeignKey(User_Feature_Definitions, null=False)
+    value = models.TextField()
+    count = models.IntegerField()
 
 class User_Data_Tables(models.Model):
     metadata_data_table = models.CharField(max_length=200)

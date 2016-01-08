@@ -31,7 +31,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.conf import settings
-from django.db.models import Count
+from django.db.models import Count, Sum
 
 from django.http import StreamingHttpResponse
 from django.core import serializers
@@ -40,6 +40,7 @@ from allauth.socialaccount.models import SocialToken
 
 from models import Cohort, Patients, Samples, Cohort_Perms, Source, Filters, Cohort_Comments
 from workbooks.models import Workbook, Worksheet
+from projects.models import Project, Study, User_Feature_Counts, User_Feature_Definitions
 from visualizations.models import Plot_Cohorts, Plot
 from bq_data_access.cohort_bigquery import BigQueryCohortSupport
 
@@ -58,7 +59,7 @@ def convert(data):
 
 BIG_QUERY_API_URL = settings.BASE_API_URL + '/_ah/api/bq_api/v1'
 COHORT_API = settings.BASE_API_URL + '/_ah/api/cohort_api/v1'
-METADATA_API = settings.BASE_API_URL + '/_ah/api/meta_api/v1'
+METADATA_API = settings.BASE_API_URL + '/_ah/api/meta_api/'
 # This URL is not used : META_DISCOVERY_URL = settings.BASE_API_URL + '/_ah/api/discovery/v1/apis/meta_api/v1/rest'
 
 
@@ -200,8 +201,8 @@ def cohort_detail(request, cohort_id=0, workbook_id=0, worksheet_id=0, create_wo
 
     # service = build('meta', 'v1', discoveryServiceUrl=META_DISCOVERY_URL)
     clin_attr = [
-        'Project',
-        'Study',
+        # 'Project',
+        # 'Study',
         'vital_status',
         # 'survival_time',
         'gender',
@@ -255,34 +256,102 @@ def cohort_detail(request, cohort_id=0, workbook_id=0, worksheet_id=0, create_wo
         'protein_quantification'
     ]
 
-    data_url = METADATA_API + '/metadata_counts?'
+    clin_attr_dsp = []
+    clin_attr_dsp += clin_attr
+    user_attr = ['user_project','user_study']
+
+    token = SocialToken.objects.filter(account__user=request.user, account__provider='Google')[0].token
+    data_url = METADATA_API + ('v2/metadata_counts?token=%s' % (token,))
 
     results = urlfetch.fetch(data_url, deadline=60)
     results = json.loads(results.content)
     totals = results['total']
 
+    # Add in user data
+    projects = Project.get_user_projects(request.user, True)
+    studies = Study.get_user_studies(request.user, True)
+    features = User_Feature_Definitions.objects.filter(study__in=studies)
+    study_counts = {}
+    project_counts = {}
+
+    for count in results['count']:
+        if 'id' in count and count['id'].startswith('study:'):
+            split = count['id'].split(':')
+            study_id = split[1]
+            feature_name = split[2]
+            study_counts[study_id] = count['total']
+
+    user_studies = []
+    for study in studies:
+        count = study_counts[study.id] if study.id in study_counts else 0
+
+        if not study.project_id in project_counts:
+            project_counts[study.project_id] = 0
+        project_counts[study.project_id] += count
+
+        user_studies += ({
+                        'count': str(count),
+                        'value': study.name,
+                        'id'   : study.id
+                      },)
+
+    user_projects = []
+    for project in projects:
+        user_projects += ({
+                            'count': str(project_counts[project.id]) if project.id in project_counts else 0,
+                            'value': project.name,
+                            'id'   : project.id
+                            },)
+
+    results['count'].append({
+        'name': 'user_projects',
+        'values': user_projects
+    })
+    results['count'].append({
+        'name': 'user_studies',
+        'values': user_studies
+    })
     # Get and sort counts
-    attr_details = convert(results['count'])
-    attr_details['RNA_sequencing'] = []
-    attr_details['miRNA_sequencing'] = []
-    attr_details['DNA_methylation'] = []
-    for key, value in attr_details.items():
+    attr_details = {
+        'RNA_sequencing': [],
+        'miRNA_sequencing': [],
+        'DNA_methylation': []
+    }
+    keys = []
+    for item in results['count']:
+        #print item
+        key = item['name']
+        values = item['values']
+
         if key.startswith('has_'):
-            data_availability_sort(key, value, data_attr, attr_details)
+            data_availability_sort(key, values, data_attr, attr_details)
         else:
-            attr_details[key] = sorted(value, key=lambda k: int(k['count']), reverse=True)
+            keys.append(item['name'])
+            item['values'] = sorted(values, key=lambda k: int(k['count']), reverse=True)
+
+            if item['name'].startswith('user_'):
+                clin_attr_dsp += (item['name'],)
+
+    for key, value in attr_details.items():
+        results['count'].append({
+                                    'name': key,
+                                    'values': value,
+                                    'id': None
+                                 })
 
     template_values = {
         'request': request,
         'users': users,
-        'attr_list': attr_details.keys(),
-        'attr_list_count': attr_details,
+        'attr_list': keys,
+        'attr_list_count': results['count'],
         'total_samples': int(totals),
-        'clin_attr': clin_attr,
+        'clin_attr': clin_attr_dsp,
         'data_attr': data_attr,
         'molec_attr': molec_attr,
+        'user_attr': user_attr,
         'base_url': settings.BASE_URL,
-        'base_api_url': settings.BASE_API_URL
+        'base_api_url': settings.BASE_API_URL,
+        'token': token
     }
     if workbook_id and worksheet_id :
         template_values['workbook']  = Workbook.objects.get(id=workbook_id)
@@ -777,7 +846,7 @@ def cohort_filelist(request, cohort_id=0):
         return redirect('/user_landing')
 
     token = SocialToken.objects.filter(account__user=request.user, account__provider='Google')[0].token
-    data_url = METADATA_API + ('/cohort_files?platform_count_only=True&cohort_id=%s&token=%s' % (cohort_id, token))
+    data_url = METADATA_API + ('v1/cohort_files?platform_count_only=True&cohort_id=%s&token=%s' % (cohort_id, token))
     result = urlfetch.fetch(data_url, deadline=120)
     items = json.loads(result.content)
     file_list = []
@@ -806,7 +875,7 @@ def cohort_filelist_ajax(request, cohort_id=0):
         return HttpResponse(response_str, status=500)
 
     token = SocialToken.objects.filter(account__user=request.user, account__provider='Google')[0].token
-    data_url = METADATA_API + ('/cohort_files?cohort_id=%s&token=%s' % (cohort_id, token))
+    data_url = METADATA_API + ('v1/cohort_files?cohort_id=%s&token=%s' % (cohort_id, token))
 
     for key in request.GET:
         data_url += '&' + key + '=' + request.GET[key]
@@ -830,7 +899,7 @@ def streaming_csv_view(request, cohort_id=0):
         return redirect('/user_landing')
 
     token = SocialToken.objects.filter(account__user=request.user, account__provider='Google')[0].token
-    data_url = METADATA_API + ('/cohort_files?cohort_id=%s&token=%s&limit=-1' % (cohort_id, token))
+    data_url = METADATA_API + ('v1/cohort_files?cohort_id=%s&token=%s&limit=-1' % (cohort_id, token))
     if 'params' in request.GET:
         params = request.GET.get('params').split(',')
 
