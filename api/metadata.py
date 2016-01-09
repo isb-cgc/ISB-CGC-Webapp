@@ -1830,13 +1830,13 @@ class Meta_Endpoints_API_v2(remote.Service):
                 if key_map and key in key_map:
                     col_name = key_map[key]
 
+                cursor = db.cursor()
                 if should_be_queried:
                     # Query the table for counts and values
                     query = ('SELECT DISTINCT %s, COUNT(1) as count FROM ' + table) % col_name
                     if where_clause['query_str']:
                         query += ' WHERE ' + where_clause['query_str']
                     query += ' GROUP BY %s ' %col_name
-                    cursor = db.cursor()
                     cursor.execute(query, where_clause['value_tuple'])
                     for row in cursor.fetchall():
                         if not row[0] in table_values:
@@ -1845,11 +1845,11 @@ class Meta_Endpoints_API_v2(remote.Service):
                         feature['total'] += int(row[1])
                 else:
                     # Just get the values so we can have them be 0
-                    cursor = db.cursor()
                     cursor.execute(('SELECT DISTINCT %s FROM ' + table) % col_name)
                     for row in cursor.fetchall():
                         if not row[0] in table_values:
                             table_values[row[0]] = 0
+                cursor.close()
 
             feature['values'] = table_values
 
@@ -1866,4 +1866,5 @@ class Meta_Endpoints_API_v2(remote.Service):
             if feature['total'] > total:
                 total = feature['total']
 
+        db.close()
         return MetadataCountsItem(count=count_list, total=total)
