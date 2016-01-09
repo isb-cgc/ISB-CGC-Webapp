@@ -100,7 +100,7 @@ def main():
     maybe_print('credentials stored in ' + args.storage_file)
     maybe_print('access_token: ' + credentials.access_token)
     maybe_print('refresh_token: ' + credentials.refresh_token)
-    return credentials
+    # return credentials
 
 def parse_args():
     parser = ArgumentParser()
@@ -111,4 +111,5 @@ def parse_args():
     return parser.parse_args()
 
 if __name__ == '__main__':
-  credentials = main()
+  # credentials = main()
+    main()
