@@ -49,6 +49,10 @@ class BigQueryCohortSupport(object):
         {
             "name": "aliquot_barcode",
             "type": "STRING"
+        },
+        {
+            "name": "study_id",
+            "type": "INTEGER"
         }
     ]
 
@@ -90,19 +94,28 @@ class BigQueryCohortSupport(object):
         return response
 
     def _build_cohort_row(self, cohort_id,
-                          patient_barcode=None, sample_barcode=None, aliquot_barcode=None):
+                          patient_barcode=None, sample_barcode=None, aliquot_barcode=None, study_id=None):
         return {
             'cohort_id': cohort_id,
             'patient_barcode': patient_barcode,
             'sample_barcode': sample_barcode,
-            'aliquot_barcode': aliquot_barcode
+            'aliquot_barcode': aliquot_barcode,
+            'study_id': study_id
         }
 
-    def add_cohort_with_sample_barcodes(self, cohort_id, barcodes):
+    def add_cohort_with_sample_barcodes(self, cohort_id, samples):
         rows = []
-        for sample_barcode in barcodes:
-            patient_barcode = sample_barcode[:12]
-            rows.append(self._build_cohort_row(cohort_id, patient_barcode, sample_barcode, None))
+        for sample in samples:
+            # TODO This is REALLY specific to TCGA. This needs to be changed
+            # patient_barcode = sample_barcode[:12]
+            barcode = sample
+            study_id = None
+            if isinstance(sample, dict):
+                barcode = sample['sample_id']
+                if 'study_id' in sample:
+                    study_id = sample['study_id']
+
+            rows.append(self._build_cohort_row(cohort_id, sample_barcode=barcode, study_id=study_id))
 
         response = self._streaming_insert(rows)
         return response
