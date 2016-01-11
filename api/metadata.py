@@ -636,6 +636,9 @@ class MetaDomainsList(messages.Message):
     has_27k                                     = messages.StringField(32, repeated=True)
     has_450k                                    = messages.StringField(33, repeated=True)
 
+class SampleBarcodeItem(messages.Message):
+    sample_barcode = messages.StringField(1)
+    study_id = messages.IntegerField(2)
 
 class MetadataAttr(messages.Message):
     attribute = messages.StringField(1)
@@ -648,6 +651,9 @@ class MetadataAttrList(messages.Message):
     items = messages.MessageField(MetadataAttr, 1, repeated=True)
     count = messages.IntegerField(2)
 
+class SampleBarcodeList(messages.Message):
+    items = messages.MessageField(SampleBarcodeItem, 1, repeated=True)
+    count = messages.IntegerField(2)
 
 class MetadataPlatformItem(messages.Message):
     DNAseq_data = messages.StringField(1)
@@ -1907,3 +1913,130 @@ class Meta_Endpoints_API_v2(remote.Service):
 
         db.close()
         return MetadataCountsItem(count=count_list, total=total)
+
+    GET_RESOURCE = endpoints.ResourceContainer(
+                                               cohort_id=messages.IntegerField(1),
+                                               token=messages.StringField(2),
+                                               filters=messages.StringField(3)
+                                               )
+    @endpoints.method(GET_RESOURCE, SampleBarcodeList,
+                      path='metadata_sample_list', http_method='GET',
+                      name='meta.metadata_sample_list')
+    def metadata_list(self, request):
+        filters = {}
+        valid_attrs = {}
+        sample_tables = {}
+        table_key_map = {}
+        sample_ids = None
+        study_ids = ()
+        cohort_id = None
+        user = get_current_user(request)
+
+        if request.__getattribute__('filters')is not None:
+            try:
+                tmp = json.loads(request.filters)
+                for filter in tmp:
+                    key = filter['key']
+                    if key not in filters:
+                        filters[key] = {'values':[], 'tables':[] }
+                    filters[key]['values'].append(filter['value'])
+
+            except Exception, e:
+                print traceback.format_exc()
+                raise endpoints.BadRequestException('Filters must be a valid JSON formatted array with objects containing both key and value properties')
+
+        db = sql_connection()
+
+        # TODO enable filtering based off of this
+        # Check for passed in saved search id
+        if request.__getattribute__('cohort_id') is not None:
+            cohort_id = str(request.cohort_id)
+            sample_query_str = 'SELECT sample_id, study_id FROM cohorts_samples WHERE cohort_id=%s;'
+
+            try:
+                cursor = db.cursor(MySQLdb.cursors.DictCursor)
+                cursor.execute(sample_query_str, (cohort_id,))
+                sample_ids = ()
+
+                for row in cursor.fetchall():
+                    sample_ids += ({ 'id': row['sample_id'], 'study': row['study_id'] },)
+                cursor.close()
+
+            except (TypeError, IndexError) as e:
+                raise endpoints.NotFoundException('Error in retrieving barcodes.')
+
+        # Add TCGA attributes to the list of available attributes
+        if 'user_studies' not in filters or 'tcga' in filters['user_studies']['values']:
+            sample_tables['metadata_samples'] = {'features':{}, 'barcode':'SampleBarcode', 'study_id':None}
+            cursor = db.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute('SELECT attribute FROM metadata_attr')
+            for row in cursor.fetchall():
+                key = 'tcga:' + row['attribute']
+                valid_attrs[key] = {'name': row['attribute']}
+                sample_tables['metadata_samples']['features'][key] = row['attribute']
+                if key in filters:
+                    filters[key]['tables'] += ('metadata_samples',)
+            cursor.close()
+
+        # If we have a user, get a list of valid studies
+        if user:
+            for study in Study.get_user_studies(user):
+                if 'user_studies' not in filters or study.id in filters['user_studies']['values']:
+                    study_ids += (study.id,)
+
+                    # Add all tables from each study
+                    for tables in User_Data_Tables.objects.filter(study=study):
+                        sample_tables[tables.metadata_samples_table] = {
+                            'features':{},
+                            'barcode':'SampleBarcode' if tables.metadata_samples_table is 'metadata_samples' else 'sample_barcode',
+                            'study_id': study.id
+                        }
+
+                    # Record features that should be in each sample table so we can know how and when we need to query
+                    for feature in User_Feature_Definitions.objects.filter(study=study):
+                        name = feature.feature_name
+                        key = 'study:' + str(study.id) + ':' + name
+
+                        if feature.shared_map_id:
+                            key = feature.shared_map_id
+                            name = feature.shared_map_id.split(':')[-1]
+
+                        if key not in valid_attrs:
+                            valid_attrs[key] = {'name': name}
+
+                        for tables in User_Data_Tables.objects.filter(study=feature.study_id):
+                            sample_tables[tables.metadata_samples_table]['features'][key] = feature.feature_name
+
+                            if key in filters:
+                                filters[key]['tables'] += (tables.metadata_samples_table,)
+        else:
+            print "User not authenticated with Metadata Endpoint API"
+
+        # Now that we're through the Studies filtering area, delete it so it doesn't get pulled into a query
+        if 'user_studies' in filters:
+            del filters['user_studies']
+
+        results = []
+        # Loop through the sample tables
+        for table, table_settings in sample_tables.items():
+            # Make sure we should run the query here, or if we have filters that won't return anything, skip
+            should_be_queried = True
+            for key, filter in filters.items():
+                if table not in filter['tables']:
+                    should_be_queried = False
+                    break
+
+            if not should_be_queried:
+                continue
+
+            where_clause = build_where_clause(filters, table_settings['features'])
+            query = 'SELECT DISTINCT %s FROM %s' % (table_settings['barcode'], table)
+            if where_clause['query_str']:
+                query += ' WHERE ' + where_clause['query_str']
+            cursor = db.cursor()
+            cursor.execute(query, where_clause['value_tuple'])
+            for row in cursor.fetchall():
+                results.append( SampleBarcodeItem(sample_barcode=row[0], study_id=table_settings['study_id']) )
+            cursor.close()
+
+        return SampleBarcodeList( items=results, count=len(results) )
