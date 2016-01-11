@@ -1956,10 +1956,13 @@ class Meta_Endpoints_API_v2(remote.Service):
             try:
                 cursor = db.cursor(MySQLdb.cursors.DictCursor)
                 cursor.execute(sample_query_str, (cohort_id,))
-                sample_ids = ()
+                sample_ids = {}
 
                 for row in cursor.fetchall():
-                    sample_ids += ({ 'id': row['sample_id'], 'study': row['study_id'] },)
+                    study_id = row['study_id']
+                    if not study_id in sample_ids:
+                        sample_ids[study_id] = ()
+                    sample_ids[study_id] += (row['sample_id'],)
                 cursor.close()
 
             except (TypeError, IndexError) as e:
@@ -2036,6 +2039,11 @@ class Meta_Endpoints_API_v2(remote.Service):
             cursor = db.cursor()
             cursor.execute(query, where_clause['value_tuple'])
             for row in cursor.fetchall():
+                study_id = table_settings['study_id']
+                if cohort_id and (study_id not in sample_ids or row[0] not in sample_ids[study_id]):
+                    # This barcode was not in our cohort's list of barcodes, skip it
+                    continue
+
                 results.append( SampleBarcodeItem(sample_barcode=row[0], study_id=table_settings['study_id']) )
             cursor.close()
 
