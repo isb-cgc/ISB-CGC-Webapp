@@ -1722,7 +1722,7 @@ class Meta_Endpoints_API_v2(remote.Service):
         filters = {}
         query_dict = {}
         valid_attrs = {}
-        sample_tables = ()
+        sample_tables = {}
         table_key_map = {}
         sample_ids = None
         study_ids = ()
@@ -1752,23 +1752,39 @@ class Meta_Endpoints_API_v2(remote.Service):
             try:
                 cursor = db.cursor(MySQLdb.cursors.DictCursor)
                 cursor.execute(sample_query_str, (cohort_id,))
-                sample_ids = ()
+                sample_ids = {}
 
                 for row in cursor.fetchall():
-                    sample_ids += ({ 'id': row['sample_id'], 'study': row['study_id'] },)
+                    if row['study_id'] not in sample_ids:
+                        sample_ids[ row['study_id'] ] = []
+                    sample_ids[ row['study_id'] ].append(row['sample_id'])
                 cursor.close()
+
+                for key in sample_ids:
+                    list = sample_ids[key]
+                    sample_ids[key] = {
+                        'SampleBarcode': build_where_clause({'SampleBarcode': list}),
+                        'sample_barcode': build_where_clause({'sample_barcode': list}),
+                    }
 
             except (TypeError, IndexError) as e:
                 raise endpoints.NotFoundException('Error in retrieving barcodes.')
 
         # Add TCGA attributes to the list of available attributes
         if 'user_studies' not in filters or 'tcga' in filters['user_studies']['values']:
-            sample_tables += ('metadata_samples',)
+            sample_tables['metadata_samples'] = {'sample_ids': None}
+            if sample_ids and None in sample_ids:
+                sample_tables['metadata_samples']['sample_ids'] = sample_ids[None]
+
             cursor = db.cursor(MySQLdb.cursors.DictCursor)
             cursor.execute('SELECT attribute FROM metadata_attr')
             for row in cursor.fetchall():
                 if row['attribute'] in METADATA_SHORTLIST:
-                    valid_attrs['tcga:' + row['attribute']] = {'name': row['attribute'],'tables': ('metadata_samples',)}
+                    valid_attrs['tcga:' + row['attribute']] = {
+                        'name': row['attribute'],
+                        'tables': ('metadata_samples',),
+                        'sample_ids': None
+                    }
             cursor.close()
 
         # If we have a user, get a list of valid studies
@@ -1778,7 +1794,10 @@ class Meta_Endpoints_API_v2(remote.Service):
                     study_ids += (study.id,)
 
                     for tables in User_Data_Tables.objects.filter(study=study):
-                        sample_tables += (tables.metadata_samples_table,)
+                        sample_tables[tables.metadata_samples_table] = {'sample_ids': None}
+                        if sample_ids and study.id in sample_ids:
+                            sample_tables[tables.metadata_samples_table]['sample_ids'] = sample_ids[study.id]
+
 
             features = User_Feature_Definitions.objects.filter(study__in=study_ids)
             for feature in features:
@@ -1790,7 +1809,7 @@ class Meta_Endpoints_API_v2(remote.Service):
                     name = feature.shared_map_id.split(':')[-1]
 
                 if key not in valid_attrs:
-                    valid_attrs[key] = {'name': name,'tables': ()}
+                    valid_attrs[key] = {'name': name,'tables': (), 'sample_ids': None}
 
                 for tables in User_Data_Tables.objects.filter(study=study):
                     valid_attrs[key]['tables'] += (tables.metadata_samples_table,)
@@ -1801,6 +1820,11 @@ class Meta_Endpoints_API_v2(remote.Service):
 
                     if key in filters:
                         filters[key]['tables'] += (tables.metadata_samples_table,)
+
+                    if sample_ids and feature.study_id in sample_ids:
+                        if valid_attrs[key]['sample_ids'] is None:
+                            valid_attrs[key]['sample_ids'] = ()
+                        valid_attrs[key]['sample_ids'] += sample_ids[feature.study_id]
         else:
             print "User not authenticated with Metadata Endpoint API"
 
@@ -1818,7 +1842,7 @@ class Meta_Endpoints_API_v2(remote.Service):
                 # We do this to avoid SQL errors for columns that don't exist
                 should_be_queried = True
                 for key, filter in filters.items():
-                    if table not in filter['tables']:
+                    if table not in filter['tables'] or (cohort_id and sample_tables[table]['sample_ids'] is None):
                         should_be_queried = False
                         break
 
@@ -1833,9 +1857,17 @@ class Meta_Endpoints_API_v2(remote.Service):
                 cursor = db.cursor()
                 if should_be_queried:
                     # Query the table for counts and values
-                    query = ('SELECT DISTINCT %s, COUNT(1) as count FROM ' + table) % col_name
+                    query = ('SELECT DISTINCT %s, COUNT(1) as count FROM %s') % (col_name, table)
                     if where_clause['query_str']:
                         query += ' WHERE ' + where_clause['query_str']
+                    if sample_tables[table]['sample_ids']:
+                        barcode_key = 'SampleBarcode' if table is 'metadata_samples' else 'sample_barcode'
+                        addt_cond = sample_tables[table]['sample_ids'][barcode_key]['query_str']
+                        if addt_cond and where_clause['query_str']:
+                            query += ' AND ' + addt_cond
+                        elif addt_cond:
+                            query += ' WHERE ' + addt_cond
+                            where_clause['value_tuple'] += sample_tables[table]['sample_ids'][barcode_key]['value_tuple']
                     query += ' GROUP BY %s ' %col_name
                     cursor.execute(query, where_clause['value_tuple'])
                     for row in cursor.fetchall():
@@ -1845,10 +1877,11 @@ class Meta_Endpoints_API_v2(remote.Service):
                         feature['total'] += int(row[1])
                 else:
                     # Just get the values so we can have them be 0
-                    cursor.execute(('SELECT DISTINCT %s FROM ' + table) % col_name)
+                    cursor.execute(('SELECT DISTINCT %s FROM %s') % (col_name, table))
                     for row in cursor.fetchall():
                         if not row[0] in table_values:
                             table_values[row[0]] = 0
+
                 cursor.close()
 
             feature['values'] = table_values
