@@ -1689,26 +1689,32 @@ class Meta_Endpoints_API_v2(remote.Service):
                                    key='tcga:'+str(row['attribute'])
                                    ))
 
-            cursor.close()
-            db.close()
-
             if user:
                 studies = Study.get_user_studies(user)
                 feature_defs = User_Feature_Definitions.objects.filter(study__in=studies)
                 for feature in feature_defs:
                     data_table = User_Data_Tables.objects.get(study=feature.study).metadata_samples_table
-                    data.append(MetadataAttr(attribute='user_'+feature.feature_name,
+                    name = feature.feature_name
+                    key = 'study:' + str(feature.study_id) + ':' + name
+
+                    if feature.shared_map_id:
+                        key = feature.shared_map_id
+
+                    data.append(MetadataAttr(attribute=name,
                                              code='N' if feature.is_numeric else 'C',
                                              spec='USER',
-                                             key='user:' + feature.study_id + ':' + feature.feature_name
+                                             key=key
                                              ))
+
+            cursor.close()
+            db.close()
 
             return MetadataAttrList(items=data, count=len(data))
 
         except (IndexError, TypeError):
             if cursor: cursor.close()
             if db: db.close()
-            raise endpoints.NotFoundException('Sample %s not found.' % (request.id,))
+            raise endpoints.InternalServerErrorException('Error retrieving attribute list')
 
     GET_RESOURCE = endpoints.ResourceContainer(
                                                filters=messages.StringField(1),
