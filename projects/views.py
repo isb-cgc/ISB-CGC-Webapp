@@ -213,7 +213,7 @@ def upload_files(request):
                         type = filter_column_name(type)
 
                     controlled = None
-                    if 'controlled' in column:
+                    if 'controlled' in column and column['controlled'] is not None:
                         controlled = column['controlled']['key']
                     else:
                         controlled = filter_column_name(column['name'])
