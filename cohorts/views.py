@@ -643,56 +643,70 @@ def set_operation(request):
         base_cohort = None
         subtract_cohorts = []
         notes = ''
-        cohort_patients = []
-        cohort_samples = []
+        patients = []
+        samples = []
 
         op = request.POST.get('operation')
         if op == 'union':
             notes = 'Union of '
             cohort_ids = request.POST.getlist('selected-ids')
-            cohorts = Cohort.objects.filter(id__in=cohort_ids)
+            cohorts = Cohort.objects.filter(id__in=cohort_ids, active=True, cohort_perms__in=request.user.cohort_perms_set.all())
             first = True
+            ids = ()
             for cohort in cohorts:
                 if first:
                     notes += cohort.name
                     first = False
                 else:
                     notes += ', ' + cohort.name
-            patients = Patients.objects.filter(cohort_id__in=cohort_ids).distinct().values_list('patient_id', flat=True)
-            samples = Samples.objects.filter(cohort_id__in=cohort_ids).distinct().values_list('sample_id', flat=True)
+                ids += (cohort.id,)
+            patients = Patients.objects.filter(cohort_id__in=ids).distinct().values_list('patient_id', flat=True)
+            samples = Samples.objects.filter(cohort_id__in=ids).distinct().values_list('sample_id', 'study_id')
         elif op == 'intersect':
-            notes = 'Intersection of '
             cohort_ids = request.POST.getlist('selected-ids')
-            cohorts = Cohort.objects.filter(id__in=cohort_ids)
-            first = True
-            for cohort in cohorts:
-                if first:
-                    notes += cohort.name
-                    first = False
-                else:
+            cohorts = Cohort.objects.filter(id__in=cohort_ids, active=True, cohort_perms__in=request.user.cohort_perms_set.all())
+            request.user.cohort_perms_set.all()
+            if len(cohorts):
+                cohort_patients = Patients.objects.filter(cohort=cohorts[0])
+                cohort_samples = Samples.objects.filter(cohort=cohorts[0])
+                notes = 'Intersection of ' + cohorts[0].name
+
+                print "Start of intersection with %s has %d" % (cohorts[0].name, len(cohort_samples))
+                for i in range(1, len(cohorts)):
+                    cohort = cohorts[i]
                     notes += ', ' + cohort.name
-            cohort_patients = tuple(Patients.objects.filter(cohort=cohorts[0]).values_list('patient_id', flat=True))
-            cohort_samples = tuple(Samples.objects.filter(cohort=cohorts[0]).values_list('sample_id', flat=True))
-            for i in range(1, len(cohorts)):
-                new_patient_list = tuple(Patients.objects.filter(cohort=cohorts[i]).values_list('patient_id', flat=True))
-                new_sample_list = tuple(Samples.objects.filter(cohort=cohorts[i]).values_list('sample_id', flat=True))
-                cohort_patients = set(cohort_patients).intersection(new_patient_list)
-                cohort_samples = set(cohort_samples).intersection(new_sample_list)
-            patients = list(cohort_patients)
-            samples = list(cohort_samples)
+
+                    cohort_samples = cohort_samples.extra(
+                            tables=[Samples._meta.db_table+"` AS `t"+str(1)], # TODO This is ugly :(
+                            where=[
+                                't'+str(i)+'.sample_id = ' + Samples._meta.db_table + '.sample_id',
+                                't'+str(i)+'.study_id = ' + Samples._meta.db_table + '.study_id',
+                                't'+str(i)+'.cohort_id = ' + Samples._meta.db_table + '.cohort_id',
+                            ]
+                    )
+                    cohort_patients = cohort_patients.extra(
+                            tables=[Patients._meta.db_table+"` AS `t"+str(1)], # TODO This is ugly :(
+                            where=[
+                                't'+str(i)+'.patient_id = ' + Patients._meta.db_table + '.patient_id',
+                                't'+str(i)+'.cohort_id = ' + Patients._meta.db_table + '.cohort_id',
+                            ]
+                    )
+                patients = cohort_patients.values_list('patient_id', flat=True)
+                samples = cohort_samples.values_list('sample_id', 'study_id')
+
         elif op == 'complement':
             base_id = request.POST.get('base-id')
             subtract_ids = request.POST.getlist('subtract-ids')
 
-            base_patients = tuple(Patients.objects.filter(cohort_id=base_id).values_list('patient_id', flat=True))
-            subtract_patients = tuple(Patients.objects.filter(cohort_id__in=subtract_ids).distinct().values_list('patient_id', flat=True))
-            cohort_patients = set(base_patients).difference(subtract_patients)
-            patients = list(cohort_patients)
+            base_patients = Patients.objects.filter(cohort_id=base_id)
+            subtract_patients = Patients.objects.filter(cohort_id__in=subtract_ids).distinct()
+            cohort_patients = base_patients.exclude(pk__in=subtract_patients.values_list('pk', flat=True))
+            patients = cohort_patients.values_list('patient_id', flat=True)
 
-            base_samples = tuple(Samples.objects.filter(cohort_id=base_id).values_list('sample_id', flat=True))
-            subtract_samples = tuple(Samples.objects.filter(cohort_id__in=subtract_ids).distinct().values_list('sample_id', flat=True))
-            cohort_samples = set(base_samples).difference(subtract_samples)
-            samples = list(cohort_samples)
+            base_samples = Samples.objects.filter(cohort_id=base_id)
+            subtract_samples = Samples.objects.filter(cohort_id__in=subtract_ids).distinct()
+            cohort_samples = base_samples.exclude(pk__in=subtract_samples.values_list('pk', flat=True))
+            samples = cohort_samples.values_list('sample_id', 'study_id')
 
             notes = 'Subtracted '
             base_cohort = Cohort.objects.get(id=base_id)
@@ -725,7 +739,7 @@ def set_operation(request):
 
             sample_list = []
             for sample in samples:
-                sample_list.append(Samples(cohort=new_cohort, sample_id=sample))
+                sample_list.append(Samples(cohort=new_cohort, sample_id=sample[0], study_id=sample[1]))
             Samples.objects.bulk_create(sample_list)
 
             # Create Sources
