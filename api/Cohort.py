@@ -82,44 +82,44 @@ class ReturnJSON(messages.Message):
     msg = messages.StringField(1)
 
 
-class User(messages.Message):
-    id = messages.StringField(1)
-    last_login = messages.StringField(2)
-    is_superuser = messages.StringField(3)
-    username = messages.StringField(4)
-    first_name = messages.StringField(5)
-    last_name = messages.StringField(6)
-    email = messages.StringField(7)
-    is_staff = messages.StringField(8)
-    is_active = messages.StringField(9)
-    date_joined = messages.StringField(10)
+# class User(messages.Message):
+#     id = messages.StringField(1)
+#     last_login = messages.StringField(2)
+#     is_superuser = messages.StringField(3)
+#     username = messages.StringField(4)
+#     first_name = messages.StringField(5)
+#     last_name = messages.StringField(6)
+#     email = messages.StringField(7)
+#     is_staff = messages.StringField(8)
+#     is_active = messages.StringField(9)
+#     date_joined = messages.StringField(10)
+#
+#
+# class UserList(messages.Message):
+#     items = messages.MessageField(User, 1, repeated=True)
 
 
-class UserList(messages.Message):
-    items = messages.MessageField(User, 1, repeated=True)
+# class SavedSearch(messages.Message):
+#     id = messages.StringField(1)
+#     search_url = messages.StringField(2)
+#     barcodes = messages.StringField(3)
+#     datatypes = messages.StringField(4)
+#     last_date_saved = messages.StringField(5)
+#     user_id = messages.StringField(6)
+#     name = messages.StringField(7)
+#     parent_id = messages.StringField(8)
+#     active = messages.StringField(9)
+#
+#
+# class SavedSearchList(messages.Message):
+#     items = messages.MessageField(SavedSearch, 1, repeated=True)
 
 
-class SavedSearch(messages.Message):
-    id = messages.StringField(1)
-    search_url = messages.StringField(2)
-    barcodes = messages.StringField(3)
-    datatypes = messages.StringField(4)
-    last_date_saved = messages.StringField(5)
-    user_id = messages.StringField(6)
-    name = messages.StringField(7)
-    parent_id = messages.StringField(8)
-    active = messages.StringField(9)
-
-
-class SavedSearchList(messages.Message):
-    items = messages.MessageField(SavedSearch, 1, repeated=True)
-
-
-class IdList(messages.Message):
-    ids = messages.IntegerField(1, repeated=True)   # List of ids
-    update = messages.IntegerField(2)               # Id of object to update
-    name = messages.StringField(3)                  # Potential name for new object or updated object
-    user_id = messages.IntegerField(4)              # User Id
+# class IdList(messages.Message):
+#     ids = messages.IntegerField(1, repeated=True)   # List of ids
+#     update = messages.IntegerField(2)               # Id of object to update
+#     name = messages.StringField(3)                  # Potential name for new object or updated object
+#     user_id = messages.IntegerField(4)              # User Id
 
 
 class FilterDetails(messages.Message):
@@ -134,8 +134,6 @@ class Cohort(messages.Message):
     perm = messages.StringField(4)
     email = messages.StringField(5)
     comments = messages.StringField(6)
-    # filter_name = messages.StringField(7)
-    # filter_value = messages.StringField(8)
     source_type = messages.StringField(7)
     source_notes = messages.StringField(8)
     parent_id = messages.IntegerField(9)
@@ -195,6 +193,7 @@ class DataFileNameKeyList(messages.Message):
     count = messages.IntegerField(2)
 
 
+# todo: replace this with class Cohort?
 class SavedCohort(messages.Message):
     id = messages.StringField(1)
     name = messages.StringField(2)
@@ -206,7 +205,8 @@ class SavedCohort(messages.Message):
     num_samples = messages.StringField(8)
 
 
-Cohort_Endpoints = endpoints.api(name='cohort_api', version='v1', description="Get information about cohorts",
+Cohort_Endpoints = endpoints.api(name='cohort_api', version='v1', description="Get information about "
+                                "cohorts, patients, and samples. Create and delete cohorts.",
                                  allowed_client_ids=[INSTALLED_APP_CLIENT_ID, endpoints.API_EXPLORER_CLIENT_ID])
 
 @Cohort_Endpoints.api_class(resource_name='cohort_endpoints')
@@ -217,6 +217,12 @@ class Cohort_Endpoints_API(remote.Service):
     @endpoints.method(GET_RESOURCE, CohortsList,
                       path='cohorts_list', http_method='GET', name='cohorts.list')
     def cohorts_list(self, request):
+        '''
+        Lists cohorts a user has either READER or OWNER permission on.
+        :param token: Optional. Access token with email scope to verify user's google identity.
+        :param cohort_id: Optional. Cohort id to get information about.
+        :return: List of one or more cohorts along with information about each cohort.
+        '''
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         user_email = None
         cursor = None
@@ -322,6 +328,14 @@ class Cohort_Endpoints_API(remote.Service):
                       path='cohort_patients_samples_list', http_method='GET',
                       name='cohorts.cohort_patients_samples_list')
     def cohort_patients_samples_list(self, request):
+        """
+        Returns information about the participants and samples in a particular cohort.
+        :param cohort_id: Required.
+        :param token: Optional. Access token with email scope to verify user's google identity.
+        :return: List of participant barcodes, sample barcodes, and a total count of each.
+        Returns error message if the cohort id is invalid or if the user does not have reader or
+        owner permissions on that cohort.
+        """
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
 
         db = None
@@ -435,6 +449,12 @@ class Cohort_Endpoints_API(remote.Service):
     @endpoints.method(GET_RESOURCE, PatientDetails,
                       path='patient_details', http_method='GET', name='cohorts.patient_details')
     def patient_details(self, request):
+        """
+        Returns information about a particular participant.
+        :param patient_barcode: Required.
+        :return: List of samples and a list of aliquots associated with the participant barcode
+        as well as clinical data on that participant.
+        """
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
 
         clinical_cursor = None
@@ -561,6 +581,14 @@ class Cohort_Endpoints_API(remote.Service):
     @endpoints.method(GET_RESOURCE, SampleDetails,
                       path='sample_details', http_method='GET', name='cohorts.sample_details')
     def sample_details(self, request):
+        """
+        Returns information about a particular sample.
+        :param sample_barcode: Required.
+        :param platform: Optional. Filter results by a particular platform.
+        :param pipeline: Optional. Filter results by a particular pipeline.
+        :return: Biospecimen data about the sample, a list of aliquots associated with the sample barcode,
+        and a list of details about each aliquot.
+        """
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
 
         biospecimen_cursor = None
@@ -734,6 +762,17 @@ class Cohort_Endpoints_API(remote.Service):
     @endpoints.method(GET_RESOURCE, DataFileNameKeyList,
                       path='datafilenamekey_list', http_method='GET', name='cohorts.datafilenamekey_list')
     def datafilenamekey_list(self, request):
+        """
+        Returns a list of cloud storage paths for files associated with either a sample barcode or
+        all the samples in a specified cohort.
+        :param sample_barcode: Required if cohort_id is absent, else optional.
+        :param cohort_id: Required if sample_barcode is absent, else optional.
+        :param platform: Optional. Filter results by platform.
+        :param pipeline: Optional. Filter results by pipeline.
+        :param token: Optional. Access token with email scope to verify user's google identity.
+        :return: List of cloud storage file paths. If the user is dbGaP authorized, controlled-access file paths
+        will appear in the list.
+        """
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         user_email = None
         cursor = None
@@ -852,6 +891,13 @@ class Cohort_Endpoints_API(remote.Service):
     @endpoints.method(POST_RESOURCE, SavedCohort,
                       path='save_cohort', http_method='POST', name='cohort.save')
     def save_cohort(self, request):
+        """
+        Creates and saves a cohort. Takes a JSON object in the request body to use as the cohort's filters.
+        :param name: Required. Name of cohort to be saved.
+        :param token: Optional. Access token with email scope to verify user's google identity.
+        :return: Information about the saved cohort, including the number of patients and the number
+        of samples in that cohort.
+        """
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         user_email = None
         patient_cursor = None
@@ -970,6 +1016,12 @@ class Cohort_Endpoints_API(remote.Service):
     @endpoints.method(DELETE_RESOURCE, ReturnJSON,
                       path='delete_cohort', http_method='POST', name='cohort.delete')
     def delete_cohort(self, request):
+        """
+        Deletes a cohort. User must have owner permissions on the cohort.
+        :param cohort_id: Required. Id of cohort to delete.
+        :param token: Optional. Access token with email scope to verify user's google identity.
+        :return: Message indicating whether the cohort was deleted or not.
+        """
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         user_email = None
         return_message = None
@@ -1025,6 +1077,18 @@ class Cohort_Endpoints_API(remote.Service):
     @endpoints.method(GET_RESOURCE, DataFileNameKeyList,
                       path='alt_datafilenamekey_list', http_method='GET', name='cohorts.alt_datafilenamekey_list')
     def alt_datafilenamekey_list(self, request):
+        """
+        Same endpoint as datafilenamekey_list using a different method. This was written to test performance.
+        Returns a list of cloud storage paths for files associated with either a sample barcode or
+        all the samples in a specified cohort.
+        :param sample_barcode: Required if cohort_id is absent, else optional.
+        :param cohort_id: Required if sample_barcode is absent, else optional.
+        :param platform: Optional. Filter results by platform.
+        :param pipeline: Optional. Filter results by pipeline.
+        :param token: Optional. Access token with email scope to verify user's google identity.
+        :return: List of cloud storage file paths. If the user is dbGaP authorized, controlled-access file paths
+        will appear in the list.
+        """
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         user_email = None
         cursor = None
