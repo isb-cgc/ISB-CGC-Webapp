@@ -147,9 +147,9 @@ class Migration(migrations.Migration):
             preserve_default=True,
         ),
         migrations.AddField(
-            model_name='worksheet_plot',
-            name='worksheet',
-            field=models.ForeignKey(blank=True, to='workbooks.Worksheet', null=True),
+            model_name='worksheet',
+            name='plot',
+            field=models.ForeignKey(blank=True, to='workbooks.Worksheet_plot', null=True),
             preserve_default=True,
         ),
         migrations.AddField(
