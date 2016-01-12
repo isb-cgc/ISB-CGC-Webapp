@@ -1834,9 +1834,7 @@ class Meta_Endpoints_API_v2(remote.Service):
                         filters[key]['tables'] += (tables.metadata_samples_table,)
 
                     if sample_ids and feature.study_id in sample_ids:
-                        if valid_attrs[key]['sample_ids'] is None:
-                            valid_attrs[key]['sample_ids'] = ()
-                        valid_attrs[key]['sample_ids'] += sample_ids[feature.study_id]
+                        valid_attrs[key]['sample_ids'] = sample_ids[feature.study_id]
         else:
             print "User not authenticated with Metadata Endpoint API"
 
@@ -1853,8 +1851,11 @@ class Meta_Endpoints_API_v2(remote.Service):
                 # Check if the filters make this table 0 anyway
                 # We do this to avoid SQL errors for columns that don't exist
                 should_be_queried = True
+                if cohort_id and sample_tables[table]['sample_ids'] is None:
+                    should_be_queried = False
+
                 for key, filter in filters.items():
-                    if table not in filter['tables'] or (cohort_id and sample_tables[table]['sample_ids'] is None):
+                    if table not in filter['tables']:
                         should_be_queried = False
                         break
 
