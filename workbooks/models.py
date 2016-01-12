@@ -10,6 +10,7 @@ from projects.models import Project, Study
 from cohorts.models import Cohort, Cohort_Perms
 from sharing.models import Shared_Resource
 from django.utils import formats
+import sys
 
 # Create your models here.
 class WorkbookManager(models.Manager):
@@ -165,7 +166,12 @@ class Worksheet(models.Model):
     @classmethod
     def destroy(cls, id):
         worksheet_model = cls.objects.get(id=id)
-        worksheet_model.destroy()
+        worksheet_model.worksheet_cohort_set.all().delete()
+        worksheet_model.worksheet_comment_set.all().delete()
+        worksheet_model.worksheet_variable_set.all().delete()
+        worksheet_model.worksheet_gene_set.all().delete()
+        #worksheet_model.worksheet_plot_set.all().delete()
+        worksheet_model.delete()
         return worksheet_model
 
     @classmethod
@@ -223,9 +229,6 @@ class Worksheet(models.Model):
         self.plot = plot
         self.save();
 
-
-    def destroy(self):
-        self.delete()
 
 class Worksheet_Cohort_Manager(models.Manager):
     content = None
@@ -490,6 +493,7 @@ class Worksheet_plot(models.Model):
     title           = models.CharField(max_length=100,  null=False)
     color_by        = models.CharField(max_length=1024, null=True)
     type            = models.CharField(max_length=1024, null=True)
+    #worksheet       = models.ForeignKey(Worksheet, blank=False, null=False)
     x_axis          = models.ForeignKey(Worksheet_variable, blank=True, null=True, related_name="worksheet_plot.x_axis")
     y_axis          = models.ForeignKey(Worksheet_variable, blank=True, null=True, related_name="worksheet_plot.y_axis")
     objects         = Worksheet_Plot_Manager()

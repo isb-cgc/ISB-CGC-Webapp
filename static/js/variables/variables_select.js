@@ -83,7 +83,7 @@ require([
                 type        : 'POST',
                 dataType    :'json',
                 url         : base_url + '/workbooks/' + workbook_id + '/worksheets/' + worksheet_id + "/variables/edit",
-                data        : JSON.stringify({variables_favorites : variable_lists}),
+                data        : JSON.stringify({var_favorites : variable_lists}),
                 beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                 success : function (data) {
                     if(!data.error) {

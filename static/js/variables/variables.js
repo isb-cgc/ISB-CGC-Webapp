@@ -56,7 +56,7 @@ require([
     'assetscore',
     'assetsresponsive',
     'base'
-], function($, jqueryui, bootstrap, session_security, d3, d3tip, vizhelpers, histogram) {
+], function($, jqueryui, bootstrap, session_security, d3, d3tip, vizhelpers) {
 
     A11y.Core();
 
@@ -279,7 +279,7 @@ require([
     $("#edit_favorite_list").on('click', function(event){
         var name = $("#variable_list_name_input").val();
         var variable_list = get_variable_list();
-        var variable_id = this.getAttribute("variable_id");
+        var variable_id = this.getAttribute("variable_list_id");
         if(variable_list.length>0){
             var csrftoken = get_cookie('csrftoken');
             $.ajax({
@@ -306,7 +306,6 @@ require([
      */
     $("#apply_to_worksheet").on('click', function(event){
         var name = $("#variable_list_name_input").val();
-        console.log("name", name);
         var workbook_id  = this.getAttribute("workbook_id");
         var worksheet_id = this.getAttribute("worksheet_id");
         var variable_list = get_variable_list();

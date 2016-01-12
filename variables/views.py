@@ -52,7 +52,7 @@ def variable_fav_list(request, workbook_id=0, worksheet_id=0, new_workbook=0):
             if variable_list :
                 template = 'variables/variables_select.html'
             else :
-                template = 'variables/variables_edit.html'
+                template = 'variables/variable_edit.html'
 
         except ObjectDoesNotExist:
             messages.error(request, 'The workbook and worksheet you were referencing does not exist.')
@@ -62,7 +62,7 @@ def variable_fav_list(request, workbook_id=0, worksheet_id=0, new_workbook=0):
         if variable_list :
             template = 'variables/variables_select.html'
         else :
-            template = 'variables/variables_edit.html'
+            template = 'variables/variable_edit.html'
 
     return render(request, template, context)
 
@@ -291,20 +291,19 @@ def initialize_variable_selection_page(request,
     variable_favorites = VariableFavorite.get_list(request.user)
 
     context = {
-        'variable_names' : variable_list.keys(),
-        'variable_list_count' : variable_list,
-        'favorite_list' : favorite_list,
-        'datatype_list' : datatype_list,
-        'projects' : projects,
+        'variable_names'        : variable_list.keys(),
+        'variable_list_count'   : variable_list,
+        'favorite_list'         : favorite_list,
+        'datatype_list'         : datatype_list,
+        'projects'              : projects,
+        'data_attr'             : data_attr,
+        'total_samples'         : totals,
 
-        'data_attr' : data_attr,
-        'total_samples' : totals,
-
-        'base_url' : settings.BASE_URL,
-        'base_api_url' : settings.BASE_API_URL,
-        'TCGA_project' : TCGA_project,
-        'common_project' : common_project,
-        'variable_favorites' : variable_favorites,
+        'base_url'                  : settings.BASE_URL,
+        'base_api_url'              : settings.BASE_API_URL,
+        'TCGA_project'              : TCGA_project,
+        'common_project'            : common_project,
+        'variable_favorites'        : variable_favorites,
         'workbook'                  : workbook_model,
         'worksheet'                 : worksheet_model,
         'existing_variable_list'    : existing_variable_list,
