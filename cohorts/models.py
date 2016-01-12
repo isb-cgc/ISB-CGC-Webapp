@@ -164,6 +164,7 @@ class Samples(models.Model):
 class Patients(models.Model):
     cohort = models.ForeignKey(Cohort, null=False, blank=False)
     patient_id = models.TextField(null=False)
+    # TODO this will need a study column eventually too, but is currently not supported in other areas
 
 class Source(models.Model):
     FILTERS = 'FILTERS'
