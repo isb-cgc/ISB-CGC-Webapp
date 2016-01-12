@@ -17,6 +17,7 @@ limitations under the License.
 """
 
 import io
+import os
 import re
 import json
 import StringIO
@@ -50,6 +51,7 @@ from google_helpers.logging_service import get_logging_resource
 from google_helpers.bigquery_service import get_bigquery_service
 from google.appengine.api.taskqueue import Task, Queue
 
+from oauth2client.client import GoogleCredentials
 from gcloud import storage, bigquery
 import pandas as pd
 import uuid
@@ -728,10 +730,11 @@ def stream_row_to_bigquery(service, project_id, dataset_id, table_name, row,
         body=insert_all_data).execute(num_retries=num_retries)
 
 
-def read_json_from_storage(project_id, bucket_id, file_id):
+def read_json_from_storage(project_id, bucket_id, file_id, credentials):
     """read the file from the bucket
     """
-    storage_client = storage.Client(project=project_id)
+
+    storage_client = storage.Client(project=project_id, credentials=credentials)
     bucket = storage_client.get_bucket(bucket_id)
     blob = bucket.get_blob(file_id)
     item_json = json.loads(blob.download_as_string())
@@ -747,10 +750,10 @@ def read_json_from_storage(project_id, bucket_id, file_id):
 
     return data_df
 
-def check_table_exists(project_id, dataset_id, table_id):
+def check_table_exists(project_id, dataset_id, table_id, credentials):
     """Check if the BigQuery table exists
     """
-    bigquery_client = bigquery.Client(project=project_id)
+    bigquery_client = bigquery.Client(project=project_id, credentials=credentials)
     dataset = bigquery_client.dataset(dataset_id)
     table = dataset.table(name=table_id)
 
@@ -759,6 +762,11 @@ def check_table_exists(project_id, dataset_id, table_id):
 def load_billing_to_bigquery(request):
     """Main: Read the file from storage and load into BigQuery
     """
+    if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):
+        credentials = GoogleCredentials.get_application_default()
+    else:
+        credentials = GoogleCredentials.from_stream(settings.GOOGLE_APPLICATION_CREDENTIALS)
+
     date = (datetime.datetime.now() + datetime.timedelta(days=-1))
 
     project_id = settings.BIGQUERY_PROJECT_NAME
@@ -771,8 +779,7 @@ def load_billing_to_bigquery(request):
     bq_service = get_bigquery_service()
 
     # read file from storage
-    print 'Storage filename: ' + str(file_id)
-    data_df = read_json_from_storage(project_id, bucket_id, file_id)
+    data_df = read_json_from_storage(project_id, bucket_id, file_id, credentials)
 
     # generate bigquery schema
     dtypes = {'cost_amount': 'FLOAT', 'endTime': 'TIMESTAMP', 'credits_amount': 'FLOAT',
@@ -780,7 +787,7 @@ def load_billing_to_bigquery(request):
     schema = generate_schema(data_df, dtypes)
 
     # check if the table exists, if not create and stream rows
-    if not check_table_exists(project_id, dataset_id, table_id):
+    if not check_table_exists(project_id, dataset_id, table_id, credentials):
 
         create_table(bq_service, project_id, dataset_id, table_id, schema)
 
