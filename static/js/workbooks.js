@@ -117,20 +117,29 @@ require([
     });
 
     // settings flyout interactions
-    $('.show-settings-flyout').on('click', function() {
+    function show_plot_settings() {
         var target = $(document).find('.settings-flyout');
         $(target).animate({
             right: '-1px'
         }, 800).toggleClass('open');
+    }
+
+    $('.show-settings-flyout').on('click', function() {
+        show_plot_settings();
     });
-    $('.hide-settings-flyout').on('click', function() {
-        $(this).parents('.fly-out.settings-flyout').animate({
+
+    function hide_plot_settings(){
+        $('.hide-settings-flyout').parents('.fly-out.settings-flyout').animate({
             right: '-400px'
         }, 800, function(){
             $(this).removeClass('open');
         })
+    }
+    $('.hide-settings-flyout').on('click', function() {
+        hide_plot_settings();
     });
 
+    //What is this for?
     $('.dropdown-menu').find("[data-toggle='modal']").click(function(){
         //$(this.getAttribute("data-target")).modal();
         console.log($(this.getAttribute("data-target")));
@@ -200,47 +209,123 @@ require([
         tabsList = $('#worksheets-tabs a[data-toggle="tab"]');
     }
 
-
     // Activate the recent added tab
-    if(display_worksheet){
-        var recentWorksheetTab = $("a[href='#"+ display_worksheet +"']");
+    if(display_worksheet_id){
+        var recentWorksheetTab = $("a[href='#"+ display_worksheet_id +"']");
         var recentWorksheetTarget = recentWorksheetTab.parent();
         //$(tabsList[0]).parent().removeClass('active');
         if(recentWorksheetTarget.closest('#more-tabs').length > 0){
             openTabsfromDropdown(recentWorksheetTarget);
         }
-    }
-
-    //search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id);
-    //search_helper_obj.update_parsets(base_api_url, 'metadata_platform_list', cohort_id);
-
-
-    function generatePlot(){
-        var plot_element = $('.plot');
-        var plot_type = $("#plot_selection").find(":selected").text();
-        var x_attr = plot_element.find('#x-axis-select')[0].selectedIndex > 0 ? plot_element.find('#x-axis-select').find(":selected").val() : "";
-        var y_attr = plot_element.find('#y-axis-select')[0].selectedIndex > 0 ? plot_element.find('#y-axis-select').find(":selected").val() : "";
-        var cohort = plot_element.find('#cohort-select')[0].selectedIndex > 0 ? plot_element.find('#cohort-select').find(":selected").val() : "";
-        var plotFactory = Object.create(plot_factory, {});
-        plotFactory.generate_plot(plot_element, x_attr, y_attr, 'CLIN:Study', cohort, false);
+    } else {
+        //load the plot of the first worksheet, if one exist
+        //get_plot(workbook_id, display_worksheet_id, plot_type, function(data){
+        //    load_plot(data);
+        //});
     }
 
     //generate plot based on user change
     $('.update-plot').on('click', function(event){
-        generatePlot();
-        $('.hide-settings-flyout').parents('.fly-out.settings-flyout').animate({
-            right: '-400px'
-        }, 800, function(){
-            $(this).removeClass('open');
-        })
+        if(valid_plot_settings()) {
+            var parent       = $(this).parent();
+            var worksheet_id = $(this).attr("worksheet_id");
+            var plot_id      = $(this).attr("plot_id");
+            var attrs = {
+                type   : parent.parentsUntil(".worksheet-body").find(".plot_selection").find(":selected").text(),
+                x_axis : {id : parent.find('#x-axis-select').find(":selected").attr('var_id'), url_code : parent.find('#x-axis-select').find(":selected").val()},
+                y_axis : {id : parent.find('#y-axis-select').find(":selected").attr('var_id'), url_code : parent.find('#y-axis-select').find(":selected").val()},
+                cohort : {id : parent.find('#cohort-select').val()},
+                color_by_cohort : parent.find('#color-by-cohort').find(":selected").val(),
+                color_by : parent.find('#color-select').find(":selected").val()
+            }
+            update_plot_model(workbook_id, worksheet_id, plot_id, attrs, function(result){
+                generate_plot(worksheet_id, attrs.type, attrs.x_axis.url_code, attrs.y_axis.url_code, 'CLIN:Study', attrs.cohort.id);
+                hide_plot_settings();
+            });
+        }
     });
 
     //generate plot type selection
-    $("#plot_selection").on("change", function(event){
-        generatePlot();
+    $(".plot_selection").on("change", function(event){
+        $(this).find(":disabled :selected").remove()
+        var worksheet_id = $(this).attr("worksheet_id");
+        var plot_type = $(this).find(":selected").text();
+        get_plot(workbook_id, worksheet_id, plot_type, function(data){
+            if(data.error){
+                console.log("Display error");
+            } else {
+                load_plot(workbook_id, data);
+                show_plot_settings();
+            }
+        });
     });
 
+    function valid_plot_settings(){
+        return true;
+    }
 
+    function generate_plot(worksheet_id, type, x_var_code, y_var_code, color_by, cohort_id){
+        var plot_element = $("[worksheet_id='"+worksheet_id+"']").parent().parent().find(".plot");
+        var plotFactory = Object.create(plot_factory, {});
+        plotFactory.generate_plot(plot_element, type, x_var_code, y_var_code, color_by, cohort_id, false);
+    }
+
+    function load_plot(worksheet_id, plot_data){
+        var plot_element = $("[worksheet_id='"+worksheet_id+"']").parent().parent().find(".plot");
+        plot_element.find('.update-plot').attr('plot_id', plot_data.id).change();
+        if(plot_data.x_axis) {
+            plot_element.find('#x-axis-select').val(plot_data.x_axis.url_code);
+        }
+        if(plot_data.y_axis) {
+            plot_element.find('#y-axis-select').val(plot_data.y_axis.url_code);
+        }
+        if(plot_data.cohort) {
+            plot_element.find('#cohort-select').val(plot_data.cohort.id);
+        }
+        if(plot_data.color_by) {
+            plot_element.find('#color_by').val(plot_data.color_by);
+        }
+    }
+
+    //the server side call made here will also change the active entry for the worksheet
+    function get_plot(workbook_id, worksheet_id, type, callback){
+        var csrftoken = get_cookie('csrftoken');
+        $.ajax({
+            type        : 'GET',
+            url         : base_url + '/workbooks/' + workbook_id + '/worksheets/' + worksheet_id + "/plots/",
+            data        : {type : type},
+            dataType    :'json',
+            beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+            success : function (result) {
+                if(result.error){
+                    callback({error: result.error});
+                }
+                if(result.data){
+                    callback(result.data);
+                }
+            },
+            error: function (result) {
+                callback({error: result.error});
+            }
+        });
+    }
+
+    function update_plot_model(workbook_id, worksheet_id, plot_id, attrs, callback){
+        var csrftoken = get_cookie('csrftoken');
+        $.ajax({
+            type        :'POST',
+            dataType    :'json',
+            url         : base_url + '/workbooks/' + workbook_id + '/worksheets/' + worksheet_id + "/plots/" + plot_id + "/edit",
+            data        : JSON.stringify({attrs : attrs}),
+            beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+            success : function (data) {
+                callback(data);
+            },
+            error: function () {
+                console.log('Failed to add variable list to workbook');
+            }
+        });
+    }
 
     // Ajax submitting forms
     $('.ajax-form-modal').find('form').on('submit', function (e) {
@@ -273,5 +358,24 @@ require([
             $this.find('.btn').removeClass('btn-disabled').attr('disabled', false);
         });
     });
+
+    /*
+        Used for getting the CORS token for submitting data
+     */
+    function get_cookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
 });
 

@@ -1,10 +1,9 @@
 import operator
-
+import json
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Q
 from projects.models import Project, Study
-
 from django.conf import settings
 
 class FavoriteManager(models.Manager):
@@ -131,5 +130,5 @@ class Variable(models.Model):
             variable_model = cls.objects.create(name=name, project_id=project, study_id=study, code=code, variable_favorite=favorite)
             variable_model.save()
         else :
-            variable_model = cls.objects.create(name=name, variable_favorite=favorite)
+            variable_model = cls.objects.create(name=name, code=code, variable_favorite=favorite)
             variable_model.save()
