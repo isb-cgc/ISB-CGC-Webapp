@@ -52,7 +52,7 @@ def variable_fav_list(request, workbook_id=0, worksheet_id=0, new_workbook=0):
             if variable_list :
                 template = 'variables/variables_select.html'
             else :
-                template = 'variables/variable_edit.html'
+                return initialize_variable_selection_page(request, workbook_id=workbook_id, worksheet_id=worksheet_id)
 
         except ObjectDoesNotExist:
             messages.error(request, 'The workbook and worksheet you were referencing does not exist.')
@@ -62,7 +62,7 @@ def variable_fav_list(request, workbook_id=0, worksheet_id=0, new_workbook=0):
         if variable_list :
             template = 'variables/variables_select.html'
         else :
-            template = 'variables/variable_edit.html'
+            return initialize_variable_selection_page(request, new_workbook=True)
 
     return render(request, template, context)
 

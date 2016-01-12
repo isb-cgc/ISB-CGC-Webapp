@@ -20,16 +20,12 @@
     <div class="panel-heading">
         <div class="options-bar">
             {% if workbook.owner.id == user.id %}
-            <a role="button" class="delete-plot" data-toggle="modal" data-target="#delete-plot-{{ plot.id }}-modal" aria-label="Delete Plot"><i class="fa fa-trash"></i></a>
-            <a role="button" class="toggle-selection" aria-label="Toggle Sample Selection"><i class="fa fa-crosshairs"></i></a>
+{#  TODO          <a role="button" class="toggle-selection" aria-label="Toggle Sample Selection"><i class="fa fa-crosshairs"></i></a>#}
             <a role="button" class="show-settings-flyout" data-target=".setting-flyout" aria-label="Show Plot Settings"><i class="fa fa-pencil"></i></a>
             {% else %}
             <a role="button" class="show-settings-flyout" data-target=".setting-flyout" aria-label="Show Plot Settings"><i class="fa fa-tasks"></i></a>
             {% endif %}
         </div>
-{#        <div class="form-group">#}
-{#            <input class="form-control" id="{{ plot.id }}-plot-title" type="text" name="name" value="{% if plot.title %}{{ plot.title }}{% else %}Untitled Plot{% endif %}" />#}
-{#        </div>#}
     </div>
     <div class="panel-body">
 
@@ -50,58 +46,64 @@
                     <div class="form-group">
                         <label for="{{ plot.id }}-x-select">X Axis Variable <a role="button" class="x-edit-field" data-attribute="x-selector" aria-label="X Field Editor"></a></label>
                         <select id="x-axis-select" plot="{{ plot.id }}" class="search-term-field" style="width: 230px;">
-                            {% if plot.xaxis.selected %}
-                                <option value="{{ plot.xaxis.selected }}" selected >{{ plot.xaxis.selected }}</option>
+                            {% if plot.x_axis %}
+                                <option value="{{ plot.x_axis.url_code }}" var_id="{{ plot.x_axis.id }}" selected >{{ plot.x_axis.name }}</option>
                             {% else %}
-                                <option disabled selected >-- select a variable--</option>
+                                <option disabled selected>-- select a variable--</option>
                             {% endif %}
                             {% for var in variables %}
-{#                                {% if var.type == plot.xaxis.type  %}#}
-                                    <option value="{{ var.url_code }}">{{ var.name }}</option>
-{#                                {% endif %}#}
+                                {% if not plot or plot.x_axis.id != var.id %}
+                                    {#                                {% if var.type == plot.yaxis.type  %}#}
+                                    <option value="{{ var.url_code }}" var_id="{{ var.id }}">{{ var.name }}</option>
+                                    {#                                {% endif %}#}
+                                {% endif %}
                             {% endfor %}
                         </select>
                     </div>
                     <button class="swap btn btn-default btn-sm inline-block space-bottom-10"><i class="fa fa-exchange fa-rotate-90"></i> Swap Values</button>
                     <div class="form-group">
                         <label for="{{ plot.id }}-y-select">Y Axis Variable <a role="button" class="y-edit-field" data-attribute="y-selector" aria-label="Y Field Editor"></a></label>
-                        <select id="y-axis-select" plot="{{ plot.id }}" class="search-term-field" style="width: 230px;">
-                            {% if plot.yaxis.selected %}
-                                <option value="{{ plot.yaxis.selected }}" selected >{{ plot.yaxis.selected }}</option>
+                        <select id="y-axis-select" class="search-term-field" style="width: 230px;">
+                            {% if plot.y_axis %}
+                                <option value="{{ plot.y_axis.url_code }}" var_id="{{ plot.y_axis.id }}" selected >{{ plot.y_axis.name }}</option>
                             {% else %}
-                                <option disabled selected >-- select a variable--</option>
+                                <option disabled selected>-- select a variable--</option>
                             {% endif %}
                             {% for var in variables %}
-{#                                {% if var.type == plot.yaxis.type  %}#}
-                                    <option value="{{ var.url_code }}">{{ var.name }}</option>
-{#                                {% endif %}#}
+                                {% if not plot or plot.y_axis.id != var.id %}
+                                    {#                                {% if var.type == plot.yaxis.type  %}#}
+                                    <option value="{{ var.url_code }}" var_id="{{ var.id }}">{{ var.name }}</option>
+                                    {#                                {% endif %}#}
+                                {% endif %}
                             {% endfor %}
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="{{ plot.id }}-color-select">Color By Feature <a role="button" class="color-edit-field" data-attribute="color-selector" aria-label="Color Field Editor"><i class="fa fa-pencil"></i></a></label></label>
-                        <div class="color-selector filter-label label label-default" type="text" id="{{ plot.id }}-color-select" name="color-attr" value="{{ plot.color_by }}">{{ plot.color_by }}</div>
+                        <div class="color-selector filter-label label label-default" type="text" id="color-select" name="color-attr" value="{{ plot.color_by }}">{{ plot.color_by }}</div>
                     </div>
                     <div class="form-group">
                         <label for="{{ plot.id }}-color-by-cohort">Color By Cohort</label>
-                        <input type="checkbox" class="color-by-cohort" id="{{ plot.id }}-color-by-cohort" />
+                        <input type="checkbox" class="color-by-cohort" id="color-by-cohort" />
                     </div>
                     <div class="form-group">
                         <label>Cohorts</label>
                         <div class="cohort-listing space-top-5">
                             <select id="cohort-select" plot="{{ plot.id }}" class="search-term-field" style="width: 230px;">
-                                {% if plot.cohort.selected %}
-                                    <option value="{{ plot.cohort.selected }}" selected >{{ plot.cohort.selected }}</option>
+                                {% if plot.cohort %}
+                                    <option value="{{ plot.cohort.id }}" selected >{{ plot.cohort.cohort.name }}</option>
                                 {% else %}
                                     <option disabled selected >-- select a cohort--</option>
                                 {% endif %}
                                 {% for cohort in cohorts %}
-                                    <option value="{{ cohort.id }}">{{ cohort.name }}</option>
+                                    {% if not plot or plot.cohort.id != cohort.id %}
+                                        <option value="{{ cohort.id }}">{{ cohort.cohort.name }}</option>
+                                    {% endif %}
                                 {% endfor %}
                             </select>
                         </div>
                     </div>
-                    <button class="update-plot btn btn-primary">Update Plot</button>
+                    <button class="update-plot btn btn-primary" worksheet_id="{{ worksheet.id }}" plot_id="{{ plot.id }}">Update Plot</button>
                     {% else %}
                     <div class="form-group">
                         <h6>X Axis Variable</h6>
