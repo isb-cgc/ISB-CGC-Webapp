@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.http import StreamingHttpResponse
 from django.http import HttpResponse, JsonResponse
-from models import Cohort, Workbook, Worksheet, Worksheet_comment, Worksheet_variable, Worksheet_gene, Worksheet_cohort
+from models import Cohort, Workbook, Worksheet, Worksheet_comment, Worksheet_variable, Worksheet_gene, Worksheet_cohort, Worksheet_plot
 from variables.models import VariableFavorite, Variable
 from genes.models import GeneFavorite
 from projects.models import Project
@@ -125,7 +125,7 @@ def workbook(request, workbook_id=0):
 
     elif request.method == "GET" :
         if workbook_id:
-            ownedWorkbooks = request.user.workbook_set.all().filter(active=True)
+            ownedWorkbooks  = request.user.workbook_set.all().filter(active=True)
             sharedWorkbooks = Workbook.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
             publicWorkbooks = Workbook.objects.all().filter(is_public=True,active=True)
 
@@ -138,18 +138,19 @@ def workbook(request, workbook_id=0):
             is_shareable = (workbook_model.owner.id == request.user.id)
 
             if is_shareable:
-                for worksheet in workbook_model.get_deep_worksheets():
+                for worksheet in workbook_model.worksheets:
                     # Check all cohorts are owned by the user
                     for cohort in worksheet.cohorts:
-                        if cohort.get_owner().id != request.user.id and not cohort.is_public():
+                        if cohort.cohort.get_owner().id != request.user.id and not cohort.cohort.is_public():
                             is_shareable = False
                             break
 
                     # Check all variables are from projects owned by the user
                     for variable in worksheet.get_variables():
-                        if variable.project.owner_id != request.user.id and not variable.project.is_public:
-                            is_shareable = False
-                            break
+                        if variable.project: #project will be null if the variable is from TCGA
+                            if variable.project.owner_id != request.user.id and not variable.project.is_public:
+                                is_shareable = False
+                                break
 
                     if not is_shareable:
                         break
@@ -162,9 +163,9 @@ def workbook(request, workbook_id=0):
                           {'name' : 'Histogram'},
                           {'name' : 'Scatter Plot'},
                           {'name' : 'Violin Plot'},
-                          {'name' : 'Violin Plot 2'},
-                          {'name' : 'Cubby Hole'},
-                          {'name' : 'SeqPeak'}]
+                          {'name' : 'Violin Plot with axis swap'},
+                          {'name' : 'Cubby Hole Plot'}]
+                         # Todo {'name' : 'SeqPeak'}]
             return render(request, template, {'workbook'    : workbook_model,
                                               'is_shareable': is_shareable,
                                               'shared'      : shared,
@@ -238,7 +239,7 @@ def worksheet_variables(request, workbook_id=0, worksheet_id=0, variable_id=0):
 
     if request.method == "POST" :
         if command == "delete" :
-            Worksheet_gene.destroy(workbook_id=workbook_id, worksheet_id=worksheet_id, id=variable_id, user=request.user)
+            Worksheet_variable.destroy(workbook_id=workbook_id, worksheet_id=worksheet_id, id=variable_id, user=request.user)
             result['message'] = "variables have been deleted from workbook"
         else :
             variables = []
@@ -247,7 +248,6 @@ def worksheet_variables(request, workbook_id=0, worksheet_id=0, variable_id=0):
                 json_response = True
                 name          = json.loads(request.body)['name']
                 variable_list = json.loads(request.body)['variables']
-
                 variable_favorite_result = VariableFavorite.create(name       = name,
                                                                    variables  = variable_list,
                                                                    user       = request.user)
@@ -371,6 +371,97 @@ def worksheet_genes(request, workbook_id=0, worksheet_id=0, genes_id=0):
     else :
         redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_model.id, 'worksheet_id': worksheet_model.id})
         return redirect(redirect_url)
+
+@login_required
+def workbook_create_with_plot(request):
+    return worksheet_plots(request=request)
+
+@login_required
+def worksheet_plots(request, workbook_id=0, worksheet_id=0, plot_id=0):
+    command  = request.path.rsplit('/',1)[1];
+    json_response = False
+    default_name  = "Untitled Workbook"
+    result        = {}
+
+    if request.method == "POST" :
+        if command == "delete" :
+            var = Worksheet_plot.objects.get(id=plot_id).delete()
+            result['message'] = "the plot has been deleted from workbook"
+        else :
+            #update
+            if "attrs" in request.body :
+                json_response = True
+                attrs = json.loads(request.body)['attrs']
+                if plot_id :
+                    plot_model = Worksheet_plot.objects.get(id=plot_id)
+                    if attrs['x_axis'] :
+                        try :
+                            plot_model.x_axis = Worksheet_variable.objects.get(id=attrs['x_axis']['id'])
+                        except ObjectDoesNotExist:
+                            None
+                    if attrs['y_axis'] :
+                        try :
+                            plot_model.y_axis = Worksheet_variable.objects.get(id=attrs['y_axis']['id'])
+                        except ObjectDoesNotExist:
+                            None
+                    if attrs['cohort'] :
+                        try :
+                            plot_model.cohort = Worksheet_cohort.objects.get(id=attrs['cohort']['id'])
+                        except ObjectDoesNotExist:
+                            None
+
+                    plot_model.save()
+                    result['updated'] = "success"
+
+            #from Details Page or list page
+            # if request.POST.get("variable_list_id") :
+            #     workbook_name = request.POST.get("name")
+            #     variable_id   = request.POST.get("variable_list_id")
+            #     try :
+            #         variable_fav = VariableFavorite.objects.get(id=variable_id)
+            #         variables = variable_fav.get_variables()
+            #     except ObjectDoesNotExist:
+            #         result['error'] = "variable favorite does not exist"
+            #
+            # #from Select Page
+            # if "var_favorites" in request.body : #{"variables_favorites":[{"id":"6"}]}
+            #     variable_fav_list = json.loads(request.body)['var_favorites']
+            #     json_response = True
+            #     for fav in variable_fav_list:
+            #         try:
+            #             fav = VariableFavorite.objects.get(id=fav['id'])
+            #             variables = fav.get_variables()
+            #         except ObjectDoesNotExist:
+            #             result['error'] = "variable favorite does not exist"
+    elif request.method == "GET" :
+        json_response = True
+        plot_type = request.GET.get('type', 'default')
+
+        worksheet_model = Worksheet.objects.get(id=worksheet_id)
+        plots = worksheet_model.worksheet_plot_set.all()
+        for p in plots :
+            p.active = False
+            p.save()
+
+        plots = worksheet_model.worksheet_plot_set.filter(type=plot_type)
+        if len(plots) == 0:
+            model = Worksheet_plot(type=plot_type, worksheet=worksheet_model)
+            model.save()
+        else :
+            model = plots[0]
+            model.active = True
+            model.save()
+
+        result['data'] = model.toJSON()
+    else :
+        result['error'] = "method not correct"
+
+    if json_response :
+        return HttpResponse(json.dumps(result), status=200)
+    else :
+        redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_model.id, 'worksheet_id': worksheet_model.id})
+        return redirect(redirect_url)
+
 
 @login_required
 def worksheet_cohorts(request, workbook_id=0, worksheet_id=0, cohort_id=0):
