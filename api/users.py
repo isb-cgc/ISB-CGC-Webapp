@@ -36,7 +36,7 @@ from api_helpers import *
 logger = logging.getLogger(__name__)
 
 CONTROLLED_ACL_GOOGLE_GROUP = settings.ACL_GOOGLE_GROUP
-
+INSTALLED_APP_CLIENT_ID = settings.INSTALLED_APP_CLIENT_ID
 
 class ReturnJSON(messages.Message):
     msg = messages.StringField(1)
@@ -53,7 +53,8 @@ def is_dbgap_authorized(user_email):
         return False
 
 
-User_Endpoints = endpoints.api(name='user_api', version='v1')
+User_Endpoints = endpoints.api(name='user_api', version='v1', description='Get information about users.',
+                               allowed_client_ids=[INSTALLED_APP_CLIENT_ID, endpoints.API_EXPLORER_CLIENT_ID])
 
 @User_Endpoints.api_class(resource_name='user_endpoints')
 class User_Endpoints_API(remote.Service):
@@ -62,6 +63,11 @@ class User_Endpoints_API(remote.Service):
     @endpoints.method(GET_RESOURCE, ReturnJSON,
                       path='am_i_dbgap_authorized', http_method='GET', name='user.amiauthorized')
     def am_i_dbgap_authorized(self, request):
+        '''
+        Returns information about the user.
+        :param token: Optional. Access token with email scope to verify user's google identity.
+        :return: ReturnJSON with msg string indicating presence or absence on the controlled-access list.
+        '''
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         user_email = None
 

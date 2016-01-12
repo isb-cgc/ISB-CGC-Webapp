@@ -817,7 +817,7 @@ class IncomingPlatformSelection(messages.Message):
     RocheGSFLX_DNASeq                   = messages.StringField(30)
 
 
-Meta_Endpoints = endpoints.api(name='meta_api', version='v1',
+Meta_Endpoints = endpoints.api(name='meta_api', version='v1', description='Metadata endpoints used by the web application.',
                                allowed_client_ids=[INSTALLED_APP_CLIENT_ID, endpoints.API_EXPLORER_CLIENT_ID])
 
 @Meta_Endpoints.api_class(resource_name='meta_endpoints')
@@ -830,6 +830,7 @@ class Meta_Endpoints_API(remote.Service):
                       path='metadata_platform_list', http_method='GET',
                       name='meta.metadata_platform_list')
     def metadata_platform_list(self, request):
+        """ Used by the web application."""
         query_dict = {}
         sample_ids = None
 
@@ -963,6 +964,7 @@ class Meta_Endpoints_API(remote.Service):
                       path='metadata_list', http_method='GET',
                       name='meta.metadata_list')
     def metadata_list(self, request):
+        """ Used by the web application."""
         select = '*'
         query_dict = {}
         selector_list = []  # todo: determine use or delete this
@@ -1104,7 +1106,7 @@ class Meta_Endpoints_API(remote.Service):
                           path='metadata_counts', http_method='GET',
                       name='meta.metadata_counts')
     def metadata_counts(self, request):
-
+        """ Used by the web application."""
         query_dict = {}
         sample_ids = None
         is_landing = False
@@ -1257,7 +1259,7 @@ class Meta_Endpoints_API(remote.Service):
                       path='metadata_attr_list', http_method='GET',
                       name='meta.metadata_attr_list')
     def metadata_attr_list(self, request):
-
+        """ Used by the web application."""
         query_dict = {}
         value_tuple = ()
         for key, value in MetadataAttr.__dict__.items():
@@ -1299,6 +1301,7 @@ class Meta_Endpoints_API(remote.Service):
                       path='metadata_domains', http_method='GET',
                       name='meta.metadata_domains')
     def domains_list(self, request):
+        """ Used by the web application."""
         db = sql_connection()
         cursor = db.cursor()
         items = {}
@@ -1397,6 +1400,7 @@ class Meta_Endpoints_API(remote.Service):
                       path='cohort_files', http_method='GET',
                       name='meta.cohort_files')
     def cohort_files(self, request):
+        """ Used by the web application."""
         limit = 20
         page = 1
         offset = 0

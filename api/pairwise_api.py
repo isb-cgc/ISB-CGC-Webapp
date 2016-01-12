@@ -85,6 +85,7 @@ class PairwiseApi(remote.Service):
 
     @endpoints.method(PairwiseJobRequest, PairwiseResults, name="run", http_method="POST")
     def run_job(self, request):
+        """ Used by the web application."""
         features = []
         count = len(request.feature) - 1
         while count >= 0:
@@ -118,6 +119,7 @@ class PairwiseApi(remote.Service):
     @endpoints.method(message_types.VoidMessage, CircvizOutput,
                       path='precomp', http_method='GET', name='precomputed')
     def precomputed_results(self, request):
+        """ Used by the web application."""
         bq_table = 'brca_pwpv'
         query = 'SELECT A_valueType, A_chr, A_startPos, A_endPos, A_featureName, A_N, A_dataType,' \
                 'B_valueType, B_chr, B_startPos, B_endPos, B_featureName, B_N, B_dataType,' \
