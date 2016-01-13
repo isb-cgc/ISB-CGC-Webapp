@@ -799,6 +799,7 @@ class Cohort_Endpoints_API(remote.Service):
             user_email = get_user_email_from_token(access_token)
 
         if user_email:
+            print 'User Email: ', user_email
             django.setup()
             try:
                 user_id = Django_User.objects.get(email=user_email).id
@@ -848,6 +849,7 @@ class Cohort_Endpoints_API(remote.Service):
 
 
             try:
+                print 'Query String: ', query_str
                 db = sql_connection()
                 cursor = db.cursor(MySQLdb.cursors.DictCursor)
                 cursor.execute(query_str, query_tuple)
