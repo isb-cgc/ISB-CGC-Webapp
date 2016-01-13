@@ -52,7 +52,8 @@ from google_helpers.bigquery_service import get_bigquery_service
 from google.appengine.api.taskqueue import Task, Queue
 
 from oauth2client.client import GoogleCredentials
-from gcloud import storage, bigquery
+# from gcloud import storage, bigquery
+from google_helpers import storage_service, bigquery_service
 import pandas as pd
 import uuid
 
@@ -734,7 +735,8 @@ def read_json_from_storage(project_id, bucket_id, file_id, credentials):
     """read the file from the bucket
     """
 
-    storage_client = storage.Client(project=project_id, credentials=credentials)
+    # storage_client = storage.Client(project=project_id, credentials=credentials)
+    storage_client = storage_service.get_storage_resource()
     bucket = storage_client.get_bucket(bucket_id)
     blob = bucket.get_blob(file_id)
     item_json = json.loads(blob.download_as_string())
@@ -753,7 +755,8 @@ def read_json_from_storage(project_id, bucket_id, file_id, credentials):
 def check_table_exists(project_id, dataset_id, table_id, credentials):
     """Check if the BigQuery table exists
     """
-    bigquery_client = bigquery.Client(project=project_id, credentials=credentials)
+    # bigquery_client = bigquery.Client(project=project_id, credentials=credentials)
+    bigquery_client = bigquery_service.get_bigquery_service()
     dataset = bigquery_client.dataset(dataset_id)
     table = dataset.table(name=table_id)
 
