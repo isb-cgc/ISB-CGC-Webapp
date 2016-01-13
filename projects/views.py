@@ -120,7 +120,7 @@ def create_metadata_tables(user, study, columns, skipSamples=False):
                 CREATE TABLE IF NOT EXISTS user_metadata_samples_%s_%s (
                   id INTEGER UNSIGNED AUTO_INCREMENT PRIMARY KEY,
                   participant_barcode VARCHAR(200),
-                  sample_barcode VARCHAR(200),
+                  sample_barcode VARCHAR(200) UNIQUE,
                   has_mrna BOOLEAN,
                   has_mirna BOOLEAN,
                   has_protein BOOLEAN,
