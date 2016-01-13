@@ -19,4 +19,4 @@ deployment:
       - sudo -E rm -rf ./lib
       - sudo -E /bin/sh ./shell/gcloud_authenticate.sh
       - sudo -E /bin/sh ./shell/gcloud-pull-staging-files.sh
-      - sudo -E ./google-cloud-sdk/bin/gcloud preview app deploy app.yaml cron.yaml queue.yaml --promote
+      - sudo -E ./google-cloud-sdk/bin/gcloud preview app deploy app.yaml cron.yaml queue.yaml --promote --verbosity debug
