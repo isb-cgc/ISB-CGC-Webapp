@@ -846,7 +846,7 @@ def save_cohort_from_plot(request):
         project_id = settings.BQ_PROJECT_ID
         cohort_settings = settings.GET_BQ_COHORT_SETTINGS()
         bcs = BigQueryCohortSupport(project_id, cohort_settings.dataset_id, cohort_settings.table_id)
-        bcs.add_cohort_with_sample_barcodes(cohort.id, samples)
+        bcs.add_cohort_with_sample_barcodes(cohort.id, cohort.samples_set.all().values_list('sample_id', 'study_id'))
 
         response_str = '<div class="row">' \
                         '<div class="col-lg-12">' \
