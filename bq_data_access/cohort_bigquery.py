@@ -110,7 +110,11 @@ class BigQueryCohortSupport(object):
             # patient_barcode = sample_barcode[:12]
             barcode = sample
             study_id = None
-            if isinstance(sample, dict):
+            if isinstance(sample, tuple):
+                barcode = sample[0]
+                if len(sample) > 1:
+                    study_id = sample[1]
+            elif isinstance(sample, dict):
                 barcode = sample['sample_id']
                 if 'study_id' in sample:
                     study_id = sample['study_id']
