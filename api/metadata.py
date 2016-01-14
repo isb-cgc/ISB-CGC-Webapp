@@ -1015,8 +1015,6 @@ class Meta_Endpoints_API(remote.Service):
         query_str, value_tuple, selector_list = generateSQLQuery(request)
         if debug: print >> sys.stderr,query_str
 
-        print query_str
-
         try:
             cursor = db.cursor(MySQLdb.cursors.DictCursor)
             cursor.execute(query_str, value_tuple)
@@ -1792,7 +1790,7 @@ class Meta_Endpoints_API_v2(remote.Service):
             cursor.execute('SELECT attribute, spec FROM metadata_attr')
             for row in cursor.fetchall():
                 if row['attribute'] in METADATA_SHORTLIST:
-                    valid_attrs[row['SPEC'] + ':' + row['attribute']] = {
+                    valid_attrs[row['spec'] + ':' + row['attribute']] = {
                         'name': row['attribute'],
                         'tables': ('metadata_samples',),
                         'sample_ids': None
