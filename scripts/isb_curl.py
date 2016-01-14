@@ -88,14 +88,14 @@ def get_credentials_location():
     check(credentials_location, "couldn't find ISB credentials...try running isb_auth.py")
     return credentials_location
 
-def load_credentials(credentials_location=get_credentials_location()):
+def load_credentials(credentials_location):
     storage = Storage(credentials_location)
     credentials = storage.get()
     check(credentials and not credentials.invalid, 'missing/invalid credentials...try running isb_auth.py')
     return credentials
 
-def get_access_token():
-    credentials = load_credentials()
+def get_access_token(credentials_location=get_credentials_location()):
+    credentials = load_credentials(credentials_location)
     if credentials.access_token_expired:
         credentials.refresh(httplib2.Http())
     return credentials.access_token
