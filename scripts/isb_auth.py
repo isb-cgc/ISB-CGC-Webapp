@@ -42,7 +42,7 @@ from oauth2client.client import OAuth2WebServerFlow
 from oauth2client import tools
 from oauth2client.file import Storage
 
-VERBOSE = True
+VERBOSE = False
 # for native application - same as settings.INSTALLED_APP_CLIENT_ID
 CLIENT_ID = '907668440978-0ol0griu70qkeb6k3gnn2vipfa5mgl60.apps.googleusercontent.com'
 # NOTE: this is NOT actually a 'secret' -- we're using the 'installed
@@ -83,7 +83,7 @@ def get_credentials(storage=None, oauth_flow_args=[]):
 
 def main():
     global VERBOSE
-    args = parse_the_args()
+    args = parse_args()
     oauth_flow_args = [args.noauth_local_webserver] if args.noauth_local_webserver else []
     VERBOSE = args.verbose
     maybe_print('--verbose: printing extra information')
@@ -93,7 +93,7 @@ def main():
     maybe_print('access_token: ' + credentials.access_token)
     maybe_print('refresh_token: ' + credentials.refresh_token)
 
-def parse_the_args():
+def parse_args():
     parser = ArgumentParser()
     parser.add_argument('--storage_file', '-s', default=DEFAULT_STORAGE_FILE, help='storage file to use for the credentials (default is {})'.format(DEFAULT_STORAGE_FILE))
     parser.add_argument('--verbose', '-v', dest='verbose', action='store_true', help='display credentials storage location, access token, and refresh token')

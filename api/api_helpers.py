@@ -201,7 +201,7 @@ def build_where_clause(dict):
 #    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     first = True
     query_str = ''
-    big_query_str = ''  # todo: make this work for nolocn-string values -- use {}.format
+    big_query_str = ''  # todo: make this work for non-string values -- use {}.format
     value_tuple = ()
     key_order = []
     for key, value in dict.items():
