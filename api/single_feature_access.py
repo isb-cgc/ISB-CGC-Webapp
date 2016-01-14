@@ -108,6 +108,7 @@ class SingleFeatureDataAccess(remote.Service):
     @endpoints_method(DataRequest, DataPointList,
                       path='feature_data', http_method='GET', name='feature_access.getFeatureData')
     def data_access_by_feature(self, request):
+        """ Used by the web application."""
         try:
             feature_id = request.feature_id
             cohort_id_array = request.cohort_id

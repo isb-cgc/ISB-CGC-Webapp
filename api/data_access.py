@@ -113,7 +113,8 @@ class PlotDataResponse(Message):
     pairwise_result = MessageField(PairwiseResults, 6, required=False)
 
 
-FeatureDataEndpointsAPI = endpoints_api(name='feature_data_api', version='v1')
+FeatureDataEndpointsAPI = endpoints_api(name='feature_data_api', version='v1',
+                                        description='Endpoints for feature data used by the web application.')
 
 
 @FeatureDataEndpointsAPI.api_class(resource_name='feature_data_endpoints')
@@ -305,6 +306,7 @@ class FeatureDataEndpoints(remote.Service):
     @endpoints_method(PlotDataRequest, PlotDataResponse,
                       path='feature_data_plot', http_method='GET', name='feature_access.getFeatureDataForPlot')
     def data_access_for_plot(self, request):
+        """ Used by the web application."""
         try:
             x_id = request.x_id
             y_id = request.y_id
