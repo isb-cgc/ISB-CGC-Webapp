@@ -63,21 +63,14 @@ def get_credentials(storage=None, oauth_flow_args=[]):
     if __name__ != '__main__' and noweb not in oauth_flow_args:
         oauth_flow_args.append(noweb)
     if storage is None:
-        print 'storage is none'
         storage = Storage(DEFAULT_STORAGE_FILE)
-    else:
-        print 'storage is not none'
     credentials = storage.get()
-    print 'credentials is'
-    print credentials
     if not credentials or credentials.invalid:
-        print 'credentials missing/invalid'
         maybe_print('credentials missing/invalid, kicking off OAuth flow')
         flow = OAuth2WebServerFlow(CLIENT_ID, CLIENT_SECRET, EMAIL_SCOPE)
         flow.auth_uri = flow.auth_uri.rstrip('/') + '?approval_prompt=force'
         credentials = tools.run_flow(flow, storage, tools.argparser.parse_args(oauth_flow_args))
-        print 'credentials is now'
-        print credentials
+
     return credentials
 
 
