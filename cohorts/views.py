@@ -604,7 +604,7 @@ def clone_cohort(request, cohort_id):
     samples = Samples.objects.filter(cohort=parent_cohort).values_list('sample_id', 'study_id')
     sample_list = []
     for sample in samples:
-        sample_list.append(Samples(cohort=cohort, sample_id=sample['sample_id'], study_id=sample['study_id']))
+        sample_list.append(Samples(cohort=cohort, sample_id=sample[0], study_id=sample[1]))
     Samples.objects.bulk_create(sample_list)
 
     # TODO Some cohorts won't have them at the moment. That isn't a big deal in this function
