@@ -87,7 +87,6 @@ require([
             });
 
     var generate_plot = function(plot, x_attr, y_attr, color_by, cohorts, cohort_override) {
-
         var width = 800,
             height = 600,
             margin = {top: 0, bottom: 50, left: 50, right: 10},

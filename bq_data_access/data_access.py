@@ -30,7 +30,6 @@ from bq_data_access.mirna_data import MIRNFeatureProvider, MIRN_FEATURE_TYPE
 from bq_data_access.clinical_data import ClinicalFeatureProvider, CLINICAL_FEATURE_TYPE
 from bq_data_access.gnab_data import GNABFeatureProvider, GNAB_FEATURE_TYPE
 
-
 class FeatureProviderFactory(object):
     @classmethod
     def get_feature_type_string(cls, feature_id):
@@ -70,7 +69,6 @@ def get_feature_vector(feature_id, cohort_id_array):
     #  ex: feature_id 'CLIN:Disease_Code'
     provider = FeatureProviderFactory.from_feature_id(feature_id)
     cohort_settings = settings.GET_BQ_COHORT_SETTINGS()
-
     result = provider.get_data(cohort_id_array, cohort_settings.dataset_id, cohort_settings.table_id)
     # ex: result[0]
     # {'aliquot_id': None, 'patient_id': u'TCGA-BH-A0B1', 'sample_id': u'TCGA-BH-A0B1-10A', 'value': u'BRCA'}

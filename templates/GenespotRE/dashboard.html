@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+{% load cohort_filters %}
+{% load project_custom_tags %}
+{#{% load tz %}#}
+{% block header %}
+{% endblock %}
+
+{% block link_page_name %}dashboard{% endblock %}
+{% block page_name %}dashboard{% endblock %}
+
+{% block page_header %}
+<div class="container">
+    <h1 class="page-header">Your Dashboard</h1>
+</div>
+{% endblock %}
+{% block content %}
+<div class="container">
+
+    <section class="panel panel-default">
+        <div class="panel-heading">
+            <a role="button" data-target="#analysis-body" data-toggle="collapse" aria-expanded="true" aria-controls="analysis-body">
+                <i class="fa fa-caret-down" style="display: inline-block;"></i>
+            </a>
+            <a href="{% url 'sample_analyses' %}">Sample Analyses</a> can be customized with the specific data you want to analyze. Start a new workbook with an analysis below.
+        </div>
+        <div class="panel-body collapse in" id="analysis-body">
+            <ul>
+                <div class="clearfix">
+                    <li class="item">
+                    <!--TODO: get bar chart-->
+                        <img class="img-fluid" src="{% static 'img/histogram.png' %}">
+                        <p>Bar Chart</p>
+                    </li>
+                    <li class="item">
+                        <img class="img-fluid" src="{% static 'img/histogram.png' %}">
+                        <p>Histogram</p>
+                    </li>
+                    <li class="item">
+                        <!--TODO: get bar chart-->
+                        <img class="img-fluid" src="{% static 'img/histogram.png' %}">
+                        <p>Scatter Plot</p>
+                    </li>
+                    <li class="item">
+                        <!--TODO: get bar chart-->
+                        <img class="img-fluid" src="{% static 'img/histogram.png' %}">
+                        <p>Violin Plot</p>
+                    </li>
+                </div>
+
+
+                <div class="collapse clearfix" id="more-analysis">
+                    <li class="item">
+                        <!--TODO: get bar chart-->
+                        <img class="img-fluid" src="{% static 'img/histogram.png' %}">
+                        <p>Violin Plot 2</p>
+                    </li>
+                    <li class="item">
+                        <!--TODO: get bar chart-->
+                        <img class="img-fluid" src="{% static 'img/histogram.png' %}">
+                        <p>Cubby Hole</p>
+                    </li>
+                    <li class="item">
+                        <img class="img-fluid" src="{% static 'img/seqpeak.png' %}" alt="">
+                        <p>SeqPeak</p>
+                    </li>
+                </div>
+                <p class="center"><a class="btn btn-link" data-target="#more-analysis" data-toggle="collapse">Show More</a></p>
+            </ul>
+        </div>
+    </section>
+    <section class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">
+                <a href="{% url 'workbooks' %}">Saved Workbooks ({{ workbooks.count }})</a></h3>
+        </div>
+        <div class="panel-body">
+            <p>Workbooks store the Analyses you create -- and their related data.</p>
+            <ul class="table-list">
+            {% if workbooks.count > 0 %}
+                {% for workbook in workbooks|sort_last_view:'workbook'|slice:':6'  %}
+                    <li>
+                        <a href="{% url 'workbook_detail' workbook.id %}">
+                            <div class="list-main">
+                                <h5 class="list-title">{{ workbook.name|title }}</h5>
+                                <p>{{ workbook.description }}</p>
+                            </div>
+                            <div class="list-info">
+                               {{ workbook.last_date_saved }}
+                            </div>
+                        </a>
+                    </li>
+                {% endfor %}
+                {% if user.workbook_set.all|active|length > 6 %}
+                <a class="btn btn-link" href="{% url 'workbooks' %}">View All</a>
+                {% endif %}
+            {% endif %}
+            </ul>
+        </div>
+        <div class="panel-footer">
+             <form id="create-workbook" method="POST" action="{% url 'workbook_create' %}" class="pull-left">
+                {% csrf_token %}
+                 <button type="submit" class="btn btn-primary" ><i class="fa fa-plus"></i>Create a New Workbook</button>
+             </form>
+            <a class="btn btn-link" href="{% url 'workbook_samples' %}">Sample Workbooks</a>
+        </div>
+    </section>
+    <div class="row">
+        <div class="col-md-6">
+            <section class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        <a href="{% url 'genes' %}">Gene Favorites ({{ user.genefavorite_set.all|active|length }})</a></h3>
+                </div>
+                <div class="panel-body">
+                    {% if user.genefavorite_set.all|active|length > 0 %}
+                    <ul class="table-list">
+                        {% for genefavorite in user.genefavorite_set.all|active|sort_last_view:'genefavorite'|slice:':6' %}
+                        <li>
+                            <a href="{% url 'gene_fav_detail' genefavorite.id %}">
+                               <p class="list-title">{{ genefavorite.name }}</p>
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                        {% if user.genefavorite_set.all|active|length > 6 %}
+                        <a href="{% url 'genes' %}" class="btn btn-link">View All</a>
+                        {% endif %}
+                    {% else %}
+                    <p>You don't have any saved Gene Favorites.</p>
+                    <a href="{% url 'gene_fav_create' %}">Create Gene Favorites</a>
+                    {% endif %}
+                </div>
+            </section>
+            <section class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        <a href="{% url 'variables' %}">Variable Favorites ({{ user.variablefavorite_set.all|active|length }})</a></h3>
+                </div>
+                <div class="panel-body">
+                    {% if user.variablefavorite_set.all|active|length > 0 %}
+                    <ul class="table-list">
+                        {% for variablefavorite in user.variablefavorite_set.all|active|sort_last_view:'variablefavorite'|slice:':6' %}
+                           <li>
+                               <a href="{% url 'variable_fav_detail' variablefavorite.id %}">
+                                   <p class="list-title">
+                                       {{ variablefavorite.name }}
+                                   </p>
+                               </a>
+                           </li>
+                        {% endfor %}
+                        {% if user.variablefavorite_set.all|active|length > 6 %}
+                        <a href="{% url 'variables' %}" class="btn btn-link">View All</a>
+                        {% endif %}
+                    </ul>
+                    {% else %}
+                    <p>You don't have any saved Variable Favorites.</p>
+                    <a href="{% url 'variable_fav_create' %}">Create Variable Favorites</a>
+                    {% endif %}
+                </div>
+            </section>
+            <section class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                    <a href="{% url 'cohort_list' %}">Saved Cohorts ({{ cohorts.count }})</a></h3>
+                </div>
+                <div class="panel-body">
+                    {% if cohorts.count > 0 %}
+                    <ul class="table-list">
+                        {% for cohort in cohorts|sort_last_view:'cohort'|slice:':6' %}
+                           <li>
+                               <a href="{% url 'cohort_details' cohort.id %}">
+                                   <div class="list-main">
+                                       <span class="list-title">{{ cohort.name }}</span>
+                                   </div>
+
+                                   <div class="list-info">
+                                       <span>{{ cohort.last_date_saved }}</span>
+                                   </div>
+                               </a>
+                           </li>
+                        {% endfor %}
+                        {% if cohorts.count > 6 %}
+                            <a class="btn btn-link" href="{% url 'cohort_list' %}">View all</a>
+                        {% endif %}
+                    </ul>
+                    {% else %}
+                    <p>You don't have any saved Cohorts.</p>
+                    <a href="{% url 'cohort' %}">Create Cohort</a>
+                    {% endif %}
+                </div>
+            </section>
+        </div>
+        <div class="col-md-6">
+            <section class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        <a href="{% url 'projects' %}">Saved Projects ({{ projects.count }})</a></h3>
+                </div>
+                <div class="panel-body">
+                    <p>You can upload from your own research projects.</p>
+                    {% if projects.count > 0 %}
+                    <ul class="table-list">
+                        {% for project in projects|sort_last_view:'project'|slice:':6' %}
+                           <li>
+                               <a href="{% url 'project_detail' project.id %}">
+                                   <p class="list-title">{{ project.name }}</p>
+                                   {% if project.description %}
+                                    <p>{{ project.description|slice:':65' }}{% if project.description|length > 65 %}&hellip;{% endif %}</p>
+                                   {% endif %}
+                               </a>
+                           </li>
+                        {% endfor %}
+                        {% if user.project_set.all|active|length > 6 %}
+                            <a class="btn btn-link" href="{% url 'projects' %}">View all</a>
+                        {% endif %}
+                    </ul>
+                    {% endif %}
+                </div>
+                <div class="panel-footer">
+                    <a href="{% url 'project_upload' %}" class="btn btn-primary"><i class="fa fa-cloud-upload"></i>Upload Project Data</a>
+                </div>
+            </section>
+            <section class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        <a href="{% url 'public_projects' %}">Public Data ({% public_project_count %})</a></h3>
+                </div>
+                <div class="panel-body">
+                    <p>Browse publicly-available studies and data</p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block js_file %}{% static 'js/dashboard.js' %}{% endblock %}

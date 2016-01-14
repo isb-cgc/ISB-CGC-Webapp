@@ -1,0 +1,92 @@
+.list-group
+  *[data-toggle="collapse"][aria-expanded="false"]
+    .fa-caret-down
+        display: none
+  *[data-toggle="collapse"][aria-expanded="true"]
+    .fa-caret-right
+        display: none
+
+  .list-group-item
+    border: 1px solid transparent
+    border-top: 1px solid darken($white, 15%)
+    border-bottom: 1px solid darken($white, 15%)
+    padding: 0 15px
+
+    &:first-child
+      border-top: none
+
+    &__heading
+      color: $isb-primary
+      font-weight: $medium-font-weight
+      padding: 10px 0 10px 15px
+      text-transform: uppercase
+      position: relative
+
+      a
+        color: $isb-primary
+        font-weight: $medium-font-weight
+        &:hover, &:focus, &:active, &:visited
+          text-decoration: none
+        & > .fa
+          position: absolute
+          left: 0
+          top: 50%
+          transform: translateY(-50%)
+
+    &__body
+      padding-bottom: 10px
+      
+.list
+  &-item
+    background: transparent
+    border-bottom: 1px solid darken($white, 15%)
+    padding: 5px 0
+
+    &__heading
+      font-size: $font-size * 1.1
+      font-weight: $bold-font-weight
+      color: $isb-primary
+
+      a
+        color: $isb-primary
+
+  .sublist-item
+    padding: 5px 0 2px 0
+    overflow: hidden
+    text-overflow: ellipsis
+
+.ul
+  list-style: disc
+  padding-left: 2.5em
+  
+.extra-values
+  display: none
+
+.table-list, .table-list_warning
+  a:hover, a:active
+    text-decoration: none
+  .list-title
+    font-size: $font-size
+    font-weight: $bold-font-weight
+    margin-bottom: 0
+    color: $isb-dark
+  .list-main
+    display: inline-block
+    vertical-align: middle
+    width: 70%
+    p
+      color: $font-color
+  .list-info
+    display: inline-block
+    vertical-align: middle
+    width: 29%
+    color: $isb-dark
+    font-size: $font-size-small
+  li
+    @extend %clearfix
+    padding: 5px 15px
+    background: lighten($isb-dark, 55%)
+    margin-bottom: 1px
+    border-left: 3px solid $isb-info
+    &:hover
+      background: lighten($info-bgcolor, 3%)

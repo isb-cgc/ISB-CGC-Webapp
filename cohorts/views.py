@@ -31,12 +31,15 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.conf import settings
+from django.db.models import Count
 
 from django.http import StreamingHttpResponse
+from django.core import serializers
 from google.appengine.api import urlfetch
 from allauth.socialaccount.models import SocialToken
 
 from models import Cohort, Patients, Samples, Cohort_Perms, Source, Filters, Cohort_Comments
+from workbooks.models import Workbook, Worksheet
 from visualizations.models import Plot_Cohorts, Plot
 from bq_data_access.cohort_bigquery import BigQueryCohortSupport
 
@@ -55,8 +58,9 @@ def convert(data):
 
 BIG_QUERY_API_URL = settings.BASE_API_URL + '/_ah/api/bq_api/v1'
 COHORT_API = settings.BASE_API_URL + '/_ah/api/cohort_api/v1'
-META_DISCOVERY_URL = settings.BASE_API_URL + '/_ah/api/discovery/v1/apis/meta_api/v1/rest'
 METADATA_API = settings.BASE_API_URL + '/_ah/api/meta_api/v1'
+# This URL is not used : META_DISCOVERY_URL = settings.BASE_API_URL + '/_ah/api/discovery/v1/apis/meta_api/v1/rest'
+
 
 
 def data_availability_sort(key, value, data_attr, attr_details):
@@ -107,9 +111,88 @@ def data_availability_sort(key, value, data_attr, attr_details):
             'value': 'BCGSC Illumina GA',
             'count': [v['count'] for v in value if v['value'] == 'True'][0]
         })
+@login_required
+def public_cohort_list(request):
+    return cohorts_list(request, is_public=True)
 
 @login_required
-def cohort_detail(request, cohort_id=0):
+def cohorts_list(request, is_public=False, workbook_id=0, worksheet_id=0, create_workbook=False):
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+    # check to see if user has read access to 'All TCGA Data' cohort
+    isb_superuser = User.objects.get(username='isb')
+    superuser_perm = Cohort_Perms.objects.get(user=isb_superuser)
+    user_all_data_perm = Cohort_Perms.objects.filter(user=request.user, cohort=superuser_perm.cohort)
+    if not user_all_data_perm:
+        Cohort_Perms.objects.create(user=request.user, cohort=superuser_perm.cohort, perm=Cohort_Perms.READER)
+
+    # add_data_cohort = Cohort.objects.filter(name='All TCGA Data')
+
+    users = User.objects.filter(is_superuser=0)
+    cohort_perms = Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True)
+    cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved').annotate(num_patients=Count('samples'))
+    cohorts.has_private_cohorts = False
+    shared_users = {}
+
+    for item in cohorts:
+        item.perm = item.get_perm(request).get_perm_display()
+        item.owner = item.get_owner()
+        shared_with_ids = Cohort_Perms.objects.filter(cohort=item, perm=Cohort_Perms.READER).values_list('user', flat=True)
+        item.shared_with_users = User.objects.filter(id__in=shared_with_ids)
+        if not item.owner.is_superuser:
+            cohorts.has_private_cohorts = True
+            # if it is not a public cohort and it has been shared with other users
+            # append the list of shared users to the shared_users array
+            if item.shared_with_users:
+                shared_users[int(item.id)] = serializers.serialize('json', item.shared_with_users, fields=('last_name', 'first_name', 'email'))
+
+        # print local_zone.localize(item.last_date_saved)
+
+    # Used for autocomplete listing
+    cohort_listing = Cohort.objects.filter(id__in=cohort_perms, active=True).values('id', 'name')
+    for cohort in cohort_listing:
+        cohort['value'] = int(cohort['id'])
+        cohort['label'] = cohort['name'].encode('utf8')
+        del cohort['id']
+        del cohort['name']
+
+    workbook = None
+    worksheet = None
+    if workbook_id != 0:
+        workbook = Workbook.objects.get(owner=request.user, id=workbook_id)
+        worksheet = workbook.worksheet_set.get(id=worksheet_id)
+
+    return render(request, 'cohorts/cohort_list.html', {'request': request,
+                                                        'cohorts': cohorts,
+                                                        'user_list': users,
+                                                        'cohorts_listing': cohort_listing,
+                                                        'shared_users':  json.dumps(shared_users),
+                                                        'base_url': settings.BASE_URL,
+                                                        'base_api_url': settings.BASE_API_URL,
+                                                        'is_public': is_public,
+                                                        'workbook': workbook,
+                                                        'worksheet': worksheet,
+                                                        'create_workbook': create_workbook,
+                                                        'from_workbook': bool(create_workbook or workbook),
+                                                        })
+
+@login_required
+def cohort_select_for_new_workbook(request):
+    return cohorts_list(request=request, is_public=False, workbook_id=0, worksheet_id=0, create_workbook=True)
+
+@login_required
+def cohort_select_for_existing_workbook(request, workbook_id, worksheet_id):
+    return cohorts_list(request=request, is_public=False, workbook_id=workbook_id, worksheet_id=worksheet_id)
+
+@login_required
+def cohort_create_for_new_workbook(request):
+    return cohort_detail(request=request, cohort_id=0, workbook_id=0, worksheet_id=0, create_workbook=True)
+
+@login_required
+def cohort_create_for_existing_workbook(request, workbook_id, worksheet_id):
+    return cohort_detail(request=request, cohort_id=0, workbook_id=workbook_id, worksheet_id=worksheet_id)
+
+@login_required
+def cohort_detail(request, cohort_id=0, workbook_id=0, worksheet_id=0, create_workbook=False):
     if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     users = User.objects.filter(is_superuser=0)
     cohort = None
@@ -201,16 +284,25 @@ def cohort_detail(request, cohort_id=0):
         'base_url': settings.BASE_URL,
         'base_api_url': settings.BASE_API_URL
     }
+    if workbook_id and worksheet_id :
+        template_values['workbook']  = Workbook.objects.get(id=workbook_id)
+        template_values['worksheet'] = Worksheet.objects.get(id=worksheet_id)
+    elif create_workbook:
+        template_values['create_workbook'] = True
+
     template = 'cohorts/new_cohort.html'
 
     if cohort_id != 0:
         try:
             cohort = Cohort.objects.get(id=cohort_id, active=True)
             cohort.perm = cohort.get_perm(request)
+            cohort.owner = cohort.get_owner()
 
             if not cohort.perm:
                 messages.error(request, 'You do not have permission to view that cohort.')
-                return redirect('user_landing')
+                return redirect('cohort_list')
+
+            cohort.mark_viewed(request)
 
             shared_with_ids = Cohort_Perms.objects.filter(cohort=cohort, perm=Cohort_Perms.READER).values_list('user', flat=True)
             shared_with_users = User.objects.filter(id__in=shared_with_ids)
@@ -222,9 +314,53 @@ def cohort_detail(request, cohort_id=0):
         except ObjectDoesNotExist:
             # Cohort doesn't exist, return to user landing with error.
             messages.error(request, 'The cohort you were looking for does not exist.')
-            return redirect('user_landing')
+            return redirect('cohort_list')
 
     return render(request, template, template_values)
+
+'''
+Saves a cohort, adds the new cohort to an existing worksheet, then redirected back to the worksheet display
+'''
+@login_required
+def save_cohort_for_existing_workbook(request):
+    return save_cohort(request=request, workbook_id=request.POST.get('workbook_id'), worksheet_id=request.POST.get("worksheet_id"))
+
+'''
+Saves a cohort, adds the new cohort to a new worksheet, then redirected back to the worksheet display
+'''
+@login_required
+def save_cohort_for_new_workbook(request):
+    return save_cohort(request=request, workbook_id=None, worksheet_id=None, create_workbook=True)
+
+@login_required
+def add_cohorts_to_worksheet(request, workbook_id=0, worksheet_id=0):
+    if request.method == 'POST':
+        cohorts = request.POST.getlist('cohorts')
+        workbook = request.user.workbook_set.get(id=workbook_id)
+        worksheet = workbook.worksheet_set.get(id=worksheet_id)
+
+        cohort_perms = request.user.cohort_perms_set.filter(cohort__active=True)
+        for cohort in cohorts:
+            cohort_model = cohort_perms.get(cohort__id=cohort).cohort
+            worksheet.add_cohort(cohort_model)
+
+    redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet_id})
+    return redirect(redirect_url)
+
+@login_required
+def remove_cohort_from_worksheet(request, workbook_id=0, worksheet_id=0, cohort_id=0):
+    if request.method == 'POST':
+        workbook = request.user.workbook_set.get(id=workbook_id)
+        worksheet = workbook.worksheet_set.get(id=worksheet_id)
+
+        cohorts = request.user.cohort_perms_set.filter(cohort__active=True,cohort__id=cohort_id, perm=Cohort_Perms.OWNER)
+        if cohorts.count() > 0:
+            for cohort in cohorts:
+                cohort_model = cohort.cohort
+                worksheet.remove_cohort(cohort_model)
+
+    redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet_id})
+    return redirect(redirect_url)
 
 '''
 This save view only works coming from cohort editing or creation views.
@@ -234,9 +370,10 @@ This save view only works coming from cohort editing or creation views.
 # TODO: Create new view to save cohorts from visualizations
 @login_required
 @csrf_protect
-def save_cohort(request):
+def save_cohort(request, workbook_id=None, worksheet_id=None, create_workbook=False):
     if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
-    redirect_url = reverse('user_landing')
+
+    redirect_url = reverse('cohort_list')
 
     samples = []
     patients = []
@@ -328,8 +465,17 @@ def save_cohort(request):
             redirect_url = reverse('cohort_details',args=[cohort.id])
             messages.info(request, 'Filters applied successfully.')
         else:
-            redirect_url = reverse('user_landing')
+            redirect_url = reverse('cohort_list')
             messages.info(request, 'Cohort, %s, created successfully.' % cohort.name)
+
+        if workbook_id and worksheet_id :
+            Worksheet.objects.get(id=worksheet_id).add_cohort(cohort)
+            redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id' : worksheet_id})
+        elif create_workbook :
+            workbook_model  = Workbook.create("default name", "This is a default workbook description", request.user)
+            worksheet_model = Worksheet.create(workbook_model.id, "worksheet 1","This is a default description")
+            worksheet_model.add_cohort(cohort)
+            redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_model.id, 'worksheet_id' : worksheet_model.id})
 
     return redirect(redirect_url) # redirect to search/ with search parameters just saved
 
@@ -337,7 +483,7 @@ def save_cohort(request):
 @csrf_protect
 def delete_cohort(request):
     if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
-    redirect_url = 'user_landing'
+    redirect_url = 'cohort_list'
     cohort_ids = request.POST.getlist('id')
     Cohort.objects.filter(id__in=cohort_ids).update(active=False)
     return redirect(reverse(redirect_url))
@@ -350,7 +496,7 @@ def share_cohort(request, cohort_id=0):
     users = User.objects.filter(id__in=user_ids)
 
     if cohort_id == 0:
-        redirect_url = '/user_landing/'
+        redirect_url = '/cohorts/'
         cohort_ids = request.POST.getlist('cohort-ids')
         cohorts = Cohort.objects.filter(id__in=cohort_ids)
     else:
@@ -408,7 +554,7 @@ def clone_cohort(request, cohort_id):
 @csrf_protect
 def set_operation(request):
     if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
-    redirect_url = '/user_landing/'
+    redirect_url = '/cohorts/'
 
     if request.POST:
         name = request.POST.get('name').encode('utf8')
@@ -516,7 +662,7 @@ def set_operation(request):
         else:
             message = 'Operation resulted in empty set of samples and patients. Cohort not created.'
             messages.warning(request, message)
-            return redirect('user_landing')
+            return redirect('cohort_list')
 
     return redirect(redirect_url)
 

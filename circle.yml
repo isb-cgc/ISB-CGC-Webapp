@@ -2,7 +2,7 @@ machine:
   timezone:
     America/Los_Angeles
   environment:
-    PYTHONPATH: /home/ubuntu/ISB-CGC-Webapp:/home/ubuntu/ISB-CGC-Webapp/lib
+    PYTHONPATH: /home/ubuntu/${CIRCLE_PROJECT_REPONAME}:/home/ubuntu/${CIRCLE_PROJECT_REPONAME}/lib
   python:
     version: 2.7.10
 dependencies:

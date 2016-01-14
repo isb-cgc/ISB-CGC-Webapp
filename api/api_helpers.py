@@ -301,7 +301,7 @@ def authorize_credentials_with_Google():
     http = httplib2.Http()
     http = credentials.authorize(http)
     service = build('bigquery', 'v2', http=http)
-
+    if debug: print >> sys.stderr,' big query authorization '+sys._getframe().f_code.co_name
     return service
 
 # TODO refactor to remove duplicate code
