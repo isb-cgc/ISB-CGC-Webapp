@@ -70,7 +70,6 @@ def get_credentials(storage=None, oauth_flow_args=[]):
         flow = OAuth2WebServerFlow(CLIENT_ID, CLIENT_SECRET, EMAIL_SCOPE)
         flow.auth_uri = flow.auth_uri.rstrip('/') + '?approval_prompt=force'
         credentials = tools.run_flow(flow, storage, tools.argparser.parse_args(oauth_flow_args))
-
     return credentials
 
 
