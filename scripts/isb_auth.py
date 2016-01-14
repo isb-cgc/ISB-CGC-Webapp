@@ -42,7 +42,7 @@ from oauth2client.client import OAuth2WebServerFlow
 from oauth2client import tools
 from oauth2client.file import Storage
 
-VERBOSE = False
+VERBOSE = True
 # for native application - same as settings.INSTALLED_APP_CLIENT_ID
 CLIENT_ID = '907668440978-0ol0griu70qkeb6k3gnn2vipfa5mgl60.apps.googleusercontent.com'
 # NOTE: this is NOT actually a 'secret' -- we're using the 'installed
@@ -63,19 +63,27 @@ def get_credentials(storage=None, oauth_flow_args=[]):
     if __name__ != '__main__' and noweb not in oauth_flow_args:
         oauth_flow_args.append(noweb)
     if storage is None:
+        print 'storage is none'
         storage = Storage(DEFAULT_STORAGE_FILE)
+    else:
+        print 'storage is not none'
     credentials = storage.get()
+    print 'credentials is'
+    print credentials
     if not credentials or credentials.invalid:
+        print 'credentials missing/invalid'
         maybe_print('credentials missing/invalid, kicking off OAuth flow')
         flow = OAuth2WebServerFlow(CLIENT_ID, CLIENT_SECRET, EMAIL_SCOPE)
         flow.auth_uri = flow.auth_uri.rstrip('/') + '?approval_prompt=force'
         credentials = tools.run_flow(flow, storage, tools.argparser.parse_args(oauth_flow_args))
+        print 'credentials is now'
+        print credentials
     return credentials
 
 
 def main():
     global VERBOSE
-    args = parse_args()
+    args = parse_the_args()
     oauth_flow_args = [args.noauth_local_webserver] if args.noauth_local_webserver else []
     VERBOSE = args.verbose
     maybe_print('--verbose: printing extra information')
@@ -85,7 +93,7 @@ def main():
     maybe_print('access_token: ' + credentials.access_token)
     maybe_print('refresh_token: ' + credentials.refresh_token)
 
-def parse_args():
+def parse_the_args():
     parser = ArgumentParser()
     parser.add_argument('--storage_file', '-s', default=DEFAULT_STORAGE_FILE, help='storage file to use for the credentials (default is {})'.format(DEFAULT_STORAGE_FILE))
     parser.add_argument('--verbose', '-v', dest='verbose', action='store_true', help='display credentials storage location, access token, and refresh token')

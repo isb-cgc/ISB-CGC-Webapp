@@ -820,18 +820,19 @@ class Cohort_Endpoints_API(remote.Service):
                     cohort_perm = Cohort_Perms.objects.get(cohort_id=cohort_id, user_id=user_id)
                 except (ObjectDoesNotExist, MultipleObjectsReturned), e:
                     logger.info(e)
-                    logger.exception(e)
+                    # logger.exception(e)
                     err_msg = "Error retrieving cohort {} for user {}: {}".format(cohort_id, user_email, e)
                     if 'Cohort_Perms' in e.message:
                         err_msg = "User {} does not have permissions on cohort {}. Error: {}"\
                             .format(user_email, cohort_id, e)
-                    raise RuntimeError(err_msg) # endpoints.UnauthorizedException(err_msg)
+                    raise endpoints.UnauthorizedException(err_msg)  # this is the exception that doesn't seem to be raised.
 
                 logger.info("Made it past the except block.")
                 # query_str += 'WHERE SampleBarcode IN (SELECT sample_id FROM cohorts_samples WHERE cohort_id=%s) '
                 query_str += 'JOIN cohorts_samples ON metadata_data.SampleBarcode=cohorts_samples.sample_id ' \
                              'WHERE cohorts_samples.cohort_id=%s '
                 query_tuple = (cohort_id,)
+
             elif sample_barcode:
                 query_str += 'WHERE SampleBarcode=%s '
                 query_tuple = (sample_barcode,)
