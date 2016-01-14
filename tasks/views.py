@@ -53,8 +53,7 @@ from google.appengine.api.taskqueue import Task, Queue
 
 from oauth2client.client import GoogleCredentials
 # from gcloud import storage, bigquery
-from google_helpers import storage_service, bigquery_service
-import pandas as pd
+# import pandas as pd
 import uuid
 
 from accounts.models import NIH_User
@@ -679,128 +678,126 @@ def normalize_json(item_y):
 #     return build('bigquery', 'v2', http=http)
 
 
-def create_table(service, project_id, dataset_id, table_id, schema):
-    """Create a BigQuery table
-    """
-    body = {
-        'schema': schema,
-        'tableReference': {
-            'tableId': table_id,
-            'projectId': project_id,
-            'datasetId': dataset_id
-        }
-    }
-    try:
-        service.tables().insert(projectId=project_id, datasetId=dataset_id,
-                                body=body).execute()
-        print 'table created: ' + table_id
-    except Exception as ex:
-        print ex
-        raise
-
-def generate_schema(df, format_dtypes, default_type='STRING'):
-    """Generate schema"""
-    fields = []
-    for column_name, dtype in df.dtypes.iteritems():
-        if column_name in format_dtypes:
-            dtype = format_dtypes[column_name]
-        else:
-            dtype = default_type
-        fields.append({'name': column_name,
-                       'type': dtype})
-
-    return {'fields': fields}
-
-
-def stream_row_to_bigquery(service, project_id, dataset_id, table_name, row,
-                           num_retries=5):
-    """Streams data into BigQuery
-    """
-    insert_all_data = {
-        'rows': [{
-            'json': row,
-            # Generate a unique id for each row so retries don't accidentally
-            # duplicate insert
-            'insertId': str(uuid.uuid4()),
-        }]
-    }
-    return service.tabledata().insertAll(
-        projectId=project_id,
-        datasetId=dataset_id,
-        tableId=table_name,
-        body=insert_all_data).execute(num_retries=num_retries)
-
-
-def read_json_from_storage(project_id, bucket_id, file_id, credentials):
-    """read the file from the bucket
-    """
-
-    # storage_client = storage.Client(project=project_id, credentials=credentials)
-    storage_client = storage_service.get_storage_resource()
-    bucket = storage_client.get_bucket(bucket_id)
-    blob = bucket.get_blob(file_id)
-    item_json = json.loads(blob.download_as_string())
-
-    # flatten the nested json string
-    all_items = []
-    for item in item_json:
-        item_content = normalize_json(item)
-        all_items.append(item_content)
-
-    # a little time consuming, but is worth converting into dataframe
-    data_df = pd.DataFrame(all_items)
-
-    return data_df
-
-def check_table_exists(project_id, dataset_id, table_id, credentials):
-    """Check if the BigQuery table exists
-    """
-    # bigquery_client = bigquery.Client(project=project_id, credentials=credentials)
-    bigquery_client = bigquery_service.get_bigquery_service()
-    dataset = bigquery_client.dataset(dataset_id)
-    table = dataset.table(name=table_id)
-
-    return table.exists()
-
-def load_billing_to_bigquery(request):
-    """Main: Read the file from storage and load into BigQuery
-    """
-    if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):
-        credentials = GoogleCredentials.get_application_default()
-    else:
-        credentials = GoogleCredentials.from_stream(settings.GOOGLE_APPLICATION_CREDENTIALS)
-
-    date = (datetime.datetime.now() + datetime.timedelta(days=-1))
-
-    project_id = settings.BIGQUERY_PROJECT_NAME
-    bucket_id = 'isb-cgc-billing-json'
-    dataset_id = 'billing'
-    table_id = 'billing_' + date.strftime("%Y%m%d")
-    file_id = 'billing-' + date.strftime("%Y-%m-%d") + '.json'
-
-    # create service
-    bq_service = get_bigquery_service()
-
-    # read file from storage
-    data_df = read_json_from_storage(project_id, bucket_id, file_id, credentials)
-
-    # generate bigquery schema
-    dtypes = {'cost_amount': 'FLOAT', 'endTime': 'TIMESTAMP', 'credits_amount': 'FLOAT',
-              'startTime': 'TIMESTAMP', 'measurements_sum': 'INTEGER'}
-    schema = generate_schema(data_df, dtypes)
-
-    # check if the table exists, if not create and stream rows
-    if not check_table_exists(project_id, dataset_id, table_id, credentials):
-
-        create_table(bq_service, project_id, dataset_id, table_id, schema)
-
-        # stream rows to bigquery table
-        for _, row in data_df.iterrows():
-            row = row.to_dict()
-            stream_row_to_bigquery(bq_service, project_id, dataset_id, table_id, row,
-                                   num_retries=5)
-
-        return HttpResponse('')
-
-    else:
-        return HttpResponse('Table already exists: cannot create table')
+# def create_table(service, project_id, dataset_id, table_id, schema):
+#     """Create a BigQuery table
+#     """
+#     body = {
+#         'schema': schema,
+#         'tableReference': {
+#             'tableId': table_id,
+#             'projectId': project_id,
+#             'datasetId': dataset_id
+#         }
+#     }
+#     try:
+#         service.tables().insert(projectId=project_id, datasetId=dataset_id,
+#                                 body=body).execute()
+#         print 'table created: ' + table_id
+#     except Exception as ex:
+#         print ex
+#         raise
+#
+# def generate_schema(df, format_dtypes, default_type='STRING'):
+#     """Generate schema"""
+#     fields = []
+#     for column_name, dtype in df.dtypes.iteritems():
+#         if column_name in format_dtypes:
+#             dtype = format_dtypes[column_name]
+#         else:
+#             dtype = default_type
+#         fields.append({'name': column_name,
+#                        'type': dtype})
+#
+#     return {'fields': fields}
+#
+#
+# def stream_row_to_bigquery(service, project_id, dataset_id, table_name, row,
+#                            num_retries=5):
+#     """Streams data into BigQuery
+#     """
+#     insert_all_data = {
+#         'rows': [{
+#             'json': row,
+#             # Generate a unique id for each row so retries don't accidentally
+#             # duplicate insert
+#             'insertId': str(uuid.uuid4()),
+#         }]
+#     }
+#     return service.tabledata().insertAll(
+#         projectId=project_id,
+#         datasetId=dataset_id,
+#         tableId=table_name,
+#         body=insert_all_data).execute(num_retries=num_retries)
+#
+#
+# def read_json_from_storage(project_id, bucket_id, file_id, credentials):
+#     """read the file from the bucket
+#     """
+#
+#     storage_client = storage.Client(project=project_id, credentials=credentials)
+#     bucket = storage_client.get_bucket(bucket_id)
+#     blob = bucket.get_blob(file_id)
+#     item_json = json.loads(blob.download_as_string())
+#
+#     # flatten the nested json string
+#     all_items = []
+#     for item in item_json:
+#         item_content = normalize_json(item)
+#         all_items.append(item_content)
+#
+#     # a little time consuming, but is worth converting into dataframe
+#     data_df = pd.DataFrame(all_items)
+#
+#     return data_df
+#
+# def check_table_exists(project_id, dataset_id, table_id, credentials):
+#     """Check if the BigQuery table exists
+#     """
+#     bigquery_client = bigquery.Client(project=project_id, credentials=credentials)
+#     dataset = bigquery_client.dataset(dataset_id)
+#     table = dataset.table(name=table_id)
+#
+#     return table.exists()
+#
+# def load_billing_to_bigquery(request):
+#     """Main: Read the file from storage and load into BigQuery
+#     """
+#     if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):
+#         credentials = GoogleCredentials.get_application_default()
+#     else:
+#         credentials = GoogleCredentials.from_stream(settings.GOOGLE_APPLICATION_CREDENTIALS)
+#
+#     date = (datetime.datetime.now() + datetime.timedelta(days=-1))
+#
+#     project_id = settings.BIGQUERY_PROJECT_NAME
+#     bucket_id = 'isb-cgc-billing-json'
+#     dataset_id = 'billing'
+#     table_id = 'billing_' + date.strftime("%Y%m%d")
+#     file_id = 'billing-' + date.strftime("%Y-%m-%d") + '.json'
+#
+#     # create service
+#     bq_service = get_bigquery_service()
+#
+#     # read file from storage
+#     data_df = read_json_from_storage(project_id, bucket_id, file_id, credentials)
+#
+#     # generate bigquery schema
+#     dtypes = {'cost_amount': 'FLOAT', 'endTime': 'TIMESTAMP', 'credits_amount': 'FLOAT',
+#               'startTime': 'TIMESTAMP', 'measurements_sum': 'INTEGER'}
+#     schema = generate_schema(data_df, dtypes)
+#
+#     # check if the table exists, if not create and stream rows
+#     if not check_table_exists(project_id, dataset_id, table_id, credentials):
+#
+#         create_table(bq_service, project_id, dataset_id, table_id, schema)
+#
+#         # stream rows to bigquery table
+#         for _, row in data_df.iterrows():
+#             row = row.to_dict()
+#             stream_row_to_bigquery(bq_service, project_id, dataset_id, table_id, row,
+#                                    num_retries=5)
+#
+#         return HttpResponse('')
+#
+#     else:
+#         return HttpResponse('Table already exists: cannot create table')
