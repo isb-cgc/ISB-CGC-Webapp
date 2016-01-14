@@ -1814,7 +1814,7 @@ class Meta_Endpoints_API_v2(remote.Service):
             features = User_Feature_Definitions.objects.filter(study__in=study_ids)
             for feature in features:
                 name = feature.feature_name
-                key = 'study:' + str(study.id) + ':' + name
+                key = 'study:' + str(feature.study_id) + ':' + name
 
                 if feature.shared_map_id:
                     key = feature.shared_map_id
@@ -1823,7 +1823,7 @@ class Meta_Endpoints_API_v2(remote.Service):
                 if key not in valid_attrs:
                     valid_attrs[key] = {'name': name,'tables': (), 'sample_ids': None}
 
-                for tables in User_Data_Tables.objects.filter(study=study):
+                for tables in User_Data_Tables.objects.filter(study_id=feature.study_id):
                     valid_attrs[key]['tables'] += (tables.metadata_samples_table,)
 
                     if not tables.metadata_samples_table in table_key_map:
