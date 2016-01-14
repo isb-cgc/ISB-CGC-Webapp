@@ -1692,7 +1692,7 @@ class Meta_Endpoints_API_v2(remote.Service):
                 data.append(MetadataAttr(attribute=str(row['attribute']),
                                    code=str(row['code']),
                                    spec=str(row['spec']),
-                                   key='tcga:'+str(row['attribute'])
+                                   key=str(row['spec']) + ':' + str(row['attribute'])
                                    ))
 
             if user:
@@ -1789,10 +1789,10 @@ class Meta_Endpoints_API_v2(remote.Service):
                 sample_tables['metadata_samples']['sample_ids'] = sample_ids[None]
 
             cursor = db.cursor(MySQLdb.cursors.DictCursor)
-            cursor.execute('SELECT attribute FROM metadata_attr')
+            cursor.execute('SELECT attribute, spec FROM metadata_attr')
             for row in cursor.fetchall():
                 if row['attribute'] in METADATA_SHORTLIST:
-                    valid_attrs['tcga:' + row['attribute']] = {
+                    valid_attrs[row['SPEC'] + ':' + row['attribute']] = {
                         'name': row['attribute'],
                         'tables': ('metadata_samples',),
                         'sample_ids': None
@@ -1973,9 +1973,9 @@ class Meta_Endpoints_API_v2(remote.Service):
         if 'user_studies' not in filters or 'tcga' in filters['user_studies']['values']:
             sample_tables['metadata_samples'] = {'features':{}, 'barcode':'SampleBarcode', 'study_id':None}
             cursor = db.cursor(MySQLdb.cursors.DictCursor)
-            cursor.execute('SELECT attribute FROM metadata_attr')
+            cursor.execute('SELECT attribute, spec FROM metadata_attr')
             for row in cursor.fetchall():
-                key = 'tcga:' + row['attribute']
+                key = row['spec'] + ':' + row['attribute']
                 valid_attrs[key] = {'name': row['attribute']}
                 sample_tables['metadata_samples']['features'][key] = row['attribute']
                 if key in filters:

@@ -213,16 +213,19 @@ def upload_files(request):
                         type = filter_column_name(type)
 
                     controlled = None
+                    shared_id = None
                     if 'controlled' in column and column['controlled'] is not None:
                         controlled = column['controlled']['key']
+                        shared_id = "CLIN:" + controlled # All shared IDs at the moment are clinical TCGA
                     else:
                         controlled = filter_column_name(column['name'])
 
                     fileJSON['COLUMNS'].append({
-                        "NAME"   : column['name'],
-                        "TYPE"   : type,
-                        "INDEX"  : column['index'],
-                        "MAP_TO" : controlled,
+                        "NAME"      : column['name'],
+                        "TYPE"      : type,
+                        "INDEX"     : column['index'],
+                        "MAP_TO"    : controlled,
+                        "SHARED_ID" : shared_id
                     })
 
                     all_columns.append({
