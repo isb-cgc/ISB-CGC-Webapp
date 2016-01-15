@@ -6,7 +6,7 @@ from django.contrib import admin
 from cohorts.models import Cohort
 from variables.models import Variable
 from genes.models import Gene
-from projects.models import Project, Study
+from projects.models import Project, Study, User_Feature_Definitions
 from cohorts.models import Cohort, Cohort_Perms
 from sharing.models import Shared_Resource
 from django.utils import formats
@@ -377,8 +377,7 @@ class Worksheet_variable(models.Model):
     name            = models.CharField(max_length=2024, blank=False)
     type            = models.CharField(max_length=1024, blank=True, null=True)
     url_code        = models.CharField(max_length=2024, blank=False)
-    project         = models.ForeignKey(Project, null=True, blank=True)
-    study           = models.ForeignKey(Study, null=True, blank=True)
+    feature         = models.ForeignKey(User_Feature_Definitions, null=True, blank=True)
     objects         = Worksheet_Variable_Manager()
 
     @classmethod
@@ -408,41 +407,25 @@ class Worksheet_variable(models.Model):
     @classmethod
     def create(cls, worksheet, variable):
         if type(variable) is not dict :
-            dict_variable = {'project_id' : '-1', 'study_id' : '-1', 'name' : variable.name, 'code' : variable.code}
-            if variable.project :
-                dict_variable['project_id'] = variable.project.id
-            if variable.project :
-                dict_variable['study_id'] = variable.study.id
+            dict_variable = {'feature_id' : variable.feature_id, 'name' : variable.name, 'code' : variable.code}
             variable = dict_variable
-        if variable['project_id'] == '-1' and variable['study_id'] == '-1' :
-            worksheet_variable_model = cls.objects.create(worksheet_id = worksheet.id,
-                                                          name = variable['name'],
-                                                          url_code = variable['code'])
-            worksheet_variable_model.save()
 
-            return_obj = {
-                'id'            : worksheet_variable_model.id,
-                'name'          : worksheet_variable_model.name,
-                'code'          : worksheet_variable_model.url_code,
-                'date_created'  : formats.date_format(worksheet_variable_model.date_created, 'DATETIME_FORMAT')
-            }
-        else:
-            project_model = Project.objects.get(id=variable['project_id'])
-            study_model = Study.objects.get(id=variable['study_id'])
-            worksheet_variable_model = cls.objects.create(worksheet_id = worksheet.id,
-                                                      name          = variable['name'],
-                                                      code          = variable['code'],
-                                                      project       = project_model,
-                                                      study         = study_model)
-            worksheet_variable_model.save()
+        worksheet_variable_model = cls.objects.create(worksheet_id = worksheet.id,
+                                                      name = variable['name'],
+                                                      url_code = variable['code'])
 
-            return_obj = {
-                'id'            : worksheet_variable_model.id,
-                'name'          : worksheet_variable_model.name,
-                'project'       : worksheet_variable_model.project.id,
-                'study'         : worksheet_variable_model.study.id,
-                'date_created'  : formats.date_format(worksheet_variable_model.date_created, 'DATETIME_FORMAT')
-            }
+        return_obj = {
+            'id'            : worksheet_variable_model.id,
+            'name'          : worksheet_variable_model.name,
+            'code'          : worksheet_variable_model.url_code,
+            'date_created'  : formats.date_format(worksheet_variable_model.date_created, 'DATETIME_FORMAT')
+        }
+
+        if variable['feature_id'] is not None:
+            worksheet_variable_model.feature_id = variable['feature_id']
+            return_obj['feature_id'] = worksheet_variable_model.feature_id
+
+        worksheet_variable_model.save()
 
         return return_obj
 
@@ -466,8 +449,7 @@ class Worksheet_variable(models.Model):
              'name'     : self.name,
              'type'     : self.type,
              'url_code' : self.url_code,
-             'project'  : self.project_id,
-             'study'    : self.study_id
+             'feature'  : self.feature_id,
              }
         return j
 

@@ -17,6 +17,7 @@ from google.appengine.api import urlfetch
 from django.conf import settings
 debug = settings.DEBUG
 from django.http import HttpResponse
+from django.db import connection
 
 from django.core import serializers
 
@@ -24,7 +25,7 @@ urlfetch.set_default_fetch_deadline(60)
 BIG_QUERY_API_URL   = settings.BASE_API_URL + '/_ah/api/bq_api/v1'
 COHORT_API          = settings.BASE_API_URL + '/_ah/api/cohort_api/v1'
 META_DISCOVERY_URL  = settings.BASE_API_URL + '/_ah/api/discovery/v1/apis/meta_api/v1/rest'
-METADATA_API        = settings.BASE_API_URL + '/_ah/api/meta_api/v1'
+METADATA_API        = settings.BASE_API_URL + '/_ah/api/meta_api/v2'
 
 
 @login_required
@@ -198,15 +199,7 @@ def initialize_variable_selection_page(request,
 
     if variable_list_id != 0:
         try:
-            existing_variable_list = VariableFavorite.get_deep(variable_list_id)
-            for var in existing_variable_list.list :
-                if not var.project :
-                    var.project_id = -1
-                    var.study_id   = -1
-                else :
-                    var.project_id = var.project.id
-                    var.study_id = var.study.id
-
+            existing_variable_list = request.user.variablefavorite_set.get(id=variable_list_id)
         except ObjectDoesNotExist:
             messages.error(request, 'The variable favorite you were looking for does not exist.')
             return redirect('variables')
@@ -246,35 +239,40 @@ def initialize_variable_selection_page(request,
     sharedProjects = Project.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
     projects = ownedProjects | sharedProjects
     projects = projects.distinct()
-    for project in projects:
-        project.studies = project.study_set.all().filter(active=True)
-        for study in project.studies:
-            study.variables = study.user_feature_definitions_set.all()
-            #TODO need to list feature_name and not name
 
     #get user favorites
     favorite_list = VariableFavorite.get_list(user=request.user)
     for fav in favorite_list :
         fav.variables = fav.get_variables()
 
+    displayed_common_variables = (
+        "vital_status",
+        "gender",
+        "age_at_initial_pathologic_diagnosis",
+        "SampleTypeCode",
+        "tumor_tissue_site",
+        "histological_type",
+        "prior_dx",
+        "tumor_status", # TODO don't know what this maps to in matadata_attr
+        "new_tumor_event_after_initial_treatment",
+        "histological_grade", # TODO is this histological_type?
+        "residual_tumor",
+        "tobacco_smoking_history",
+        "icd-10",
+        "icd-o-3_site",
+        "icd-o-3_histology"
+    )
+    common_variables = []
+    cursor = connection.cursor()
+    # TODO We only select CLIN variables because we don't have a BQ data provider for SAMP data
+    cursor.execute('SELECT attribute FROM metadata_attr WHERE spec = "CLIN" ORDER BY attribute ASC')
+    for row in cursor.fetchall():
+        if row[0] in displayed_common_variables:
+            common_variables.append(row[0])
+    cursor.close()
     #stubbed data for populating the variable list model
     TCGA_project    = {"id" : -1, "study" : {"id" :-1, "name" : ""}, "name" : "TCGA"}
-    common_project  = {"id" : -1, "study" : {"id" :-1, "name" : ""}, "name" : "Common", "variables" : [
-        "Vital Status",
-        "Gender",
-        "Age at Diagnosis",
-        "Sample Type Code",
-        "Tumor Tissue Site",
-        "Histological Type",
-        "Prior Diagnosis",
-        "Tumor Status",
-        "New Tumor Event After Initial Treatment",
-        "Histological Grade",
-        "Residual Tumor",
-        "Tobacco Smoking History",
-        "ICD-10",
-        "ICD-O-3 Site",
-        "ICD-O-3 Histology"]}
+    common_project  = {"id" : -1, "study" : {"id" :-1, "name" : ""}, "name" : "Common", "variables" : common_variables}
 
     data_url = METADATA_API + '/metadata_counts?'
     results = urlfetch.fetch(data_url, deadline=60)
@@ -283,15 +281,15 @@ def initialize_variable_selection_page(request,
 
     #Get and sort counts
     variable_list = convert(results['count'])
-    variable_list['RNA_sequencing'] = []
-    variable_list['miRNA_sequencing'] = []
-    variable_list['DNA_methylation'] = []
+    keys = []
+    for variable in variable_list:
+        keys.append(variable['name'])
 
     # users can select from their saved variable favorites
     variable_favorites = VariableFavorite.get_list(request.user)
 
     context = {
-        'variable_names'        : variable_list.keys(),
+        'variable_names'        : keys,
         'variable_list_count'   : variable_list,
         'favorite_list'         : favorite_list,
         'datatype_list'         : datatype_list,

@@ -3,7 +3,7 @@ import json
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Q
-from projects.models import Project, Study
+from projects.models import Project, Study, User_Feature_Definitions
 from django.conf import settings
 
 class FavoriteManager(models.Manager):
@@ -55,7 +55,7 @@ class VariableFavorite(models.Model):
         variable_favorite_model.save()
 
         for var in variables :
-            Variable.create(name=var['name'], project_id=var['project_id'], study_id = var['study_id'], code=var['code'], favorite=variable_favorite_model)
+            Variable.objects.create(name=var['name'], feature_id=var['feature_id'], code=var['code'], variable_favorite=variable_favorite_model)
 
         return_obj = {
             'name' : variable_favorite_model.name,
@@ -71,7 +71,7 @@ class VariableFavorite(models.Model):
             var.delete()
 
         for var in variables :
-            Variable.create(name=var['name'], project_id=var['project_id'], study_id = var['study_id'], favorite=self)
+            Variable.objects.create(name=var['name'], feature_id=var['project_id'], code=var['code'], variable_favorite=self)
 
         self.save()
         return_obj = {
@@ -118,17 +118,5 @@ class Variable(models.Model):
     name               = models.TextField(null=False, blank=False)
     variable_favorite  = models.ForeignKey(VariableFavorite, blank=False)
     code               = models.CharField(max_length=2024, blank=False)
-    project            = models.ForeignKey(Project, null=True, blank=True)
-    study              = models.ForeignKey(Study, null=True, blank=True)
+    feature            = models.ForeignKey(User_Feature_Definitions, null=True, blank=True)
     objects            = VariableManager()
-
-    @classmethod
-    def create(cls, name, project_id, study_id, code, favorite):
-        if project_id != "-1" and study_id != "-1" :
-            study   = Study.objects.get(id=study_id)
-            project = Project.objects.get(id=project_id)
-            variable_model = cls.objects.create(name=name, project_id=project, study_id=study, code=code, variable_favorite=favorite)
-            variable_model.save()
-        else :
-            variable_model = cls.objects.create(name=name, code=code, variable_favorite=favorite)
-            variable_model.save()

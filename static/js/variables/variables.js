@@ -68,10 +68,10 @@ require([
     function set_pill_deletes(){
         $('a.delete-x').off('click');
         $('a.delete-x').on('click', function() {
-            var search_id = $(this).parent('span').attr('value');
-            $('#' + search_id).prop('checked', false);
+            var code = $(this).parent('span').data('code');
+            $('.variable-toggle-checkbox[value="' + code + '"]').prop('checked', false);
             $(this).parent('span').remove();
-            $('#create-cohort-form .form-control-static').find('span[value="' + search_id + '"]').remove();
+            $('#create-cohort-form .form-control-static').find('span[data-code="' + code + '"]').remove();
             return false;
         });
     }
@@ -122,43 +122,47 @@ require([
     /*
         Creates a ui pill representing a user selected variable
      */
-    function add_variable_pill(name, code, project_id, study_id, project_name, study_name) {
-        var token_str = '<span class="selected-variable" variable="' + name + '" code="' + code + '" project="' + project_id + '" study="' + study_id + '" name="viz-ids">'
-            + ' <a href="" class="delete-x filter-label label label-default">'
-            + project_name + ' : ' + study_name + ' : ' + name
-            + ' <i class="fa fa-times"></a>'
-            + '</span>';
+    function add_variable_pill(name, code, feature_id) {
+        var token = $('<span>');
+        token.addClass('selected-variable')
+            .attr('data-name', name)
+            .attr('data-code', code)
+            .attr('data-feature-id', feature_id)
+            .append(
+                $('<a>').addClass('delete-x filter-label label label-default')
+                    .text(name).append(' <i class="fa fa-times"></a>')
+            );
 
-        var token = $(token_str);
-        $('.selected-filters .panel-body').append(token.clone());
-        $('#create-cohort-form .form-control-static').append(token.clone());
+        token.data('selected-clone', token.clone(true))
+            .data('create-cohort-clone', token.clone(true));
+
+        $('.selected-filters .panel-body').append(token.data('selected-clone'));
+        $('#create-cohort-form .form-control-static').append(token.data('create-cohort-clone'));
 
         set_pill_deletes();
-    };
+        return token;
+    }
 
     /*
         Removes a ui pill representing a user selected variable
     */
-    function remove_variable_pill(name, project, study){
-        $(".selected-variable[variable='" + name + "'][project='" + project + "'][study='" + study + "']").remove();
-        $('#create-cohort-form .form-control-static [variable="' + name + '"] [project="' + project + '"] [study="' + study + '"]').remove();
+    function remove_variable_pill(code){
+        $(".selected-variable[data-code='" + code + "']").remove();
+        $('#create-cohort-form .form-control-static [data-code="' + code + '"]').remove();
     }
 
     /*
         Adds or removes a variable pill when users click on a checkbox representing a variable
      */
     $('input[type="checkbox"]').on('change', function(event){
-        var id = $(this).prop('id');
-        var name            = $(this).attr('variable_name');
-        var code            = $(this).attr('code');
-        var project         = $(this).attr('project');
-        var study           = $(this).attr('study');
-        var project_name    = $(this).attr('project_name');
-        var study_name      = $(this).attr('study_name');
-        if ($(this).is(':checked')) { // Checkbox checked
-            add_variable_pill(name, code, project, study, project_name, study_name);
+        var $this      = $(this),
+            name       = $this.data('text-label'),
+            code       = $this.val(),
+            feature_id = $this.data('feature-id');
+        if ($this.is(':checked')) { // Checkbox checked
+            add_variable_pill(name, code, feature_id);
         } else {
-            remove_variable_pill(name, project, study);
+            remove_variable_pill(code);
         }
     });
 
@@ -166,13 +170,10 @@ require([
         Adds a variable pill when users select a variable from from dropdowns in the TCGA tab
      */
     $('.search-term-field').on('change', function(event){
-        var project         = $(this).attr('project');
-        var study           = $(this).attr('study');
-        var project_name    = $(this).attr('project_name');
-        var study_name      = $(this).attr('study_name');
-        var name            = $(this).find(":selected").text();
-        var code            = $(this).find(":selected").val();
-        add_variable_pill(name, code, project, study, project_name, study_name);
+        var $this      = $(this),
+            name       = $this.find(":selected").text(),
+            code       = $this.find(":selected").val();
+        add_variable_pill(name, code);
     });
 
     /*
@@ -236,11 +237,10 @@ require([
     function get_variable_list(){
         var variable_list = [];
         $(".selected-variable").each(function (index) {
-            var variable_name   = this.getAttribute('variable');
-            var code            = this.getAttribute('code');
-            var project_id      = this.getAttribute('project');
-            var study_id        = this.getAttribute('study');
-            variable_list.push({name: variable_name, code : code, project_id: project_id, study_id: study_id});
+            var variable_name   = this.getAttribute('data-name');
+            var code            = this.getAttribute('data-code');
+            var feature_id      = this.getAttribute('data-feature-id');
+            variable_list.push({name: variable_name, code : code, feature_id: feature_id});
         });
 
         return variable_list;
@@ -250,11 +250,11 @@ require([
         Creates a favorite_list then redirects to the favorite list
      */
     $("#create_favorite_list").on('click', function(event){
-        var name = $("#variable_list_name_input").val();
-        if(name==""){
+        var name = $.trim($("#variable_list_name_input").val());
+        var variable_list = get_variable_list();
+        if(name=="" || !variable_list.length){
             //TODO Create fail ui indicator
         } else {
-            var variable_list = get_variable_list();
             var csrftoken = get_cookie('csrftoken');
             $.ajax({
                 type: 'POST',
@@ -277,10 +277,10 @@ require([
         Edits an existing favorite_list then redirects to the favorite list, or other place
      */
     $("#edit_favorite_list").on('click', function(event){
-        var name = $("#variable_list_name_input").val();
+        var name = $.trim($("#variable_list_name_input").val());
         var variable_list = get_variable_list();
         var variable_id = this.getAttribute("variable_list_id");
-        if(variable_list.length>0){
+        if(name && variable_list.length>0){
             var csrftoken = get_cookie('csrftoken');
             $.ajax({
                 type : 'POST',
@@ -305,11 +305,11 @@ require([
         Add a variable list to an existing worksheet
      */
     $("#apply_to_worksheet").on('click', function(event){
-        var name = $("#variable_list_name_input").val();
+        var name = $.trim($("#variable_list_name_input").val());
         var workbook_id  = this.getAttribute("workbook_id");
         var worksheet_id = this.getAttribute("worksheet_id");
         var variable_list = get_variable_list();
-        if(variable_list.length>0){
+        if(name && variable_list.length>0){
             var csrftoken = get_cookie('csrftoken');
             $.ajax({
                 type : 'POST',
