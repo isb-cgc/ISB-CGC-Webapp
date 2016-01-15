@@ -21,6 +21,7 @@ import operator
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Q
+from projects.models import Study, User_Feature_Definitions
 
 
 class CohortManager(models.Manager):
@@ -158,10 +159,12 @@ class Cohort(models.Model):
 class Samples(models.Model):
     cohort = models.ForeignKey(Cohort, null=False, blank=False)
     sample_id = models.TextField(null=False)
+    study = models.ForeignKey(Study, null=True, blank=True) # Null here means TCGA
 
 class Patients(models.Model):
     cohort = models.ForeignKey(Cohort, null=False, blank=False)
     patient_id = models.TextField(null=False)
+    # TODO this will need a study column eventually too, but is currently not supported in other areas
 
 class Source(models.Model):
     FILTERS = 'FILTERS'
@@ -196,6 +199,7 @@ class Filters(models.Model):
     resulting_cohort = models.ForeignKey(Cohort, null=True, blank=True)
     name = models.CharField(max_length=256, null=False)
     value = models.CharField(max_length=512, null=False)
+    feature_def = models.ForeignKey(User_Feature_Definitions, null=True, blank=True)
 
 class Cohort_Comments(models.Model):
     cohort = models.ForeignKey(Cohort, blank=False, related_name='cohort_comment')

@@ -410,12 +410,13 @@
     </div>
 
     <script type="text/javascript">
-    var attr_list = {{ attr_list|safe }};
-    var attr_counts = {{ attr_list_count|safe }};
+    var attr_list = {{ attr_list|tojson|safe }};
+    var attr_counts = {{ attr_list_count|tojson|safe }};
     var total_samples = {{ total_samples|safe }};
     var base_url = '{{ base_url|safe }}';
     var base_api_url = '{{ base_api_url|safe }}';
     var cohort_id = {{ cohort.id }};
+    var api_token = {{ token|tojson|safe }};
     </script>
 {% endblock %}
 

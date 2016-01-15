@@ -78,34 +78,44 @@ require([
     var search_helper_obj = Object.create(search_helpers, {});
 
     var checkbox_callback = function() {
-        var id = $(this).prop('id');
-        if ($(this).is(':checked')) { // Checkbox checked
-            var tmp = id.split('-');
-            var name = tmp[0];
-            var value = $(this).closest('label').text();
-            var token_str = '<span class="" value="'
-                + id + '" name="viz-ids">'
-                + ' <a href="" class="delete-x filter-label label label-default">'
-                + name + ': ' + value
-                + ' <i class="fa fa-times"></a>'
-                + '</span>';
-            var token = $(token_str);
-            $('.selected-filters .panel-body').append(token.clone());
-            $('#create-cohort-form .form-control-static').append(token.clone());
+        var $this = $(this);
+
+        if ($this.is(':checked')) { // Checkbox checked
+            var feature = $this.closest('.cohort-feature-select-block'),
+                value = $this;
+
+            var token = $('<span>').data({
+                'feature-id'   : feature.data('feature-id'),
+                'feature-name' : feature.data('feature-name'),
+                'value-id'     : value.data('value-id'),
+                'value-name'   : value.data('value-name'),
+            });
+            token.append(
+                $('<a>').addClass('delete-x filter-label label label-default')
+                    .text(feature.data('feature-name') + ': ' + value.data('value-name'))
+                    .append('<i class="fa fa-times">')
+            );
+            
+            $this.data({
+                'select-filters-item': token.clone(true),
+                'create-cohort-form-item': token.clone(true)
+            });
+            $('.selected-filters .panel-body').append( $this.data('select-filters-item') );
+            $('#create-cohort-form .form-control-static').append( $this.data('create-cohort-form-item') );
             $('a.delete-x').on('click', function() {
-                var search_id = $(this).parent('span').attr('value');
+                var search_id = $this.parent('span').attr('value');
                 $('#' + search_id).prop('checked', false);
-                $(this).parent('span').remove();
-                search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id);
+                $this.parent('span').remove();
+                search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id, undefined, 'v2', api_token);
                 search_helper_obj.update_parsets(base_api_url, 'metadata_platform_list', cohort_id);
                 $('#create-cohort-form .form-control-static').find('span[value="' + search_id + '"]').remove();
                 return false;
             });
         } else { // Checkbox unchecked
-            $('.selected-filters span[value="' + id + '"]').remove();
-            $('#create-cohort-form .form-control-static span[value="' + id + '"]').remove();
+            $this.data('select-filters-item').remove();
+            $this.data('create-cohort-form-item').remove();
         }
-        search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id);
+        search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id, undefined, 'v2', api_token);
         search_helper_obj.update_parsets(base_api_url, 'metadata_platform_list', cohort_id);
     };
 
@@ -141,7 +151,7 @@ require([
             $(this).prop('checked', false);
         });
         $('#create-cohort-form .form-control-static').empty();
-        search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id);
+        search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id, undefined, 'v2', api_token);
     });
 
     $('#add-filter-btn').on('click', function() {
@@ -170,7 +180,12 @@ require([
         var form = $(this);
 
         $('.selected-filters .panel-body span').each(function() {
-            form.append('<input type="hidden" name="filters" value="' + $(this).attr('value') + '" />');
+            var $this = $(this),
+                value = {
+                    'feature': { name: $this.data('feature-name'), id: $this.data('feature-id') },
+                    'value'  : { name: $this.data('value-name')  , id: $this.data('value-id')   }
+                };
+            form.append($('<input>').attr({ type: 'hidden', name: 'filters', value: JSON.stringify(value)}));
         });
 
         if (cohort_id) {
@@ -267,7 +282,7 @@ require([
         return false;
     });
 
-    search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id);
+    search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id, undefined, 'v2', api_token);
     search_helper_obj.update_parsets(base_api_url, 'metadata_platform_list', cohort_id);
 
     $('#shared-with-btn').on('click', function(e){

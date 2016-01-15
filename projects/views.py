@@ -10,7 +10,7 @@ from django.conf import settings
 from django.db import connection
 from django.core.urlresolvers import reverse
 from data_upload.models import UserUpload, UserUploadedFile
-from projects.models import User_Feature_Definitions, Project
+from projects.models import User_Feature_Definitions, User_Feature_Counts, Project
 from sharing.service import create_share
 from google.appengine.api.mail import send_mail
 
@@ -120,7 +120,7 @@ def create_metadata_tables(user, study, columns, skipSamples=False):
                 CREATE TABLE IF NOT EXISTS user_metadata_samples_%s_%s (
                   id INTEGER UNSIGNED AUTO_INCREMENT PRIMARY KEY,
                   participant_barcode VARCHAR(200),
-                  sample_barcode VARCHAR(200),
+                  sample_barcode VARCHAR(200) UNIQUE,
                   has_mrna BOOLEAN,
                   has_mirna BOOLEAN,
                   has_protein BOOLEAN,
@@ -213,16 +213,19 @@ def upload_files(request):
                         type = filter_column_name(type)
 
                     controlled = None
+                    shared_id = None
                     if 'controlled' in column and column['controlled'] is not None:
                         controlled = column['controlled']['key']
+                        shared_id = "CLIN:" + controlled # All shared IDs at the moment are clinical TCGA
                     else:
                         controlled = filter_column_name(column['name'])
 
                     fileJSON['COLUMNS'].append({
-                        "NAME"   : column['name'],
-                        "TYPE"   : type,
-                        "INDEX"  : column['index'],
-                        "MAP_TO" : controlled,
+                        "NAME"      : column['name'],
+                        "TYPE"      : type,
+                        "INDEX"     : column['index'],
+                        "MAP_TO"    : controlled,
+                        "SHARED_ID" : shared_id
                     })
 
                     all_columns.append({
@@ -352,6 +355,22 @@ def study_data_success(request, project_id=0, study_id=0, dataset_id=0):
 
     if not datatables.data_upload.key == request.GET.get('key'):
         raise Exception("Invalid data key when marking data success")
+
+    ufds = User_Feature_Definitions.objects.filter(study_id=study.id)
+    cursor = connection.cursor()
+
+    for user_feature in ufds:
+        user_feature
+        col_name = filter_column_name(user_feature.feature_name)
+
+        cursor.execute('SELECT COUNT(1) AS "count", '+ col_name +' AS "val" FROM ' + datatables.metadata_samples_table)
+        values = cursor.fetchall()
+
+        for value in values:
+            ufc = User_Feature_Counts.objects.create(feature=user_feature, value=value[1], count=value[0])
+            ufc.save()
+
+    cursor.close()
 
     datatables.data_upload.status = 'Complete'
     datatables.data_upload.save()

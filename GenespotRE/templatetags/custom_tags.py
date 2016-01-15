@@ -20,6 +20,7 @@ limitations under the License.
 import string
 
 from django.template.defaulttags import register
+import json
 import re
 
 
@@ -31,6 +32,8 @@ def get_item(dictionary, key):
 
 @register.filter
 def get_readable_name(csv_name):
+    if csv_name.startswith('user_') and csv_name != 'user_project' and csv_name != 'user_study':
+        csv_name = csv_name[5:]
 
     translation_dictionary = {
         'DNAseq_data': 'DNAseq',
@@ -196,3 +199,30 @@ def is_public(list, key=None):
 @register.filter
 def sort_last_view(list, key=''):
     return list.order_by('-' + key + '_last_view__last_view')
+
+def quick_js_bracket_replace(matchobj):
+    if matchobj.group(0) == '<':
+        return '\u003C'
+    else:
+        return '\u003E'
+
+@register.filter
+def tojson(obj, esacpe_html=True):
+    output = json.dumps(obj)
+    if esacpe_html:
+        output = re.sub(re.compile(r'(<|>)'), quick_js_bracket_replace, output)
+    return output
+
+@register.filter
+def list_contains_name(list, value):
+    for item in list:
+        if item['name'] == value:
+            return True
+    return False
+
+@register.filter
+def get_named_item(list, value):
+    for item in list:
+        if item['name'] == value:
+            return item
+    return None
