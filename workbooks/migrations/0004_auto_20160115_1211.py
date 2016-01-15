@@ -7,7 +7,7 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('projects', '0001_initial'),
+        ('projects', b'__first__'),
         ('workbooks', '0003_auto_20160112_1034'),
     ]
 
