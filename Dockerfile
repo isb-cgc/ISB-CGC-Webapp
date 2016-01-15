@@ -64,5 +64,4 @@ RUN cp /app/google_appengine/lib/endpoints-1.0/endpoints/* /app/lib/endpoints/
 
 ENV PYTHONPATH=/app:/app/lib
 
-RUN python /app/manage.py makemigrations
-RUN python /app/manage.py migrate
+RUN python /app/manage.py migrate --noinput

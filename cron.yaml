@@ -35,3 +35,6 @@ cron:
 - description: log ACL changes on buckets
   url: /tasks/log_acls
   schedule: every 1 minutes
+#- description: load billing tables
+#  url: /tasks/load_billing_to_bigquery
+#  schedule: every 24 hours
