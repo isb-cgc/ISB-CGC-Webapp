@@ -98,6 +98,8 @@ class Cohort(messages.Message):
     source_notes = messages.StringField(8)
     parent_id = messages.IntegerField(9)
     filters = messages.MessageField(FilterDetails, 10, repeated=True)
+    num_patients = messages.StringField(11)
+    num_samples = messages.StringField(12)
 
 class CohortsList(messages.Message):
     items = messages.MessageField(Cohort, 1, repeated=True)
@@ -146,18 +148,6 @@ class SampleDetails(messages.Message):
 class DataFileNameKeyList(messages.Message):
     datafilenamekeys = messages.StringField(1, repeated=True)
     count = messages.IntegerField(2)
-
-
-# todo: replace this with class Cohort?
-class SavedCohort(messages.Message):
-    id = messages.StringField(1)
-    name = messages.StringField(2)
-    active = messages.StringField(3)
-    last_date_saved = messages.StringField(4)
-    user_id = messages.StringField(5)
-    filters = messages.MessageField(FilterDetails, 6, repeated=True)
-    num_patients = messages.StringField(7)
-    num_samples = messages.StringField(8)
 
 
 Cohort_Endpoints = endpoints.api(name='cohort_api', version='v1', description="Get information about "
@@ -848,7 +838,7 @@ class Cohort_Endpoints_API(remote.Service):
                                                 name=messages.StringField(2, required=True),
                                                 token=messages.StringField(3)
                                                 )
-    @endpoints.method(POST_RESOURCE, SavedCohort,
+    @endpoints.method(POST_RESOURCE, Cohort,
                       path='save_cohort', http_method='POST', name='cohort.save')
     def save_cohort(self, request):
         """
@@ -958,14 +948,13 @@ class Cohort_Endpoints_API(remote.Service):
             bcs = BigQueryCohortSupport(project_id, cohort_settings.dataset_id, cohort_settings.table_id)
             bcs.add_cohort_with_sample_barcodes(created_cohort.id, sample_barcodes)
 
-            return SavedCohort(id=str(created_cohort.id),
-                               name=cohort_name,
-                               active='True',
-                               last_date_saved=str(datetime.utcnow()),
-                               user_id=str(user_id),
-                               num_patients=str(len(patient_barcodes)),
-                               num_samples=str(len(sample_barcodes))
-                               )
+            return Cohort(id=str(created_cohort.id),
+                          name=cohort_name,
+                          last_date_saved=str(datetime.utcnow()),
+                          num_patients=str(len(patient_barcodes)),
+                          num_samples=str(len(sample_barcodes))
+                          )
+
         else:
             raise endpoints.UnauthorizedException("Authentication failed.")
 
@@ -1025,6 +1014,7 @@ class Cohort_Endpoints_API(remote.Service):
                     "or you do not have owner or reader permissions on this cohort." % cohort_id)
         else:
             return_message = "Unsuccessful authentication."
+            # todo: when endpoints.UnauthorizedException is fixed, add that here.
 
         return ReturnJSON(msg=return_message)
 
@@ -1131,14 +1121,14 @@ class Cohort_Endpoints_API(remote.Service):
             query_tuple = (sample_barcode,)
 
         if platform:
-            query_str += ' and Platform=%s '
+            query_str += ' and metadata_data.Platform=%s '
             query_tuple += (platform,)
 
         if pipeline:
-            query_str += ' and Pipeline=%s '
+            query_str += ' and metadata_data.Pipeline=%s '
             query_tuple += (pipeline,)
 
-        query_str += ' GROUP BY DataFileNameKey'
+        query_str += ' GROUP BY metadata_data.DataFileNameKey'
 
 
         try:
@@ -1176,7 +1166,7 @@ class Cohort_Endpoints_API(remote.Service):
                       path='preview_cohort', http_method='POST', name='cohort.preview')
     def preview_cohort(self, request):
         """
-        Creates and saves a cohort. Takes a JSON object in the request body to use as the cohort's filters.
+        Previews a cohort. Takes a JSON object in the request body to use as the cohort's filters.
         :return: Information about the cohort, including the number of patients and the number
         of samples in that cohort.
         """
