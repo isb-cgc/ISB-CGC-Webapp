@@ -260,7 +260,7 @@
                         </ul>
                     </li>
                     {% endif %}
-                    <li class="menu-item"><a href="{% url 'variables' %}">Manage Variables Favorite ( {{ user.variablefavorite_last_view_set.all|active:'variablefavorite'|length }} )</a></li>
+                    <li class="menu-item"><a href="{% url 'variables' %}">Manage Variables Favorite ( {{ user.variablefavorite_set.all|active|length }} )</a></li>
                     <li class="menu-item"><a href="{% url 'variable_fav_create' %}">Create Favorite Variable(s)</a></li>
                     <li class="menu-item"><a href="{% url 'variable_select_for_new_workbook' %}">Select Variables for a New Workbook</a></li>
                 </ul>
