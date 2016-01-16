@@ -36,7 +36,7 @@ gem install sass
 
 # Install Google App Engine
 echo "Installing Google App Engine..."
-wget -q https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.30.zip -O ${HOME}/google_appengine.zip
+wget -q https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.31.zip -O ${HOME}/google_appengine.zip
 unzip -nq ${HOME}/google_appengine.zip -d $HOME
 export PATH=$PATH:${HOME}/google_appengine/
 mkdir ${HOMEROOT}/lib/endpoints/ 2> /dev/null
