@@ -1813,6 +1813,10 @@ class Meta_Endpoints_API_v2(remote.Service):
 
             features = User_Feature_Definitions.objects.filter(study__in=study_ids)
             for feature in features:
+                if ' ' in feature.feature_name:
+                    # It is not a column name and comes from molecular data, ignore it
+                    continue
+
                 name = feature.feature_name
                 key = 'study:' + str(feature.study_id) + ':' + name
 

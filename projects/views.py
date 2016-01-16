@@ -360,7 +360,9 @@ def study_data_success(request, project_id=0, study_id=0, dataset_id=0):
     cursor = connection.cursor()
 
     for user_feature in ufds:
-        user_feature
+        if ' ' in user_feature.feature_name:
+            # Molecular data will not be column names but rather names of features
+            continue
         col_name = filter_column_name(user_feature.feature_name)
 
         cursor.execute('SELECT COUNT(1) AS "count", '+ col_name +' AS "val" FROM ' + datatables.metadata_samples_table)
