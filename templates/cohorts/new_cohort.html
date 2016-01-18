@@ -64,7 +64,7 @@
                 <div role="tabpanel" class="tab-pane active" id="clinical-filters">
                     <ul class="list-group" id="clin-accordion" role="tablist" aria-multiselectable="true">
                         {% for attr in clin_attr %}
-                            {% if attr in attr_list_count %}
+                            {% if attr_list_count|list_contains_name:attr %}
                                 <li class="list-group-item">
                                     <div id="heading-{{attr}}" class="list-group-item__heading">
                                         <a role="button" data-toggle="collapse" data-parent="#clin-accordion" href="#collapse-{{ attr }}" aria-expanded="false" aria-controls="collapse-{{ attr }}">
@@ -72,14 +72,14 @@
                                         </a>
                                     </div>
 
-                                    <div id="collapse-{{ attr }}" class="list-group-item__body collapse" role="tabpanel" aria-labelledby="heading-{{ attr }}">
+                                    <div id="collapse-{{ attr }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" aria-labelledby="heading-{{ attr }}" data-feature-name="{{ attr }}" data-feature-id="{% if attr_list_count|get_named_item:attr|get_item:'id' %}{{ attr_list_count|get_named_item:attr|get_item:'id' }}{% endif %}">
                                         <ul class="search-checkbox-list" id="{{ attr }}">
-                                            {% with attr_list_count|get_item:attr|how_many_more:6 as num_more %}
-                                                {% for v in attr_list_count|get_item:attr %}
+                                            {% with attr_list_count|get_named_item:attr|get_item:'values'|how_many_more:6 as num_more %}
+                                                {% for v in attr_list_count|get_named_item:attr|get_item:'values' %}
                                                     {% if forloop.counter0 < 6 %}
                                                         <li class="checkbox">
-                                                            <label for="{{ attr }}-{{ v.value|replace_whitespace:'_' }}">
-                                                                <input type="checkbox" name="elements-selected" id="{{ attr }}-{{ v.value|replace_whitespace:'_' }}" >
+                                                            <label>
+                                                                <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}" data-value-id="{% if v.id %}{{ v.id }}{% endif %}">
                                                                 {% if v.value == 'None' %}NA{% else %}{{ v.value|get_readable_name }}{% endif %}
                                                             </label>
                                                             <span class="count">({{ v.count }})</span>
@@ -87,16 +87,16 @@
                                                     {% elif forloop.counter0 == 6 and num_more > 0 %}
                                                         <a class="show-more">{{ num_more }} more</a>
                                                         <li class="extra-values checkbox" style="display:none;">
-                                                            <label for="{{ attr }}-{{ v.value|replace_whitespace:'_' }}">
-                                                                <input type="checkbox" name="elements-selected" id="{{ attr }}-{{ v.value|replace_whitespace:'_' }}" >
+                                                            <label>
+                                                                <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}" data-value-id="{% if v.id %}{{ v.id }}{% endif %}">
                                                                 {% if v.value == 'None' %}NA{% else %}{{ v.value|get_readable_name }}{% endif %}
                                                             </label>
                                                             <span class="count">({{ v.count }})</span>
                                                         </li>
                                                     {% else %}
                                                         <li class="extra-values checkbox" style="display:none;">
-                                                            <label for="{{ attr }}-{{ v.value|replace_whitespace:'_' }}">
-                                                                <input type="checkbox" name="elements-selected" id="{{ attr }}-{{ v.value|replace_whitespace:'_' }}" >
+                                                            <label>
+                                                                <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}" data-value-id="{% if v.id %}{{ v.id }}{% endif %}">
                                                                 {% if v.value == 'None' %}NA{% else %}{{ v.value|get_readable_name }}{% endif %}
                                                             </label>
                                                             <span class="count">({{ v.count }})</span>
@@ -124,13 +124,13 @@
                                         <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ attr|get_readable_name }}
                                     </a>
                                 </div>
-                                <div id="collapse-{{ attr }}" class="list-group-item__body collapse" role="tabpanel" aria-labelledby="heading-{{ attr }}">
+                                <div id="collapse-{{ attr }}" class="list-group-item__body collapse" role="tabpanel" aria-labelledby="heading-{{ attr }}" data-feature-name="{{ attr }}">
                                     <ul class="search-checkbox-list" id="{{ attr }}">
-                                        {% if attr in attr_list_count %}
-                                            {% for v in attr_list_count|get_item:attr %}
+                                        {% if attr_list_count|list_contains_name:attr %}
+                                            {% for v in attr_list_count|get_named_item:attr|get_item:'values' %}
                                                 <li class="checkbox">
                                                     <!-- todo: make a custom tag for the id for data_attr attributes-->
-                                                    <label for="{{ v.value|get_data_attr_id:attr }}"><input type="checkbox" name="elements-selected" id="{{ v.value|get_data_attr_id:attr }}" >{{ v.value }}</label>
+                                                    <label><input type="checkbox" name="elements-selected" data-value-name="{{ v.value|get_data_attr_id:attr }}" >{{ v.value }}</label>
                                                     <span class="count">({{ v.count }})</span>
                                                 </li>
                                             {% endfor %}
@@ -253,11 +253,12 @@
     </div>
 
     <script type="text/javascript">
-    var attr_list = {{ attr_list|safe }};
+    var attr_list = {{ attr_list|tojson|safe }};
     var total_samples = {{ total_samples|safe }};
-    var attr_counts = {{ attr_list_count|safe }};
+    var attr_counts = {{ attr_list_count|tojson|safe }};
     var base_api_url = '{{ base_api_url|safe }}';
     var cohort_id = undefined;
+    var api_token = {{ token|tojson|safe }};
     </script>
 {% endblock %}
 

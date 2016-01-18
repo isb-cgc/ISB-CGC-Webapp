@@ -49,7 +49,7 @@
          <!-- tabs of worksheets -->
         <ul class="nav nav-tabs_excel" id="worksheets-tabs">
             <!-- for each worksheet in workbook -->
-            {% for worksheet in workbook.worksheet_set.all %}
+            {% for worksheet in workbook.worksheets %}
                 {% if forloop.counter < 4 %}
                     <li class="{% if display_worksheet and display_worksheet.id == worksheet.id %} active {% elif not display_worksheet and forloop.counter == 1 %} active {% endif %}">
                          <a href="#{{ worksheet.id }}" data-toggle="tab">{{ worksheet.name }}</a>
@@ -102,7 +102,7 @@
         </ul>
         <div class="tab-content">
              <!-- for each worksheet in workbook -->
-             {% for worksheet in workbook.worksheet_set.all %}
+             {% for worksheet in workbook.worksheets %}
                  <div class="worksheet tab-pane fade {% if not display_worksheet and forloop.counter == 1 %} in active{% elif display_worksheet and display_worksheet.id == worksheet.id %} in active {% endif %}" id="{{ worksheet.id }}" >
                      <!-- worksheet description -->
                      <div class="worksheet-header">
@@ -124,9 +124,9 @@
                                         <span>Genes </span>
                                         {% endif %}
                                     </div>
-                                    {% if worksheet.genes %}
+                                    {% if worksheet.worksheet_gene_set.count > 0 %}
                                     <ul class="list-item__body">
-                                        {% with worksheet.genes|how_many_more:6 as num_more  %}
+                                        {% with worksheet.worksheet_gene_set.all|how_many_more:6 as num_more  %}
                                             {% for gene in worksheet.genes %}
                                                 {% if forlook.counter0 < 6 %}
                                                     <li class="sublist-item">{{ gene.gene|upper }}</li>
@@ -150,9 +150,9 @@
                                         <span>Variables </span>
                                         {% endif %}
                                     </div>
-                                    {% if worksheet.variables %}
+                                    {% if worksheet.worksheet_variable_set.count > 0 %}
                                     <ul class="list-item__body">
-                                        {% with worksheet.variables|how_many_more:6 as num_more  %}
+                                        {% with worksheet.worksheet_variable_set.all|how_many_more:6 as num_more  %}
                                             {% for variable in worksheet.variables %}
                                                 {% if forlook.counter0 < 6 %}
                                                     <li class="sublist-item">{{ variable.name|upper }}</li>
@@ -225,24 +225,26 @@
                             {% if workbook.owner.id == user.id %}
                             <h5>Analysis Type</h5>
                             <div class="form-group gray-area">
-                                <select id="plot_selection" class="form-control">
-                                    {% if worksheet.selected_plot %}
-                                        <option value="{{ worksheet.selected_plot }}" selected >{{ worksheet.selected_plot }}</option>
+                                <select worksheet_id="{{ worksheet.id }}" class="form-control plot_selection">
+                                    {% if worksheet.active_plot %}
+                                        <option value="{{ worksheet.active_plot.type }}" selected >{{ worksheet.active_plot.type }}</option>
                                     {% else %}
-                                        <option disabled hidden selected >-- select an analysis --</option>
+                                        <option disabled selected >-- select an analysis --</option>
                                     {% endif %}
-                                    {% for graph in plot_types %}
-                                        <option value="{{ graph.name }}">{{ graph.name }}</option>
+                                    {% for plot in plot_types %}
+                                        {% if not worksheet.active_plot or plot.name != worksheet.active_plot.type %}
+                                            <option value="{{ plot.name }}">{{ plot.name }}</option>
+                                        {% endif %}
                                     {% endfor %}
                                 </select>
                             </div>
                             <div class="plot-container">
-                                {% include 'workbooks/workbook_plot.html' with plot=worksheet.plot variables=worksheet.variables cohorts=worksheet.cohorts %}
+                                {% include 'workbooks/workbook_plot.html' with plot=worksheet.active_plot variables=worksheet.variables cohorts=worksheet.cohorts %}
                                 <!-- plot needs to indicate saved plot data such as selected variables, cohorts, title, etc -->
                                 <!-- workbook_plot also needs to have reference to all worksheet cohorts, variables and genes -->
                             </div>
-                            {% elif worksheet.selected_plot %}
-                            <h5>Analysis Type: {{ worksheet.selected_plot }}</h5>
+                            {% elif worksheet.active_plot %}
+                            <h5>Analysis Type: {{ worksheet.active_plot.type }}</h5>
                             <div class="plot-container">
                                 {% include 'workbooks/workbook_plot.html' with plot=worksheet.plot variables=worksheet.variables cohorts=worksheet.cohorts %}
                                 <!-- plot needs to indicate saved plot data such as selected variables, cohorts, title, etc -->
@@ -292,9 +294,10 @@
 {% include "workbooks/workbook_modals.html" %}
 
 <script type="text/javascript">
-    var base_api_url = '{{ base_api_url|safe }}';
-    var base_url = '{{ base_url|safe }}';
-    var display_worksheet = '{{ display_worksheet.id|safe }}';
+    var base_api_url            = '{{ base_api_url|safe }}';
+    var base_url                = '{{ base_url|safe }}';
+    var display_worksheet_id    = '{{ display_worksheet.id|safe }}';
+    var workbook_id             = '{{ workbook.id }}';
 
     //plot specific variables
 {#    var plots_data = {{ plots_data|safe }};#}

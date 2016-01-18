@@ -97,9 +97,9 @@
                                     {% for attr in common_project.variables %}
                                         <li class="list-group-item checkbox">
                                             <div id="heading-{{ attr }}" class="list-group-item__heading">
-                                                <label for="{{ attr }}">
-                                                    <input type="checkbox" value="{{ attr }}" name="elements-selected" variable_name="{{ attr }}" project_name="{{ common_project.name }}" project="{{ common_project.id }}" study_name="{{ common_project.study.name }} "study="{{ common_project.study.id }}" >
-                                                    {{ attr }}
+                                                <label>
+                                                    <input class="variable-toggle-checkbox" type="checkbox" value="CLIN:{{ attr }}" name="elements-selected" data-text-label="{{ attr|get_readable_name }}">
+                                                    {{ attr|get_readable_name }}
                                                 </label>
                                             </div>
                                         </li>
@@ -118,11 +118,11 @@
 
                                             <div id="collapse-{{ fav.id }}" class="list-group-item__body collapse" role="tabpanel" aria-labelledby="heading-{{ fav.id }}">
                                                 <ul class="search-checkbox-list" id="clin-accordion" role="tablist" aria-multiselectable="true">
-                                                    {% for var in fav.variables %}
+                                                    {% for var in fav.variable_set.all %}
                                                         <li class="checkbox">
                                                             <div id="heading-{{ var.id }}">
-                                                                <label for="{{ var.name }}">
-                                                                    <input type="checkbox" value="{{ var.name }}" name="elements-selected" variable_name="{{ var.name }}" project_name="{{ var.project.name }}" project="{{ var.project.id }}" study_name="{{ var.study.name }} "study="{{ var.study.id }}">
+                                                                <label>
+                                                                    <input class="variable-toggle-checkbox" type="checkbox" value="{{ var.code }}" name="elements-selected" data-text-label="{{ var.name }}" {% if var.feature %}data-feature-id="{{ var.feature.id }}"{% endif %}>
                                                                     {{ var.name }}
                                                                 </label>
                                                             </div>
@@ -185,7 +185,7 @@
                             <div role="tabpanel" class="tab-pane" id="uploaded">
                                 <ul class="list-group" id="clin-accordion" role="tablist" aria-multiselectable="true">
                                     {% for project in projects %}
-                                        {% for study in project.study_list %}
+                                        {% for study in project.study_set.all|active %}
                                             <li class="list-group-item">
                                                 <div id="heading-{{ data_type_name }}" class="list-group-item__heading">
                                                     <a role="button"  data-toggle="collapse" data-parent="#clin-accordion" href="#collapse-{{ project.id }}-{{ study.id }}" aria-expanded="false" aria-controls="collapse-{{ attr }}">
@@ -195,25 +195,25 @@
 
                                                 <div id="collapse-{{ project.id }}-{{ study.id }}" class="list-group-item__body collapse" role="tabpanel" aria-labelledby="heading-{{ project.id }}-{{ study.id }}">
                                                     <ul class="search-checkbox-list" id="{{ data_type_name }}">
-                                                        {% with variable_list_count|get_item:attr|how_many_more:6 as num_more %}
-                                                            {% for variable in study.variables %} {#|get_item:attr %}#}
+                                                        {% with study.user_feature_definitions_set.all|how_many_more:6 as num_more %}
+                                                            {% for variable in study.user_feature_definitions_set.all %} {#|get_item:attr %}#}
                                                                 {% if forloop.counter0 < 6 %}
                                                                     <li class="checkbox">
-                                                                        <label for="{{ variable.name }}">
-                                                                            <input type="checkbox" name="elements-selected" id="{{ variable.name }}" > {{ variable.name }}
+                                                                        <label>
+                                                                            <input class="variable-toggle-checkbox" type="checkbox" name="elements-selected" value="{% if variable.shared_map_id %}{{ variable.shared_map_id }}{% else %}USER:{{ study.id }}:{{ variable.id }}{% endif %}" data-text-label="{{ study.name }}: {{ variable.feature_name|get_readable_name }}" data-feature-id="{{ variable.id }}" > {{ variable.feature_name|get_readable_name }}
                                                                         </label>
                                                                     </li>
                                                                 {% elif forloop.counter0 == 6 and num_more > 0 %}
                                                                     <a class="show-more">{{ num_more }} more</a>
                                                                     <li class="extra-values checkbox" style="display:none;">
-                                                                        <label for="{{ variable.name }}">
-                                                                            <input type="checkbox" name="elements-selected" id="{{ variable.name }}">  {{ variable.name }}
+                                                                        <label>
+                                                                            <input class="variable-toggle-checkbox" type="checkbox" name="elements-selected" value="{% if variable.shared_map_id %}{{ variable.shared_map_id }}{% else %}USER:{{ study.id }}:{{ variable.id }}{% endif %}" data-text-label="{{ study.name }}: {{ variable.feature_name|get_readable_name }}" data-feature-id="{{ variable.id }}" > {{ variable.feature_name|get_readable_name }}
                                                                         </label>
                                                                     </li>
                                                                 {% else %}
                                                                     <li class="extra-values checkbox" style="display:none;">
-                                                                        <label for="{{ variable.name }}">
-                                                                            <input type="checkbox" name="elements-selected" id="{{ variable.name }}">  {{ variable.name }}
+                                                                        <label>
+                                                                            <input class="variable-toggle-checkbox" type="checkbox" name="elements-selected" value="{% if variable.shared_map_id %}{{ variable.shared_map_id }}{% else %}USER:{{ study.id }}:{{ variable.id }}{% endif %}" data-text-label="{{ study.name }}: {{ variable.feature_name|get_readable_name }}" data-feature-id="{{ variable.id }}" > {{ variable.feature_name|get_readable_name }}
                                                                         </label>
                                                                     </li>
                                                                 {% endif %}
@@ -251,10 +251,10 @@
                     </div>
                     <div class="panel-body">
                         {% if existing_variable_list %}
-                            {% for variable in existing_variable_list.list %}
-                            <span class="selected-variable" variable="{{ variable.name }}" code="{{ variable.code }}" project="{{ variable.project_id }}" study="{{ variable.study_id }}">
+                            {% for variable in existing_variable_list.variable_set %}
+                            <span class="selected-variable" data-name="{{ variable.name }}" data-code="{{ variable.code }}" data-feature-id="{{ variable.feature_id }}">
                                 <a class="delete-x filter-label label label-default">
-                                    {{ variable.project.name }}: {{ variable.study.name }} : {{ variable.name }}
+                                    {{ variable.name }}
                                     <i class="fa fa-times"></i>
                                 </a>
                             </span>

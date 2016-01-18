@@ -6,10 +6,13 @@ from django.contrib import admin
 from cohorts.models import Cohort
 from variables.models import Variable
 from genes.models import Gene
-from projects.models import Project, Study
+from projects.models import Project, Study, User_Feature_Definitions
 from cohorts.models import Cohort, Cohort_Perms
 from sharing.models import Shared_Resource
 from django.utils import formats
+from django.core import serializers
+import sys
+import json
 
 # Create your models here.
 class WorkbookManager(models.Manager):
@@ -80,7 +83,7 @@ class Workbook(models.Model):
 
         worksheets = workbook_model.get_worksheets()
         for worksheet in worksheets:
-            worksheet.destroy()
+            Worksheet.destroy(id=worksheet.id)
 
         workbook_model.delete()
         return workbook_model
@@ -120,14 +123,8 @@ class Workbook(models.Model):
             worksheet.variables = worksheet.get_variables()
             worksheet.genes     = worksheet.get_genes()
             worksheet.cohorts   = worksheet.get_cohorts()
-            # worksheet.plot      = {'title'  : "default title",
-            #                        'type'   : "default type",
-            #                        'xaxis'  : {'selected'   : None,
-            #                                    'type'       : "numerical"},
-            #                        'yaxis'  : {'selected'   : None,
-            #                                    'type'       : 'categorical'},
-            #                        'cohort' : {'selected'   : None}
-            #                        }
+
+            worksheet.active_plot = worksheet.get_active_plot()
         return worksheets
 
 class Workbook_Last_View(models.Model):
@@ -157,7 +154,6 @@ class Worksheet(models.Model):
     name            = models.CharField(max_length=2024, blank=False)
     description     = models.CharField(max_length=2024, null=False)
     workbook        = models.ForeignKey(Workbook, null=False, blank=False)
-    plot            = models.ForeignKey('Worksheet_plot', null=True, blank=True)
     last_date_saved = models.DateTimeField(auto_now_add=True)
     date_created    = models.DateTimeField(auto_now_add=True)
     objects         = WorksheetManager()
@@ -165,7 +161,12 @@ class Worksheet(models.Model):
     @classmethod
     def destroy(cls, id):
         worksheet_model = cls.objects.get(id=id)
-        worksheet_model.destroy()
+        worksheet_model.worksheet_cohort_set.all().delete()
+        worksheet_model.worksheet_comment_set.all().delete()
+        worksheet_model.worksheet_variable_set.all().delete()
+        worksheet_model.worksheet_gene_set.all().delete()
+        worksheet_model.worksheet_plot_set.all().delete()
+        worksheet_model.delete()
         return worksheet_model
 
     @classmethod
@@ -201,12 +202,7 @@ class Worksheet(models.Model):
         return self.worksheet_gene_set.filter(worksheet=self)
 
     def get_cohorts(self):
-        work_cohorts = self.worksheet_cohort_set.filter(worksheet=self)
-        cohorts = []
-        for co in work_cohorts :
-            cohorts.append(co.cohort)
-
-        return cohorts
+        return self.worksheet_cohort_set.filter(worksheet=self)
 
     def add_cohort(self, cohort):
         Worksheet_cohort.create(self.id, cohort)
@@ -214,18 +210,26 @@ class Worksheet(models.Model):
     def remove_cohort(self, cohort):
         self.worksheet_cohort_set.get(cohort=cohort).destroy()
 
-    def set_plot(self, title, type):
-        if self.plot :
-            self.plot.delete()
+    def get_active_plot(self):
+        active_set_list = self.worksheet_plot_set.filter(active=True).values()
+        if len(active_set_list) > 0 :
+            return Worksheet_plot.get_deep_plot(id=active_set_list[0]['id'])
+        return None
 
-        plot = Worksheet_plot(title=title, type=type)
+    def get_plot(self):
+        return self.worksheet_plot_set.filter(worksheet=self)[0]
+
+    def set_plot(self, type):
+        #currently there is only of each plot type in a worksheet
+        for p in self.worksheet_plots_set.filter(worksheet=self, type=type) :
+            p.delete()
+
+        for p in self.worksheet_plots_set.filter(worksheet=self, active=True):
+            p.active = False
+            p.save()
+
+        plot = Worksheet_plot(type=type, worksheet=self, active=True)
         plot.save()
-        self.plot = plot
-        self.save();
-
-
-    def destroy(self):
-        self.delete()
 
 class Worksheet_Cohort_Manager(models.Manager):
     content = None
@@ -286,7 +290,14 @@ class Worksheet_cohort(models.Model):
             return_obj = {
                 'error'     : "you do not have access to update this worksheet",
             }
-        return return_obj
+            return return_obj
+
+    def toJSON(self):
+        j = {'id'        : self.id,
+             'cohort'    : {'id' : self.cohort.id, 'name' : self.cohort.name},
+             'worksheet' : self.worksheet_id
+             }
+        return j
 
     def destroy(self):
         self.delete()
@@ -364,9 +375,9 @@ class Worksheet_variable(models.Model):
     modified_date   = models.DateTimeField(auto_now=True)
     worksheet       = models.ForeignKey(Worksheet, null=False, blank=False)
     name            = models.CharField(max_length=2024, blank=False)
+    type            = models.CharField(max_length=1024, blank=True, null=True)
     url_code        = models.CharField(max_length=2024, blank=False)
-    project         = models.ForeignKey(Project, null=True, blank=True)
-    study           = models.ForeignKey(Study, null=True, blank=True)
+    feature         = models.ForeignKey(User_Feature_Definitions, null=True, blank=True)
     objects         = Worksheet_Variable_Manager()
 
     @classmethod
@@ -378,7 +389,7 @@ class Worksheet_variable(models.Model):
             #TODO delete all then resave not the most efficient
             variables = Worksheet_variable.objects.filter(worksheet=worksheet_model)
             for var in variables :
-                var.destroy();
+                var.delete();
 
             results = []
             for variable in variable_list :
@@ -396,42 +407,25 @@ class Worksheet_variable(models.Model):
     @classmethod
     def create(cls, worksheet, variable):
         if type(variable) is not dict :
-            dict_variable = {'project_id' : '-1', 'study_id' : '-1', 'name' : variable.name, 'code' : variable.code}
-            if variable.project :
-                dict_variable['project_id'] = variable.project.id
-            if variable.project :
-                dict_variable['study_id'] = variable.study.id
+            dict_variable = {'feature_id' : variable.feature_id, 'name' : variable.name, 'code' : variable.code}
             variable = dict_variable
 
-        if variable['project_id'] == '-1' and variable['study_id'] == '-1' :
-            worksheet_variable_model = cls.objects.create(worksheet_id = worksheet.id,
-                                                          name = variable['name'],
-                                                          url_code = variable['code'])
-            worksheet_variable_model.save()
+        worksheet_variable_model = cls.objects.create(worksheet_id = worksheet.id,
+                                                      name = variable['name'],
+                                                      url_code = variable['code'])
 
-            return_obj = {
-                'id'            : worksheet_variable_model.id,
-                'name'          : worksheet_variable_model.name,
-                'code'          : worksheet_variable_model.url_code,
-                'date_created'  : formats.date_format(worksheet_variable_model.date_created, 'DATETIME_FORMAT')
-            }
-        else:
-            project_model = Project.objects.get(id=variable['project_id'])
-            study_model = Study.objects.get(id=variable['study_id'])
-            worksheet_variable_model = cls.objects.create(worksheet_id = worksheet.id,
-                                                      name          = variable['name'],
-                                                      code          = variable['code'],
-                                                      project       = project_model,
-                                                      study         = study_model)
-            worksheet_variable_model.save()
+        return_obj = {
+            'id'            : worksheet_variable_model.id,
+            'name'          : worksheet_variable_model.name,
+            'code'          : worksheet_variable_model.url_code,
+            'date_created'  : formats.date_format(worksheet_variable_model.date_created, 'DATETIME_FORMAT')
+        }
 
-            return_obj = {
-                'id'            : worksheet_variable_model.id,
-                'name'          : worksheet_variable_model.name,
-                'project'       : worksheet_variable_model.project.id,
-                'study'         : worksheet_variable_model.study.id,
-                'date_created'  : formats.date_format(worksheet_variable_model.date_created, 'DATETIME_FORMAT')
-            }
+        if variable['feature_id'] is not None:
+            worksheet_variable_model.feature_id = variable['feature_id']
+            return_obj['feature_id'] = worksheet_variable_model.feature_id
+
+        worksheet_variable_model.save()
 
         return return_obj
 
@@ -450,8 +444,15 @@ class Worksheet_variable(models.Model):
             }
         return return_obj
 
-    def destroy(self):
-        self.delete()
+    def toJSON(self):
+        j = {'id'       : self.id,
+             'name'     : self.name,
+             'type'     : self.type,
+             'url_code' : self.url_code,
+             'feature'  : self.feature_id,
+             }
+        return j
+
 
 class Worksheet_Comment_Manager(models.Manager):
     content = None
@@ -487,12 +488,38 @@ class Worksheet_plot(models.Model):
     id              = models.AutoField(primary_key=True)
     date_created    = models.DateTimeField(auto_now_add=True)
     modified_date   = models.DateTimeField(auto_now=True)
-    title           = models.CharField(max_length=100,  null=False)
     color_by        = models.CharField(max_length=1024, null=True)
     type            = models.CharField(max_length=1024, null=True)
+    worksheet       = models.ForeignKey(Worksheet, blank=False, null=True)
+    active          = models.BooleanField(default=True)
     x_axis          = models.ForeignKey(Worksheet_variable, blank=True, null=True, related_name="worksheet_plot.x_axis")
     y_axis          = models.ForeignKey(Worksheet_variable, blank=True, null=True, related_name="worksheet_plot.y_axis")
+    cohort          = models.ForeignKey(Worksheet_cohort, blank=True, null=True, related_name="worksheet_plot.cohort")
     objects         = Worksheet_Plot_Manager()
+
+    @classmethod
+    def get_deep_plot(cls, id):
+        model = Worksheet_plot.objects.get(id=id)
+        return model
+
+    def toJSON(self):
+        j = {'id'        : self.id,
+             'color_by'  : self.color_by,
+             'type'      : self.type,
+             'worksheet' : self.worksheet_id,
+             'active'    : self.active,
+             }
+        if self.x_axis :
+            j['x_axis']  = self.x_axis.toJSON()
+
+        if self.y_axis :
+            j['y_axis']  = self.y_axis.toJSON()
+
+        if self.cohort :
+            j['cohort']  = self.cohort.toJSON()
+
+
+        return j
 
 @admin.register(Workbook)
 class WorkbookAdmin(admin.ModelAdmin):

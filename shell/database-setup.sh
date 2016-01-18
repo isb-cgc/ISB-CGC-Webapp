@@ -12,8 +12,7 @@ fi
 export PYTHONPATH=${HOMEROOT}/lib/:${HOMEROOT}/
 echo $PYTHONPATH
 echo "Running Migrations..."
-python ${HOMEROOT}/manage.py makemigrations
-python ${HOMEROOT}/manage.py migrate
+python ${HOMEROOT}/manage.py migrate --noinput
 
 echo "Creating Django User..."
 mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -e "GRANT SELECT, INSERT, UPDATE, DELETE ON $DATABASE_NAME.* TO \"django\"@\"localhost\" IDENTIFIED BY \"PASSWORD\""

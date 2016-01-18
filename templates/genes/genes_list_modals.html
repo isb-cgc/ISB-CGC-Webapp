@@ -1,4 +1,4 @@
-<!-- Delete Variable Favorite Modal -->
+<!-- Delete Gene Favorite Modal -->
 <div class="modal fade" id="delete-favorite-modal-{{ favorite.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-workbook-header" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -6,7 +6,7 @@
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title">Delete this variable favorite "{{ favorite.name|title }}"?</h4>
             </div>
-            <form id="delete-workbook" method="POST" action="{% url 'variable_fav_delete' favorite.id %}">
+            <form id="delete-workbook" method="POST" action="{% url 'gene_fav_delete' favorite.id %}">
                 {% csrf_token %}
                 <div class="modal-footer">
                     <input type="submit" value="Delete" class="btn btn-primary" />
@@ -23,14 +23,14 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Create a new workbook using the variable favorite "{{ favorite.name|title }}"</h4>
+                <h4 class="modal-title">Create a new workbook using the gene favorite "{{ favorite.name|title }}"</h4>
             </div>
-            <form id="edit-workbook" method="POST" action="{% url 'worksheet_create_with_variables' %}">
+            <form id="edit-workbook" method="POST" action="{% url 'worksheet_create_with_genes' %}">
                 {% csrf_token %}
                 <div class="modal-body">
                     <label for="name">Name (required)</label>
                     <input class="form-control" type="text" name="name" value="{{ favorite.name }} workbook"/>
-                    <input type="hidden" name="variable_id" value="{{ favorite.id }}" />
+                    <input type="hidden" name="gene_list_id" value="{{ favorite.id }}" />
                 </div>
                 <div class="modal-footer">
                     <input type="submit" value="Create Workbook" class="btn btn-primary" />
