@@ -69,7 +69,6 @@ import httplib2
 import os
 import sys
 from oauth2client.file import Storage
-from argparse import ArgumentParser
 
 CREDENTIALS_LOC_ENV = 'ISB_CREDENTIALS'
 DEFAULT_CREDENTIALS_LOC = os.path.join(os.path.expanduser("~"), '.isb_credentials')
