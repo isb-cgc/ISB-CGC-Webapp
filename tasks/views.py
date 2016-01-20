@@ -318,7 +318,6 @@ def CloudSQL_logging(request):
     filenames = get_binary_log_filenames()
     yesterdays_binary_log_file = filenames[-2]
     logger.info("Yesterday's binary log file: " + str(yesterdays_binary_log_file))
-    logger.info(settings.DATABASES['default'])
     arglist = ['mysqlbinlog',
                '--read-from-remote-server',
                yesterdays_binary_log_file,
@@ -343,7 +342,6 @@ def CloudSQL_logging(request):
     if i == 2:
         output = child.read()
         date_start_char = output.find('#1')
-        logger.info(output[:min(500, len(output))])
         if date_start_char > -1:
             date_str = output[date_start_char+1:date_start_char+7]
         else:
