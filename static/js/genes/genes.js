@@ -14,7 +14,7 @@ require.config({
         typeahead : 'libs/typeahead'
     },
     shim: {
-        'bootstrap': ['typeahead', 'jquery'],
+        'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
         'session_security': ['jquery'],
         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
@@ -58,9 +58,9 @@ require([
 
     //create bloodhound typeahead engine for gene suggestions
     var gene_suggestions = new Bloodhound({
-        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('symbol'),
+        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
         queryTokenizer: Bloodhound.tokenizers.whitespace,
-        prefetch: base_url + '/genes/suggest/a.json',
+        prefetch : base_url + '/genes/suggest/a.json',
         remote: {
             url: base_url + '/genes/suggest/%QUERY.json',
             wildcard: '%QUERY'
@@ -68,13 +68,14 @@ require([
     });
     gene_suggestions.initialize();
     function createTokenizer() {
+        // be aware bootstrap tokenfield requires 'value' as the datem attribute field : https://github.com/sliptree/bootstrap-tokenfield/issues/189
         geneListField.tokenfield({
             typeahead : [
                 null, {
-                    name : 'test',
                     source : gene_suggestions.ttAdapter(),
-                    display: 'symbol'
+                    display: 'value'
             }],
+            delimiter : " ",
             minLength: 2,
             tokens: geneFavs
         }).on('tokenfield:createdtoken', function (event) {
@@ -91,12 +92,11 @@ require([
 
             //  check whether user enter a valid gene name
             //var isValid = true;
-            validate_genes([event.attrs.value.toUpperCase()], function validCallback(result){
-                if(!result.event.attrs.value.toUpperCase()){
+            validate_genes([event.attrs.value], function validCallback(result){
+                if(!result[event.attrs.value]){
                     $(event.relatedTarget).addClass('invalid error');
                     $('.helper-text__invalid').show();
                 }
-
                 if ($('div.token.invalid.error').length < 1) {
                     $('.helper-text__invalid').hide();
                 }
@@ -104,18 +104,6 @@ require([
                     $('.helper-text__repeat').hide();
                 }
             })
-
-            //if (_.indexOf(genelist, event.attrs.value.toUpperCase()) < 0) {
-            //    $(event.relatedTarget).addClass('invalid error');
-            //    $('.helper-text__invalid').show();
-            //}
-
-            //if ($('div.token.invalid.error').length < 1) {
-            //    $('.helper-text__invalid').hide();
-            //}
-            //if ($('div.token.invalid.repeat').length < 1) {
-            //    $('.helper-text__repeat').hide();
-            //}
         }).on('tokenfield:removedtoken', function (event) {
             if ($('div.token.invalid.error').length < 1) {
                 $('.helper-text__invalid').hide();
@@ -124,7 +112,6 @@ require([
                 $('.helper-text__repeat').hide();
             }
         })
-;
     }
     createTokenizer();
 
@@ -241,12 +228,12 @@ require([
     }
 
     function validate_genes(list, cb){
-        if(string.length > 0){
+        if(list.length > 0){
             var csrftoken = get_cookie('csrftoken');
             $.ajax({
                 type        : 'POST',
                 dataType    :'json',
-                url         : base_url + '/genes/is_valid',
+                url         : base_url + '/genes/is_valid/',
                 data        : JSON.stringify({'genes-list' : list}),
                 beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                 success : function (data) {

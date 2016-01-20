@@ -21,9 +21,7 @@ from django.conf import settings
 # returns a json object keyed on each gene symbol with values of whether or not they are valid
 @login_required
 def check_gene_list_validity(request):
-    gene_list = request.POST.get("genes-list")
-    gene_list = [x.strip() for x in gene_list.split(',')]
-    gene_list = list(set(gene_list))
+    gene_list = json.loads(request.body)['genes-list']
     response = {}
     response['results'] = {}
     for gene in gene_list:
@@ -38,7 +36,7 @@ def suggest_gene_symbols(request, string):
     response = GeneSymbol.suggest_symbol(string)
     result = []
     for obj in response :
-        result.append({'symbol' : obj['symbol']})
+        result.append({'value' : obj['symbol']})
 
     return HttpResponse(json.dumps(result), status=200)
 
@@ -172,7 +170,8 @@ def gene_fav_delete(request, gene_fav_id):
 def gene_fav_save(request, gene_fav_id=0):
     name = request.POST.get("genes-name")
     gene_list = request.POST.get("genes-list")
-    gene_list = [x.strip() for x in gene_list.split(',')]
+
+    gene_list = [x.strip() for x in gene_list.split(' ')]
     gene_list = list(set(gene_list))
 
     if gene_fav_id :
