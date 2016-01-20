@@ -491,10 +491,8 @@ def save_cohort(request, workbook_id=None, worksheet_id=None, create_workbook=Fa
             if len(filter_obj):
                 data_url += '&filters=' + re.sub(r'\s+', '', urllib.quote( json.dumps(filter_obj) ))
 
-        print >> sys.stderr, "cohort data url: " + data_url
         result = urlfetch.fetch(data_url, deadline=60)
         items = json.loads(result.content)
-        print >> sys.stderr, "cohort result: " + json.dumps(result.content)
         items = items['items']
         for item in items:
             samples.append(item['sample_barcode'])
