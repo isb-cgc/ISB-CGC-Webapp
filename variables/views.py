@@ -245,32 +245,24 @@ def initialize_variable_selection_page(request,
     for fav in favorite_list :
         fav.variables = fav.get_variables()
 
-    displayed_common_variables = (
-        "vital_status",
-        "gender",
-        "age_at_initial_pathologic_diagnosis",
-        "SampleTypeCode",
-        "tumor_tissue_site",
-        "histological_type",
-        "prior_dx",
-        "tumor_status", # TODO don't know what this maps to in matadata_attr
-        "new_tumor_event_after_initial_treatment",
-        "histological_grade", # TODO is this histological_type?
-        "residual_tumor",
-        "tobacco_smoking_history",
-        "icd-10",
-        "icd-o-3_site",
-        "icd-o-3_histology"
-    )
-    common_variables = []
-    cursor = connection.cursor()
-    # TODO We only select CLIN variables because we don't have a BQ data provider for SAMP data
-    cursor.execute('SELECT attribute FROM metadata_attr WHERE spec = "CLIN" ORDER BY attribute ASC')
-    for row in cursor.fetchall():
-        if row[0] in displayed_common_variables:
-            common_variables.append(row[0])
-    cursor.close()
-    #stubbed data for populating the variable list model
+    #TODO common variables need to be refactored into an adaptive list based on common used
+    displayed_common_variables = [
+        {'name' : "vital_status",                          'code' : 'CLIN:vital_status'},
+        {'name' : "gender",                                'code' : 'CLIN:gender'},
+        {'name' : "age_at_initial_pathologic_diagnosis",   'code' : 'CLIN:age_at_initial_pathologic_diagnosis'},
+        {'name' : "tumor_tissue_site",                     'code' : 'CLIN:tumor_tissue_site'},
+        {'name' : "histological_type",                     'code' : 'CLIN:histological_type'},
+        {'name' : "prior_diagnosis",                       'code' : 'CLIN:prior_dx'},
+        {'name' : "tumor_status",                          'code' : 'CLIN:person_neoplasm_cancer_status'},
+        {'name' : "new_tumor_event_after_initial_treatment", 'code' : 'CLIN:new_tumor_event_after_initial_treatment'},
+        {'name' : "histological_grade",                    'code' : 'CLIN:neoplasm_histologic_grade'},
+        {'name' : "residual_tumor",                        'code' : 'CLIN:residual_tumor'},
+        {'name' : "tobacco_smoking_history",               'code' : 'CLIN:tobacco_smoking_history'},
+        {'name' : "icd-10",                                'code' : 'CLIN:icd_10'},
+        {'name' : "icd-o-3_site",                          'code' : 'CLIN:icd_o_3_site'},
+        {'name' : "icd-o-3_histology",                     'code' : 'CLIN:icd_o_3_histology'}
+    ]
+    common_variables = displayed_common_variables
     TCGA_project    = {"id" : -1, "study" : {"id" :-1, "name" : ""}, "name" : "TCGA"}
     common_project  = {"id" : -1, "study" : {"id" :-1, "name" : ""}, "name" : "Common", "variables" : common_variables}
 
