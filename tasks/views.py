@@ -318,11 +318,12 @@ def CloudSQL_logging(request):
     filenames = get_binary_log_filenames()
     yesterdays_binary_log_file = filenames[-2]
     logger.info("Yesterday's binary log file: " + str(yesterdays_binary_log_file))
+    logger.info(settings.DATABASES['default'])
     arglist = ['mysqlbinlog',
                '--read-from-remote-server',
                yesterdays_binary_log_file,
                '--host',
-               settings.DATABASES['default']['host'],
+               settings.DATABASES['default']['HOST'],
                '--user',
                settings.DATABASES['default']['USER'],
                '--base64-output=DECODE-ROWS',
