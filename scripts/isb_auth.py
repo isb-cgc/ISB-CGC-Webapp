@@ -31,8 +31,16 @@ to access the API.
 
 2. Python
     import isb_auth
+    isb_auth.get_credentials()
 
-    isb_auth.main()
+    # optional: to store credentials in a different location
+    from oauth2client.file import Storage
+    import isb_auth
+    import os
+
+    storage_file = os.path.join(os.path.expanduser("~"), "{USER_CREDENTIALS_FILE_NAME}")
+    storage = Storage(storage_file)
+    isb_auth.get_credentials(storage=storage)
 '''
 
 from argparse import ArgumentParser
