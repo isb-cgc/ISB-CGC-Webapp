@@ -12,10 +12,33 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.views.decorators.csrf import csrf_protect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from models import GeneFavorite
+from models import GeneFavorite, GeneSymbol
 from workbooks.models import Workbook, Worksheet
 from django.contrib.auth.models import User
 from django.conf import settings
+
+# validates whether each gene is a list of gene symbols are known gene symbols
+# returns a json object keyed on each gene symbol with values of whether or not they are valid
+@login_required
+def check_gene_list_validity(request):
+    gene_list = json.loads(request.body)['genes-list']
+    response = {}
+    response['results'] = {}
+    for gene in gene_list:
+        response['results'][gene] = GeneSymbol.is_gene_valid(gene)
+
+    return HttpResponse(json.dumps(response), status=200)
+
+# based on input entered, return a list of gene symbol suggestions
+# returns a json array of gene symbol suggestions
+@login_required
+def suggest_gene_symbols(request, string):
+    response = GeneSymbol.suggest_symbol(string)
+    result = []
+    for obj in response :
+        result.append({'value' : obj['symbol']})
+
+    return HttpResponse(json.dumps(result), status=200)
 
 @login_required
 def gene_fav_list_for_new_workbook(request):
@@ -53,6 +76,7 @@ def gene_fav_list(request, workbook_id=0, worksheet_id=0, new_workbook=0):
         else :
             template = 'genes/genes_edit.html'
             context['genes'] = []
+            context['base_url'] = settings.BASE_URL
 
     return render(request, template, context)
 
@@ -64,7 +88,7 @@ def gene_fav_detail_for_new_workbook(request, gene_fav_id):
 def gene_fav_detail(request, gene_fav_id, workbook_id=0, worksheet_id=0, new_workbook=0):
     template = 'genes/genes_detail.html'
     context = {}
-
+    context['base_url'] = settings.BASE_URL
     if new_workbook :
         context['new_workbook'] = True
 
@@ -96,6 +120,7 @@ def gene_fav_edit_for_new_workbook(request):
 def gene_fav_edit(request, gene_fav_id=0, workbook_id=0, worksheet_id=0, new_workbook=0):
     template = 'genes/genes_edit.html'
     context = {'genes' : [] }
+    context['base_url'] = settings.BASE_URL
 
     if new_workbook :
         context['new_workbook'] = True
@@ -145,7 +170,8 @@ def gene_fav_delete(request, gene_fav_id):
 def gene_fav_save(request, gene_fav_id=0):
     name = request.POST.get("genes-name")
     gene_list = request.POST.get("genes-list")
-    gene_list = [x.strip() for x in gene_list.split(',')]
+
+    gene_list = [x.strip() for x in gene_list.split(' ')]
     gene_list = list(set(gene_list))
 
     if gene_fav_id :

@@ -8,6 +8,7 @@
 {% block page_name %}genes_edit{% endblock %}
 
 {% block page_header %}
+<link type="text/css" rel="stylesheet" href="{% static 'css/token-typeahead.css' %}" />
 <div class="container">
     <ol class="breadcrumb">
         <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
@@ -98,6 +99,7 @@
     </section>
 </div>
 <script type="text/javascript">
+    var base_url = '{{ base_url|safe }}';
     {% if gene_favorite %}
         var gene_fav = { genes : {{ genes }} };
     {% else %}

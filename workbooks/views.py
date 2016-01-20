@@ -147,8 +147,8 @@ def workbook(request, workbook_id=0):
 
                     # Check all variables are from projects owned by the user
                     for variable in worksheet.get_variables():
-                        if variable.project: #project will be null if the variable is from TCGA
-                            if variable.project.owner_id != request.user.id and not variable.project.is_public:
+                        if variable.feature: #feature will be null if the variable is from TCGA
+                            if variable.feature.study.project.owner_id != request.user.id and not variable.feature.study.project.is_public:
                                 is_shareable = False
                                 break
 
