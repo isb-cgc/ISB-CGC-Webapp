@@ -27,6 +27,7 @@ from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.contrib.auth.models import User as Django_User
 import django
 import MySQLdb
+import json
 
 from metadata import MetadataItem, IncomingMetadataItem
 
@@ -82,50 +83,9 @@ class ReturnJSON(messages.Message):
     msg = messages.StringField(1)
 
 
-# class User(messages.Message):
-#     id = messages.StringField(1)
-#     last_login = messages.StringField(2)
-#     is_superuser = messages.StringField(3)
-#     username = messages.StringField(4)
-#     first_name = messages.StringField(5)
-#     last_name = messages.StringField(6)
-#     email = messages.StringField(7)
-#     is_staff = messages.StringField(8)
-#     is_active = messages.StringField(9)
-#     date_joined = messages.StringField(10)
-#
-#
-# class UserList(messages.Message):
-#     items = messages.MessageField(User, 1, repeated=True)
-
-
-# class SavedSearch(messages.Message):
-#     id = messages.StringField(1)
-#     search_url = messages.StringField(2)
-#     barcodes = messages.StringField(3)
-#     datatypes = messages.StringField(4)
-#     last_date_saved = messages.StringField(5)
-#     user_id = messages.StringField(6)
-#     name = messages.StringField(7)
-#     parent_id = messages.StringField(8)
-#     active = messages.StringField(9)
-#
-#
-# class SavedSearchList(messages.Message):
-#     items = messages.MessageField(SavedSearch, 1, repeated=True)
-
-
-# class IdList(messages.Message):
-#     ids = messages.IntegerField(1, repeated=True)   # List of ids
-#     update = messages.IntegerField(2)               # Id of object to update
-#     name = messages.StringField(3)                  # Potential name for new object or updated object
-#     user_id = messages.IntegerField(4)              # User Id
-
-
 class FilterDetails(messages.Message):
     name = messages.StringField(1)
     value = messages.StringField(2)
-
 
 class Cohort(messages.Message):
     id = messages.StringField(1)
@@ -138,11 +98,12 @@ class Cohort(messages.Message):
     source_notes = messages.StringField(8)
     parent_id = messages.IntegerField(9)
     filters = messages.MessageField(FilterDetails, 10, repeated=True)
+    num_patients = messages.StringField(11)
+    num_samples = messages.StringField(12)
 
 class CohortsList(messages.Message):
     items = messages.MessageField(Cohort, 1, repeated=True)
     count = messages.IntegerField(2)
-
 
 class CohortPatientsSamplesList(messages.Message):
     patients = messages.StringField(1, repeated=True)
@@ -152,13 +113,11 @@ class CohortPatientsSamplesList(messages.Message):
     cohort_id = messages.IntegerField(5)
     error = messages.StringField(6)
 
-
 class PatientDetails(messages.Message):
     clinical_data = messages.MessageField(MetadataItem, 1)
     samples = messages.StringField(2, repeated=True)
     aliquots = messages.StringField(3, repeated=True)
     error = messages.StringField(4)
-
 
 class DataDetails(messages.Message):
     SampleBarcode = messages.StringField(1)
@@ -178,7 +137,6 @@ class DataDetails(messages.Message):
     SDRFFileName = messages.StringField(15)
     SecurityProtocol = messages.StringField(16)
 
-
 class SampleDetails(messages.Message):
     biospecimen_data = messages.MessageField(MetadataItem, 1)
     aliquots = messages.StringField(2, repeated=True)
@@ -187,22 +145,9 @@ class SampleDetails(messages.Message):
     data_details_count = messages.IntegerField(5)
     error = messages.StringField(6)
 
-
 class DataFileNameKeyList(messages.Message):
     datafilenamekeys = messages.StringField(1, repeated=True)
     count = messages.IntegerField(2)
-
-
-# todo: replace this with class Cohort?
-class SavedCohort(messages.Message):
-    id = messages.StringField(1)
-    name = messages.StringField(2)
-    active = messages.StringField(3)
-    last_date_saved = messages.StringField(4)
-    user_id = messages.StringField(5)
-    filters = messages.MessageField(FilterDetails, 6, repeated=True)
-    num_patients = messages.StringField(7)
-    num_samples = messages.StringField(8)
 
 
 Cohort_Endpoints = endpoints.api(name='cohort_api', version='v1', description="Get information about "
@@ -893,7 +838,7 @@ class Cohort_Endpoints_API(remote.Service):
                                                 name=messages.StringField(2, required=True),
                                                 token=messages.StringField(3)
                                                 )
-    @endpoints.method(POST_RESOURCE, SavedCohort,
+    @endpoints.method(POST_RESOURCE, Cohort,
                       path='save_cohort', http_method='POST', name='cohort.save')
     def save_cohort(self, request):
         """
@@ -1003,14 +948,13 @@ class Cohort_Endpoints_API(remote.Service):
             bcs = BigQueryCohortSupport(project_id, cohort_settings.dataset_id, cohort_settings.table_id)
             bcs.add_cohort_with_sample_barcodes(created_cohort.id, sample_barcodes)
 
-            return SavedCohort(id=str(created_cohort.id),
-                               name=cohort_name,
-                               active='True',
-                               last_date_saved=str(datetime.utcnow()),
-                               user_id=str(user_id),
-                               num_patients=str(len(patient_barcodes)),
-                               num_samples=str(len(sample_barcodes))
-                               )
+            return Cohort(id=str(created_cohort.id),
+                          name=cohort_name,
+                          last_date_saved=str(datetime.utcnow()),
+                          num_patients=str(len(patient_barcodes)),
+                          num_samples=str(len(sample_barcodes))
+                          )
+
         else:
             raise endpoints.UnauthorizedException("Authentication failed.")
 
@@ -1070,6 +1014,7 @@ class Cohort_Endpoints_API(remote.Service):
                     "or you do not have owner or reader permissions on this cohort." % cohort_id)
         else:
             return_message = "Unsuccessful authentication."
+            # todo: when endpoints.UnauthorizedException is fixed, add that here.
 
         return ReturnJSON(msg=return_message)
 
@@ -1176,14 +1121,14 @@ class Cohort_Endpoints_API(remote.Service):
             query_tuple = (sample_barcode,)
 
         if platform:
-            query_str += ' and Platform=%s '
+            query_str += ' and metadata_data.Platform=%s '
             query_tuple += (platform,)
 
         if pipeline:
-            query_str += ' and Pipeline=%s '
+            query_str += ' and metadata_data.Pipeline=%s '
             query_tuple += (pipeline,)
 
-        query_str += ' GROUP BY DataFileNameKey'
+        query_str += ' GROUP BY metadata_data.DataFileNameKey'
 
 
         try:
@@ -1213,3 +1158,72 @@ class Cohort_Endpoints_API(remote.Service):
         finally:
             if cursor: cursor.close()
             if db and db.open: db.close()
+
+
+
+    POST_RESOURCE = endpoints.ResourceContainer(IncomingMetadataItem)
+    @endpoints.method(POST_RESOURCE, CohortPatientsSamplesList,
+                      path='preview_cohort', http_method='POST', name='cohort.preview')
+    def preview_cohort(self, request):
+        """
+        Previews a cohort. Takes a JSON object in the request body to use as the cohort's filters.
+        :return: Information about the cohort, including the number of patients and the number
+        of samples in that cohort.
+        """
+        print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+        patient_cursor = None
+        sample_cursor = None
+        db = None
+
+        keys = [k for k in IncomingMetadataItem.__dict__.keys() if not k.startswith('_') and request.__getattribute__(k)]
+        values = (request.__getattribute__(k) for k in keys)
+        query_dict = dict(zip(keys, values))
+
+        if not query_dict:
+            sorted_keys = sorted(k for k in IncomingMetadataItem.__dict__.keys() if not k.startswith('_'))
+            raise endpoints.BadRequestException(
+                "You must specify at least one filter to preview a cohort. "
+                "Possible filters are: {}".format(sorted_keys))
+
+        patient_query_str = 'SELECT DISTINCT(IF(ParticipantBarcode="", LEFT(SampleBarcode,12), ParticipantBarcode)) ' \
+                            'AS ParticipantBarcode ' \
+                            'FROM metadata_samples '
+
+        sample_query_str = 'SELECT SampleBarcode ' \
+                           'FROM metadata_samples '
+
+        value_tuple = ()
+        if len(query_dict) > 0:
+            where_clause = build_where_clause(query_dict)
+            patient_query_str += ' WHERE ' + where_clause['query_str']
+            sample_query_str += ' WHERE ' + where_clause['query_str']
+            value_tuple = where_clause['value_tuple']
+
+        sample_query_str += ' GROUP BY SampleBarcode'
+
+        patient_barcodes = []
+        sample_barcodes = []
+        try:
+            db = sql_connection()
+            patient_cursor = db.cursor(MySQLdb.cursors.DictCursor)
+            patient_cursor.execute(patient_query_str, value_tuple)
+            for row in patient_cursor.fetchall():
+                patient_barcodes.append(row['ParticipantBarcode'])
+
+            sample_cursor = db.cursor(MySQLdb.cursors.DictCursor)
+            sample_cursor.execute(sample_query_str, value_tuple)
+            for row in sample_cursor.fetchall():
+                sample_barcodes.append(row['SampleBarcode'])
+
+        except (IndexError, TypeError), e:
+            logger.warn(e)
+            raise endpoints.NotFoundException("Error retrieving samples or patients: {}".format(e))
+        finally:
+            if patient_cursor: patient_cursor.close()
+            if sample_cursor: sample_cursor.close()
+            if db and db.open: db.close()
+
+        return CohortPatientsSamplesList(patients=patient_barcodes,
+                                          patient_count=len(patient_barcodes),
+                                          samples=sample_barcodes,
+                                          sample_count=len(sample_barcodes))
