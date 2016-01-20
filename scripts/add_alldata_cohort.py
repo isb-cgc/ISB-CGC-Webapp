@@ -55,6 +55,10 @@ class BigQueryCohortSupport(object):
         {
             "name": "aliquot_barcode",
             "type": "STRING"
+        },
+        {
+            "name": "study_id",
+            "type": "INTEGER"
         }
     ]
 
