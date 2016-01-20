@@ -322,7 +322,7 @@ def CloudSQL_logging(request):
                '--read-from-remote-server',
                yesterdays_binary_log_file,
                '--host',
-               settings.IPV4,
+               settings.DATABASES['default']['host'],
                '--user',
                settings.DATABASES['default']['USER'],
                '--base64-output=DECODE-ROWS',
@@ -333,6 +333,7 @@ def CloudSQL_logging(request):
                '--ssl-cert=' + settings.DATABASES['default']['OPTIONS']['ssl']['cert'],
                '--ssl-key=' + settings.DATABASES['default']['OPTIONS']['ssl']['key']
                ]
+
 
     child = pexpect.spawn(' '.join(arglist))
     child.expect('Enter password:')
