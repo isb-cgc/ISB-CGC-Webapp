@@ -105,3 +105,27 @@ class Gene(models.Model):
     id            = models.AutoField(primary_key=True)
     name          = models.TextField(null=False, blank=False)
     gene_favorite = models.ForeignKey(GeneFavorite, null=False, blank=False)
+
+class GeneSymbol_Manager(models.Manager):
+    content = None
+
+#used solely for list of gene symbols
+class GeneSymbol(models.Model):
+    id     = models.AutoField(primary_key=True)
+    symbol = models.CharField(max_length=255, null=False, blank=False, db_index=True)
+    objects = GeneSymbol_Manager()
+
+     #returns a boolean on whether the string is valid
+    @classmethod
+    def is_gene_valid(cls, string):
+        result = cls.objects.filter(symbol=string)
+        if result.count() > 0:
+            return True
+        else:
+            return False
+
+    #returns a list of gene symbol suggestions
+    @classmethod
+    def suggest_symbol(cls, string):
+        results = cls.objects.filter(symbol__startswith=string)[:10].values('symbol')
+        return results

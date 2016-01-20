@@ -98,6 +98,7 @@
     </section>
 </div>
 <script type="text/javascript">
+    var base_url = '{{ base_url|safe }}';
     {% if gene_favorite %}
         var gene_fav = { genes : {{ genes }} };
     {% else %}

@@ -9,16 +9,28 @@ require.config({
         assetscore: 'js/libs/assets.core',
         assetsresponsive: 'js/libs/assets.responsive',
         base: 'js/base',
-        tokenfield: 'libs/bootstrap-tokenfield.min'
+        tokenfield: 'libs/bootstrap-tokenfield.min',
+        bloodhound: 'libs/bloodhound',
+        typeahead : 'libs/typeahead'
     },
     shim: {
-        'bootstrap': ['jquery'],
+        'bootstrap': ['typeahead', 'jquery'],
         'jqueryui': ['jquery'],
         'session_security': ['jquery'],
         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
         'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
         'underscore': {exports: '_'},
-        'tokenfield': ['jquery', 'jqueryui']
+        'tokenfield': ['jquery', 'jqueryui'],
+        'typeahead':{
+            deps: ['jquery'],
+            init: function ($) {
+                return require.s.contexts._.registry['typeahead.js'].factory( $ );
+            }
+        },
+        'bloodhound': {
+           deps: ['jquery'],
+           exports: 'Bloodhound'
+        }
     }
 });
 
@@ -27,16 +39,16 @@ require([
     'jqueryui',
     'bootstrap',
     'session_security',
+    'bloodhound',
+    'typeahead',
     'underscore',
     'assetscore',
     'assetsresponsive',
     'base',
     'tokenfield'
-], function($, jqueryui, bootstrap, session_security, _) {
+], function($, jqueryui, bootstrap, session_security, Bloodhound, typeahead, _) {
     'use strict';
 
-    // Temp valid gene list
-    var genelist = ['PTEN', 'PIK3CA', 'AKT', 'MTOR', 'BRCA1'];
     var geneListField = $('#paste-in-genes');
     var geneFavs = (gene_fav) ? gene_fav.genes : [];
 
@@ -44,14 +56,25 @@ require([
         geneFavs = geneFavs.concat(uploaded_genes);
     }
 
+    //create bloodhound typeahead engine for gene suggestions
+    var gene_suggestions = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('symbol'),
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        prefetch: base_url + '/genes/suggest/a.json',
+        remote: {
+            url: base_url + '/genes/suggest/%QUERY.json',
+            wildcard: '%QUERY'
+        }
+    });
+    gene_suggestions.initialize();
     function createTokenizer() {
         geneListField.tokenfield({
-            autocomplete: {
-                source: genelist,
-                delay: 100,
-                appendTo: "#tokenfield-holder"
-            },
-            showAutocompleteOnFocus: true,
+            typeahead : [
+                null, {
+                    name : 'test',
+                    source : gene_suggestions.ttAdapter(),
+                    display: 'symbol'
+            }],
             minLength: 2,
             tokens: geneFavs
         }).on('tokenfield:createdtoken', function (event) {
@@ -67,18 +90,32 @@ require([
             });
 
             //  check whether user enter a valid gene name
-            var isValid = true;
-            if (_.indexOf(genelist, event.attrs.value.toUpperCase()) < 0) {
-                $(event.relatedTarget).addClass('invalid error');
-                $('.helper-text__invalid').show();
-            }
+            //var isValid = true;
+            validate_genes([event.attrs.value.toUpperCase()], function validCallback(result){
+                if(!result.event.attrs.value.toUpperCase()){
+                    $(event.relatedTarget).addClass('invalid error');
+                    $('.helper-text__invalid').show();
+                }
 
-            if ($('div.token.invalid.error').length < 1) {
-                $('.helper-text__invalid').hide();
-            }
-            if ($('div.token.invalid.repeat').length < 1) {
-                $('.helper-text__repeat').hide();
-            }
+                if ($('div.token.invalid.error').length < 1) {
+                    $('.helper-text__invalid').hide();
+                }
+                if ($('div.token.invalid.repeat').length < 1) {
+                    $('.helper-text__repeat').hide();
+                }
+            })
+
+            //if (_.indexOf(genelist, event.attrs.value.toUpperCase()) < 0) {
+            //    $(event.relatedTarget).addClass('invalid error');
+            //    $('.helper-text__invalid').show();
+            //}
+
+            //if ($('div.token.invalid.error').length < 1) {
+            //    $('.helper-text__invalid').hide();
+            //}
+            //if ($('div.token.invalid.repeat').length < 1) {
+            //    $('.helper-text__repeat').hide();
+            //}
         }).on('tokenfield:removedtoken', function (event) {
             if ($('div.token.invalid.error').length < 1) {
                 $('.helper-text__invalid').hide();
@@ -86,7 +123,8 @@ require([
             if ($('div.token.invalid.repeat').length < 1) {
                 $('.helper-text__repeat').hide();
             }
-        });
+        })
+;
     }
     createTokenizer();
 
@@ -200,6 +238,27 @@ require([
             }
         }
         return cookieValue;
+    }
+
+    function validate_genes(list, cb){
+        if(string.length > 0){
+            var csrftoken = get_cookie('csrftoken');
+            $.ajax({
+                type        : 'POST',
+                dataType    :'json',
+                url         : base_url + '/genes/is_valid',
+                data        : JSON.stringify({'genes-list' : list}),
+                beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+                success : function (data) {
+                    if(!data.error) {
+                        cb(data.results);
+                    }
+                },
+                error: function () {
+                    console.log('Failed to add gene_lists to workbook');
+                }
+            });
+        }
     }
 
     function checkUploadedGeneListAgainstGeneIdentifier(gene_list){
