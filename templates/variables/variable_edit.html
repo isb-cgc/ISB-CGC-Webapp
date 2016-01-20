@@ -251,13 +251,13 @@
                     </div>
                     <div class="panel-body">
                         {% if existing_variable_list %}
-                            {% for variable in existing_variable_list.variable_set %}
-                            <span class="selected-variable" data-name="{{ variable.name }}" data-code="{{ variable.code }}" data-feature-id="{{ variable.feature_id }}">
-                                <a class="delete-x filter-label label label-default">
-                                    {{ variable.name }}
-                                    <i class="fa fa-times"></i>
-                                </a>
-                            </span>
+                            {% for variable in existing_variable_list.variable_set.all %}
+                                <span class="selected-variable" data-name="{{ variable.name }}" data-code="{{ variable.code }}" data-feature-id="{{ variable.feature_id }}">
+                                    <a class="delete-x filter-label label label-default">
+                                        {{ variable.name }}
+                                        <i class="fa fa-times"></i>
+                                    </a>
+                                </span>
                             {% endfor %}
                         {% else %}
                             <p class="help-block">Select your favorite variables from the left panel.</p>
