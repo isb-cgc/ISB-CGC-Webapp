@@ -343,7 +343,7 @@ def CloudSQL_logging(request):
         output = child.read()
         date_start_char = output.find('#1')
         logger.info(output[:min(500, len(output))])
-        if date_start_char:  # if date_star_char is not zero
+        if date_start_char > -1:
             date_str = output[date_start_char+1:date_start_char+7]
         else:
             utc_now = datetime.datetime.utcnow()
