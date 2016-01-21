@@ -279,7 +279,7 @@ define(['jquery'], function($) {
                 var base_feature_search_url = base_api_url + '/_ah/api/feature_type_api/v1/feature_search?';
                 var feature_search_url = base_feature_search_url + "datatype=" + datatype;
                 for (var i in filters) {
-                    feature_search_url += "&" + filters[i].filter + "=" + filters[i].value + ",";
+                    feature_search_url += "&" + filters[i].filter + "=" + filters[i].value; //+ ",";
                 }
                 feature_search_url = feature_search_url.substring(0, feature_search_url.length - 1);
 
@@ -314,11 +314,10 @@ define(['jquery'], function($) {
             });
 
             // Select the options we're interested in
-            var options = $(obj).parents('.field-search').find('.'+value+'-options').toggleClass('hidden');
-
-            console.log("datatype_selector_change_callback: I don't think this is called");
+            var options = $(obj).parent();
 
             // For each option, if it requires and autocomplete box, initialize it
+            console.log(options.find('select.field-options'));
             options.find('select.field-options').each(function() {
                 if ($(this).hasClass('select2')) {
                     var datatype = value;
@@ -332,14 +331,17 @@ define(['jquery'], function($) {
                                 return { keyword: params.term, page: params.page };
                             },
                             processResults: function (data, page) {
-                                var items = $.map(data['values'], function (item) {
-                                    var obj = {};
-                                    obj.id = item;
-                                    obj.text = item;
-                                    return obj;
-                                });
-                                return {results: items};
-
+                                if(data['values']) {
+                                    var items = $.map(data['values'], function (item) {
+                                        var obj = {};
+                                        obj.id = item;
+                                        obj.text = item;
+                                        return obj;
+                                    });
+                                    return {results: items};
+                                } else {
+                                    return {results: []};
+                                }
                             }
                         },
                         id: function (item) { return item['id']; },
@@ -354,7 +356,7 @@ define(['jquery'], function($) {
             // If it's clinical treat it differently and only use the search-term-field autocomplete
             if (value == 'CLIN') {
                 // Initialize clinical search box
-                $(obj).parents('.field-search').find('.search-field.'+value+'-options .search-term-field').select2({
+               $(obj).parent().find('.search-term-field').select2({
                     ajax: {
                         url: feature_search_url,
                         dataType: 'json',
@@ -362,13 +364,18 @@ define(['jquery'], function($) {
                             return { keyword: params.term, page: params.page };
                         },
                         processResults: function (data, page) {
-                            var items = $.map(data['items'], function (item) {
-                                var obj = {};
-                                obj.id = item['internal_feature_id'];
-                                obj.text = item['label'];
-                                return obj;
-                            });
-                            return {results: items};
+                            if(data['values']) {
+                                var items = $.map(data['items'], function (item) {
+                                    var obj = {};
+                                    obj.id = item['internal_feature_id'];
+                                    obj.text = item['label'];
+                                    return obj;
+                                });
+                                return {results: items};
+                            } else {
+                                return {results: []};
+                            }
+
 
                         }
                     },
@@ -397,7 +404,7 @@ define(['jquery'], function($) {
                         }
                     },
                     error: function(e) {
-                        console.log(e['reponseText']);
+                        //console.log(e['responseText']);
                     }
                 });
             }
@@ -449,7 +456,6 @@ define(['jquery'], function($) {
             $(obj).parents('.field-search').find('button.select-field').attr('data-label', $(obj).find('select option:selected').html());
         },
         datatype_selector_change_callback: function(obj) {
-            console.log(obj)
             var value = $(obj).val();
             var helpers = this;
             // Reset feature search url to new datatype
@@ -464,8 +470,6 @@ define(['jquery'], function($) {
 
             // Select the options we're interested in
             var options = $(obj).parents('.field-search').find('.'+value+'-options').toggleClass('hidden');
-
-            console.log("datatype_selector_change_callback: I don't think this is called");
 
             // For each option, if it requires and autocomplete box, initialize it
             options.find('select.field-options').each(function() {
