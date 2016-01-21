@@ -12,6 +12,7 @@ from django.http import HttpResponse, JsonResponse
 from models import Cohort, Workbook, Worksheet, Worksheet_comment, Worksheet_variable, Worksheet_gene, Worksheet_cohort, Worksheet_plot
 from variables.models import VariableFavorite, Variable
 from genes.models import GeneFavorite
+from analysis.models import Analysis
 from projects.models import Project
 from sharing.service import create_share
 from django.conf import settings
@@ -80,25 +81,48 @@ def workbook_create_with_project(request):
     #add every variable within the model
     for study in project_model.study_set.all().filter(active=True) :
         for var in study.user_feature_definitions_set.all() :
-            Worksheet_variable.objects.create(worksheet_id = worksheet_model.id,
+            work_var = Worksheet_variable.objects.create(worksheet_id = worksheet_model.id,
                                               name         = var.feature_name,
-                                              code         = var.bq_map_id,
-                                              project      = project_model,
-                                              study        = study)
-            Worksheet_variable.save()
+                                              url_code     = var.bq_map_id,
+                                              feature_id   = var.id)
+            work_var.save()
 
     redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_model.id})
     return redirect(redirect_url)
 
-#TODO not complete
+@login_required
+def workbook_create_with_variables(request):
+    var_list_id = request.POST.get('variable_list_id')
+    var_list_model = VariableFavorite.objects.get(id=var_list_id)
+
+    workbook_model = Workbook.create(name="Untitled Workbook", description="this is an untitled workbook with all variables of variable favorite list \"" + var_list_model.name + "\" added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
+    worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
+
+    for var in var_list_model.get_variables() :
+        work_var = Worksheet_variable.objects.create(worksheet_id = worksheet_model.id,
+                                          name         = var.name,
+                                          url_code     = var.code,
+                                          feature_id   = var.feature_id)
+
+        work_var.save()
+
+    redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_model.id})
+    return redirect(redirect_url)
+
 @login_required
 def workbook_create_with_analysis(request):
     analysis_type   = request.POST.get('analysis')
-    workbook_model  = Workbook.create(name="Untitled Workbook", description="this is an untitled workbook with a \"" + analysis_type + "\" plot added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
-    worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
-    worksheet_model.set_plot(title="missing a title", type=analysis_type)
 
-    redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_model.id})
+    allowed_types = Analysis.get_types()
+    redirect_url = reverse('sample_analyses')
+    for type in allowed_types :
+        if analysis_type == type['name'] :
+            workbook_model  = Workbook.create(name="Untitled Workbook", description="this is an untitled workbook with a \"" + analysis_type + "\" plot added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
+            worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
+            worksheet_model.set_plot(type=analysis_type)
+            redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_model.id})
+            break
+
     return redirect(redirect_url)
 
 @login_required
@@ -159,13 +183,8 @@ def workbook(request, workbook_id=0):
             if workbook_model.owner.id != request.user.id and not workbook_model.is_public:
                 shared = request.user.shared_resource_set.get(workbook__id=workbook_id)
 
-            plot_types = [{'name' : 'Bar Chart'},
-                          {'name' : 'Histogram'},
-                          {'name' : 'Scatter Plot'},
-                          {'name' : 'Violin Plot'},
-                          {'name' : 'Violin Plot with axis swap'},
-                          {'name' : 'Cubby Hole Plot'}]
-                         # Todo {'name' : 'SeqPeak'}]
+            plot_types = Analysis.get_types()
+
             return render(request, template, {'workbook'    : workbook_model,
                                               'is_shareable': is_shareable,
                                               'shared'      : shared,
@@ -225,10 +244,6 @@ def worksheet(request, workbook_id=0, worksheet_id=0):
             redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_id})
 
     return redirect(redirect_url)
-
-@login_required
-def workbook_create_with_variables(request):
-    return worksheet_variables(request=request)
 
 @login_required
 def worksheet_variables(request, workbook_id=0, worksheet_id=0, variable_id=0):

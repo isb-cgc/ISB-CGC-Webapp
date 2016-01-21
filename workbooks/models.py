@@ -221,10 +221,10 @@ class Worksheet(models.Model):
 
     def set_plot(self, type):
         #currently there is only of each plot type in a worksheet
-        for p in self.worksheet_plots_set.filter(worksheet=self, type=type) :
+        for p in self.worksheet_plot_set.filter(worksheet=self, type=type) :
             p.delete()
 
-        for p in self.worksheet_plots_set.filter(worksheet=self, active=True):
+        for p in self.worksheet_plot_set.filter(worksheet=self, active=True):
             p.active = False
             p.save()
 
@@ -443,6 +443,7 @@ class Worksheet_variable(models.Model):
                 'error'     : "you do not have access to update this worksheet",
             }
         return return_obj
+
 
     def toJSON(self):
         j = {'id'       : self.id,
