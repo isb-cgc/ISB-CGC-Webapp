@@ -101,6 +101,9 @@ class FeatureDefinitionSearcherFactory(object):
             return MIRNSearcher()
         elif datatype == GNAB_FEATURE_TYPE:
             return GNABSearcher()
+        #TODO build a full search on all features
+        #elif datatype == ALL:
+        #    return FullSearcher()
         raise InvalidDataTypeException("Invalid datatype '{datatype}'".format(datatype=datatype))
 
 FeatureAccessEndpointsAPI = endpoints_api(name='feature_type_api', version='v1',

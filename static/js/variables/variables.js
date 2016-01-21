@@ -107,6 +107,7 @@ require([
             }
         });
 
+        console.log(parent[0]);
         vizhelpers.get_variable_field_options(datatype, filters, function(options){
             var selectbox = parent.parent('.search-field').find('.feature-search .search-term-field');
             selectbox.empty();

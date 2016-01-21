@@ -317,7 +317,6 @@ define(['jquery'], function($) {
             var options = $(obj).parent();
 
             // For each option, if it requires and autocomplete box, initialize it
-            console.log(options.find('select.field-options'));
             options.find('select.field-options').each(function() {
                 if ($(this).hasClass('select2')) {
                     var datatype = value;
@@ -348,7 +347,8 @@ define(['jquery'], function($) {
                         escapeMarkup: function (markup) { return markup; },
                         minimumInputLength: 1,
                         templateResult: helpers.select2_formatting,
-                        templateSelection: helpers.select2_formatting
+                        templateSelection: helpers.select2_formatting,
+                        width: '100%'
                     });
                 }
             });
@@ -356,7 +356,7 @@ define(['jquery'], function($) {
             // If it's clinical treat it differently and only use the search-term-field autocomplete
             if (value == 'CLIN') {
                 // Initialize clinical search box
-               $(obj).parent().find('.search-term-field').select2({
+                $(obj).parent().find('.search-term-field').select2({
                     ajax: {
                         url: feature_search_url,
                         dataType: 'json',
@@ -364,7 +364,7 @@ define(['jquery'], function($) {
                             return { keyword: params.term, page: params.page };
                         },
                         processResults: function (data, page) {
-                            if(data['values']) {
+                            if(data['items']) {
                                 var items = $.map(data['items'], function (item) {
                                     var obj = {};
                                     obj.id = item['internal_feature_id'];
