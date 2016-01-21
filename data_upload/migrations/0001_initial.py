@@ -64,7 +64,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(serialize=False, primary_key=True)),
                 ('bucket', models.CharField(max_length=155, null=True)),
-                ('file', models.FileField(storage=google_helpers.cloud_file_storage.CloudFileStorage(), upload_to=data_upload.models.get_user_bucket)),
+                ('file', models.FileField(upload_to=data_upload.models.get_user_bucket)),
                 ('upload', models.ForeignKey(to='data_upload.UserUpload')),
             ],
             options={
