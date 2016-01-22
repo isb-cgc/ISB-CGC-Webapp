@@ -149,46 +149,50 @@ def workbook(request, workbook_id=0):
 
     elif request.method == "GET" :
         if workbook_id:
-            ownedWorkbooks  = request.user.workbook_set.all().filter(active=True)
-            sharedWorkbooks = Workbook.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
-            publicWorkbooks = Workbook.objects.all().filter(is_public=True,active=True)
+            try :
+                ownedWorkbooks  = request.user.workbook_set.all().filter(active=True)
+                sharedWorkbooks = Workbook.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
+                publicWorkbooks = Workbook.objects.all().filter(is_public=True,active=True)
 
-            workbooks = ownedWorkbooks | sharedWorkbooks | publicWorkbooks
-            workbooks = workbooks.distinct()
+                workbooks = ownedWorkbooks | sharedWorkbooks | publicWorkbooks
+                workbooks = workbooks.distinct()
 
-            workbook_model = workbooks.get(id=workbook_id)
-            workbook_model.worksheets = workbook_model.get_deep_worksheets()
+                workbook_model = workbooks.get(id=workbook_id)
+                workbook_model.worksheets = workbook_model.get_deep_worksheets()
 
-            is_shareable = (workbook_model.owner.id == request.user.id)
+                is_shareable = (workbook_model.owner.id == request.user.id)
 
-            if is_shareable:
-                for worksheet in workbook_model.worksheets:
-                    # Check all cohorts are owned by the user
-                    for cohort in worksheet.cohorts:
-                        if cohort.cohort.get_owner().id != request.user.id and not cohort.cohort.is_public():
-                            is_shareable = False
-                            break
-
-                    # Check all variables are from projects owned by the user
-                    for variable in worksheet.get_variables():
-                        if variable.feature: #feature will be null if the variable is from TCGA
-                            if variable.feature.study.project.owner_id != request.user.id and not variable.feature.study.project.is_public:
+                if is_shareable:
+                    for worksheet in workbook_model.worksheets:
+                        # Check all cohorts are owned by the user
+                        for cohort in worksheet.cohorts:
+                            if cohort.cohort.get_owner().id != request.user.id and not cohort.cohort.is_public():
                                 is_shareable = False
                                 break
 
-                    if not is_shareable:
-                        break
+                        # Check all variables are from projects owned by the user
+                        for variable in worksheet.get_variables():
+                            if variable.feature: #feature will be null if the variable is from TCGA
+                                if variable.feature.study.project.owner_id != request.user.id and not variable.feature.study.project.is_public:
+                                    is_shareable = False
+                                    break
 
-            shared = None
-            if workbook_model.owner.id != request.user.id and not workbook_model.is_public:
-                shared = request.user.shared_resource_set.get(workbook__id=workbook_id)
+                        if not is_shareable:
+                            break
 
-            plot_types = Analysis.get_types()
+                shared = None
+                if workbook_model.owner.id != request.user.id and not workbook_model.is_public:
+                    shared = request.user.shared_resource_set.get(workbook__id=workbook_id)
 
-            return render(request, template, {'workbook'    : workbook_model,
-                                              'is_shareable': is_shareable,
-                                              'shared'      : shared,
-                                              'plot_types'  : plot_types})
+                plot_types = Analysis.get_types()
+
+                return render(request, template, {'workbook'    : workbook_model,
+                                                  'is_shareable': is_shareable,
+                                                  'shared'      : shared,
+                                                  'plot_types'  : plot_types})
+            except ObjectDoesNotExist:
+                redirect_url = reverse('workbooks')
+                return redirect(redirect_url)
         else :
             redirect_url = reverse('workbooks')
             return redirect(redirect_url)
@@ -347,7 +351,7 @@ def worksheet_genes(request, workbook_id=0, worksheet_id=0, genes_id=0):
             if request.POST.get("genes-list") :
                 name = request.POST.get("genes-name")
                 gene_list = request.POST.get("genes-list")
-                gene_list = [x.strip() for x in gene_list.split(',')]
+                gene_list = [x.strip() for x in gene_list.split(' ')]
                 gene_list = list(set(gene_list))
                 GeneFavorite.create(name=name, gene_list=gene_list, user=request.user)
                 messages.info(request, 'The gene favorite list \"' + name + '\" was created and added to your worksheet')
@@ -431,35 +435,21 @@ def worksheet_plots(request, workbook_id=0, worksheet_id=0, plot_id=0):
                             plot_model.y_axis = Worksheet_variable.objects.get(id=attrs['y_axis']['id'])
                         except ObjectDoesNotExist:
                             None
+                    if attrs['color_by'] :
+                        try :
+                            plot_model.color_by = Worksheet_variable.objects.get(id=attrs['color_by']['id'])
+                        except ObjectDoesNotExist:
+                            None
                     if attrs['cohort'] :
                         try :
                             plot_model.cohort = Worksheet_cohort.objects.get(id=attrs['cohort']['id'])
                         except ObjectDoesNotExist:
                             None
 
+
                     plot_model.save()
                     result['updated'] = "success"
 
-            #from Details Page or list page
-            # if request.POST.get("variable_list_id") :
-            #     workbook_name = request.POST.get("name")
-            #     variable_id   = request.POST.get("variable_list_id")
-            #     try :
-            #         variable_fav = VariableFavorite.objects.get(id=variable_id)
-            #         variables = variable_fav.get_variables()
-            #     except ObjectDoesNotExist:
-            #         result['error'] = "variable favorite does not exist"
-            #
-            # #from Select Page
-            # if "var_favorites" in request.body : #{"variables_favorites":[{"id":"6"}]}
-            #     variable_fav_list = json.loads(request.body)['var_favorites']
-            #     json_response = True
-            #     for fav in variable_fav_list:
-            #         try:
-            #             fav = VariableFavorite.objects.get(id=fav['id'])
-            #             variables = fav.get_variables()
-            #         except ObjectDoesNotExist:
-            #             result['error'] = "variable favorite does not exist"
     elif request.method == "GET" :
         json_response = True
         plot_type = request.GET.get('type', 'default')
