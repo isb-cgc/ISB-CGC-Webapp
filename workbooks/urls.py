@@ -27,10 +27,10 @@ urlpatterns = patterns('',
     url(r'^(?P<workbook_id>\d+)/worksheets/(?P<worksheet_id>\d+)/edit$',    views.worksheet, name='worksheet_edit'),
 
     url(r'^(?P<workbook_id>\d+)/worksheets/(?P<worksheet_id>\d+)/variables/edit$',                         views.worksheet_variables, name='worksheet_variables_edit'),
-    url(r'^(?P<workbook_id>\d+)/worksheets/(?P<worksheet_id>\d+)/variables/(?P<variable_id>\d+)/delete$',  views.worksheet_variables, name='worksheet_variables_delete'),
+    url(r'^(?P<workbook_id>\d+)/worksheets/(?P<worksheet_id>\d+)/variables/(?P<variable_id>\d+)/delete$',  views.worksheet_variable_delete, name='worksheet_variables_delete'),
 
     url(r'^(?P<workbook_id>\d+)/worksheets/(?P<worksheet_id>\d+)/genes/edit$',                          views.worksheet_genes, name='worksheet_genes_edit'),
-    url(r'^(?P<workbook_id>\d+)/worksheets/(?P<worksheet_id>\d+)/genes/(?P<genes_id>\d+)/delete$',      views.worksheet_genes, name='worksheet_genes_delete'),
+    url(r'^(?P<workbook_id>\d+)/worksheets/(?P<worksheet_id>\d+)/genes/(?P<gene_id>\d+)/delete$',       views.worksheet_gene_delete, name='worksheet_gene_delete'),
 
     url(r'^(?P<workbook_id>\d+)/worksheets/(?P<worksheet_id>\d+)/cohorts/edit$',                        views.worksheet_cohorts, name='worksheet_cohorts_edit'),
     url(r'^(?P<workbook_id>\d+)/worksheets/(?P<worksheet_id>\d+)/cohorts/(?P<cohorts_id>\d+)/delete$',  views.worksheet_cohorts, name='worksheet_cohorts_delete'),

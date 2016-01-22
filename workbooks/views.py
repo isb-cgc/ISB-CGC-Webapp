@@ -246,6 +246,12 @@ def worksheet(request, workbook_id=0, worksheet_id=0):
     return redirect(redirect_url)
 
 @login_required
+def worksheet_variable_delete(request, workbook_id=0, worksheet_id=0, variable_id=0):
+    Worksheet.objects.get(id=worksheet_id).remove_variable(variable_id);
+    redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet_id})
+    return redirect(redirect_url)
+
+@login_required
 def worksheet_variables(request, workbook_id=0, worksheet_id=0, variable_id=0):
     command  = request.path.rsplit('/',1)[1];
     json_response = False
@@ -318,6 +324,12 @@ def worksheet_variables(request, workbook_id=0, worksheet_id=0, variable_id=0):
 @login_required
 def workbook_create_with_genes(request):
     return worksheet_genes(request=request)
+
+@login_required
+def worksheet_gene_delete(request, workbook_id=0, worksheet_id=0, gene_id=0):
+    Worksheet.objects.get(id=worksheet_id).remove_gene(gene_id);
+    redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet_id})
+    return redirect(redirect_url)
 
 @login_required
 def worksheet_genes(request, workbook_id=0, worksheet_id=0, genes_id=0):

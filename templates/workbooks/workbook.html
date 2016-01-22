@@ -129,15 +129,24 @@
                                         {% with worksheet.worksheet_gene_set.all|how_many_more:6 as num_more  %}
                                             {% for gene in worksheet.genes %}
                                                 {% if forlook.counter0 < 6 %}
-                                                    <li class="sublist-item">{{ gene.gene|upper }}</li>
+                                                    <li class="sublist-item">
+                                                        {% if shared %}
+                                                            {{ gene.gene|title }}
+                                                        {% else %}
+                                                            <form action="{% url 'worksheet_gene_delete' workbook_id=workbook.id worksheet_id=worksheet.id gene_id=gene.id %}" method="POST">
+                                                                {% csrf_token %}
+                                                                <button type="submit" class="text-danger workbook-remove-item"><i class="fa fa-close"></i></button>
+                                                                {{ gene.gene|title }}
+                                                            </form>
+                                                        {% endif %}
+                                                    </li>
                                                 {% elif forloop.counter0 == 6 and num_more > 0 %}
                                                     <a class="show-more">{{num_more}} more</a>
-                                                    <li class="extra-values sublist-item">{{ gene.name|upper }}</li>
+                                                    <li class="extra-values sublist-item">
+                                                        {{ gene.gene|title }}
+                                                    </li>
                                                 {% endif %}
                                             {% endfor %}
-                                            {% if num_more > 0 %}
-                                                <a class="show-less" style="display:none;">Show Less</a>
-                                            {% endif %}
                                         {% endwith %}
                                     </ul>
                                     {% endif %}
@@ -155,15 +164,24 @@
                                         {% with worksheet.worksheet_variable_set.all|how_many_more:6 as num_more  %}
                                             {% for variable in worksheet.variables %}
                                                 {% if forlook.counter0 < 6 %}
-                                                    <li class="sublist-item">{{ variable.name|upper }}</li>
+                                                    <li class="sublist-item">
+                                                        {% if shared %}
+                                                            {{ variable.name|title }}
+                                                        {% else %}
+                                                            <form action="{% url 'worksheet_variables_delete' workbook_id=workbook.id worksheet_id=worksheet.id variable_id=variable.id %}" method="POST">
+                                                                {% csrf_token %}
+                                                                <button type="submit" class="text-danger workbook-remove-item"><i class="fa fa-close"></i></button>
+                                                                {{ variable.name|title }}
+                                                            </form>
+                                                        {% endif %}
+                                                    </li>
                                                 {% elif forloop.counter0 == 6 and num_more > 0 %}
                                                     <a class="show-more">{{num_more}} more</a>
-                                                    <li class="extra-values sublist-item">{{ variable.name|upper }}</li>
+                                                    <li class="extra-values sublist-item">
+                                                        {{ variable.name|title }}
+                                                    </li>
                                                 {% endif %}
                                             {% endfor %}
-                                            {% if num_more > 0 %}
-                                                <a class="show-less" style="display:none;">Show Less</a>
-                                            {% endif %}
                                         {% endwith %}
                                     </ul>
                                     {% endif %}
@@ -298,13 +316,6 @@
     var base_url                = '{{ base_url|safe }}';
     var display_worksheet_id    = '{{ display_worksheet.id|safe }}';
     var workbook_id             = '{{ workbook.id }}';
-
-    //plot specific variables
-{#    var plots_data = {{ plots_data|safe }};#}
-{#    var x_attr = '{% if viz|length %}{{ viz.plots.0.x_axis }}{% else %}country{% endif %}';#}
-{#    var y_attr = '{% if viz|length %}{{ viz.plots.0.y_axis }}{% else %}{% endif %}';#}
-{#    var color_by = '{% if viz|length and viz.plots.0.color_by != 'None' %}{{ viz.plots.0.color_by }}{% else %}disease_code{% endif %}';#}
-{#    var cohort_list = {{ cohorts|safe }};#}
 </script>
 
 {% endblock content %}

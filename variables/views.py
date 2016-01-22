@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from bq_data_access.feature_search.util import SearchableFieldHelper
 from models import VariableFavorite
-from workbooks.models import Workbook, Worksheet
+from workbooks.models import Workbook, Worksheet, Worksheet_variable
 from projects.models import Project, Study
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages

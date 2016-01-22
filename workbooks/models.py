@@ -198,8 +198,14 @@ class Worksheet(models.Model):
     def get_variables(self):
         return self.worksheet_variable_set.filter(worksheet=self)
 
+    def remove_variable(self, id):
+        Worksheet_variable.objects.get(id=id).delete()
+
     def get_genes(self):
         return self.worksheet_gene_set.filter(worksheet=self)
+
+    def remove_gene(self, id):
+        Worksheet_gene.objects.get(id=id).delete()
 
     def get_cohorts(self):
         return self.worksheet_cohort_set.filter(worksheet=self)
