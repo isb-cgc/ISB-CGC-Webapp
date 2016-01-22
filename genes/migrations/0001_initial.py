@@ -47,6 +47,16 @@ class Migration(migrations.Migration):
             },
             bases=(models.Model,),
         ),
+        migrations.CreateModel(
+            name='GeneSymbol',
+            fields=[
+                ('id', models.AutoField(serialize=False, primary_key=True)),
+                ('symbol', models.CharField(max_length=255, db_index=True)),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
         migrations.AddField(
             model_name='gene',
             name='gene_favorite',
