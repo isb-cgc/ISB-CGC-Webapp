@@ -125,6 +125,7 @@ class Migration(migrations.Migration):
                 ('modified_date', models.DateTimeField(auto_now=True)),
                 ('name', models.CharField(max_length=2024)),
                 ('url_code', models.CharField(max_length=2024)),
+                ('color_by', models.CharField(max_length=1024, null=True)),
                 ('project', models.ForeignKey(blank=True, to='projects.Project', null=True)),
                 ('study', models.ForeignKey(blank=True, to='projects.Study', null=True)),
                 ('worksheet', models.ForeignKey(to='workbooks.Worksheet')),
@@ -143,12 +144,6 @@ class Migration(migrations.Migration):
             model_name='worksheet_plot',
             name='y_axis',
             field=models.ForeignKey(related_name='worksheet_plot.y_axis', blank=True, to='workbooks.Worksheet_variable', null=True),
-            preserve_default=True,
-        ),
-        migrations.AddField(
-            model_name='worksheet_plot',
-            name='color_by',
-            field=models.ForeignKey(related_name='worksheet_plot.color_by', blank=True, to='workbooks.Worksheet_variable', null=True),
             preserve_default=True,
         ),
         migrations.AddField(
