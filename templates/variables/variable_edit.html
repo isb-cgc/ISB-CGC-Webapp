@@ -87,19 +87,19 @@
                             <li role="presentation"><a href="#favorites" aria-controls="favorites" role="tab" data-toggle="tab">Favorites ({{ favorite_list | length }})</a></li>
                             <li role="presentation"><a href="#datatypes" aria-controls="datatypes" role="tab" data-toggle="tab">Data Types</a></li>
                             <li role="presentation"><a href="#uploaded"  aria-controls="Uploaded" role="tab" data-toggle="tab">Projects</a></li>
-                            <li role="presentation"><a href="#search"    aria-controls="search" role="tab" data-toggle="tab">Search</a></li>
+{# TODO                     <li role="presentation"><a href="#search"    aria-controls="search" role="tab" data-toggle="tab">Search</a></li>#}
                         </ul>
 
                         <!-- Tab panes -->
                         <div class="tab-content">
                             <div role="tabpanel" class="tab-pane active filter-panel" id="common">
-                                <ul class="list-group" id="clin-accordion" role="tablist" aria-multiselectable="true">
+                                <ul class="list-group" id="common-accordion" role="tablist" aria-multiselectable="true">
                                     {% for attr in common_project.variables %}
                                         <li class="list-group-item checkbox">
-                                            <div id="heading-{{ attr }}" class="list-group-item__heading">
+                                            <div id="heading-{{ attr.name }}" class="list-group-item__heading">
                                                 <label>
-                                                    <input class="variable-toggle-checkbox" type="checkbox" value="CLIN:{{ attr }}" name="elements-selected" data-text-label="{{ attr|get_readable_name }}">
-                                                    {{ attr|get_readable_name }}
+                                                    <input class="variable-toggle-checkbox" type="checkbox" value="{{ attr.code }}" name="elements-selected" data-text-label="{{ attr.name|get_readable_name }}">
+                                                    {{ attr.name|get_readable_name }}
                                                 </label>
                                             </div>
                                         </li>
@@ -107,7 +107,7 @@
                                 </ul>
                             </div>
                             <div role="tabpanel" class="tab-pane filter-panel" id="favorites">
-                                <ul class="list-group" id="clin-accordion" role="tablist" aria-multiselectable="true">
+                                <ul class="list-group" id="favorites-accordion" role="tablist" aria-multiselectable="true">
                                     {% for fav in favorite_list %}
                                         <li class="list-group-item">
                                             <div id="heading-{{ fav.name }}" data-field="{{ fav.name }}" class="list-group-item__heading">
@@ -139,11 +139,11 @@
                                 </div>
                             </div>
                             <div role="tabpanel" class="tab-pane filter-panel" id="datatypes">
-                                <ul class="list-group" id="clin-accordion" role="tablist" aria-multiselectable="true">
+                                <ul class="list-group" id="data-type-accordion" role="tablist" aria-multiselectable="true">
                                     {% for type in datatype_list %}
                                         <li class="list-group-item">
                                             <div id="heading-{{ type.datatype }}" data-field="{{ type.datatype }}" class="list-group-item__heading datatype-selector">
-                                                <a role="button" data-toggle="collapse" data-parent="#clin-accordion" href="#collapse-{{ type.datatype }}" aria-expanded="false" aria-controls="collapse-{{ type.datatype }}">
+                                                <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-{{ type.datatype }}" aria-expanded="false" aria-controls="collapse-{{ type.datatype }}">
                                                     <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ type.label }}
                                                 </a>
                                             </div>
@@ -151,7 +151,7 @@
                                             <div id="collapse-{{ type.datatype }}" class="list-group-item__body collapse" role="tabpanel" aria-labelledby="heading-{{ type.datatype }}">
                                                 {% if type.datatype == 'CLIN' %}
                                                     <div class="form-group search-field {{ type.datatype }}-options ">
-                                                        <div class="search-term feature-search">
+                                                        <div  class="search-term feature-search">
                                                             <label for="{{ type.datatype }}-search-term-select">Feature Search</label>
                                                             <select id="{{ type.datatype }}-search-term-select" class="search-term-field"></select>
                                                         </div>
@@ -160,7 +160,7 @@
                                                     <div class="form-group search-field {{ type.datatype }}">
                                                         <div class="search-term" data-field="{{ type.datatype }}">
                                                             {% for field in type.fields %}
-                                                                <label for="{{ type.datatype }}-{{ field.name }}">{{ field.label }} Filter</label>
+                                                                <label class="space-top-15" for="{{ type.datatype }}-{{ field.name }}">{{ field.label }} Filter</label>
                                                                 <select id="{{ plot.id }}-{{ type.datatype }}-{{ field.name }}-search-term-select" class="form-control field-options {{ field.name }}-options {% if not field.static %}select2{% endif %}" data-field="{{ field.name }}">
                                                                     {% if field.static %}
                                                                         <option value="" disabled selected>Please select an option</option>
@@ -183,50 +183,54 @@
                                 </ul>
                             </div>
                             <div role="tabpanel" class="tab-pane" id="uploaded">
-                                <ul class="list-group" id="clin-accordion" role="tablist" aria-multiselectable="true">
-                                    {% for project in projects %}
-                                        {% for study in project.study_set.all|active %}
-                                            <li class="list-group-item">
-                                                <div id="heading-{{ data_type_name }}" class="list-group-item__heading">
-                                                    <a role="button"  data-toggle="collapse" data-parent="#clin-accordion" href="#collapse-{{ project.id }}-{{ study.id }}" aria-expanded="false" aria-controls="collapse-{{ attr }}">
-                                                        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ project.name }} | {{ study.name }}
-                                                    </a>
-                                                </div>
+                                <ul class="list-group" id="project-accordion" role="tablist" aria-multiselectable="true">
+                                    {% if projects %}
+                                        {% for project in projects %}
+                                            {% for study in project.study_set.all|active %}
+                                                <li class="list-group-item">
+                                                    <div id="heading-{{ data_type_name }}" class="list-group-item__heading">
+                                                        <a role="button"  data-toggle="collapse" data-parent="#project-accordion" href="#collapse-{{ project.id }}-{{ study.id }}" aria-expanded="false" aria-controls="collapse-{{ attr }}">
+                                                            <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ project.name }} | {{ study.name }}
+                                                        </a>
+                                                    </div>
 
-                                                <div id="collapse-{{ project.id }}-{{ study.id }}" class="list-group-item__body collapse" role="tabpanel" aria-labelledby="heading-{{ project.id }}-{{ study.id }}">
-                                                    <ul class="search-checkbox-list" id="{{ data_type_name }}">
-                                                        {% with study.user_feature_definitions_set.all|how_many_more:6 as num_more %}
-                                                            {% for variable in study.user_feature_definitions_set.all %} {#|get_item:attr %}#}
-                                                                {% if forloop.counter0 < 6 %}
-                                                                    <li class="checkbox">
-                                                                        <label>
-                                                                            <input class="variable-toggle-checkbox" type="checkbox" name="elements-selected" value="{% if variable.shared_map_id %}{{ variable.shared_map_id }}{% else %}USER:{{ study.id }}:{{ variable.id }}{% endif %}" data-text-label="{{ study.name }}: {{ variable.feature_name|get_readable_name }}" data-feature-id="{{ variable.id }}" > {{ variable.feature_name|get_readable_name }}
-                                                                        </label>
-                                                                    </li>
-                                                                {% elif forloop.counter0 == 6 and num_more > 0 %}
-                                                                    <a class="show-more">{{ num_more }} more</a>
-                                                                    <li class="extra-values checkbox" style="display:none;">
-                                                                        <label>
-                                                                            <input class="variable-toggle-checkbox" type="checkbox" name="elements-selected" value="{% if variable.shared_map_id %}{{ variable.shared_map_id }}{% else %}USER:{{ study.id }}:{{ variable.id }}{% endif %}" data-text-label="{{ study.name }}: {{ variable.feature_name|get_readable_name }}" data-feature-id="{{ variable.id }}" > {{ variable.feature_name|get_readable_name }}
-                                                                        </label>
-                                                                    </li>
-                                                                {% else %}
-                                                                    <li class="extra-values checkbox" style="display:none;">
-                                                                        <label>
-                                                                            <input class="variable-toggle-checkbox" type="checkbox" name="elements-selected" value="{% if variable.shared_map_id %}{{ variable.shared_map_id }}{% else %}USER:{{ study.id }}:{{ variable.id }}{% endif %}" data-text-label="{{ study.name }}: {{ variable.feature_name|get_readable_name }}" data-feature-id="{{ variable.id }}" > {{ variable.feature_name|get_readable_name }}
-                                                                        </label>
-                                                                    </li>
+                                                    <div id="collapse-{{ project.id }}-{{ study.id }}" class="list-group-item__body collapse" role="tabpanel" aria-labelledby="heading-{{ project.id }}-{{ study.id }}">
+                                                        <ul class="search-checkbox-list" id="{{ data_type_name }}">
+                                                            {% with study.user_feature_definitions_set.all|how_many_more:6 as num_more %}
+                                                                {% for variable in study.user_feature_definitions_set.all %} {#|get_item:attr %}#}
+                                                                    {% if forloop.counter0 < 6 %}
+                                                                        <li class="checkbox">
+                                                                            <label>
+                                                                                <input class="variable-toggle-checkbox" type="checkbox" name="elements-selected" value="{% if variable.shared_map_id %}{{ variable.shared_map_id }}{% else %}USER:{{ study.id }}:{{ variable.id }}{% endif %}" data-text-label="{{ study.name }}: {{ variable.feature_name|get_readable_name }}" data-feature-id="{{ variable.id }}" > {{ variable.feature_name|get_readable_name }}
+                                                                            </label>
+                                                                        </li>
+                                                                    {% elif forloop.counter0 == 6 and num_more > 0 %}
+                                                                        <a class="show-more">{{ num_more }} more</a>
+                                                                        <li class="extra-values checkbox" style="display:none;">
+                                                                            <label>
+                                                                                <input class="variable-toggle-checkbox" type="checkbox" name="elements-selected" value="{% if variable.shared_map_id %}{{ variable.shared_map_id }}{% else %}USER:{{ study.id }}:{{ variable.id }}{% endif %}" data-text-label="{{ study.name }}: {{ variable.feature_name|get_readable_name }}" data-feature-id="{{ variable.id }}" > {{ variable.feature_name|get_readable_name }}
+                                                                            </label>
+                                                                        </li>
+                                                                    {% else %}
+                                                                        <li class="extra-values checkbox" style="display:none;">
+                                                                            <label>
+                                                                                <input class="variable-toggle-checkbox" type="checkbox" name="elements-selected" value="{% if variable.shared_map_id %}{{ variable.shared_map_id }}{% else %}USER:{{ study.id }}:{{ variable.id }}{% endif %}" data-text-label="{{ study.name }}: {{ variable.feature_name|get_readable_name }}" data-feature-id="{{ variable.id }}" > {{ variable.feature_name|get_readable_name }}
+                                                                            </label>
+                                                                        </li>
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                                {% if num_more > 0 %}
+                                                                    <a class="show-less" style="display:none;">less</a>
                                                                 {% endif %}
-                                                            {% endfor %}
-                                                            {% if num_more > 0 %}
-                                                                <a class="show-less" style="display:none;">less</a>
-                                                            {% endif %}
-                                                        {% endwith %}
-                                                    </ul>
-                                                </div>
-                                            </li>
+                                                            {% endwith %}
+                                                        </ul>
+                                                    </div>
+                                                </li>
+                                            {% endfor %}
                                         {% endfor %}
-                                    {% endfor %}
+                                    {% else %}
+                                        <div class="space-top-15"><center>No projects available</center></div>
+                                    {% endif %}
                                 </ul>
                             </div>
                             <div role="tabpanel" class="tab-pane" id="search">
@@ -251,13 +255,13 @@
                     </div>
                     <div class="panel-body">
                         {% if existing_variable_list %}
-                            {% for variable in existing_variable_list.variable_set %}
-                            <span class="selected-variable" data-name="{{ variable.name }}" data-code="{{ variable.code }}" data-feature-id="{{ variable.feature_id }}">
-                                <a class="delete-x filter-label label label-default">
-                                    {{ variable.name }}
-                                    <i class="fa fa-times"></i>
-                                </a>
-                            </span>
+                            {% for variable in existing_variable_list.variable_set.all %}
+                                <span class="selected-variable" data-name="{{ variable.name }}" data-code="{{ variable.code }}" data-feature-id="{{ variable.feature_id }}">
+                                    <a class="delete-x filter-label label label-default">
+                                        {{ variable.name }}
+                                        <i class="fa fa-times"></i>
+                                    </a>
+                                </span>
                             {% endfor %}
                         {% else %}
                             <p class="help-block">Select your favorite variables from the left panel.</p>

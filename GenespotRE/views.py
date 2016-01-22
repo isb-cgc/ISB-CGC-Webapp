@@ -404,7 +404,3 @@ def dashboard_page(request):
         'projects' : projects,
         'workbooks': workbooks,
     })
-
-@login_required
-def sample_analyses(request):
-    return render(request, 'GenespotRE/sample_analyses.html')

@@ -8,10 +8,7 @@ from django.conf import settings
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('projects', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('sharing', '0001_initial'),
-        ('cohorts', '0001_initial'),
     ]
 
     operations = [
@@ -23,10 +20,7 @@ class Migration(migrations.Migration):
                 ('description', models.CharField(max_length=2024)),
                 ('date_created', models.DateTimeField(auto_now_add=True)),
                 ('last_date_saved', models.DateTimeField(auto_now_add=True)),
-                ('active', models.BooleanField(default=True)),
                 ('is_public', models.BooleanField(default=False)),
-                ('owner', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
-                ('shared', models.ManyToManyField(to='sharing.Shared_Resource')),
             ],
             options={
             },
@@ -65,7 +59,6 @@ class Migration(migrations.Migration):
                 ('description', models.CharField(max_length=2024)),
                 ('last_date_saved', models.DateTimeField(auto_now_add=True)),
                 ('date_created', models.DateTimeField(auto_now_add=True)),
-                ('workbook', models.ForeignKey(to='workbooks.Workbook')),
             ],
             options={
             },
@@ -117,11 +110,8 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(serialize=False, primary_key=True)),
                 ('date_created', models.DateTimeField(auto_now_add=True)),
                 ('modified_date', models.DateTimeField(auto_now=True)),
-                ('color_by', models.CharField(max_length=1024, null=True)),
+                ('title', models.CharField(max_length=100)),
                 ('type', models.CharField(max_length=1024, null=True)),
-                ('active', models.BooleanField(default=True)),
-                ('cohort', models.ForeignKey(related_name='worksheet_plot.cohort', blank=True, to='workbooks.Worksheet_cohort', null=True)),
-                ('worksheet', models.ForeignKey(to='workbooks.Worksheet', null=True)),
             ],
             options={
             },
@@ -134,9 +124,9 @@ class Migration(migrations.Migration):
                 ('date_created', models.DateTimeField(auto_now_add=True)),
                 ('modified_date', models.DateTimeField(auto_now=True)),
                 ('name', models.CharField(max_length=2024)),
-                ('type', models.CharField(max_length=1024, null=True, blank=True)),
                 ('url_code', models.CharField(max_length=2024)),
-                ('feature', models.ForeignKey(blank=True, to='projects.User_Feature_Definitions', null=True)),
+                ('project', models.ForeignKey(blank=True, to='projects.Project', null=True)),
+                ('study', models.ForeignKey(blank=True, to='projects.Study', null=True)),
                 ('worksheet', models.ForeignKey(to='workbooks.Worksheet')),
             ],
             options={
@@ -153,6 +143,24 @@ class Migration(migrations.Migration):
             model_name='worksheet_plot',
             name='y_axis',
             field=models.ForeignKey(related_name='worksheet_plot.y_axis', blank=True, to='workbooks.Worksheet_variable', null=True),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='worksheet_plot',
+            name='color_by',
+            field=models.ForeignKey(related_name='worksheet_plot.color_by', blank=True, to='workbooks.Worksheet_variable', null=True),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='worksheet',
+            name='plot',
+            field=models.ForeignKey(blank=True, to='workbooks.Worksheet_plot', null=True),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='worksheet',
+            name='workbook',
+            field=models.ForeignKey(to='workbooks.Workbook'),
             preserve_default=True,
         ),
     ]

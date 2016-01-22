@@ -8,6 +8,7 @@
 {% block page_name %}genes_edit{% endblock %}
 
 {% block page_header %}
+<link type="text/css" rel="stylesheet" href="{% static 'css/token-typeahead.css' %}" />
 <div class="container">
     <ol class="breadcrumb">
         <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
@@ -91,13 +92,14 @@
                         </li>
                         <li role="menuitem"><a href="{% url 'gene_select_for_new_workbook' %}">Cancel</a></li>
                     {% endif %}
-                    <menuitem class="btn btn-link pull-right"><a href="">View System Gene Identifiers</a></menuitem>
+{#                    <menuitem class="btn btn-link pull-right"><a href="">View System Gene Identifiers</a></menuitem>#}
                 </ul>
             </form>
         </div>
     </section>
 </div>
 <script type="text/javascript">
+    var base_url = '{{ base_url|safe }}';
     {% if gene_favorite %}
         var gene_fav = { genes : {{ genes }} };
     {% else %}

@@ -217,12 +217,15 @@ require([
         if(recentWorksheetTarget.closest('#more-tabs').length > 0){
             openTabsfromDropdown(recentWorksheetTarget);
         }
-    } else {
-        //load the plot of the first worksheet, if one exist
-        //get_plot(workbook_id, display_worksheet_id, plot_type, function(data){
-        //    load_plot(data);
-        //});
     }
+
+    $('.swap').click(function(){
+        var x = $(this).parent().find('#x-axis-select').find(":selected").val()
+        var y = $(this).parent().find('#y-axis-select').find(":selected").val()
+
+        $(this).parent().find('#x-axis-select').val(y);
+        $(this).parent().find('#y-axis-select').val(x);
+    });
 
     //generate plot based on user change
     $('.update-plot').on('click', function(event){
@@ -234,12 +237,13 @@ require([
                 type   : parent.parentsUntil(".worksheet-body").find(".plot_selection").find(":selected").text(),
                 x_axis : {id : parent.find('#x-axis-select').find(":selected").attr('var_id'), url_code : parent.find('#x-axis-select').find(":selected").val()},
                 y_axis : {id : parent.find('#y-axis-select').find(":selected").attr('var_id'), url_code : parent.find('#y-axis-select').find(":selected").val()},
+                color_by : {id : parent.find('#color_by').find(":selected").attr('var_id'), url_code : parent.find('#color_by').find(":selected").val()},
                 cohort : {id : parent.find('#cohort-select').val()},
-                color_by_cohort : parent.find('#color-by-cohort').find(":selected").val(),
-                color_by : parent.find('#color-select').find(":selected").val()
+                //TODO : Where does this get entered for generating plots
+                // color_by_cohort : parent.find('#color-by-cohort').find(":selected").val()
             }
             update_plot_model(workbook_id, worksheet_id, plot_id, attrs, function(result){
-                generate_plot(worksheet_id, attrs.type, attrs.x_axis.url_code, attrs.y_axis.url_code, 'CLIN:Study', attrs.cohort.id);
+                generate_plot(worksheet_id, attrs.type, attrs.x_axis.url_code, attrs.y_axis.url_code, attrs.color_by.url_code, attrs.cohort.id);
                 hide_plot_settings();
             });
         }
