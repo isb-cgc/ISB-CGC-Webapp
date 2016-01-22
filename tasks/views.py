@@ -52,8 +52,8 @@ from google_helpers.bigquery_service import get_bigquery_service
 from google.appengine.api.taskqueue import Task, Queue
 
 from oauth2client.client import GoogleCredentials
-# from gcloud import storage, bigquery
-# import pandas as pd
+from gcloud import storage, bigquery
+import pandas as pd
 import uuid
 
 from accounts.models import NIH_User
@@ -328,7 +328,6 @@ def CloudSQL_logging(request):
     filenames = get_binary_log_filenames()
     yesterdays_binary_log_file = filenames[-2]
     logger.info("Yesterday's binary log file: " + str(yesterdays_binary_log_file))
-    logger.info(settings.DATABASES['default'])
     arglist = ['mysqlbinlog',
                '--read-from-remote-server',
                yesterdays_binary_log_file,
