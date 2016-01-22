@@ -12,6 +12,7 @@ from django.http import HttpResponse, JsonResponse
 from models import Cohort, Workbook, Worksheet, Worksheet_comment, Worksheet_variable, Worksheet_gene, Worksheet_cohort, Worksheet_plot
 from variables.models import VariableFavorite, Variable
 from genes.models import GeneFavorite
+from analysis.models import Analysis
 from projects.models import Project
 from sharing.service import create_share
 from django.conf import settings
@@ -80,25 +81,48 @@ def workbook_create_with_project(request):
     #add every variable within the model
     for study in project_model.study_set.all().filter(active=True) :
         for var in study.user_feature_definitions_set.all() :
-            Worksheet_variable.objects.create(worksheet_id = worksheet_model.id,
+            work_var = Worksheet_variable.objects.create(worksheet_id = worksheet_model.id,
                                               name         = var.feature_name,
-                                              code         = var.bq_map_id,
-                                              project      = project_model,
-                                              study        = study)
-            Worksheet_variable.save()
+                                              url_code     = var.bq_map_id,
+                                              feature_id   = var.id)
+            work_var.save()
 
     redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_model.id})
     return redirect(redirect_url)
 
-#TODO not complete
+@login_required
+def workbook_create_with_variables(request):
+    var_list_id = request.POST.get('variable_list_id')
+    var_list_model = VariableFavorite.objects.get(id=var_list_id)
+
+    workbook_model = Workbook.create(name="Untitled Workbook", description="this is an untitled workbook with all variables of variable favorite list \"" + var_list_model.name + "\" added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
+    worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
+
+    for var in var_list_model.get_variables() :
+        work_var = Worksheet_variable.objects.create(worksheet_id = worksheet_model.id,
+                                          name         = var.name,
+                                          url_code     = var.code,
+                                          feature_id   = var.feature_id)
+
+        work_var.save()
+
+    redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_model.id})
+    return redirect(redirect_url)
+
 @login_required
 def workbook_create_with_analysis(request):
     analysis_type   = request.POST.get('analysis')
-    workbook_model  = Workbook.create(name="Untitled Workbook", description="this is an untitled workbook with a \"" + analysis_type + "\" plot added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
-    worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
-    worksheet_model.set_plot(title="missing a title", type=analysis_type)
 
-    redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_model.id})
+    allowed_types = Analysis.get_types()
+    redirect_url = reverse('sample_analyses')
+    for type in allowed_types :
+        if analysis_type == type['name'] :
+            workbook_model  = Workbook.create(name="Untitled Workbook", description="this is an untitled workbook with a \"" + analysis_type + "\" plot added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
+            worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
+            worksheet_model.set_plot(type=analysis_type)
+            redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_model.id})
+            break
+
     return redirect(redirect_url)
 
 @login_required
@@ -125,51 +149,50 @@ def workbook(request, workbook_id=0):
 
     elif request.method == "GET" :
         if workbook_id:
-            ownedWorkbooks  = request.user.workbook_set.all().filter(active=True)
-            sharedWorkbooks = Workbook.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
-            publicWorkbooks = Workbook.objects.all().filter(is_public=True,active=True)
+            try :
+                ownedWorkbooks  = request.user.workbook_set.all().filter(active=True)
+                sharedWorkbooks = Workbook.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
+                publicWorkbooks = Workbook.objects.all().filter(is_public=True,active=True)
 
-            workbooks = ownedWorkbooks | sharedWorkbooks | publicWorkbooks
-            workbooks = workbooks.distinct()
+                workbooks = ownedWorkbooks | sharedWorkbooks | publicWorkbooks
+                workbooks = workbooks.distinct()
 
-            workbook_model = workbooks.get(id=workbook_id)
-            workbook_model.worksheets = workbook_model.get_deep_worksheets()
+                workbook_model = workbooks.get(id=workbook_id)
+                workbook_model.worksheets = workbook_model.get_deep_worksheets()
 
-            is_shareable = (workbook_model.owner.id == request.user.id)
+                is_shareable = (workbook_model.owner.id == request.user.id)
 
-            if is_shareable:
-                for worksheet in workbook_model.worksheets:
-                    # Check all cohorts are owned by the user
-                    for cohort in worksheet.cohorts:
-                        if cohort.cohort.get_owner().id != request.user.id and not cohort.cohort.is_public():
-                            is_shareable = False
-                            break
-
-                    # Check all variables are from projects owned by the user
-                    for variable in worksheet.get_variables():
-                        if variable.feature: #feature will be null if the variable is from TCGA
-                            if variable.feature.study.project.owner_id != request.user.id and not variable.feature.study.project.is_public:
+                if is_shareable:
+                    for worksheet in workbook_model.worksheets:
+                        # Check all cohorts are owned by the user
+                        for cohort in worksheet.cohorts:
+                            if cohort.cohort.get_owner().id != request.user.id and not cohort.cohort.is_public():
                                 is_shareable = False
                                 break
 
-                    if not is_shareable:
-                        break
+                        # Check all variables are from projects owned by the user
+                        for variable in worksheet.get_variables():
+                            if variable.feature: #feature will be null if the variable is from TCGA
+                                if variable.feature.study.project.owner_id != request.user.id and not variable.feature.study.project.is_public:
+                                    is_shareable = False
+                                    break
 
-            shared = None
-            if workbook_model.owner.id != request.user.id and not workbook_model.is_public:
-                shared = request.user.shared_resource_set.get(workbook__id=workbook_id)
+                        if not is_shareable:
+                            break
 
-            plot_types = [{'name' : 'Bar Chart'},
-                          {'name' : 'Histogram'},
-                          {'name' : 'Scatter Plot'},
-                          {'name' : 'Violin Plot'},
-                          {'name' : 'Violin Plot with axis swap'},
-                          {'name' : 'Cubby Hole Plot'}]
-                         # Todo {'name' : 'SeqPeak'}]
-            return render(request, template, {'workbook'    : workbook_model,
-                                              'is_shareable': is_shareable,
-                                              'shared'      : shared,
-                                              'plot_types'  : plot_types})
+                shared = None
+                if workbook_model.owner.id != request.user.id and not workbook_model.is_public:
+                    shared = request.user.shared_resource_set.get(workbook__id=workbook_id)
+
+                plot_types = Analysis.get_types()
+
+                return render(request, template, {'workbook'    : workbook_model,
+                                                  'is_shareable': is_shareable,
+                                                  'shared'      : shared,
+                                                  'plot_types'  : plot_types})
+            except ObjectDoesNotExist:
+                redirect_url = reverse('workbooks')
+                return redirect(redirect_url)
         else :
             redirect_url = reverse('workbooks')
             return redirect(redirect_url)
@@ -227,8 +250,10 @@ def worksheet(request, workbook_id=0, worksheet_id=0):
     return redirect(redirect_url)
 
 @login_required
-def workbook_create_with_variables(request):
-    return worksheet_variables(request=request)
+def worksheet_variable_delete(request, workbook_id=0, worksheet_id=0, variable_id=0):
+    Worksheet.objects.get(id=worksheet_id).remove_variable(variable_id);
+    redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet_id})
+    return redirect(redirect_url)
 
 @login_required
 def worksheet_variables(request, workbook_id=0, worksheet_id=0, variable_id=0):
@@ -305,6 +330,12 @@ def workbook_create_with_genes(request):
     return worksheet_genes(request=request)
 
 @login_required
+def worksheet_gene_delete(request, workbook_id=0, worksheet_id=0, gene_id=0):
+    Worksheet.objects.get(id=worksheet_id).remove_gene(gene_id);
+    redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet_id})
+    return redirect(redirect_url)
+
+@login_required
 def worksheet_genes(request, workbook_id=0, worksheet_id=0, genes_id=0):
     command  = request.path.rsplit('/',1)[1];
     json_response = False
@@ -320,7 +351,7 @@ def worksheet_genes(request, workbook_id=0, worksheet_id=0, genes_id=0):
             if request.POST.get("genes-list") :
                 name = request.POST.get("genes-name")
                 gene_list = request.POST.get("genes-list")
-                gene_list = [x.strip() for x in gene_list.split(',')]
+                gene_list = [x.strip() for x in gene_list.split(' ')]
                 gene_list = list(set(gene_list))
                 GeneFavorite.create(name=name, gene_list=gene_list, user=request.user)
                 messages.info(request, 'The gene favorite list \"' + name + '\" was created and added to your worksheet')
@@ -404,35 +435,21 @@ def worksheet_plots(request, workbook_id=0, worksheet_id=0, plot_id=0):
                             plot_model.y_axis = Worksheet_variable.objects.get(id=attrs['y_axis']['id'])
                         except ObjectDoesNotExist:
                             None
+                    if attrs['color_by'] :
+                        try :
+                            plot_model.color_by = Worksheet_variable.objects.get(id=attrs['color_by']['id'])
+                        except ObjectDoesNotExist:
+                            None
                     if attrs['cohort'] :
                         try :
                             plot_model.cohort = Worksheet_cohort.objects.get(id=attrs['cohort']['id'])
                         except ObjectDoesNotExist:
                             None
 
+
                     plot_model.save()
                     result['updated'] = "success"
 
-            #from Details Page or list page
-            # if request.POST.get("variable_list_id") :
-            #     workbook_name = request.POST.get("name")
-            #     variable_id   = request.POST.get("variable_list_id")
-            #     try :
-            #         variable_fav = VariableFavorite.objects.get(id=variable_id)
-            #         variables = variable_fav.get_variables()
-            #     except ObjectDoesNotExist:
-            #         result['error'] = "variable favorite does not exist"
-            #
-            # #from Select Page
-            # if "var_favorites" in request.body : #{"variables_favorites":[{"id":"6"}]}
-            #     variable_fav_list = json.loads(request.body)['var_favorites']
-            #     json_response = True
-            #     for fav in variable_fav_list:
-            #         try:
-            #             fav = VariableFavorite.objects.get(id=fav['id'])
-            #             variables = fav.get_variables()
-            #         except ObjectDoesNotExist:
-            #             result['error'] = "variable favorite does not exist"
     elif request.method == "GET" :
         json_response = True
         plot_type = request.GET.get('type', 'default')

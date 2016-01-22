@@ -17,5 +17,6 @@ urlpatterns = patterns('',
     url(r'^workbook/new/variable/(?P<variable_fav_id>\d+)$',                     views.variable_fav_detail_for_new_workbook, name="variable_detail_for_new_workbook"),
     url(r'^workbook/(?P<workbook_id>\d+)/worksheet/(?P<worksheet_id>\d+)$',                           views.variable_fav_list,   name="variable_select_for_existing_workbook"),
     url(r'^workbook/(?P<workbook_id>\d+)/worksheet/(?P<worksheet_id>\d+)/new$',                       views.variable_fav_edit_for_existing_workbook,   name="variable_create_for_existing_workbook"),
+
     url(r'^(?P<variable_fav_id>\d+)/workbook/(?P<workbook_id>\d+)/worksheet/(?P<worksheet_id>\d+)$',  views.variable_fav_detail, name="variable_detail_for_existing_workbook")
 )
