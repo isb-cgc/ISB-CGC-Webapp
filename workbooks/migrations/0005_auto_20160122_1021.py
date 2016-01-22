@@ -11,10 +11,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='worksheet_variable',
-            name='color_by',
-        ),
         migrations.AddField(
             model_name='worksheet_plot',
             name='color_by',
