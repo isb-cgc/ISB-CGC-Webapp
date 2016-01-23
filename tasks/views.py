@@ -730,7 +730,7 @@ def load_billing_to_bigquery(request):
         load_date = (datetime.datetime.now() + datetime.timedelta(days=-num-1))
 
         # construct the service object for the interacting with the Cloud Storage API
-        service = get_bigquery_service()
+        service = get_storage_resource()
 
         print >> sys.stderr, '>< Load billing json from date: {}'.format(load_date.strftime("%Y-%m-%d"))
         logging.info('>< Load billing json from date: {}'.format(load_date.strftime("%Y-%m-%d")))
@@ -745,7 +745,14 @@ def load_billing_to_bigquery(request):
         file_info = read_file_from_gcs(service, GCS_BUCKET, file_to_load)
 
         # process the file - flatten the json, convert to new-line delimited
-        upload_fh = preprocess_file(file_info)
+        try:
+            upload_fh = preprocess_file(file_info)
+        except TypeError, e:
+            print >> sys.stderr, '\n\nBarfed on preprocess_file date: {}. Error: {}. File info: {}'\
+                .format(load_date.strftime("%Y-%m-%d"), e, file_info)
+            continue
+        else:
+            print >> sys.stderr, '\n\nSuccess! {}'.format(load_date.strftime("%Y-%m-%d"))
 
         # upload the processed file to google cloud storage
         upload_file_to_gcs(service, GCS_BUCKET, upload_fh, file_to_upload)
@@ -759,4 +766,4 @@ def load_billing_to_bigquery(request):
                                gcs_load_file, 'NEWLINE_DELIMITED_JSON',
                                'WRITE_TRUNCATE')
 
-        return HttpResponse('')
+    return HttpResponse('')
