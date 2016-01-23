@@ -258,7 +258,7 @@ require([
             if(data.error){
                 console.log("Display error");
             } else {
-                load_plot(workbook_id, data);
+                load_plot(worksheet_id, data);
                 show_plot_settings();
             }
         });
@@ -276,6 +276,7 @@ require([
 
     function load_plot(worksheet_id, plot_data){
         var plot_element = $("[worksheet_id='"+worksheet_id+"']").parent().parent().find(".plot");
+
         plot_element.find('.update-plot').attr('plot_id', plot_data.id).change();
         if(plot_data.x_axis) {
             plot_element.find('#x-axis-select').val(plot_data.x_axis.url_code);
