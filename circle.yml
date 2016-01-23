@@ -16,8 +16,7 @@ deployment:
   staging:
     branch: [BlinkUX-blink-pr]
     commands:
+      - sudo -E rm -rf ./lib
       - sudo -E /bin/sh ./shell/gcloud_authenticate.sh
       - sudo -E /bin/sh ./shell/gcloud-pull-staging-files.sh
-      - sudo -E ./google_appengine/appcfg.py -A isb-cgc update . --noauth_local_webserver
-      - sudo -E ./google_appengine/appcfg.py -A isb-cgc update_cron . --noauth_local_webserver
-      - sudo -E ./google_appengine/appcfg.py -A isb-cgc update_queues . --noauth_local_webserver
+      - sudo -E ./google-cloud-sdk/bin/gcloud preview app deploy app.yaml cron.yaml queue.yaml --promote
