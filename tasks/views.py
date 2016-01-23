@@ -674,24 +674,39 @@ def read_file_from_gcs(service, bucket_id, file_id):
     """Reads the bucket object and get the contents
        We are getting the StringIO value
     """
+    req = service.objects().get_media(
+        bucket=bucket_id, object=file_id)
     try:
-        print >> sys.stderr,'< Download source file {}'.format(file_id)
-        fileio = cStringIO.StringIO()
-        request = service.objects().get_media(bucket=bucket_id,
-                                              object=file_id)
-
-        media = MediaIoBaseDownload(fileio, request, chunksize=1024*1024)
+        fh = io.BytesIO()
+        downloader = MediaIoBaseDownload(fh, req, chunksize=1024*1024)
         done = False
         while not done:
-            status, done = media.next_chunk()
-            print >> sys.stderr,"Download %s%%." % (status.progress() * 100)
-    except HttpError, error:
-        print >> sys.stderr,"An error occurred: %s" % error
+            status, done = downloader.next_chunk()
+
+    # throws HttpError if this file is not found
+    except HttpError, e:
+        print >> sys.stderr, e
     else:
-        # the billing file in this case is just KB size
-        file_content = fileio.getvalue()
-        fileio.close()
-        return file_content
+        return fh.getvalue()
+    ## old:
+    # try:
+    #     print >> sys.stderr,'< Download source file {}'.format(file_id)
+    #     fileio = cStringIO.StringIO()
+    #     request = service.objects().get_media(bucket=bucket_id,
+    #                                           object=file_id)
+    #
+    #     media = MediaIoBaseDownload(fileio, request, chunksize=1024*1024)
+    #     done = False
+    #     while not done:
+    #         status, done = media.next_chunk()
+    #         print >> sys.stderr,"Download %s%%." % (status.progress() * 100)
+    # except HttpError, error:
+    #     print >> sys.stderr,"An error occurred: %s" % error
+    # else:
+    #     # the billing file in this case is just KB size
+    #     file_content = fileio.getvalue()
+    #     fileio.close()
+    #     return file_content
 
 def upload_file_to_gcs(service, bucket_name, file_content, filename):
     """Upload a file to Google cloud storage
@@ -730,7 +745,7 @@ def load_billing_to_bigquery(request):
         load_date = (datetime.datetime.now() + datetime.timedelta(days=-num-1))
 
         # construct the service object for the interacting with the Cloud Storage API
-        service = get_storage_resource()
+        service = get_special_storage_resource()
 
         print >> sys.stderr, '>< Load billing json from date: {}'.format(load_date.strftime("%Y-%m-%d"))
         logging.info('>< Load billing json from date: {}'.format(load_date.strftime("%Y-%m-%d")))
@@ -748,11 +763,11 @@ def load_billing_to_bigquery(request):
         try:
             upload_fh = preprocess_file(file_info)
         except TypeError, e:
-            print >> sys.stderr, '\n\nBarfed on preprocess_file date: {}. Error: {}. File info: {}'\
+            print >> sys.stderr, '\nBarfed on preprocess_file date: {}. Error: {}. File info: {}'\
                 .format(load_date.strftime("%Y-%m-%d"), e, file_info)
             continue
         else:
-            print >> sys.stderr, '\n\nSuccess! {}'.format(load_date.strftime("%Y-%m-%d"))
+            print >> sys.stderr, '\nSuccess! {}'.format(load_date.strftime("%Y-%m-%d"))
 
         # upload the processed file to google cloud storage
         upload_file_to_gcs(service, GCS_BUCKET, upload_fh, file_to_upload)
