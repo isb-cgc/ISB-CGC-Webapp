@@ -18,9 +18,11 @@ limitations under the License.
 
 import logging
 from re import compile as re_compile
+from time import sleep
 
 from django.conf import settings
 
+from bq_data_access.feature_value_types import ValueType
 from bq_data_access.errors import FeatureNotFoundException
 from bq_data_access.gexp_data import GEXPFeatureProvider, GEXP_FEATURE_TYPE
 from bq_data_access.methylation_data import METHFeatureProvider, METH_FEATURE_TYPE
@@ -69,14 +71,14 @@ class FeatureProviderFactory(object):
             return GEXPFeatureProvider
         elif feature_type == METH_FEATURE_TYPE:
             return METHFeatureProvider
-        elif feature_type == CNVR_FEATURE_TYPE:
-            return CNVRFeatureProvider
-        elif feature_type == RPPA_FEATURE_TYPE:
-            return RPPAFeatureProvider
-        elif feature_type == MIRN_FEATURE_TYPE:
-            return MIRNFeatureProvider
-        elif feature_type == GNAB_FEATURE_TYPE:
-            return GNABFeatureProvider
+        #elif feature_type == CNVR_FEATURE_TYPE:
+        #    return CNVRFeatureProvider
+        #elif feature_type == RPPA_FEATURE_TYPE:
+        #    return RPPAFeatureProvider
+        #elif feature_type == MIRN_FEATURE_TYPE:
+        #    return MIRNFeatureProvider
+        #elif feature_type == GNAB_FEATURE_TYPE:
+        #    return GNABFeatureProvider
 
     @classmethod
     def from_feature_id(cls, feature_id):
@@ -139,3 +141,66 @@ def get_feature_vector(feature_id, cohort_id_array):
         items.append(data_item)
 
     return provider.get_value_type(), items
+
+# TODO document
+def get_feature_vectors_async(params_array):
+    project_id = settings.BQ_PROJECT_ID
+
+    result = {}
+    provider_array = []
+
+    cohort_settings = settings.GET_BQ_COHORT_SETTINGS()
+
+    # Submit jobs
+    for feature_id, cohort_id_array in params_array:
+        provider = FeatureProviderFactory.from_feature_id(feature_id)
+        job_reference = provider.get_data_job_reference(cohort_id_array, cohort_settings.dataset_id, cohort_settings.table_id)
+
+        logging.info("Submitted {job_id}: {fid} - {cohorts}".format(job_id=job_reference['jobId'], fid=feature_id,
+                                                          cohorts=str(cohort_id_array)))
+        provider_array.append({
+            'feature_id': feature_id,
+            'provider': provider,
+            'ready': False,
+            'job_reference': job_reference
+        })
+
+    all_done = False
+    total_retries = 0
+
+    # Poll for completion
+    while all_done is False and total_retries < 20:
+        total_retries += 1
+
+        for item in provider_array:
+            is_finished = item['provider'].is_bigquery_job_finished(project_id)
+            logging.info("Status {job_id}: {status}".format(job_id=item['job_reference']['jobId'],
+                                                            status=str(is_finished)))
+
+            if item['ready'] is False and is_finished:
+                item['ready'] = True
+                query_result = item['provider'].download_and_unpack_query_result()
+                data = []
+
+                for data_point in query_result:
+                    data_item = {key: data_point[key] for key in ['patient_id', 'sample_id', 'aliquot_id']}
+                    value = provider.process_data_point(data_point)
+
+                    if value is None:
+                        value = 'NA'
+                    data_item['value'] = value
+                    data.append(data_item)
+
+                feature_id = item['feature_id']
+                result[feature_id] = {
+                    'type': item['provider'].get_value_type(),
+                    'data': data
+                }
+
+            sleep(1)
+
+        all_done = all([j['ready'] for j in provider_array])
+        logging.debug("Done: {done}    retry: {retry}".format(done=str(all_done), retry=total_retries))
+
+    return result
+

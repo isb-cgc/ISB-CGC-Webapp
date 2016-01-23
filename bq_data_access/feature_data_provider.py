@@ -32,12 +32,15 @@ class FeatureDataProvider(object):
     TODO: Document interface
     """
     def __init__(self):
-        pass
+        self.job_reference = None
+        self.bigquery_service = None
 
     @DurationLogged('FEATURE', 'AUTH')
     def get_bq_service(self):
-        bigquery_service = authorize_credentials_with_Google()
-        return bigquery_service
+        if self.bigquery_service is None:
+            self.bigquery_service = authorize_credentials_with_Google()
+
+        return self.bigquery_service
 
     @DurationLogged('FEATURE', 'BQ_SUBMIT')
     def submit_bigquery_job(self, bigquery, project_id, query_body, batch=False):
@@ -76,7 +79,7 @@ class FeatureDataProvider(object):
                 raise Exception(job['status'])
 
     @DurationLogged('FEATURE', 'BQ_FETCH')
-    def download_query_result(self, bigquery, query_job):
+    def download_query_result(self, bigquery, job_reference):
         result = []
         page_token = None
         total_rows = 0
@@ -84,7 +87,7 @@ class FeatureDataProvider(object):
         while True:
             page = bigquery.jobs().getQueryResults(
                     pageToken=page_token,
-                    **query_job['jobReference']).execute(num_retries=2)
+                    **job_reference).execute(num_retries=2)
 
             if int(page['totalRows']) == 0:
                 break
@@ -98,6 +101,15 @@ class FeatureDataProvider(object):
                 break
 
         return result
+
+    def is_bigquery_job_finished(self, project_id):
+        job_collection = self.get_bq_service().jobs()
+        bigquery_job_id = self.job_reference['jobId']
+
+        job = job_collection.get(projectId=project_id,
+                                 jobId=bigquery_job_id).execute()
+
+        return job['status']['state'] == 'DONE'
 
     def do_query(self, project_id, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array):
         bigquery_service = self.get_bq_service()
@@ -115,12 +127,40 @@ class FeatureDataProvider(object):
         result = self.unpack_query_response(query_result_array)
         return result
 
+    def download_and_unpack_query_result(self):
+        bigquery_service = self.get_bq_service()
+        query_result_array = self.download_query_result(bigquery_service, self.job_reference)
+
+        result = self.unpack_query_response(query_result_array)
+        return result
+
     def get_data_from_bigquery(self, cohort_id_array, cohort_dataset, cohort_table):
         project_id = settings.BQ_PROJECT_ID
         project_name = settings.BIGQUERY_PROJECT_NAME
         dataset_name = settings.BIGQUERY_DATASET2
         result = self.do_query(project_id, project_name, dataset_name, self.table_name, self.feature_def,
                                cohort_dataset, cohort_table, cohort_id_array)
+        return result
+
+    def submit_query_and_get_job_ref(self, project_id, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array):
+        bigquery_service = self.get_bq_service()
+
+        query_body = self.build_query(project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array)
+        query_job = self.submit_bigquery_job(bigquery_service, project_id, query_body)
+
+        # Poll for completion of the query
+        self.job_reference = query_job['jobReference']
+        job_id = query_job['jobReference']['jobId']
+        logging.debug("JOBID {id}".format(id=job_id))
+
+        return self.job_reference
+
+    def get_data_job_reference(self, cohort_id_array, cohort_dataset, cohort_table):
+        project_id = settings.BQ_PROJECT_ID
+        project_name = settings.BIGQUERY_PROJECT_NAME
+        dataset_name = settings.BIGQUERY_DATASET2
+        result = self.submit_query_and_get_job_ref(project_id, project_name, dataset_name, self.table_name,
+                                                   self.feature_def, cohort_dataset, cohort_table, cohort_id_array)
         return result
 
     def get_data(self, cohort_id_array, cohort_dataset, cohort_table):
