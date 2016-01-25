@@ -142,8 +142,8 @@ class FeatureDataProvider(object):
                                cohort_dataset, cohort_table, cohort_id_array)
         return result
 
-    def submit_query_and_get_job_ref(self, project_id, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array):
-        bigquery_service = self.get_bq_service()
+    def submit_query_and_get_job_ref(self, bigquery_service, project_id, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array):
+        #bigquery_service = self.get_bq_service()
 
         query_body = self.build_query(project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array)
         query_job = self.submit_bigquery_job(bigquery_service, project_id, query_body)
@@ -155,11 +155,11 @@ class FeatureDataProvider(object):
 
         return self.job_reference
 
-    def get_data_job_reference(self, cohort_id_array, cohort_dataset, cohort_table):
+    def get_data_job_reference(self, bigquery_service, cohort_id_array, cohort_dataset, cohort_table):
         project_id = settings.BQ_PROJECT_ID
         project_name = settings.BIGQUERY_PROJECT_NAME
         dataset_name = settings.BIGQUERY_DATASET2
-        result = self.submit_query_and_get_job_ref(project_id, project_name, dataset_name, self.table_name,
+        result = self.submit_query_and_get_job_ref(bigquery_service, project_id, project_name, dataset_name, self.table_name,
                                                    self.feature_def, cohort_dataset, cohort_table, cohort_id_array)
         return result
 

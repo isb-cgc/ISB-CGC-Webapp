@@ -22,6 +22,9 @@ from time import sleep
 
 from django.conf import settings
 
+from api.api_helpers import authorize_credentials_with_Google
+
+from bq_data_access.feature_data_provider import FeatureDataProvider
 from bq_data_access.feature_value_types import ValueType
 from bq_data_access.errors import FeatureNotFoundException
 from bq_data_access.gexp_data import GEXPFeatureProvider, GEXP_FEATURE_TYPE
@@ -142,19 +145,20 @@ def get_feature_vector(feature_id, cohort_id_array):
 
     return provider.get_value_type(), items
 
+
 # TODO document
 def get_feature_vectors_async(params_array):
+    bigquery_service = authorize_credentials_with_Google()
     project_id = settings.BQ_PROJECT_ID
 
     result = {}
     provider_array = []
 
     cohort_settings = settings.GET_BQ_COHORT_SETTINGS()
-
     # Submit jobs
     for feature_id, cohort_id_array in params_array:
         provider = FeatureProviderFactory.from_feature_id(feature_id)
-        job_reference = provider.get_data_job_reference(cohort_id_array, cohort_settings.dataset_id, cohort_settings.table_id)
+        job_reference = provider.get_data_job_reference(bigquery_service, cohort_id_array, cohort_settings.dataset_id, cohort_settings.table_id)
 
         logging.info("Submitted {job_id}: {fid} - {cohorts}".format(job_id=job_reference['jobId'], fid=feature_id,
                                                           cohorts=str(cohort_id_array)))
@@ -167,9 +171,11 @@ def get_feature_vectors_async(params_array):
 
     all_done = False
     total_retries = 0
+    poll_count = 0
 
     # Poll for completion
     while all_done is False and total_retries < 20:
+        poll_count += 1
         total_retries += 1
 
         for item in provider_array:
