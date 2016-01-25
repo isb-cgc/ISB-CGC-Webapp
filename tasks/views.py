@@ -51,6 +51,14 @@ from google_helpers.logging_service import get_logging_resource
 from google_helpers.bigquery_service import get_bigquery_service
 from google.appengine.api.taskqueue import Task, Queue
 
+<<<<<<< HEAD
+=======
+from oauth2client.client import GoogleCredentials
+from gcloud import storage, bigquery
+import pandas as pd
+import uuid
+
+>>>>>>> 40de0f2ccd40d5bd8ea9a52e6283c4c1a11a46e5
 from accounts.models import NIH_User
 from api.api_helpers import sql_connection
 
@@ -334,7 +342,7 @@ def CloudSQL_logging(request):
                '--read-from-remote-server',
                yesterdays_binary_log_file,
                '--host',
-               settings.IPV4,
+               settings.DATABASES['default']['HOST'],
                '--user',
                settings.DATABASES['default']['USER'],
                '--base64-output=DECODE-ROWS',
