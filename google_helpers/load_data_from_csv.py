@@ -25,8 +25,7 @@ import json
 import time
 import uuid
 import sys
-from googleapiclient import discovery
-from oauth2client.client import GoogleCredentials
+from google_helpers.bigquery_service import get_bigquery_service
 
 
 # [START load_table]
@@ -108,19 +107,14 @@ def poll_job(bigquery, job):
 # [START run]
 def run(project_id, dataset_id, table_name, schema_file, data_path,
          source_format='NEWLINE_DELIMITED_JSON', write_disposition='WRITE_EMPTY', num_retries=5, poll_interval=1):
-    # [START build_service]
-    # Grab the application's default credentials from the environment.
-    credentials = GoogleCredentials.get_application_default()
 
-    # Construct the service object for interacting with the BigQuery API.
-    bigquery = discovery.build('bigquery', 'v2', credentials=credentials)
-    # [END build_service]
+    bigquery_service = get_bigquery_service()
 
     with open(schema_file, 'r') as f:
         schema = json.load(f)
 
     job = load_table(
-        bigquery,
+        bigquery_service,
         project_id,
         dataset_id,
         table_name,
@@ -131,7 +125,7 @@ def run(project_id, dataset_id, table_name, schema_file, data_path,
         write_disposition
     )
 
-    poll_job(bigquery, job)
+    poll_job(bigquery_service, job)
 
 # [END run]
 

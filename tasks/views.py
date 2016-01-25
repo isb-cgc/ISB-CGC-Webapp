@@ -60,7 +60,7 @@ from google_helpers import load_data_from_csv
 PROJECT_ID = settings.BIGQUERY_PROJECT_NAME
 BQ_DATASET = 'billing'
 GCS_BUCKET = 'isb-cgc-billing-json'
-BILLING_SCHEMA = 'billing_schema.json'
+BILLING_SCHEMA = os.path.abspath(os.path.join(os.path.dirname(__file__), 'billing_schema.json'))
 
 
 debug = settings.DEBUG
@@ -543,111 +543,6 @@ def log_acls(request):
     return HttpResponse('')
 
 
-# @login_required
-# def metrics_cloudsql_users(request, start_date, end_date):
-#     if not request.user.is_superuser:
-#         return HttpResponse('You need to be logged in as a superuser.')
-#
-#     assert start_date.isdigit(), "{} is not a digit".format(start_date)
-#     assert end_date.isdigit(), "{} is not a digit".format(end_date)
-#     assert len(start_date) == 6, "start_date must be of the form yymmdd"
-#     assert len(end_date) == 6, "end_date must be of the form yymmdd"
-#     assert int(end_date) > int(start_date), "end_date must be later than start_date"
-#
-#     user_metrics_dict = {}
-#
-#     # convert to date
-#     start_date = datetime.datetime.strptime("20" + start_date, "%Y%m%d")
-#     end_date = datetime.datetime.strptime("20" + end_date, "%Y%m%d")
-#
-#     parse_cloudsql_logs(user_metrics_dict, start_date, end_date)
-#
-#     csv_response = write_user_metrics_csv_file(user_metrics_dict)
-#     csv_response['Content-Disposition'] = 'attachment; filename="Users from {} to {}.csv"'.format(start_date, end_date)
-#
-#     # return HttpResponse('<pre>'+json.dumps(user_metrics_dict, indent=4)+'</pre>')
-#     return csv_response
-#
-# def parse_cloudsql_logs(user_metrics_dict, start_date, end_date):
-#
-#     storage_client = get_special_storage_resource()
-#
-#     date_range = (end_date - start_date).days
-#
-#     for day_delta in range(date_range+1):
-#         day = start_date + datetime.timedelta(days=day_delta)
-#         day = day.strftime("%y%m%d")
-#         user_metrics_dict[day] = {}
-#         req = storage_client.objects().get_media(
-#             bucket='isb-cgc_logs', object='cloudsql_activity_log_{}.txt'.format(day))
-#         try:
-#             fh = io.BytesIO()
-#             downloader = MediaIoBaseDownload(fh, req, chunksize=1024*1024)
-#             done = False
-#             while not done:
-#                 status, done = downloader.next_chunk()
-#
-#         # throws HttpError if this file is not found
-#         except HttpError, e:
-#             print >> sys.stderr, e
-#         else:
-#             write_user_activity(fh.getvalue(), user_metrics_dict[day])
-#
-#
-# def write_user_activity(log_str, user_metrics_current_day):
-#     user_metrics_current_day['new_users'] = []
-#     new_user_index_list = [m.start() for m in re.finditer('### INSERT INTO `prod`.`auth_user`', log_str)]
-#
-#     for i in new_user_index_list:
-#         new_user_email_start_index = log_str.find("@8='", i) + 4
-#         new_user_email_end_index = log_str.find("'", new_user_email_start_index)
-#         new_user_email = log_str[new_user_email_start_index:new_user_email_end_index]
-#         user_metrics_current_day['new_users'].append(new_user_email)
-#
-#     user_metrics_current_day['old_users'] = {}
-#     old_user_index_list = [m.start() for m in re.finditer('### UPDATE `prod`.`auth_user`', log_str)]
-#
-#     for i in old_user_index_list:
-#         old_user_email_start_index = log_str.find("@8='", i) + 4
-#         old_user_email_end_index = log_str.find("'", old_user_email_start_index)
-#         old_user_email = log_str[old_user_email_start_index:old_user_email_end_index]
-#         if old_user_email not in user_metrics_current_day['new_users']:
-#             if old_user_email not in user_metrics_current_day['old_users'].keys():
-#                 user_metrics_current_day['old_users'][old_user_email] = []
-#             old_user_last_login_start_index = log_str.find("@3=", old_user_email_end_index) + 3
-#             old_user_last_login_end_index = log_str.find("\r\n", old_user_last_login_start_index)
-#             old_user_login_date = log_str[old_user_last_login_start_index:old_user_last_login_end_index]
-#             user_metrics_current_day['old_users'][old_user_email].append(old_user_login_date)
-#
-#
-# def write_user_metrics_csv_file(user_metrics_dict):
-#     rows = ()
-#     rows = (["Date", "Number of New Users", "Number of Returning Users"],)
-#     for date in user_metrics_dict.keys():
-#         rows += ([
-#                     str(date),
-#                     str(len(user_metrics_dict[date].get('new_users', []))),
-#                     str(len(user_metrics_dict[date].get('old_users', {}).keys()))
-#                  ],)
-#
-#     pseudo_buffer = Echo()
-#     writer = csv.writer(pseudo_buffer)
-#     response = StreamingHttpResponse((writer.writerow(row) for row in rows),
-#                                          content_type="text/csv")
-#
-#     return response
-#
-#
-# class Echo(object):
-#     """An object that implements just the write method of the file-like
-#     interface.
-#     """
-#     def write(self, value):
-#         """Write the value by returning it, instead of storing in a buffer."""
-#         return value
-
-
-
 
 """Load billing json file from storage into BigQuery
 """
@@ -687,26 +582,10 @@ def read_file_from_gcs(service, bucket_id, file_id):
     except HttpError, e:
         print >> sys.stderr, e
     else:
-        return fh.getvalue()
-    ## old:
-    # try:
-    #     print >> sys.stderr,'< Download source file {}'.format(file_id)
-    #     fileio = cStringIO.StringIO()
-    #     request = service.objects().get_media(bucket=bucket_id,
-    #                                           object=file_id)
-    #
-    #     media = MediaIoBaseDownload(fileio, request, chunksize=1024*1024)
-    #     done = False
-    #     while not done:
-    #         status, done = media.next_chunk()
-    #         print >> sys.stderr,"Download %s%%." % (status.progress() * 100)
-    # except HttpError, error:
-    #     print >> sys.stderr,"An error occurred: %s" % error
-    # else:
-    #     # the billing file in this case is just KB size
-    #     file_content = fileio.getvalue()
-    #     fileio.close()
-    #     return file_content
+        file_content = fh.getvalue()
+        fh.close()
+        return file_content
+
 
 def upload_file_to_gcs(service, bucket_name, file_content, filename):
     """Upload a file to Google cloud storage
@@ -741,11 +620,16 @@ def preprocess_file(file_content):
 def load_billing_to_bigquery(request):
     """Main: Read the file from storage and load into BigQuery
     """
+    env = os.getenv('SERVER_SOFTWARE')
+
     for num in range(36):
         load_date = (datetime.datetime.now() + datetime.timedelta(days=-num-1))
 
         # construct the service object for the interacting with the Cloud Storage API
-        service = get_special_storage_resource()
+        if env.startswith('Google App Engine/'):
+            service = get_storage_resource()
+        else:
+            service = get_special_storage_resource()
 
         print >> sys.stderr, '>< Load billing json from date: {}'.format(load_date.strftime("%Y-%m-%d"))
         logging.info('>< Load billing json from date: {}'.format(load_date.strftime("%Y-%m-%d")))
@@ -776,6 +660,8 @@ def load_billing_to_bigquery(request):
         # load the uploaded file from the storage(new-line delimited) into bigquery
         # create a new table, replacing the contents
         print >> sys.stderr, '<> Loading file from storage into BigQuery'
+        print >> sys.stderr, 'BILLING_SCHEMA: '
+        print >> sys.stderr, BILLING_SCHEMA
         logging.info('<> Loading file from storage into BigQuery')
         load_data_from_csv.run(PROJECT_ID, BQ_DATASET, table_id, BILLING_SCHEMA,
                                gcs_load_file, 'NEWLINE_DELIMITED_JSON',
