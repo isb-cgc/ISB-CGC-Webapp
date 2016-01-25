@@ -632,7 +632,7 @@ def load_billing_to_bigquery(request):
             service = get_special_storage_resource()
 
         print >> sys.stderr, '>< Load billing json from date: {}'.format(load_date.strftime("%Y-%m-%d"))
-        logging.info('>< Load billing json from date: {}'.format(load_date.strftime("%Y-%m-%d")))
+        logger.info('>< Load billing json from date: {}'.format(load_date.strftime("%Y-%m-%d")))
 
         # some params
         table_id = 'billing_' + load_date.strftime("%Y%m%d")
@@ -660,9 +660,7 @@ def load_billing_to_bigquery(request):
         # load the uploaded file from the storage(new-line delimited) into bigquery
         # create a new table, replacing the contents
         print >> sys.stderr, '<> Loading file from storage into BigQuery'
-        print >> sys.stderr, 'BILLING_SCHEMA: '
-        print >> sys.stderr, BILLING_SCHEMA
-        logging.info('<> Loading file from storage into BigQuery')
+        logger.info('<> Loading file from storage into BigQuery')
         load_data_from_csv.run(PROJECT_ID, BQ_DATASET, table_id, BILLING_SCHEMA,
                                gcs_load_file, 'NEWLINE_DELIMITED_JSON',
                                'WRITE_TRUNCATE')

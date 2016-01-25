@@ -21,11 +21,15 @@ For more information, see the README.md under /bigquery.
 """
 
 import argparse
+import logging
 import json
 import time
 import uuid
 import sys
+
 from google_helpers.bigquery_service import get_bigquery_service
+
+logger = logging.getLogger(__name__)
 
 
 # [START load_table]
@@ -80,7 +84,8 @@ def load_table(bigquery, project_id, dataset_id, table_name, source_schema,
 def poll_job(bigquery, job):
     """Waits for a job to complete."""
 
-    print('Waiting for job to finish...')
+    logger.info('Waiting for poll_job for table {} to finish...'.format(
+        job['configuration']['load']['destinationTable']['tableId']))
 
     request = bigquery.jobs().get(
         projectId=job['jobReference']['projectId'],
@@ -90,14 +95,15 @@ def poll_job(bigquery, job):
         result = request.execute(num_retries=2)
 
         if 'errors' in result['status']:
-            print ('Error loading table:')
+            logger.warn('Error loading table: {}'.format(
+                job['configuration']['load']['destinationTable']['tableId']))
             raise RuntimeError(json.dumps(result['status']['errors'], indent=4))
-            return
 
         if result['status']['state'] == 'DONE':
             if 'errorResult' in result['status']:
                 raise RuntimeError(result['status']['errorResult'])
-            print('Job complete.')
+            print >> sys.stderr, 'Job complete.'
+            logger.info('poll_job complete.')
             return
 
         time.sleep(1)
