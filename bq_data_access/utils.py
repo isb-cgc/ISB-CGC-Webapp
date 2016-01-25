@@ -43,10 +43,11 @@ def find_all_id_keys(*vectors, **kwargs):
 
     return identifiers
 
+
 class VectorMergeSupport(object):
     def __init__(self, missing_value, sample_id_key, row_ids=[]):
         self.missing_value = missing_value
-        self.sample_id_key = sample_id_key  # ex 'sample_id'
+        self.sample_id_key = sample_id_key
 
         # Sparse data goes here
         self.data = OrderedDict()
@@ -67,32 +68,18 @@ class VectorMergeSupport(object):
         if row_id not in self.data:
             self.data[row_id] = []
 
-        # ex: self.data['x'].append(_get_index_for_sample_id('TCGA-BH-A0B1-10A'), '66')
-        # so self.data['x'] is a list of tuples with (index, value) instead of (barcode, value)
         self.data[row_id].append((self._get_index_for_sample_id(sample_id), value))
 
     def add_dict_array(self, vector, vector_id, value_key):
-        # ex vector:
-        # {'aliquot_id': None,
-        #  'patient_id': u        # {'aliquot_id': None,
-        #  'patient_id': u'TCGA-BH-A0B1',
-        #  'sample_id': u'TCGA-BH-A0B1-10A',
-        #  'value': u'66'},
-        #  'sample_id': u'TCGA-BH-A0B1-10A',
-        #  'value': u'66'}
-        # ex: vector_id: 'x'
-        # ex: value_key: 'value'
-
         for item in vector:
             sample_id = item[self.sample_id_key]
             value = item[value_key]
-            # ex: _add_data_point('x', 'TCGA-BH-A0B1-10A', '66')
             self._add_data_point(vector_id, sample_id, value)
 
     def get_merged_dict(self):
         num_samples = self.current_sample_index
-        # print num_samples #== this equals the number of patients in cohort. It should be the number of samples.
-        result = [{} for x in xrange(num_samples)]
+        result = [{} for _ in xrange(num_samples)]
+        sample_id_keys = self.sample_ids.keys()
 
         for row_id, row_samples in self.data.items():
             row_values = [self.missing_value] * len(self.sample_ids)
@@ -100,11 +87,12 @@ class VectorMergeSupport(object):
             for sample_index, value in row_samples:
                 row_values[sample_index] = value
 
+            counter = 0
             for index, value in enumerate(row_values):
+                counter += 1
                 d = result[index]
-                d[self.sample_id_key] = self.sample_ids.keys()[index]
+                d[self.sample_id_key] = sample_id_keys[index]
                 d[row_id] = value
-
         return result
 
 
