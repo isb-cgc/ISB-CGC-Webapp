@@ -17,18 +17,18 @@ limitations under the License.
 """
 
 import logging
-import time
 
 from endpoints import api as endpoints_api, method as endpoints_method
 from endpoints import NotFoundException, InternalServerErrorException
 from protorpc import remote
 from protorpc.messages import BooleanField, EnumField, IntegerField, Message, MessageField, StringField
 
-from bq_data_access.errors import FeatureNotFoundException
 from bq_data_access.feature_value_types import ValueType
-from bq_data_access.data_access import is_valid_feature_identifier, get_feature_vector
+from bq_data_access.data_access import is_valid_feature_identifier, get_feature_vectors_async
 from bq_data_access.utils import VectorMergeSupport
 from bq_data_access.cohort_cloudsql import CloudSQLCohortAccess
+from bq_data_access.utils import DurationLogged
+
 from api.pairwise import PairwiseInputVector, Pairwise
 from api.pairwise_api import PairwiseResults, PairwiseResultVector, PairwiseFilterMessage
 
@@ -159,6 +159,7 @@ class FeatureDataEndpoints(remote.Service):
         return result
 
     # TODO refactor to separate module
+    @DurationLogged('PAIRWISE', 'GET')
     def get_pairwise_result(self, feature_array):
         # Format the feature vectors for pairwise
         input_vectors = Pairwise.prepare_feature_vector(feature_array)
@@ -184,7 +185,12 @@ class FeatureDataEndpoints(remote.Service):
 
         return results
 
+    @DurationLogged('FEATURE', 'VECTOR_MERGE')
+    def get_merged_dict_timed(self, vms):
+        return vms.get_merged_dict()
+
     # TODO refactor missing value logic out of this module
+    @DurationLogged('FEATURE', 'GET_VECTORS')
     def get_merged_feature_vectors(self, x_id, y_id, c_id, cohort_id_array):
         """
         Fetches and merges data for two or three feature vectors (see parameter documentation below).
@@ -223,22 +229,26 @@ class FeatureDataEndpoints(remote.Service):
         :return: PlotDataResponse
         """
 
-        start = time.time()
-
-        x_type, x_vec = get_feature_vector(x_id, cohort_id_array)
+        async_params = [(x_id, cohort_id_array),
+                        (c_id, cohort_id_array)]
 
         y_type, y_vec = ValueType.STRING, []
         if y_id is not None:
-            y_type, y_vec = get_feature_vector(y_id, cohort_id_array)
-        c_type, c_vec = get_feature_vector(c_id, cohort_id_array)
+            async_params.append((y_id, cohort_id_array))
+
+        async_result = get_feature_vectors_async(async_params)
+        if y_id is not None:
+            y_type, y_vec = async_result[y_id]['type'], async_result[y_id]['data']
+
+        x_type, x_vec = async_result[x_id]['type'], async_result[x_id]['data']
+        c_type, c_vec = async_result[c_id]['type'], async_result[c_id]['data']
 
         # TODO fix hardcoded usage of 'patient_id'
         vms = VectorMergeSupport('NA', 'sample_id', ['x', 'y', 'c']) # changed so that it plots per sample not patient
         vms.add_dict_array(x_vec, 'x', 'value')
         vms.add_dict_array(y_vec, 'y', 'value')
         vms.add_dict_array(c_vec, 'c', 'value')
-
-        merged = vms.get_merged_dict()
+        merged = self.get_merged_dict_timed(vms)
 
         # Resolve which (requested) cohorts each datapoint belongs to.
         cohort_set_dict = CloudSQLCohortAccess.get_cohorts_for_datapoints(cohort_id_array)
@@ -271,9 +281,6 @@ class FeatureDataEndpoints(remote.Service):
         # TODO assign label for y if y_id is None, as in that case the y-field will be missing from the response
         label_message = PlotDataFeatureLabels(x=x_id, y=y_id, c=c_id)
 
-        end = time.time()
-        time_elapsed = end-start
-
         # TODO Refactor pairwise call to separate function
         # Include pairwise results
         input_vectors = [PairwiseInputVector(x_id, x_type, x_vec),
@@ -284,13 +291,10 @@ class FeatureDataEndpoints(remote.Service):
 
         pairwise_result = None
         try:
-            logging.debug("Calling Pairwise...")
             pairwise_result = self.get_pairwise_result(input_vectors)
         except Exception as e:
             logging.warn("Pairwise results not included in returned object")
             logging.exception(e)
-
-        logging.info('Time elapsed: ' + str(time_elapsed))
 
         return PlotDataResponse(types=type_message, labels=label_message, items=items,
                                 cohort_set=cohort_info_obj_array,
