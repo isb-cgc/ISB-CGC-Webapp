@@ -179,13 +179,14 @@ def get_feature_vectors_async(params_array, poll_retry_limit=20):
         total_retries += 1
 
         for item in provider_array:
-            is_finished = item['provider'].is_bigquery_job_finished(project_id)
+            provider = item['provider']
+            is_finished = provider.is_bigquery_job_finished(project_id)
             logging.info("Status {job_id}: {status}".format(job_id=item['job_reference']['jobId'],
                                                             status=str(is_finished)))
 
             if item['ready'] is False and is_finished:
                 item['ready'] = True
-                query_result = item['provider'].download_and_unpack_query_result()
+                query_result = provider.download_and_unpack_query_result()
                 data = []
 
                 for data_point in query_result:
@@ -199,7 +200,7 @@ def get_feature_vectors_async(params_array, poll_retry_limit=20):
 
                 feature_id = item['feature_id']
                 result[feature_id] = {
-                    'type': item['provider'].get_value_type(),
+                    'type': provider.get_value_type(),
                     'data': data
                 }
 
