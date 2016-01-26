@@ -31,9 +31,9 @@ class FeatureDataProvider(object):
 
     TODO: Document interface
     """
-    def __init__(self):
+    def __init__(self, bigquery_service=None):
         self.job_reference = None
-        self.bigquery_service = None
+        self.bigquery_service = bigquery_service
 
     @DurationLogged('FEATURE', 'AUTH')
     def get_bq_service(self):
@@ -111,22 +111,6 @@ class FeatureDataProvider(object):
 
         return job['status']['state'] == 'DONE'
 
-    def do_query(self, project_id, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array):
-        bigquery_service = self.get_bq_service()
-
-        query_body = self.build_query(project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array)
-        query_job = self.submit_bigquery_job(bigquery_service, project_id, query_body)
-
-        # Poll for completion of the query
-        job_id = query_job['jobReference']['jobId']
-        logging.debug("JOBID {id}".format(id=job_id))
-
-        self.poll_async_job(bigquery_service, project_id, job_id)
-        query_result_array = self.download_query_result(bigquery_service, query_job)
-
-        result = self.unpack_query_response(query_result_array)
-        return result
-
     def download_and_unpack_query_result(self):
         bigquery_service = self.get_bq_service()
         query_result_array = self.download_query_result(bigquery_service, self.job_reference)
@@ -134,16 +118,8 @@ class FeatureDataProvider(object):
         result = self.unpack_query_response(query_result_array)
         return result
 
-    def get_data_from_bigquery(self, cohort_id_array, cohort_dataset, cohort_table):
-        project_id = settings.BQ_PROJECT_ID
-        project_name = settings.BIGQUERY_PROJECT_NAME
-        dataset_name = settings.BIGQUERY_DATASET2
-        result = self.do_query(project_id, project_name, dataset_name, self.table_name, self.feature_def,
-                               cohort_dataset, cohort_table, cohort_id_array)
-        return result
-
-    def submit_query_and_get_job_ref(self, bigquery_service, project_id, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array):
-        #bigquery_service = self.get_bq_service()
+    def submit_query_and_get_job_ref(self, project_id, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array):
+        bigquery_service = self.get_bq_service()
 
         query_body = self.build_query(project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array)
         query_job = self.submit_bigquery_job(bigquery_service, project_id, query_body)
@@ -155,14 +131,11 @@ class FeatureDataProvider(object):
 
         return self.job_reference
 
-    def get_data_job_reference(self, bigquery_service, cohort_id_array, cohort_dataset, cohort_table):
+    def get_data_job_reference(self, cohort_id_array, cohort_dataset, cohort_table):
         project_id = settings.BQ_PROJECT_ID
         project_name = settings.BIGQUERY_PROJECT_NAME
         dataset_name = settings.BIGQUERY_DATASET2
-        result = self.submit_query_and_get_job_ref(bigquery_service, project_id, project_name, dataset_name, self.table_name,
+        result = self.submit_query_and_get_job_ref(project_id, project_name, dataset_name, self.table_name,
                                                    self.feature_def, cohort_dataset, cohort_table, cohort_id_array)
         return result
 
-    def get_data(self, cohort_id_array, cohort_dataset, cohort_table):
-        result = self.get_data_from_bigquery(cohort_id_array, cohort_dataset, cohort_table)
-        return result
