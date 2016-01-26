@@ -18,8 +18,6 @@ limitations under the License.
 
 import logging
 from re import compile as re_compile
-from uuid import uuid4
-from time import sleep
 
 from api.schema.tcga_clinical import schema as clinical_schema
 
@@ -162,17 +160,6 @@ class ClinicalFeatureProvider(FeatureDataProvider):
                 'value': row['f'][2]['v']
             })
 
-        return result
-
-    def get_data_from_bigquery2(self, cohort_id_array, cohort_dataset, cohort_table):
-        project_id = settings.BQ_PROJECT_ID
-        project_name = settings.BIGQUERY_PROJECT_NAME
-        dataset_name = settings.BIGQUERY_DATASET2
-        result = self.do_query(project_id, project_name, dataset_name, self.table_name, self.feature_def, cohort_dataset, cohort_table, cohort_id_array)
-        return result
-
-    def get_data2(self, cohort_id_array, cohort_dataset, cohort_table):
-        result = self.get_data_from_bigquery(cohort_id_array, cohort_dataset, cohort_table)
         return result
 
     def get_table_name(self):
