@@ -196,14 +196,14 @@ class METHFeatureDef(object):
 class METHFeatureProvider(FeatureDataProvider):
     TABLES = TABLES
 
-    def __init__(self, feature_id):
+    def __init__(self, feature_id, **kwargs):
         self.feature_type = ''
         self.cpg_probe = ''
         self.feature_def = None
         self.table_name = ''
         self.platform = ''
         self.parse_internal_feature_id(feature_id)
-        super(METHFeatureProvider, self).__init__()
+        super(METHFeatureProvider, self).__init__(**kwargs)
 
     def get_value_type(self):
         return ValueType.FLOAT
