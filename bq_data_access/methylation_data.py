@@ -199,6 +199,7 @@ class METHFeatureProvider(FeatureDataProvider):
     def __init__(self, feature_id):
         self.feature_type = ''
         self.cpg_probe = ''
+        self.feature_def = None
         self.table_name = ''
         self.platform = ''
         self.parse_internal_feature_id(feature_id)
@@ -212,7 +213,7 @@ class METHFeatureProvider(FeatureDataProvider):
 
     @classmethod
     def process_data_point(cls, data_point):
-        return str(data_point['beta_value'])
+        return data_point['beta_value']
 
     def build_query(self, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array):
         # Generate the 'IN' statement string: (%s, %s, ..., %s)

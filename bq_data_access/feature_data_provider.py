@@ -35,7 +35,6 @@ class FeatureDataProvider(object):
         self.job_reference = None
         self.bigquery_service = bigquery_service
 
-    @DurationLogged('FEATURE', 'AUTH')
     def get_bq_service(self):
         if self.bigquery_service is None:
             self.bigquery_service = authorize_credentials_with_Google()

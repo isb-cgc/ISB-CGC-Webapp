@@ -105,11 +105,11 @@ class GEXPFeatureDef(object):
 class GEXPFeatureProvider(FeatureDataProvider):
     TABLES = TABLES
 
-    def __init__(self, feature_id):
+    def __init__(self, feature_id, **kwargs):
         self.feature_def = None
         self.table_name = ''
         self.parse_internal_feature_id(feature_id)
-        super(GEXPFeatureProvider, self).__init__()
+        super(GEXPFeatureProvider, self).__init__(**kwargs)
 
     def get_value_type(self):
         return ValueType.FLOAT
@@ -118,7 +118,7 @@ class GEXPFeatureProvider(FeatureDataProvider):
         return DataTypes.GEXP
 
     def process_data_point(self, data_point):
-        return str(data_point['value'])
+        return data_point['value']
 
     def build_query(self, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array):
         # Generate the 'IN' statement string: (%s, %s, ..., %s)

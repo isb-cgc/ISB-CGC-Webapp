@@ -84,9 +84,9 @@ class FeatureProviderFactory(object):
         #    return GNABFeatureProvider
 
     @classmethod
-    def from_feature_id(cls, feature_id):
+    def from_feature_id(cls, feature_id, **kwargs):
         provider_class = cls.get_provider_class_from_feature_id(feature_id)
-        return provider_class(feature_id)
+        return provider_class(feature_id, **kwargs)
 
 
 def is_valid_feature_identifier(feature_id):
@@ -147,7 +147,7 @@ def get_feature_vector(feature_id, cohort_id_array):
 
 
 # TODO document
-def get_feature_vectors_async(params_array):
+def get_feature_vectors_async(params_array, poll_retry_limit=20):
     bigquery_service = authorize_credentials_with_Google()
     project_id = settings.BQ_PROJECT_ID
 
@@ -157,8 +157,8 @@ def get_feature_vectors_async(params_array):
     cohort_settings = settings.GET_BQ_COHORT_SETTINGS()
     # Submit jobs
     for feature_id, cohort_id_array in params_array:
-        provider = FeatureProviderFactory.from_feature_id(feature_id)
-        job_reference = provider.get_data_job_reference(bigquery_service, cohort_id_array, cohort_settings.dataset_id, cohort_settings.table_id)
+        provider = FeatureProviderFactory.from_feature_id(feature_id, bigquery_service=bigquery_service)
+        job_reference = provider.get_data_job_reference(cohort_id_array, cohort_settings.dataset_id, cohort_settings.table_id)
 
         logging.info("Submitted {job_id}: {fid} - {cohorts}".format(job_id=job_reference['jobId'], fid=feature_id,
                                                           cohorts=str(cohort_id_array)))
@@ -174,7 +174,7 @@ def get_feature_vectors_async(params_array):
     poll_count = 0
 
     # Poll for completion
-    while all_done is False and total_retries < 20:
+    while all_done is False and total_retries < poll_retry_limit:
         poll_count += 1
         total_retries += 1
 
@@ -190,7 +190,7 @@ def get_feature_vectors_async(params_array):
 
                 for data_point in query_result:
                     data_item = {key: data_point[key] for key in ['patient_id', 'sample_id', 'aliquot_id']}
-                    value = provider.process_data_point(data_point)
+                    value = str(provider.process_data_point(data_point))
 
                     if value is None:
                         value = 'NA'

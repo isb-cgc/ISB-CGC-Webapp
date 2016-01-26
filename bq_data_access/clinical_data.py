@@ -90,11 +90,11 @@ class ClinicalFeatureProvider(FeatureDataProvider):
         }
     ]
 
-    def __init__(self, feature_id):
+    def __init__(self, feature_id, **kwargs):
         self.table_name = ''
         self.feature_def = None
         self.parse_internal_feature_id(feature_id)
-        super(ClinicalFeatureProvider, self).__init__()
+        super(ClinicalFeatureProvider, self).__init__(**kwargs)
 
     def get_value_type(self):
         return self.feature_def.value_type
