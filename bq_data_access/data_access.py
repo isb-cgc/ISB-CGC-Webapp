@@ -24,8 +24,6 @@ from django.conf import settings
 
 from api.api_helpers import authorize_credentials_with_Google
 
-from bq_data_access.feature_data_provider import FeatureDataProvider
-from bq_data_access.feature_value_types import ValueType
 from bq_data_access.errors import FeatureNotFoundException
 from bq_data_access.gexp_data import GEXPFeatureProvider, GEXP_FEATURE_TYPE
 from bq_data_access.methylation_data import METHFeatureProvider, METH_FEATURE_TYPE
@@ -80,8 +78,8 @@ class FeatureProviderFactory(object):
             return RPPAFeatureProvider
         elif feature_type == MIRN_FEATURE_TYPE:
             return MIRNFeatureProvider
-        #elif feature_type == GNAB_FEATURE_TYPE:
-        #    return GNABFeatureProvider
+        elif feature_type == GNAB_FEATURE_TYPE:
+            return GNABFeatureProvider
 
     @classmethod
     def from_feature_id(cls, feature_id, **kwargs):
