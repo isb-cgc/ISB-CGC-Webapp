@@ -67,6 +67,16 @@ def get_feature_type():
 
 
 class GEXPFeatureDef(object):
+    # Regular expression for parsing the feature definition.
+    #
+    # Example ID: GEXP:TP53:mrna_bcgsc_illumina_hiseq
+    regex = re_compile("^GEXP:"
+                       # gene
+                       "([a-zA-Z0-9]+):"
+                       # table
+                       "(" + "|".join([table['id'] for table in TABLES]) +
+                       ")$")
+
     def __init__(self, gene, value_field, table_id):
         self.gene = gene
         self.value_field = value_field
@@ -83,17 +93,7 @@ class GEXPFeatureDef(object):
 
     @classmethod
     def from_feature_id(cls, feature_id):
-        # Example ID: GEXP:TP53:mrna_bcgsc_illumina_hiseq
-        gexp_tables = "|".join([table['id'] for table in TABLES])
-
-        regex = re_compile("^GEXP:"
-                           # gene
-                           "([a-zA-Z0-9]+):"
-                           # table
-                           "(" + gexp_tables +
-                           ")$")
-
-        feature_fields = regex.findall(feature_id)
+        feature_fields = cls.regex.findall(feature_id)
         if len(feature_fields) == 0:
             raise FeatureNotFoundException(feature_id)
 

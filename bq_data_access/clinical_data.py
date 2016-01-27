@@ -44,6 +44,13 @@ class InvalidClinicalFeatureIDException(Exception):
 
 
 class ClinicalFeatureDef(object):
+    # Regular expression for parsing the feature definition.
+    #
+    # Example ID: CLIN:vital_status
+    regex = re_compile("^CLIN:"
+                       # column name
+                       "([a-zA-Z0-9_\-]+)$")
+
     def __init__(self, table_field, value_type):
         self.table_field = table_field
         self.value_type = value_type
@@ -62,12 +69,7 @@ class ClinicalFeatureDef(object):
 
     @classmethod
     def from_feature_id(cls, feature_id):
-        # Example ID: CLIN:vital_status
-        regex = re_compile("^CLIN:"
-                           # column name
-                           "([a-zA-Z0-9_\-]+)$")
-
-        feature_fields = regex.findall(feature_id)
+        feature_fields = cls.regex.findall(feature_id)
         if len(feature_fields) == 0:
             raise FeatureNotFoundException(feature_id)
         column_name = feature_fields[0]
