@@ -74,8 +74,8 @@ class FeatureProviderFactory(object):
             return GEXPFeatureProvider
         elif feature_type == METH_FEATURE_TYPE:
             return METHFeatureProvider
-        #elif feature_type == CNVR_FEATURE_TYPE:
-        #    return CNVRFeatureProvider
+        elif feature_type == CNVR_FEATURE_TYPE:
+            return CNVRFeatureProvider
         #elif feature_type == RPPA_FEATURE_TYPE:
         #    return RPPAFeatureProvider
         #elif feature_type == MIRN_FEATURE_TYPE:
