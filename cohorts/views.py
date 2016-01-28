@@ -41,7 +41,7 @@ from google.appengine.api import urlfetch
 from allauth.socialaccount.models import SocialToken
 
 from models import Cohort, Patients, Samples, Cohort_Perms, Source, Filters, Cohort_Comments
-from workbooks.models import Workbook, Worksheet
+from workbooks.models import Workbook, Worksheet, Worksheet_plot
 from projects.models import Project, Study, User_Feature_Counts, User_Feature_Definitions
 from visualizations.models import Plot_Cohorts, Plot
 from bq_data_access.cohort_bigquery import BigQueryCohortSupport
@@ -806,6 +806,8 @@ def save_comment(request):
 def save_cohort_from_plot(request):
     if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     cohort_name = request.POST.get('cohort-name', 'Plot Selected Cohort')
+    result = {}
+
     if cohort_name:
         # Create Cohort
         cohort = Cohort.objects.create(name=cohort_name)
@@ -815,12 +817,11 @@ def save_cohort_from_plot(request):
         perm = Cohort_Perms.objects.create(cohort=cohort, user=request.user, perm=Cohort_Perms.OWNER)
         perm.save()
 
-        # Create Sources
-        plot_id = request.POST.get('plot_id')
-        source_cohorts = Plot_Cohorts.objects.filter(plot=Plot.objects.get(id=plot_id))
+        # Create Sources, at this point only one cohort for a plot
+        plot_id = request.POST.get('plot-id')
+        source_plot = Worksheet_plot.objects.get(id=plot_id)
         source_list = []
-        for source in source_cohorts:
-            source_list.append(Source(parent=source.cohort, cohort=cohort, type=Source.PLOT_SEL))
+        source_list.append(Source(parent=source_plot.cohort.cohort, cohort=cohort, type=Source.PLOT_SEL))
         Source.objects.bulk_create(source_list)
 
         # Create Samples
@@ -848,20 +849,16 @@ def save_cohort_from_plot(request):
         bcs = BigQueryCohortSupport(project_id, cohort_settings.dataset_id, cohort_settings.table_id)
         bcs.add_cohort_with_sample_barcodes(cohort.id, cohort.samples_set.all().values_list('sample_id', 'study_id'))
 
-        response_str = '<div class="row">' \
-                        '<div class="col-lg-12">' \
-                        '<div class="alert alert-info alert-dismissible">' \
-                        '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>' \
-                        'Cohort, {name}, created successfully.' \
-                        '</div></div></div>'.format(name=cohort.name)
-        return HttpResponse(response_str, status=200)
-    response_str = '<div class="row">' \
-                    '<div class="col-lg-12">' \
-                    '<div class="alert alert-danger alert-dismissible">' \
-                    '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>' \
-                    'Cohort failed to save.' \
-                    '</div></div></div>'
-    return HttpResponse(response_str, status=500)
+        workbook_id  = source_plot.worksheet.workbook_id
+        worksheet_id = source_plot.worksheet_id
+
+
+        result['message'] = "Cohort '" + cohort.name + "' created from the selected sample"
+    else :
+        result['error'] = "parameters were not correct"
+
+    return HttpResponse(json.dumps(result), status=200)
+
 
 @login_required
 @csrf_protect

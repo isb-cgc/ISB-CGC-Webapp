@@ -18,31 +18,50 @@
 
 define(['jquery', 'd3', 'd3tip', 'vizhelpers'],
 function($, d3, d3tip, helpers) {
+    var svg;
+    var margin;
+    var zoom_area;
+    var zoom_rect;
+    var width;
+    var height;
+    var x;
+    var xAxis;
+    var y;
+    var yAxis;
+    var min_n;
+    var max_n;
+
     return {
-        createHistogramPlot: function (svg, raw_Data, values_only, width, height, x_attr, xLabel, tip, margin, legend) {
+        createHistogramPlot : function (svg_param, raw_Data, values_only, width_param, height_param, x_attr, xLabel, tip, margin_param, legend) {
+            svg    = svg_param;
+            width  = width_param;
+            height = height_param;
+            margin = margin_param;
 
             var num_bins = Math.ceil(Math.sqrt(raw_Data.length));
             var hist_data = d3.layout.histogram()
                 .bins(num_bins)
                 .frequency(false)(values_only);
-
             var kde = science.stats.kde().sample(values_only);
-
             var tmp = helpers.get_min_max(raw_Data, x_attr);
-            var min_n = tmp[0];
-            var max_n = tmp[1];
-            var x = d3.scale.linear()
+            min_n = tmp[0];
+            max_n = tmp[1];
+
+
+            x = d3.scale.linear()
                 .range([margin.left, width - margin.right])
                 .domain([min_n, max_n]);
-            var xAxis = d3.svg.axis()
+            xAxis = d3.svg.axis()
                 .scale(x)
                 .orient('bottom');
-            var y = d3.scale.linear()
+
+            y = d3.scale.linear()
                 .range([height - margin.bottom - margin.top, 0])
                 .domain([0, d3.max(hist_data, function (d) {
                     return d.y;
                 })]);
-            var yAxis = d3.svg.axis()
+
+            yAxis = d3.svg.axis()
                 .scale(y)
                 .orient('left')
                 .tickFormat(d3.format(".1%"))
@@ -60,7 +79,7 @@ function($, d3, d3tip, helpers) {
                 .y(y)
                 .on('zoom', zoomer);
 
-            var zoom_area = svg.append('g')
+            zoom_area = svg.append('g')
                 .attr('class', 'zoom_area')
                 .append('rect')
                 .attr('width', width)
@@ -162,7 +181,7 @@ function($, d3, d3tip, helpers) {
                 $('#save-cohort-'+plot_id+'-modal input[name="samples"]').attr('value', sample_list);
                 $(svg[0]).parents('.plot')
                     .find('.save-cohort-card').show()
-                    .attr('style', 'position:absolute; top: 60px; left:' +(x(e[1])+margin.left)+'px;');
+                    .attr('style', 'position:relative; top: -600px; left:' +(x(e[1])+10)+'px;');
             };
 
             // If the brush is empty, select all circles.
@@ -204,9 +223,8 @@ function($, d3, d3tip, helpers) {
                 .attr('transform', 'rotate(-90) translate(' + (-1 * (height/2)) + ',10)')
                 .text('Percentage of Samples in Grouping');
 
-            var check_selection_state = function (obj) {
-                if (obj) {
-
+            function check_selection_state(isActive) {
+                if (isActive) {
                     // Remove zoom area
                     svg.selectAll('.zoom_area').remove();
 
@@ -231,7 +249,8 @@ function($, d3, d3tip, helpers) {
                     // Append new zoom area
                     zoom_area = svg.append('g')
                         .attr('class', 'zoom_area')
-                        .append('rect')
+
+                    zoom_rect = zoom_area.append('rect')
                         .attr('width', width)
                         .attr('height', height)
                         .style('opacity', 0);
@@ -243,6 +262,16 @@ function($, d3, d3tip, helpers) {
                 }
             };
 
+            function resize() {
+                width = svg.node().parentNode.offsetWidth - 10;
+
+                //TODO resize plot
+            }
+
+            function check_selection_state_wrapper(button){
+                check_selection_state(button);
+            }
+
             $(svg[0]).parents('.plot').find('.toggle-selection').unbind();
             $(svg[0]).parents('.plot').find('.toggle-selection').on('click', function () {
                 $(this).toggleClass('active');
@@ -251,6 +280,13 @@ function($, d3, d3tip, helpers) {
             });
 
             check_selection_state($(svg[0]).parents('.plot').find('.toggle-selection').hasClass('active'));
+
+            return {
+                resize                : resize,
+                check_selection_state : check_selection_state_wrapper
+            }
         }
+
+
     };
 });

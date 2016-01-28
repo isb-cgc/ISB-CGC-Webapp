@@ -29,10 +29,12 @@ define([
     'violin_plot',
     'histogram_plot',
     'bar_plot',
+    'visualizations/mock_histogram_data',
     'select2',
     'assetscore',
     'assetsresponsive'
-], function($, jqueryui, bootstrap, session_security, d3, d3tip, vizhelpers, scatter_plot, cubby_plot, violin_plot, histogram, bar_graph) {
+
+], function($, jqueryui, bootstrap, session_security, d3, d3tip, vizhelpers, scatter_plot, cubby_plot, violin_plot, histogram, bar_graph, mock_histogram_data ) {
     A11y.Core();
 
     var scatter_plot_obj = Object.create(scatter_plot, {});
@@ -86,7 +88,7 @@ define([
     function generate_plot(plot_element, type, x_attr, y_attr, color_by, cohorts, cohort_override) {
         var width  = 800,
             height = 600,
-            margin = {top: 0, bottom: 50, left: 50, right: 10},
+            margin = {top: 0, bottom: 50, left: 70, right: 10},
             x_type = '',
             y_type = '';
 
@@ -119,10 +121,12 @@ define([
         var plot_selector = '#' + plot_element.prop('id') + ' .plot-div';
         var legend_selector = '#' + plot_element.prop('id') + ' .legend';
         plot_element.find('.plot-loader').show();
-        $.ajax({
-            type: 'GET',
-            url: api_url,
-            success: function(data, status, xhr) {
+
+        //$.ajax({
+        //    type: 'GET',
+        //    url: api_url,
+        //    success: function(data, status, xhr) {
+                data = mock_histogram_data.get_data();
                 if (data.hasOwnProperty('pairwise_result')) {
                     var pairwise_div = plot_element.find('.pairwise-result');
                     if (data['pairwise_result'].hasOwnProperty('result_vectors')) {
@@ -172,16 +176,18 @@ define([
                                 .attr('height', height);
                             var vals = helpers.values_only(data, 'x');
 
-                            histogram_obj.createHistogramPlot(
-                                svg,
-                                data,
-                                vals,
-                                width,
-                                height,
-                                'x',
-                                x_attr,
-                                cubby_tip,
-                                margin);
+                            histogram = histogram_obj.createHistogramPlot(
+                                            svg,
+                                            data,
+                                            vals,
+                                            width,
+                                            height,
+                                            'x',
+                                            x_attr,
+                                            cubby_tip,
+                                            margin);
+                            d3.select(window).on('resize', histogram.resize);
+
                             break;
                         case 'Scatter Plot': //((x_type == 'INTEGER' || x_type == 'FLOAT') && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
                             // Scatter plot
@@ -324,22 +330,22 @@ define([
                         .text('Cohort provided has no samples.');
                 }
                 plot_element.find('.plot-loader').hide();
-            },
-            error: function(xhr, status, error) {
-                plot_element.find('.plot-loader').hide();
-                var plot_selector = '#' + plot_element.prop('id') + ' .plot-div';
-                d3.select(plot_selector)
-                            .append('svg')
-                            .attr('width', width)
-                            .attr('height', height)
-                            .append('text')
-                            .attr('fill', 'black')
-                            .style('font-size', 20)
-                            .attr('text-anchor', 'middle')
-                            .attr('transform', 'translate(' + (width/2) + ',' + (height/2) + ')')
-                            .text('There was an error retrieving plot data.');
-            }
-        });
+        //    },
+        //    error: function(xhr, status, error) {
+        //        plot_element.find('.plot-loader').hide();
+        //        var plot_selector = '#' + plot_element.prop('id') + ' .plot-div';
+        //        d3.select(plot_selector)
+        //                    .append('svg')
+        //                    .attr('width', width)
+        //                    .attr('height', height)
+        //                    .append('text')
+        //                    .attr('fill', 'black')
+        //                    .style('font-size', 20)
+        //                    .attr('text-anchor', 'middle')
+        //                    .attr('transform', 'translate(' + (width/2) + ',' + (height/2) + ')')
+        //                    .text('There was an error retrieving plot data.');
+        //    }
+        //});
 
 
     };
@@ -356,7 +362,6 @@ define([
 
     // Update Plot
     function updatePlot() {
-        //$('.update-plot').on('click', function() {
         var plot = $(this).parents('.plot');
         var x_attr = plot.find('.x-selector').attr('value');
         var y_attr = plot.find('.y-selector').attr('value');
@@ -369,7 +374,6 @@ define([
             return $(d).attr('value');
         });
         generate_plot(plot, x_attr, y_attr, color_by, cohorts, cohort_override);
-        //});
     }
 
     // Delete Plot
