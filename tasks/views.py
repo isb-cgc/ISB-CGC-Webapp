@@ -128,7 +128,7 @@ def scrub_nih_users(dbGaP_authorized_list):
         for member in members:
             email = member['email']
             logger.info("Checking user {} on ACL_GOOGLE_GROUP list".format(email))
-            # skip email  907668440978-oskt05du3ao083cke14641u35deokgjj@developer.gserviceaccount.com?
+
             try:
                 # get user id from email
                 user_id = User.objects.get(email=email).id
@@ -136,18 +136,27 @@ def scrub_nih_users(dbGaP_authorized_list):
                 nih_user = NIH_User.objects.get(user_id=user_id)
                 nih_username = nih_user.NIH_username
 
-                # verify that nih_username is in one of the rows
-                if not matching_row_exists(rows, 'login', nih_username):
+                is_on_new_nih_authorized_list = matching_row_exists(rows, 'login', nih_username)
+
+                # verify that nih_username is in one of the rows, that the nih_user is dbGaP authorized, and that the nih_user is active
+                if not is_on_new_nih_authorized_list or not nih_user.dbGaP_authorized or not nih_user.active:
+
                     # remove from ACL_GOOGLE_GROUP
                     directory_service.members().delete(groupKey=ACL_GOOGLE_GROUP, memberKey=email).execute(http=directory_http_auth)
-                    logger.warn("Deleted user {} from ACL_GOOGLE_GROUP because a matching entry was not found in the dbGaP authorized list.".format(email))
+                    if not nih_user.dbGaP_authorized or not nih_user.active:
+                        logger.warn("Deleted user {} from the controlled-access google group "
+                                    "because strangely their entry in the database had dbGaP_authorized={} and active={}"
+                                    .format(email, str(nih_user.dbGaP_authorized), str(nih_user.active)))
+                    if not is_on_new_nih_authorized_list:
+                        logger.warn("Deleted user {} from the controlled-access google group "
+                                    "because a matching entry was not found in the dbGaP authorized list.".format(email))
                     nih_user.dbGaP_authorized = False
                     nih_user.save()
-                    logger.warn("Changed NIH user {}'s dbGaP_authorized to False because a matching entry was not found in the dbGaP authorized list.".format(nih_username))
+                    logger.warn("Changed NIH user {}'s dbGaP_authorized to False.".format(nih_username))
 
             # if that user is somehow on ACL_GOOGLE_GROUP but has 0 or plural entries in User or NIH_User
             except (MultipleObjectsReturned, ObjectDoesNotExist), e:
-                logger.debug("Problem getting either {}'s user id or their NIH username: {}".format(email, str(e)))
+                logger.warn("Strangely, there was a problem getting either {}'s user id or their NIH username: {}".format(email, str(e)))
                 # remove from ACL_GOOGLE_GROUP
                 directory_service.members().delete(groupKey=ACL_GOOGLE_GROUP, memberKey=email).execute(http=directory_http_auth)
                 continue
