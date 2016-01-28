@@ -42,7 +42,7 @@ from django.http import StreamingHttpResponse
 
 from googleapiclient import http
 from googleapiclient.errors import HttpError
-from googleapiclient.http import MediaIoBaseDownload
+from googleapiclient.http import MediaIoBaseDownload, MediaIoBaseUpload
 from google_helpers.directory_service import get_directory_resource
 from google_helpers.reports_service import get_reports_resource
 from google_helpers.storage_service import get_storage_resource, get_special_storage_resource
@@ -51,15 +51,17 @@ from google_helpers.logging_service import get_logging_resource
 from google_helpers.bigquery_service import get_bigquery_service
 from google.appengine.api.taskqueue import Task, Queue
 
-from oauth2client.client import GoogleCredentials
-# from gcloud import storage, bigquery
-# import pandas as pd
-import uuid
-
 from accounts.models import NIH_User
 from api.api_helpers import sql_connection
 
-import pprint
+import cStringIO
+from google_helpers import load_data_from_csv
+
+PROJECT_ID = settings.BIGQUERY_PROJECT_NAME
+BQ_DATASET = 'billing'
+GCS_BUCKET = 'isb-cgc-billing-json'
+BILLING_SCHEMA = os.path.abspath(os.path.join(os.path.dirname(__file__), 'billing_schema.json'))
+
 
 debug = settings.DEBUG
 
@@ -126,7 +128,7 @@ def scrub_nih_users(dbGaP_authorized_list):
         for member in members:
             email = member['email']
             logger.info("Checking user {} on ACL_GOOGLE_GROUP list".format(email))
-            # skip email  907668440978-oskt05du3ao083cke14641u35deokgjj@developer.gserviceaccount.com?
+
             try:
                 # get user id from email
                 user_id = User.objects.get(email=email).id
@@ -134,18 +136,27 @@ def scrub_nih_users(dbGaP_authorized_list):
                 nih_user = NIH_User.objects.get(user_id=user_id)
                 nih_username = nih_user.NIH_username
 
-                # verify that nih_username is in one of the rows
-                if not matching_row_exists(rows, 'login', nih_username):
+                is_on_new_nih_authorized_list = matching_row_exists(rows, 'login', nih_username)
+
+                # verify that nih_username is in one of the rows, that the nih_user is dbGaP authorized, and that the nih_user is active
+                if not is_on_new_nih_authorized_list or not nih_user.dbGaP_authorized or not nih_user.active:
+
                     # remove from ACL_GOOGLE_GROUP
                     directory_service.members().delete(groupKey=ACL_GOOGLE_GROUP, memberKey=email).execute(http=directory_http_auth)
-                    logger.warn("Deleted user {} from ACL_GOOGLE_GROUP because a matching entry was not found in the dbGaP authorized list.".format(email))
+                    if not nih_user.dbGaP_authorized or not nih_user.active:
+                        logger.warn("Deleted user {} from the controlled-access google group "
+                                    "because strangely their entry in the database had dbGaP_authorized={} and active={}"
+                                    .format(email, str(nih_user.dbGaP_authorized), str(nih_user.active)))
+                    if not is_on_new_nih_authorized_list:
+                        logger.warn("Deleted user {} from the controlled-access google group "
+                                    "because a matching entry was not found in the dbGaP authorized list.".format(email))
                     nih_user.dbGaP_authorized = False
                     nih_user.save()
-                    logger.warn("Changed NIH user {}'s dbGaP_authorized to False because a matching entry was not found in the dbGaP authorized list.".format(nih_username))
+                    logger.warn("Changed NIH user {}'s dbGaP_authorized to False.".format(nih_username))
 
             # if that user is somehow on ACL_GOOGLE_GROUP but has 0 or plural entries in User or NIH_User
             except (MultipleObjectsReturned, ObjectDoesNotExist), e:
-                logger.debug("Problem getting either {}'s user id or their NIH username: {}".format(email, str(e)))
+                logger.warn("Strangely, there was a problem getting either {}'s user id or their NIH username: {}".format(email, str(e)))
                 # remove from ACL_GOOGLE_GROUP
                 directory_service.members().delete(groupKey=ACL_GOOGLE_GROUP, memberKey=email).execute(http=directory_http_auth)
                 continue
@@ -332,7 +343,7 @@ def CloudSQL_logging(request):
                '--read-from-remote-server',
                yesterdays_binary_log_file,
                '--host',
-               settings.IPV4,
+               settings.DATABASES['default']['HOST'],
                '--user',
                settings.DATABASES['default']['USER'],
                '--base64-output=DECODE-ROWS',
@@ -541,111 +552,9 @@ def log_acls(request):
     return HttpResponse('')
 
 
-@login_required
-def metrics_cloudsql_users(request, start_date, end_date):
-    if not request.user.is_superuser:
-        return HttpResponse('You need to be logged in as a superuser.')
 
-    assert start_date.isdigit(), "{} is not a digit".format(start_date)
-    assert end_date.isdigit(), "{} is not a digit".format(end_date)
-    assert len(start_date) == 6, "start_date must be of the form yymmdd"
-    assert len(end_date) == 6, "end_date must be of the form yymmdd"
-    assert int(end_date) > int(start_date), "end_date must be later than start_date"
-
-    user_metrics_dict = {}
-
-    # convert to date
-    start_date = datetime.datetime.strptime("20" + start_date, "%Y%m%d")
-    end_date = datetime.datetime.strptime("20" + end_date, "%Y%m%d")
-
-    parse_cloudsql_logs(user_metrics_dict, start_date, end_date)
-
-    csv_response = write_user_metrics_csv_file(user_metrics_dict)
-    csv_response['Content-Disposition'] = 'attachment; filename="Users from {} to {}.csv"'.format(start_date, end_date)
-
-    # return HttpResponse('<pre>'+json.dumps(user_metrics_dict, indent=4)+'</pre>')
-    return csv_response
-
-def parse_cloudsql_logs(user_metrics_dict, start_date, end_date):
-
-    storage_client = get_special_storage_resource()
-
-    date_range = (end_date - start_date).days
-
-    for day_delta in range(date_range+1):
-        day = start_date + datetime.timedelta(days=day_delta)
-        day = day.strftime("%y%m%d")
-        user_metrics_dict[day] = {}
-        req = storage_client.objects().get_media(
-            bucket='isb-cgc_logs', object='cloudsql_activity_log_{}.txt'.format(day))
-        try:
-            fh = io.BytesIO()
-            downloader = MediaIoBaseDownload(fh, req, chunksize=1024*1024)
-            done = False
-            while not done:
-                status, done = downloader.next_chunk()
-
-        # throws HttpError if this file is not found
-        except HttpError, e:
-            print >> sys.stderr, e
-        else:
-            write_user_activity(fh.getvalue(), user_metrics_dict[day])
-
-
-def write_user_activity(log_str, user_metrics_current_day):
-    user_metrics_current_day['new_users'] = []
-    new_user_index_list = [m.start() for m in re.finditer('### INSERT INTO `prod`.`auth_user`', log_str)]
-
-    for i in new_user_index_list:
-        new_user_email_start_index = log_str.find("@8='", i) + 4
-        new_user_email_end_index = log_str.find("'", new_user_email_start_index)
-        new_user_email = log_str[new_user_email_start_index:new_user_email_end_index]
-        user_metrics_current_day['new_users'].append(new_user_email)
-
-    user_metrics_current_day['old_users'] = {}
-    old_user_index_list = [m.start() for m in re.finditer('### UPDATE `prod`.`auth_user`', log_str)]
-
-    for i in old_user_index_list:
-        old_user_email_start_index = log_str.find("@8='", i) + 4
-        old_user_email_end_index = log_str.find("'", old_user_email_start_index)
-        old_user_email = log_str[old_user_email_start_index:old_user_email_end_index]
-        if old_user_email not in user_metrics_current_day['new_users']:
-            if old_user_email not in user_metrics_current_day['old_users'].keys():
-                user_metrics_current_day['old_users'][old_user_email] = []
-            old_user_last_login_start_index = log_str.find("@3=", old_user_email_end_index) + 3
-            old_user_last_login_end_index = log_str.find("\r\n", old_user_last_login_start_index)
-            old_user_login_date = log_str[old_user_last_login_start_index:old_user_last_login_end_index]
-            user_metrics_current_day['old_users'][old_user_email].append(old_user_login_date)
-
-
-def write_user_metrics_csv_file(user_metrics_dict):
-    rows = ()
-    rows = (["Date", "Number of New Users", "Number of Returning Users"],)
-    for date in user_metrics_dict.keys():
-        rows += ([
-                    str(date),
-                    str(len(user_metrics_dict[date].get('new_users', []))),
-                    str(len(user_metrics_dict[date].get('old_users', {}).keys()))
-                 ],)
-
-    pseudo_buffer = Echo()
-    writer = csv.writer(pseudo_buffer)
-    response = StreamingHttpResponse((writer.writerow(row) for row in rows),
-                                         content_type="text/csv")
-
-    return response
-
-
-class Echo(object):
-    """An object that implements just the write method of the file-like
-    interface.
-    """
-    def write(self, value):
-        """Write the value by returning it, instead of storing in a buffer."""
-        return value
-
-
-
+"""Load billing json file from storage into BigQuery
+"""
 
 def normalize_json(item_y):
     """Converts a nested json string into a flat dict
@@ -665,139 +574,104 @@ def normalize_json(item_y):
     flatten(item_y)
     return out
 
-# def create_client(http=None):
-#     """Create BigQuery client
-#     """
-#     bq_scope = ['https://www.googleapis.com/auth/bigquery']
-#     credentials = GoogleCredentials.get_application_default()
-#     if credentials.create_scoped_required():
-#         credentials = credentials.create_scoped(bq_scope)
-#     if not http:
-#         http = httplib2.Http()
-#     credentials.authorize(http)
-#     return build('bigquery', 'v2', http=http)
+def read_file_from_gcs(service, bucket_id, file_id):
+    """Reads the bucket object and get the contents
+       We are getting the StringIO value
+    """
+    req = service.objects().get_media(
+        bucket=bucket_id, object=file_id)
+    try:
+        fh = io.BytesIO()
+        downloader = MediaIoBaseDownload(fh, req, chunksize=1024*1024)
+        done = False
+        while not done:
+            status, done = downloader.next_chunk()
+
+    # throws HttpError if this file is not found
+    except HttpError, e:
+        print >> sys.stderr, e
+    else:
+        file_content = fh.getvalue()
+        fh.close()
+        return file_content
 
 
-# def create_table(service, project_id, dataset_id, table_id, schema):
-#     """Create a BigQuery table
-#     """
-#     body = {
-#         'schema': schema,
-#         'tableReference': {
-#             'tableId': table_id,
-#             'projectId': project_id,
-#             'datasetId': dataset_id
-#         }
-#     }
-#     try:
-#         service.tables().insert(projectId=project_id, datasetId=dataset_id,
-#                                 body=body).execute()
-#         print 'table created: ' + table_id
-#     except Exception as ex:
-#         print ex
-#         raise
-#
-# def generate_schema(df, format_dtypes, default_type='STRING'):
-#     """Generate schema"""
-#     fields = []
-#     for column_name, dtype in df.dtypes.iteritems():
-#         if column_name in format_dtypes:
-#             dtype = format_dtypes[column_name]
-#         else:
-#             dtype = default_type
-#         fields.append({'name': column_name,
-#                        'type': dtype})
-#
-#     return {'fields': fields}
-#
-#
-# def stream_row_to_bigquery(service, project_id, dataset_id, table_name, row,
-#                            num_retries=5):
-#     """Streams data into BigQuery
-#     """
-#     insert_all_data = {
-#         'rows': [{
-#             'json': row,
-#             # Generate a unique id for each row so retries don't accidentally
-#             # duplicate insert
-#             'insertId': str(uuid.uuid4()),
-#         }]
-#     }
-#     return service.tabledata().insertAll(
-#         projectId=project_id,
-#         datasetId=dataset_id,
-#         tableId=table_name,
-#         body=insert_all_data).execute(num_retries=num_retries)
-#
-#
-# def read_json_from_storage(project_id, bucket_id, file_id, credentials):
-#     """read the file from the bucket
-#     """
-#
-#     storage_client = storage.Client(project=project_id, credentials=credentials)
-#     bucket = storage_client.get_bucket(bucket_id)
-#     blob = bucket.get_blob(file_id)
-#     item_json = json.loads(blob.download_as_string())
-#
-#     # flatten the nested json string
-#     all_items = []
-#     for item in item_json:
-#         item_content = normalize_json(item)
-#         all_items.append(item_content)
-#
-#     # a little time consuming, but is worth converting into dataframe
-#     data_df = pd.DataFrame(all_items)
-#
-#     return data_df
-#
-# def check_table_exists(project_id, dataset_id, table_id, credentials):
-#     """Check if the BigQuery table exists
-#     """
-#     bigquery_client = bigquery.Client(project=project_id, credentials=credentials)
-#     dataset = bigquery_client.dataset(dataset_id)
-#     table = dataset.table(name=table_id)
-#
-#     return table.exists()
-#
-# def load_billing_to_bigquery(request):
-#     """Main: Read the file from storage and load into BigQuery
-#     """
-#     if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):
-#         credentials = GoogleCredentials.get_application_default()
-#     else:
-#         credentials = GoogleCredentials.from_stream(settings.GOOGLE_APPLICATION_CREDENTIALS)
-#
-#     date = (datetime.datetime.now() + datetime.timedelta(days=-1))
-#
-#     project_id = settings.BIGQUERY_PROJECT_NAME
-#     bucket_id = 'isb-cgc-billing-json'
-#     dataset_id = 'billing'
-#     table_id = 'billing_' + date.strftime("%Y%m%d")
-#     file_id = 'billing-' + date.strftime("%Y-%m-%d") + '.json'
-#
-#     # create service
-#     bq_service = get_bigquery_service()
-#
-#     # read file from storage
-#     data_df = read_json_from_storage(project_id, bucket_id, file_id, credentials)
-#
-#     # generate bigquery schema
-#     dtypes = {'cost_amount': 'FLOAT', 'endTime': 'TIMESTAMP', 'credits_amount': 'FLOAT',
-#               'startTime': 'TIMESTAMP', 'measurements_sum': 'INTEGER'}
-#     schema = generate_schema(data_df, dtypes)
-#
-#     # check if the table exists, if not create and stream rows
-#     if not check_table_exists(project_id, dataset_id, table_id, credentials):
-#
-#         create_table(bq_service, project_id, dataset_id, table_id, schema)
-#
-#         # stream rows to bigquery table
-#         for _, row in data_df.iterrows():
-#             row = row.to_dict()
-#             stream_row_to_bigquery(bq_service, project_id, dataset_id, table_id, row,
-#                                    num_retries=5)
-#
-#         return HttpResponse('')
-#
-#     else:
-#         return HttpResponse('Table already exists: cannot create table')
+def upload_file_to_gcs(service, bucket_name, file_content, filename):
+    """Upload a file to Google cloud storage
+    """
+    try:
+        upload = MediaIoBaseUpload(file_content, mimetype='application/json',
+                                   resumable=True)
+
+        req = service.objects().insert(media_body=upload, name=filename,
+                                       bucket=bucket_name)
+        resp = req.execute()
+        print >> sys.stderr, '> Uploaded source file {}'.format(filename)
+        print >> sys.stderr,json.dumps(resp, indent=2)
+    except HttpError, error:
+        print >> sys.stderr, "An error occurred: %s" % error
+
+
+def preprocess_file(file_content):
+    """process the file - flatten the json, convert to new-line delimited
+    """
+    out = cStringIO.StringIO()
+    item_json = json.loads(file_content)
+
+    # flatten the nested json string
+    for item in item_json:
+        item_content = normalize_json(item) # flatten
+        out.write(json.dumps(item_content) + '\n')
+
+    return out
+
+
+def load_billing_to_bigquery(request):
+    """Main: Read the file from storage and load into BigQuery
+    """
+    env = os.getenv('SERVER_SOFTWARE')
+
+    for num in range(36):
+        load_date = (datetime.datetime.now() + datetime.timedelta(days=-num-1))
+
+        # construct the service object for the interacting with the Cloud Storage API
+        if env.startswith('Google App Engine/'):
+            service = get_storage_resource()
+        else:
+            service = get_special_storage_resource()
+
+        print >> sys.stderr, '>< Load billing json from date: {}'.format(load_date.strftime("%Y-%m-%d"))
+        logger.info('>< Load billing json from date: {}'.format(load_date.strftime("%Y-%m-%d")))
+
+        # some params
+        table_id = 'billing_' + load_date.strftime("%Y%m%d")
+        file_to_load = 'billing-' + load_date.strftime("%Y-%m-%d") + '.json'
+        file_to_upload = 'intermediary/' + file_to_load
+        gcs_load_file = 'gs://' + GCS_BUCKET + '/' + file_to_upload
+
+        # read the file from the google cloud storage
+        file_info = read_file_from_gcs(service, GCS_BUCKET, file_to_load)
+
+        # process the file - flatten the json, convert to new-line delimited
+        try:
+            upload_fh = preprocess_file(file_info)
+        except TypeError, e:
+            print >> sys.stderr, '\nBarfed on preprocess_file date: {}. Error: {}. File info: {}'\
+                .format(load_date.strftime("%Y-%m-%d"), e, file_info)
+            continue
+        else:
+            print >> sys.stderr, '\nSuccess! {}'.format(load_date.strftime("%Y-%m-%d"))
+
+        # upload the processed file to google cloud storage
+        upload_file_to_gcs(service, GCS_BUCKET, upload_fh, file_to_upload)
+        upload_fh.close()  # do we need to close?(no buffer?)
+
+        # load the uploaded file from the storage(new-line delimited) into bigquery
+        # create a new table, replacing the contents
+        print >> sys.stderr, '<> Loading file from storage into BigQuery'
+        logger.info('<> Loading file from storage into BigQuery')
+        load_data_from_csv.run(PROJECT_ID, BQ_DATASET, table_id, BILLING_SCHEMA,
+                               gcs_load_file, 'NEWLINE_DELIMITED_JSON',
+                               'WRITE_TRUNCATE')
+
+    return HttpResponse('')

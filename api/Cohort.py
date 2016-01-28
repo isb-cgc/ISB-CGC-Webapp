@@ -744,16 +744,7 @@ class Cohort_Endpoints_API(remote.Service):
             user_email = get_user_email_from_token(access_token)
 
         if user_email:
-            django.setup()
-            try:
-                user_id = Django_User.objects.get(email=user_email).id
-                nih_user = NIH_User.objects.get(user_id=user_id)
-                dbGaP_authorized = nih_user.dbGaP_authorized and nih_user.active
-            except (ObjectDoesNotExist, MultipleObjectsReturned), e:
-                if type(e) is MultipleObjectsReturned:
-                    logger.warn(e)
-                    raise endpoints.NotFoundException("%s has multiple entries in the user database." % user_email)
-
+            dbGaP_authorized = is_dbgap_authorized(user_email)
 
             query_str = 'SELECT DataFileNameKey, SecurityProtocol, Repository ' \
                         'FROM metadata_data '
@@ -1069,24 +1060,7 @@ class Cohort_Endpoints_API(remote.Service):
 
         if not user_email:
             raise endpoints.UnauthorizedException("Authentication failed.")
-        try:
-            db = sql_connection()
-            user_cursor = db.cursor(MySQLdb.cursors.DictCursor)
-            user_query_str = 'SELECT * ' \
-                             'FROM auth_user ' \
-                             'LEFT JOIN accounts_nih_user ' \
-                             'ON auth_user.id=accounts_nih_user.user_id ' \
-                             'WHERE auth_user.email=%s '
-            user_cursor.execute(user_query_str, (user_email,))
-            row = user_cursor.fetchone()
-            dbGaP_authorized = row['dbGaP_authorized'] and row['active']
-        except (IndexError, TypeError), e:
-            logger.warn(e)
-        finally:
-            if user_cursor: user_cursor.close()
-            if db and db.open: db.close()
-            if row is None:
-                raise endpoints.UnauthorizedException("Authentication of {} failed.".format(user_email))
+        dbGaP_authorized = is_dbgap_authorized(user_email)
 
         query_str = 'SELECT DataFileNameKey, SecurityProtocol, Repository ' \
                     'FROM metadata_data '

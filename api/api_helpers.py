@@ -22,10 +22,13 @@ import os
 import MySQLdb
 import httplib2
 from oauth2client.client import GoogleCredentials, AccessTokenCredentials
+from google_helpers.directory_service import get_directory_resource
+from googleapiclient.errors import HttpError
 from django.conf import settings
 from googleapiclient.discovery import build
+import logging
 
-
+CONTROLLED_ACL_GOOGLE_GROUP = settings.ACL_GOOGLE_GROUP
 debug = settings.DEBUG
 
 # Database connection
@@ -338,3 +341,13 @@ def get_user_email_from_token(access_token):
     if 'email' in user_info:
         user_email = user_info['email']
     return user_email
+
+
+def is_dbgap_authorized(user_email):
+    directory_service, http_auth = get_directory_resource()
+    try:
+        directory_service.members().get(groupKey=CONTROLLED_ACL_GOOGLE_GROUP,
+                                        memberKey=user_email).execute(http=http_auth)
+        return True
+    except HttpError, e:
+        return False
