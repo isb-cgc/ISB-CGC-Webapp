@@ -31,7 +31,7 @@ from bq_data_access.utils import DurationLogged
 
 from api.pairwise import PairwiseInputVector, Pairwise
 from api.pairwise_api import PairwiseResults, PairwiseResultVector, PairwiseFilterMessage
-
+import sys
 
 class DataRequest(Message):
     feature_id = StringField(1, required=True)
@@ -113,7 +113,8 @@ class PlotDataResponse(Message):
     pairwise_result = MessageField(PairwiseResults, 6, required=False)
 
 
-FeatureDataEndpointsAPI = endpoints_api(name='feature_data_api', version='v1')
+FeatureDataEndpointsAPI = endpoints_api(name='feature_data_api', version='v1',
+                                        description='Endpoints for feature data used by the web application.')
 
 
 @FeatureDataEndpointsAPI.api_class(resource_name='feature_data_endpoints')
@@ -232,6 +233,11 @@ class FeatureDataEndpoints(remote.Service):
         async_params = [(x_id, cohort_id_array),
                         (c_id, cohort_id_array)]
 
+#        start = time.time()
+#
+#        logging.info('Data Query Start: ')
+#        x_type, x_vec = get_feature_vector(x_id, cohort_id_array)
+
         y_type, y_vec = ValueType.STRING, []
         if y_id is not None:
             async_params.append((y_id, cohort_id_array))
@@ -250,15 +256,22 @@ class FeatureDataEndpoints(remote.Service):
         vms.add_dict_array(c_vec, 'c', 'value')
         merged = self.get_merged_dict_timed(vms)
 
+
+#        logging.info('Data Query 1 : ' + str(time.time() - start))
+#        merged = vms.get_merged_dict()
+
+#        logging.info('Data Query 2 : ' + str(time.time() - start))
         # Resolve which (requested) cohorts each datapoint belongs to.
         cohort_set_dict = CloudSQLCohortAccess.get_cohorts_for_datapoints(cohort_id_array)
 
+#        logging.info('Data Query 3 : ' + str(time.time() - start))
         # Get the name and ID for every requested cohort.
         cohort_info_array = CloudSQLCohortAccess.get_cohort_info(cohort_id_array)
         cohort_info_obj_array = []
         for item in cohort_info_array:
             cohort_info_obj_array.append(PlotDataCohortInfo(**item))
 
+        #logging.info('Data Query 4 : ' + str(time.time() - start))
         items = []
         for value_bundle in merged:
             sample_id = value_bundle['sample_id']
@@ -273,6 +286,7 @@ class FeatureDataEndpoints(remote.Service):
                 value_bundle['cohort'] = cohort_set
             items.append(PlotDataPoint(**value_bundle))
 
+        #logging.info('Data Query 5 : ' + str(time.time() - start))
         counts = self.get_counts(merged)
         count_message = PlotDatapointCount(**counts)
 
@@ -296,6 +310,8 @@ class FeatureDataEndpoints(remote.Service):
             logging.warn("Pairwise results not included in returned object")
             logging.exception(e)
 
+        #logging.info('Time elapsed: ' + str(time_elapsed))
+        #logging.info('Data Query 6: ' + str(time.time() - start))
         return PlotDataResponse(types=type_message, labels=label_message, items=items,
                                 cohort_set=cohort_info_obj_array,
                                 counts=count_message, pairwise_result=pairwise_result)
@@ -320,6 +336,7 @@ class FeatureDataEndpoints(remote.Service):
     @endpoints_method(PlotDataRequest, PlotDataResponse,
                       path='feature_data_plot', http_method='GET', name='feature_access.getFeatureDataForPlot')
     def data_access_for_plot(self, request):
+        """ Used by the web application."""
         try:
             x_id = request.x_id
             y_id = request.y_id

@@ -45,7 +45,7 @@ class SeqPeekDataProvider(GNABFeatureProvider):
              "AND Tumor_SampleBarcode IN ( "
              "    SELECT sample_barcode "
              "    FROM [{project_name}:{cohort_dataset}.{cohort_table}] "
-             "    WHERE cohort_id IN ({cohort_id_list}) "
+             "    WHERE cohort_id IN ({cohort_id_list})  AND study_id IS NULL"
              ") ")
 
         query = query_template.format(dataset_name=dataset_name, project_name=project_name, table_name=table_name,

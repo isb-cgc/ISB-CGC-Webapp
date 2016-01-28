@@ -134,6 +134,7 @@ class FeatureDataProvider(object):
         project_id = settings.BQ_PROJECT_ID
         project_name = settings.BIGQUERY_PROJECT_NAME
         dataset_name = settings.BIGQUERY_DATASET2
+
         result = self.submit_query_and_get_job_ref(project_id, project_name, dataset_name, self.table_name,
                                                    self.feature_def, cohort_dataset, cohort_table, cohort_id_array)
         return result

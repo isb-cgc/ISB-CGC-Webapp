@@ -21,8 +21,6 @@ from re import compile as re_compile
 
 from api.schema.tcga_clinical import schema as clinical_schema
 
-from django.conf import settings
-
 from bq_data_access.feature_data_provider import FeatureDataProvider
 from bq_data_access.errors import FeatureNotFoundException
 from bq_data_access.feature_value_types import DataTypes, BigQuerySchemaToValueTypeConverter
@@ -124,7 +122,7 @@ class ClinicalFeatureProvider(FeatureDataProvider):
              "WHERE biospec.sample_id IN ( "
              "    SELECT sample_barcode "
              "    FROM [{project_name}:{cohort_dataset}.{cohort_table}] "
-             "    WHERE cohort_id IN ({cohort_id_list}) "
+             "    WHERE cohort_id IN ({cohort_id_list}) AND study_id IS NULL"
              ")"
              "GROUP BY clin.ParticipantBarcode, biospec.sample_id, clin.{column_name}")
 

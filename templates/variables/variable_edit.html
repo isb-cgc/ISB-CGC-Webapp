@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+{% block title %}Edit Variable Favorite | ISB-CGC{% endblock %}}
+{% block extra_css_libs %}{% endblock %}
+{% block header %}{% endblock %}
+
+{% block link_page_name %}variable_edit{% endblock %}
+{% block page_name %}variable_edit{% endblock %}
+
+{% block page_header %}
+{# TODO if page is access via adding a list to a workbook, attach a warning if the user navigates from this page without applying the workbook list #}
+<div class="container">
+    <ol class="breadcrumb">
+        {% if workbook %}
+            <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+            <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
+            <li><a href="{% url 'workbook_detail' workbook.id %}">{{ workbook.name }}</a></li>
+            <li><a href="{% url 'variable_select_for_existing_workbook' workbook.id worksheet.id %}">Saved Variable Favorites</a></li>
+        {% elif new_workbook %}
+            <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+        {% else %}
+            <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+            <li><a href="{% url 'variables' %}">Saved Variable Favorites</a></li>
+        {% endif %}
+    </ol>
+    {% csrf_token %}
+    {% if workbook %}
+        <h1 class="page-header">Data Source | Variables</h1>
+        <div class="page-action-group">
+            <button id="apply_to_worksheet" workbook_id="{{ workbook.id }}" worksheet_id="{{ worksheet.id }}" class="btn btn-primary">Apply to Worksheet</button>
+            <a href="{% url 'workbook_detail' workbook.id %}" class="btn btn-link">Back to Workbook</a>
+        </div>
+    {% else  %}
+        {% if existing_variable_list %}
+            <div class="clearfix">
+                <h1 class="page-header pull-left">Edit Variable Favorite</h1>
+                <ul class="page-action-group pull-right">
+                    <li role="menuitem"><button class="btn btn-primary" variable_id="{{ existing_variable_list.id }}" id="edit_favorite_list" >Save Changes</button></li>
+                    <li role="menuitem"><a class="btn btn-link" href="{% url 'variable_fav_detail' existing_variable_list.id %}">Cancel</a></li>
+                </ul>
+            </div>
+        {% elif new_workbook %}
+            <h1 class="page-header">Data Source | Variables</h1>
+            <ul class="page-action-group">
+                <button id="select_then_create_new_workbook" class="btn btn-primary">Create New Workbook with Selected Variables</button>
+                <a href="{% url 'variables' %}" class="btn btn-link">Cancel</a>
+            </ul>
+        {% else %}
+            <h1 class="page-header pull-left">Create Variable Favorite</h1>
+            <ul class="page-action-group pull-right">
+                <li><button class="btn btn-primary" id="create_favorite_list">Save As Favorite</button></li>
+                <li><a class="btn btn-link" href="{% url 'variables' %}">Cancel</a></li>
+            </ul>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}
+{% block content %}
+{% csrf_token %}
+    <section class="col-lg-12">
+         <div class="panel form-group panel-default">
+            {% if existing_variable_list %}
+                <div class="panel-heading">
+                    <label for="variable-name" class="panel-title">Name of Favorite (Required)</label>
+                </div>
+                <div class="panel-body">
+                    <input type="text" id="variable_list_name_input" placeholder="My new favorite variable" class="form-control" value="{{ existing_variable_list.name }}" required>
+                </div>
+            {% else %}
+                <div class="panel-heading">
+                    <label for="variable-name" class="panel-title">Name of Favorite (Required)</label>
+                </div>
+                <div class="panel-body">
+                    <input type="text" id="variable_list_name_input" placeholder="My new favorite variable" class="form-control" value="" required>
+                </div>
+            {% endif %}
+         </div>
+    </section>
+    <div class="col-lg-6" id="filter-panel">
+        <section class="panel panel-default">
+            <div class="panel-body">
+                <div class="row">
+                    <div class="tabpanel" role="tabpanel">
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li role="presentation" class="active"><a href="#common" aria-controls="common" role="tab" data-toggle="tab">Common</a></li>
+                            <li role="presentation"><a href="#favorites" aria-controls="favorites" role="tab" data-toggle="tab">Favorites ({{ favorite_list | length }})</a></li>
+                            <li role="presentation"><a href="#datatypes" aria-controls="datatypes" role="tab" data-toggle="tab">Data Types</a></li>
+                            <li role="presentation"><a href="#uploaded"  aria-controls="Uploaded" role="tab" data-toggle="tab">Projects</a></li>
+{# TODO                     <li role="presentation"><a href="#search"    aria-controls="search" role="tab" data-toggle="tab">Search</a></li>#}
+                        </ul>
+
+                        <!-- Tab panes -->
+                        <div class="tab-content">
+                            <div role="tabpanel" class="tab-pane active filter-panel" id="common">
+                                <ul class="list-group" id="common-accordion" role="tablist" aria-multiselectable="true">
+                                    {% for attr in common_project.variables %}
+                                        <li class="list-group-item checkbox">
+                                            <div id="heading-{{ attr.name }}" class="list-group-item__heading">
+                                                <label>
+                                                    <input class="variable-toggle-checkbox" type="checkbox" value="{{ attr.code }}" name="elements-selected" data-text-label="{{ attr.name|get_readable_name }}">
+                                                    {{ attr.name|get_readable_name }}
+                                                </label>
+                                            </div>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            <div role="tabpanel" class="tab-pane filter-panel" id="favorites">
+                                <ul class="list-group" id="favorites-accordion" role="tablist" aria-multiselectable="true">
+                                    {% for fav in favorite_list %}
+                                        <li class="list-group-item">
+                                            <div id="heading-{{ fav.name }}" data-field="{{ fav.name }}" class="list-group-item__heading">
+                                                <a role="button" data-toggle="collapse" data-parent="#clin-accordion" href="#collapse-{{ fav.id }}" aria-expanded="false" aria-controls="collapse-{{ fav.id }}">
+                                                    <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ fav.name }}
+                                                </a>
+                                            </div>
+
+                                            <div id="collapse-{{ fav.id }}" class="list-group-item__body collapse" role="tabpanel" aria-labelledby="heading-{{ fav.id }}">
+                                                <ul class="search-checkbox-list" id="clin-accordion" role="tablist" aria-multiselectable="true">
+                                                    {% for var in fav.variable_set.all %}
+                                                        <li class="checkbox">
+                                                            <div id="heading-{{ var.id }}">
+                                                                <label>
+                                                                    <input class="variable-toggle-checkbox" type="checkbox" value="{{ var.code }}" name="elements-selected" data-text-label="{{ var.name }}" {% if var.feature %}data-feature-id="{{ var.feature.id }}"{% endif %}>
+                                                                    {{ var.name }}
+                                                                </label>
+                                                            </div>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+
+                                <div class="tab-content">
+                                    <a href="{% url 'variables' %}">Manage Saved Favorites ({{ favorite_list | length }})</a>
+                                </div>
+                            </div>
+                            <div role="tabpanel" class="tab-pane filter-panel" id="datatypes">
+                                <ul class="list-group" id="data-type-accordion" role="tablist" aria-multiselectable="true">
+                                    {% for type in datatype_list %}
+                                        <li class="list-group-item">
+                                            <div id="heading-{{ type.datatype }}" data-field="{{ type.datatype }}" class="list-group-item__heading datatype-selector">
+                                                <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-{{ type.datatype }}" aria-expanded="false" aria-controls="collapse-{{ type.datatype }}">
+                                                    <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ type.label }}
+                                                </a>
+                                            </div>
+
+                                            <div id="collapse-{{ type.datatype }}" class="list-group-item__body collapse" role="tabpanel" aria-labelledby="heading-{{ type.datatype }}">
+                                                {% if type.datatype == 'CLIN' %}
+                                                    <div class="form-group search-field {{ type.datatype }}-options ">
+                                                        <div  class="search-term feature-search">
+                                                            <label for="{{ type.datatype }}-search-term-select">Feature Search</label>
+                                                            <select id="{{ type.datatype }}-search-term-select" class="search-term-field"></select>
+                                                        </div>
+                                                    </div>
+                                                {% else %}
+                                                    <div class="form-group search-field {{ type.datatype }}">
+                                                        <div class="search-term" data-field="{{ type.datatype }}">
+                                                            {% for field in type.fields %}
+                                                                <label class="space-top-15" for="{{ type.datatype }}-{{ field.name }}">{{ field.label }} Filter</label>
+                                                                <select id="{{ plot.id }}-{{ type.datatype }}-{{ field.name }}-search-term-select" class="form-control field-options {{ field.name }}-options {% if not field.static %}select2{% endif %}" data-field="{{ field.name }}">
+                                                                    {% if field.static %}
+                                                                        <option value="" disabled selected>Please select an option</option>
+                                                                        {% for value in field.values %}
+                                                                            <option value="{{ value }}">{{ value }}</option>
+                                                                        {% endfor %}
+                                                                    {% endif %}
+                                                                </select>
+                                                            {% endfor %}
+                                                        </div>
+                                                        <div class="search-term feature-search space-top-15">
+                                                            <label for="{{ type.datatype }}-search-term-select">Select Feature</label>
+                                                            <select id="{{ type.datatype }}-search-term-select" project="{{ TCGA_project.id }}" project_name="{{ TCGA_project.name }}" study="{{ TCGA_project.study.id }}" study_name="{{ TCGA_project.study.name}}" class="search-term-field form-control"></select>
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            <div role="tabpanel" class="tab-pane" id="uploaded">
+                                <ul class="list-group" id="project-accordion" role="tablist" aria-multiselectable="true">
+                                    {% if projects %}
+                                        {% for project in projects %}
+                                            {% for study in project.study_set.all|active %}
+                                                <li class="list-group-item">
+                                                    <div id="heading-{{ data_type_name }}" class="list-group-item__heading">
+                                                        <a role="button"  data-toggle="collapse" data-parent="#project-accordion" href="#collapse-{{ project.id }}-{{ study.id }}" aria-expanded="false" aria-controls="collapse-{{ attr }}">
+                                                            <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ project.name }} | {{ study.name }}
+                                                        </a>
+                                                    </div>
+
+                                                    <div id="collapse-{{ project.id }}-{{ study.id }}" class="list-group-item__body collapse" role="tabpanel" aria-labelledby="heading-{{ project.id }}-{{ study.id }}">
+                                                        <ul class="search-checkbox-list" id="{{ data_type_name }}">
+                                                            {% with study.user_feature_definitions_set.all|how_many_more:6 as num_more %}
+                                                                {% for variable in study.user_feature_definitions_set.all %} {#|get_item:attr %}#}
+                                                                    {% if forloop.counter0 < 6 %}
+                                                                        <li class="checkbox">
+                                                                            <label>
+                                                                                <input class="variable-toggle-checkbox" type="checkbox" name="elements-selected" value="{% if variable.shared_map_id %}{{ variable.shared_map_id }}{% else %}USER:{{ study.id }}:{{ variable.id }}{% endif %}" data-text-label="{{ study.name }}: {{ variable.feature_name|get_readable_name }}" data-feature-id="{{ variable.id }}" > {{ variable.feature_name|get_readable_name }}
+                                                                            </label>
+                                                                        </li>
+                                                                    {% elif forloop.counter0 == 6 and num_more > 0 %}
+                                                                        <a class="show-more">{{ num_more }} more</a>
+                                                                        <li class="extra-values checkbox" style="display:none;">
+                                                                            <label>
+                                                                                <input class="variable-toggle-checkbox" type="checkbox" name="elements-selected" value="{% if variable.shared_map_id %}{{ variable.shared_map_id }}{% else %}USER:{{ study.id }}:{{ variable.id }}{% endif %}" data-text-label="{{ study.name }}: {{ variable.feature_name|get_readable_name }}" data-feature-id="{{ variable.id }}" > {{ variable.feature_name|get_readable_name }}
+                                                                            </label>
+                                                                        </li>
+                                                                    {% else %}
+                                                                        <li class="extra-values checkbox" style="display:none;">
+                                                                            <label>
+                                                                                <input class="variable-toggle-checkbox" type="checkbox" name="elements-selected" value="{% if variable.shared_map_id %}{{ variable.shared_map_id }}{% else %}USER:{{ study.id }}:{{ variable.id }}{% endif %}" data-text-label="{{ study.name }}: {{ variable.feature_name|get_readable_name }}" data-feature-id="{{ variable.id }}" > {{ variable.feature_name|get_readable_name }}
+                                                                            </label>
+                                                                        </li>
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                                {% if num_more > 0 %}
+                                                                    <a class="show-less" style="display:none;">less</a>
+                                                                {% endif %}
+                                                            {% endwith %}
+                                                        </ul>
+                                                    </div>
+                                                </li>
+                                            {% endfor %}
+                                        {% endfor %}
+                                    {% else %}
+                                        <div class="space-top-15"><center>No projects available</center></div>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                            <div role="tabpanel" class="tab-pane" id="search">
+                                <br>
+                                <div class="form-group">
+                                    <input type="text" class="form-control" placeholder="Search">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <div class="col-lg-6">
+        <section class="panel">
+            <form action="">
+                <div class="form-group selected-filters panel-default">
+                    <div class="panel-heading clearfix">
+                        <label class="panel-title pull-left">Selected Variables</label>
+                        <p class="pull-right"><a role="button" id="clear-filters">Clear All</a></p>
+                    </div>
+                    <div class="panel-body">
+                        {% if existing_variable_list %}
+                            {% for variable in existing_variable_list.variable_set.all %}
+                                <span class="selected-variable" data-name="{{ variable.name }}" data-code="{{ variable.code }}" data-feature-id="{{ variable.feature_id }}">
+                                    <a class="delete-x filter-label label label-default">
+                                        {{ variable.name }}
+                                        <i class="fa fa-times"></i>
+                                    </a>
+                                </span>
+                            {% endfor %}
+                        {% else %}
+                            <p class="help-block">Select your favorite variables from the left panel.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </form>
+        </section>
+    </div>
+
+    <script type="text/javascript">
+    var attr_list       = {{ variable_names | safe }};
+    var attr_counts     = {{ variable_list_count | safe }};
+    var total_samples   = {{ total_samples|safe }};
+    var base_api_url    = '{{ base_api_url|safe }}';
+    var cohort_id       = undefined;
+    </script>
+{% endblock %}
+
+{% block js_file %}{% static 'js/variables/variables.js' %}{% endblock %}

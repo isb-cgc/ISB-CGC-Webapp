@@ -22,9 +22,9 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
     var parsets_obj = Object.create(draw_parsets, {});
     return  {
 
-        update_counts: function(base_api_url, endpoint, cohort_id, limit) {
+        update_counts: function(base_api_url, endpoint, cohort_id, limit, version, token) {
             var filters = this.format_filters();
-            var api_url = this.generate_metadata_url(base_api_url, endpoint, filters, cohort_id, limit);
+            var api_url = this.generate_metadata_url(base_api_url, endpoint, filters, cohort_id, limit, version, token);
             var update_filters = this.update_filter_counts;
             $('.clinical-trees .spinner').show();
             $.ajax({
@@ -42,9 +42,9 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             });
         },
 
-        update_parsets: function(base_api_url, endpoint, cohort_id) {
+        update_parsets: function(base_api_url, endpoint, cohort_id, version, token) {
             var filters = this.format_filters();
-            var api_url = this.generate_metadata_url(base_api_url, endpoint, filters, cohort_id);
+            var api_url = this.generate_metadata_url(base_api_url, endpoint, filters, cohort_id, null, version, token);
             var context = this;
             $.ajax({
                 type: 'GET',
@@ -52,11 +52,11 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                 success: function(results, status, xhr) {
                     if (results.hasOwnProperty('items')) {
                         var features = [
-                                'DNAseq_data',
-                                'mirnPlatform',
                                 'cnvrPlatform',
+                                'DNAseq_data',
                                 'methPlatform',
                                 'gexpPlatform',
+                                'mirnPlatform',
                                 'rppaPlatform'
                             ];
                         var plot_features = [
@@ -85,23 +85,30 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
         },
 
         format_filters: function() {
-            var list = {};
+            var list = [];
             $('.selected-filters .panel-body span').each(function() {
-                var value = $(this).attr('value');
-                var splitpoint = value.indexOf('-');
-                var key = value.slice(0, splitpoint);
-                var val = value.slice(splitpoint+1);
-                if (key in list) {
-                    list[key] += ',' + val;
-                } else {
-                    list[key] = val;
-                }
+                var $this = $(this),
+                    key = $this.data('feature-name'),
+                    val = $this.data('value-name');
+
+                if ($this.data('feature-id'))
+                    key = $this.data('feature-id');
+                if ($this.data('value-id'))
+                    val = $this.data('value-id');
+
+                if(!list[key])
+                    list[key] = [];
+                list.push({
+                    key: key,
+                    value: val,
+                });
             });
             return list;
         },
 
-        generate_metadata_url: function(base_api_url, endpoint, filters, cohort_id, limit) {
-            var api_url = base_api_url + '/_ah/api/meta_api/v1/' + endpoint + '?';
+        generate_metadata_url: function(base_api_url, endpoint, filters, cohort_id, limit, version, token) {
+            version = version || 'v1';
+            var api_url = base_api_url + '/_ah/api/meta_api/' + version + '/' + endpoint + '?';
 
             if (cohort_id) {
                 api_url += 'cohort_id=' + cohort_id + '&';
@@ -109,9 +116,12 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             if (limit != null && limit !== undefined) {
                 api_url += 'limit=' + limit + '&';
             }
+            if (token) {
+                api_url += 'token=' + encodeURIComponent(token) + '&';
+            }
 
-            for (var item in filters) {
-                api_url += item + '=' + filters[item] + '&';
+            if (filters) {
+                api_url += 'filters=' + encodeURIComponent(JSON.stringify(filters)) + '&';
             }
 
             return api_url;
@@ -119,20 +129,23 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
 
         update_filter_counts: function(counts) {
             $('#filter-panel ul li input').each(function() {
-                var id = $(this).prop('id');
-                var split_point = id.indexOf('-');
-                var attr = id.slice(0, split_point);
-                var value = id.slice(split_point+1);
-                var new_count = '';
-                for (var i = 0; i < counts[attr].length; i++) {
-                    if (counts[attr][i]['value'].replace(/\s+/g, '_') == value) {
-                        new_count = '(' + counts[attr][i]['count'] + ')';
+                var $this = $(this),
+                    attr = $this.data('feature-name'),
+                    value = $this.data('value-name'),
+                    new_count = '';
+
+                if (counts[attr]) {
+                    for (var i = 0; i < counts[attr].length; i++) {
+                        if (counts[attr][i]['value'].replace(/\s+/g, '_') == value) {
+                            new_count = '(' + counts[attr][i]['count'] + ')';
+                        }
                     }
-                }
-                if (new_count == '') {
-                    new_count = '(0)';
-                }
-                $(this).siblings('span').html(new_count);
+                    if (new_count == '') {
+                        new_count = '(0)';
+                    }
+                    $(this).siblings('span').html(new_count);
+                } // Else we don't get counts from the metadata api yet
+
             })
 
         },

@@ -23,6 +23,7 @@ from time import sleep
 from django.conf import settings
 
 from api.api_helpers import authorize_credentials_with_Google
+from api.api_helpers import sql_connection, MySQLdb
 
 from bq_data_access.errors import FeatureNotFoundException
 from bq_data_access.gexp_data import GEXPFeatureProvider, GEXP_FEATURE_TYPE
@@ -32,12 +33,12 @@ from bq_data_access.protein_data import RPPAFeatureProvider, RPPA_FEATURE_TYPE
 from bq_data_access.mirna_data import MIRNFeatureProvider, MIRN_FEATURE_TYPE
 from bq_data_access.clinical_data import ClinicalFeatureProvider, CLINICAL_FEATURE_TYPE
 from bq_data_access.gnab_data import GNABFeatureProvider, GNAB_FEATURE_TYPE
-
+from bq_data_access.user_data import UserFeatureProvider, USER_FEATURE_TYPE
 
 class FeatureProviderFactory(object):
     @classmethod
     def get_feature_type_string(cls, feature_id):
-        regex = re_compile("^(CLIN|GEXP|METH|CNVR|RPPA|MIRN|GNAB):")
+        regex = re_compile("^(CLIN|GEXP|METH|CNVR|RPPA|MIRN|GNAB|USER):")
 
         feature_fields = regex.findall(feature_id)
         if len(feature_fields) == 0:
@@ -80,6 +81,8 @@ class FeatureProviderFactory(object):
             return MIRNFeatureProvider
         elif feature_type == GNAB_FEATURE_TYPE:
             return GNABFeatureProvider
+        elif feature_type == USER_FEATURE_TYPE:
+            return UserFeatureProvider
 
     @classmethod
     def from_feature_id(cls, feature_id, **kwargs):
@@ -148,7 +151,6 @@ def get_feature_vector(feature_id, cohort_id_array):
 def get_feature_vectors_async(params_array, poll_retry_limit=20):
     bigquery_service = authorize_credentials_with_Google()
     project_id = settings.BQ_PROJECT_ID
-
     result = {}
     provider_array = []
 
@@ -159,7 +161,7 @@ def get_feature_vectors_async(params_array, poll_retry_limit=20):
         job_reference = provider.get_data_job_reference(cohort_id_array, cohort_settings.dataset_id, cohort_settings.table_id)
 
         logging.info("Submitted {job_id}: {fid} - {cohorts}".format(job_id=job_reference['jobId'], fid=feature_id,
-                                                          cohorts=str(cohort_id_array)))
+                                                                    cohorts=str(cohort_id_array)))
         provider_array.append({
             'feature_id': feature_id,
             'provider': provider,
@@ -209,3 +211,111 @@ def get_feature_vectors_async(params_array, poll_retry_limit=20):
 
     return result
 
+
+def user_feature_handler(feature_id, cohort_id_array):
+    include_tcga = False
+    user_studies = ()
+    for cohort_id in cohort_id_array:
+        try:
+            db = sql_connection()
+            cursor = db.cursor(MySQLdb.cursors.DictCursor)
+
+            cursor.execute("SELECT study_id FROM cohorts_samples WHERE cohort_id = %s GROUP BY study_id", (cohort_id,))
+            for row in cursor.fetchall():
+                if row['study_id'] is None:
+                    include_tcga = True
+                else:
+                    user_studies += (row['study_id'],)
+
+        except Exception as e:
+            if db: db.close()
+            if cursor: cursor.close()
+            raise e
+
+    #  ex: feature_id 'CLIN:Disease_Code'
+    user_feature_id = None
+    if feature_id.startswith('USER:'):
+        # Try and convert it with a shared ID to a TCGA queryable id
+        user_feature_id = feature_id
+        feature_id = UserFeatureProvider.convert_user_feature_id(feature_id)
+        if feature_id is None:
+            # Querying user specific data, don't include TCGA
+            include_tcga = False
+
+    return {
+        'include_tcga': include_tcga,
+        'user_studies': user_studies,
+        'user_feature_id': user_feature_id
+    }
+
+
+def get_feature_vector(feature_id, cohort_id_array):
+    include_tcga = False
+    user_studies = ()
+    for cohort_id in cohort_id_array:
+        try:
+            db = sql_connection()
+            cursor = db.cursor(MySQLdb.cursors.DictCursor)
+
+            cursor.execute("SELECT study_id FROM cohorts_samples WHERE cohort_id = %s GROUP BY study_id", (cohort_id,))
+            for row in cursor.fetchall():
+                if row['study_id'] is None:
+                    include_tcga = True
+                else:
+                    user_studies += (row['study_id'],)
+
+        except Exception as e:
+            if db: db.close()
+            if cursor: cursor.close()
+            raise e
+
+    #  ex: feature_id 'CLIN:Disease_Code'
+    user_feature_id = None
+    if feature_id.startswith('USER:'):
+        # Try and convert it with a shared ID to a TCGA queryable id
+        user_feature_id = feature_id
+        feature_id = UserFeatureProvider.convert_user_feature_id(feature_id)
+        if feature_id is None:
+            # Querying user specific data, don't include TCGA
+            include_tcga = False
+
+    items = []
+    type = None
+    result = []
+    cohort_settings = settings.GET_BQ_COHORT_SETTINGS()
+    if include_tcga:
+        provider = FeatureProviderFactory.from_feature_id(feature_id)
+        result = provider.get_data(cohort_id_array, cohort_settings.dataset_id, cohort_settings.table_id)
+
+        # ex: result[0]
+        # {'aliquot_id': None, 'patient_id': u'TCGA-BH-A0B1', 'sample_id': u'TCGA-BH-A0B1-10A', 'value': u'BRCA'}
+        for data_point in result:
+            data_item = {key: data_point[key] for key in ['patient_id', 'sample_id', 'aliquot_id']}
+            value = provider.process_data_point(data_point)
+            # TODO refactor missing value logic
+            if value is None:
+                value = 'NA'
+            data_item['value'] = value
+            items.append(data_item)
+
+        type = provider.get_value_type()
+
+    if len(user_studies) > 0:
+        # Query User Data
+        user_provider = UserFeatureProvider(feature_id, user_feature_id=user_feature_id)
+        user_result = user_provider.get_data(cohort_id_array, cohort_settings.dataset_id, cohort_settings.table_id)
+        result.extend(user_result)
+
+        for data_point in user_result:
+            data_item = {key: data_point[key] for key in ['patient_id', 'sample_id', 'aliquot_id']}
+            value = provider.process_data_point(data_point)
+            # TODO refactor missing value logic
+            if value is None:
+                value = 'NA'
+            data_item['value'] = value
+            items.append(data_item)
+
+        if not type:
+            type = user_provider.get_value_type()
+
+    return type, items

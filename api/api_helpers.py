@@ -196,7 +196,7 @@ def applyFilter(field, dict):
 
     return where_clause
 
-def build_where_clause(dict):
+def build_where_clause(dict, alt_key_map=False):
 # this one gets called a lot
 #    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     first = True
@@ -205,12 +205,23 @@ def build_where_clause(dict):
     value_tuple = ()
     key_order = []
     for key, value in dict.items():
-        key_order.append(key)
-
-        # If it's a list of values, split it into an array
-        if isinstance(value, basestring):
+        # Check if we need to map to a different column name for a given key
+        if alt_key_map and key in alt_key_map:
+            key = alt_key_map[key]
+            if 'values' in value:
+                value = value['values']
+        # Multitable where's will come in with : in the name. Only grab the column piece for now
+        elif ':' in key:
+            key = key.split(':')[-1]
+            if 'values' in value:
+                value = value['values']
+        # Multitable filter lists don't come in as string as they can contain arbitrary text in values
+        elif isinstance(value, basestring):
+            # If it's a list of values, split it into an array
             if ',' in value:
                 value = value.split(',')
+
+        key_order.append(key)
 
         # If it's first in the list, don't append an "and"
         if first:
@@ -235,14 +246,14 @@ def build_where_clause(dict):
             big_query_str += ' %s in (' % key
             i = 0
             for val in value:
-                value_tuple = value_tuple + (val,)
+                value_tuple = value_tuple + (val.strip(),)
                 if i == 0:
                     query_str += '%s'
-                    big_query_str += '"' + val + '"'
+                    big_query_str += '"' + str(val) + '"'
                     i += 1
                 else:
                     query_str += ',%s'
-                    big_query_str += ',' + '"' + val + '"'
+                    big_query_str += ',' + '"' + str(val) + '"'
             query_str += ')'
             big_query_str += ')'
             if has_null:
@@ -268,7 +279,7 @@ def build_where_clause(dict):
                 big_query_str += ' %s=' % key
                 query_str += '%s'
                 big_query_str += '"%s"' % value
-                value_tuple = value_tuple + (value,)
+                value_tuple = value_tuple + (value.strip(),)
     return {'query_str': query_str, 'value_tuple': value_tuple, 'key_order': key_order, 'big_query_str': big_query_str}
 
 
@@ -301,7 +312,7 @@ def authorize_credentials_with_Google():
     http = httplib2.Http()
     http = credentials.authorize(http)
     service = build('bigquery', 'v2', http=http)
-
+    if debug: print >> sys.stderr,' big query authorization '+sys._getframe().f_code.co_name
     return service
 
 # TODO refactor to remove duplicate code

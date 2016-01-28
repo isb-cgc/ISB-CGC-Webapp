@@ -18,9 +18,9 @@ Authenticates user for accessing the ISB-CGC Endpoint APIs.
 May be run from the command line or in scripts/ipython.
 
 The credentials file can be copied to any machine from which you want
-to access the API.  The token can also be used directly.
+to access the API.
 
-1. cmd line -- saves FILE                                   
+1. Command Line
    python ./isb_auth.py          saves the user's credentials;
                       OPTIONAL:
                          -v       for verbose (returns token!)
@@ -29,26 +29,18 @@ to access the API.  The token can also be used directly.
                                   gives user a URL to paste into their browser,
                                   and asks for an auth code in return
 
+2. Python
+    import isb_auth
+    isb_auth.get_credentials()
 
-2. script/ipython -- returns a credentials object; token can be used as an
-                     argument to some endpoints URLs in the CGC APIs.
-   import isb_auth
-   token = isb_auth.get_credentials().access_token
+    # optional: to store credentials in a different location
+    from oauth2client.file import Storage
+    import isb_auth
+    import os
 
-
-3. Google Cloud Datalab -- run locally, on your home machine:
-   python ./isb_auth.py -v
-
-   Generates something like:
-   --verbose: printing extra information
-   credentials stored in /path/to/.isb_credentials
-   access_token: ya29.IAPODVRzyo1ew9T...    >------+-- Copy & Paste this into datalab
-   ...                                             |
-                                                   |
-   datalab> token = 'ya29.IAPODVRzyo1ew9T...'  <---+
-
-
-   See isb_curl.py help header for more information.
+    storage_file = os.path.join(os.path.expanduser("~"), "{USER_CREDENTIALS_FILE_NAME}")
+    storage = Storage(storage_file)
+    isb_auth.get_credentials(storage=storage)
 '''
 
 from argparse import ArgumentParser
@@ -100,7 +92,6 @@ def main():
     maybe_print('credentials stored in ' + args.storage_file)
     maybe_print('access_token: ' + credentials.access_token)
     maybe_print('refresh_token: ' + credentials.refresh_token)
-    return credentials
 
 def parse_args():
     parser = ArgumentParser()
@@ -111,4 +102,4 @@ def parse_args():
     return parser.parse_args()
 
 if __name__ == '__main__':
-  credentials = main()
+    main()

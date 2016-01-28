@@ -27,7 +27,8 @@ require.config({
         assetscore: 'libs/assets.core',
         assetsresponsive: 'libs/assets.responsive',
         d3: 'libs/d3.min',
-        d3tip: 'libs/d3-tip'
+        d3tip: 'libs/d3-tip',
+        base: 'base'
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -51,6 +52,7 @@ require([
 
     'assetscore',
     'assetsresponsive',
+    'base'
 ], function($, jqueryui, bootstrap, session_security, d3, d3tip, treegraph) {
     A11y.Core();
 

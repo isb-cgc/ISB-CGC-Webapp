@@ -17,6 +17,8 @@ limitations under the License.
 """
 
 import io
+import os
+import re
 import json
 import StringIO
 import csv
@@ -36,15 +38,23 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.conf import settings
+from django.http import StreamingHttpResponse
 
 from googleapiclient import http
 from googleapiclient.errors import HttpError
+from googleapiclient.http import MediaIoBaseDownload
 from google_helpers.directory_service import get_directory_resource
 from google_helpers.reports_service import get_reports_resource
-from google_helpers.storage_service import get_storage_resource
+from google_helpers.storage_service import get_storage_resource, get_special_storage_resource
 from google_helpers.resourcemanager_service import get_crm_resource
 from google_helpers.logging_service import get_logging_resource
+from google_helpers.bigquery_service import get_bigquery_service
 from google.appengine.api.taskqueue import Task, Queue
+
+from oauth2client.client import GoogleCredentials
+# from gcloud import storage, bigquery
+# import pandas as pd
+import uuid
 
 from accounts.models import NIH_User
 from api.api_helpers import sql_connection
@@ -341,7 +351,11 @@ def CloudSQL_logging(request):
     if i == 2:
         output = child.read()
         date_start_char = output.find('#1')
-        date_str = output[date_start_char+1:date_start_char+7]
+        if date_start_char:  # if date_star_char is not zero
+            date_str = output[date_start_char+1:date_start_char+7]
+        else:
+            utc_now = datetime.datetime.utcnow()
+            date_str = str(utc_now.year)[2:] + str(utc_now.month) + str(utc_now.day-1) + '?'
         storage_service = get_storage_resource()
         media = http.MediaIoBaseUpload(io.BytesIO(output), 'text/plain')
         filename = 'cloudsql_activity_log_' + date_str + '.txt'
@@ -525,3 +539,265 @@ def log_acls(request):
     write_log_entry('bucket_defacls', defacls)
 
     return HttpResponse('')
+
+
+@login_required
+def metrics_cloudsql_users(request, start_date, end_date):
+    if not request.user.is_superuser:
+        return HttpResponse('You need to be logged in as a superuser.')
+
+    assert start_date.isdigit(), "{} is not a digit".format(start_date)
+    assert end_date.isdigit(), "{} is not a digit".format(end_date)
+    assert len(start_date) == 6, "start_date must be of the form yymmdd"
+    assert len(end_date) == 6, "end_date must be of the form yymmdd"
+    assert int(end_date) > int(start_date), "end_date must be later than start_date"
+
+    user_metrics_dict = {}
+
+    # convert to date
+    start_date = datetime.datetime.strptime("20" + start_date, "%Y%m%d")
+    end_date = datetime.datetime.strptime("20" + end_date, "%Y%m%d")
+
+    parse_cloudsql_logs(user_metrics_dict, start_date, end_date)
+
+    csv_response = write_user_metrics_csv_file(user_metrics_dict)
+    csv_response['Content-Disposition'] = 'attachment; filename="Users from {} to {}.csv"'.format(start_date, end_date)
+
+    # return HttpResponse('<pre>'+json.dumps(user_metrics_dict, indent=4)+'</pre>')
+    return csv_response
+
+def parse_cloudsql_logs(user_metrics_dict, start_date, end_date):
+
+    storage_client = get_special_storage_resource()
+
+    date_range = (end_date - start_date).days
+
+    for day_delta in range(date_range+1):
+        day = start_date + datetime.timedelta(days=day_delta)
+        day = day.strftime("%y%m%d")
+        user_metrics_dict[day] = {}
+        req = storage_client.objects().get_media(
+            bucket='isb-cgc_logs', object='cloudsql_activity_log_{}.txt'.format(day))
+        try:
+            fh = io.BytesIO()
+            downloader = MediaIoBaseDownload(fh, req, chunksize=1024*1024)
+            done = False
+            while not done:
+                status, done = downloader.next_chunk()
+
+        # throws HttpError if this file is not found
+        except HttpError, e:
+            print >> sys.stderr, e
+        else:
+            write_user_activity(fh.getvalue(), user_metrics_dict[day])
+
+
+def write_user_activity(log_str, user_metrics_current_day):
+    user_metrics_current_day['new_users'] = []
+    new_user_index_list = [m.start() for m in re.finditer('### INSERT INTO `prod`.`auth_user`', log_str)]
+
+    for i in new_user_index_list:
+        new_user_email_start_index = log_str.find("@8='", i) + 4
+        new_user_email_end_index = log_str.find("'", new_user_email_start_index)
+        new_user_email = log_str[new_user_email_start_index:new_user_email_end_index]
+        user_metrics_current_day['new_users'].append(new_user_email)
+
+    user_metrics_current_day['old_users'] = {}
+    old_user_index_list = [m.start() for m in re.finditer('### UPDATE `prod`.`auth_user`', log_str)]
+
+    for i in old_user_index_list:
+        old_user_email_start_index = log_str.find("@8='", i) + 4
+        old_user_email_end_index = log_str.find("'", old_user_email_start_index)
+        old_user_email = log_str[old_user_email_start_index:old_user_email_end_index]
+        if old_user_email not in user_metrics_current_day['new_users']:
+            if old_user_email not in user_metrics_current_day['old_users'].keys():
+                user_metrics_current_day['old_users'][old_user_email] = []
+            old_user_last_login_start_index = log_str.find("@3=", old_user_email_end_index) + 3
+            old_user_last_login_end_index = log_str.find("\r\n", old_user_last_login_start_index)
+            old_user_login_date = log_str[old_user_last_login_start_index:old_user_last_login_end_index]
+            user_metrics_current_day['old_users'][old_user_email].append(old_user_login_date)
+
+
+def write_user_metrics_csv_file(user_metrics_dict):
+    rows = ()
+    rows = (["Date", "Number of New Users", "Number of Returning Users"],)
+    for date in user_metrics_dict.keys():
+        rows += ([
+                    str(date),
+                    str(len(user_metrics_dict[date].get('new_users', []))),
+                    str(len(user_metrics_dict[date].get('old_users', {}).keys()))
+                 ],)
+
+    pseudo_buffer = Echo()
+    writer = csv.writer(pseudo_buffer)
+    response = StreamingHttpResponse((writer.writerow(row) for row in rows),
+                                         content_type="text/csv")
+
+    return response
+
+
+class Echo(object):
+    """An object that implements just the write method of the file-like
+    interface.
+    """
+    def write(self, value):
+        """Write the value by returning it, instead of storing in a buffer."""
+        return value
+
+
+
+
+def normalize_json(item_y):
+    """Converts a nested json string into a flat dict
+    """
+    out = {}
+
+    def flatten(item_x, name=''):
+        """Flatten nested string"""
+        if type(item_x) is dict:
+            for item_a in item_x:
+                flatten(item_x[item_a], name +  item_a + '_')
+        elif type(item_x) is list:
+            for item_a in item_x:
+                flatten(item_a, name)
+        else:
+            out[str(name[:-1])] = item_x
+    flatten(item_y)
+    return out
+
+# def create_client(http=None):
+#     """Create BigQuery client
+#     """
+#     bq_scope = ['https://www.googleapis.com/auth/bigquery']
+#     credentials = GoogleCredentials.get_application_default()
+#     if credentials.create_scoped_required():
+#         credentials = credentials.create_scoped(bq_scope)
+#     if not http:
+#         http = httplib2.Http()
+#     credentials.authorize(http)
+#     return build('bigquery', 'v2', http=http)
+
+
+# def create_table(service, project_id, dataset_id, table_id, schema):
+#     """Create a BigQuery table
+#     """
+#     body = {
+#         'schema': schema,
+#         'tableReference': {
+#             'tableId': table_id,
+#             'projectId': project_id,
+#             'datasetId': dataset_id
+#         }
+#     }
+#     try:
+#         service.tables().insert(projectId=project_id, datasetId=dataset_id,
+#                                 body=body).execute()
+#         print 'table created: ' + table_id
+#     except Exception as ex:
+#         print ex
+#         raise
+#
+# def generate_schema(df, format_dtypes, default_type='STRING'):
+#     """Generate schema"""
+#     fields = []
+#     for column_name, dtype in df.dtypes.iteritems():
+#         if column_name in format_dtypes:
+#             dtype = format_dtypes[column_name]
+#         else:
+#             dtype = default_type
+#         fields.append({'name': column_name,
+#                        'type': dtype})
+#
+#     return {'fields': fields}
+#
+#
+# def stream_row_to_bigquery(service, project_id, dataset_id, table_name, row,
+#                            num_retries=5):
+#     """Streams data into BigQuery
+#     """
+#     insert_all_data = {
+#         'rows': [{
+#             'json': row,
+#             # Generate a unique id for each row so retries don't accidentally
+#             # duplicate insert
+#             'insertId': str(uuid.uuid4()),
+#         }]
+#     }
+#     return service.tabledata().insertAll(
+#         projectId=project_id,
+#         datasetId=dataset_id,
+#         tableId=table_name,
+#         body=insert_all_data).execute(num_retries=num_retries)
+#
+#
+# def read_json_from_storage(project_id, bucket_id, file_id, credentials):
+#     """read the file from the bucket
+#     """
+#
+#     storage_client = storage.Client(project=project_id, credentials=credentials)
+#     bucket = storage_client.get_bucket(bucket_id)
+#     blob = bucket.get_blob(file_id)
+#     item_json = json.loads(blob.download_as_string())
+#
+#     # flatten the nested json string
+#     all_items = []
+#     for item in item_json:
+#         item_content = normalize_json(item)
+#         all_items.append(item_content)
+#
+#     # a little time consuming, but is worth converting into dataframe
+#     data_df = pd.DataFrame(all_items)
+#
+#     return data_df
+#
+# def check_table_exists(project_id, dataset_id, table_id, credentials):
+#     """Check if the BigQuery table exists
+#     """
+#     bigquery_client = bigquery.Client(project=project_id, credentials=credentials)
+#     dataset = bigquery_client.dataset(dataset_id)
+#     table = dataset.table(name=table_id)
+#
+#     return table.exists()
+#
+# def load_billing_to_bigquery(request):
+#     """Main: Read the file from storage and load into BigQuery
+#     """
+#     if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):
+#         credentials = GoogleCredentials.get_application_default()
+#     else:
+#         credentials = GoogleCredentials.from_stream(settings.GOOGLE_APPLICATION_CREDENTIALS)
+#
+#     date = (datetime.datetime.now() + datetime.timedelta(days=-1))
+#
+#     project_id = settings.BIGQUERY_PROJECT_NAME
+#     bucket_id = 'isb-cgc-billing-json'
+#     dataset_id = 'billing'
+#     table_id = 'billing_' + date.strftime("%Y%m%d")
+#     file_id = 'billing-' + date.strftime("%Y-%m-%d") + '.json'
+#
+#     # create service
+#     bq_service = get_bigquery_service()
+#
+#     # read file from storage
+#     data_df = read_json_from_storage(project_id, bucket_id, file_id, credentials)
+#
+#     # generate bigquery schema
+#     dtypes = {'cost_amount': 'FLOAT', 'endTime': 'TIMESTAMP', 'credits_amount': 'FLOAT',
+#               'startTime': 'TIMESTAMP', 'measurements_sum': 'INTEGER'}
+#     schema = generate_schema(data_df, dtypes)
+#
+#     # check if the table exists, if not create and stream rows
+#     if not check_table_exists(project_id, dataset_id, table_id, credentials):
+#
+#         create_table(bq_service, project_id, dataset_id, table_id, schema)
+#
+#         # stream rows to bigquery table
+#         for _, row in data_df.iterrows():
+#             row = row.to_dict()
+#             stream_row_to_bigquery(bq_service, project_id, dataset_id, table_id, row,
+#                                    num_retries=5)
+#
+#         return HttpResponse('')
+#
+#     else:
+#         return HttpResponse('Table already exists: cannot create table')
