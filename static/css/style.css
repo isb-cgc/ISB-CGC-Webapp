@@ -1325,7 +1325,7 @@ a.skip-nav {
   position: relative;
   overflow: hidden;
   margin: 0 -10px -5px -10px; }
-  .panel-body {
+  .worksheet-panel-body {
     min-height: 635px;
   }
   .worksheet .fly-out {
