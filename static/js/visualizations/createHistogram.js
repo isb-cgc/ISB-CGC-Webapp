@@ -163,7 +163,6 @@ function($, d3, d3tip, helpers) {
                 var sample_list = [];
                 var patient_list = [];
                 var e = brush.extent();
-                var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                 svg.selectAll('rect.bar').classed("selected", function (d) {
                     return e[0] <= (d['x'] + d['dx']) && d['x'] <= e[1];
                 });
@@ -176,12 +175,8 @@ function($, d3, d3tip, helpers) {
                     sample_list = sample_list.concat(samples);
                     patient_list = patient_list.concat(patients);
                 });
-                $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + total_samples);
-                $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Participants: ' + total_patients);
-                $('#save-cohort-'+plot_id+'-modal input[name="samples"]').attr('value', sample_list);
-                $(svg[0]).parents('.plot')
-                    .find('.save-cohort-card').show()
-                    .attr('style', 'position:relative; top: -600px; left:' +(x(e[1])+10)+'px;');
+
+                sample_form_update(e, total_samples, total_patients, sample_list);
             };
 
             // If the brush is empty, select all circles.
@@ -194,6 +189,7 @@ function($, d3, d3tip, helpers) {
 
             var brush = d3.svg.brush()
                 .x(x)
+                .on('brushstart', function(){ svg.selectAll('.extent').style("fill", "rgba(40,130,50,0.5");})
                 .on('brush', brushmove)
                 .on('brushend', brushend);
 
@@ -262,9 +258,28 @@ function($, d3, d3tip, helpers) {
                 }
             };
 
+            /*
+                Update the sample cohort bar update
+             */
+            function sample_form_update(extent, total_samples, total_patients, sample_list){
+                $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + total_samples);
+                $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Participants: ' + total_patients);
+                $('#save-cohort-' + plot_id + '-modal input[name="samples"]').attr('value', sample_list);
+                $(svg[0]).parents('.plot')
+                    .find('.save-cohort-card').show()
+                    .attr('style', 'position:relative; top: -600px; left:' + (x(extent[1]) + 10) + 'px;');
+
+                if (total_samples > 0){
+                    $(svg[0]).parents('.plot')
+                        .find('.save-cohort-card').find('.btn').prop('disabled', false);
+                } else {
+                    $(svg[0]).parents('.plot')
+                        .find('.save-cohort-card').find('.btn').prop('disabled', true);
+                }
+            }
+
             function resize() {
                 width = svg.node().parentNode.offsetWidth - 10;
-
                 //TODO resize plot
             }
 
@@ -272,21 +287,10 @@ function($, d3, d3tip, helpers) {
                 check_selection_state(button);
             }
 
-            $(svg[0]).parents('.plot').find('.toggle-selection').unbind();
-            $(svg[0]).parents('.plot').find('.toggle-selection').on('click', function () {
-                $(this).toggleClass('active');
-
-                check_selection_state($(this).hasClass('active'));
-            });
-
-            check_selection_state($(svg[0]).parents('.plot').find('.toggle-selection').hasClass('active'));
-
             return {
                 resize                : resize,
                 check_selection_state : check_selection_state_wrapper
             }
         }
-
-
     };
 });

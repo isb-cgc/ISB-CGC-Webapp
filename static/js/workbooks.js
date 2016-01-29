@@ -69,7 +69,6 @@ require([
     'assetsresponsive',
     'base'
 ], function ($, plot_factory) {
-
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function() {
         var forms = $(this).find('form');
@@ -142,7 +141,6 @@ require([
     //What is this for?
     $('.dropdown-menu').find("[data-toggle='modal']").click(function(){
         //$(this.getAttribute("data-target")).modal();
-        console.log($(this.getAttribute("data-target")));
     })
 
     ////Model communications
@@ -170,7 +168,6 @@ require([
                 $('.comment-flyout .flyout-body').append('<p class="comment-content error">Fail to save comment. Please try back later.</p>')
                 form.reset()
             }
-
         });
 
         return false;
@@ -270,10 +267,24 @@ require([
     }
 
     //generates the actual svg plots by accepting the plot settings configured in the settings area
-    function generate_plot(worksheet_id, type, x_var_code, y_var_code, color_by, cohort_id){
-        var plot_element = $("[worksheet_id='"+worksheet_id+"']").parent().parent().find(".plot");
+    function generate_plot(worksheet_id, type, x_var_code, y_var_code, color_by, cohort_ids){
         var plotFactory = Object.create(plot_factory, {});
-        plotFactory.generate_plot(plot_element, type, x_var_code, y_var_code, color_by, cohort_id, false);
+
+        var plot_element = $("[worksheet_id='"+worksheet_id+"']").parent().parent().find(".plot");
+        var plot_loader  = plot_element.find('.plot-loader');
+        var plot_area    = plot_element.find('.plot-div');
+        var plot_legend  = plot_element.find('.legend');
+        var pair_wise    = plot_element.find('.pairwise-result');
+        pair_wise.empty();
+        plot_area.empty();
+        plot_legend.empty();
+        var plot_selector   = '#' + plot_element.prop('id') + ' .plot-div';
+        var legend_selector = '#' + plot_element.prop('id') + ' .legend';
+
+        plot_loader.fadeIn();
+        plotFactory.generate_plot(plot_selector, legend_selector, pair_wise, type, x_var_code, y_var_code, color_by, cohort_ids, false, function(){
+            plot_loader.fadeOut();
+        });
     }
 
     //loads the plot data into the ui inputs for adjustment
@@ -281,6 +292,7 @@ require([
         var plot_element = $("[worksheet_id='"+worksheet_id+"']").parent().parent().find(".plot");
 
         plot_element.find('.update-plot').attr('plot_id', plot_data.id).change();
+        plot_element.find('#cohort-plot-id').val(plot_data.id).change();
         if(plot_data.x_axis) {
             plot_element.find('#x-axis-select').val(plot_data.x_axis.url_code);
         }
@@ -367,7 +379,9 @@ require([
         });
     });
 
-    // Saving cohorts from plot
+    /*
+        Saving cohorts from plot,
+     */
     $('form[action="/cohorts/save_cohort_from_plot/"]').on('submit', function(event) {
         event.preventDefault();
         var form = this;

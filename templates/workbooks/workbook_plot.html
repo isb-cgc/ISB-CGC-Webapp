@@ -29,8 +29,13 @@
     </div>
     <div class="panel-body">
         <div class="worksheet-plot-loader plot-loader" style="display:none;">
-            <div style="">
-                <i class="fa fa-spinner fa-spin"></i>
+            <div class="load-bar">
+              <div class="bar"></div>
+              <div class="bar"></div>
+              <div class="bar"></div>
+            </div>
+            <div class="loading-text">
+                Data is being collected...
             </div>
         </div>
 
@@ -176,7 +181,7 @@
                     <div class="modal-body">
                         <label class="form-inline" for="{{ plot.id }}-new-cohort-name">New Cohort Name</label>
                         <input type="text" class="form-control" name="cohort-name" id="{{ plot.id }}-new-cohort-name" placeholder="Enter a name for the new cohort.">
-                        <input type="hidden" name="plot-id" value="{{ plot.id }}" />
+                        <input type="hidden" id="cohort-plot-id" name="plot-id" value="{{ plot.id }}" />
                         <input type="hidden" name="samples" value="" />
                     </div>
                     <div class="modal-footer">
