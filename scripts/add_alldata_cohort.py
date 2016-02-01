@@ -55,6 +55,10 @@ class BigQueryCohortSupport(object):
         {
             "name": "aliquot_barcode",
             "type": "STRING"
+        },
+        {
+            "name": "study_id",
+            "type": "INTEGER"
         }
     ]
 
@@ -153,7 +157,7 @@ def get_superuser_id(conn, superuser_name):
 def get_sample_barcodes(conn):
     logging.info("Getting list of sample barcodes from MySQL")
     cursor = conn.cursor(DictCursor)
-    select_samples_str = 'SELECT distinct SampleBarcode from metadata_samples;'
+    select_samples_str = 'SELECT distinct SampleBarcode from metadata_samples where Project="TCGA";'
     cursor.execute(select_samples_str)
     rows = cursor.fetchall()
     cursor.close()
@@ -161,7 +165,7 @@ def get_sample_barcodes(conn):
 
 def get_patient_barcodes(conn):
     cursor = conn.cursor(DictCursor)
-    select_patients_str = 'SELECT DISTINCT ParticipantBarcode from metadata_samples;'
+    select_patients_str = 'SELECT DISTINCT ParticipantBarcode from metadata_samples where Project="TCGA";'
     cursor.execute(select_patients_str)
     rows = cursor.fetchall()
     cursor.close()

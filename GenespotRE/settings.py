@@ -21,14 +21,12 @@ import os
 
 import secret_settings
 
-
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + os.sep
 DEBUG = secret_settings.get('DEBUG')
 TEMPLATE_DEBUG = DEBUG
 ALLOWED_HOSTS = [
     secret_settings.get('ALLOWED_HOST')
 ]
-
 
 ### added for connecting to CloudSQL with SSL certs on MVM platform
 SSL_DIR = os.path.abspath(os.path.dirname(__file__))+os.sep
@@ -40,6 +38,8 @@ MVM_ON = True
 #)
 ADMINS = ()
 MANAGERS = ADMINS
+
+REQUEST_PROJECT_EMAIL = secret_settings.get('REQUEST_PROJECT_EMAIL')
 
 PROJECT_ID = secret_settings.get('PROJECT_ID')
 BQ_PROJECT_ID = secret_settings.get('BQ_PROJECT_ID')
@@ -56,11 +56,13 @@ PAIRWISE_SERVICE_URL = secret_settings.get('PAIRWISE_SERVICE_URL')
 OPEN_DATA_BUCKET = secret_settings.get('OPEN_DATA_BUCKET')
 CONTROLLED_DATA_BUCKET = secret_settings.get('CONTROLLED_DATA_BUCKET')
 
+GCLOUD_BUCKET = secret_settings.get('GCLOUD_BUCKET')
+
 # BigQuery cohort storage settings
 COHORT_DATASET_ID = secret_settings.get('COHORT_DATASET_ID')
 DEVELOPER_COHORT_TABLE_ID = secret_settings.get('DEVELOPER_COHORT_TABLE_ID')
 
-NIH_AUTH_ON = False
+NIH_AUTH_ON = os.environ.get('NIH_AUTH_ON', False)
 
 if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):  
     # or os.getenv('SETTINGS_MODE') == 'prod':
@@ -97,6 +99,7 @@ BIGQUERY_DATASET2 = secret_settings.get('BIGQUERY_DATASET2')
 def get_bigquery_dataset():
     return BIGQUERY_DATASET
 
+PROJECT_NAME = secret_settings.get('PROJECT_NAME')
 BIGQUERY_PROJECT_NAME = secret_settings.get('BIGQUERY_PROJECT_NAME')
 
 def get_bigquery_project_name():
@@ -114,7 +117,13 @@ class BigQueryCohortStorageSettings(object):
 def GET_BQ_COHORT_SETTINGS():
     return BigQueryCohortStorageSettings(COHORT_DATASET_ID, DEVELOPER_COHORT_TABLE_ID)
 
+USE_CLOUD_STORAGE = secret_settings.get('USE_CLOUD_STORAGE')
 
+PROCESSING_ENABLED = secret_settings.get('PROCESSING_ENABLED')
+PROCESSING_JENKINS_URL = secret_settings.get('PROCESSING_JENKINS_URL')
+PROCESSING_JENKINS_PROJECT = secret_settings.get('PROCESSING_JENKINS_PROJECT')
+PROCESSING_JENKINS_USER = secret_settings.get('PROCESSING_JENKINS_USER')
+PROCESSING_JENKINS_PASSWORD = secret_settings.get('PROCESSING_JENKINS_PASSWORD')
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -142,7 +151,9 @@ USE_TZ = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = ''
+MEDIA_FOLDER = secret_settings.get('MEDIA_FOLDER')
+MEDIA_ROOT = os.path.join(os.path.dirname(__file__), '..', '..', secret_settings.get('MEDIA_FOLDER'))
+MEDIA_ROOT = os.path.normpath(MEDIA_ROOT)
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -226,7 +237,13 @@ INSTALLED_APPS = (
     'GenespotRE',
     'visualizations',
     'seqpeek',
-    'cohorts'
+    'sharing',
+    'cohorts',
+    'projects',
+    'genes',
+    'variables',
+    'workbooks',
+    'data_upload'
 )
 
 #############################
@@ -282,7 +299,7 @@ LOGGING = {
 #  Start django-allauth  #
 ##########################
 
-LOGIN_REDIRECT_URL = '/user_landing/'
+LOGIN_REDIRECT_URL = '/dashboard/'
 
 INSTALLED_APPS += (
     'accounts',

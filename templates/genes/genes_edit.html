@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+{% block title %}Gene Favorite Edit | ISB-CGC{% endblock %}}
+{% block header %}{% endblock %}
+
+{% block link_page_name %}genes_edit{% endblock %}
+{% block page_name %}genes_edit{% endblock %}
+
+{% block page_header %}
+<link type="text/css" rel="stylesheet" href="{% static 'css/token-typeahead.css' %}" />
+<div class="container">
+    <ol class="breadcrumb">
+        <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+        {% if workbook %}
+            <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
+            <li><a href="{% url 'worksheet_display' workbook.id worksheet.id %}">{{ workbook.name }}</a></li>
+            <li><a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Saved Gene Favorites</a></li>
+        {% elif new_workbook %}
+            <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
+            <li><a href="{% url 'gene_select_for_new_workbook' %}">Saved Gene Favorites</a></li>
+        {% else %}
+            <li><a href="{% url 'genes' %}">Saved Gene Favorites</a></li>
+        {% endif %}
+    </ol>
+    {% if workbook %}
+        <h1 class="page-header">Create Gene List</h1>
+    {% else %}
+        <h1 class="page-header">Edit Gene Favorite</h1>
+    {% endif %}
+</div>
+{% endblock %}
+{% block content %}
+<div class="container">
+    <section class="panel panel-defaul">
+        <div class="panel-heading">
+        </div>
+        <div class="panel-body">
+            {% if gene_favorite %}
+                <form method="POST" action="{% url 'gene_fav_update' gene_favorite.id %}">
+            {% elif workbook %}
+                <form method="POST" action="{% url 'worksheet_genes_edit' workbook.id worksheet.id %}">
+            {% elif new_workbook %}
+                <form method="POST" action="{% url 'worksheet_create_with_genes' %}">
+            {% else %}
+                <form method="POST" action="{% url 'gene_fav_save' %}">
+            {% endif %}
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="genes-name">Name of Favorite (Required)</label>
+                    <input class="form-control" type="text" value="{% if 'gene_fav_detail' %}{{gene_favorite.name}}{% endif %} " name="genes-name" required>
+                </div>
+
+                <div class="form-group">
+                    <div>
+                        <label for="genes-list">Selected Genes (required)</label>
+                        <button class="btn btn-link" id="clearAll">Clear All</button>
+                        <span> | </span>
+                        <div id="uploadField" class="center" style="display : inline-block;">
+                            <button class="btn btn-link" id="file-upload-btn">
+                                <i class="fa fa-file"></i> Upload Genes List
+                            </button>
+                            <input type="file" name="upload" id="file-upload-field" style="display: none">
+                            <div id="uploading" class="collapse" style="margin-left: 20px;">
+                                <i class="fa fa-circle-o-notch fa-spin"></i>  <span id="selected-file-name"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="tokenfield-holder">
+                        <!-- "paste-in-genes" -->
+                        <textarea name="genes-list" class="form-control tokenfield" id="paste-in-genes"  placeholder="Enter your favorite gene's name" required></textarea>
+                    </div>
+                    <div class="tokenfield">
+                        <p class="helper-text__repeat" style="display: none;"><i class="fa fa-exclamation-circle"></i> <span class="token invalid repeat">Repetitive</span>Genes will be removed on submit </p>
+                        <p class="helper-text__invalid" style="display: none;"><i class="fa fa-exclamation-circle"></i> The following <span class="token invalid">items</span>were not recognized as gene identifiers. You may either correct or delete these items -- or upload them as-is.</p>
+                    </div>
+                </div>
+                <ul class="page-action-group">
+                    {% if gene_favorite %}
+                        <li role="menuitem">
+                            <input type="submit" value="Save Changes" class="btn btn-primary"/>
+                        </li>
+                        <li role="menuitem"><menuitem class="btn btn-link"><a href="{% url 'gene_fav_detail' gene_favorite.id %}">Cancel</a></menuitem></li>
+                    {% elif workbook %}
+                        <li role="menuitem">
+                            <input type="submit" value="Apply to Worksheet" class="btn btn-primary"/>
+                        </li>
+                        <li role="menuitem"><a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Cancel</a></li>
+                    {% else %}
+                        <li role="menuitem">
+                            <input type="submit" value="Save as Favorite" class="btn btn-primary"/>
+                        </li>
+                        <li role="menuitem"><a href="{% url 'gene_select_for_new_workbook' %}">Cancel</a></li>
+                    {% endif %}
+{#                    <menuitem class="btn btn-link pull-right"><a href="">View System Gene Identifiers</a></menuitem>#}
+                </ul>
+            </form>
+        </div>
+    </section>
+</div>
+<script type="text/javascript">
+    var base_url = '{{ base_url|safe }}';
+    {% if gene_favorite %}
+        var gene_fav = { genes : {{ genes }} };
+    {% else %}
+        var gene_fav = { genes : [] };
+    {% endif %}
+</script>
+{% endblock %}
+
+{% block js_file %}{% static 'js/genes/genes.js' %}{% endblock %}

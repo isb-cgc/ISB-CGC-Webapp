@@ -83,7 +83,7 @@ def build_query(project_name, dataset_name, table_name, gene, value_field, cohor
          "AND Tumor_SampleBarcode IN ( "
          "    SELECT sample_barcode "
          "    FROM [{project_name}:{cohort_dataset}.{cohort_table}] "
-         "    WHERE cohort_id IN ({cohort_id_list}) "
+         "    WHERE cohort_id IN ({cohort_id_list})  AND study_id IS NULL"
          ") ")
 
     if value_field == 'num_mutations':
