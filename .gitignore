@@ -46,7 +46,6 @@ coverage.xml
 
 # Django stuff:
 *.log
-migrations/
 
 # Sphinx documentation
 docs/_build/
@@ -66,7 +65,6 @@ target/
 #*
 *.json
 *.patch
-migrations/
 .env
 *.env
 scripts/metadata_featdef_tables.sql
@@ -95,3 +93,6 @@ tmp*
 
 # Emacs
 \#*\#
+
+#ignore mock visualization data
+static/js/visualizations/mock_histogram_data.js

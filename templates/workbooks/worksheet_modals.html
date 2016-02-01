@@ -1,0 +1,69 @@
+<!-- Duplicate Worksheet Modal -->
+<div class="modal fade" id="copy-worksheet-modal-{{ worksheet.id }}" tabindex="-1" role="dialog" aria-labelledby="copy-workbook-header" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title"></h4>
+            </div>
+            <div class="modal-body">
+                Duplicate this Worksheet "{{ worksheet.name }}"?
+            </div>
+            <form id="copy-workbook" method="POST" action="{% url 'worksheet_copy' workbook.id worksheet.id %}">
+                {% csrf_token %}
+                <div class="modal-footer">
+                    <input type="submit" value="Duplicate" class="btn btn-primary" />
+                    <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Worksheet Modal -->
+<div class="modal fade" id="delete-worksheet-modal-{{ worksheet.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-workbook-header" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title"></h4>
+            </div>
+            <div class="modal-body">
+                Delete this Worksheet "{{ worksheet.name }}"?
+            </div>
+            <form id="delete-workbook" method="POST" action="{% url 'worksheet_delete' workbook.id worksheet.id %}">
+                {% csrf_token %}
+                <div class="modal-footer">
+                    <input type="submit" value="Delete" class="btn btn-primary" />
+                    <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Worksheet Details Modal -->
+<div class="modal fade" id="edit-worksheet-details-modal-{{ worksheet.id }}" tabindex="-1" role="dialog" aria-labelledby="edit-workbook-header" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Worksheet Details</h4>
+            </div>
+            <form id="edit-workbook" method="POST" action="{% url 'worksheet_edit' workbook.id worksheet.id %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <label for="name">Name (required)</label>
+                    <input class="form-control" type="text" name="name" value="{{ worksheet.name }}"/>
+                    <br>
+                    <label for="description">Description (optional)</label>
+                    <textarea class="form-control" name="description">{{worksheet.description }}</textarea>
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" value="Update" class="btn btn-primary" />
+                    <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -789,6 +789,7 @@ class Cohort_Endpoints_API(remote.Service):
 
 
             try:
+                print 'Query String: ', query_str
                 db = sql_connection()
                 cursor = db.cursor(MySQLdb.cursors.DictCursor)
                 cursor.execute(query_str, query_tuple)

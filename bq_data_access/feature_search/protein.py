@@ -30,7 +30,7 @@ from bq_data_access.protein_data import RPPA_FEATURE_TYPE
 
 class RPPASearcher(object):
     feature_search_valid_fields = set(['gene_name', 'protein_name'])
-    field_search_valid_fields = set(['gene_name', 'probe_name'])
+    field_search_valid_fields = set(['gene_name', 'probe_name', 'protein_name'])
 
     searchable_fields = [
         {'name': 'gene_name',
