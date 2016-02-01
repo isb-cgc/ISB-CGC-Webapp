@@ -26,6 +26,7 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.contrib.auth.models import User as Django_User
 import django
+import django.db
 import MySQLdb
 import json
 
@@ -263,6 +264,7 @@ class Cohort_Endpoints_API(remote.Service):
                 if cursor: cursor.close()
                 if filter_cursor: filter_cursor.close()
                 if db and db.open: db.close()
+                django.db.close_connection()
         else:
             raise endpoints.UnauthorizedException("Authentication failed.")
 
@@ -820,6 +822,7 @@ class Cohort_Endpoints_API(remote.Service):
             finally:
                 if cursor: cursor.close()
                 if db and db.open: db.close()
+                django.db.close_connection()
 
         else:
             raise endpoints.UnauthorizedException("Authentication failed.")
@@ -908,6 +911,7 @@ class Cohort_Endpoints_API(remote.Service):
                 if patient_cursor: patient_cursor.close()
                 if sample_cursor: sample_cursor.close()
                 if db and db.open: db.close()
+                django.db.close_connection()
 
             cohort_name = request.__getattribute__('name')
 
@@ -1003,6 +1007,8 @@ class Cohort_Endpoints_API(remote.Service):
                 raise endpoints.NotFoundException(
                     "Either cohort %d does not have an entry in the database "
                     "or you do not have owner or reader permissions on this cohort." % cohort_id)
+            finally:
+                django.db.close_connection()
         else:
             return_message = "Unsuccessful authentication."
             # todo: when endpoints.UnauthorizedException is fixed, add that here.
