@@ -20,18 +20,22 @@
     <div class="panel-heading">
         <div class="options-bar">
             {% if workbook.owner.id == user.id %}
-{#  TODO    <a role="button" class="toggle-selection" aria-label="Toggle Sample Selection"><i class="fa fa-crosshairs"></i></a>#}
+            <a role="button" class="toggle-selection" aria-label="Toggle Sample Selection"><i class="fa fa-crosshairs"></i></a>
             <a role="button" class="show-settings-flyout" data-target=".setting-flyout" aria-label="Show Plot Settings">Edit Analysis Settings</i></a>
             {% else %}
             <a role="button" class="show-settings-flyout" data-target=".setting-flyout" aria-label="Show Plot Settings"><i class="fa fa-tasks"></i></a>
             {% endif %}
         </div>
     </div>
-    <div class="panel-body">
-
+    <div class="worksheet-panel-body panel-body">
         <div class="worksheet-plot-loader plot-loader" style="display:none;">
-            <div style="">
-                <i class="fa fa-spinner fa-spin"></i>
+            <div class="load-bar">
+              <div class="bar"></div>
+              <div class="bar"></div>
+              <div class="bar"></div>
+            </div>
+            <div class="loading-text">
+                Data is being collected...
             </div>
         </div>
 
@@ -177,43 +181,13 @@
                     <div class="modal-body">
                         <label class="form-inline" for="{{ plot.id }}-new-cohort-name">New Cohort Name</label>
                         <input type="text" class="form-control" name="cohort-name" id="{{ plot.id }}-new-cohort-name" placeholder="Enter a name for the new cohort.">
-                        <input type="hidden" name="plot_id" value="{{ plot.id }}" />
+                        <input type="hidden" id="cohort-plot-id" name="plot-id" value="{{ plot.id }}" />
                         <input type="hidden" name="samples" value="" />
                     </div>
                     <div class="modal-footer">
                         {% csrf_token %}
                         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                         <input type="submit" value="Save Cohort" class="btn btn-primary" />
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Delete Plot Modal -->
-    <div class="modal fade" id="delete-plot-{{ plot.id }}-modal" tabindex="-1" role="dialog" aria-labelledby="delete-plot-{{ plot.id }}-header" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="delete-plot-{{ plot.id }}-header">Delete Plot</h4>
-                </div>
-
-                <form id="delete-plot-{{ plot.id }}" method="POST" action="{% url 'delete_plot' %}">
-
-                    <div class="modal-body">
-                        Are you sure you want to delete this plot?
-                        <input type="hidden" name="plot_id" value="{{ plot.id }}" />
-
-                    </div>
-                    <div class="modal-footer">
-                        {% csrf_token %}
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-{#                        {% if viz and viz.user.id != request.user.id %}#}
-{#                            <input type="submit" value="Clone Visualization" class="btn btn-primary" />#}
-{#                        {% else %}#}
-                            <input type="submit" value="Delete Plot" class="btn btn-primary" />
-{#                        {% endif %}#}
                     </div>
                 </form>
             </div>

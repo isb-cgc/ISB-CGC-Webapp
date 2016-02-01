@@ -313,12 +313,9 @@ function($, d3, d3tip, vizhelpers) {
                             .filter(function(item, i, a) { return i == a.indexOf(item) }).length;
                         sample_list = sample_list.concat(samples);
                     });
-                    $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + total_samples);
-                    $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Participants: ' + total_patients);
-                    $('#save-cohort-'+plot_id+'-modal input[name="samples"]').attr('value', sample_list);
-                    $(svg[0]).parents('.plot')
-                        .find('.save-cohort-card').show()
-                        .attr('style', 'position:absolute; top: 35px; left: 850px;');
+
+                    //.on('brushstart', function(){ svg.selectAll('.extent').style("fill", "rgba(40,130,50,0.5");})
+                    sample_form_update({}, total_samples, total_patients, sample_list);
                 });
 
             plot_area.selectAll('.counts')
@@ -364,11 +361,8 @@ function($, d3, d3tip, vizhelpers) {
 
             var check_selection_state = function(obj) {
                 if (obj) {
-
                     // Remove zoom area
                     svg.selectAll('.zoom_area').remove();
-
-
                 } else {
                     var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                     // Clear selections
@@ -388,19 +382,48 @@ function($, d3, d3tip, vizhelpers) {
                         .style('opacity', 0);
 
                     // Register zoom event listeners
-        //            zoom.on('zoom', zoom_x);
+                    // zoom.on('zoom', zoom_x);
                     zoom_area.call(zoom);
                 }
             };
 
-            $(svg[0]).parents('.plot').find('.toggle-selection').unbind();
-            $(svg[0]).parents('.plot').find('.toggle-selection').on('click', function () {
-                $(this).toggleClass('active');
+             /*
+                Update the sample cohort bar update
+             */
+            function sample_form_update(extent, total_samples, total_patients, sample_list){
+                var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
 
-                check_selection_state($(this).hasClass('active'));
-            });
+                $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + total_samples);
+                $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Participants: ' + total_patients);
+                $('#save-cohort-' + plot_id + '-modal input[name="samples"]').attr('value', sample_list);
+                $(svg[0]).parents('.plot')
+                    .find('.save-cohort-card').show()
+                    .attr('style', 'position:absolute; top: 35px; left: 850px;');
+                    //.attr('style', 'position:absolute; top: '+ (y(extent[1][1]) + 180)+'px; left:' +(x2(extent[1][0]) + 90)+'px;');
 
-            check_selection_state($(svg[0]).parents('.plot').find('.toggle-selection').hasClass('active'));
+                if (total_samples > 0){
+                    $(svg[0]).parents('.plot')
+                        .find('.save-cohort-card').find('.btn').prop('disabled', false);
+                } else {
+                    $(svg[0]).parents('.plot')
+                        .find('.save-cohort-card').find('.btn').prop('disabled', true);
+                }
+
+            }
+
+            function resize() {
+                width = svg.node().parentNode.offsetWidth - 10;
+                //TODO resize plot
+            }
+
+            function check_selection_state_wrapper(bool){
+                check_selection_state(bool);
+            }
+
+            return {
+                resize                : resize,
+                check_selection_state : check_selection_state_wrapper
+            }
         }
     };
 });
