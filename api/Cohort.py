@@ -26,6 +26,7 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.contrib.auth.models import User as Django_User
 import django
+import django.db
 import MySQLdb
 import json
 
@@ -188,6 +189,7 @@ class Cohort_Endpoints_API(remote.Service):
 
         if user_email:
             django.setup()
+            django.db.close_connection()
             try:
                 user_id = Django_User.objects.get(email=user_email).id
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
@@ -263,6 +265,7 @@ class Cohort_Endpoints_API(remote.Service):
                 if cursor: cursor.close()
                 if filter_cursor: filter_cursor.close()
                 if db and db.open: db.close()
+
         else:
             raise endpoints.UnauthorizedException("Authentication failed.")
 
@@ -301,6 +304,7 @@ class Cohort_Endpoints_API(remote.Service):
 
         if user_email:
             django.setup()
+            django.db.close_connection()
             try:
                 user_id = Django_User.objects.get(email=user_email).id
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
@@ -744,6 +748,8 @@ class Cohort_Endpoints_API(remote.Service):
             user_email = get_user_email_from_token(access_token)
 
         if user_email:
+            django.setup()
+            django.db.close_connection()
             dbGaP_authorized = is_dbgap_authorized(user_email)
 
             query_str = 'SELECT DataFileNameKey, SecurityProtocol, Repository ' \
@@ -858,6 +864,7 @@ class Cohort_Endpoints_API(remote.Service):
 
         if user_email:
             django.setup()
+            django.db.close_connection()
             try:
                 django_user = Django_User.objects.get(email=user_email)
                 user_id = django_user.id
@@ -981,6 +988,7 @@ class Cohort_Endpoints_API(remote.Service):
 
         if user_email:
             django.setup()
+            django.db.close_connection()
             try:
                 django_user = Django_User.objects.get(email=user_email)
                 user_id = django_user.id
@@ -1004,6 +1012,7 @@ class Cohort_Endpoints_API(remote.Service):
                 raise endpoints.NotFoundException(
                     "Either cohort %d does not have an entry in the database "
                     "or you do not have owner or reader permissions on this cohort." % cohort_id)
+
         else:
             return_message = "Unsuccessful authentication."
             # todo: when endpoints.UnauthorizedException is fixed, add that here.
