@@ -1780,6 +1780,8 @@ class Meta_Endpoints_API_v2(remote.Service):
                     }
 
             except (TypeError, IndexError) as e:
+                if cursor: cursor.close()
+                if db: db.close()
                 raise endpoints.NotFoundException('Error in retrieving barcodes.')
 
         # Add TCGA attributes to the list of available attributes
@@ -1971,6 +1973,8 @@ class Meta_Endpoints_API_v2(remote.Service):
                 cursor.close()
 
             except (TypeError, IndexError) as e:
+                if cursor: cursor.close()
+                if db: db.close()
                 raise endpoints.NotFoundException('Error in retrieving barcodes.')
 
         # Add TCGA attributes to the list of available attributes
@@ -2051,5 +2055,5 @@ class Meta_Endpoints_API_v2(remote.Service):
 
                 results.append( SampleBarcodeItem(sample_barcode=row[0], study_id=table_settings['study_id']) )
             cursor.close()
-
+            db.close()
         return SampleBarcodeList( items=results, count=len(results) )
