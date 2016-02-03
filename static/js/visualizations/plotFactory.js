@@ -29,7 +29,7 @@ define([
     'violin_plot',
     'histogram_plot',
     'bar_plot',
-    'visualizations/mock_histogram_data',
+    //'visualizations/mock_histogram_data',
     'select2',
     'assetscore',
     'assetsresponsive'
