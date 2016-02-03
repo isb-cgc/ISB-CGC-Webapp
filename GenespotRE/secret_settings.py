@@ -131,6 +131,9 @@ SETTINGS = {
 
     'SU_USER': os.environ.get('SUPERUSER_USERNAME', 'isb'),
     'SU_PASS': os.environ.get('SUPERUSER_PASSWORD', 'isbcgctest'),
+
+    'SITE_GOOGLE_TAG_MANAGER_ID' : os.environ.get('SITE_GOOGLE_TAG_MANAGER_ID', False),
+    'SITE_GOOGLE_ANALYTICS' : os.environ.get('SITE_GOOGLE_ANALYTICS_ID', False),
 }
 
 if os.environ.has_key('DB_SSL_CERT'):
