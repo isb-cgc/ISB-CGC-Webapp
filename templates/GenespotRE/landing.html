@@ -27,56 +27,75 @@
 {% block page_name %}landing{% endblock %}
 {% block content %}
 
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="jumbotron">
-                <h1>ISB Cancer Genomics Cloud</h1>
+    <header>
+        <div class="lj-overlay lj-overlay-color lj-overlay-image"></div>
+        <div class="container">
+            <div class="row">
+              <div class="col-xs-12 lj-title">
+                <h1 class="lj-text-center"><span>Cancer Genomics Cloud</span></h1>
+              </div>
+            </div>
 
+            <div class="row">
+                <div class="col-xs-8 col-xs-offset-2 lj-title-paragraph">
+                    <p class="lj-text-center" >The ISB Cancer Genomics Cloud (ISB-CGC) is democratizing access to <a href = "http://cancergenome.nih.gov/" target = "_blank"><strong>TCGA</strong></a> data and coupling it with unprecedented computational power to allow researchers to explore and analyze this vast data-space.</p>
+                </div>
             </div>
+
+            <div class="row">
+           <div class="col-sm-3"></div>
+            <div class="col-sm-2 lj-header-button lj-block-center" data-scroll-reveal="wait 0.5s, then enter bottom and move 20px over 0.5s">
+              <a href="http://isb-cancer-genomics-cloud.readthedocs.org/en/latest/" target = "_blank">Documentation</a>
+            </div>
+            <div class="col-sm-2 lj-header-button lj-block-center" data-scroll-reveal="wait 0.5s, then enter bottom and move 20px over 0.5s">
+              <a href="https://github.com/isb-cgc/" target = "_blank"> <i class="fa fa-github fa-lg" ></i> GitHub</a>
+            </div>
+            <div class="col-sm-2 lj-header-button lj-block-center" data-scroll-reveal="wait 0.5s, then enter bottom and move 20px over 0.5s">
+              <a href="https://groups.google.com/a/isb-cgc.org/forum/#!newtopic/feedback" target = "_blank">Feedback</a>
+            </div>
+            <div class="col-sm-3"></div>
+          </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col-sm-12 col-md-6 col-lg-6">
-            <div class="landing-block about-us">
-                <h3>About Us</h3>
-                <p>The Cancer Genomics Cloud is a platform that serves as a large scale repository and provides the computational infrastructure necessary to carry out cancer genomics research at unprecedented scales. </p>
-                <p>This project is a collaboration between the Institute for Systems Biology, Google, and SRA.</p>
-                <p>Please use a Google managed email account to log into this systems.</p>
+    </header>
+    <div class="row landing-content">
+        <div class="col-sm-12">
+            <div class="row">
+                <div class="col-sm-10 col-sm-offset-1 lj-icon-box-heading lj-text-left">
+                    <h2>Partners:</h2>
+                    <p style="text-align: center;">
+                        <a href="https://cloud.google.com/">
+                            <img class="alignnone wp-image-800 size-full" src="static/img/google_cloud_logo.png" alt="Google Cloud Platform" width="393" />
+                        </a>
+                        <a href="https://www.sra.com/">
+                            <img class="alignnone size-full wp-image-801" src="static/img/csra-logo.png" alt="SRA International" width="393" />
+                        </a>
+                    </p>
+                </div>
             </div>
-            <div class="landing-block">
-                <h3>Useful Links</h3>
-                <ul>
-                    <li><a target="_blank" href="https://github.com/isb-cgc/ISB-CGC-Webapp">Code Repository</a></li>
-                    <li><a href="{% url 'help' %}">Documentation</a></li>
-{#                    <li><a href="#">Policies and Guidelines</a></li>#}
-                </ul>
-            </div>
+
+
+        <div class="col-sm-10 col-sm-offset-1">
+            <h2>About Us:</h2>
+            <p>The Cancer Genomics Cloud is a platform that serves as a large scale repository and provides the computational infrastructure necessary to carry out cancer genomics research at unprecedented scales. </p>
+            <p>Please use a Google managed email account to log into this systems.</p>
+
 
             {% if version %}
             <br/>
             Last deployed to version {{ version.version }} on {{ version.date }}
             {% endif %}
         </div>
-        <div class="col-lg-6">
-            <h3>Warning Notice</h3>
-            <p>You are accessing a U.S. Government (National Institute of Health (NIH), National Cancer Institute (NCI) and Institute for Systems Biology ISB) website / application which may contain information that must be protected under the U. S. Privacy Act or other sensitive information which is intended for authorized Scientific or Research use only. Network activity and Application usage is monitored to maintain system security, availability, and to ensure appropriate and legitimate usage, there is no right or expectation to privacy on this website / system. Unauthorized attempts to upload information, change information, or use of this website for other than its intended purpose may result in disciplinary action, civil, and/or criminal penalties. Any individual or system that accesses this website should have no expectation of privacy regarding any communications or data processed by this website. Anyone accessing this website expressly consents to monitoring of their actions and all communication or data transiting or stored on or related to this website and is advised that if such monitoring reveals possible evidence of criminal activity, NIH may provide that evidence to law enforcement officials.</p>
-            <h3>Funding</h3>
+
+        <div class="col-sm-10 col-sm-offset-1">
+            <h2>Funding:</h2>
             <p>This project has been funded in whole with Federal funds from the National Cancer Institute, National Institutes of Health, Department of Health and Human Services, under Contract No. HHSN261201400007C.</p>
         </div>
-        {% if tree_data %}
-            <div class="col-sm-12 col-md-6 col-lg-6">
-                <div class="landing-block graph-block">
-                    <h3>Tumor Type Samples</h3>
-                    <div id="disease-map">
-                        <div class="alert alert-info alert-dismissible">
-                            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                            Try hovering
-                        </div>
-                    </div>
-                    <p>Total Number of Samples: <span></span></p>
-                </div>
-            </div>
-        {% endif %}
+
+
+        <div class="col-sm-10 col-sm-offset-1">
+            <h2>Warning Notice:</h2>
+            <p>You are accessing a U.S. Government (National Institute of Health (NIH), National Cancer Institute (NCI) and Institute for Systems Biology ISB) website / application which may contain information that must be protected under the U. S. Privacy Act or other sensitive information which is intended for authorized Scientific or Research use only. Network activity and Application usage is monitored to maintain system security, availability, and to ensure appropriate and legitimate usage, there is no right or expectation to privacy on this website / system. Unauthorized attempts to upload information, change information, or use of this website for other than its intended purpose may result in disciplinary action, civil, and/or criminal penalties. Any individual or system that accesses this website should have no expectation of privacy regarding any communications or data processed by this website. Anyone accessing this website expressly consents to monitoring of their actions and all communication or data transiting or stored on or related to this website and is advised that if such monitoring reveals possible evidence of criminal activity, NIH may provide that evidence to law enforcement officials.</p>
+        </div>
 
     </div>
     <script type="text/javascript">
