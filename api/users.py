@@ -41,16 +41,6 @@ INSTALLED_APP_CLIENT_ID = settings.INSTALLED_APP_CLIENT_ID
 class ReturnJSON(messages.Message):
     msg = messages.StringField(1)
 
-def is_dbgap_authorized(user_email):
-    directory_service, http_auth = get_directory_resource()
-    try:
-        directory_service.members().get(groupKey=CONTROLLED_ACL_GOOGLE_GROUP,
-                                        memberKey=user_email).execute(http=http_auth)
-        return True
-    except HttpError, e:
-        logger.info("{} checked their membership in {} and saw they were not in that group."
-                    .format(user_email, CONTROLLED_ACL_GOOGLE_GROUP))
-        return False
 
 
 User_Endpoints = endpoints.api(name='user_api', version='v1', description='Get information about users.',

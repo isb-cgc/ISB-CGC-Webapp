@@ -28,6 +28,5 @@ urlpatterns = patterns('',
     url(r'^remove_user_from_ACL/(?P<nih_username>\w+)/$', views.remove_user_from_ACL, name="remove_user_from_ACL"),
     url(r'^create_and_log_reports', views.create_and_log_reports, name="create_and_log_reports"),
     url(r'^log_acls', views.log_acls, name="log_acls"),
-    url(r'^metrics_cloudsql_users/(?P<start_date>\d+)/(?P<end_date>\d+)/$', views.metrics_cloudsql_users),
-    # url(r'load_billing_to_bigquery', views.load_billing_to_bigquery)
+    url(r'load_billing_to_bigquery', views.load_billing_to_bigquery)
     )

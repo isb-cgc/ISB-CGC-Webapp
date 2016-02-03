@@ -1,0 +1,12 @@
+{{ shared_by.first_name }} {{ shared_by.last_name }} Has Shared a {{ type }}
+
+Hello {{ user.first_name }},
+
+{{ shared_by.first_name }} {{ shared_by.last_name }} wanted to share a {{ type|lower }} with you. You've been added to the {{ item.name }} {{ type|lower }}. You can now view this {{ type|lower }} on the site from your {{ type|lower }} page.
+
+{% if item.description %}
+Here's a quick description of the {{ type|lower }}
+    {{ item.description|escape }}
+{% endif %}
+
+Copyright 2015 Institute of Systems Biology

@@ -22,10 +22,13 @@ import os
 import MySQLdb
 import httplib2
 from oauth2client.client import GoogleCredentials, AccessTokenCredentials
+from google_helpers.directory_service import get_directory_resource
+from googleapiclient.errors import HttpError
 from django.conf import settings
 from googleapiclient.discovery import build
+import logging
 
-
+CONTROLLED_ACL_GOOGLE_GROUP = settings.ACL_GOOGLE_GROUP
 debug = settings.DEBUG
 
 # Database connection
@@ -196,7 +199,7 @@ def applyFilter(field, dict):
 
     return where_clause
 
-def build_where_clause(dict):
+def build_where_clause(dict, alt_key_map=False):
 # this one gets called a lot
 #    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     first = True
@@ -205,12 +208,23 @@ def build_where_clause(dict):
     value_tuple = ()
     key_order = []
     for key, value in dict.items():
-        key_order.append(key)
-
-        # If it's a list of values, split it into an array
-        if isinstance(value, basestring):
+        # Check if we need to map to a different column name for a given key
+        if alt_key_map and key in alt_key_map:
+            key = alt_key_map[key]
+            if 'values' in value:
+                value = value['values']
+        # Multitable where's will come in with : in the name. Only grab the column piece for now
+        elif ':' in key:
+            key = key.split(':')[-1]
+            if 'values' in value:
+                value = value['values']
+        # Multitable filter lists don't come in as string as they can contain arbitrary text in values
+        elif isinstance(value, basestring):
+            # If it's a list of values, split it into an array
             if ',' in value:
                 value = value.split(',')
+
+        key_order.append(key)
 
         # If it's first in the list, don't append an "and"
         if first:
@@ -238,11 +252,11 @@ def build_where_clause(dict):
                 value_tuple = value_tuple + (val.strip(),)
                 if i == 0:
                     query_str += '%s'
-                    big_query_str += '"' + val + '"'
+                    big_query_str += '"' + str(val) + '"'
                     i += 1
                 else:
                     query_str += ',%s'
-                    big_query_str += ',' + '"' + val + '"'
+                    big_query_str += ',' + '"' + str(val) + '"'
             query_str += ')'
             big_query_str += ')'
             if has_null:
@@ -301,7 +315,7 @@ def authorize_credentials_with_Google():
     http = httplib2.Http()
     http = credentials.authorize(http)
     service = build('bigquery', 'v2', http=http)
-
+    if debug: print >> sys.stderr,' big query authorization '+sys._getframe().f_code.co_name
     return service
 
 # TODO refactor to remove duplicate code
@@ -327,3 +341,13 @@ def get_user_email_from_token(access_token):
     if 'email' in user_info:
         user_email = user_info['email']
     return user_email
+
+
+def is_dbgap_authorized(user_email):
+    directory_service, http_auth = get_directory_resource()
+    try:
+        directory_service.members().get(groupKey=CONTROLLED_ACL_GOOGLE_GROUP,
+                                        memberKey=user_email).execute(http=http_auth)
+        return True
+    except HttpError, e:
+        return False

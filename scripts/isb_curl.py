@@ -70,7 +70,6 @@ import os
 import sys
 from oauth2client.file import Storage
 
-
 CREDENTIALS_LOC_ENV = 'ISB_CREDENTIALS'
 DEFAULT_CREDENTIALS_LOC = os.path.join(os.path.expanduser("~"), '.isb_credentials')
 
@@ -107,6 +106,7 @@ def main():
     access_token = get_access_token()
     curl_args = ['curl', '-H', 'Authorization: Bearer ' + access_token] + args
     os.execvp('curl', curl_args)
+
 
 # this allows us to call this from command line
 if __name__ == '__main__':
