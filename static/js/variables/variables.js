@@ -257,7 +257,7 @@ require([
             var csrftoken = get_cookie('csrftoken');
             $.ajax({
                 type: 'POST',
-                url : base_api_url + '/variables/save',
+                url : base_url + '/variables/save',
                 data: JSON.stringify({name : name, variables : variable_list}),
                 beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                 success: function (data) {
