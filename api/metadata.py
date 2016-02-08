@@ -26,6 +26,7 @@ from django.contrib.auth.models import User as Django_User
 from accounts.models import NIH_User
 from cohorts.models import Cohort_Perms,  Cohort as Django_Cohort,Patients, Samples, Filters
 from projects.models import Study, User_Feature_Definitions, User_Feature_Counts, User_Data_Tables
+from django.core.signals import request_finished
 import django
 import logging
 import re
@@ -1721,6 +1722,10 @@ class Meta_Endpoints_API_v2(remote.Service):
             if cursor: cursor.close()
             if db: db.close()
             raise endpoints.InternalServerErrorException('Error retrieving attribute list')
+        finally:
+            if cursor: cursor.close()
+            if db: db.close()
+            request_finished.send(self)
 
     GET_RESOURCE = endpoints.ResourceContainer(
                                                filters=messages.StringField(1),
@@ -1755,6 +1760,7 @@ class Meta_Endpoints_API_v2(remote.Service):
                 raise endpoints.BadRequestException('Filters must be a valid JSON formatted array with objects containing both key and value properties')
 
         db = sql_connection()
+        django.setup()
 
         # Check for passed in saved search id
         if request.__getattribute__('cohort_id') is not None:
@@ -1780,6 +1786,8 @@ class Meta_Endpoints_API_v2(remote.Service):
                     }
 
             except (TypeError, IndexError) as e:
+                if cursor: cursor.close()
+                if db: db.close()
                 raise endpoints.NotFoundException('Error in retrieving barcodes.')
 
         # Add TCGA attributes to the list of available attributes
@@ -1917,6 +1925,7 @@ class Meta_Endpoints_API_v2(remote.Service):
                 total = feature['total']
 
         db.close()
+        request_finished.send(self)
         return MetadataCountsItem(count=count_list, total=total)
 
     GET_RESOURCE = endpoints.ResourceContainer(
@@ -1951,6 +1960,7 @@ class Meta_Endpoints_API_v2(remote.Service):
                 raise endpoints.BadRequestException('Filters must be a valid JSON formatted array with objects containing both key and value properties')
 
         db = sql_connection()
+        django.setup()
 
         # TODO enable filtering based off of this
         # Check for passed in saved search id
@@ -1971,6 +1981,8 @@ class Meta_Endpoints_API_v2(remote.Service):
                 cursor.close()
 
             except (TypeError, IndexError) as e:
+                if cursor: cursor.close()
+                if db: db.close()
                 raise endpoints.NotFoundException('Error in retrieving barcodes.')
 
         # Add TCGA attributes to the list of available attributes
@@ -2051,5 +2063,6 @@ class Meta_Endpoints_API_v2(remote.Service):
 
                 results.append( SampleBarcodeItem(sample_barcode=row[0], study_id=table_settings['study_id']) )
             cursor.close()
-
+        db.close()
+        request_finished.send(self)
         return SampleBarcodeList( items=results, count=len(results) )

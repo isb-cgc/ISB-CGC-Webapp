@@ -392,6 +392,9 @@ def get_binary_log_filenames():
         return filenames
     except (TypeError, IndexError) as e:
         logger.warn('Error in retrieving binary log filenames: {}'.format(e))
+    finally:
+        if cursor: cursor.close()
+        if db: db.close()
 
 
 @login_required
