@@ -157,17 +157,39 @@ def get_feature_vectors_async(params_array, poll_retry_limit=20):
     cohort_settings = settings.GET_BQ_COHORT_SETTINGS()
     # Submit jobs
     for feature_id, cohort_id_array in params_array:
-        provider = FeatureProviderFactory.from_feature_id(feature_id, bigquery_service=bigquery_service)
-        job_reference = provider.get_data_job_reference(cohort_id_array, cohort_settings.dataset_id, cohort_settings.table_id)
+        user_data = user_feature_handler(feature_id, cohort_id_array)
 
-        logging.info("Submitted {job_id}: {fid} - {cohorts}".format(job_id=job_reference['jobId'], fid=feature_id,
-                                                                    cohorts=str(cohort_id_array)))
-        provider_array.append({
-            'feature_id': feature_id,
-            'provider': provider,
-            'ready': False,
-            'job_reference': job_reference
-        })
+        if user_data['include_tcga']:
+            provider = FeatureProviderFactory.from_feature_id(feature_id, bigquery_service=bigquery_service)
+            job_reference = provider.get_data_job_reference(cohort_id_array, cohort_settings.dataset_id, cohort_settings.table_id)
+
+            logging.info("Submitted TCGA {job_id}: {fid} - {cohorts}".format(job_id=job_reference['jobId'], fid=feature_id,
+                                                                             cohorts=str(cohort_id_array)))
+            provider_array.append({
+                'feature_id': feature_id,
+                'provider': provider,
+                'ready': False,
+                'job_reference': job_reference
+            })
+
+        #if user_data['user_feature_id'] is not None:
+        if len(user_data['user_studies']) > 0:
+            converted_feature_id = user_data['converted_feature_id']
+            user_feature_id = user_data['user_feature_id']
+            logging.debug("user_feature_id: {0}".format(user_feature_id))
+            provider = UserFeatureProvider(converted_feature_id, user_feature_id=user_feature_id)
+            job_reference = provider.get_data_job_reference(cohort_id_array, cohort_settings.dataset_id, cohort_settings.table_id)
+            #user_result = provider.get_data(cohort_id_array, cohort_settings.dataset_id, cohort_settings.table_id)
+
+            logging.info("Submitted USER {job_id}: {fid} - {cohorts}".format(job_id=job_reference['jobId'], fid=feature_id,
+                                                                             cohorts=str(cohort_id_array)))
+            provider_array.append({
+                'feature_id': feature_id,
+                'provider': provider,
+                'ready': False,
+                'job_reference': job_reference
+            })
+
 
     all_done = False
     total_retries = 0
@@ -199,10 +221,16 @@ def get_feature_vectors_async(params_array, poll_retry_limit=20):
                     data.append(data_item)
 
                 feature_id = item['feature_id']
-                result[feature_id] = {
-                    'type': provider.get_value_type(),
-                    'data': data
-                }
+                value_type = provider.get_value_type()
+                if feature_id not in result:
+                    result[feature_id] = {
+                        'type': value_type,
+                        'all_types': [value_type],
+                        'data': data
+                    }
+                else:
+                    result[feature_id]['data'].extend(data)
+                    result[feature_id]['all_types'].append(value_type)
 
             sleep(1)
 
@@ -231,6 +259,7 @@ def user_feature_handler(feature_id, cohort_id_array):
             if db: db.close()
             if cursor: cursor.close()
             raise e
+    logging.debug("User studies found: {0}".format(len(user_studies)))
 
     #  ex: feature_id 'CLIN:Disease_Code'
     user_feature_id = None
@@ -243,6 +272,7 @@ def user_feature_handler(feature_id, cohort_id_array):
             include_tcga = False
 
     return {
+        'converted_feature_id': feature_id,
         'include_tcga': include_tcga,
         'user_studies': user_studies,
         'user_feature_id': user_feature_id
