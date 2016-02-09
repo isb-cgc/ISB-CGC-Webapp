@@ -84,12 +84,29 @@ require([
             var feature = $this.closest('.cohort-feature-select-block'),
                 value = $this;
 
-            var token = $('<span>').data({
-                'feature-id'   : feature.data('feature-id'),
-                'feature-name' : feature.data('feature-name'),
-                'value-id'     : value.data('value-id'),
-                'value-name'   : value.data('value-name'),
-            });
+            if (feature.data('feature-type') == 'datatype') { // Datatype feature
+                var feature_value = value.data('value-name').split('-');
+                if (feature_value[1] == 'True') {
+                    feature_value[1] = 1;
+                } else {
+                    feature_value[1] = 0;
+                }
+                var token = $('<span>').data({
+                    'feature-id'   : 'SAMP:' + feature_value[0],
+                    'feature-name' : feature_value[0],
+                    'value-id'     : value.data('value-id'),
+                    'value-name'   : feature_value[1]
+                });
+
+            } else {
+                var token = $('<span>').data({
+                    'feature-id'   : feature.data('feature-id'),
+                    'feature-name' : feature.data('feature-name'),
+                    'value-id'     : value.data('value-id'),
+                    'value-name'   : value.data('value-name'),
+                });
+            }
+
             token.append(
                 $('<a>').addClass('delete-x filter-label label label-default')
                     .text(feature.data('feature-name') + ': ' + value.data('value-name'))
