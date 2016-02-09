@@ -458,8 +458,8 @@ def save_cohort(request, workbook_id=None, worksheet_id=None, create_workbook=Fa
         deactivate_sources = request.POST.get('deactivate_sources')
         filters = request.POST.getlist('filters')
 
-        token = SocialToken.objects.filter(account__user=request.user, account__provider='Google')[0].token
-        data_url = METADATA_API + ('v2/metadata_sample_list?token=%s' % (token,))
+        # token = SocialToken.objects.filter(account__user=request.user, account__provider='Google')[0].token
+        data_url = METADATA_API + 'v2/metadata_sample_list?'
 
         # Given cohort_id is the only source id.
         if source:
