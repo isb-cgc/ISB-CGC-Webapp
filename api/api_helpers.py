@@ -282,7 +282,7 @@ def build_where_clause(dict, alt_key_map=False):
                 big_query_str += ' %s=' % key
                 query_str += '%s'
                 big_query_str += '"%s"' % value
-                value_tuple += (val.strip(),) if type(val) is str else (val,)
+                value_tuple += (value.strip(),) if type(value) is str else (value,)
     return {'query_str': query_str, 'value_tuple': value_tuple, 'key_order': key_order, 'big_query_str': big_query_str}
 
 
