@@ -69,7 +69,6 @@ require([
     'assetsresponsive',
     'base'
 ], function ($, plot_factory) {
-
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function() {
         var forms = $(this).find('form');
@@ -142,7 +141,6 @@ require([
     //What is this for?
     $('.dropdown-menu').find("[data-toggle='modal']").click(function(){
         //$(this.getAttribute("data-target")).modal();
-        console.log($(this.getAttribute("data-target")));
     })
 
     ////Model communications
@@ -170,7 +168,6 @@ require([
                 $('.comment-flyout .flyout-body').append('<p class="comment-content error">Fail to save comment. Please try back later.</p>')
                 form.reset()
             }
-
         });
 
         return false;
@@ -254,29 +251,48 @@ require([
         $(this).find(":disabled :selected").remove()
         var worksheet_id = $(this).attr("worksheet_id");
         var plot_type = $(this).find(":selected").text();
-        get_plot(workbook_id, worksheet_id, plot_type, function(data){
+        get_plot_model(workbook_id, worksheet_id, plot_type, function(data){
             if(data.error){
                 console.log("Display error");
             } else {
-                load_plot(workbook_id, data);
+                load_plot(worksheet_id, data);
                 show_plot_settings();
             }
         });
     });
 
+    //validate the plot settings before initiating the plot
     function valid_plot_settings(){
         return true;
     }
 
-    function generate_plot(worksheet_id, type, x_var_code, y_var_code, color_by, cohort_id){
-        var plot_element = $("[worksheet_id='"+worksheet_id+"']").parent().parent().find(".plot");
+    //generates the actual svg plots by accepting the plot settings configured in the settings area
+    function generate_plot(worksheet_id, type, x_var_code, y_var_code, color_by, cohort_ids){
         var plotFactory = Object.create(plot_factory, {});
-        plotFactory.generate_plot(plot_element, type, x_var_code, y_var_code, color_by, cohort_id, false);
+
+        var plot_element = $("[worksheet_id='"+worksheet_id+"']").parent().parent().find(".plot");
+        var plot_loader  = plot_element.find('.plot-loader');
+        var plot_area    = plot_element.find('.plot-div');
+        var plot_legend  = plot_element.find('.legend');
+        var pair_wise    = plot_element.find('.pairwise-result');
+        pair_wise.empty();
+        plot_area.empty();
+        plot_legend.empty();
+        var plot_selector   = '#' + plot_element.prop('id') + ' .plot-div';
+        var legend_selector = '#' + plot_element.prop('id') + ' .legend';
+
+        plot_loader.fadeIn();
+        plotFactory.generate_plot(plot_selector, legend_selector, pair_wise, type, x_var_code, y_var_code, color_by, cohort_ids, false, function(){
+            plot_loader.fadeOut();
+        });
     }
 
+    //loads the plot data into the ui inputs for adjustment
     function load_plot(worksheet_id, plot_data){
         var plot_element = $("[worksheet_id='"+worksheet_id+"']").parent().parent().find(".plot");
+
         plot_element.find('.update-plot').attr('plot_id', plot_data.id).change();
+        plot_element.find('#cohort-plot-id').val(plot_data.id).change();
         if(plot_data.x_axis) {
             plot_element.find('#x-axis-select').val(plot_data.x_axis.url_code);
         }
@@ -292,7 +308,7 @@ require([
     }
 
     //the server side call made here will also change the active entry for the worksheet
-    function get_plot(workbook_id, worksheet_id, type, callback){
+    function get_plot_model(workbook_id, worksheet_id, type, callback){
         var csrftoken = get_cookie('csrftoken');
         $.ajax({
             type        : 'GET',
@@ -361,6 +377,44 @@ require([
         .always(function () {
             $this.find('.btn').removeClass('btn-disabled').attr('disabled', false);
         });
+    });
+
+    /*
+        Saving cohorts from plot,
+     */
+    $('form[action="/cohorts/save_cohort_from_plot/"]').on('submit', function(event) {
+        event.preventDefault();
+        var form = this;
+        $.ajax({
+            type: 'POST',
+            url: base_url + '/cohorts/save_cohort_from_plot/',
+            dataType  :'json',
+            data: $(this).serialize(),
+            success: function(data) {
+                console.log(data)
+                if(data.error){
+                    $('#js-messages').append(
+                        $('<p>')
+                            .addClass('alert alert-danger alert-dismissible')
+                            .text(data.error));
+                } else {
+                     $('#js-messages').append(
+                        $('<p>')
+                            .addClass('alert alert-info alert-dismissible')
+                            .text(data.message));
+                }
+                $('.toggle-selection').click();
+                $('.modal').modal('hide');
+                form.reset();
+                $("html, body").animate({
+                    scrollTop: 0
+                }, 600);
+            },
+            error: function(data) {
+                form.reset();
+            }
+        });
+        return false;
     });
 
     /*

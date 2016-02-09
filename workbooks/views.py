@@ -218,13 +218,7 @@ def worksheet_display(request, workbook_id=0, worksheet_id=0):
         if str(worksheet.id) == worksheet_id :
             display_worksheet = worksheet
 
-        plot_types = [{'name' : 'Bar Chart'},
-                          {'name' : 'Histogram'},
-                          {'name' : 'Scatter Plot'},
-                          {'name' : 'Violin Plot'},
-                          {'name' : 'Violin Plot 2'},
-                          {'name' : 'Cubby Hole'},
-                          {'name' : 'SeqPeak'}]
+    plot_types = Analysis.get_types()
     return render(request, template, {'workbook'            : workbook_model,
                                       'display_worksheet'   : display_worksheet,
                                       'plot_types'          : plot_types})
