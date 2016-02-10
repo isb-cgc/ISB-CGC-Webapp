@@ -278,7 +278,7 @@ require([
     $("#edit_favorite_list").on('click', function(event){
         var name = $.trim($("#variable_list_name_input").val());
         var variable_list = get_variable_list();
-        var variable_id = this.getAttribute("variable_list_id");
+        var variable_id = this.getAttribute("variable_id");
         if(name && variable_list.length>0){
             var csrftoken = get_cookie('csrftoken');
             $.ajax({

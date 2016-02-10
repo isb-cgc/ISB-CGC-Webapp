@@ -71,7 +71,8 @@ class VariableFavorite(models.Model):
             var.delete()
 
         for var in variables :
-            Variable.objects.create(name=var['name'], feature_id=var['project_id'], code=var['code'], variable_favorite=self)
+            print var
+            Variable.objects.create(name=var['name'], feature_id=var['feature_id'], code=var['code'], variable_favorite=self)
 
         self.save()
         return_obj = {
