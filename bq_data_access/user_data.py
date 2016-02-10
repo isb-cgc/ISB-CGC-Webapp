@@ -255,7 +255,12 @@ class UserFeatureProvider(FeatureDataProvider):
                 # Build our query
                 queries.append(feature_def.build_query(cohort_table_full, cohort_id_array))
 
-        query = ' UNION '.join(queries)
+        # Create a combination query using the UNION ALL operator. Each data source defined above (query1, query2, ...)
+        # will be combined as follows:
+        #
+        # (query 1) , (query 2) , ... , (query 3)
+        #
+        query = ' , '.join(['(' + query + ')' for query in queries])
         logging.info("BQ_QUERY_USER: " + query)
         return query
 
@@ -332,8 +337,6 @@ class UserFeatureProvider(FeatureDataProvider):
         query_job = self.submit_bigquery_job(bigquery_service, project_id, query_body)
 
         self.job_reference = query_job['jobReference']
-        job_id = query_job['jobReference']['jobId']
-        logging.debug("JOBID {id}".format(id=job_id))
 
         return self.job_reference
 
