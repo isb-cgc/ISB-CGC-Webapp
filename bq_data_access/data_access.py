@@ -25,6 +25,8 @@ from django.conf import settings
 from api.api_helpers import authorize_credentials_with_Google
 from api.api_helpers import sql_connection, MySQLdb
 
+from bq_data_access.feature_value_types import ValueType
+
 from bq_data_access.errors import FeatureNotFoundException
 from bq_data_access.gexp_data import GEXPFeatureProvider, GEXP_FEATURE_TYPE
 from bq_data_access.methylation_data import METHFeatureProvider, METH_FEATURE_TYPE
@@ -147,7 +149,7 @@ def get_feature_vector(feature_id, cohort_id_array):
     return provider.get_value_type(), items
 
 
-# TODO document
+# TODO refactor to smaller functions and document
 def get_feature_vectors_async(params_array, poll_retry_limit=20):
     bigquery_service = authorize_credentials_with_Google()
     project_id = settings.BQ_PROJECT_ID
@@ -155,6 +157,7 @@ def get_feature_vectors_async(params_array, poll_retry_limit=20):
     provider_array = []
 
     cohort_settings = settings.GET_BQ_COHORT_SETTINGS()
+
     # Submit jobs
     for feature_id, cohort_id_array in params_array:
         user_data = user_feature_handler(feature_id, cohort_id_array)
@@ -172,24 +175,25 @@ def get_feature_vectors_async(params_array, poll_retry_limit=20):
                 'job_reference': job_reference
             })
 
-        #if user_data['user_feature_id'] is not None:
         if len(user_data['user_studies']) > 0:
             converted_feature_id = user_data['converted_feature_id']
             user_feature_id = user_data['user_feature_id']
             logging.debug("user_feature_id: {0}".format(user_feature_id))
             provider = UserFeatureProvider(converted_feature_id, user_feature_id=user_feature_id)
-            job_reference = provider.get_data_job_reference(cohort_id_array, cohort_settings.dataset_id, cohort_settings.table_id)
-            #user_result = provider.get_data(cohort_id_array, cohort_settings.dataset_id, cohort_settings.table_id)
 
-            logging.info("Submitted USER {job_id}: {fid} - {cohorts}".format(job_id=job_reference['jobId'], fid=feature_id,
-                                                                             cohorts=str(cohort_id_array)))
-            provider_array.append({
-                'feature_id': feature_id,
-                'provider': provider,
-                'ready': False,
-                'job_reference': job_reference
-            })
+            if not provider.is_queryable(cohort_id_array):
+                logging.debug("No UserFeatureDefs for '{0}'".format(converted_feature_id))
+            else:
+                job_reference = provider.get_data_job_reference(cohort_id_array, cohort_settings.dataset_id, cohort_settings.table_id)
 
+                logging.info("Submitted USER {job_id}: {fid} - {cohorts}".format(job_id=job_reference['jobId'], fid=feature_id,
+                                                                                 cohorts=str(cohort_id_array)))
+                provider_array.append({
+                    'feature_id': feature_id,
+                    'provider': provider,
+                    'ready': False,
+                    'job_reference': job_reference
+                })
 
     all_done = False
     total_retries = 0
@@ -225,17 +229,26 @@ def get_feature_vectors_async(params_array, poll_retry_limit=20):
                 if feature_id not in result:
                     result[feature_id] = {
                         'type': value_type,
-                        'all_types': [value_type],
                         'data': data
                     }
                 else:
+                    # TODO fix possible bug:
+                    # The ValueType of the data from the user feature provider may not match that of the TCGA
+                    # provider above.
                     result[feature_id]['data'].extend(data)
-                    result[feature_id]['all_types'].append(value_type)
 
             sleep(1)
 
         all_done = all([j['ready'] for j in provider_array])
         logging.debug("Done: {done}    retry: {retry}".format(done=str(all_done), retry=total_retries))
+
+    for feature_id, _ in params_array:
+        if feature_id not in result:
+            result[feature_id] = {
+                'ready': True,
+                'data': [],
+                'type': ValueType.STRING
+            }
 
     return result
 
@@ -259,9 +272,7 @@ def user_feature_handler(feature_id, cohort_id_array):
             if db: db.close()
             if cursor: cursor.close()
             raise e
-    logging.debug("User studies found: {0}".format(len(user_studies)))
 
-    #  ex: feature_id 'CLIN:Disease_Code'
     user_feature_id = None
     if feature_id.startswith('USER:'):
         # Try and convert it with a shared ID to a TCGA queryable id

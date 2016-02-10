@@ -19,18 +19,18 @@ limitations under the License.
 import logging
 from re import compile as re_compile
 
-from api.api_helpers import authorize_credentials_with_Google, sql_connection
+from api.api_helpers import sql_connection
 
 import MySQLdb
 
 from django.conf import settings
 
+from bq_data_access.feature_value_types import ValueType
+
 from bq_data_access.errors import FeatureNotFoundException
-from bq_data_access.feature_value_types import DataTypes, BigQuerySchemaToValueTypeConverter
+from bq_data_access.feature_value_types import DataTypes
 from bq_data_access.feature_data_provider import FeatureDataProvider
 from bq_data_access.utils import DurationLogged
-
-import sys
 
 USER_FEATURE_TYPE = 'USER'
 
@@ -54,7 +54,14 @@ class UserFeatureDef(object):
         self.column_name = column_name
         self.study_id = study_id
         self.filters = filters
+        self.bq_row_id = None
         self.type = "STRING" if is_numeric else "FLOAT"
+
+    def get_value_type(self):
+        if self.type == "STRING":
+            return ValueType.STRING
+        else:
+            return ValueType.FLOAT
 
     @classmethod
     def get_table_and_field(cls, bq_id):
@@ -67,7 +74,7 @@ class UserFeatureDef(object):
 
         # Is only symbol at the moment
         symbol = None
-        if len(split) > 3:
+        if len(split) > 4:
             symbol = split[3]
 
         return bq_table, column_name, symbol
@@ -154,10 +161,8 @@ class UserFeatureDef(object):
 
             results = []
             for row in cursor.fetchall():
-
                 bq_table, column_name, symbol = cls.get_table_and_field(row['bq_map_id'])
                 filters = None
-                #logging.debug("UserFeatureDef.from_feature_id results: {0}".format(str([bq_table, column_name, symbol])))
                 if symbol is not None:
                     filters = {
                         'Symbol': symbol
@@ -174,31 +179,35 @@ class UserFeatureDef(object):
             if cursor: cursor.close()
             raise e
 
+    def unpack_value_from_bigquery_row(self, bq_row):
+        return bq_row['f'][self.bq_row_id + 2]['v']
+
     def build_query(self, cohort_table, cohort_ids):
         cohort_str = ",".join([str(cohort_id) for cohort_id in cohort_ids])
         query =  """
-            SELECT t.sample_barcode, t.{column_name}
+            SELECT {fdef_id} AS fdef_id, t.sample_barcode, t.{column_name}
             FROM [{table_name}] AS t
             JOIN [{cohort_table}] AS c
-              ON c.sample_id = t.sample_barcode
+              ON c.sample_barcode = t.sample_barcode
             WHERE
               c.study_id = {study_id}
               AND c.cohort_id IN ({cohort_list})
-        """.format(column_name=self.column_name, table_name=self.bq_table, cohort_table=cohort_table,
-                   study_id=self.study_id, cohort_list=cohort_str)
+        """.format(fdef_id=self.bq_row_id, column_name=self.column_name, table_name=self.bq_table,
+                   cohort_table=cohort_table, study_id=self.study_id, cohort_list=cohort_str)
 
         if self.filters is not None:
             for key, val in self.filters.items():
                 query += ' AND t.{filter_key} = "{value}" '.format(filter_key=key, value=val)
 
-        query += ' GROUP BY t.sample_barcode ' # To prevent duplicates from multiple cohorts
-        logging.debug("USER DEF QUERY: {0}".format(query))
+        query += " GROUP BY t.sample_barcode, t.{column_name} ".format(column_name=self.column_name) # To prevent duplicates from multiple cohorts
         return query
 
 
 class UserFeatureProvider(FeatureDataProvider):
     def __init__(self, feature_id, user_feature_id=None, **kwargs):
+        self.feature_defs = None
         self.parse_internal_feature_id(feature_id, user_feature_id=user_feature_id)
+        self._study_ids = None
         super(UserFeatureProvider, self).__init__(**kwargs)
 
     def get_feature_type(self):
@@ -235,18 +244,14 @@ class UserFeatureProvider(FeatureDataProvider):
         return data_point['value']
 
     def get_value_type(self):
-        if len(self.feature_defs) > 0:
-            return self.feature_defs[0].type
-        return "Unknown"
+        return self.feature_defs[0].get_value_type()
 
     def build_query(self, study_ids, cohort_id_array, cohort_dataset, cohort_table):
-        logging.debug("UserFeatureProvider.build_query: {0}".format(str([study_ids, cohort_id_array, cohort_dataset, cohort_table])))
         queries = []
         cohort_table_full = settings.BIGQUERY_PROJECT_NAME + ':' + cohort_dataset + '.' + cohort_table
-        logging.debug("# feature defs: {0}".format(str(len(self.feature_defs))))
+
         for feature_def in self.feature_defs:
             if int(feature_def.study_id) in study_ids:
-                logging.debug("       building query for study_id {0}".format(str(feature_def.study_id)))
                 # Build our query
                 queries.append(feature_def.build_query(cohort_table_full, cohort_id_array))
 
@@ -254,46 +259,10 @@ class UserFeatureProvider(FeatureDataProvider):
         logging.info("BQ_QUERY_USER: " + query)
         return query
 
-    def do_query(self, study_ids, cohort_id_array, cohort_dataset, cohort_table):
-        bigquery_service = authorize_credentials_with_Google()
-        query = self.build_query(study_ids, cohort_id_array, cohort_dataset, cohort_table)
-
-        if query is '':
-            # No matching features <=> study data; Return
-            return []
-
-        query_body = {
-            'query': query
-        }
-
-        print >> sys.stderr, "RUNNING QUERY: " + str(query)
-        table_data = bigquery_service.jobs()
-        query_response = table_data.query(projectId=settings.BQ_PROJECT_ID, body=query_body).execute()
-
-        result = []
-        num_result_rows = int(query_response['totalRows'])
-        if num_result_rows == 0:
-            return result
-
-        for row in query_response['rows']:
-            result.append({
-                'patient_id': None,
-                'sample_id': row['f'][0]['v'],
-                'aliquot_id': None,
-                'value': row['f'][1]['v']
-            })
-
-        return result
-
     @DurationLogged('USER', 'UNPACK')
     def unpack_query_response(self, query_result_array):
         """
-        Unpacks values from a BigQuery response object into a flat array. The array will contain dicts with
-        the following fields:
-        - 'patient_id': Patient barcode
-        - 'sample_id': Sample barcode
-        - 'aliquot_id': Aliquot barcode
-        - 'value': Value of the selected column from the user data table(s)
+        Unpacks values from a BigQuery response object into a flat array.
 
         Args:
             query_result_array: A BigQuery query response object
@@ -304,17 +273,24 @@ class UserFeatureProvider(FeatureDataProvider):
         result = []
 
         for row in query_result_array:
+            # TODO document
+            feature_def_index = int(row['f'][0]['v'])
+            feature_def = self.feature_defs[feature_def_index]
+
             result.append({
-                'patient_id': row['f'][0]['v'],
+                'patient_id': None,
                 'sample_id': row['f'][1]['v'],
-                'aliquot_id': row['f'][2]['v'],
-                'value': row['f'][3]['v']
+                'aliquot_id': None,
+                'value': feature_def.unpack_value_from_bigquery_row(row)
             })
 
         return result
 
-    def get_data(self, cohort_id_array, cohort_dataset, cohort_table):
+    def get_study_ids(self, cohort_id_array):
         # NOTE: We ignore cohort info here because we will be pull from a specified location
+        if self._study_ids is not None:
+            return self._study_ids
+
         study_ids = ()
         for cohort_id in cohort_id_array:
             try:
@@ -323,9 +299,7 @@ class UserFeatureProvider(FeatureDataProvider):
 
                 cursor.execute("SELECT study_id FROM cohorts_samples WHERE cohort_id = %s GROUP BY study_id", (cohort_id,))
                 for row in cursor.fetchall():
-                    if row['study_id'] is None:
-                        include_tcga = True
-                    else:
+                    if row['study_id'] is not None:
                         study_ids += (row['study_id'],)
 
             except Exception as e:
@@ -333,30 +307,8 @@ class UserFeatureProvider(FeatureDataProvider):
                 if cursor: cursor.close()
                 raise e
 
-        result = self.do_query(study_ids, cohort_id_array, cohort_dataset, cohort_table)
-        return result
-
-    def get_study_ids(self, cohort_id_array, cohort_dataset, cohort_table):
-        # NOTE: We ignore cohort info here because we will be pull from a specified location
-        study_ids = ()
-        for cohort_id in cohort_id_array:
-            try:
-                db = sql_connection()
-                cursor = db.cursor(MySQLdb.cursors.DictCursor)
-
-                cursor.execute("SELECT study_id FROM cohorts_samples WHERE cohort_id = %s GROUP BY study_id", (cohort_id,))
-                for row in cursor.fetchall():
-                    if row['study_id'] is None:
-                        include_tcga = True
-                    else:
-                        study_ids += (row['study_id'],)
-
-            except Exception as e:
-                if db: db.close()
-                if cursor: cursor.close()
-                raise e
-
-        return study_ids
+        self._study_ids = study_ids
+        return self._study_ids
 
     def parse_internal_feature_id(self, feature_id, user_feature_id=None):
         if user_feature_id is None or user_feature_id is '':
@@ -366,23 +318,35 @@ class UserFeatureProvider(FeatureDataProvider):
             logging.debug("UserFeatureProvider.parse_internal_feature_id - user_feature_id: {0}".format(user_feature_id))
             self.feature_defs = UserFeatureDef.from_user_feature_id(user_feature_id)
 
+        # Assign a unique identifier to all feature defs.
+        # TODO document
+        for index, feature_def in enumerate(self.feature_defs):
+            feature_def.bq_row_id = index
+
     def submit_query_and_get_job_ref(self, project_id, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array):
-        study_ids = self.get_study_ids(cohort_id_array, cohort_dataset, cohort_table)
+        study_ids = self.get_study_ids(cohort_id_array)
 
         bigquery_service = self.get_bq_service()
 
-        #def build_query(self, study_ids, cohort_id_array, cohort_dataset, cohort_table):
-        #query_body = self.build_query(project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array)
         query_body = self.build_query(study_ids, cohort_id_array, cohort_dataset, cohort_table)
         query_job = self.submit_bigquery_job(bigquery_service, project_id, query_body)
 
-        # Poll for completion of the query
         self.job_reference = query_job['jobReference']
         job_id = query_job['jobReference']['jobId']
         logging.debug("JOBID {id}".format(id=job_id))
 
         return self.job_reference
 
+    def is_queryable(self, cohort_id_array):
+        study_ids = self.get_study_ids(cohort_id_array)
+        queryable = False
+
+        for feature_def in self.feature_defs:
+            if int(feature_def.study_id) in study_ids:
+                queryable = True
+                break
+
+        return queryable
 
     def get_data_job_reference(self, cohort_id_array, cohort_dataset, cohort_table):
         project_id = settings.BQ_PROJECT_ID
@@ -400,7 +364,7 @@ class UserFeatureProvider(FeatureDataProvider):
             UserFeatureDef.from_feature_id(feature_id)
             is_valid = True
         except Exception:
-            # GEXPFeatureDef.from_feature_id raises Exception if the feature identifier
+            # UserFeatureDef.from_feature_id raises Exception if the feature identifier
             # is not valid. Nothing needs to be done here, since is_valid is already False.
             pass
         finally:
