@@ -341,6 +341,10 @@ class UserFeatureProvider(FeatureDataProvider):
         return self.job_reference
 
     def is_queryable(self, cohort_id_array):
+        """
+        Answers if this instance would submit a BigQuery job if the submit_query_and_get_job_ref member function
+        was called.
+        """
         study_ids = self.get_study_ids(cohort_id_array)
         queryable = False
 

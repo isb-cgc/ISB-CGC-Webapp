@@ -181,9 +181,10 @@ def get_feature_vectors_async(params_array, poll_retry_limit=20):
             logging.debug("user_feature_id: {0}".format(user_feature_id))
             provider = UserFeatureProvider(converted_feature_id, user_feature_id=user_feature_id)
 
-            if not provider.is_queryable(cohort_id_array):
-                logging.debug("No UserFeatureDefs for '{0}'".format(converted_feature_id))
-            else:
+            # The UserFeatureProvider instance might not generate a BigQuery query and job at all given the combination
+            # of cohort(s) and feature identifiers. The provider is not added to the array, and therefore to the
+            # polling loop below, if it would not submit a BigQuery job.
+            if provider.is_queryable(cohort_id_array):
                 job_reference = provider.get_data_job_reference(cohort_id_array, cohort_settings.dataset_id, cohort_settings.table_id)
 
                 logging.info("Submitted USER {job_id}: {fid} - {cohorts}".format(job_id=job_reference['jobId'], fid=feature_id,
@@ -194,6 +195,8 @@ def get_feature_vectors_async(params_array, poll_retry_limit=20):
                     'ready': False,
                     'job_reference': job_reference
                 })
+            else:
+                logging.debug("No UserFeatureDefs for '{0}'".format(converted_feature_id))
 
     all_done = False
     total_retries = 0
