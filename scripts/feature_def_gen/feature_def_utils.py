@@ -79,7 +79,6 @@ def submit_query_async(bigquery, project_id, query, batch=False, num_retries=5):
         body=job_data).execute(num_retries=num_retries)
 
 
-
 def poll_async_job(bigquery_service, config, job_id, poll_interval=5):
     job_collection = bigquery_service.jobs()
 

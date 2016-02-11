@@ -20,10 +20,11 @@ from argparse import ArgumentParser
 import logging
 import os
 from sys import exit
-from MySQLdb import connect
-from MySQLdb.cursors import DictCursor
 import datetime
 import httplib2
+
+from MySQLdb import connect
+from MySQLdb.cursors import DictCursor
 
 from GenespotRE import secret_settings
 from apiclient.discovery import build
@@ -134,6 +135,7 @@ def get_mysql_connection():
 
 
 def get_existing_alldata_cohort_mysql(conn, cohort_name):
+
     cursor = conn.cursor(DictCursor)
     cursor.execute('select id from cohorts_cohort where name=%s', [cohort_name])
     cohort_id = cursor.fetchone()

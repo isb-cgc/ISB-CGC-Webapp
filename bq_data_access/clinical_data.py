@@ -19,14 +19,12 @@ limitations under the License.
 import logging
 from re import compile as re_compile
 
-from api.api_helpers import authorize_credentials_with_Google
 from api.schema.tcga_clinical import schema as clinical_schema
 
-from django.conf import settings
-
+from bq_data_access.feature_data_provider import FeatureDataProvider
 from bq_data_access.errors import FeatureNotFoundException
 from bq_data_access.feature_value_types import DataTypes, BigQuerySchemaToValueTypeConverter
-import sys
+from bq_data_access.utils import DurationLogged
 
 CLINICAL_FEATURE_TYPE = 'CLIN'
 
@@ -44,6 +42,13 @@ class InvalidClinicalFeatureIDException(Exception):
 
 
 class ClinicalFeatureDef(object):
+    # Regular expression for parsing the feature definition.
+    #
+    # Example ID: CLIN:vital_status
+    regex = re_compile("^CLIN:"
+                       # column name
+                       "([a-zA-Z0-9_\-]+)$")
+
     def __init__(self, table_field, value_type):
         self.table_field = table_field
         self.value_type = value_type
@@ -62,12 +67,7 @@ class ClinicalFeatureDef(object):
 
     @classmethod
     def from_feature_id(cls, feature_id):
-        # Example ID: CLIN:vital_status
-        regex = re_compile("^CLIN:"
-                           # column name
-                           "([a-zA-Z0-9_\-]+)$")
-
-        feature_fields = regex.findall(feature_id)
+        feature_fields = cls.regex.findall(feature_id)
         if len(feature_fields) == 0:
             raise FeatureNotFoundException(feature_id)
         column_name = feature_fields[0]
@@ -79,7 +79,7 @@ class ClinicalFeatureDef(object):
         return cls(table_field, value_type)
 
 
-class ClinicalFeatureProvider(object):
+class ClinicalFeatureProvider(FeatureDataProvider):
     TABLES = [
         {
             'name': 'Clinical',
@@ -88,9 +88,11 @@ class ClinicalFeatureProvider(object):
         }
     ]
 
-    def __init__(self, feature_id):
+    def __init__(self, feature_id, **kwargs):
         self.table_name = ''
+        self.feature_def = None
         self.parse_internal_feature_id(feature_id)
+        super(ClinicalFeatureProvider, self).__init__(**kwargs)
 
     def get_value_type(self):
         return self.feature_def.value_type
@@ -132,24 +134,25 @@ class ClinicalFeatureProvider(object):
         logging.debug("BQ_QUERY_CLIN: " + query)
         return query
 
-    def do_query(self, project_id, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array):
-        bigquery_service = authorize_credentials_with_Google()
-        query = self.build_query(project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array)
+    @DurationLogged('CLIN', 'UNPACK')
+    def unpack_query_response(self, query_result_array):
+        """
+        Unpacks values from a BigQuery response object into a flat array. The array will contain dicts with
+        the following fields:
+        - 'patient_id': Patient barcode
+        - 'sample_id': Sample barcode
+        - 'aliquot_id': Always None
+        - 'value': Value of the selected column from the clinical data table
 
-        query_body = {
-            'query': query
-        }
+        Args:
+            query_result_array: A BigQuery query response object
 
-        print >> sys.stderr, "RUNNING QUERY: " + str(query)
-        table_data = bigquery_service.jobs()
-        query_response = table_data.query(projectId=project_id, body=query_body).execute()
-
+        Returns:
+            Array of dict objects.
+        """
         result = []
-        num_result_rows = int(query_response['totalRows'])
-        if num_result_rows == 0:
-            return result
 
-        for row in query_response['rows']:
+        for row in query_result_array:
             result.append({
                 'patient_id': row['f'][0]['v'],
                 'sample_id': row['f'][1]['v'],
@@ -159,20 +162,22 @@ class ClinicalFeatureProvider(object):
 
         return result
 
-    def get_data_from_bigquery(self, cohort_id_array, cohort_dataset, cohort_table):
-        project_id = settings.BQ_PROJECT_ID
-        project_name = settings.BIGQUERY_PROJECT_NAME
-        dataset_name = settings.BIGQUERY_DATASET2
-        result = self.do_query(project_id, project_name, dataset_name, self.table_name, self.feature_def, cohort_dataset, cohort_table, cohort_id_array)
-        return result
-
-    def get_data(self, cohort_id_array, cohort_dataset, cohort_table):
-        result = self.get_data_from_bigquery(cohort_id_array, cohort_dataset, cohort_table)
-        return result
-
     def get_table_name(self):
         return self.TABLES[0]['name']
 
     def parse_internal_feature_id(self, feature_id):
         self.feature_def = ClinicalFeatureDef.from_feature_id(feature_id)
         self.table_name = self.get_table_name()
+
+    @classmethod
+    def is_valid_feature_id(cls, feature_id):
+        is_valid = False
+        try:
+            ClinicalFeatureDef.from_feature_id(feature_id)
+            is_valid = True
+        except Exception:
+            # ClinicalFeatureDef.from_feature_id raises Exception if the feature identifier
+            # is not valid. Nothing needs to be done here, since is_valid is already False.
+            pass
+        finally:
+            return is_valid
