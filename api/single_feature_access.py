@@ -28,7 +28,6 @@ from protorpc.messages import EnumField, IntegerField, Message, MessageField, St
 
 from bq_data_access.errors import FeatureNotFoundException
 from bq_data_access.feature_value_types import ValueType
-from bq_data_access.data_access import get_feature_vector
 from bq_data_access.data_access import is_valid_feature_identifier, get_feature_vectors_async
 from bq_data_access.utils import VectorMergeSupport
 from bq_data_access.cohort_cloudsql import CloudSQLCohortAccess

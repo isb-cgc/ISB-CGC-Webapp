@@ -65,7 +65,6 @@ class UserFeatureDef(object):
 
     @classmethod
     def get_table_and_field(cls, bq_id):
-
         split = bq_id.split(':')
         # First pieces are the project:dataset:table
         bq_table = split[0] + ':' + split[1] + '.' + split[2]
@@ -95,8 +94,6 @@ class UserFeatureDef(object):
         if len(feature_fields) == 0:
             raise FeatureNotFoundException(feature_id)
         study_id, user_feature_id = feature_fields[0]
-        #study_id = feature_fields[0]
-        #user_feature_id = feature_fields[1]
         bq_id = None
         shared_id = None
         is_numeric = False
@@ -204,6 +201,9 @@ class UserFeatureDef(object):
 
 
 class UserFeatureProvider(FeatureDataProvider):
+    """
+    Feature data provider for user data.
+    """
     def __init__(self, feature_id, user_feature_id=None, **kwargs):
         self.feature_defs = None
         self.parse_internal_feature_id(feature_id, user_feature_id=user_feature_id)
@@ -216,7 +216,6 @@ class UserFeatureProvider(FeatureDataProvider):
     @classmethod
     def convert_user_feature_id(cls, feature_id):
         bq_id = None
-        logging.debug("{0}".format(feature_id.split(':')[-1]))
         try:
             db = sql_connection()
             cursor = db.cursor(MySQLdb.cursors.DictCursor)
@@ -247,6 +246,41 @@ class UserFeatureProvider(FeatureDataProvider):
         return self.feature_defs[0].get_value_type()
 
     def build_query(self, study_ids, cohort_id_array, cohort_dataset, cohort_table):
+        """
+        Builds the BigQuery query string for USER data. The query string is constructed from one or more data sources
+        (queries), such that each associated UserFeatureDef instance constructs one data source. Each data source
+        selects one column from a user data table, and therefore maps to one column in the query result.
+
+        The query result table contains a column ("fdef_id") that identifies which data source (UserFeatureDef instance)
+        that produced each row.
+
+        When unpacking the query result table, the decoding of each row is delegated to the a UserFeatureDef instance
+        identified by the "fdef_id" column value in that row.
+
+        Example of a query result table:
+
+            |-------+--------------+--------+--------+--------|
+            |fdef_id|sample_barcode|column_0|column_1|column_n|
+            |-------+--------------+--------+--------+--------|
+            |0      |barcode_1     |<val>   |null    |null    |
+            |0      |barcode_2     |<val>   |null    |null    |
+            |0      |...           |<val>   |null    |null    |
+            |0      |barcode_m     |<val>   |null    |null    |
+            |-------+--------------+--------+--------+--------|
+            |1      |barcode_1     |null    |<val>   |null    |
+            |1      |barcode_2     |null    |<val>   |null    |
+            |1      |...           |null    |<val>   |null    |
+            |1      |barcode_m     |null    |<val>   |null    |
+            |-------+--------------+--------+--------+--------|
+            |n      |barcode_1     |null    |null    |<val>   |
+            |n      |barcode_2     |null    |null    |<val>   |
+            |n      |...           |null    |null    |<val>   |
+            |n      |barcode_m     |null    |null    |<val>   |
+            |-------+--------------+--------+--------+--------|
+
+        Returns: BigQuery query string.
+
+        """
         queries = []
         cohort_table_full = settings.BIGQUERY_PROJECT_NAME + ':' + cohort_dataset + '.' + cohort_table
 
@@ -258,11 +292,35 @@ class UserFeatureProvider(FeatureDataProvider):
         # Create a combination query using the UNION ALL operator. Each data source defined above (query1, query2, ...)
         # will be combined as follows:
         #
-        # (query 1) , (query 2) , ... , (query 3)
+        # (query 1)
+        #  ,
+        # (query 2)
+        #  ,
+        #  ...
+        #  ,
+        # (query n)
         #
         query = ' , '.join(['(' + query + ')' for query in queries])
         logging.info("BQ_QUERY_USER: " + query)
         return query
+
+    def unpack_value_from_row_with_feature_def(self, row):
+        """
+        Decodes the value from a query result.
+
+        Delegates the selection and decoding of the correct column in the row to the UserFeatureDef instance
+        identified by the "fdef_id" column on the row.
+
+        Args:
+            row: BigQuery query result row.
+
+        Returns: The value for the row.
+
+        """
+        feature_def_index = int(row['f'][0]['v']) # fdef_id
+        feature_def = self.feature_defs[feature_def_index]
+
+        return feature_def.unpack_value_from_bigquery_row(row)
 
     @DurationLogged('USER', 'UNPACK')
     def unpack_query_response(self, query_result_array):
@@ -278,21 +336,19 @@ class UserFeatureProvider(FeatureDataProvider):
         result = []
 
         for row in query_result_array:
-            # TODO document
-            feature_def_index = int(row['f'][0]['v'])
-            feature_def = self.feature_defs[feature_def_index]
-
             result.append({
                 'patient_id': None,
                 'sample_id': row['f'][1]['v'],
                 'aliquot_id': None,
-                'value': feature_def.unpack_value_from_bigquery_row(row)
+                'value': self.unpack_value_from_row_with_feature_def(row)
             })
 
         return result
 
     def get_study_ids(self, cohort_id_array):
-        # NOTE: We ignore cohort info here because we will be pull from a specified location
+        """
+        Returns: The user study identifiers associated with the samples in all given cohorts.
+        """
         if self._study_ids is not None:
             return self._study_ids
 
@@ -328,7 +384,7 @@ class UserFeatureProvider(FeatureDataProvider):
         for index, feature_def in enumerate(self.feature_defs):
             feature_def.bq_row_id = index
 
-    def submit_query_and_get_job_ref(self, project_id, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array):
+    def _submit_query_and_get_job_ref(self, project_id, project_name, dataset_name, cohort_dataset, cohort_table, cohort_id_array):
         study_ids = self.get_study_ids(cohort_id_array)
 
         bigquery_service = self.get_bq_service()
@@ -360,8 +416,8 @@ class UserFeatureProvider(FeatureDataProvider):
         project_name = settings.BIGQUERY_PROJECT_NAME
         dataset_name = settings.BIGQUERY_DATASET2
 
-        result = self.submit_query_and_get_job_ref(project_id, project_name, dataset_name, None,
-                                                   None, cohort_dataset, cohort_table, cohort_id_array)
+        result = self._submit_query_and_get_job_ref(project_id, project_name, dataset_name,
+                                                    cohort_dataset, cohort_table, cohort_id_array)
         return result
 
     @classmethod
