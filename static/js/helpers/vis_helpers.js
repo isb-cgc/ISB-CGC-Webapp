@@ -281,7 +281,7 @@ define(['jquery'], function($) {
                 for (var i in filters) {
                     feature_search_url += "&" + filters[i].filter + "=" + filters[i].value; //+ ",";
                 }
-                feature_search_url = feature_search_url.substring(0, feature_search_url.length - 1);
+                feature_search_url = feature_search_url.substring(0, feature_search_url.length);
 
                 // Re-initialize select box with new features from feature search url
                 $.ajax({
