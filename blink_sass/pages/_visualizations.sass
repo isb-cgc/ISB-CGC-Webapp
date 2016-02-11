@@ -15,38 +15,37 @@
     .grid path
         stroke-width: 0
 
-    .plot
-        .plot-div
-            .extent
-                fill: #000
-                fill-opacity: .1
-                stroke: #fff
+    .plot-div
+        .extent
+            fill: #000
+            fill-opacity: .1
+            stroke: #fff
 
-            .expected_fill.selected
-                stroke: $tooltip-color
-                stroke-width: 5px
+        .expected_fill.selected
+            stroke: $tooltip-color
+            stroke-width: 5px
 
-            .bar
-                fill: rgba(0,0,0,0.5)
-                &:hover, &.selected
-                    fill: rgba(0,0,225,0.5)
+        .bar
+            fill: rgba(0,0,0,0.5)
+            &:hover, &.selected
+                fill: rgba(0,0,225,0.5)
 
-        .show-flyout:hover
-            cursor: pointer
+    .show-flyout:hover
+        cursor: pointer
 
-        .save-cohort-card
-            background-color: rgba($tooltip-color, 0.8)
-            border-radius: 3px
-            color: #fff
-            padding: 5px
+    .save-cohort-card
+        background-color: rgba($tooltip-color, 0.8)
+        border-radius: 3px
+        color: #fff
+        padding: 5px
 
-        .pairwise-result
-            .table
-                th.logp, th.n, th.na, th.nb, th.pa, th.pb
-                    width: 60px
-                td
-                    word-wrap: break-word
-                    word-break: break-word
+    .pairwise-result
+        .table
+            th.logp, th.n, th.na, th.nb, th.pa, th.pb
+                width: 60px
+            td
+                word-wrap: break-word
+                word-break: break-word
 
     .legend
         display: inline-block
