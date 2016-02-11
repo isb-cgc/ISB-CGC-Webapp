@@ -259,7 +259,7 @@ define([
         return api_url;
     }
 
-    function configure_pairwise_display(element){
+    function configure_pairwise_display(element, data){
         if (data['pairwise_result'].hasOwnProperty('result_vectors')) {
             var vectors = data['pairwise_result']['result_vectors'];
 
@@ -290,7 +290,7 @@ define([
             y_type = '';
 
         if (data.hasOwnProperty('pairwise_result')) {
-            configure_pairwise_display(pairwise_element);
+            configure_pairwise_display(pairwise_element, data);
         }
         if (data.hasOwnProperty('items')) {
             //TODO where are these used?
