@@ -18,12 +18,13 @@ limitations under the License.
 
 import logging
 from re import compile as re_compile
-from api.api_helpers import authorize_credentials_with_Google
 
 from django.conf import settings
 
 from bq_data_access.errors import FeatureNotFoundException
 from bq_data_access.feature_value_types import ValueType, DataTypes
+from bq_data_access.feature_data_provider import FeatureDataProvider
+from bq_data_access.utils import DurationLogged
 
 RPPA_FEATURE_TYPE = 'RPPA'
 
@@ -33,20 +34,22 @@ def get_feature_type():
 
 
 class RPPAFeatureDef(object):
+    # Regular expression for parsing the feature definition.
+    #
+    # Example ID: RPPA:GYG1:GYG-Glycogenin1
+    regex = re_compile("^RPPA:"
+                       # gene
+                       "([a-zA-Z0-9]+):"
+                       # protein name
+                       "([a-zA-Z0-9._\-]+)$")
+
     def __init__(self, gene, protein_name):
         self.gene = gene
         self.protein_name = protein_name
 
     @classmethod
     def from_feature_id(cls, feature_id):
-        # Example ID: RPPA:GYG1:GYG-Glycogenin1
-        regex = re_compile("^RPPA:"
-                           # gene
-                           "([a-zA-Z0-9]+):"
-                           # protein name
-                           "([a-zA-Z0-9._\-]+)$")
-
-        feature_fields = regex.findall(feature_id)
+        feature_fields = cls.regex.findall(feature_id)
         if len(feature_fields) == 0:
             raise FeatureNotFoundException(feature_id)
 
@@ -54,7 +57,7 @@ class RPPAFeatureDef(object):
         return cls(gene_label, protein_name)
 
 
-class RPPAFeatureProvider(object):
+class RPPAFeatureProvider(FeatureDataProvider):
     TABLES = [
         {
             'name': 'Protein',
@@ -63,11 +66,12 @@ class RPPAFeatureProvider(object):
         }
     ]
 
-    def __init__(self, feature_id):
+    def __init__(self, feature_id, **kwargs):
         self.feature_def = None
         self.table_info = None
         self.table_name = ''
         self.parse_internal_feature_id(feature_id)
+        super(RPPAFeatureProvider, self).__init__(**kwargs)
 
     def get_value_type(self):
         return ValueType.FLOAT
@@ -77,7 +81,7 @@ class RPPAFeatureProvider(object):
 
     @classmethod
     def process_data_point(cls, data_point):
-        return str(data_point['value'])
+        return data_point['value']
 
     def build_query(self, project_name, dataset_name, table_name, feature_def,  cohort_dataset, cohort_table, cohort_id_array):
         # Generate the 'IN' statement string: (%s, %s, ..., %s)
@@ -101,23 +105,25 @@ class RPPAFeatureProvider(object):
         logging.debug("BQ_QUERY_RPPA: " + query)
         return query
 
-    def do_query(self, project_id, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array):
-        bigquery_service = authorize_credentials_with_Google()
+    @DurationLogged('RPPA', 'UNPACK')
+    def unpack_query_response(self, query_result_array):
+        """
+        Unpacks values from a BigQuery response object into a flat array. The array will contain dicts with
+        the following fields:
+        - 'patient_id': Patient barcode
+        - 'sample_id': Sample barcode
+        - 'aliquot_id': Aliquot barcode
+        - 'value': Value of the selected column from the protein data table
 
-        query = self.build_query(project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array)
-        query_body = {
-            'query': query
-        }
+        Args:
+            query_result_array: A BigQuery query response object
 
-        table_data = bigquery_service.jobs()
-        query_response = table_data.query(projectId=project_id, body=query_body).execute()
-
+        Returns:
+            Array of dict objects.
+        """
         result = []
-        num_result_rows = int(query_response['totalRows'])
-        if num_result_rows == 0:
-            return result
 
-        for row in query_response['rows']:
+        for row in query_result_array:
             result.append({
                 'patient_id': row['f'][0]['v'],
                 'sample_id': row['f'][1]['v'],
@@ -143,3 +149,15 @@ class RPPAFeatureProvider(object):
         self.feature_def = RPPAFeatureDef.from_feature_id(feature_id)
         self.table_name = self.TABLES[0]['name']
 
+    @classmethod
+    def is_valid_feature_id(cls, feature_id):
+        is_valid = False
+        try:
+            RPPAFeatureDef.from_feature_id(feature_id)
+            is_valid = True
+        except Exception:
+            # RPPAFeatureDef.from_feature_id raises Exception if the feature identifier
+            # is not valid. Nothing needs to be done here, since is_valid is already False.
+            pass
+        finally:
+            return is_valid

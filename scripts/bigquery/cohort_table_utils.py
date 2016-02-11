@@ -17,11 +17,109 @@ limitations under the License.
 """
 
 from argparse import ArgumentParser
+from copy import deepcopy
+from httplib2 import Http
 
-from api.api_helpers import authorize_credentials_with_google_from_file
-from bq_data_access.cohort_bigquery import BigQueryCohortSupport, COHORT_DATASETS, COHORT_TABLES
+COHORT_DATASETS = {
+    'prod': 'cloud_deployment_cohorts',
+    'staging': 'cloud_deployment_cohorts',
+    'dev': 'dev_deployment_cohorts'
+}
 
-from GenespotRE.settings import get_project_identifier, GOOGLE_APPLICATION_CREDENTIALS
+COHORT_TABLES = {
+    'prod': 'prod_cohorts',
+    'staging': 'staging_cohorts'
+}
+
+from apiclient.discovery import build
+from oauth2client.client import GoogleCredentials
+
+from GenespotRE.settings import get_project_identifier
+
+def authorize_and_get_bq_service():
+    credentials = GoogleCredentials.get_application_default().create_scoped(['https://www.googleapis.com/auth/bigquery'])
+    http = Http()
+    http = credentials.authorize(http)
+
+    bigquery_service = build('bigquery', 'v2', http=http)
+    return bigquery_service
+
+# TODO Use bq_data_access.BigQueryCohortSupport
+class BigQueryCohortSupport(object):
+    cohort_schema = [
+        {
+            "name": "cohort_id",
+            "type": "INTEGER",
+            "mode": "REQUIRED"
+        },
+        {
+            "name": "patient_barcode",
+            "type": "STRING"
+        },
+        {
+            "name": "sample_barcode",
+            "type": "STRING"
+        },
+        {
+            "name": "aliquot_barcode",
+            "type": "STRING"
+        }
+    ]
+
+    patient_type = 'patient'
+    sample_type = 'sample'
+
+
+    @classmethod
+    def get_schema(cls):
+        return deepcopy(cls.cohort_schema)
+
+    def __init__(self, service, project_id, dataset_id, table_id):
+        self.service = service
+        self.project_id = project_id
+        self.dataset_id = dataset_id
+        self.table_id = table_id
+
+    def _build_request_body_from_rows(self, rows):
+        insertable_rows = []
+        for row in rows:
+            insertable_rows.append({
+                'json': row
+            })
+
+        return {
+            "rows": insertable_rows
+        }
+
+    def _streaming_insert(self, rows):
+        table_data = self.service.tabledata()
+
+        body = self._build_request_body_from_rows(rows)
+
+        response = table_data.insertAll(projectId=self.project_id,
+                                        datasetId=self.dataset_id,
+                                        tableId=self.table_id,
+                                        body=body).execute()
+
+        return response
+
+    def _build_cohort_row(self, cohort_id,
+                          patient_barcode=None, sample_barcode=None, aliquot_barcode=None):
+        return {
+            'cohort_id': cohort_id,
+            'patient_barcode': patient_barcode,
+            'sample_barcode': sample_barcode,
+            'aliquot_barcode': aliquot_barcode
+        }
+
+    def add_cohort_with_sample_barcodes(self, cohort_id, barcodes):
+        rows = []
+        for sample_barcode in barcodes:
+            patient_barcode = sample_barcode[:12]
+            rows.append(self._build_cohort_row(cohort_id, patient_barcode, sample_barcode, None))
+
+        response = self._streaming_insert(rows)
+        return response
 
 def create_table(dataset_id, table_id):
     print("Creating table {0}.{1}".format(dataset_id, table_id))
@@ -47,7 +145,8 @@ def create_table(dataset_id, table_id):
         }
     }
 
-    service = authorize_credentials_with_google_from_file(GOOGLE_APPLICATION_CREDENTIALS)
+    service = authorize_and_get_bq_service()
+
     table = service.tables().insert(
         body=table,
         **dataset_args

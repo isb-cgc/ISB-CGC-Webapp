@@ -17,18 +17,18 @@ limitations under the License.
 """
 
 import logging
-import time
 
 from endpoints import api as endpoints_api, method as endpoints_method
 from endpoints import NotFoundException, InternalServerErrorException
 from protorpc import remote
 from protorpc.messages import BooleanField, EnumField, IntegerField, Message, MessageField, StringField
 
-from bq_data_access.errors import FeatureNotFoundException
 from bq_data_access.feature_value_types import ValueType
-from bq_data_access.data_access import get_feature_vector
+from bq_data_access.data_access import is_valid_feature_identifier, get_feature_vectors_async
 from bq_data_access.utils import VectorMergeSupport
 from bq_data_access.cohort_cloudsql import CloudSQLCohortAccess
+from bq_data_access.utils import DurationLogged
+
 from api.pairwise import PairwiseInputVector, Pairwise
 from api.pairwise_api import PairwiseResults, PairwiseResultVector, PairwiseFilterMessage
 import sys
@@ -160,6 +160,7 @@ class FeatureDataEndpoints(remote.Service):
         return result
 
     # TODO refactor to separate module
+    @DurationLogged('PAIRWISE', 'GET')
     def get_pairwise_result(self, feature_array):
         # Format the feature vectors for pairwise
         input_vectors = Pairwise.prepare_feature_vector(feature_array)
@@ -185,7 +186,12 @@ class FeatureDataEndpoints(remote.Service):
 
         return results
 
+    @DurationLogged('FEATURE', 'VECTOR_MERGE')
+    def get_merged_dict_timed(self, vms):
+        return vms.get_merged_dict()
+
     # TODO refactor missing value logic out of this module
+    @DurationLogged('FEATURE', 'GET_VECTORS')
     def get_merged_feature_vectors(self, x_id, y_id, c_id, cohort_id_array):
         """
         Fetches and merges data for two or three feature vectors (see parameter documentation below).
@@ -224,37 +230,48 @@ class FeatureDataEndpoints(remote.Service):
         :return: PlotDataResponse
         """
 
-        start = time.time()
+        async_params = [(x_id, cohort_id_array),
+                        (c_id, cohort_id_array)]
 
-        logging.info('Data Query Start: ')
-        x_type, x_vec = get_feature_vector(x_id, cohort_id_array)
+#        start = time.time()
+#
+#        logging.info('Data Query Start: ')
+#        x_type, x_vec = get_feature_vector(x_id, cohort_id_array)
 
         y_type, y_vec = ValueType.STRING, []
         if y_id is not None:
-            y_type, y_vec = get_feature_vector(y_id, cohort_id_array)
-        c_type, c_vec = get_feature_vector(c_id, cohort_id_array)
+            async_params.append((y_id, cohort_id_array))
+
+        async_result = get_feature_vectors_async(async_params)
+        if y_id is not None:
+            y_type, y_vec = async_result[y_id]['type'], async_result[y_id]['data']
+
+        x_type, x_vec = async_result[x_id]['type'], async_result[x_id]['data']
+        c_type, c_vec = async_result[c_id]['type'], async_result[c_id]['data']
 
         # TODO fix hardcoded usage of 'patient_id'
         vms = VectorMergeSupport('NA', 'sample_id', ['x', 'y', 'c']) # changed so that it plots per sample not patient
         vms.add_dict_array(x_vec, 'x', 'value')
         vms.add_dict_array(y_vec, 'y', 'value')
         vms.add_dict_array(c_vec, 'c', 'value')
+        merged = self.get_merged_dict_timed(vms)
 
-        logging.info('Data Query 1 : ' + str(time.time() - start))
-        merged = vms.get_merged_dict()
 
-        logging.info('Data Query 2 : ' + str(time.time() - start))
+#        logging.info('Data Query 1 : ' + str(time.time() - start))
+#        merged = vms.get_merged_dict()
+
+#        logging.info('Data Query 2 : ' + str(time.time() - start))
         # Resolve which (requested) cohorts each datapoint belongs to.
         cohort_set_dict = CloudSQLCohortAccess.get_cohorts_for_datapoints(cohort_id_array)
 
-        logging.info('Data Query 3 : ' + str(time.time() - start))
+#        logging.info('Data Query 3 : ' + str(time.time() - start))
         # Get the name and ID for every requested cohort.
         cohort_info_array = CloudSQLCohortAccess.get_cohort_info(cohort_id_array)
         cohort_info_obj_array = []
         for item in cohort_info_array:
             cohort_info_obj_array.append(PlotDataCohortInfo(**item))
 
-        logging.info('Data Query 4 : ' + str(time.time() - start))
+        #logging.info('Data Query 4 : ' + str(time.time() - start))
         items = []
         for value_bundle in merged:
             sample_id = value_bundle['sample_id']
@@ -269,7 +286,7 @@ class FeatureDataEndpoints(remote.Service):
                 value_bundle['cohort'] = cohort_set
             items.append(PlotDataPoint(**value_bundle))
 
-        logging.info('Data Query 5 : ' + str(time.time() - start))
+        #logging.info('Data Query 5 : ' + str(time.time() - start))
         counts = self.get_counts(merged)
         count_message = PlotDatapointCount(**counts)
 
@@ -277,9 +294,6 @@ class FeatureDataEndpoints(remote.Service):
 
         # TODO assign label for y if y_id is None, as in that case the y-field will be missing from the response
         label_message = PlotDataFeatureLabels(x=x_id, y=y_id, c=c_id)
-
-        end = time.time()
-        time_elapsed = end-start
 
         # TODO Refactor pairwise call to separate function
         # Include pairwise results
@@ -291,17 +305,33 @@ class FeatureDataEndpoints(remote.Service):
 
         pairwise_result = None
         try:
-            logging.debug("Calling Pairwise...")
             pairwise_result = self.get_pairwise_result(input_vectors)
         except Exception as e:
             logging.warn("Pairwise results not included in returned object")
             logging.exception(e)
 
         #logging.info('Time elapsed: ' + str(time_elapsed))
-        logging.info('Data Query 6: ' + str(time.time() - start))
+        #logging.info('Data Query 6: ' + str(time.time() - start))
         return PlotDataResponse(types=type_message, labels=label_message, items=items,
                                 cohort_set=cohort_info_obj_array,
                                 counts=count_message, pairwise_result=pairwise_result)
+
+    def get_feature_id_validity_for_array(self, feature_id_array):
+        """
+        For each feature identifier in an array, check whether or not the identifier is
+        valid.
+
+        Args:
+            feature_id_array:
+
+        Returns:
+            Array of tuples - (feature identifier, <is valid>)
+        """
+        result = []
+        for feature_id in feature_id_array:
+            result.append((feature_id, is_valid_feature_identifier(feature_id)))
+
+        return result
 
     @endpoints_method(PlotDataRequest, PlotDataResponse,
                       path='feature_data_plot', http_method='GET', name='feature_access.getFeatureDataForPlot')
@@ -312,10 +342,25 @@ class FeatureDataEndpoints(remote.Service):
             y_id = request.y_id
             c_id = request.c_id
             cohort_id_array = request.cohort_id
+
+            # Check that all requested feature identifiers are valid. Do not check for y_id if it is not
+            # supplied in the request.
+            feature_ids_to_check = [x_id, c_id]
+            if y_id is not None:
+                feature_ids_to_check = [x_id, y_id, c_id]
+            valid_features = self.get_feature_id_validity_for_array(feature_ids_to_check)
+
+            for feature_id, is_valid in valid_features:
+                logging.info((feature_id, is_valid))
+                if not is_valid:
+                    logging.error("Invalid internal feature ID '{}'".format(feature_id))
+                    raise NotFoundException()
+
             return self.get_merged_feature_vectors(x_id, y_id, c_id, cohort_id_array)
-        except FeatureNotFoundException as fnf:
-            logging.error("Invalid internal feature ID '{}'".format(str(fnf)))
-            raise NotFoundException()
+        except NotFoundException as nfe:
+            # Pass through NotFoundException so that it is not handled as Exception below.
+            raise nfe
         except Exception as e:
             logging.exception(e)
             raise InternalServerErrorException()
+

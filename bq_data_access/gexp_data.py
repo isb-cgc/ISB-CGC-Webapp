@@ -18,12 +18,11 @@ limitations under the License.
 
 import logging
 from re import compile as re_compile
-from api.api_helpers import authorize_credentials_with_Google
 
-from django.conf import settings
-
+from bq_data_access.feature_data_provider import FeatureDataProvider
 from bq_data_access.errors import FeatureNotFoundException
 from bq_data_access.feature_value_types import ValueType, DataTypes
+from bq_data_access.utils import DurationLogged
 
 TABLES = [
     {
@@ -68,6 +67,16 @@ def get_feature_type():
 
 
 class GEXPFeatureDef(object):
+    # Regular expression for parsing the feature definition.
+    #
+    # Example ID: GEXP:TP53:mrna_bcgsc_illumina_hiseq
+    regex = re_compile("^GEXP:"
+                       # gene
+                       "([a-zA-Z0-9]+):"
+                       # table
+                       "(" + "|".join([table['id'] for table in TABLES]) +
+                       ")$")
+
     def __init__(self, gene, value_field, table_id):
         self.gene = gene
         self.value_field = value_field
@@ -84,17 +93,7 @@ class GEXPFeatureDef(object):
 
     @classmethod
     def from_feature_id(cls, feature_id):
-        # Example ID: GEXP:TP53:mrna_bcgsc_illumina_hiseq
-        gexp_tables = "|".join([table['id'] for table in TABLES])
-
-        regex = re_compile("^GEXP:"
-                           # gene
-                           "([a-zA-Z0-9]+):"
-                           # table
-                           "(" + gexp_tables +
-                           ")$")
-
-        feature_fields = regex.findall(feature_id)
+        feature_fields = cls.regex.findall(feature_id)
         if len(feature_fields) == 0:
             raise FeatureNotFoundException(feature_id)
 
@@ -103,13 +102,14 @@ class GEXPFeatureDef(object):
         return cls(gene_label, value_field, table_id)
 
 
-class GEXPFeatureProvider(object):
+class GEXPFeatureProvider(FeatureDataProvider):
     TABLES = TABLES
 
-    def __init__(self, feature_id):
+    def __init__(self, feature_id, **kwargs):
         self.feature_def = None
         self.table_name = ''
         self.parse_internal_feature_id(feature_id)
+        super(GEXPFeatureProvider, self).__init__(**kwargs)
 
     def get_value_type(self):
         return ValueType.FLOAT
@@ -118,7 +118,7 @@ class GEXPFeatureProvider(object):
         return DataTypes.GEXP
 
     def process_data_point(self, data_point):
-        return str(data_point['value'])
+        return data_point['value']
 
     def build_query(self, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array):
         # Generate the 'IN' statement string: (%s, %s, ..., %s)
@@ -142,24 +142,25 @@ class GEXPFeatureProvider(object):
         logging.debug("BQ_QUERY_GEXP: " + query)
         return query
 
-    def do_query(self, project_id, project_name, dataset_name, table_name, feature_def,
-                 cohort_dataset, cohort_table, cohort_id_array):
-        bigquery_service = authorize_credentials_with_Google()
+    @DurationLogged('GEXP', 'UNPACK')
+    def unpack_query_response(self, query_result_array):
+        """
+        Unpacks values from a BigQuery response object into a flat array. The array will contain dicts with
+        the following fields:
+        - 'patient_id': Patient barcode
+        - 'sample_id': Sample barcode
+        - 'aliquot_id': Aliquot barcode
+        - 'value': Value of the selected column from the clinical data table
 
-        query = self.build_query(project_name, dataset_name, table_name, feature_def,
-                                 cohort_dataset, cohort_table, cohort_id_array)
-        query_body = {
-            'query': query
-        }
+        Args:
+            query_result_array: A BigQuery query response object
 
-        table_data = bigquery_service.jobs()
-        query_response = table_data.query(projectId=project_id, body=query_body).execute()
+        Returns:
+            Array of dict objects.
+        """
         result = []
-        num_result_rows = int(query_response['totalRows'])
-        if num_result_rows == 0:
-            return result
 
-        for row in query_response['rows']:
+        for row in query_result_array:
             result.append({
                 'patient_id': row['f'][0]['v'],
                 'sample_id': row['f'][1]['v'],
@@ -167,18 +168,6 @@ class GEXPFeatureProvider(object):
                 'value': float(row['f'][3]['v'])
             })
 
-        return result
-
-    def get_data_from_bigquery(self, cohort_id_array, cohort_dataset, cohort_table):
-        project_id = settings.BQ_PROJECT_ID
-        project_name = settings.BIGQUERY_PROJECT_NAME
-        dataset_name = settings.BIGQUERY_DATASET2
-        result = self.do_query(project_id, project_name, dataset_name, self.table_name, self.feature_def,
-                          cohort_dataset, cohort_table, cohort_id_array)
-        return result
-
-    def get_data(self, cohort_id_array, cohort_dataset, cohort_table):
-        result = self.get_data_from_bigquery(cohort_id_array, cohort_dataset, cohort_table)
         return result
 
     # TODO refactor, duplicate code shared with GEXPFeatureDef
@@ -196,4 +185,15 @@ class GEXPFeatureProvider(object):
         table_info = self.get_table_info(self.feature_def.table_id)
         self.table_name = table_info['table_id']
 
-
+    @classmethod
+    def is_valid_feature_id(cls, feature_id):
+        is_valid = False
+        try:
+            GEXPFeatureDef.from_feature_id(feature_id)
+            is_valid = True
+        except Exception:
+            # GEXPFeatureDef.from_feature_id raises Exception if the feature identifier
+            # is not valid. Nothing needs to be done here, since is_valid is already False.
+            pass
+        finally:
+            return is_valid
