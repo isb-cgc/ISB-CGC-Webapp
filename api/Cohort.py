@@ -20,14 +20,13 @@ import logging
 from datetime import datetime
 
 import endpoints
-from protorpc import messages, message_types
+from protorpc import messages
 from protorpc import remote
-from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.contrib.auth.models import User as Django_User
+from django.core.signals import request_finished
 import django
-import MySQLdb
-import json
+
 
 from metadata import MetadataItem, IncomingMetadataItem
 
@@ -262,6 +261,7 @@ class Cohort_Endpoints_API(remote.Service):
                 if cursor: cursor.close()
                 if filter_cursor: filter_cursor.close()
                 if db and db.open: db.close()
+                request_finished.send(self)
         else:
             raise endpoints.UnauthorizedException("Authentication failed.")
 
@@ -378,6 +378,7 @@ class Cohort_Endpoints_API(remote.Service):
             finally:
                 if cursor: cursor.close()
                 if db and db.open: db.close()
+                request_finished.send(self)
 
         else:
             raise endpoints.UnauthorizedException("Authentication failed.")
@@ -966,6 +967,7 @@ class Cohort_Endpoints_API(remote.Service):
                 if patient_cursor: patient_cursor.close()
                 if sample_cursor: sample_cursor.close()
                 if db and db.open: db.close()
+                request_finished.send(self)
 
             cohort_name = request.__getattribute__('name')
 
@@ -1042,6 +1044,7 @@ class Cohort_Endpoints_API(remote.Service):
                 user_id = django_user.id
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
                 logger.warn(e)
+                request_finished.send(self)
                 raise endpoints.NotFoundException("%s does not have an entry in the user database." % user_email)
             try:
                 cohort_to_deactivate = Django_Cohort.objects.get(id=cohort_id)
@@ -1055,14 +1058,15 @@ class Cohort_Endpoints_API(remote.Service):
                         return_message = 'You do not have owner permission on cohort %d.' % cohort_id
                 else:
                     return_message = "Cohort %d was already deactivated." % cohort_id
+                request_finished.send(self)
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
                 logger.warn(e)
+                request_finished.send(self)
                 raise endpoints.NotFoundException(
                     "Either cohort %d does not have an entry in the database "
                     "or you do not have owner or reader permissions on this cohort." % cohort_id)
         else:
-            return_message = "Unsuccessful authentication."
-            # todo: when endpoints.UnauthorizedException is fixed, add that here.
+            raise endpoints.UnauthorizedException("Unsuccessful authentication.")
 
         return ReturnJSON(msg=return_message)
 
@@ -1130,6 +1134,6 @@ class Cohort_Endpoints_API(remote.Service):
             if db and db.open: db.close()
 
         return CohortPatientsSamplesList(patients=patient_barcodes,
-                                          patient_count=len(patient_barcodes),
-                                          samples=sample_barcodes,
-                                          sample_count=len(sample_barcodes))
+                                         patient_count=len(patient_barcodes),
+                                         samples=sample_barcodes,
+                                         sample_count=len(sample_barcodes))

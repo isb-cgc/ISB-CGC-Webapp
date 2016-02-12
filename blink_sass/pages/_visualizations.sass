@@ -2,11 +2,7 @@
  * Visualizations Styles
  *******************************************/
 
-#visualizations
-    margin-top: 115px
-
-    .data-holder
-        display: none
+.worksheet-panel-body
 
     .axis path, .axis line
         fill: none
@@ -19,134 +15,37 @@
     .grid path
         stroke-width: 0
 
-    .plot
-        //display: inline-block
-        width: 100%
-        margin-top: 15px
+    .plot-div
+        .extent
+            fill: #000
+            fill-opacity: .1
+            stroke: #fff
 
-        .panel-heading
-            .form-control
-                width: 80%
-                margin-bottom: 10px
-            .options-bar
-                float: right
-                font-size: 24px
-                a
-                    cursor: pointer
-                i
-                    margin-left: 5px
-                .toggle-selection.active
-                    color: $primary-color
-                .expected_fill.selected
-                    stroke: $primary-color
-                    stroke-opacity: 1
-                    stroke-width: 3px
-            h5
-                margin: 0px
-        .plot-div
-            display: inline-block
-            margin: 20px
-            max-width: 800px
-            height: 650px
-            vertical-align: top
-            overflow: hidden
+        .expected_fill.selected
+            stroke: $tooltip-color
+            stroke-width: 5px
 
+        .bar
+            fill: rgba(0,0,0,0.5)
+            &:hover, &.selected
+                fill: rgba(0,0,225,0.5)
 
-            .extent
-                fill: #000
-                fill-opacity: .1
-                stroke: #fff
+    .show-flyout:hover
+        cursor: pointer
 
-            .expected_fill.selected
-                stroke: $tooltip-color
-                stroke-width: 5px
+    .save-cohort-card
+        background-color: rgba($tooltip-color, 0.8)
+        border-radius: 3px
+        color: #fff
+        padding: 5px
 
-            .bar
-                fill: rgba(0,0,0,0.5)
-                &:hover, &.selected
-                    fill: rgba(0,0,225,0.5)
-
-        .show-flyout:hover
-            cursor: pointer
-
-        .fly-out
-            position: fixed
-            width: 300px
-            //height: 791px
-            right: -300px
-            top: 118px
-            bottom: 0px
-            background-color: #fff
-            border: $border
-            margin-top: -16px
-            z-index: 1000
-            .flyout-heading
-                border-bottom: $border
-                padding: 0px 10px
-            .flyout-body
-                padding: 10px
-            .flyout-footer
-                bottom: 0px
-                position: absolute
-                width: 100%
-                border-top: $border
-                padding: 10px
-            .form-control
-                padding: 0px 10px
-
-            .hide-flyout
-                float: right
-                &:hover
-                    cursor: pointer
-            .cohort-listing
-                div.filter-label
-                    display: block
-                    text-align: left
-                    a
-                        cursor: pointer
-                        float: right
-
-            .add-cohort
-                cursor: pointer
-                font-size: 13px
-                font-weight: normal
-                margin-top: 2px
-
-            .cohort-search
-                .select-cohort
-                    display: block
-                    text-align: left
-
-            .comment-username
-                font-weight: bold
-                font-size: 14px
-                margin: 0px
-            .comment-date
-                font-size: 12px
-                color: $link-color
-            .comment-content
-                background-color: $primary-color-xlight
-                border-radius: 5px
-                padding: 5px 10px
-                color: $link-color
-
-        .save-cohort-card
-            background-color: rgba($tooltip-color, 0.8)
-            border-radius: 3px
-            color: #fff
-            padding: 5px
-
-        .panel-body
-            position: relative
-            overflow: hidden
-
-        .pairwise-result
-            .table
-                th.logp, th.n, th.na, th.nb, th.pa, th.pb
-                    width: 60px
-                td
-                    word-wrap: break-word
-                    word-break: break-word
+    .pairwise-result
+        .table
+            th.logp, th.n, th.na, th.nb, th.pa, th.pb
+                width: 60px
+            td
+                word-wrap: break-word
+                word-break: break-word
 
     .legend
         display: inline-block
@@ -157,43 +56,6 @@
         .unselected
             fill-opacity: 0
 
-    #search-details
-        table
-            display: inline-block
-            vertical-align: top
-            td
-                padding: 5px 10px
-                &.key
-                    font-weight: bold
-                    width: 100px
-                &.value
-                    word-wrap: break-word
-                    width: 200px
-
-
-    #selected-points ol
-        list-style: decimal
-        li
-            margin-left: 20px
-
-    .vis-config
-        label
-            padding: 2px 10px 2px 0px
-
-    .plot-loader
-        position: absolute
-        width: 1138px
-        height: 790px
-        background: rgba(0, 0, 0, 0.5)
-        z-index: 100
-        margin: -15px 0px 0px -15px
-        //margin-top: 180px
-        i
-            position: absolute
-            left: 43%
-            top: 40%
-            margin: auto
-            font-size: 200px
 
 #seqpeek
     #seqpeek-form

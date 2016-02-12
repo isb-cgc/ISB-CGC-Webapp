@@ -18,12 +18,11 @@ limitations under the License.
 
 import logging
 from re import compile as re_compile
-from api.api_helpers import authorize_credentials_with_Google
-
-from django.conf import settings
 
 from bq_data_access.errors import FeatureNotFoundException
 from bq_data_access.feature_value_types import ValueType, DataTypes
+from bq_data_access.feature_data_provider import FeatureDataProvider
+from bq_data_access.utils import DurationLogged
 
 CNVR_FEATURE_TYPE = 'CNVR'
 IDENTIFIER_COLUMN_NAME = 'sample_id'
@@ -34,6 +33,17 @@ def get_feature_type():
 
 
 class CNVRFeatureDef(object):
+    # Regular expression for parsing the feature definition.
+    #
+    # Example ID: CNVR:max_segment_mean:X:133276258:133276370
+    regex = re_compile("^CNVR:"
+                       # value
+                       "(avg_segment_mean|std_dev_segment_mean|min_segment_mean|max_segment_mean|num_segments):"
+                       # validate outside - chromosome 1-23, X, Y, M
+                       "(\d|\d\d|X|Y|M):"
+                       # coordinates start:end
+                       "(\d+):(\d+)$")
+
     def __init__(self, value_field, chromosome, start, end):
         self.value_field = value_field
         self.chromosome = chromosome
@@ -42,16 +52,7 @@ class CNVRFeatureDef(object):
 
     @classmethod
     def from_feature_id(cls, feature_id):
-        # Example ID: CNVR:max_segment_mean:X:133276258:133276370
-        regex = re_compile("^CNVR:"
-                           # value
-                           "(avg_segment_mean|std_dev_segment_mean|min_segment_mean|max_segment_mean|num_segments):"
-                           # validate outside - chromosome 1-23, X, Y, M
-                           "(\d|\d\d|X|Y|M):"
-                           # coordinates start:end
-                           "(\d+):(\d+)$")
-
-        feature_fields = regex.findall(feature_id)
+        feature_fields = cls.regex.findall(feature_id)
         if len(feature_fields) == 0:
             raise FeatureNotFoundException(feature_id)
         logging.debug(feature_fields)
@@ -64,7 +65,7 @@ class CNVRFeatureDef(object):
         return cls(value_field, chromosome, start, end)
 
 
-class CNVRFeatureProvider(object):
+class CNVRFeatureProvider(FeatureDataProvider):
     TABLES = [
         {
             'name': 'CNV',
@@ -73,10 +74,11 @@ class CNVRFeatureProvider(object):
         }
     ]
 
-    def __init__(self, feature_id):
+    def __init__(self, feature_id, **kwargs):
         self.table_name = ''
         self.feature_def = None
         self.parse_internal_feature_id(feature_id)
+        super(CNVRFeatureProvider, self).__init__(**kwargs)
 
     def get_value_type(self):
         return ValueType.FLOAT
@@ -86,7 +88,7 @@ class CNVRFeatureProvider(object):
 
     @classmethod
     def process_data_point(cls, data_point):
-        return str(data_point['value'])
+        return data_point['value']
 
     def build_query(self, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array):
         # Generate the 'IN' statement string: (%s, %s, ..., %s)
@@ -123,23 +125,11 @@ class CNVRFeatureProvider(object):
         logging.debug("BQ_QUERY_CNVR: " + query)
         return query
 
-    def do_query(self, project_id, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array):
-        bigquery_service = authorize_credentials_with_Google()
-
-        query = self.build_query(project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array)
-        query_body = {
-            'query': query
-        }
-
-        table_data = bigquery_service.jobs()
-        query_response = table_data.query(projectId=project_id, body=query_body).execute()
-
+    @DurationLogged('CNVR', 'UNPACK')
+    def unpack_query_response(self, query_result_array):
         result = []
-        num_result_rows = int(query_response['totalRows'])
-        if num_result_rows == 0:
-            return result
 
-        for row in query_response['rows']:
+        for row in query_result_array:
             result.append({
                 'patient_id': row['f'][0]['v'],
                 'sample_id': row['f'][1]['v'],
@@ -149,21 +139,22 @@ class CNVRFeatureProvider(object):
 
         return result
 
-    def get_data_from_bigquery(self, cohort_id_array, cohort_dataset, cohort_table):
-        project_id = settings.BQ_PROJECT_ID
-        project_name = settings.BIGQUERY_PROJECT_NAME
-        dataset_name = settings.BIGQUERY_DATASET2
-        result = self.do_query(project_id, project_name, dataset_name, self.table_name, self.feature_def,
-                               cohort_dataset, cohort_table, cohort_id_array)
-        return result
-
-    def get_data(self, cohort_id_array, cohort_dataset, cohort_table):
-        result = self.get_data_from_bigquery(cohort_id_array, cohort_dataset, cohort_table)
-        return result
-
     def get_table_name(self):
         return self.TABLES[0]['name']
 
     def parse_internal_feature_id(self, feature_id):
         self.feature_def = CNVRFeatureDef.from_feature_id(feature_id)
         self.table_name = self.get_table_name()
+
+    @classmethod
+    def is_valid_feature_id(cls, feature_id):
+        is_valid = False
+        try:
+            CNVRFeatureDef.from_feature_id(feature_id)
+            is_valid = True
+        except Exception:
+            # CNVRFeatureDef.from_feature_id raises Exception if the feature identifier
+            # is not valid. Nothing needs to be done here, since is_valid is already False.
+            pass
+        finally:
+            return is_valid

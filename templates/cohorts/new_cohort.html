@@ -124,7 +124,7 @@
                                         <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ attr|get_readable_name }}
                                     </a>
                                 </div>
-                                <div id="collapse-{{ attr }}" class="list-group-item__body collapse" role="tabpanel" aria-labelledby="heading-{{ attr }}" data-feature-name="{{ attr }}">
+                                <div id="collapse-{{ attr }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" aria-labelledby="heading-{{ attr }}" data-feature-name="{{ attr }}" data-feature-type="datatype">
                                     <ul class="search-checkbox-list" id="{{ attr }}">
                                         {% if attr_list_count|list_contains_name:attr %}
                                             {% for v in attr_list_count|get_named_item:attr|get_item:'values' %}
