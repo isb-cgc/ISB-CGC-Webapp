@@ -17,20 +17,18 @@ limitations under the License.
 """
 
 import endpoints
-import logging
 import django
 import pytz
 import datetime
 from protorpc import messages
 from protorpc import remote
-from django.conf import settings
 
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.contrib.auth.models import User as Django_User
 from accounts.models import NIH_User
+from django.core.signals import request_finished
 
-from google_helpers.directory_service import get_directory_resource
-from googleapiclient.errors import HttpError
+
 from api_helpers import *
 
 logger = logging.getLogger(__name__)
@@ -38,9 +36,9 @@ logger = logging.getLogger(__name__)
 CONTROLLED_ACL_GOOGLE_GROUP = settings.ACL_GOOGLE_GROUP
 INSTALLED_APP_CLIENT_ID = settings.INSTALLED_APP_CLIENT_ID
 
+
 class ReturnJSON(messages.Message):
     msg = messages.StringField(1)
-
 
 
 User_Endpoints = endpoints.api(name='user_api', version='v1', description='Get information about users.',
@@ -72,13 +70,14 @@ class User_Endpoints_API(remote.Service):
             user_email = get_user_email_from_token(access_token)
 
         if user_email:
+            # this checks the controlled-access google group
             am_dbgap_authorized = is_dbgap_authorized(user_email)
 
             if not am_dbgap_authorized:
                 return ReturnJSON(msg="You are not on the controlled-access google group.")
 
-            # all the following situations should never happen
             django.setup()
+            # all the following five situations should never happen
 
             # 1. check to make sure they have an entry in auth_user
             try:
@@ -86,6 +85,7 @@ class User_Endpoints_API(remote.Service):
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
                 logger.error("Email {} is in {} group but did not have a unique entry in auth_user table. Error: {}"
                              .format(user_email, CONTROLLED_ACL_GOOGLE_GROUP, e))
+                request_finished.send(self)
                 raise endpoints.NotFoundException("{} is in the controlled-access google group "
                                                   "but does not have an entry in the user database."
                                                   .format(user_email))
@@ -100,6 +100,8 @@ class User_Endpoints_API(remote.Service):
                 raise endpoints.NotFoundException("{} is in the controlled-access google group "
                                                   "but does not have an entry in the nih_user database."
                                                   .format(user_email))
+            finally:
+                request_finished.send(self)
 
             # 3. check if their entry in accounts_nih_user is currently active
             if not nih_user.active:
