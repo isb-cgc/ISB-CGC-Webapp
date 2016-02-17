@@ -27,7 +27,7 @@ require.config({
         assetscore: 'libs/assets.core',
         assetsresponsive: 'libs/assets.responsive',
 
-        igvbeta: 'libs/igv-beta'
+        igvbeta: 'libs/igv'
     },
     shim: {
         'session_security': ['jquery'],
@@ -53,7 +53,13 @@ require([
     A11y.Core();
 
     var browser;
+
+    var clientId = '907668440978-j9ec27vhg0e0mmpjvrcelfq7ah9n0ntm.apps.googleusercontent.com';
+
+
     $('.generate-btn').on('click', function() {
+
+
         var selected = $('select.rgselector:visible option:selected');
         var tracks = [];
         for (var i = 0; i < selected.length; i++) {
@@ -63,9 +69,15 @@ require([
                 url: 'https://www.googleapis.com/genomics/v1beta2',
                 readGroupSetIds: $(selected[i]).val(),
                 name: $(selected[i]).text(),
-                referenceName: '7'
+                referenceName: '1'
             })
         }
+        //tracks.push({
+        //    sourceType: 'gcs',
+        //    type: 'bam',
+        //    url: '', ## gs:// url to .bam file. Location must also contain .bai file.
+        //    name: 'GCS bam file'
+        //});
         tracks.push({
             name: "Genes",
             url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
@@ -77,12 +89,35 @@ require([
             showNavigation: true,
             genome: "hg19",
             locus: "egfr",
-            apiKey: 'AIzaSyDbqoM1bNdaCTn2-OtarruG4NmI8e-qHAk',
             tracks: tracks
         };
         $('#igv-div').empty();
         igv.browser = null;
         browser = igv.createBrowser($('#igv-div')[0], options);
+
+        // Testing bq access
+        var config = {
+            'client_id': clientId,
+            'scope': 'https://www.googleapis.com/auth/bigquery'
+        };
+
+        gapi.auth.authorize(config, function (tokenJson) {
+            gapi.client.load('bigquery', 'v2');
+            oauth.google.apiKey = 'a717bf753c08ea7293a226014a1134867d6c5884';
+            igv.oauth.google.access_token = tokenJson.access_token;
+
+            igv.browser.loadTrack(
+                {
+                    //autoHeight: false,
+                    sourceType: 'bigquery',
+                    featureType: 'seg',
+                    name: 'BRCA',
+                    cohort: 'SELECT ParticipantBarcode FROM [isb-cgc:tcga_201510_alpha.Clinical_data] WHERE Study = "BRCA"'
+                }
+            )
+        });
+
+
     });
 
     $('#dataset-selector').on('change', function() {
