@@ -27,9 +27,10 @@ class ValueType(Enum):
     INTEGER = 2
     FLOAT = 3
     BOOLEAN = 4
+    UNKNOWN = 5 # We can get queries that return no data, which may be of an unknown type
 
 IdentifierTypes = enum(PATIENT=1, SAMPLE=2, ALIQUOT=3)
-DataTypes = enum(CLIN=1, GEXP=2, METH=3, CNVR=4, RPPA=5, MIRN=6, GNAB=7)
+DataTypes = enum(CLIN=1, GEXP=2, METH=3, CNVR=4, RPPA=5, MIRN=6, GNAB=7, USER=8)
 
 IDENTIER_FIELDS_FOR_DATA_TYPES = {
     #TODO: change clin to match new BQ clin table in tcga_data_open
@@ -66,6 +67,9 @@ IDENTIER_FIELDS_FOR_DATA_TYPES = {
         IdentifierTypes.PATIENT: 'ParticipantBarcode',
         IdentifierTypes.SAMPLE: 'Tumor_SampleBarcode',
         IdentifierTypes.ALIQUOT: 'Tumor_AliquotBarcode'
+    },
+    DataTypes.USER: {
+        IdentifierTypes.SAMPLE: 'sample_barcode'
     }
 }
 

@@ -17,6 +17,8 @@ limitations under the License.
 """
 
 import io
+import os
+import re
 import json
 import StringIO
 import csv
@@ -36,20 +38,30 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.conf import settings
+from django.http import StreamingHttpResponse
 
 from googleapiclient import http
 from googleapiclient.errors import HttpError
+from googleapiclient.http import MediaIoBaseDownload, MediaIoBaseUpload
 from google_helpers.directory_service import get_directory_resource
 from google_helpers.reports_service import get_reports_resource
-from google_helpers.storage_service import get_storage_resource
+from google_helpers.storage_service import get_storage_resource, get_special_storage_resource
 from google_helpers.resourcemanager_service import get_crm_resource
 from google_helpers.logging_service import get_logging_resource
+from google_helpers.bigquery_service import get_bigquery_service
 from google.appengine.api.taskqueue import Task, Queue
 
 from accounts.models import NIH_User
 from api.api_helpers import sql_connection
 
-import pprint
+import cStringIO
+from google_helpers import load_data_from_csv
+
+PROJECT_ID = settings.BIGQUERY_PROJECT_NAME
+BQ_DATASET = 'billing'
+GCS_BUCKET = 'isb-cgc-billing-json'
+BILLING_SCHEMA = os.path.abspath(os.path.join(os.path.dirname(__file__), 'billing_schema.json'))
+
 
 debug = settings.DEBUG
 
@@ -116,7 +128,7 @@ def scrub_nih_users(dbGaP_authorized_list):
         for member in members:
             email = member['email']
             logger.info("Checking user {} on ACL_GOOGLE_GROUP list".format(email))
-            # skip email  907668440978-oskt05du3ao083cke14641u35deokgjj@developer.gserviceaccount.com?
+
             try:
                 # get user id from email
                 user_id = User.objects.get(email=email).id
@@ -124,18 +136,27 @@ def scrub_nih_users(dbGaP_authorized_list):
                 nih_user = NIH_User.objects.get(user_id=user_id)
                 nih_username = nih_user.NIH_username
 
-                # verify that nih_username is in one of the rows
-                if not matching_row_exists(rows, 'login', nih_username):
+                is_on_new_nih_authorized_list = matching_row_exists(rows, 'login', nih_username)
+
+                # verify that nih_username is in one of the rows, that the nih_user is dbGaP authorized, and that the nih_user is active
+                if not is_on_new_nih_authorized_list or not nih_user.dbGaP_authorized or not nih_user.active:
+
                     # remove from ACL_GOOGLE_GROUP
                     directory_service.members().delete(groupKey=ACL_GOOGLE_GROUP, memberKey=email).execute(http=directory_http_auth)
-                    logger.warn("Deleted user {} from ACL_GOOGLE_GROUP because a matching entry was not found in the dbGaP authorized list.".format(email))
+                    if not nih_user.dbGaP_authorized or not nih_user.active:
+                        logger.warn("Deleted user {} from the controlled-access google group "
+                                    "because strangely their entry in the database had dbGaP_authorized={} and active={}"
+                                    .format(email, str(nih_user.dbGaP_authorized), str(nih_user.active)))
+                    if not is_on_new_nih_authorized_list:
+                        logger.warn("Deleted user {} from the controlled-access google group "
+                                    "because a matching entry was not found in the dbGaP authorized list.".format(email))
                     nih_user.dbGaP_authorized = False
                     nih_user.save()
-                    logger.warn("Changed NIH user {}'s dbGaP_authorized to False because a matching entry was not found in the dbGaP authorized list.".format(nih_username))
+                    logger.warn("Changed NIH user {}'s dbGaP_authorized to False.".format(nih_username))
 
             # if that user is somehow on ACL_GOOGLE_GROUP but has 0 or plural entries in User or NIH_User
             except (MultipleObjectsReturned, ObjectDoesNotExist), e:
-                logger.debug("Problem getting either {}'s user id or their NIH username: {}".format(email, str(e)))
+                logger.warn("Strangely, there was a problem getting either {}'s user id or their NIH username: {}".format(email, str(e)))
                 # remove from ACL_GOOGLE_GROUP
                 directory_service.members().delete(groupKey=ACL_GOOGLE_GROUP, memberKey=email).execute(http=directory_http_auth)
                 continue
@@ -322,7 +343,7 @@ def CloudSQL_logging(request):
                '--read-from-remote-server',
                yesterdays_binary_log_file,
                '--host',
-               settings.IPV4,
+               settings.DATABASES['default']['HOST'],
                '--user',
                settings.DATABASES['default']['USER'],
                '--base64-output=DECODE-ROWS',
@@ -341,7 +362,11 @@ def CloudSQL_logging(request):
     if i == 2:
         output = child.read()
         date_start_char = output.find('#1')
-        date_str = output[date_start_char+1:date_start_char+7]
+        if date_start_char:  # if date_star_char is not zero
+            date_str = output[date_start_char+1:date_start_char+7]
+        else:
+            utc_now = datetime.datetime.utcnow()
+            date_str = str(utc_now.year)[2:] + str(utc_now.month) + str(utc_now.day-1) + '?'
         storage_service = get_storage_resource()
         media = http.MediaIoBaseUpload(io.BytesIO(output), 'text/plain')
         filename = 'cloudsql_activity_log_' + date_str + '.txt'
@@ -367,6 +392,9 @@ def get_binary_log_filenames():
         return filenames
     except (TypeError, IndexError) as e:
         logger.warn('Error in retrieving binary log filenames: {}'.format(e))
+    finally:
+        if cursor: cursor.close()
+        if db: db.close()
 
 
 @login_required
@@ -523,5 +551,130 @@ def log_acls(request):
     # write log entry
     write_log_entry('bucket_acls', acls)
     write_log_entry('bucket_defacls', defacls)
+
+    return HttpResponse('')
+
+
+
+"""Load billing json file from storage into BigQuery
+"""
+
+def normalize_json(item_y):
+    """Converts a nested json string into a flat dict
+    """
+    out = {}
+
+    def flatten(item_x, name=''):
+        """Flatten nested string"""
+        if type(item_x) is dict:
+            for item_a in item_x:
+                flatten(item_x[item_a], name +  item_a + '_')
+        elif type(item_x) is list:
+            for item_a in item_x:
+                flatten(item_a, name)
+        else:
+            out[str(name[:-1])] = item_x
+    flatten(item_y)
+    return out
+
+def read_file_from_gcs(service, bucket_id, file_id):
+    """Reads the bucket object and get the contents
+       We are getting the StringIO value
+    """
+    req = service.objects().get_media(
+        bucket=bucket_id, object=file_id)
+    try:
+        fh = io.BytesIO()
+        downloader = MediaIoBaseDownload(fh, req, chunksize=1024*1024)
+        done = False
+        while not done:
+            status, done = downloader.next_chunk()
+
+    # throws HttpError if this file is not found
+    except HttpError, e:
+        print >> sys.stderr, e
+    else:
+        file_content = fh.getvalue()
+        fh.close()
+        return file_content
+
+
+def upload_file_to_gcs(service, bucket_name, file_content, filename):
+    """Upload a file to Google cloud storage
+    """
+    try:
+        upload = MediaIoBaseUpload(file_content, mimetype='application/json',
+                                   resumable=True)
+
+        req = service.objects().insert(media_body=upload, name=filename,
+                                       bucket=bucket_name)
+        resp = req.execute()
+        print >> sys.stderr, '> Uploaded source file {}'.format(filename)
+        print >> sys.stderr,json.dumps(resp, indent=2)
+    except HttpError, error:
+        print >> sys.stderr, "An error occurred: %s" % error
+
+
+def preprocess_file(file_content):
+    """process the file - flatten the json, convert to new-line delimited
+    """
+    out = cStringIO.StringIO()
+    item_json = json.loads(file_content)
+
+    # flatten the nested json string
+    for item in item_json:
+        item_content = normalize_json(item) # flatten
+        out.write(json.dumps(item_content) + '\n')
+
+    return out
+
+
+def load_billing_to_bigquery(request):
+    """Main: Read the file from storage and load into BigQuery
+    """
+    env = os.getenv('SERVER_SOFTWARE')
+
+    for num in range(36):
+        load_date = (datetime.datetime.now() + datetime.timedelta(days=-num-1))
+
+        # construct the service object for the interacting with the Cloud Storage API
+        if env.startswith('Google App Engine/'):
+            service = get_storage_resource()
+        else:
+            service = get_special_storage_resource()
+
+        print >> sys.stderr, '>< Load billing json from date: {}'.format(load_date.strftime("%Y-%m-%d"))
+        logger.info('>< Load billing json from date: {}'.format(load_date.strftime("%Y-%m-%d")))
+
+        # some params
+        table_id = 'billing_' + load_date.strftime("%Y%m%d")
+        file_to_load = 'billing-' + load_date.strftime("%Y-%m-%d") + '.json'
+        file_to_upload = 'intermediary/' + file_to_load
+        gcs_load_file = 'gs://' + GCS_BUCKET + '/' + file_to_upload
+
+        # read the file from the google cloud storage
+        file_info = read_file_from_gcs(service, GCS_BUCKET, file_to_load)
+
+        # process the file - flatten the json, convert to new-line delimited
+        try:
+            upload_fh = preprocess_file(file_info)
+        except TypeError, e:
+            print >> sys.stderr, '\nBarfed on preprocess_file date: {}. Error: {}. File info: {}'\
+                .format(load_date.strftime("%Y-%m-%d"), e, file_info)
+            continue
+        else:
+            print >> sys.stderr, '\nSuccess! {}'.format(load_date.strftime("%Y-%m-%d"))
+
+        # upload the processed file to google cloud storage
+        upload_file_to_gcs(service, GCS_BUCKET, upload_fh, file_to_upload)
+        upload_fh.close()  # do we need to close?(no buffer?)
+
+        # load the uploaded file from the storage(new-line delimited) into bigquery
+        # create a new table, replacing the contents
+        print >> sys.stderr, '<> Loading file from storage into BigQuery'
+        logger.info('<> Loading file from storage into BigQuery')
+        load_data_from_csv.run(PROJECT_ID, BQ_DATASET, table_id, BILLING_SCHEMA,
+                               gcs_load_file, 'NEWLINE_DELIMITED_JSON',
+                               'WRITE_TRUNCATE')
 
     return HttpResponse('')

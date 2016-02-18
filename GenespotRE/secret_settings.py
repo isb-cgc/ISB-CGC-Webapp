@@ -6,9 +6,12 @@ dotenv.read_dotenv(join(dirname(__file__), '../.env'))
 
 SETTINGS = {
     'SECRET_KEY': os.environ.get('DJANGO_SECRET_KEY', ''), # Django SECRET_KEY
-    'DEBUG': os.environ.get('DEBUG', False),
+    'DEBUG': os.environ.get(bool('DEBUG'), False),
     'PROJECT_ID': os.environ.get('GCLOUD_PROJECT_ID'), # Google Cloud Project ID #
     'BQ_PROJECT_ID': os.environ.get('BIGQUERY_PROJECT_ID', os.environ.get('GCLOUD_PROJECT_ID')), # Google Cloud Project ID #
+    'PROJECT_NAME': os.environ.get('GCLOUD_PROJECT_NAME'),
+
+    'REQUEST_PROJECT_EMAIL': os.environ.get('REQUEST_PROJECT_EMAIL', 'request@example.com'),
 
     # TODO: Should be deleted at some point in favor of merged settings
     'CLOUD_BASE_URL': os.environ.get('CLOUD_BASE_URL', 'http://isb-cgc.appspot.com/'), # Deployed url
@@ -84,7 +87,8 @@ SETTINGS = {
 
     'BIGQUERY_DATASET': 'isb_cgc', # ??? Who is using this ???
     'BIGQUERY_DATASET2': 'tcga_data_open', # Name of BigQuery dataset containing open tcga data
-    'BIGQUERY_PROJECT_NAME': 'isb-cgc', # Name of project that owns BigQuery datasets
+    #'BIGQUERY_PROJECT_NAME': 'isb-cgc', # Name of project that owns BigQuery datasets
+    'BIGQUERY_PROJECT_NAME': os.environ.get('GCLOUD_PROJECT_NAME'),
 
     'GOOGLE_APPLICATION_CREDENTIALS': os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')) if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS') else '', # Path to privatekey.json
     'CLIENT_SECRETS': os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('CLIENT_SECRETS')) if os.environ.get('CLIENT_SECRETS') else '', # Path to client_secrets.json
@@ -110,14 +114,28 @@ SETTINGS = {
     'DCC_CONTROLLED_DATA_BUCKET': os.environ.get('DCC_CONTROLLED_DATA_BUCKET'),
     'CGHUB_CONTROLLED_DATA_BUCKET': os.environ.get('CGHUB_CONTROLLED_DATA_BUCKET'),
 
+    'USE_CLOUD_STORAGE': os.environ.get('USE_CLOUD_STORAGE', 'False'),
+    'GCLOUD_BUCKET': os.environ.get('GOOGLE_STORAGE_BUCKET'),
+    'MEDIA_FOLDER': os.environ.get('MEDIA_FOLDER', 'uploads/'),
+
     # IGV Project ID
     'IGV_PROJECT_ID': os.environ.get('IGV_PROJECT_ID'),
+
+    # Processing
+    'PROCESSING_ENABLED': os.environ.get('PROCESSING_ENABLED', False),
+    'PROCESSING_JENKINS_URL': os.environ.get('PROCESSING_JENKINS_URL', 'http://localhost/jenkins'),
+    'PROCESSING_JENKINS_PROJECT': os.environ.get('PROCESSING_JENKINS_PROJECT', 'cgc-processing'),
+    'PROCESSING_JENKINS_USER': os.environ.get('PROCESSING_JENKINS_USER', 'user'),
+    'PROCESSING_JENKINS_PASSWORD': os.environ.get('PROCESSING_JENKINS_PASSWORD', ''),
 
     # SAML setting
     'SAML_FOLDER': os.environ.get('SAML_FOLDER'),
 
     'SU_USER': os.environ.get('SUPERUSER_USERNAME', 'isb'),
     'SU_PASS': os.environ.get('SUPERUSER_PASSWORD', 'isbcgctest'),
+
+    'SITE_GOOGLE_TAG_MANAGER_ID' : os.environ.get('SITE_GOOGLE_TAG_MANAGER_ID', False),
+    'SITE_GOOGLE_ANALYTICS' : os.environ.get('SITE_GOOGLE_ANALYTICS_ID', False),
 }
 
 if os.environ.has_key('DB_SSL_CERT'):

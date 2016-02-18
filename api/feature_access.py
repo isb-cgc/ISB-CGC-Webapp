@@ -101,14 +101,19 @@ class FeatureDefinitionSearcherFactory(object):
             return MIRNSearcher()
         elif datatype == GNAB_FEATURE_TYPE:
             return GNABSearcher()
+        #TODO build a full search on all features
+        #elif datatype == ALL:
+        #    return FullSearcher()
         raise InvalidDataTypeException("Invalid datatype '{datatype}'".format(datatype=datatype))
 
-FeatureAccessEndpointsAPI = endpoints_api(name='feature_type_api', version='v1')
+FeatureAccessEndpointsAPI = endpoints_api(name='feature_type_api', version='v1',
+                                          description='Endpoints used by the web application to return features.')
 @FeatureAccessEndpointsAPI.api_class(resource_name='feature_type_endpoints')
 class FeatureAccessEndpoints(remote.Service):
     @endpoints_method(FeatureTypeSearchRequest, FeatureTypeList,
                       path='feature_search', http_method='GET', name='feature_access.FeatureSearch')
     def feature_search(self, request):
+        """ Used by the web application."""
         try:
             datatype = request.datatype
             searcher = FeatureDefinitionSearcherFactory.build_from_datatype(datatype)
@@ -147,6 +152,7 @@ class FeatureAccessEndpoints(remote.Service):
     @endpoints_method(FeatureTypeFieldSearchRequest, FeatureFieldSearchResult,
                       path='feature_field_search', http_method='GET', name='feature_access.getFeatureFieldSearch')
     def feature_field_search(self, request):
+        """ Used by the web application."""
         try:
             datatype, keyword, field = request.datatype, request.keyword, request.field
             searcher = FeatureDefinitionSearcherFactory.build_from_datatype(datatype)

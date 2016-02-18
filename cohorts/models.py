@@ -21,6 +21,7 @@ import operator
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Q
+from projects.models import Study, User_Feature_Definitions
 
 
 class CohortManager(models.Manager):
@@ -55,6 +56,23 @@ class Cohort(models.Model):
         return len(self.patients_set.all())
 
     '''
+    Sets the last viewed time for a cohort
+    '''
+    def mark_viewed (self, request, user=None):
+        if user is None:
+            user = request.user
+
+        last_view = self.cohort_last_view_set.filter(user=user)
+        if last_view is None or len(last_view) is 0:
+            last_view = self.cohort_last_view_set.create(user=user)
+        else:
+            last_view = last_view[0]
+
+        last_view.save(False, True)
+
+        return last_view
+
+    '''
     Returns the highest level of permission the user has.
     '''
     def get_perm(self, request):
@@ -67,6 +85,11 @@ class Cohort(models.Model):
 
     def get_owner(self):
         return self.cohort_perms_set.filter(perm=Cohort_Perms.OWNER)[0].user
+
+    def is_public(self):
+        isbuser = User.objects.get(username='isb', is_superuser=True)
+        return (self.cohort_perms_set.filter(perm=Cohort_Perms.OWNER)[0].user_id == isbuser.id)
+
 
     '''
     Returns a list of filters used on this cohort and all of its parents that were created using a filters.
@@ -136,10 +159,12 @@ class Cohort(models.Model):
 class Samples(models.Model):
     cohort = models.ForeignKey(Cohort, null=False, blank=False)
     sample_id = models.TextField(null=False)
+    study = models.ForeignKey(Study, null=True, blank=True) # Null here means TCGA
 
 class Patients(models.Model):
     cohort = models.ForeignKey(Cohort, null=False, blank=False)
     patient_id = models.TextField(null=False)
+    # TODO this will need a study column eventually too, but is currently not supported in other areas
 
 class Source(models.Model):
     FILTERS = 'FILTERS'
@@ -174,9 +199,15 @@ class Filters(models.Model):
     resulting_cohort = models.ForeignKey(Cohort, null=True, blank=True)
     name = models.CharField(max_length=256, null=False)
     value = models.CharField(max_length=512, null=False)
+    feature_def = models.ForeignKey(User_Feature_Definitions, null=True, blank=True)
 
 class Cohort_Comments(models.Model):
     cohort = models.ForeignKey(Cohort, blank=False, related_name='cohort_comment')
     user = models.ForeignKey(User, null=False, blank=False)
     date_created = models.DateTimeField(auto_now_add=True)
     content = models.CharField(max_length=1024, null=False)
+
+class Cohort_Last_View(models.Model):
+    cohort = models.ForeignKey(Cohort, blank=False)
+    user = models.ForeignKey(User, null=False, blank=False)
+    last_view = models.DateTimeField(auto_now_add=True, auto_now=True)

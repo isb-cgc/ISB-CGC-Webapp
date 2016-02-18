@@ -1,0 +1,217 @@
+/********************************************
+ * Visualizations Styles
+ *******************************************/
+
+.worksheet-panel-body
+
+    .axis path, .axis line
+        fill: none
+        stroke: #000
+
+    .grid .tick, .axis .tick line
+        stroke: lightgrey
+        stroke-opacity: 0.7
+
+    .grid path
+        stroke-width: 0
+
+    .plot-div
+        .extent
+            fill: #000
+            fill-opacity: .1
+            stroke: #fff
+
+        .expected_fill.selected
+            stroke: $tooltip-color
+            stroke-width: 5px
+
+        .bar
+            fill: rgba(0,0,0,0.5)
+            &:hover, &.selected
+                fill: rgba(0,0,225,0.5)
+
+    .show-flyout:hover
+        cursor: pointer
+
+    .save-cohort-card
+        background-color: rgba($tooltip-color, 0.8)
+        border-radius: 3px
+        color: #fff
+        padding: 5px
+
+    .pairwise-result
+        .table
+            th.logp, th.n, th.na, th.nb, th.pa, th.pb
+                width: 60px
+            td
+                word-wrap: break-word
+                word-break: break-word
+
+    .legend
+        display: inline-block
+        margin: 20px
+        overflow-y: auto
+        max-height: 650px
+        vertical-align: top
+        .unselected
+            fill-opacity: 0
+
+
+#seqpeek
+    #seqpeek-form
+        margin-top: 20px
+        > div
+            width: 80%
+    .extent
+        fill: #000
+        fill-opacity: .1
+
+#circviz
+    margin-top: 80px
+
+    //svg
+    //    cursor:default
+
+    .ticks .labels
+        stroke: black
+        text-anchor: middle
+        visibility: hidden
+        dy: .35em
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif
+        font-size: 13px
+        font-weight: normal
+
+    .region_label
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif
+        font-size: 20px
+        font-weight: normal
+
+    .axes .labels
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif
+        font-size: 12px
+        font-weight: normal
+
+    svg .ideogram .radial_lines
+        stroke: null
+        /*stroke:#444;*/
+        stroke-width: 1.5px
+
+    svg .wedge .background
+        fill: none
+        stroke: #444
+        opacity: 0.6
+
+    //svg .wedge[data-ring="0"] .background
+    //	fill: rgba(255,255,255,0.7)
+    //	stroke: none
+    //	stroke-width: 0
+
+    svg .wedge[data-ring="0"] .background
+        fill: none
+        stroke: none
+        stroke-width: 0px
+
+    svg .wedge[data-ring="1"] .background
+        fill: rgba(200,200,200,0.4)
+        stroke-width: 0
+
+    // hovercard css
+
+
+
+    .hovercard.pinned .pin
+        color: rgba(255,0,0,1.0)
+
+    .hovercard .tools
+        background-color: transparent
+        background: #ddd
+        border: 1px solid #333
+        top: 1px
+        left: 1px
+        color: #000
+
+    .hovercard .tools span
+        padding: 2px
+
+    .hovercard .data
+        width: 100%
+        cursor: pointer
+
+    .hovercard .data table
+
+
+    .hovercard .links tr
+        vertical-align: middle
+
+    .hovercard .links a
+        color: blue
+        font-size: 14px
+        vertical-align: middle
+        text-decoration: none
+
+    .hovercard .links a:visited
+        color: blue
+        text-decoration: none
+
+    .hovercard .links a:hover
+        color: blue
+        text-decoration: none
+
+    .hovercard .pin
+        text-align: center
+        color : black
+        cursor: pointer
+
+    .hovercard .move
+        cursor: move
+
+    .hovercard .move:active
+        cursor: move
+
+    .hovercard .footer
+        text-align: right
+        margin-right: 5px
+        color: rgb(240,10,10)
+        cursor: pointer
+
+    i.icon-ucsc
+        content: url('/static/img/ucsc.png')
+
+    i.icon-cosmic
+        content: url('/static/img/cosmic.png')
+
+    i.icon-ensembl
+        content: url('/static/img/ensembl.png')
+
+    i.icon-mirBase
+        content: url('/static/img/mirbase.png')
+
+#igv
+    i.igv-app-icon
+        background-color: transparent
+    .igvNavigationZoom
+        font-size: 24px
+        i:first-child
+            margin-right: 5px
+
+.hovercard
+    position: fixed
+    top: 0px
+    left: 0px
+    /*display : block;*/
+    /*visibility: hidden;*/
+    z-index: 100000
+    font-family: inherit !important
+    font-size: 16px !important
+    color: #666 !important
+    line-height: 1.5em
+    background: rgba(255,255,255,0.9)
+    border: 2px solid #ddd
+    -moz-border-radius: 3px
+    -webkit-border-radius: 3px
+    border-radius: 3px
+    padding: 2px
+    table
+        margin-bottom: 10px
+        td
+            padding: 0px 5px
