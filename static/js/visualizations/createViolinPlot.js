@@ -446,7 +446,7 @@ function($, d3, d3tip, vizhelpers) {
                 $('#save-cohort-' + plot_id + '-modal input[name="samples"]').attr('value', sample_list);
                 $(svg[0]).parents('.plot')
                     .find('.save-cohort-card').show()
-                    .attr('style', 'position:absolute; top: '+ (y(extent[1][1]) + 180)+'px; left:' +(x2(extent[1][0]) + 90)+'px;');
+                    .attr('style', 'position:absolute; top: '+ (y(extent[1][1]) + 180)+'px; left:' +(extent[1][0] + 90)+'px;');
 
                 if (total_samples > 0){
                     $(svg[0]).parents('.plot')
