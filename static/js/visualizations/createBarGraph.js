@@ -120,11 +120,11 @@ function($, d3, d3tip, vizhelpers) {
                 .append('rect')
                 .attr('height', margin.bottom+margin.top)
                 .attr('width', width-margin.left-margin.right)
-                .attr('transform', 'translate(' + margin.left + ',' + (height  - margin.bottom) + ')');
+                .attr('transform', 'translate(' + margin.left + ',' + (height  - margin.bottom - margin.top) + ')');
 
             x_axis_area.append('g')
                 .attr('class', 'x axis')
-                .attr('transform', 'translate(' + margin.left + ',' + (height - margin.bottom) + ')')
+                .attr('transform', 'translate(' + margin.left + ',' + (height - margin.bottom - margin.top) + ')')
                 .call(xAxis)
                 .selectAll('text')
                 .style('text-anchor', 'end')
@@ -138,7 +138,8 @@ function($, d3, d3tip, vizhelpers) {
                 var patient_list = [];
                 var e = brush.extent();
                 svg.selectAll('rect.bar').classed("selected", function (d) {
-                    return e[0] <= x($(this).attr('value')) + parseInt($(this).attr('width')) && x($(this).attr('value')) <= e[1];
+                    return e[0]-margin.left <= x($(this).attr('value')) + parseInt($(this).attr('width'))
+                        && x($(this).attr('value')) <= e[1]-margin.left;
                 });
                 $('rect.bar.selected').each(function () {
                     var samples = $(this).attr('data-samples').split(',');
@@ -202,7 +203,7 @@ function($, d3, d3tip, vizhelpers) {
                             .selectAll('rect')
                             .attr('y', 0)
                             .attr('height', height - margin.bottom)
-                            .attr('transform', 'translate(' + margin.left + ', 0)');
+                            .attr('transform', 'translate(0, 0)');
                     }
                 } else {
                     var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];

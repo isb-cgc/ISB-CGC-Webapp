@@ -367,7 +367,17 @@ function($, d3, d3tip, vizhelpers) {
                 .attr('transform', 'translate(' + margin.left + ',0)')
                 .call(yAxis);
 
-            svg.append('g')
+            var x_axis_area = svg.append('g')
+                .attr('clip-path', 'url(#x_axis_area_clip)');
+
+            x_axis_area.append('clipPath')
+                    .attr('id', 'x_axis_area_clip')
+                    .append('rect')
+                    .attr('height', margin.bottom+margin.top)
+                    .attr('width', width-margin.left-margin.right)
+                    .attr('transform', 'translate(' + margin.left + ',' + (height-margin.top-margin.bottom) + ')');
+
+            x_axis_area.append('g')
                 .attr('class', 'x axis')
                 .attr('transform', 'translate(' + margin.left + ',' + (height - margin.bottom) + ')')
                 .call(xAxis);
