@@ -354,7 +354,7 @@ TEMPLATE_CONTEXT_PROCESSORS += (
 
 SITE_SUPERUSER_USERNAME = os.environ.get('SUPERUSER_USERNAME', '')
 SITE_SUPERUSER_EMAIL = ''
-SITE_SUPERUSER_PASSWORD = os.environ.get('SUPERUSER_PASSWORD', 'isbcgctest')
+SITE_SUPERUSER_PASSWORD = os.environ.get('SUPERUSER_PASSWORD', '')
 
 ############################
 #   End django-finalware   #
