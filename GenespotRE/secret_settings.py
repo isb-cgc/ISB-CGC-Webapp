@@ -110,7 +110,8 @@ SETTINGS = {
 
     # Cloud Storage Buckets
     'OPEN_DATA_BUCKET': os.environ.get('OPEN_DATA_BUCKET'),
-    'CONTROLLED_DATA_BUCKET': os.environ.get('CONTROLLED_DATA_BUCKET'),
+    'DCC_CONTROLLED_DATA_BUCKET': os.environ.get('DCC_CONTROLLED_DATA_BUCKET'),
+    'CGHUB_CONTROLLED_DATA_BUCKET': os.environ.get('CGHUB_CONTROLLED_DATA_BUCKET'),
 
     'USE_CLOUD_STORAGE': os.environ.get('USE_CLOUD_STORAGE', 'False'),
     'GCLOUD_BUCKET': os.environ.get('GOOGLE_STORAGE_BUCKET'),
