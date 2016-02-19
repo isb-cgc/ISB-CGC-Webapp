@@ -18,97 +18,81 @@ limitations under the License.
 
 # Django settings for GAE_Django17 project.
 import os
+from os.path import join, dirname
+import dotenv
+dotenv.read_dotenv(join(dirname(__file__), '../.env'))
 
-import secret_settings
+BASE_DIR                = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + os.sep
+DEBUG                   = bool(os.environ.get('DEBUG', False))
+TEMPLATE_DEBUG          = DEBUG
+ALLOWED_HOSTS           = [os.environ.get('ALLOWED_HOST', 'localhost')]
 
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + os.sep
-DEBUG = secret_settings.get('DEBUG')
-TEMPLATE_DEBUG = DEBUG
-ALLOWED_HOSTS = [
-    secret_settings.get('ALLOWED_HOST')
-]
-
-### added for connecting to CloudSQL with SSL certs on MVM platform
 SSL_DIR = os.path.abspath(os.path.dirname(__file__))+os.sep
-MVM_ON = True
-###
 
-#ADMINS = (
-    # ('Your Name', 'your_email@example.com'),
-#)
-ADMINS = ()
-MANAGERS = ADMINS
+ADMINS                  = ()
+MANAGERS                = ADMINS
 
-REQUEST_PROJECT_EMAIL = secret_settings.get('REQUEST_PROJECT_EMAIL')
+REQUEST_PROJECT_EMAIL   = os.environ.get('REQUEST_PROJECT_EMAIL', 'request@example.com')
 
-PROJECT_ID = secret_settings.get('PROJECT_ID')
-BQ_PROJECT_ID = secret_settings.get('BQ_PROJECT_ID')
-IGV_PROJECT_ID = secret_settings.get('IGV_PROJECT_ID')
+PROJECT_ID              = os.environ.get('GCLOUD_PROJECT_ID', '')
+BQ_PROJECT_ID           = os.environ.get('BIGQUERY_PROJECT_ID', PROJECT_ID)
+IGV_PROJECT_ID          = os.environ.get('IGV_PROJECT_ID', '') # This can be PROJECT_ID
 
-CLOUD_BASE_URL = secret_settings.get('CLOUD_BASE_URL')
-CLOUD_API_URL = secret_settings.get('CLOUD_API_URL')
-LOCAL_BASE_URL = secret_settings.get('LOCAL_BASE_URL')
+BASE_URL                = os.environ.get('BASE_URL', 'http://isb-cgc.appspot.com/')
+BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://api-dot-isb-cgc.appspot.com/')
+LOCAL_BASE_URL          = os.environ.get('BASE_URL', 'http://localhost:8080')
 
 # Compute services
-PAIRWISE_SERVICE_URL = secret_settings.get('PAIRWISE_SERVICE_URL')
+PAIRWISE_SERVICE_URL    = os.environ.get('PAIRWISE_SERVICE_URL', None)
 
 # Data Buckets
-OPEN_DATA_BUCKET = secret_settings.get('OPEN_DATA_BUCKET')
-CONTROLLED_DATA_BUCKET = secret_settings.get('CONTROLLED_DATA_BUCKET')
-DCC_CONTROLLED_DATA_BUCKET = secret_settings.get('DCC_CONTROLLED_DATA_BUCKET')
-CGHUB_CONTROLLED_DATA_BUCKET = secret_settings.get('CGHUB_CONTROLLED_DATA_BUCKET')
-
-GCLOUD_BUCKET = secret_settings.get('GCLOUD_BUCKET')
+OPEN_DATA_BUCKET        = os.environ.get('OPEN_DATA_BUCKET', '')
+CONTROLLED_DATA_BUCKET  = os.environ.get('CONTROLLED_DATA_BUCKET', '')
+DCC_CONTROLLED_DATA_BUCKET = os.environ.get('DCC_CONTROLLED_DATA_BUCKET', '')
+CGHUB_CONTROLLED_DATA_BUCKET = os.environ.get('CGHUB_CONTROLLED_DATA_BUCKET', '')
+GCLOUD_BUCKET           = os.environ.get('GOOGLE_STORAGE_BUCKET')
 
 # BigQuery cohort storage settings
-COHORT_DATASET_ID = secret_settings.get('COHORT_DATASET_ID')
-DEVELOPER_COHORT_TABLE_ID = secret_settings.get('DEVELOPER_COHORT_TABLE_ID')
+COHORT_DATASET_ID           = os.environ.get('COHORT_DATASET_ID', 'cohort_dataset')
+BIGQUERY_COHORT_TABLE_ID    = os.environ.get('BIGQUERY_COHORT_TABLE_ID', 'developer_cohorts')
 
-NIH_AUTH_ON = os.environ.get('NIH_AUTH_ON', False)
+NIH_AUTH_ON             = bool(os.environ.get('NIH_AUTH_ON', False))
 
-if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):  
-    # or os.getenv('SETTINGS_MODE') == 'prod':
-    DATABASES = secret_settings.get('DATABASE')
-    BASE_URL = CLOUD_BASE_URL
-    BASE_API_URL = CLOUD_API_URL
+DATABASES = {'default': {
+    'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.mysql'),
+    'HOST': os.environ.get('DATABASE_HOST', '127.0.0.1'),
+    'PORT': os.environ.get('DATABASE_PORT', 3306),
+    'NAME': os.environ.get('DATABASE_NAME', ''),
+    'USER': os.environ.get('DATABASE_USER'),
+    'PASSWORD': os.environ.get('DATABASE_PASSWORD')
+}}
+
+if os.environ.has_key('DB_SSL_CERT'):
+    DATABASES['default']['OPTIONS'] = {
+        'ssl': {
+            'ca': os.environ.get('DB_SSL_CA'),
+            'cert': os.environ.get('DB_SSL_CERT'),
+            'key': os.environ.get('DB_SSL_KEY')
+        }
+    }
+if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):
     SITE_ID = 4
-    DEVELOPER_COHORT_TABLE_ID = secret_settings.get('CLOUD_COHORT_TABLE')
     NIH_AUTH_ON = True
-elif os.getenv('SETTINGS_MODE') == 'dev':
-    DATABASES = secret_settings.get('DATABASE')
-    BASE_URL = LOCAL_BASE_URL
-    BASE_API_URL = LOCAL_BASE_URL
-    SITE_ID = 3
 else:
-    DATABASES = secret_settings.get('DATABASE')
-    BASE_URL = LOCAL_BASE_URL
-    BASE_API_URL = LOCAL_BASE_URL
     SITE_ID = 3
-    # Set developer-specific cohort table here
-    DEVELOPER_COHORT_TABLE_ID = secret_settings.get('DEVELOPER_COHORT_TABLE_ID')
+    NIH_AUTH_ON = False
 
-# For running local unit tests for models
-import sys
-if 'test' in sys.argv:
-    DATABASES = secret_settings.get('TEST_DATABASE')
 
 def get_project_identifier():
     return BQ_PROJECT_ID
 
-BIGQUERY_DATASET = secret_settings.get('BIGQUERY_DATASET')
-BIGQUERY_DATASET2 = secret_settings.get('BIGQUERY_DATASET2')
+BIGQUERY_DATASET            = os.environ.get('BIGQUERY_DATASET', '')
 
-def get_bigquery_dataset():
-    return BIGQUERY_DATASET
-
-PROJECT_NAME = secret_settings.get('PROJECT_NAME')
-BIGQUERY_PROJECT_NAME = secret_settings.get('BIGQUERY_PROJECT_NAME')
-
-def get_bigquery_project_name():
-    return BIGQUERY_PROJECT_NAME
+PROJECT_NAME                = os.environ.get('GCLOUD_PROJECT_NAME')
+BIGQUERY_PROJECT_NAME       = os.environ.get('BIGQUERY_PROJECT_NAME', PROJECT_NAME)
 
 # Set cohort table here
-if DEVELOPER_COHORT_TABLE_ID is None:
+if BIGQUERY_COHORT_TABLE_ID is None:
     raise Exception("Developer-specific cohort table ID is not set.")
 
 class BigQueryCohortStorageSettings(object):
@@ -117,15 +101,15 @@ class BigQueryCohortStorageSettings(object):
         self.table_id = table_id
 
 def GET_BQ_COHORT_SETTINGS():
-    return BigQueryCohortStorageSettings(COHORT_DATASET_ID, DEVELOPER_COHORT_TABLE_ID)
+    return BigQueryCohortStorageSettings(COHORT_DATASET_ID, BIGQUERY_COHORT_TABLE_ID)
 
-USE_CLOUD_STORAGE = secret_settings.get('USE_CLOUD_STORAGE')
+USE_CLOUD_STORAGE           = os.environ.get('USE_CLOUD_STORAGE', 'False')
 
-PROCESSING_ENABLED = secret_settings.get('PROCESSING_ENABLED')
-PROCESSING_JENKINS_URL = secret_settings.get('PROCESSING_JENKINS_URL')
-PROCESSING_JENKINS_PROJECT = secret_settings.get('PROCESSING_JENKINS_PROJECT')
-PROCESSING_JENKINS_USER = secret_settings.get('PROCESSING_JENKINS_USER')
-PROCESSING_JENKINS_PASSWORD = secret_settings.get('PROCESSING_JENKINS_PASSWORD')
+PROCESSING_ENABLED          = os.environ.get('PROCESSING_ENABLED', False)
+PROCESSING_JENKINS_URL      = os.environ.get('PROCESSING_JENKINS_URL', 'http://localhost/jenkins')
+PROCESSING_JENKINS_PROJECT  = os.environ.get('PROCESSING_JENKINS_PROJECT', 'cgc-processing')
+PROCESSING_JENKINS_USER     = os.environ.get('PROCESSING_JENKINS_USER', 'user')
+PROCESSING_JENKINS_PASSWORD = os.environ.get('PROCESSING_JENKINS_PASSWORD', '')
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -153,8 +137,8 @@ USE_TZ = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
-MEDIA_FOLDER = secret_settings.get('MEDIA_FOLDER')
-MEDIA_ROOT = os.path.join(os.path.dirname(__file__), '..', '..', secret_settings.get('MEDIA_FOLDER'))
+MEDIA_FOLDER = os.environ.get('MEDIA_FOLDER', 'uploads/')
+MEDIA_ROOT = os.path.join(os.path.dirname(__file__), '..', '..', MEDIA_FOLDER)
 MEDIA_ROOT = os.path.normpath(MEDIA_ROOT)
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
@@ -185,18 +169,15 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
-#    'django.core.context_processors.tz' # moved this to template_context_processors
 )
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = secret_settings.get('SECRET_KEY')
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '')
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-    # 'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -224,7 +205,6 @@ TEMPLATE_DIRS = (
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
     os.path.join(BASE_DIR, 'templates'),
-    # os.path.join(BASE_DIR, 'lib/django/contrib/admin/templates'),
 )
 
 INSTALLED_APPS = (
@@ -312,7 +292,6 @@ INSTALLED_APPS += (
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     'allauth.socialaccount.context_processors.socialaccount',
-    # 'allauth.account.context_processors.account', # deprecated in django-allauth
     'django.core.context_processors.request',
     'django.contrib.auth.context_processors.auth',
     'django.contrib.messages.context_processors.messages',
@@ -343,26 +322,26 @@ SOCIALACCOUNT_PROVIDERS = \
 #   End django-allauth   #
 ##########################
 
-GOOGLE_APPLICATION_CREDENTIALS  = secret_settings.get('GOOGLE_APPLICATION_CREDENTIALS')
-CLIENT_SECRETS                  = secret_settings.get('CLIENT_SECRETS')
-PEM_FILE                        = secret_settings.get('PEM_FILE')
-CLIENT_EMAIL                    = secret_settings.get('CLIENT_EMAIL')
-WEB_CLIENT_ID                   = secret_settings.get('WEB_CLIENT_ID')
-INSTALLED_APP_CLIENT_ID         = secret_settings.get('INSTALLED_APP_CLIENT_ID')
+GOOGLE_APPLICATION_CREDENTIALS  = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')) if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS') else '' # Path to privatekey.json
+CLIENT_SECRETS                  = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('CLIENT_SECRETS')) if os.environ.get('CLIENT_SECRETS') else ''
+PEM_FILE                        = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('PEM_FILE')) if os.environ.get('PEM_FILE') else ''
+CLIENT_EMAIL                    = os.environ.get('CLIENT_EMAIL', '') # Client email from client_secrets.json
+WEB_CLIENT_ID                   = os.environ.get('WEB_CLIENT_ID', '') # Client ID from client_secrets.json
+INSTALLED_APP_CLIENT_ID         = os.environ.get('INSTALLED_APP_CLIENT_ID', '') # Native Client ID
 
 #################################
 #   For NIH/eRA Commons login   #
 #################################
 
 LOGIN_EXPIRATION_HOURS = 24
-FAKE_DBGAP_AUTHENTICATION_LIST_FILENAME  = secret_settings.get('FAKE_DBGAP_AUTHENTICATION_LIST_FILENAME')
-DBGAP_AUTHENTICATION_LIST_FILENAME  = secret_settings.get('DBGAP_AUTHENTICATION_LIST_FILENAME')
-DBGAP_AUTHENTICATION_LIST_BUCKET    = secret_settings.get('DBGAP_AUTHENTICATION_LIST_BUCKET')
-ACL_GOOGLE_GROUP                    = secret_settings.get('ACL_GOOGLE_GROUP')
-OPEN_ACL_GOOGLE_GROUP               = secret_settings.get('OPEN_ACL_GOOGLE_GROUP')
-ERA_LOGIN_URL                       = secret_settings.get('ERA_LOGIN_URL')
-IPV4                                = secret_settings.get('IPV4')
-SAML_FOLDER                         = secret_settings.get('SAML_FOLDER')
+FAKE_DBGAP_AUTHENTICATION_LIST_FILENAME = os.environ.get('FAKE_DBGAP_AUTHENTICATION_LIST_FILENAME', '') # This should be removed in favour of putting the change in .env files
+DBGAP_AUTHENTICATION_LIST_FILENAME      = os.environ.get('DBGAP_AUTHENTICATION_LIST_FILENAME', '')
+DBGAP_AUTHENTICATION_LIST_BUCKET        = os.environ.get('DBGAP_AUTHENTICATION_LIST_BUCKET', '')
+ACL_GOOGLE_GROUP                        = os.environ.get('ACL_GOOGLE_GROUP', '')
+OPEN_ACL_GOOGLE_GROUP                   = os.environ.get('OPEN_ACL_GOOGLE_GROUP', '')
+ERA_LOGIN_URL                           = os.environ.get('ERA_LOGIN_URL', '')
+IPV4                                    = os.environ.get('IPV4', '')
+SAML_FOLDER                             = os.environ.get('SAML_FOLDER')
 
 ##############################
 #   Start django-finalware   #
@@ -373,10 +352,9 @@ INSTALLED_APPS += (
 TEMPLATE_CONTEXT_PROCESSORS += (
     'finalware.context_processors.contextify', 'GenespotRE.context_processor.additional_context')
 
-SITE_SUPERUSER_USERNAME = secret_settings.get('SU_USER')
+SITE_SUPERUSER_USERNAME = os.environ.get('SUPERUSER_USERNAME', '')
 SITE_SUPERUSER_EMAIL = ''
-SITE_SUPERUSER_PASSWORD = secret_settings.get('SU_PASS')
-SITE_GOOGLE_ANALYTICS   = secret_settings.get('SITE_GOOGLE_ANALYTICS')
+SITE_SUPERUSER_PASSWORD = os.environ.get('SUPERUSER_PASSWORD', '')
 
 ############################
 #   End django-finalware   #
@@ -385,4 +363,6 @@ SITE_GOOGLE_ANALYTICS   = secret_settings.get('SITE_GOOGLE_ANALYTICS')
 ############################
 #   CUSTOM TEMPLATE CONTEXT
 ############################
-SITE_GOOGLE_TAG_MANAGER_ID = secret_settings.get('SITE_GOOGLE_TAG_MANAGER_ID')
+
+SITE_GOOGLE_ANALYTICS   = os.environ.get('SITE_GOOGLE_ANALYTICS_ID', False)
+SITE_GOOGLE_TAG_MANAGER_ID = os.environ.get('SITE_GOOGLE_TAG_MANAGER_ID', False)
