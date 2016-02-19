@@ -367,7 +367,17 @@ function($, d3, d3tip, vizhelpers) {
                 .attr('transform', 'translate(' + margin.left + ',0)')
                 .call(yAxis);
 
-            svg.append('g')
+            var x_axis_area = svg.append('g')
+                .attr('clip-path', 'url(#x_axis_area_clip)');
+
+            x_axis_area.append('clipPath')
+                    .attr('id', 'x_axis_area_clip')
+                    .append('rect')
+                    .attr('height', margin.bottom+margin.top)
+                    .attr('width', width-margin.left-margin.right)
+                    .attr('transform', 'translate(' + margin.left + ',' + (height-margin.top-margin.bottom) + ')');
+
+            x_axis_area.append('g')
                 .attr('class', 'x axis')
                 .attr('transform', 'translate(' + margin.left + ',' + (height - margin.bottom) + ')')
                 .call(xAxis);
@@ -436,7 +446,7 @@ function($, d3, d3tip, vizhelpers) {
                 $('#save-cohort-' + plot_id + '-modal input[name="samples"]').attr('value', sample_list);
                 $(svg[0]).parents('.plot')
                     .find('.save-cohort-card').show()
-                    .attr('style', 'position:absolute; top: '+ (y(extent[1][1]) + 180)+'px; left:' +(x2(extent[1][0]) + 90)+'px;');
+                    .attr('style', 'position:absolute; top: '+ (y(extent[1][1]) + 180)+'px; left:' +(extent[1][0] + 90)+'px;');
 
                 if (total_samples > 0){
                     $(svg[0]).parents('.plot')
