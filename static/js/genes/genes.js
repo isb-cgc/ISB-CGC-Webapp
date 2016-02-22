@@ -255,7 +255,7 @@ require([
         var valid_genes = [];
 
         genes.forEach(function(gene){
-            if(genelist.indexOf(gene.toUpperCase()) < 0){
+            if(gene_list.indexOf(gene.toUpperCase()) < 0){
                 invalid_genes.push(gene);
             }else{
                 valid_genes.push(gene);
