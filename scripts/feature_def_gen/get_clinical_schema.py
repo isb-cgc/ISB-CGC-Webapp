@@ -22,7 +22,7 @@ from json import dump as json_dump
 from apiclient.discovery import build
 from oauth2client.client import GoogleCredentials
 
-from GenespotRE.settings import BIGQUERY_DATASET2 as DATASET
+from GenespotRE.settings import BIGQUERY_DATASET as DATASET
 
 CLINICAL_TABLE_ID = "Clinical"
 
