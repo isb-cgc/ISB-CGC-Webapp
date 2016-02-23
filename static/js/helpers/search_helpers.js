@@ -36,7 +36,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                     attr_counts = results['count'];
                     $('.menu-bar .total-samples').html(results['total'] + ' Samples');
                     update_filters(attr_counts);
-                    tree_graph_obj.draw_trees(results);
+                    tree_graph_obj.draw_trees(attr_counts);
                     $('.clinical-trees .spinner').hide()
                 }
             });
