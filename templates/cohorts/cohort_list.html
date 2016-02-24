@@ -17,19 +17,19 @@
     <ol class="breadcrumb">
         <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
         {% if workbook %}
-        <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
-        <li><a href="{% url 'workbook_detail' workbook_id=workbook.id %}">{{ workbook.name|title }}</a></li>
+            <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
+            <li><a href="{% url 'workbook_detail' workbook_id=workbook.id %}">{{ workbook.name|title }}</a></li>
         {% endif %}
     </ol>
     <h1 class="page-header pull-left">{% if from_workbook %}Data Source | {% endif %}Cohorts</h1>
     {% if from_workbook %}
-    <a href="{% if workbook %}{% url 'cohort_create_for_existing_workbook' workbook_id=workbook.id worksheet_id=worksheet.id %}{% else %}{% url 'cohort_create_for_new_workbook' %}{% endif %}" class="btn btn-primary pull-right"><i class="fa fa-plus"></i> Create New Cohort</a>
-    <form id="cohort-apply-to-workbook" action="{% url 'add_cohorts_to_worksheet' workbook_id=workbook.id worksheet_id=worksheet.id %}" method="POST">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-primary pull-right" disabled="disabled">{% if create_workbook %}Create Workbook{% else %}Apply to Worksheet{% endif %}</button>
-    </form>
+        <a href="{% if workbook %}{% url 'cohort_create_for_existing_workbook' workbook_id=workbook.id worksheet_id=worksheet.id %}{% else %}{% url 'cohort_create_for_new_workbook' %}{% endif %}" class="btn btn-primary pull-right"><i class="fa fa-plus"></i> Create New Cohort</a>
+        <form id="cohort-apply-to-workbook" action="{% url 'add_cohorts_to_worksheet' workbook_id=workbook.id worksheet_id=worksheet.id %}" method="POST">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary pull-right" disabled="disabled">{% if create_workbook %}Create Workbook{% else %}Apply to Worksheet{% endif %}</button>
+        </form>
     {% else %}
-    <a href="{% url 'cohort' %}" class="btn btn-primary pull-right"><i class="fa fa-plus"></i> Create New Cohort</a>
+        <a href="{% url 'cohort' %}" class="btn btn-primary pull-right"><i class="fa fa-plus"></i> Create New Cohort</a>
     {% endif %}
 </div>
 {% endblock %}
