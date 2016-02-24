@@ -167,22 +167,22 @@ class FeatureDataEndpoints(remote.Service):
         outputs = Pairwise.run_pairwise(input_vectors)
 
         results = PairwiseResults(result_vectors=[], filter_messages=[])
-
-        for row_label, row in outputs.items():
-            if type(row) is dict:
-                results.result_vectors.append(PairwiseResultVector(feature_1=row['feature_A'],
-                                                                   feature_2=row['feature_B'],
-                                                                   comparison_type=row['comparison_type'],
-                                                                   correlation_coefficient=row['correlation_coefficient'],
-                                                                   n=int(row['n']),
-                                                                   _logp=float(row['_logp']),
-                                                                   n_A=int(row['n_A']),
-                                                                   p_A=float(row['p_A']),
-                                                                   n_B=int(row['n_B']),
-                                                                   p_B=float(row['p_B']),
-                                                                   exclusion_rules=row['exclusion_rules']))
-            elif type(row) is unicode:
-                results.filter_messages.append(PairwiseFilterMessage(filter_message=row[0]))
+        if outputs is not None:
+            for row_label, row in outputs.items():
+                if type(row) is dict:
+                    results.result_vectors.append(PairwiseResultVector(feature_1=row['feature_A'],
+                                                                       feature_2=row['feature_B'],
+                                                                       comparison_type=row['comparison_type'],
+                                                                       correlation_coefficient=row['correlation_coefficient'],
+                                                                       n=int(row['n']),
+                                                                       _logp=float(row['_logp']),
+                                                                       n_A=int(row['n_A']),
+                                                                       p_A=float(row['p_A']),
+                                                                       n_B=int(row['n_B']),
+                                                                       p_B=float(row['p_B']),
+                                                                       exclusion_rules=row['exclusion_rules']))
+                elif type(row) is unicode:
+                    results.filter_messages.append(PairwiseFilterMessage(filter_message=row[0]))
 
         return results
 
