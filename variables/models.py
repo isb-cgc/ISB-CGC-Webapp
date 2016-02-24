@@ -1,5 +1,6 @@
 import operator
 import json
+import sys
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Q
@@ -71,7 +72,10 @@ class VariableFavorite(models.Model):
             var.delete()
 
         for var in variables :
-            Variable.objects.create(name=var['name'], feature_id=var['feature_id'], code=var['code'], variable_favorite=self)
+            if var['feature_id'] != "None" :
+                Variable.objects.create(name=var['name'], feature_id=var['feature_id'], code=var['code'], variable_favorite_id=self.id)
+            else :
+                Variable.objects.create(name=var['name'], code=var['code'], variable_favorite_id=self.id)
 
         self.save()
         return_obj = {
