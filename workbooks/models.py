@@ -501,7 +501,6 @@ class Worksheet_plot(models.Model):
     x_axis          = models.ForeignKey(Worksheet_variable, blank=True, null=True, related_name="worksheet_plot.x_axis")
     y_axis          = models.ForeignKey(Worksheet_variable, blank=True, null=True, related_name="worksheet_plot.y_axis")
     color_by        = models.ForeignKey(Worksheet_variable, blank=True, null=True, related_name="worksheet_plot.color_by")
-    cohort          = models.ForeignKey(Worksheet_cohort, blank=True, null=True, related_name="worksheet_plot.cohort")
     objects         = Worksheet_Plot_Manager()
 
     @classmethod
@@ -521,11 +520,32 @@ class Worksheet_plot(models.Model):
         if self.y_axis :
             j['y_axis']  = self.y_axis.toJSON()
 
-        if self.cohort :
-            j['cohort']  = self.cohort.toJSON()
-
         if self.color_by :
             j['color_by']  = self.color_by.toJSON()
+
+        j['cohort'] = []
+        cohorts = Worksheet_plot_cohort.objects.filter(plot=self)
+        for c in cohorts :
+            j['cohort'].append(c.toJSON())
+
+        return j
+
+class Worksheet_Plot_Cohort_Manager(models.Manager):
+    content = None
+
+class Worksheet_plot_cohort(models.Model):
+    id              = models.AutoField(primary_key=True)
+    date_created    = models.DateTimeField(auto_now_add=True)
+    modified_date   = models.DateTimeField(auto_now=True)
+    plot            = models.ForeignKey(Worksheet_plot, blank=True, null=True, related_name="worksheet_plot")
+    cohort          = models.ForeignKey(Worksheet_cohort, blank=True, null=True, related_name="worksheet_plot.cohort")
+    objects         = Worksheet_Plot_Manager()
+
+    def toJSON(self):
+        j = {'id'        : self.id,
+             'plot'      : self.plot.id,
+             'cohort'    : self.cohort.toJSON(),
+             }
 
         return j
 
