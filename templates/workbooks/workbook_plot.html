@@ -106,19 +106,15 @@
 {#                    </div>#}
                     <div class="form-group">
                         <label>Cohorts</label>
-                        <div class="cohort-listing space-top-5">
-                            <select id="cohort-select" plot="{{ plot.id }}" class="search-term-field" style="width: 230px;">
-                                {% if plot.cohort %}
-                                    <option value="{{ plot.cohort.id }}" selected >{{ plot.cohort.cohort.name }}</option>
-                                {% else %}
-                                    <option disabled selected >-- select a cohort--</option>
-                                {% endif %}
-                                {% for cohort in cohorts %}
-                                    {% if not plot or plot.cohort.id != cohort.id %}
-                                        <option value="{{ cohort.id }}">{{ cohort.cohort.name }}</option>
-                                    {% endif %}
-                                {% endfor %}
-                            </select>
+                        <div class="cohort-listing" plot="{{ plot.id }}">
+                            {% for cohort in cohorts %}
+                                 <div class="checkbox" style="margin-top: 0px; margin-bottom: 5px;">
+                                      <label>
+                                        <input class="variable-toggle-checkbox" name="cohort-checkbox" aria-label="cohort-checkbox" type="checkbox" cohort-id="{{ cohort.cohort.id }}" value="{{ cohort.id }}">
+                                        {{ cohort.cohort.name }}
+                                      </label>
+                                 </div>
+                            {% endfor %}
                         </div>
                     </div>
                     <button class="update-plot btn btn-primary" worksheet_id="{{ worksheet.id }}" plot_id="{{ plot.id }}">Update Plot</button>

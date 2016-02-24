@@ -235,22 +235,23 @@ require([
                 x_axis : {id : parent.find('#x-axis-select').find(":selected").attr('var_id'), url_code : parent.find('#x-axis-select').find(":selected").val()},
                 y_axis : {id : parent.find('#y-axis-select').find(":selected").attr('var_id'), url_code : parent.find('#y-axis-select').find(":selected").val()},
                 color_by : {id : parent.find('#color_by').find(":selected").attr('var_id'), url_code : parent.find('#color_by').find(":selected").val()},
-                cohort : {id : parent.find('#cohort-select').val()},
-                //TODO : Where does this get entered for generating plots
-                // color_by_cohort : parent.find('#color-by-cohort').find(":selected").val()
+                cohorts  : parent.find('[name="cohort-checkbox"]:checked').map(function(){return {id : this.value, cohort_id : $(this).attr("cohort-id")};}).get()
             }
             update_plot_model(workbook_id, worksheet_id, plot_id, attrs, function(result){
-                generate_plot(worksheet_id, attrs.type, attrs.x_axis.url_code, attrs.y_axis.url_code, attrs.color_by.url_code, attrs.cohort.id);
+                var cohorts = [];
+                //create list of actual cohort models
+                for(var i in attrs.cohorts){
+                    cohorts.push(attrs.cohorts[i].cohort_id);
+                }
+                generate_plot(worksheet_id, attrs.type, attrs.x_axis.url_code, attrs.y_axis.url_code, attrs.color_by.url_code, cohorts);
                 hide_plot_settings();
             });
         }
     });
 
-    //generate plot type selection
-    $(".plot_selection").on("change", function(event){
-        $(this).find(":disabled :selected").remove()
-        var worksheet_id = $(this).attr("worksheet_id");
-        var plot_type = $(this).find(":selected").text();
+    function get_plot_info(selector){
+        var worksheet_id = $(selector).attr("worksheet_id");
+        var plot_type = $(selector).find(":selected").text();
         get_plot_model(workbook_id, worksheet_id, plot_type, function(data){
             if(data.error){
                 console.log("Display error");
@@ -259,6 +260,16 @@ require([
                 show_plot_settings();
             }
         });
+    }
+    //get plot model when selection changes
+    $(".plot_selection").on("change", function(event){
+        $(this).find(":disabled :selected").remove()
+        get_plot_info(this);
+    });
+
+    //initialize all plots at the beginning
+    $(".plot_selection").each(function(){
+        get_plot_info(this);
     });
 
     //validate the plot settings before initiating the plot
@@ -299,11 +310,18 @@ require([
         if(plot_data.y_axis) {
             plot_element.find('#y-axis-select').val(plot_data.y_axis.url_code);
         }
-        if(plot_data.cohort) {
-            plot_element.find('#cohort-select').val(plot_data.cohort.id);
-        }
         if(plot_data.color_by) {
-            plot_element.find('#color_by').val(plot_data.color_by);
+            plot_element.find('#color_by').val(plot_data.color_by.url_code);
+        }
+        if(plot_data.cohort) {
+            for(var i in plot_data.cohort){
+                plot_element.find('[name="cohort-checkbox"]').each(function(){
+                    //comparing worksheet_cohorts model ids
+                    if(plot_data.cohort[i].cohort.id == parseInt(this.value)){
+                        $(this).prop("checked", true);
+                    }
+                });
+            }
         }
     }
 

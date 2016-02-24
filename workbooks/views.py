@@ -1,7 +1,6 @@
 from copy import deepcopy
 import json
 import re
-from google.appengine.api import urlfetch
 from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
@@ -9,7 +8,7 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.http import StreamingHttpResponse
 from django.http import HttpResponse, JsonResponse
-from models import Cohort, Workbook, Worksheet, Worksheet_comment, Worksheet_variable, Worksheet_gene, Worksheet_cohort, Worksheet_plot
+from models import Cohort, Workbook, Worksheet, Worksheet_comment, Worksheet_variable, Worksheet_gene, Worksheet_cohort, Worksheet_plot, Worksheet_plot_cohort
 from variables.models import VariableFavorite, Variable
 from genes.models import GeneFavorite
 from analysis.models import Analysis
@@ -92,10 +91,10 @@ def workbook_create_with_project(request):
 
 @login_required
 def workbook_create_with_variables(request):
-    var_list_id = request.POST.get('variable_list_id')
+    var_list_id    = request.POST.get('variable_id')
     var_list_model = VariableFavorite.objects.get(id=var_list_id)
 
-    workbook_model = Workbook.create(name="Untitled Workbook", description="this is an untitled workbook with all variables of variable favorite list \"" + var_list_model.name + "\" added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
+    workbook_model = Workbook.create(name=request.POST.get('name'), description="this is an untitled workbook with all variables of variable favorite list \"" + var_list_model.name + "\" added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
     worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
 
     for var in var_list_model.get_variables() :
@@ -434,9 +433,12 @@ def worksheet_plots(request, workbook_id=0, worksheet_id=0, plot_id=0):
                             plot_model.color_by = Worksheet_variable.objects.get(id=attrs['color_by']['id'])
                         except ObjectDoesNotExist:
                             None
-                    if attrs['cohort'] :
+                    if attrs['cohorts'] :
                         try :
-                            plot_model.cohort = Worksheet_cohort.objects.get(id=attrs['cohort']['id'])
+                            Worksheet_plot_cohort.objects.filter(plot=plot_model).delete()
+                            for obj in attrs['cohorts'] :
+                                wpc = Worksheet_plot_cohort(plot=plot_model, cohort_id=obj['id'])
+                                wpc.save()
                         except ObjectDoesNotExist:
                             None
 
