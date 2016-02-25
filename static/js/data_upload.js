@@ -600,7 +600,7 @@ require([
         var uploadDataType = $('.data-radio:checked').val();
         if(uploadDataType === 'high' && hleCheckbox.is(':checked')) {
             uploadDataType = 'extend';
-            form.append('extend-study-id', $('project-selection').val());
+            form.append('extend-study-id', $('#project-selection').val());
         }
         form.append('data-type', uploadDataType);
 
