@@ -60,8 +60,6 @@ require([
         }
     });
 
-
-
     var delete_x_callback = function () {
         $(this).parent('.cohort-label').remove();
         return false;
@@ -141,7 +139,7 @@ require([
         // If no checkboxes are selected
         if ($('#cohorts-list tr:not(:first) input[type="checkbox"]:checked').length == 0) {
             $('#cohorts-list .select-all').prop('checked', false);
-            disable_buttons(tablename);
+            //disable_buttons(tablename);
             repopulate_cohort_selects();
 
         } else {
