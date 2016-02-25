@@ -31,9 +31,33 @@ def get_item(dictionary, key):
     return dictionary.get(key)
 
 @register.filter
-def get_readable_name(csv_name):
+def get_readable_name(csv_name, attr=None):
     if csv_name.startswith('user_') and csv_name != 'user_project' and csv_name != 'user_study':
         csv_name = csv_name[5:]
+
+    attr_specific_translation = {
+        'SampleTypeCode': {
+            '01': 'Primary solid Tumor',
+            '02': 'Recurrent Solid Tumor',
+            '03': 'Primary Blood Derived Cancer - Peripheral Blood',
+            '04': 'Recurrent Blood Derived Cancer - Bone Marrow',
+            '05': 'Additional - New Primary',
+            '06': 'Metastatic',
+            '07': 'Additional Metastatic',
+            '08': 'Human Tumor Original Cells',
+            '09': 'Primary Blood Derived Cancer - Bone Marrow',
+            '10': 'Blood Derived Normal',
+            '11': 'Solid Tissue Normal',
+            '12': 'Buccal Cell Normal',
+            '13': 'EBV Immortalized Normal',
+            '14': 'Bone Marrow Normal',
+            '20': 'Control Analyte',
+            '40': 'Recurrent Blood Derived Cancer - Peripheral Blood',
+            '50': 'Cell Lines',
+            '60': 'Primary Xenograft Tissue',
+            '61': 'Cell Line Derived Xenograft Tissue'
+        }
+    }
 
     translation_dictionary = {
         'DNAseq_data': 'DNAseq',
@@ -66,30 +90,12 @@ def get_readable_name(csv_name):
         'icd_10': 'ICD-10',
         'icd_o_3_histology': 'ICD-O-3 Histology',
         'icd_o_3_site': 'ICD-O-3 Site',
-        'SampleTypeCode': 'Sample Type Code',
-
-        # Sample Type Codes
-        '01': 'Primary solid Tumor',
-        '02': 'Recurrent Solid Tumor',
-        '03': 'Primary Blood Derived Cancer - Peripheral Blood',
-        '04': 'Recurrent Blood Derived Cancer - Bone Marrow',
-        '05': 'Additional - New Primary',
-        '06': 'Metastatic',
-        '07': 'Additional Metastatic',
-        '08': 'Human Tumor Original Cells',
-        '09': 'Primary Blood Derived Cancer - Bone Marrow',
-        '10': 'Blood Derived Normal',
-        '11': 'Solid Tissue Normal',
-        '12': 'Buccal Cell Normal',
-        '13': 'EBV Immortalized Normal',
-        '14': 'Bone Marrow Normal',
-        '20': 'Control Analyte',
-        '40': 'Recurrent Blood Derived Cancer - Peripheral Blood',
-        '50': 'Cell Lines',
-        '60': 'Primary Xenograft Tissue',
-        '61': 'Cell Line Derived Xenograft Tissue'
+        'SampleTypeCode': 'Sample Type Code'
     }
-    if translation_dictionary.get(csv_name):
+
+    if attr in attr_specific_translation.keys():
+        return attr_specific_translation[attr][csv_name]
+    elif translation_dictionary.get(csv_name):
         return translation_dictionary.get(csv_name)
     else:
         csv_name = csv_name.replace('_', ' ')
