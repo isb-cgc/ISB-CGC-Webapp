@@ -160,9 +160,13 @@ def cohorts_list(request, is_public=False, workbook_id=0, worksheet_id=0, create
 
     workbook = None
     worksheet = None
+    previously_selected_cohort_ids = []
     if workbook_id != 0:
         workbook = Workbook.objects.get(owner=request.user, id=workbook_id)
         worksheet = workbook.worksheet_set.get(id=worksheet_id)
+        worksheet_cohorts = worksheet.worksheet_cohort_set.all()
+        for wc in worksheet_cohorts :
+            previously_selected_cohort_ids.append(wc.cohort_id)
 
     return render(request, 'cohorts/cohort_list.html', {'request': request,
                                                         'cohorts': cohorts,
@@ -174,8 +178,9 @@ def cohorts_list(request, is_public=False, workbook_id=0, worksheet_id=0, create
                                                         'is_public': is_public,
                                                         'workbook': workbook,
                                                         'worksheet': worksheet,
+                                                        'previously_selected_cohort_ids' : previously_selected_cohort_ids,
                                                         'create_workbook': create_workbook,
-                                                        'from_workbook': bool(not create_workbook or workbook),
+                                                        'from_workbook': bool(workbook),
                                                         })
 
 @login_required
@@ -410,7 +415,18 @@ def add_cohorts_to_worksheet(request, workbook_id=0, worksheet_id=0):
         workbook = request.user.workbook_set.get(id=workbook_id)
         worksheet = workbook.worksheet_set.get(id=worksheet_id)
 
+        existing_w_cohorts = worksheet.worksheet_cohort_set.all()
+        existing_cohort_ids = []
+        for wc in existing_w_cohorts :
+            existing_cohort_ids.append(str(wc.cohort_id))
+
+        for ec in existing_cohort_ids:
+            if ec not in cohorts :
+                missing_cohort = Cohort.objects.get(id=ec)
+                worksheet.remove_cohort(missing_cohort)
+
         cohort_perms = request.user.cohort_perms_set.filter(cohort__active=True)
+
         for cohort in cohorts:
             cohort_model = cohort_perms.get(cohort__id=cohort).cohort
             worksheet.add_cohort(cohort_model)
