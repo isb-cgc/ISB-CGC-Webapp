@@ -160,17 +160,17 @@ def normalize_ages(ages):
             if age and age != 'None':
                 int_age = float(age)
                 if int_age < 40:
-                    new_age_list['10 to 39'] += int(age)
+                    new_age_list['10 to 39'] += int(count)
                 elif int_age < 50:
-                    new_age_list['40 to 49'] += int(age)
+                    new_age_list['40 to 49'] += int(count)
                 elif int_age < 60:
-                    new_age_list['50 to 59'] += int(age)
+                    new_age_list['50 to 59'] += int(count)
                 elif int_age < 70:
-                    new_age_list['60 to 69'] += int(age)
+                    new_age_list['60 to 69'] += int(count)
                 elif int_age < 80:
-                    new_age_list['70 to 79'] += int(age)
+                    new_age_list['70 to 79'] += int(count)
                 else:
-                    new_age_list['Over 80'] += int(age)
+                    new_age_list['Over 80'] += int(count)
             else:
                 new_age_list['None'] += int(count)
         else:
