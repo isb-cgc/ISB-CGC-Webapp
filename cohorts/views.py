@@ -180,7 +180,7 @@ def cohorts_list(request, is_public=False, workbook_id=0, worksheet_id=0, create
                                                         'worksheet': worksheet,
                                                         'previously_selected_cohort_ids' : previously_selected_cohort_ids,
                                                         'create_workbook': create_workbook,
-                                                        'from_workbook': bool(not create_workbook or workbook),
+                                                        'from_workbook': bool(workbook),
                                                         })
 
 @login_required
