@@ -449,7 +449,7 @@ require([
     }
 
     function validateSectionTwo() {
-        var hasErrors = validateSectionOne();
+        var hasErrors = !validateSectionOne();
 
         var hasSampleBarcode = _.every(addedFiles, function (file) {
                 if(!file.processed || !file.processed.columns)
@@ -473,7 +473,7 @@ require([
             errorMessage('All files must have a platform and a pipeline filled in');
         }
 
-        return hasErrors;
+        return !hasErrors;
     }
 
     var processListEl = $('#file-process-list');
@@ -600,15 +600,17 @@ require([
         var uploadDataType = $('.data-radio:checked').val();
         if(uploadDataType === 'high' && hleCheckbox.is(':checked')) {
             uploadDataType = 'extend';
-            form.append('extend-study-id', $('project-selection').val());
+            form.append('extend-study-id', $('#high-level-extend-study').val());
         }
         form.append('data-type', uploadDataType);
 
+        var pipelines_valid = true;
         _.each(addedFiles, function (added) {
             form.append('file_'+added.uid, added.file, added.file.name);
             form.append('file_' + added.uid + '_type', added.datatype);
             if(!added.processed)
                 added.processed = {};
+
             added.processed.platform = added.$columnsEl.find('.platform-field').val();
             added.processed.pipeline = added.$columnsEl.find('.pipeline-field').val();
             form.append('file_' + added.uid + '_desc', JSON.stringify(added.processed));
@@ -624,12 +626,11 @@ require([
             processData: false,
             contentType: false,
         }).done(function (res) {
-            console.log('Response: ', res);
-            if(res.status === 'success') {
+            if (res.status === 'success') {
                 $('#base-data-form')[0].reset();
                 location.href = res.redirect_url;
             } else {
-                errorMessage('Error submitting response' + res.message);
+                errorMessage('Error submitting response : ' + res.message);
             }
         }).fail(function () {
             errorMessage('We had an error submitting the response. Please try again later');

@@ -899,11 +899,14 @@ class Meta_Endpoints_API(remote.Service):
         # Get the list of valid parameters from request
         for key, value in MetadataItem.__dict__.items():
             if not key.startswith('_'):
-                if request.__getattribute__(key) is not None:
+                if request.__getattribute__(key) is not None and len(request.__getattribute__(key)) > 0:
+                    values = []
+                    for val in request.__getattribute__(key):
+                        values.append(val)
                     if key.startswith('has_'):
-                        query_dict[key] = '1' if request.__getattribute__(key) == 'True' else '0'
+                        query_dict[key] = '1' if values[0] == 'True' else '0'
                     else:
-                        query_dict[key] = request.__getattribute__(key).replace('_', ' ')
+                        query_dict[key] = ','.join(values).replace('_', ' ')
                     # combinations: has_UNC_HiSeq_RNASeq and has_UNC_GA_RNASeq 20 rows
                     # has_UNC_HiSeq_RNASeq and has_BCGSC_GA_RNASeq 209 rows
                     # has_BCGSC_HiSeq_RNASeq and has_UNC_HiSeq_RNASeq 919 rows
@@ -1854,6 +1857,11 @@ class Meta_Endpoints_API_v2(remote.Service):
         if 'user_studies' in filters:
             del filters['user_studies']
 
+        # For filters with no tables at this point, assume its the TCGA metadata_samples table
+        for key, obj in filters.items():
+            if not obj['tables']:
+                filters[key]['tables'].append('metadata_samples')
+
         # Loop through the features
         for key, feature in valid_attrs.items():
             # Get a count for each feature
@@ -1892,7 +1900,7 @@ class Meta_Endpoints_API_v2(remote.Service):
                             query += ' AND ' + addt_cond
                         elif addt_cond:
                             query += ' WHERE ' + addt_cond
-                            where_clause['value_tuple'] += sample_tables[table]['sample_ids'][barcode_key]['value_tuple']
+                        where_clause['value_tuple'] += sample_tables[table]['sample_ids'][barcode_key]['value_tuple']
                     query += ' GROUP BY %s ' %col_name
                     cursor.execute(query, where_clause['value_tuple'])
                     for row in cursor.fetchall():
@@ -1915,9 +1923,15 @@ class Meta_Endpoints_API_v2(remote.Service):
         total = 0
         for key, feature in valid_attrs.items():
             value_list = []
+
+            # Special case for age ranges
+            if key == 'CLIN:age_at_initial_pathologic_diagnosis':
+                feature['values'] = normalize_ages(feature['values'])
+
             for value, count in feature['values'].items():
                 if feature['name'].startswith('has_'):
                     value = 'True' if value else 'False'
+
                 value_list.append(MetaValueListCount(value=str(value), count=count))
 
             count_list.append(MetadataAttributeValues(name=feature['name'], values=value_list, id=key, total=feature['total']))

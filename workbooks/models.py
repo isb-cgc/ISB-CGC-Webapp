@@ -211,7 +211,13 @@ class Worksheet(models.Model):
         return self.worksheet_cohort_set.filter(worksheet=self)
 
     def add_cohort(self, cohort):
-        Worksheet_cohort.create(self.id, cohort)
+        existing_w_cohorts = self.worksheet_cohort_set.all()
+        existing_cohort_ids = []
+        for wc in existing_w_cohorts :
+            existing_cohort_ids.append(wc.cohort_id)
+
+        if cohort.id not in existing_cohort_ids :
+            Worksheet_cohort.create(self.id, cohort)
 
     def remove_cohort(self, cohort):
         self.worksheet_cohort_set.get(cohort=cohort).destroy()
