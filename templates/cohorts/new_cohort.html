@@ -200,6 +200,7 @@
                 <h4 class="panel-title">Clinical Features</h4>
             </div>
             <div class="panel-body">
+                <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
                 <div id="tree-graph-clinical"></div>
             </div>
             <div id="more-graphs"><button class="btn btn-link" role="button">Show More</button></div>
@@ -212,6 +213,7 @@
             </div>
             <div class="panel-body">
                 <div id="multi-categorical"></div>
+                <a href="{% url 'cohort_filelist' cohort.id %}">View File list</a>
             </div>
         </div>
     </div>
