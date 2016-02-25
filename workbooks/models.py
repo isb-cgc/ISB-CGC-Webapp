@@ -182,6 +182,23 @@ class Worksheet(models.Model):
                              name=worksheet.name + " copy",
                              description=worksheet.description)
         worksheet_copy.save()
+
+        worksheet_cohorts = worksheet.worksheet_cohort_set.all()
+        for wc in worksheet_cohorts:
+            worksheet_copy.add_cohort(wc.cohort)
+
+        worksheet_variables = worksheet.worksheet_variable_set.all()
+        for wv in worksheet_variables:
+            wv.pk = None
+            wv.worksheet = worksheet_copy
+            wv.save()
+
+        worksheet_genes = worksheet.worksheet_gene_set.all()
+        for wg in worksheet_genes:
+            wg.pk = None
+            wg.worksheet = worksheet_copy
+            wg.save()
+
         return worksheet_copy
 
     @classmethod
