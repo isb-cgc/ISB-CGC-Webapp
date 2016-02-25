@@ -628,7 +628,7 @@ require([
                 $('#base-data-form')[0].reset();
                 location.href = res.redirect_url;
             } else {
-                errorMessage('Error submitting response' + res.message);
+                errorMessage('Error submitting response : ' + res.message);
             }
         }).fail(function () {
             errorMessage('We had an error submitting the response. Please try again later');
