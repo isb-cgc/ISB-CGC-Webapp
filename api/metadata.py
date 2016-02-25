@@ -1854,6 +1854,11 @@ class Meta_Endpoints_API_v2(remote.Service):
         if 'user_studies' in filters:
             del filters['user_studies']
 
+        # For filters with no tables at this point, assume its the TCGA metadata_samples table
+        for key, obj in filters.items():
+            if not obj['tables']:
+                filters[key]['tables'].append('metadata_samples')
+
         # Loop through the features
         for key, feature in valid_attrs.items():
             # Get a count for each feature
@@ -1892,7 +1897,7 @@ class Meta_Endpoints_API_v2(remote.Service):
                             query += ' AND ' + addt_cond
                         elif addt_cond:
                             query += ' WHERE ' + addt_cond
-                            where_clause['value_tuple'] += sample_tables[table]['sample_ids'][barcode_key]['value_tuple']
+                        where_clause['value_tuple'] += sample_tables[table]['sample_ids'][barcode_key]['value_tuple']
                     query += ' GROUP BY %s ' %col_name
                     cursor.execute(query, where_clause['value_tuple'])
                     for row in cursor.fetchall():
