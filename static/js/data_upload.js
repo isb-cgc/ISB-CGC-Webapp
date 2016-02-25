@@ -600,7 +600,7 @@ require([
         var uploadDataType = $('.data-radio:checked').val();
         if(uploadDataType === 'high' && hleCheckbox.is(':checked')) {
             uploadDataType = 'extend';
-            form.append('extend-study-id', $('#project-selection').val());
+            form.append('extend-study-id', $('#high-level-extend-study').val());
         }
         form.append('data-type', uploadDataType);
 
@@ -626,12 +626,11 @@ require([
             processData: false,
             contentType: false,
         }).done(function (res) {
-            console.log('Response: ', res);
             if (res.status === 'success') {
                 $('#base-data-form')[0].reset();
                 location.href = res.redirect_url;
             } else {
-                errorMessage('Error submitting response' + res.message);
+                errorMessage('Error submitting response : ' + res.message);
             }
         }).fail(function () {
             errorMessage('We had an error submitting the response. Please try again later');

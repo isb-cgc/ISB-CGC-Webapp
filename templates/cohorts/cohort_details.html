@@ -105,7 +105,7 @@
                                                         <li class="checkbox">
                                                             <label>
                                                                 <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}" data-value-id="{% if v.id %}{{ v.id }}{% endif %}">
-                                                                {% if v.value == 'None' %}NA{% else %}{{ v.value|get_readable_name }}{% endif %}
+                                                                {% if v.value == 'None' %}NA{% else %}{{ v.value|get_readable_name:attr }}{% endif %}
                                                             </label>
                                                             <span class="count">({{ v.count }})</span>
                                                         </li>
@@ -114,7 +114,7 @@
                                                         <li class="extra-values checkbox" style="display:none;">
                                                             <label>
                                                                 <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}" data-value-id="{% if v.id %}{{ v.id }}{% endif %}">
-                                                                {% if v.value == 'None' %}NA{% else %}{{ v.value|get_readable_name }}{% endif %}
+                                                                {% if v.value == 'None' %}NA{% else %}{{ v.value|get_readable_name:attr }}{% endif %}
                                                             </label>
                                                             <span class="count">({{ v.count }})</span>
                                                         </li>
@@ -122,7 +122,7 @@
                                                         <li class="extra-values checkbox" style="display:none;">
                                                             <label>
                                                                 <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}" data-value-id="{% if v.id %}{{ v.id }}{% endif %}">
-                                                                {% if v.value == 'None' %}NA{% else %}{{ v.value|get_readable_name }}{% endif %}
+                                                                {% if v.value == 'None' %}NA{% else %}{{ v.value|get_readable_name:attr }}{% endif %}
                                                             </label>
                                                             <span class="count">({{ v.count }})</span>
                                                         </li>
