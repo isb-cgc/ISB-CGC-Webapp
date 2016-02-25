@@ -98,7 +98,7 @@ def project_upload(request):
     return render(request, template, context)
 
 def filter_column_name(original):
-    return re.sub(r"[^a-zA-Z]+", "_", original.lower())
+    return re.sub(r"[^a-zA-Z0-9]+", "_", original.lower())
 
 def create_metadata_tables(user, study, columns, skipSamples=False):
     with connection.cursor() as cursor:
