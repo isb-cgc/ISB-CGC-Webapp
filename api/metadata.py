@@ -957,7 +957,6 @@ class Meta_Endpoints_API(remote.Service):
                     "FROM metadata_samples "
 
         value_tuple = ()
-        print query_dict
         if len(query_dict) > 0:
             where_clause = build_where_clause(query_dict)
             query_str += ' WHERE ' + where_clause['query_str']
@@ -1924,9 +1923,15 @@ class Meta_Endpoints_API_v2(remote.Service):
         total = 0
         for key, feature in valid_attrs.items():
             value_list = []
+
+            # Special case for age ranges
+            if key == 'CLIN:age_at_initial_pathologic_diagnosis':
+                feature['values'] = normalize_ages(feature['values'])
+
             for value, count in feature['values'].items():
                 if feature['name'].startswith('has_'):
                     value = 'True' if value else 'False'
+
                 value_list.append(MetaValueListCount(value=str(value), count=count))
 
             count_list.append(MetadataAttributeValues(name=feature['name'], values=value_list, id=key, total=feature['total']))
