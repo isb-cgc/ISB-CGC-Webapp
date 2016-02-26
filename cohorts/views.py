@@ -836,8 +836,10 @@ def save_cohort_from_plot(request):
         # Create Sources, at this point only one cohort for a plot
         plot_id = request.POST.get('plot-id')
         source_plot = Worksheet_plot.objects.get(id=plot_id)
+        plot_cohorts = source_plot.get_cohorts()
         source_list = []
-        source_list.append(Source(parent=source_plot.cohort.cohort, cohort=cohort, type=Source.PLOT_SEL))
+        for c in plot_cohorts :
+            source_list.append(Source(parent=c, cohort=cohort, type=Source.PLOT_SEL))
         Source.objects.bulk_create(source_list)
 
         # Create Samples

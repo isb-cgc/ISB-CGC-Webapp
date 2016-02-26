@@ -127,6 +127,30 @@ class Workbook(models.Model):
             worksheet.active_plot = worksheet.get_active_plot()
         return worksheets
 
+    def is_shareable(self, request):
+        is_shareable = (self.owner.id == request.user.id)
+
+        if is_shareable:
+            for worksheet in self.get_deep_worksheets():
+                # Check all cohorts are owned by the user
+                for cohort in worksheet.cohorts:
+                    if cohort.cohort.get_owner().id != request.user.id and not cohort.cohort.is_public():
+                        is_shareable = False
+                        break
+
+                # Check all variables are from projects owned by the user
+                for variable in worksheet.get_variables():
+                    if variable.feature: #feature will be null if the variable is from TCGA
+                        if variable.feature.study.project.owner_id != request.user.id and not variable.feature.study.project.is_public:
+                            is_shareable = False
+                            break
+
+                if not is_shareable:
+                    break
+
+        return is_shareable
+
+
 class Workbook_Last_View(models.Model):
     workbook = models.ForeignKey(Workbook, blank=False)
     user = models.ForeignKey(User, null=False, blank=False)
@@ -182,6 +206,23 @@ class Worksheet(models.Model):
                              name=worksheet.name + " copy",
                              description=worksheet.description)
         worksheet_copy.save()
+
+        worksheet_cohorts = worksheet.worksheet_cohort_set.all()
+        for wc in worksheet_cohorts:
+            worksheet_copy.add_cohort(wc.cohort)
+
+        worksheet_variables = worksheet.worksheet_variable_set.all()
+        for wv in worksheet_variables:
+            wv.pk = None
+            wv.worksheet = worksheet_copy
+            wv.save()
+
+        worksheet_genes = worksheet.worksheet_gene_set.all()
+        for wg in worksheet_genes:
+            wg.pk = None
+            wg.worksheet = worksheet_copy
+            wg.save()
+
         return worksheet_copy
 
     @classmethod
@@ -514,6 +555,14 @@ class Worksheet_plot(models.Model):
         model = Worksheet_plot.objects.get(id=id)
         return model
 
+    #return the actual cohort models from a plot
+    def get_cohorts(self):
+        wpc = Worksheet_plot_cohort.objects.filter(plot=self)
+        cohorts = []
+        for c in wpc:
+            cohorts.append(c.cohort.cohort)
+        return cohorts
+
     def toJSON(self):
         j = {'id'        : self.id,
              'type'      : self.type,
@@ -557,7 +606,7 @@ class Worksheet_plot_cohort(models.Model):
 
 @admin.register(Workbook)
 class WorkbookAdmin(admin.ModelAdmin):
-    list_display = ('id','name','description','date_created','last_date_saved')
+    list_display = ('id','name','description','date_created','last_date_saved', 'is_public')
     exclude = ('shared',)
 
 @admin.register(Worksheet)

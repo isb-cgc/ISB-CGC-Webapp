@@ -68,11 +68,11 @@ def workbook_create_with_cohort_list(request):
 
     return HttpResponse(json.dumps(result), status=200)
 
-#TODO not complete
+#TODO maybe complete
 @login_required
 def workbook_create_with_project(request):
     project_id = request.POST.get('project_id')
-    project_model = Project.get(id=project_id)
+    project_model = Project.objects.get(id=project_id)
 
     workbook_model = Workbook.create(name="Untitled Workbook", description="this is an untitled workbook with all variables of project \"" + project_model.name + "\" added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
     worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
@@ -91,10 +91,10 @@ def workbook_create_with_project(request):
 
 @login_required
 def workbook_create_with_variables(request):
-    var_list_id    = request.POST.get('variable_id')
+    var_list_id    = request.POST.get('variable_list_id')
     var_list_model = VariableFavorite.objects.get(id=var_list_id)
-
-    workbook_model = Workbook.create(name=request.POST.get('name'), description="this is an untitled workbook with all variables of variable favorite list \"" + var_list_model.name + "\" added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
+    name = request.POST.get('name', var_list_model.name + ' workbook')
+    workbook_model = Workbook.create(name=name, description="this is an untitled workbook with all variables of variable favorite list \"" + var_list_model.name + "\" added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
     worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
 
     for var in var_list_model.get_variables() :
@@ -159,25 +159,7 @@ def workbook(request, workbook_id=0):
                 workbook_model = workbooks.get(id=workbook_id)
                 workbook_model.worksheets = workbook_model.get_deep_worksheets()
 
-                is_shareable = (workbook_model.owner.id == request.user.id)
-
-                if is_shareable:
-                    for worksheet in workbook_model.worksheets:
-                        # Check all cohorts are owned by the user
-                        for cohort in worksheet.cohorts:
-                            if cohort.cohort.get_owner().id != request.user.id and not cohort.cohort.is_public():
-                                is_shareable = False
-                                break
-
-                        # Check all variables are from projects owned by the user
-                        for variable in worksheet.get_variables():
-                            if variable.feature: #feature will be null if the variable is from TCGA
-                                if variable.feature.study.project.owner_id != request.user.id and not variable.feature.study.project.is_public:
-                                    is_shareable = False
-                                    break
-
-                        if not is_shareable:
-                            break
+                is_shareable = workbook_model.is_shareable(request)
 
                 shared = None
                 if workbook_model.owner.id != request.user.id and not workbook_model.is_public:
@@ -212,13 +194,15 @@ def worksheet_display(request, workbook_id=0, worksheet_id=0):
     template = 'workbooks/workbook.html'
     workbook_model = Workbook.deep_get(workbook_id)
     workbook_model.mark_viewed(request)
-
+    is_shareable = workbook_model.is_shareable(request)
+    print is_shareable
     for worksheet in workbook_model.worksheets:
         if str(worksheet.id) == worksheet_id :
             display_worksheet = worksheet
 
     plot_types = Analysis.get_types()
     return render(request, template, {'workbook'            : workbook_model,
+                                      'is_shareable'        : is_shareable,
                                       'display_worksheet'   : display_worksheet,
                                       'plot_types'          : plot_types})
 

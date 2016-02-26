@@ -10,41 +10,56 @@
 
 {% block page_header %}
 <div class="container">
-    <ol class="breadcrumb">
-        <li><a href="{% url type %}">{{ type|title }}</a></li>
-    </ol>
     <h1 class="page-header">{{ title|title }} Invitation</h1>
 </div>
 {% endblock %}
 {% block content %}
     <div class="container">
-        <section>
-            <p>
-                {% if resource.owner.first_name %}
-                {{ resource.owner.first_name }} {{ resource.owner.last_name }}
-                {% else %}
-                {{ resource.owner }}
-                {% endif %} wants to share this {{ title|lower }} with you! To view
-                this item, simply register for the site or sign in to an existing account.
-            </p>
-        </section>
-        <section class="panel panel-primary">
-            <div class="panel-heading clearfix">
-                <h4 class="panel-title pull-left">{{ resource.name }}</h4>
-            </div>
-            <div class="panel-body">
-                {% if resource.description %}
-                <p>{{ resource.description }}</p>
-                {% else %}
-                <p>This item doesn't have a description at the moment</p>
-                {% endif %}
-            </div>
-        </section>
-        <section>
-            <div>
-                <a href="{% url 'account_login' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-primary">Accept Invitation</a>
-            </div>
-        </section>
+        {% if message %}
+            <section>
+                <p>
+                    The resource cannot be shared to you because {{ message }}
+                </p>
+            </section>
+            <section>
+                <div>
+                    {% if user.id %}
+                        <a href="{% url 'dashboard' %}" class="btn btn-primary">Your Dashboard{</a>
+                    {% else %}
+                        <a href="{% url 'account_login' %}" class="btn btn-primary">Sign Up</a>
+                        <a href="{% url 'account_login' %}" class="btn btn-primary">Log In</a>
+                    {% endif %}
+                </div>
+            </section>
+        {% else %}
+            <section>
+                <p>
+                    {% if resource.owner.first_name %}
+                    {{ resource.owner.first_name }} {{ resource.owner.last_name }}
+                    {% else %}
+                    {{ resource.owner }}
+                    {% endif %} wants to share this {{ title|lower }} with you! To view
+                    this item, simply register for the site or sign in to an existing account.
+                </p>
+            </section>
+            <section class="panel panel-primary">
+                <div class="panel-heading clearfix">
+                    <h4 class="panel-title pull-left">{{ resource.name }}</h4>
+                </div>
+                <div class="panel-body">
+                    {% if resource.description %}
+                    <p>{{ resource.description }}</p>
+                    {% else %}
+                    <p>This item doesn't have a description at the moment</p>
+                    {% endif %}
+                </div>
+            </section>
+            <section>
+                <div>
+                    <a href="{% url 'account_login' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-primary">Accept Invitation</a>
+                </div>
+            </section>
+        {% endif %}
     </div>
 {% endblock %}
 
