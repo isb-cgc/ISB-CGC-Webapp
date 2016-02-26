@@ -69,5 +69,7 @@ require([
         .always(function () {
             $this.find('.btn').removeClass('btn-disabled').attr('disabled', false);
         });
+        return false;
+
     });
 });
