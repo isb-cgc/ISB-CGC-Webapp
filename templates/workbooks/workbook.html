@@ -137,7 +137,9 @@
                                                         {% else %}
                                                             <form action="{% url 'worksheet_gene_delete' workbook_id=workbook.id worksheet_id=worksheet.id gene_id=gene.id %}" method="POST">
                                                                 {% csrf_token %}
-                                                                <button type="submit" class="text-danger workbook-remove-item"><i class="fa fa-close"></i></button>
+                                                                {% if workbook.owner.id == user.id %}
+                                                                    <button type="submit" class="text-danger workbook-remove-item"><i class="fa fa-close"></i></button>
+                                                                {% endif %}
                                                                 {{ gene.gene|title }}
                                                             </form>
                                                         {% endif %}
@@ -172,7 +174,9 @@
                                                         {% else %}
                                                             <form action="{% url 'worksheet_variables_delete' workbook_id=workbook.id worksheet_id=worksheet.id variable_id=variable.id %}" method="POST">
                                                                 {% csrf_token %}
-                                                                <button type="submit" class="text-danger workbook-remove-item"><i class="fa fa-close"></i></button>
+                                                                {% if workbook.owner.id == user.id %}
+                                                                    <button type="submit" class="text-danger workbook-remove-item"><i class="fa fa-close"></i></button>
+                                                                {% endif %}
                                                                 {{ variable.name|title }}
                                                             </form>
                                                         {% endif %}
@@ -208,7 +212,9 @@
                                                         {% else %}
                                                             <form action="{% url 'remove_cohort_from_worksheet' workbook_id=workbook.id worksheet_id=worksheet.id cohort_id=cohort.id %}" method="POST">
                                                                 {% csrf_token %}
-                                                                <button type="submit" class="text-danger workbook-remove-item"><i class="fa fa-close"></i></button>
+                                                                {% if workbook.owner.id == user.id %}
+                                                                    <button type="submit" class="text-danger workbook-remove-item"><i class="fa fa-close"></i></button>
+                                                                {% endif %}
                                                                 <a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name|title }}</a>
                                                             </form>
                                                         {% endif %}
@@ -243,39 +249,44 @@
                                 <a class="fa fa-caret-right"></a>
                             </div>
                             {% if workbook.owner.id == user.id %}
-                            <h5>Analysis Type</h5>
-                            <div class="form-group gray-area">
-                                <select worksheet_id="{{ worksheet.id }}" class="form-control plot_selection">
-                                    {% if worksheet.active_plot %}
-                                        <option value="{{ worksheet.active_plot.type }}" selected >{{ worksheet.active_plot.type }}</option>
-                                    {% else %}
-                                        <option disabled selected >-- select an analysis --</option>
-                                    {% endif %}
-                                    {% for plot in plot_types %}
-                                        {% if not worksheet.active_plot or plot.name != worksheet.active_plot.type %}
-                                            <option value="{{ plot.name }}">{{ plot.name }}</option>
+                                <h5>Analysis Type</h5>
+                                <div class="form-group gray-area">
+                                    <select worksheet_id="{{ worksheet.id }}" class="form-control plot_selection">
+                                        {% if worksheet.active_plot %}
+                                            <option value="{{ worksheet.active_plot.type }}" selected >{{ worksheet.active_plot.type }}</option>
+                                        {% else %}
+                                            <option disabled selected >-- select an analysis --</option>
                                         {% endif %}
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="plot-container">
-                                {% include 'workbooks/workbook_plot.html' with plot=worksheet.active_plot variables=worksheet.variables cohorts=worksheet.cohorts %}
-                                <!-- plot needs to indicate saved plot data such as selected variables, cohorts, title, etc -->
-                                <!-- workbook_plot also needs to have reference to all worksheet cohorts, variables and genes -->
-                            </div>
-                            {% elif worksheet.active_plot %}
-                            <h5>Analysis Type: {{ worksheet.active_plot.type }}</h5>
-                            <div class="plot-container">
-                                {% include 'workbooks/workbook_plot.html' with plot=worksheet.plot variables=worksheet.variables cohorts=worksheet.cohorts %}
-                                <!-- plot needs to indicate saved plot data such as selected variables, cohorts, title, etc -->
-                                <!-- workbook_plot also needs to have reference to all worksheet cohorts, variables and genes -->
-                            </div>
-                            {% else %}
-                            <div class="plot-container">
-                                <div class="message message-info alert fade in">
-                                    <p>No Analysis Available</p>
+                                        {% for plot in plot_types %}
+                                            {% if not worksheet.active_plot or plot.name != worksheet.active_plot.type %}
+                                                <option value="{{ plot.name }}">{{ plot.name }}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
                                 </div>
-                            </div>
+                                <div class="plot-container">
+                                    {% include 'workbooks/workbook_plot.html' with plot=worksheet.active_plot variables=worksheet.variables cohorts=worksheet.cohorts %}
+                                    <!-- plot needs to indicate saved plot data such as selected variables, cohorts, title, etc -->
+                                    <!-- workbook_plot also needs to have reference to all worksheet cohorts, variables and genes -->
+                                </div>
+                            {% elif worksheet.active_plot %}
+                                <h5>Analysis Type</h5>
+                                <div class="form-group">
+                                    <select worksheet_id="{{ worksheet.id }}" disabled class="form-control plot_selection">
+                                        <option value="{{ worksheet.active_plot.type }}" selected >{{ worksheet.active_plot.type }}</option>
+                                    </select>
+                                </div>
+                                <div class="plot-container">
+                                    {% include 'workbooks/workbook_plot.html' with plot=worksheet.active_plot variables=worksheet.variables cohorts=worksheet.cohorts %}
+                                    <!-- plot needs to indicate saved plot data such as selected variables, cohorts, title, etc -->
+                                    <!-- workbook_plot also needs to have reference to all worksheet cohorts, variables and genes -->
+                                </div>
+                            {% else %}
+                                <div class="plot-container">
+                                    <div class="message message-info alert fade in">
+                                        <p>No Analysis Available</p>
+                                    </div>
+                                </div>
                             {% endif %}
                         </div>
                         <!-- end worksheet analysis section -->
