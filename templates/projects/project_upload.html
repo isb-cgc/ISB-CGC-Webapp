@@ -77,7 +77,7 @@
                                 </label>
                                 <select class="form-control inline-block input-sm" id="high-level-extend-study" disabled>
                                     <option value="" disabled selected hidden>-- Select a Project/Study --</option>
-                                    <option>All TCGA Data</option>
+{#                                    <option>All TCGA Data</option>#}
                                     {% for project in projects %}
                                     <optgroup label="{{ project.name }}">
                                     {% for study in project.study_set.all %}
