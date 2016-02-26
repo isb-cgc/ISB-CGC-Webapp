@@ -230,6 +230,7 @@ require([
             var parent       = $(this).parent();
             var worksheet_id = $(this).attr("worksheet_id");
             var plot_id      = $(this).attr("plot_id");
+            console.log(parent.find('#x-axis-select').find(":selected").attr('var_id'));
             var attrs = {
                 type   : parent.parentsUntil(".worksheet-body").find(".plot_selection").find(":selected").text(),
                 x_axis : {id : parent.find('#x-axis-select').find(":selected").attr('var_id'), url_code : parent.find('#x-axis-select').find(":selected").val()},
