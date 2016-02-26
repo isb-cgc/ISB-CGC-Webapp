@@ -91,10 +91,10 @@ def workbook_create_with_project(request):
 
 @login_required
 def workbook_create_with_variables(request):
-    var_list_id    = request.POST.get('variable_id')
+    var_list_id    = request.POST.get('variable_list_id')
     var_list_model = VariableFavorite.objects.get(id=var_list_id)
-
-    workbook_model = Workbook.create(name=request.POST.get('name'), description="this is an untitled workbook with all variables of variable favorite list \"" + var_list_model.name + "\" added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
+    name = request.POST.get('name', var_list_model.name + ' workbook')
+    workbook_model = Workbook.create(name=name, description="this is an untitled workbook with all variables of variable favorite list \"" + var_list_model.name + "\" added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
     worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
 
     for var in var_list_model.get_variables() :
