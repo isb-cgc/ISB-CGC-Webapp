@@ -531,6 +531,14 @@ class Worksheet_plot(models.Model):
         model = Worksheet_plot.objects.get(id=id)
         return model
 
+    #return the actual cohort models from a plot
+    def get_cohorts(self):
+        wpc = Worksheet_plot_cohort.objects.filter(plot=self)
+        cohorts = []
+        for c in wpc:
+            cohorts.append(c.cohort.cohort)
+        return cohorts
+
     def toJSON(self):
         j = {'id'        : self.id,
              'type'      : self.type,
