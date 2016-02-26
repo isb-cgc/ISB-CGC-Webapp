@@ -392,7 +392,7 @@ require([
         return false;
     });
 
-    $("#createWorkbookWithCohort").on("click", function(){
+    $(".createWorkbookWithCohort").on("click", function(){
         //get the selected cohort
         var cohorts = [];
         $('#cohorts-list input[type="checkbox"]').each(function() {
