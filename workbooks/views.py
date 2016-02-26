@@ -68,11 +68,11 @@ def workbook_create_with_cohort_list(request):
 
     return HttpResponse(json.dumps(result), status=200)
 
-#TODO not complete
+#TODO maybe complete
 @login_required
 def workbook_create_with_project(request):
     project_id = request.POST.get('project_id')
-    project_model = Project.get(id=project_id)
+    project_model = Project.objects.get(id=project_id)
 
     workbook_model = Workbook.create(name="Untitled Workbook", description="this is an untitled workbook with all variables of project \"" + project_model.name + "\" added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
     worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
