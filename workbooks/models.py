@@ -574,7 +574,7 @@ class Worksheet_plot_cohort(models.Model):
 
 @admin.register(Workbook)
 class WorkbookAdmin(admin.ModelAdmin):
-    list_display = ('id','name','description','date_created','last_date_saved')
+    list_display = ('id','name','description','date_created','last_date_saved', 'is_public')
     exclude = ('shared',)
 
 @admin.register(Worksheet)
