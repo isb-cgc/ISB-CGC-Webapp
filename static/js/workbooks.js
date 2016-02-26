@@ -289,7 +289,7 @@ require([
         })
     });
 
-    //initialize all plots at the beginning
+    ////initialize all plots at the beginning
     $(".plot_selection").each(function(){
         var self = this;
         get_plot_info(this, function(success){
@@ -346,7 +346,8 @@ require([
         var plot_element = $("[worksheet_id='"+worksheet_id+"']").parent().parent().find(".plot");
 
         plot_element.find('.update-plot').attr('plot_id', plot_data.id).change();
-        plot_element.find('#cohort-plot-id').val(plot_data.id).change();
+        plot_element.find('#cohort-plot-id').val(plot_data.id);
+
         if(plot_data.x_axis) {
             plot_element.find('#x-axis-select').val(plot_data.x_axis.url_code);
         }
