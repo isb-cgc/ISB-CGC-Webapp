@@ -127,6 +127,30 @@ class Workbook(models.Model):
             worksheet.active_plot = worksheet.get_active_plot()
         return worksheets
 
+    def is_shareable(self, request):
+        is_shareable = (self.owner.id == request.user.id)
+
+        if is_shareable:
+            for worksheet in self.get_deep_worksheets():
+                # Check all cohorts are owned by the user
+                for cohort in worksheet.cohorts:
+                    if cohort.cohort.get_owner().id != request.user.id and not cohort.cohort.is_public():
+                        is_shareable = False
+                        break
+
+                # Check all variables are from projects owned by the user
+                for variable in worksheet.get_variables():
+                    if variable.feature: #feature will be null if the variable is from TCGA
+                        if variable.feature.study.project.owner_id != request.user.id and not variable.feature.study.project.is_public:
+                            is_shareable = False
+                            break
+
+                if not is_shareable:
+                    break
+
+        return is_shareable
+
+
 class Workbook_Last_View(models.Model):
     workbook = models.ForeignKey(Workbook, blank=False)
     user = models.ForeignKey(User, null=False, blank=False)

@@ -159,25 +159,7 @@ def workbook(request, workbook_id=0):
                 workbook_model = workbooks.get(id=workbook_id)
                 workbook_model.worksheets = workbook_model.get_deep_worksheets()
 
-                is_shareable = (workbook_model.owner.id == request.user.id)
-
-                if is_shareable:
-                    for worksheet in workbook_model.worksheets:
-                        # Check all cohorts are owned by the user
-                        for cohort in worksheet.cohorts:
-                            if cohort.cohort.get_owner().id != request.user.id and not cohort.cohort.is_public():
-                                is_shareable = False
-                                break
-
-                        # Check all variables are from projects owned by the user
-                        for variable in worksheet.get_variables():
-                            if variable.feature: #feature will be null if the variable is from TCGA
-                                if variable.feature.study.project.owner_id != request.user.id and not variable.feature.study.project.is_public:
-                                    is_shareable = False
-                                    break
-
-                        if not is_shareable:
-                            break
+                is_shareable = workbook_model.is_shareable(request)
 
                 shared = None
                 if workbook_model.owner.id != request.user.id and not workbook_model.is_public:
@@ -212,13 +194,15 @@ def worksheet_display(request, workbook_id=0, worksheet_id=0):
     template = 'workbooks/workbook.html'
     workbook_model = Workbook.deep_get(workbook_id)
     workbook_model.mark_viewed(request)
-
+    is_shareable = workbook_model.is_shareable(request)
+    print is_shareable
     for worksheet in workbook_model.worksheets:
         if str(worksheet.id) == worksheet_id :
             display_worksheet = worksheet
 
     plot_types = Analysis.get_types()
     return render(request, template, {'workbook'            : workbook_model,
+                                      'is_shareable'        : is_shareable,
                                       'display_worksheet'   : display_worksheet,
                                       'plot_types'          : plot_types})
 
