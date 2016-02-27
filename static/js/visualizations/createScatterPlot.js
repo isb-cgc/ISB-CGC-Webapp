@@ -23,7 +23,7 @@ function($, d3, d3tip, vizhelpers) {
         create_scatterplot: function(svg, data, domain, range, xLabel, yLabel, xParam, yParam, colorBy, legend, width, height, cohort_set) {
             var margin = {top: 10, bottom: 50, left: 50, right: 10};
             var yVal = function(d) {
-                    if (d[yParam] && d[yParam] != 'NA') {
+                    if (d[yParam] && d[yParam] != 'None') {
                         return d[yParam];
                     } else {
                         d[yParam] = range[1];
@@ -39,7 +39,7 @@ function($, d3, d3tip, vizhelpers) {
                     .tickSize(-width - margin.left - margin.right, 0, 0);
 
             var xVal = function(d) {
-                    if (d[xParam] && d[xParam] != 'NA') {
+                    if (d[xParam] && d[xParam] != 'None') {
                         return d[xParam];
                     } else {
                         d[xParam] = domain[1];
