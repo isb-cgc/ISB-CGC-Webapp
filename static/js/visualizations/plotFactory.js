@@ -56,6 +56,10 @@ define([
                 return '<span>Mean: ' + mean.toFixed(2) + '</span><br/><span>%: ' + (d.y * 100).toFixed(2) + '%</span>';
             });
 
+    function generate_axis_label(attr) {
+        return $('option[value="' + attr + '"]:first').html()
+    }
+
     /*
         Generate bar chart
      */
@@ -73,7 +77,7 @@ define([
             height,
             bar_width,
             'x',
-            x_attr,
+            generate_axis_label(x_attr),
             cubby_tip,
             margin);
 
@@ -97,7 +101,7 @@ define([
                 width,
                 height,
                 'x',
-                x_attr,
+                generate_axis_label(x_attr),
                 cubby_tip,
                 margin);
 
@@ -122,8 +126,8 @@ define([
              data,
              domain,
              range,
-             x_attr,  // xLabel
-             y_attr,  // yLabel
+             generate_axis_label(x_attr),  // xLabel
+             generate_axis_label(y_attr),  // yLabel
              'x',     // xParam
              'y',     // yParam
              color_by,
@@ -159,8 +163,8 @@ define([
             violin_width,
             max_n,
             min_n,
-            x_attr,
-            y_attr,
+            generate_axis_label(x_attr),
+            generate_axis_label(y_attr),
             'x',
             'y',
             color_by,
@@ -194,8 +198,8 @@ define([
             violin_width,
             max_n,
             min_n,
-            y_attr,
-            x_attr,
+            generate_axis_label(y_attr),
+            generate_axis_label(x_attr),
             'y',
             'x',
             color_by,
@@ -224,8 +228,8 @@ define([
             data,
             xdomain,
             ydomain,
-            x_attr,
-            y_attr,
+            generate_axis_label(x_attr),
+            generate_axis_label(y_attr),
             'x',
             'y',
             'c',
