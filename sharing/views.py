@@ -7,16 +7,16 @@ from sharing.models import Shared_Resource
 def sharing_add(request, sharing_id=0):
     template = 'sharing/sharing_detail.html'
     shared = Shared_Resource.objects.get(id=sharing_id, share_key=request.GET['key'])
+    message = ""
 
     if request.user.is_authenticated():
         if shared.redeemed and shared.matched_user_id != request.user.id:
-            raise Exception('This invitation has already been redeemed by a different user')
+            message = 'this invitation has already been redeemed by a different user'
+        else :
+            shared.redeemed = True
+            shared.matched_user = request.user
+            shared.save()
 
-        shared.redeemed = True
-        shared.matched_user = request.user
-        shared.save()
-
-        # We've redeemed, we'll just redirect to the resource below
 
     type = None
     resource = None
@@ -30,10 +30,25 @@ def sharing_add(request, sharing_id=0):
         redirect_page = 'project_detail'
         redirect_id_key = 'project_id'
         resource = shared.project_set.all().first()
-    #elif resc._set.count() > 0:
+    elif shared.workbook_set.count() > 0:
+        type = 'workbooks'
+        title = 'Workbook'
+        redirect_page = 'workbook_detail'
+        redirect_id_key = 'workbook_id'
+        resource = shared.workbook_set.all().first()
 
     if not resource:
-        raise Exception('We were not able to find the resource that was shared with you')
+        message = 'we were not able to find the resource'
+
+    if message != "" :
+        context = {
+            'type': 'workbooks',
+            'title': "Unknown",
+            'resource': resource,
+            'shared'  : shared,
+            'message' : message
+        }
+        return render(request, template, context)
 
     if request.user.is_authenticated():
         return HttpResponseRedirect(reverse(redirect_page, kwargs={

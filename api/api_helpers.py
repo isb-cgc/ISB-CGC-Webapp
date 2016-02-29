@@ -44,10 +44,10 @@ def sql_connection():
                 db = database['NAME'],
                 user = database['USER'],
                 passwd = database['PASSWORD'],
-                ssl = database['OPTIONS']['ssl'])            
+                ssl = database['OPTIONS']['ssl'])
         except:
             print >> sys.stderr, "Unexpected ERROR in sql_connection(): ", sys.exc_info()[0]
-            #return HttpResponse( traceback.format_exc() ) 
+            #return HttpResponse( traceback.format_exc() )
             raise # if you want to soldier bravely on despite the exception, but comment to stderr
     else:
         # Connecting to localhost
@@ -154,35 +154,29 @@ def gql_age_by_ranges(q, key, value):
 
 def normalize_ages(ages):
     if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
-    result = []
     new_age_list = {'10 to 39': 0, '40 to 49': 0, '50 to 59': 0, '60 to 69': 0, '70 to 79': 0, 'Over 80': 0, 'None': 0}
-    for age in ages:
-        # print 'type(age):'
-        # print type(age)
+    for age, count in ages.items():
         if type(age) != dict:
-
-            if age.value != 'None':
-                int_age = float(age.value)
+            if age and age != 'None':
+                int_age = float(age)
                 if int_age < 40:
-                    new_age_list['10 to 39'] += int(age.count)
+                    new_age_list['10 to 39'] += int(count)
                 elif int_age < 50:
-                    new_age_list['40 to 49'] += int(age.count)
+                    new_age_list['40 to 49'] += int(count)
                 elif int_age < 60:
-                    new_age_list['50 to 59'] += int(age.count)
+                    new_age_list['50 to 59'] += int(count)
                 elif int_age < 70:
-                    new_age_list['60 to 69'] += int(age.count)
+                    new_age_list['60 to 69'] += int(count)
                 elif int_age < 80:
-                    new_age_list['70 to 79'] += int(age.count)
+                    new_age_list['70 to 79'] += int(count)
                 else:
-                    new_age_list['Over 80'] += int(age.count)
+                    new_age_list['Over 80'] += int(count)
             else:
-                new_age_list['None'] += int(age.count)
+                new_age_list['None'] += int(count)
         else:
             print age
 
-    for key, value in new_age_list.items():
-        result.append({'count': value, 'value': key})
-    return result
+    return new_age_list
 
 def applyFilter(field, dict):
 # this one gets called a lot...
@@ -249,7 +243,7 @@ def build_where_clause(dict, alt_key_map=False):
             big_query_str += ' %s in (' % key
             i = 0
             for val in value:
-                value_tuple += (val.strip(),) if type(val) is str else (val,)
+                value_tuple += (val.strip(),) if type(val) is unicode else (val,)
                 if i == 0:
                     query_str += '%s'
                     big_query_str += '"' + str(val) + '"'
@@ -282,7 +276,7 @@ def build_where_clause(dict, alt_key_map=False):
                 big_query_str += ' %s=' % key
                 query_str += '%s'
                 big_query_str += '"%s"' % value
-                value_tuple += (value.strip(),) if type(value) is str else (value,)
+                value_tuple += (value.strip(),) if type(value) is unicode else (value,)
     return {'query_str': query_str, 'value_tuple': value_tuple, 'key_order': key_order, 'big_query_str': big_query_str}
 
 
