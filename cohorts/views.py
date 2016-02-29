@@ -509,69 +509,75 @@ def save_cohort(request, workbook_id=None, worksheet_id=None, create_workbook=Fa
 
         result = urlfetch.fetch(data_url, deadline=60)
         items = json.loads(result.content)
-        items = items['items']
-        for item in items:
-            samples.append(item['sample_barcode'])
-            #patients.append(item['ParticipantBarcode'])
 
-        # Create new cohort
-        cohort = Cohort.objects.create(name=name)
-        cohort.save()
+        #it is possible the the filters are creating a cohort with no samples
+        if int(items['count']) == 0 :
+            messages.error(request, 'The filters selected returned 0 samples. Please alter your filters and try again')
+            redirect_url = reverse('cohort')
+        else :
+            items = items['items']
+            for item in items:
+                samples.append(item['sample_barcode'])
+                #patients.append(item['ParticipantBarcode'])
 
-        # If there are sample ids
-        sample_list = []
-        for item in items:
-            study = None
-            if 'study_id' in item:
-                study = item['study_id']
-            sample_list.append(Samples(cohort=cohort, sample_id=item['sample_barcode'], study_id=study))
-        Samples.objects.bulk_create(sample_list)
+            # Create new cohort
+            cohort = Cohort.objects.create(name=name)
+            cohort.save()
 
-        # TODO This would be a nice to have if we have a mapped ParticipantBarcode value
-        # TODO Also this gets weird with mixed mapped and unmapped ParticipantBarcode columns in cohorts
-        # If there are patient ids
-        # patient_list = []
-        # if len(patients):
-        #     patients = list(set(patients))
-        #     for patient_code in patients:
-        #         patient_list.append(Patients(cohort=cohort, patient_id=patient_code))
-        # Patients.objects.bulk_create(patient_list)
+            # If there are sample ids
+            sample_list = []
+            for item in items:
+                study = None
+                if 'study_id' in item:
+                    study = item['study_id']
+                sample_list.append(Samples(cohort=cohort, sample_id=item['sample_barcode'], study_id=study))
+            Samples.objects.bulk_create(sample_list)
 
-        # Set permission for user to be owner
-        perm = Cohort_Perms(cohort=cohort, user=request.user, perm=Cohort_Perms.OWNER)
-        perm.save()
+            # TODO This would be a nice to have if we have a mapped ParticipantBarcode value
+            # TODO Also this gets weird with mixed mapped and unmapped ParticipantBarcode columns in cohorts
+            # If there are patient ids
+            # patient_list = []
+            # if len(patients):
+            #     patients = list(set(patients))
+            #     for patient_code in patients:
+            #         patient_list.append(Patients(cohort=cohort, patient_id=patient_code))
+            # Patients.objects.bulk_create(patient_list)
 
-        # Create the source if it was given
-        if source:
-            Source.objects.create(parent=parent, cohort=cohort, type=Source.FILTERS).save()
+            # Set permission for user to be owner
+            perm = Cohort_Perms(cohort=cohort, user=request.user, perm=Cohort_Perms.OWNER)
+            perm.save()
 
-        # Create filters applied
-        if filters:
-            for filter in filter_obj:
-                Filters.objects.create(resulting_cohort=cohort, name=filter['key'], value=filter['value']).save()
+            # Create the source if it was given
+            if source:
+                Source.objects.create(parent=parent, cohort=cohort, type=Source.FILTERS).save()
 
-        # Store cohort to BigQuery
-        project_id = settings.BQ_PROJECT_ID
-        cohort_settings = settings.GET_BQ_COHORT_SETTINGS()
-        bcs = BigQueryCohortSupport(project_id, cohort_settings.dataset_id, cohort_settings.table_id)
-        bcs.add_cohort_with_sample_barcodes(cohort.id, cohort.samples_set.values_list('sample_id','study_id'))
+            # Create filters applied
+            if filters:
+                for filter in filter_obj:
+                    Filters.objects.create(resulting_cohort=cohort, name=filter['key'], value=filter['value']).save()
 
-        # Check if coming from applying filters and redirect accordingly
-        if 'apply-filters' in request.POST:
-            redirect_url = reverse('cohort_details',args=[cohort.id])
-            messages.info(request, 'Filters applied successfully.')
-        else:
-            redirect_url = reverse('cohort_list')
-            messages.info(request, 'Cohort, %s, created successfully.' % cohort.name)
+            # Store cohort to BigQuery
+            project_id = settings.BQ_PROJECT_ID
+            cohort_settings = settings.GET_BQ_COHORT_SETTINGS()
+            bcs = BigQueryCohortSupport(project_id, cohort_settings.dataset_id, cohort_settings.table_id)
+            bcs.add_cohort_with_sample_barcodes(cohort.id, cohort.samples_set.values_list('sample_id','study_id'))
 
-        if workbook_id and worksheet_id :
-            Worksheet.objects.get(id=worksheet_id).add_cohort(cohort)
-            redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id' : worksheet_id})
-        elif create_workbook :
-            workbook_model  = Workbook.create("default name", "This is a default workbook description", request.user)
-            worksheet_model = Worksheet.create(workbook_model.id, "worksheet 1","This is a default description")
-            worksheet_model.add_cohort(cohort)
-            redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_model.id, 'worksheet_id' : worksheet_model.id})
+            # Check if coming from applying filters and redirect accordingly
+            if 'apply-filters' in request.POST:
+                redirect_url = reverse('cohort_details',args=[cohort.id])
+                messages.info(request, 'Filters applied successfully.')
+            else:
+                redirect_url = reverse('cohort_list')
+                messages.info(request, 'Cohort, %s, created successfully.' % cohort.name)
+
+            if workbook_id and worksheet_id :
+                Worksheet.objects.get(id=worksheet_id).add_cohort(cohort)
+                redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id' : worksheet_id})
+            elif create_workbook :
+                workbook_model  = Workbook.create("default name", "This is a default workbook description", request.user)
+                worksheet_model = Worksheet.create(workbook_model.id, "worksheet 1","This is a default description")
+                worksheet_model.add_cohort(cohort)
+                redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_model.id, 'worksheet_id' : worksheet_model.id})
 
     return redirect(redirect_url) # redirect to search/ with search parameters just saved
 
