@@ -207,10 +207,6 @@ class Worksheet(models.Model):
                              description=worksheet.description)
         worksheet_copy.save()
 
-        worksheet_cohorts = worksheet.worksheet_cohort_set.all()
-        for wc in worksheet_cohorts:
-            worksheet_copy.add_cohort(wc.cohort)
-
         worksheet_variables = worksheet.worksheet_variable_set.all()
         for wv in worksheet_variables:
             wv.pk = None
@@ -222,6 +218,25 @@ class Worksheet(models.Model):
             wg.pk = None
             wg.worksheet = worksheet_copy
             wg.save()
+
+        worksheet_cohorts = worksheet.worksheet_cohort_set.all()
+        for wc in worksheet_cohorts:
+            wc.pk = None
+            wc.worksheet = worksheet_copy
+            wc.save()
+
+        worksheet_plots = worksheet.worksheet_plot_set.all()
+        for wp in worksheet_plots:
+            worksheet_plot_cohorts = Worksheet_plot_cohort.objects.filter(plot=wp)
+            wp.pk = None
+            wp.worksheet = worksheet_copy
+            wp.save()
+
+            for wpc in worksheet_plot_cohorts: #should be the pre-existing plot cohorts
+                wpc.pk = None
+                wpc.plot = wp
+                wpc.cohort = Worksheet_cohort.objects.filter(worksheet_id=worksheet_copy.id).filter(cohort_id=wpc.cohort.cohort_id).first()
+                wpc.save()
 
         return worksheet_copy
 
@@ -594,7 +609,7 @@ class Worksheet_plot_cohort(models.Model):
     modified_date   = models.DateTimeField(auto_now=True)
     plot            = models.ForeignKey(Worksheet_plot, blank=True, null=True, related_name="worksheet_plot")
     cohort          = models.ForeignKey(Worksheet_cohort, blank=True, null=True, related_name="worksheet_plot.cohort")
-    objects         = Worksheet_Plot_Manager()
+    objects         = Worksheet_Plot_Cohort_Manager()
 
     def toJSON(self):
         j = {'id'        : self.id,
