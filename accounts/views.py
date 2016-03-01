@@ -279,18 +279,21 @@ def retrieve_expirable_object_contents_and_delete(bucket, object_name, expiratio
 def get_object_with_metadata(bucket, object_name):
     ret_vals = {}
 
-    def get_metadata():
-        ret_vals['metadata'] = get_object_metadata(bucket, object_name)
+    # def get_metadata():
+    #     ret_vals['metadata'] = get_object_metadata(bucket, object_name)
+    #
+    # def get_contents():
+    #     ret_vals['contents'] = read_object(bucket, object_name)
+    # metadata_thread = Thread(target=get_metadata)
+    # contents_thread = Thread(target=get_contents)
+    #
+    # metadata_thread.start()
+    # contents_thread.start()
+    # metadata_thread.join()
+    # contents_thread.join()
 
-    def get_contents():
-        ret_vals['contents'] = read_object(bucket, object_name)
-    metadata_thread = Thread(target=get_metadata)
-    contents_thread = Thread(target=get_contents)
-
-    metadata_thread.start()
-    contents_thread.start()
-    metadata_thread.join()
-    contents_thread.join()
+    ret_vals['metadata'] = get_object_metadata(bucket, object_name)
+    ret_vals['contents'] = read_object(bucket, object_name)
 
     missing = filter(lambda k: k not in ret_vals, ['metadata', 'contents'])
     if missing:
