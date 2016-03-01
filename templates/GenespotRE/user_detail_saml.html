@@ -9,9 +9,9 @@
         </p>
 
         {% if not user_details.NIH_username %}
-           <a href="{% url 'demo:saml_index' %}?sso">Associate with eRA Commons Account</a>
+           <a href="{{ ERA_LOGIN_URL }}?sso">Associate with eRA Commons Account</a>
         {% else %}
-            <a href="{% url 'demo:saml_index' %}?sso">Log in with your eRA Commons Account {{ user_details.NIH_username }}</a>
+            <a href="{{ ERA_LOGIN_URL }}?sso">Log in with your eRA Commons Account {{ user_details.NIH_username }}</a>
             <a href="{% url 'unlink_accounts' %}">Unlink {{ user_details.email }} from the NIH username {{ user_details.NIH_username }}</a>
         {% endif %}
        <a href="https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login" target="_blank">Learn More</a>

@@ -182,7 +182,8 @@ def user_detail(request, user_id):
         return render(request, 'GenespotRE/user_detail.html',
                       {'request': request,
                        'user_details': user_details,
-                       'NIH_AUTH_ON': settings.NIH_AUTH_ON
+                       'NIH_AUTH_ON': settings.NIH_AUTH_ON,
+                       'ERA_LOGIN_URL': settings.ERA_LOGIN_URL
                        })
     else:
         return render(request, '403.html')
