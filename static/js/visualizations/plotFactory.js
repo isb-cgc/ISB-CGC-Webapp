@@ -288,7 +288,7 @@ define([
 
     function select_plot(plot_selector, legend_selector, pairwise_element, type, x_attr, y_attr, color_by, cohorts, cohort_override, data){
 
-        var width  = $('.worksheet-panel-body').width(), //TODO should be based on size of screen
+        var width  = $('.worksheet.active .worksheet-panel-body:first').width(), //TODO should be based on size of screen
             height = 700, //TODO ditto
             margin = {top: 0, bottom: 100, left: 70, right: 10},
             x_type = '',
@@ -298,13 +298,6 @@ define([
             configure_pairwise_display(pairwise_element, data);
         }
         if (data.hasOwnProperty('items')) {
-            //TODO where are these used?
-            x_type = data['types']['x'];
-            if (y_attr && y_attr != '') {
-                y_type = data['types']['y'];
-            } else {
-                y_type = 'none'
-            }
 
             var cohort_set = data['cohort_set'];
             data = data['items'];
