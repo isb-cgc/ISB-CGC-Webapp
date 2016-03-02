@@ -1,19 +1,14 @@
 """
-
 Copyright 2015, Institute for Systems Biology
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-
    http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
 """
 
 import logging
@@ -179,22 +174,15 @@ def user_detail(request, user_id):
                 logger.warn("Error when retrieving nih_user with user_id {}. {}".format(str(user_id), str(e)))
                 # todo: add code to unlink all accounts?
 
-        era_login_url = "{}?sso&redirect_url={}/accounts/nih_login".format(settings.ERA_LOGIN_URL,
-                                                                            settings.BASE_URL)
-
         return render(request, 'GenespotRE/user_detail.html',
                       {'request': request,
                        'user_details': user_details,
                        'NIH_AUTH_ON': settings.NIH_AUTH_ON,
-                       'ERA_LOGIN_URL': era_login_url
+                       'ERA_LOGIN_URL': settings.ERA_LOGIN_URL
                        })
     else:
         return render(request, '403.html')
 
-
-@login_required
-def nih_login(request):
-    logging.info('at nih_login')
 
 @login_required
 def bucket_object_list(request):
