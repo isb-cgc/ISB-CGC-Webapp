@@ -1470,11 +1470,13 @@ class Meta_Endpoints_API(remote.Service):
                 user_id = Django_User.objects.get(email=user_email).id
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
                 logger.warn(e)
+                request_finished.send(self)
                 raise endpoints.NotFoundException("%s does not have an entry in the user database." % user_email)
             try:
                 cohort_perm = Cohort_Perms.objects.get(cohort_id=cohort_id, user_id=user_id)
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
                 logger.warn(e)
+                request_finished.send(self)
                 raise endpoints.UnauthorizedException("%s does not have permission to view cohort %d." % (user_email, cohort_id))
 
             try:
@@ -1554,6 +1556,7 @@ class Meta_Endpoints_API(remote.Service):
         finally:
             if cursor: cursor.close()
             if db: db.close()
+            request_finished.send(self)
 
     GET_RESOURCE = endpoints.ResourceContainer(sample_id=messages.StringField(1, required=True))
     @endpoints.method(GET_RESOURCE, SampleFiles,
