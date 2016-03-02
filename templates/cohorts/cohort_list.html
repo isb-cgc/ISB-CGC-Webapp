@@ -490,56 +490,6 @@
         </div>
     </div>
 
-    <!-- Delete Visualizations Modal -->
-    <div class="modal fade" id="delete-viz-modal" tabindex="-1" role="dialog" aria-labelledby="delete-viz-header" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="delete-viz-header">Share Cohort</h4>
-                </div>
-                <form id="delete-viz-form" method="POST" action="{% url 'deleteviz' %}">
-                    <div class="modal-body">
-                        <label>Are you sure you want to delete visualizations?</label>
-                        <p class="form-control-static selected-viz"></p>
-                    </div>
-                    <div class="modal-footer">
-                        {% csrf_token %}
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                        <input type="submit" value="Delete Visualization" class="btn btn-primary" />
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Share Visualizations Modal -->
-    <div class="modal fade" id="share-viz-modal" tabindex="-1" role="dialog" aria-labelledby="share-viz-header" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="share-viz-header">Share Cohort</h4>
-                </div>
-                <form id="share-viz-form" method="POST" action="{% url 'share_viz' %}">
-                    <div class="modal-body">
-                        <p class="form-control-static selected-viz"></p>
-                        <label for="share-viz-users">Please select the users you would like to share these cohorts with:</label>
-                        <select id="share-viz-users" name="users" multiple="multiple">
-                            {% for user in user_list %}
-                            <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }} ({{ user.email }})</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="modal-footer">
-                        {% csrf_token %}
-                        <input type="submit" value="Share Visualization" class="btn btn-primary" />
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
     <script type="text/javascript">
     var cohort_list = {{ cohorts_listing|safe }};
     var shared_users = {{ shared_users|safe }};
