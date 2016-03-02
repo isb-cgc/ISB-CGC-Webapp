@@ -969,7 +969,7 @@ def streaming_csv_view(request, cohort_id=0):
         writer = csv.writer(pseudo_buffer)
         response = StreamingHttpResponse((writer.writerow(row) for row in rows),
                                          content_type="text/csv")
-        response['Content-Disposition'] = 'attachment; filename="somefilename.csv"'
+        response['Content-Disposition'] = 'attachment; filename="file_list.csv"'
         return response
 
     elif 'error' in items:
