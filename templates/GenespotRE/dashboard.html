@@ -29,8 +29,7 @@
             <ul>
                 <div class="clearfix">
                     <li class="item">
-                    <!--TODO: get bar chart-->
-                        <img class="img-fluid" src="{% static 'img/histogram.png' %}">
+                        <img class="img-fluid" src="{% static 'img/barchart.png' %}">
                         <p>Bar Chart</p>
                     </li>
                     <li class="item">
@@ -38,13 +37,12 @@
                         <p>Histogram</p>
                     </li>
                     <li class="item">
-                        <!--TODO: get bar chart-->
+                        <!--TODO: get scatterplot chart-->
                         <img class="img-fluid" src="{% static 'img/histogram.png' %}">
                         <p>Scatter Plot</p>
                     </li>
                     <li class="item">
-                        <!--TODO: get bar chart-->
-                        <img class="img-fluid" src="{% static 'img/histogram.png' %}">
+                        <img class="img-fluid" src="{% static 'img/violinplot.png' %}">
                         <p>Violin Plot</p>
                     </li>
                 </div>
@@ -52,13 +50,11 @@
 
                 <div class="collapse clearfix" id="more-analysis">
                     <li class="item">
-                        <!--TODO: get bar chart-->
-                        <img class="img-fluid" src="{% static 'img/histogram.png' %}">
+                        <img class="img-fluid" src="{% static 'img/violinplot.png' %}">
                         <p>Violin Plot 2</p>
                     </li>
                     <li class="item">
-                        <!--TODO: get bar chart-->
-                        <img class="img-fluid" src="{% static 'img/histogram.png' %}">
+                        <img class="img-fluid" src="{% static 'img/cubbyhole.png' %}">
                         <p>Cubby Hole</p>
                     </li>
 {#                    <li class="item">#}
@@ -127,12 +123,12 @@
                         {% endfor %}
                     </ul>
                         {% if user.genefavorite_set.all|active|length > 6 %}
-                        <a href="{% url 'genes' %}" class="btn btn-link">View All</a>
+                        <a href="{% url 'genes' %}" class="btn btn-link float-right">View All</a>
                         {% endif %}
                     {% else %}
                     <p>You don't have any saved Gene Favorites.</p>
-                    <a href="{% url 'gene_fav_create' %}">Create Gene Favorites</a>
                     {% endif %}
+                    <a href="{% url 'gene_fav_create' %}" class="btn btn-link">Create Gene Favorites</a>
                 </div>
             </section>
             <section class="panel panel-default">
@@ -153,13 +149,13 @@
                            </li>
                         {% endfor %}
                         {% if user.variablefavorite_set.all|active|length > 6 %}
-                        <a href="{% url 'variables' %}" class="btn btn-link">View All</a>
+                        <a href="{% url 'variables' %}" class="btn btn-link float-right">View All</a>
                         {% endif %}
                     </ul>
                     {% else %}
                     <p>You don't have any saved Variable Favorites.</p>
-                    <a href="{% url 'variable_fav_create' %}">Create Variable Favorites</a>
                     {% endif %}
+                    <a href="{% url 'variable_fav_create' %}" class="btn btn-link">Create Variable Favorites</a>
                 </div>
             </section>
             <section class="panel panel-default">
@@ -184,13 +180,13 @@
                            </li>
                         {% endfor %}
                         {% if cohorts.count > 6 %}
-                            <a class="btn btn-link" href="{% url 'cohort_list' %}">View all</a>
+                            <a class="btn btn-link float-right" href="{% url 'cohort_list' %}">View all</a>
                         {% endif %}
                     </ul>
                     {% else %}
                     <p>You don't have any saved Cohorts.</p>
-                    <a href="{% url 'cohort' %}">Create Cohort</a>
                     {% endif %}
+                    <a href="{% url 'cohort' %}" class="btn btn-link">Create Cohort</a>
                 </div>
             </section>
         </div>
