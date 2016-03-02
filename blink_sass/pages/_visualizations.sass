@@ -27,7 +27,7 @@
             stroke: $tooltip-color
             stroke-width: 5px
 
-        .bar
+        .plot-bar
             fill: rgba(0,0,0,0.5)
             &:hover, &.selected
                 fill: rgba(0,0,225,0.5)
@@ -218,3 +218,84 @@
         margin-bottom: 10px
         td
             padding: 0px 5px
+
+/********************************************
+ * plot loading animation
+ *********************************************/
+
+.load-bar
+  position: relative
+  width: 100%
+  height: 15px
+  background-color: #fdba2c
+
+.bar
+  content: ""
+  display: inline
+  position: absolute
+  width: 0
+  height: 100%
+  left: 50%
+  text-align: center
+
+.bar:nth-child(1)
+  background-color: #F7991B
+  -webkit-animation: loading 3s linear infinite
+          animation: loading 3s linear infinite
+
+.bar:nth-child(2)
+  background-color: #49AFCD
+  -webkit-animation: loading 3s linear 1s infinite
+          animation: loading 3s linear 1s infinite
+
+.bar:nth-child(3)
+  background-color: #a94442
+  -webkit-animation: loading 3s linear 2s infinite
+          animation: loading 3s linear 2s infinite
+
+@-webkit-keyframes loading
+  from
+    left: 50%
+    width: 0
+    z-index: 100
+  33.3333%
+    left: 0
+    width: 100%
+    z-index: 10
+  to
+    left: 0
+    width: 100%
+
+@keyframes loading
+  from
+    left: 50%
+    width: 0
+    z-index: 100
+  33.3333%
+    left: 0
+    width: 100%
+    z-index: 10
+  to
+    left: 0
+    width: 100%
+
+.worksheet-plot-loader
+  height: 600px
+  width: 825px
+  background: #d0d0d0 !important
+  z-index: 100
+  margin: -6px -15px 0px -15px
+  .worksheet-plot-loader div
+    margin-right: auto
+    margin-left: auto
+  .worksheet-plot-loader i
+    left: 43%
+    top: 40%
+    margin: auto
+    font-size: 200px
+
+.loading-text
+  width: 100%
+  padding-top: 180px
+  font-size: 25px
+  text-align: center

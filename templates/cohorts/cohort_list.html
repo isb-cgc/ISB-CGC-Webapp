@@ -17,19 +17,19 @@
     <ol class="breadcrumb">
         <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
         {% if workbook %}
-        <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
-        <li><a href="{% url 'workbook_detail' workbook_id=workbook.id %}">{{ workbook.name|title }}</a></li>
+            <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
+            <li><a href="{% url 'workbook_detail' workbook_id=workbook.id %}">{{ workbook.name|title }}</a></li>
         {% endif %}
     </ol>
     <h1 class="page-header pull-left">{% if from_workbook %}Data Source | {% endif %}Cohorts</h1>
     {% if from_workbook %}
-    <a href="{% if workbook %}{% url 'cohort_create_for_existing_workbook' workbook_id=workbook.id worksheet_id=worksheet.id %}{% else %}{% url 'cohort_create_for_new_workbook' %}{% endif %}" class="btn btn-primary pull-right"><i class="fa fa-plus"></i> Create New Cohort</a>
-    <form id="cohort-apply-to-workbook" action="{% url 'add_cohorts_to_worksheet' workbook_id=workbook.id worksheet_id=worksheet.id %}" method="POST">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-primary pull-right" disabled="disabled">{% if create_workbook %}Create Workbook{% else %}Apply to Worksheet{% endif %}</button>
-    </form>
+        <a href="{% if workbook %}{% url 'cohort_create_for_existing_workbook' workbook_id=workbook.id worksheet_id=worksheet.id %}{% else %}{% url 'cohort_create_for_new_workbook' %}{% endif %}" class="btn btn-primary pull-right"><i class="fa fa-plus"></i> Create New Cohort</a>
+        <form id="cohort-apply-to-workbook" action="{% url 'add_cohorts_to_worksheet' workbook_id=workbook.id worksheet_id=worksheet.id %}" method="POST">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary pull-right" disabled="disabled">{% if create_workbook %}Create Workbook{% else %}Apply to Worksheet{% endif %}</button>
+        </form>
     {% else %}
-    <a href="{% url 'cohort' %}" class="btn btn-primary pull-right"><i class="fa fa-plus"></i> Create New Cohort</a>
+        <a href="{% url 'cohort' %}" class="btn btn-primary pull-right"><i class="fa fa-plus"></i> Create New Cohort</a>
     {% endif %}
 </div>
 {% endblock %}
@@ -48,29 +48,29 @@
             <div role="tabpanel" class="tab-pane {% if not is_public %} active {% endif %} " id="save-cohorts-list">
                 {% if cohorts.has_private_cohorts %}
                     {% if not from_workbook %}
-                    <div class="page-action-group">
-                        <li role="menuitem">
-                            <button id="createWorkbookWithCohort" class="btn btn-default">New Workbook</button>
-                        </li>
-                        <li class="separator"></li>
-                        <li role="menuitem">
-                            <button id='delete-cohorts' type="button" class="btn btn-info" data-toggle="modal" data-target="#delete-cohorts-modal" aria-label="delete-cohorts" role="button" aria-expanded="true">
-                                <i class="fa fa-trash"></i>
-                                Delete
-                            </button>
-                        </li>
-                        <li role="menuitem">
-                            <button id="cohort-sets" type="button" class="btn btn-info" data-toggle="modal" data-target="#union-modal" aria-label="set-logic" role="button" aria-expanded="true">
-                            Set Operations
-                            </button>
-                        </li>
-                        <li role="menuitem">
-                            <button class="btn btn-info" id="share-cohorts-btn" type="button" data-toggle="modal" data-target="#share-cohorts-modal" aria-label="share-cohorts" role="button" aria-expanded="true">
-                                <i class="fa fa-share-alt"></i>
-                                Share
-                            </button>
-                        </li>
-                    </div>
+                        <div class="page-action-group">
+                            <li role="menuitem">
+                                <button class="btn btn-default createWorkbookWithCohort">New Workbook</button>
+                            </li>
+                            <li class="separator"></li>
+                            <li role="menuitem">
+                                <button id='delete-cohorts' type="button" class="btn btn-info" data-toggle="modal" data-target="#delete-cohorts-modal" aria-label="delete-cohorts" role="button" aria-expanded="true">
+                                    <i class="fa fa-trash"></i>
+                                    Delete
+                                </button>
+                            </li>
+                            <li role="menuitem">
+                                <button id="cohort-sets" type="button" class="btn btn-info" data-toggle="modal" data-target="#union-modal" aria-label="set-logic" role="button" aria-expanded="true">
+                                Set Operations
+                                </button>
+                            </li>
+                            <li role="menuitem">
+                                <button class="btn btn-info" id="share-cohorts-btn" type="button" data-toggle="modal" data-target="#share-cohorts-modal" aria-label="share-cohorts" role="button" aria-expanded="true">
+                                    <i class="fa fa-share-alt"></i>
+                                    Share
+                                </button>
+                            </li>
+                        </div>
                     {% endif %}
 
                     <table id="cohort-table" class="table table-striped tablesorter">
@@ -87,7 +87,9 @@
                         {% for cohort in cohorts %}
                         {% if cohort.owner.is_superuser == False %}
                             <tr>
-                                <td class="checkbox-col"><input type="checkbox" name="id" value="{{ cohort.id }}" title="{{ cohort.name }} Checkbox" aria-label="cohort-checkbox"/></td>
+                                <td class="checkbox-col">
+                                    <input {% if cohort.id in previously_selected_cohort_ids %}checked{% endif %} type="checkbox" name="id" value="{{ cohort.id }}" title="{{ cohort.name }} Checkbox" aria-label="cohort-checkbox"/>
+                                </td>
                                 <td class="name-col"><a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a></td>
                                 <td class="sample-col">{#{ cohort.num_patients }#} {{ cohort.sample_size }} </td>
                                 <td>{{ cohort.patient_size }}</td>
@@ -122,7 +124,7 @@
             <div role="tabpanel" class="tab-pane {% if is_public %} active {% endif %} " id="public-cohorts-list">
                 {% if not from_workbook %}
                 <div class="page-action-group">
-                    <li role="menuitem"><button class="btn btn-default">New Workbook</button></li>
+                    <li role="menuitem"><button class="btn btn-default createWorkbookWithCohort">New Workbook</button></li>
                     <li class="separator"></li>
                     <li role="menuitem"><button class="btn btn-info">Set Operations</button></li>
                 </div>
@@ -140,7 +142,9 @@
                         {% for cohort in cohorts %}
                             {% if cohort.owner.is_superuser == True %}
                             <tr>
-                                <td class="checkbox-col"><input type="checkbox" name="id" value="{{ cohort.id }}" title="{{ cohort.name }} Checkbox" aria-label="cohort-checkbox"/></td>
+                                <td class="checkbox-col">
+                                    <input {% if cohort.id in previously_selected_cohort_ids %}checked{% endif %} type="checkbox" name="id" value="{{ cohort.id }}" title="{{ cohort.name }} Checkbox" aria-label="cohort-checkbox"/>
+                                </td>
                                 <td class="name-col"><a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a></td>
                                 <td class="sample-col">{#{ cohort.num_patients }#} {{ cohort.sample_size }} </td>
                                 <td>{{ cohort.patient_size }}</td>

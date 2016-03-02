@@ -46,10 +46,9 @@
             </div>
             <div class="flyout-body" style="bottom: inherit; overflow-y:inherit;">
                 <div class="main-settings">
-                    {% if workbook.owner.id == user.id %}
                     <div class="form-group">
                         <label for="{{ plot.id }}-x-select">X Axis Variable <a role="button" class="x-edit-field" data-attribute="x-selector" aria-label="X Field Editor"></a></label>
-                        <select id="x-axis-select" plot="{{ plot.id }}" class="search-term-field" style="width: 230px;">
+                        <select id="x-axis-select" {% if workbook.owner.id != user.id %} disabled {% endif %} plot="{{ plot.id }}" class="search-term-field" style="width: 230px;">
                             {% if plot.x_axis %}
                                 <option value="{{ plot.x_axis.url_code }}" var_id="{{ plot.x_axis.id }}" selected >{{ plot.x_axis.name }}</option>
                             {% else %}
@@ -64,10 +63,12 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <button class="swap btn btn-default btn-sm inline-block space-bottom-10"><i class="fa fa-exchange fa-rotate-90"></i>Swap Values</button>
+                    {% if workbook.owner.id == user.id %}
+                        <button class="swap btn btn-default btn-sm inline-block space-bottom-10"><i class="fa fa-exchange fa-rotate-90"></i>Swap Values</button>
+                    {% endif %}
                     <div class="form-group">
                         <label for="{{ plot.id }}-y-select">Y Axis Variable <a role="button" class="y-edit-field" data-attribute="y-selector" aria-label="Y Field Editor"></a></label>
-                        <select id="y-axis-select" class="search-term-field" style="width: 230px;">
+                        <select id="y-axis-select" {% if workbook.owner.id != user.id %} disabled {% endif %} class="search-term-field" style="width: 230px;">
                             {% if plot.y_axis %}
                                 <option value="{{ plot.y_axis.url_code }}" var_id="{{ plot.y_axis.id }}" selected >{{ plot.y_axis.name }}</option>
                             {% else %}
@@ -85,7 +86,7 @@
                     <div class="form-group">
                         <label for="{{ plot.id }}-color-select">Color By Feature</label>
 {#                        <div class="color-selector filter-label label label-default" type="text" id="color-select" name="color-attr" value="{{ plot.color_by }}">{{ plot.color_by }}</div>#}
-                        <select id="color_by" class="search-term-field" style="width: 230px;">
+                        <select id="color_by" {% if workbook.owner.id != user.id %} disabled {% endif %} class="search-term-field" style="width: 230px;">
                             {% if plot.color_by %}
                                 <option value="{{ plot.color_by.url_code }}" var_id="{{ plot.color_by.id }}" selected >{{ plot.color_by.name }}</option>
                             {% else %}
@@ -106,58 +107,33 @@
 {#                    </div>#}
                     <div class="form-group">
                         <label>Cohorts</label>
-                        <div class="cohort-listing space-top-5">
-                            <select id="cohort-select" plot="{{ plot.id }}" class="search-term-field" style="width: 230px;">
-                                {% if plot.cohort %}
-                                    <option value="{{ plot.cohort.id }}" selected >{{ plot.cohort.cohort.name }}</option>
-                                {% else %}
-                                    <option disabled selected >-- select a cohort--</option>
-                                {% endif %}
-                                {% for cohort in cohorts %}
-                                    {% if not plot or plot.cohort.id != cohort.id %}
-                                        <option value="{{ cohort.id }}">{{ cohort.cohort.name }}</option>
-                                    {% endif %}
-                                {% endfor %}
-                            </select>
+                        <div class="cohort-listing" plot="{{ plot.id }}">
+                            {% for cohort in cohorts %}
+                                 <div class="checkbox" style="margin-top: 0px; margin-bottom: 5px;">
+                                      <label>
+                                        <input {% if workbook.owner.id != user.id %} disabled {% endif %} class="variable-toggle-checkbox" name="cohort-checkbox" aria-label="cohort-checkbox" type="checkbox" cohort-id="{{ cohort.cohort.id }}" value="{{ cohort.id }}">
+                                        {{ cohort.cohort.name }}
+                                      </label>
+                                 </div>
+                            {% endfor %}
                         </div>
                     </div>
-                    <button class="update-plot btn btn-primary" worksheet_id="{{ worksheet.id }}" plot_id="{{ plot.id }}">Update Plot</button>
-                    {% else %}
-                    <div class="form-group">
-                        <h6>X Axis Variable</h6>
-                        <p>{{ plot.xaxis.selected }}</p>
-                    </div>
-                    {% if plot.yaxis.selected %}
-                    <div class="form-group">
-                        <h6>Y Axis Variable</h6>
-                        <p>{{ plot.yaxis.selected }}</p>
-                    </div>
-                    {% endif %}
-                    <div class="form-group">
-                        {% if plot.color_by %}
-                        <h6>Color By Feature </h6>
-                        <p>{{ plot.color_by }}</p>
-                        {% endif %}
-                        <p>{% if plot.color_by_cohort %}<i class="fa fa-check text-success"></i>{% else %}<i class="fa fa-close text-danger"></i>{% endif %} Color By Cohort</p>
-                    </div>
-                    <div class="form-group">
-                        <h6>Cohort</h6>
-                        <p>{{ plot.cohort.selected }}</p>
-                    </div>
-                    {% endif %}
+                    <button {% if workbook.owner.id != user.id %} style="display:none" {% endif %} class="update-plot btn btn-primary" worksheet_id="{{ worksheet.id }}" plot_id="{{ plot.id }}">Update Plot</button>
                 </div>
             </div>
         </div>
 
         <div class="plot-div">
-            <div class="worksheet-instruction">
-                <p><i class="fa fa-exclamation-circle"></i> To Complete this Analysis: </p>
-                <ul class="ul">
-                    <li>You must select an Analysis Type (above)</li>
-                    <li>You must select <a href="{% url 'genes' %}">Genes</a> or <a href="{% url 'variables' %}">Variables</a> (or, optionally, both)</li>
-                    <li>You must select a <a href="{% url 'cohort_list' %}">Cohorts</a></li>
-                </ul>
-            </div>
+            {% if workbook.owner.id == user.id %}
+                <div class="worksheet-instruction">
+                    <p><i class="fa fa-exclamation-circle"></i> To Complete this Analysis: </p>
+                    <ul class="ul">
+                        <li>You must select an Analysis Type (above)</li>
+                        <li>You must select <a href="{% url 'genes' %}">Genes</a> or <a href="{% url 'variables' %}">Variables</a> (or, optionally, both)</li>
+                        <li>You must select a <a href="{% url 'cohort_list' %}">Cohorts</a></li>
+                    </ul>
+                </div>
+            {% endif %}
         </div>
         <div class="legend"></div>
         <div class="pairwise-result"></div>
