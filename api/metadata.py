@@ -2080,3 +2080,133 @@ class Meta_Endpoints_API_v2(remote.Service):
         db.close()
         request_finished.send(self)
         return SampleBarcodeList( items=results, count=len(results) )
+
+
+    GET_RESOURCE = endpoints.ResourceContainer(
+                                               filters=messages.StringField(1),
+                                               token=messages.StringField(3),
+                                               cohort_id=messages.IntegerField(2))
+    @endpoints.method(GET_RESOURCE, MetadataPlatformItemList,
+                      path='metadata_platform_list', http_method='GET',
+                      name='meta.metadata_platform_list')
+    def metadata_platform_list(self, request):
+        """ Used by the web application."""
+        filters = {}
+        sample_ids = None
+
+        if request.__getattribute__('filters')is not None:
+            try:
+                tmp = json.loads(request.filters)
+                for filter in tmp:
+                    key = filter['key']
+                    if key not in filters:
+                        filters[key] = {'values':[], 'tables':[] }
+                    filters[key]['values'].append(filter['value'])
+
+            except Exception, e:
+                print traceback.format_exc()
+                raise endpoints.BadRequestException('Filters must be a valid JSON formatted array with objects containing both key and value properties')
+
+        db = sql_connection()
+
+        # Check for passed in saved search id
+        if request.__getattribute__('cohort_id') is not None:
+            cohort_id = str(request.cohort_id)
+            sample_query_str = 'SELECT sample_id FROM cohorts_samples WHERE cohort_id=%s;'
+
+            try:
+                cursor = db.cursor(MySQLdb.cursors.DictCursor)
+                cursor.execute(sample_query_str, (cohort_id,))
+                sample_ids = ()
+
+                for row in cursor.fetchall():
+                    sample_ids += (row['sample_id'],)
+
+            except (TypeError, IndexError) as e:
+                print e
+                raise endpoints.NotFoundException('Error in retrieving barcodes.')
+
+        query_str = "SELECT " \
+                    "IF(has_Illumina_DNASeq=1, " \
+                    "'Yes', 'None'" \
+                    ") AS DNAseq_data," \
+                    "IF (has_SNP6=1, 'Genome_Wide_SNP_6', 'None') as cnvrPlatform," \
+                    "CASE" \
+                    "  WHEN has_BCGSC_HiSeq_RNASeq=1 and has_UNC_HiSeq_RNASeq=0" \
+                    "    THEN 'HiSeq/BCGSC'" \
+                    "  WHEN has_BCGSC_HiSeq_RNASeq=1 and has_UNC_HiSeq_RNASeq=1" \
+                    "    THEN 'HiSeq/BCGSC and UNC V2'" \
+                    "  WHEN has_UNC_HiSeq_RNASeq=1 and has_BCGSC_HiSeq_RNASeq=0 and has_BCGSC_GA_RNASeq=0 and has_UNC_GA_RNASeq=0" \
+                    "    THEN 'HiSeq/UNC V2'" \
+                    "  WHEN has_UNC_HiSeq_RNASeq=1 and has_BCGSC_HiSeq_RNASeq=0 and has_BCGSC_GA_RNASeq=0 and has_UNC_GA_RNASeq=1" \
+                    "    THEN 'GA and HiSeq/UNC V2'" \
+                    "  WHEN has_UNC_HiSeq_RNASeq=1 and has_BCGSC_HiSeq_RNASeq=0 and has_BCGSC_GA_RNASeq=1 and has_UNC_GA_RNASeq=0" \
+                    "    THEN 'HiSeq/UNC V2 and GA/BCGSC'" \
+                    "  WHEN has_UNC_HiSeq_RNASeq=1 and has_BCGSC_HiSeq_RNASeq=1 and has_BCGSC_GA_RNASeq=0 and has_UNC_GA_RNASeq=0" \
+                    "    THEN 'HiSeq/UNC V2 and BCGSC'" \
+                    "  WHEN has_BCGSC_GA_RNASeq=1 and has_UNC_HiSeq_RNASeq=0" \
+                    "    THEN 'GA/BCGSC'" \
+                    "  WHEN has_UNC_GA_RNASeq=1 and has_UNC_HiSeq_RNASeq=0" \
+                    "    THEN 'GA/UNC V2'" \
+                    "  ELSE 'None'" \
+                    "END AS gexpPlatform," \
+                    "CASE " \
+                    "   WHEN has_27k=1 and has_450k=0" \
+                    "     THEN 'HumanMethylation27'" \
+                    "   WHEN has_27k=0 and has_450k=1" \
+                    "     THEN 'HumanMethylation450'" \
+                    "   WHEN has_27k=1 and has_450k=1" \
+                    "     THEN '27k and 450k'" \
+                    "   ELSE 'None'" \
+                    "END AS methPlatform," \
+                    "CASE " \
+                    "   WHEN has_HiSeq_miRnaSeq=1 and has_GA_miRNASeq=0" \
+                    "      THEN 'IlluminaHiSeq_miRNASeq'" \
+                    "   WHEN has_HiSeq_miRnaSeq=0 and has_GA_miRNASeq=1" \
+                    "      THEN 'IlluminaGA_miRNASeq'" \
+                    "   WHEN has_HiSeq_miRnaSeq=1 and has_GA_miRNASeq=1" \
+                    "      THEN 'GA and HiSeq'" \
+                    "   ELSE 'None'" \
+                    "END AS mirnPlatform," \
+                    "IF (has_RPPA=1, 'MDA_RPPA_Core', 'None') AS rppaPlatform " \
+                    "FROM metadata_samples "
+
+        value_tuple = ()
+        if len(filters) > 0:
+            where_clause = build_where_clause(filters)
+            query_str += ' WHERE ' + where_clause['query_str']
+            value_tuple = where_clause['value_tuple']
+
+        if sample_ids:
+            if query_str.rfind('WHERE') >= 0:
+                query_str += ' and SampleBarcode in %s' % (sample_ids,)
+            else:
+                query_str += ' WHERE SampleBarcode in %s' % (sample_ids,)
+
+        query_str += ';'
+
+        try:
+            cursor = db.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute(query_str, value_tuple)
+            data = []
+            for row in cursor.fetchall():
+
+                item = MetadataPlatformItem(
+                    DNAseq_data=str(row['DNAseq_data']),
+                    cnvrPlatform=str(row['cnvrPlatform']),
+                    gexpPlatform=str(row['gexpPlatform']),
+                    methPlatform=str(row['methPlatform']),
+                    mirnPlatform=str(row['mirnPlatform']),
+                    rppaPlatform=str(row['rppaPlatform']),
+                )
+                data.append(item)
+
+            cursor.close()
+            db.close()
+
+            return MetadataPlatformItemList(items=data)
+
+        except (IndexError, TypeError) as e:
+            if cursor: cursor.close()
+            if db: db.close()
+            raise endpoints.NotFoundException('Sample not found.')
