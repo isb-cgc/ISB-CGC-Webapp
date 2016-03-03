@@ -101,6 +101,24 @@
                             {% endfor %}
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label for="{{ plot.id }}-color-select">Gene (SeqPeek)</label>
+                        <select id="gene_label" {% if workbook.owner.id != user.id %} disabled {% endif %} class="search-term-field" style="width: 230px;">
+                            {% if plot.gene_label %}
+                                <option value="{{ plot.gene_label }}" selected >{{ plot.gene_label }}</option>
+                            {% else %}
+                                <option disabled selected>-- select a gene--</option>
+                            {% endif %}
+                            {% for gene_item in genes %}
+                                {% if not plot or plot.gene_label != gene_item.gene %}
+                                    {# TODO {% if gene_item.gene == plot.gene_label %}#}
+                                    <option value="{{ gene_item.gene }}">{{ gene_item.gene }}</option>
+                                    {# TODO {% endif %}#}
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+
 {#                    <div class="form-group">#}
 {#                        <label for="{{ plot.id }}-color-by-cohort">Color By Cohort</label>#}
 {#                        <input type="checkbox" class="color-by-cohort" id="color-by-cohort" />#}

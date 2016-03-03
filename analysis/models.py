@@ -14,8 +14,9 @@ class Analysis(models.Model):
                  {'name' : 'Scatter Plot',               'description' : "This is a short description", 'image' : 'img/histogram.png'},
                  {'name' : 'Violin Plot',                'description' : "This is a short description", 'image' : 'img/histogram.png'},
                  {'name' : 'Violin Plot with axis swap', 'description' : "This is a short description", 'image' : 'img/histogram.png'},
-                 {'name' : 'Cubby Hole Plot',            'description' : "This is a short description", 'image' : 'img/histogram.png'}]
-                # Todo {'name' : 'SeqPeak'}],
-                # description : This visualization shows where somatic mutations have been observed on a linear representation of a specific protein.  Each horizontal strip represents the protein, with data from different tumor types (aka cohorts or studies) shown stacked one on top of the other. </p>
+                 {'name' : 'Cubby Hole Plot',            'description' : "This is a short description", 'image' : 'img/histogram.png'},
+                 {'name' : 'SeqPeek',                    'description' : "This visualization shows where somatic mutations have been observed on a linear representation of a specific protein.  Each horizontal strip represents the protein, with data from different tumor types (aka cohorts or studies) shown stacked one on top of the other. </p>",
+                                                         'image': 'img/histogram.png'}]
+
 
         return types
