@@ -32,7 +32,7 @@ function($, d3, d3tip, vizhelpers) {
                 };
 
             var yScale = d3.scale.linear().range([height-margin.bottom, margin.top]).domain(range);
-            var yMap = function(d) { return yScale(yVal(d));};
+            var yMap = function(d) { if(typeof(Number(d.y)) == "number"){return yScale(yVal(d));} else { return 0;}};
             var yAxis = d3.svg.axis()
                     .scale(yScale)
                     .orient("left")
@@ -48,7 +48,7 @@ function($, d3, d3tip, vizhelpers) {
                 };
 
             var xScale = d3.scale.linear().range([margin.left, width]).domain(domain);
-            var xMap = function(d) { return xScale(xVal(d));};
+            var xMap = function(d) {if(typeof(Number(d.x)) == "number"){return xScale(xVal(d));} else { return 0;}};
             var xAxis = d3.svg.axis()
                     .scale(xScale)
                     .orient("bottom")

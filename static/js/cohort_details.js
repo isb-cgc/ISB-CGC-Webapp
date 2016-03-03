@@ -124,7 +124,7 @@ require([
                 $('#' + search_id).prop('checked', false);
                 $this.parent('span').remove();
                 search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id, undefined, 'v2', api_token);
-                search_helper_obj.update_parsets(base_api_url, 'metadata_platform_list', cohort_id), 'v1';
+                search_helper_obj.update_parsets(base_api_url, 'metadata_platform_list', cohort_id), 'v2';
                 $('#create-cohort-form .form-control-static').find('span[value="' + search_id + '"]').remove();
                 return false;
             });
@@ -133,7 +133,7 @@ require([
             $this.data('create-cohort-form-item').remove();
         }
         search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id, undefined, 'v2', api_token);
-        search_helper_obj.update_parsets(base_api_url, 'metadata_platform_list', cohort_id, 'v1');
+        search_helper_obj.update_parsets(base_api_url, 'metadata_platform_list', cohort_id, 'v2');
     };
 
     $('.search-checkbox-list input[type="checkbox"]').on('change', checkbox_callback);
@@ -300,12 +300,16 @@ require([
     });
 
     search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id, undefined, 'v2', api_token);
-    search_helper_obj.update_parsets(base_api_url, 'metadata_platform_list', cohort_id, 'v1');
+    search_helper_obj.update_parsets(base_api_url, 'metadata_platform_list', cohort_id, 'v2');
 
     $('#shared-with-btn').on('click', function(e){
         var target = $(this).data('target');
 
         $(target + ' a[data-target="#shared-pane"]').tab('show');
+    })
+
+    $('#create-cohort-modal form').on('submit', function() {
+        $(this).find('input[type="submit"]').attr('disabled', 'disabled');
     })
 });
 
