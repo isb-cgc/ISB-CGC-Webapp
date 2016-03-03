@@ -329,6 +329,18 @@ require([
         }
     });
 
+    $('.show-more').on('click', function() {
+        $(this).siblings('li.extra-values').show();
+        $(this).siblings('.show-less').show();
+        $(this).hide();
+    });
+
+    $('.show-less').on('click', function() {
+        $(this).siblings('li.extra-values').hide();
+        $(this).siblings('.show-more').show();
+        $(this).hide();
+    });
+
     /*
         Used for getting the CORS token for submitting data
      */

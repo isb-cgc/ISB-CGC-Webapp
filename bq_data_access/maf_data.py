@@ -136,7 +136,7 @@ def build_feature_query():
                        FROM [{project_name}:{dataset_name}.{table_name}] \
                        GROUP BY Hugo_Symbol")
 
-    query_str = query_template.format(dataset_name=settings.BIGQUERY_DATASET2,
+    query_str = query_template.format(dataset_name=settings.BIGQUERY_DATASET,
                                       project_name=settings.BIGQUERY_PROJECT_NAME, table_name='MAF')
 
     return [query_str]
@@ -201,7 +201,7 @@ class GNABFeatureProvider(object):
     def get_data_from_bigquery(self, cohort_id_array, cohort_dataset, cohort_table):
         project_id = settings.BQ_PROJECT_ID
         project_name = settings.BIGQUERY_PROJECT_NAME
-        dataset_name = settings.BIGQUERY_DATASET2
+        dataset_name = settings.BIGQUERY_DATASET
         result = do_query(project_id, project_name, dataset_name,
                           self.table_name, self.gene_label, self.value_field,
                           cohort_dataset, cohort_table, cohort_id_array)

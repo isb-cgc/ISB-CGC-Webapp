@@ -60,8 +60,6 @@ require([
         }
     });
 
-
-
     var delete_x_callback = function () {
         $(this).parent('.cohort-label').remove();
         return false;
@@ -141,7 +139,7 @@ require([
         // If no checkboxes are selected
         if ($('#cohorts-list tr:not(:first) input[type="checkbox"]:checked').length == 0) {
             $('#cohorts-list .select-all').prop('checked', false);
-            disable_buttons(tablename);
+            //disable_buttons(tablename);
             repopulate_cohort_selects();
 
         } else {
@@ -279,13 +277,12 @@ require([
                         + ' <a href="" class="delete-x"><i class="fa fa-times"></a>'
                         + '</span>';
             var cohort_token = $(token_str);
-            $(event.target).parents('.col-md-10').find('.form-control-static').append(cohort_token);
+            $(event.target).parents('.form-group').find('.form-control-static').append(cohort_token);
             $('.delete-x').on('click', delete_x_callback);
             $(this).val('');
             $(this).hide();
             return false;
-        },
-        appendTo: '.cohort-search-div'
+        }
     }).hide();
 
     $.tablesorter.addParser({
@@ -394,7 +391,7 @@ require([
         return false;
     });
 
-    $("#createWorkbookWithCohort").on("click", function(){
+    $(".createWorkbookWithCohort").on("click", function(){
         //get the selected cohort
         var cohorts = [];
         $('#cohorts-list input[type="checkbox"]').each(function() {

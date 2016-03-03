@@ -49,8 +49,17 @@
                                     <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" class="dropdown-arrow"><i class="fa fa-caret-down"></i></a>
                                     <ul class="dropdown-menu">
                                         <li><a href="{% url 'project_detail' project.id %}">Edit</a> </li>
-                                        <li><a role="button">Delete</a></li>
-                                        <li><a href="">New Workbook</a></li>
+                                        <li><a role="button" data-toggle="modal" data-target="#delete-project-modal-{{ project.id }}">Delete</a></li>
+                                        <li>
+                                            <a>
+                                                <form action="{% url 'worksheet_create_with_projects' %}" method="POST">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="project_id" value="{{ project.id }}">
+                                                    <button type="submit">New Workbook</button>
+                                                </form>
+                                            </a>
+{#                                            <a href="{% url 'create_with_project' project.id %}">New Workbook</a>#}
+                                        </li>
                                     </ul>
                                     <span class="row-expand-button"></span>
                                 </div>
@@ -84,6 +93,25 @@
                             <td>{{ study.last_date_saved|date:"SHORT_DATETIME_FORMAT" }}</td>
                         {% endfor %}
                         </tr>
+
+                        <!-- Delete Project Modal For Each Project-->
+                        <div class="modal fade" id="delete-project-modal-{{ project.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-project-header" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                        <h4 class="modal-title">Delete this Project?</h4>
+                                    </div>
+                                    <form id="delete-project" method="POST" action="{% url 'project_delete' project.id %}" data-redirect="{% url 'projects' %}">
+                                        {% csrf_token %}
+                                        <div class="modal-footer">
+                                            <input type="submit" value="Delete" class="btn btn-primary" />
+                                            <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -146,6 +174,8 @@
                 {% endif %}
             </div>
         </div>
+
+
     </div>
 </div>
 {% endblock %}
