@@ -360,6 +360,8 @@ SITE_SUPERUSER_PASSWORD = os.environ.get('SUPERUSER_PASSWORD', '')
 #   End django-finalware   #
 ############################
 
+CONN_MAX_AGE = 0
+
 ############################
 #   CUSTOM TEMPLATE CONTEXT
 ############################
