@@ -277,13 +277,12 @@ require([
                         + ' <a href="" class="delete-x"><i class="fa fa-times"></a>'
                         + '</span>';
             var cohort_token = $(token_str);
-            $(event.target).parents('.col-md-10').find('.form-control-static').append(cohort_token);
+            $(event.target).parents('.form-group').find('.form-control-static').append(cohort_token);
             $('.delete-x').on('click', delete_x_callback);
             $(this).val('');
             $(this).hide();
             return false;
-        },
-        appendTo: '.cohort-search-div'
+        }
     }).hide();
 
     $.tablesorter.addParser({

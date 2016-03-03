@@ -202,14 +202,14 @@ def cohort_create_for_existing_workbook(request, workbook_id, worksheet_id):
 @login_required
 def cohort_detail(request, cohort_id=0, workbook_id=0, worksheet_id=0, create_workbook=False):
     if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
-    users = User.objects.filter(is_superuser=0)
+    users = User.objects.filter(is_superuser=0).exclude(id=request.user.id)
     cohort = None
     shared_with_users = []
 
     # service = build('meta', 'v1', discoveryServiceUrl=META_DISCOVERY_URL)
     clin_attr = [
-        # 'Project',
-        # 'Study',
+        'Project',
+        'Study',
         'vital_status',
         # 'survival_time',
         'gender',
@@ -969,7 +969,7 @@ def streaming_csv_view(request, cohort_id=0):
         writer = csv.writer(pseudo_buffer)
         response = StreamingHttpResponse((writer.writerow(row) for row in rows),
                                          content_type="text/csv")
-        response['Content-Disposition'] = 'attachment; filename="somefilename.csv"'
+        response['Content-Disposition'] = 'attachment; filename="file_list.csv"'
         return response
 
     elif 'error' in items:

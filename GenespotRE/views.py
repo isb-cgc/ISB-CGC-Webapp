@@ -1,19 +1,14 @@
 """
-
 Copyright 2015, Institute for Systems Biology
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-
    http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
 """
 
 import logging
@@ -182,7 +177,8 @@ def user_detail(request, user_id):
         return render(request, 'GenespotRE/user_detail.html',
                       {'request': request,
                        'user_details': user_details,
-                       'NIH_AUTH_ON': settings.NIH_AUTH_ON
+                       'NIH_AUTH_ON': settings.NIH_AUTH_ON,
+                       'ERA_LOGIN_URL': settings.ERA_LOGIN_URL
                        })
     else:
         return render(request, '403.html')
@@ -383,7 +379,7 @@ def dashboard_page(request):
     # Cohort List
     isb_superuser = User.objects.get(username='isb')
     public_cohorts = Cohort_Perms.objects.filter(user=isb_superuser,perm=Cohort_Perms.OWNER).values_list('cohort', flat=True)
-    cohort_perms = Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True).exclude(cohort__id__in=public_cohorts)
+    cohort_perms = list(set(Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True).exclude(cohort__id__in=public_cohorts)))
     cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved')
 
     # Project List

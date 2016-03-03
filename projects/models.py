@@ -49,14 +49,22 @@ class Project(models.Model):
         return last_view
 
     @classmethod
-    def get_user_projects(cls, user, includeShared=True):
+    def get_user_projects(cls, user, includeShared=True, includePublic=False):
         projects = user.project_set.all().filter(active=True)
         if includeShared:
             sharedProjects = cls.objects.filter(shared__matched_user=user, shared__active=True, active=True)
             projects = projects | sharedProjects
-            projects = projects.distinct()
+        if includePublic:
+            publicProjects = cls.objects.filter(is_public=True, active=True)
+            projects = projects | publicProjects
+
+        projects = projects.distinct()
 
         return projects
+
+    @classmethod
+    def get_public_projects(cls):
+        return cls.objects.filter(is_public=True, active=True)
 
     def __str__(self):
         return self.name
