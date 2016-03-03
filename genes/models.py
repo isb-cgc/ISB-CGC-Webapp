@@ -127,5 +127,5 @@ class GeneSymbol(models.Model):
     #returns a list of gene symbol suggestions
     @classmethod
     def suggest_symbol(cls, string):
-        results = cls.objects.filter(symbol__icontains=string)[:10].values('symbol')
+        results = cls.objects.filter(symbol__istartswith=string)[:10].values('symbol')
         return results
