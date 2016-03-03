@@ -59,6 +59,7 @@ def convert(data):
     else:
         return data
 
+USER_DATA_ON = settings.USER_DATA_ON
 BIG_QUERY_API_URL = settings.BASE_API_URL + '/_ah/api/bq_api/v1'
 COHORT_API = settings.BASE_API_URL + '/_ah/api/cohort_api/v1'
 METADATA_API = settings.BASE_API_URL + '/_ah/api/meta_api/'
@@ -265,7 +266,6 @@ def cohort_detail(request, cohort_id=0, workbook_id=0, worksheet_id=0, create_wo
 
     clin_attr_dsp = []
     clin_attr_dsp += clin_attr
-    user_attr = ['user_project','user_study']
 
     token = SocialToken.objects.filter(account__user=request.user, account__provider='Google')[0].token
     data_url = METADATA_API + ('v2/metadata_counts?token=%s' % (token,))
@@ -273,51 +273,54 @@ def cohort_detail(request, cohort_id=0, workbook_id=0, worksheet_id=0, create_wo
     results = urlfetch.fetch(data_url, deadline=60)
     results = json.loads(results.content)
     totals = results['total']
+    print USER_DATA_ON
+    if USER_DATA_ON:
+        # Add in user data
+        user_attr = ['user_project','user_study']
+        projects = Project.get_user_projects(request.user, True)
+        studies = Study.get_user_studies(request.user, True)
+        features = User_Feature_Definitions.objects.filter(study__in=studies)
+        study_counts = {}
+        project_counts = {}
 
-    # Add in user data
-    projects = Project.get_user_projects(request.user, True)
-    studies = Study.get_user_studies(request.user, True)
-    features = User_Feature_Definitions.objects.filter(study__in=studies)
-    study_counts = {}
-    project_counts = {}
+        for count in results['count']:
+            if 'id' in count and count['id'].startswith('study:'):
+                split = count['id'].split(':')
+                study_id = split[1]
+                feature_name = split[2]
+                study_counts[study_id] = count['total']
 
-    for count in results['count']:
-        if 'id' in count and count['id'].startswith('study:'):
-            split = count['id'].split(':')
-            study_id = split[1]
-            feature_name = split[2]
-            study_counts[study_id] = count['total']
+        user_studies = []
+        for study in studies:
+            count = study_counts[study.id] if study.id in study_counts else 0
 
-    user_studies = []
-    for study in studies:
-        count = study_counts[study.id] if study.id in study_counts else 0
+            if not study.project_id in project_counts:
+                project_counts[study.project_id] = 0
+            project_counts[study.project_id] += count
 
-        if not study.project_id in project_counts:
-            project_counts[study.project_id] = 0
-        project_counts[study.project_id] += count
+            user_studies += ({
+                            'count': str(count),
+                            'value': study.name,
+                            'id'   : study.id
+                          },)
 
-        user_studies += ({
-                        'count': str(count),
-                        'value': study.name,
-                        'id'   : study.id
-                      },)
+        user_projects = []
+        for project in projects:
+            user_projects += ({
+                                'count': str(project_counts[project.id]) if project.id in project_counts else 0,
+                                'value': project.name,
+                                'id'   : project.id
+                                },)
 
-    user_projects = []
-    for project in projects:
-        user_projects += ({
-                            'count': str(project_counts[project.id]) if project.id in project_counts else 0,
-                            'value': project.name,
-                            'id'   : project.id
-                            },)
+        results['count'].append({
+            'name': 'user_projects',
+            'values': user_projects
+        })
+        results['count'].append({
+            'name': 'user_studies',
+            'values': user_studies
+        })
 
-    results['count'].append({
-        'name': 'user_projects',
-        'values': user_projects
-    })
-    results['count'].append({
-        'name': 'user_studies',
-        'values': user_studies
-    })
     # Get and sort counts
     attr_details = {
         'RNA_sequencing': [],
@@ -355,11 +358,14 @@ def cohort_detail(request, cohort_id=0, workbook_id=0, worksheet_id=0, create_wo
         'clin_attr': clin_attr_dsp,
         'data_attr': data_attr,
         'molec_attr': molec_attr,
-        'user_attr': user_attr,
         'base_url': settings.BASE_URL,
         'base_api_url': settings.BASE_API_URL,
         'token': token
     }
+
+    if USER_DATA_ON:
+        template_values['user_attr'] = user_attr
+
     if workbook_id and worksheet_id :
         template_values['workbook']  = Workbook.objects.get(id=workbook_id)
         template_values['worksheet'] = Worksheet.objects.get(id=worksheet_id)
