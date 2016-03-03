@@ -149,11 +149,24 @@ def get_feature_vector(feature_id, cohort_id_array):
     return provider.get_value_type(), items
 
 
-# TODO refactor to smaller functions and document
-def get_feature_vectors_async(params_array, poll_retry_limit=20):
+def submit_tcga_job(feature_id, cohort_id_array, bigquery_service, cohort_settings):
+    provider = FeatureProviderFactory.from_feature_id(feature_id, bigquery_service=bigquery_service)
+    job_reference = provider.get_data_job_reference(cohort_id_array, cohort_settings.dataset_id, cohort_settings.table_id)
+
+    logging.info("Submitted TCGA {job_id}: {fid} - {cohorts}".format(job_id=job_reference['jobId'], fid=feature_id,
+                                                                     cohorts=str(cohort_id_array)))
+    job_item = {
+        'feature_id': feature_id,
+        'provider': provider,
+        'ready': False,
+        'job_reference': job_reference
+    }
+
+    return job_item
+
+
+def submit_jobs_with_user_data(params_array):
     bigquery_service = authorize_credentials_with_Google()
-    project_id = settings.BQ_PROJECT_ID
-    result = {}
     provider_array = []
 
     cohort_settings = settings.GET_BQ_COHORT_SETTINGS()
@@ -163,17 +176,8 @@ def get_feature_vectors_async(params_array, poll_retry_limit=20):
         user_data = user_feature_handler(feature_id, cohort_id_array)
 
         if user_data['include_tcga']:
-            provider = FeatureProviderFactory.from_feature_id(feature_id, bigquery_service=bigquery_service)
-            job_reference = provider.get_data_job_reference(cohort_id_array, cohort_settings.dataset_id, cohort_settings.table_id)
-
-            logging.info("Submitted TCGA {job_id}: {fid} - {cohorts}".format(job_id=job_reference['jobId'], fid=feature_id,
-                                                                             cohorts=str(cohort_id_array)))
-            provider_array.append({
-                'feature_id': feature_id,
-                'provider': provider,
-                'ready': False,
-                'job_reference': job_reference
-            })
+            job_item = submit_tcga_job(feature_id, cohort_id_array, bigquery_service, cohort_settings)
+            provider_array.append(job_item)
 
         if len(user_data['user_studies']) > 0:
             converted_feature_id = user_data['converted_feature_id']
@@ -198,6 +202,11 @@ def get_feature_vectors_async(params_array, poll_retry_limit=20):
             else:
                 logging.debug("No UserFeatureDefs for '{0}'".format(converted_feature_id))
 
+    return provider_array
+
+
+def get_submitted_job_results(provider_array, project_id, poll_retry_limit):
+    result = {}
     all_done = False
     total_retries = 0
     poll_count = 0
@@ -244,6 +253,40 @@ def get_feature_vectors_async(params_array, poll_retry_limit=20):
 
         all_done = all([j['ready'] for j in provider_array])
         logging.debug("Done: {done}    retry: {retry}".format(done=str(all_done), retry=total_retries))
+
+        return result
+
+
+def get_feature_vectors_with_user_data(params_array, poll_retry_limit=20):
+    provider_array = submit_jobs_with_user_data(params_array)
+
+    project_id = settings.BQ_PROJECT_ID
+    result = get_submitted_job_results(provider_array, project_id, poll_retry_limit)
+
+    for feature_id, _ in params_array:
+        if feature_id not in result:
+            result[feature_id] = {
+                'ready': True,
+                'data': [],
+                'type': ValueType.STRING
+            }
+
+    return result
+
+
+def get_feature_vectors_tcga_only(params_array, poll_retry_limit=20):
+    bigquery_service = authorize_credentials_with_Google()
+    provider_array = []
+
+    cohort_settings = settings.GET_BQ_COHORT_SETTINGS()
+
+    # Submit jobs
+    for feature_id, cohort_id_array in params_array:
+        job_item = submit_tcga_job(feature_id, cohort_id_array, bigquery_service, cohort_settings)
+        provider_array.append(job_item)
+
+    project_id = settings.BQ_PROJECT_ID
+    result = get_submitted_job_results(provider_array, project_id, poll_retry_limit)
 
     for feature_id, _ in params_array:
         if feature_id not in result:
