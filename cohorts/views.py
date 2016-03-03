@@ -208,8 +208,8 @@ def cohort_detail(request, cohort_id=0, workbook_id=0, worksheet_id=0, create_wo
 
     # service = build('meta', 'v1', discoveryServiceUrl=META_DISCOVERY_URL)
     clin_attr = [
-        # 'Project',
-        # 'Study',
+        'Project',
+        'Study',
         'vital_status',
         # 'survival_time',
         'gender',

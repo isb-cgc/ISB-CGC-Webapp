@@ -32,8 +32,8 @@ def get_item(dictionary, key):
 
 @register.filter
 def get_readable_name(csv_name, attr=None):
-    if csv_name.startswith('user_') and csv_name != 'user_project' and csv_name != 'user_study':
-        csv_name = csv_name[5:]
+    # if csv_name.startswith('user_') and csv_name != 'user_project' and csv_name != 'user_study':
+    #     csv_name = csv_name[5:]
 
     attr_specific_translation = {
         'SampleTypeCode': {
@@ -90,7 +90,12 @@ def get_readable_name(csv_name, attr=None):
         'icd_10': 'ICD-10',
         'icd_o_3_histology': 'ICD-O-3 Histology',
         'icd_o_3_site': 'ICD-O-3 Site',
-        'SampleTypeCode': 'Sample Type Code'
+        'SampleTypeCode': 'Sample Type Code',
+        'Project': 'Public Projects',
+        'Study': 'Public Studies',
+        'user_projects': 'Your Projects',
+        'user_studys': 'Your Studies'
+
     }
 
     if attr in attr_specific_translation.keys():
