@@ -560,6 +560,7 @@ class Worksheet_plot(models.Model):
     type            = models.CharField(max_length=1024, null=True)
     worksheet       = models.ForeignKey(Worksheet, blank=False, null=True)
     active          = models.BooleanField(default=True)
+    gene_label      = models.CharField(max_length=1024, null=True)
     x_axis          = models.ForeignKey(Worksheet_variable, blank=True, null=True, related_name="worksheet_plot.x_axis")
     y_axis          = models.ForeignKey(Worksheet_variable, blank=True, null=True, related_name="worksheet_plot.y_axis")
     color_by        = models.ForeignKey(Worksheet_variable, blank=True, null=True, related_name="worksheet_plot.color_by")
