@@ -216,54 +216,86 @@ require([
         }
     }
 
+
+    /*
+     * gather the options and selections on a variable
+     */
+    function get_values(selection){
+        var result;
+        if(selection.attr("type") == "common"){
+            result = {variable : selection.val(), type : "common"};
+        } else {
+            result = {variable : selection.val(), type : "gene"};
+            var parent = selection.parents(".variable-container");
+            result['specification'] = parent.find('.spec-select').find(":selected").val();
+            var options = parent.find('.attr-options :visible');
+
+            //get all the gene selections for this variable
+            options.find('.field-options').each(function(i, ele){
+                if($(ele).hasClass("select2")){
+                    result[ele.id] = {selection: $(ele).parent().find("option").first().val(), options: [$(ele).parent().find("option").first()]};
+                } else {
+                    result[ele.id] = {selection: ele.value, options: []};
+                    $(ele).find("option").each(function (i, ele2) {
+                        result[ele.id].options.push(ele2);
+                    });
+                }
+            });
+
+            //gather entire list of options for swapping
+            result['selection'] = {selected : options.find('#search-term-select').find(":selected").val(), options : []};
+            options.find('#search-term-select').find("option").each(function(i, ele){
+                result['selection'].options.push(ele);
+            });
+        }
+        return result;
+    }
+
+    /*
+     * apply data values to the variable_element
+     */
+    function apply_values(variable_element, data){
+        if(data.type == "common"){
+            variable_element.val(data.variable);
+            axis_select_change(variable_element);
+        } else if(data.type == "gene") {
+            variable_element.val(data.variable);
+            axis_select_change(variable_element);
+            var parent = variable_element.parents(".variable-container");
+            parent.find('.spec-select').val(data.specification);
+            axis_attribute_change(parent.find('.spec-select'));
+            vizhelpers.get_datatype_search_interfaces(parent.find('.spec-select'), parent.find('.spec-select').val());
+
+            var keys = Object.keys(data);
+            parent.find('.'+ data.specification).find('.field-options').each(function(i, ele){
+                if($.inArray(ele.id, keys)){
+                    if($(ele).hasClass('select2')){
+                        $(ele).parent().find('.select2-selection__rendered').empty();
+                        $(ele).parent().find('.select2-selection__rendered').append(data[ele.id].options[0]);
+                    } else {
+                        $(ele).empty();
+                        for (var i in data[ele.id].options) {
+                            $(ele).append(data[ele.id].options[i]);
+                        }
+                    }
+                }
+            });
+            parent.find('#search-term-select').empty();
+            for(var i in data["selection"].options){
+                parent.find('#search-term-select').append(data["selection"].options[i]);
+            }
+            parent.find('#search-term-select').val(data["selection"].selected);
+        }
+    }
+
     /*
      * Event handler for the Swap button
      */
     $('.swap').click(function(){
-        function get_values(selection){
-            var result;
-            if(selection.attr("type") != "gene"){
-                result = {variable : selection.val(), type : "common"};
-            } else {
-                result = {variable : selection.val(), type : "gene"};
-                var parent = selection.parents(".variable-container");
-                var spec   = parent.find('.spec-select').find(":selected").val();
-                var options = parent.find('.attr-options :visible');
-                var selection = options.find('#search-term-select').find(":selected").val();
-                //get all the gene selections for this variable
-                options.find('.field-options').each(function(i, ele){
-                    result[ele.id] = ele.value;
-                });
-                result['specification'] = spec;
-                result['selection']     = selection;
-            }
-            return result;
-        }
-
-        function apply_values(variable_element, data){
-            if(data.type == "common"){
-                variable_element.val(data.variable);
-                axis_select_change(variable_element);
-            } else {
-                variable_element.val(data.variable);
-                var parent = variable_element.parents(".variable-container");
-                parent.find('.spec-select').val(data.specification);
-                axis_attribute_change(parent.find('.spec-select'));
-                var keys = Object.keys(data)
-                parent.find('.'+ data.specification).find('.field-options').each(function(i, ele){
-                    if($.inArray(ele.id, keys)){
-                        ele.value = data[ele.id];
-                    }
-                });
-                parent.find('#search-term-select').val(data.selection);
-            }
-        }
-
         var x = get_values($(this).parent().find('#x-axis-select').find(":selected"));
         var y = get_values($(this).parent().find('#y-axis-select').find(":selected"));
-
-        apply_values($(this).parent().find('#x-axis-select'), y);
         apply_values($(this).parent().find('#y-axis-select'), x);
+        apply_values($(this).parent().find('#x-axis-select'), y);
     });
 
     /*
@@ -321,7 +353,6 @@ require([
      * Event Handlers for Y-Axis
      */
     function y_select_change(self) {
-        console.log("y_select_changed");
         $(self).parent().find(".attr-options").fadeOut();
         var type = $(self).find(":selected").attr('type');
         if(type == "gene"){
@@ -336,7 +367,6 @@ require([
         y_select_change(this);
     });
     function y_attribute_change(self){
-        console.log("y_attribute_changed");
         $(self).parent().find(".attr-options").fadeOut();
         var attr = $(self).find(":selected").val();
         $(self).parent().find("."+attr).fadeIn();
@@ -348,10 +378,11 @@ require([
     /*
      * Gene attribute selection
      */
-    $('.datatype-selector').on('click',  function() { console.log("data-type selector"); vizhelpers.get_datatype_search_interfaces(this, this.getAttribute("data-field"));});
-    $('.feature-search').on('change',    function() { console.log("feature search");  vizhelpers.field_search_change_callback(this); });
-    $('.select-field').on('click',       function() { console.log("select-field"); vizhelpers.select_field_callback(this); });
-    $('.close-field-search').on('click', function() { console.log("close-field-search");vizhelpers.close_field_search_callback(this); });
+    //$('.x-edit-field, .y-edit-field, .color-edit-field').on('click', function() { vizhelpers.show_field_search_panel(this); });
+    $('.datatype-selector').on('change', function() { vizhelpers.get_datatype_search_interfaces(this, this.value)});
+    $('.feature-search').on('change',    function() { console.log("feature search");     vizhelpers.field_search_change_callback(this); });
+    $('.select-field').on('click',       function() { console.log("select-field");       vizhelpers.select_field_callback(this); });
+    $('.close-field-search').on('click', function() { console.log("close-field-search"); vizhelpers.close_field_search_callback(this); });
     $('.field-options').on('change', function(event) {
         var self            = $(this);
         var parent          = self.parent();
@@ -371,20 +402,25 @@ require([
         vizhelpers.get_variable_field_options(datatype, filters, function(options){
             var selectbox = parent.parent('.search-field').find('.feature-search .search-term-field');
             selectbox.empty();
-            selectbox.append('<option value="" disabled selected>Please select an option</option>');
-            for (var i = 0; i < options.length; i++) {
-                selectbox.append('<option value="'+options[i]['internal_feature_id']+'">'+options[i]['label']+'</option>')
+
+            if(options.length>0) {
+                selectbox.append('<option value="" disabled selected>Please select an option</option>');
+                for (var i = 0; i < options.length; i++) {
+                    selectbox.append('<option value="' + options[i]['internal_feature_id'] + '">' + options[i]['label'] + '</option>')
+                }
+            } else {
+                selectbox.append('<option value="" disabled selected>No features available</option>');
             }
         });
-    })
+    });
 
     //generate plot based on user change
     $('.update-plot').on('click', function(event){
         if(valid_plot_settings($(this).parent())) {
-            //var data = get_plot_info_on_page($(this).parent());
-            //update_plot_model(workbook_id, data.worksheet_id, data.plot_id, data.attrs, function(result){
-            //    generate_plot(data.worksheet_id, data.attrs.type, data.attrs.x_axis.url_code, data.attrs.y_axis.url_code, data.attrs.color_by.url_code, data.attrs.cohorts);
-            //    hide_plot_settings();
+            var data = get_plot_info_on_page($(this).parent());
+            //update_plot_model(workbook_id, data.worksheet_id, data.plot_id, data.attrs, data.selections, function(result){
+                generate_plot(data.worksheet_id, data.attrs.type, data.attrs.x_axis.url_code, data.attrs.y_axis.url_code, data.attrs.color_by.url_code, data.attrs.cohorts);
+                hide_plot_settings();
             //});
         }
     });
@@ -407,6 +443,10 @@ require([
         var result = {
             worksheet_id : $(worksheet).find('.update-plot').attr("worksheet_id"),
             plot_id      : $(worksheet).find('.update-plot').attr("plot_id"),
+            selections   : {
+                x_axis : get_values($(worksheet).find('#x-axis-select').find(":selected")),
+                y_axis : get_values($(worksheet).find('#y-axis-select').find(":selected")),
+            },
             attrs        : {
                 type: parent.parentsUntil(".worksheet-body").find(".plot_selection").find(":selected").text(),
                 x_axis: variable_values('x-axis-select'),
@@ -420,11 +460,6 @@ require([
                 }).get()
             }
         }
-
-        //{
-        //    id: parent.find('#y-axis-select').find(":selected").attr('var_id'),
-        //    url_code: parent.find('#y-axis-select').find(":selected").val()
-        //},
         return result;
     }
 
@@ -513,6 +548,7 @@ require([
         plot_element.find('.update-plot').attr('plot_id', plot_data.id).change();
         plot_element.find('#cohort-plot-id').val(plot_data.id);
 
+        //apply values
         if(plot_data.x_axis) {
             plot_element.find('#x-axis-select').val(plot_data.x_axis.url_code);
         }
@@ -558,13 +594,13 @@ require([
         });
     }
 
-    function update_plot_model(workbook_id, worksheet_id, plot_id, attrs, callback){
+    function update_plot_model(workbook_id, worksheet_id, plot_id, attrs, selections, callback){
         var csrftoken = get_cookie('csrftoken');
         $.ajax({
             type        :'POST',
             dataType    :'json',
             url         : base_url + '/workbooks/' + workbook_id + '/worksheets/' + worksheet_id + "/plots/" + plot_id + "/edit",
-            data        : JSON.stringify({attrs : attrs}),
+            data        : JSON.stringify({attrs : attrs, selections: selections}),
             beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
             success : function (data) {
                 callback(data);

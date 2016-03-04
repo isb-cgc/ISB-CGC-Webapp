@@ -71,7 +71,7 @@
                                 {% endif %}
                             {% endfor %}
                         </select>
-                        <select id="x-gene-attribute-select" class="form-control spec-select" style="display:none; margin-top:5px; width: 230px;">
+                        <select id="x-gene-attribute-select" class="form-control spec-select datatype-selector" style="display:none; margin-top:5px; width: 230px;">
                             <option disabled selected>-- select a specification--</option>
                             {% for type in datatype_list %}
                                 <option value="{{ type.datatype }}">{{ type.label}}</option>
@@ -131,7 +131,7 @@
                                 {% endif %}
                             {% endfor %}
                         </select>
-                        <select id="y-gene-attribute-select" class="form-control spec-select" style="display:none; margin-top:5px; width: 230px;">
+                        <select id="y-gene-attribute-select" class="form-control spec-select datatype-selector" style="display:none; margin-top:5px; width: 230px;">
                             <option disabled selected>-- select a specification--</option>
                             {% for type in datatype_list %}
                                 <option value="{{ type.datatype }}">{{ type.label}}</option>

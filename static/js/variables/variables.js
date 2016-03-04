@@ -94,6 +94,7 @@ require([
     $('.close-field-search').on('click', function() { vizhelpers.close_field_search_callback(this); });
 
     $('.field-options').on('change', function(event) {
+        console.log("asdfasdfasdf");
         var self            = $(this);
         var parent          = self.parent();
         var datatype        = parent[0].getAttribute('data-field');
@@ -107,7 +108,6 @@ require([
             }
         });
 
-        console.log(parent[0]);
         vizhelpers.get_variable_field_options(datatype, filters, function(options){
             var selectbox = parent.parent('.search-field').find('.feature-search .search-term-field');
             selectbox.empty();
