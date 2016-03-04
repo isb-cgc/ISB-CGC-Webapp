@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.http import StreamingHttpResponse
+from bq_data_access.feature_search.util import SearchableFieldHelper
 from django.http import HttpResponse, JsonResponse
 from models import Cohort, Workbook, Worksheet, Worksheet_comment, Worksheet_variable, Worksheet_gene, Worksheet_cohort, Worksheet_plot, Worksheet_plot_cohort
 from variables.models import VariableFavorite, Variable
@@ -124,6 +125,28 @@ def workbook_create_with_analysis(request):
 
     return redirect(redirect_url)
 
+def get_gene_datatypes():
+    datatype_labels = {'GEXP' : 'Gene Expression',
+                       'METH' : 'Methylation',
+                       'CNVR' : 'Copy Number',
+                       'RPPA' : 'Protein',
+                       'GNAB' : 'Mutation'}
+
+    datatype_list = SearchableFieldHelper.get_fields_for_all_datatypes()
+    if debug: print >> sys.stderr, ' attrs ' + json.dumps(datatype_list)
+    return_list = []
+    for type in datatype_list:
+        if type['datatype'] != 'CLIN' and type['datatype'] != 'MIRN' :
+            type['label'] = datatype_labels[type['datatype']]
+            return_list.append(type)
+
+        #remove gene in fields as they are set with the variable selection
+        for index, field in enumerate(type['fields']):
+            if field['label'] == "Gene":
+                del type['fields'][index]
+
+    return return_list
+
 @login_required
 def workbook(request, workbook_id=0):
     template = 'workbooks/workbook.html'
@@ -168,6 +191,7 @@ def workbook(request, workbook_id=0):
                 plot_types = Analysis.get_types()
 
                 return render(request, template, {'workbook'    : workbook_model,
+                                                  'datatypes'   : get_gene_datatypes(),
                                                   'is_shareable': is_shareable,
                                                   'shared'      : shared,
                                                   'plot_types'  : plot_types,
@@ -204,6 +228,7 @@ def worksheet_display(request, workbook_id=0, worksheet_id=0):
     plot_types = Analysis.get_types()
     return render(request, template, {'workbook'            : workbook_model,
                                       'is_shareable'        : is_shareable,
+                                      'datatypes'           : get_gene_datatypes(),
                                       'display_worksheet'   : display_worksheet,
                                       'plot_types'          : plot_types})
 

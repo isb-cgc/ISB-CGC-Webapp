@@ -58,17 +58,17 @@ require.config({
 require([
     'jquery',
     'plot_factory',
+    'vizhelpers',
     'session_security',
     'jqueryui',
     'bootstrap',
     'd3',
     'd3tip',
-    'vizhelpers',
     'select2',
     'assetscore',
     'assetsresponsive',
     'base'
-], function ($, plot_factory) {
+], function ($, plot_factory, vizhelpers) {
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function() {
         var forms = $(this).find('form');
@@ -216,41 +216,201 @@ require([
         }
     }
 
+    /*
+     * Event handler for the Swap button
+     */
     $('.swap').click(function(){
-        var x = $(this).parent().find('#x-axis-select').find(":selected").val()
-        var y = $(this).parent().find('#y-axis-select').find(":selected").val()
+        function get_values(selection){
+            var result;
+            if(selection.attr("type") != "gene"){
+                result = {variable : selection.val(), type : "common"};
+            } else {
+                result = {variable : selection.val(), type : "gene"};
+                var parent = selection.parents(".variable-container");
+                var spec   = parent.find('.spec-select').find(":selected").val();
+                var options = parent.find('.attr-options :visible');
+                var selection = options.find('#search-term-select').find(":selected").val();
+                //get all the gene selections for this variable
+                options.find('.field-options').each(function(i, ele){
+                    result[ele.id] = ele.value;
+                });
+                result['specification'] = spec;
+                result['selection']     = selection;
+            }
+            return result;
+        }
 
-        $(this).parent().find('#x-axis-select').val(y);
-        $(this).parent().find('#y-axis-select').val(x);
+        function apply_values(variable_element, data){
+            if(data.type == "common"){
+                variable_element.val(data.variable);
+                axis_select_change(variable_element);
+            } else {
+                variable_element.val(data.variable);
+                var parent = variable_element.parents(".variable-container");
+                parent.find('.spec-select').val(data.specification);
+                axis_attribute_change(parent.find('.spec-select'));
+                var keys = Object.keys(data)
+                parent.find('.'+ data.specification).find('.field-options').each(function(i, ele){
+                    if($.inArray(ele.id, keys)){
+                        ele.value = data[ele.id];
+                    }
+                });
+                parent.find('#search-term-select').val(data.selection);
+            }
+        }
+
+        var x = get_values($(this).parent().find('#x-axis-select').find(":selected"));
+        var y = get_values($(this).parent().find('#y-axis-select').find(":selected"));
+
+        apply_values($(this).parent().find('#x-axis-select'), y);
+        apply_values($(this).parent().find('#y-axis-select'), x);
     });
 
+    /*
+     * Event Handlers for X-Axis
+     */
+    function axis_attribute_change(self){
+        if($(self).attr('id') == 'x-gene-attribute-select'){
+            x_attribute_change(self);
+        } else if($(self).attr('id') == 'y-gene-attribute-select'){
+            y_attribute_change(self);
+        }
+    }
+    function axis_select_change(self){
+        if($(self).attr('id') == 'x-axis-select'){
+            x_select_change(self);
+        } else if($(self).attr('id') == 'y-axis-select'){
+            y_select_change(self);
+        }
+    }
+    function x_select_change(self){
+        var type = $(self).find(":selected").attr('type');
+        $(self).parent().find(".attr-options").fadeOut();
+        if(type == "gene"){
+            $(self).parent().find("#x-gene-attribute-select").fadeIn();
+            var gene = $(self).find(":selected").val();
+        } else {
+            $(self).parent().find("#x-gene-attribute-select").fadeOut();
+            $(self).parent().find("#x-axis-data-type-container").fadeOut();
+        }
+    }
+    $('#x-axis-select').change(function(){
+        x_select_change(this);
+    });
+    function x_attribute_change(self){
+        $(self).parent().find(".attr-options").fadeOut();
+        var attr = $(self).find(":selected").val();
+        $(self).parent().find("."+attr).fadeIn();
+    }
+    $("#x-gene-attribute-select").change(function(){
+        x_attribute_change(this);
+    });
+
+    /*
+     * Color_by handler, update based on x and y selection
+     */
+    $(".search-term-field").change(function(){
+        var parent    = $(this).parents(".variable-container");
+        var selection = $(this).find(":selected");
+        var variable  = parent.attr('variable');
+        parent.parent().find("#color_by").find('[axis="'+variable+'"]').remove();
+        parent.parent().find("#color_by").append('<option axis="'+variable+'" value="'+selection.val()+'">'+selection.text()+'</option>');
+    });
+
+    /*
+     * Event Handlers for Y-Axis
+     */
+    function y_select_change(self) {
+        console.log("y_select_changed");
+        $(self).parent().find(".attr-options").fadeOut();
+        var type = $(self).find(":selected").attr('type');
+        if(type == "gene"){
+            $(self).parent().find("#y-gene-attribute-select").fadeIn();
+            var gene = $(self).find(":selected").val();
+        } else {
+            $(self).parent().find("#y-gene-attribute-select").fadeOut();
+            $(self).parent().find("#y-axis-data-type-container").fadeOut();
+        }
+    }
+    $('#y-axis-select').change(function(){
+        y_select_change(this);
+    });
+    function y_attribute_change(self){
+        console.log("y_attribute_changed");
+        $(self).parent().find(".attr-options").fadeOut();
+        var attr = $(self).find(":selected").val();
+        $(self).parent().find("."+attr).fadeIn();
+    }
+    $("#y-gene-attribute-select").change(function(){
+        y_attribute_change(this);
+    });
+
+    /*
+     * Gene attribute selection
+     */
+    $('.datatype-selector').on('click',  function() { console.log("data-type selector"); vizhelpers.get_datatype_search_interfaces(this, this.getAttribute("data-field"));});
+    $('.feature-search').on('change',    function() { console.log("feature search");  vizhelpers.field_search_change_callback(this); });
+    $('.select-field').on('click',       function() { console.log("select-field"); vizhelpers.select_field_callback(this); });
+    $('.close-field-search').on('click', function() { console.log("close-field-search");vizhelpers.close_field_search_callback(this); });
+    $('.field-options').on('change', function(event) {
+        var self            = $(this);
+        var parent          = self.parent();
+        var datatype        = parent[0].getAttribute('data-field');
+        var filterElements  = parent.find('select');
+        var variable_name   = self.parents(".variable-container").attr('variable');
+        var gene_selection  = self.parents(".variable-container").find('#' + variable_name).find(":selected").val();
+        var filters         = [{ filter : 'gene_name',
+                                 value  : gene_selection}];
+        $.each(filterElements, function(i, ele){
+            var value = $(ele).find(":selected").text();
+            if(value !== "" && value !== "Please select an option" ){
+                filters.push({'filter' : ele.getAttribute('data-field'), 'value' : value});
+            }
+        });
+
+        vizhelpers.get_variable_field_options(datatype, filters, function(options){
+            var selectbox = parent.parent('.search-field').find('.feature-search .search-term-field');
+            selectbox.empty();
+            selectbox.append('<option value="" disabled selected>Please select an option</option>');
+            for (var i = 0; i < options.length; i++) {
+                selectbox.append('<option value="'+options[i]['internal_feature_id']+'">'+options[i]['label']+'</option>')
+            }
+        });
+    })
 
     //generate plot based on user change
     $('.update-plot').on('click', function(event){
         if(valid_plot_settings($(this).parent())) {
-            var data = get_plot_info_on_page($(this).parent());
-            update_plot_model(workbook_id, data.worksheet_id, data.plot_id, data.attrs, function(result){
-                generate_plot(data.worksheet_id, data.attrs.type, data.attrs.x_axis.url_code, data.attrs.y_axis.url_code, data.attrs.color_by.url_code, data.attrs.cohorts);
-                hide_plot_settings();
-            });
+            //var data = get_plot_info_on_page($(this).parent());
+            //update_plot_model(workbook_id, data.worksheet_id, data.plot_id, data.attrs, function(result){
+            //    generate_plot(data.worksheet_id, data.attrs.type, data.attrs.x_axis.url_code, data.attrs.y_axis.url_code, data.attrs.color_by.url_code, data.attrs.cohorts);
+            //    hide_plot_settings();
+            //});
         }
     });
 
     function get_plot_info_on_page(worksheet){
         var parent       = $(worksheet).find('.update-plot').parent();
+
+        function variable_values(label){
+            var result;
+            if(parent.find('#'+label).find(":selected").attr("type") == "gene"){
+                result = {  id : parent.find('#'+label).find(":selected").attr('var_id'),
+                            url_code : parent.find('[variable="'+ label + '"]').find("#search-term-select").find(":selected").val()};
+            } else {
+                result = {  id: parent.find('#'+label).find(":selected").attr('var_id'),
+                            url_code: parent.find('#'+label).find(":selected").val()}
+            }
+            return result;
+        }
+
         var result = {
             worksheet_id : $(worksheet).find('.update-plot').attr("worksheet_id"),
             plot_id      : $(worksheet).find('.update-plot').attr("plot_id"),
             attrs        : {
                 type: parent.parentsUntil(".worksheet-body").find(".plot_selection").find(":selected").text(),
-                x_axis: {
-                    id: parent.find('#x-axis-select').find(":selected").attr('var_id'),
-                    url_code: parent.find('#x-axis-select').find(":selected").val()
-                },
-                y_axis: {
-                    id: parent.find('#y-axis-select').find(":selected").attr('var_id'),
-                    url_code: parent.find('#y-axis-select').find(":selected").val()
-                },
+                x_axis: variable_values('x-axis-select'),
+                y_axis: variable_values('y-axis-select'),
                 color_by: {
                     id: parent.find('#color_by').find(":selected").attr('var_id'),
                     url_code: parent.find('#color_by').find(":selected").val()
@@ -260,6 +420,11 @@ require([
                 }).get()
             }
         }
+
+        //{
+        //    id: parent.find('#y-axis-select').find(":selected").attr('var_id'),
+        //    url_code: parent.find('#y-axis-select').find(":selected").val()
+        //},
         return result;
     }
 
