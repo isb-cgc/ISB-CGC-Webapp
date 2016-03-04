@@ -246,7 +246,6 @@ class FeatureDataEndpoints(remote.Service):
         x_type, x_vec = async_result[x_id]['type'], async_result[x_id]['data']
         c_type, c_vec = async_result[c_id]['type'], async_result[c_id]['data']
 
-        # TODO fix hardcoded usage of 'patient_id'
         vms = VectorMergeSupport('NA', 'sample_id', ['x', 'y', 'c']) # changed so that it plots per sample not patient
         vms.add_dict_array(x_vec, 'x', 'value')
         vms.add_dict_array(y_vec, 'y', 'value')

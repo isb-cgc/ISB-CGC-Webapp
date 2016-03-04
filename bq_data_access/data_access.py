@@ -280,7 +280,7 @@ def get_submitted_job_results(provider_array, project_id, poll_retry_limit, skip
         all_done = all([j['ready'] for j in provider_array])
         logging.debug("Done: {done}    retry: {retry}".format(done=str(all_done), retry=total_retries))
 
-        return result
+    return result
 
 
 def format_query_result_for_plot(provider_instance, query_result):
@@ -304,16 +304,6 @@ def get_feature_vectors_with_user_data(params_array, poll_retry_limit=20, skip_f
     project_id = settings.BQ_PROJECT_ID
     result = get_submitted_job_results(provider_array, project_id, poll_retry_limit, skip_formatting_for_plot)
 
-    for parameter_object in params_array:
-        feature_id = parameter_object.feature_id
-
-        if feature_id not in result:
-            result[feature_id] = {
-                'ready': True,
-                'data': [],
-                'type': ValueType.STRING
-            }
-
     return result
 
 
@@ -330,16 +320,6 @@ def get_feature_vectors_tcga_only(params_array, poll_retry_limit=20, skip_format
 
     project_id = settings.BQ_PROJECT_ID
     result = get_submitted_job_results(provider_array, project_id, poll_retry_limit, skip_formatting_for_plot)
-
-    for parameter_object in params_array:
-        feature_id = parameter_object.feature_id
-
-        if feature_id not in result:
-            result[feature_id] = {
-                'ready': True,
-                'data': [],
-                'type': ValueType.STRING
-            }
 
     return result
 
