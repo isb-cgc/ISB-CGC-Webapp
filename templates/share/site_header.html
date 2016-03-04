@@ -1,0 +1,53 @@
+{% load staticfiles %}
+{#{% load custom_tags %}#}
+
+<header class="navbar navbar-fixed-top site-header" role="header">
+    <nav class="container">
+        <div class="row">
+            <div class="col-lg-12">
+            <div class="nav navbar-left">
+                 <ul class="">
+                     {% if user.is_authenticated %}
+                        <li class="navbar-item"> <a href="{% url 'dashboard' %}"><img class="navbar-brand" src="{% static 'img/isblogo.png' %}" alt="ISB Logo"/><span class="navbar-item">ISB-CGC</span></a></li>
+                     {% else %}
+                        <li class="navbar-item"> <a href="{% url 'landing_page' %}"><img class="navbar-brand" src="{% static 'img/isblogo.png' %}" alt="ISB Logo"/><span class="navbar-item">ISB-CGC</span></a></li>
+                     {% endif %}
+
+{#                    <li class="navbar-link navbar-item"><a href="{% url 'landing_page' %}">About</a></li>#}
+                    <li class="navbar-link navbar-item"><a href="http://isb-cancer-genomics-cloud.readthedocs.org/en/latest/" target="_blank">Help</a></li>
+                </ul>
+            </div>
+
+{#            <div class="nav navbar-right">#}
+{#                {% if user.is_authenticated %}#}
+{#                    <div id="user-login" class="navbar-item">#}
+{#                        <a class="avatar-link" href="{% url 'user_detail' user.id %}">#}
+{#                            <img src="{{ user.socialaccount_set.all.0.get_avatar_url }}" width="32" height="32" alt="Avatar Link to User Details">#}
+{#                        </a>#}
+{##}
+{#                        <div class="dropdown">#}
+{#                            <a role="button" class="dropdown-toggle navbar-item__text" id="user-dropdown" data-toggle="dropdown" aria-label="User Dropdown" aria-expanded="true">#}
+{#                                {{ user.first_name }} <i class="fa fa-caret-down"></i>#}
+{#                            </a>#}
+{#                            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-label="user-dropdown">#}
+{#                                <li role="menuitem"><a href="#logout-modal" data-toggle="modal" data-target="#logout-modal" title="Sign Out"><i class="fa fa-sign-out"></i>Sign Out</a></li>#}
+{#                            </ul>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    <div class="navbar-item">#}
+{#                        <a type="button" class="navbar-item__text lines-button x collapsed" data-toggle="collapse" data-target="#subnav" aria-expanded="false" aria-controls="subnav">#}
+{#                            <span class="lines"></span>#}
+{#                            Menu#}
+{#                        </a>#}
+{#                    </div>#}
+{#                {% else %}#}
+{#                    <div id="user-login" class="navbar-form inline-block">#}
+{#                        <!-- same thing as /accounts/login-->#}
+{#                        <a class="login-link" href="{% url 'account_login' %}" title="Sign In"><i class="fa fa-sign-in"></i> Sign In</a>#}
+{#                    </div>#}
+{#                {% endif %}#}
+{#            </div>#}
+            </div>
+        </div>
+    </nav>
+</header>
