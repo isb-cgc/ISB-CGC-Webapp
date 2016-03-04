@@ -542,12 +542,15 @@ def save_cohort(request, workbook_id=None, worksheet_id=None, create_workbook=Fa
             # TODO This would be a nice to have if we have a mapped ParticipantBarcode value
             # TODO Also this gets weird with mixed mapped and unmapped ParticipantBarcode columns in cohorts
             # If there are patient ids
-            # patient_list = []
-            # if len(patients):
-            #     patients = list(set(patients))
-            #     for patient_code in patients:
-            #         patient_list.append(Patients(cohort=cohort, patient_id=patient_code))
-            # Patients.objects.bulk_create(patient_list)
+            # If we are *not* using user data, get participant barcodes from metadata_data
+            if not USER_DATA_ON:
+                participant_url = METADATA_API + ('v2/metadata_participant_list?cohort_id=%s' % (str(cohort.id),))
+                participant_result = urlfetch.fetch(participant_url, deadline=60)
+                participant_items = json.loads(participant_result.content)
+                participant_list = []
+                for item in participant_items['items']:
+                    participant_list.append(Patients(cohort=cohort, patient_id=item['sample_barcode']))
+                Patients.objects.bulk_create(participant_list)
 
             # Set permission for user to be owner
             perm = Cohort_Perms(cohort=cohort, user=request.user, perm=Cohort_Perms.OWNER)
