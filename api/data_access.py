@@ -24,10 +24,11 @@ from protorpc import remote
 from protorpc.messages import BooleanField, EnumField, IntegerField, Message, MessageField, StringField
 
 from bq_data_access.feature_value_types import ValueType
-from bq_data_access.data_access import is_valid_feature_identifier, get_feature_vectors_with_user_data
+from bq_data_access.data_access import is_valid_feature_identifier, get_feature_vectors_tcga_only, get_feature_vectors_with_user_data
 from bq_data_access.utils import VectorMergeSupport
 from bq_data_access.cohort_cloudsql import CloudSQLCohortAccess
 from bq_data_access.utils import DurationLogged
+from bq_data_access.data_access import FeatureIdQueryDescription
 
 from api.pairwise import PairwiseInputVector, Pairwise
 from api.pairwise_api import PairwiseResults, PairwiseResultVector, PairwiseFilterMessage
@@ -230,14 +231,15 @@ class FeatureDataEndpoints(remote.Service):
         :return: PlotDataResponse
         """
 
-        async_params = [(x_id, cohort_id_array),
-                        (c_id, cohort_id_array)]
+        async_params = [FeatureIdQueryDescription(x_id, cohort_id_array),
+                        FeatureIdQueryDescription(c_id, cohort_id_array)]
 
         y_type, y_vec = ValueType.STRING, []
         if y_id is not None:
-            async_params.append((y_id, cohort_id_array))
+            async_params.append(FeatureIdQueryDescription(y_id, cohort_id_array))
 
-        async_result = get_feature_vectors_with_user_data(async_params)
+        async_result = get_feature_vectors_tcga_only(async_params)
+
         if y_id is not None:
             y_type, y_vec = async_result[y_id]['type'], async_result[y_id]['data']
 
