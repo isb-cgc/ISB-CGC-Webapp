@@ -445,7 +445,7 @@ class Worksheet_variable(models.Model):
     name            = models.CharField(max_length=2024, blank=False)
     type            = models.CharField(max_length=1024, blank=True, null=True)
     url_code        = models.CharField(max_length=2024, blank=False)
-    feature         = models.ForeignKey(User_Feature_Definitions, null=True, blank=True)
+    feature         = models.ForeignKey(User_Feature_Definitions, null=True, blank=True) #only used for user generated variable
     objects         = Worksheet_Variable_Manager()
 
     @classmethod
