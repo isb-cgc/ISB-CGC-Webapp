@@ -56,6 +56,10 @@ define([
                 return '<span>Mean: ' + mean.toFixed(2) + '</span><br/><span>%: ' + (d.y * 100).toFixed(2) + '%</span>';
             });
 
+    function generate_axis_label(attr) {
+        return $('option[value="' + attr + '"]:first').html()
+    }
+
     /*
         Generate bar chart
      */
@@ -73,7 +77,7 @@ define([
             height,
             bar_width,
             'x',
-            x_attr,
+            generate_axis_label(x_attr),
             cubby_tip,
             margin);
 
@@ -97,7 +101,7 @@ define([
                 width,
                 height,
                 'x',
-                x_attr,
+                generate_axis_label(x_attr),
                 cubby_tip,
                 margin);
 
@@ -122,8 +126,8 @@ define([
              data,
              domain,
              range,
-             x_attr,  // xLabel
-             y_attr,  // yLabel
+             generate_axis_label(x_attr),  // xLabel
+             generate_axis_label(y_attr),  // yLabel
              'x',     // xParam
              'y',     // yParam
              color_by,
@@ -159,8 +163,8 @@ define([
             violin_width,
             max_n,
             min_n,
-            x_attr,
-            y_attr,
+            generate_axis_label(x_attr),
+            generate_axis_label(y_attr),
             'x',
             'y',
             color_by,
@@ -194,8 +198,8 @@ define([
             violin_width,
             max_n,
             min_n,
-            y_attr,
-            x_attr,
+            generate_axis_label(y_attr),
+            generate_axis_label(x_attr),
             'y',
             'x',
             color_by,
@@ -224,8 +228,8 @@ define([
             data,
             xdomain,
             ydomain,
-            x_attr,
-            y_attr,
+            generate_axis_label(x_attr),
+            generate_axis_label(y_attr),
             'x',
             'y',
             'c',
@@ -283,9 +287,10 @@ define([
     }
 
     function select_plot(plot_selector, legend_selector, pairwise_element, type, x_attr, y_attr, color_by, cohorts, cohort_override, data){
-        var width  = 800, //TODO should be based on size of screen
-            height = 600, //TODO ditto
-            margin = {top: 0, bottom: 50, left: 70, right: 10},
+
+        var width  = $('.worksheet.active .worksheet-panel-body:first').width(), //TODO should be based on size of screen
+            height = 700, //TODO ditto
+            margin = {top: 0, bottom: 100, left: 70, right: 10},
             x_type = '',
             y_type = '';
 
@@ -293,13 +298,6 @@ define([
             configure_pairwise_display(pairwise_element, data);
         }
         if (data.hasOwnProperty('items')) {
-            //TODO where are these used?
-            x_type = data['types']['x'];
-            if (y_attr && y_attr != '') {
-                y_type = data['types']['y'];
-            } else {
-                y_type = 'none'
-            }
 
             var cohort_set = data['cohort_set'];
             data = data['items'];
@@ -369,10 +367,6 @@ define([
         cohorts_override : boolean on whether to override the color_by parameter
      */
     function generate_plot(plot_selector, legend_selector, pairwise_element, type, x_attr, y_attr, color_by, cohorts, cohort_override, callback) {
-
-        //data = mock_histogram_data.get_data();
-        //select_plot(plot_selector, legend_selector, pairwise_element, type, x_attr, y_attr, color_by, cohorts, cohort_override, data);
-        //callback();
         $.ajax({
             type: 'GET',
             url: get_data_url(base_api_url, cohorts, x_attr, y_attr, color_by),

@@ -70,7 +70,7 @@ function($, d3, d3tip, helpers) {
             var zoomer = function () {
                 svg.select('.x.axis').call(xAxis);
                 svg.select('.y.axis').call(yAxis);
-                plot_area.selectAll('.bar').attr('transform', 'translate(' + d3.event.translate[0] + ',' + d3.event.translate[1] + ')scale(' + d3.event.scale + ',' + d3.event.scale + ')');
+                plot_area.selectAll('.plot-bar').attr('transform', 'translate(' + d3.event.translate[0] + ',' + d3.event.translate[1] + ')scale(' + d3.event.scale + ',' + d3.event.scale + ')');
                 plot_area.selectAll('path.line').attr('transform', 'translate(' + d3.event.translate[0] + ',' + d3.event.translate[1] + ')scale(' + d3.event.scale + ',' + d3.event.scale + ')');
             };
 
@@ -117,10 +117,10 @@ function($, d3, d3tip, helpers) {
                     height: height - margin.top - margin.bottom})
                 .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-            plot_area.selectAll(".bar")
+            plot_area.selectAll(".plot-bar")
                 .data(hist_data)
                 .enter().append("rect")
-                .attr("class", "bar")
+                .attr("class", "plot-bar")
                 .attr('data-samples', function (d) {
                     return d['samples'];
                 })
@@ -163,10 +163,10 @@ function($, d3, d3tip, helpers) {
                 var sample_list = [];
                 var patient_list = [];
                 var e = brush.extent();
-                svg.selectAll('rect.bar').classed("selected", function (d) {
+                svg.selectAll('rect.plot-bar').classed("selected", function (d) {
                     return e[0] <= (d['x'] + d['dx']) && d['x'] <= e[1];
                 });
-                $('rect.bar.selected').each(function () {
+                $('rect.plot-bar.selected').each(function () {
                     var samples = $(this).attr('data-samples').split(',');
                     var patients = $.map(samples, function(d) { return d.substr(0, 12);})
                         .filter(function(item, i, a) { return i == a.indexOf(item); });
@@ -262,6 +262,7 @@ function($, d3, d3tip, helpers) {
                 Update the sample cohort bar update
              */
             function sample_form_update(extent, total_samples, total_patients, sample_list){
+                var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                 $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + total_samples);
                 $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Participants: ' + total_patients);
                 $('#save-cohort-' + plot_id + '-modal input[name="samples"]').attr('value', sample_list);

@@ -69,7 +69,7 @@ function($, d3, d3tip, vizhelpers) {
             var zoomer = function() {
                 svg.select('.x.axis').attr('transform', 'translate(' + (d3.event.translate[0]+margin.left) + ',' + (height - margin.bottom) + ')').call(xAxis);
                 svg.selectAll('.x.axis text').style('text-anchor', 'end').attr('transform', 'translate(' + -15 + ',' + 10 + ') rotate(-90)');
-                plot_area.selectAll('.bar').attr('transform', 'translate(' + d3.event.translate[0] + ',0)');
+                plot_area.selectAll('.plot-bar').attr('transform', 'translate(' + d3.event.translate[0] + ',0)');
             };
 
             var x2 = d3.scale.linear()
@@ -97,10 +97,10 @@ function($, d3, d3tip, vizhelpers) {
                         height: height-margin.top - margin.bottom})
                 .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-            plot_area.selectAll(".bar")
+            plot_area.selectAll(".plot-bar")
                 .data(data)
                 .enter().append("rect")
-                    .attr("class", "bar")
+                    .attr("class", "plot-bar")
                     .attr('data-samples', function(d) { return d['samples']; })
                     .attr("x", function(d) { return x(d.value) + margin.left; })
                     .attr("y", function(d) {
@@ -120,11 +120,11 @@ function($, d3, d3tip, vizhelpers) {
                 .append('rect')
                 .attr('height', margin.bottom+margin.top)
                 .attr('width', width-margin.left-margin.right)
-                .attr('transform', 'translate(' + margin.left + ',' + (height  - margin.bottom) + ')');
+                .attr('transform', 'translate(' + margin.left + ',' + (height  - margin.bottom - margin.top) + ')');
 
             x_axis_area.append('g')
                 .attr('class', 'x axis')
-                .attr('transform', 'translate(' + margin.left + ',' + (height - margin.bottom) + ')')
+                .attr('transform', 'translate(' + margin.left + ',' + (height - margin.bottom - margin.top) + ')')
                 .call(xAxis)
                 .selectAll('text')
                 .style('text-anchor', 'end')
@@ -137,10 +137,11 @@ function($, d3, d3tip, vizhelpers) {
                 var sample_list = [];
                 var patient_list = [];
                 var e = brush.extent();
-                svg.selectAll('rect.bar').classed("selected", function (d) {
-                    return e[0] <= x($(this).attr('value')) + parseInt($(this).attr('width')) && x($(this).attr('value')) <= e[1];
+                svg.selectAll('rect.plot-bar').classed("selected", function (d) {
+                    return e[0]-margin.left <= x($(this).attr('value')) + parseInt($(this).attr('width'))
+                        && x($(this).attr('value')) <= e[1]-margin.left;
                 });
-                $('rect.bar.selected').each(function () {
+                $('rect.plot-bar.selected').each(function () {
                     var samples = $(this).attr('data-samples').split(',');
                     var patients = $.map(samples, function (d) {
                             return d.substr(0, 12);
@@ -202,7 +203,7 @@ function($, d3, d3tip, vizhelpers) {
                             .selectAll('rect')
                             .attr('y', 0)
                             .attr('height', height - margin.bottom)
-                            .attr('transform', 'translate(' + margin.left + ', 0)');
+                            .attr('transform', 'translate(0, 0)');
                     }
                 } else {
                     var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];

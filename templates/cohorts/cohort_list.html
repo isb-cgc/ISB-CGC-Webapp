@@ -17,19 +17,19 @@
     <ol class="breadcrumb">
         <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
         {% if workbook %}
-        <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
-        <li><a href="{% url 'workbook_detail' workbook_id=workbook.id %}">{{ workbook.name|title }}</a></li>
+            <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
+            <li><a href="{% url 'workbook_detail' workbook_id=workbook.id %}">{{ workbook.name|title }}</a></li>
         {% endif %}
     </ol>
     <h1 class="page-header pull-left">{% if from_workbook %}Data Source | {% endif %}Cohorts</h1>
     {% if from_workbook %}
-    <a href="{% if workbook %}{% url 'cohort_create_for_existing_workbook' workbook_id=workbook.id worksheet_id=worksheet.id %}{% else %}{% url 'cohort_create_for_new_workbook' %}{% endif %}" class="btn btn-primary pull-right"><i class="fa fa-plus"></i> Create New Cohort</a>
-    <form id="cohort-apply-to-workbook" action="{% url 'add_cohorts_to_worksheet' workbook_id=workbook.id worksheet_id=worksheet.id %}" method="POST">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-primary pull-right" disabled="disabled">{% if create_workbook %}Create Workbook{% else %}Apply to Worksheet{% endif %}</button>
-    </form>
+        <a href="{% if workbook %}{% url 'cohort_create_for_existing_workbook' workbook_id=workbook.id worksheet_id=worksheet.id %}{% else %}{% url 'cohort_create_for_new_workbook' %}{% endif %}" class="btn btn-primary pull-right"><i class="fa fa-plus"></i> Create New Cohort</a>
+        <form id="cohort-apply-to-workbook" action="{% url 'add_cohorts_to_worksheet' workbook_id=workbook.id worksheet_id=worksheet.id %}" method="POST">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary pull-right" disabled="disabled">{% if create_workbook %}Create Workbook{% else %}Apply to Worksheet{% endif %}</button>
+        </form>
     {% else %}
-    <a href="{% url 'cohort' %}" class="btn btn-primary pull-right"><i class="fa fa-plus"></i> Create New Cohort</a>
+        <a href="{% url 'cohort' %}" class="btn btn-primary pull-right"><i class="fa fa-plus"></i> Create New Cohort</a>
     {% endif %}
 </div>
 {% endblock %}
@@ -48,29 +48,29 @@
             <div role="tabpanel" class="tab-pane {% if not is_public %} active {% endif %} " id="save-cohorts-list">
                 {% if cohorts.has_private_cohorts %}
                     {% if not from_workbook %}
-                    <div class="page-action-group">
-                        <li role="menuitem">
-                            <button id="createWorkbookWithCohort" class="btn btn-default">New Workbook</button>
-                        </li>
-                        <li class="separator"></li>
-                        <li role="menuitem">
-                            <button id='delete-cohorts' type="button" class="btn btn-info" data-toggle="modal" data-target="#delete-cohorts-modal" aria-label="delete-cohorts" role="button" aria-expanded="true">
-                                <i class="fa fa-trash"></i>
-                                Delete
-                            </button>
-                        </li>
-                        <li role="menuitem">
-                            <button id="cohort-sets" type="button" class="btn btn-info" data-toggle="modal" data-target="#union-modal" aria-label="set-logic" role="button" aria-expanded="true">
-                            Set Operations
-                            </button>
-                        </li>
-                        <li role="menuitem">
-                            <button class="btn btn-info" id="share-cohorts-btn" type="button" data-toggle="modal" data-target="#share-cohorts-modal" aria-label="share-cohorts" role="button" aria-expanded="true">
-                                <i class="fa fa-share-alt"></i>
-                                Share
-                            </button>
-                        </li>
-                    </div>
+                        <div class="page-action-group">
+                            <li role="menuitem">
+                                <button class="btn btn-default createWorkbookWithCohort">New Workbook</button>
+                            </li>
+                            <li class="separator"></li>
+                            <li role="menuitem">
+                                <button id='delete-cohorts' type="button" class="btn btn-info" data-toggle="modal" data-target="#delete-cohorts-modal" aria-label="delete-cohorts" role="button" aria-expanded="true">
+                                    <i class="fa fa-trash"></i>
+                                    Delete
+                                </button>
+                            </li>
+                            <li role="menuitem">
+                                <button id="cohort-sets" type="button" class="btn btn-info" data-toggle="modal" data-target="#union-modal" aria-label="set-logic" role="button" aria-expanded="true">
+                                Set Operations
+                                </button>
+                            </li>
+                            <li role="menuitem">
+                                <button class="btn btn-info" id="share-cohorts-btn" type="button" data-toggle="modal" data-target="#share-cohorts-modal" aria-label="share-cohorts" role="button" aria-expanded="true">
+                                    <i class="fa fa-share-alt"></i>
+                                    Share
+                                </button>
+                            </li>
+                        </div>
                     {% endif %}
 
                     <table id="cohort-table" class="table table-striped tablesorter">
@@ -87,7 +87,9 @@
                         {% for cohort in cohorts %}
                         {% if cohort.owner.is_superuser == False %}
                             <tr>
-                                <td class="checkbox-col"><input type="checkbox" name="id" value="{{ cohort.id }}" title="{{ cohort.name }} Checkbox" aria-label="cohort-checkbox"/></td>
+                                <td class="checkbox-col">
+                                    <input {% if cohort.id in previously_selected_cohort_ids %}checked{% endif %} type="checkbox" name="id" value="{{ cohort.id }}" title="{{ cohort.name }} Checkbox" aria-label="cohort-checkbox"/>
+                                </td>
                                 <td class="name-col"><a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a></td>
                                 <td class="sample-col">{#{ cohort.num_patients }#} {{ cohort.sample_size }} </td>
                                 <td>{{ cohort.patient_size }}</td>
@@ -122,7 +124,7 @@
             <div role="tabpanel" class="tab-pane {% if is_public %} active {% endif %} " id="public-cohorts-list">
                 {% if not from_workbook %}
                 <div class="page-action-group">
-                    <li role="menuitem"><button class="btn btn-default">New Workbook</button></li>
+                    <li role="menuitem"><button class="btn btn-default createWorkbookWithCohort">New Workbook</button></li>
                     <li class="separator"></li>
                     <li role="menuitem"><button class="btn btn-info">Set Operations</button></li>
                 </div>
@@ -140,7 +142,9 @@
                         {% for cohort in cohorts %}
                             {% if cohort.owner.is_superuser == True %}
                             <tr>
-                                <td class="checkbox-col"><input type="checkbox" name="id" value="{{ cohort.id }}" title="{{ cohort.name }} Checkbox" aria-label="cohort-checkbox"/></td>
+                                <td class="checkbox-col">
+                                    <input {% if cohort.id in previously_selected_cohort_ids %}checked{% endif %} type="checkbox" name="id" value="{{ cohort.id }}" title="{{ cohort.name }} Checkbox" aria-label="cohort-checkbox"/>
+                                </td>
                                 <td class="name-col"><a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a></td>
                                 <td class="sample-col">{#{ cohort.num_patients }#} {{ cohort.sample_size }} </td>
                                 <td>{{ cohort.patient_size }}</td>
@@ -157,45 +161,6 @@
     </div>
 </div>
 
-    <!-- Create Plot Modal -->
-    <div class="modal fade" id="create-generic-viz-modal" tabindex="-1" role="dialog" aria-labelledby="create-generic-viz-header" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="create-generic-viz-header">Create Visualization</h4>
-                </div>
-                <form id="generic-viz" method="POST" action="{% url 'genericplot' %}">
-                    <div class="modal-body">
-                        {% if cohorts %}
-                            <label class="form-inline" for="new-viz-name">New Visualization Name</label>
-                            <input type="text" class="form-control" id="new-viz-name" name="vis_title" placeholder="Enter name for new visualization">
-
-                            <label for="cohort_id">Please select a cohort:</label>
-                            <select class="form-control viz-cohort-select space-bottom-10" name="cohort_id" id="cohort_id">
-                                {% for cohort in cohorts %}
-                                    <option value="{{ cohort.id }}">{{ cohort.name }}</option>
-                                {% endfor %}
-                            </select>
-                        {% else %}
-                            <p>Please create cohort first.</p>
-                        {% endif %}
-                    </div>
-                    <div class="modal-footer">
-
-                        {% csrf_token %}
-                        {% if cohorts %}
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                            <input type="submit" value="Create Visualization" class="btn btn-primary" />
-                        {% else %}
-                            <button type="button" class="btn btn-primary" data-dismiss="modal">Okay</button>
-                        {% endif %}
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
     <!-- Set Operation Modal -->
     <div class="modal fade" id="union-modal" tabindex="-1" role="dialog" aria-labelledby="union-header" aria-hidden="true">
         <div class="modal-dialog">
@@ -208,7 +173,7 @@
                     <div class="modal-body">
                         <div class="form-group">
                             <label for="new-cohort-name">Cohort Name</label>
-                            <input type="text" class="form-control" id="new-cohort-name" name="name" placeholder="Enter name for new cohort">
+                            <input type="text" class="form-control" id="new-cohort-name" name="name" placeholder="Enter name for new cohort" required>
                         </div>
                         <div class="form-group">
                             <label for="operation">Set Operation</label>
@@ -324,214 +289,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-    <!-- Create Plot Modal -->
-    <div class="modal fade" id="create-generic-viz-modal" tabindex="-1" role="dialog" aria-labelledby="create-generic-viz-header" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="create-generic-viz-header">Create Visualization</h4>
-                </div>
-                <form id="generic-viz" method="POST" action="{% url 'genericplot' %}">
-                    <div class="modal-body">
-                        {% if cohorts %}
-                            <label class="form-inline" for="new-viz-name">New Visualization Name</label>
-                            <input type="text" class="form-control" id="new-viz-name" name="vis_title" placeholder="Enter name for new visualization">
-
-                            <label for="cohort_id">Please select a cohort:</label>
-                            <select class="form-control viz-cohort-select space-bottom-10" name="cohort_id" id="cohort_id">
-                                {% for cohort in cohorts %}
-                                    <option value="{{ cohort.id }}">{{ cohort.name }}</option>
-                                {% endfor %}
-                            </select>
-                        {% else %}
-                            <p>Please create cohort first.</p>
-                        {% endif %}
-                    </div>
-                    <div class="modal-footer">
-
-                        {% csrf_token %}
-                        {% if cohorts %}
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                            <input type="submit" value="Create Visualization" class="btn btn-primary" />
-                        {% else %}
-                            <button type="button" class="btn btn-primary" data-dismiss="modal">Okay</button>
-                        {% endif %}
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Set Operation Modal -->
-    <div class="modal fade" id="union-modal" tabindex="-1" role="dialog" aria-labelledby="union-header" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="union-header">New Cohorts</h4>
-                </div>
-                <form id="set-op-cohort" method="POST" action="{% url 'set_operation' %}" class="">
-                    <div class="modal-body form-horizontal">
-                        <div class="form-group">
-                            <label class="col-md-2" for="new-cohort-name">Cohort Name</label>
-                            <div class="col-md-10">
-                                <input type="text" class="form-control" id="new-cohort-name" name="name" placeholder="Enter name for new cohort" required>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-md-2" for="operation">Set Operation</label>
-                            <div class="col-md-10">
-                                <select name="operation" id="operation" class="form-control">
-                                    <option value="union">Union</option>
-                                    <option value="intersect">Intersection</option>
-                                    <option value="complement">Complement</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group set-control">
-                            <label class="col-md-2" for="selected-ids">Selected Cohorts</label>
-                            <div class="col-md-10">
-                                <div class="form-control-static" id="selected-ids">
-
-                                </div>
-                                <div class="cohort-search-div">
-                                    <a href="" class="add-cohort btn btn-primary"><i class="fa fa-plus"></i></a>
-                                    <input type="text" class="search-cohorts form-control" aria-label="Cohort Search Box"/>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group complement-control">
-                            <label class="col-md-2" for="base-cohort">Base Cohort</label>
-                            <div class="col-md-10">
-                                <p class="form-control-static" id="base-id"></p>
-                                <div class="cohort-search-div">
-                                    <a href="" class="add-cohort btn btn-primary"><i class="fa fa-plus"></i></a>
-                                    <input type="text" class="search-cohorts form-control" aria-label="Cohort Search Box"/>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group complement-control">
-                            <label class="col-md-2" for="subtract-cohorts">Subtracted Cohorts</label>
-                            <div class="col-md-10">
-                                <p class="form-control-static" id="subtract-ids"></p>
-                                <div class="cohort-search-div">
-                                    <a href="" class="add-cohort btn btn-primary"><i class="fa fa-plus"></i></a>
-                                    <input type="text" class="search-cohorts form-control" aria-label="Cohort Search Box"/>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                    <div class="modal-footer">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-primary">Okay</button>
-                        <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Delete Cohort Modal -->
-    <div class="modal fade" id="delete-cohorts-modal" tabindex="-1" role="dialog" aria-labelledby="delete-cohort-header" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="delete-cohort-header">Delete Cohorts</h4>
-                </div>
-                <form id="delete-cohort-form" method="POST" action="{% url 'delete_cohort' %}">
-                    <div class="modal-body">
-                        <label>Are you sure you want to delete cohorts?</label>
-                        <p class="form-control-static selected-cohorts"></p>
-                    </div>
-                    <div class="modal-footer">
-                        {% csrf_token %}
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                        <input type="submit" value="Delete" class="btn btn-primary" />
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Share Cohort Modal -->
-    <div class="modal fade" id="share-cohorts-modal" tabindex="-1" role="dialog" aria-labelledby="share-cohort-header" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="share-cohort-header">Share Cohort</h4>
-                </div>
-                <form id="share-cohort-form" method="POST" action="{% url 'share_cohorts' %}">
-                    <div class="modal-body">
-                        <p class="form-control-static selected-cohorts"></p>
-                        <label for="share-cohort-users">Please select the users you would like to share these cohorts with:</label>
-                        <select id="share-cohort-users" name="users" multiple="multiple">
-                            {% for user in user_list %}
-                            <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }} ({{ user.email }})</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="modal-footer">
-                        {% csrf_token %}
-                        <input type="submit" value="Share Cohort" class="btn btn-primary" />
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Delete Visualizations Modal -->
-    <div class="modal fade" id="delete-viz-modal" tabindex="-1" role="dialog" aria-labelledby="delete-viz-header" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="delete-viz-header">Share Cohort</h4>
-                </div>
-                <form id="delete-viz-form" method="POST" action="{% url 'deleteviz' %}">
-                    <div class="modal-body">
-                        <label>Are you sure you want to delete visualizations?</label>
-                        <p class="form-control-static selected-viz"></p>
-                    </div>
-                    <div class="modal-footer">
-                        {% csrf_token %}
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                        <input type="submit" value="Delete Visualization" class="btn btn-primary" />
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Share Visualizations Modal -->
-    <div class="modal fade" id="share-viz-modal" tabindex="-1" role="dialog" aria-labelledby="share-viz-header" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="share-viz-header">Share Cohort</h4>
-                </div>
-                <form id="share-viz-form" method="POST" action="{% url 'share_viz' %}">
-                    <div class="modal-body">
-                        <p class="form-control-static selected-viz"></p>
-                        <label for="share-viz-users">Please select the users you would like to share these cohorts with:</label>
-                        <select id="share-viz-users" name="users" multiple="multiple">
-                            {% for user in user_list %}
-                            <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }} ({{ user.email }})</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="modal-footer">
-                        {% csrf_token %}
-                        <input type="submit" value="Share Visualization" class="btn btn-primary" />
-                    </div>
-                </form>
             </div>
         </div>
     </div>

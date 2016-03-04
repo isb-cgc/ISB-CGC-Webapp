@@ -481,111 +481,111 @@ class MetadataItem(messages.Message):
 Incoming object needs to use age that's a string (eg. 10_to_39)
 '''
 class IncomingMetadataItem(messages.Message):
-    adenocarcinoma_invasion                                         = messages.StringField(1)
-    age_at_initial_pathologic_diagnosis                             = messages.StringField(2)
-    anatomic_neoplasm_subdivision                                   = messages.StringField(3)
-    avg_percent_lymphocyte_infiltration                             = messages.FloatField(4)
-    avg_percent_monocyte_infiltration                               = messages.FloatField(5)
-    avg_percent_necrosis                                            = messages.FloatField(6)
-    avg_percent_neutrophil_infiltration                             = messages.FloatField(7)
-    avg_percent_normal_cells                                        = messages.FloatField(8)
-    avg_percent_stromal_cells                                       = messages.FloatField(9)
-    avg_percent_tumor_cells                                         = messages.FloatField(10)
-    avg_percent_tumor_nuclei                                        = messages.FloatField(11)
-    batch_number                                                    = messages.IntegerField(12)
-    bcr                                                             = messages.StringField(13)
-    clinical_M                                                      = messages.StringField(14)
-    clinical_N                                                      = messages.StringField(15)
-    clinical_stage                                                  = messages.StringField(16)
-    clinical_T                                                      = messages.StringField(17)
-    colorectal_cancer                                               = messages.StringField(18)
-    country                                                         = messages.StringField(19)
-    country_of_procurement                                          = messages.StringField(20)
-    days_to_birth                                                   = messages.IntegerField(21)
-    days_to_collection                                              = messages.IntegerField(22)
-    # days_to_sample_procurement                                    = messages.IntegerField(23)
-    days_to_death                                                   = messages.IntegerField(23)
-    days_to_initial_pathologic_diagnosis                            = messages.IntegerField(24)
-    days_to_last_followup                                           = messages.IntegerField(25)
-    days_to_submitted_specimen_dx                                   = messages.IntegerField(26)
-    Study                                                           = messages.StringField(27)
-    ethnicity                                                       = messages.StringField(28)
-    frozen_specimen_anatomic_site                                   = messages.StringField(29)
-    gender                                                          = messages.StringField(30)
-    height                                                          = messages.IntegerField(31)
-    histological_type                                               = messages.StringField(32)
-    history_of_colon_polyps                                         = messages.StringField(33)
-    history_of_neoadjuvant_treatment                                = messages.StringField(34)
-    history_of_prior_malignancy                                     = messages.StringField(35)
-    hpv_calls                                                       = messages.StringField(36)
-    hpv_status                                                      = messages.StringField(37)
-    icd_10                                                          = messages.StringField(38)
-    icd_o_3_histology                                               = messages.StringField(39)
-    icd_o_3_site                                                    = messages.StringField(40)
-    lymph_node_examined_count                                       = messages.IntegerField(41)
-    lymphatic_invasion                                              = messages.StringField(42)
-    lymphnodes_examined                                             = messages.StringField(43)
-    lymphovascular_invasion_present                                 = messages.StringField(44)
-    max_percent_lymphocyte_infiltration                             = messages.IntegerField(45)
-    max_percent_monocyte_infiltration                               = messages.IntegerField(46)
-    max_percent_necrosis                                            = messages.IntegerField(47)
-    max_percent_neutrophil_infiltration                             = messages.IntegerField(48)
-    max_percent_normal_cells                                        = messages.IntegerField(49)
-    max_percent_stromal_cells                                       = messages.IntegerField(50)
-    max_percent_tumor_cells                                         = messages.IntegerField(51)
-    max_percent_tumor_nuclei                                        = messages.IntegerField(52)
-    menopause_status                                                = messages.StringField(53)
-    min_percent_lymphocyte_infiltration                             = messages.IntegerField(54)
-    min_percent_monocyte_infiltration                               = messages.IntegerField(55)
-    min_percent_necrosis                                            = messages.IntegerField(56)
-    min_percent_neutrophil_infiltration                             = messages.IntegerField(57)
-    min_percent_normal_cells                                        = messages.IntegerField(58)
-    min_percent_stromal_cells                                       = messages.IntegerField(59)
-    min_percent_tumor_cells                                         = messages.IntegerField(60)
-    min_percent_tumor_nuclei                                        = messages.IntegerField(61)
-    mononucleotide_and_dinucleotide_marker_panel_analysis_status    = messages.StringField(62)
-    mononucleotide_marker_panel_analysis_status                     = messages.StringField(63)
-    neoplasm_histologic_grade                                       = messages.StringField(64)
-    new_tumor_event_after_initial_treatment                         = messages.StringField(65)
-    number_of_lymphnodes_examined                                   = messages.IntegerField(66)
-    number_of_lymphnodes_positive_by_he                             = messages.IntegerField(67)
-    ParticipantBarcode                                              = messages.StringField(68)
-    pathologic_M                                                    = messages.StringField(69)
-    pathologic_N                                                    = messages.StringField(70)
-    pathologic_stage                                                = messages.StringField(71)
-    pathologic_T                                                    = messages.StringField(72)
-    person_neoplasm_cancer_status                                   = messages.StringField(73)
-    pregnancies                                                     = messages.StringField(74)
-    preservation_method                                             = messages.StringField(75)
-    primary_neoplasm_melanoma_dx                                    = messages.StringField(76)
-    primary_therapy_outcome_success                                 = messages.StringField(77)
-    prior_dx                                                        = messages.StringField(78)
-    Project                                                         = messages.StringField(79)
-    psa_value                                                       = messages.FloatField(80)
-    race                                                            = messages.StringField(81)
-    residual_tumor                                                  = messages.StringField(82)
-    SampleBarcode                                                   = messages.StringField(83)
-    tobacco_smoking_history                                         = messages.StringField(86)
-    total_number_of_pregnancies                                     = messages.IntegerField(87)
-    tumor_tissue_site                                               = messages.StringField(88)
-    tumor_pathology                                                 = messages.StringField(89)
-    tumor_type                                                      = messages.StringField(90)
-    weiss_venous_invasion                                                 = messages.StringField(91)
-    vital_status                                                    = messages.StringField(92)
-    weight                                                          = messages.IntegerField(93)
-    year_of_initial_pathologic_diagnosis                            = messages.StringField(94)
-    SampleTypeCode                                                  = messages.StringField(95)
-    has_Illumina_DNASeq                                             = messages.StringField(96)
-    has_BCGSC_HiSeq_RNASeq                                          = messages.StringField(97)
-    has_UNC_HiSeq_RNASeq                                            = messages.StringField(98)
-    has_BCGSC_GA_RNASeq                                             = messages.StringField(99)
-    has_UNC_GA_RNASeq                                               = messages.StringField(100)
-    has_HiSeq_miRnaSeq                                              = messages.StringField(101)
-    has_GA_miRNASeq                                                 = messages.StringField(102)
-    has_RPPA                                                        = messages.StringField(103)
-    has_SNP6                                                        = messages.StringField(104)
-    has_27k                                                         = messages.StringField(105)
-    has_450k                                                        = messages.StringField(106)
+    adenocarcinoma_invasion                                         = messages.StringField(1, repeated=True)
+    age_at_initial_pathologic_diagnosis                             = messages.StringField(2, repeated=True)
+    anatomic_neoplasm_subdivision                                   = messages.StringField(3, repeated=True)
+    avg_percent_lymphocyte_infiltration                             = messages.FloatField(4, repeated=True)
+    avg_percent_monocyte_infiltration                               = messages.FloatField(5, repeated=True)
+    avg_percent_necrosis                                            = messages.FloatField(6, repeated=True)
+    avg_percent_neutrophil_infiltration                             = messages.FloatField(7, repeated=True)
+    avg_percent_normal_cells                                        = messages.FloatField(8, repeated=True)
+    avg_percent_stromal_cells                                       = messages.FloatField(9, repeated=True)
+    avg_percent_tumor_cells                                         = messages.FloatField(10, repeated=True)
+    avg_percent_tumor_nuclei                                        = messages.FloatField(11, repeated=True)
+    batch_number                                                    = messages.IntegerField(12, repeated=True)
+    bcr                                                             = messages.StringField(13, repeated=True)
+    clinical_M                                                      = messages.StringField(14, repeated=True)
+    clinical_N                                                      = messages.StringField(15, repeated=True)
+    clinical_stage                                                  = messages.StringField(16, repeated=True)
+    clinical_T                                                      = messages.StringField(17, repeated=True)
+    colorectal_cancer                                               = messages.StringField(18, repeated=True)
+    country                                                         = messages.StringField(19, repeated=True)
+    country_of_procurement                                          = messages.StringField(20, repeated=True)
+    days_to_birth                                                   = messages.IntegerField(21, repeated=True)
+    days_to_collection                                              = messages.IntegerField(22, repeated=True)
+    # days_to_sample_procurement                                    = messages.IntegerField(23, repeated=True)
+    days_to_death                                                   = messages.IntegerField(23, repeated=True)
+    days_to_initial_pathologic_diagnosis                            = messages.IntegerField(24, repeated=True)
+    days_to_last_followup                                           = messages.IntegerField(25, repeated=True)
+    days_to_submitted_specimen_dx                                   = messages.IntegerField(26, repeated=True)
+    Study                                                           = messages.StringField(27, repeated=True)
+    ethnicity                                                       = messages.StringField(28, repeated=True)
+    frozen_specimen_anatomic_site                                   = messages.StringField(29, repeated=True)
+    gender                                                          = messages.StringField(30, repeated=True)
+    height                                                          = messages.IntegerField(31, repeated=True)
+    histological_type                                               = messages.StringField(32, repeated=True)
+    history_of_colon_polyps                                         = messages.StringField(33, repeated=True)
+    history_of_neoadjuvant_treatment                                = messages.StringField(34, repeated=True)
+    history_of_prior_malignancy                                     = messages.StringField(35, repeated=True)
+    hpv_calls                                                       = messages.StringField(36, repeated=True)
+    hpv_status                                                      = messages.StringField(37, repeated=True)
+    icd_10                                                          = messages.StringField(38, repeated=True)
+    icd_o_3_histology                                               = messages.StringField(39, repeated=True)
+    icd_o_3_site                                                    = messages.StringField(40, repeated=True)
+    lymph_node_examined_count                                       = messages.IntegerField(41, repeated=True)
+    lymphatic_invasion                                              = messages.StringField(42, repeated=True)
+    lymphnodes_examined                                             = messages.StringField(43, repeated=True)
+    lymphovascular_invasion_present                                 = messages.StringField(44, repeated=True)
+    max_percent_lymphocyte_infiltration                             = messages.IntegerField(45, repeated=True)
+    max_percent_monocyte_infiltration                               = messages.IntegerField(46, repeated=True)
+    max_percent_necrosis                                            = messages.IntegerField(47, repeated=True)
+    max_percent_neutrophil_infiltration                             = messages.IntegerField(48, repeated=True)
+    max_percent_normal_cells                                        = messages.IntegerField(49, repeated=True)
+    max_percent_stromal_cells                                       = messages.IntegerField(50, repeated=True)
+    max_percent_tumor_cells                                         = messages.IntegerField(51, repeated=True)
+    max_percent_tumor_nuclei                                        = messages.IntegerField(52, repeated=True)
+    menopause_status                                                = messages.StringField(53, repeated=True)
+    min_percent_lymphocyte_infiltration                             = messages.IntegerField(54, repeated=True)
+    min_percent_monocyte_infiltration                               = messages.IntegerField(55, repeated=True)
+    min_percent_necrosis                                            = messages.IntegerField(56, repeated=True)
+    min_percent_neutrophil_infiltration                             = messages.IntegerField(57, repeated=True)
+    min_percent_normal_cells                                        = messages.IntegerField(58, repeated=True)
+    min_percent_stromal_cells                                       = messages.IntegerField(59, repeated=True)
+    min_percent_tumor_cells                                         = messages.IntegerField(60, repeated=True)
+    min_percent_tumor_nuclei                                        = messages.IntegerField(61, repeated=True)
+    mononucleotide_and_dinucleotide_marker_panel_analysis_status    = messages.StringField(62, repeated=True)
+    mononucleotide_marker_panel_analysis_status                     = messages.StringField(63, repeated=True)
+    neoplasm_histologic_grade                                       = messages.StringField(64, repeated=True)
+    new_tumor_event_after_initial_treatment                         = messages.StringField(65, repeated=True)
+    number_of_lymphnodes_examined                                   = messages.IntegerField(66, repeated=True)
+    number_of_lymphnodes_positive_by_he                             = messages.IntegerField(67, repeated=True)
+    ParticipantBarcode                                              = messages.StringField(68, repeated=True)
+    pathologic_M                                                    = messages.StringField(69, repeated=True)
+    pathologic_N                                                    = messages.StringField(70, repeated=True)
+    pathologic_stage                                                = messages.StringField(71, repeated=True)
+    pathologic_T                                                    = messages.StringField(72, repeated=True)
+    person_neoplasm_cancer_status                                   = messages.StringField(73, repeated=True)
+    pregnancies                                                     = messages.StringField(74, repeated=True)
+    preservation_method                                             = messages.StringField(75, repeated=True)
+    primary_neoplasm_melanoma_dx                                    = messages.StringField(76, repeated=True)
+    primary_therapy_outcome_success                                 = messages.StringField(77, repeated=True)
+    prior_dx                                                        = messages.StringField(78, repeated=True)
+    Project                                                         = messages.StringField(79, repeated=True)
+    psa_value                                                       = messages.FloatField(80, repeated=True)
+    race                                                            = messages.StringField(81, repeated=True)
+    residual_tumor                                                  = messages.StringField(82, repeated=True)
+    SampleBarcode                                                   = messages.StringField(83, repeated=True)
+    tobacco_smoking_history                                         = messages.StringField(86, repeated=True)
+    total_number_of_pregnancies                                     = messages.IntegerField(87, repeated=True)
+    tumor_tissue_site                                               = messages.StringField(88, repeated=True)
+    tumor_pathology                                                 = messages.StringField(89, repeated=True)
+    tumor_type                                                      = messages.StringField(90, repeated=True)
+    weiss_venous_invasion                                           = messages.StringField(91, repeated=True)
+    vital_status                                                    = messages.StringField(92, repeated=True)
+    weight                                                          = messages.IntegerField(93, repeated=True)
+    year_of_initial_pathologic_diagnosis                            = messages.StringField(94, repeated=True)
+    SampleTypeCode                                                  = messages.StringField(95, repeated=True)
+    has_Illumina_DNASeq                                             = messages.StringField(96, repeated=True)
+    has_BCGSC_HiSeq_RNASeq                                          = messages.StringField(97, repeated=True)
+    has_UNC_HiSeq_RNASeq                                            = messages.StringField(98, repeated=True)
+    has_BCGSC_GA_RNASeq                                             = messages.StringField(99, repeated=True)
+    has_UNC_GA_RNASeq                                               = messages.StringField(100, repeated=True)
+    has_HiSeq_miRnaSeq                                              = messages.StringField(101, repeated=True)
+    has_GA_miRNASeq                                                 = messages.StringField(102, repeated=True)
+    has_RPPA                                                        = messages.StringField(103, repeated=True)
+    has_SNP6                                                        = messages.StringField(104, repeated=True)
+    has_27k                                                         = messages.StringField(105, repeated=True)
+    has_450k                                                        = messages.StringField(106, repeated=True)
 
 class MetadataAttributeValues(messages.Message):
     name = messages.StringField(1)
@@ -899,11 +899,14 @@ class Meta_Endpoints_API(remote.Service):
         # Get the list of valid parameters from request
         for key, value in MetadataItem.__dict__.items():
             if not key.startswith('_'):
-                if request.__getattribute__(key) is not None:
+                if request.__getattribute__(key) is not None and len(request.__getattribute__(key)) > 0:
+                    values = []
+                    for val in request.__getattribute__(key):
+                        values.append(val)
                     if key.startswith('has_'):
-                        query_dict[key] = '1' if request.__getattribute__(key) == 'True' else '0'
+                        query_dict[key] = '1' if values[0] == 'True' else '0'
                     else:
-                        query_dict[key] = request.__getattribute__(key).replace('_', ' ')
+                        query_dict[key] = ','.join(values).replace('_', ' ')
                     # combinations: has_UNC_HiSeq_RNASeq and has_UNC_GA_RNASeq 20 rows
                     # has_UNC_HiSeq_RNASeq and has_BCGSC_GA_RNASeq 209 rows
                     # has_BCGSC_HiSeq_RNASeq and has_UNC_HiSeq_RNASeq 919 rows
@@ -1467,11 +1470,13 @@ class Meta_Endpoints_API(remote.Service):
                 user_id = Django_User.objects.get(email=user_email).id
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
                 logger.warn(e)
+                request_finished.send(self)
                 raise endpoints.NotFoundException("%s does not have an entry in the user database." % user_email)
             try:
                 cohort_perm = Cohort_Perms.objects.get(cohort_id=cohort_id, user_id=user_id)
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
                 logger.warn(e)
+                request_finished.send(self)
                 raise endpoints.UnauthorizedException("%s does not have permission to view cohort %d." % (user_email, cohort_id))
 
             try:
@@ -1551,6 +1556,7 @@ class Meta_Endpoints_API(remote.Service):
         finally:
             if cursor: cursor.close()
             if db: db.close()
+            request_finished.send(self)
 
     GET_RESOURCE = endpoints.ResourceContainer(sample_id=messages.StringField(1, required=True))
     @endpoints.method(GET_RESOURCE, SampleFiles,
@@ -1854,6 +1860,11 @@ class Meta_Endpoints_API_v2(remote.Service):
         if 'user_studies' in filters:
             del filters['user_studies']
 
+        # For filters with no tables at this point, assume its the TCGA metadata_samples table
+        for key, obj in filters.items():
+            if not obj['tables']:
+                filters[key]['tables'].append('metadata_samples')
+
         # Loop through the features
         for key, feature in valid_attrs.items():
             # Get a count for each feature
@@ -1892,7 +1903,7 @@ class Meta_Endpoints_API_v2(remote.Service):
                             query += ' AND ' + addt_cond
                         elif addt_cond:
                             query += ' WHERE ' + addt_cond
-                            where_clause['value_tuple'] += sample_tables[table]['sample_ids'][barcode_key]['value_tuple']
+                        where_clause['value_tuple'] += sample_tables[table]['sample_ids'][barcode_key]['value_tuple']
                     query += ' GROUP BY %s ' %col_name
                     cursor.execute(query, where_clause['value_tuple'])
                     for row in cursor.fetchall():
@@ -1915,9 +1926,15 @@ class Meta_Endpoints_API_v2(remote.Service):
         total = 0
         for key, feature in valid_attrs.items():
             value_list = []
+
+            # Special case for age ranges
+            if key == 'CLIN:age_at_initial_pathologic_diagnosis':
+                feature['values'] = normalize_ages(feature['values'])
+
             for value, count in feature['values'].items():
                 if feature['name'].startswith('has_'):
                     value = 'True' if value else 'False'
+
                 value_list.append(MetaValueListCount(value=str(value), count=count))
 
             count_list.append(MetadataAttributeValues(name=feature['name'], values=value_list, id=key, total=feature['total']))
@@ -2066,3 +2083,133 @@ class Meta_Endpoints_API_v2(remote.Service):
         db.close()
         request_finished.send(self)
         return SampleBarcodeList( items=results, count=len(results) )
+
+
+    GET_RESOURCE = endpoints.ResourceContainer(
+                                               filters=messages.StringField(1),
+                                               token=messages.StringField(3),
+                                               cohort_id=messages.IntegerField(2))
+    @endpoints.method(GET_RESOURCE, MetadataPlatformItemList,
+                      path='metadata_platform_list', http_method='GET',
+                      name='meta.metadata_platform_list')
+    def metadata_platform_list(self, request):
+        """ Used by the web application."""
+        filters = {}
+        sample_ids = None
+
+        if request.__getattribute__('filters')is not None:
+            try:
+                tmp = json.loads(request.filters)
+                for filter in tmp:
+                    key = filter['key']
+                    if key not in filters:
+                        filters[key] = {'values':[], 'tables':[] }
+                    filters[key]['values'].append(filter['value'])
+
+            except Exception, e:
+                print traceback.format_exc()
+                raise endpoints.BadRequestException('Filters must be a valid JSON formatted array with objects containing both key and value properties')
+
+        db = sql_connection()
+
+        # Check for passed in saved search id
+        if request.__getattribute__('cohort_id') is not None:
+            cohort_id = str(request.cohort_id)
+            sample_query_str = 'SELECT sample_id FROM cohorts_samples WHERE cohort_id=%s;'
+
+            try:
+                cursor = db.cursor(MySQLdb.cursors.DictCursor)
+                cursor.execute(sample_query_str, (cohort_id,))
+                sample_ids = ()
+
+                for row in cursor.fetchall():
+                    sample_ids += (row['sample_id'],)
+
+            except (TypeError, IndexError) as e:
+                print e
+                raise endpoints.NotFoundException('Error in retrieving barcodes.')
+
+        query_str = "SELECT " \
+                    "IF(has_Illumina_DNASeq=1, " \
+                    "'Yes', 'None'" \
+                    ") AS DNAseq_data," \
+                    "IF (has_SNP6=1, 'Genome_Wide_SNP_6', 'None') as cnvrPlatform," \
+                    "CASE" \
+                    "  WHEN has_BCGSC_HiSeq_RNASeq=1 and has_UNC_HiSeq_RNASeq=0" \
+                    "    THEN 'HiSeq/BCGSC'" \
+                    "  WHEN has_BCGSC_HiSeq_RNASeq=1 and has_UNC_HiSeq_RNASeq=1" \
+                    "    THEN 'HiSeq/BCGSC and UNC V2'" \
+                    "  WHEN has_UNC_HiSeq_RNASeq=1 and has_BCGSC_HiSeq_RNASeq=0 and has_BCGSC_GA_RNASeq=0 and has_UNC_GA_RNASeq=0" \
+                    "    THEN 'HiSeq/UNC V2'" \
+                    "  WHEN has_UNC_HiSeq_RNASeq=1 and has_BCGSC_HiSeq_RNASeq=0 and has_BCGSC_GA_RNASeq=0 and has_UNC_GA_RNASeq=1" \
+                    "    THEN 'GA and HiSeq/UNC V2'" \
+                    "  WHEN has_UNC_HiSeq_RNASeq=1 and has_BCGSC_HiSeq_RNASeq=0 and has_BCGSC_GA_RNASeq=1 and has_UNC_GA_RNASeq=0" \
+                    "    THEN 'HiSeq/UNC V2 and GA/BCGSC'" \
+                    "  WHEN has_UNC_HiSeq_RNASeq=1 and has_BCGSC_HiSeq_RNASeq=1 and has_BCGSC_GA_RNASeq=0 and has_UNC_GA_RNASeq=0" \
+                    "    THEN 'HiSeq/UNC V2 and BCGSC'" \
+                    "  WHEN has_BCGSC_GA_RNASeq=1 and has_UNC_HiSeq_RNASeq=0" \
+                    "    THEN 'GA/BCGSC'" \
+                    "  WHEN has_UNC_GA_RNASeq=1 and has_UNC_HiSeq_RNASeq=0" \
+                    "    THEN 'GA/UNC V2'" \
+                    "  ELSE 'None'" \
+                    "END AS gexpPlatform," \
+                    "CASE " \
+                    "   WHEN has_27k=1 and has_450k=0" \
+                    "     THEN 'HumanMethylation27'" \
+                    "   WHEN has_27k=0 and has_450k=1" \
+                    "     THEN 'HumanMethylation450'" \
+                    "   WHEN has_27k=1 and has_450k=1" \
+                    "     THEN '27k and 450k'" \
+                    "   ELSE 'None'" \
+                    "END AS methPlatform," \
+                    "CASE " \
+                    "   WHEN has_HiSeq_miRnaSeq=1 and has_GA_miRNASeq=0" \
+                    "      THEN 'IlluminaHiSeq_miRNASeq'" \
+                    "   WHEN has_HiSeq_miRnaSeq=0 and has_GA_miRNASeq=1" \
+                    "      THEN 'IlluminaGA_miRNASeq'" \
+                    "   WHEN has_HiSeq_miRnaSeq=1 and has_GA_miRNASeq=1" \
+                    "      THEN 'GA and HiSeq'" \
+                    "   ELSE 'None'" \
+                    "END AS mirnPlatform," \
+                    "IF (has_RPPA=1, 'MDA_RPPA_Core', 'None') AS rppaPlatform " \
+                    "FROM metadata_samples "
+
+        value_tuple = ()
+        if len(filters) > 0:
+            where_clause = build_where_clause(filters)
+            query_str += ' WHERE ' + where_clause['query_str']
+            value_tuple = where_clause['value_tuple']
+
+        if sample_ids:
+            if query_str.rfind('WHERE') >= 0:
+                query_str += ' and SampleBarcode in %s' % (sample_ids,)
+            else:
+                query_str += ' WHERE SampleBarcode in %s' % (sample_ids,)
+
+        query_str += ';'
+
+        try:
+            cursor = db.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute(query_str, value_tuple)
+            data = []
+            for row in cursor.fetchall():
+
+                item = MetadataPlatformItem(
+                    DNAseq_data=str(row['DNAseq_data']),
+                    cnvrPlatform=str(row['cnvrPlatform']),
+                    gexpPlatform=str(row['gexpPlatform']),
+                    methPlatform=str(row['methPlatform']),
+                    mirnPlatform=str(row['mirnPlatform']),
+                    rppaPlatform=str(row['rppaPlatform']),
+                )
+                data.append(item)
+
+            cursor.close()
+            db.close()
+
+            return MetadataPlatformItemList(items=data)
+
+        except (IndexError, TypeError) as e:
+            if cursor: cursor.close()
+            if db: db.close()
+            raise endpoints.NotFoundException('Sample not found.')

@@ -103,6 +103,15 @@ function($, d3, d3tip, vis_helpers) {
                 'Gender',
                 'Age at Initial Pathologic Diagnosis'
             ];
+
+            // Munge Data
+            var tree_data = {};
+            for (var i = 0; i < data.length; i++) {
+                if (clin_attr.indexOf(data[i]['name']) > 0) {
+                    tree_data[data[i]['name']] = data[i]['values']
+                }
+            }
+
             for (var i = 0; i < clin_attr.length; i++) {
                 var tree_div = d3.select('#tree-graph-clinical')
                     .append('div')
@@ -116,8 +125,7 @@ function($, d3, d3tip, vis_helpers) {
                     .style("height", h + "px")
                     .append("svg:g")
                     .attr("transform", "translate(.5,.5)");
-
-                this.draw_tree(data['count'][clin_attr[i]], graph_svg, clin_attr[i], w, h, false);
+                this.draw_tree(tree_data[clin_attr[i]], graph_svg, clin_attr[i], w, h, false);
             }
         }
     };
