@@ -16,8 +16,6 @@ limitations under the License.
 
 """
 
-import logging
-
 from django.conf import settings
 
 from bq_data_access.cohort_cloudsql import CloudSQLCohortAccess
@@ -30,7 +28,7 @@ class SeqPeekMAFWithCohorts(object):
         self.cohort_info = cohort_info
 
 
-class SeqPeekMAFDataAccess(object):
+class SeqPeekMAFDataFormatter(object):
     def get_feature_vector(self, feature_id, cohort_id_array):
         cohort_settings = settings.GET_BQ_COHORT_SETTINGS()
         provider = SeqPeekDataProvider(feature_id)
@@ -59,9 +57,8 @@ class SeqPeekMAFDataAccess(object):
 
         return cohort_info_array
 
-    def get_data(self, feature_id, cohort_id_array):
-        vector = self.get_feature_vector(feature_id, cohort_id_array)
-        self.annotate_vector_with_cohorts(cohort_id_array, vector)
-
+    def format_maf_vector_with_cohorts(self, maf_vector, cohort_id_array):
+        self.annotate_vector_with_cohorts(cohort_id_array, maf_vector)
         cohort_info = self.get_cohort_information(cohort_id_array)
-        return SeqPeekMAFWithCohorts(vector, cohort_info)
+
+        return SeqPeekMAFWithCohorts(maf_vector, cohort_info)

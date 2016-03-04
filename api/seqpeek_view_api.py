@@ -23,9 +23,12 @@ from endpoints import InternalServerErrorException
 from protorpc import remote
 from protorpc.messages import IntegerField, Message, MessageField, StringField, Variant
 
-from bq_data_access.seqpeek.seqpeek_view import SeqPeekViewDataAccess
+from bq_data_access.seqpeek.seqpeek_view import SeqPeekViewDataBuilder
+from bq_data_access.data_access import get_feature_vectors_tcga_only
 from api.seqpeek_api import SeqPeekDataEndpointsAPI, MAFRecord, maf_array_to_record
-
+from bq_data_access.seqpeek.seqpeek_maf_formatter import SeqPeekMAFDataFormatter
+from bq_data_access.seqpeek_maf_data import SeqPeekDataProvider
+from bq_data_access.data_access import ProviderClassQueryDescription
 
 class SeqPeekViewDataRequest(Message):
     hugo_symbol = StringField(1, required=True)
@@ -119,6 +122,9 @@ def create_interpro_record(interpro_literal):
 
 @SeqPeekDataEndpointsAPI.api_class(resource_name='data_endpoints')
 class SeqPeekViewDataAccessAPI(remote.Service):
+    def build_gnab_feature_id(self, gene_label):
+        return "GNAB:{gene_label}:variant_classification".format(gene_label=gene_label)
+
     def create_response(self, seqpeek_view_data):
         plot_data = seqpeek_view_data['plot_data']
         tracks = []
@@ -144,8 +150,26 @@ class SeqPeekViewDataAccessAPI(remote.Service):
             hugo_symbol = request.hugo_symbol
             cohort_id_array = request.cohort_id
 
-            seqpeek_data = SeqPeekViewDataAccess().get_data(hugo_symbol, cohort_id_array)
-            response = self.create_response(seqpeek_data)
+            gnab_feature_id = self.build_gnab_feature_id(hugo_symbol)
+            logging.debug("GNAB feature ID for SeqPeke: {0}".format(gnab_feature_id))
+
+            async_params = [ProviderClassQueryDescription(SeqPeekDataProvider, gnab_feature_id, cohort_id_array)]
+            maf_data_result = get_feature_vectors_tcga_only(async_params, skip_formatting_for_plot=True)
+
+            maf_data_vector = maf_data_result[gnab_feature_id]['data']
+
+            # Since the gene (hugo_symbol) parameter is part of the GNAB feature ID,
+            # it will be sanity-checked in the SeqPeekMAFDataAccess instance.
+            seqpeek_data = SeqPeekMAFDataFormatter().format_maf_vector_with_cohorts(maf_data_vector, cohort_id_array)
+
+            seqpeek_maf_vector = seqpeek_data.maf_vector
+            seqpeek_cohort_info = seqpeek_data.cohort_info
+            seqpeek_view_data = SeqPeekViewDataBuilder().build_view_data(hugo_symbol,
+                                                                         seqpeek_maf_vector,
+                                                                         seqpeek_cohort_info,
+                                                                         cohort_id_array)
+
+            response = self.create_response(seqpeek_view_data)
             return response
         except Exception as e:
             logging.exception(e)

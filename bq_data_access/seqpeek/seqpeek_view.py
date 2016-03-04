@@ -19,7 +19,6 @@ limitations under the License.
 from copy import deepcopy
 import logging
 
-from bq_data_access.seqpeek.seqpeek_maf import SeqPeekMAFDataAccess
 from bq_data_access.seqpeek.seqpeek_interpro import InterProDataProvider
 
 SAMPLE_ID_FIELD_NAME = 'sample_id'
@@ -120,7 +119,6 @@ class MAFData(object):
 
 
 def build_track_data(track_id_list, all_tumor_mutations):
-    logging.debug(str(all_tumor_mutations))
     tracks = []
     for track_id in track_id_list:
         logging.debug("Track ID " + str(track_id))
@@ -169,21 +167,19 @@ def get_track_id_list(param):
     return map(str, param)
 
 
-class SeqPeekViewDataAccess(object):
-    def get_data(self, hugo_symbol, cohort_id_list):
+class SeqPeekViewDataBuilder(object):
+    def build_view_data(self, hugo_symbol, maf_vector, seqpeek_cohort_info, cohort_id_list):
         context = get_genes_tumors_lists()
 
         track_id_list = get_track_id_list(cohort_id_list)
-        gnab_feature = build_gnab_feature_id(hugo_symbol)
 
         # Since the gene (hugo_symbol) parameter is part of the GNAB feature ID,
         # it will be sanity-checked in the SeqPeekMAFDataAccess instance.
-        seqpeek_data = SeqPeekMAFDataAccess().get_data(gnab_feature, cohort_id_list)
+        uniprot_id = find_uniprot_id(maf_vector)
 
-        uniprot_id = find_uniprot_id(seqpeek_data.maf_vector)
         logging.info("UniProt ID: " + str(uniprot_id))
         protein_data = get_protein_domains(uniprot_id)
-        track_data = build_track_data(track_id_list, seqpeek_data.maf_vector)
+        track_data = build_track_data(track_id_list, maf_vector)
 
         plot_data = {
             'gene_label': hugo_symbol,
@@ -202,7 +198,7 @@ class SeqPeekViewDataAccess(object):
         #   if the track is aggregate
         for track in plot_data['tracks']:
             track['type'] = 'tumor'
-            track['label'] = get_track_label(track, seqpeek_data.cohort_info)
+            track['label'] = get_track_label(track, seqpeek_cohort_info)
 
         plot_data['tracks'].append(build_summary_track(plot_data['tracks']))
 
