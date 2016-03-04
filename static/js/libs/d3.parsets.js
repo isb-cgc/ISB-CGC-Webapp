@@ -34,9 +34,9 @@
             tooltip_ = defaultTooltip,
             categoryTooltip = defaultCategoryTooltip,
             value_,
-            spacing = 20,
+            spacing = 10,
             width = 500, // change this for height
-            height = 900,
+            height = 680,
             tension = 0.6,
             tension0,
             duration = 500;
@@ -213,7 +213,7 @@
                                     }
                                 }
                                 d3.select(this)
-                                    .attr("transform", translateY)//function(d) { return "translate(" + d.y + ",960)rotate(270)";})//"translate(0," + d.y + ")")
+                                    .attr("transform", translateY)
                                     .transition();
                                 ribbon.filter(function(r) { return r.source.dimension === d || r.target.dimension === d; })
                                     .attr("d", ribbonPath);
@@ -227,7 +227,7 @@
                                     d.y = y0 + i * dy;
                                 });
                                 transition(d3.select(this))
-                                    .attr("transform", translateY)//function(d) { return "translate(" + d.y + ",960)rotate(270)"; }) //"translate(0," + d.y + ")")
+                                    .attr("transform", translateY)
                                     .tween("ribbon", ribbonTweenY);
                             }));
                     dimension.select("text").select("tspan.sort.alpha")
@@ -235,7 +235,7 @@
                     dimension.select("text").select("tspan.sort.size")
                         .on("click.parsets", sortBy("size", function(a, b) { return a.count - b.count; }, dimension));
                     dimension.transition().duration(duration)
-                        .attr("transform", translateY)//function(d) { return "translate(" + d.y + ",960)rotate(270)";})//function(d) { return "translate(0," + d.y + ")"; })
+                        .attr("transform", translateY)
                         .tween("ribbon", ribbonTweenY);
                     dimension.exit().remove();
 
@@ -760,8 +760,7 @@
 
     function identity(d) { return d; }
 
-    function translateY(d) { return "translate(" + (d.y+60) + ",550)rotate(270)";
-    } //return "translate(0," + d.y + ")"; }
+    function translateY(d) { return "translate(" + (d.y+0) + ",550)rotate(270)";}
 
     function defaultTooltip(d) {
         var count = d.count,

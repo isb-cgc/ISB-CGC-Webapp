@@ -18,30 +18,50 @@
 
 define(['jquery', 'd3', 'd3tip', 'vizhelpers'],
 function($, d3, d3tip, helpers) {
+    var svg;
+    var margin;
+    var zoom_area;
+    var zoom_rect;
+    var width;
+    var height;
+    var x;
+    var xAxis;
+    var y;
+    var yAxis;
+    var min_n;
+    var max_n;
+
     return {
-        createHistogramPlot: function (svg, raw_Data, values_only, width, height, x_attr, xLabel, tip, margin, legend) {
+        createHistogramPlot : function (svg_param, raw_Data, values_only, width_param, height_param, x_attr, xLabel, tip, margin_param, legend) {
+            svg    = svg_param;
+            width  = width_param;
+            height = height_param;
+            margin = margin_param;
 
             var num_bins = Math.ceil(Math.sqrt(raw_Data.length));
             var hist_data = d3.layout.histogram()
                 .bins(num_bins)
                 .frequency(false)(values_only);
-
             var kde = science.stats.kde().sample(values_only);
             var tmp = helpers.get_min_max(raw_Data, x_attr);
-            var min_n = tmp[0];
-            var max_n = tmp[1];
-            var x = d3.scale.linear()
+            min_n = tmp[0];
+            max_n = tmp[1];
+
+
+            x = d3.scale.linear()
                 .range([margin.left, width - margin.right])
                 .domain([min_n, max_n]);
-            var xAxis = d3.svg.axis()
+            xAxis = d3.svg.axis()
                 .scale(x)
                 .orient('bottom');
-            var y = d3.scale.linear()
+
+            y = d3.scale.linear()
                 .range([height - margin.bottom - margin.top, 0])
                 .domain([0, d3.max(hist_data, function (d) {
                     return d.y;
                 })]);
-            var yAxis = d3.svg.axis()
+
+            yAxis = d3.svg.axis()
                 .scale(y)
                 .orient('left')
                 .tickFormat(d3.format(".1%"))
@@ -50,7 +70,7 @@ function($, d3, d3tip, helpers) {
             var zoomer = function () {
                 svg.select('.x.axis').call(xAxis);
                 svg.select('.y.axis').call(yAxis);
-                plot_area.selectAll('.bar').attr('transform', 'translate(' + d3.event.translate[0] + ',' + d3.event.translate[1] + ')scale(' + d3.event.scale + ',' + d3.event.scale + ')');
+                plot_area.selectAll('.plot-bar').attr('transform', 'translate(' + d3.event.translate[0] + ',' + d3.event.translate[1] + ')scale(' + d3.event.scale + ',' + d3.event.scale + ')');
                 plot_area.selectAll('path.line').attr('transform', 'translate(' + d3.event.translate[0] + ',' + d3.event.translate[1] + ')scale(' + d3.event.scale + ',' + d3.event.scale + ')');
             };
 
@@ -59,7 +79,7 @@ function($, d3, d3tip, helpers) {
                 .y(y)
                 .on('zoom', zoomer);
 
-            var zoom_area = svg.append('g')
+            zoom_area = svg.append('g')
                 .attr('class', 'zoom_area')
                 .append('rect')
                 .attr('width', width)
@@ -97,10 +117,10 @@ function($, d3, d3tip, helpers) {
                     height: height - margin.top - margin.bottom})
                 .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-            plot_area.selectAll(".bar")
+            plot_area.selectAll(".plot-bar")
                 .data(hist_data)
                 .enter().append("rect")
-                .attr("class", "bar")
+                .attr("class", "plot-bar")
                 .attr('data-samples', function (d) {
                     return d['samples'];
                 })
@@ -143,11 +163,10 @@ function($, d3, d3tip, helpers) {
                 var sample_list = [];
                 var patient_list = [];
                 var e = brush.extent();
-                var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
-                svg.selectAll('rect.bar').classed("selected", function (d) {
+                svg.selectAll('rect.plot-bar').classed("selected", function (d) {
                     return e[0] <= (d['x'] + d['dx']) && d['x'] <= e[1];
                 });
-                $('rect.bar.selected').each(function () {
+                $('rect.plot-bar.selected').each(function () {
                     var samples = $(this).attr('data-samples').split(',');
                     var patients = $.map(samples, function(d) { return d.substr(0, 12);})
                         .filter(function(item, i, a) { return i == a.indexOf(item); });
@@ -156,12 +175,8 @@ function($, d3, d3tip, helpers) {
                     sample_list = sample_list.concat(samples);
                     patient_list = patient_list.concat(patients);
                 });
-                $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + total_samples);
-                $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Participants: ' + total_patients);
-                $('#save-cohort-'+plot_id+'-modal input[name="samples"]').attr('value', sample_list);
-                $(svg[0]).parents('.plot')
-                    .find('.save-cohort-card').show()
-                    .attr('style', 'position:absolute; top: 60px; left:' +(x(e[1])+margin.left)+'px;');
+
+                sample_form_update(e, total_samples, total_patients, sample_list);
             };
 
             // If the brush is empty, select all circles.
@@ -174,6 +189,7 @@ function($, d3, d3tip, helpers) {
 
             var brush = d3.svg.brush()
                 .x(x)
+                .on('brushstart', function(){ svg.selectAll('.extent').style("fill", "rgba(40,130,50,0.5");})
                 .on('brush', brushmove)
                 .on('brushend', brushend);
 
@@ -203,9 +219,8 @@ function($, d3, d3tip, helpers) {
                 .attr('transform', 'rotate(-90) translate(' + (-1 * (height/2)) + ',10)')
                 .text('Percentage of Samples in Grouping');
 
-            var check_selection_state = function (obj) {
-                if (obj) {
-
+            function check_selection_state(isActive) {
+                if (isActive) {
                     // Remove zoom area
                     svg.selectAll('.zoom_area').remove();
 
@@ -230,7 +245,8 @@ function($, d3, d3tip, helpers) {
                     // Append new zoom area
                     zoom_area = svg.append('g')
                         .attr('class', 'zoom_area')
-                        .append('rect')
+
+                    zoom_rect = zoom_area.append('rect')
                         .attr('width', width)
                         .attr('height', height)
                         .style('opacity', 0);
@@ -242,14 +258,40 @@ function($, d3, d3tip, helpers) {
                 }
             };
 
-            $(svg[0]).parents('.plot').find('.toggle-selection').unbind();
-            $(svg[0]).parents('.plot').find('.toggle-selection').on('click', function () {
-                $(this).toggleClass('active');
+            /*
+                Update the sample cohort bar update
+             */
+            function sample_form_update(extent, total_samples, total_patients, sample_list){
+                var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
+                $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + total_samples);
+                $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Participants: ' + total_patients);
+                $('#save-cohort-' + plot_id + '-modal input[name="samples"]').attr('value', sample_list);
+                $(svg[0]).parents('.plot')
+                    .find('.save-cohort-card').show()
+                    .attr('style', 'position:relative; top: -600px; left:' + (x(extent[1]) + 10) + 'px;');
 
-                check_selection_state($(this).hasClass('active'));
-            });
+                if (total_samples > 0){
+                    $(svg[0]).parents('.plot')
+                        .find('.save-cohort-card').find('.btn').prop('disabled', false);
+                } else {
+                    $(svg[0]).parents('.plot')
+                        .find('.save-cohort-card').find('.btn').prop('disabled', true);
+                }
+            }
 
-            check_selection_state($(svg[0]).parents('.plot').find('.toggle-selection').hasClass('active'));
+            function resize() {
+                width = svg.node().parentNode.offsetWidth - 10;
+                //TODO resize plot
+            }
+
+            function check_selection_state_wrapper(button){
+                check_selection_state(button);
+            }
+
+            return {
+                resize                : resize,
+                check_selection_state : check_selection_state_wrapper
+            }
         }
     };
 });

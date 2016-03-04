@@ -265,8 +265,152 @@ define(['jquery'], function($) {
         select2_formatting: function(item) {
             return '<option value="'+item['id']+'">'+item['text']+'</option>';
         },
-        field_option_change_callback: function(obj) {
 
+        /*  Gather options for a particular variable based on specified parameters
+          * This performs a similar function to field_option_change_callback
+          *
+          * Arguments :
+          *     datatype    : indicator of type of data gather options, eg. GEXP, etc
+          *     filters     : an array of filters unique to the data type, eg [{filter : "", value : ""}, {},..]
+          *     callback    : the return call on success
+          */
+        get_variable_field_options : function(datatype, filters, callback){
+            if(typeof(callback) !== 'undefined'){
+                var base_feature_search_url = base_api_url + '/_ah/api/feature_type_api/v1/feature_search?';
+                var feature_search_url = base_feature_search_url + "datatype=" + datatype;
+                for (var i in filters) {
+                    feature_search_url += "&" + filters[i].filter + "=" + filters[i].value; //+ ",";
+                }
+                feature_search_url = feature_search_url.substring(0, feature_search_url.length);
+
+                // Re-initialize select box with new features from feature search url
+                $.ajax({
+                    type: 'GET',
+                    url: feature_search_url,
+                    success: function (data) {
+                        data = data['items'] ? data['items'] : [];
+                        callback(data);
+                    }
+                });
+            } else {
+                console.log("parameters on 'get_variable_field_options' is not correct");
+            }
+        },
+
+        /*  Gather autocomplete interfaces for search parameters on TCGA data
+          * This performs a similar function to field_option_change_callback
+          *
+          */
+        get_datatype_search_interfaces : function(obj, datatype) {
+            var value   = datatype;
+            var helpers = this;
+            var feature_search_url = base_feature_search_url + 'datatype=' + value;
+
+            // Hide all field options
+            $(obj).parents('.field-search').find('.search-field').each(function() {
+                if (!$(this).hasClass('hidden')) {
+                    $(this).toggleClass('hidden');
+                }
+            });
+
+            // Select the options we're interested in
+            var options = $(obj).parent();
+
+            // For each option, if it requires and autocomplete box, initialize it
+            options.find('select.field-options').each(function() {
+                if ($(this).hasClass('select2')) {
+                    var datatype = value;
+                    var field = $(this).attr('data-field');
+                    var feature_search_url = base_api_url + '/_ah/api/feature_type_api/v1/feature_field_search?datatype=' + datatype + '&field=' + field;
+                    $(this).select2({
+                        ajax: {
+                            url: feature_search_url,
+                            dataType: 'json',
+                            data: function (params) {
+                                return { keyword: params.term, page: params.page };
+                            },
+                            processResults: function (data, page) {
+                                if(data['values']) {
+                                    var items = $.map(data['values'], function (item) {
+                                        var obj = {};
+                                        obj.id = item;
+                                        obj.text = item;
+                                        return obj;
+                                    });
+                                    return {results: items};
+                                } else {
+                                    return {results: []};
+                                }
+                            }
+                        },
+                        id: function (item) { return item['id']; },
+                        escapeMarkup: function (markup) { return markup; },
+                        minimumInputLength: 1,
+                        templateResult: helpers.select2_formatting,
+                        templateSelection: helpers.select2_formatting,
+                        width: '100%'
+                    });
+                }
+            });
+
+            // If it's clinical treat it differently and only use the search-term-field autocomplete
+            if (value == 'CLIN') {
+                // Initialize clinical search box
+                $(obj).parent().find('.search-term-field').select2({
+                    ajax: {
+                        url: feature_search_url,
+                        dataType: 'json',
+                        data: function (params) {
+                            return { keyword: params.term, page: params.page };
+                        },
+                        processResults: function (data, page) {
+                            if(data['items']) {
+                                var items = $.map(data['items'], function (item) {
+                                    var obj = {};
+                                    obj.id = item['internal_feature_id'];
+                                    obj.text = item['label'];
+                                    return obj;
+                                });
+                                return {results: items};
+                            } else {
+                                return {results: []};
+                            }
+
+
+                        }
+                    },
+                    id: function (item) { return item['id']; },
+                    escapeMarkup: function (markup) { return markup; },
+                    minimumInputLength: 1,
+                    templateResult: helpers.select2_formatting,
+                    templateSelection: helpers.select2_formatting,
+                    width: '100%'
+                })
+            } else {
+                // Initialize select box with new features from feature search url
+                var that = this;
+                $.ajax({
+                    type: 'GET',
+                    url: feature_search_url,
+                    success: function(data) {
+                        data = data['items'];
+                        var selectbox = $(that).parents('.search-field').find('.feature-search .search-term-field');
+                        selectbox.empty();
+                        selectbox.append('<option value="" disabled selected>Please select an option</option>');
+                        if (data) {
+                            for (var i = 0; i < data.length; i++) {
+                                selectbox.append('<option value="'+data[i]['internal_feature_id']+'">'+data[i]['label']+'</option>')
+                            }
+                        }
+                    },
+                    error: function(e) {
+                        //console.log(e['responseText']);
+                    }
+                });
+            }
+        },
+
+        field_option_change_callback : function(obj) {
             // Find the field name in the -options class
             var field = $(obj).attr('data-field');
 
@@ -275,6 +419,7 @@ define(['jquery'], function($) {
 
             // Append field and value to feature search url
             var index_of_field = feature_search_url.indexOf(field + '=');
+
             if (index_of_field > -1) {
                 var end_of_field = feature_search_url.indexOf('&', index_of_field);
                 if (end_of_field > -1) {
@@ -290,6 +435,7 @@ define(['jquery'], function($) {
 
             // Re-initialize select box with new features from feature search url
             var that = obj;
+            console.log("looking up features");
             $.ajax({
                 type: 'GET',
                 url: feature_search_url,

@@ -19,6 +19,7 @@
 define (['jquery', 'd3', 'd3tip', 'vizhelpers'],
 function($, d3, d3tip, vizhelpers) {
     return {
+
         dataCounts: function(data, x_attr) {
             var counts = {};
             var samples = {};
@@ -68,7 +69,7 @@ function($, d3, d3tip, vizhelpers) {
             var zoomer = function() {
                 svg.select('.x.axis').attr('transform', 'translate(' + (d3.event.translate[0]+margin.left) + ',' + (height - margin.bottom) + ')').call(xAxis);
                 svg.selectAll('.x.axis text').style('text-anchor', 'end').attr('transform', 'translate(' + -15 + ',' + 10 + ') rotate(-90)');
-                plot_area.selectAll('.bar').attr('transform', 'translate(' + d3.event.translate[0] + ',0)');
+                plot_area.selectAll('.plot-bar').attr('transform', 'translate(' + d3.event.translate[0] + ',0)');
             };
 
             var x2 = d3.scale.linear()
@@ -96,10 +97,10 @@ function($, d3, d3tip, vizhelpers) {
                         height: height-margin.top - margin.bottom})
                 .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-            plot_area.selectAll(".bar")
+            plot_area.selectAll(".plot-bar")
                 .data(data)
                 .enter().append("rect")
-                    .attr("class", "bar")
+                    .attr("class", "plot-bar")
                     .attr('data-samples', function(d) { return d['samples']; })
                     .attr("x", function(d) { return x(d.value) + margin.left; })
                     .attr("y", function(d) {
@@ -119,42 +120,42 @@ function($, d3, d3tip, vizhelpers) {
                 .append('rect')
                 .attr('height', margin.bottom+margin.top)
                 .attr('width', width-margin.left-margin.right)
-                .attr('transform', 'translate(' + margin.left + ',' + (height  - margin.bottom) + ')');
+                .attr('transform', 'translate(' + margin.left + ',' + (height  - margin.bottom - margin.top) + ')');
 
             x_axis_area.append('g')
                 .attr('class', 'x axis')
-                .attr('transform', 'translate(' + margin.left + ',' + (height - margin.bottom) + ')')
+                .attr('transform', 'translate(' + margin.left + ',' + (height - margin.bottom - margin.top) + ')')
                 .call(xAxis)
                 .selectAll('text')
                 .style('text-anchor', 'end')
                 .attr('transform', 'translate(' + -15 + ',' + 10 + ') rotate(-90)');
 
-            // Highlight the selected rectangles.
+            // Highlight the selected rectangles whenever the cursor is moved
             var brushmove = function(p) {
                 var total_samples = 0;
                 var total_patients = 0;
                 var sample_list = [];
                 var patient_list = [];
                 var e = brush.extent();
-                var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
-                svg.selectAll('rect.bar').classed("selected", function(d) {
-                    return e[0] <= x($(this).attr('value')) + parseInt($(this).attr('width')) && x($(this).attr('value')) <= e[1];
-                    });
-                $('rect.bar.selected').each(function () {
+                svg.selectAll('rect.plot-bar').classed("selected", function (d) {
+                    return e[0]-margin.left <= x($(this).attr('value')) + parseInt($(this).attr('width'))
+                        && x($(this).attr('value')) <= e[1]-margin.left;
+                });
+                $('rect.plot-bar.selected').each(function () {
                     var samples = $(this).attr('data-samples').split(',');
-                    var patients = $.map(samples, function(d) {return d.substr(0, 12);})
-                        .filter(function(item, i, a) { return i == a.indexOf(item); });
+                    var patients = $.map(samples, function (d) {
+                            return d.substr(0, 12);
+                        })
+                        .filter(function (item, i, a) {
+                            return i == a.indexOf(item);
+                        });
                     total_samples += samples.length;
                     total_patients += patients.length;
                     sample_list = sample_list.concat(samples);
                     patient_list = patient_list.concat(patients);
                 });
-                $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + total_samples);
-                $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Participants: ' + total_patients);
-                $('#save-cohort-'+plot_id+'-modal input[name="samples"]').attr('value', sample_list);
-                $(svg[0]).parents('.plot')
-                    .find('.save-cohort-card').show()
-                    .attr('style', 'position:absolute; top: 60px; left:' +(x(e[1])+margin.left)+'px;');
+
+                sample_form_update(e, total_samples, total_patients, sample_list);
             };
 
             // If the brush is empty, select all circles.
@@ -164,6 +165,7 @@ function($, d3, d3tip, vizhelpers) {
 
             var brush = d3.svg.brush()
                 .x(x2)
+                .on('brushstart', function(){ svg.selectAll('.extent').style("fill", "rgba(40,130,50,0.5");})
                 .on('brush', brushmove)
                 .on('brushend', brushend);
 
@@ -190,7 +192,6 @@ function($, d3, d3tip, vizhelpers) {
 
             var check_selection_state = function(obj) {
                 if (obj) {
-
                     // Remove zoom area
                     svg.selectAll('.zoom_area').remove();
 
@@ -202,7 +203,7 @@ function($, d3, d3tip, vizhelpers) {
                             .selectAll('rect')
                             .attr('y', 0)
                             .attr('height', height - margin.bottom)
-                            .attr('transform', 'translate(' + margin.left + ', 0)');
+                            .attr('transform', 'translate(0, 0)');
                     }
                 } else {
                     var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
@@ -233,14 +234,41 @@ function($, d3, d3tip, vizhelpers) {
                 }
             };
 
-            $(svg[0]).parents('.plot').find('.toggle-selection').unbind();
-            $(svg[0]).parents('.plot').find('.toggle-selection').on('click', function () {
-                $(this).toggleClass('active');
+            /*
+                Update the sample cohort bar update
+             */
+            function sample_form_update(extent, total_samples, total_patients, sample_list){
+                var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
+                $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + total_samples);
+                $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Participants: ' + total_patients);
+                $('#save-cohort-' + plot_id + '-modal input[name="samples"]').attr('value', sample_list);
+                $(svg[0]).parents('.plot')
+                    .find('.save-cohort-card').show()
+                    .attr('style', 'position:relative; top: -' + height + 'px; left:' + (x2(extent[1]) + 80) + 'px;');
 
-                check_selection_state($(this).hasClass('active'));
-            });
+                if (total_samples > 0){
+                    $(svg[0]).parents('.plot')
+                        .find('.save-cohort-card').find('.btn').prop('disabled', false);
+                } else {
+                    $(svg[0]).parents('.plot')
+                        .find('.save-cohort-card').find('.btn').prop('disabled', true);
+                }
 
-            check_selection_state($(svg[0]).parents('.plot').find('.toggle-selection').hasClass('active'));
+            }
+
+            function resize() {
+                width = svg.node().parentNode.offsetWidth - 10;
+                //TODO resize plot
+            }
+
+            function check_selection_state_wrapper(bool){
+                check_selection_state(bool);
+            }
+
+            return {
+                resize                : resize,
+                check_selection_state : check_selection_state_wrapper
+            }
         }
     };
 });

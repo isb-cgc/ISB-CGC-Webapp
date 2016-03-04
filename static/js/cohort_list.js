@@ -54,7 +54,10 @@ require([
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function() {
-        $(this).find('form')[0].reset();
+        var form = $(this).find('form');
+        if(form.length){
+            form[0].reset();
+        }
     });
 
     var delete_x_callback = function () {
@@ -68,18 +71,23 @@ require([
         $('.selected-cohorts').empty();
 
         $('.viz-cohort-select').each(function() { $(this).empty(); });
+        $('#cohort-apply-to-workbook input[name=cohorts]').remove();
     };
 
-    var clear_viz_objects = function() {
-        $('.selected-viz').empty();
+    var disable_buttons = function(tablename){
+        $(tablename).parent().find('.page-action-group .btn').prop('disabled', 'disabled');
+        $('#cohort-apply-to-workbook .btn').prop('disabled', 'disabled');
     };
-
+    var enable_buttons = function(tablename){
+        $(tablename).parent().find('.page-action-group .btn').removeAttr('disabled');
+        $('#cohort-apply-to-workbook .btn').removeAttr('disabled');
+    };
     var repopulate_cohort_selects = function() {
         $('#cohorts-list tr:not(:first)').each(function() {
             var id = $(this).find('input').val();
             var name = $(this).find('.name-col a').html();
             var option = $('<option value="' + id + '">' + name + '</option>');
-            $('.viz-cohort-select').each(function() {
+            $('.viz-cohort-select').each(function () {
                 if ($(this).parent().find('.viz-cohort-select:first')[0] != this
                     && $(this).has('.none-value').length == 0) {
                     $(this).append($('<option class="none-value" value="">None</option>'));
@@ -87,26 +95,19 @@ require([
                 option = option.clone();
                 $(this).append(option);
             });
-//            var token = $('<span class="cohort-label label label-default space-right-5" value="'
-//                        + id + '" name="selected-ids">'
-//                        + name
-//                        + ' <a role="button" class="delete-x"><i class="fa fa-times"></a>'
-//                        + '</span>');
-//            $('#selected-ids').append(token.clone());
-//            $('.selected-cohorts').each(function() {
-//                var clone = token.clone();
-//                $(this).append(clone)
-//            });
-//            $('.delete-x').on('click', delete_x_callback)
         });
     };
 
+    // Initiate buttons states on load
+    disable_buttons('#cohort-table');
+    disable_buttons('#public-cohort-table');
+    $('.complement-control').hide();
+
     $('.select-all').on('change', function() {
         var checked = $(this).is(':checked');
+        var tablename = '#' + $(this).closest('table')[0].id;
         if (checked) {
-            $('#cohort-sets').removeAttr('disabled');
-            $('#share-cohorts-btn').removeAttr('disabled');
-            $('#delete-cohorts').removeAttr('disabled');
+            enable_buttons(tablename);
             var ids = [];
             $('#cohorts-list tr:not(:first) input[type="checkbox"]').each(function() {
                 var token = $('<span class="cohort-label label label-default space-right-5" value="'
@@ -120,9 +121,7 @@ require([
             });
 
         } else {
-            $('#cohort-sets').prop('disabled', 'disabled');
-            $('#share-cohorts-btn').prop('disabled', 'disabled');
-            $('#delete-cohorts').prop('disabled', 'disabled');
+            disable_buttons(tablename);
             clear_objects();
             repopulate_cohort_selects();
         }
@@ -136,24 +135,20 @@ require([
     $('#cohorts-list tr:not(:first) input[type="checkbox"]').on('change', function() {
         var ids = [];
         clear_objects();
-
+        var tablename = '#' + $(this).closest('table')[0].id;
         // If no checkboxes are selected
         if ($('#cohorts-list tr:not(:first) input[type="checkbox"]:checked').length == 0) {
-            $('#cohort-sets').prop('disabled', 'disabled');
-            $('#share-cohorts-btn').prop('disabled', 'disabled');
-            $('#delete-cohorts').prop('disabled', 'disabled');
             $('#cohorts-list .select-all').prop('checked', false);
-            //$('#cohorts-table').parent().find('.page-action-group .btn').prop('disabled', 'disabled');
+            //disable_buttons(tablename);
             repopulate_cohort_selects();
 
         } else {
-            $('#cohort-sets').removeAttr('disabled');
-            $('#share-cohorts-btn').removeAttr('disabled');
-            $('#delete-cohorts').removeAttr('disabled');
-            //$('#cohorts-table').parent().find('.page-action-group .btn').removeAttr('disabled');
+            enable_buttons(tablename);
+            var formApply = $('#cohort-apply-to-workbook');
             $('#cohorts-list input[type="checkbox"]').each(function() {
                 if ($(this).is(':checked') && $(this).val() != 'on') {
 
+                    formApply.append($('<input>', {type: 'hidden', name: 'cohorts', value: $(this).val()}));
                     ids.push($(this).val());
                     var option = $('<option value="' + $(this).val() + '">' + $(this).parents('tr').find('.name-col a').html() + '</option>');
                     var token_str = '<span class="cohort-label label label-default space-right-5" value="'
@@ -180,62 +175,43 @@ require([
         }
     });
 
-    $('#vizualizations-list input[type="checkbox"]').on('change', function() {
-        clear_viz_objects();
-        if ($('#vizualizations-list tr:not(:first) input[type="checkbox"]:checked').length == 0) {
-            $('#delete-viz-btn').prop('disabled', 'disabled');
-            $('#share-viz-btn').prop('disabled', 'disabled');
-            $('#vizualizations-list .select-all').prop('checked', false);
-        } else {
-            $('#delete-viz-btn').removeAttr('disabled');
-            $('#share-viz-btn').removeAttr('disabled');
+    $('#cohorts-list .shared').on('click', function (e) {
+        var modalName = $(this).data('target');
+        var item = $(this).closest('tr').find('input[type="checkbox"]');
 
-            $('#vizualizations-list input[type="checkbox"]').each(function() {
-                if ($(this).is(':checked') && $(this).val() != 'on') {
-                    var token_str = '<span class="cohort-label label label-default space-right-5" value="'
-                        + $(this).val() + '" name="viz-ids">'
-                        + $(this).parents('tr').find('.name-col a').html()
-                        + ' <a role="button" class="delete-x"><i class="fa fa-times"></a>'
-                        + '</span>';
-                    var cohort_token = $(token_str);
-                    $('.selected-viz').each(function() {
-                        $(this).append(cohort_token.clone());
-                    });
-                    $('.delete-x').on('click', delete_x_callback);
-                }
-            })
+        $(this).closest('table').find('input[type="checkbox"]').attr('checked', false);
+        item.click();
 
-        }
+        $(modalName + ' a[data-target="#shared-with-pane"]').tab('show');
     });
-
-    $('#seqpeek-list input[type="checkbox"]').on('change', function() {
-        clear_viz_objects();
-        if ($('#seqpeek-list tr:not(:first) input[type="checkbox"]:checked').length == 0) {
-            $('#delete-sp-btn').prop('disabled', 'disabled');
-            $('#share-sp-btn').prop('disabled', 'disabled');
-            $('#seqpeek-list .select-all').prop('checked', false);
-        } else {
-            $('#delete-sp-btn').removeAttr('disabled');
-            $('#share-sp-btn').removeAttr('disabled');
-
-            $('#seqpeek-list input[type="checkbox"]').each(function() {
-                if ($(this).is(':checked') && $(this).val() != 'on') {
-                    var token_str = '<span class="cohort-label label label-default space-right-5" value="'
-                        + $(this).val() + '" name="viz-ids">'
-                        + $(this).parents('tr').find('.name-col a').html()
-                        + ' <a role="button" class="delete-x"><i class="fa fa-times"></a>'
-                        + '</span>';
-                    var cohort_token = $(token_str);
-                    $('.selected-viz').each(function() {
-                        $(this).append(cohort_token.clone());
-                    });
-                    $('.delete-x').on('click', delete_x_callback);
-                }
+    $('#share-cohorts-modal').on('show.bs.modal', function () {
+        var users = [];
+        var userId = [];
+        var that = this;
+        $('#cohorts-list tr:not(:first) input:checked').each(function(){
+            var tempt = shared_users[$(this).val()];
+            if(tempt){
+                JSON.parse(tempt).forEach(function(user){
+                    if($.inArray(user.pk, userId) < 0){
+                        users.push(user.fields);
+                        userId.push(user.pk);
+                    }
+                })
+            }
+        })
+        console.log(users);
+        var table = $(that).find('table');
+        if(users.length){
+            table.append('<thead><th>Name</th><th>Email</th></thead>')
+            users.forEach(function(user){
+                $(that).find('table').append('<tr><td>'+ user.first_name + ' ' + user.last_name + '</td><td>'+ user.email +'</td></tr>')
             })
-
+        }else{
+            table.append('<p class="center">Your List is Empty</p>')
         }
+    }).on('hidden.bs.modal', function(){
+        $(this).find('table').html('');
     });
-
     $('#set-op-cohort').on('submit', function() {
         var form = $(this);
         $('#selected-ids').children().each(function() {
@@ -301,13 +277,12 @@ require([
                         + ' <a href="" class="delete-x"><i class="fa fa-times"></a>'
                         + '</span>';
             var cohort_token = $(token_str);
-            $(event.target).parents('.col-md-10').find('.form-control-static').append(cohort_token);
+            $(event.target).parents('.form-group').find('.form-control-static').append(cohort_token);
             $('.delete-x').on('click', delete_x_callback);
             $(this).val('');
             $(this).hide();
             return false;
-        },
-        appendTo: '.cohort-search-div'
+        }
     }).hide();
 
     $.tablesorter.addParser({
@@ -333,14 +308,14 @@ require([
         type: 'numeric'
     });
 
-    $('#cohort-table, #viz-table, #seqpeek-table').tablesorter({
+    $('#cohort-table').tablesorter({
         headers: {
             0: {sorter:false},
             6: {sorter:'customDate'}
         },
         sortList: [[6,1]]
     });
-    $('#public-cohort-table').tablesorter({
+    $('#public-cohort-table, #viz-table, #seqpeek-table').tablesorter({
         headers: {
             0: {sorter:false},
             4: {sorter:'customDate'}
@@ -391,7 +366,7 @@ require([
                             + '<td class="sample-col">' + visualizations[i]['plots'] + '</td>'
                             + '<td class="owner-col">' + visualizations[i]['owner'] + '</td>'
                             + '<td class="date-col">' + visualizations[i]['last_date_saved'] + '</td>'
-                            + '</tr>'
+                            + '</tr>';
                         $('#search-viz-table tbody').append(item);
                     }
                 } else {
@@ -416,12 +391,51 @@ require([
         return false;
     });
 
-    $('.complement-control').hide();
-    $('#cohort-sets').prop('disabled', 'disabled');
-    $('#share-cohorts-btn').prop('disabled', 'disabled');
-    $('#delete-cohorts').prop('disabled', 'disabled');
-    $('#delete-viz-btn').prop('disabled', 'disabled');
-    $('#share-viz-btn').prop('disabled', 'disabled');
-    $('#delete-sp-btn').prop('disabled', 'disabled');
-    $('#share-sp-btn').prop('disabled', 'disabled');
+    $(".createWorkbookWithCohort").on("click", function(){
+        //get the selected cohort
+        var cohorts = [];
+        $('#cohorts-list input[type="checkbox"]').each(function() {
+            if ($(this).is(':checked') && $(this).val() != 'on') {
+                cohorts.push($(this).val());
+            }
+        });
+
+        if(cohorts.length > 0){
+            var csrftoken = get_cookie('csrftoken');
+            $.ajax({
+                type: 'POST',
+                dataType :'json',
+                url : base_url + '/workbooks/create_with_cohort_list',
+                data: JSON.stringify({cohorts : cohorts}),
+                beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+                success: function (data) {
+                    if(!data.error) {
+                        window.location = base_url + '/workbooks/' + data.workbook_id + '/worksheets/' + data.worksheet_id + '/';
+                    } else {
+                        console.log('Failed to create workbook with cohorts.');
+                    }
+                },
+                error: function () {
+                    console.log('Failed to create workbook with cohorts.');
+                }
+            });
+        }
+    })
+
+    //TODO this should be moved to a shared library
+    function get_cookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
 });
