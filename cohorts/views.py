@@ -273,7 +273,7 @@ def cohort_detail(request, cohort_id=0, workbook_id=0, worksheet_id=0, create_wo
     results = urlfetch.fetch(data_url, deadline=60)
     results = json.loads(results.content)
     totals = results['total']
-    print USER_DATA_ON
+
     if USER_DATA_ON:
         # Add in user data
         user_attr = ['user_project','user_study']
