@@ -40,7 +40,9 @@ require.config({
         scatter_plot : 'visualizations/createScatterPlot',
         cubby_plot : 'visualizations/createCubbyPlot',
         violin_plot : 'visualizations/createViolinPlot',
-        bar_plot : 'visualizations/createBarGraph'
+        bar_plot : 'visualizations/createBarGraph',
+        seqpeek_view: 'seqpeek_view',
+        seqpeek: 'seqpeek_view/seqpeek'
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -230,7 +232,7 @@ require([
         if(valid_plot_settings($(this).parent())) {
             var data = get_plot_info_on_page($(this).parent());
             update_plot_model(workbook_id, data.worksheet_id, data.plot_id, data.attrs, function(result){
-                generate_plot(data.worksheet_id, data.attrs.type, data.attrs.x_axis.url_code, data.attrs.y_axis.url_code, data.attrs.color_by.url_code, data.attrs.cohorts);
+                generate_plot(data.worksheet_id, data.attrs.type, data.attrs.x_axis.url_code, data.attrs.y_axis.url_code, data.attrs.color_by.url_code, data.attrs.cohorts, data.attrs.gene_label);
                 hide_plot_settings();
             });
         }
@@ -257,7 +259,8 @@ require([
                 },
                 cohorts: parent.find('[name="cohort-checkbox"]:checked').map(function () {
                     return {id: this.value, cohort_id: $(this).attr("cohort-id")};
-                }).get()
+                }).get(),
+                gene_label: parent.find('#gene_label').find(":selected").text()
             }
         }
         return result;
@@ -296,7 +299,7 @@ require([
             if(success) {
                 if (valid_plot_settings($(self).parentsUntil(".worksheet-body").find('.update-plot').parent())) {
                     var data = get_plot_info_on_page($(self).parentsUntil(".worksheet-body").find('.update-plot').parent());
-                    generate_plot(data.worksheet_id, data.attrs.type, data.attrs.x_axis.url_code, data.attrs.y_axis.url_code, data.attrs.color_by.url_code, data.attrs.cohorts)
+                    generate_plot(data.worksheet_id, data.attrs.type, data.attrs.x_axis.url_code, data.attrs.y_axis.url_code, data.attrs.color_by.url_code, data.attrs.cohorts, data.attrs.gene_label)
                 }
             }
         });
@@ -316,7 +319,7 @@ require([
     }
 
     //generates the actual svg plots by accepting the plot settings configured in the settings area
-    function generate_plot(worksheet_id, type, x_var_code, y_var_code, color_by, cohorts){
+    function generate_plot(worksheet_id, type, x_var_code, y_var_code, color_by, cohorts, gene_label){
         var cohort_ids = [];
         //create list of actual cohort models
         for(var i in cohorts){
@@ -336,7 +339,7 @@ require([
         var legend_selector = '#' + plot_element.prop('id') + ' .legend';
 
         plot_loader.fadeIn();
-        plotFactory.generate_plot(plot_selector, legend_selector, pair_wise, type, x_var_code, y_var_code, color_by, cohort_ids, false, function(){
+        plotFactory.generate_plot(plot_selector, legend_selector, pair_wise, type, x_var_code, y_var_code, color_by, cohort_ids, gene_label, false, function(){
             plot_loader.fadeOut();
         });
     }

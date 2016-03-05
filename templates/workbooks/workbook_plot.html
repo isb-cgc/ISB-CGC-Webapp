@@ -102,7 +102,7 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="{{ plot.id }}-color-select">Gene (SeqPeek)</label>
+                        <label for="{{ plot.id }}-gene-label-select">Gene (SeqPeek)</label>
                         <select id="gene_label" {% if workbook.owner.id != user.id %} disabled {% endif %} class="search-term-field" style="width: 230px;">
                             {% if plot.gene_label %}
                                 <option value="{{ plot.gene_label }}" selected >{{ plot.gene_label }}</option>

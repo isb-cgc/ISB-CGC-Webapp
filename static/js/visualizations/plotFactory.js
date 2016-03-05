@@ -29,12 +29,13 @@ define([
     'violin_plot',
     'histogram_plot',
     'bar_plot',
+    'seqpeek_view/seqpeek_view',
     //'visualizations/mock_histogram_data',
     'select2',
     'assetscore',
     'assetsresponsive'
 
-], function($, jqueryui, bootstrap, session_security, d3, d3tip, vizhelpers, scatter_plot, cubby_plot, violin_plot, histogram, bar_graph, mock_histogram_data ) {
+], function($, jqueryui, bootstrap, session_security, d3, d3tip, vizhelpers, scatter_plot, cubby_plot, violin_plot, histogram, bar_graph, seqpeek_view, mock_histogram_data ) {
     A11y.Core();
 
     var scatter_plot_obj = Object.create(scatter_plot, {});
@@ -263,6 +264,24 @@ define([
         return api_url;
     }
 
+    /*
+     Generate url for gathering data for a SeqPeek plot
+     */
+    function get_seqpeek_data_url(base_api_url, cohorts, gene_label){
+        var cohort_str = '';
+        for (var i = 0; i < cohorts.length; i++) {
+            if (i == 0) {
+                cohort_str += 'cohort_id=' + cohorts[i];
+            } else {
+                cohort_str += '&cohort_id=' + cohorts[i];
+            }
+        }
+        var api_url = base_api_url + '/_ah/api/seqpeek_data_api/v1/view_data?' + cohort_str;
+        api_url += "&hugo_symbol=" + gene_label;
+
+        return api_url;
+    }
+
     function configure_pairwise_display(element, data){
         if (data['pairwise_result'].hasOwnProperty('result_vectors')) {
             var vectors = data['pairwise_result']['result_vectors'];
@@ -357,6 +376,16 @@ define([
         }
     };
 
+    function generate_seqpeek_plot(plot_selector, legend_selector, view_data) {
+        var plot_data = view_data['plot_data'];
+        var element = $(plot_selector)[0];
+
+        // Render a HTML table for the visualization. Each track will be in a separate <tr> element.
+        var table_selector = seqpeek_view.render_seqpeek_table(element, plot_data['tracks']);
+
+        seqpeek_view.render_seqpeek(table_selector, view_data);
+    };
+
     /* Parameters
         plot_element : required, html element to display the plot, this function requires a specific html structure of the plot element
         type         : required
@@ -366,33 +395,65 @@ define([
         cohorts      : required
         cohorts_override : boolean on whether to override the color_by parameter
      */
-    function generate_plot(plot_selector, legend_selector, pairwise_element, type, x_attr, y_attr, color_by, cohorts, cohort_override, callback) {
-        $.ajax({
-            type: 'GET',
-            url: get_data_url(base_api_url, cohorts, x_attr, y_attr, color_by),
-            success: function(data, status, xhr) {
-                select_plot(plot_selector, legend_selector, pairwise_element, type, x_attr, y_attr, color_by, cohorts, cohort_override, data);
-                callback();
-            },
-            error: function(xhr, status, error) {
-                var width  = 800, //TODO should be based on size of screen
-                height = 600, //TODO ditto
-                margin = {top: 0, bottom: 50, left: 70, right: 10},
-                x_type = '',
-                y_type = '';
-                d3.select(plot_selector)
-                            .append('svg')
-                            .attr('width', width)
-                            .attr('height', height)
-                            .append('text')
-                            .attr('fill', 'black')
-                            .style('font-size', 20)
-                            .attr('text-anchor', 'middle')
-                            .attr('transform', 'translate(' + (width/2) + ',' + (height/2) + ')')
-                            .text('There was an error retrieving plot data.');
-                callback();
-            }
-        });
+    function generate_plot(plot_selector, legend_selector, pairwise_element, type, x_attr, y_attr, color_by, cohorts, gene_label, cohort_override, callback) {
+        if (type == "SeqPeek") {
+            var seqpeek_data_url = get_seqpeek_data_url(base_api_url, cohorts, gene_label);
+
+            $.ajax({
+                type: 'GET',
+                url: seqpeek_data_url,
+                success: function (data, status, xhr) {
+                    generate_seqpeek_plot(plot_selector, legend_selector, data);
+                    callback();
+                },
+                error: function (xhr, status, error) {
+                    var width = 800, //TODO should be based on size of screen
+                        height = 600, //TODO ditto
+                        margin = {top: 0, bottom: 50, left: 70, right: 10},
+                        x_type = '',
+                        y_type = '';
+                    d3.select(plot_selector)
+                        .append('svg')
+                        .attr('width', width)
+                        .attr('height', height)
+                        .append('text')
+                        .attr('fill', 'black')
+                        .style('font-size', 20)
+                        .attr('text-anchor', 'middle')
+                        .attr('transform', 'translate(' + (width / 2) + ',' + (height / 2) + ')')
+                        .text('There was an error retrieving plot data.');
+                    callback();
+                }
+            });
+        }
+        else {
+            $.ajax({
+                type: 'GET',
+                url: get_data_url(base_api_url, cohorts, x_attr, y_attr, color_by),
+                success: function (data, status, xhr) {
+                    select_plot(plot_selector, legend_selector, pairwise_element, type, x_attr, y_attr, color_by, cohorts, cohort_override, data);
+                    callback();
+                },
+                error: function (xhr, status, error) {
+                    var width = 800, //TODO should be based on size of screen
+                        height = 600, //TODO ditto
+                        margin = {top: 0, bottom: 50, left: 70, right: 10},
+                        x_type = '',
+                        y_type = '';
+                    d3.select(plot_selector)
+                        .append('svg')
+                        .attr('width', width)
+                        .attr('height', height)
+                        .append('text')
+                        .attr('fill', 'black')
+                        .style('font-size', 20)
+                        .attr('text-anchor', 'middle')
+                        .attr('transform', 'translate(' + (width / 2) + ',' + (height / 2) + ')')
+                        .text('There was an error retrieving plot data.');
+                    callback();
+                }
+            });
+        }
     };
 
     // Update Plot
