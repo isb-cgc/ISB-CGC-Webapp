@@ -29,7 +29,6 @@ define([
     'violin_plot',
     'histogram_plot',
     'bar_plot',
-    //'visualizations/mock_histogram_data',
     'select2',
     'assetscore',
     'assetsresponsive'
@@ -256,7 +255,12 @@ define([
         }
         var api_url = base_api_url + '/_ah/api/feature_data_api/v1/feature_data_plot?' + cohort_str;
 
-        api_url += '&x_id=' + x_attr + '&c_id=' + color_by;
+        api_url += '&x_id=' + x_attr;
+        if(color_by != ""){
+            api_url += '&c_id=' + color_by;
+        } else {
+            api_url += '&c_id=' + x_attr;
+        }
         if (y_attr && y_attr != '') {
             api_url += '&y_id=' + y_attr
         }
@@ -286,7 +290,7 @@ define([
         }
     }
 
-    function select_plot(plot_selector, legend_selector, pairwise_element, type, x_attr, y_attr, color_by, cohorts, cohort_override, data){
+    function select_plot(args){//plot_selector, legend_selector, pairwise_element, type, x_attr, y_attr, color_by, cohorts, cohort_override, data){
 
         var width  = $('.worksheet.active .worksheet-panel-body:first').width(), //TODO should be based on size of screen
             height = 700, //TODO ditto
@@ -294,38 +298,39 @@ define([
             x_type = '',
             y_type = '';
 
+        var data = args.data;
         if (data.hasOwnProperty('pairwise_result')) {
-            configure_pairwise_display(pairwise_element, data);
+            configure_pairwise_display(args.pairwise_element, data);
         }
         if (data.hasOwnProperty('items')) {
 
             var cohort_set = data['cohort_set'];
             data = data['items'];
-            if (cohort_override) {
-                color_by = 'cohort';
+            if (args.cohort_override) {
+                args.color_by = 'cohort';
             } else {
-                color_by = 'c';
+                args.color_by = 'c';
             }
 
             var visualization;
-            switch (type){
+            switch (args.type){
                 case "Bar Chart" : //x_type == 'STRING' && y_type == 'none'
-                    visualization = generate_bar_chart(margin, plot_selector, height, width, x_attr, data);
+                    visualization = generate_bar_chart(margin, args.plot_selector, height, width, args.x, data);
                     break;
                 case "Histogram" : //((x_type == 'INTEGER' || x_type == 'FLOAT') && y_type == 'none') {
-                    visualization = generate_histogram(margin, plot_selector, height, width, x_attr, data);
+                    visualization = generate_histogram(margin, args.plot_selector, height, width, args.x, data);
                     break;
                 case 'Scatter Plot': //((x_type == 'INTEGER' || x_type == 'FLOAT') && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
-                    visualization = generate_scatter_plot(margin, plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data)
+                    visualization = generate_scatter_plot(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by, cohort_set, data)
                     break;
                 case "Violin Plot": //(x_type == 'STRING' && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
-                    visualization = generate_violin_plot(margin, plot_selector, legend_selector, height, width, x_attr, y_attr, color_by,  cohort_set, data)
+                    visualization = generate_violin_plot(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data)
                     break;
                 case 'Violin Plot with axis swap'://(y_type == 'STRING' && (x_type == 'INTEGER'|| x_type == 'FLOAT')) {
-                    visualization = generate_violin_plot_axis_swap(margin, plot_selector, legend_selector, height, width, x_attr, y_attr, color_by,  cohort_set, data)
+                    visualization = generate_violin_plot_axis_swap(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data)
                     break;
                 case 'Cubby Hole Plot' : //(x_type == 'STRING' && y_type == 'STRING') {
-                    visualization = generate_cubby_hole_plot(margin, plot_selector, legend_selector, height, width, x_attr, y_attr, color_by,  cohort_set, data)
+                    visualization = generate_cubby_hole_plot(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data)
                     break;
                 default :
                     break;
@@ -358,20 +363,30 @@ define([
     };
 
     /* Parameters
-        plot_element : required, html element to display the plot, this function requires a specific html structure of the plot element
-        type         : required
-        x_attr       : require
-        y_attr       : not required
-        color_by     : not required
-        cohorts      : required
+        plot_selector    : jquery selector for the plot container
+        legend_selector  : jquery selector for the legend container
+        pairwise_element : html element for the pairwise element
+        type             : required
+        x                : require
+        y                : not required
+        color_by         : not required
+        cohorts          : required
         cohorts_override : boolean on whether to override the color_by parameter
      */
-    function generate_plot(plot_selector, legend_selector, pairwise_element, type, x_attr, y_attr, color_by, cohorts, cohort_override, callback) {
+    function generate_plot(args, callback){ //plot_selector, legend_selector, pairwise_element, type, x_attr, y_attr, color_by, cohorts, cohort_override, callback) {
         $.ajax({
             type: 'GET',
-            url: get_data_url(base_api_url, cohorts, x_attr, y_attr, color_by),
+            url: get_data_url(base_api_url, args.cohorts, args.x, args.y, args.color_by),
             success: function(data, status, xhr) {
-                select_plot(plot_selector, legend_selector, pairwise_element, type, x_attr, y_attr, color_by, cohorts, cohort_override, data);
+                select_plot({plot_selector    : args.plot_selector,
+                             legend_selector  : args.legend_selector,
+                             pairwise_element : args.pairwise_element,
+                             type             : args.type,
+                             x                : args.x,
+                             y                : args.y,
+                             color_by         : args.cohorts,
+                             cohort_override  : args.color_override,
+                             data             : data});
                 callback();
             },
             error: function(xhr, status, error) {
@@ -380,7 +395,7 @@ define([
                 margin = {top: 0, bottom: 50, left: 70, right: 10},
                 x_type = '',
                 y_type = '';
-                d3.select(plot_selector)
+                d3.select(args.plot_selector)
                             .append('svg')
                             .attr('width', width)
                             .attr('height', height)

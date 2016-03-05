@@ -86,15 +86,16 @@ require([
         return false;
     });
 
+    // set up the search bars for Clinical and MiRNA tabs
+    vizhelpers.get_datatype_search_interfaces($("#mirna-accordion"), "MIRN");
+    vizhelpers.get_datatype_search_interfaces($("#clinical-accordion"), "CLIN");
+
     // Field Editing
     $('.x-edit-field, .y-edit-field, .color-edit-field').on('click', function() { vizhelpers.show_field_search_panel(this); });
-    $('.datatype-selector').on('click', function() {vizhelpers.get_datatype_search_interfaces(this, this.getAttribute("data-field"));});
     $('.feature-search').on('change', function() { vizhelpers.field_search_change_callback(this); });
     $('.select-field').on('click', function() { vizhelpers.select_field_callback(this); });
     $('.close-field-search').on('click', function() { vizhelpers.close_field_search_callback(this); });
-
     $('.field-options').on('change', function(event) {
-        console.log("asdfasdfasdf");
         var self            = $(this);
         var parent          = self.parent();
         var datatype        = parent[0].getAttribute('data-field');

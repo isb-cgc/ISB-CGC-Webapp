@@ -425,24 +425,11 @@ def worksheet_plots(request, workbook_id=0, worksheet_id=0, plot_id=0):
             #update
             if "attrs" in request.body :
                 json_response = True
-                attrs = json.loads(request.body)['attrs']
+                attrs    = json.loads(request.body)['attrs']
+                settings = json.loads(request.body)['settings']
                 if plot_id :
                     plot_model = Worksheet_plot.objects.get(id=plot_id)
-                    if attrs['x_axis'] :
-                        try :
-                            plot_model.x_axis = Worksheet_variable.objects.get(id=attrs['x_axis']['id'])
-                        except ObjectDoesNotExist:
-                            None
-                    if attrs['y_axis'] :
-                        try :
-                            plot_model.y_axis = Worksheet_variable.objects.get(id=attrs['y_axis']['id'])
-                        except ObjectDoesNotExist:
-                            None
-                    if attrs['color_by'] :
-                        try :
-                            plot_model.color_by = Worksheet_variable.objects.get(id=attrs['color_by']['id'])
-                        except ObjectDoesNotExist:
-                            None
+                    plot_model.settings_json = settings
                     if attrs['cohorts'] :
                         try :
                             Worksheet_plot_cohort.objects.filter(plot=plot_model).delete()
