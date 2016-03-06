@@ -563,12 +563,6 @@ class Worksheet_plot(models.Model):
     active          = models.BooleanField(default=True)
     settings_json   = models.TextField(blank=True, null=True)
 
-    ## to be removed
-    # x_axis          = models.ForeignKey(Worksheet_variable, blank=True, null=True, related_name="worksheet_plot.x_axis")
-    # y_axis          = models.ForeignKey(Worksheet_variable, blank=True, null=True, related_name="worksheet_plot.y_axis")
-    # color_by        = models.ForeignKey(Worksheet_variable, blank=True, null=True, related_name="worksheet_plot.color_by")
-    ###
-
     objects         = Worksheet_Plot_Manager()
 
     @classmethod
