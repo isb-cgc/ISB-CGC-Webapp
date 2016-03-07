@@ -40,71 +40,145 @@
         </div>
 
         <!-- Settings Flyout -->
-        <div class="fly-out settings-flyout plot-config" id="plot-{{ plot.id }}-settings">
+        <div class="fly-out settings-flyout plot-config" style="overflow-y: scroll;" id="plot-{{ plot.id }}-settings">
             <div class="flyout-heading">
                 <h5>Plot Settings <a role="button" class="hide-settings-flyout pull-right" aria-label="Hide Settings Flyout"><i class="fa fa-times"></i></a></h5>
             </div>
             <div class="flyout-body" style="bottom: inherit; overflow-y:inherit;">
                 <div class="main-settings">
-                    <div class="form-group">
+
+                    <!-- X Axis selection -->
+                    <div class="form-group variable-container" variable="x-axis-select">
                         <label for="{{ plot.id }}-x-select">X Axis Variable <a role="button" class="x-edit-field" data-attribute="x-selector" aria-label="X Field Editor"></a></label>
-                        <select id="x-axis-select" {% if workbook.owner.id != user.id %} disabled {% endif %} plot="{{ plot.id }}" class="search-term-field" style="width: 230px;">
+                        <select id="x-axis-select" {% if workbook.owner.id != user.id %} disabled {% endif %} plot="{{ plot.id }}" class="form-control search-term-field" style="width: 230px;">
                             {% if plot.x_axis %}
                                 <option value="{{ plot.x_axis.url_code }}" var_id="{{ plot.x_axis.id }}" selected >{{ plot.x_axis.name }}</option>
                             {% else %}
                                 <option disabled selected>-- select a variable--</option>
                             {% endif %}
+                            {% for gene in genes %}
+                                {% if not plot or plot.x_axis.id != gene.id %}
+                                    {# TODO {% if var.type == plot.yaxis.type  %}#}
+                                    <option type="gene" value="{{ gene.gene }}" var_id="{{ gene.id }}">{{ gene.gene }}</option>
+                                    {# TODO {% endif %}#}
+                                {% endif %}
+                            {% endfor %}
                             {% for var in variables %}
                                 {% if not plot or plot.x_axis.id != var.id %}
                                     {# TODO {% if var.type == plot.yaxis.type  %}#}
-                                    <option value="{{ var.url_code }}" var_id="{{ var.id }}">{{ var.name }}</option>
+                                    <option type="common" value="{{ var.url_code }}" var_id="{{ var.id }}">{{ var.name }}</option>
                                     {# TODO {% endif %}#}
                                 {% endif %}
                             {% endfor %}
                         </select>
+                        <select id="x-gene-attribute-select" class="form-control spec-select datatype-selector" style="display:none; margin-top:5px; width: 230px;">
+                            <option disabled selected>-- select a specification--</option>
+                            {% for type in datatype_list %}
+                                <option value="{{ type.datatype }}">{{ type.label}}</option>
+                            {% endfor %}
+                        </select>
+
+                        {# Selection of specific attributes of a gene if it is selected in the dropdown above #}
+                        {% for type in datatype_list %}
+                            <div style="display:none" class="{{ type.datatype }} attr-options form-group search-field">
+                                <div class="search-term" data-field="{{ type.datatype }}">
+                                    {% for field in type.fields %}
+                                        <label class="space-top-15">{{ field.label }} Filter</label>
+                                        <select id="{{ field.label }}" class="form-control field-options {{ field.name }}-options {% if not field.static %}select2{% endif %}" data-field="{{ field.name }}">
+                                            {% if field.static %}
+                                                <option value="" disabled selected>Please select an option</option>
+                                                {% for value in field.values %}
+                                                    <option value="{{ value }}">{{ value }}</option>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </select>
+                                    {% endfor %}
+                                </div>
+                                <div class="search-term feature-search space-top-15">
+                                    <label for="search-term-select">Select Feature</label>
+                                    <select id="search-term-select" project="{{ TCGA_project.id }}" project_name="{{ TCGA_project.name }}" study="{{ TCGA_project.study.id }}" study_name="{{ TCGA_project.study.name}}" class="search-term-field form-control"></select>
+                                </div>
+                            </div>
+                        {% endfor %}
                     </div>
+
+                    <!-- Swap selection -->
                     {% if workbook.owner.id == user.id %}
                         <button class="swap btn btn-default btn-sm inline-block space-bottom-10"><i class="fa fa-exchange fa-rotate-90"></i>Swap Values</button>
                     {% endif %}
-                    <div class="form-group">
+
+                    <!-- Y Axis selection -->
+                    <div class="form-group variable-container" variable="y-axis-select">
                         <label for="{{ plot.id }}-y-select">Y Axis Variable <a role="button" class="y-edit-field" data-attribute="y-selector" aria-label="Y Field Editor"></a></label>
-                        <select id="y-axis-select" {% if workbook.owner.id != user.id %} disabled {% endif %} class="search-term-field" style="width: 230px;">
+                        <select id="y-axis-select" {% if workbook.owner.id != user.id %} disabled {% endif %} plot="{{ plot.id }}" class="form-control search-term-field" style="width: 230px;">
                             {% if plot.y_axis %}
                                 <option value="{{ plot.y_axis.url_code }}" var_id="{{ plot.y_axis.id }}" selected >{{ plot.y_axis.name }}</option>
                             {% else %}
                                 <option disabled selected>-- select a variable--</option>
                             {% endif %}
+                            {% for gene in genes %}
+                                {% if not plot or plot.y_axis.id != gene.id %}
+                                    {# TODO {% if var.type == plot.yaxis.type  %}#}
+                                    <option type="gene" value="{{ gene.gene }}" var_id="{{ gene.id }}">{{ gene.gene }}</option>
+                                    {# TODO {% endif %}#}
+                                {% endif %}
+                            {% endfor %}
                             {% for var in variables %}
                                 {% if not plot or plot.y_axis.id != var.id %}
                                     {# TODO {% if var.type == plot.yaxis.type  %}#}
-                                    <option value="{{ var.url_code }}" var_id="{{ var.id }}">{{ var.name }}</option>
+                                    <option type="common" value="{{ var.url_code }}" var_id="{{ var.id }}">{{ var.name }}</option>
                                     {# TODO {% endif %}#}
                                 {% endif %}
                             {% endfor %}
                         </select>
+                        <select id="y-gene-attribute-select" class="form-control spec-select datatype-selector" style="display:none; margin-top:5px; width: 230px;">
+                            <option disabled selected>-- select a specification--</option>
+                            {% for type in datatype_list %}
+                                <option value="{{ type.datatype }}">{{ type.label}}</option>
+                            {% endfor %}
+                        </select>
+                        {# Selection of specific attributes of a gene if it is selected in the dropdown above #}
+                        {% for type in datatype_list %}
+                            <div style="display:none" class="{{ type.datatype }} attr-options form-group search-field">
+                                <div class="search-term" data-field="{{ type.datatype }}">
+                                    {% for field in type.fields %}
+                                        <label class="space-top-15">{{ field.label }} Filter</label>
+                                        <select id="{{ field.label }}" class="form-control field-options {{ field.name }}-options {% if not field.static %}select2{% endif %}" data-field="{{ field.name }}">
+                                            {% if field.static %}
+                                                <option value="" disabled selected>Please select an option</option>
+                                                {% for value in field.values %}
+                                                    <option value="{{ value }}">{{ value }}</option>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </select>
+                                    {% endfor %}
+                                </div>
+                                <div class="search-term feature-search space-top-15">
+                                    <label for="search-term-select">Select Feature</label>
+                                    <select id="search-term-select" project="{{ TCGA_project.id }}" project_name="{{ TCGA_project.name }}" study="{{ TCGA_project.study.id }}" study_name="{{ TCGA_project.study.name}}" class="search-term-field form-control"></select>
+                                </div>
+                            </div>
+                        {% endfor %}
                     </div>
+
+                    <!-- Color By variable. only offer x and y selections-->
                     <div class="form-group">
-                        <label for="{{ plot.id }}-color-select">Color By Feature</label>
+                        <label for="color-by">Color By Feature</label>
 {#                        <div class="color-selector filter-label label label-default" type="text" id="color-select" name="color-attr" value="{{ plot.color_by }}">{{ plot.color_by }}</div>#}
-                        <select id="color_by" {% if workbook.owner.id != user.id %} disabled {% endif %} class="search-term-field" style="width: 230px;">
+                        <select id="color_by" {% if workbook.owner.id != user.id %} disabled {% endif %} class=" form-control search-term-field" style="width: 230px;">
                             {% if plot.color_by %}
                                 <option value="{{ plot.color_by.url_code }}" var_id="{{ plot.color_by.id }}" selected >{{ plot.color_by.name }}</option>
                             {% else %}
                                 <option disabled selected>-- select a variable--</option>
                             {% endif %}
-                            {% for var in variables %}
-                                {% if not plot or plot.color_by.id != var.id %}
-                                    {# TODO {% if var.type == plot.yaxis.type  %}#}
-                                    <option value="{{ var.url_code }}" var_id="{{ var.id }}">{{ var.name }}</option>
-                                    {# TODO {% endif %}#}
-                                {% endif %}
-                            {% endfor %}
                         </select>
                     </div>
+
 {#                    <div class="form-group">#}
 {#                        <label for="{{ plot.id }}-color-by-cohort">Color By Cohort</label>#}
 {#                        <input type="checkbox" class="color-by-cohort" id="color-by-cohort" />#}
 {#                    </div>#}
+
                     <div class="form-group">
                         <label>Cohorts</label>
                         <div class="cohort-listing" plot="{{ plot.id }}">
