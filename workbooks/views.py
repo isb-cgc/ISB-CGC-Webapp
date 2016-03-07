@@ -194,8 +194,7 @@ def workbook(request, workbook_id=0):
                                                   'datatypes'   : get_gene_datatypes(),
                                                   'is_shareable': is_shareable,
                                                   'shared'      : shared,
-                                                  'plot_types'  : plot_types,
-                                                  'base_api_url': settings.BASE_API_URL})
+                                                  'plot_types'  : plot_types})
             except ObjectDoesNotExist:
                 redirect_url = reverse('workbooks')
                 return redirect(redirect_url)

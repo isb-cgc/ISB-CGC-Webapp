@@ -222,10 +222,10 @@ require([
      */
     function get_simple_values(selection) {
         var result;
-        result = {variable: selection.find(":selected").val(), type : "common", options: []}
+        result = {variable: selection.find(":selected").val(), type : "common", options: []};
         $(selection).find("option").each(function(i,ele){
            result.options.push({value : $(ele).val(), text : $(ele).text()});
-        })
+        });
         return result;
     }
 
@@ -382,6 +382,12 @@ require([
             } else {
                 parent.parent().find("#color_by").append('<option value="' + y.selection.selected + '">' + y.selection.text + '</option>');
             }
+
+            // Append common variables as well
+            var common_vars = parent.find('#x-axis-select option[type="common"]').each(function() {
+                var x = get_values($(this));
+                parent.parent().find("#color_by").append('<option value="' + x.variable + '">' + x.text + '</option>');
+            });
         }
     });
 
