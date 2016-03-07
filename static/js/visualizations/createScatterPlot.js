@@ -23,7 +23,7 @@ function($, d3, d3tip, vizhelpers) {
         create_scatterplot: function(svg, data, domain, range, xLabel, yLabel, xParam, yParam, colorBy, legend, width, height, cohort_set) {
             var margin = {top: 10, bottom: 50, left: 50, right: 10};
             var yVal = function(d) {
-                    if (d[yParam] && d[yParam] != 'BA') {
+                    if (d[yParam] && d[yParam] != 'NA') {
                         return d[yParam];
                     } else {
                         d[yParam] = range[1];

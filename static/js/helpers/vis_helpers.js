@@ -22,17 +22,17 @@ define(['jquery'], function($) {
     return {
         get_min_max: function(data, selector) {
             return [Math.floor(d3.min(data, function(d) {
-                if (d[selector] && d[selector] != "None") {
+                if (d[selector] && d[selector] != "NA") {
                     return parseFloat(d[selector]);
                 } else {
-                    return null
+                    return 0
                 }
             })),
                     Math.ceil(d3.max(data, function(d) {
-                if (d[selector] && d[selector] != "None") {
+                if (d[selector] && d[selector] != "NA") {
                     return parseFloat(d[selector]);
                 } else {
-                    return null
+                    return 0
                 }
             }))];
         },
