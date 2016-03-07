@@ -307,5 +307,9 @@ require([
 
         $(target + ' a[data-target="#shared-pane"]').tab('show');
     })
+
+    $('#create-cohort-modal form').on('submit', function() {
+        $(this).find('input[type="submit"]').attr('disabled', 'disabled');
+    })
 });
 

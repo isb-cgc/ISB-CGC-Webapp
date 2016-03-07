@@ -107,7 +107,7 @@ function($, d3, d3tip, vis_helpers) {
             // Munge Data
             var tree_data = {};
             for (var i = 0; i < data.length; i++) {
-                if (clin_attr.indexOf(data[i]['name']) > 0) {
+                if (clin_attr.indexOf(data[i]['name']) >= 0) {
                     tree_data[data[i]['name']] = data[i]['values']
                 }
             }

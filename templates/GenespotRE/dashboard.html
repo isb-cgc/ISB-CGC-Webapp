@@ -29,8 +29,7 @@
             <ul>
                 <div class="clearfix">
                     <li class="item">
-                    <!--TODO: get bar chart-->
-                        <img class="img-fluid" src="{% static 'img/histogram.png' %}">
+                        <img class="img-fluid" src="{% static 'img/barchart.png' %}">
                         <p>Bar Chart</p>
                     </li>
                     <li class="item">
@@ -38,13 +37,12 @@
                         <p>Histogram</p>
                     </li>
                     <li class="item">
-                        <!--TODO: get bar chart-->
+                        <!--TODO: get scatterplot chart-->
                         <img class="img-fluid" src="{% static 'img/histogram.png' %}">
                         <p>Scatter Plot</p>
                     </li>
                     <li class="item">
-                        <!--TODO: get bar chart-->
-                        <img class="img-fluid" src="{% static 'img/histogram.png' %}">
+                        <img class="img-fluid" src="{% static 'img/violinplot.png' %}">
                         <p>Violin Plot</p>
                     </li>
                 </div>
@@ -52,13 +50,11 @@
 
                 <div class="collapse clearfix" id="more-analysis">
                     <li class="item">
-                        <!--TODO: get bar chart-->
-                        <img class="img-fluid" src="{% static 'img/histogram.png' %}">
+                        <img class="img-fluid" src="{% static 'img/violinplot.png' %}">
                         <p>Violin Plot 2</p>
                     </li>
                     <li class="item">
-                        <!--TODO: get bar chart-->
-                        <img class="img-fluid" src="{% static 'img/histogram.png' %}">
+                        <img class="img-fluid" src="{% static 'img/cubbyhole.png' %}">
                         <p>Cubby Hole</p>
                     </li>
 {#                    <li class="item">#}
@@ -110,58 +106,7 @@
     </section>
     <div class="row">
         <div class="col-md-6">
-            <section class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">
-                        <a href="{% url 'genes' %}">Gene Favorites ({{ user.genefavorite_set.all|active|length }})</a></h3>
-                </div>
-                <div class="panel-body">
-                    {% if user.genefavorite_set.all|active|length > 0 %}
-                    <ul class="table-list">
-                        {% for genefavorite in user.genefavorite_set.all|active|sort_last_view:'genefavorite'|slice:':6' %}
-                        <li>
-                            <a href="{% url 'gene_fav_detail' genefavorite.id %}">
-                               <p class="list-title">{{ genefavorite.name }}</p>
-                            </a>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                        {% if user.genefavorite_set.all|active|length > 6 %}
-                        <a href="{% url 'genes' %}" class="btn btn-link">View All</a>
-                        {% endif %}
-                    {% else %}
-                    <p>You don't have any saved Gene Favorites.</p>
-                    <a href="{% url 'gene_fav_create' %}">Create Gene Favorites</a>
-                    {% endif %}
-                </div>
-            </section>
-            <section class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">
-                        <a href="{% url 'variables' %}">Variable Favorites ({{ user.variablefavorite_set.all|active|length }})</a></h3>
-                </div>
-                <div class="panel-body">
-                    {% if user.variablefavorite_set.all|active|length > 0 %}
-                    <ul class="table-list">
-                        {% for variablefavorite in user.variablefavorite_set.all|active|sort_last_view:'variablefavorite'|slice:':6' %}
-                           <li>
-                               <a href="{% url 'variable_fav_detail' variablefavorite.id %}">
-                                   <p class="list-title">
-                                       {{ variablefavorite.name }}
-                                   </p>
-                               </a>
-                           </li>
-                        {% endfor %}
-                        {% if user.variablefavorite_set.all|active|length > 6 %}
-                        <a href="{% url 'variables' %}" class="btn btn-link">View All</a>
-                        {% endif %}
-                    </ul>
-                    {% else %}
-                    <p>You don't have any saved Variable Favorites.</p>
-                    <a href="{% url 'variable_fav_create' %}">Create Variable Favorites</a>
-                    {% endif %}
-                </div>
-            </section>
+
             <section class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">
@@ -183,17 +128,77 @@
                                </a>
                            </li>
                         {% endfor %}
-                        {% if cohorts.count > 6 %}
-                            <a class="btn btn-link" href="{% url 'cohort_list' %}">View all</a>
+                        {% if cohorts.count > 12 %}
+                            <a class="btn btn-link float-right" href="{% url 'cohort_list' %}">View all</a>
                         {% endif %}
                     </ul>
                     {% else %}
                     <p>You don't have any saved Cohorts.</p>
-                    <a href="{% url 'cohort' %}">Create Cohort</a>
                     {% endif %}
+                    <a href="{% url 'cohort' %}" class="btn btn-link">Create Cohort</a>
                 </div>
             </section>
         </div>
+        <div class="col-md-6">
+            <section class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        <a href="{% url 'genes' %}">Gene Favorites ({{ user.genefavorite_set.all|active|length }})</a></h3>
+                </div>
+                <div class="panel-body">
+                    {% if user.genefavorite_set.all|active|length > 0 %}
+                    <ul class="table-list">
+                        {% for genefavorite in user.genefavorite_set.all|active|sort_last_view:'genefavorite'|slice:':6' %}
+                        <li>
+                            <a href="{% url 'gene_fav_detail' genefavorite.id %}">
+                               <p class="list-title">{{ genefavorite.name }}</p>
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                        {% if user.genefavorite_set.all|active|length > 6 %}
+                        <a href="{% url 'genes' %}" class="btn btn-link float-right">View All</a>
+                        {% endif %}
+                    {% else %}
+                    <p>You don't have any saved Gene Favorites.</p>
+                    {% endif %}
+                    <a href="{% url 'gene_fav_create' %}" class="btn btn-link">Create Gene Favorites</a>
+                </div>
+            </section>
+            <section class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        <a href="{% url 'variables' %}">Variable Favorites ({{ user.variablefavorite_set.all|active|length }})</a></h3>
+                </div>
+                <div class="panel-body">
+                    {% if user.variablefavorite_set.all|active|length > 0 %}
+                    <ul class="table-list">
+                        {% for variablefavorite in user.variablefavorite_set.all|active|sort_last_view:'variablefavorite'|slice:':6' %}
+                           <li>
+                               <a href="{% url 'variable_fav_detail' variablefavorite.id %}">
+                                   <p class="list-title">
+                                       {{ variablefavorite.name }}
+                                   </p>
+                               </a>
+                           </li>
+                        {% endfor %}
+                        {% if user.variablefavorite_set.all|active|length > 6 %}
+                        <a href="{% url 'variables' %}" class="btn btn-link float-right">View All</a>
+                        {% endif %}
+                    </ul>
+                    {% else %}
+                    <p>You don't have any saved Variable Favorites.</p>
+                    {% endif %}
+                    <a href="{% url 'variable_fav_create' %}" class="btn btn-link">Create Variable Favorites</a>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    {% if USER_DATA_ON %}
+        <hr>
+    <div class="row">
         <div class="col-md-6">
             <section class="panel panel-default">
                 <div class="panel-heading">
@@ -224,6 +229,8 @@
                     <a href="{% url 'project_upload' %}" class="btn btn-primary"><i class="fa fa-cloud-upload"></i>Upload Project Data</a>
                 </div>
             </section>
+        </div>
+        <div class="col-md-6">
             <section class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">
@@ -235,6 +242,7 @@
             </section>
         </div>
     </div>
+    {% endif %}
 
 </div>
 {% endblock %}
