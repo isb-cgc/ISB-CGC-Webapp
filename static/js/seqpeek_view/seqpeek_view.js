@@ -8,7 +8,6 @@ define([
         render_seqpeek_table: function(target_element, tracks) {
             var table = $('<table></table>').appendTo(target_element);
             var header_row = $('<tr></tr>').appendTo($('<thead></thead>').appendTo(table));
-                //.append('<tr><th>Cohort</th><th>Samples (#)</th></tr>');
 
             $('<th>Cohort</th><th>Samples (#)</th>').appendTo(header_row);
             var locator_column = $('<th style="text-align: center;"><canvas id="seqpeek-mini-locator" width="400" height="24"></canvas></th>').appendTo(header_row);

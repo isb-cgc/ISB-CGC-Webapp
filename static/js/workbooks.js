@@ -497,6 +497,7 @@ require([
                 x_axis   : get_values($(worksheet).find('#x-axis-select').find(":selected")),
                 y_axis   : get_values($(worksheet).find('#y-axis-select').find(":selected")),
                 color_by : get_simple_values(parent.find('#color_by')),
+                gene_label: get_simple_values(parent.find('#gene_label'))
             },
             attrs : {
                 type    : parent.parentsUntil(".worksheet-body").find(".plot_selection").find(":selected").text(),
@@ -554,9 +555,9 @@ require([
                                     type         : data.attrs.type,
                                     x            : data.attrs.x_axis.url_code,
                                     y            : data.attrs.y_axis.url_code,
+                                    gene_label   : data.attrs.gene_label,
                                     color_by     : data.attrs.color_by.url_code,
                                     cohorts      : data.attrs.cohorts});
-                    // TODO gene label
                 }
             }
         });
@@ -612,7 +613,7 @@ require([
                                     gene_label       : args.gene_label,
                                     cohorts          : cohort_ids,
                                     color_override   : false}, function(){
-            // TODO gene label
+
             plot_loader.fadeOut();
         });
     }
@@ -637,7 +638,7 @@ require([
             apply_values(plot_element.find('#color_by'), plot_data.color_by);
         }
         if(plot_data.gene_label) {
-            apply_values(plot_element.find('#gene_label'), plot_data.gene_label);
+            plot_element.find("#gene_label").val(plot_data.gene_label.variable);
         }
 
         if(plot_data.cohort) {
