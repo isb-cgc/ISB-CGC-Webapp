@@ -81,10 +81,18 @@ class SeqPeekViewPlotDataRecord(Message):
     regions = MessageField(SeqPeekRegionRecord, 3, repeated=True)
 
 
+class SeqPeekRemovedRow(Message):
+    name = StringField(1, required=True)
+    num = IntegerField(2, required=True)
+
+
 class SeqPeekViewRecord(Message):
     cohort_id_list = StringField(1, repeated=True)
     hugo_symbol = StringField(2, required=True)
     plot_data = MessageField(SeqPeekViewPlotDataRecord, 3, required=True)
+    removed_row_statistics = MessageField(SeqPeekRemovedRow, 4, repeated=True)
+
+
 
 
 def create_interpro_record(interpro_literal):
@@ -140,8 +148,14 @@ class SeqPeekViewDataAccessAPI(remote.Service):
 
         protein = create_interpro_record(plot_data['protein'])
         plot_data_record = SeqPeekViewPlotDataRecord(tracks=tracks, protein=protein, regions=region_records)
-        return SeqPeekViewRecord(plot_data=plot_data_record , hugo_symbol=seqpeek_view_data['hugo_symbol'],
-                                 cohort_id_list=seqpeek_view_data['cohort_id_list'])
+
+        removed_row_statistics = []
+        for item in seqpeek_view_data['removed_row_statistics']:
+            removed_row_statistics.append(SeqPeekRemovedRow(**item))
+
+        return SeqPeekViewRecord(plot_data=plot_data_record, hugo_symbol=seqpeek_view_data['hugo_symbol'],
+                                 cohort_id_list=seqpeek_view_data['cohort_id_list'],
+                                 removed_row_statistics=removed_row_statistics)
 
     @endpoints_method(SeqPeekViewDataRequest, SeqPeekViewRecord,
                       path='view_data', http_method='GET', name='seqpeek.getViewData')
@@ -160,14 +174,17 @@ class SeqPeekViewDataAccessAPI(remote.Service):
 
             # Since the gene (hugo_symbol) parameter is part of the GNAB feature ID,
             # it will be sanity-checked in the SeqPeekMAFDataAccess instance.
-            seqpeek_data = SeqPeekMAFDataFormatter().format_maf_vector_with_cohorts(maf_data_vector, cohort_id_array)
+            seqpeek_data = SeqPeekMAFDataFormatter().format_maf_vector_for_view(maf_data_vector, cohort_id_array)
 
             seqpeek_maf_vector = seqpeek_data.maf_vector
             seqpeek_cohort_info = seqpeek_data.cohort_info
+            removed_row_statistics_dict = seqpeek_data.removed_row_statistics
+
             seqpeek_view_data = SeqPeekViewDataBuilder().build_view_data(hugo_symbol,
                                                                          seqpeek_maf_vector,
                                                                          seqpeek_cohort_info,
-                                                                         cohort_id_array)
+                                                                         cohort_id_array,
+                                                                         removed_row_statistics_dict)
 
             response = self.create_response(seqpeek_view_data)
             return response
