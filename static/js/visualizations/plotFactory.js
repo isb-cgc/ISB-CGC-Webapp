@@ -248,10 +248,12 @@ define([
         var element = $(plot_selector)[0];
 
         // Render a HTML table for the visualization. Each track will be in a separate <tr> element.
-        var table_selector = seqpeek_view.render_seqpeek_table(element, plot_data['tracks']);
+        var seqpeek_el = seqpeek_view.render_seqpeek_template(element, view_data['hugo_symbol'], plot_data['tracks']);
+        var table_selector = seqpeek_el.table;
+        var gene_element = seqpeek_el.gene_element;
 
-        seqpeek_view.render_seqpeek(table_selector, view_data);
-    };
+        seqpeek_view.render_seqpeek(table_selector, gene_element, view_data);
+    }
 
     /*
         Generate url for gathering data

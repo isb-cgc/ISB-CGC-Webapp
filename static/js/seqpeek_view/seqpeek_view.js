@@ -5,7 +5,7 @@ define([
     SeqPeekViewFactory
 ) {
     return {
-        render_seqpeek_table: function(target_element, tracks) {
+        render_seqpeek_template: function(target_element, gene_label, tracks) {
             var table = $('<table></table>').appendTo(target_element);
             var header_row = $('<tr></tr>').appendTo($('<thead></thead>').appendTo(table));
 
@@ -29,10 +29,16 @@ define([
             }
 
             table_body.append('<tr><td></td><td></td><td id="seqpeek-tick-element"></td></tr>');
-            return table;
+
+            // Display gene label
+            $('<div><h4>Gene</h4><label>' + gene_label + '</label></div>').appendTo(target_element);
+
+            return {
+                'table': table
+            };
         },
 
-        render_seqpeek: function(target_table_selector, data_bundle) {
+        render_seqpeek: function(target_table_selector, gene_element, data_bundle) {
             var plot_data = data_bundle['plot_data'];
             var tracks = plot_data['tracks'];
 
