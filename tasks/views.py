@@ -80,40 +80,17 @@ VERY_EXPIRED_SECONDS = 60 * 60
 
 
 def get_nih_authorized_list(request):
-    try:
-        f = open('NIH_FTP.txt')
-        contents = f.read()
-        json_content = json.loads(contents)
-        host = str(json_content['host'])
-        username = str(json_content['username'])
-        password = str(json_content['password'])
-        filename = str(json_content['filename'])
 
-        sftp_conn = pysftp.Connection(host=host, username=username, password=password)
+    storage_service = get_storage_resource()
+    filename = settings.DBGAP_AUTHENTICATION_LIST_FILENAME
+    bucket_name = settings.DBGAP_AUTHENTICATION_LIST_BUCKET
 
-        output = StringIO.StringIO()
-        sftp_conn.sftp_client.getfo(filename, output)
-        contents = output.getvalue()
+    req = storage_service.objects().get_media(bucket=bucket_name,
+                                              object=filename)
+    contents = req.execute()
+    scrub_nih_users(contents)
 
-
-        storage_service = get_storage_resource()
-        media = http.MediaIoBaseUpload(io.BytesIO(contents), 'text/plain')
-        filename = settings.DBGAP_AUTHENTICATION_LIST_FILENAME
-        bucket_name = settings.DBGAP_AUTHENTICATION_LIST_BUCKET
-
-        req = storage_service.objects().insert(bucket=bucket_name,
-                                               name=filename,
-                                               media_body=media
-                                               )
-        req.execute()
-
-        sftp_conn.close()
-        scrub_nih_users(contents)
-
-        return HttpResponse('')
-
-    except Exception, e:
-        return HttpResponse(e)
+    return HttpResponse('')
 
 
 # scrub ACL_GOOGLE_GROUP of user emails that don't have an NIH_username corresponding to the dbGaP_authorized_list

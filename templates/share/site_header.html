@@ -88,6 +88,7 @@
                     <li class="menu-item"><a href="{% url 'workbook_samples' %}">Sample Workbooks</a></li>
                 </ul>
             </li>
+            {% if USER_DATA_ON %}
             <li class="menu-item has-drop-down">
                 <a>PROJECTS <i class="fa fa-caret-down"></i></a>
                 <ul class="sub-menu drop">
@@ -127,6 +128,7 @@
                     <li class="menu-item"><a href="{% url 'public_projects' %}">Public Projects ( {% public_project_count %} )</a></li>
                 </ul>
             </li>
+            {% endif %}
             <li class="menu-item has-drop-down">
                 <a>ANALYSES <i class="fa fa-caret-down"></i></a>
                 <ul class="sub-menu drop">
