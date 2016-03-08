@@ -167,19 +167,30 @@ def get_track_id_list(param):
     return map(str, param)
 
 
+def format_removed_row_statistics_to_list(stats_dict):
+    result = []
+    for key, value in stats_dict.items():
+        result.append({
+            'name': key,
+            'num': value
+        })
+
+    return result
+
+
 class SeqPeekViewDataBuilder(object):
-    def build_view_data(self, hugo_symbol, maf_vector, seqpeek_cohort_info, cohort_id_list):
+    def build_view_data(self, hugo_symbol, filtered_maf_vector, seqpeek_cohort_info, cohort_id_list, removed_row_statistics):
         context = get_genes_tumors_lists()
 
         track_id_list = get_track_id_list(cohort_id_list)
 
         # Since the gene (hugo_symbol) parameter is part of the GNAB feature ID,
         # it will be sanity-checked in the SeqPeekMAFDataAccess instance.
-        uniprot_id = find_uniprot_id(maf_vector)
+        uniprot_id = find_uniprot_id(filtered_maf_vector)
 
         logging.info("UniProt ID: " + str(uniprot_id))
         protein_data = get_protein_domains(uniprot_id)
-        track_data = build_track_data(track_id_list, maf_vector)
+        track_data = build_track_data(track_id_list, filtered_maf_vector)
 
         plot_data = {
             'gene_label': hugo_symbol,
@@ -219,7 +230,8 @@ class SeqPeekViewDataBuilder(object):
             'plot_data': plot_data,
             'hugo_symbol': hugo_symbol,
             'tumor_list': tumor_list,
-            'cohort_id_list': track_id_list
+            'cohort_id_list': track_id_list,
+            'removed_row_statistics': format_removed_row_statistics_to_list(removed_row_statistics)
         })
 
         return context

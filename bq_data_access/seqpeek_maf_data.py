@@ -23,6 +23,7 @@ from bq_data_access.utils import DurationLogged
 
 SEQPEEK_FEATURE_TYPE = 'SEQPEEK'
 
+
 class SeqPeekDataProvider(GNABFeatureProvider):
     def __init__(self, feature_id, **kwargs):
         super(SeqPeekDataProvider, self).__init__(feature_id, **kwargs)
@@ -63,17 +64,17 @@ class SeqPeekDataProvider(GNABFeatureProvider):
 
         skip_count = 0
         for row in query_result_array:
-            uniprot_aapos = row['f'][4]['v']
-            if uniprot_aapos is None:
-                skip_count += 1
-                continue
+            #uniprot_aapos = row['f'][4]['v']
+            #if uniprot_aapos is None:
+            #    skip_count += 1
+            #    continue
 
             result.append({
                 'patient_id': row['f'][0]['v'],
                 'sample_id': row['f'][1]['v'],
                 'aliquot_id': row['f'][2]['v'],
                 'hugo_symbol': row['f'][3]['v'],
-                'uniprot_aapos': int(uniprot_aapos),
+                'uniprot_aapos': row['f'][4]['v'],
                 'variant_classification': row['f'][5]['v'],
                 'uniprot_id': row['f'][6]['v'],
             })
