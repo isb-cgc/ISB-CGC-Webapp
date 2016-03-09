@@ -9,7 +9,7 @@ define([
             var table = $('<table></table>').appendTo(target_element);
             var header_row = $('<tr></tr>').appendTo($('<thead></thead>').appendTo(table));
 
-            $('<th>Cohort</th><th>Samples (#)</th>').appendTo(header_row);
+            $('<th>Cohort</th><th></th>').appendTo(header_row);
             var locator_column = $('<th style="text-align: center;"><canvas id="seqpeek-mini-locator" width="400" height="24"></canvas></th>').appendTo(header_row);
             var locator_svg = $('<svg height="24"></svg>').appendTo(locator_column);
 
@@ -19,13 +19,32 @@ define([
                 .append('<text x="120" y="15" font-size="10">whole protein</text>');
 
             var table_body = $('<tbody></tbody>').appendTo(table);
+            var track, new_tr;
+
             for (var i = 0; i < tracks.length; i++) {
-                var new_tr = '<tr>' +
-                    '<td>' + tracks[i]['label'] + '</td>' +
-                    '<td>' + tracks[i]['number_of_samples'] + '</td>' +
-                    '<td id="' + tracks[i]['row_id'] + '"></td>' +
+                track = tracks[i];
+
+                new_tr = '<tr>' +
+                    '<td colspan="2">' + track['label'] + '</td>' +
+                    '<td rowspan="2" id="' + track['row_id'] + '"></td>' +
                     '</tr>';
                 table_body.append(new_tr);
+
+                if (track['type'] == 'tumor') {
+                    new_tr = '<tr>' +
+                        '<td style="font-size: 8pt">C: ' + track['cohort_size'] + '</td>' +
+                        '<td style="font-size: 8pt">S: ' + track['number_of_samples'] + '</td>' +
+                        '</tr>';
+                }
+                // "COMBINED" track
+                else {
+                    new_tr = '<tr>' +
+                        '<td colspan="2" style="font-size: 8pt">S: ' + track['number_of_samples'] + '</td>' +
+                        '</tr>';
+                }
+
+                table_body.append(new_tr);
+
             }
 
             table_body.append('<tr><td></td><td></td><td id="seqpeek-tick-element"></td></tr>');
