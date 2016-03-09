@@ -17,10 +17,8 @@ rsa==3.2
 simplejson==3.8.1
 six==1.10.0  #1.5.2
 uritemplate==0.6
-pysftp==0.2.8
 GoogleAppEngineCloudStorageClient==1.9.22.1
-git+https://github.com/BlinkUX/paramiko.git@v1.15-GAE#egg=paramiko
 django-dotenv==1.3.0
 django-finalware==0.1.1
 pexpect==4.0.1
-pandas==0.17.0
+
