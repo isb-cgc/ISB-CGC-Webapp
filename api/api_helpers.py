@@ -110,7 +110,6 @@ def sql_age_by_ranges(value):
         elif str(value) == 'None':
             result += ' age_at_initial_pathologic_diagnosis is null'
 
-    # print '\n\nresult is ' + result
     return result
 
 def gql_age_by_ranges(q, key, value):
@@ -202,6 +201,8 @@ def build_where_clause(dict, alt_key_map=False):
     value_tuple = ()
     key_order = []
     for key, value in dict.items():
+        if isinstance(value, list) and len(value) == 1:
+            value = value[0]
         # Check if we need to map to a different column name for a given key
         if alt_key_map and key in alt_key_map:
             key = alt_key_map[key]
