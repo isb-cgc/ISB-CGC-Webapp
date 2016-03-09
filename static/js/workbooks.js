@@ -386,7 +386,10 @@ require([
             // Append common variables as well
             var common_vars = parent.find('#x-axis-select option[type="common"]').each(function() {
                 var x = get_values($(this));
-                parent.parent().find("#color_by").append('<option value="' + x.variable + '">' + x.text + '</option>');
+                // Check to see that option does not already exist
+                if (parent.parent().find('#color_by option[value="' + x.variable + '"]').length == 0) {
+                    parent.parent().find("#color_by").append('<option value="' + x.variable + '">' + x.text + '</option>');
+                }
             });
         }
     });
