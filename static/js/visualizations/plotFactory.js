@@ -247,6 +247,8 @@ define([
         var plot_data = view_data['plot_data'];
         var element = $(plot_selector)[0];
 
+        seqpeek_view.render_seqpeek_legend(legend_selector);
+
         // Render a HTML table for the visualization. Each track will be in a separate <tr> element.
         var seqpeek_el = seqpeek_view.render_seqpeek_template(element, view_data['hugo_symbol'], plot_data['tracks']);
         var table_selector = seqpeek_el.table;

@@ -5,6 +5,38 @@ define([
     SeqPeekViewFactory
 ) {
     return {
+        render_seqpeek_legend: function(target_element) {
+            var MUTATION_TYPE_COLOR_MAP = {
+                Nonsense_Mutation: "#71C560",
+                Silent: "#9768C4",
+                Frame_Shift_Del: "#98B8B8",
+                Frame_Shift_Ins: "#98B8B8",
+                Missense_Mutation: "#4F473D",
+                In_Frame_Ins: "#C1B14C",
+                In_Frame_Del: "#C1B14C"
+            };
+
+            var table = $('<table>' +
+                '<thead>' +
+                '<tr><th>Key</th><th>Mutation Type</th>' +
+                '</tr>' +
+                '</thead>' +
+                '</table>');
+
+            var tbody2 = $('<tbody></tbody>').appendTo(table);
+
+            $.each(MUTATION_TYPE_COLOR_MAP, function(key, color) {
+                var table_row = $('<tr>' +
+                    '<td style="background-color: ' + color + '"></td>' +
+                    '<td>' + key + '</td>' +
+                    '</tr>');
+
+                table_row.appendTo(tbody2);
+            });
+
+            table.appendTo(target_element);
+        },
+
         render_seqpeek_template: function(target_element, gene_label, tracks) {
             var table = $('<table></table>').appendTo(target_element);
             var header_row = $('<tr></tr>').appendTo($('<thead></thead>').appendTo(table));
