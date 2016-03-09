@@ -265,7 +265,7 @@
                                     </select>
                                 </div>
                                 <div class="plot-container">
-                                    {% include 'workbooks/workbook_plot.html' with plot=worksheet.active_plot variables=worksheet.variables cohorts=worksheet.cohorts %}
+                                    {% include 'workbooks/workbook_plot.html' with plot=worksheet.active_plot datatype_list=datatypes genes=worksheet.genes variables=worksheet.variables cohorts=worksheet.cohorts %}
                                     <!-- plot needs to indicate saved plot data such as selected variables, cohorts, title, etc -->
                                     <!-- workbook_plot also needs to have reference to all worksheet cohorts, variables and genes -->
                                 </div>
@@ -277,7 +277,7 @@
                                     </select>
                                 </div>
                                 <div class="plot-container">
-                                    {% include 'workbooks/workbook_plot.html' with plot=worksheet.active_plot variables=worksheet.variables cohorts=worksheet.cohorts %}
+                                    {% include 'workbooks/workbook_plot.html' with plot=worksheet.active_plot datatype_list=datatypes genes=worksheet.genes variables=worksheet.variables cohorts=worksheet.cohorts %}
                                     <!-- plot needs to indicate saved plot data such as selected variables, cohorts, title, etc -->
                                     <!-- workbook_plot also needs to have reference to all worksheet cohorts, variables and genes -->
                                 </div>
@@ -325,8 +325,8 @@
 {% include "workbooks/workbook_modals.html" %}
 
 <script type="text/javascript">
-    var base_api_url            = '{{ base_api_url|safe }}';
-    var base_url                = '{{ base_url|safe }}';
+    var base_api_url            = '{{ BASE_API_URL|safe }}';
+    var base_url                = '{{ BASE_URL|safe }}';
     var display_worksheet_id    = '{{ display_worksheet.id|safe }}';
     var workbook_id             = '{{ workbook.id }}';
 </script>

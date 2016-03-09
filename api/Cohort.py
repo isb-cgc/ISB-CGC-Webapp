@@ -32,7 +32,6 @@ import json
 
 from metadata import MetadataItem, IncomingMetadataItem
 
-from accounts.models import NIH_User
 from cohorts.models import Cohort as Django_Cohort, Cohort_Perms, Patients, Samples, Filters
 from bq_data_access.cohort_bigquery import BigQueryCohortSupport
 from api_helpers import *
@@ -80,6 +79,19 @@ IMPORTANT_FEATURES = [
     'rppaPlatform'
 ]
 
+BUILTIN_ENDPOINTS_PARAMETERS = [
+    'alt',
+    'fields',
+    'enum',
+    'enumDescriptions',
+    'key',
+    'oauth_token',
+    'prettyPrint',
+    'quotaUser',
+    'userIp'
+]
+
+
 
 class ReturnJSON(messages.Message):
     msg = messages.StringField(1)
@@ -122,7 +134,6 @@ class PatientDetails(messages.Message):
     clinical_data = messages.MessageField(MetadataItem, 1)
     samples = messages.StringField(2, repeated=True)
     aliquots = messages.StringField(3, repeated=True)
-    error = messages.StringField(4)
 
 
 class DataDetails(messages.Message):
@@ -135,14 +146,16 @@ class DataDetails(messages.Message):
     DataLevel = messages.StringField(7)
     Datatype = messages.StringField(8)
     GenomeReference = messages.StringField(9)
-    Pipeline = messages.StringField(10)
-    Platform = messages.StringField(11)
-    platform_full_name = messages.StringField(12)
-    Project = messages.StringField(13)
-    Repository = messages.StringField(14)
-    SDRFFileName = messages.StringField(15)
-    SecurityProtocol = messages.StringField(16)
-    CloudStoragePath = messages.StringField(17)
+    GG_dataset_id = messages.StringField(10)
+    GG_readgroupset_id = messages.StringField(11)
+    Pipeline = messages.StringField(12)
+    Platform = messages.StringField(13)
+    platform_full_name = messages.StringField(14)
+    Project = messages.StringField(15)
+    Repository = messages.StringField(16)
+    SDRFFileName = messages.StringField(17)
+    SecurityProtocol = messages.StringField(18)
+    CloudStoragePath = messages.StringField(19)
 
 
 class SampleDetails(messages.Message):
@@ -170,23 +183,52 @@ class GoogleGenomicsList(messages.Message):
     count = messages.IntegerField(2)
 
 
-def check_for_bad_keys(request, query_dict):
+def are_there_bad_keys(request):
+    '''
+    Checks for unrecognized fields in an endpoint request
+    :param request: the request object from the endpoint
+    :return: boolean indicating True if bad (unrecognized) fields are present in the request
+    '''
+    unrecognized_param_dict = {
+        k: request.get_unrecognized_field_info(k)[0]
+        for k in request.all_unrecognized_fields()
+        if k not in BUILTIN_ENDPOINTS_PARAMETERS
+    }
+    return unrecognized_param_dict != {}
 
-    # todo: possibly use request.all_unrecognized_fields() (type list)
-    bad_keys = [k for k in request._Message__unrecognized_fields.keys() if k != 'alt']
 
-    if bad_keys or not query_dict:
+def are_there_no_acceptable_keys(request):
+    '''
+    Checks for a lack of recognized fields in an endpoints request. Used in save_cohort and preview_cohort endpoints.
+    :param request: the request object from the endpoint
+    :return: boolean indicating True if there are no recognized fields in the request.
+    '''
+    param_dict = {
+        k.name: request.get_assigned_value(k.name)
+        for k in request.all_fields()
+        if request.get_assigned_value(k.name)
+    }
+    return param_dict == {}
 
-        sorted_keys = sorted([k for k in IncomingMetadataItem.__dict__.keys() if not k.startswith('_')],
-                             key=lambda s: s.lower())
-        err_msg = ''
-        if bad_keys:
-            bad_key_str = "'" + "', '".join(bad_keys) + "'"
-            err_msg += "The following filters were not recognized: {}. ".format(bad_key_str)
-        err_msg += "You must specify at least one of the following case-sensitive " \
-                   "filters to preview a cohort: {}".format(sorted_keys)
-        raise endpoints.BadRequestException(err_msg)
 
+def construct_parameter_error_message(request, filter_required):
+    err_msg = ''
+    sorted_acceptable_keys = sorted([k.name for k in request.all_fields()], key=lambda s: s.lower())
+    unrecognized_param_dict = {
+        k: request.get_unrecognized_field_info(k)[0]
+        for k in request.all_unrecognized_fields()
+        if k not in BUILTIN_ENDPOINTS_PARAMETERS
+    }
+    if unrecognized_param_dict:
+        bad_key_str = "'" + "', '".join(unrecognized_param_dict.keys()) + "'"
+        err_msg += "The following filters were not recognized: {}. ".format(bad_key_str)
+    if filter_required:
+        err_msg += "You must specify at least one of the following " \
+                       "case-sensitive filters: {}".format(sorted_acceptable_keys)
+    else:
+        err_msg += "Acceptable filters are: {}".format(sorted_acceptable_keys)
+
+    return err_msg
 
 Cohort_Endpoints = endpoints.api(name='cohort_api', version='v1', description="Get information about "
                                 "cohorts, patients, and samples. Create and delete cohorts.",
@@ -201,10 +243,9 @@ class Cohort_Endpoints_API(remote.Service):
                       path='cohorts_list', http_method='GET', name='cohorts.list')
     def cohorts_list(self, request):
         '''
-        Lists cohorts a user has either READER or OWNER permission on.
-        :param token: Optional. Access token with email scope to verify user's google identity.
-        :param cohort_id: Optional. Cohort id to get information about.
-        :return: List of one or more cohorts along with information about each cohort.
+        Returns information about cohorts a user has either READER or OWNER permission on.
+        Authentication is required. Optionally takes a cohort id as a parameter to
+        only list information about one cohort.
         '''
         user_email = None
         cursor = None
@@ -217,11 +258,11 @@ class Cohort_Endpoints_API(remote.Service):
         # users have the option of pasting the access token in the query string
         # or in the 'token' field in the api explorer
         # but this is not required
-        access_token = request.__getattribute__('token')
+        access_token = request.get_assigned_value('token')
         if access_token:
             user_email = get_user_email_from_token(access_token)
 
-        cohort_id = request.__getattribute__('cohort_id')
+        cohort_id = request.get_assigned_value('cohort_id')
 
         if user_email:
             django.setup()
@@ -312,12 +353,9 @@ class Cohort_Endpoints_API(remote.Service):
                       name='cohorts.cohort_patients_samples_list')
     def cohort_patients_samples_list(self, request):
         """
-        Returns information about the participants and samples in a particular cohort.
-        :param cohort_id: Required.
-        :param token: Optional. Access token with email scope to verify user's google identity.
-        :return: List of participant barcodes, sample barcodes, and a total count of each.
-        Returns error message if the cohort id is invalid or if the user does not have reader or
-        owner permissions on that cohort.
+        Takes a cohort id as a required parameter and returns information about the participants
+        and samples in a particular cohort. Authentication is required.
+        User must have either READER or OWNER permissions on the cohort.
         """
 
         db = None
@@ -330,11 +368,11 @@ class Cohort_Endpoints_API(remote.Service):
         # users have the option of pasting the access token in the query string
         # or in the 'token' field in the api explorer
         # but this is not required
-        access_token = request.__getattribute__('token')
+        access_token = request.get_assigned_value('token')
         if access_token:
             user_email = get_user_email_from_token(access_token)
 
-        cohort_id = request.__getattribute__('cohort_id')
+        cohort_id = request.get_assigned_value('cohort_id')
 
         if user_email:
             django.setup()
@@ -429,10 +467,10 @@ class Cohort_Endpoints_API(remote.Service):
                       path='patient_details', http_method='GET', name='cohorts.patient_details')
     def patient_details(self, request):
         """
-        Returns information about a particular participant.
-        :param patient_barcode: Required.
-        :return: List of samples and a list of aliquots associated with the participant barcode
-        as well as clinical data on that participant.
+        Returns information about a specific participant,
+        including a list of samples and aliquots derived from this patient.
+        Takes a participant barcode (of length 12, *eg* TCGA-B9-7268) as a required parameter.
+        User does not need to be authenticated.
         """
 
         clinical_cursor = None
@@ -440,7 +478,7 @@ class Cohort_Endpoints_API(remote.Service):
         aliquot_cursor = None
         db = None
 
-        patient_barcode = request.__getattribute__('patient_barcode')
+        patient_barcode = request.get_assigned_value('patient_barcode')
 
         clinical_query_str = 'select * ' \
                     'from metadata_clinical ' \
@@ -463,11 +501,7 @@ class Cohort_Endpoints_API(remote.Service):
             clinical_cursor = db.cursor(MySQLdb.cursors.DictCursor)
             clinical_cursor.execute(clinical_query_str, query_tuple)
             row = clinical_cursor.fetchone()
-            if row is None:
-                clinical_cursor.close()
-                db.close()
-                error_message = "Patient barcode {} not found in metadata_clinical table.".format(patient_barcode)
-                return PatientDetails(error=error_message, clinical_data=None, samples=[], aliquots=[])
+
             item = MetadataItem(
                 age_at_initial_pathologic_diagnosis=None if "age_at_initial_pathologic_diagnosis" not in row or row["age_at_initial_pathologic_diagnosis"] is None else int(row["age_at_initial_pathologic_diagnosis"]),
                 anatomic_neoplasm_subdivision=str(row["anatomic_neoplasm_subdivision"]),
@@ -545,6 +579,7 @@ class Cohort_Endpoints_API(remote.Service):
 
             return PatientDetails(clinical_data=item, samples=sample_data, aliquots=aliquot_data)
         except (IndexError, TypeError), e:
+            logger.info("Patient {} not found. Error: {}".format(patient_barcode, e))
             raise endpoints.NotFoundException("Patient {} not found.".format(patient_barcode))
         finally:
             if clinical_cursor: clinical_cursor.close()
@@ -555,19 +590,15 @@ class Cohort_Endpoints_API(remote.Service):
 
     GET_RESOURCE = endpoints.ResourceContainer(sample_barcode=messages.StringField(1, required=True),
                                                platform=messages.StringField(2),
-                                               pipeline=messages.StringField(3),
-                                               token=messages.StringField(4))
+                                               pipeline=messages.StringField(3))
     @endpoints.method(GET_RESOURCE, SampleDetails,
                       path='sample_details', http_method='GET', name='cohorts.sample_details')
     def sample_details(self, request):
         """
-        Returns information about a particular sample.
-        :param sample_barcode: Required.
-        :param platform: Optional. Filter results by a particular platform.
-        :param pipeline: Optional. Filter results by a particular pipeline.
-        :param token: Optional. Access token with email scope to verify user's google identity.
-        :return: Biospecimen data about the sample, a list of aliquots associated with the sample barcode,
-        and a list of details about each aliquot.
+        Given a sample barcode (of length 16, *eg* TCGA-B9-7268-01A), this endpoint returns
+        all available "biospecimen" information about this sample,
+        the associated patient barcode, a list of associated aliquots,
+        and a list of "data_details" blocks describing each of the data files associated with this sample
         """
 
         biospecimen_cursor = None
@@ -576,23 +607,7 @@ class Cohort_Endpoints_API(remote.Service):
         data_cursor = None
         db = None
 
-        user_email = None
-        dbGaP_authorized = False
-
-        if endpoints.get_current_user() is not None:
-            user_email = endpoints.get_current_user().email()
-
-        # users have the option of pasting the access token in the query string
-        # or in the 'token' field in the api explorer
-        # but this is not required
-        access_token = request.__getattribute__('token')
-        if access_token:
-            user_email = get_user_email_from_token(access_token)
-
-        if user_email:
-            dbGaP_authorized = is_dbgap_authorized(user_email)
-
-        sample_barcode = request.__getattribute__('sample_barcode')
+        sample_barcode = request.get_assigned_value('sample_barcode')
         biospecimen_query_str = 'select * ' \
                                 'from metadata_biospecimen ' \
                                 'where SampleBarcode=%s'
@@ -621,6 +636,8 @@ class Cohort_Endpoints_API(remote.Service):
                          'DataLevel,' \
                          'Datatype,' \
                          'GenomeReference,' \
+                         'GG_dataset_id, ' \
+                         'GG_readgroupset_id, ' \
                          'Pipeline,' \
                          'Platform,' \
                          'platform_full_name,' \
@@ -631,17 +648,14 @@ class Cohort_Endpoints_API(remote.Service):
                          'from metadata_data ' \
                          'where SampleBarcode=%s '
 
-        if not dbGaP_authorized:
-            data_query_str += 'and SecurityProtocol != "dbGap controlled-access" '
-
-        if request.__getattribute__('platform') is not None:
-            platform = request.__getattribute__('platform')
+        if request.get_assigned_value('platform') is not None:
+            platform = request.get_assigned_value('platform')
             aliquot_query_str += ' and platform=%s '
             data_query_str += ' and platform=%s '
             extra_query_tuple += (str(platform),)
 
-        if request.__getattribute__('pipeline') is not None:
-            pipeline = request.__getattribute__('pipeline')
+        if request.get_assigned_value('pipeline') is not None:
+            pipeline = request.get_assigned_value('pipeline')
             aliquot_query_str += ' and pipeline=%s '
             data_query_str += ' and pipeline=%s '
             extra_query_tuple += (str(pipeline),)
@@ -654,12 +668,7 @@ class Cohort_Endpoints_API(remote.Service):
             biospecimen_cursor = db.cursor(MySQLdb.cursors.DictCursor)
             biospecimen_cursor.execute(biospecimen_query_str, query_tuple)
             row = biospecimen_cursor.fetchone()
-            if row is None:
-                biospecimen_cursor.close()
-                db.close()
-                error_message = "Sample barcode {} not found in metadata_biospecimen table.".format(sample_barcode)
-                return SampleDetails(biospecimen_data=None, aliquots=[], patient=None, data_details=[],
-                                     data_details_count=None, error=error_message)
+
             item = MetadataItem(
                 avg_percent_lymphocyte_infiltration=None if "avg_percent_lymphocyte_infiltration" not in row or row["avg_percent_lymphocyte_infiltration"] is None else float(row["avg_percent_lymphocyte_infiltration"]),
                 avg_percent_monocyte_infiltration=None if "avg_percent_monocyte_infiltration" not in row or row["avg_percent_monocyte_infiltration"] is None else float(row["avg_percent_monocyte_infiltration"]),
@@ -715,31 +724,36 @@ class Cohort_Endpoints_API(remote.Service):
             data_cursor = db.cursor(MySQLdb.cursors.DictCursor)
             data_cursor.execute(data_query_str, extra_query_tuple)
             data_data = []
+            bad_repo_count = 0
+            bad_repo_set = set()
             for row in data_cursor.fetchall():
-
-                file_path = row.get('DataFileNameKey') if len(row.get('DataFileNameKey', '')) else '/file-path-currently-unavailable'
-                cloud_storage_path = ''
+                if not row.get('DataFileNameKey'):
+                    continue
                 if 'controlled' not in str(row['SecurityProtocol']).lower():
-                    cloud_storage_path = "gs://{}{}".format(settings.OPEN_DATA_BUCKET, file_path)
-                elif dbGaP_authorized:
-                    bucket_name = ''
-                    # hard-coding mock bucket names for now --testing purposes only
+                    cloud_storage_path = "gs://{}{}".format(settings.OPEN_DATA_BUCKET, row.get('DataFileNameKey'))
+                else:  # not filtering on dbGaP_authorized:
                     if row['Repository'].lower() == 'dcc':
                         bucket_name = settings.DCC_CONTROLLED_DATA_BUCKET
                     elif row['Repository'].lower() == 'cghub':
                         bucket_name = settings.CGHUB_CONTROLLED_DATA_BUCKET
-                    cloud_storage_path = "gs://{}{}".format(bucket_name, file_path)
+                    else:  # shouldn't ever happen
+                        bad_repo_count += 1
+                        bad_repo_set.add(row['Repository'])
+                        continue
+                    cloud_storage_path = "gs://{}{}".format(bucket_name, row.get('DataFileNameKey'))
 
                 data_item = DataDetails(
                     SampleBarcode=str(row['SampleBarcode']),
                     DataCenterName=str(row['DataCenterName']),
                     DataCenterType=str(row['DataCenterType']),
                     DataFileName=str(row['DataFileName']),
-                    DataFileNameKey=file_path,
+                    DataFileNameKey=str(row.get('DataFileNameKey')),
                     DatafileUploaded=str(row['DatafileUploaded']),
                     DataLevel=str(row['DataLevel']),
                     Datatype=str(row['Datatype']),
                     GenomeReference=str(row['GenomeReference']),
+                    GG_dataset_id=str(row['GG_dataset_id']),
+                    GG_readgroupset_id=str(row['GG_readgroupset_id']),
                     Pipeline=str(row['Pipeline']),
                     Platform=str(row['Platform']),
                     platform_full_name=str(row['platform_full_name']),
@@ -750,15 +764,17 @@ class Cohort_Endpoints_API(remote.Service):
                     CloudStoragePath=cloud_storage_path
                 )
                 data_data.append(data_item)
-
+            if bad_repo_count > 0:
+                logger.warn("not returning {count} row(s) in sample_details due to repositories: {bad_repo_list}"
+                            .format(count=bad_repo_count, bad_repo_list=list(bad_repo_set)))
             return SampleDetails(biospecimen_data=item, aliquots=aliquot_data,
                                  patient=patient_barcode, data_details=data_data,
                                  data_details_count=len(data_data))
 
         except (IndexError, TypeError) as e:
-            logger.warn(e)
+            logger.info("Sample details for barcode {} not found. Error: {}".format(sample_barcode, e))
             raise endpoints.NotFoundException(
-                "Sample details for barcode {} not found. Error: {}".format(sample_barcode, e))
+                "Sample details for barcode {} not found.".format(sample_barcode))
         finally:
             if biospecimen_cursor: biospecimen_cursor.close()
             if aliquot_cursor: aliquot_cursor.close()
@@ -776,24 +792,21 @@ class Cohort_Endpoints_API(remote.Service):
                       path='datafilenamekey_list_from_cohort', http_method='GET', name='cohorts.datafilenamekey_list_from_cohort')
     def datafilenamekey_list_from_cohort(self, request):
         """
-        Returns a list of cloud storage paths for files associated with
-        all the samples in a specified cohort.
-        :param cohort_id: Required.
-        :param platform: Optional. Filter results by platform.
-        :param pipeline: Optional. Filter results by pipeline.
-        :param token: Optional. Access token with email scope to verify user's google identity.
-        :return: List of cloud storage file paths. If the user is dbGaP authorized, controlled-access file paths
-        will appear in the list.
+        Takes a cohort id as a required parameter and
+        returns cloud storage paths to files associated with all the samples in that cohort.
+        Authentication is required. User must have READER or OWNER permissions on the cohort.
         """
         user_email = None
         cursor = None
         db = None
-        dbGaP_authorized = False
-        cohort_id = None
 
-        platform = request.__getattribute__('platform')
-        pipeline = request.__getattribute__('pipeline')
-        cohort_id = request.__getattribute__('cohort_id')
+        platform = request.get_assigned_value('platform')
+        pipeline = request.get_assigned_value('pipeline')
+        cohort_id = request.get_assigned_value('cohort_id')
+
+        if are_there_bad_keys(request):
+            err_msg = construct_parameter_error_message(request, False)
+            raise endpoints.BadRequestException(err_msg)
 
         if endpoints.get_current_user() is not None:
             user_email = endpoints.get_current_user().email()
@@ -801,12 +814,12 @@ class Cohort_Endpoints_API(remote.Service):
         # users have the option of pasting the access token in the query string
         # or in the 'token' field in the api explorer
         # but this is not required
-        access_token = request.__getattribute__('token')
+        access_token = request.get_assigned_value('token')
         if access_token:
             user_email = get_user_email_from_token(access_token)
 
         if user_email:
-            dbGaP_authorized = is_dbgap_authorized(user_email)
+            django.setup()
 
             query_str = 'SELECT DataFileNameKey, SecurityProtocol, Repository ' \
                         'FROM metadata_data '
@@ -841,22 +854,29 @@ class Cohort_Endpoints_API(remote.Service):
                 db = sql_connection()
                 cursor = db.cursor(MySQLdb.cursors.DictCursor)
                 cursor.execute(query_str, query_tuple)
-                logger.info(query_str)
-                logger.info(query_tuple)
 
                 datafilenamekeys = []
+                bad_repo_count = 0
+                bad_repo_set = set()
                 for row in cursor.fetchall():
-                    file_path = row.get('DataFileNameKey') if len(row.get('DataFileNameKey', '')) else '/file-path-currently-unavailable'
+                    if not row.get('DataFileNameKey'):
+                        continue
                     if 'controlled' not in str(row['SecurityProtocol']).lower():
-                        datafilenamekeys.append("gs://{}{}".format(settings.OPEN_DATA_BUCKET, file_path))
-                    elif dbGaP_authorized:
+                        datafilenamekeys.append("gs://{}{}".format(settings.OPEN_DATA_BUCKET, row.get('DataFileNameKey')))
+                    else:  # not filtering on dbGaP_authorized
                         bucket_name = ''
                         if row['Repository'].lower() == 'dcc':
                             bucket_name = settings.DCC_CONTROLLED_DATA_BUCKET
                         elif row['Repository'].lower() == 'cghub':
                             bucket_name = settings.CGHUB_CONTROLLED_DATA_BUCKET
-                        datafilenamekeys.append("gs://{}{}".format(bucket_name, file_path))
-
+                        else:  # shouldn't ever happen
+                            bad_repo_count += 1
+                            bad_repo_set.add(row['Repository'])
+                            continue
+                        datafilenamekeys.append("gs://{}{}".format(bucket_name, row.get('DataFileNameKey')))
+                if bad_repo_count > 0:
+                    logger.warn("not returning {count} row(s) in sample_details due to repositories: {bad_repo_list}"
+                                .format(count=bad_repo_count, bad_repo_list=list(bad_repo_set)))
                 return DataFileNameKeyList(datafilenamekeys=datafilenamekeys, count=len(datafilenamekeys))
 
             except (IndexError, TypeError), e:
@@ -872,41 +892,24 @@ class Cohort_Endpoints_API(remote.Service):
 
     GET_RESOURCE = endpoints.ResourceContainer(sample_barcode=messages.StringField(1, required=True),
                                                platform=messages.StringField(2),
-                                               pipeline=messages.StringField(3),
-                                               token=messages.StringField(4))
+                                               pipeline=messages.StringField(3))
     @endpoints.method(GET_RESOURCE, DataFileNameKeyList,
                       path='datafilenamekey_list_from_sample', http_method='GET', name='cohorts.datafilenamekey_list_from_sample')
     def datafilenamekey_list_from_sample(self, request):
         """
-        Returns a list of cloud storage paths for files associated with either a sample barcode.
-        :param sample_barcode: Required.
-        :param platform: Optional. Filter results by platform.
-        :param pipeline: Optional. Filter results by pipeline.
-        :param token: Optional. Access token with email scope to verify user's google identity.
-        :return: List of cloud storage file paths. If the user is dbGaP authorized, controlled-access file paths
-        will appear in the list.
+        Takes a sample barcode as a required parameter and
+        returns cloud storage paths to files associated with that sample.
         """
-        user_email = None
         cursor = None
         db = None
-        dbGaP_authorized = False
 
-        sample_barcode = request.__getattribute__('sample_barcode')
-        platform = request.__getattribute__('platform')
-        pipeline = request.__getattribute__('pipeline')
+        sample_barcode = request.get_assigned_value('sample_barcode')
+        platform = request.get_assigned_value('platform')
+        pipeline = request.get_assigned_value('pipeline')
 
-        if endpoints.get_current_user() is not None:
-            user_email = endpoints.get_current_user().email()
-
-        # users have the option of pasting the access token in the query string
-        # or in the 'token' field in the api explorer
-        # but this is not required
-        access_token = request.__getattribute__('token')
-        if access_token:
-            user_email = get_user_email_from_token(access_token)
-
-        if user_email:
-            dbGaP_authorized = is_dbgap_authorized(user_email)
+        if are_there_bad_keys(request):
+            err_msg = construct_parameter_error_message(request, False)
+            raise endpoints.BadRequestException(err_msg)
 
         query_str = 'SELECT DataFileNameKey, SecurityProtocol, Repository ' \
                     'FROM metadata_data WHERE SampleBarcode=%s '
@@ -927,23 +930,29 @@ class Cohort_Endpoints_API(remote.Service):
             db = sql_connection()
             cursor = db.cursor(MySQLdb.cursors.DictCursor)
             cursor.execute(query_str, query_tuple)
-            logger.info(query_str)
-            logger.info(query_tuple)
 
             datafilenamekeys = []
-
+            bad_repo_count = 0
+            bad_repo_set = set()
             for row in cursor.fetchall():
-                file_path = row.get('DataFileNameKey') if len(row.get('DataFileNameKey', '')) else '/file-path-currently-unavailable'
+                if not row.get('DataFileNameKey'):
+                    continue
                 if 'controlled' not in str(row['SecurityProtocol']).lower():
-                    datafilenamekeys.append("gs://{}{}".format(settings.OPEN_DATA_BUCKET, file_path))
-                elif dbGaP_authorized:
+                    datafilenamekeys.append("gs://{}{}".format(settings.OPEN_DATA_BUCKET, row.get('DataFileNameKey')))
+                else:  # not filtering on dbGaP_authorized
                     bucket_name = ''
                     if row['Repository'].lower() == 'dcc':
                         bucket_name = settings.DCC_CONTROLLED_DATA_BUCKET
                     elif row['Repository'].lower() == 'cghub':
                         bucket_name = settings.CGHUB_CONTROLLED_DATA_BUCKET
-                    datafilenamekeys.append("gs://{}{}".format(bucket_name, file_path))
-
+                    else:  # shouldn't ever happen
+                        bad_repo_count += 0
+                        bad_repo_set.add(row['Repository'])
+                        continue
+                    datafilenamekeys.append("gs://{}{}".format(bucket_name, row.get('DataFileNameKey')))
+            if bad_repo_count > 0:
+                logger.warn("not returning {count} row(s) in sample_details due to repositories: {bad_repo_list}"
+                            .format(count=bad_repo_count, bad_repo_list=list(bad_repo_set)))
             return DataFileNameKeyList(datafilenamekeys=datafilenamekeys, count=len(datafilenamekeys))
 
         except (IndexError, TypeError), e:
@@ -964,9 +973,8 @@ class Cohort_Endpoints_API(remote.Service):
     def save_cohort(self, request):
         """
         Creates and saves a cohort. Takes a JSON object in the request body to use as the cohort's filters.
-        :param name: Required. Name of cohort to be saved.
-        :param token: Optional. Access token with email scope to verify user's google identity.
-        :return: Information about the saved cohort, including the number of patients and the number
+        Authentication is required.
+        Returns information about the saved cohort, including the number of patients and the number
         of samples in that cohort.
         """
         user_email = None
@@ -980,7 +988,7 @@ class Cohort_Endpoints_API(remote.Service):
         # users have the option of pasting the access token in the query string
         # or in the 'token' field in the api explorer
         # but this is not required
-        access_token = request.__getattribute__('token')
+        access_token = request.get_assigned_value('token')
         if access_token:
             user_email = get_user_email_from_token(access_token)
 
@@ -993,12 +1001,16 @@ class Cohort_Endpoints_API(remote.Service):
                 logger.warn(e)
                 raise endpoints.NotFoundException("%s does not have an entry in the user database." % user_email)
 
-            keys = [k for k in IncomingMetadataItem.__dict__.keys()
-                    if not k.startswith('_') and request.__getattribute__(k)]
-            values = (request.__getattribute__(k) for k in keys)
-            query_dict = dict(zip(keys, values))
+            query_dict = {
+                k.name: request.get_assigned_value(k.name)
+                for k in request.all_fields()
+                if request.get_assigned_value(k.name)
+                and k.name is not 'name' and k.name is not 'token'
+            }
 
-            check_for_bad_keys(request, query_dict)  #, extra_fields=['name', 'token'])
+            if are_there_bad_keys(request) or are_there_no_acceptable_keys(request):
+                err_msg = construct_parameter_error_message(request, True)
+                raise endpoints.BadRequestException(err_msg)
 
             patient_query_str = 'SELECT DISTINCT(IF(ParticipantBarcode="", LEFT(SampleBarcode,12), ParticipantBarcode)) AS ParticipantBarcode ' \
                                 'FROM metadata_samples '
@@ -1039,7 +1051,7 @@ class Cohort_Endpoints_API(remote.Service):
                 if db and db.open: db.close()
                 request_finished.send(self)
 
-            cohort_name = request.__getattribute__('name')
+            cohort_name = request.get_assigned_value('name')
 
             # 1. create new cohorts_cohort with name, active=True, last_date_saved=now
             created_cohort = Django_Cohort.objects.create(name=cohort_name, active=True, last_date_saved=datetime.utcnow())
@@ -1088,9 +1100,6 @@ class Cohort_Endpoints_API(remote.Service):
     def delete_cohort(self, request):
         """
         Deletes a cohort. User must have owner permissions on the cohort.
-        :param cohort_id: Required. Id of cohort to delete.
-        :param token: Optional. Access token with email scope to verify user's google identity.
-        :return: Message indicating whether the cohort was deleted or not.
         """
         user_email = None
         return_message = None
@@ -1101,11 +1110,11 @@ class Cohort_Endpoints_API(remote.Service):
         # users have the option of pasting the access token in the query string
         # or in the 'token' field in the api explorer
         # but this is not required
-        access_token = request.__getattribute__('token')
+        access_token = request.get_assigned_value('token')
         if access_token:
             user_email = get_user_email_from_token(access_token)
 
-        cohort_id = request.__getattribute__('cohort_id')
+        cohort_id = request.get_assigned_value('cohort_id')
 
         if user_email:
             django.setup()
@@ -1147,22 +1156,25 @@ class Cohort_Endpoints_API(remote.Service):
                       path='preview_cohort', http_method='POST', name='cohorts.preview')
     def preview_cohort(self, request):
         """
-        Previews a cohort. Takes a JSON object in the request body to use as the cohort's filters.
-        :return: Information about the cohort, including the number of patients and the number
-        of samples in that cohort.
+        Takes a JSON object of filters in the request body and returns a "preview" of the cohort that would
+        result from passing a similar request to the cohort **save** endpoint.  This preview consists of
+        two lists: the lists of participant (aka patient) barcodes, and the list of sample barcodes.
+        Authentication is not required.
         """
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         patient_cursor = None
         sample_cursor = None
         db = None
 
-        keys = [k for k in IncomingMetadataItem.__dict__.keys()
-                if not k.startswith('_') and request.__getattribute__(k)]
+        query_dict = {
+            k.name: request.get_assigned_value(k.name)
+            for k in request.all_fields()
+            if request.get_assigned_value(k.name)
+        }
 
-        values = (request.__getattribute__(k) for k in keys)
-        query_dict = dict(zip(keys, values))
-
-        check_for_bad_keys(request, query_dict)
+        if are_there_bad_keys(request) or are_there_no_acceptable_keys(request):
+            err_msg = construct_parameter_error_message(request, True)
+            raise endpoints.BadRequestException(err_msg)
 
         patient_query_str = 'SELECT DISTINCT(IF(ParticipantBarcode="", LEFT(SampleBarcode,12), ParticipantBarcode)) ' \
                             'AS ParticipantBarcode ' \
@@ -1218,13 +1230,15 @@ class Cohort_Endpoints_API(remote.Service):
         """
         Returns a list of Google Genomics dataset and readgroupset ids associated with
         all the samples in a specified cohort.
-        :param cohort_id: Required.
-        :param token: Optional. Access token to verify a user's identity
-        :return: List of google genomics dataset and readgroupset ids.
+        Authentication is required. User must have either READER or OWNER permissions on the cohort.
         """
         cursor = None
         db = None
-        cohort_id = request.__getattribute__('cohort_id')
+        cohort_id = request.get_assigned_value('cohort_id')
+
+        if are_there_bad_keys(request):
+            err_msg = construct_parameter_error_message(request, False)
+            raise endpoints.BadRequestException(err_msg)
 
         if endpoints.get_current_user() is not None:
             user_email = endpoints.get_current_user().email()
@@ -1232,7 +1246,7 @@ class Cohort_Endpoints_API(remote.Service):
         # users have the option of pasting the access token in the query string
         # or in the 'token' field in the api explorer
         # but this is not required
-        access_token = request.__getattribute__('token')
+        access_token = request.get_assigned_value('token')
         if access_token:
             user_email = get_user_email_from_token(access_token)
 
@@ -1291,15 +1305,17 @@ class Cohort_Endpoints_API(remote.Service):
                       path='google_genomics_from_sample', http_method='GET', name='cohorts.google_genomics_from_sample')
     def google_genomics_from_sample(self, request):
         """
-        Returns a list of Google Genomics dataset and readgroupset ids associated with
-        all the samples in a specified cohort.
-        :param cohort_id: Required.
-        :return: List of google genomics dataset and readgroupset ids.
+        Takes a sample barcode as a required parameter and returns the Google Genomics dataset id
+        and readgroupset id associated with the sample, if any.
         """
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         cursor = None
         db = None
-        sample_barcode = request.__getattribute__('sample_barcode')
+        sample_barcode = request.get_assigned_value('sample_barcode')
+
+        if are_there_bad_keys(request):
+            err_msg = construct_parameter_error_message(request, False)
+            raise endpoints.BadRequestException(err_msg)
 
         query_str = 'SELECT SampleBarcode, GG_dataset_id, GG_readgroupset_id ' \
                     'FROM metadata_data ' \

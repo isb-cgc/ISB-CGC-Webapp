@@ -13,6 +13,7 @@ from django.utils import formats
 from django.core import serializers
 import sys
 import json
+import ast
 
 # Create your models here.
 class WorkbookManager(models.Manager):
@@ -560,9 +561,8 @@ class Worksheet_plot(models.Model):
     type            = models.CharField(max_length=1024, null=True)
     worksheet       = models.ForeignKey(Worksheet, blank=False, null=True)
     active          = models.BooleanField(default=True)
-    x_axis          = models.ForeignKey(Worksheet_variable, blank=True, null=True, related_name="worksheet_plot.x_axis")
-    y_axis          = models.ForeignKey(Worksheet_variable, blank=True, null=True, related_name="worksheet_plot.y_axis")
-    color_by        = models.ForeignKey(Worksheet_variable, blank=True, null=True, related_name="worksheet_plot.color_by")
+    settings_json   = models.TextField(blank=True, null=True)
+
     objects         = Worksheet_Plot_Manager()
 
     @classmethod
@@ -579,21 +579,14 @@ class Worksheet_plot(models.Model):
         return cohorts
 
     def toJSON(self):
-        j = {'id'        : self.id,
-             'type'      : self.type,
-             'worksheet' : self.worksheet_id,
-             'active'    : self.active,
-             }
-        if self.x_axis :
-            j['x_axis']  = self.x_axis.toJSON()
-
-        if self.y_axis :
-            j['y_axis']  = self.y_axis.toJSON()
-
-        if self.color_by :
-            j['color_by']  = self.color_by.toJSON()
-
-        j['cohort'] = []
+        j = {}
+        if self.settings_json :
+            j = ast.literal_eval(self.settings_json)
+        j['id']         = self.id,
+        j['type']       = self.type,
+        j['worksheet']  = self.worksheet_id,
+        j['active']     = self.active,
+        j['cohort']     = []
         cohorts = Worksheet_plot_cohort.objects.filter(plot=self)
         for c in cohorts :
             j['cohort'].append(c.toJSON())
