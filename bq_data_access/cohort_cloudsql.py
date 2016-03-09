@@ -105,9 +105,17 @@ class CloudSQLCohortAccess(object):
         # Generate the 'IN' statement string: (%s, %s, ..., %s)
         cohort_id_stmt = ', '.join(['%s' for x in xrange(len(cohort_id_array))])
 
-        query = 'SELECT id, name FROM {cohort_info_table} WHERE id IN ({cohort_id_stmt})'.format(
+        query_template = ("SELECT ti.id AS cohort_id, ti.name, COUNT(ts.sample_id) AS size "
+                          "FROM {cohort_info_table} ti "
+                          "   LEFT JOIN {cohort_samples_table} ts ON ts.cohort_id = ti.id "
+                          "WHERE ti.id IN ({cohort_id_stmt}) "
+                          "GROUP BY ti.id, ti.name")
+
+        query = query_template.format(
             cohort_info_table=DJANGO_COHORT_INFO_TABLE,
+            cohort_samples_table=DJANGO_COHORT_SAMPLES_TABLE,
             cohort_id_stmt=cohort_id_stmt)
+
         try:
             db = sql_connection()
             cursor = db.cursor(DictCursor)
@@ -117,8 +125,9 @@ class CloudSQLCohortAccess(object):
 
             for row in cursor.fetchall():
                 result.append({
-                    'id': row['id'],
-                    'name': row['name']
+                    'id': row['cohort_id'],
+                    'name': row['name'],
+                    'size': row['size']
                 })
 
             cursor.close()
@@ -130,13 +139,3 @@ class CloudSQLCohortAccess(object):
             raise CohortException('get_cohort_info CloudSQL error, cohort IDs {cohort_ids}: {message}'.format(
                 cohort_ids=cohort_id_array,
                 message=str(e.message)))
-
-def main():
-    cohort_id_array = [2, 4, 5]
-    samples = CloudSQLCohortAccess.get_cohorts_for_datapoints(cohort_id_array)
-    from json import dumps as json_dumps
-    print(json_dumps(samples, indent=2, sort_keys=True))
-
-
-if __name__ == '__main__':
-    main()
