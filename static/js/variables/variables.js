@@ -159,7 +159,7 @@ require([
             name       = $this.data('text-label'),
             code       = $this.val(),
             feature_id = $this.data('feature-id');
-        if ($this.is(':checked')) { // Checkbox checked
+        if ($this.is(':checked') && $('.selected-filters span[data-code="' + code + '"]') == 0) { // Checkbox checked and not already in list
             add_variable_pill(name, code, feature_id);
         } else {
             remove_variable_pill(code);
@@ -173,7 +173,9 @@ require([
         var $this      = $(this),
             name       = $this.find(":selected").text(),
             code       = $this.find(":selected").val();
-        add_variable_pill(name, code);
+        if ($('.selected-filters span[data-code="' + code + '"]') == 0) { // Check to see if selected already
+            add_variable_pill(name, code);
+        }
     });
 
     /*
