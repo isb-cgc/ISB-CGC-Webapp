@@ -40,13 +40,6 @@ class SeqPeekMAFWithCohorts(object):
 
 
 class SeqPeekMAFDataFormatter(object):
-    def get_feature_vector(self, feature_id, cohort_id_array):
-        cohort_settings = settings.GET_BQ_COHORT_SETTINGS()
-        provider = SeqPeekDataProvider(feature_id)
-        result = provider.get_data(cohort_id_array, cohort_settings.dataset_id, cohort_settings.table_id)
-
-        return result
-
     def annotate_vector_with_cohorts(self, cohort_id_array, result):
         # Resolve which (requested) cohorts each datapoint belongs to.
         cohort_set_dict = CloudSQLCohortAccess.get_cohorts_for_datapoints(cohort_id_array)
@@ -82,7 +75,7 @@ class SeqPeekMAFDataFormatter(object):
         return result, removed_stats
 
     def get_cohort_information(self, cohort_id_array):
-        # Get the name and ID for every requested cohort.
+        # Get the name, size and ID for every requested cohort.
         cohort_info_array = CloudSQLCohortAccess.get_cohort_info(cohort_id_array)
 
         return cohort_info_array

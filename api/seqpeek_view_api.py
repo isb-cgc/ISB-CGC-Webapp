@@ -30,15 +30,18 @@ from bq_data_access.seqpeek.seqpeek_maf_formatter import SeqPeekMAFDataFormatter
 from bq_data_access.seqpeek_maf_data import SeqPeekDataProvider
 from bq_data_access.data_access import ProviderClassQueryDescription
 
+
 class SeqPeekViewDataRequest(Message):
     hugo_symbol = StringField(1, required=True)
     cohort_id = IntegerField(2, repeated=True)
+
 
 class InterproMatchLocation(Message):
     # TODO this should likely be a float
     score = IntegerField(1, variant=Variant.INT32)
     start = IntegerField(2, variant=Variant.INT32)
     end = IntegerField(3, variant=Variant.INT32)
+
 
 class InterproMatch(Message):
     status = StringField(1)
@@ -72,7 +75,8 @@ class SeqPeekTrackRecord(Message):
     type = StringField(2, required=True)
     label = StringField(3, required=True)
     number_of_samples = IntegerField(4, required=True)
-    row_id = StringField(5, required=True)
+    cohort_size = IntegerField(5, required=False)
+    row_id = StringField(6, required=True)
 
 
 class SeqPeekViewPlotDataRecord(Message):
@@ -91,8 +95,6 @@ class SeqPeekViewRecord(Message):
     hugo_symbol = StringField(2, required=True)
     plot_data = MessageField(SeqPeekViewPlotDataRecord, 3, required=True)
     removed_row_statistics = MessageField(SeqPeekRemovedRow, 4, repeated=True)
-
-
 
 
 def create_interpro_record(interpro_literal):
@@ -140,7 +142,8 @@ class SeqPeekViewDataAccessAPI(remote.Service):
             mutations = maf_array_to_record(track['mutations'])
             tracks.append(SeqPeekTrackRecord(mutations=mutations, label=track['label'], type=track["type"],
                                              row_id=track['render_info']['row_id'],
-                                             number_of_samples=track['statistics']['samples']['numberOf']))
+                                             number_of_samples=track['statistics']['samples']['numberOf'],
+                                             cohort_size=track['statistics']['cohort_size']))
 
         region_records = []
         for region in plot_data['regions']:
