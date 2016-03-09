@@ -481,7 +481,12 @@ class MetadataItem(messages.Message):
 Incoming object needs to use age that's a string (eg. 10_to_39)
 '''
 class IncomingMetadataItem(messages.Message):
+    '''
+    test description for incoming metdata item
+    :param adenocarcinoma_invasion: description of adenocarcinoma
+    '''
     adenocarcinoma_invasion                                         = messages.StringField(1, repeated=True)
+    """description of adenocarcinoma"""
     age_at_initial_pathologic_diagnosis                             = messages.StringField(2, repeated=True)
     anatomic_neoplasm_subdivision                                   = messages.StringField(3, repeated=True)
     avg_percent_lymphocyte_infiltration                             = messages.FloatField(4, repeated=True)
