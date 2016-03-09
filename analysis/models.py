@@ -21,9 +21,9 @@ class Analysis(models.Model):
                  {'name' : 'Violin Plot',
                   'description' : "Used to plot a categorical feature on the x-axis versus a numerical feature on the y-axis. Points in the plot can be colored by another categorical feature.",
                   'image' : 'img/violinplot.png'},
-                 {'name' : 'Violin Plot with axis swap',
-                  'description' : "Used to plot a categorical feature on the y-axis versus a numerical feature on the x-axis. Points in the plot can be colored by another categorical feature.",
-                  'image' : 'img/violinplot.png'},
+                 # {'name' : 'Violin Plot with axis swap',
+                 #  'description' : "Used to plot a categorical feature on the y-axis versus a numerical feature on the x-axis. Points in the plot can be colored by another categorical feature.",
+                 #  'image' : 'img/violinplot.png'},
                  {'name' : 'Cubby Hole Plot',
                   'description' : "Used to plot two categorical features. Boxes are colored by their related p-values.",
                   'image' : 'img/cubbyhole.png'}]
