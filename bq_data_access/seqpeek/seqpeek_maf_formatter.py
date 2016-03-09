@@ -16,15 +16,12 @@ limitations under the License.
 
 """
 
-from django.conf import settings
-
 from collections import defaultdict
 from copy import deepcopy
 import logging
 from re import compile as re_compile
 
 from bq_data_access.cohort_cloudsql import CloudSQLCohortAccess
-from bq_data_access.seqpeek_maf_data import SeqPeekDataProvider
 
 COORDINATE_FIELD_NAME = 'uniprot_aapos'
 TYPE_FIELD_NAME = 'variant_classification'
