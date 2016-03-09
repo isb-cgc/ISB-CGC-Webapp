@@ -1,0 +1,62 @@
+[
+    {
+        "type": "STRING",
+        "name": "accountId"
+    },
+    {
+        "type": "FLOAT",
+        "name": "cost_amount"
+    },
+    {
+        "type": "STRING",
+        "name": "cost_currency"
+    },
+    {
+        "type": "FLOAT",
+        "name": "credits_amount"
+    },
+    {
+        "type": "STRING",
+        "name": "credits_creditId"
+    },
+    {
+        "type": "STRING",
+        "name": "credits_currency"
+    },
+    {
+        "type": "TIMESTAMP",
+        "name": "endTime"
+    },
+    {
+        "type": "STRING",
+        "name": "lineItemId"
+    },
+    {
+        "type": "STRING",
+        "name": "measurements_measurementId"
+    },
+    {
+        "type": "STRING",
+        "name": "measurements_sum"
+    },
+    {
+        "type": "STRING",
+        "name": "measurements_unit"
+    },
+    {
+        "type": "STRING",
+        "name": "projectId"
+    },
+    {
+        "type": "STRING",
+        "name": "projectName"
+    },
+    {
+        "type": "INTEGER",
+        "name": "projectNumber"
+    },
+    {
+        "type": "TIMESTAMP",
+        "name": "startTime"
+    }
+]
