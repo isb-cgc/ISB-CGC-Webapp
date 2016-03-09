@@ -63,7 +63,7 @@ target/
 *.pem
 .sass-cache
 #*
-*.json
+#*.json
 *.patch
 .env
 *.env
