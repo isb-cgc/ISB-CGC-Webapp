@@ -37,6 +37,7 @@ from bq_data_access.clinical_data import ClinicalFeatureProvider, CLINICAL_FEATU
 from bq_data_access.gnab_data import GNABFeatureProvider, GNAB_FEATURE_TYPE
 from bq_data_access.user_data import UserFeatureProvider, USER_FEATURE_TYPE
 
+
 class FeatureProviderFactory(object):
     @classmethod
     def get_feature_type_string(cls, feature_id):
@@ -90,6 +91,28 @@ class FeatureProviderFactory(object):
     def from_feature_id(cls, feature_id, **kwargs):
         provider_class = cls.get_provider_class_from_feature_id(feature_id)
         return provider_class(feature_id, **kwargs)
+
+    @classmethod
+    def from_parameters(cls, parameters_obj, **kwargs):
+        if isinstance(parameters_obj, FeatureIdQueryDescription):
+            return cls.from_feature_id(parameters_obj.feature_id, **kwargs)
+        elif isinstance(parameters_obj, ProviderClassQueryDescription):
+            class_type = parameters_obj.feature_data_provider_class
+            feature_id = parameters_obj.feature_id
+            return class_type(feature_id, **kwargs)
+
+
+class FeatureIdQueryDescription(object):
+    def __init__(self, feature_id, cohort_id_array):
+        self.feature_id = feature_id
+        self.cohort_id_array = cohort_id_array
+
+
+class ProviderClassQueryDescription(object):
+    def __init__(self, feature_data_provider_class, feature_id, cohort_id_array):
+        self.feature_data_provider_class = feature_data_provider_class
+        self.feature_id = feature_id
+        self.cohort_id_array = cohort_id_array
 
 
 def is_valid_feature_identifier(feature_id):
@@ -149,31 +172,40 @@ def get_feature_vector(feature_id, cohort_id_array):
     return provider.get_value_type(), items
 
 
-# TODO refactor to smaller functions and document
-def get_feature_vectors_async(params_array, poll_retry_limit=20):
+def submit_tcga_job(param_obj, bigquery_service, cohort_settings):
+    provider = FeatureProviderFactory.from_parameters(param_obj, bigquery_service=bigquery_service)
+    feature_id = param_obj.feature_id
+    cohort_id_array = param_obj.cohort_id_array
+    job_reference = provider.get_data_job_reference(cohort_id_array, cohort_settings.dataset_id, cohort_settings.table_id)
+
+    logging.info("Submitted TCGA {job_id}: {fid} - {cohorts}".format(job_id=job_reference['jobId'], fid=feature_id,
+                                                                             cohorts=str(cohort_id_array)))
+    job_item = {
+        'feature_id': feature_id,
+        'provider': provider,
+        'ready': False,
+        'job_reference': job_reference
+    }
+
+    return job_item
+
+
+def submit_jobs_with_user_data(params_array):
     bigquery_service = authorize_credentials_with_Google()
-    project_id = settings.BQ_PROJECT_ID
-    result = {}
     provider_array = []
 
     cohort_settings = settings.GET_BQ_COHORT_SETTINGS()
 
     # Submit jobs
-    for feature_id, cohort_id_array in params_array:
+    for parameter_object in params_array:
+        feature_id = parameter_object.feature_id
+        cohort_id_array = parameter_object.cohort_id_array
+
         user_data = user_feature_handler(feature_id, cohort_id_array)
 
         if user_data['include_tcga']:
-            provider = FeatureProviderFactory.from_feature_id(feature_id, bigquery_service=bigquery_service)
-            job_reference = provider.get_data_job_reference(cohort_id_array, cohort_settings.dataset_id, cohort_settings.table_id)
-
-            logging.info("Submitted TCGA {job_id}: {fid} - {cohorts}".format(job_id=job_reference['jobId'], fid=feature_id,
-                                                                             cohorts=str(cohort_id_array)))
-            provider_array.append({
-                'feature_id': feature_id,
-                'provider': provider,
-                'ready': False,
-                'job_reference': job_reference
-            })
+            job_item = submit_tcga_job(parameter_object, bigquery_service, cohort_settings)
+            provider_array.append(job_item)
 
         if len(user_data['user_studies']) > 0:
             converted_feature_id = user_data['converted_feature_id']
@@ -198,6 +230,11 @@ def get_feature_vectors_async(params_array, poll_retry_limit=20):
             else:
                 logging.debug("No UserFeatureDefs for '{0}'".format(converted_feature_id))
 
+    return provider_array
+
+
+def get_submitted_job_results(provider_array, project_id, poll_retry_limit, skip_formatting_for_plot):
+    result = {}
     all_done = False
     total_retries = 0
     poll_count = 0
@@ -209,6 +246,7 @@ def get_feature_vectors_async(params_array, poll_retry_limit=20):
 
         for item in provider_array:
             provider = item['provider']
+            feature_id = item['feature_id']
             is_finished = provider.is_bigquery_job_finished(project_id)
             logging.info("Status {job_id}: {status}".format(job_id=item['job_reference']['jobId'],
                                                             status=str(is_finished)))
@@ -216,42 +254,72 @@ def get_feature_vectors_async(params_array, poll_retry_limit=20):
             if item['ready'] is False and is_finished:
                 item['ready'] = True
                 query_result = provider.download_and_unpack_query_result()
-                data = []
 
-                for data_point in query_result:
-                    data_item = {key: data_point[key] for key in ['patient_id', 'sample_id', 'aliquot_id']}
-                    value = str(provider.process_data_point(data_point))
+                if not skip_formatting_for_plot:
+                    data = format_query_result_for_plot(provider, query_result)
 
-                    if value is None:
-                        value = 'NA'
-                    data_item['value'] = value
-                    data.append(data_item)
-
-                feature_id = item['feature_id']
-                value_type = provider.get_value_type()
-                if feature_id not in result:
-                    result[feature_id] = {
-                        'type': value_type,
-                        'data': data
-                    }
+                    value_type = provider.get_value_type()
+                    if feature_id not in result:
+                        result[feature_id] = {
+                            'type': value_type,
+                            'data': data
+                        }
+                    else:
+                        # TODO fix possible bug:
+                        # The ValueType of the data from the user feature provider may not match that of the TCGA
+                        # provider above.
+                        result[feature_id]['data'].extend(data)
                 else:
-                    # TODO fix possible bug:
-                    # The ValueType of the data from the user feature provider may not match that of the TCGA
-                    # provider above.
-                    result[feature_id]['data'].extend(data)
+                    result[feature_id] = {
+                        'data': query_result,
+                        'type': None
+                    }
 
             sleep(1)
 
         all_done = all([j['ready'] for j in provider_array])
         logging.debug("Done: {done}    retry: {retry}".format(done=str(all_done), retry=total_retries))
 
-    for feature_id, _ in params_array:
-        if feature_id not in result:
-            result[feature_id] = {
-                'ready': True,
-                'data': [],
-                'type': ValueType.STRING
-            }
+    return result
+
+
+def format_query_result_for_plot(provider_instance, query_result):
+    data = []
+
+    for data_point in query_result:
+        data_item = {key: data_point[key] for key in ['patient_id', 'sample_id', 'aliquot_id']}
+        value = str(provider_instance.process_data_point(data_point))
+
+        if value is None:
+            value = 'NA'
+        data_item['value'] = value
+        data.append(data_item)
+
+    return data
+
+
+def get_feature_vectors_with_user_data(params_array, poll_retry_limit=20, skip_formatting_for_plot=False):
+    provider_array = submit_jobs_with_user_data(params_array)
+
+    project_id = settings.BQ_PROJECT_ID
+    result = get_submitted_job_results(provider_array, project_id, poll_retry_limit, skip_formatting_for_plot)
+
+    return result
+
+
+def get_feature_vectors_tcga_only(params_array, poll_retry_limit=20, skip_formatting_for_plot=False):
+    bigquery_service = authorize_credentials_with_Google()
+    provider_array = []
+
+    cohort_settings = settings.GET_BQ_COHORT_SETTINGS()
+
+    # Submit jobs
+    for parameter_object in params_array:
+        job_item = submit_tcga_job(parameter_object, bigquery_service, cohort_settings)
+        provider_array.append(job_item)
+
+    project_id = settings.BQ_PROJECT_ID
+    result = get_submitted_job_results(provider_array, project_id, poll_retry_limit, skip_formatting_for_plot)
 
     return result
 

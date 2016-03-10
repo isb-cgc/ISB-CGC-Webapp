@@ -85,8 +85,11 @@
                         <ul class="nav nav-tabs" role="tablist">
                             <li role="presentation" class="active"><a href="#common" aria-controls="common" role="tab" data-toggle="tab">Common</a></li>
                             <li role="presentation"><a href="#favorites" aria-controls="favorites" role="tab" data-toggle="tab">Favorites ({{ favorite_list | length }})</a></li>
-                            <li role="presentation"><a href="#datatypes" aria-controls="datatypes" role="tab" data-toggle="tab">Data Types</a></li>
+                            <li role="presentation"><a href="#clinical"  aria-controls="clinical" role="tab" data-toggle="tab">Clinical</a></li>
+                            <li role="presentation"><a href="#mirna"     aria-controls="mRNA" role="tab" data-toggle="tab">miRNA</a></li>
+                            {% if USER_DATA_ON %}
                             <li role="presentation"><a href="#uploaded"  aria-controls="Uploaded" role="tab" data-toggle="tab">Projects</a></li>
+                            {% endif %}
 {# TODO                     <li role="presentation"><a href="#search"    aria-controls="search" role="tab" data-toggle="tab">Search</a></li>#}
                         </ul>
 
@@ -133,53 +136,59 @@
                                         </li>
                                     {% endfor %}
                                 </ul>
-
                                 <div class="tab-content">
                                     <a href="{% url 'variables' %}">Manage Saved Favorites ({{ favorite_list | length }})</a>
                                 </div>
                             </div>
-                            <div role="tabpanel" class="tab-pane filter-panel" id="datatypes">
-                                <ul class="list-group" id="data-type-accordion" role="tablist" aria-multiselectable="true">
-                                    {% for type in datatype_list %}
-                                        <li class="list-group-item">
-                                            <div id="heading-{{ type.datatype }}" data-field="{{ type.datatype }}" class="list-group-item__heading datatype-selector">
-                                                <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-{{ type.datatype }}" aria-expanded="false" aria-controls="collapse-{{ type.datatype }}">
-                                                    <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ type.label }}
-                                                </a>
-                                            </div>
+                            <div role="tabpanel" class="tab-pane filter-panel" id="clinical">
+                                <ul class="list-group" id="clinical-accordion" data-field="CLIN" role="tablist" aria-multiselectable="true">
+                                    <li class="list-group-item">
+                                        {% for type in datatype_list %}
+                                            {% if type.datatype == 'CLIN' %}
+{#                                                <div id="heading-{{ type.datatype }}" data-field="{{ type.datatype }}" class="list-group-item__heading datatype-selector">#}
+{#                                                    <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-{{ type.datatype }}" aria-expanded="false" aria-controls="collapse-{{ type.datatype }}">#}
+{#                                                        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ type.label }}#}
+{#                                                    </a>#}
+{#                                                </div>#}
 
-                                            <div id="collapse-{{ type.datatype }}" class="list-group-item__body collapse" role="tabpanel" aria-labelledby="heading-{{ type.datatype }}">
-                                                {% if type.datatype == 'CLIN' %}
-                                                    <div class="form-group search-field {{ type.datatype }}-options ">
-                                                        <div  class="search-term feature-search">
-                                                            <label for="{{ type.datatype }}-search-term-select">Feature Search</label>
-                                                            <select id="{{ type.datatype }}-search-term-select" class="search-term-field"></select>
-                                                        </div>
+                                                <div class="form-group search-field {{ type.datatype }}-options ">
+                                                    <div class="search-term feature-search">
+                                                        <label for="{{ type.datatype }}-search-term-select">Feature Search</label>
+                                                        <select id="{{ type.datatype }}-search-term-select" class="form-control search-term-field"></select>
                                                     </div>
-                                                {% else %}
-                                                    <div class="form-group search-field {{ type.datatype }}">
-                                                        <div class="search-term" data-field="{{ type.datatype }}">
-                                                            {% for field in type.fields %}
-                                                                <label class="space-top-15" for="{{ type.datatype }}-{{ field.name }}">{{ field.label }} Filter</label>
-                                                                <select id="{{ plot.id }}-{{ type.datatype }}-{{ field.name }}-search-term-select" class="form-control field-options {{ field.name }}-options {% if not field.static %}select2{% endif %}" data-field="{{ field.name }}">
-                                                                    {% if field.static %}
-                                                                        <option value="" disabled selected>Please select an option</option>
-                                                                        {% for value in field.values %}
-                                                                            <option value="{{ value }}">{{ value }}</option>
-                                                                        {% endfor %}
-                                                                    {% endif %}
-                                                                </select>
-                                                            {% endfor %}
-                                                        </div>
-                                                        <div class="search-term feature-search space-top-15">
-                                                            <label for="{{ type.datatype }}-search-term-select">Select Feature</label>
-                                                            <select id="{{ type.datatype }}-search-term-select" project="{{ TCGA_project.id }}" project_name="{{ TCGA_project.name }}" study="{{ TCGA_project.study.id }}" study_name="{{ TCGA_project.study.name}}" class="search-term-field form-control"></select>
-                                                        </div>
-                                                    </div>
-                                                {% endif %}
+                                                </div>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </li>
+                                </ul>
+                            </div>
+                            <div role="tabpanel" class="tab-pane filter-panel" id="mirna">
+                                <ul class="list-group" id="mirna-accordion" role="tablist" aria-multiselectable="true">
+                                    <li class="list-group-item" >
+                                    {% for type in datatype_list %}
+                                        {% if type.datatype == 'MIRN' %}
+                                             <div class="form-group search-field {{ type.datatype }}">
+                                                <div class="search-term" data-field="{{ type.datatype }}">
+                                                    {% for field in type.fields %}
+                                                        <label class="space-top-15" for="{{ type.datatype }}-{{ field.name }}">{{ field.label }} Filter</label>
+                                                        <select id="{{ plot.id }}-{{ type.datatype }}-{{ field.name }}-search-term-select" class="form-control field-options {{ field.name }}-options {% if not field.static %}select2{% endif %}" data-field="{{ field.name }}">
+                                                            {% if field.static %}
+                                                                <option value="" disabled selected>Please select an option</option>
+                                                                {% for value in field.values %}
+                                                                    <option value="{{ value }}">{{ value }}</option>
+                                                                {% endfor %}
+                                                            {% endif %}
+                                                        </select>
+                                                    {% endfor %}
+                                                </div>
+                                                <div class="search-term feature-search space-top-15">
+                                                    <label for="{{ type.datatype }}-search-term-select">Select Feature</label>
+                                                    <select id="{{ type.datatype }}-search-term-select" project="{{ TCGA_project.id }}" project_name="{{ TCGA_project.name }}" study="{{ TCGA_project.study.id }}" study_name="{{ TCGA_project.study.name}}" class="search-term-field form-control"></select>
+                                                </div>
                                             </div>
-                                        </li>
+                                        {% endif %}
                                     {% endfor %}
+                                    </li>
                                 </ul>
                             </div>
                             <div role="tabpanel" class="tab-pane" id="uploaded">

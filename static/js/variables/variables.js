@@ -86,13 +86,15 @@ require([
         return false;
     });
 
+    // set up the search bars for Clinical and MiRNA tabs
+    vizhelpers.get_datatype_search_interfaces($("#mirna-accordion"), "MIRN");
+    vizhelpers.get_datatype_search_interfaces($("#clinical-accordion"), "CLIN");
+
     // Field Editing
     $('.x-edit-field, .y-edit-field, .color-edit-field').on('click', function() { vizhelpers.show_field_search_panel(this); });
-    $('.datatype-selector').on('click', function() {vizhelpers.get_datatype_search_interfaces(this, this.getAttribute("data-field"));});
     $('.feature-search').on('change', function() { vizhelpers.field_search_change_callback(this); });
     $('.select-field').on('click', function() { vizhelpers.select_field_callback(this); });
     $('.close-field-search').on('click', function() { vizhelpers.close_field_search_callback(this); });
-
     $('.field-options').on('change', function(event) {
         var self            = $(this);
         var parent          = self.parent();
@@ -107,7 +109,6 @@ require([
             }
         });
 
-        console.log(parent[0]);
         vizhelpers.get_variable_field_options(datatype, filters, function(options){
             var selectbox = parent.parent('.search-field').find('.feature-search .search-term-field');
             selectbox.empty();
@@ -158,7 +159,7 @@ require([
             name       = $this.data('text-label'),
             code       = $this.val(),
             feature_id = $this.data('feature-id');
-        if ($this.is(':checked')) { // Checkbox checked
+        if ($this.is(':checked') && $('.selected-filters span[data-code="' + code + '"]').length == 0) { // Checkbox checked and not already in list
             add_variable_pill(name, code, feature_id);
         } else {
             remove_variable_pill(code);
@@ -172,7 +173,9 @@ require([
         var $this      = $(this),
             name       = $this.find(":selected").text(),
             code       = $this.find(":selected").val();
-        add_variable_pill(name, code);
+        if ($('.selected-filters span[data-code="' + code + '"]').length == 0) { // Check to see if selected already
+            add_variable_pill(name, code);
+        }
     });
 
     /*

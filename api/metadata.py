@@ -481,7 +481,12 @@ class MetadataItem(messages.Message):
 Incoming object needs to use age that's a string (eg. 10_to_39)
 '''
 class IncomingMetadataItem(messages.Message):
+    '''
+    test description for incoming metdata item
+    :param adenocarcinoma_invasion: description of adenocarcinoma
+    '''
     adenocarcinoma_invasion                                         = messages.StringField(1, repeated=True)
+    """description of adenocarcinoma"""
     age_at_initial_pathologic_diagnosis                             = messages.StringField(2, repeated=True)
     anatomic_neoplasm_subdivision                                   = messages.StringField(3, repeated=True)
     avg_percent_lymphocyte_infiltration                             = messages.FloatField(4, repeated=True)
@@ -2084,6 +2089,51 @@ class Meta_Endpoints_API_v2(remote.Service):
         request_finished.send(self)
         return SampleBarcodeList( items=results, count=len(results) )
 
+    GET_RESOURCE = endpoints.ResourceContainer(
+                                               cohort_id=messages.IntegerField(1, required=True),
+                                               )
+    @endpoints.method(GET_RESOURCE, SampleBarcodeList,
+                      path='metadata_participant_list', http_method='GET',
+                      name='meta.metadata_participant_list')
+    def metadata_participant_list(self, request):
+        db = sql_connection()
+
+        cohort_id = str(request.cohort_id)
+        sample_query_str = 'SELECT sample_id, study_id FROM cohorts_samples WHERE cohort_id=%s;'
+
+        try:
+            cursor = db.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute(sample_query_str, (cohort_id,))
+            sample_ids = []
+
+            for row in cursor.fetchall():
+                sample_ids.append(row['sample_id'])
+
+            participant_query = 'SELECT DISTINCT ParticipantBarcode from metadata_data where SampleBarcode in ('
+            first = True
+            value_tuple = ()
+            for barcode in sample_ids:
+                value_tuple += (barcode,)
+                if first:
+                    participant_query += '%s'
+                    first = False
+                else:
+                    participant_query += ',%s'
+
+            participant_query += ');'
+            results = []
+            cursor.execute(participant_query, value_tuple)
+            for row in cursor.fetchall():
+                results.append(SampleBarcodeItem(sample_barcode=row['ParticipantBarcode'], study_id=0))
+
+            cursor.close()
+            db.close()
+            return SampleBarcodeList(items=results, count=len(results))
+
+        except (TypeError, IndexError) as e:
+            if cursor: cursor.close()
+            if db: db.close()
+            raise endpoints.NotFoundException('Error in retrieving barcodes.')
 
     GET_RESOURCE = endpoints.ResourceContainer(
                                                filters=messages.StringField(1),

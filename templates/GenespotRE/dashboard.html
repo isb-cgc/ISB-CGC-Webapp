@@ -18,6 +18,7 @@
 {% block content %}
 <div class="container">
 
+    {% if USER_DATA_ON %}
     <section class="panel panel-default">
         <div class="panel-heading">
             <a role="button" data-target="#analysis-body" data-toggle="collapse" aria-expanded="true" aria-controls="analysis-body">
@@ -37,8 +38,7 @@
                         <p>Histogram</p>
                     </li>
                     <li class="item">
-                        <!--TODO: get scatterplot chart-->
-                        <img class="img-fluid" src="{% static 'img/histogram.png' %}">
+                        <img class="img-fluid" src="{% static 'img/scatterplot.png' %}">
                         <p>Scatter Plot</p>
                     </li>
                     <li class="item">
@@ -57,15 +57,17 @@
                         <img class="img-fluid" src="{% static 'img/cubbyhole.png' %}">
                         <p>Cubby Hole</p>
                     </li>
-{#                    <li class="item">#}
-{#                        <img class="img-fluid" src="{% static 'img/seqpeak.png' %}" alt="">#}
-{#                        <p>SeqPeak</p>#}
-{#                    </li>#}
+                    <li class="item">
+                        <img class="img-fluid" src="{% static 'img/seqpeak.png' %}" alt="">
+                        <p>SeqPeak</p>
+                    </li>
                 </div>
                 <p class="center"><a class="btn btn-link" data-target="#more-analysis" data-toggle="collapse">Show More</a></p>
             </ul>
         </div>
     </section>
+    {% endif %}
+
     <section class="panel panel-default">
         <div class="panel-heading">
             <h3 class="panel-title">
@@ -105,6 +107,40 @@
         </div>
     </section>
     <div class="row">
+        <div class="col-md-6">
+
+            <section class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                    <a href="{% url 'cohort_list' %}">Saved Cohorts ({{ cohorts.count }})</a></h3>
+                </div>
+                <div class="panel-body">
+                    {% if cohorts.count > 0 %}
+                    <ul class="table-list">
+                        {% for cohort in cohorts|sort_last_view:'cohort'|slice:':6' %}
+                           <li>
+                               <a href="{% url 'cohort_details' cohort.id %}">
+                                   <div class="list-main">
+                                       <span class="list-title">{{ cohort.name }}</span>
+                                   </div>
+
+                                   <div class="list-info">
+                                       <span>{{ cohort.last_date_saved }}</span>
+                                   </div>
+                               </a>
+                           </li>
+                        {% endfor %}
+                        {% if cohorts.count > 12 %}
+                            <a class="btn btn-link float-right" href="{% url 'cohort_list' %}">View all</a>
+                        {% endif %}
+                    </ul>
+                    {% else %}
+                    <p>You don't have any saved Cohorts.</p>
+                    {% endif %}
+                    <a href="{% url 'cohort' %}" class="btn btn-link">Create Cohort</a>
+                </div>
+            </section>
+        </div>
         <div class="col-md-6">
             <section class="panel panel-default">
                 <div class="panel-heading">
@@ -158,38 +194,13 @@
                     <a href="{% url 'variable_fav_create' %}" class="btn btn-link">Create Variable Favorites</a>
                 </div>
             </section>
-            <section class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">
-                    <a href="{% url 'cohort_list' %}">Saved Cohorts ({{ cohorts.count }})</a></h3>
-                </div>
-                <div class="panel-body">
-                    {% if cohorts.count > 0 %}
-                    <ul class="table-list">
-                        {% for cohort in cohorts|sort_last_view:'cohort'|slice:':6' %}
-                           <li>
-                               <a href="{% url 'cohort_details' cohort.id %}">
-                                   <div class="list-main">
-                                       <span class="list-title">{{ cohort.name }}</span>
-                                   </div>
 
-                                   <div class="list-info">
-                                       <span>{{ cohort.last_date_saved }}</span>
-                                   </div>
-                               </a>
-                           </li>
-                        {% endfor %}
-                        {% if cohorts.count > 6 %}
-                            <a class="btn btn-link float-right" href="{% url 'cohort_list' %}">View all</a>
-                        {% endif %}
-                    </ul>
-                    {% else %}
-                    <p>You don't have any saved Cohorts.</p>
-                    {% endif %}
-                    <a href="{% url 'cohort' %}" class="btn btn-link">Create Cohort</a>
-                </div>
-            </section>
         </div>
+    </div>
+
+    {% if USER_DATA_ON %}
+        <hr>
+    <div class="row">
         <div class="col-md-6">
             <section class="panel panel-default">
                 <div class="panel-heading">
@@ -220,6 +231,8 @@
                     <a href="{% url 'project_upload' %}" class="btn btn-primary"><i class="fa fa-cloud-upload"></i>Upload Project Data</a>
                 </div>
             </section>
+        </div>
+        <div class="col-md-6">
             <section class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">
@@ -231,6 +244,7 @@
             </section>
         </div>
     </div>
+    {% endif %}
 
 </div>
 {% endblock %}

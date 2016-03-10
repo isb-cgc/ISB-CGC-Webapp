@@ -100,6 +100,8 @@ def get_readable_name(csv_name, attr=None):
 
     if attr in attr_specific_translation.keys():
         return attr_specific_translation[attr][csv_name]
+    elif attr == 'Project' or attr == 'Study':
+        return csv_name.upper()
     elif translation_dictionary.get(csv_name):
         return translation_dictionary.get(csv_name)
     else:

@@ -57,6 +57,7 @@ COHORT_DATASET_ID           = os.environ.get('COHORT_DATASET_ID', 'cohort_datase
 BIGQUERY_COHORT_TABLE_ID    = os.environ.get('BIGQUERY_COHORT_TABLE_ID', 'developer_cohorts')
 
 NIH_AUTH_ON             = bool(os.environ.get('NIH_AUTH_ON', False))
+USER_DATA_ON            = bool(os.environ.get('USER_DATA_ON', False))
 
 DATABASES = {'default': {
     'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.mysql'),
@@ -360,7 +361,7 @@ SITE_SUPERUSER_PASSWORD = os.environ.get('SUPERUSER_PASSWORD', '')
 #   End django-finalware   #
 ############################
 
-CONN_MAX_AGE = 0
+CONN_MAX_AGE = 60
 
 ############################
 #   CUSTOM TEMPLATE CONTEXT
