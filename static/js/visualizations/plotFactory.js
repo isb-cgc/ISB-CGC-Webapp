@@ -368,9 +368,6 @@ define([
                 case 'Cubby Hole Plot' : //(x_type == 'STRING' && y_type == 'STRING') {
                     visualization = generate_cubby_hole_plot(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data)
                     break;
-                case 'SeqPeek':
-                    visualization = generate_seqpeek_plot(args.plot_selector, args.legend_selector, data);
-                    break
                 default :
                     break;
             }
