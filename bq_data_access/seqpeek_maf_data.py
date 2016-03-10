@@ -1,6 +1,6 @@
 """
 
-Copyright 2015, Institute for Systems Biology
+Copyright 2016, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,14 +17,16 @@ limitations under the License.
 """
 
 import logging
-from api.api_helpers import authorize_credentials_with_Google
 
 from bq_data_access.gnab_data import GNABFeatureProvider
+from bq_data_access.utils import DurationLogged
+
+SEQPEEK_FEATURE_TYPE = 'SEQPEEK'
 
 
 class SeqPeekDataProvider(GNABFeatureProvider):
-    def __init__(self, feature_id):
-        super(SeqPeekDataProvider, self).__init__(feature_id)
+    def __init__(self, feature_id, **kwargs):
+        super(SeqPeekDataProvider, self).__init__(feature_id, **kwargs)
 
     @classmethod
     def process_data_point(cls, data_point):
@@ -56,40 +58,29 @@ class SeqPeekDataProvider(GNABFeatureProvider):
         logging.debug("BQ_QUERY_SEQPEEK: " + query)
         return query
 
-    def do_query(self, project_id, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array):
-        bigquery_service = authorize_credentials_with_Google()
-
-        query = self.build_query(project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array)
-        query_body = {
-            'query': query
-        }
-
-        table_data = bigquery_service.jobs()
-        query_response = table_data.query(projectId=project_id, body=query_body).execute()
-
+    @DurationLogged('SEQPEEK_GNAB', 'UNPACK')
+    def unpack_query_response(self, query_result_array):
         result = []
-        num_result_rows = int(query_response['totalRows'])
-        if num_result_rows == 0:
-            return result
 
         skip_count = 0
-        for row in query_response['rows']:
-            uniprot_aapos = row['f'][4]['v']
-            if uniprot_aapos is None:
-                skip_count += 1
-                continue
+        for row in query_result_array:
+            #uniprot_aapos = row['f'][4]['v']
+            #if uniprot_aapos is None:
+            #    skip_count += 1
+            #    continue
 
             result.append({
                 'patient_id': row['f'][0]['v'],
                 'sample_id': row['f'][1]['v'],
                 'aliquot_id': row['f'][2]['v'],
                 'hugo_symbol': row['f'][3]['v'],
-                'uniprot_aapos': int(uniprot_aapos),
+                'uniprot_aapos': row['f'][4]['v'],
                 'variant_classification': row['f'][5]['v'],
                 'uniprot_id': row['f'][6]['v'],
             })
 
-        logging.debug("Query result is {qrows} rows, skipped {skipped} rows".format(qrows=num_result_rows,
+        logging.debug(str(result[0]))
+        logging.debug("Query result is {qrows} rows, skipped {skipped} rows".format(qrows=len(query_result_array),
                                                                                     skipped=skip_count))
         return result
 

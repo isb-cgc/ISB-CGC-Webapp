@@ -545,7 +545,7 @@ def save_cohort(request, workbook_id=None, worksheet_id=None, create_workbook=Fa
             # If we are *not* using user data, get participant barcodes from metadata_data
             if not USER_DATA_ON:
                 participant_url = METADATA_API + ('v2/metadata_participant_list?cohort_id=%s' % (str(cohort.id),))
-                participant_result = urlfetch.fetch(participant_url, deadline=60)
+                participant_result = urlfetch.fetch(participant_url, deadline=120)
                 participant_items = json.loads(participant_result.content)
                 participant_list = []
                 for item in participant_items['items']:

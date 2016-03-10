@@ -21,13 +21,14 @@ class Analysis(models.Model):
                  {'name' : 'Violin Plot',
                   'description' : "Used to plot a categorical feature on the x-axis versus a numerical feature on the y-axis. Points in the plot can be colored by another categorical feature.",
                   'image' : 'img/violinplot.png'},
-                 {'name' : 'Violin Plot with axis swap',
-                  'description' : "Used to plot a categorical feature on the y-axis versus a numerical feature on the x-axis. Points in the plot can be colored by another categorical feature.",
-                  'image' : 'img/violinplot.png'},
+                 # {'name' : 'Violin Plot with axis swap',
+                 #  'description' : "Used to plot a categorical feature on the y-axis versus a numerical feature on the x-axis. Points in the plot can be colored by another categorical feature.",
+                 #  'image' : 'img/violinplot.png'},
                  {'name' : 'Cubby Hole Plot',
                   'description' : "Used to plot two categorical features. Boxes are colored by their related p-values.",
-                  'image' : 'img/cubbyhole.png'}]
-                # Todo {'name' : 'SeqPeak'}],
-                # description : This visualization shows where somatic mutations have been observed on a linear representation of a specific protein.  Each horizontal strip represents the protein, with data from different tumor types (aka cohorts or studies) shown stacked one on top of the other. </p>
+                  'image' : 'img/cubbyhole.png'},
+                 {'name' : 'SeqPeek',
+                  'description' : "This visualization shows where somatic mutations have been observed on a linear representation of a specific protein.  Each horizontal strip represents the protein, with data from different tumor types (aka cohorts or studies) shown stacked one on top of the other. </p>",
+                  'image': 'img/seqpeak.png'}]
 
         return types
