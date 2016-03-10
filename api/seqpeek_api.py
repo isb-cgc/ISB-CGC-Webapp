@@ -24,7 +24,7 @@ from endpoints import api as endpoints_api, method as endpoints_method
 from endpoints import InternalServerErrorException
 from protorpc import remote
 from protorpc.messages import IntegerField, Message, MessageField, StringField, Variant
-from bq_data_access.seqpeek.seqpeek_maf import SeqPeekMAFDataAccess
+from bq_data_access.seqpeek.seqpeek_maf_formatter import SeqPeekMAFDataFormatter
 
 
 class DataRequest(Message):
@@ -86,7 +86,7 @@ class SeqPeekDataAccessAPI(remote.Service):
             feature_id = request.feature_id
             cohort_id_array = request.cohort_id
 
-            maf_with_cohorts = SeqPeekMAFDataAccess().get_data(feature_id, cohort_id_array)
+            maf_with_cohorts = SeqPeekMAFDataFormatter().format_maf_vector_for_view(feature_id, cohort_id_array)
             response = self.create_response(maf_with_cohorts)
             return response
         except Exception as e:

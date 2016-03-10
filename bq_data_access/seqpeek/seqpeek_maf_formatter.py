@@ -16,28 +16,27 @@ limitations under the License.
 
 """
 
+from collections import defaultdict
+from copy import deepcopy
 import logging
-
-from django.conf import settings
+from re import compile as re_compile
 
 from bq_data_access.cohort_cloudsql import CloudSQLCohortAccess
-from bq_data_access.seqpeek_maf_data import SeqPeekDataProvider
+
+COORDINATE_FIELD_NAME = 'uniprot_aapos'
+TYPE_FIELD_NAME = 'variant_classification'
+
+DIGIT_FINDER_RE = re_compile('^\d+$')
 
 
 class SeqPeekMAFWithCohorts(object):
-    def __init__(self, maf_vector, cohort_info):
+    def __init__(self, maf_vector, cohort_info, removed_row_stats):
         self.maf_vector = maf_vector
         self.cohort_info = cohort_info
+        self.removed_row_statistics = removed_row_stats
 
 
-class SeqPeekMAFDataAccess(object):
-    def get_feature_vector(self, feature_id, cohort_id_array):
-        cohort_settings = settings.GET_BQ_COHORT_SETTINGS()
-        provider = SeqPeekDataProvider(feature_id)
-        result = provider.get_data(cohort_id_array, cohort_settings.dataset_id, cohort_settings.table_id)
-
-        return result
-
+class SeqPeekMAFDataFormatter(object):
     def annotate_vector_with_cohorts(self, cohort_id_array, result):
         # Resolve which (requested) cohorts each datapoint belongs to.
         cohort_set_dict = CloudSQLCohortAccess.get_cohorts_for_datapoints(cohort_id_array)
@@ -53,15 +52,34 @@ class SeqPeekMAFDataAccess(object):
                 cohort_set = cohort_set_dict[sample_id]
             row['cohort'] = cohort_set
 
+    def remove_rows_with_no_aa_position(self, data):
+        result = []
+        removed_stats = defaultdict(int)
+
+        count = 0
+        for row in data:
+            aapos = row[COORDINATE_FIELD_NAME]
+            if aapos is not None and len(DIGIT_FINDER_RE.findall(aapos)) == 1:
+                count += 1
+                item = deepcopy(row)
+                item[COORDINATE_FIELD_NAME] = int(aapos)
+                result.append(item)
+            # Include removed row in statistics
+            else:
+                removed_stats[row[TYPE_FIELD_NAME]] += 1
+
+        logging.debug("SeqPeek MAF filtered rows: {0}, total: {1}".format(len(result), len(data)))
+        return result, removed_stats
+
     def get_cohort_information(self, cohort_id_array):
-        # Get the name and ID for every requested cohort.
+        # Get the name, size and ID for every requested cohort.
         cohort_info_array = CloudSQLCohortAccess.get_cohort_info(cohort_id_array)
 
         return cohort_info_array
 
-    def get_data(self, feature_id, cohort_id_array):
-        vector = self.get_feature_vector(feature_id, cohort_id_array)
-        self.annotate_vector_with_cohorts(cohort_id_array, vector)
-
+    def format_maf_vector_for_view(self, maf_vector, cohort_id_array):
+        filtered_maf_vector, removed_stats = self.remove_rows_with_no_aa_position(maf_vector)
+        self.annotate_vector_with_cohorts(cohort_id_array, filtered_maf_vector)
         cohort_info = self.get_cohort_information(cohort_id_array)
-        return SeqPeekMAFWithCohorts(vector, cohort_info)
+
+        return SeqPeekMAFWithCohorts(filtered_maf_vector, cohort_info, removed_stats)

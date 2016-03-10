@@ -19,7 +19,6 @@ limitations under the License.
 from copy import deepcopy
 import logging
 
-from bq_data_access.seqpeek.seqpeek_maf import SeqPeekMAFDataAccess
 from bq_data_access.seqpeek.seqpeek_interpro import InterProDataProvider
 
 SAMPLE_ID_FIELD_NAME = 'sample_id'
@@ -61,12 +60,23 @@ def sort_track_mutations(mutations_array):
     return sorted(mutations_array, key=lambda k: k[COORDINATE_FIELD_NAME])
 
 
-def get_track_statistics(track):
-    return {
+def get_track_statistics_by_track_type(track, cohort_info_map):
+    track_id = track[TRACK_ID_FIELD]
+
+    result = {
         'samples': {
             'numberOf': get_number_of_unique_samples(track)
         }
     }
+
+    if track['type'] == 'tumor':
+        cohort_info = cohort_info_map[track_id]
+        result['cohort_size'] = cohort_info['size']
+    else:
+        # Do not assign cohort size for the 'COMBINED' track.
+        result['cohort_size'] = None
+
+    return result
 
 
 def filter_protein_domains(match_array):
@@ -98,6 +108,14 @@ def build_summary_track(tracks):
     }
 
 
+def get_track_label_and_cohort_information(track_id_value, cohort_info_map):
+    cohort_info = cohort_info_map[track_id_value]
+
+    label = cohort_info['name']
+    cohort_size = cohort_info['size']
+    return label, cohort_size
+
+
 def get_track_label(track, cohort_info_array):
     # The IDs in cohort_info_array are integers, whereas the track IDs are strings.
     cohort_map = {str(item['id']): item['name'] for item in cohort_info_array}
@@ -120,10 +138,8 @@ class MAFData(object):
 
 
 def build_track_data(track_id_list, all_tumor_mutations):
-    logging.debug(str(all_tumor_mutations))
     tracks = []
     for track_id in track_id_list:
-        logging.debug("Track ID " + str(track_id))
         tracks.append({
             TRACK_ID_FIELD: track_id,
             'mutations': filter(lambda m: int(track_id) in set(m['cohort']), all_tumor_mutations)
@@ -169,21 +185,31 @@ def get_track_id_list(param):
     return map(str, param)
 
 
-class SeqPeekViewDataAccess(object):
-    def get_data(self, hugo_symbol, cohort_id_list):
+def format_removed_row_statistics_to_list(stats_dict):
+    result = []
+    for key, value in stats_dict.items():
+        result.append({
+            'name': key,
+            'num': value
+        })
+
+    return result
+
+
+class SeqPeekViewDataBuilder(object):
+    def build_view_data(self, hugo_symbol, filtered_maf_vector, seqpeek_cohort_info, cohort_id_list, removed_row_statistics):
         context = get_genes_tumors_lists()
 
+        cohort_info_map = {str(item['id']): item for item in seqpeek_cohort_info}
         track_id_list = get_track_id_list(cohort_id_list)
-        gnab_feature = build_gnab_feature_id(hugo_symbol)
 
         # Since the gene (hugo_symbol) parameter is part of the GNAB feature ID,
         # it will be sanity-checked in the SeqPeekMAFDataAccess instance.
-        seqpeek_data = SeqPeekMAFDataAccess().get_data(gnab_feature, cohort_id_list)
+        uniprot_id = find_uniprot_id(filtered_maf_vector)
 
-        uniprot_id = find_uniprot_id(seqpeek_data.maf_vector)
         logging.info("UniProt ID: " + str(uniprot_id))
         protein_data = get_protein_domains(uniprot_id)
-        track_data = build_track_data(track_id_list, seqpeek_data.maf_vector)
+        track_data = build_track_data(track_id_list, filtered_maf_vector)
 
         plot_data = {
             'gene_label': hugo_symbol,
@@ -202,13 +228,15 @@ class SeqPeekViewDataAccess(object):
         #   if the track is aggregate
         for track in plot_data['tracks']:
             track['type'] = 'tumor'
-            track['label'] = get_track_label(track, seqpeek_data.cohort_info)
+
+            label, cohort_size = get_track_label_and_cohort_information(track[TRACK_ID_FIELD], cohort_info_map)
+            track['label'] = label
 
         plot_data['tracks'].append(build_summary_track(plot_data['tracks']))
 
         for track in plot_data['tracks']:
             # Calculate statistics
-            track['statistics'] = get_track_statistics(track)
+            track['statistics'] = get_track_statistics_by_track_type(track, cohort_info_map)
             # Unique ID for each row
             track['render_info'] = {
                 'row_id': get_table_row_id(track[TRACK_ID_FIELD])
@@ -223,7 +251,8 @@ class SeqPeekViewDataAccess(object):
             'plot_data': plot_data,
             'hugo_symbol': hugo_symbol,
             'tumor_list': tumor_list,
-            'cohort_id_list': track_id_list
+            'cohort_id_list': track_id_list,
+            'removed_row_statistics': format_removed_row_statistics_to_list(removed_row_statistics)
         })
 
         return context
