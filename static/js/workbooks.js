@@ -291,7 +291,7 @@ require([
 
             var keys = Object.keys(data);
             parent.find('.'+ data.specification).find('.field-options').each(function(i, ele){
-                if($.inArray(ele.id, keys)){
+                if($.inArray(ele.id, keys) != -1){
                     if($(ele).hasClass('select2')){
                         $(ele).parent().find('.select2-selection__rendered').empty();
                         $(ele).parent().find('.select2-selection__rendered').append('<option value="' + data[ele.id].options[0].value + '"> '+ data[ele.id].options[0].text + '</option>');
@@ -546,7 +546,48 @@ require([
     }
     //get plot model when selection changes
     $(".plot_selection").on("change", function(event){
-        $(this).find(":disabled :selected").remove()
+        $(this).find(":disabled :selected").remove();
+        var plot_type = $(this).val();
+        var x_widgets = $(this).closest('.worksheet-body').find('div[variable="x-axis-select"]');
+        var y_widgets = $(this).closest('.worksheet-body').find('div[variable="y-axis-select"]');
+        var c_widgets = $(this).closest('.worksheet-body').find('div.form-group.color-by-group');
+        var swap = $(this).closest('.worksheet-body').find('button.swap');
+        var sp_genes = $(this).closest('.worksheet-body').find('.seqpeek-genes');
+        x_widgets.show();
+        y_widgets.show();
+        c_widgets.show();
+        swap.show();
+        sp_genes.hide();
+        switch (plot_type){
+                case "Bar Chart" : //x_type == 'STRING' && y_type == 'none'
+                    y_widgets.hide();
+                    c_widgets.hide();
+                    swap.hide();
+                    break;
+                case "Histogram" : //((x_type == 'INTEGER' || x_type == 'FLOAT') && y_type == 'none') {
+                    y_widgets.hide();
+                    c_widgets.hide();
+                    swap.hide();
+                    break;
+                case 'Scatter Plot': //((x_type == 'INTEGER' || x_type == 'FLOAT') && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
+                    break;
+                case "Violin Plot": //(x_type == 'STRING' && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
+                    break;
+                case 'Violin Plot with axis swap'://(y_type == 'STRING' && (x_type == 'INTEGER'|| x_type == 'FLOAT')) {
+                    break;
+                case 'Cubby Hole Plot': //(x_type == 'STRING' && y_type == 'STRING') {
+                    c_widgets.hide();
+                    break;
+                case 'SeqPeek':
+                    sp_genes.show();
+                    x_widgets.hide();
+                    y_widgets.hide();
+                    c_widgets.hide();
+                    swap.hide();
+                    break;
+                default :
+                    break;
+            }
         get_plot_info(this, function(success){
             show_plot_settings();
         })

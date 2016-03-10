@@ -272,10 +272,8 @@ define([
         var api_url = base_api_url + '/_ah/api/feature_data_api/v1/feature_data_plot?' + cohort_str;
 
         api_url += '&x_id=' + x_attr;
-        if(color_by != ""){
+        if(color_by && color_by != ''){
             api_url += '&c_id=' + color_by;
-        } else {
-            api_url += '&c_id=' + x_attr;
         }
         if (y_attr && y_attr != '') {
             api_url += '&y_id=' + y_attr
@@ -389,7 +387,7 @@ define([
         }
         else {
             // No samples provided TODO abstract view information
-            d3.select(plot_selector)
+            d3.select(args.plot_selector)
                 .append('svg')
                 .attr('width', width)
                 .attr('height', height)

@@ -162,10 +162,10 @@
                     </div>
 
                     <!-- Color By variable. only offer x and y selections-->
-                    <div class="form-group">
+                    <div class="form-group color-by-group">
                         <label for="color-by">Color By Feature</label>
 {#                        <div class="color-selector filter-label label label-default" type="text" id="color-select" name="color-attr" value="{{ plot.color_by }}">{{ plot.color_by }}</div>#}
-                        <select id="color_by" {% if workbook.owner.id != user.id %} disabled {% endif %} class=" form-control search-term-field" style="width: 230px;">
+                        <select id="color_by" {% if workbook.owner.id != user.id %} disabled {% endif %} class="form-control search-term-field" style="width: 230px;">
                             {% if plot.color_by %}
                                 <option value="{{ plot.color_by.url_code }}" var_id="{{ plot.color_by.id }}" selected >{{ plot.color_by.name }}</option>
                             {% else %}
@@ -174,9 +174,10 @@
                         </select>
                     </div>
 
-                    <div class="form-group">
-                        <label for="{{ plot.id }}-gene-label-select">Gene (SeqPeek)</label>
-                        <select id="gene_label" {% if workbook.owner.id != user.id %} disabled {% endif %} class="search-term-field" style="width: 230px;">
+                    <!-- Gene Label for SeqPeek -->
+                    <div class="form-group seqpeek-genes">
+                        <label for="{{ plot.id }}-gene-label-select">Gene</label>
+                        <select id="gene_label" {% if workbook.owner.id != user.id %} disabled {% endif %} class="form-control search-term-field" style="width: 230px;">
                             {% if plot.gene_label %}
                                 <option value="{{ plot.gene_label }}" selected >{{ plot.gene_label }}</option>
                             {% else %}
