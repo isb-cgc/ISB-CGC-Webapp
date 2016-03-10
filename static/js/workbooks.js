@@ -90,6 +90,10 @@ require([
         $(e.target).siblings('a').find('i.fa-caret-down').hide()
     });
 
+    $('#copy-workbook, #delete-workbook').on('submit', function() {
+        $(this).find('input[type="submit"]').attr('disabled', 'disabled');
+    });
+
     $('.show-more').on('click', function () {
         $(this).siblings('li.extra-values').show();
         $(this).siblings('.show-less').show();
