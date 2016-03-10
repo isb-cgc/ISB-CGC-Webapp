@@ -24,10 +24,11 @@ from protorpc import remote
 from protorpc.messages import BooleanField, EnumField, IntegerField, Message, MessageField, StringField
 
 from bq_data_access.feature_value_types import ValueType
-from bq_data_access.data_access import is_valid_feature_identifier, get_feature_vectors_async
+from bq_data_access.data_access import is_valid_feature_identifier, get_feature_vectors_tcga_only, get_feature_vectors_with_user_data
 from bq_data_access.utils import VectorMergeSupport
 from bq_data_access.cohort_cloudsql import CloudSQLCohortAccess
 from bq_data_access.utils import DurationLogged
+from bq_data_access.data_access import FeatureIdQueryDescription
 
 from api.pairwise import PairwiseInputVector, Pairwise
 from api.pairwise_api import PairwiseResults, PairwiseResultVector, PairwiseFilterMessage
@@ -53,7 +54,7 @@ class DataPointList(Message):
 class PlotDataRequest(Message):
     x_id = StringField(1, required=True)
     y_id = StringField(2, required=False)
-    c_id = StringField(3, required=True)
+    c_id = StringField(3, required=False)
     cohort_id = IntegerField(4, repeated=True)
     pairwise = BooleanField(5, required=False)
 
@@ -224,54 +225,46 @@ class FeatureDataEndpoints(remote.Service):
 
         :param x_id: Feature identifier for x-axis e.g. 'CLIN:age_at_initial_pathologic_diagnosis'
         :param y_id: Feature identifier for y-axis. If None, values for 'y' in the response will be marked as missing.
-        :param c_id: Feature identifier for color-by
+        :param c_id: Feature identifier for color-by. If None, values for 'c' in the response will be marked as missing.
         :param cohort_id_array: Cohort identifier array.
 
         :return: PlotDataResponse
         """
 
-        async_params = [(x_id, cohort_id_array),
-                        (c_id, cohort_id_array)]
+        async_params = [FeatureIdQueryDescription(x_id, cohort_id_array)]
 
-#        start = time.time()
-#
-#        logging.info('Data Query Start: ')
-#        x_type, x_vec = get_feature_vector(x_id, cohort_id_array)
-
+        c_type, c_vec = ValueType.STRING, []
         y_type, y_vec = ValueType.STRING, []
-        if y_id is not None:
-            async_params.append((y_id, cohort_id_array))
 
-        async_result = get_feature_vectors_async(async_params)
+        if c_id is not None:
+            async_params.append(FeatureIdQueryDescription(c_id, cohort_id_array))
+        if y_id is not None:
+            async_params.append(FeatureIdQueryDescription(y_id, cohort_id_array))
+
+        async_result = get_feature_vectors_tcga_only(async_params)
+
+        if c_id is not None:
+            c_type, c_vec = async_result[c_id]['type'], async_result[c_id]['data']
         if y_id is not None:
             y_type, y_vec = async_result[y_id]['type'], async_result[y_id]['data']
 
         x_type, x_vec = async_result[x_id]['type'], async_result[x_id]['data']
-        c_type, c_vec = async_result[c_id]['type'], async_result[c_id]['data']
 
-        # TODO fix hardcoded usage of 'patient_id'
         vms = VectorMergeSupport('NA', 'sample_id', ['x', 'y', 'c']) # changed so that it plots per sample not patient
         vms.add_dict_array(x_vec, 'x', 'value')
         vms.add_dict_array(y_vec, 'y', 'value')
         vms.add_dict_array(c_vec, 'c', 'value')
         merged = self.get_merged_dict_timed(vms)
 
-
-#        logging.info('Data Query 1 : ' + str(time.time() - start))
-#        merged = vms.get_merged_dict()
-
-#        logging.info('Data Query 2 : ' + str(time.time() - start))
         # Resolve which (requested) cohorts each datapoint belongs to.
         cohort_set_dict = CloudSQLCohortAccess.get_cohorts_for_datapoints(cohort_id_array)
 
-#        logging.info('Data Query 3 : ' + str(time.time() - start))
         # Get the name and ID for every requested cohort.
         cohort_info_array = CloudSQLCohortAccess.get_cohort_info(cohort_id_array)
         cohort_info_obj_array = []
         for item in cohort_info_array:
-            cohort_info_obj_array.append(PlotDataCohortInfo(**item))
+            cohort_info_obj_array.append(PlotDataCohortInfo(id=item['id'], name=item['name']))
 
-        #logging.info('Data Query 4 : ' + str(time.time() - start))
         items = []
         for value_bundle in merged:
             sample_id = value_bundle['sample_id']
@@ -286,7 +279,6 @@ class FeatureDataEndpoints(remote.Service):
                 value_bundle['cohort'] = cohort_set
             items.append(PlotDataPoint(**value_bundle))
 
-        #logging.info('Data Query 5 : ' + str(time.time() - start))
         counts = self.get_counts(merged)
         count_message = PlotDatapointCount(**counts)
 
@@ -310,8 +302,6 @@ class FeatureDataEndpoints(remote.Service):
             logging.warn("Pairwise results not included in returned object")
             logging.exception(e)
 
-        #logging.info('Time elapsed: ' + str(time_elapsed))
-        #logging.info('Data Query 6: ' + str(time.time() - start))
         return PlotDataResponse(types=type_message, labels=label_message, items=items,
                                 cohort_set=cohort_info_obj_array,
                                 counts=count_message, pairwise_result=pairwise_result)
@@ -345,9 +335,12 @@ class FeatureDataEndpoints(remote.Service):
 
             # Check that all requested feature identifiers are valid. Do not check for y_id if it is not
             # supplied in the request.
-            feature_ids_to_check = [x_id, c_id]
+            feature_ids_to_check = [x_id]
+            if c_id is not None:
+                feature_ids_to_check.append(c_id)
             if y_id is not None:
-                feature_ids_to_check = [x_id, y_id, c_id]
+                feature_ids_to_check.append(y_id)
+
             valid_features = self.get_feature_id_validity_for_array(feature_ids_to_check)
 
             for feature_id, is_valid in valid_features:

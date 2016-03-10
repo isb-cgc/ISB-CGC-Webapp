@@ -40,7 +40,9 @@ require.config({
         scatter_plot : 'visualizations/createScatterPlot',
         cubby_plot : 'visualizations/createCubbyPlot',
         violin_plot : 'visualizations/createViolinPlot',
-        bar_plot : 'visualizations/createBarGraph'
+        bar_plot : 'visualizations/createBarGraph',
+        seqpeek_view: 'seqpeek_view',
+        seqpeek: 'seqpeek_view/seqpeek'
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -463,13 +465,19 @@ require([
     $('.update-plot').on('click', function(event){
         if(valid_plot_settings($(this).parent())) {
             var data = get_plot_info_on_page($(this).parent());
+            //update_plot_model(workbook_id, data.worksheet_id, data.plot_id, data.attrs, function(result){
+            //    generate_plot(data.worksheet_id, data.attrs.type, data.attrs.x_axis.url_code, data.attrs.y_axis.url_code, data.attrs.color_by.url_code, data.attrs.cohorts, data.attrs.gene_label);
+
             update_plot_model(workbook_id, data.worksheet_id, data.plot_id, data.attrs, data.selections, function(result){
                 generate_plot({ worksheet_id : data.worksheet_id,
                                 type         : data.attrs.type,
                                 x            : data.attrs.x_axis.url_code,
                                 y            : data.attrs.y_axis.url_code,
                                 color_by     : data.attrs.color_by.url_code,
+                                gene_label   : data.attrs.gene_label,
+
                                 cohorts      : data.attrs.cohorts});
+                // TODO gene label
                 hide_plot_settings();
             });
         }
@@ -498,6 +506,7 @@ require([
                 x_axis   : get_values($(worksheet).find('#x-axis-select').find(":selected")),
                 y_axis   : get_values($(worksheet).find('#y-axis-select').find(":selected")),
                 color_by : get_simple_values(parent.find('#color_by')),
+                gene_label: get_simple_values(parent.find('#gene_label'))
             },
             attrs : {
                 type    : parent.parentsUntil(".worksheet-body").find(".plot_selection").find(":selected").text(),
@@ -506,7 +515,8 @@ require([
                 color_by: {url_code: parent.find('#color_by').find(":selected").val()},
                 cohorts: parent.find('[name="cohort-checkbox"]:checked').map(function () {
                     return {id: this.value, cohort_id: $(this).attr("cohort-id")};
-                }).get()
+                }).get(),
+                gene_label: parent.find('#gene_label').find(":selected").text()
             }
         }
 
@@ -549,10 +559,12 @@ require([
             if(success) {
                 if (valid_plot_settings($(self).parentsUntil(".worksheet-body").find('.update-plot').parent())) {
                     var data = get_plot_info_on_page($(self).parentsUntil(".worksheet-body").find('.update-plot').parent());
+                    //generate_plot(data.worksheet_id, data.attrs.type, data.attrs.x_axis.url_code, data.attrs.y_axis.url_code, data.attrs.color_by.url_code, data.attrs.cohorts, data.attrs.gene_label)
                     generate_plot({ worksheet_id : data.worksheet_id,
                                     type         : data.attrs.type,
                                     x            : data.attrs.x_axis.url_code,
                                     y            : data.attrs.y_axis.url_code,
+                                    gene_label   : data.attrs.gene_label,
                                     color_by     : data.attrs.color_by.url_code,
                                     cohorts      : data.attrs.cohorts});
                 }
@@ -599,6 +611,7 @@ require([
         var legend_selector = '#' + plot_element.prop('id') + ' .legend';
 
         plot_loader.fadeIn();
+//        plotFactory.generate_plot(plot_selector, legend_selector, pair_wise, type, x_var_code, y_var_code, color_by, cohort_ids, gene_label, false, function(){
         plotFactory.generate_plot({ plot_selector    : plot_selector,
                                     legend_selector  : legend_selector,
                                     pairwise_element : pair_wise,
@@ -606,8 +619,10 @@ require([
                                     x                : args.x,
                                     y                : args.y,
                                     color_by         : args.color_by,
+                                    gene_label       : args.gene_label,
                                     cohorts          : cohort_ids,
                                     color_override   : false}, function(){
+
             plot_loader.fadeOut();
         });
     }
@@ -630,6 +645,9 @@ require([
         }
         if(plot_data.color_by) {
             apply_values(plot_element.find('#color_by'), plot_data.color_by);
+        }
+        if(plot_data.gene_label) {
+            plot_element.find("#gene_label").val(plot_data.gene_label.variable);
         }
 
         if(plot_data.cohort) {

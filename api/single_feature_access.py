@@ -28,7 +28,7 @@ from protorpc.messages import EnumField, IntegerField, Message, MessageField, St
 
 from bq_data_access.errors import FeatureNotFoundException
 from bq_data_access.feature_value_types import ValueType
-from bq_data_access.data_access import is_valid_feature_identifier, get_feature_vectors_async
+from bq_data_access.data_access import is_valid_feature_identifier, get_feature_vectors_with_user_data
 from bq_data_access.utils import VectorMergeSupport
 from bq_data_access.cohort_cloudsql import CloudSQLCohortAccess
 
@@ -57,7 +57,7 @@ class SingleFeatureDataAccess(remote.Service):
         start = time.time()
 
         async_params = [(feature_id, cohort_id_array)]
-        async_result = get_feature_vectors_async(async_params)
+        async_result = get_feature_vectors_with_user_data(async_params)
 
         feature_type, feature_vec = async_result[feature_id]['type'], async_result[feature_id]['data']
 

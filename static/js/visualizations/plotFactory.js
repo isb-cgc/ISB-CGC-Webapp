@@ -29,11 +29,13 @@ define([
     'violin_plot',
     'histogram_plot',
     'bar_plot',
+    'seqpeek_view/seqpeek_view',
+    //'visualizations/mock_histogram_data',
     'select2',
     'assetscore',
     'assetsresponsive'
 
-], function($, jqueryui, bootstrap, session_security, d3, d3tip, vizhelpers, scatter_plot, cubby_plot, violin_plot, histogram, bar_graph, mock_histogram_data ) {
+], function($, jqueryui, bootstrap, session_security, d3, d3tip, vizhelpers, scatter_plot, cubby_plot, violin_plot, histogram, bar_graph, seqpeek_view, mock_histogram_data ) {
     A11y.Core();
 
     var scatter_plot_obj = Object.create(scatter_plot, {});
@@ -241,6 +243,20 @@ define([
         return  {plot : plot, svg : svg}
     }
 
+    function generate_seqpeek_plot(plot_selector, legend_selector, view_data) {
+        var plot_data = view_data['plot_data'];
+        var element = $(plot_selector)[0];
+
+        seqpeek_view.render_seqpeek_legend(legend_selector);
+
+        // Render a HTML table for the visualization. Each track will be in a separate <tr> element.
+        var seqpeek_el = seqpeek_view.render_seqpeek_template(element, view_data['hugo_symbol'], plot_data['tracks']);
+        var table_selector = seqpeek_el.table;
+        var gene_element = seqpeek_el.gene_element;
+
+        seqpeek_view.render_seqpeek(table_selector, gene_element, view_data);
+    }
+
     /*
         Generate url for gathering data
      */
@@ -264,6 +280,24 @@ define([
         if (y_attr && y_attr != '') {
             api_url += '&y_id=' + y_attr
         }
+        return api_url;
+    }
+
+    /*
+     Generate url for gathering data for a SeqPeek plot
+     */
+    function get_seqpeek_data_url(base_api_url, cohorts, gene_label){
+        var cohort_str = '';
+        for (var i = 0; i < cohorts.length; i++) {
+            if (i == 0) {
+                cohort_str += 'cohort_id=' + cohorts[i];
+            } else {
+                cohort_str += '&cohort_id=' + cohorts[i];
+            }
+        }
+        var api_url = base_api_url + '/_ah/api/seqpeek_data_api/v1/view_data?' + cohort_str;
+        api_url += "&hugo_symbol=" + gene_label;
+
         return api_url;
     }
 
@@ -302,6 +336,8 @@ define([
         if (data.hasOwnProperty('pairwise_result')) {
             configure_pairwise_display(args.pairwise_element, data);
         }
+        // The response form the SeqPeek data endpoint has a different schema. This is case is handled in
+        // another branch below.
         if (data.hasOwnProperty('items')) {
 
             var cohort_set = data['cohort_set'];
@@ -347,7 +383,11 @@ define([
             //establish resize call to data
             d3.select(window).on('resize', visualization.plot.resize);
 
-        } else {
+        }
+        else if (args.type == "SeqPeek") {
+            visualization = generate_seqpeek_plot(args.plot_selector, args.legend_selector, data);
+        }
+        else {
             // No samples provided TODO abstract view information
             d3.select(plot_selector)
                 .append('svg')
@@ -362,21 +402,18 @@ define([
         }
     };
 
-    /* Parameters
-        plot_selector    : jquery selector for the plot container
-        legend_selector  : jquery selector for the legend container
-        pairwise_element : html element for the pairwise element
-        type             : required
-        x                : require
-        y                : not required
-        color_by         : not required
-        cohorts          : required
-        cohorts_override : boolean on whether to override the color_by parameter
-     */
     function generate_plot(args, callback){ //plot_selector, legend_selector, pairwise_element, type, x_attr, y_attr, color_by, cohorts, cohort_override, callback) {
+        var plot_data_url;
+        if (args.type == "SeqPeek") {
+            plot_data_url = get_seqpeek_data_url(base_api_url, args.cohorts, args.gene_label);
+        }
+        else {
+            plot_data_url = get_data_url(base_api_url, args.cohorts, args.x, args.y, args.color_by);
+        }
+
         $.ajax({
             type: 'GET',
-            url: get_data_url(base_api_url, args.cohorts, args.x, args.y, args.color_by),
+            url: plot_data_url,
             success: function(data, status, xhr) {
                 select_plot({plot_selector    : args.plot_selector,
                              legend_selector  : args.legend_selector,
