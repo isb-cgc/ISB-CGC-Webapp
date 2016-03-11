@@ -791,6 +791,7 @@ require([
     $('form[action="/cohorts/save_cohort_from_plot/"]').on('submit', function(event) {
         event.preventDefault();
         var form = this;
+        $(this).find('input[type="submit"]').attr('disabled', 'disabled');
         $.ajax({
             type: 'POST',
             url: base_url + '/cohorts/save_cohort_from_plot/',
@@ -811,6 +812,7 @@ require([
                 $('.toggle-selection').click();
                 $('.modal').modal('hide');
                 form.reset();
+                $(form).find('input[type="submit"]').removeAttr('disabled');
                 $("html, body").animate({
                     scrollTop: 0
                 }, 600);
