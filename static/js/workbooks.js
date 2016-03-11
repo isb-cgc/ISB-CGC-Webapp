@@ -539,6 +539,9 @@ require([
             } else {
                 result = {  url_code: parent.find('#'+label).find(":selected").val()}
             }
+            if (result.url_code == "-- select a variable--"){
+                result.url_code = "";
+            }
             return result;
         }
 
@@ -563,9 +566,7 @@ require([
             }
         }
 
-        if (result.attrs.color_by.url_code == "-- select a variable--"){
-            result.attrs.color_by.url_code = "";
-        }
+
         return result;
     }
 
