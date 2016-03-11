@@ -304,62 +304,69 @@ def search_cohorts_viz(request):
     return HttpResponse(json.dumps(result_obj), status=200)
 
 @login_required
-def igv(request, readgroupset_id=None):
+def igv(request, sample_barcode=None, readgroupset_id=None):
     if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
-    service, http_auth = get_genomics_resource()
-    datasets = convert(service.datasets().list(projectNumber=settings.IGV_PROJECT_ID).execute())
+    # service, http_auth = get_genomics_resource()
+    # datasets = convert(service.datasets().list(projectNumber=settings.IGV_PROJECT_ID).execute())
 
-    dataset_ids = []
-    dataset_objs = []
-    nih_user = None
+    # dataset_ids = []
+    # dataset_objs = []
+    # nih_user = None
 
-    for dataset in datasets['datasets']:
-        if 'isPublic' in dataset and dataset['isPublic'] is True:
-            dataset_ids.append(dataset['id'])
-            dataset_objs.append({'id': dataset['id'], 'name': dataset['name']})
+    # for dataset in datasets['datasets']:
+    #     if 'isPublic' in dataset and dataset['isPublic'] is True:
+    #         dataset_ids.append(dataset['id'])
+    #         dataset_objs.append({'id': dataset['id'], 'name': dataset['name']})
+    #
+    # try:
+    #     nih_user = NIH_User.objects.get(user_id=request.user.id)
+    # except (MultipleObjectsReturned, ObjectDoesNotExist), e:
+    #     if type(e) is MultipleObjectsReturned:
+    #         logger.warn("Multiple NIH_User objects for user id {}".format(request.user.id))
+    #
+    # if nih_user is not None:
+    #     if nih_user.dbGaP_authorized is True and nih_user.active is True:
+    #         dataset_ids = []
+    #         dataset_objs = []
+    #         for dataset in datasets['datasets']:
+    #             dataset_ids.append(dataset['id'])
+    #             dataset_objs.append({'id': dataset['id'], 'name': dataset['name']})
 
-    try:
-        nih_user = NIH_User.objects.get(user_id=request.user.id)
-    except (MultipleObjectsReturned, ObjectDoesNotExist), e:
-        if type(e) is MultipleObjectsReturned:
-            logger.warn("Multiple NIH_User objects for user id {}".format(request.user.id))
+    # content = convert(service.readgroupsets().get(body={'datasetIds':dataset_ids}).execute())
+    # read_group_set_ids = []
+    # selected = {}
+    # context = {'request': request}
+    # for rgset in content['readGroupSets']:
+    #
+    #     if readgroupset_id and rgset['id'] == readgroupset_id:
+    #         selected['rgs_id'] = rgset['id']
+    #         selected['dataset_id'] = rgset['datasetId']
+    #         context['selected'] = selected
+    #
+    #     read_group_set_ids.append({
+    #         'datasetId': rgset['datasetId'],
+    #         'id': rgset['id'],
+    #         'name': rgset['name'],
+    #         'filename': rgset['filename']
+    #     })
+    #
+    # for dataset in dataset_objs:
+    #     rgsets = []
+    #     for rgset in read_group_set_ids:
+    #         if rgset['datasetId'] == dataset['id']:
+    #             rgsets.append(rgset)
+    #     dataset['readGroupSets'] = rgsets
+    # context['datasets'] = dataset_objs
+    context = {}
+    sample_barcode = request.GET.get('sample_barcode')
+    readgroupset_id = request.GET.get('readgroupset_id')
+    if sample_barcode:
+        context['sample_barcode'] = sample_barcode
 
-    if nih_user is not None:
-        if nih_user.dbGaP_authorized is True and nih_user.active is True:
-            dataset_ids = []
-            dataset_objs = []
-            for dataset in datasets['datasets']:
-                dataset_ids.append(dataset['id'])
-                dataset_objs.append({'id': dataset['id'], 'name': dataset['name']})
-
-
-    content = convert(service.readgroupsets().search(body={'datasetIds':dataset_ids}).execute())
-    read_group_set_ids = []
-    selected = {}
-    context = {'request': request}
-    for rgset in content['readGroupSets']:
-
-        if readgroupset_id and rgset['id'] == readgroupset_id:
-            selected['rgs_id'] = rgset['id']
-            selected['dataset_id'] = rgset['datasetId']
-            context['selected'] = selected
-
-        read_group_set_ids.append({
-            'datasetId': rgset['datasetId'],
-            'id': rgset['id'],
-            'name': rgset['name'],
-            'filename': rgset['filename']
-        })
-
-    for dataset in dataset_objs:
-        rgsets = []
-        for rgset in read_group_set_ids:
-            if rgset['datasetId'] == dataset['id']:
-                rgsets.append(rgset)
-        dataset['readGroupSets'] = rgsets
-    context['datasets'] = dataset_objs
-    if 'selected' not in context and readgroupset_id:
-        messages.info(request, 'The selected readgroupset id (%s) does not exist in the available datasets.' % readgroupset_id)
+    if readgroupset_id:
+        context['readgroupset_id'] = readgroupset_id
+    else:
+        messages.info(request, 'The selected readgroupset id (%s) does not exist.' % readgroupset_id)
     return render(request, 'GenespotRE/igv.html', context)
 
 def health_check(request):
@@ -367,7 +374,6 @@ def health_check(request):
     return HttpResponse('')
 
 def help_page(request):
-    print request.user
     return render(request, 'GenespotRE/help.html')
 
 def about_page(request):

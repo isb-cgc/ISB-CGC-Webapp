@@ -114,7 +114,7 @@ require([
                         files[i]['datatype'] = '';
                     }
                     if (files[i]['gg_readgroupset_id']) {
-                        files[i]['gg_readgroupset_id'] = '<a href="'+ base_url + '/' + files[i]['gg_readgroupset_id'] + '"><i class="fa fa-check"></i> Go to IGV</a>'
+                        files[i]['gg_readgroupset_id'] = '<a href="'+ base_url + '/igv/?sample_barcode=' + files[i]['sample'] + '&readgroupset_id=' + files[i]['gg_readgroupset_id'] + '"><i class="fa fa-check"></i> Go to IGV</a>'
                     }
                     $('.filelist-panel table tbody').append(
                         '<tr>' +
