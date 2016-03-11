@@ -79,6 +79,7 @@ require([
         showNavigation: true,
         genome: "hg19",
         locus: "egfr",
+        apiKey: 'AIzaSyDbqoM1bNdaCTn2-OtarruG4NmI8e-qHAk',
         tracks: tracks
     };
     $('#igv-div').empty();
