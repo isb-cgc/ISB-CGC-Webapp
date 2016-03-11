@@ -380,6 +380,7 @@ class Cohort_Endpoints_API(remote.Service):
                 user_id = Django_User.objects.get(email=user_email).id
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
                 logger.warn(e)
+                request_finished.send(self)
                 raise endpoints.UnauthorizedException("%s does not have an entry in the user database." % user_email)
 
             try:
@@ -834,6 +835,7 @@ class Cohort_Endpoints_API(remote.Service):
                 if 'Cohort_Perms' in e.message:
                     err_msg = "User {} does not have permissions on cohort {}. Error: {}"\
                         .format(user_email, cohort_id, e)
+                request_finished.send(self)
                 raise endpoints.UnauthorizedException(err_msg)
 
             query_str += 'JOIN cohorts_samples ON metadata_data.SampleBarcode=cohorts_samples.sample_id ' \
@@ -885,6 +887,7 @@ class Cohort_Endpoints_API(remote.Service):
             finally:
                 if cursor: cursor.close()
                 if db and db.open: db.close()
+                request_finished.send(self)
 
         else:
             raise endpoints.UnauthorizedException("Authentication failed.")
@@ -999,6 +1002,7 @@ class Cohort_Endpoints_API(remote.Service):
                 user_id = django_user.id
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
                 logger.warn(e)
+                request_finished.send(self)
                 raise endpoints.NotFoundException("%s does not have an entry in the user database." % user_email)
 
             query_dict = {
@@ -1262,6 +1266,7 @@ class Cohort_Endpoints_API(remote.Service):
                 if 'Cohort_Perms' in e.message:
                     err_msg = "User {} does not have permissions on cohort {}. Error: {}"\
                         .format(user_email, cohort_id, e)
+                request_finished.send(self)
                 raise endpoints.UnauthorizedException(err_msg)
 
 
@@ -1296,6 +1301,7 @@ class Cohort_Endpoints_API(remote.Service):
             finally:
                 if cursor: cursor.close()
                 if db and db.open: db.close()
+                request_finished.send(self)
         else:
             raise endpoints.UnauthorizedException("Authentication failed.")
 
