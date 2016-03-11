@@ -358,19 +358,14 @@ def igv(request, sample_barcode=None, readgroupset_id=None):
     #     dataset['readGroupSets'] = rgsets
     # context['datasets'] = dataset_objs
     context = {}
-    print sample_barcode
-    print readgroupset_id
     sample_barcode = request.GET.get('sample_barcode')
     readgroupset_id = request.GET.get('readgroupset_id')
-    print sample_barcode
-    print readgroupset_id
     if sample_barcode:
         context['sample_barcode'] = sample_barcode
 
     if readgroupset_id:
         context['readgroupset_id'] = readgroupset_id
     else:
-    # if 'selected' not in context and readgroupset_id:
         messages.info(request, 'The selected readgroupset id (%s) does not exist.' % readgroupset_id)
     return render(request, 'GenespotRE/igv.html', context)
 
@@ -379,7 +374,6 @@ def health_check(request):
     return HttpResponse('')
 
 def help_page(request):
-    print request.user
     return render(request, 'GenespotRE/help.html')
 
 def about_page(request):

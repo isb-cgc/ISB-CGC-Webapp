@@ -53,16 +53,7 @@ require([
     A11y.Core();
 
     var browser;
-
-    var clientId = '907668440978-j9ec27vhg0e0mmpjvrcelfq7ah9n0ntm.apps.googleusercontent.com';
-
-
-    //$('.generate-btn').on('click', function() {
-
-
-    var selected = $('select.rgselector:visible option:selected');
     var tracks = [];
-    //for (var i = 0; i < selected.length; i++) {
     tracks.push({
         sourceType: 'ga4gh',
         type: 'bam',
@@ -71,7 +62,6 @@ require([
         name: sample_barcode,
         referenceName: '1'
     });
-    //}
     //tracks.push({
     //    sourceType: 'gcs',
     //    type: 'bam',
@@ -117,9 +107,6 @@ require([
         //)
     });
 
-
-    //});
-    //
     //$('#dataset-selector').on('change', function() {
     //    var id = $(this).prop('value');
     //    $('.rgselector').hide();
