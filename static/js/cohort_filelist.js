@@ -115,6 +115,8 @@ require([
                     }
                     if (files[i]['gg_readgroupset_id']) {
                         files[i]['gg_readgroupset_id'] = '<a href="'+ base_url + '/igv/?sample_barcode=' + files[i]['sample'] + '&readgroupset_id=' + files[i]['gg_readgroupset_id'] + '"><i class="fa fa-check"></i> Go to IGV</a>'
+                    } else {
+                        files[i]['gg_readgroupset_id'] = '';
                     }
                     $('.filelist-panel table tbody').append(
                         '<tr>' +
