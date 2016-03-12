@@ -5,6 +5,10 @@ define([
     SeqPeekViewFactory
 ) {
     return {
+        render_no_data_message: function(target_element, gene_label) {
+            $('<h3>No data found for gene ' + gene_label + '</h3>').appendTo(target_element);
+        },
+
         render_seqpeek_legend: function(target_element) {
             var MUTATION_TYPE_COLOR_MAP = {
                 Nonsense_Mutation: "#71C560",
