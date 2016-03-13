@@ -90,7 +90,7 @@ def get_readable_name(csv_name, attr=None):
         'icd_10': 'ICD-10',
         'icd_o_3_histology': 'ICD-O-3 Histology',
         'icd_o_3_site': 'ICD-O-3 Site',
-        'SampleTypeCode': 'Sample Type Code',
+        'SampleTypeCode': 'Sample Type',
         'Project': 'Public Projects',
         'Study': 'Public Studies',
         'user_projects': 'Your Projects',

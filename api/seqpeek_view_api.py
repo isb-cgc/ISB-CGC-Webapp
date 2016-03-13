@@ -81,7 +81,7 @@ class SeqPeekTrackRecord(Message):
 
 class SeqPeekViewPlotDataRecord(Message):
     tracks = MessageField(SeqPeekTrackRecord, 1, repeated=True)
-    protein = MessageField(InterproItem, 2, required=True)
+    protein = MessageField(InterproItem, 2, required=False)
     regions = MessageField(SeqPeekRegionRecord, 3, repeated=True)
 
 
@@ -175,22 +175,28 @@ class SeqPeekViewDataAccessAPI(remote.Service):
 
             maf_data_vector = maf_data_result[gnab_feature_id]['data']
 
-            # Since the gene (hugo_symbol) parameter is part of the GNAB feature ID,
-            # it will be sanity-checked in the SeqPeekMAFDataAccess instance.
-            seqpeek_data = SeqPeekMAFDataFormatter().format_maf_vector_for_view(maf_data_vector, cohort_id_array)
+            if len(maf_data_vector) > 0:
+                # Since the gene (hugo_symbol) parameter is part of the GNAB feature ID,
+                # it will be sanity-checked in the SeqPeekMAFDataAccess instance.
+                seqpeek_data = SeqPeekMAFDataFormatter().format_maf_vector_for_view(maf_data_vector, cohort_id_array)
 
-            seqpeek_maf_vector = seqpeek_data.maf_vector
-            seqpeek_cohort_info = seqpeek_data.cohort_info
-            removed_row_statistics_dict = seqpeek_data.removed_row_statistics
+                seqpeek_maf_vector = seqpeek_data.maf_vector
+                seqpeek_cohort_info = seqpeek_data.cohort_info
+                removed_row_statistics_dict = seqpeek_data.removed_row_statistics
 
-            seqpeek_view_data = SeqPeekViewDataBuilder().build_view_data(hugo_symbol,
-                                                                         seqpeek_maf_vector,
-                                                                         seqpeek_cohort_info,
-                                                                         cohort_id_array,
-                                                                         removed_row_statistics_dict)
+                seqpeek_view_data = SeqPeekViewDataBuilder().build_view_data(hugo_symbol,
+                                                                             seqpeek_maf_vector,
+                                                                             seqpeek_cohort_info,
+                                                                             cohort_id_array,
+                                                                             removed_row_statistics_dict)
 
-            response = self.create_response(seqpeek_view_data)
-            return response
+                response = self.create_response(seqpeek_view_data)
+                return response
+            else:
+                # No data found
+                return SeqPeekViewRecord(plot_data=SeqPeekViewPlotDataRecord(tracks=[], protein=None, regions=[]),
+                                         hugo_symbol=hugo_symbol, cohort_id_list=[str(i) for i in cohort_id_array],
+                                         removed_row_statistics=[])
         except Exception as e:
             logging.exception(e)
             raise InternalServerErrorException()
