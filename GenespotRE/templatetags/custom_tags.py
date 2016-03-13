@@ -56,6 +56,13 @@ def get_readable_name(csv_name, attr=None):
             '50': 'Cell Lines',
             '60': 'Primary Xenograft Tissue',
             '61': 'Cell Line Derived Xenograft Tissue'
+        },
+        'prior_dx': {
+            'Yes': 'Yes',
+            'No': 'No',
+            'Yes, History of Prior Malignancy': 'Yes, History of Prior Malignancy',
+            'Yes, History of Synchronous and or Bilateral Malignancy': 'Yes, History of Synchronous and or Bilateral Malignancy',
+            'Yes, History of Synchronous/Bilateral Malignancy': 'Yes, History of Synchronous/Bilateral Malignancy'
         }
     }
 
