@@ -535,7 +535,7 @@ require([
         function variable_values(label){
             var result;
             if(parent.find('#'+label).find(":selected").attr("type") == "gene"){
-                result = {  url_code : parent.find('[variable="'+ label + '"]').find("#search-term-select").find(":selected").val()};
+                result = {  url_code : parent.find('[variable="'+ label + '"] #search-term-select').find(":selected").val()};
             } else {
                 result = {  url_code: parent.find('#'+label).find(":selected").val()}
             }
