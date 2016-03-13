@@ -232,7 +232,9 @@ class SeqPeekViewDataBuilder(object):
             label, cohort_size = get_track_label_and_cohort_information(track[TRACK_ID_FIELD], cohort_info_map)
             track['label'] = label
 
-        plot_data['tracks'].append(build_summary_track(plot_data['tracks']))
+        # Display the "combined" track only if more than one cohort is visualized
+        if len(cohort_id_list) >= 2:
+            plot_data['tracks'].append(build_summary_track(plot_data['tracks']))
 
         for track in plot_data['tracks']:
             # Calculate statistics
