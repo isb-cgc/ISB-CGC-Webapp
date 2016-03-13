@@ -301,11 +301,15 @@ class Cohort_Endpoints_API(remote.Service):
                 query_str += ' where ' + '=%s and '.join(key for key in query_dict.keys()) + '=%s'
                 query_tuple = tuple(value for value in query_dict.values())
 
+            filter_query_str = ''
+            row = None
+
             try:
                 db = sql_connection()
                 cursor = db.cursor(MySQLdb.cursors.DictCursor)
                 cursor.execute(query_str, query_tuple)
                 data = []
+
                 for row in cursor.fetchall():
                     filter_query_str = 'SELECT name, value ' \
                                        'FROM cohorts_filters ' \
@@ -337,6 +341,11 @@ class Cohort_Endpoints_API(remote.Service):
             except (IndexError, TypeError) as e:
                 raise endpoints.NotFoundException(
                     "User {}'s cohorts not found. {}: {}".format(user_email, type(e), e))
+            except MySQLdb.ProgrammingError as e:
+                msg = '{}:\n\tcohort query: {} {}\n\tfilter query: {} {}'\
+                    .format(e, query_str, query_tuple, filter_query_str, str(row))
+                logger.warn(msg)
+                raise endpoints.BadRequestException("Error retrieving cohorts or filters. {}".format(msg))
             finally:
                 if cursor: cursor.close()
                 if filter_cursor: filter_cursor.close()
@@ -383,27 +392,40 @@ class Cohort_Endpoints_API(remote.Service):
                 request_finished.send(self)
                 raise endpoints.UnauthorizedException("%s does not have an entry in the user database." % user_email)
 
+            cohort_perms_query = "select count(*) from cohorts_cohort_perms where user_id=%s and cohort_id=%s"
+            cohort_perms_tuple = (user_id, cohort_id)
+            cohort_query = "select count(*) from cohorts_cohort where id=%s and active=%s"
+            cohort_tuple = (cohort_id, unicode('0'))
+
             try:
                 db = sql_connection()
                 cursor = db.cursor(MySQLdb.cursors.DictCursor)
-                cursor.execute("select count(*) from cohorts_cohort_perms where user_id=%s and cohort_id=%s", (user_id, cohort_id))
+                cursor.execute(cohort_perms_query, cohort_perms_tuple)
                 result = cursor.fetchone()
                 if int(result['count(*)']) == 0:
                     error_message = "{} does not have owner or reader permissions on cohort {}.".format(user_email, cohort_id)
+                    request_finished.send(self)
                     raise endpoints.ForbiddenException(error_message)
 
-                cursor.execute("select count(*) from cohorts_cohort where id=%s and active=%s", (cohort_id, unicode('0')))
+                cursor.execute(cohort_query, cohort_tuple)
                 result = cursor.fetchone()
                 if int(result['count(*)']) > 0:
                     error_message = "Cohort {} was deleted.".format(cohort_id)
+                    request_finished.send(self)
                     raise endpoints.NotFoundException(error_message)
 
             except (IndexError, TypeError) as e:
                 logger.warn(e)
                 raise endpoints.NotFoundException("Cohort {} not found.".format(cohort_id))
+            except MySQLdb.ProgrammingError as e:
+                msg = '{}:\n\tcohort permissions query: {} {}\n\tcohort query: {} {}'\
+                    .format(e, cohort_perms_query, cohort_perms_tuple, cohort_query, cohort_tuple)
+                logger.warn(msg)
+                raise endpoints.BadRequestException("Error retrieving cohorts or cohort permissions. {}".format(msg))
             finally:
                 if cursor: cursor.close()
                 if db and db.open: db.close()
+                request_finished.send(self)
 
             patient_query_str = 'select cohorts_patients.patient_id ' \
                         'from cohorts_patients ' \
@@ -453,6 +475,11 @@ class Cohort_Endpoints_API(remote.Service):
             except (IndexError, TypeError) as e:
                 logger.warn(e)
                 raise endpoints.NotFoundException("Cohort {} not found.".format(cohort_id))
+            except MySQLdb.ProgrammingError as e:
+                msg = '{}:\n\tpatient query: {} {}\n\tsample query: {} {}'\
+                    .format(e, patient_query_str, patient_query_tuple, sample_query_str, sample_query_tuple)
+                logger.warn(msg)
+                raise endpoints.BadRequestException("Error retrieving patients or samples. {}".format(msg))
             finally:
                 if cursor: cursor.close()
                 if db and db.open: db.close()
@@ -582,6 +609,12 @@ class Cohort_Endpoints_API(remote.Service):
         except (IndexError, TypeError), e:
             logger.info("Patient {} not found. Error: {}".format(patient_barcode, e))
             raise endpoints.NotFoundException("Patient {} not found.".format(patient_barcode))
+        except MySQLdb.ProgrammingError as e:
+            msg = '{}:\n\tpatient query: {} {}\n\tsample query: {} {}\n\taliquot query: {} {}'\
+                .format(e, clinical_query_str, query_tuple, sample_query_str, query_tuple,
+                        aliquot_query_str, query_tuple)
+            logger.warn(msg)
+            raise endpoints.BadRequestException("Error retrieving patient, sample, or aliquot data. {}".format(msg))
         finally:
             if clinical_cursor: clinical_cursor.close()
             if sample_cursor: sample_cursor.close()
@@ -776,6 +809,12 @@ class Cohort_Endpoints_API(remote.Service):
             logger.info("Sample details for barcode {} not found. Error: {}".format(sample_barcode, e))
             raise endpoints.NotFoundException(
                 "Sample details for barcode {} not found.".format(sample_barcode))
+        except MySQLdb.ProgrammingError as e:
+            msg = '{}:\n\tbiospecimen query: {} {}\n\tpatient query: {} {}\n\tdata query: {} {}'\
+                .format(e, biospecimen_query_str, query_tuple, patient_query_str, query_tuple,
+                        data_query_str, extra_query_tuple)
+            logger.warn(msg)
+            raise endpoints.BadRequestException("Error retrieving biospecimen, patient, or other data. {}".format(msg))
         finally:
             if biospecimen_cursor: biospecimen_cursor.close()
             if aliquot_cursor: aliquot_cursor.close()
@@ -790,7 +829,8 @@ class Cohort_Endpoints_API(remote.Service):
                                                pipeline=messages.StringField(3),
                                                token=messages.StringField(4))
     @endpoints.method(GET_RESOURCE, DataFileNameKeyList,
-                      path='datafilenamekey_list_from_cohort', http_method='GET', name='cohorts.datafilenamekey_list_from_cohort')
+                      path='datafilenamekey_list_from_cohort', http_method='GET',
+                      name='cohorts.datafilenamekey_list_from_cohort')
     def datafilenamekey_list_from_cohort(self, request):
         """
         Takes a cohort id as a required parameter and
@@ -884,6 +924,10 @@ class Cohort_Endpoints_API(remote.Service):
             except (IndexError, TypeError), e:
                 logger.warn(e)
                 raise endpoints.NotFoundException("File paths for cohort {} not found.".format(cohort_id))
+            except MySQLdb.ProgrammingError as e:
+                msg = '{}:\n\t query: {} {}'.format(e, query_str, query_tuple)
+                logger.warn(msg)
+                raise endpoints.BadRequestException("Error retrieving file paths. {}".format(msg))
             finally:
                 if cursor: cursor.close()
                 if db and db.open: db.close()
@@ -961,7 +1005,10 @@ class Cohort_Endpoints_API(remote.Service):
         except (IndexError, TypeError), e:
             logger.warn(e)
             raise endpoints.NotFoundException("File paths for sample {} not found.".format(sample_barcode))
-
+        except MySQLdb.ProgrammingError as e:
+            msg = '{}:\n\t query: {} {}'.format(e, query_str, query_tuple)
+            logger.warn(msg)
+            raise endpoints.BadRequestException("Error retrieving file paths. {}".format(msg))
         finally:
             if cursor: cursor.close()
             if db and db.open: db.close()
@@ -1014,9 +1061,11 @@ class Cohort_Endpoints_API(remote.Service):
 
             if are_there_bad_keys(request) or are_there_no_acceptable_keys(request):
                 err_msg = construct_parameter_error_message(request, True)
+                request_finished.send(self)
                 raise endpoints.BadRequestException(err_msg)
 
-            patient_query_str = 'SELECT DISTINCT(IF(ParticipantBarcode="", LEFT(SampleBarcode,12), ParticipantBarcode)) AS ParticipantBarcode ' \
+            patient_query_str = 'SELECT DISTINCT(IF(ParticipantBarcode="", LEFT(SampleBarcode,12), ParticipantBarcode)) ' \
+                                'AS ParticipantBarcode ' \
                                 'FROM metadata_samples '
 
             sample_query_str = 'SELECT SampleBarcode ' \
@@ -1029,7 +1078,6 @@ class Cohort_Endpoints_API(remote.Service):
                 sample_query_str += ' WHERE ' + where_clause['query_str']
                 value_tuple = where_clause['value_tuple']
 
-            # patient_query_str += ' GROUP BY ParticipantBarcode'
             sample_query_str += ' GROUP BY SampleBarcode'
 
             patient_barcodes = []
@@ -1049,6 +1097,11 @@ class Cohort_Endpoints_API(remote.Service):
             except (IndexError, TypeError), e:
                 logger.warn(e)
                 raise endpoints.NotFoundException("Error retrieving samples or patients")
+            except MySQLdb.ProgrammingError as e:
+                msg = '{}:\n\tpatient query: {} {}\n\tsample query: {} {}'\
+                    .format(e, patient_query_str, value_tuple, sample_query_str, value_tuple)
+                logger.warn(msg)
+                raise endpoints.BadRequestException("Error saving cohort. {}".format(msg))
             finally:
                 if patient_cursor: patient_cursor.close()
                 if sample_cursor: sample_cursor.close()
@@ -1150,7 +1203,7 @@ class Cohort_Endpoints_API(remote.Service):
                     "or you do not have owner or reader permissions on this cohort." % cohort_id)
         else:
             raise endpoints.UnauthorizedException("Unsuccessful authentication.")
-        request_finished.send(self)
+
         return ReturnJSON(msg=return_message)
 
 
@@ -1165,7 +1218,7 @@ class Cohort_Endpoints_API(remote.Service):
         two lists: the lists of participant (aka patient) barcodes, and the list of sample barcodes.
         Authentication is not required.
         """
-        print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+        # print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         patient_cursor = None
         sample_cursor = None
         db = None
@@ -1215,6 +1268,11 @@ class Cohort_Endpoints_API(remote.Service):
         except (IndexError, TypeError), e:
             logger.warn(e)
             raise endpoints.NotFoundException("Error retrieving samples or patients: {}".format(e))
+        except MySQLdb.ProgrammingError as e:
+            msg = '{}:\n\tpatient query: {} {}\n\tsample query: {} {}'\
+                .format(e, patient_query_str, value_tuple, sample_query_str, value_tuple)
+            logger.warn(msg)
+            raise endpoints.BadRequestException("Error previewing cohort. {}".format(msg))
         finally:
             if patient_cursor: patient_cursor.close()
             if sample_cursor: sample_cursor.close()
@@ -1238,6 +1296,7 @@ class Cohort_Endpoints_API(remote.Service):
         """
         cursor = None
         db = None
+        user_email = None
         cohort_id = request.get_assigned_value('cohort_id')
 
         if are_there_bad_keys(request):
@@ -1297,7 +1356,14 @@ class Cohort_Endpoints_API(remote.Service):
 
             except (IndexError, TypeError), e:
                 logger.warn(e)
-                raise endpoints.NotFoundException("Google Genomics dataset and readgroupset id's for cohort {} not found.".format(cohort_id))
+                raise endpoints.NotFoundException(
+                    "Google Genomics dataset and readgroupset id's for cohort {} not found."
+                        .format(cohort_id))
+            except MySQLdb.ProgrammingError as e:
+                msg = '{}:\n\tquery: {} {}'\
+                    .format(e, query_str, query_tuple)
+                logger.warn(msg)
+                raise endpoints.BadRequestException("Error retrieving genomics data for cohort. {}".format(msg))
             finally:
                 if cursor: cursor.close()
                 if db and db.open: db.close()
@@ -1314,7 +1380,7 @@ class Cohort_Endpoints_API(remote.Service):
         Takes a sample barcode as a required parameter and returns the Google Genomics dataset id
         and readgroupset id associated with the sample, if any.
         """
-        print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+        # print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         cursor = None
         db = None
         sample_barcode = request.get_assigned_value('sample_barcode')
@@ -1349,7 +1415,14 @@ class Cohort_Endpoints_API(remote.Service):
 
         except (IndexError, TypeError), e:
             logger.warn(e)
-            raise endpoints.NotFoundException("Google Genomics dataset and readgroupset id's for sample {} not found.".format(sample_barcode))
+            raise endpoints.NotFoundException(
+                "Google Genomics dataset and readgroupset id's for sample {} not found."
+                    .format(sample_barcode))
+        except MySQLdb.ProgrammingError as e:
+            msg = '{}:\n\tquery: {} {}'\
+                .format(e, query_str, query_tuple)
+            logger.warn(msg)
+            raise endpoints.BadRequestException("Error retrieving genomics data for sample. {}".format(msg))
         finally:
             if cursor: cursor.close()
             if db and db.open: db.close()
