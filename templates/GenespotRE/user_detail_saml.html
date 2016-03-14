@@ -22,7 +22,6 @@
         <p>Congratulations, {{ user_details.NIH_username }}! Your eRA account has been authenticated. Now we need to verify if you have dbGaP authorization. This process may take up to 24 hours.</p>
 
         <a href="https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login" target="_blank">How to Apply for dbGaP Access</a>
-        <a href="https://github.com/isb-cgc/software-engineering-coordination/files/63234/Link.to.Data.Use.Certification.Agreement.docx">How to Access Controlled-Access Data</a>
     {% else %} {# Both authorized #}
         <p><i class="fa fa-check-circle"></i> dbGaP Access Authorized</p>
         <hr>
@@ -32,7 +31,7 @@
         </p>
 
 {#        <a href="">How to Access Controlled-Access Data</a>#}
-        <a href="https://tcga-data.nci.nih.gov/docs/TCGA_Data_Use_Certification.pdf" target="_blank">Data Use Certification Agreement</a>
+        <a href="https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?view_pdf&stacc=phs000854.v1.p8" target="_blank">Data Use Certification Agreement</a>
     {% endif %}
     {% if membership %}
         <hr>
