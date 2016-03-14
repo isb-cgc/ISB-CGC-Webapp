@@ -75,8 +75,9 @@ class SeqPeekTrackRecord(Message):
     type = StringField(2, required=True)
     label = StringField(3, required=True)
     number_of_samples = IntegerField(4, required=True)
-    cohort_size = IntegerField(5, required=False)
-    row_id = StringField(6, required=True)
+    mutated_positions = IntegerField(5, required=True)
+    cohort_size = IntegerField(6, required=False)
+    row_id = StringField(7, required=True)
 
 
 class SeqPeekViewPlotDataRecord(Message):
@@ -143,6 +144,7 @@ class SeqPeekViewDataAccessAPI(remote.Service):
             tracks.append(SeqPeekTrackRecord(mutations=mutations, label=track['label'], type=track["type"],
                                              row_id=track['render_info']['row_id'],
                                              number_of_samples=track['statistics']['samples']['numberOf'],
+                                             mutated_positions=track['statistics']['samples']['mutated_positions'],
                                              cohort_size=track['statistics']['cohort_size']))
 
         region_records = []
