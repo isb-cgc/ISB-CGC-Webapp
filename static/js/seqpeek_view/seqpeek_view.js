@@ -6,7 +6,9 @@ define([
 ) {
     return {
         render_no_data_message: function(target_element, gene_label) {
-            $('<h3>No data found for gene ' + gene_label + '</h3>').appendTo(target_element);
+            var message = 'The selected cohorts have no somatic mutations in the gene ' + gene_label;
+
+            $('<h3>' + message + '</h3>').appendTo(target_element);
         },
 
         render_seqpeek_legend: function(target_element) {
@@ -27,7 +29,7 @@ define([
                 '</thead>' +
                 '</table>');
 
-            var tbody2 = $('<tbody></tbody>').appendTo(table);
+            var tbody = $('<tbody></tbody>').appendTo(table);
 
             $.each(MUTATION_TYPE_COLOR_MAP, function(key, color) {
                 var table_row = $('<tr>' +
@@ -35,7 +37,7 @@ define([
                     '<td>' + key + '</td>' +
                     '</tr>');
 
-                table_row.appendTo(tbody2);
+                table_row.appendTo(tbody);
             });
 
             table.appendTo(target_element);
@@ -62,20 +64,26 @@ define([
 
                 new_tr = '<tr>' +
                     '<td colspan="2">' + track['label'] + '</td>' +
-                    '<td rowspan="2" id="' + track['row_id'] + '"></td>' +
+                    '<td rowspan="4" id="' + track['row_id'] + '"></td>' +
                     '</tr>';
                 table_body.append(new_tr);
 
                 if (track['type'] == 'tumor') {
-                    new_tr = '<tr>' +
-                        '<td style="font-size: 8pt">C: ' + track['cohort_size'] + '</td>' +
-                        '<td style="font-size: 8pt">S: ' + track['number_of_samples'] + '</td>' +
+                    new_tr =
+                        '<tr>' +
+                            '<td style="font-size: 8pt">Patients: ' + track['cohort_size'] + '</td>' +
+                        '</tr>' +
+                        '<tr>' +
+                            '<td style="font-size: 8pt">Mutants: ' + track['number_of_samples'] + '</td>' +
+                        '</tr>' +
+                        '<tr>' +
+                            '<td style="font-size: 8pt">Mut pos: ' + track['mutated_positions'] + '</td>' +
                         '</tr>';
                 }
                 // "COMBINED" track
                 else {
                     new_tr = '<tr>' +
-                        '<td colspan="2" style="font-size: 8pt">S: ' + track['number_of_samples'] + '</td>' +
+                        '<td colspan="2" style="font-size: 8pt">Mutants: ' + track['number_of_samples'] + '</td>' +
                         '</tr>';
                 }
 
