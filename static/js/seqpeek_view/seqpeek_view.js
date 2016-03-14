@@ -70,21 +70,26 @@ define([
 
                 if (track['type'] == 'tumor') {
                     new_tr =
-                        '<tr>' +
-                            '<td style="font-size: 8pt">Patients: ' + track['cohort_size'] + '</td>' +
+                        '<tr style="font-size: 8pt">' +
+                            '<td>Patients:</td><td>' + track['cohort_size'] + '</td>' +
                         '</tr>' +
-                        '<tr>' +
-                            '<td style="font-size: 8pt">Mutants: ' + track['number_of_samples'] + '</td>' +
+                        '<tr style="font-size: 8pt">' +
+                            '<td>Mutants:</td><td>' + track['number_of_samples'] + '</td>' +
                         '</tr>' +
-                        '<tr>' +
-                            '<td style="font-size: 8pt">Mut pos: ' + track['mutated_positions'] + '</td>' +
+                        '<tr style="font-size: 8pt">' +
+                            '<td>Unique pos:</td><td>' + track['mutated_positions'] + '</td>' +
                         '</tr>';
                 }
                 // "COMBINED" track
                 else {
-                    new_tr = '<tr>' +
-                        '<td colspan="2" style="font-size: 8pt">Mutants: ' + track['number_of_samples'] + '</td>' +
-                        '</tr>';
+                    new_tr =
+                        '<tr style="font-size: 8pt">' +
+                            '<td>Mutants:</td><td>' + track['number_of_samples'] + '</td>' +
+                        '</tr>' +
+                        '<tr style="font-size: 8pt">' +
+                            '<td>Unique pos:</td><td>' + track['mutated_positions'] + '</td>' +
+                        '</tr>' +
+                        '<tr><td></td><td></td></tr>';
                 }
 
                 table_body.append(new_tr);
