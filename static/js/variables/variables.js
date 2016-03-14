@@ -252,6 +252,7 @@ require([
         Creates a favorite_list then redirects to the favorite list
      */
     $("#create_favorite_list").on('click', function(event){
+        $(this).attr('disabled', 'disabled');
         var name = $.trim($("#variable_list_name_input").val());
         var variable_list = get_variable_list();
         if(name=="" || !variable_list.length){
