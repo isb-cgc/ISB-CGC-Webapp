@@ -245,16 +245,24 @@ define([
 
     function generate_seqpeek_plot(plot_selector, legend_selector, view_data) {
         var plot_data = view_data['plot_data'];
+        var hugo_symbol = view_data['hugo_symbol'];
+
         var element = $(plot_selector)[0];
 
-        seqpeek_view.render_seqpeek_legend(legend_selector);
+        if (plot_data.hasOwnProperty('tracks')) {
+            seqpeek_view.render_seqpeek_legend(legend_selector);
 
-        // Render a HTML table for the visualization. Each track will be in a separate <tr> element.
-        var seqpeek_el = seqpeek_view.render_seqpeek_template(element, view_data['hugo_symbol'], plot_data['tracks']);
-        var table_selector = seqpeek_el.table;
-        var gene_element = seqpeek_el.gene_element;
+            // Render a HTML table for the visualization. Each track will be in a separate <tr> element.
+            var seqpeek_el = seqpeek_view.render_seqpeek_template(element, hugo_symbol, plot_data['tracks']);
+            var table_selector = seqpeek_el.table;
+            var gene_element = seqpeek_el.gene_element;
 
-        seqpeek_view.render_seqpeek(table_selector, gene_element, view_data);
+            seqpeek_view.render_seqpeek(table_selector, gene_element, view_data);
+        }
+        else {
+            // No data was found for the gene and cohorts
+            seqpeek_view.render_no_data_message(plot_selector, hugo_symbol);
+        }
     }
 
     /*

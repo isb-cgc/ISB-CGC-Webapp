@@ -56,6 +56,13 @@ def get_readable_name(csv_name, attr=None):
             '50': 'Cell Lines',
             '60': 'Primary Xenograft Tissue',
             '61': 'Cell Line Derived Xenograft Tissue'
+        },
+        'prior_dx': {
+            'Yes': 'Yes',
+            'No': 'No',
+            'Yes, History of Prior Malignancy': 'Yes, History of Prior Malignancy',
+            'Yes, History of Synchronous and or Bilateral Malignancy': 'Yes, History of Synchronous and or Bilateral Malignancy',
+            'Yes, History of Synchronous/Bilateral Malignancy': 'Yes, History of Synchronous/Bilateral Malignancy'
         }
     }
 
@@ -90,7 +97,7 @@ def get_readable_name(csv_name, attr=None):
         'icd_10': 'ICD-10',
         'icd_o_3_histology': 'ICD-O-3 Histology',
         'icd_o_3_site': 'ICD-O-3 Site',
-        'SampleTypeCode': 'Sample Type Code',
+        'SampleTypeCode': 'Sample Type',
         'Project': 'Public Projects',
         'Study': 'Public Studies',
         'user_projects': 'Your Projects',

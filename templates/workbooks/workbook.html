@@ -133,21 +133,21 @@
                                                 {% if forlook.counter0 < 6 %}
                                                     <li class="sublist-item">
                                                         {% if shared %}
-                                                            {{ gene.gene|title }}
+                                                            {{ gene.gene }}
                                                         {% else %}
                                                             <form action="{% url 'worksheet_gene_delete' workbook_id=workbook.id worksheet_id=worksheet.id gene_id=gene.id %}" method="POST">
                                                                 {% csrf_token %}
                                                                 {% if workbook.owner.id == user.id %}
                                                                     <button type="submit" class="text-danger workbook-remove-item"><i class="fa fa-close"></i></button>
                                                                 {% endif %}
-                                                                {{ gene.gene|title }}
+                                                                {{ gene.gene }}
                                                             </form>
                                                         {% endif %}
                                                     </li>
                                                 {% elif forloop.counter0 == 6 and num_more > 0 %}
                                                     <a class="show-more">{{num_more}} more</a>
                                                     <li class="extra-values sublist-item">
-                                                        {{ gene.gene|title }}
+                                                        {{ gene.gene }}
                                                     </li>
                                                 {% endif %}
                                             {% endfor %}
@@ -170,21 +170,21 @@
                                                 {% if forlook.counter0 < 6 %}
                                                     <li class="sublist-item">
                                                         {% if shared %}
-                                                            {{ variable.name|title }}
+                                                            {{ variable.name }}
                                                         {% else %}
                                                             <form action="{% url 'worksheet_variables_delete' workbook_id=workbook.id worksheet_id=worksheet.id variable_id=variable.id %}" method="POST">
                                                                 {% csrf_token %}
                                                                 {% if workbook.owner.id == user.id %}
                                                                     <button type="submit" class="text-danger workbook-remove-item"><i class="fa fa-close"></i></button>
                                                                 {% endif %}
-                                                                {{ variable.name|title }}
+                                                                {{ variable.name }}
                                                             </form>
                                                         {% endif %}
                                                     </li>
                                                 {% elif forloop.counter0 == 6 and num_more > 0 %}
                                                     <a class="show-more">{{num_more}} more</a>
                                                     <li class="extra-values sublist-item">
-                                                        {{ variable.name|title }}
+                                                        {{ variable.name }}
                                                     </li>
                                                 {% endif %}
                                             {% endfor %}
@@ -208,14 +208,14 @@
                                                 {% if forlook.counter0 < 6 %}
                                                     <li class="sublist-item">
                                                         {% if shared %}
-                                                            {{ cohort.name|title }}
+                                                            {{ cohort.name }}
                                                         {% else %}
                                                             <form action="{% url 'remove_cohort_from_worksheet' workbook_id=workbook.id worksheet_id=worksheet.id cohort_id=cohort.id %}" method="POST">
                                                                 {% csrf_token %}
                                                                 {% if workbook.owner.id == user.id %}
                                                                     <button type="submit" class="text-danger workbook-remove-item"><i class="fa fa-close"></i></button>
                                                                 {% endif %}
-                                                                <a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name|title }}</a>
+                                                                <a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a>
                                                             </form>
                                                         {% endif %}
                                                     </li>
@@ -223,9 +223,9 @@
                                                     <a class="show-more">{{num_more}} more</a>
                                                     <li class="extra-values sublist-item">
                                                         {% if shared %}
-                                                            {{ cohort.name|title }}
+                                                            {{ cohort.name }}
                                                         {% else %}
-                                                            <a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name|title }}</a>
+                                                            <a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a>
                                                         {% endif %}
                                                     </li>
                                                 {% endif %}

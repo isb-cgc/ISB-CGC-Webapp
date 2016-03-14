@@ -64,11 +64,6 @@ class SeqPeekDataProvider(GNABFeatureProvider):
 
         skip_count = 0
         for row in query_result_array:
-            #uniprot_aapos = row['f'][4]['v']
-            #if uniprot_aapos is None:
-            #    skip_count += 1
-            #    continue
-
             result.append({
                 'patient_id': row['f'][0]['v'],
                 'sample_id': row['f'][1]['v'],
@@ -79,7 +74,6 @@ class SeqPeekDataProvider(GNABFeatureProvider):
                 'uniprot_id': row['f'][6]['v'],
             })
 
-        logging.debug(str(result[0]))
         logging.debug("Query result is {qrows} rows, skipped {skipped} rows".format(qrows=len(query_result_array),
                                                                                     skipped=skip_count))
         return result
