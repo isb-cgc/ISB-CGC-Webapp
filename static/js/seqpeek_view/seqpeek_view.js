@@ -6,7 +6,9 @@ define([
 ) {
     return {
         render_no_data_message: function(target_element, gene_label) {
-            $('<h3>No data found for gene ' + gene_label + '</h3>').appendTo(target_element);
+            var message = 'The selected cohorts have no somatic mutations in the gene ' + gene_label;
+
+            $('<h3>' + message + '</h3>').appendTo(target_element);
         },
 
         render_seqpeek_legend: function(target_element) {
