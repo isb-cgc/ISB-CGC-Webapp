@@ -36,13 +36,19 @@ def build_gnab_feature_id(gene):
 
 
 def get_number_of_unique_samples(track):
-    # todo: change this to get total_rows from bigquery endpoint
-    # note: result from this function isn't the same as total_rows from bigquery
     sample_ids = set()
     for mutation in track['mutations']:
         sample_ids.add(mutation[SAMPLE_ID_FIELD_NAME])
 
     return len(sample_ids)
+
+
+def get_number_of_mutated_positions(track):
+    sample_locations = set()
+    for mutation in track['mutations']:
+        sample_locations.add(mutation[COORDINATE_FIELD_NAME])
+
+    return len(sample_locations)
 
 
 # TODO remove if not needed
@@ -65,7 +71,8 @@ def get_track_statistics_by_track_type(track, cohort_info_map):
 
     result = {
         'samples': {
-            'numberOf': get_number_of_unique_samples(track)
+            'numberOf': get_number_of_unique_samples(track),
+            'mutated_positions': get_number_of_mutated_positions(track)
         }
     }
 
