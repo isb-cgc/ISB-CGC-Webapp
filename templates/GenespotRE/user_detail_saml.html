@@ -15,7 +15,7 @@
             <a href="{% url 'unlink_accounts' %}">Unlink {{ user_details.email }} from the NIH username {{ user_details.NIH_username }}</a>
         {% endif %}
         <a href="https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login" target="_blank">Learn More</a>
-        <a href="https://github.com/isb-cgc/software-engineering-coordination/files/63234/Link.to.Data.Use.Certification.Agreement.docx">How to Access Controlled-Access Data</a>
+
     {% elif not user_details.dbGaP_authorized %} {# no dbGaP #}
         <p><i class="fa fa-check-circle"></i> eRA Account Authenticated</p>
         <hr>
@@ -31,7 +31,7 @@
             <p id="NIH_expiration">{{ user_details.NIH_assertion_expiration|safe }} GMT</p>
         </p>
 
-
+{#        <a href="">How to Access Controlled-Access Data</a>#}
         <a href="https://tcga-data.nci.nih.gov/docs/TCGA_Data_Use_Certification.pdf" target="_blank">Data Use Certification Agreement</a>
     {% endif %}
     {% if membership %}
