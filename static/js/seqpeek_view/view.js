@@ -40,6 +40,8 @@ function (
         var SAMPLE_PLOT_TRACK_STEM_HEIGHT = 30;
         var TRACK_SVG_WIDTH = VIEWPORT_WIDTH + Y_AXIS_SCALE_WIDTH;
 
+        var EMPTY_TRACK_HEIGHT = 30;
+
         var AMINO_ACID_POSITION_FIELD_NAME = "uniprot_aapos";
         var COORDINATE_FIELD_NAME = "uniprot_aapos";
         var TYPE_FIELD_NAME = "variant_classification";
@@ -347,11 +349,20 @@ function (
 
                 track_instance.setHeightFromStatistics();
                 var variant_track_height = track_instance.getHeight();
-                var total_track_height = variant_track_height + PROTEIN_DOMAIN_HEIGHT;
+                var track_screen_height;
+
+                if (variant_track_height > 0) {
+                    track_screen_height = variant_track_height
+                }
+                else {
+                    track_screen_height = EMPTY_TRACK_HEIGHT
+                }
+
+                var total_track_height = track_screen_height + PROTEIN_DOMAIN_HEIGHT;
 
                 track_obj.variant_track_svg.attr("height", total_track_height);
                 track_obj.region_track_svg
-                    .attr("transform", "translate(0," + (variant_track_height) + ")");
+                    .attr("transform", "translate(0," + (track_screen_height) + ")");
 
                 this.__render_scales(track_obj.variant_track_svg, total_track_height, track_instance.statistics, track_obj.y_axis_type);
             }, this);
@@ -390,8 +401,11 @@ function (
         },
 
         __render_scales: function(track_selector, total_track_height, track_statistics, scale_type_label) {
+            if (track_statistics.max_samples_in_location == 2) {
+                this.__render_scales_minimal(track_selector, total_track_height, track_statistics, scale_type_label, true);
+            }
             if (track_statistics.max_samples_in_location <= 2) {
-                this.__render_scales_minimal(track_selector, total_track_height, track_statistics, scale_type_label);
+                this.__render_scales_minimal(track_selector, total_track_height, track_statistics, scale_type_label, false);
             }
             else {
                 this.__render_scales_full(track_selector, total_track_height, track_statistics, scale_type_label);
@@ -481,7 +495,7 @@ function (
                 .text("Samples in location");
         },
 
-        __render_scales_minimal: function(track_selector, total_track_height, track_statistics, scale_type_label) {
+        __render_scales_minimal: function(track_selector, total_track_height, track_statistics, scale_type_label, draw_min_max) {
             var y_axis_label_font_size = 10;
             var y_axis_label_x = 10;
 
@@ -495,17 +509,19 @@ function (
                 .attr("class", "y-axis")
                 .attr("transform", "translate(0," + total_track_height + ")");
 
-            axis.append("svg:text")
-                .attr("x", right - 15)
-                .attr("y", -total_track_height + 10)
-                .attr("font-size", y_axis_label_font_size)
-                .text("max " + track_statistics.max_samples_in_location);
+            if (draw_min_max == true) {
+                axis.append("svg:text")
+                    .attr("x", right - 15)
+                    .attr("y", -total_track_height + 10)
+                    .attr("font-size", y_axis_label_font_size)
+                    .text("max " + track_statistics.max_samples_in_location);
 
-            axis.append("svg:text")
-                .attr("x", right - 15)
-                .attr("y",  -total_track_height + 20)
-                .attr("font-size", y_axis_label_font_size)
-                .text("min " + track_statistics.min_samples_in_location);
+                axis.append("svg:text")
+                    .attr("x", right - 15)
+                    .attr("y", -total_track_height + 20)
+                    .attr("font-size", y_axis_label_font_size)
+                    .text("min " + track_statistics.min_samples_in_location);
+            }
 
             axis.append("svg:text")
                 .attr("x", type_label_x)

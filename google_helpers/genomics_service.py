@@ -45,5 +45,5 @@ def get_genomics_resource():
         )
 
     http_auth = credentials.authorize(Http())
-    service = discovery.build('genomics', 'v1beta2', http=http_auth)
+    service = discovery.build('genomics', 'v1', http=http_auth)
     return service, http_auth

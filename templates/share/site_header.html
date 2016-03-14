@@ -85,7 +85,7 @@
                             <button type="submit">Create a New Workbook</button>
                         </form>
                     </li>
-                    <li class="menu-item"><a href="{% url 'workbook_samples' %}">Sample Workbooks</a></li>
+{#                    <li class="menu-item"><a href="{% url 'workbook_samples' %}">Sample Workbooks</a></li>#}
                 </ul>
             </li>
             {% if USER_DATA_ON %}
@@ -163,13 +163,13 @@
                                     <button type="submit">Violin Plot</button>
                                 </form>
                             </li>
-                            <li class="menu-item">
-                                <form action="{% url 'worksheet_create_with_analysis' %}" method="POST">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="analysis" value="Violin Plot with axis swap">
-                                    <button type="submit">Violin Plot with axis swap</button>
-                                </form>
-                            </li>
+{#                            <li class="menu-item">#}
+{#                                <form action="{% url 'worksheet_create_with_analysis' %}" method="POST">#}
+{#                                    {% csrf_token %}#}
+{#                                    <input type="hidden" name="analysis" value="Violin Plot with axis swap">#}
+{#                                    <button type="submit">Violin Plot with axis swap</button>#}
+{#                                </form>#}
+{#                            </li>#}
                             <li class="menu-item">
                                 <form action="{% url 'worksheet_create_with_analysis' %}" method="POST">
                                     {% csrf_token %}
@@ -177,13 +177,13 @@
                                     <button type="submit">Cubby Hole</button>
                                 </form>
                             </li>
-{#                            <li class="menu-item">#}
-{#                                <form action="{% url 'worksheet_create_with_analysis' %}" method="POST">#}
-{#                                    {% csrf_token %}#}
-{#                                    <input type="hidden" name="analysis" value="seqpeak">#}
-{#                                    <button type="submit">SeqPeak</button>#}
-{#                                </form>#}
-{#                            </li>#}
+                            <li class="menu-item">
+                                <form action="{% url 'worksheet_create_with_analysis' %}" method="POST">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="analysis" value="SeqPeek">
+                                    <button type="submit">SeqPeek</button>
+                                </form>
+                            </li>
                         </ul>
                     </li>
                     <li class="menu-item"><a href="{% url 'sample_analyses' %}">Browse All Analyses</a></li>
