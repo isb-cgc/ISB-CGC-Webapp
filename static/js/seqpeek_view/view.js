@@ -202,7 +202,7 @@ function (
 
         render: function () {
             var seqpeek_data = [];
-            var protein_data = this.data_bundle['protein'];
+            var protein_data = this.data_bundle['protein']['interpro_json'];
             var region_data = this.data_bundle['regions'];
 
             _.each(this.data_bundle['tracks'], function (track) {
@@ -408,11 +408,11 @@ function (
                 this.__render_scales_minimal(track_selector, total_track_height, track_statistics, scale_type_label, false);
             }
             else {
-                this.__render_scales_full(track_selector, total_track_height, track_statistics, scale_type_label);
+                this.__render_scales_full(track_selector, total_track_height, track_statistics, scale_type_label, false);
             }
         },
 
-        __render_scales_full: function(track_selector, total_track_height, track_statistics, scale_type_label) {
+        __render_scales_full: function(track_selector, total_track_height, track_statistics, scale_type_label, include_text) {
             var y_axis_label_font_size = 10;
             var y_axis_label_x = 10;
 
@@ -486,13 +486,15 @@ function (
                 .attr("y", type_label_y)
                 .text(scale_type_label);
 
-            axis.append("svg:text")
-                .attr("x", 0)
-                // Use the "y" attribute for horizontal positioning, because of the rotation.
-                .attr("y", y_axis_label_x)
-                .attr("transform", "rotate(-90)")
-                .attr("font-size", y_axis_label_font_size)
-                .text("Samples in location");
+            if (include_text) {
+                axis.append("svg:text")
+                    .attr("x", 0)
+                    // Use the "y" attribute for horizontal positioning, because of the rotation.
+                    .attr("y", y_axis_label_x)
+                    .attr("transform", "rotate(-90)")
+                    .attr("font-size", y_axis_label_font_size)
+                    .text("Samples in location");
+            }
         },
 
         __render_scales_minimal: function(track_selector, total_track_height, track_statistics, scale_type_label, draw_min_max) {
