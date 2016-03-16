@@ -222,8 +222,8 @@
                     <p><i class="fa fa-exclamation-circle"></i> To Complete this Analysis: </p>
                     <ul class="ul">
                         <li>You must select an Analysis Type (above)</li>
-                        <li>You must select <a href="{% url 'genes' %}">Genes</a> or <a href="{% url 'variables' %}">Variables</a> (or, optionally, both)</li>
-                        <li>You must select a <a href="{% url 'cohort_list' %}">Cohorts</a></li>
+                        <li>You must select <a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Genes</a> or <a href="{% url 'variable_select_for_existing_workbook' workbook.id worksheet.id %}">Variables</a> (or, optionally, both)</li>
+                        <li>You must select a <a href="{% url 'cohort_select_for_existing_workbook' workbook.id worksheet.id %}%}">Cohorts</a></li>
                     </ul>
                 </div>
             {% endif %}
