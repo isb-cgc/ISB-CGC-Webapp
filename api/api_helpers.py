@@ -240,6 +240,7 @@ def build_where_clause(dict, alt_key_map=False):
                 query_str += ' (%s is null or' % key
                 big_query_str += ' (%s is null or' % key
                 value.remove('None')
+                value.append('')
             query_str += ' %s in (' % key
             big_query_str += ' %s in (' % key
             i = 0
