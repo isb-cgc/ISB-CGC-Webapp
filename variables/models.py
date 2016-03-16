@@ -120,6 +120,7 @@ class VariableManager(models.Manager):
 class Variable(models.Model):
     id                 = models.AutoField(primary_key=True)
     name               = models.TextField(null=False, blank=False)
+    type               = models.CharField(max_length=20, null=True, blank=True)
     variable_favorite  = models.ForeignKey(VariableFavorite, blank=False)
     code               = models.CharField(max_length=2024, blank=False)
     feature            = models.ForeignKey(User_Feature_Definitions, null=True, blank=True)

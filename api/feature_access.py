@@ -40,7 +40,6 @@ from bq_data_access.feature_search.protein import RPPASearcher
 from bq_data_access.feature_search.microrna_searcher import MIRNSearcher
 from bq_data_access.feature_search.gnab_searcher import GNABSearcher
 
-
 class ClinicalFeatureType(Message):
     feature_type = StringField(1)
     gene = StringField(2)
@@ -71,6 +70,7 @@ class FeatureSearchResult(Message):
     feature_type = StringField(1)
     internal_feature_id = StringField(2)
     label = StringField(3)
+    type  = StringField(4)
 
 class FeatureTypeList(Message):
     items = MessageField(FeatureSearchResult, 1, repeated=True)
@@ -127,7 +127,7 @@ class FeatureAccessEndpoints(remote.Service):
 
             result = searcher.search(parameters)
             items = []
-            fields = ['label', 'internal_feature_id']
+            fields = ['label', 'internal_feature_id', 'type']
             for row in result:
                 items.append({key: row[key] for key in fields})
 

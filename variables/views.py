@@ -247,20 +247,20 @@ def initialize_variable_selection_page(request,
 
     #TODO common variables need to be refactored into an adaptive list based on common used
     displayed_common_variables = [
-        {'name' : "vital_status",                          'code' : 'CLIN:vital_status'},
-        {'name' : "gender",                                'code' : 'CLIN:gender'},
-        {'name' : "age_at_initial_pathologic_diagnosis",   'code' : 'CLIN:age_at_initial_pathologic_diagnosis'},
-        {'name' : "tumor_tissue_site",                     'code' : 'CLIN:tumor_tissue_site'},
-        {'name' : "histological_type",                     'code' : 'CLIN:histological_type'},
-        {'name' : "prior_diagnosis",                       'code' : 'CLIN:prior_dx'},
-        {'name' : "tumor_status",                          'code' : 'CLIN:person_neoplasm_cancer_status'},
-        {'name' : "new_tumor_event_after_initial_treatment", 'code' : 'CLIN:new_tumor_event_after_initial_treatment'},
-        {'name' : "histological_grade",                    'code' : 'CLIN:neoplasm_histologic_grade'},
-        {'name' : "residual_tumor",                        'code' : 'CLIN:residual_tumor'},
-        {'name' : "tobacco_smoking_history",               'code' : 'CLIN:tobacco_smoking_history'},
-        {'name' : "icd-10",                                'code' : 'CLIN:icd_10'},
-        {'name' : "icd-o-3_site",                          'code' : 'CLIN:icd_o_3_site'},
-        {'name' : "icd-o-3_histology",                     'code' : 'CLIN:icd_o_3_histology'}
+        {'name' : "vital_status",                          'code' : 'CLIN:vital_status',                                'type' : 'C'},
+        {'name' : "gender",                                'code' : 'CLIN:gender',                                      'type' : 'C'},
+        {'name' : "age_at_initial_pathologic_diagnosis",   'code' : 'CLIN:age_at_initial_pathologic_diagnosis',         'type' : 'N'},
+        {'name' : "tumor_tissue_site",                     'code' : 'CLIN:tumor_tissue_site',                           'type' : 'C'},
+        {'name' : "histological_type",                     'code' : 'CLIN:histological_type',                           'type' : 'C'},
+        {'name' : "prior_diagnosis",                       'code' : 'CLIN:prior_dx',                                    'type' : 'C'},
+        {'name' : "tumor_status",                          'code' : 'CLIN:person_neoplasm_cancer_status',               'type' : 'C'},
+        {'name' : "new_tumor_event_after_initial_treatment", 'code' : 'CLIN:new_tumor_event_after_initial_treatment',   'type' : 'C'},
+        {'name' : "histological_grade",                    'code' : 'CLIN:neoplasm_histologic_grade',                   'type' : 'C'},
+        {'name' : "residual_tumor",                        'code' : 'CLIN:residual_tumor',                              'type' : 'C'},
+        {'name' : "tobacco_smoking_history",               'code' : 'CLIN:tobacco_smoking_history',                     'type' : 'C'},
+        {'name' : "icd-10",                                'code' : 'CLIN:icd_10',                                      'type' : 'C'},
+        {'name' : "icd-o-3_site",                          'code' : 'CLIN:icd_o_3_site',                                'type' : 'C'},
+        {'name' : "icd-o-3_histology",                     'code' : 'CLIN:icd_o_3_histology',                           'type' : 'C'}
     ]
     common_variables = displayed_common_variables
     TCGA_project    = {"id" : -1, "study" : {"id" :-1, "name" : ""}, "name" : "TCGA"}
