@@ -152,13 +152,13 @@ def cohorts_list(request, is_public=False, workbook_id=0, worksheet_id=0, create
         # print local_zone.localize(item.last_date_saved)
 
     # Used for autocomplete listing
-    cohort_listing = Cohort.objects.filter(id__in=cohort_perms, active=True).values('id', 'name')
-    for cohort in cohort_listing:
-        cohort['value'] = int(cohort['id'])
-        cohort['label'] = cohort['name'].encode('utf8')
-        del cohort['id']
-        del cohort['name']
-
+    cohort_id_names = Cohort.objects.filter(id__in=cohort_perms, active=True).values('id', 'name')
+    cohort_listing = []
+    for cohort in cohort_id_names:
+        cohort_listing.append({
+            'value': int(cohort['id']),
+            'label': cohort['name'].encode('utf8')
+        })
     workbook = None
     worksheet = None
     previously_selected_cohort_ids = []
