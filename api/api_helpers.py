@@ -192,7 +192,7 @@ def applyFilter(field, dict):
 
     return where_clause
 
-def build_where_clause(dict, alt_key_map=False):
+def build_where_clause(filters, alt_key_map=False):
 # this one gets called a lot
 #    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     first = True
@@ -200,7 +200,10 @@ def build_where_clause(dict, alt_key_map=False):
     big_query_str = ''  # todo: make this work for non-string values -- use {}.format
     value_tuple = ()
     key_order = []
-    for key, value in dict.items():
+    for key, value in filters.items():
+        if isinstance(value, dict) and 'values' in value:
+            value = value['values']
+
         if isinstance(value, list) and len(value) == 1:
             value = value[0]
         # Check if we need to map to a different column name for a given key
@@ -240,7 +243,6 @@ def build_where_clause(dict, alt_key_map=False):
                 query_str += ' (%s is null or' % key
                 big_query_str += ' (%s is null or' % key
                 value.remove('None')
-                value.append('')
             query_str += ' %s in (' % key
             big_query_str += ' %s in (' % key
             i = 0
