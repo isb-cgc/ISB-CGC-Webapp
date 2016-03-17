@@ -30,7 +30,6 @@ define([
     'histogram_plot',
     'bar_plot',
     'seqpeek_view/seqpeek_view',
-    //'visualizations/mock_histogram_data',
     'select2',
     'assetscore',
     'assetsresponsive'

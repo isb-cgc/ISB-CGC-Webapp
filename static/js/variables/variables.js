@@ -238,7 +238,7 @@ require([
     });
 
     /*
-        convenience function for gathering selected variables from the ui pill list
+        Convenience function for gathering selected variables from the ui pill list
      */
     function get_variable_list(){
         var variable_list = [];
@@ -246,7 +246,8 @@ require([
             var variable_name   = this.getAttribute('data-name');
             var code            = this.getAttribute('data-code');
             var feature_id      = this.getAttribute('data-feature-id');
-            variable_list.push({name: variable_name, code : code, feature_id: feature_id});
+            var type            = this.getAttribute('data-type');
+            variable_list.push({name: variable_name, code : code, feature_id: feature_id, type : type});
         });
 
         return variable_list;
