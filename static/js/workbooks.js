@@ -231,7 +231,7 @@ require([
     }
 
     /*
-     * gather the options and selections on a variable
+     * gather the options and selections on a variable in the plot settings
      */
     function get_values(selection){
         var result;
@@ -271,16 +271,28 @@ require([
     /*
      * apply data values to the variable_element
      */
-    function apply_values(variable_element, data){
+    function apply_axis_values(variable_element, data, axis_settings){
         if(data.type == "common"){
             if(data.options){
                 for(var i in data.options){
-                    variable_element.append('<option value="' + data.options[i].value + '"> '+ data.options[i].text + '</option>');
+                    console.log(data, axis_settings);
+                    if(typeof(axis_settings) !== 'undefined') {
+                        if( (data.options[i].type == 'C' && axis_settings.type == 'CATEGORICAL') ||
+                            (data.options[i].type == 'N' && axis_settings.type == 'NUMERICAL')   ||
+                            (!data.options[i].type       && axis_settings.type == 'NUMERICAL')     ) {
+                            variable_element.append('<option value="' + data.options[i].value + '"> ' + data.options[i].text + '</option>');
+                        }
+                    } else {
+                        variable_element.append('<option value="' + data.options[i].value + '"> ' + data.options[i].text + '</option>');
+                    }
                 }
             }
             variable_element.val(data.variable);
             axis_select_change(variable_element);
         } else if(data.type == "gene") {
+            /*
+             * FYI We are assuming that a gene variables are numerical
+             */
             variable_element.val(data.variable);
             axis_select_change(variable_element);
             var parent = variable_element.parents(".variable-container");
@@ -319,8 +331,8 @@ require([
     $('.swap').click(function(){
         var x = get_values($(this).parent().find('#x-axis-select').find(":selected"));
         var y = get_values($(this).parent().find('#y-axis-select').find(":selected"));
-        apply_values($(this).parent().find('#y-axis-select'), x);
-        apply_values($(this).parent().find('#x-axis-select'), y);
+        apply_axis_values($(this).parent().find('#y-axis-select'), x); //TODO add appropriate Axis settings
+        apply_axis_values($(this).parent().find('#x-axis-select'), y); //TODO add appropriate Axis settings
     });
 
     /*
@@ -424,7 +436,6 @@ require([
     /*
      * Gene attribute selection
      */
-    //$('.x-edit-field, .y-edit-field, .color-edit-field').on('click', function() { vizhelpers.show_field_search_panel(this); });
     $('.datatype-selector').on('change', function() { vizhelpers.get_datatype_search_interfaces(this, this.value)});
     $('.feature-search').on('change',    function() { vizhelpers.field_search_change_callback(this); });
     $('.select-field').on('click',       function() { vizhelpers.select_field_callback(this); });
@@ -473,44 +484,41 @@ require([
         swap.show();
         sp_genes.hide();
         switch (plot_type){
-                case "Bar Chart" : //x_type == 'STRING' && y_type == 'none'
-                    y_widgets.hide();
-                    c_widgets.hide();
-                    swap.hide();
-                    break;
-                case "Histogram" : //((x_type == 'INTEGER' || x_type == 'FLOAT') && y_type == 'none') {
-                    y_widgets.hide();
-                    c_widgets.hide();
-                    swap.hide();
-                    break;
-                case 'Scatter Plot': //((x_type == 'INTEGER' || x_type == 'FLOAT') && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
-                    break;
-                case "Violin Plot": //(x_type == 'STRING' && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
-                    break;
-                case 'Violin Plot with axis swap'://(y_type == 'STRING' && (x_type == 'INTEGER'|| x_type == 'FLOAT')) {
-                    break;
-                case 'Cubby Hole Plot': //(x_type == 'STRING' && y_type == 'STRING') {
-                    c_widgets.hide();
-                    break;
-                case 'SeqPeek':
-                    sp_genes.show();
-                    x_widgets.hide();
-                    y_widgets.hide();
-                    c_widgets.hide();
-                    swap.hide();
-                    break;
-                default :
-                    break;
-            }
+            case "Bar Chart" : //x_type == 'STRING' && y_type == 'none'
+                y_widgets.hide();
+                c_widgets.hide();
+                swap.hide();
+                break;
+            case "Histogram" : //((x_type == 'INTEGER' || x_type == 'FLOAT') && y_type == 'none') {
+                y_widgets.hide();
+                c_widgets.hide();
+                swap.hide();
+                break;
+            case 'Scatter Plot': //((x_type == 'INTEGER' || x_type == 'FLOAT') && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
+                break;
+            case "Violin Plot": //(x_type == 'STRING' && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
+                break;
+            case 'Violin Plot with axis swap'://(y_type == 'STRING' && (x_type == 'INTEGER'|| x_type == 'FLOAT')) {
+                break;
+            case 'Cubby Hole Plot': //(x_type == 'STRING' && y_type == 'STRING') {
+                c_widgets.hide();
+                break;
+            case 'SeqPeek':
+                sp_genes.show();
+                x_widgets.hide();
+                y_widgets.hide();
+                c_widgets.hide();
+                swap.hide();
+                break;
+            default :
+                break;
+        }
     };
 
     //generate plot based on user change
     $('.update-plot').on('click', function(event){
         if(valid_plot_settings($(this).parent())) {
             var data = get_plot_info_on_page($(this).parent());
-            //update_plot_model(workbook_id, data.worksheet_id, data.plot_id, data.attrs, function(result){
-            //    generate_plot(data.worksheet_id, data.attrs.type, data.attrs.x_axis.url_code, data.attrs.y_axis.url_code, data.attrs.color_by.url_code, data.attrs.cohorts, data.attrs.gene_label);
-
             update_plot_model(workbook_id, data.worksheet_id, data.plot_id, data.attrs, data.selections, function(result){
                 generate_plot({ worksheet_id : data.worksheet_id,
                                 type         : data.attrs.type,
@@ -518,7 +526,6 @@ require([
                                 y            : data.attrs.y_axis.url_code,
                                 color_by     : data.attrs.color_by.url_code,
                                 gene_label   : data.attrs.gene_label,
-
                                 cohorts      : data.attrs.cohorts});
                 // TODO gene label
                 hide_plot_settings();
@@ -579,7 +586,7 @@ require([
                     console.log("Display error");
                     callback(false);
                 } else {
-                    load_plot(worksheet_id, data, function (success) {
+                    load_plot(worksheet_id, data, plot_factory.get_plot_settings(plot_type), function (success) {
                         callback(true);
                     });
                 }
@@ -602,13 +609,13 @@ require([
     ////initialize all plots at the beginning
     $(".plot_selection").each(function(){
         var self = this;
+
         get_plot_info(this, function(success){
             if(success) {
+                var flyout = $(self).parentsUntil(".worksheet-body").find('.settings-flyout');
+                var data = get_plot_info_on_page($(self).parentsUntil(".worksheet-body").find('.update-plot').parent());
+                hide_show_widgets(data.attrs.type, flyout);
                 if (valid_plot_settings($(self).parentsUntil(".worksheet-body").find('.update-plot').parent())) {
-                    // hide/show settings as appropriate
-                    var flyout = $(self).parentsUntil(".worksheet-body").find('.settings-flyout');
-                    var data = get_plot_info_on_page($(self).parentsUntil(".worksheet-body").find('.update-plot').parent());
-                    hide_show_widgets(data.attrs.type, flyout);
                     //generate_plot(data.worksheet_id, data.attrs.type, data.attrs.x_axis.url_code, data.attrs.y_axis.url_code, data.attrs.color_by.url_code, data.attrs.cohorts, data.attrs.gene_label)
                     generate_plot({ worksheet_id : data.worksheet_id,
                                     type         : data.attrs.type,
@@ -680,7 +687,7 @@ require([
     /*
      * loads the plot data into the ui inputs for adjustment
      */
-    function load_plot(worksheet_id, plot_data, callback){
+    function load_plot(worksheet_id, plot_data, plot_settings, callback){
         var plot_element = $("[worksheet_id='"+worksheet_id+"']").parent().parent().find(".plot");
 
         plot_element.find('.update-plot').attr('plot_id', plot_data.id).change();
@@ -688,13 +695,13 @@ require([
 
         //apply values
         if(plot_data.x_axis) {
-            apply_values(plot_element.find('#x-axis-select'), plot_data.x_axis);
+            apply_axis_values(plot_element.find('#x-axis-select'), plot_data.x_axis, plot_settings.axis.x_axis);
         }
         if(plot_data.y_axis) {
-            apply_values(plot_element.find('#y-axis-select'), plot_data.y_axis);
+            apply_axis_values(plot_element.find('#y-axis-select'), plot_data.y_axis, plot_settings.axis.y_axis);
         }
         if(plot_data.color_by) {
-            apply_values(plot_element.find('#color_by'), plot_data.color_by);
+            apply_axis_values(plot_element.find('#color_by'), plot_data.color_by);
         }
         if(plot_data.gene_label) {
             plot_element.find("#gene_label").val(plot_data.gene_label.variable);

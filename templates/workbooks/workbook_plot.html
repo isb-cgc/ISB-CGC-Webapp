@@ -58,9 +58,7 @@
                             {% endif %}
                             {% for gene in genes %}
                                 {% if not plot or plot.x_axis.id != gene.id %}
-                                    {# TODO {% if var.type == plot.yaxis.type  %}#}
                                     <option type="gene" value="{{ gene.gene }}" var_id="{{ gene.id }}">{{ gene.gene }}</option>
-                                    {# TODO {% endif %}#}
                                 {% endif %}
                             {% endfor %}
                             {% for var in variables %}
