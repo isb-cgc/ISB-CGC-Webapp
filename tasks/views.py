@@ -104,7 +104,7 @@ def scrub_nih_users(dbGaP_authorized_list):
             email = member['email']
             logger.info("Checking user {} on ACL_GOOGLE_GROUP list".format(email))
             if email.endswith('developer.gserviceaccount.com'):
-                continue  # ignore email addresses that are actually service accounts
+                continue  # ignore emails that are actually service accounts
 
             try:
                 # get user id from email
