@@ -479,6 +479,7 @@ def save_cohort(request, workbook_id=None, worksheet_id=None, create_workbook=Fa
         source = request.POST.get('source')
         deactivate_sources = request.POST.get('deactivate_sources')
         filters = request.POST.getlist('filters')
+        projects = request.user.project_set.all()
 
         token = SocialToken.objects.filter(account__user=request.user, account__provider='Google')[0].token
         data_url = METADATA_API + ('v2/metadata_sample_list?token=%s' % (token,))
@@ -505,10 +506,20 @@ def save_cohort(request, workbook_id=None, worksheet_id=None, create_workbook=Fa
                 if 'id' in tmp['value'] and tmp['value']['id']:
                     val = tmp['value']['id']
 
-                filter_obj.append({
-                    'key': key,
-                    'value': val
-                })
+                if key == 'user_projects':
+                    proj = projects.get(id=val)
+                    studies = proj.study_set.all()
+                    for study in studies:
+                        filter_obj.append({
+                            'key': 'user_studies',
+                            'value': str(study.id)
+                        })
+
+                else :
+                    filter_obj.append({
+                        'key': key,
+                        'value': val
+                    })
 
             if len(filter_obj):
                 data_url += '&filters=' + re.sub(r'\s+', '', urllib.quote( json.dumps(filter_obj) ))
