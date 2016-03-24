@@ -330,6 +330,34 @@ require([
         }
     });
 
+    $('#select_then_create_new_workbook').on('click', function(event) {
+        var name = $.trim($("#variable_list_name_input").val());
+        var variable_list = get_variable_list();
+        if(name=="" || !variable_list.length){
+            $.createMessage('Please check that your variable list name is not empty, and that you have selected at least one variable.', 'warning')
+        } else {
+            $(this).attr('disabled', 'disabled');
+            var csrftoken = get_cookie('csrftoken');
+            $.ajax({
+                type: 'POST',
+                url : base_url + '/variables/save',
+                data: JSON.stringify({name : name, variables : variable_list}),
+                beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+                success: function (data) {
+                    data = $.parseJSON(data);
+                    var form = $('#create-workbook');
+                    form.attr('action', base_url+'/workbooks/create_with_variables');
+                    form.append('<input name="variable_list_id" value="'+data['model']['id']+'">');
+                    form.trigger('submit');
+                },
+                error: function () {
+                    $.createMessage('There was an error in creating your variable list.', 'error');
+                }
+
+            });
+        }
+    });
+
     $('.show-more').on('click', function() {
         $(this).siblings('li.extra-values').show();
         $(this).siblings('.show-less').show();
