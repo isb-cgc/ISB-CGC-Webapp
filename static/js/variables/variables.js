@@ -252,12 +252,12 @@ require([
         Creates a favorite_list then redirects to the favorite list
      */
     $("#create_favorite_list").on('click', function(event){
-        $(this).attr('disabled', 'disabled');
         var name = $.trim($("#variable_list_name_input").val());
         var variable_list = get_variable_list();
         if(name=="" || !variable_list.length){
-            //TODO Create fail ui indicator
+            $.createMessage('Please check that your variable list name is not empty, and that you have selected at least one variable.', 'warning')
         } else {
+            $(this).attr('disabled', 'disabled');
             var csrftoken = get_cookie('csrftoken');
             $.ajax({
                 type: 'POST',
@@ -268,8 +268,7 @@ require([
                     window.location = base_url + '/variables/';
                 },
                 error: function () {
-                    //TODO Create fail ui indicator
-                    console.log('Failed to save variable_list.');
+                    $.createMessage('There was an error in creating your variable list.', 'error');
                 }
 
             });
@@ -294,13 +293,12 @@ require([
                     window.location = base_url + '/variables/';
                 },
                 error: function () {
-                    //TODO Create fail ui indicator
-                    console.log('Failed to save variable_list.');
+                    $.createMessage('There was an error in creating your variable list.', 'error');
                 }
 
             });
         } else {
-            //TODO Create fail ui indicator that they need to select one or more variables
+            $.createMessage('Please check that your variable list name is not empty, and that you have selected at least one variable.', 'warning')
         }
     });
 
@@ -323,13 +321,12 @@ require([
                     window.location = base_url + '/workbooks/' + workbook_id + '/worksheets/' + worksheet_id + '/';
                 },
                 error: function () {
-                    //TODO Create fail ui indicator
-                    console.log('Failed to save variable_list.');
+                    $.createMessage('There was an error in creating your variable list.', 'error');
                 }
 
             });
         } else {
-            //TODO Create fail ui indicator that they need to select one or more variables
+            $.createMessage('Please check that your variable list name is not empty, and that you have selected at least one variable.', 'warning')
         }
     });
 
