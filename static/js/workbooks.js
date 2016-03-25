@@ -715,7 +715,7 @@ require([
 
     //the server side call made here will also change the active entry for the worksheet
     function get_plot_model(workbook_id, worksheet_id, type, callback){
-        var csrftoken = get_cookie('csrftoken');
+        var csrftoken = $.getCookie('csrftoken');
         $.ajax({
             type        : 'GET',
             url         : base_url + '/workbooks/' + workbook_id + '/worksheets/' + worksheet_id + "/plots/",
@@ -737,7 +737,7 @@ require([
     }
 
     function update_plot_model(workbook_id, worksheet_id, plot_id, attrs, selections, callback){
-        var csrftoken = get_cookie('csrftoken');
+        var csrftoken = $.getCookie('csrftoken');
         $.ajax({
             type        :'POST',
             dataType    :'json',
@@ -830,7 +830,7 @@ require([
     $('.remove-shared-user').on('click', function() {
         var shared_id = $(this).attr('data-shared-id');
         var url = base_url + '/share/' + shared_id + '/remove';
-        var csrftoken = get_cookie('csrftoken');
+        var csrftoken = $.getCookie('csrftoken');
         var button = $(this);
         $.ajax({
             type        :'POST',
@@ -839,8 +839,11 @@ require([
             data        : {owner: true},
             beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
             success : function (data) {
-                console.log(data);
                 button.parents('tr').remove();
+                var count = parseInt($($('.share-count')[0]).html());
+                $('.share-count').each(function() {
+                   $(this).html(count-1);
+                });
             },
             error: function () {
                 console.log('Failed to remove user');
