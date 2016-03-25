@@ -63,9 +63,8 @@
                             {% endfor %}
                             {% for var in variables %}
                                 {% if not plot or plot.x_axis.id != var.id %}
-                                    {# TODO {% if var.type == plot.yaxis.type  %}#}
-                                    <option type="common" value="{{ var.url_code }}" var_id="{{ var.id }}">{{ var.name }}</option>
-                                    {# TODO {% endif %}#}
+                                    <!-- type is checked via javascript -->
+                                    <option type="common" var_type="{{var.type}}" value="{{ var.url_code }}" var_id="{{ var.id }}">{{ var.name }}</option>
                                 {% endif %}
                             {% endfor %}
                         </select>
@@ -116,16 +115,14 @@
                             {% endif %}
                             {% for gene in genes %}
                                 {% if not plot or plot.y_axis.id != gene.id %}
-                                    {# TODO {% if var.type == plot.yaxis.type  %}#}
                                     <option type="gene" value="{{ gene.gene }}" var_id="{{ gene.id }}">{{ gene.gene }}</option>
                                     {# TODO {% endif %}#}
                                 {% endif %}
                             {% endfor %}
                             {% for var in variables %}
                                 {% if not plot or plot.y_axis.id != var.id %}
-                                    {# TODO {% if var.type == plot.yaxis.type  %}#}
-                                    <option type="common" value="{{ var.url_code }}" var_id="{{ var.id }}">{{ var.name }}</option>
-                                    {# TODO {% endif %}#}
+                                    <!-- type is checked via javascript -->
+                                    <option type="common" var_type='{{var.type}}' value="{{ var.url_code }}" var_id="{{ var.id }}">{{ var.name }}</option>
                                 {% endif %}
                             {% endfor %}
                         </select>
