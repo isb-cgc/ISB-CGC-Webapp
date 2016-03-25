@@ -32,7 +32,12 @@
 
 {% block page_header %}
     <div class="container">
-        <h1 class="page-header">IGV Browser</h1>
+        <h1 class="page-header pull-left"><a href="https://www.broadinstitute.org/igv/" target="_blank">IGV Browser</a></h1>
+        <div class="pull-right">
+            <a href="https://www.broadinstitute.org/igv/" target="_blank">
+                <img class="header-igv-logo" alt="IGV Logo" src="{% static 'img/IGV_logo.png' %}" />
+            </a>
+        </div>
     </div>
 {% endblock %}
 

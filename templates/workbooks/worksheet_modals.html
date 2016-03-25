@@ -56,8 +56,8 @@
                     <label for="name">Name (required)</label>
                     <input class="form-control" type="text" name="name" value="{{ worksheet.name }}"/>
                     <br>
-                    <label for="description">Description (optional)</label>
-                    <textarea class="form-control" name="description">{{worksheet.description }}</textarea>
+                    <label for="description">Description (optional, max length is 2000 characters)</label>
+                    <textarea class="form-control" name="description" maxlength="2000">{{worksheet.description }}</textarea>
                 </div>
                 <div class="modal-footer">
                     <input type="submit" value="Update" class="btn btn-primary" />
