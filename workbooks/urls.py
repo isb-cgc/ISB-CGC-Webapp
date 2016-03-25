@@ -11,6 +11,7 @@ urlpatterns = patterns('',
     url(r'^(?P<workbook_id>\d+)/edit$',     views.workbook, name='workbook_edit'),
     url(r'^(?P<workbook_id>\d+)/delete$',   views.workbook, name='workbook_delete'),
     url(r'^(?P<workbook_id>\d+)/share$',    views.workbook_share, name='workbook_share'),
+    url(r'^(?P<workbook_id>\d+)/unshare$',  views.workbook_unshare, name='workbook_unshare'),
     url(r'^(?P<workbook_id>\d+)/copy$',     views.workbook, name='workbook_copy'),
 
     url(r'^create_with_project$',           views.workbook_create_with_project,     name='worksheet_create_with_projects'),

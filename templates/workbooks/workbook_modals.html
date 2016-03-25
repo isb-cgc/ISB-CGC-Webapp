@@ -158,6 +158,7 @@
                                 <tr>
                                     <th>Name</th>
                                     <th>Email</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -170,6 +171,9 @@
                                     </td>
                                     <td>
                                         {{shared.email}}
+                                    </td>
+                                    <td>
+                                        <a class="remove-shared-user" role="button" data-shared-id="{{ shared.id }}"><i class="fa fa-times"></i></a>
                                     </td>
                                 </tr>
                             {% endfor %}

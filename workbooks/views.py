@@ -213,6 +213,16 @@ def workbook_share(request, workbook_id=0):
     })
 
 @login_required
+def workbook_unshare(request, workbook_id=0):
+    emails = request.POST['remove_user'].strip()
+    workbook = request.user.workbook_set.get(id=workbook_id, active=True)
+    create_share(request, workbook, emails, 'Workbook')
+
+    return JsonResponse({
+        'status': 'success'
+    })
+
+@login_required
 #used to display a particular worksheet on page load
 def worksheet_display(request, workbook_id=0, worksheet_id=0):
     template = 'workbooks/workbook.html'

@@ -825,6 +825,30 @@ require([
     });
 
     /*
+        Remove shared user
+     */
+    $('.remove-shared-user').on('click', function() {
+        var shared_id = $(this).attr('data-shared-id');
+        var url = base_url + '/share/' + shared_id + '/remove';
+        var csrftoken = get_cookie('csrftoken');
+        var button = $(this);
+        $.ajax({
+            type        :'POST',
+            url         : url,
+            dataType    :'json',
+            data        : {owner: true},
+            beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+            success : function (data) {
+                console.log(data);
+                button.parents('tr').remove();
+            },
+            error: function () {
+                console.log('Failed to remove user');
+            }
+        })
+    });
+
+    /*
         Used for getting the CORS token for submitting data
      */
     function get_cookie(name) {
