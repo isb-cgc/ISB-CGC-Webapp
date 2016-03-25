@@ -282,6 +282,9 @@ require([
             $(this).val('');
             $(this).hide();
             return false;
+        },
+        open: function(event, ui) {
+            $('.ui-autocomplete').css('width', $(this).parents('.form-group').width() + 'px')
         }
     }).hide();
 

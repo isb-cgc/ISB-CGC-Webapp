@@ -120,6 +120,8 @@
                 background: $white
             .dropdown
                 display: inline-block
+                vertical-align: top
+                padding: 8px 0px
                 &> a
                     color: $isb-warning
                     display: inline-block
@@ -129,7 +131,10 @@
         > a
             color: $font-color
             display: inline-block
-
+            text-overflow: ellipsis
+            max-width: 324px
+            white-space: nowrap
+            overflow: hidden
             &:hover, &:focus
                 background-color: transparent
 
