@@ -109,7 +109,7 @@
                      <!-- worksheet description -->
                      <div class="worksheet-header">
                          <p>{{worksheet.description}}</p>
-                        <button class="show-flyout btn btn-default btn-sm pull-right" title="Show Comments">comments ({{ worksheet.comments | length }})</button>
+                        <button class="show-flyout btn btn-default btn-sm pull-right" title="Show Comments">comments (<span class="comment-count">{{ worksheet.comments | length }}</span>)</button>
                      </div>
 
                      <div class="worksheet-body">

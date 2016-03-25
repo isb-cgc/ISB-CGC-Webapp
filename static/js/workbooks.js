@@ -159,15 +159,18 @@ require([
             data: $(this).serialize(),
             success: function (data) {
                 data = JSON.parse(data);
-                $('.comment-flyout .flyout-body').append('<h5 class="comment-username">' + data['first_name'] + ' ' + data['last_name'] + '</h5>');
-                $('.comment-flyout .flyout-body').append('<p class="comment-content">' + data['content'] + '</p>')
-                $('.comment-flyout .flyout-body').append('<p class="comment-date">' + data['date_created'] + '</p>');
+                var flyout_body = $(form).parents('.comment-flyout').find('.flyout-body');
+                $(flyout_body).append('<h5 class="comment-username">' + data['first_name'] + ' ' + data['last_name'] + '</h5>');
+                $(flyout_body).append('<p class="comment-content">' + data['content'] + '</p>');
+                $(flyout_body).append('<p class="comment-date">' + data['date_created'] + '</p>');
 
                 form.reset();
+                var comment_count = parseInt($(form).parents('.worksheet').find('.comment-count').html());
+                $(form).parents('.worksheet').find('.comment-count').html(comment_count + 1);
+
             },
             error: function () {
-                console.log('Failed to save comment.');
-                $('.comment-flyout .flyout-body').append('<p class="comment-content error">Fail to save comment. Please try back later.</p>')
+                $('.comment-flyout .flyout-body').append('<p class="comment-content error">Fail to save comment. Please try back later.</p>');
                 form.reset()
             }
         });
@@ -180,7 +183,7 @@ require([
         $(this).parent().toggleClass('open');
         $(this).toggleClass('open');
         $(this).parent().prev('.worksheet-nav').toggleClass('closed');
-    })
+    });
 
     // tabs interaction on dropdown selected
     var tabsList = $('#worksheets-tabs a[data-toggle="tab"]');
@@ -193,7 +196,7 @@ require([
             openTabsfromDropdown(targetTab);
         }
         e.preventDefault();
-    })
+    });
 
     function openTabsfromDropdown(target) {
         var lastTabNum = 3;
