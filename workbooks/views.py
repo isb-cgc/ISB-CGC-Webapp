@@ -92,12 +92,23 @@ def workbook_create_with_project(request):
 
 @login_required
 def workbook_create_with_variables(request):
-    var_list_id    = request.POST.get('variable_list_id')
+    json_data = request.POST.get('json_data')
+    if json_data:
+        data = json.loads(json_data)
+        # TODO: Refactor so that user can create using multiple variable lists
+        var_list_id = data['variable_list_id'][0]
+    else:
+        var_list_id    = request.POST.get('variable_list_id')
+
+
     var_list_model = VariableFavorite.objects.get(id=var_list_id)
     name = request.POST.get('name', var_list_model.name + ' workbook')
     workbook_model = Workbook.create(name=name, description="this is an untitled workbook with all variables of variable favorite list \"" + var_list_model.name + "\" added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
+    workbook_model.save()
     worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
+    worksheet_model.save()
 
+    print workbook_model.id
     for var in var_list_model.get_variables() :
         work_var = Worksheet_variable.objects.create(worksheet_id = worksheet_model.id,
                                           name         = var.name,
@@ -107,7 +118,10 @@ def workbook_create_with_variables(request):
         work_var.save()
 
     redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_model.id})
-    return redirect(redirect_url)
+    if json_data:
+        return JsonResponse({'workbook_id': workbook_model.id, 'worksheet_id': worksheet_model.id})
+    else:
+        return redirect(redirect_url)
 
 @login_required
 def workbook_create_with_analysis(request):
