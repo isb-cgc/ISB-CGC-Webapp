@@ -31,7 +31,13 @@ require([
     'base',
 ], function($, jqueryui, bootstrap, session_security, _) {
     'use strict';
-
+    var warning = false;
+    $('input[type="checkbox"]').on('click', function() {
+         if ($('input[type="checkbox"]:checked').length > 1 && !warning) {
+             $.createMessage('Only one variable list can be used to create workbook.', 'warning');
+             warning = true;
+         }
+    });
     $('#addToNewAnalysis').on('click', function (event) {
         //get the selected cohort
         var variable_lists = [];
@@ -47,9 +53,8 @@ require([
             var csrftoken = get_cookie('csrftoken');
             $.ajax({
                 type        : 'POST',
-                dataType    :'json',
                 url         : base_url + '/workbooks/create_with_variables',
-                data        : JSON.stringify({variables_favorites : variable_lists}),
+                data        : {json_data: JSON.stringify({variable_list_id: variable_lists})},
                 beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                 success : function (data) {
                     if(!data.error) {
