@@ -25,7 +25,7 @@ import re
 
 from django.utils import formats
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.decorators.csrf import csrf_protect
@@ -996,3 +996,21 @@ def streaming_csv_view(request, cohort_id=0):
         messages.error(request, items['error']['message'])
         return redirect(reverse('cohort_filelist', kwargs={'cohort_id':cohort_id}))
     return render(request)
+
+@login_required
+def unshare_cohort(request, cohort_id=0):
+
+    if request.POST.get('owner'):
+        # The owner of the resource should also be able to remove users they shared with.
+        # Get user_id from post
+        user_id = request.POST.get('user_id')
+        resc = Cohort_Perms.objects.get(cohort_id=cohort_id, user_id=user_id)
+    else:
+        # This allows users to remove resources shared with them
+        resc = Cohort_Perms.objects.get(cohort_id=cohort_id, user_id=request.user.id)
+
+    resc.delete()
+
+    return JsonResponse({
+        'status': 'success'
+    })
