@@ -174,9 +174,8 @@ require([
         $('#content-panel').removeClass('col-md-12').addClass('col-md-8');
         $('#filter-panel').show();
         $('.selected-filters').show();
-        //$('.menu-bar a[data-target="#apply-filters-modal"]').show();
-        $('#cancel-add-filter-btn').show();
-        //$('.menu-bar .dropdown').hide();
+        $('.page-header').hide();
+        $('input[name="cohort-name"]').show();
         $('#default-cohort-menu').hide();
         $('#edit-cohort-menu').show();
         showHideMoreGraphButton();
@@ -186,10 +185,10 @@ require([
         $('#content-panel').removeClass('col-md-8').addClass('col-md-12');
         $('#filter-panel').hide();
         $('.selected-filters').hide();
-        //$('.menu-bar a[data-target="#apply-filters-modal"]').hide();
+        $('.page-header').show();
+        $('input[name="cohort-name"]').hide();
         $('#default-cohort-menu').show();
         $('#edit-cohort-menu').hide();
-        //$('.menu-bar .dropdown').show();
     });
 
     $('#create-cohort-form, #apply-filters-form').on('submit', function() {
@@ -204,7 +203,9 @@ require([
             form.append($('<input>').attr({ type: 'hidden', name: 'filters', value: JSON.stringify(value)}));
         });
 
+
         if (cohort_id) {
+            $('#apply-filter-cohort-name').prop('value', $('#edit-cohort-name').val());
             form.append('<input type="hidden" name="source" value="' + cohort_id + '" />');
             form.append('<input type="hidden" name="deactivate_sources" value="' + true + '" />');
         }

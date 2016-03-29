@@ -33,7 +33,7 @@
         <li><a href="{% url 'cohort_list' %}">Saved Cohorts</a></li>
     </ol>
     <h1 class="page-header">{{ cohort.name }} </h1>
-
+    <input id="edit-cohort-name" type="text" name="cohort-name" value="{{ cohort.name }}" class="form-control input-lg space-top-15" style="display: none"/>
     <div class="page-action-group">
 
         <ul id="default-cohort-menu">
@@ -408,7 +408,7 @@
                 </div>
                 <form id="apply-filters-form" method="POST" action="{% url 'save_cohort' %}">
                     <div class="modal-body">
-                        <label for="apply-filter-cohort-name">Applying new filters will permanently modify the existing cohort.</label>
+                        <label for="apply-filter-cohort-name">Saving changes will permanently modify the existing cohort.</label>
                         <input type="hidden" id="apply-filter-cohort-name" name="name" value="{{ cohort.name }}"/>
                         <input type="hidden" name="apply-filters" value="True"/>
                     </div>
