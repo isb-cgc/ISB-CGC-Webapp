@@ -120,12 +120,11 @@ require([
             $('.selected-filters .panel-body').append( $this.data('select-filters-item') );
             $('#create-cohort-form .form-control-static').append( $this.data('create-cohort-form-item') );
             $('a.delete-x').on('click', function() {
-                var search_id = $this.parent('span').attr('value');
-                $('#' + search_id).prop('checked', false);
-                $this.parent('span').remove();
+                var checked_box = $('div[data-feature-id="' + $(this).parent('span').data('feature-id') + '"] input[type="checkbox"][data-value-name="' + $(this).parent('span').data('value-name') + '"]');
+                checked_box.prop('checked', false);
+                $(this).parent('span').remove();
                 search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id, undefined, 'v2', api_token);
                 search_helper_obj.update_parsets(base_api_url, 'metadata_platform_list', cohort_id), 'v2';
-                $('#create-cohort-form .form-control-static').find('span[value="' + search_id + '"]').remove();
                 return false;
             });
         } else { // Checkbox unchecked
