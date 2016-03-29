@@ -140,6 +140,10 @@ require([
         $('#create-cohort-form .form-control-static').append(token.data('create-cohort-clone'));
 
         set_pill_deletes();
+
+        $('input[type="checkbox"][value="'+code+'"]').each(function() {
+            $(this).prop('checked', true);
+        });
         return token;
     }
 
@@ -149,6 +153,9 @@ require([
     function remove_variable_pill(code){
         $(".selected-variable[data-code='" + code + "']").remove();
         $('#create-cohort-form .form-control-static [data-code="' + code + '"]').remove();
+        $('input[type="checkbox"][value="'+code+'"]').each(function() {
+            $(this).prop('checked', false);
+        })
     }
 
     /*
@@ -159,7 +166,7 @@ require([
             name       = $this.data('text-label'),
             code       = $this.val(),
             feature_id = $this.data('feature-id');
-        if ($this.is(':checked') && $('.selected-filters span[data-code="' + code + '"]').length == 0) { // Checkbox checked and not already in list
+        if ($(this).is(':checked') && $('.selected-filters span[data-code="' + code + '"]').length == 0) { // Checkbox checked and not already in list
             add_variable_pill(name, code, feature_id);
         } else {
             remove_variable_pill(code);
@@ -387,6 +394,18 @@ require([
             }
         }
         return cookieValue;
+    }
+
+    /*
+        If there are variables on load, check off the boxes that are already selected
+     */
+    if ($('.selected-filters span').length > 0) {
+        var variable_list = get_variable_list();
+        for (var i = 0; i < variable_list.length; i++ ) {
+            $('input[type="checkbox"][value="'+variable_list[i]['code']+'"]').each(function() {
+                $(this).prop('checked', true);
+            })
+        }
     }
 
 });
