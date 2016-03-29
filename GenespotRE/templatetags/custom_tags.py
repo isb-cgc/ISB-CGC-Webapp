@@ -156,42 +156,47 @@ def get_data_attr_id(value, attr):
         return display_str
 
 @register.filter
-def get_disease_name(disease_code):
+def get_tooltip_text(value_id, attr):
     disease_dictionary = {
-        "ACC": 'Adrenocortical carcinoma',
-        "BLCA": "Bladder Urothelial Carcinoma",
-        "BRCA": "Breast invasive carcinoma",
-        "CESC": 'Cervical squamous cell carcinoma and endocervical adenocarcinoma',
-        "COAD": "Colon adenocarcinoma",
-        "DLBC": 'Lymphoid Neoplasm Diffuse Large B-cell Lymphoma',
-        "ESCA": 'Esophageal carcinoma',
-        "FPPP": '',
-        "GBM": "Glioblastoma Multiforme",
-        "HNSC": "Head and Neck squamous cell carcinoma",
-        "KICH": 'Kidney Chromophobe',
-        "KIRC": "Kidney renal clear cell carcinoma",
-        "KIRP": 'Kidney renal papillary cell carcinoma',
-        "LAML": 'Acute Myeloid Leukemia',
-        "LGG": 'Brain Lower Grade Glioma',
-        "LIHC": 'Liver hepatocellular carcinoma',
-        "LUAD": "Lung adenocarcinoma",
-        "LUSC": "Lung squamous cell carcinoma",
-        "MESO": 'Mesothelioma',
-        "OV": "Ovarian serous cystadenocarcinoma",
-        "PAAD": 'Pancreatic adenocarcinoma',
-        "PRAD": 'Prostate adenocarcinoma',
-        "READ": "Rectum adenocarcinoma",
-        "SARC": 'Sarcoma',
-        "SKCM": 'Skin Cutaneous Melanoma',
-        "STAD": "Stomach adenocarcinoma",
-        "THCA": 'Thyroid carcinoma',
-        "UCEC": "Uterine Corpus Endometrial Carcinoma",
-        "UCS": 'Uterine Carcinosarcoma',
-        "UVM": 'Uveal Melanoma'
+        'Study': {
+            "ACC": 'Adrenocortical carcinoma',
+            "BLCA": "Bladder Urothelial Carcinoma",
+            "BRCA": "Breast invasive carcinoma",
+            "CESC": 'Cervical squamous cell carcinoma and endocervical adenocarcinoma',
+            "COAD": "Colon adenocarcinoma",
+            "DLBC": 'Lymphoid Neoplasm Diffuse Large B-cell Lymphoma',
+            "ESCA": 'Esophageal carcinoma',
+            "FPPP": '',
+            "GBM": "Glioblastoma Multiforme",
+            "HNSC": "Head and Neck squamous cell carcinoma",
+            "KICH": 'Kidney Chromophobe',
+            "KIRC": "Kidney renal clear cell carcinoma",
+            "KIRP": 'Kidney renal papillary cell carcinoma',
+            "LAML": 'Acute Myeloid Leukemia',
+            "LGG": 'Brain Lower Grade Glioma',
+            "LIHC": 'Liver hepatocellular carcinoma',
+            "LUAD": "Lung adenocarcinoma",
+            "LUSC": "Lung squamous cell carcinoma",
+            "MESO": 'Mesothelioma',
+            "OV": "Ovarian serous cystadenocarcinoma",
+            "PAAD": 'Pancreatic adenocarcinoma',
+            "PRAD": 'Prostate adenocarcinoma',
+            "READ": "Rectum adenocarcinoma",
+            "SARC": 'Sarcoma',
+            "SKCM": 'Skin Cutaneous Melanoma',
+            "STAD": "Stomach adenocarcinoma",
+            "THCA": 'Thyroid carcinoma',
+            "UCEC": "Uterine Corpus Endometrial Carcinoma",
+            "UCS": 'Uterine Carcinosarcoma',
+            "UVM": 'Uveal Melanoma'
+        }
     }
 
-    if disease_dictionary.get(disease_code):
-        return disease_dictionary.get(disease_code)
+    if attr in disease_dictionary:
+        if value_id in disease_dictionary[attr]:
+            return disease_dictionary[attr][value_id]
+        else:
+            return ''
     else:
         return ''
 
