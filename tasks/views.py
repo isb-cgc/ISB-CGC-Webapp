@@ -256,7 +256,8 @@ def check_user_login(request):
 
 def check_users_sweeper(request):
     logger.info('check users sweeper runnning...')
-    expired_users = [user for user in NIH_User.objects.all() if is_very_expired(user.NIH_assertion_expiration)]
+    expired_users = [user for user in NIH_User.objects.all()
+                     if is_very_expired(user.NIH_assertion_expiration) and user.active]
 
     if expired_users:
         fallback_queue = Queue(name=FALLBACK_QUEUE_NAME)
