@@ -101,7 +101,7 @@
                                         <li class="list-group-item checkbox">
                                             <div id="heading-{{ attr.name }}" class="list-group-item__heading">
                                                 <label>
-                                                    <input class="variable-toggle-checkbox" type="checkbox" value="{{ attr.code }}" name="elements-selected" data-text-label="{{ attr.name|get_readable_name }}">
+                                                    <input class="variable-toggle-checkbox" type="checkbox" value="{{ attr.code }}" var_type="{{ attr.type }}" name="elements-selected" data-text-label="{{ attr.name|get_readable_name }}">
                                                     {{ attr.name|get_readable_name }}
                                                 </label>
                                             </div>
@@ -210,20 +210,20 @@
                                                                     {% if forloop.counter0 < 6 %}
                                                                         <li class="checkbox">
                                                                             <label>
-                                                                                <input class="variable-toggle-checkbox" type="checkbox" name="elements-selected" value="{% if variable.shared_map_id %}{{ variable.shared_map_id }}{% else %}USER:{{ study.id }}:{{ variable.id }}{% endif %}" data-text-label="{{ study.name }}: {{ variable.feature_name|get_readable_name }}" data-feature-id="{{ variable.id }}" > {{ variable.feature_name|get_readable_name }}
+                                                                                <input class="variable-toggle-checkbox" type="checkbox" name="elements-selected" var_type="{% if variable.is_numeric %}N{% else %}C{% endif %}" value="{% if variable.shared_map_id %}{{ variable.shared_map_id }}{% else %}USER:{{ study.id }}:{{ variable.id }}{% endif %}" data-text-label="{{ study.name }}: {{ variable.feature_name|get_readable_name }}" data-feature-id="{{ variable.id }}" > {{ variable.feature_name|get_readable_name }}
                                                                             </label>
                                                                         </li>
                                                                     {% elif forloop.counter0 == 6 and num_more > 0 %}
                                                                         <a class="show-more">{{ num_more }} more</a>
                                                                         <li class="extra-values checkbox" style="display:none;">
                                                                             <label>
-                                                                                <input class="variable-toggle-checkbox" type="checkbox" name="elements-selected" value="{% if variable.shared_map_id %}{{ variable.shared_map_id }}{% else %}USER:{{ study.id }}:{{ variable.id }}{% endif %}" data-text-label="{{ study.name }}: {{ variable.feature_name|get_readable_name }}" data-feature-id="{{ variable.id }}" > {{ variable.feature_name|get_readable_name }}
+                                                                                <input class="variable-toggle-checkbox" type="checkbox" name="elements-selected" var_type="{% if variable.is_numeric %}N{% else %}C{% endif %}" value="{% if variable.shared_map_id %}{{ variable.shared_map_id }}{% else %}USER:{{ study.id }}:{{ variable.id }}{% endif %}" data-text-label="{{ study.name }}: {{ variable.feature_name|get_readable_name }}" data-feature-id="{{ variable.id }}" > {{ variable.feature_name|get_readable_name }}
                                                                             </label>
                                                                         </li>
                                                                     {% else %}
                                                                         <li class="extra-values checkbox" style="display:none;">
                                                                             <label>
-                                                                                <input class="variable-toggle-checkbox" type="checkbox" name="elements-selected" value="{% if variable.shared_map_id %}{{ variable.shared_map_id }}{% else %}USER:{{ study.id }}:{{ variable.id }}{% endif %}" data-text-label="{{ study.name }}: {{ variable.feature_name|get_readable_name }}" data-feature-id="{{ variable.id }}" > {{ variable.feature_name|get_readable_name }}
+                                                                                <input class="variable-toggle-checkbox" type="checkbox" name="elements-selected" var_type="{% if variable.is_numeric %}N{% else %}C{% endif %}" value="{% if variable.shared_map_id %}{{ variable.shared_map_id }}{% else %}USER:{{ study.id }}:{{ variable.id }}{% endif %}" data-text-label="{{ study.name }}: {{ variable.feature_name|get_readable_name }}" data-feature-id="{{ variable.id }}" > {{ variable.feature_name|get_readable_name }}
                                                                             </label>
                                                                         </li>
                                                                     {% endif %}
