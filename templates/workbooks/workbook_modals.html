@@ -13,8 +13,8 @@
                     <label for="share-viz-users">Name (required)</label>
                     <input class="form-control" type="text" name="name" value="{{ workbook.name }}" required/>
                     <br>
-                    <label for="share-viz-users">Description (optional)</label>
-                    <textarea class="form-control" name="description">{{workbook.description }}</textarea>
+                    <label for="share-viz-users">Description (optional, max length is 2000 characters)</label>
+                    <textarea class="form-control" name="description" maxlength="2000">{{workbook.description }}</textarea>
                 </div>
                 <div class="modal-footer">
                     <input type="submit" value="Update" class="btn btn-primary" />
@@ -59,8 +59,8 @@
                     <label for="name">Name (required)</label>
                     <input class="form-control" type="text" name="name" value="New Worksheet"/>
                     <br>
-                    <label for="description">Description (optional)</label>
-                    <textarea class="form-control" name="description" placeholder="Add a description"></textarea>
+                    <label for="description">Description (optional, max length is 2000 characters)</label>
+                    <textarea class="form-control" name="description" placeholder="Add a description" maxlength="2000"></textarea>
                 </div>
                 <div class="modal-footer">
                     <input type="submit" value="Create" class="btn btn-primary" />
@@ -158,6 +158,7 @@
                                 <tr>
                                     <th>Name</th>
                                     <th>Email</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -170,6 +171,9 @@
                                     </td>
                                     <td>
                                         {{shared.email}}
+                                    </td>
+                                    <td>
+                                        <a class="remove-shared-user" role="button" data-shared-id="{{ shared.id }}"><i class="fa fa-times"></i></a>
                                     </td>
                                 </tr>
                             {% endfor %}

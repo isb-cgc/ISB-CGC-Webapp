@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% load custom_tags %}
+{% load workbook_custom_tags %}
 
 {% block title %}Workbooks | ISB-CGC{% endblock %}}
 {% block extra_css_libs %}{% endblock %}
@@ -26,7 +27,7 @@
         {% if is_shareable %}
         <li class="separator"></li>
         <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#share-workbook-modal-{{ workbook.id }}">Share</button></li>
-        <li role="menuitem"><button class="btn btn-link" data-toggle="modal" data-target="#share-workbook-modal-{{ workbook.id }}">Shared with ({{ workbook.shared.count }})</button></li>
+        <li role="menuitem"><button class="btn btn-link" data-toggle="modal" data-target="#share-workbook-modal-{{ workbook.id }}">Shared with (<span class="share-count">{{ workbook.shared.all|shared_active_count }}</span>)</button></li>
         {% endif %}
         {% elif workbook.is_public %}
         {# Is a public workbook #}
@@ -36,7 +37,7 @@
         {% else %}
         {# Is a shared workbook #}
         <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#remove-workbook-modal-{{ workbook.id }}">Remove</button></li>
-        <li role="menuitem"><button class="btn btn-link" data-toggle="modal" data-target="#share-workbook-modal-{{ workbook.id }}">Shared with ({{ workbook.shared.count }})</button></li>
+        <li role="menuitem"><button class="btn btn-link" data-toggle="modal" data-target="#share-workbook-modal-{{ workbook.id }}">Shared with (<span class="share-count">{{ workbook.shared.all|shared_active_count }}</span>)</button></li>
         {% endif %}
 
     </ul>
@@ -109,7 +110,7 @@
                      <!-- worksheet description -->
                      <div class="worksheet-header">
                          <p>{{worksheet.description}}</p>
-                        <button class="show-flyout btn btn-default btn-sm pull-right" title="Show Comments">comments ({{ worksheet.comments | length }})</button>
+                        <button class="show-flyout btn btn-default btn-sm pull-right" title="Show Comments">comments (<span class="comment-count">{{ worksheet.comments | length }}</span>)</button>
                      </div>
 
                      <div class="worksheet-body">

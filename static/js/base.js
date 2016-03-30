@@ -98,6 +98,14 @@ require([
         }
     });
 
+    $.createMessage = function(message, messageType) {
+        var message_obj = $('<div class="row">' +
+                            '<div class="col-lg-12">' +
+                            '<div class="alert alert-'+messageType+' alert-dismissible">' +
+                            '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>'
+                            + message + '</div></div></div>');
+        message_obj.prependTo('main > .container');
+    };
     //function openPublicTabOnUrlHash(targetTabID){
     //     // Open public tabs based on url hash
     //    if(window.location.hash && window.location.hash.slice(1) == 'public') {

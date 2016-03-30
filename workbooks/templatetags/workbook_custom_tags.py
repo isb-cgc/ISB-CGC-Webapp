@@ -16,3 +16,11 @@ def user_workbook_count(context):
     workbooks = userWorkbooks | sharedWorkbooks
 
     return workbooks.distinct().count()
+
+@register.filter
+def shared_active_count(shares):
+    count = 0
+    for share in shares:
+        if share.active:
+            count += 1
+    return count
