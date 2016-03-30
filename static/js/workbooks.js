@@ -508,9 +508,6 @@ require([
     $('.update-plot').on('click', function(event){
         if(valid_plot_settings($(this).parent())) {
             var data = get_plot_info_on_page($(this).parent());
-            //update_plot_model(workbook_id, data.worksheet_id, data.plot_id, data.attrs, function(result){
-            //    generate_plot(data.worksheet_id, data.attrs.type, data.attrs.x_axis.url_code, data.attrs.y_axis.url_code, data.attrs.color_by.url_code, data.attrs.cohorts, data.attrs.gene_label);
-
             update_plot_model(workbook_id, data.worksheet_id, data.plot_id, data.attrs, data.selections, function(result){
                 generate_plot({ worksheet_id : data.worksheet_id,
                                 type         : data.attrs.type,
@@ -524,6 +521,10 @@ require([
                 hide_plot_settings();
             });
         }
+    });
+
+    $('.resubmit-button').on("click", function(){
+        $(this).parentsUntil(".worksheet-body").find('.update-plot').click();
     });
 
     /*
@@ -661,7 +662,7 @@ require([
         var legend_selector = '#' + plot_element.prop('id') + ' .legend';
 
         plot_loader.fadeIn();
-//        plotFactory.generate_plot(plot_selector, legend_selector, pair_wise, type, x_var_code, y_var_code, color_by, cohort_ids, gene_label, false, function(){
+        $('.resubmit-button').hide();
         plotFactory.generate_plot({ plot_selector    : plot_selector,
                                     legend_selector  : legend_selector,
                                     pairwise_element : pair_wise,
@@ -671,7 +672,10 @@ require([
                                     color_by         : args.color_by,
                                     gene_label       : args.gene_label,
                                     cohorts          : cohort_ids,
-                                    color_override   : false}, function(){
+                                    color_override   : false}, function(result){
+            if(result.error){
+                $('.resubmit-button').show();
+            }
 
             plot_loader.fadeOut();
         });

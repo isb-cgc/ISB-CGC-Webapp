@@ -239,6 +239,13 @@ nav {
 /********************************************
  * Whole Site Widget Style
  *******************************************/
+.resubmit-button {
+  position :relative;
+  top: -405px;
+  left: 285px;
+  display:none;
+}
+
 .btn {
   text-transform: capitalize;
   overflow: hidden;

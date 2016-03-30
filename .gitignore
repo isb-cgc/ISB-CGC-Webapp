@@ -68,6 +68,7 @@ target/
 .env
 *.env
 scripts/metadata_featdef_tables.sql
+scripts/prod_main_metadata_feature_defs_031516.sql
 
 # dummy datasets
 *.tsv
