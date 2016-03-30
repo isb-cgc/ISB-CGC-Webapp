@@ -363,6 +363,8 @@ def cohort_detail(request, cohort_id=0, workbook_id=0, worksheet_id=0, create_wo
         'token': token
     }
 
+    print >> sys.stderr, clin_attr_dsp
+
     if USER_DATA_ON:
         template_values['user_attr'] = user_attr
 

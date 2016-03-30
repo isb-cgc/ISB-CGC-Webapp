@@ -175,8 +175,8 @@
         </div>
     </div>
     <script type="text/javascript"> 
-{#            var last_login_client_time = new Date("{{ user_details.last_login }}");#}
-{#            document.getElementById('last_login').innerHTML = last_login_client_time; #}
+            var last_login_client_time = new Date("{{ user_details.last_login|safe }}".replace(" ","T"));
+            document.getElementById('last_login').innerHTML = last_login_client_time; 
     </script>
 {% endblock %}
 

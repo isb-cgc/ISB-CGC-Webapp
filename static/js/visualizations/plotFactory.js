@@ -30,7 +30,6 @@ define([
     'histogram_plot',
     'bar_plot',
     'seqpeek_view/seqpeek_view',
-    //'visualizations/mock_histogram_data',
     'select2',
     'assetscore',
     'assetsresponsive'
@@ -408,6 +407,40 @@ define([
         }
     };
 
+    function get_plot_settings(plot_type){
+        var settings = {
+            axis : []
+        };
+        switch (plot_type){
+            case "Bar Chart" : //x_type == 'STRING' && y_type == 'none'
+                settings.axis.push({name : 'x_axis', type : 'CATEGORICAL'});
+                break;
+            case "Histogram" : //((x_type == 'INTEGER' || x_type == 'FLOAT') && y_type == 'none') {
+                settings.axis.push({name : 'x_axis', type : 'NUMERICAL'});
+                break;
+            case 'Scatter Plot': //((x_type == 'INTEGER' || x_type == 'FLOAT') && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
+                settings.axis.push({name : 'x_axis', type : 'NUMERICAL'});
+                settings.axis.push({name : 'y_axis', type : 'NUMERICAL'});
+                break;
+            case "Violin Plot": //(x_type == 'STRING' && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
+                settings.axis.push({name : 'x_axis', type : 'CATEGORICAL'});
+                settings.axis.push({name : 'y_axis', type : 'NUMERICAL'});
+                break;
+            case 'Violin Plot with axis swap'://(y_type == 'STRING' && (x_type == 'INTEGER'|| x_type == 'FLOAT')) {
+                settings.axis.push({name : 'x_axis', type : 'NUMERICAL'});
+                settings.axis.push({name : 'y_axis', type : 'CATEGORICAL'});
+                break;
+            case 'Cubby Hole Plot' : //(x_type == 'STRING' && y_type == 'STRING') {
+                settings.axis.push({name : 'x_axis', type : 'CATEGORICAL'});
+                settings.axis.push({name : 'y_axis', type : 'CATEGORICAL'});
+                break;
+            default :
+                break;
+        };
+
+        return settings;
+    }
+
     function generate_plot(args, callback){ //plot_selector, legend_selector, pairwise_element, type, x_attr, y_attr, color_by, cohorts, cohort_override, callback) {
         var plot_data_url;
         if (args.type == "SeqPeek") {
@@ -453,24 +486,9 @@ define([
         });
     };
 
-    // Update Plot
-    //function updatePlot() {
-    //    var plot = $(this).parents('.plot');
-    //    var x_attr = plot.find('.x-selector').attr('value');
-    //    var y_attr = plot.find('.y-selector').attr('value');
-    //    var color_by = plot.find('.color-selector').attr('value');
-    //    var cohort_override = false;
-    //    if (plot.find('.color-by-cohort').is(':checked')) {
-    //        cohort_override = true;
-    //    }
-    //    var cohorts = $.map(plot.find('.cohort-listing div'), function (d) {
-    //        return $(d).attr('value');
-    //    });
-    //    generate_plot(plot, x_attr, y_attr, color_by, cohorts, cohort_override);
-    //};
-
     return {
-        generate_plot : generate_plot
+        generate_plot     : generate_plot,
+        get_plot_settings : get_plot_settings
     };
 });
 /**
