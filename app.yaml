@@ -27,14 +27,13 @@ resources:
   memory_gb: 2.2
 
 builtins:
-#- django_wsgi: on
 - remote_api: on
 - appstats: on
 - deferred: on
 
 handlers:
 - url: /favicon.ico
-  static_files: static/img/lsdf/favicon.ico
+  static_files: static/img/favicon.ico
   upload: static/imgfavicon.ico
   secure: always
 - url: /static
