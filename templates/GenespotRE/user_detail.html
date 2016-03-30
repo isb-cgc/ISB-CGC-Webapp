@@ -49,10 +49,10 @@
                         <td>Email Address</td>
                         <td>{{ user_details.email }}</td>
                     </tr>
-{#                    <tr>#}
-{#                        <td>Last Logged In</td>#}
-{#                        <td id="last_login">{{ user_details.last_login|safe }} GMT</td>#}
-{#                    </tr>#}
+                    <tr>
+                        <td>Last Logged In</td>
+                        <td id="last_login">{{ user_details.last_login }}</td>
+                    </tr>
                 </table>
             </div>
         </div>
@@ -175,8 +175,8 @@
         </div>
     </div>
     <script type="text/javascript"> 
-            var last_login_client_time = new Date("{{ user_details.last_login|safe }}");
-            document.getElementById('last_login').innerHTML = last_login_client_time; 
+{#            var last_login_client_time = new Date("{{ user_details.last_login }}");#}
+{#            document.getElementById('last_login').innerHTML = last_login_client_time; #}
     </script>
 {% endblock %}
 
