@@ -18,12 +18,12 @@ echo "Creating Django User..."
 mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -e "GRANT SELECT, INSERT, UPDATE, DELETE ON $DATABASE_NAME.* TO \"django\"@\"localhost\" IDENTIFIED BY \"PASSWORD\""
 
 # This is legacy code until these tables can be refactored out of the system
-if [ ! -f ${HOMEROOT}/scripts/metadata_featdef_tables.sql ]; then
+if [ ! -f ${HOMEROOT}/scripts/prod_main_metadata_feature_defs_031516.sql ]; then
 echo "Downloading SQL Table File..."
-wget -q https://storage.googleapis.com/sql-table-dumps/metadata_featuredefs_dev_test_012016.sql -O ${HOMEROOT}/scripts/metadata_featdef_tables.sql
+wget -q https://storage.googleapis.com/sql-table-dumps/prod_main_metadata_feature_defs_031516.sql -O ${HOMEROOT}/scripts/prod_main_metadata_feature_defs_031516.sql
 fi
 echo "Applying SQL Table File... (may take a while)"
-mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/metadata_featdef_tables.sql
+mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/prod_main_metadata_feature_defs_031516.sql
 
 echo "Adding Cohort/Site Data..."
 python ${HOMEROOT}/scripts/add_site_ids.py
