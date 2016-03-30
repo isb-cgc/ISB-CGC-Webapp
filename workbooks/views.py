@@ -234,7 +234,7 @@ def worksheet_display(request, workbook_id=0, worksheet_id=0):
     workbook_model = Workbook.deep_get(workbook_id)
     workbook_model.mark_viewed(request)
     is_shareable = workbook_model.is_shareable(request)
-    print is_shareable
+
     for worksheet in workbook_model.worksheets:
         if str(worksheet.id) == worksheet_id :
             display_worksheet = worksheet

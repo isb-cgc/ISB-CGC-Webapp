@@ -481,7 +481,8 @@ class Worksheet_variable(models.Model):
 
         worksheet_variable_model = cls.objects.create(worksheet_id = worksheet.id,
                                                       name = variable['name'],
-                                                      url_code = variable['code'])
+                                                      url_code = variable['code'],
+                                                      type = variable['type'])
 
         return_obj = {
             'id'            : worksheet_variable_model.id,
