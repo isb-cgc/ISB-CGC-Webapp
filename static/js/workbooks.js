@@ -553,6 +553,10 @@ require([
         }
     });
 
+    $('.resubmit-button').on("click", function(){
+        $(this).parentsUntil(".worksheet-body").find('.update-plot').click();
+    });
+
     /*
      * Gather plot information on the page
      */
@@ -694,6 +698,7 @@ require([
         var legend_selector = '#' + plot_element.prop('id') + ' .legend';
 
         plot_loader.fadeIn();
+        $('.resubmit-button').hide();
         plotFactory.generate_plot({ plot_selector    : plot_selector,
                                     legend_selector  : legend_selector,
                                     pairwise_element : pair_wise,
@@ -703,7 +708,10 @@ require([
                                     color_by         : args.color_by,
                                     gene_label       : args.gene_label,
                                     cohorts          : cohort_ids,
-                                    color_override   : false}, function(){
+                                    color_override   : false}, function(result){
+            if(result.error){
+                $('.resubmit-button').show();
+            }
 
             plot_loader.fadeOut();
         });
