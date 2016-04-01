@@ -463,7 +463,8 @@ define([
                              color_by         : args.cohorts,
                              cohort_override  : args.color_override,
                              data             : data});
-                callback();
+                callback({});
+
             },
             error: function(xhr, status, error) {
                 var width  = 800, //TODO should be based on size of screen
@@ -479,9 +480,9 @@ define([
                             .attr('fill', 'black')
                             .style('font-size', 20)
                             .attr('text-anchor', 'middle')
-                            .attr('transform', 'translate(' + (width/2) + ',' + (height/2) + ')')
-                            .text('There was an error retrieving plot data.');
-                callback();
+                            .attr('transform', 'translate(' + (width/2) + ',' + (height/3.5) + ')')
+                            .text('There was an error retrieving plot data. Please try again');
+                callback({error : true});
             }
         });
     };
