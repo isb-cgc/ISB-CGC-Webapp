@@ -279,9 +279,9 @@ require([
                 var name = plot_settings.axis[axis_index].name;
                 var options;
                 if (name == 'x_axis') {
-                    options = $(element).find('#x-axis-select option');
+                    options = $(element).find('.x-axis-select option');
                 } else if (name == 'y_axis') {
-                    options = $(element).find('#y-axis-select option');
+                    options = $(element).find('.y-axis-select option');
                 }
 
                 options.each(function (i, element) {
@@ -348,26 +348,26 @@ require([
      * Event handler for the Swap button
      */
     $('.swap').click(function(){
-        var x = get_values($(this).parent().find('#x-axis-select').find(":selected"));
-        var y = get_values($(this).parent().find('#y-axis-select').find(":selected"));
-        apply_axis_values($(this).parent().find('#y-axis-select'), x);
-        apply_axis_values($(this).parent().find('#x-axis-select'), y);
+        var x = get_values($(this).parent().find('.x-axis-select').find(":selected"));
+        var y = get_values($(this).parent().find('.y-axis-select').find(":selected"));
+        apply_axis_values($(this).parent().find('.y-axis-select'), x);
+        apply_axis_values($(this).parent().find('.x-axis-select'), y);
     });
 
     /*
      * Event Handlers for X-Axis
      */
     function axis_attribute_change(self){
-        if($(self).attr('id') == 'x-gene-attribute-select'){
+        if($(self).hasClass('x-gene-attribute-select')){
             x_attribute_change(self);
-        } else if($(self).attr('id') == 'y-gene-attribute-select'){
+        } else if($(self).hasClass('y-gene-attribute-select')){
             y_attribute_change(self);
         }
     }
     function axis_select_change(self){
-        if($(self).attr('id') == 'x-axis-select'){
+        if($(self).hasClass('x-axis-select')){
             x_select_change(self);
-        } else if($(self).attr('id') == 'y-axis-select'){
+        } else if($(self).hasClass('y-axis-select')){
             y_select_change(self);
         }
     }
@@ -375,14 +375,14 @@ require([
         var type = $(self).find(":selected").attr('type');
         $(self).parent().find(".attr-options").fadeOut();
         if(type == "gene"){
-            $(self).parent().find("#x-gene-attribute-select").fadeIn();
+            $(self).parent().find(".x-gene-attribute-select").fadeIn();
             var gene = $(self).find(":selected").val();
         } else {
-            $(self).parent().find("#x-gene-attribute-select").fadeOut();
+            $(self).parent().find(".x-gene-attribute-select").fadeOut();
             $(self).parent().find("#x-axis-data-type-container").fadeOut();
         }
     }
-    $('#x-axis-select').change(function(){
+    $('.x-axis-select').change(function(){
         x_select_change(this);
     });
     function x_attribute_change(self){
@@ -390,7 +390,7 @@ require([
         var attr = $(self).find(":selected").val();
         $(self).parent().find("."+attr).fadeIn();
     }
-    $("#x-gene-attribute-select").change(function(){
+    $(".x-gene-attribute-select").change(function(){
         x_attribute_change(this);
     });
 
@@ -400,8 +400,8 @@ require([
     $(".search-term-field").change(function(){
         if($(this).attr('id') != "color_by") {
             var parent = $(this).parents(".main-settings");
-            var x = get_values(parent.find('#x-axis-select').find(":selected"));
-            var y = get_values(parent.find('#y-axis-select').find(":selected"));
+            var x = get_values(parent.find('.x-axis-select').find(":selected"));
+            var y = get_values(parent.find('.y-axis-select').find(":selected"));
             parent.parent().find("#color_by").empty();
             parent.parent().find("#color_by").append('<option value="" disabled selected>Please select an option</option>');
             if (x.type == "common") {
@@ -416,7 +416,7 @@ require([
             }
 
             // Append common variables as well
-            var common_vars = parent.find('#x-axis-select option[type="common"]').each(function() {
+            var common_vars = parent.find('.x-axis-select option[type="common"]').each(function() {
                 var x = get_values($(this));
                 // Check to see that option does not already exist
                 if (parent.parent().find('#color_by option[value="' + x.variable + '"]').length == 0) {
@@ -433,14 +433,14 @@ require([
         $(self).parent().find(".attr-options").fadeOut();
         var type = $(self).find(":selected").attr('type');
         if(type == "gene"){
-            $(self).parent().find("#y-gene-attribute-select").fadeIn();
+            $(self).parent().find(".y-gene-attribute-select").fadeIn();
             var gene = $(self).find(":selected").val();
         } else {
-            $(self).parent().find("#y-gene-attribute-select").fadeOut();
-            $(self).parent().find("#y-axis-data-type-container").fadeOut();
+            $(self).parent().find(".y-gene-attribute-select").fadeOut();
+            $(self).parent().find("#y-data-type-container").fadeOut();
         }
     }
-    $('#y-axis-select').change(function(){
+    $('.y-axis-select').change(function(){
         y_select_change(this);
     });
     function y_attribute_change(self){
@@ -448,7 +448,7 @@ require([
         var attr = $(self).find(":selected").val();
         $(self).parent().find("."+attr).fadeIn();
     }
-    $("#y-gene-attribute-select").change(function(){
+    $(".y-gene-attribute-select").change(function(){
         y_attribute_change(this);
     });
 
@@ -465,7 +465,7 @@ require([
         var datatype        = parent[0].getAttribute('data-field');
         var filterElements  = parent.find('select');
         var variable_name   = self.parents(".variable-container").attr('variable');
-        var gene_selection  = self.parents(".variable-container").find('#' + variable_name).find(":selected").val();
+        var gene_selection  = self.parents(".variable-container").find(":selected").val();
         var filters         = [{ filter : 'gene_name',
                                  value  : gene_selection}];
         $.each(filterElements, function(i, ele){
@@ -565,10 +565,10 @@ require([
 
         function variable_values(label){
             var result;
-            if(parent.find('#'+label).find(":selected").attr("type") == "gene"){
+            if(parent.find('.'+label).find(":selected").attr("type") == "gene"){
                 result = {  url_code : parent.find('[variable="'+ label + '"] #search-term-select').find(":selected").val()};
             } else {
-                result = {  url_code: parent.find('#'+label).find(":selected").val()}
+                result = {  url_code: parent.find('.'+label).find(":selected").val()}
             }
             if (result.url_code == "-- select a variable--"){
                 result.url_code = "";
@@ -580,8 +580,8 @@ require([
             worksheet_id : $(worksheet).find('.update-plot').attr("worksheet_id"),
             plot_id      : $(worksheet).find('.update-plot').attr("plot_id"),
             selections   : {
-                x_axis   : get_values($(worksheet).find('#x-axis-select').find(":selected")),
-                y_axis   : get_values($(worksheet).find('#y-axis-select').find(":selected")),
+                x_axis   : get_values($(worksheet).find('.x-axis-select').find(":selected")),
+                y_axis   : get_values($(worksheet).find('.y-axis-select').find(":selected")),
                 color_by : get_simple_values(parent.find('#color_by')),
                 gene_label: get_simple_values(parent.find('#gene_label'))
             },
@@ -698,7 +698,7 @@ require([
         var legend_selector = '#' + plot_element.prop('id') + ' .legend';
 
         plot_loader.fadeIn();
-        $('.resubmit-button').hide();
+        plot_element.find('.resubmit-button').hide();
         plotFactory.generate_plot({ plot_selector    : plot_selector,
                                     legend_selector  : legend_selector,
                                     pairwise_element : pair_wise,
@@ -710,7 +710,7 @@ require([
                                     cohorts          : cohort_ids,
                                     color_override   : false}, function(result){
             if(result.error){
-                $('.resubmit-button').show();
+                plot_element.find('.resubmit-button').show();
             }
 
             plot_loader.fadeOut();
@@ -728,10 +728,10 @@ require([
 
         //apply values
         if(plot_data.x_axis) {
-            apply_axis_values(plot_element.find('#x-axis-select'), plot_data.x_axis);
+            apply_axis_values(plot_element.find('.x-axis-select'), plot_data.x_axis);
         }
         if(plot_data.y_axis) {
-            apply_axis_values(plot_element.find('#y-axis-select'), plot_data.y_axis);
+            apply_axis_values(plot_element.find('.y-axis-select'), plot_data.y_axis);
         }
         if(plot_data.color_by) {
             apply_axis_values(plot_element.find('#color_by'), plot_data.color_by);
