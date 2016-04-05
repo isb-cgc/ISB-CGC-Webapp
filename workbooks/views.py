@@ -113,6 +113,7 @@ def workbook_create_with_variables(request):
         work_var = Worksheet_variable.objects.create(worksheet_id = worksheet_model.id,
                                           name         = var.name,
                                           url_code     = var.code,
+                                          type         = var.type,
                                           feature_id   = var.feature_id)
 
         work_var.save()
@@ -233,7 +234,7 @@ def worksheet_display(request, workbook_id=0, worksheet_id=0):
     workbook_model = Workbook.deep_get(workbook_id)
     workbook_model.mark_viewed(request)
     is_shareable = workbook_model.is_shareable(request)
-    print is_shareable
+
     for worksheet in workbook_model.worksheets:
         if str(worksheet.id) == worksheet_id :
             display_worksheet = worksheet
@@ -308,7 +309,7 @@ def worksheet_variables(request, workbook_id=0, worksheet_id=0, variable_id=0):
                     result['error'] = "variable favorite does not exist"
 
             #from Select Page
-            if "var_favorites" in request.body : #{"variables_favorites":[{"id":"6"}]}
+            if "var_favorites" in request.body :
                 variable_fav_list = json.loads(request.body)['var_favorites']
                 json_response = True
                 for fav in variable_fav_list:

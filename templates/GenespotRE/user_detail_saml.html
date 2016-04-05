@@ -41,7 +41,7 @@
         </p>
     {% endif %}
     <script type="text/javascript"> 
-            var NIH_assertion_expiration_client_time = new Date("{{ user_details.NIH_assertion_expiration|safe }}");
+            var NIH_assertion_expiration_client_time = new Date("{{ user_details.NIH_assertion_expiration|safe }}".replace(" ","T"));
             document.getElementById('NIH_expiration').innerHTML = NIH_assertion_expiration_client_time; 
     </script>
 {%  endblock %}

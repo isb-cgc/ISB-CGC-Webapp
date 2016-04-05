@@ -363,6 +363,8 @@ def cohort_detail(request, cohort_id=0, workbook_id=0, worksheet_id=0, create_wo
         'token': token
     }
 
+    print >> sys.stderr, clin_attr_dsp
+
     if USER_DATA_ON:
         template_values['user_attr'] = user_attr
 
@@ -585,7 +587,7 @@ def save_cohort(request, workbook_id=None, worksheet_id=None, create_workbook=Fa
             # Check if coming from applying filters and redirect accordingly
             if 'apply-filters' in request.POST:
                 redirect_url = reverse('cohort_details',args=[cohort.id])
-                messages.info(request, 'Filters applied successfully.')
+                messages.info(request, 'Changes applied successfully.')
             else:
                 redirect_url = reverse('cohort_list')
                 messages.info(request, 'Cohort, %s, created successfully.' % cohort.name)
