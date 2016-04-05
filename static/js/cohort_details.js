@@ -120,12 +120,11 @@ require([
             $('.selected-filters .panel-body').append( $this.data('select-filters-item') );
             $('#create-cohort-form .form-control-static').append( $this.data('create-cohort-form-item') );
             $('a.delete-x').on('click', function() {
-                var search_id = $this.parent('span').attr('value');
-                $('#' + search_id).prop('checked', false);
-                $this.parent('span').remove();
+                var checked_box = $('div[data-feature-id="' + $(this).parent('span').data('feature-id') + '"] input[type="checkbox"][data-value-name="' + $(this).parent('span').data('value-name') + '"]');
+                checked_box.prop('checked', false);
+                $(this).parent('span').remove();
                 search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id, undefined, 'v2', api_token);
                 search_helper_obj.update_parsets(base_api_url, 'metadata_platform_list', cohort_id), 'v2';
-                $('#create-cohort-form .form-control-static').find('span[value="' + search_id + '"]').remove();
                 return false;
             });
         } else { // Checkbox unchecked
@@ -175,9 +174,8 @@ require([
         $('#content-panel').removeClass('col-md-12').addClass('col-md-8');
         $('#filter-panel').show();
         $('.selected-filters').show();
-        //$('.menu-bar a[data-target="#apply-filters-modal"]').show();
-        $('#cancel-add-filter-btn').show();
-        //$('.menu-bar .dropdown').hide();
+        $('.page-header').hide();
+        $('input[name="cohort-name"]').show();
         $('#default-cohort-menu').hide();
         $('#edit-cohort-menu').show();
         showHideMoreGraphButton();
@@ -187,10 +185,10 @@ require([
         $('#content-panel').removeClass('col-md-8').addClass('col-md-12');
         $('#filter-panel').hide();
         $('.selected-filters').hide();
-        //$('.menu-bar a[data-target="#apply-filters-modal"]').hide();
+        $('.page-header').show();
+        $('input[name="cohort-name"]').hide();
         $('#default-cohort-menu').show();
         $('#edit-cohort-menu').hide();
-        //$('.menu-bar .dropdown').show();
     });
 
     $('#create-cohort-form, #apply-filters-form').on('submit', function() {
@@ -205,7 +203,9 @@ require([
             form.append($('<input>').attr({ type: 'hidden', name: 'filters', value: JSON.stringify(value)}));
         });
 
+
         if (cohort_id) {
+            $('#apply-filter-cohort-name').prop('value', $('#edit-cohort-name').val());
             form.append('<input type="hidden" name="source" value="' + cohort_id + '" />');
             form.append('<input type="hidden" name="deactivate_sources" value="' + true + '" />');
         }

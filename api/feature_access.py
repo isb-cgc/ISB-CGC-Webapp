@@ -127,9 +127,13 @@ class FeatureAccessEndpoints(remote.Service):
 
             result = searcher.search(parameters)
             items = []
-            fields = ['label', 'internal_feature_id', 'type']
+            fields = ['label', 'internal_feature_id', 'feature_type']
             for row in result:
-                items.append({key: row[key] for key in fields})
+                obj = {key: row[key] for key in fields}
+                print obj
+                if obj['feature_type'] == 'CLIN':
+                    obj['type'] = row['type']
+                items.append(obj)
 
             return FeatureTypeList(items=items)
 
