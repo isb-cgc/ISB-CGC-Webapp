@@ -112,7 +112,7 @@ class VariableFavorite(models.Model):
 class VariableFavorite_Last_View(models.Model):
     variablefavorite = models.ForeignKey(VariableFavorite, blank=False)
     user = models.ForeignKey(User, null=False, blank=False)
-    last_view = models.DateTimeField(auto_now_add=True, auto_now=True)
+    last_view = models.DateTimeField(auto_now=True)
 
 class VariableManager(models.Manager):
     content = "null"
