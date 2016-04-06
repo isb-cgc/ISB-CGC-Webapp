@@ -122,14 +122,30 @@ require([
             $('a.delete-x').on('click', function() {
                 var checked_box = $('div[data-feature-id="' + $(this).parent('span').data('feature-id') + '"] input[type="checkbox"][data-value-name="' + $(this).parent('span').data('value-name') + '"]');
                 checked_box.prop('checked', false);
+                var span_data = $(this).parent('span').data();
                 $(this).parent('span').remove();
+
+                // Remove create cohort form pill
+                $('#create-cohort-form .form-control-static span').each(function() {
+                    if ($(this).data('feature-id') == span_data['feature-id'] && $(this).data('value-name') == span_data['value-name']) {
+                        $(this).remove();
+                    }
+                });
+
                 search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id, undefined, 'v2', api_token);
                 search_helper_obj.update_parsets(base_api_url, 'metadata_platform_list', cohort_id), 'v2';
                 return false;
             });
         } else { // Checkbox unchecked
+            // Remove create cohort form pill
+            $('#create-cohort-form .form-control-static span').each(function() {
+                if ($(this).data('feature-id') == $this.data('create-cohort-form-item').data('feature-id') && $(this).data('value-name') == $this.data('create-cohort-form-item').data('value-name')) {
+                    $(this).remove();
+                }
+            });
             $this.data('select-filters-item').remove();
             $this.data('create-cohort-form-item').remove();
+
         }
         search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id, undefined, 'v2', api_token);
         search_helper_obj.update_parsets(base_api_url, 'metadata_platform_list', cohort_id, 'v2');
