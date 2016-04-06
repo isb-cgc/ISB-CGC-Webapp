@@ -744,12 +744,12 @@ def set_operation(request):
 
             base_patients = Patients.objects.filter(cohort_id=base_id)
             subtract_patients = Patients.objects.filter(cohort_id__in=subtract_ids).distinct()
-            cohort_patients = base_patients.exclude(pk__in=subtract_patients.values_list('pk', flat=True))
+            cohort_patients = base_patients.exclude(patient_id__in=subtract_patients.values_list('patient_id', flat=True))
             patients = cohort_patients.values_list('patient_id', flat=True)
 
             base_samples = Samples.objects.filter(cohort_id=base_id)
             subtract_samples = Samples.objects.filter(cohort_id__in=subtract_ids).distinct()
-            cohort_samples = base_samples.exclude(pk__in=subtract_samples.values_list('pk', flat=True))
+            cohort_samples = base_samples.exclude(sample_id__in=subtract_samples.values_list('sample_id', flat=True))
             samples = cohort_samples.values_list('sample_id', 'study_id')
 
             notes = 'Subtracted '
