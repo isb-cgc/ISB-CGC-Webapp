@@ -42,10 +42,6 @@
             <div class="panel-body">
                 <table class="user-info" role="presentation">
                     <tr>
-                        <td>User ID</td>
-                        <td>{{ user_details.id }}</td>
-                    </tr>
-                    <tr>
                         <td>Name</td>
                         <td>{{ user_details.first_name }} {{ user_details.last_name }}</td>
                     </tr>
@@ -53,10 +49,9 @@
                         <td>Email Address</td>
                         <td>{{ user_details.email }}</td>
                     </tr>
-
                     <tr>
                         <td>Last Logged In</td>
-                        <td id="last_login">{{ user_details.last_login|safe }} GMT</td>
+                        <td id="last_login">{{ user_details.last_login }}</td>
                     </tr>
                 </table>
             </div>

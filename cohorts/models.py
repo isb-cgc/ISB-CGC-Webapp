@@ -99,17 +99,19 @@ class Cohort(models.Model):
     '''
     def get_filters(self):
         filter_list = []
-        # Iterate through all parents
         cohort = self
-        while cohort:
-            filter_list.extend(Filters.objects.filter(resulting_cohort=cohort))
-            sources = Source.objects.filter(cohort=cohort)
-            if sources:
-                cohort = sources[0].parent
-            else:
-                cohort = None
+        # TODO append list of sources in order to accurately gather all filters from mulitple parents, this only looks up one parent all the way up to the root.
+        # Iterate through all parents
+        #
+        # while cohort:
+        #     filter_list.extend(Filters.objects.filter(resulting_cohort=cohort))
+        #     sources = Source.objects.filter(cohort=cohort)
+        #     if sources:
+        #         cohort = sources[0].parent
+        #     else:
+        #         cohort = None
 
-        return filter_list
+        return Filters.objects.filter(resulting_cohort=cohort)
 
     '''
     Returns a list of notes from its parents.
