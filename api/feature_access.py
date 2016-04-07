@@ -130,7 +130,6 @@ class FeatureAccessEndpoints(remote.Service):
             fields = ['label', 'internal_feature_id', 'feature_type']
             for row in result:
                 obj = {key: row[key] for key in fields}
-                print obj
                 if obj['feature_type'] == 'CLIN':
                     obj['type'] = row['type']
                 items.append(obj)
