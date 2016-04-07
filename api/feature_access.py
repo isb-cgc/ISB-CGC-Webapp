@@ -40,7 +40,6 @@ from bq_data_access.feature_search.protein import RPPASearcher
 from bq_data_access.feature_search.microrna_searcher import MIRNSearcher
 from bq_data_access.feature_search.gnab_searcher import GNABSearcher
 
-
 class ClinicalFeatureType(Message):
     feature_type = StringField(1)
     gene = StringField(2)
@@ -71,6 +70,7 @@ class FeatureSearchResult(Message):
     feature_type = StringField(1)
     internal_feature_id = StringField(2)
     label = StringField(3)
+    type  = StringField(4)
 
 class FeatureTypeList(Message):
     items = MessageField(FeatureSearchResult, 1, repeated=True)
@@ -101,14 +101,19 @@ class FeatureDefinitionSearcherFactory(object):
             return MIRNSearcher()
         elif datatype == GNAB_FEATURE_TYPE:
             return GNABSearcher()
+        #TODO build a full search on all features
+        #elif datatype == ALL:
+        #    return FullSearcher()
         raise InvalidDataTypeException("Invalid datatype '{datatype}'".format(datatype=datatype))
 
-FeatureAccessEndpointsAPI = endpoints_api(name='feature_type_api', version='v1')
+FeatureAccessEndpointsAPI = endpoints_api(name='feature_type_api', version='v1',
+                                          description='Endpoints used by the web application to return features.')
 @FeatureAccessEndpointsAPI.api_class(resource_name='feature_type_endpoints')
 class FeatureAccessEndpoints(remote.Service):
     @endpoints_method(FeatureTypeSearchRequest, FeatureTypeList,
                       path='feature_search', http_method='GET', name='feature_access.FeatureSearch')
     def feature_search(self, request):
+        """ Used by the web application."""
         try:
             datatype = request.datatype
             searcher = FeatureDefinitionSearcherFactory.build_from_datatype(datatype)
@@ -122,9 +127,12 @@ class FeatureAccessEndpoints(remote.Service):
 
             result = searcher.search(parameters)
             items = []
-            fields = ['label', 'internal_feature_id']
+            fields = ['label', 'internal_feature_id', 'feature_type']
             for row in result:
-                items.append({key: row[key] for key in fields})
+                obj = {key: row[key] for key in fields}
+                if obj['feature_type'] == 'CLIN':
+                    obj['type'] = row['type']
+                items.append(obj)
 
             return FeatureTypeList(items=items)
 
@@ -147,6 +155,7 @@ class FeatureAccessEndpoints(remote.Service):
     @endpoints_method(FeatureTypeFieldSearchRequest, FeatureFieldSearchResult,
                       path='feature_field_search', http_method='GET', name='feature_access.getFeatureFieldSearch')
     def feature_field_search(self, request):
+        """ Used by the web application."""
         try:
             datatype, keyword, field = request.datatype, request.keyword, request.field
             searcher = FeatureDefinitionSearcherFactory.build_from_datatype(datatype)

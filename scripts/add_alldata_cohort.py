@@ -20,10 +20,11 @@ from argparse import ArgumentParser
 import logging
 import os
 from sys import exit
-from MySQLdb import connect
-from MySQLdb.cursors import DictCursor
 import datetime
 import httplib2
+
+from MySQLdb import connect
+from MySQLdb.cursors import DictCursor
 
 from GenespotRE import secret_settings
 from apiclient.discovery import build
@@ -55,6 +56,10 @@ class BigQueryCohortSupport(object):
         {
             "name": "aliquot_barcode",
             "type": "STRING"
+        },
+        {
+            "name": "study_id",
+            "type": "INTEGER"
         }
     ]
 
@@ -130,6 +135,7 @@ def get_mysql_connection():
 
 
 def get_existing_alldata_cohort_mysql(conn, cohort_name):
+
     cursor = conn.cursor(DictCursor)
     cursor.execute('select id from cohorts_cohort where name=%s', [cohort_name])
     cohort_id = cursor.fetchone()
@@ -153,7 +159,7 @@ def get_superuser_id(conn, superuser_name):
 def get_sample_barcodes(conn):
     logging.info("Getting list of sample barcodes from MySQL")
     cursor = conn.cursor(DictCursor)
-    select_samples_str = 'SELECT distinct SampleBarcode from metadata_samples;'
+    select_samples_str = 'SELECT distinct SampleBarcode from metadata_samples where Project="TCGA";'
     cursor.execute(select_samples_str)
     rows = cursor.fetchall()
     cursor.close()
@@ -161,7 +167,7 @@ def get_sample_barcodes(conn):
 
 def get_patient_barcodes(conn):
     cursor = conn.cursor(DictCursor)
-    select_patients_str = 'SELECT DISTINCT ParticipantBarcode from metadata_samples;'
+    select_patients_str = 'SELECT DISTINCT ParticipantBarcode from metadata_samples where Project="TCGA";'
     cursor.execute(select_patients_str)
     rows = cursor.fetchall()
     cursor.close()

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
+{% load custom_tags %}
 {% load tz %}
-
 {% comment %}
 
    Copyright 2015, Institute for Systems Biology
@@ -21,7 +21,7 @@
 {% endcomment %}
 
 {% block header %}
-{#    <script type="text/javascript" src="{% static 'js/user_details.js' %}"></script>#}
+
 {% endblock %}
 
 {% block link_page_name %}user-details{% endblock %}
@@ -42,10 +42,6 @@
             <div class="panel-body">
                 <table class="user-info" role="presentation">
                     <tr>
-                        <td>User ID</td>
-                        <td>{{ user_details.id }}</td>
-                    </tr>
-                    <tr>
                         <td>Name</td>
                         <td>{{ user_details.first_name }} {{ user_details.last_name }}</td>
                     </tr>
@@ -53,15 +49,10 @@
                         <td>Email Address</td>
                         <td>{{ user_details.email }}</td>
                     </tr>
-
                     <tr>
                         <td>Last Logged In</td>
-                        <td>{{ user_details.last_login|localtime }}</td>
+                        <td id="last_login">{{ user_details.last_login }}</td>
                     </tr>
-{#                    <tr>#}
-{#                        <td>Date Joined</td>#}
-{#                        <td>{{ user_details.date_joined|localtime }}</td>#}
-{#                    </tr>#}
                 </table>
             </div>
         </div>
@@ -92,7 +83,7 @@
             <div class="panel-body">
                 {% if True %}
                     <p>
-                        <a href="https://groups.google.com/a/isb-cgc.org/forum/#!newtopic/request-gcp" target="_blank">Request</a> a Google Cloud Project to start uploading your own datasets, setup your own virtual machines and run custom processing pipelines on TCGA data.
+                        Apply for "cloud credits" and your own Google Cloud project by submitting a request <a href="https://groups.google.com/a/isb-cgc.org/forum/#!newtopic/request-gcp" target="_blank">here</a>.
                     </p>
                 {% else %}
                     <p><i class="fa fa-check-circle"></i> Connected to Google Cloud Platform</p>
@@ -183,7 +174,10 @@
             </div>
         </div>
     </div>
-
+    <script type="text/javascript"> 
+            var last_login_client_time = new Date("{{ user_details.last_login|safe }}".replace(" ","T"));
+            document.getElementById('last_login').innerHTML = last_login_client_time; 
+    </script>
 {% endblock %}
 
 {% block js_file %}{% static 'js/user_details.js' %}{% endblock %}

@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+{% block title %}Genes Favorite Details | ISB-CGC{% endblock %}}
+{% block extra_css_libs %}{% endblock %}
+{% block header %}{% endblock %}
+
+{% block link_page_name %}genes_detail{% endblock %}
+{% block page_name %}genes_detail{% endblock %}
+
+{% block page_header %}
+<div class="container">
+    <ol class="breadcrumb">
+        <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+        {% if workbook %}
+            <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
+            <li><a href="{% url 'worksheet_display' workbook.id worksheet.id %}">{{ workbook.name }}</a></li>
+            <li><a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Saved Gene Favorites</a></li>
+        {% elif new_workbook %}
+            <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
+            <li><a href="{% url 'gene_select_for_new_workbook' %}">Saved Gene Favorites</a></li>
+        {% else %}
+            <li><a href="{% url 'genes' %}">Saved Gene Favorites</a></li>
+        {% endif %}
+    </ol>
+    <h1 class="page-header">Gene Favorite Details</h1>
+</div>
+{% endblock %}
+{% block content %}
+<div class="container">
+
+    <section class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">{{gene_favorite.name}}</h4>
+        </div>
+        <div class="panel-body">
+            <div>
+                <h5>Selected Genes</h5>
+                <ul>
+                    {% for gene in gene_favorite.genes  %}
+                        <li class="delete-x filter-label label label-default">{{gene.name}}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div>
+                <ul class="page-action-group">
+                    {% if not workbook and not new_workbook %}
+                        <li><a class="btn btn-info" href="{% url 'gene_fav_edit' gene_favorite.id %}"><i class="fa fa-pencil"></i> Edit</a></li>
+                        <li><a data-toggle="modal" data-target="#delete-favorite-modal" class="btn btn-info">Delete</a></li>
+                    {% endif %}
+                    <li role="menuitem">
+                        {% if not workbook %}
+                            <a data-toggle="modal" data-target="#new-favorite-workbook-modal" class="btn btn-default">Apply to New Workbook</a>
+                        {% else %}
+                            <form action="{% url 'worksheet_genes_edit' workbook.id worksheet.id %}" method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="gene_list_id" value="{{ gene_favorite.id }}">
+                                <button class="btn btn-default" type="submit"><i class="fa fa-plus"></i>Apply to Analysis</button>
+                                <a class="btn btn-info"  href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Back</a>
+                            </form>
+                        {% endif %}
+                    </li>
+                    <li class="pull-right"><a class="btn btn-link" href="http://www.genenames.org/" target="_blank">View System Gene Identifier</a></li>
+                </ul>
+            </div>
+        </div>
+    </section>
+</div>
+    <!-- Delete variable modal -->
+<div class="modal fade" id="delete-favorite-modal" tabindex="-1" role="dialog" aria-labelledby="delete-favorite-header" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Delete this gene favorite "{{ gene_favorite.name|title }}"?</h4>
+            </div>
+            <form id="delete-workbook" method="POST" action="{% url 'gene_fav_delete' gene_favorite.id %}">
+                {% csrf_token %}
+                <div class="modal-footer">
+                    <input type="submit" value="Delete" class="btn btn-primary" />
+                    <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Create new workbook using favorite Modal -->
+<div class="modal fade" id="new-favorite-workbook-modal" tabindex="-1" role="dialog" aria-labelledby="edit-workbook-header" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Create a new workbook using the gene favorite "{{ gene_favorite.name|title }}"</h4>
+            </div>
+            <form id="edit-workbook" method="POST" action="{% url 'worksheet_create_with_genes' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <label for="name">Name (required)</label>
+                    <input class="form-control" type="text" name="name" value="{{ gene_favorite.name }} workbook"/>
+                    <input type="hidden" name="gene_list_id" value="{{ gene_favorite.id }}" />
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" value="Create Workbook" class="btn btn-primary" />
+                    <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js_file %}{% static 'js/base.js' %}{% endblock %}

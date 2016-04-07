@@ -96,7 +96,7 @@ def build_query(project_name, dataset_name, table_name, gene_symbol, value_field
          "AND SampleBarcode IN ( "
          "    SELECT sample_barcode "
          "    FROM [{project_name}:{cohort_dataset}.{cohort_table}] "
-         "    WHERE cohort_id IN ({cohort_id_list}) "
+         "    WHERE cohort_id IN ({cohort_id_list})  AND study_id IS NULL"
          ") ")
 
     query = query_template.format(dataset_name=dataset_name, project_name=project_name, table_name=table_name,
@@ -156,7 +156,7 @@ class MRNAFeatureProvider(object):
     def get_data_from_bigquery(self, cohort_id_array, cohort_dataset, cohort_table):
         project_id = settings.BQ_PROJECT_ID
         project_name = settings.BIGQUERY_PROJECT_NAME
-        dataset_name = settings.BIGQUERY_DATASET2
+        dataset_name = settings.BIGQUERY_DATASET
         result = do_query(project_id, project_name, dataset_name, self.table_name, self.gene_label, self.value_field,
                           cohort_dataset, cohort_table, cohort_id_array)
         return result

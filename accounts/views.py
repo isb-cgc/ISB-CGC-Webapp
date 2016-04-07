@@ -39,6 +39,7 @@ def extended_logout_view(request):
     try:
         nih_user = NIH_User.objects.get(user_id=request.user.id)
         nih_user.active = False
+        nih_user.dbGaP_authorized = False
         nih_user.save()
         logger.info("NIH user {} inactivated".format(nih_user.NIH_username))
     except (ObjectDoesNotExist, MultipleObjectsReturned), e:

@@ -25,8 +25,13 @@ from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.contrib.auth.models import User as Django_User
 from accounts.models import NIH_User
 from cohorts.models import Cohort_Perms,  Cohort as Django_Cohort,Patients, Samples, Filters
+from projects.models import Study, User_Feature_Definitions, User_Feature_Counts, User_Data_Tables
+from django.core.signals import request_finished
 import django
 import logging
+import re
+import json
+import traceback
 
 from api_helpers import *
 
@@ -34,8 +39,9 @@ logger = logging.getLogger(__name__)
 
 debug = settings.DEBUG
 
+INSTALLED_APP_CLIENT_ID = settings.INSTALLED_APP_CLIENT_ID
 OPEN_DATA_BUCKET = settings.OPEN_DATA_BUCKET
-CONTROLLED_DATA_BUCKET = settings.CONTROLLED_DATA_BUCKET
+#CONTROLLED_DATA_BUCKET = settings.CONTROLLED_DATA_BUCKET
 
 METADATA_SHORTLIST = [
     # 'adenocarcinoma_invasion',
@@ -475,117 +481,119 @@ class MetadataItem(messages.Message):
 Incoming object needs to use age that's a string (eg. 10_to_39)
 '''
 class IncomingMetadataItem(messages.Message):
-    adenocarcinoma_invasion                                         = messages.StringField(1)
-    age_at_initial_pathologic_diagnosis                             = messages.StringField(2)
-    anatomic_neoplasm_subdivision                                   = messages.StringField(3)
-    avg_percent_lymphocyte_infiltration                             = messages.FloatField(4)
-    avg_percent_monocyte_infiltration                               = messages.FloatField(5)
-    avg_percent_necrosis                                            = messages.FloatField(6)
-    avg_percent_neutrophil_infiltration                             = messages.FloatField(7)
-    avg_percent_normal_cells                                        = messages.FloatField(8)
-    avg_percent_stromal_cells                                       = messages.FloatField(9)
-    avg_percent_tumor_cells                                         = messages.FloatField(10)
-    avg_percent_tumor_nuclei                                        = messages.FloatField(11)
-    batch_number                                                    = messages.IntegerField(12)
-    bcr                                                             = messages.StringField(13)
-    clinical_M                                                      = messages.StringField(14)
-    clinical_N                                                      = messages.StringField(15)
-    clinical_stage                                                  = messages.StringField(16)
-    clinical_T                                                      = messages.StringField(17)
-    colorectal_cancer                                               = messages.StringField(18)
-    country                                                         = messages.StringField(19)
-    country_of_procurement                                          = messages.StringField(20)
-    days_to_birth                                                   = messages.IntegerField(21)
-    days_to_collection                                              = messages.IntegerField(22)
-    # days_to_sample_procurement                                    = messages.IntegerField(23)
-    days_to_death                                                   = messages.IntegerField(23)
-    days_to_initial_pathologic_diagnosis                            = messages.IntegerField(24)
-    days_to_last_followup                                           = messages.IntegerField(25)
-    days_to_submitted_specimen_dx                                   = messages.IntegerField(26)
-    Study                                                           = messages.StringField(27)
-    ethnicity                                                       = messages.StringField(28)
-    frozen_specimen_anatomic_site                                   = messages.StringField(29)
-    gender                                                          = messages.StringField(30)
-    height                                                          = messages.IntegerField(31)
-    histological_type                                               = messages.StringField(32)
-    history_of_colon_polyps                                         = messages.StringField(33)
-    history_of_neoadjuvant_treatment                                = messages.StringField(34)
-    history_of_prior_malignancy                                     = messages.StringField(35)
-    hpv_calls                                                       = messages.StringField(36)
-    hpv_status                                                      = messages.StringField(37)
-    icd_10                                                          = messages.StringField(38)
-    icd_o_3_histology                                               = messages.StringField(39)
-    icd_o_3_site                                                    = messages.StringField(40)
-    lymph_node_examined_count                                       = messages.IntegerField(41)
-    lymphatic_invasion                                              = messages.StringField(42)
-    lymphnodes_examined                                             = messages.StringField(43)
-    lymphovascular_invasion_present                                 = messages.StringField(44)
-    max_percent_lymphocyte_infiltration                             = messages.IntegerField(45)
-    max_percent_monocyte_infiltration                               = messages.IntegerField(46)
-    max_percent_necrosis                                            = messages.IntegerField(47)
-    max_percent_neutrophil_infiltration                             = messages.IntegerField(48)
-    max_percent_normal_cells                                        = messages.IntegerField(49)
-    max_percent_stromal_cells                                       = messages.IntegerField(50)
-    max_percent_tumor_cells                                         = messages.IntegerField(51)
-    max_percent_tumor_nuclei                                        = messages.IntegerField(52)
-    menopause_status                                                = messages.StringField(53)
-    min_percent_lymphocyte_infiltration                             = messages.IntegerField(54)
-    min_percent_monocyte_infiltration                               = messages.IntegerField(55)
-    min_percent_necrosis                                            = messages.IntegerField(56)
-    min_percent_neutrophil_infiltration                             = messages.IntegerField(57)
-    min_percent_normal_cells                                        = messages.IntegerField(58)
-    min_percent_stromal_cells                                       = messages.IntegerField(59)
-    min_percent_tumor_cells                                         = messages.IntegerField(60)
-    min_percent_tumor_nuclei                                        = messages.IntegerField(61)
-    mononucleotide_and_dinucleotide_marker_panel_analysis_status    = messages.StringField(62)
-    mononucleotide_marker_panel_analysis_status                     = messages.StringField(63)
-    neoplasm_histologic_grade                                       = messages.StringField(64)
-    new_tumor_event_after_initial_treatment                         = messages.StringField(65)
-    number_of_lymphnodes_examined                                   = messages.IntegerField(66)
-    number_of_lymphnodes_positive_by_he                             = messages.IntegerField(67)
-    ParticipantBarcode                                              = messages.StringField(68)
-    pathologic_M                                                    = messages.StringField(69)
-    pathologic_N                                                    = messages.StringField(70)
-    pathologic_stage                                                = messages.StringField(71)
-    pathologic_T                                                    = messages.StringField(72)
-    person_neoplasm_cancer_status                                   = messages.StringField(73)
-    pregnancies                                                     = messages.StringField(74)
-    preservation_method                                             = messages.StringField(75)
-    primary_neoplasm_melanoma_dx                                    = messages.StringField(76)
-    primary_therapy_outcome_success                                 = messages.StringField(77)
-    prior_dx                                                        = messages.StringField(78)
-    Project                                                         = messages.StringField(79)
-    psa_value                                                       = messages.FloatField(80)
-    race                                                            = messages.StringField(81)
-    residual_tumor                                                  = messages.StringField(82)
-    SampleBarcode                                                   = messages.StringField(83)
-    tobacco_smoking_history                                         = messages.StringField(86)
-    total_number_of_pregnancies                                     = messages.IntegerField(87)
-    tumor_tissue_site                                               = messages.StringField(88)
-    tumor_pathology                                                 = messages.StringField(89)
-    tumor_type                                                      = messages.StringField(90)
-    weiss_venous_invasion                                                 = messages.StringField(91)
-    vital_status                                                    = messages.StringField(92)
-    weight                                                          = messages.IntegerField(93)
-    year_of_initial_pathologic_diagnosis                            = messages.StringField(94)
-    SampleTypeCode                                                  = messages.StringField(95)
-    has_Illumina_DNASeq                                             = messages.StringField(96)
-    has_BCGSC_HiSeq_RNASeq                                          = messages.StringField(97)
-    has_UNC_HiSeq_RNASeq                                            = messages.StringField(98)
-    has_BCGSC_GA_RNASeq                                             = messages.StringField(99)
-    has_UNC_GA_RNASeq                                               = messages.StringField(100)
-    has_HiSeq_miRnaSeq                                              = messages.StringField(101)
-    has_GA_miRNASeq                                                 = messages.StringField(102)
-    has_RPPA                                                        = messages.StringField(103)
-    has_SNP6                                                        = messages.StringField(104)
-    has_27k                                                         = messages.StringField(105)
-    has_450k                                                        = messages.StringField(106)
+    age_at_initial_pathologic_diagnosis                             = messages.StringField(1, repeated=True)
+    anatomic_neoplasm_subdivision                                   = messages.StringField(2, repeated=True)
+    avg_percent_lymphocyte_infiltration                             = messages.FloatField(3, repeated=True)
+    avg_percent_monocyte_infiltration                               = messages.FloatField(4, repeated=True)
+    avg_percent_necrosis                                            = messages.FloatField(5, repeated=True)
+    avg_percent_neutrophil_infiltration                             = messages.FloatField(6, repeated=True)
+    avg_percent_normal_cells                                        = messages.FloatField(7, repeated=True)
+    avg_percent_stromal_cells                                       = messages.FloatField(8, repeated=True)
+    avg_percent_tumor_cells                                         = messages.FloatField(9, repeated=True)
+    avg_percent_tumor_nuclei                                        = messages.FloatField(10, repeated=True)
+    batch_number                                                    = messages.IntegerField(11, repeated=True)
+    bcr                                                             = messages.StringField(12, repeated=True)
+    clinical_M                                                      = messages.StringField(13, repeated=True)
+    clinical_N                                                      = messages.StringField(14, repeated=True)
+    clinical_stage                                                  = messages.StringField(15, repeated=True)
+    clinical_T                                                      = messages.StringField(16, repeated=True)
+    colorectal_cancer                                               = messages.StringField(17, repeated=True)
+    country                                                         = messages.StringField(18, repeated=True)
+    days_to_birth                                                   = messages.IntegerField(19, repeated=True)
+    days_to_collection                                              = messages.IntegerField(20, repeated=True)
+    days_to_death                                                   = messages.IntegerField(21, repeated=True)
+    days_to_initial_pathologic_diagnosis                            = messages.IntegerField(22, repeated=True)
+    days_to_last_followup                                           = messages.IntegerField(23, repeated=True)
+    days_to_submitted_specimen_dx                                   = messages.IntegerField(24, repeated=True)
+    Study                                                           = messages.StringField(25, repeated=True)
+    ethnicity                                                       = messages.StringField(26, repeated=True)
+    frozen_specimen_anatomic_site                                   = messages.StringField(27, repeated=True)
+    gender                                                          = messages.StringField(28, repeated=True)
+    height                                                          = messages.IntegerField(29, repeated=True)
+    histological_type                                               = messages.StringField(30, repeated=True)
+    history_of_colon_polyps                                         = messages.StringField(31, repeated=True)
+    history_of_neoadjuvant_treatment                                = messages.StringField(32, repeated=True)
+    history_of_prior_malignancy                                     = messages.StringField(33, repeated=True)
+    hpv_calls                                                       = messages.StringField(34, repeated=True)
+    hpv_status                                                      = messages.StringField(35, repeated=True)
+    icd_10                                                          = messages.StringField(36, repeated=True)
+    icd_o_3_histology                                               = messages.StringField(37, repeated=True)
+    icd_o_3_site                                                    = messages.StringField(38, repeated=True)
+    lymphatic_invasion                                              = messages.StringField(39, repeated=True)
+    lymphnodes_examined                                             = messages.StringField(40, repeated=True)
+    lymphovascular_invasion_present                                 = messages.StringField(41, repeated=True)
+    max_percent_lymphocyte_infiltration                             = messages.IntegerField(42, repeated=True)
+    max_percent_monocyte_infiltration                               = messages.IntegerField(43, repeated=True)
+    max_percent_necrosis                                            = messages.IntegerField(44, repeated=True)
+    max_percent_neutrophil_infiltration                             = messages.IntegerField(45, repeated=True)
+    max_percent_normal_cells                                        = messages.IntegerField(46, repeated=True)
+    max_percent_stromal_cells                                       = messages.IntegerField(47, repeated=True)
+    max_percent_tumor_cells                                         = messages.IntegerField(48, repeated=True)
+    max_percent_tumor_nuclei                                        = messages.IntegerField(49, repeated=True)
+    menopause_status                                                = messages.StringField(50, repeated=True)
+    min_percent_lymphocyte_infiltration                             = messages.IntegerField(51, repeated=True)
+    min_percent_monocyte_infiltration                               = messages.IntegerField(52, repeated=True)
+    min_percent_necrosis                                            = messages.IntegerField(53, repeated=True)
+    min_percent_neutrophil_infiltration                             = messages.IntegerField(54, repeated=True)
+    min_percent_normal_cells                                        = messages.IntegerField(55, repeated=True)
+    min_percent_stromal_cells                                       = messages.IntegerField(56, repeated=True)
+    min_percent_tumor_cells                                         = messages.IntegerField(57, repeated=True)
+    min_percent_tumor_nuclei                                        = messages.IntegerField(58, repeated=True)
+    mononucleotide_and_dinucleotide_marker_panel_analysis_status    = messages.StringField(59, repeated=True)
+    mononucleotide_marker_panel_analysis_status                     = messages.StringField(60, repeated=True)
+    neoplasm_histologic_grade                                       = messages.StringField(61, repeated=True)
+    new_tumor_event_after_initial_treatment                         = messages.StringField(62, repeated=True)
+    number_of_lymphnodes_examined                                   = messages.IntegerField(63, repeated=True)
+    number_of_lymphnodes_positive_by_he                             = messages.IntegerField(64, repeated=True)
+    ParticipantBarcode                                              = messages.StringField(65, repeated=True)
+    pathologic_M                                                    = messages.StringField(66, repeated=True)
+    pathologic_N                                                    = messages.StringField(67, repeated=True)
+    pathologic_stage                                                = messages.StringField(68, repeated=True)
+    pathologic_T                                                    = messages.StringField(69, repeated=True)
+    person_neoplasm_cancer_status                                   = messages.StringField(70, repeated=True)
+    pregnancies                                                     = messages.StringField(71, repeated=True)
+    primary_neoplasm_melanoma_dx                                    = messages.StringField(72, repeated=True)
+    primary_therapy_outcome_success                                 = messages.StringField(73, repeated=True)
+    prior_dx                                                        = messages.StringField(74, repeated=True)
+    Project                                                         = messages.StringField(75, repeated=True)
+    psa_value                                                       = messages.FloatField(76, repeated=True)
+    race                                                            = messages.StringField(77, repeated=True)
+    residual_tumor                                                  = messages.StringField(78, repeated=True)
+    SampleBarcode                                                   = messages.StringField(79, repeated=True)
+    tobacco_smoking_history                                         = messages.StringField(80, repeated=True)
+    tumor_tissue_site                                               = messages.StringField(81, repeated=True)
+    tumor_type                                                      = messages.StringField(82, repeated=True)
+    weiss_venous_invasion                                           = messages.StringField(83, repeated=True)
+    vital_status                                                    = messages.StringField(84, repeated=True)
+    weight                                                          = messages.IntegerField(85, repeated=True)
+    year_of_initial_pathologic_diagnosis                            = messages.StringField(86, repeated=True)
+    SampleTypeCode                                                  = messages.StringField(87, repeated=True)
+    has_Illumina_DNASeq                                             = messages.StringField(88, repeated=True)
+    has_BCGSC_HiSeq_RNASeq                                          = messages.StringField(89, repeated=True)
+    has_UNC_HiSeq_RNASeq                                            = messages.StringField(90, repeated=True)
+    has_BCGSC_GA_RNASeq                                             = messages.StringField(91, repeated=True)
+    has_UNC_GA_RNASeq                                               = messages.StringField(92, repeated=True)
+    has_HiSeq_miRnaSeq                                              = messages.StringField(93, repeated=True)
+    has_GA_miRNASeq                                                 = messages.StringField(94, repeated=True)
+    has_RPPA                                                        = messages.StringField(95, repeated=True)
+    has_SNP6                                                        = messages.StringField(96, repeated=True)
+    has_27k                                                         = messages.StringField(97, repeated=True)
+    has_450k                                                        = messages.StringField(98, repeated=True)
+
+class MetadataAttributeValues(messages.Message):
+    name = messages.StringField(1)
+    id = messages.StringField(2)
+    values = messages.MessageField(MetaValueListCount, 3, repeated=True)
+    total = messages.IntegerField(4)
 
 class MetadataItemList(messages.Message):
     items = messages.MessageField(MetadataItem, 1, repeated=True)
     count = messages.MessageField(MetaAttrValuesList, 2)
     total = messages.IntegerField(3)
 
+class MetadataCountsItem(messages.Message):
+    count = messages.MessageField(MetadataAttributeValues, 1, repeated=True)
+    total = messages.IntegerField(2)
 
 class MetaDomainsList(messages.Message):
     gender                                      = messages.StringField(1, repeated=True)
@@ -622,17 +630,24 @@ class MetaDomainsList(messages.Message):
     has_27k                                     = messages.StringField(32, repeated=True)
     has_450k                                    = messages.StringField(33, repeated=True)
 
+class SampleBarcodeItem(messages.Message):
+    sample_barcode = messages.StringField(1)
+    study_id = messages.IntegerField(2)
 
 class MetadataAttr(messages.Message):
     attribute = messages.StringField(1)
     code = messages.StringField(2)
     spec = messages.StringField(3)
+    key = messages.StringField(4)
 
 
 class MetadataAttrList(messages.Message):
     items = messages.MessageField(MetadataAttr, 1, repeated=True)
     count = messages.IntegerField(2)
 
+class SampleBarcodeList(messages.Message):
+    items = messages.MessageField(SampleBarcodeItem, 1, repeated=True)
+    count = messages.IntegerField(2)
 
 class MetadataPlatformItem(messages.Message):
     DNAseq_data = messages.StringField(1)
@@ -642,12 +657,10 @@ class MetadataPlatformItem(messages.Message):
     mirnPlatform = messages.StringField(5)
     rppaPlatform = messages.StringField(6)
 
-
 class MetadataPlatformItemList(messages.Message):
     items = messages.MessageField(MetadataPlatformItem, 1, repeated=True)
 
 def createDataItem(data, selectors):
-
     if len(selectors):
         item = MetadataItem()
         for attr in selectors:
@@ -677,7 +690,7 @@ def generateSQLQuery(request):
     # Check for passed in saved search id
     if request.__getattribute__('cohort_id') is not None:
         cohort_id = str(request.cohort_id)
-        sample_query_str = 'SELECT sample_id FROM cohorts_samples WHERE cohort_id=%s;'
+        sample_query_str = 'SELECT sample_id FROM cohorts_samples WHERE cohort_id=%s AND study_id IS NULL;'
 
         try:
             cursor = db.cursor(MySQLdb.cursors.DictCursor)
@@ -818,7 +831,30 @@ class IncomingPlatformSelection(messages.Message):
     RocheGSFLX_DNASeq                   = messages.StringField(30)
 
 
-Meta_Endpoints = endpoints.api(name='meta_api', version='v1')
+def get_current_user(request):
+    user_email = None
+    user_id = None
+    if endpoints.get_current_user() is not None:
+        user_email = endpoints.get_current_user().email()
+
+    # users have the option of pasting the access token in the query string
+    # or in the 'token' field in the api explorer
+    # but this is not required
+    access_token = request.__getattribute__('token')
+    if access_token:
+        user_email = get_user_email_from_token(access_token)
+
+    if user_email or user_id:
+        django.setup()
+        try:
+            return Django_User.objects.get(email=user_email)
+        except (ObjectDoesNotExist, MultipleObjectsReturned), e:
+            logger.warn(e)
+
+    return None
+
+Meta_Endpoints = endpoints.api(name='meta_api', version='v1', description='Metadata endpoints used by the web application.',
+                               allowed_client_ids=[INSTALLED_APP_CLIENT_ID, endpoints.API_EXPLORER_CLIENT_ID])
 
 @Meta_Endpoints.api_class(resource_name='meta_endpoints')
 class Meta_Endpoints_API(remote.Service):
@@ -830,6 +866,7 @@ class Meta_Endpoints_API(remote.Service):
                       path='metadata_platform_list', http_method='GET',
                       name='meta.metadata_platform_list')
     def metadata_platform_list(self, request):
+        """ Used by the web application."""
         query_dict = {}
         sample_ids = None
 
@@ -855,11 +892,14 @@ class Meta_Endpoints_API(remote.Service):
         # Get the list of valid parameters from request
         for key, value in MetadataItem.__dict__.items():
             if not key.startswith('_'):
-                if request.__getattribute__(key) is not None:
+                if request.__getattribute__(key) is not None and len(request.__getattribute__(key)) > 0:
+                    values = []
+                    for val in request.__getattribute__(key):
+                        values.append(val)
                     if key.startswith('has_'):
-                        query_dict[key] = '1' if request.__getattribute__(key) == 'True' else '0'
+                        query_dict[key] = '1' if values[0] == 'True' else '0'
                     else:
-                        query_dict[key] = request.__getattribute__(key).replace('_', ' ')
+                        query_dict[key] = ','.join(values).replace('_', ' ')
                     # combinations: has_UNC_HiSeq_RNASeq and has_UNC_GA_RNASeq 20 rows
                     # has_UNC_HiSeq_RNASeq and has_BCGSC_GA_RNASeq 209 rows
                     # has_BCGSC_HiSeq_RNASeq and has_UNC_HiSeq_RNASeq 919 rows
@@ -948,7 +988,8 @@ class Meta_Endpoints_API(remote.Service):
             return MetadataPlatformItemList(items=data)
 
         except (IndexError, TypeError) as e:
-            print e
+            if cursor: cursor.close()
+            if db: db.close()
             raise endpoints.NotFoundException('Sample not found.')
 
 
@@ -962,6 +1003,7 @@ class Meta_Endpoints_API(remote.Service):
                       path='metadata_list', http_method='GET',
                       name='meta.metadata_list')
     def metadata_list(self, request):
+        """ Used by the web application."""
         select = '*'
         query_dict = {}
         selector_list = []  # todo: determine use or delete this
@@ -970,8 +1012,6 @@ class Meta_Endpoints_API(remote.Service):
         db = sql_connection()
         query_str, value_tuple, selector_list = generateSQLQuery(request)
         if debug: print >> sys.stderr,query_str
-
-        print query_str
 
         try:
             cursor = db.cursor(MySQLdb.cursors.DictCursor)
@@ -1091,7 +1131,8 @@ class Meta_Endpoints_API(remote.Service):
             return MetadataItemList(items=data, total=len(data))
 
         except (IndexError, TypeError) as e:
-            print e
+            if cursor: cursor.close()
+            if db: db.close()
             raise endpoints.NotFoundException('Sample not found.')
 
 
@@ -1102,17 +1143,18 @@ class Meta_Endpoints_API(remote.Service):
                           path='metadata_counts', http_method='GET',
                       name='meta.metadata_counts')
     def metadata_counts(self, request):
-
+        """ Used by the web application."""
         query_dict = {}
         sample_ids = None
         is_landing = False
-        db = sql_connection()
+
 
         if request.__getattribute__('is_landing') is not None:
             is_landing = request.__getattribute__('is_landing')
 
         if is_landing:
             try:
+                db = sql_connection()
                 cursor = db.cursor()
                 cursor.execute('SELECT Study, COUNT(Study) as disease_count FROM metadata_samples GROUP BY Study;')
                 data = []
@@ -1125,10 +1167,13 @@ class Meta_Endpoints_API(remote.Service):
 
                 attr_values_list = MetaAttrValuesList(Study=data)
 
+                cursor.close()
+                db.close()
+
                 return MetadataItemList(count=attr_values_list)
 
             except (IndexError, TypeError) as e:
-                print e
+
                 raise endpoints.NotFoundException('Error in getting landing data.')
 
         # Check for passed in saved search id
@@ -1137,15 +1182,17 @@ class Meta_Endpoints_API(remote.Service):
             sample_query_str = 'SELECT sample_id FROM cohorts_samples WHERE cohort_id=%s;'
 
             try:
+                db = sql_connection()
                 cursor = db.cursor(MySQLdb.cursors.DictCursor)
                 cursor.execute(sample_query_str, (cohort_id,))
                 sample_ids = ()
 
                 for row in cursor.fetchall():
                     sample_ids += (row['sample_id'],)
+                cursor.close()
+                db.close()
 
             except (TypeError, IndexError) as e:
-                print e
                 raise endpoints.NotFoundException('Error in retrieving barcodes.')
 
 
@@ -1182,6 +1229,7 @@ class Meta_Endpoints_API(remote.Service):
             value_count_query_str += ' GROUP BY %s;' % key
 
             try:
+                db = sql_connection()
                 cursor = db.cursor()
                 cursor.execute(value_count_query_str, value_count_tuple)
 
@@ -1228,16 +1276,16 @@ class Meta_Endpoints_API(remote.Service):
 
                 if key == 'age_at_initial_pathologic_diagnosis':
                     value_list['age_at_initial_pathologic_diagnosis'] = normalize_metadata_ages(value_list['age_at_initial_pathologic_diagnosis'])
-
+                cursor.close()
+                db.close()
             except (KeyError, TypeError) as e:
-                print e
+                if cursor: cursor.close()
+                if db: db.close()
                 raise endpoints.NotFoundException('Error in getting value counts.')
 
         value_list_item = MetaAttrValuesList()
         for key in METADATA_SHORTLIST:
             value_list_item.__setattr__(key, None if key not in value_list else value_list[key])
-
-        # pprint.pprint(value_list_item)
 
         return MetadataItemList(count=value_list_item, total=total)
 
@@ -1248,7 +1296,7 @@ class Meta_Endpoints_API(remote.Service):
                       path='metadata_attr_list', http_method='GET',
                       name='meta.metadata_attr_list')
     def metadata_attr_list(self, request):
-
+        """ Used by the web application."""
         query_dict = {}
         value_tuple = ()
         for key, value in MetadataAttr.__dict__.items():
@@ -1281,6 +1329,8 @@ class Meta_Endpoints_API(remote.Service):
             return MetadataAttrList(items=data, count=len(data))
 
         except (IndexError, TypeError):
+            if cursor: cursor.close()
+            if db: db.close()
             raise endpoints.NotFoundException('Sample %s not found.' % (request.id,))
 
 
@@ -1288,6 +1338,7 @@ class Meta_Endpoints_API(remote.Service):
                       path='metadata_domains', http_method='GET',
                       name='meta.metadata_domains')
     def domains_list(self, request):
+        """ Used by the web application."""
         db = sql_connection()
         cursor = db.cursor()
         items = {}
@@ -1336,7 +1387,8 @@ class Meta_Endpoints_API(remote.Service):
                             item_list.append(str(item[0]))
                     items[feature] = item_list
             items['age_at_initial_pathologic_diagnosis'] = ['10 to 39', '40 to 49', '50 to 59', '60 to 69', '70 to 79', 'Over 80', 'None']
-
+            cursor.close()
+            db.close()
             return MetaDomainsList(
                 gender                               = items['gender'],
                 history_of_neoadjuvant_treatment     = items['history_of_neoadjuvant_treatment'],
@@ -1369,6 +1421,8 @@ class Meta_Endpoints_API(remote.Service):
                 )
 
         except (IndexError, TypeError):
+            if cursor: cursor.close()
+            if db: db.close()
             raise endpoints.NotFoundException('Error in meta_domains')
 
 
@@ -1376,22 +1430,26 @@ class Meta_Endpoints_API(remote.Service):
                                                cohort_id=messages.IntegerField(1, required=True),
                                                page=messages.IntegerField(2),
                                                limit=messages.IntegerField(3),
-                                               token=messages.StringField(4)
+                                               token=messages.StringField(4),
+                                               platform_count_only=messages.StringField(5)
                                                )
     @endpoints.method(GET_RESOURCE, SampleFiles,
                       path='cohort_files', http_method='GET',
                       name='meta.cohort_files')
     def cohort_files(self, request):
+        """ Used by the web application."""
         limit = 20
         page = 1
         offset = 0
         cohort_id = request.cohort_id
 
+        platform_count_only = request.__getattribute__('platform_count_only')
         is_dbGaP_authorized = False
         user_email = None
         user_id = None
         if endpoints.get_current_user() is not None:
             user_email = endpoints.get_current_user().email()
+
         # users have the option of pasting the access token in the query string
         # or in the 'token' field in the api explorer
         # but this is not required
@@ -1405,20 +1463,23 @@ class Meta_Endpoints_API(remote.Service):
                 user_id = Django_User.objects.get(email=user_email).id
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
                 logger.warn(e)
+                request_finished.send(self)
                 raise endpoints.NotFoundException("%s does not have an entry in the user database." % user_email)
             try:
                 cohort_perm = Cohort_Perms.objects.get(cohort_id=cohort_id, user_id=user_id)
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
                 logger.warn(e)
-                raise endpoints.NotFoundException("%s does not have permission to view cohort %d." % (user_email, cohort_id))
+                request_finished.send(self)
+                raise endpoints.UnauthorizedException("%s does not have permission to view cohort %d." % (user_email, cohort_id))
 
             try:
-                is_dbGaP_authorized = bool(NIH_User.objects.get(user_id=user_id).dbGaP_authorized)
+                nih_user = NIH_User.objects.get(user_id=user_id)
+                is_dbGaP_authorized = nih_user.dbGaP_authorized and nih_user.active
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
                 logger.info("%s does not have an entry in NIH_User: %s" % (user_email, str(e)))
         else:
             logger.warn("Authentication required for cohort_files endpoint.")
-            raise endpoints.NotFoundException("No user email found.")
+            raise endpoints.UnauthorizedException("No user email found.")
 
         if request.__getattribute__('page') is not None:
             page = request.page
@@ -1426,16 +1487,14 @@ class Meta_Endpoints_API(remote.Service):
         if request.__getattribute__('limit') is not None:
             limit = request.limit
 
-        platform_count_query = 'select Platform, count(Platform) as platform_count from metadata_data where SampleBarcode in (select sample_id from cohorts_samples where cohort_id=%s) and DatafileUploaded="true" '
-        count_query = 'select count(*) as row_count from metadata_data where SampleBarcode in (select sample_id from cohorts_samples where cohort_id=%s) and DatafileUploaded="true" '
-        query = 'select SampleBarcode, DatafileName, DatafileNameKey, Pipeline, Platform, DataLevel, Datatype, GG_readgroupset_id from metadata_data where SampleBarcode in (select sample_id from cohorts_samples where cohort_id=%s) and DatafileUploaded="true" '
+        platform_count_query = 'select Platform, count(Platform) as platform_count from cohorts_samples cs join metadata_data md on md.SampleBarcode = cs.sample_id where cohort_id=%s and DatafileUploaded="true" '
+        query = 'select SampleBarcode, DatafileName, DatafileNameKey, Pipeline, Platform, DataLevel, Datatype, GG_readgroupset_id from metadata_data md join cohorts_samples cs on md.SampleBarcode = cs.sample_id where cohort_id=%s and DatafileUploaded="true" '
 
         if not is_dbGaP_authorized:
-            platform_count_query += ' and SecurityProtocol="dbGap open-access" group by Platform;'
-            count_query += ' and SecurityProtocol="dbGap open-access" '
+            platform_count_query += ' and SecurityProtocol="dbGap open-access" group by Platform order by cs.sample_id;'
             query += ' and SecurityProtocol="dbGap open-access" '
         else:
-            platform_count_query += ' group by Platform;'
+            platform_count_query += ' group by Platform order by cs.sample_id;'
 
         # Check for incoming platform selectors
         platform_selector_list = []
@@ -1445,11 +1504,7 @@ class Meta_Endpoints_API(remote.Service):
                     platform_selector_list.append(key)
 
         if len(platform_selector_list):
-            count_query += ' and Platform in ("' + '","'.join(platform_selector_list) + '");'
             query += ' and Platform in ("' + '","'.join(platform_selector_list) + '")'
-
-        else:
-            count_query += ';'
 
         query_tuple = (cohort_id,)
         if limit != -1:
@@ -1460,35 +1515,41 @@ class Meta_Endpoints_API(remote.Service):
             query += ' offset %s'
             query_tuple += (offset,)
         query += ';'
-        db = sql_connection()
-        cursor = db.cursor(MySQLdb.cursors.DictCursor)
 
         try:
-            cursor.execute(count_query, (cohort_id,))
-            count = cursor.fetchone()['row_count']
+            db = sql_connection()
+            cursor = db.cursor(MySQLdb.cursors.DictCursor)
             cursor.execute(platform_count_query, (cohort_id,))
 
             platform_count_list = []
+            count = 0
             if cursor.rowcount > 0:
                 for row in cursor.fetchall():
+                    if len(platform_selector_list):
+                        if row['Platform'] in platform_selector_list:
+                            count += int(row['platform_count'])
+                    else:
+                        count += int(row['platform_count'])
                     platform_count_list.append(PlatformCount(platform=row['Platform'], count=row['platform_count']))
             else:
                 platform_count_list.append(PlatformCount(platform='None', count=0))
-            cursor.execute(query, query_tuple)
 
             file_list = []
-
-            if cursor.rowcount > 0:
-                for item in cursor.fetchall():
-                    print item
-                    file_list.append(FileDetails(sample=item['SampleBarcode'], cloudstorage_location=item['DatafileNameKey'], filename=item['DatafileName'], pipeline=item['Pipeline'], platform=item['Platform'], datalevel=item['DataLevel'], datatype=item['Datatype'], gg_readgroupset_id=item['GG_readgroupset_id']))
-            else:
-                file_list.append(FileDetails(sample='None', filename='', pipeline='', platform='', datalevel=''))
+            if not platform_count_only:
+                cursor.execute(query, query_tuple)
+                if cursor.rowcount > 0:
+                    for item in cursor.fetchall():
+                        file_list.append(FileDetails(sample=item['SampleBarcode'], cloudstorage_location=item['DatafileNameKey'], filename=item['DatafileName'], pipeline=item['Pipeline'], platform=item['Platform'], datalevel=item['DataLevel'], datatype=item['Datatype'], gg_readgroupset_id=item['GG_readgroupset_id']))
+                else:
+                    file_list.append(FileDetails(sample='None', filename='', pipeline='', platform='', datalevel=''))
             return SampleFiles(total_file_count=count, page=page, platform_count_list=platform_count_list, file_list=file_list)
 
         except (IndexError, TypeError):
             raise endpoints.ServiceException('Error getting counts')
-
+        finally:
+            if cursor: cursor.close()
+            if db: db.close()
+            request_finished.send(self)
 
     GET_RESOURCE = endpoints.ResourceContainer(sample_id=messages.StringField(1, required=True))
     @endpoints.method(GET_RESOURCE, SampleFiles,
@@ -1504,23 +1565,44 @@ class Meta_Endpoints_API(remote.Service):
         as well as counts for the number of files for each platform.
         '''
 
+        global cloudstorage_location
         sample_id = request.sample_id
         dbGaP_authorized = False
 
-        query = 'select SampleBarcode, DatafileName, Pipeline, Platform, IF(SecurityProtocol LIKE "%%open%%", DatafileNameKey, "Restricted") as DatafileNameKey from metadata_data where SampleBarcode=%s;'
+        query = "select SampleBarcode, " \
+                "DatafileName, " \
+                "Pipeline, " \
+                "Platform, " \
+                "IF(SecurityProtocol LIKE '%%open%%', DatafileNameKey, 'Restricted') as DatafileNameKey, " \
+                "SecurityProtocol " \
+                "from metadata_data " \
+                "where SampleBarcode=%s;"
 
         if endpoints.get_current_user():
-            user_email = endpoints.get_current_user()
+            user_email = endpoints.get_current_user().email()
             try:
                 user_id = Django_User.objects.get(email=user_email)
                 nih_user = NIH_User.objects.get(user_id=user_id)
                 dbGaP_authorized = nih_user.dbGaP_authorized and nih_user.active
                 if dbGaP_authorized:
-                    query = 'select SampleBarcode, DatafileName, Pipeline, Platform, DatafileNameKey, SecurityProtocol from metadata_data where SampleBarcode=%s;'
+                    query = "select SampleBarcode, " \
+                            "DatafileName, " \
+                            "Pipeline, " \
+                            "Platform, " \
+                            "DatafileNameKey, " \
+                            "SecurityProtocol, " \
+                            "Repository " \
+                            "from metadata_data " \
+                            "where SampleBarcode=%s;"
             except (ObjectDoesNotExist, MultipleObjectsReturned) as e:
-                logger.warn("Tried accessing sample_files endpoint with user {}: {}".format(user_email, str(e)))
+                if type(e) is MultipleObjectsReturned:
+                    logger.error("Meta.sample_files endpoint with user {} gave error: {}".format(user_email, str(e)))
 
-        platform_query = 'select Platform, count(Platform) as platform_count from metadata_data where SampleBarcode=%s group by Platform;'
+        platform_query = "select Platform, " \
+                         "count(Platform) as platform_count " \
+                         "from metadata_data " \
+                         "where SampleBarcode=%s " \
+                         "group by Platform;"
 
         db = sql_connection()
         cursor = db.cursor(MySQLdb.cursors.DictCursor)
@@ -1530,14 +1612,642 @@ class Meta_Endpoints_API(remote.Service):
             file_list = []
             platform_list = []
             for item in cursor.fetchall():
-                if dbGaP_authorized:
-                    cloudstorage_location = 'None' if item['DatafileNameKey'] == '' else 'gs://{}/{}'.format(OPEN_DATA_BUCKET if 'open' in item['SecurityProtocol'] else CONTROLLED_DATA_BUCKET, item['DatafileNameKey'])
+                if len(item.get('DatafileNameKey', '')) == 0:
+                    cloudstorage_location = 'File location not found.'
+                elif 'open' in item['SecurityProtocol']:
+                    cloudstorage_location = 'gs://{}{}'.format(OPEN_DATA_BUCKET, item['DatafileNameKey'])
+                elif dbGaP_authorized:
+                    # hard-coding mock bucket names for now --testing purposes only
+                    if item['Repository'].lower() == 'dcc':
+                        cloudstorage_location = 'gs://{}{}'.format(
+                            'gs://62f2c827-mock-mock-mock-1cde698a4f77', item['DatafileNameKey'])
+                    elif item['Repository'].lower() == 'cghub':
+                        cloudstorage_location = 'gs://{}{}'.format(
+                            'gs://360ee3ad-mock-mock-mock-52f9a5e7f99a', item['DatafileNameKey'])
                 else:
-                    cloudstorage_location = 'None' if item['DatafileNameKey'] == '' or item['DatafileNameKey'] == 'Restricted' else 'gs://{}/{}'.format(OPEN_DATA_BUCKET, item['DatafileNameKey'])
-                file_list.append(FileDetails(filename=item['DatafileName'], pipeline=item['Pipeline'], platform=item['Platform'], cloudstorage_location=cloudstorage_location))
+                    cloudstorage_location = item.get('DatafileNameKey')  # this will return "Restricted"
+
+                file_list.append(
+                    FileDetails(
+                        filename=item['DatafileName'],
+                        pipeline=item['Pipeline'],
+                        platform=item['Platform'],
+                        cloudstorage_location=cloudstorage_location
+                    )
+                )
             cursor.execute(platform_query, (sample_id,))
             for item in cursor.fetchall():
                 platform_list.append(PlatformCount(platform=item['Platform'], count=item['platform_count']))
+            cursor.close()
+            db.close()
             return SampleFiles(total_file_count=len(file_list), page=1, platform_count_list=platform_list, file_list=file_list)
         except Exception as e:
+            if cursor: cursor.close()
+            if db: db.close()
             raise endpoints.NotFoundException('Error getting file details: {}'.format(str(e)))
+
+"""
+Metadata Endpoints v2
+
+Includes User Uploaded Data
+"""
+Meta_Endpoints_v2 = endpoints.api(name='meta_api', version='v2',
+                               description='Retrieve metadata information relating to projects, cohorts, and other data',
+                               allowed_client_ids=[INSTALLED_APP_CLIENT_ID, endpoints.API_EXPLORER_CLIENT_ID])
+
+@Meta_Endpoints_v2.api_class(resource_name='meta_endpoints')
+class Meta_Endpoints_API_v2(remote.Service):
+
+    GET_RESOURCE = endpoints.ResourceContainer(
+            MetadataAttr,
+            token=messages.StringField(4),
+    )
+    @endpoints.method(GET_RESOURCE, MetadataAttrList,
+                      path='attributes', http_method='GET',
+                      name='meta.attr_list')
+    def metadata_attr_list(self, request):
+
+        user = get_current_user(request)
+        query_dict = {}
+        value_tuple = ()
+        for key, value in MetadataAttr.__dict__.items():
+            if not key.startswith('_'):
+                if request.__getattribute__(key) != None:
+                    query_dict[key] = request.__getattribute__(key)
+
+        if len(query_dict) == 0:
+            query_str = 'SELECT * FROM metadata_attr'
+        else:
+            query_str = 'SELECT * FROM metadata_attr where'
+            where_clause = build_where_clause(query_dict)
+            query_str += where_clause['query_str']
+            value_tuple = where_clause['value_tuple']
+
+        try:
+            db = sql_connection()
+            cursor = db.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute(query_str, value_tuple)
+            data = []
+            for row in cursor.fetchall():
+                data.append(MetadataAttr(attribute=str(row['attribute']),
+                                   code=str(row['code']),
+                                   spec=str(row['spec']),
+                                   key=str(row['spec']) + ':' + str(row['attribute'])
+                                   ))
+
+            if user:
+                studies = Study.get_user_studies(user)
+                feature_defs = User_Feature_Definitions.objects.filter(study__in=studies)
+                for feature in feature_defs:
+                    data_table = User_Data_Tables.objects.get(study=feature.study).metadata_samples_table
+                    name = feature.feature_name
+                    key = 'study:' + str(feature.study_id) + ':' + name
+
+                    if feature.shared_map_id:
+                        key = feature.shared_map_id
+
+                    data.append(MetadataAttr(attribute=name,
+                                             code='N' if feature.is_numeric else 'C',
+                                             spec='USER',
+                                             key=key
+                                             ))
+
+            cursor.close()
+            db.close()
+
+            return MetadataAttrList(items=data, count=len(data))
+
+        except (IndexError, TypeError):
+            if cursor: cursor.close()
+            if db: db.close()
+            raise endpoints.InternalServerErrorException('Error retrieving attribute list')
+        finally:
+            if cursor: cursor.close()
+            if db: db.close()
+            request_finished.send(self)
+
+    GET_RESOURCE = endpoints.ResourceContainer(
+                                               filters=messages.StringField(1),
+                                               token=messages.StringField(3),
+                                               cohort_id=messages.IntegerField(2))
+    @endpoints.method(GET_RESOURCE, MetadataCountsItem,
+                          path='metadata_counts', http_method='GET',
+                      name='meta.metadata_counts')
+    def metadata_counts(self, request):
+
+        filters = {}
+        query_dict = {}
+        valid_attrs = {}
+        sample_tables = {}
+        table_key_map = {}
+        sample_ids = None
+        study_ids = ()
+        cohort_id = None
+        user = get_current_user(request)
+
+        if request.__getattribute__('filters')is not None:
+            try:
+                tmp = json.loads(request.filters)
+                for filter in tmp:
+                    key = filter['key']
+                    if key not in filters:
+                        filters[key] = {'values':[], 'tables':[] }
+                    filters[key]['values'].append(filter['value'])
+
+            except Exception, e:
+                print traceback.format_exc()
+                raise endpoints.BadRequestException('Filters must be a valid JSON formatted array with objects containing both key and value properties')
+
+        db = sql_connection()
+        django.setup()
+
+        # Check for passed in saved search id
+        if request.__getattribute__('cohort_id') is not None:
+            cohort_id = str(request.cohort_id)
+            sample_query_str = 'SELECT sample_id, study_id FROM cohorts_samples WHERE cohort_id=%s;'
+
+            try:
+                cursor = db.cursor(MySQLdb.cursors.DictCursor)
+                cursor.execute(sample_query_str, (cohort_id,))
+                sample_ids = {}
+
+                for row in cursor.fetchall():
+                    if row['study_id'] not in sample_ids:
+                        sample_ids[ row['study_id'] ] = []
+                    sample_ids[ row['study_id'] ].append(row['sample_id'])
+                cursor.close()
+
+                for key in sample_ids:
+                    list = sample_ids[key]
+                    sample_ids[key] = {
+                        'SampleBarcode': build_where_clause({'SampleBarcode': list}),
+                        'sample_barcode': build_where_clause({'sample_barcode': list}),
+                    }
+
+            except (TypeError, IndexError) as e:
+                if cursor: cursor.close()
+                if db: db.close()
+                raise endpoints.NotFoundException('Error in retrieving barcodes.')
+
+        # Add TCGA attributes to the list of available attributes
+        if 'user_studies' not in filters or 'tcga' in filters['user_studies']['values']:
+            sample_tables['metadata_samples'] = {'sample_ids': None}
+            if sample_ids and None in sample_ids:
+                sample_tables['metadata_samples']['sample_ids'] = sample_ids[None]
+
+            cursor = db.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute('SELECT attribute, spec FROM metadata_attr')
+            for row in cursor.fetchall():
+                if row['attribute'] in METADATA_SHORTLIST:
+                    valid_attrs[row['spec'] + ':' + row['attribute']] = {
+                        'name': row['attribute'],
+                        'tables': ('metadata_samples',),
+                        'sample_ids': None
+                    }
+            cursor.close()
+
+        # If we have a user, get a list of valid studies
+        if user:
+            for study in Study.get_user_studies(user):
+                if 'user_studies' not in filters or study.id in filters['user_studies']['values']:
+                    study_ids += (study.id,)
+
+                    for tables in User_Data_Tables.objects.filter(study=study):
+                        sample_tables[tables.metadata_samples_table] = {'sample_ids': None}
+                        if sample_ids and study.id in sample_ids:
+                            sample_tables[tables.metadata_samples_table]['sample_ids'] = sample_ids[study.id]
+
+
+            features = User_Feature_Definitions.objects.filter(study__in=study_ids)
+            for feature in features:
+                if ' ' in feature.feature_name:
+                    # It is not a column name and comes from molecular data, ignore it
+                    continue
+
+                name = feature.feature_name
+                key = 'study:' + str(feature.study_id) + ':' + name
+
+                if feature.shared_map_id:
+                    key = feature.shared_map_id
+                    name = feature.shared_map_id.split(':')[-1]
+
+                if key not in valid_attrs:
+                    valid_attrs[key] = {'name': name,'tables': (), 'sample_ids': None}
+
+                for tables in User_Data_Tables.objects.filter(study_id=feature.study_id):
+                    valid_attrs[key]['tables'] += (tables.metadata_samples_table,)
+
+                    if not tables.metadata_samples_table in table_key_map:
+                        table_key_map[tables.metadata_samples_table] = {}
+                    table_key_map[tables.metadata_samples_table][key] = feature.feature_name
+
+                    if key in filters:
+                        filters[key]['tables'] += (tables.metadata_samples_table,)
+
+                    if sample_ids and feature.study_id in sample_ids:
+                        valid_attrs[key]['sample_ids'] = sample_ids[feature.study_id]
+        else:
+            print "User not authenticated with Metadata Endpoint API"
+
+        # Now that we're through the Studies filtering area, delete it so it doesn't get pulled into a query
+        if 'user_studies' in filters:
+            del filters['user_studies']
+
+        # For filters with no tables at this point, assume its the TCGA metadata_samples table
+        for key, obj in filters.items():
+            if not obj['tables']:
+                filters[key]['tables'].append('metadata_samples')
+
+        # Loop through the features
+        for key, feature in valid_attrs.items():
+            # Get a count for each feature
+            table_values = {}
+            feature['total'] = 0
+            for table in feature['tables']:
+                # Check if the filters make this table 0 anyway
+                # We do this to avoid SQL errors for columns that don't exist
+                should_be_queried = True
+                if cohort_id and sample_tables[table]['sample_ids'] is None:
+                    should_be_queried = False
+
+                for key, filter in filters.items():
+                    if table not in filter['tables']:
+                        should_be_queried = False
+                        break
+
+                # Build Filter Where Clause
+                key_map = table_key_map[table] if table in table_key_map else False
+                where_clause = build_where_clause(filters, alt_key_map=key_map)
+
+                col_name = feature['name']
+                if key_map and key in key_map:
+                    col_name = key_map[key]
+
+                cursor = db.cursor()
+                if should_be_queried:
+                    # Query the table for counts and values
+                    query = ('SELECT DISTINCT %s, COUNT(1) as count FROM %s') % (col_name, table)
+                    if where_clause['query_str']:
+                        query += ' WHERE ' + where_clause['query_str']
+                    if sample_tables[table]['sample_ids']:
+                        barcode_key = 'SampleBarcode' if table is 'metadata_samples' else 'sample_barcode'
+                        addt_cond = sample_tables[table]['sample_ids'][barcode_key]['query_str']
+                        if addt_cond and where_clause['query_str']:
+                            query += ' AND ' + addt_cond
+                        elif addt_cond:
+                            query += ' WHERE ' + addt_cond
+                        where_clause['value_tuple'] += sample_tables[table]['sample_ids'][barcode_key]['value_tuple']
+                    query += ' GROUP BY %s ' %col_name
+                    cursor.execute(query, where_clause['value_tuple'])
+                    for row in cursor.fetchall():
+                        if not row[0] in table_values:
+                            table_values[row[0]] = 0
+                        table_values[row[0]] += int(row[1])
+                        feature['total'] += int(row[1])
+                else:
+                    # Just get the values so we can have them be 0
+                    cursor.execute(('SELECT DISTINCT %s FROM %s') % (col_name, table))
+                    for row in cursor.fetchall():
+                        if not row[0] in table_values:
+                            table_values[row[0]] = 0
+
+                cursor.close()
+
+            feature['values'] = table_values
+
+        count_list = []
+        total = 0
+        for key, feature in valid_attrs.items():
+            value_list = []
+
+            # Special case for age ranges
+            if key == 'CLIN:age_at_initial_pathologic_diagnosis':
+                feature['values'] = normalize_ages(feature['values'])
+
+            for value, count in feature['values'].items():
+                if feature['name'].startswith('has_'):
+                    value = 'True' if value else 'False'
+
+                value_list.append(MetaValueListCount(value=str(value), count=count))
+
+            count_list.append(MetadataAttributeValues(name=feature['name'], values=value_list, id=key, total=feature['total']))
+            if feature['total'] > total:
+                total = feature['total']
+
+        db.close()
+        request_finished.send(self)
+        return MetadataCountsItem(count=count_list, total=total)
+
+    GET_RESOURCE = endpoints.ResourceContainer(
+                                               cohort_id=messages.IntegerField(1),
+                                               token=messages.StringField(2),
+                                               filters=messages.StringField(3)
+                                               )
+    @endpoints.method(GET_RESOURCE, SampleBarcodeList,
+                      path='metadata_sample_list', http_method='GET',
+                      name='meta.metadata_sample_list')
+    def metadata_list(self, request):
+        filters = {}
+        valid_attrs = {}
+        sample_tables = {}
+        table_key_map = {}
+        sample_ids = None
+        study_ids = ()
+        cohort_id = None
+        user = get_current_user(request)
+
+        if request.__getattribute__('filters')is not None:
+            try:
+                tmp = json.loads(request.filters)
+                for filter in tmp:
+                    key = filter['key']
+                    if key not in filters:
+                        filters[key] = {'values':[], 'tables':[] }
+                    filters[key]['values'].append(filter['value'])
+
+            except Exception, e:
+                print traceback.format_exc()
+                raise endpoints.BadRequestException('Filters must be a valid JSON formatted array with objects containing both key and value properties')
+
+        db = sql_connection()
+        django.setup()
+
+        # TODO enable filtering based off of this
+        # Check for passed in saved search id
+        if request.__getattribute__('cohort_id') is not None:
+            cohort_id = str(request.cohort_id)
+            sample_query_str = 'SELECT sample_id, study_id FROM cohorts_samples WHERE cohort_id=%s;'
+
+            try:
+                cursor = db.cursor(MySQLdb.cursors.DictCursor)
+                cursor.execute(sample_query_str, (cohort_id,))
+                sample_ids = {}
+
+                for row in cursor.fetchall():
+                    study_id = row['study_id']
+                    if not study_id in sample_ids:
+                        sample_ids[study_id] = ()
+                    sample_ids[study_id] += (row['sample_id'],)
+                cursor.close()
+
+            except (TypeError, IndexError) as e:
+                if cursor: cursor.close()
+                if db: db.close()
+                raise endpoints.NotFoundException('Error in retrieving barcodes.')
+
+        # Add TCGA attributes to the list of available attributes
+        if 'user_studies' not in filters or 'tcga' in filters['user_studies']['values']:
+            sample_tables['metadata_samples'] = {'features':{}, 'barcode':'SampleBarcode', 'study_id':None}
+            cursor = db.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute('SELECT attribute, spec FROM metadata_attr')
+            for row in cursor.fetchall():
+                key = row['spec'] + ':' + row['attribute']
+                valid_attrs[key] = {'name': row['attribute']}
+                sample_tables['metadata_samples']['features'][key] = row['attribute']
+                if key in filters:
+                    filters[key]['tables'] += ('metadata_samples',)
+            cursor.close()
+
+        # If we have a user, get a list of valid studies
+        if user:
+            for study in Study.get_user_studies(user):
+                if 'user_studies' not in filters or study.id in filters['user_studies']['values']:
+                    study_ids += (study.id,)
+
+                    # Add all tables from each study
+                    for tables in User_Data_Tables.objects.filter(study=study):
+                        sample_tables[tables.metadata_samples_table] = {
+                            'features':{},
+                            'barcode':'SampleBarcode' if tables.metadata_samples_table is 'metadata_samples' else 'sample_barcode',
+                            'study_id': study.id
+                        }
+
+                    # Record features that should be in each sample table so we can know how and when we need to query
+                    for feature in User_Feature_Definitions.objects.filter(study=study):
+                        name = feature.feature_name
+                        key = 'study:' + str(study.id) + ':' + name
+
+                        if feature.shared_map_id:
+                            key = feature.shared_map_id
+                            name = feature.shared_map_id.split(':')[-1]
+
+                        if key not in valid_attrs:
+                            valid_attrs[key] = {'name': name}
+
+                        for tables in User_Data_Tables.objects.filter(study=feature.study_id):
+                            sample_tables[tables.metadata_samples_table]['features'][key] = feature.feature_name
+
+                            if key in filters:
+                                filters[key]['tables'] += (tables.metadata_samples_table,)
+        else:
+            print "User not authenticated with Metadata Endpoint API"
+
+        # Now that we're through the Studies filtering area, delete it so it doesn't get pulled into a query
+        if 'user_studies' in filters:
+            del filters['user_studies']
+
+        results = []
+        # Loop through the sample tables
+        for table, table_settings in sample_tables.items():
+            # Make sure we should run the query here, or if we have filters that won't return anything, skip
+            should_be_queried = True
+            for key, filter in filters.items():
+                if table not in filter['tables']:
+                    should_be_queried = False
+                    break
+
+            if not should_be_queried:
+                continue
+
+            where_clause = build_where_clause(filters, table_settings['features'])
+            query = 'SELECT DISTINCT %s FROM %s' % (table_settings['barcode'], table)
+            if where_clause['query_str']:
+                query += ' WHERE ' + where_clause['query_str']
+            cursor = db.cursor()
+            cursor.execute(query, where_clause['value_tuple'])
+            for row in cursor.fetchall():
+                study_id = table_settings['study_id']
+                if cohort_id and (study_id not in sample_ids or row[0] not in sample_ids[study_id]):
+                    # This barcode was not in our cohort's list of barcodes, skip it
+                    continue
+
+                results.append( SampleBarcodeItem(sample_barcode=row[0], study_id=table_settings['study_id']) )
+            cursor.close()
+        db.close()
+        request_finished.send(self)
+        return SampleBarcodeList( items=results, count=len(results) )
+
+    GET_RESOURCE = endpoints.ResourceContainer(
+                                               cohort_id=messages.IntegerField(1, required=True),
+                                               )
+    @endpoints.method(GET_RESOURCE, SampleBarcodeList,
+                      path='metadata_participant_list', http_method='GET',
+                      name='meta.metadata_participant_list')
+    def metadata_participant_list(self, request):
+        db = sql_connection()
+
+        cohort_id = str(request.cohort_id)
+        sample_query_str = 'SELECT sample_id, study_id FROM cohorts_samples WHERE cohort_id=%s;'
+
+        try:
+            cursor = db.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute(sample_query_str, (cohort_id,))
+            sample_ids = []
+
+            for row in cursor.fetchall():
+                sample_ids.append(row['sample_id'])
+
+            participant_query = 'SELECT DISTINCT ParticipantBarcode from metadata_data where SampleBarcode in ('
+            first = True
+            value_tuple = ()
+            for barcode in sample_ids:
+                value_tuple += (barcode,)
+                if first:
+                    participant_query += '%s'
+                    first = False
+                else:
+                    participant_query += ',%s'
+
+            participant_query += ');'
+            results = []
+            cursor.execute(participant_query, value_tuple)
+            for row in cursor.fetchall():
+                results.append(SampleBarcodeItem(sample_barcode=row['ParticipantBarcode'], study_id=0))
+
+            cursor.close()
+            db.close()
+            return SampleBarcodeList(items=results, count=len(results))
+
+        except (TypeError, IndexError) as e:
+            if cursor: cursor.close()
+            if db: db.close()
+            raise endpoints.NotFoundException('Error in retrieving barcodes.')
+
+    GET_RESOURCE = endpoints.ResourceContainer(
+                                               filters=messages.StringField(1),
+                                               token=messages.StringField(3),
+                                               cohort_id=messages.IntegerField(2))
+    @endpoints.method(GET_RESOURCE, MetadataPlatformItemList,
+                      path='metadata_platform_list', http_method='GET',
+                      name='meta.metadata_platform_list')
+    def metadata_platform_list(self, request):
+        """ Used by the web application."""
+        filters = {}
+        sample_ids = None
+
+        if request.__getattribute__('filters')is not None:
+            try:
+                tmp = json.loads(request.filters)
+                for filter in tmp:
+                    key = filter['key']
+                    if key not in filters:
+                        filters[key] = {'values':[], 'tables':[] }
+                    filters[key]['values'].append(filter['value'])
+
+            except Exception, e:
+                print traceback.format_exc()
+                raise endpoints.BadRequestException('Filters must be a valid JSON formatted array with objects containing both key and value properties')
+
+        db = sql_connection()
+
+        # Check for passed in saved search id
+        if request.__getattribute__('cohort_id') is not None:
+            cohort_id = str(request.cohort_id)
+            sample_query_str = 'SELECT sample_id FROM cohorts_samples WHERE cohort_id=%s;'
+
+            try:
+                cursor = db.cursor(MySQLdb.cursors.DictCursor)
+                cursor.execute(sample_query_str, (cohort_id,))
+                sample_ids = ()
+
+                for row in cursor.fetchall():
+                    sample_ids += (row['sample_id'],)
+
+            except (TypeError, IndexError) as e:
+                print e
+                raise endpoints.NotFoundException('Error in retrieving barcodes.')
+
+        query_str = "SELECT " \
+                    "IF(has_Illumina_DNASeq=1, " \
+                    "'Yes', 'None'" \
+                    ") AS DNAseq_data," \
+                    "IF (has_SNP6=1, 'Genome_Wide_SNP_6', 'None') as cnvrPlatform," \
+                    "CASE" \
+                    "  WHEN has_BCGSC_HiSeq_RNASeq=1 and has_UNC_HiSeq_RNASeq=0" \
+                    "    THEN 'HiSeq/BCGSC'" \
+                    "  WHEN has_BCGSC_HiSeq_RNASeq=1 and has_UNC_HiSeq_RNASeq=1" \
+                    "    THEN 'HiSeq/BCGSC and UNC V2'" \
+                    "  WHEN has_UNC_HiSeq_RNASeq=1 and has_BCGSC_HiSeq_RNASeq=0 and has_BCGSC_GA_RNASeq=0 and has_UNC_GA_RNASeq=0" \
+                    "    THEN 'HiSeq/UNC V2'" \
+                    "  WHEN has_UNC_HiSeq_RNASeq=1 and has_BCGSC_HiSeq_RNASeq=0 and has_BCGSC_GA_RNASeq=0 and has_UNC_GA_RNASeq=1" \
+                    "    THEN 'GA and HiSeq/UNC V2'" \
+                    "  WHEN has_UNC_HiSeq_RNASeq=1 and has_BCGSC_HiSeq_RNASeq=0 and has_BCGSC_GA_RNASeq=1 and has_UNC_GA_RNASeq=0" \
+                    "    THEN 'HiSeq/UNC V2 and GA/BCGSC'" \
+                    "  WHEN has_UNC_HiSeq_RNASeq=1 and has_BCGSC_HiSeq_RNASeq=1 and has_BCGSC_GA_RNASeq=0 and has_UNC_GA_RNASeq=0" \
+                    "    THEN 'HiSeq/UNC V2 and BCGSC'" \
+                    "  WHEN has_BCGSC_GA_RNASeq=1 and has_UNC_HiSeq_RNASeq=0" \
+                    "    THEN 'GA/BCGSC'" \
+                    "  WHEN has_UNC_GA_RNASeq=1 and has_UNC_HiSeq_RNASeq=0" \
+                    "    THEN 'GA/UNC V2'" \
+                    "  ELSE 'None'" \
+                    "END AS gexpPlatform," \
+                    "CASE " \
+                    "   WHEN has_27k=1 and has_450k=0" \
+                    "     THEN 'HumanMethylation27'" \
+                    "   WHEN has_27k=0 and has_450k=1" \
+                    "     THEN 'HumanMethylation450'" \
+                    "   WHEN has_27k=1 and has_450k=1" \
+                    "     THEN '27k and 450k'" \
+                    "   ELSE 'None'" \
+                    "END AS methPlatform," \
+                    "CASE " \
+                    "   WHEN has_HiSeq_miRnaSeq=1 and has_GA_miRNASeq=0" \
+                    "      THEN 'IlluminaHiSeq_miRNASeq'" \
+                    "   WHEN has_HiSeq_miRnaSeq=0 and has_GA_miRNASeq=1" \
+                    "      THEN 'IlluminaGA_miRNASeq'" \
+                    "   WHEN has_HiSeq_miRnaSeq=1 and has_GA_miRNASeq=1" \
+                    "      THEN 'GA and HiSeq'" \
+                    "   ELSE 'None'" \
+                    "END AS mirnPlatform," \
+                    "IF (has_RPPA=1, 'MDA_RPPA_Core', 'None') AS rppaPlatform " \
+                    "FROM metadata_samples "
+
+        value_tuple = ()
+        if len(filters) > 0:
+            where_clause = build_where_clause(filters)
+            query_str += ' WHERE ' + where_clause['query_str']
+            value_tuple = where_clause['value_tuple']
+
+        if sample_ids:
+            if query_str.rfind('WHERE') >= 0:
+                query_str += ' and SampleBarcode in %s' % (sample_ids,)
+            else:
+                query_str += ' WHERE SampleBarcode in %s' % (sample_ids,)
+
+        query_str += ';'
+
+        try:
+            cursor = db.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute(query_str, value_tuple)
+            data = []
+            for row in cursor.fetchall():
+
+                item = MetadataPlatformItem(
+                    DNAseq_data=str(row['DNAseq_data']),
+                    cnvrPlatform=str(row['cnvrPlatform']),
+                    gexpPlatform=str(row['gexpPlatform']),
+                    methPlatform=str(row['methPlatform']),
+                    mirnPlatform=str(row['mirnPlatform']),
+                    rppaPlatform=str(row['rppaPlatform']),
+                )
+                data.append(item)
+
+            cursor.close()
+            db.close()
+
+            return MetadataPlatformItemList(items=data)
+
+        except (IndexError, TypeError) as e:
+            if cursor: cursor.close()
+            if db: db.close()
+            raise endpoints.NotFoundException('Sample not found.')

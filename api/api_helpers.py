@@ -22,39 +22,34 @@ import os
 import MySQLdb
 import httplib2
 from oauth2client.client import GoogleCredentials, AccessTokenCredentials
+from google_helpers.directory_service import get_directory_resource
+from googleapiclient.errors import HttpError
 from django.conf import settings
 from googleapiclient.discovery import build
+import logging
 
-
+CONTROLLED_ACL_GOOGLE_GROUP = settings.ACL_GOOGLE_GROUP
 debug = settings.DEBUG
 
 # Database connection
 def sql_connection():
-    if debug:
-        print >> sys.stderr, "      ****** sql_connection() Called. *******"
-        env = os.getenv('SERVER_SOFTWARE')
-        print >> sys.stderr, "Printing Environment."
-        print >> sys.stderr, env
-        database = settings.DATABASES['default']
-        print >> sys.stderr, "Printing Database."
-        print >> sys.stderr, database
+    env = os.getenv('SERVER_SOFTWARE')
+    database = settings.DATABASES['default']
     if env.startswith('Google App Engine/'):
         # Connecting from App Engine
-        if debug: print >> sys.stderr, "PASSED env.startswith('Google App Engine/')"
         try:
             db = MySQLdb.connect(
                 host = database['HOST'],
-                port = 3306, #database['PORT'],
+                port = 3306,
                 db = database['NAME'],
                 user = database['USER'],
                 passwd = database['PASSWORD'],
-                ssl = database['OPTIONS']['ssl'])            
+                ssl = database['OPTIONS']['ssl'])
         except:
             print >> sys.stderr, "Unexpected ERROR in sql_connection(): ", sys.exc_info()[0]
-            #return HttpResponse( traceback.format_exc() ) 
+            #return HttpResponse( traceback.format_exc() )
             raise # if you want to soldier bravely on despite the exception, but comment to stderr
     else:
-        if debug: print >> sys.stderr, "FAILED env.startswith('Google App Engine/')"
         # Connecting to localhost
         try:
             db = MySQLdb.connect(
@@ -64,10 +59,9 @@ def sql_connection():
                 passwd=database['PASSWORD'])
         except:
             print >> sys.stderr, "Unexpected ERROR in sql_connection(): ", sys.exc_info()[0]
-            #return HttpResponse( traceback.format_exc() ) 
+            #return HttpResponse( traceback.format_exc() )
             raise # if you want to soldier bravely on despite the exception, but comment to stderr
 
-    if debug: print >> sys.stderr, "Made it to the end of sql_connection()."
     return db
 
 
@@ -116,7 +110,6 @@ def sql_age_by_ranges(value):
         elif str(value) == 'None':
             result += ' age_at_initial_pathologic_diagnosis is null'
 
-    # print '\n\nresult is ' + result
     return result
 
 def gql_age_by_ranges(q, key, value):
@@ -160,35 +153,29 @@ def gql_age_by_ranges(q, key, value):
 
 def normalize_ages(ages):
     if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
-    result = []
     new_age_list = {'10 to 39': 0, '40 to 49': 0, '50 to 59': 0, '60 to 69': 0, '70 to 79': 0, 'Over 80': 0, 'None': 0}
-    for age in ages:
-        # print 'type(age):'
-        # print type(age)
+    for age, count in ages.items():
         if type(age) != dict:
-
-            if age.value != 'None':
-                int_age = float(age.value)
+            if age and age != 'None':
+                int_age = float(age)
                 if int_age < 40:
-                    new_age_list['10 to 39'] += int(age.count)
+                    new_age_list['10 to 39'] += int(count)
                 elif int_age < 50:
-                    new_age_list['40 to 49'] += int(age.count)
+                    new_age_list['40 to 49'] += int(count)
                 elif int_age < 60:
-                    new_age_list['50 to 59'] += int(age.count)
+                    new_age_list['50 to 59'] += int(count)
                 elif int_age < 70:
-                    new_age_list['60 to 69'] += int(age.count)
+                    new_age_list['60 to 69'] += int(count)
                 elif int_age < 80:
-                    new_age_list['70 to 79'] += int(age.count)
+                    new_age_list['70 to 79'] += int(count)
                 else:
-                    new_age_list['Over 80'] += int(age.count)
+                    new_age_list['Over 80'] += int(count)
             else:
-                new_age_list['None'] += int(age.count)
+                new_age_list['None'] += int(count)
         else:
             print age
 
-    for key, value in new_age_list.items():
-        result.append({'count': value, 'value': key})
-    return result
+    return new_age_list
 
 def applyFilter(field, dict):
 # this one gets called a lot...
@@ -205,7 +192,7 @@ def applyFilter(field, dict):
 
     return where_clause
 
-def build_where_clause(dict):
+def build_where_clause(filters, alt_key_map=False):
 # this one gets called a lot
 #    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     first = True
@@ -213,13 +200,29 @@ def build_where_clause(dict):
     big_query_str = ''  # todo: make this work for non-string values -- use {}.format
     value_tuple = ()
     key_order = []
-    for key, value in dict.items():
-        key_order.append(key)
+    for key, value in filters.items():
+        if isinstance(value, dict) and 'values' in value:
+            value = value['values']
 
-        # If it's a list of values, split it into an array
-        if isinstance(value, basestring):
+        if isinstance(value, list) and len(value) == 1:
+            value = value[0]
+        # Check if we need to map to a different column name for a given key
+        if alt_key_map and key in alt_key_map:
+            key = alt_key_map[key]
+            if 'values' in value:
+                value = value['values']
+        # Multitable where's will come in with : in the name. Only grab the column piece for now
+        elif ':' in key:
+            key = key.split(':')[-1]
+            if 'values' in value:
+                value = value['values']
+        # Multitable filter lists don't come in as string as they can contain arbitrary text in values
+        elif isinstance(value, basestring):
+            # If it's a list of values, split it into an array
             if ',' in value:
                 value = value.split(',')
+
+        key_order.append(key)
 
         # If it's first in the list, don't append an "and"
         if first:
@@ -244,14 +247,14 @@ def build_where_clause(dict):
             big_query_str += ' %s in (' % key
             i = 0
             for val in value:
-                value_tuple = value_tuple + (val,)
+                value_tuple += (val.strip(),) if type(val) is unicode else (val,)
                 if i == 0:
                     query_str += '%s'
-                    big_query_str += '"' + val + '"'
+                    big_query_str += '"' + str(val) + '"'
                     i += 1
                 else:
                     query_str += ',%s'
-                    big_query_str += ',' + '"' + val + '"'
+                    big_query_str += ',' + '"' + str(val) + '"'
             query_str += ')'
             big_query_str += ')'
             if has_null:
@@ -277,7 +280,7 @@ def build_where_clause(dict):
                 big_query_str += ' %s=' % key
                 query_str += '%s'
                 big_query_str += '"%s"' % value
-                value_tuple = value_tuple + (value,)
+                value_tuple += (value.strip(),) if type(value) is unicode else (value,)
     return {'query_str': query_str, 'value_tuple': value_tuple, 'key_order': key_order, 'big_query_str': big_query_str}
 
 
@@ -310,7 +313,7 @@ def authorize_credentials_with_Google():
     http = httplib2.Http()
     http = credentials.authorize(http)
     service = build('bigquery', 'v2', http=http)
-
+    if debug: print >> sys.stderr,' big query authorization '+sys._getframe().f_code.co_name
     return service
 
 # TODO refactor to remove duplicate code
@@ -336,3 +339,13 @@ def get_user_email_from_token(access_token):
     if 'email' in user_info:
         user_email = user_info['email']
     return user_email
+
+
+def is_dbgap_authorized(user_email):
+    directory_service, http_auth = get_directory_resource()
+    try:
+        directory_service.members().get(groupKey=CONTROLLED_ACL_GOOGLE_GROUP,
+                                        memberKey=user_email).execute(http=http_auth)
+        return True
+    except HttpError, e:
+        return False

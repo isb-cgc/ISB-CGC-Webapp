@@ -38,23 +38,23 @@
 
             <div class="row">
                 <div class="col-xs-8 col-xs-offset-2 lj-title-paragraph">
-                    <p class="lj-text-center" >This site is no longer active. Please go to our live site <a href="https://isb-cgc.appspot.com">here</a> for more information and updates.</p>
+                    <p class="lj-text-center" >The ISB Cancer Genomics Cloud (ISB-CGC) is democratizing access to <a href = "http://cancergenome.nih.gov/" target = "_blank"><strong>TCGA</strong></a> data and coupling it with unprecedented computational power to allow researchers to explore and analyze this vast data-space.</p>
                 </div>
             </div>
 
             <div class="row">
-                <div class="col-sm-3"></div>
-                <div class="col-sm-2 lj-header-button lj-block-center" data-scroll-reveal="wait 0.5s, then enter bottom and move 20px over 0.5s">
-                  <a href="http://isb-cancer-genomics-cloud.readthedocs.org/en/latest/" target = "_blank">Documentation</a>
-                </div>
-                <div class="col-sm-2 lj-header-button lj-block-center" data-scroll-reveal="wait 0.5s, then enter bottom and move 20px over 0.5s">
-                  <a href="https://github.com/isb-cgc/" target = "_blank"> <i class="fa fa-github fa-lg" ></i> GitHub</a>
-                </div>
-                <div class="col-sm-2 lj-header-button lj-block-center" data-scroll-reveal="wait 0.5s, then enter bottom and move 20px over 0.5s">
-                  <a href="https://groups.google.com/a/isb-cgc.org/forum/#!newtopic/feedback" target = "_blank">Feedback</a>
-                </div>
-                <div class="col-sm-3"></div>
+           <div class="col-sm-3"></div>
+            <div class="col-sm-2 lj-header-button lj-block-center" data-scroll-reveal="wait 0.5s, then enter bottom and move 20px over 0.5s">
+              <a href="http://isb-cancer-genomics-cloud.readthedocs.org/en/latest/" target = "_blank">Documentation</a>
             </div>
+            <div class="col-sm-2 lj-header-button lj-block-center" data-scroll-reveal="wait 0.5s, then enter bottom and move 20px over 0.5s">
+              <a href="https://github.com/isb-cgc/" target = "_blank"> <i class="fa fa-github fa-lg" ></i> GitHub</a>
+            </div>
+            <div class="col-sm-2 lj-header-button lj-block-center" data-scroll-reveal="wait 0.5s, then enter bottom and move 20px over 0.5s">
+              <a href="https://groups.google.com/a/isb-cgc.org/forum/#!newtopic/feedback" target = "_blank">Feedback</a>
+            </div>
+            <div class="col-sm-3"></div>
+          </div>
         </div>
     </header>
     <div class="row landing-content">
@@ -64,10 +64,10 @@
                     <h2>Partners:</h2>
                     <p style="text-align: center;">
                         <a href="https://cloud.google.com/">
-                            <img class="alignnone wp-image-800 size-full" src="static/img/google_cloud_logo.png" alt="Google Cloud Platform" width="393" />
+                            <img class="alignnone wp-image-800 size-full" src="static/img/gcp-logo.png" alt="Google Cloud Platform" />
                         </a>
                         <a href="https://www.sra.com/">
-                            <img class="alignnone size-full wp-image-801" src="static/img/csra-logo.png" alt="SRA International" width="393" />
+                            <img class="alignnone size-full wp-image-801" src="static/img/csra-logo.png" alt="SRA International" />
                         </a>
                     </p>
                 </div>
@@ -78,6 +78,12 @@
             <h2>About Us:</h2>
             <p>The Cancer Genomics Cloud is a platform that serves as a large scale repository and provides the computational infrastructure necessary to carry out cancer genomics research at unprecedented scales. </p>
             <p>Please use a Google managed email account to log into this systems.</p>
+
+
+            {% if version %}
+            <br/>
+            Last deployed to version {{ version.version }} on {{ version.date }}
+            {% endif %}
         </div>
 
         <div class="col-sm-10 col-sm-offset-1">

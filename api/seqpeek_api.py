@@ -24,7 +24,7 @@ from endpoints import api as endpoints_api, method as endpoints_method
 from endpoints import InternalServerErrorException
 from protorpc import remote
 from protorpc.messages import IntegerField, Message, MessageField, StringField, Variant
-from bq_data_access.seqpeek.seqpeek_maf import SeqPeekMAFDataAccess
+from bq_data_access.seqpeek.seqpeek_maf_formatter import SeqPeekMAFDataFormatter
 
 
 class DataRequest(Message):
@@ -53,7 +53,8 @@ class MAFRecordList(Message):
     items = MessageField(MAFRecord, 1, repeated=True)
     cohort_set = MessageField(PlotDataCohortInfo, 2, repeated=True)
 
-SeqPeekDataEndpointsAPI = endpoints_api(name='seqpeek_data_api', version='v1')
+SeqPeekDataEndpointsAPI = endpoints_api(name='seqpeek_data_api', version='v1',
+                                        description='Endpoints used by the seqpeek visualization in the web application.')
 
 
 def maf_array_to_record(maf_array):
@@ -68,12 +69,7 @@ def maf_array_to_record(maf_array):
 class SeqPeekDataAccessAPI(remote.Service):
 
     def create_response(self, maf_with_cohorts):
-        """
-        Converts a SeqPeekMAFWithCohorts instance to a protorpc Message.
 
-        :param maf_with_cohorts: SeqPeekMAFWithCohorts instance
-        :return: MAFRecordList response.
-        """
         data_points = maf_array_to_record(maf_with_cohorts.maf_vector)
 
         cohort_info_obj_array = []
@@ -85,11 +81,12 @@ class SeqPeekDataAccessAPI(remote.Service):
     @endpoints_method(DataRequest, MAFRecordList,
                       path='by_gnab_feature', http_method='GET', name='seqpeek.getMAFDataWithCohorts')
     def data_access_by_gnab_feature(self, request):
+        """ Used by the web application."""
         try:
             feature_id = request.feature_id
             cohort_id_array = request.cohort_id
 
-            maf_with_cohorts = SeqPeekMAFDataAccess().get_data(feature_id, cohort_id_array)
+            maf_with_cohorts = SeqPeekMAFDataFormatter().format_maf_vector_for_view(feature_id, cohort_id_array)
             response = self.create_response(maf_with_cohorts)
             return response
         except Exception as e:

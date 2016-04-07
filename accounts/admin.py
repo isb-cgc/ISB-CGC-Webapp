@@ -19,7 +19,7 @@ limitations under the License.
 from django.contrib import admin
 from django.contrib.auth.models import User
 
-from accounts.models import NIH_User, Bucket
+from accounts.models import NIH_User, Bucket, GoogleProject
 
 
 class NIH_UserAdmin(admin.ModelAdmin):
@@ -47,6 +47,13 @@ class BucketAdmin(admin.ModelAdmin):
         'bucket_permissions'
     )
 
+class GoogleProjectAdmin(admin.ModelAdmin):
+    list_display = (
+        'user',
+        'project_name',
+        'project_id'
+    )
 
 admin.site.register(NIH_User, NIH_UserAdmin)
 admin.site.register(Bucket, BucketAdmin)
+admin.site.register(GoogleProject, GoogleProjectAdmin)

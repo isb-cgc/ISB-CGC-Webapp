@@ -208,6 +208,10 @@ require([
     //    console.log(uploaded_list.valid);
     //})
 
+    $('form.create-gene-list').on('submit', function() {
+        $(this).find('input[type="submit"]').attr('disabled', 'disabled');
+    });
+
     /*
         Used for getting the CORS token for submitting data
      */

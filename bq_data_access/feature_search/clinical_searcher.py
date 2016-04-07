@@ -21,7 +21,6 @@ from api.schema.tcga_clinical import schema as clinical_schema
 from bq_data_access.clinical_data import CLINICAL_FEATURE_TYPE
 from bq_data_access.feature_search.common import InvalidFieldException, EmptyQueryException
 
-
 class ClinicalSearcher(object):
     feature_search_valid_fields = ['keyword']
 
@@ -80,11 +79,14 @@ class ClinicalSearcher(object):
             column_name = feature_item['name']
             human_readable_name = self.build_feature_label(column_name)
             internal_id = 'CLIN:' + column_name
-
+            type = "N"
+            if feature_item['type'] == "STRING" :
+                type = "C"
             found_features.append({
                 'feature_type': 'CLIN',
                 'internal_feature_id': internal_id,
-                'label': human_readable_name
+                'label': human_readable_name,
+                'type' : type
             })
 
         return found_features

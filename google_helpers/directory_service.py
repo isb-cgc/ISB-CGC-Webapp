@@ -47,6 +47,5 @@ def get_directory_resource():
 
     http_auth = credentials.authorize(Http())
 
-    # todo: this has thrown AccessTokenRefreshError at least once
     service = discovery.build('admin', 'directory_v1', http=http_auth)
     return service, http_auth

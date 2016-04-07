@@ -25,21 +25,30 @@
 {% block link_page_name %}cohort-details{% endblock %}
 {% block page_name %}cohort-details{% endblock %}
 
-{% block secondary_nav %}
-    <div class="container">
-        <div class="row">
-            <div class="menu-bar">
+{% block page_header %}
+<div class="container">
+    {% if workbook %}
+        <ol class="breadcrumb">
+            <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+            <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
+            <li><a href="{% url 'worksheet_display' workbook.id worksheet.id%}">{{ workbook.name }}</a></li>
+        </ol>
+    {% else %}
+        <ol class="breadcrumb">
+            <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+            <li><a href="{% url 'cohort_list' %}">Cohorts</a></li>
+        </ol>
+    {% endif %}
+    <h1 class="page-header pull-left">Create Cohort</h1>
+    {% if workbook %}
+        <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal">Apply to Worksheet</button>
+    {% elif create_workbook %}
+        <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal">Apply to new Worksheet</button>
+    {% else %}
+        <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal">Save As New Cohort</button>
+    {% endif %}
 
-                <div class="col-md-10 space-top-5">
-                    <h3>Create Cohort</h3>
-                    {#                <h4 class="total-samples">{{ total_samples }} Samples</h4>#}
-                </div>
-                <div class="col-md-2">
-                    <a role="button" class="btn btn-primary space-top-10 float-right" data-toggle="modal" data-target="#create-cohort-modal">Save As New Cohort</a>
-                </div>
-            </div>
-        </div>
-    </div>
+</div>
 {% endblock %}
 
 {% block content %}
@@ -53,78 +62,84 @@
             </ul>
             <div class="tab-content">
                 <div role="tabpanel" class="tab-pane active" id="clinical-filters">
-                    <div class="panel-group" id="clin-accordion" role="tablist" aria-multiselectable="true">
+                    <ul class="list-group" id="clin-accordion" role="tablist" aria-multiselectable="true">
                         {% for attr in clin_attr %}
-                            {% if attr in attr_list_count %}
-                                <div class="panel panel-default">
-                                    <a role="button" data-toggle="collapse" data-parent="#clin-accordion" href="#collapse-{{ attr }}" aria-expanded="true" aria-controls="collapse-{{ attr }}">
-                                        <div class="panel-heading" role="tab" id="heading-{{ attr }}"><i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ attr|get_readable_name }}</div>
-                                    </a>
-                                    <div id="collapse-{{ attr }}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-{{ attr }}">
-                                        <div class="panel-body">
-                                            <ul class="search-checkbox-list" id="{{ attr }}">
-                                                {% with attr_list_count|get_item:attr|how_many_more:6 as num_more %}
-                                                    {% for v in attr_list_count|get_item:attr %}
-                                                        {% if forloop.counter0 < 6 %}
-                                                            <li>
-                                                                <input type="checkbox" name="elements-selected" id="{{ attr }}-{{ v.value|replace_whitespace:'_' }}" >
-                                                                <label for="{{ attr }}-{{ v.value|replace_whitespace:'_' }}">{{ v.value }}</label>
-                                                                <span class="count">({{ v.count }})</span>
-                                                            </li>
-                                                        {% elif forloop.counter0 == 6 and num_more > 0 %}
-                                                            <a class="show-more">{{ num_more }} more</a>
-                                                            <li class="extra-values" style="display:none;">
-                                                                <input type="checkbox" name="elements-selected" id="{{ attr }}-{{ v.value|replace_whitespace:'_' }}" >
-                                                                <label for="{{ attr }}-{{ v.value|replace_whitespace:'_' }}">{{ v.value }}</label>
-                                                                <span class="count">({{ v.count }})</span>
-                                                            </li>
-                                                        {% else %}
-                                                            <li class="extra-values" style="display:none;">
-                                                                <input type="checkbox" name="elements-selected" id="{{ attr }}-{{ v.value|replace_whitespace:'_' }}" >
-                                                                <label for="{{ attr }}-{{ v.value|replace_whitespace:'_' }}">{{ v.value }}</label>
-                                                                <span class="count">({{ v.count }})</span>
-                                                            </li>
-                                                        {% endif %}
-                                                    {% endfor %}
-                                                    {% if num_more > 0 %}
-                                                        <a class="show-less" style="display:none;">less</a>
-                                                    {% endif %}
-                                                {% endwith %}
-                                            </ul>
-                                        </div>
+                            {% if attr_list_count|list_contains_name:attr %}
+                                <li class="list-group-item">
+                                    <div id="heading-{{attr}}" class="list-group-item__heading">
+                                        <a role="button" data-toggle="collapse" data-parent="#clin-accordion" href="#collapse-{{ attr }}" aria-expanded="false" aria-controls="collapse-{{ attr }}">
+                                            <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr|get_readable_name }}
+                                        </a>
                                     </div>
-                                </div>
+
+                                    <div id="collapse-{{ attr }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" aria-labelledby="heading-{{ attr }}" data-feature-name="{{ attr }}" data-feature-id="{% if attr_list_count|get_named_item:attr|get_item:'id' %}{{ attr_list_count|get_named_item:attr|get_item:'id' }}{% endif %}">
+                                        <ul class="search-checkbox-list" id="{{ attr }}">
+                                            {% with attr_list_count|get_named_item:attr|get_item:'values'|how_many_more:6 as num_more %}
+                                                {% for v in attr_list_count|get_named_item:attr|get_item:'values' %}
+                                                    {% if forloop.counter0 < 6 %}
+                                                        <li class="checkbox">
+                                                            <label title="{{ v.value|get_tooltip_text:attr }}">
+                                                                <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}" data-value-id="{% if v.id %}{{ v.id }}{% endif %}">
+                                                                {% if v.value == 'None' %}NA{% else %}{{v.value|get_readable_name:attr }}{% endif %}
+                                                            </label>
+                                                            <span class="count">({{ v.count }})</span>
+                                                        </li>
+                                                    {% elif forloop.counter0 == 6 and num_more > 0 %}
+                                                        <a class="show-more">{{ num_more }} more</a>
+                                                        <li class="extra-values checkbox" style="display:none;">
+                                                            <label title="{{ v.value|get_tooltip_text:attr }}">
+                                                                <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}" data-value-id="{% if v.id %}{{ v.id }}{% endif %}">
+                                                                {% if v.value == 'None' %}NA{% else %}{{ v.value|get_readable_name:attr }}{% endif %}
+                                                            </label>
+                                                            <span class="count">({{ v.count }})</span>
+                                                        </li>
+                                                    {% else %}
+                                                        <li class="extra-values checkbox" style="display:none;">
+                                                            <label title="{{ v.value|get_tooltip_text:attr }}">
+                                                                <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}" data-value-id="{% if v.id %}{{ v.id }}{% endif %}">
+                                                                {% if v.value == 'None' %}NA{% else %}{{ v.value|get_readable_name:attr }}{% endif %}
+                                                            </label>
+                                                            <span class="count">({{ v.count }})</span>
+                                                        </li>
+                                                    {% endif %}
+                                                {% endfor %}
+                                                {% if num_more > 0 %}
+                                                    <a class="show-less" style="display:none;">less</a>
+                                                {% endif %}
+                                            {% endwith %}
+                                        </ul>
+                                    </div>
+                                </li>
                             {% endif %}
                         {% endfor %}
-                    </div>
+                    </ul>
                 </div>
                 <!-- data filters tab -->
                 <div role="tabpanel" class="tab-pane" id="data-filters">
-                    <div class="panel-group" id="data-type-accordion" role="tablist" aria-multiselectable="true">
+                    <ul class="list-group" id="data-type-accordion" role="tablist" aria-multiselectable="true">
                         {% for attr in data_attr %}
-                            <div class="panel panel-default">
-                                <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-{{ attr }}" aria-expanded="true" aria-controls="collapse-{{ attr }}">
-                                    <div class="panel-heading" role="tab" id="heading-{{ attr }}"><i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ attr|get_readable_name }}</div>
-                                </a>
-                                <div id="collapse-{{ attr }}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-{{ attr }}">
-                                    <div class="panel-body">
-                                        <ul class="search-checkbox-list" id="{{ attr }}">
-                                            {% if attr in attr_list_count %}
-                                                {% for v in attr_list_count|get_item:attr %}
-                                                    <li>
-                                                        <!-- todo: make a custom tag for the id for data_attr attributes-->
-                                                        <input type="checkbox" name="elements-selected" id="{{ v.value|get_data_attr_id:attr }}" >
-                                                        <label for="{{ v.value|get_data_attr_id:attr }}">{{ v.value }}</label>
-                                                        <span class="count">({{ v.count }})</span>
-                                                    </li>
-                                                {% endfor %}
-                                            {% endif %}
-                                        </ul>
-                                    </div>
+                            <li class="list-group-item">
+                                <div class="list-group-item__heading" role="tab" id="heading-{{ attr }}">
+                                    <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-{{ attr }}" aria-expanded="false" aria-controls="collapse-{{ attr }}">
+                                        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ attr|get_readable_name }}
+                                    </a>
                                 </div>
-                            </div>
+                                <div id="collapse-{{ attr }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" aria-labelledby="heading-{{ attr }}" data-feature-name="{{ attr }}" data-feature-type="datatype">
+                                    <ul class="search-checkbox-list" id="{{ attr }}">
+                                        {% if attr_list_count|list_contains_name:attr %}
+                                            {% for v in attr_list_count|get_named_item:attr|get_item:'values' %}
+                                                <li class="checkbox">
+                                                    <!-- todo: make a custom tag for the id for data_attr attributes-->
+                                                    <label><input type="checkbox" name="elements-selected" data-value-name="{{ v.value|get_data_attr_id:attr }}" >{{ v.value }}</label>
+                                                    <span class="count">({{ v.count }})</span>
+                                                </li>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </li>
                         {% endfor %}
-                    </div>
+                    </ul>
                 </div>
 {#                <!-- molecular filters tab -->#}
 {#                <div role="tabpanel" class="tab-pane" id="molecular-filters">#}
@@ -170,29 +185,31 @@
     </div>
 
     <div class="col-lg-8">
-        <div class="selected-filters panel">
-            <div class="panel-heading">
-                <h4>Selected Filters <a role="button" id="clear-filters">Clear All</a></h4>
+        <div class="selected-filters panel panel-default">
+            <div class="panel-heading clearfix">
+                <h4 class="panel-title pull-left">Selected Filters</h4>
+                <a class="pull-right" role="button" id="clear-filters">Clear All</a>
             </div>
             <div class="panel-body">
 
             </div>
         </div>
 
-        <div class="clinical-trees panel">
+        <div class="clinical-trees panel panel-default">
             <div class="panel-heading">
-                <h4>Clinical Features</h4>
+                <h4 class="panel-title">Clinical Features</h4>
             </div>
             <div class="panel-body">
+                <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
                 <div id="tree-graph-clinical"></div>
             </div>
-            <div id="more-graphs"><button class="btn btn-default" role="button">Show More</button></div>
-            <div id="less-graphs" style="display: none;"><button class="btn btn-default" role="button">Show Less</button></div>
+            <div id="more-graphs"><button class="btn btn-link" role="button">Show More</button></div>
+            <div id="less-graphs" style="display: none;"><button class="btn btn-link" role="button">Show Less</button></div>
         </div>
 
-        <div class="parallel-sets panel">
+        <div class="parallel-sets panel panel-default">
             <div class="panel-heading">
-                <h4>Data Availability</h4>
+                <h4 class="panel-title">Public Data Availability</h4>
             </div>
             <div class="panel-body">
                 <div id="multi-categorical"></div>
@@ -208,15 +225,23 @@
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <h4 class="modal-title" id="createCohortModal">Create Cohort</h4>
                 </div>
-                <form id="create-cohort-form" method="POST" action="{% url 'save_cohort' %}">
-                    <div class="modal-body form-horizontal">
+                {% if workbook and worksheet %}
+                    <form id="create-cohort-form" method="POST" action="{% url 'save_cohort_for_existing_workbook' %}" >
+                    <input type="hidden" value="{{ worksheet.id }}" name="worksheet_id" />
+                    <input type="hidden" value="{{ workbook.id }}" name="workbook_id" />
+                {% elif create_workbook %}
+                    <form id="create-cohort-form" method="POST" action="{% url 'save_cohort_for_new_workbook' %}" >
+                {% else %}
+                    <form id="create-cohort-form" method="POST" action="{% url 'save_cohort' %}">
+                {% endif %}
+                    <div class="modal-body">
                         <div class="form-group">
-                            <label class="col-md-2" for="cohort-name">Name:</label>
-                            <div class="col-md-10"><input type="text" id="cohort-name" name="name" /></div>
+                            <label for="cohort-name">Name:</label>
+                            <input class="form-control" type="text" id="cohort-name" name="name" required />
                         </div>
                         <div class="form-group">
-                            <label class="col-md-2" for="filters">Selected Filters:</label>
-                            <div class="col-md-10"><p class="form-control-static"></p></div>
+                            <label for="filters">Selected Filters:</label>
+                            <p class="form-control-static"></p>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -229,11 +254,12 @@
     </div>
 
     <script type="text/javascript">
-    var attr_list = {{ attr_list|safe }};
+    var attr_list = {{ attr_list|tojson|safe }};
     var total_samples = {{ total_samples|safe }};
-    var attr_counts = {{ attr_list_count|safe }};
+    var attr_counts = {{ attr_list_count|tojson|safe }};
     var base_api_url = '{{ base_api_url|safe }}';
     var cohort_id = undefined;
+    var api_token = {{ token|tojson|safe }};
     </script>
 {% endblock %}
 

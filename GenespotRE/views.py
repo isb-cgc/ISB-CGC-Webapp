@@ -1,19 +1,14 @@
 """
-
 Copyright 2015, Institute for Systems Biology
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-
    http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
 """
 
 import logging
@@ -44,7 +39,12 @@ from google_helpers.directory_service import get_directory_resource
 from googleapiclient.errors import HttpError
 from visualizations.models import SavedViz, Viz_Perms
 from cohorts.models import Cohort, Cohort_Perms
+from projects.models import Project
+from workbooks.models import Workbook
 from accounts.models import NIH_User
+
+from allauth.socialaccount.models import SocialAccount
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 
 
 debug = settings.DEBUG
@@ -109,7 +109,7 @@ Handles login and user creation for new users.
 Returns user to landing page.
 '''
 def landing_page(request):
-    if debug: 
+    if debug:
         print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
         print >> sys.stderr,'App Version: '+modules.get_current_version_name()
         try:
@@ -140,8 +140,6 @@ def user_list(request):
     return render(request, 'GenespotRE/user_list.html', {'request': request,
                                                           'users': users})
 
-from allauth.socialaccount.models import SocialAccount
-from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 
 '''
 Returns page that has user details
@@ -149,6 +147,7 @@ Returns page that has user details
 @login_required
 def user_detail(request, user_id):
     if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+
     if int(request.user.id) == int(user_id):
 
         user = User.objects.get(id=user_id)
@@ -167,7 +166,7 @@ def user_detail(request, user_id):
             nih_user = NIH_User.objects.get(user_id=user_id)
             user_details['NIH_username'] = nih_user.NIH_username
             user_details['NIH_assertion_expiration'] = nih_user.NIH_assertion_expiration
-            user_details['dbGaP_authorized'] = nih_user.dbGaP_authorized
+            user_details['dbGaP_authorized'] = nih_user.dbGaP_authorized and nih_user.active
             user_details['NIH_active'] = nih_user.active
         except (MultipleObjectsReturned, ObjectDoesNotExist), e:
             if type(e) is MultipleObjectsReturned:
@@ -178,10 +177,11 @@ def user_detail(request, user_id):
         return render(request, 'GenespotRE/user_detail.html',
                       {'request': request,
                        'user_details': user_details,
-                       'NIH_AUTH_ON': settings.NIH_AUTH_ON
+                       'NIH_AUTH_ON': settings.NIH_AUTH_ON,
+                       'ERA_LOGIN_URL': settings.ERA_LOGIN_URL
                        })
     else:
-        return render(request, '500.html')
+        return render(request, '403.html')
 
 
 @login_required
@@ -304,67 +304,105 @@ def search_cohorts_viz(request):
     return HttpResponse(json.dumps(result_obj), status=200)
 
 @login_required
-def igv(request, readgroupset_id=None):
+def igv(request, sample_barcode=None, readgroupset_id=None):
     if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
-    service, http_auth = get_genomics_resource()
-    datasets = convert(service.datasets().list(projectNumber=settings.IGV_PROJECT_ID).execute())
+    # service, http_auth = get_genomics_resource()
+    # datasets = convert(service.datasets().list(projectNumber=settings.IGV_PROJECT_ID).execute())
 
-    dataset_ids = []
-    dataset_objs = []
-    nih_user = None
+    # dataset_ids = []
+    # dataset_objs = []
+    # nih_user = None
 
-    for dataset in datasets['datasets']:
-        if 'isPublic' in dataset and dataset['isPublic'] is True:
-            dataset_ids.append(dataset['id'])
-            dataset_objs.append({'id': dataset['id'], 'name': dataset['name']})
+    # for dataset in datasets['datasets']:
+    #     if 'isPublic' in dataset and dataset['isPublic'] is True:
+    #         dataset_ids.append(dataset['id'])
+    #         dataset_objs.append({'id': dataset['id'], 'name': dataset['name']})
+    #
+    # try:
+    #     nih_user = NIH_User.objects.get(user_id=request.user.id)
+    # except (MultipleObjectsReturned, ObjectDoesNotExist), e:
+    #     if type(e) is MultipleObjectsReturned:
+    #         logger.warn("Multiple NIH_User objects for user id {}".format(request.user.id))
+    #
+    # if nih_user is not None:
+    #     if nih_user.dbGaP_authorized is True and nih_user.active is True:
+    #         dataset_ids = []
+    #         dataset_objs = []
+    #         for dataset in datasets['datasets']:
+    #             dataset_ids.append(dataset['id'])
+    #             dataset_objs.append({'id': dataset['id'], 'name': dataset['name']})
 
-    try:
-        nih_user = NIH_User.objects.get(user_id=request.user.id)
-    except (MultipleObjectsReturned, ObjectDoesNotExist), e:
-        if type(e) is MultipleObjectsReturned:
-            logger.warn("Multiple NIH_User objects for user id {}".format(request.user.id))
+    # content = convert(service.readgroupsets().get(body={'datasetIds':dataset_ids}).execute())
+    # read_group_set_ids = []
+    # selected = {}
+    # context = {'request': request}
+    # for rgset in content['readGroupSets']:
+    #
+    #     if readgroupset_id and rgset['id'] == readgroupset_id:
+    #         selected['rgs_id'] = rgset['id']
+    #         selected['dataset_id'] = rgset['datasetId']
+    #         context['selected'] = selected
+    #
+    #     read_group_set_ids.append({
+    #         'datasetId': rgset['datasetId'],
+    #         'id': rgset['id'],
+    #         'name': rgset['name'],
+    #         'filename': rgset['filename']
+    #     })
+    #
+    # for dataset in dataset_objs:
+    #     rgsets = []
+    #     for rgset in read_group_set_ids:
+    #         if rgset['datasetId'] == dataset['id']:
+    #             rgsets.append(rgset)
+    #     dataset['readGroupSets'] = rgsets
+    # context['datasets'] = dataset_objs
+    context = {}
+    sample_barcode = request.GET.get('sample_barcode')
+    readgroupset_id = request.GET.get('readgroupset_id')
+    if sample_barcode:
+        context['sample_barcode'] = sample_barcode
 
-    if nih_user is not None:
-        if nih_user.dbGaP_authorized is True and nih_user.active is True:
-            dataset_ids = []
-            dataset_objs = []
-            for dataset in datasets['datasets']:
-                dataset_ids.append(dataset['id'])
-                dataset_objs.append({'id': dataset['id'], 'name': dataset['name']})
-
-
-    content = convert(service.readgroupsets().search(body={'datasetIds':dataset_ids}).execute())
-    read_group_set_ids = []
-    selected = {}
-    context = {'request': request}
-    for rgset in content['readGroupSets']:
-
-        if readgroupset_id and rgset['id'] == readgroupset_id:
-            selected['rgs_id'] = rgset['id']
-            selected['dataset_id'] = rgset['datasetId']
-            context['selected'] = selected
-
-        read_group_set_ids.append({
-            'datasetId': rgset['datasetId'],
-            'id': rgset['id'],
-            'name': rgset['name'],
-            'filename': rgset['filename']
-        })
-
-    for dataset in dataset_objs:
-        rgsets = []
-        for rgset in read_group_set_ids:
-            if rgset['datasetId'] == dataset['id']:
-                rgsets.append(rgset)
-        dataset['readGroupSets'] = rgsets
-    context['datasets'] = dataset_objs
-    if 'selected' not in context and readgroupset_id:
-        messages.info(request, 'The selected readgroupset id (%s) does not exist in the available datasets.' % readgroupset_id)
+    if readgroupset_id:
+        context['readgroupset_id'] = readgroupset_id
+    else:
+        messages.info(request, 'The selected readgroupset id (%s) does not exist.' % readgroupset_id)
     return render(request, 'GenespotRE/igv.html', context)
 
 def health_check(request):
 #    print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     return HttpResponse('')
 
-def help(request):
+def help_page(request):
     return render(request, 'GenespotRE/help.html')
+
+def about_page(request):
+    return render(request, 'GenespotRE/about.html')
+
+@login_required
+def dashboard_page(request):
+
+    # Cohort List
+    isb_superuser = User.objects.get(username='isb')
+    public_cohorts = Cohort_Perms.objects.filter(user=isb_superuser,perm=Cohort_Perms.OWNER).values_list('cohort', flat=True)
+    cohort_perms = list(set(Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True).exclude(cohort__id__in=public_cohorts)))
+    cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved')
+
+    # Project List
+    ownedProjects = request.user.project_set.all().filter(active=True)
+    sharedProjects = Project.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
+    projects = ownedProjects | sharedProjects
+    projects = projects.distinct().order_by('-last_date_saved')
+
+    # Workbook List
+    userWorkbooks = request.user.workbook_set.all().filter(active=True)
+    sharedWorkbooks = Workbook.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
+    workbooks = userWorkbooks | sharedWorkbooks
+    workbooks = workbooks.distinct().order_by('-last_date_saved')
+
+    return render(request, 'GenespotRE/dashboard.html', {
+        'request'  : request,
+        'cohorts'  : cohorts,
+        'projects' : projects,
+        'workbooks': workbooks,
+    })

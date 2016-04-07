@@ -17,22 +17,21 @@ limitations under the License.
 """
 
 import logging
-import sys
 from datetime import datetime
 
 import endpoints
-from google.appengine.ext import ndb
 from protorpc import messages, message_types
 from protorpc import remote
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.contrib.auth.models import User as Django_User
+from django.core.signals import request_finished
 import django
 import MySQLdb
+import json
 
 from metadata import MetadataItem, IncomingMetadataItem
 
-from accounts.models import NIH_User
 from cohorts.models import Cohort as Django_Cohort, Cohort_Perms, Patients, Samples, Filters
 from bq_data_access.cohort_bigquery import BigQueryCohortSupport
 from api_helpers import *
@@ -41,12 +40,8 @@ from api_helpers import *
 logger = logging.getLogger(__name__)
 
 INSTALLED_APP_CLIENT_ID = settings.INSTALLED_APP_CLIENT_ID
+CONTROLLED_ACL_GOOGLE_GROUP = settings.ACL_GOOGLE_GROUP
 
-
-
-#################################################################
-#  BEGINNING OF FEATURE MATRIX ENDPOINTS
-#################################################################
 DEFAULT_COHORT_NAME = 'Untitled Cohort'
 
 IMPORTANT_FEATURES = [
@@ -84,53 +79,23 @@ IMPORTANT_FEATURES = [
     'rppaPlatform'
 ]
 
+BUILTIN_ENDPOINTS_PARAMETERS = [
+    'alt',
+    'fields',
+    'enum',
+    'enumDescriptions',
+    'key',
+    'oauth_token',
+    'prettyPrint',
+    'quotaUser',
+    'userIp'
+]
+
+MAX_FILTER_VALUE_LENGTH = 496  # max_len of Filter.value is 512, but 507 is too long. 495 is ok.
+
+
 class ReturnJSON(messages.Message):
     msg = messages.StringField(1)
-
-
-class tcga_data_file(ndb.Expando):
-    pass
-
-
-# todo: refactor to from users import User (from users api)
-class User(messages.Message):
-    id = messages.StringField(1)
-    last_login = messages.StringField(2)
-    is_superuser = messages.StringField(3)
-    username = messages.StringField(4)
-    first_name = messages.StringField(5)
-    last_name = messages.StringField(6)
-    email = messages.StringField(7)
-    is_staff = messages.StringField(8)
-    is_active = messages.StringField(9)
-    date_joined = messages.StringField(10)
-
-
-class UserList(messages.Message):
-    items = messages.MessageField(User, 1, repeated=True)
-
-
-class SavedSearch(messages.Message):
-    id = messages.StringField(1)
-    search_url = messages.StringField(2)
-    barcodes = messages.StringField(3)
-    datatypes = messages.StringField(4)
-    last_date_saved = messages.StringField(5)
-    user_id = messages.StringField(6)
-    name = messages.StringField(7)
-    parent_id = messages.StringField(8)
-    active = messages.StringField(9)
-
-
-class SavedSearchList(messages.Message):
-    items = messages.MessageField(SavedSearch, 1, repeated=True)
-
-
-class IdList(messages.Message):
-    ids = messages.IntegerField(1, repeated=True)   # List of ids
-    update = messages.IntegerField(2)               # Id of object to update
-    name = messages.StringField(3)                  # Potential name for new object or updated object
-    user_id = messages.IntegerField(4)              # User Id
 
 
 class FilterDetails(messages.Message):
@@ -145,12 +110,13 @@ class Cohort(messages.Message):
     perm = messages.StringField(4)
     email = messages.StringField(5)
     comments = messages.StringField(6)
-    filter_name = messages.StringField(7)
-    filter_value = messages.StringField(8)
-    source_type = messages.StringField(9)
-    source_notes = messages.StringField(10)
-    parent_id = messages.IntegerField(11)
-    filters = messages.MessageField(FilterDetails, 12, repeated=True)
+    source_type = messages.StringField(7)
+    source_notes = messages.StringField(8)
+    parent_id = messages.IntegerField(9)
+    filters = messages.MessageField(FilterDetails, 10, repeated=True)
+    num_patients = messages.StringField(11)
+    num_samples = messages.StringField(12)
+
 
 class CohortsList(messages.Message):
     items = messages.MessageField(Cohort, 1, repeated=True)
@@ -181,13 +147,16 @@ class DataDetails(messages.Message):
     DataLevel = messages.StringField(7)
     Datatype = messages.StringField(8)
     GenomeReference = messages.StringField(9)
-    Pipeline = messages.StringField(10)
-    Platform = messages.StringField(11)
-    platform_full_name = messages.StringField(12)
-    Project = messages.StringField(13)
-    Repository = messages.StringField(14)
-    SDRFFileName = messages.StringField(15)
-    SecurityProtocol = messages.StringField(16)
+    GG_dataset_id = messages.StringField(10)
+    GG_readgroupset_id = messages.StringField(11)
+    Pipeline = messages.StringField(12)
+    Platform = messages.StringField(13)
+    platform_full_name = messages.StringField(14)
+    Project = messages.StringField(15)
+    Repository = messages.StringField(16)
+    SDRFFileName = messages.StringField(17)
+    SecurityProtocol = messages.StringField(18)
+    CloudStoragePath = messages.StringField(19)
 
 
 class SampleDetails(messages.Message):
@@ -196,37 +165,126 @@ class SampleDetails(messages.Message):
     patient = messages.StringField(3)
     data_details = messages.MessageField(DataDetails, 4, repeated=True)
     data_details_count = messages.IntegerField(5)
+    error = messages.StringField(6)
 
 
 class DataFileNameKeyList(messages.Message):
     datafilenamekeys = messages.StringField(1, repeated=True)
+    count = messages.IntegerField(2)
 
 
-class SavedCohort(messages.Message):
-    id = messages.StringField(1)
-    name = messages.StringField(2)
-    active = messages.StringField(3)
-    last_date_saved = messages.StringField(4)
-    user_id = messages.StringField(5)  # for cohorts_cohort_perms. Not shown: perm (OWNER, READER)
-    filter_name = messages.StringField(6, repeated=True)  # for cohorts_filters.name
-    filter_value = messages.StringField(7, repeated=True)  # for cohorts_filters.value. Not shown: cohorts_filters.resulting_cohort_id
-    last_date_saved_alt = message_types.DateTimeField(8)
-    filters = messages.MessageField(FilterDetails, 9, repeated=True)
+class GoogleGenomicsItem(messages.Message):
+    SampleBarcode = messages.StringField(1)
+    GG_dataset_id = messages.StringField(2)
+    GG_readgroupset_id = messages.StringField(3)
 
 
-Cohort_Endpoints = endpoints.api(name='cohort_api', version='v1', description="Get information about cohorts",
+class GoogleGenomicsList(messages.Message):
+    items = messages.MessageField(GoogleGenomicsItem, 1, repeated=True)
+    count = messages.IntegerField(2)
+
+
+def are_there_bad_keys(request):
+    '''
+    Checks for unrecognized fields in an endpoint request
+    :param request: the request object from the endpoint
+    :return: boolean indicating True if bad (unrecognized) fields are present in the request
+    '''
+    unrecognized_param_dict = {
+        k: request.get_unrecognized_field_info(k)[0]
+        for k in request.all_unrecognized_fields()
+        if k not in BUILTIN_ENDPOINTS_PARAMETERS
+    }
+    return unrecognized_param_dict != {}
+
+
+def are_there_no_acceptable_keys(request):
+    '''
+    Checks for a lack of recognized fields in an endpoints request. Used in save_cohort and preview_cohort endpoints.
+    :param request: the request object from the endpoint
+    :return: boolean indicating True if there are no recognized fields in the request.
+    '''
+    param_dict = {
+        k.name: request.get_assigned_value(k.name)
+        for k in request.all_fields()
+        if request.get_assigned_value(k.name)
+    }
+    return param_dict == {}
+
+
+def construct_parameter_error_message(request, filter_required):
+    err_msg = ''
+    sorted_acceptable_keys = sorted([k.name for k in request.all_fields()], key=lambda s: s.lower())
+    unrecognized_param_dict = {
+        k: request.get_unrecognized_field_info(k)[0]
+        for k in request.all_unrecognized_fields()
+        if k not in BUILTIN_ENDPOINTS_PARAMETERS
+    }
+    if unrecognized_param_dict:
+        bad_key_str = "'" + "', '".join(unrecognized_param_dict.keys()) + "'"
+        err_msg += "The following filters were not recognized: {}. ".format(bad_key_str)
+    if filter_required:
+        err_msg += "You must specify at least one of the following " \
+                       "case-sensitive filters: {}".format(sorted_acceptable_keys)
+    else:
+        err_msg += "Acceptable filters are: {}".format(sorted_acceptable_keys)
+
+    return err_msg
+
+
+def get_list_of_split_values_for_filter_model(large_value_list):
+    '''
+    :rtype: list
+    :param large_value_list: protorpc.messages.FieldList
+    :return: list of smaller protorpc.messages.FieldLists
+    '''
+
+    return_list = []
+
+    # if length_of_list is larger than 512 characters,
+    # the Filter model will not be able to be saved
+    # with this as the value field
+    length_of_list = len('"' + '", "'.join(large_value_list) + '"')
+    while length_of_list > MAX_FILTER_VALUE_LENGTH:
+        new_smaller_list = []
+        length_of_smaller_list = len('"' + '", "'.join(new_smaller_list) + '"')
+        while length_of_smaller_list < MAX_FILTER_VALUE_LENGTH:
+            try:
+                new_smaller_list.append(large_value_list.pop())
+            except IndexError:
+                break
+            length_of_smaller_list = len('"' + '", "'.join(new_smaller_list) + '"')
+        large_value_list.append(new_smaller_list.pop())
+        return_list.append(new_smaller_list)
+        length_of_list = len('"' + '", "'.join(large_value_list) + '"')
+
+    if len(large_value_list):
+        return_list.append(large_value_list)
+
+    return return_list
+
+
+Cohort_Endpoints = endpoints.api(name='cohort_api', version='v1', description="Get information about "
+                                "cohorts, patients, and samples. Create and delete cohorts.",
                                  allowed_client_ids=[INSTALLED_APP_CLIENT_ID, endpoints.API_EXPLORER_CLIENT_ID])
 
 @Cohort_Endpoints.api_class(resource_name='cohort_endpoints')
 class Cohort_Endpoints_API(remote.Service):
 
 
-    GET_RESOURCE = endpoints.ResourceContainer(token=messages.StringField(1), cohort_id=messages.StringField(2))
+    GET_RESOURCE = endpoints.ResourceContainer(token=messages.StringField(1), cohort_id=messages.IntegerField(2))
     @endpoints.method(GET_RESOURCE, CohortsList,
                       path='cohorts_list', http_method='GET', name='cohorts.list')
     def cohorts_list(self, request):
-        print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+        '''
+        Returns information about cohorts a user has either READER or OWNER permission on.
+        Authentication is required. Optionally takes a cohort id as a parameter to
+        only list information about one cohort.
+        '''
         user_email = None
+        cursor = None
+        filter_cursor = None
+        db = None
 
         if endpoints.get_current_user() is not None:
             user_email = endpoints.get_current_user().email()
@@ -234,11 +292,11 @@ class Cohort_Endpoints_API(remote.Service):
         # users have the option of pasting the access token in the query string
         # or in the 'token' field in the api explorer
         # but this is not required
-        access_token = request.__getattribute__('token')
+        access_token = request.get_assigned_value('token')
         if access_token:
             user_email = get_user_email_from_token(access_token)
 
-        cohort_id = request.__getattribute__('cohort_id')
+        cohort_id = request.get_assigned_value('cohort_id')
 
         if user_email:
             django.setup()
@@ -250,7 +308,7 @@ class Cohort_Endpoints_API(remote.Service):
 
             query_dict = {'cohorts_cohort_perms.user_id': user_id, 'cohorts_cohort.active': unicode('1')}
 
-            if cohort_id and cohort_id.isdigit():
+            if cohort_id:
                 query_dict['cohorts_cohort.id'] = cohort_id
 
             query_str = 'select cohorts_cohort.id, ' \
@@ -260,8 +318,7 @@ class Cohort_Endpoints_API(remote.Service):
                         'auth_user.email, ' \
                         'cohorts_cohort_comments.content as comments, ' \
                         'cohorts_source.type as source_type, ' \
-                        'cohorts_source.notes as source_notes, ' \
-                        'cohorts_source.parent_id ' \
+                        'cohorts_source.notes as source_notes ' \
                         'from cohorts_cohort_perms ' \
                         'join cohorts_cohort ' \
                         'on cohorts_cohort.id=cohorts_cohort_perms.cohort_id ' \
@@ -274,20 +331,35 @@ class Cohort_Endpoints_API(remote.Service):
 
             query_tuple = ()
             if query_dict:
-                query_str += ' where ' + '=%s and '.join(key for key in query_dict.keys()) + '=%s'
+                query_str += ' where ' + '=%s and '.join(key for key in query_dict.keys()) + '=%s '
                 query_tuple = tuple(value for value in query_dict.values())
+
+            query_str += 'group by  ' \
+            'cohorts_cohort.id,  ' \
+            'cohorts_cohort.name,  ' \
+            'cohorts_cohort.last_date_saved,  ' \
+            'cohorts_cohort_perms.perm,  ' \
+            'auth_user.email,  ' \
+            'comments,  ' \
+            'source_type,  ' \
+            'source_notes '
+
+            filter_query_str = ''
+            row = None
 
             try:
                 db = sql_connection()
                 cursor = db.cursor(MySQLdb.cursors.DictCursor)
                 cursor.execute(query_str, query_tuple)
                 data = []
+
                 for row in cursor.fetchall():
-                    filter_query_str = 'select name, value ' \
-                                       'from cohorts_filters ' \
-                                       'where cohorts_filters.resulting_cohort_id=%s'
+                    filter_query_str = 'SELECT name, value ' \
+                                       'FROM cohorts_filters ' \
+                                       'WHERE cohorts_filters.resulting_cohort_id=%s'
+
                     filter_cursor = db.cursor(MySQLdb.cursors.DictCursor)
-                    filter_cursor.execute(filter_query_str, str(row['id']))
+                    filter_cursor.execute(filter_query_str, (str(row['id']),))
                     filter_data = []
                     for filter_row in filter_cursor.fetchall():
                         filter_data.append(FilterDetails(
@@ -302,28 +374,48 @@ class Cohort_Endpoints_API(remote.Service):
                         perm=str(row['perm']),
                         email=str(row['email']),
                         comments=str(row['comments']),
-                        # filter_name=str(row['filter_name']),
-                        # filter_value=str(row['filter_value']),
                         source_type=None if row['source_type'] is None else str(row['source_type']),
                         source_notes=None if row['source_notes'] is None else str(row['source_notes']),
-                        parent_id=None if row['parent_id'] is None else int(row['parent_id']),
+                        # parent_id=None if row['parent_id'] is None else int(row['parent_id']),
                         filters=filter_data
                     ))
-                cursor.close()
-                db.close()
+
+                if len(data) == 0:
+                    optional_message = " matching cohort id " + str(cohort_id) if cohort_id is not None else ""
+                    raise endpoints.NotFoundException("{} has no active cohorts{}."
+                                                      .format(user_email, optional_message))
                 return CohortsList(items=data, count=len(data))
-            except (IndexError, TypeError):
-                raise endpoints.NotFoundException("User %s's cohorts not found." % (request.id,))
+            except (IndexError, TypeError) as e:
+                raise endpoints.NotFoundException(
+                    "User {}'s cohorts not found. {}: {}".format(user_email, type(e), e))
+            except MySQLdb.ProgrammingError as e:
+                msg = '{}:\n\tcohort query: {} {}\n\tfilter query: {} {}'\
+                    .format(e, query_str, query_tuple, filter_query_str, str(row))
+                logger.warn(msg)
+                raise endpoints.BadRequestException("Error retrieving cohorts or filters. {}".format(msg))
+            finally:
+                if cursor: cursor.close()
+                if filter_cursor: filter_cursor.close()
+                if db and db.open: db.close()
+                request_finished.send(self)
         else:
-            raise endpoints.NotFoundException("Authentication failed.")
+            raise endpoints.UnauthorizedException("Authentication failed.")
 
 
-    GET_RESOURCE = endpoints.ResourceContainer(cohort_id=messages.StringField(1, required=True),
+    GET_RESOURCE = endpoints.ResourceContainer(cohort_id=messages.IntegerField(1, required=True),
                                                token=messages.StringField(2))
     @endpoints.method(GET_RESOURCE, CohortPatientsSamplesList,
-                      path='cohort_patients_samples_list', http_method='GET', name='cohorts.cohort_patients_samples_list')
+                      path='cohort_patients_samples_list', http_method='GET',
+                      name='cohorts.cohort_patients_samples_list')
     def cohort_patients_samples_list(self, request):
-        print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+        """
+        Takes a cohort id as a required parameter and returns information about the participants
+        and samples in a particular cohort. Authentication is required.
+        User must have either READER or OWNER permissions on the cohort.
+        """
+
+        db = None
+        cursor = None
         user_email = None
 
         if endpoints.get_current_user() is not None:
@@ -332,14 +424,11 @@ class Cohort_Endpoints_API(remote.Service):
         # users have the option of pasting the access token in the query string
         # or in the 'token' field in the api explorer
         # but this is not required
-        access_token = request.__getattribute__('token')
+        access_token = request.get_assigned_value('token')
         if access_token:
             user_email = get_user_email_from_token(access_token)
 
-        cohort_id = request.__getattribute__('cohort_id')
-
-        if not cohort_id.isdigit():
-            raise endpoints.NotFoundException("Cohort_id must be an integer. You entered {}.".format(cohort_id))
+        cohort_id = request.get_assigned_value('cohort_id')
 
         if user_email:
             django.setup()
@@ -347,24 +436,43 @@ class Cohort_Endpoints_API(remote.Service):
                 user_id = Django_User.objects.get(email=user_email).id
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
                 logger.warn(e)
-                raise endpoints.NotFoundException("%s does not have an entry in the user database." % user_email)
+                request_finished.send(self)
+                raise endpoints.UnauthorizedException("%s does not have an entry in the user database." % user_email)
+
+            cohort_perms_query = "select count(*) from cohorts_cohort_perms where user_id=%s and cohort_id=%s"
+            cohort_perms_tuple = (user_id, cohort_id)
+            cohort_query = "select count(*) from cohorts_cohort where id=%s and active=%s"
+            cohort_tuple = (cohort_id, unicode('0'))
 
             try:
                 db = sql_connection()
                 cursor = db.cursor(MySQLdb.cursors.DictCursor)
-                cursor.execute("select count(*) from cohorts_cohort_perms where user_id=%s and cohort_id=%s", (user_id, cohort_id))
+                cursor.execute(cohort_perms_query, cohort_perms_tuple)
                 result = cursor.fetchone()
                 if int(result['count(*)']) == 0:
-                    raise endpoints.NotFoundException("{} does not have owner or reader permissions on cohort {}."
-                                                      .format(user_email, cohort_id))
-                cursor.execute("select count(*) from cohorts_cohort where id=%s and active=%s", (cohort_id, unicode('0')))
+                    error_message = "{} does not have owner or reader permissions on cohort {}.".format(user_email, cohort_id)
+                    request_finished.send(self)
+                    raise endpoints.ForbiddenException(error_message)
+
+                cursor.execute(cohort_query, cohort_tuple)
                 result = cursor.fetchone()
                 if int(result['count(*)']) > 0:
-                    raise endpoints.NotFoundException("Cohort {} was deleted.".format(cohort_id))
-                cursor.close()
-                db.close()
-            except (IndexError, TypeError):
+                    error_message = "Cohort {} was deleted.".format(cohort_id)
+                    request_finished.send(self)
+                    raise endpoints.NotFoundException(error_message)
+
+            except (IndexError, TypeError) as e:
+                logger.warn(e)
                 raise endpoints.NotFoundException("Cohort {} not found.".format(cohort_id))
+            except MySQLdb.ProgrammingError as e:
+                msg = '{}:\n\tcohort permissions query: {} {}\n\tcohort query: {} {}'\
+                    .format(e, cohort_perms_query, cohort_perms_tuple, cohort_query, cohort_tuple)
+                logger.warn(msg)
+                raise endpoints.BadRequestException("Error retrieving cohorts or cohort permissions. {}".format(msg))
+            finally:
+                if cursor: cursor.close()
+                if db and db.open: db.close()
+                request_finished.send(self)
 
             patient_query_str = 'select cohorts_patients.patient_id ' \
                         'from cohorts_patients ' \
@@ -405,18 +513,27 @@ class Cohort_Endpoints_API(remote.Service):
                 sample_data = []
                 for row in cursor.fetchall():
                     sample_data.append(row['sample_id'])
-                cursor.close()
-                db.close()
+
                 return CohortPatientsSamplesList(patients=patient_data,
                                                  patient_count=len(patient_data),
                                                  samples=sample_data,
                                                  sample_count=len(sample_data),
                                                  cohort_id=int(cohort_id))
-            except (IndexError, TypeError):
-                raise endpoints.NotFoundException("Cohort %s not found." % (request.cohort_id),)
+            except (IndexError, TypeError) as e:
+                logger.warn(e)
+                raise endpoints.NotFoundException("Cohort {} not found.".format(cohort_id))
+            except MySQLdb.ProgrammingError as e:
+                msg = '{}:\n\tpatient query: {} {}\n\tsample query: {} {}'\
+                    .format(e, patient_query_str, patient_query_tuple, sample_query_str, sample_query_tuple)
+                logger.warn(msg)
+                raise endpoints.BadRequestException("Error retrieving patients or samples. {}".format(msg))
+            finally:
+                if cursor: cursor.close()
+                if db and db.open: db.close()
+                request_finished.send(self)
 
         else:
-            raise endpoints.NotFoundException("Authentication failed.")
+            raise endpoints.UnauthorizedException("Authentication failed.")
 
 
 
@@ -424,16 +541,26 @@ class Cohort_Endpoints_API(remote.Service):
     @endpoints.method(GET_RESOURCE, PatientDetails,
                       path='patient_details', http_method='GET', name='cohorts.patient_details')
     def patient_details(self, request):
-        print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+        """
+        Returns information about a specific participant,
+        including a list of samples and aliquots derived from this patient.
+        Takes a participant barcode (of length 12, *eg* TCGA-B9-7268) as a required parameter.
+        User does not need to be authenticated.
+        """
 
-        patient_barcode = request.__getattribute__('patient_barcode')
+        clinical_cursor = None
+        sample_cursor = None
+        aliquot_cursor = None
+        db = None
+
+        patient_barcode = request.get_assigned_value('patient_barcode')
 
         clinical_query_str = 'select * ' \
                     'from metadata_clinical ' \
                     'where ParticipantBarcode=%s' \
                     # % patient_barcode
 
-        query_tuple = [str(patient_barcode)]
+        query_tuple = (str(patient_barcode),)
 
 
         sample_query_str = 'select SampleBarcode ' \
@@ -449,6 +576,7 @@ class Cohort_Endpoints_API(remote.Service):
             clinical_cursor = db.cursor(MySQLdb.cursors.DictCursor)
             clinical_cursor.execute(clinical_query_str, query_tuple)
             row = clinical_cursor.fetchone()
+
             item = MetadataItem(
                 age_at_initial_pathologic_diagnosis=None if "age_at_initial_pathologic_diagnosis" not in row or row["age_at_initial_pathologic_diagnosis"] is None else int(row["age_at_initial_pathologic_diagnosis"]),
                 anatomic_neoplasm_subdivision=str(row["anatomic_neoplasm_subdivision"]),
@@ -524,13 +652,21 @@ class Cohort_Endpoints_API(remote.Service):
             for row in aliquot_cursor.fetchall():
                 aliquot_data.append(row['AliquotBarcode'])
 
-            clinical_cursor.close()
-            sample_cursor.close()
-            aliquot_cursor.close()
-            db.close()
             return PatientDetails(clinical_data=item, samples=sample_data, aliquots=aliquot_data)
         except (IndexError, TypeError), e:
-            raise endpoints.NotFoundException("Patient %s not found." % (str(request.patient_barcode),))
+            logger.info("Patient {} not found. Error: {}".format(patient_barcode, e))
+            raise endpoints.NotFoundException("Patient {} not found.".format(patient_barcode))
+        except MySQLdb.ProgrammingError as e:
+            msg = '{}:\n\tpatient query: {} {}\n\tsample query: {} {}\n\taliquot query: {} {}'\
+                .format(e, clinical_query_str, query_tuple, sample_query_str, query_tuple,
+                        aliquot_query_str, query_tuple)
+            logger.warn(msg)
+            raise endpoints.BadRequestException("Error retrieving patient, sample, or aliquot data. {}".format(msg))
+        finally:
+            if clinical_cursor: clinical_cursor.close()
+            if sample_cursor: sample_cursor.close()
+            if aliquot_cursor: aliquot_cursor.close()
+            if db and db.open: db.close()
 
 
     GET_RESOURCE = endpoints.ResourceContainer(sample_barcode=messages.StringField(1, required=True),
@@ -539,8 +675,20 @@ class Cohort_Endpoints_API(remote.Service):
     @endpoints.method(GET_RESOURCE, SampleDetails,
                       path='sample_details', http_method='GET', name='cohorts.sample_details')
     def sample_details(self, request):
-        print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
-        sample_barcode = request.__getattribute__('sample_barcode')
+        """
+        Given a sample barcode (of length 16, *eg* TCGA-B9-7268-01A), this endpoint returns
+        all available "biospecimen" information about this sample,
+        the associated patient barcode, a list of associated aliquots,
+        and a list of "data_details" blocks describing each of the data files associated with this sample
+        """
+
+        biospecimen_cursor = None
+        aliquot_cursor = None
+        patient_cursor = None
+        data_cursor = None
+        db = None
+
+        sample_barcode = request.get_assigned_value('sample_barcode')
         biospecimen_query_str = 'select * ' \
                                 'from metadata_biospecimen ' \
                                 'where SampleBarcode=%s'
@@ -569,6 +717,8 @@ class Cohort_Endpoints_API(remote.Service):
                          'DataLevel,' \
                          'Datatype,' \
                          'GenomeReference,' \
+                         'GG_dataset_id, ' \
+                         'GG_readgroupset_id, ' \
                          'Pipeline,' \
                          'Platform,' \
                          'platform_full_name,' \
@@ -577,16 +727,16 @@ class Cohort_Endpoints_API(remote.Service):
                          'SDRFFileName,' \
                          'SecurityProtocol ' \
                          'from metadata_data ' \
-                         'where SampleBarcode=%s'
+                         'where SampleBarcode=%s '
 
-        if request.__getattribute__('platform') is not None:
-            platform = request.__getattribute__('platform')
+        if request.get_assigned_value('platform') is not None:
+            platform = request.get_assigned_value('platform')
             aliquot_query_str += ' and platform=%s '
             data_query_str += ' and platform=%s '
             extra_query_tuple += (str(platform),)
 
-        if request.__getattribute__('pipeline') is not None:
-            pipeline = request.__getattribute__('pipeline')
+        if request.get_assigned_value('pipeline') is not None:
+            pipeline = request.get_assigned_value('pipeline')
             aliquot_query_str += ' and pipeline=%s '
             data_query_str += ' and pipeline=%s '
             extra_query_tuple += (str(pipeline),)
@@ -599,6 +749,7 @@ class Cohort_Endpoints_API(remote.Service):
             biospecimen_cursor = db.cursor(MySQLdb.cursors.DictCursor)
             biospecimen_cursor.execute(biospecimen_query_str, query_tuple)
             row = biospecimen_cursor.fetchone()
+
             item = MetadataItem(
                 avg_percent_lymphocyte_infiltration=None if "avg_percent_lymphocyte_infiltration" not in row or row["avg_percent_lymphocyte_infiltration"] is None else float(row["avg_percent_lymphocyte_infiltration"]),
                 avg_percent_monocyte_infiltration=None if "avg_percent_monocyte_infiltration" not in row or row["avg_percent_monocyte_infiltration"] is None else float(row["avg_percent_monocyte_infiltration"]),
@@ -641,57 +792,111 @@ class Cohort_Endpoints_API(remote.Service):
             patient_cursor = db.cursor(MySQLdb.cursors.DictCursor)
             patient_cursor.execute(patient_query_str, query_tuple)
             row = patient_cursor.fetchone()
+            if row is None:
+                aliquot_cursor.close()
+                patient_cursor.close()
+                biospecimen_cursor.close()
+                db.close()
+                error_message = "Sample barcode {} not found in metadata_biospecimen table.".format(sample_barcode)
+                return SampleDetails(biospecimen_data=None, aliquots=[], patient=None, data_details=[],
+                                     data_details_count=None, error=error_message)
             patient_barcode = str(row["ParticipantBarcode"])
 
             data_cursor = db.cursor(MySQLdb.cursors.DictCursor)
             data_cursor.execute(data_query_str, extra_query_tuple)
             data_data = []
+            bad_repo_count = 0
+            bad_repo_set = set()
             for row in data_cursor.fetchall():
+                if not row.get('DataFileNameKey'):
+                    continue
+                if 'controlled' not in str(row['SecurityProtocol']).lower():
+                    cloud_storage_path = "gs://{}{}".format(settings.OPEN_DATA_BUCKET, row.get('DataFileNameKey'))
+                else:  # not filtering on dbGaP_authorized:
+                    if row['Repository'].lower() == 'dcc':
+                        bucket_name = settings.DCC_CONTROLLED_DATA_BUCKET
+                    elif row['Repository'].lower() == 'cghub':
+                        bucket_name = settings.CGHUB_CONTROLLED_DATA_BUCKET
+                    else:  # shouldn't ever happen
+                        bad_repo_count += 1
+                        bad_repo_set.add(row['Repository'])
+                        continue
+                    cloud_storage_path = "gs://{}{}".format(bucket_name, row.get('DataFileNameKey'))
+
                 data_item = DataDetails(
                     SampleBarcode=str(row['SampleBarcode']),
                     DataCenterName=str(row['DataCenterName']),
                     DataCenterType=str(row['DataCenterType']),
                     DataFileName=str(row['DataFileName']),
-                    DataFileNameKey=str(row['DataFileNameKey']),
+                    DataFileNameKey=str(row.get('DataFileNameKey')),
                     DatafileUploaded=str(row['DatafileUploaded']),
                     DataLevel=str(row['DataLevel']),
                     Datatype=str(row['Datatype']),
                     GenomeReference=str(row['GenomeReference']),
+                    GG_dataset_id=str(row['GG_dataset_id']),
+                    GG_readgroupset_id=str(row['GG_readgroupset_id']),
                     Pipeline=str(row['Pipeline']),
                     Platform=str(row['Platform']),
                     platform_full_name=str(row['platform_full_name']),
                     Project=str(row['Project']),
                     Repository=str(row['Repository']),
                     SDRFFileName=str(row['SDRFFileName']),
-                    SecurityProtocol=str(row['SecurityProtocol'])
+                    SecurityProtocol=str(row['SecurityProtocol']),
+                    CloudStoragePath=cloud_storage_path
                 )
                 data_data.append(data_item)
-
-            biospecimen_cursor.close()
-            aliquot_cursor.close()
-            patient_cursor.close()
-            data_cursor.close()
-            db.close()
-
+            if bad_repo_count > 0:
+                logger.warn("not returning {count} row(s) in sample_details due to repositories: {bad_repo_list}"
+                            .format(count=bad_repo_count, bad_repo_list=list(bad_repo_set)))
             return SampleDetails(biospecimen_data=item, aliquots=aliquot_data,
                                  patient=patient_barcode, data_details=data_data,
                                  data_details_count=len(data_data))
 
-        except (IndexError, TypeError), e:
-            logger.warn(e)
-            raise endpoints.NotFoundException("Sample %s not found." % (str(request.sample_barcode),))
+        except (IndexError, TypeError) as e:
+            logger.info("Sample details for barcode {} not found. Error: {}".format(sample_barcode, e))
+            raise endpoints.NotFoundException(
+                "Sample details for barcode {} not found.".format(sample_barcode))
+        except MySQLdb.ProgrammingError as e:
+            msg = '{}:\n\tbiospecimen query: {} {}\n\tpatient query: {} {}\n\tdata query: {} {}'\
+                .format(e, biospecimen_query_str, query_tuple, patient_query_str, query_tuple,
+                        data_query_str, extra_query_tuple)
+            logger.warn(msg)
+            raise endpoints.BadRequestException("Error retrieving biospecimen, patient, or other data. {}".format(msg))
+        finally:
+            if biospecimen_cursor: biospecimen_cursor.close()
+            if aliquot_cursor: aliquot_cursor.close()
+            if patient_cursor: patient_cursor.close()
+            if data_cursor: data_cursor.close()
+            if db and db.open: db.close()
 
 
-    GET_RESOURCE = endpoints.ResourceContainer(sample_barcode=messages.StringField(1, required=True),
-                                               platform=messages.StringField(2),
-                                               pipeline=messages.StringField(3),
-                                               token=messages.StringField(4))
+
+    GET_RESOURCE = endpoints.ResourceContainer(cohort_id=messages.IntegerField(1, required=True),
+                                               limit=messages.IntegerField(2),
+                                               platform=messages.StringField(3),
+                                               pipeline=messages.StringField(4),
+                                               token=messages.StringField(5))
     @endpoints.method(GET_RESOURCE, DataFileNameKeyList,
-                      path='datafilenamekey_list', http_method='GET', name='cohorts.datafilenamekey_list')
-    def datafilenamekey_list(self, request):
-        print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+                      path='datafilenamekey_list_from_cohort', http_method='GET',
+                      name='cohorts.datafilenamekey_list_from_cohort')
+    def datafilenamekey_list_from_cohort(self, request):
+        """
+        Takes a cohort id as a required parameter and returns cloud storage paths to files
+        associated with all the samples in that cohort, up to a default limit of 10,000 files.
+        Authentication is required. User must have READER or OWNER permissions on the cohort.
+        """
         user_email = None
-        dbGaP_authorized = False
+        cursor = None
+        db = None
+
+        limit = request.get_assigned_value('limit')
+        platform = request.get_assigned_value('platform')
+        pipeline = request.get_assigned_value('pipeline')
+        cohort_id = request.get_assigned_value('cohort_id')
+
+        if are_there_bad_keys(request):
+            err_msg = construct_parameter_error_message(request, False)
+            raise endpoints.BadRequestException(err_msg)
 
         if endpoints.get_current_user() is not None:
             user_email = endpoints.get_current_user().email()
@@ -699,27 +904,117 @@ class Cohort_Endpoints_API(remote.Service):
         # users have the option of pasting the access token in the query string
         # or in the 'token' field in the api explorer
         # but this is not required
-        access_token = request.__getattribute__('token')
+        access_token = request.get_assigned_value('token')
         if access_token:
             user_email = get_user_email_from_token(access_token)
 
         if user_email:
             django.setup()
+
+            query_str = 'SELECT DataFileNameKey, SecurityProtocol, Repository ' \
+                        'FROM metadata_data '
+
             try:
                 user_id = Django_User.objects.get(email=user_email).id
-                dbGaP_authorized = NIH_User.objects.get(user_id=user_id).dbGaP_authorized
+                django_cohort = Django_Cohort.objects.get(id=cohort_id)
+                cohort_perm = Cohort_Perms.objects.get(cohort_id=cohort_id, user_id=user_id)
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
                 logger.warn(e)
-                # raise endpoints.NotFoundException("%s does not have an entry in the user database." % user_email)
+                err_msg = "Error retrieving cohort {} for user {}: {}".format(cohort_id, user_email, e)
+                if 'Cohort_Perms' in e.message:
+                    err_msg = "User {} does not have permissions on cohort {}. Error: {}"\
+                        .format(user_email, cohort_id, e)
+                request_finished.send(self)
+                raise endpoints.UnauthorizedException(err_msg)
+
+            query_str += 'JOIN cohorts_samples ON metadata_data.SampleBarcode=cohorts_samples.sample_id ' \
+                         'WHERE cohorts_samples.cohort_id=%s ' \
+                         'AND DataFileNameKey != "" AND DataFileNameKey is not null '
+            query_tuple = (cohort_id,)
+
+            if platform:
+                query_str += ' and metadata_data.Platform=%s '
+                query_tuple += (platform,)
+
+            if pipeline:
+                query_str += ' and metadata_data.Pipeline=%s '
+                query_tuple += (pipeline,)
+
+            query_str += ' GROUP BY DataFileNameKey, SecurityProtocol, Repository '
+            if limit is None:
+                query_str += ' LIMIT 10000'
+            else:
+                query_str += ' LIMIT %s'
+                query_tuple += (limit,)
+
+            try:
+                db = sql_connection()
+                cursor = db.cursor(MySQLdb.cursors.DictCursor)
+                cursor.execute(query_str, query_tuple)
+
+                datafilenamekeys = []
+                bad_repo_count = 0
+                bad_repo_set = set()
+                for row in cursor.fetchall():
+                    if not row.get('DataFileNameKey'):
+                        continue
+                    if 'controlled' not in str(row['SecurityProtocol']).lower():
+                        datafilenamekeys.append("gs://{}{}".format(settings.OPEN_DATA_BUCKET, row.get('DataFileNameKey')))
+                    else:  # not filtering on dbGaP_authorized
+                        bucket_name = ''
+                        if row['Repository'].lower() == 'dcc':
+                            bucket_name = settings.DCC_CONTROLLED_DATA_BUCKET
+                        elif row['Repository'].lower() == 'cghub':
+                            bucket_name = settings.CGHUB_CONTROLLED_DATA_BUCKET
+                        else:  # shouldn't ever happen
+                            bad_repo_count += 1
+                            bad_repo_set.add(row['Repository'])
+                            continue
+                        datafilenamekeys.append("gs://{}{}".format(bucket_name, row.get('DataFileNameKey')))
+                if bad_repo_count > 0:
+                    logger.warn("not returning {count} row(s) in sample_details due to repositories: {bad_repo_list}"
+                                .format(count=bad_repo_count, bad_repo_list=list(bad_repo_set)))
+                return DataFileNameKeyList(datafilenamekeys=datafilenamekeys, count=len(datafilenamekeys))
+
+            except (IndexError, TypeError), e:
+                logger.warn(e)
+                raise endpoints.NotFoundException("File paths for cohort {} not found.".format(cohort_id))
+            except MySQLdb.ProgrammingError as e:
+                msg = '{}:\n\t query: {} {}'.format(e, query_str, query_tuple)
+                logger.warn(msg)
+                raise endpoints.BadRequestException("Error retrieving file paths. {}".format(msg))
+            finally:
+                if cursor: cursor.close()
+                if db and db.open: db.close()
+                request_finished.send(self)
+
+        else:
+            raise endpoints.UnauthorizedException("Authentication failed.")
 
 
-        sample_barcode = request.__getattribute__('sample_barcode')
-        platform = request.__getattribute__('platform')
-        pipeline = request.__getattribute__('pipeline')
+    GET_RESOURCE = endpoints.ResourceContainer(sample_barcode=messages.StringField(1, required=True),
+                                               platform=messages.StringField(2),
+                                               pipeline=messages.StringField(3))
+    @endpoints.method(GET_RESOURCE, DataFileNameKeyList,
+                      path='datafilenamekey_list_from_sample', http_method='GET', name='cohorts.datafilenamekey_list_from_sample')
+    def datafilenamekey_list_from_sample(self, request):
+        """
+        Takes a sample barcode as a required parameter and
+        returns cloud storage paths to files associated with that sample.
+        """
+        cursor = None
+        db = None
+
+        sample_barcode = request.get_assigned_value('sample_barcode')
+        platform = request.get_assigned_value('platform')
+        pipeline = request.get_assigned_value('pipeline')
+
+        if are_there_bad_keys(request):
+            err_msg = construct_parameter_error_message(request, False)
+            raise endpoints.BadRequestException(err_msg)
 
         query_str = 'SELECT DataFileNameKey, SecurityProtocol, Repository ' \
-                    'FROM metadata_data ' \
-                    'WHERE SampleBarcode=%s '
+                    'FROM metadata_data WHERE SampleBarcode=%s '
 
         query_tuple = (sample_barcode,)
 
@@ -731,7 +1026,7 @@ class Cohort_Endpoints_API(remote.Service):
             query_str += ' and Pipeline=%s '
             query_tuple += (pipeline,)
 
-        query_str += ' GROUP BY DataFileNameKey'
+        query_str += ' GROUP BY DataFileNameKey, SecurityProtocol, Repository'
 
         try:
             db = sql_connection()
@@ -739,35 +1034,58 @@ class Cohort_Endpoints_API(remote.Service):
             cursor.execute(query_str, query_tuple)
 
             datafilenamekeys = []
+            bad_repo_count = 0
+            bad_repo_set = set()
             for row in cursor.fetchall():
-                file_path = row.get('DataFileNameKey') if len(row.get('DataFileNameKey', '')) else '/file-path-currently-unavailable'
+                if not row.get('DataFileNameKey'):
+                    continue
                 if 'controlled' not in str(row['SecurityProtocol']).lower():
-                    datafilenamekeys.append("gs://{}{}".format(settings.OPEN_DATA_BUCKET, file_path))
-                elif dbGaP_authorized:
+                    datafilenamekeys.append("gs://{}{}".format(settings.OPEN_DATA_BUCKET, row.get('DataFileNameKey')))
+                else:  # not filtering on dbGaP_authorized
                     bucket_name = ''
-                    # hard-coding mock bucket names for now --testing purposes only
                     if row['Repository'].lower() == 'dcc':
-                        bucket_name = 'gs://62f2c827-mock-mock-mock-1cde698a4f77'
+                        bucket_name = settings.DCC_CONTROLLED_DATA_BUCKET
                     elif row['Repository'].lower() == 'cghub':
-                        bucket_name = 'gs://360ee3ad-mock-mock-mock-52f9a5e7f99a'
-                    datafilenamekeys.append("{}{}".format(bucket_name, file_path))
-
-            return DataFileNameKeyList(datafilenamekeys=datafilenamekeys)
+                        bucket_name = settings.CGHUB_CONTROLLED_DATA_BUCKET
+                    else:  # shouldn't ever happen
+                        bad_repo_count += 0
+                        bad_repo_set.add(row['Repository'])
+                        continue
+                    datafilenamekeys.append("gs://{}{}".format(bucket_name, row.get('DataFileNameKey')))
+            if bad_repo_count > 0:
+                logger.warn("not returning {count} row(s) in sample_details due to repositories: {bad_repo_list}"
+                            .format(count=bad_repo_count, bad_repo_list=list(bad_repo_set)))
+            return DataFileNameKeyList(datafilenamekeys=datafilenamekeys, count=len(datafilenamekeys))
 
         except (IndexError, TypeError), e:
             logger.warn(e)
-            raise endpoints.NotFoundException("Sample %s not found." % (str(request.sample_barcode),))
-
+            raise endpoints.NotFoundException("File paths for sample {} not found.".format(sample_barcode))
+        except MySQLdb.ProgrammingError as e:
+            msg = '{}:\n\t query: {} {}'.format(e, query_str, query_tuple)
+            logger.warn(msg)
+            raise endpoints.BadRequestException("Error retrieving file paths. {}".format(msg))
+        finally:
+            if cursor: cursor.close()
+            if db and db.open: db.close()
 
     POST_RESOURCE = endpoints.ResourceContainer(IncomingMetadataItem,
                                                 name=messages.StringField(2, required=True),
                                                 token=messages.StringField(3)
                                                 )
-    @endpoints.method(POST_RESOURCE, SavedCohort,
-                      path='save_cohort', http_method='POST', name='cohort.save')
+
+    @endpoints.method(POST_RESOURCE, Cohort,
+                      path='save_cohort', http_method='POST', name='cohorts.save')
     def save_cohort(self, request):
-        print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+        """
+        Creates and saves a cohort. Takes a JSON object in the request body to use as the cohort's filters.
+        Authentication is required.
+        Returns information about the saved cohort, including the number of patients and the number
+        of samples in that cohort.
+        """
         user_email = None
+        patient_cursor = None
+        sample_cursor = None
+        db = None
 
         if endpoints.get_current_user() is not None:
             user_email = endpoints.get_current_user().email()
@@ -775,7 +1093,7 @@ class Cohort_Endpoints_API(remote.Service):
         # users have the option of pasting the access token in the query string
         # or in the 'token' field in the api explorer
         # but this is not required
-        access_token = request.__getattribute__('token')
+        access_token = request.get_assigned_value('token')
         if access_token:
             user_email = get_user_email_from_token(access_token)
 
@@ -786,13 +1104,23 @@ class Cohort_Endpoints_API(remote.Service):
                 user_id = django_user.id
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
                 logger.warn(e)
+                request_finished.send(self)
                 raise endpoints.NotFoundException("%s does not have an entry in the user database." % user_email)
 
-            keys = [k for k in IncomingMetadataItem.__dict__.keys() if not k.startswith('_') and request.__getattribute__(k)]
-            values = (request.__getattribute__(k) for k in keys)
-            query_dict = dict(zip(keys, values))
+            query_dict = {
+                k.name: request.get_assigned_value(k.name)
+                for k in request.all_fields()
+                if request.get_assigned_value(k.name)
+                and k.name is not 'name' and k.name is not 'token'
+            }
 
-            patient_query_str = 'SELECT DISTINCT(IF(ParticipantBarcode="", LEFT(SampleBarcode,12), ParticipantBarcode)) AS ParticipantBarcode ' \
+            if are_there_bad_keys(request) or are_there_no_acceptable_keys(request):
+                err_msg = construct_parameter_error_message(request, True)
+                request_finished.send(self)
+                raise endpoints.BadRequestException(err_msg)
+
+            patient_query_str = 'SELECT DISTINCT(IF(ParticipantBarcode="", LEFT(SampleBarcode,12), ParticipantBarcode)) ' \
+                                'AS ParticipantBarcode ' \
                                 'FROM metadata_samples '
 
             sample_query_str = 'SELECT SampleBarcode ' \
@@ -805,7 +1133,6 @@ class Cohort_Endpoints_API(remote.Service):
                 sample_query_str += ' WHERE ' + where_clause['query_str']
                 value_tuple = where_clause['value_tuple']
 
-            # patient_query_str += ' GROUP BY ParticipantBarcode'
             sample_query_str += ' GROUP BY SampleBarcode'
 
             patient_barcodes = []
@@ -824,10 +1151,19 @@ class Cohort_Endpoints_API(remote.Service):
 
             except (IndexError, TypeError), e:
                 logger.warn(e)
-                # todo: more informative message
                 raise endpoints.NotFoundException("Error retrieving samples or patients")
+            except MySQLdb.ProgrammingError as e:
+                msg = '{}:\n\tpatient query: {} {}\n\tsample query: {} {}'\
+                    .format(e, patient_query_str, value_tuple, sample_query_str, value_tuple)
+                logger.warn(msg)
+                raise endpoints.BadRequestException("Error saving cohort. {}".format(msg))
+            finally:
+                if patient_cursor: patient_cursor.close()
+                if sample_cursor: sample_cursor.close()
+                if db and db.open: db.close()
+                request_finished.send(self)
 
-            cohort_name = request.__getattribute__('name')
+            cohort_name = request.get_assigned_value('name')
 
             # 1. create new cohorts_cohort with name, active=True, last_date_saved=now
             created_cohort = Django_Cohort.objects.create(name=cohort_name, active=True, last_date_saved=datetime.utcnow())
@@ -849,7 +1185,12 @@ class Cohort_Endpoints_API(remote.Service):
 
             # 5. Create filters applied
             for key, val in query_dict.items():
-                Filters.objects.create(resulting_cohort=created_cohort, name=key, value=val).save()
+                if len('", "'.join(val)) > MAX_FILTER_VALUE_LENGTH:
+                    new_val_list = get_list_of_split_values_for_filter_model(val)
+                    for new_val in new_val_list:
+                        Filters.objects.create(resulting_cohort=created_cohort, name=key, value=new_val).save()
+                else:
+                    Filters.objects.create(resulting_cohort=created_cohort, name=key, value=val).save()
 
             # 6. Store cohort to BigQuery
             project_id = settings.BQ_PROJECT_ID
@@ -857,34 +1198,29 @@ class Cohort_Endpoints_API(remote.Service):
             bcs = BigQueryCohortSupport(project_id, cohort_settings.dataset_id, cohort_settings.table_id)
             bcs.add_cohort_with_sample_barcodes(created_cohort.id, sample_barcodes)
 
-            return SavedCohort(id=str(created_cohort.id),
-                               name=cohort_name,
-                               active='True',
-                               last_date_saved=str(datetime.utcnow()),
-                               user_id=str(user_id)
-                               )
+            request_finished.send(self)
+            return Cohort(id=str(created_cohort.id),
+                          name=cohort_name,
+                          last_date_saved=str(datetime.utcnow()),
+                          num_patients=str(len(patient_barcodes)),
+                          num_samples=str(len(sample_barcodes))
+                          )
+
         else:
-            raise endpoints.NotFoundException("Authentication failed.")
-            # todo: make SavedCohort have num_patients and num_samples instead of filter_name, filter_value
-        # id = messages.StringField(1)
-        # name = messages.StringField(2)
-        # active = messages.StringField(3)
-        # last_date_saved = messages.StringField(4)
-        # user_id = messages.StringField(5)  # for cohorts_cohort_perms. Not shown: perm (OWNER, READER)
-        # filter_name = messages.StringField(6)  # for cohorts_filters.name
-        # filter_value = messages.StringField(7)  # for cohorts_filters.value. Not shown: cohorts_filters.resulting_cohort_id
-        # last_date_saved_alt = message_types.DateTimeField(8)
+            raise endpoints.UnauthorizedException("Authentication failed.")
 
 
     DELETE_RESOURCE = endpoints.ResourceContainer(cohort_id=messages.IntegerField(1, required=True),
                                                   token=messages.StringField(2)
                                                   )
     @endpoints.method(DELETE_RESOURCE, ReturnJSON,
-                      path='delete_cohort', http_method='POST', name='cohort.delete')
+                      path='delete_cohort', http_method='POST', name='cohorts.delete')
     def delete_cohort(self, request):
-        print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+        """
+        Deletes a cohort. User must have owner permissions on the cohort.
+        """
         user_email = None
-        result_message = None
+        return_message = None
 
         if endpoints.get_current_user() is not None:
             user_email = endpoints.get_current_user().email()
@@ -892,11 +1228,11 @@ class Cohort_Endpoints_API(remote.Service):
         # users have the option of pasting the access token in the query string
         # or in the 'token' field in the api explorer
         # but this is not required
-        access_token = request.__getattribute__('token')
+        access_token = request.get_assigned_value('token')
         if access_token:
             user_email = get_user_email_from_token(access_token)
 
-        cohort_id = request.__getattribute__('cohort_id')
+        cohort_id = request.get_assigned_value('cohort_id')
 
         if user_email:
             django.setup()
@@ -905,6 +1241,7 @@ class Cohort_Endpoints_API(remote.Service):
                 user_id = django_user.id
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
                 logger.warn(e)
+                request_finished.send(self)
                 raise endpoints.NotFoundException("%s does not have an entry in the user database." % user_email)
             try:
                 cohort_to_deactivate = Django_Cohort.objects.get(id=cohort_id)
@@ -918,12 +1255,236 @@ class Cohort_Endpoints_API(remote.Service):
                         return_message = 'You do not have owner permission on cohort %d.' % cohort_id
                 else:
                     return_message = "Cohort %d was already deactivated." % cohort_id
+
             except (ObjectDoesNotExist, MultipleObjectsReturned), e:
                 logger.warn(e)
                 raise endpoints.NotFoundException(
                     "Either cohort %d does not have an entry in the database "
                     "or you do not have owner or reader permissions on this cohort." % cohort_id)
+            finally:
+                request_finished.send(self)
         else:
-            return_message = "Unsuccessful authentication."
+            raise endpoints.UnauthorizedException("Unsuccessful authentication.")
 
         return ReturnJSON(msg=return_message)
+
+
+
+    POST_RESOURCE = endpoints.ResourceContainer(IncomingMetadataItem)
+    @endpoints.method(POST_RESOURCE, CohortPatientsSamplesList,
+                      path='preview_cohort', http_method='POST', name='cohorts.preview')
+    def preview_cohort(self, request):
+        """
+        Takes a JSON object of filters in the request body and returns a "preview" of the cohort that would
+        result from passing a similar request to the cohort **save** endpoint.  This preview consists of
+        two lists: the lists of participant (aka patient) barcodes, and the list of sample barcodes.
+        Authentication is not required.
+        """
+        # print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+        patient_cursor = None
+        sample_cursor = None
+        db = None
+
+        query_dict = {
+            k.name: request.get_assigned_value(k.name)
+            for k in request.all_fields()
+            if request.get_assigned_value(k.name)
+        }
+
+        if are_there_bad_keys(request) or are_there_no_acceptable_keys(request):
+            err_msg = construct_parameter_error_message(request, True)
+            raise endpoints.BadRequestException(err_msg)
+
+        patient_query_str = 'SELECT DISTINCT(IF(ParticipantBarcode="", LEFT(SampleBarcode,12), ParticipantBarcode)) ' \
+                            'AS ParticipantBarcode ' \
+                            'FROM metadata_samples '
+
+        sample_query_str = 'SELECT SampleBarcode ' \
+                           'FROM metadata_samples '
+
+        value_tuple = ()
+
+        if len(query_dict) > 0:
+            where_clause = build_where_clause(query_dict)
+            patient_query_str += ' WHERE ' + where_clause['query_str']
+            sample_query_str += ' WHERE ' + where_clause['query_str']
+            value_tuple = where_clause['value_tuple']
+
+        sample_query_str += ' GROUP BY SampleBarcode'
+
+        patient_barcodes = []
+        sample_barcodes = []
+
+        try:
+            db = sql_connection()
+            patient_cursor = db.cursor(MySQLdb.cursors.DictCursor)
+            patient_cursor.execute(patient_query_str, value_tuple)
+            for row in patient_cursor.fetchall():
+                patient_barcodes.append(row['ParticipantBarcode'])
+
+            sample_cursor = db.cursor(MySQLdb.cursors.DictCursor)
+            sample_cursor.execute(sample_query_str, value_tuple)
+            for row in sample_cursor.fetchall():
+                sample_barcodes.append(row['SampleBarcode'])
+
+        except (IndexError, TypeError), e:
+            logger.warn(e)
+            raise endpoints.NotFoundException("Error retrieving samples or patients: {}".format(e))
+        except MySQLdb.ProgrammingError as e:
+            msg = '{}:\n\tpatient query: {} {}\n\tsample query: {} {}'\
+                .format(e, patient_query_str, value_tuple, sample_query_str, value_tuple)
+            logger.warn(msg)
+            raise endpoints.BadRequestException("Error previewing cohort. {}".format(msg))
+        finally:
+            if patient_cursor: patient_cursor.close()
+            if sample_cursor: sample_cursor.close()
+            if db and db.open: db.close()
+
+        return CohortPatientsSamplesList(patients=patient_barcodes,
+                                          patient_count=len(patient_barcodes),
+                                          samples=sample_barcodes,
+                                          sample_count=len(sample_barcodes))
+
+
+    GET_RESOURCE = endpoints.ResourceContainer(cohort_id=messages.IntegerField(1, required=True),
+                                               token=messages.StringField(2))
+    @endpoints.method(GET_RESOURCE, GoogleGenomicsList,
+                      path='google_genomics_from_cohort', http_method='GET', name='cohorts.google_genomics_from_cohort')
+    def google_genomics_from_cohort(self, request):
+        """
+        Returns a list of Google Genomics dataset and readgroupset ids associated with
+        all the samples in a specified cohort.
+        Authentication is required. User must have either READER or OWNER permissions on the cohort.
+        """
+        cursor = None
+        db = None
+        user_email = None
+        cohort_id = request.get_assigned_value('cohort_id')
+
+        if are_there_bad_keys(request):
+            err_msg = construct_parameter_error_message(request, False)
+            raise endpoints.BadRequestException(err_msg)
+
+        if endpoints.get_current_user() is not None:
+            user_email = endpoints.get_current_user().email()
+
+        # users have the option of pasting the access token in the query string
+        # or in the 'token' field in the api explorer
+        # but this is not required
+        access_token = request.get_assigned_value('token')
+        if access_token:
+            user_email = get_user_email_from_token(access_token)
+
+        if user_email:
+            django.setup()
+            try:
+                user_id = Django_User.objects.get(email=user_email).id
+                django_cohort = Django_Cohort.objects.get(id=cohort_id)
+                cohort_perm = Cohort_Perms.objects.get(cohort_id=cohort_id, user_id=user_id)
+            except (ObjectDoesNotExist, MultipleObjectsReturned), e:
+                logger.warn(e)
+                err_msg = "Error retrieving cohort {} for user {}: {}".format(cohort_id, user_email, e)
+                if 'Cohort_Perms' in e.message:
+                    err_msg = "User {} does not have permissions on cohort {}. Error: {}"\
+                        .format(user_email, cohort_id, e)
+                request_finished.send(self)
+                raise endpoints.UnauthorizedException(err_msg)
+
+
+            query_str = 'SELECT SampleBarcode, GG_dataset_id, GG_readgroupset_id ' \
+                        'FROM metadata_data ' \
+                        'JOIN cohorts_samples ON metadata_data.SampleBarcode=cohorts_samples.sample_id ' \
+                        'WHERE cohorts_samples.cohort_id=%s ' \
+                        'AND GG_dataset_id !="" AND GG_readgroupset_id !="" ' \
+                        'GROUP BY SampleBarcode, GG_dataset_id, GG_readgroupset_id;'
+
+            query_tuple = (cohort_id,)
+            try:
+                db = sql_connection()
+                cursor = db.cursor(MySQLdb.cursors.DictCursor)
+                cursor.execute(query_str, query_tuple)
+
+                google_genomics_items = []
+                for row in cursor.fetchall():
+                    google_genomics_items.append(
+                        GoogleGenomicsItem(
+                            SampleBarcode=row['SampleBarcode'],
+                            GG_dataset_id=row['GG_dataset_id'],
+                            GG_readgroupset_id=row['GG_readgroupset_id']
+                        )
+                    )
+
+                return GoogleGenomicsList(items=google_genomics_items, count=len(google_genomics_items))
+
+            except (IndexError, TypeError), e:
+                logger.warn(e)
+                raise endpoints.NotFoundException(
+                    "Google Genomics dataset and readgroupset id's for cohort {} not found."
+                        .format(cohort_id))
+            except MySQLdb.ProgrammingError as e:
+                msg = '{}:\n\tquery: {} {}'\
+                    .format(e, query_str, query_tuple)
+                logger.warn(msg)
+                raise endpoints.BadRequestException("Error retrieving genomics data for cohort. {}".format(msg))
+            finally:
+                if cursor: cursor.close()
+                if db and db.open: db.close()
+                request_finished.send(self)
+        else:
+            raise endpoints.UnauthorizedException("Authentication failed.")
+
+
+    GET_RESOURCE = endpoints.ResourceContainer(sample_barcode=messages.StringField(1, required=True))
+    @endpoints.method(GET_RESOURCE, GoogleGenomicsList,
+                      path='google_genomics_from_sample', http_method='GET', name='cohorts.google_genomics_from_sample')
+    def google_genomics_from_sample(self, request):
+        """
+        Takes a sample barcode as a required parameter and returns the Google Genomics dataset id
+        and readgroupset id associated with the sample, if any.
+        """
+        # print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+        cursor = None
+        db = None
+        sample_barcode = request.get_assigned_value('sample_barcode')
+
+        if are_there_bad_keys(request):
+            err_msg = construct_parameter_error_message(request, False)
+            raise endpoints.BadRequestException(err_msg)
+
+        query_str = 'SELECT SampleBarcode, GG_dataset_id, GG_readgroupset_id ' \
+                    'FROM metadata_data ' \
+                    'WHERE SampleBarcode=%s ' \
+                    'AND GG_dataset_id !="" AND GG_readgroupset_id !="" ' \
+                    'GROUP BY SampleBarcode, GG_dataset_id, GG_readgroupset_id;'
+
+        query_tuple = (sample_barcode,)
+        try:
+            db = sql_connection()
+            cursor = db.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute(query_str, query_tuple)
+
+            google_genomics_items = []
+            for row in cursor.fetchall():
+                google_genomics_items.append(
+                    GoogleGenomicsItem(
+                        SampleBarcode=row['SampleBarcode'],
+                        GG_dataset_id=row['GG_dataset_id'],
+                        GG_readgroupset_id=row['GG_readgroupset_id']
+                    )
+                )
+
+            return GoogleGenomicsList(items=google_genomics_items, count=len(google_genomics_items))
+
+        except (IndexError, TypeError), e:
+            logger.warn(e)
+            raise endpoints.NotFoundException(
+                "Google Genomics dataset and readgroupset id's for sample {} not found."
+                    .format(sample_barcode))
+        except MySQLdb.ProgrammingError as e:
+            msg = '{}:\n\tquery: {} {}'\
+                .format(e, query_str, query_tuple)
+            logger.warn(msg)
+            raise endpoints.BadRequestException("Error retrieving genomics data for sample. {}".format(msg))
+        finally:
+            if cursor: cursor.close()
+            if db and db.open: db.close()

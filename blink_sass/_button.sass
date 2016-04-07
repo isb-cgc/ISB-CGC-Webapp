@@ -1,0 +1,102 @@
+.btn
+  text-transform: capitalize
+  overflow: hidden
+  position: relative
+  i.fa
+    padding-right: 5px
+    position: relative
+  .fa.fa-rotate-90
+    padding-right: 0
+  &.active
+    .fa-cloud-upload
+      display: none
+    .fa
+      padding: 0
+
+.btn__ripple
+  width: 24px
+  height: 24px
+  border-radius: 50%
+  background-color: rgba(255, 255, 255, 0.25)
+  display: inline-block
+  position: absolute
+  animation: ripple $transition ease-out
+
+.btn-default
+    &:hover, &:active, &:focus
+        background-color: $isb-warning !important
+        color: $white !important
+        border: 1px solid $isb-warning !important
+
+.btn-link
+  font-weight: $regular-font-weight
+  &:focus, &:active, &:focus:active, &.active
+    outline: transparent
+
+.btn-oval
+  border-radius: 50%
+  width: 36px
+  height: 36px
+
+.btn-symbol
+  i.fa
+    padding-right: 0
+// hamburger button on the menu
+.lines-button
+  display: inline-block
+  padding: $button-size/2 $button-size/4
+  transition: .3s
+  cursor: pointer
+  user-select: none
+  border-radius: $button-size/7
+
+  &.collapsed
+    .lines
+      @include line($button-size, $isb-primary)
+      position: relative
+      vertical-align: middle
+
+      &:before, &:after
+        @include line($button-size, $isb-primary)
+        left: 0
+        transform-origin: $button-size/14 center
+
+      &:before
+        top: $button-size/4
+        transform: rotate3d(0,0,1,0)
+
+      &:after
+        top: -$button-size/4
+        transform: rotate3d(0,0,1,0)
+
+    &:hover
+      opacity: 1
+      .lines
+        &:before
+          top: $button-size/3.5
+        &:after
+          top: -$button-size/3.5
+
+  .lines
+    @include line($button-size, transparent)
+    position: relative
+    vertical-align: middle
+    margin-top: -4px
+
+    &:before, &:after
+      @include line($button-size, $isb-primary)
+      position: absolute
+      content: ''
+      transform-origin: 50% 50%
+      top: 0
+      width: $button-size
+    &:before
+      transform: rotate3d(0,0,1,45deg)
+    &:after
+      transform: rotate3d(0,0,1,-45deg)
+
+  &:active
+    transition: 0
+    background: rgba(0,0,0,.1)
+
+
