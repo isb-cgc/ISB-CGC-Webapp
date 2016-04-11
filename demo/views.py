@@ -52,6 +52,10 @@ ACL_GOOGLE_GROUP = settings.ACL_GOOGLE_GROUP
 login_expiration_seconds = settings.LOGIN_EXPIRATION_HOURS * 60 * 60
 COUNTDOWN_SECONDS = login_expiration_seconds + (60 * 15)
 
+LOGOUT_WORKER_TASKQUEUE = settings.LOGOUT_WORKER_TASKQUEUE
+CHECK_NIH_USER_LOGIN_TASK_URI = settings.CHECK_NIH_USER_LOGIN_TASK_URI
+CRON_MODULE = settings.CRON_MODULE
+
 
 def init_saml_auth(req):
     auth = OneLogin_Saml2_Auth(req, custom_base_path=settings.SAML_FOLDER)
@@ -189,8 +193,10 @@ def index(request):
                 str(nih_user.NIH_username), str(created)))
 
             # put task in queue to deactivate NIH_User entry after NIH_assertion_expiration has passed
-            task = Task(url='/tasks/check_user_login', params={'user_id': request.user.id}, countdown=COUNTDOWN_SECONDS)
-            task.add(queue_name='logout-worker')
+            task = Task(url=CHECK_NIH_USER_LOGIN_TASK_URI,
+                        params={'user_id': request.user.id, 'deployment': CRON_MODULE},
+                        countdown=COUNTDOWN_SECONDS)
+            task.add(queue_name=LOGOUT_WORKER_TASKQUEUE)
             logger.info('enqueued check_login task for user, {}, for {} hours from now'.format(
                 request.user.id, COUNTDOWN_SECONDS / (60*60)))
 
@@ -211,11 +217,11 @@ def index(request):
                 warn_message = 'You are reminded that when accessing controlled access information you are bound by the dbGaP TCGA DATA USE CERTIFICATION AGREEMENT (DUCA).' + warn_message
             try:
                 result = directory_client.members().get(groupKey=ACL_GOOGLE_GROUP,
-                                                         memberKey=user_email).execute(http=http_auth)
+                                                        memberKey=user_email).execute(http=http_auth)
                 # if the user is in the google group but isn't dbGaP authorized, delete member from group
                 if len(result) and not is_dbGaP_authorized:
                     directory_client.members().delete(groupKey=ACL_GOOGLE_GROUP,
-                                                       memberKey=user_email).execute(http=http_auth)
+                                                      memberKey=user_email).execute(http=http_auth)
                     logger.warn("User {} was deleted from group {} because they don't have dbGaP authorization.".format(user_email, ACL_GOOGLE_GROUP))
             # if the user_email doesn't exist in the google group an HttpError will be thrown...
             except HttpError:
@@ -231,7 +237,6 @@ def index(request):
                     ).execute(http=http_auth)
                     logger.info(result)
                     logger.info("User {} added to {}.".format(user_email, ACL_GOOGLE_GROUP))
-
 
             messages.info(request, warn_message)
             return HttpResponseRedirect(auth.redirect_to('https://{}'.format(req['http_host'])))
