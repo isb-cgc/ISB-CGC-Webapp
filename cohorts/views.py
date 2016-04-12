@@ -1024,3 +1024,23 @@ def unshare_cohort(request, cohort_id=0):
     return JsonResponse({
         'status': 'success'
     })
+
+@login_required
+def get_metadata(request):
+    endpoint = request.GET.get('endpoint', 'metadata_counts')
+    version = request.GET.get('version', 'v1')
+    filters = request.GET.get('filters', '{}')
+    cohort = request.GET.get('cohort_id', None)
+    limit = request.GET.get('limit', None)
+    token = SocialToken.objects.filter(account__user=request.user, account__provider='Google')[0].token
+    data_url = METADATA_API + ('%s/%s?token=%s&filter=%s' % (version, endpoint, token, filters))
+    if cohort:
+        data_url += ('&cohort_id=%s' % (cohort,))
+
+    if limit:
+        data_url += ('&limit=%s' % (limit,))
+
+    results = urlfetch.fetch(data_url, deadline=60)
+    results = json.loads(results.content)
+
+    return JsonResponse(results)
