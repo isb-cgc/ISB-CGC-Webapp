@@ -186,6 +186,9 @@ require([
     $('.search-term-field').on('change', function(event){
         //find the options specified to be created in the vis_helper.js line 265 select2_formatting function.
         var selectedOption = $(this).parents('.form-group').find('.select2-selection__rendered').children().first();
+        if (selectedOption.length == 0) {
+            selectedOption = $(this).find(':selected');
+        }
         var name       = selectedOption.text();
         var code       = selectedOption.val();
         var var_type   = selectedOption.attr('var_type');
