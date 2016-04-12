@@ -109,7 +109,7 @@ require([
         if (checked) {
             enable_buttons(tablename);
             var ids = [];
-            $('#cohorts-list tr:not(:first) input[type="checkbox"]').each(function() {
+            $(this).parents('table').find('tr:not(:first) input[type="checkbox"]').each(function() {
                 var token = $('<span class="cohort-label label label-default space-right-5" value="'
                         + $(this).val() + '" name="selected-ids">'
                         + $(this).parents('tr').find('.name-col a').html()
