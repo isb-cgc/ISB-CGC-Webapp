@@ -1043,7 +1043,7 @@ def get_metadata(request):
         'token': token,
         'filters': filters
     }
-    data_url = METADATA_API + ('%s/%s' % (version, endpoint))
+    data_url = METADATA_API + ('%s/%s/' % (version, endpoint))
     if cohort:
         # data_url += ('&cohort_id=%s' % (cohort,))
         payload['cohort_id'] = cohort
