@@ -22,9 +22,9 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
     var parsets_obj = Object.create(draw_parsets, {});
     return  {
 
-        update_counts: function(base_url, endpoint, cohort_id, limit, version) {
+        update_counts: function(base_url_domain, endpoint, cohort_id, limit, version) {
             var filters = this.format_filters();
-            var api_url = this.generate_metadata_url(base_url, endpoint, filters, cohort_id, limit, version);
+            var api_url = this.generate_metadata_url(base_url_domain, endpoint, filters, cohort_id, limit, version);
             var update_filters = this.update_filter_counts;
             $('.clinical-trees .spinner').show();
             $.ajax({
@@ -42,9 +42,9 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             });
         },
 
-        update_parsets: function(base_url, endpoint, cohort_id, version) {
+        update_parsets: function(base_url_domain, endpoint, cohort_id, version) {
             var filters = this.format_filters();
-            var api_url = this.generate_metadata_url(base_url, endpoint, filters, cohort_id, null, version);
+            var api_url = this.generate_metadata_url(base_url_domain, endpoint, filters, cohort_id, null, version);
             var context = this;
             $.ajax({
                 type: 'GET',
@@ -106,9 +106,9 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             return list;
         },
 
-        generate_metadata_url: function(base_url, endpoint, filters, cohort_id, limit, version) {
+        generate_metadata_url: function(base_url_domain, endpoint, filters, cohort_id, limit, version) {
             version = version || 'v1';
-            var api_url = base_url + '/cohorts/get_metadata_ajax?version=' + version + '&endpoint=' + endpoint + '&';
+            var api_url = base_url_domain + '/cohorts/get_metadata_ajax?version=' + version + '&endpoint=' + endpoint + '&';
 
             if (cohort_id) {
                 api_url += 'cohort_id=' + cohort_id + '&';
