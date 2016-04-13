@@ -184,10 +184,11 @@ require([
         Adds a variable pill when users select a variable from from dropdowns in the TCGA tab
      */
     $('.search-term-field').on('change', function(event){
-        //find the options specified to be created in the vis_helper.js line 265 select2_formatting function.
-        var selectedOption = $(this).parents('.form-group').find('.select2-selection__rendered').children().first();
-        if (selectedOption.length == 0) {
+        if ($(this).attr('id') == 'MIRN-search-term-select') {
             selectedOption = $(this).find(':selected');
+        } else { // CLIN
+            //find the options specified to be created in the vis_helper.js line 265 select2_formatting function.
+            var selectedOption = $(this).parents('.form-group').find('.select2-selection__rendered').children().first();
         }
         var name       = selectedOption.text();
         var code       = selectedOption.val();
