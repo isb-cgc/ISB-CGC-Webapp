@@ -1035,7 +1035,6 @@ def get_metadata(request):
     endpoint = request.GET.get('endpoint', 'metadata_counts')
     version = request.GET.get('version', 'v1')
     filters = request.GET.get('filters', '{}')
-    # print filters
     cohort = request.GET.get('cohort_id', None)
     limit = request.GET.get('limit', None)
     token = SocialToken.objects.filter(account__user=request.user, account__provider='Google')[0].token
@@ -1054,7 +1053,6 @@ def get_metadata(request):
         payload['limit'] = limit
 
     results = urlfetch.fetch(data_url, method=urlfetch.POST, payload=json.dumps(payload), deadline=60, headers={'Content-Type': 'application/json'})
-    print len(results.content)
     results = json.loads(results.content)
 
     return JsonResponse(results)
