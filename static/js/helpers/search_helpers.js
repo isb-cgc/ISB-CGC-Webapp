@@ -44,7 +44,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
 
         update_parsets: function(base_url, endpoint, cohort_id, version) {
             var filters = this.format_filters();
-            var api_url = this.generate_metadata_url(base_url, endpoint, filters, cohort_id, null, version, token);
+            var api_url = this.generate_metadata_url(base_url, endpoint, filters, cohort_id, null, version);
             var context = this;
             $.ajax({
                 type: 'GET',
