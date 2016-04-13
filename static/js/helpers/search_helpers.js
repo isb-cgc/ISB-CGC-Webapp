@@ -108,7 +108,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
 
         generate_metadata_url: function(base_url_domain, endpoint, filters, cohort_id, limit, version) {
             version = version || 'v1';
-            var api_url = base_url_domain + '/cohorts/get_metadata_ajax?version=' + version + '&endpoint=' + endpoint + '&';
+            var api_url = base_url_domain + '/cohorts/get_metadata_ajax/?version=' + version + '&endpoint=' + endpoint + '&';
 
             if (cohort_id) {
                 api_url += 'cohort_id=' + cohort_id + '&';
