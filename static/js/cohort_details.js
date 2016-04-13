@@ -137,8 +137,8 @@ require([
                     }
                 });
 
-                search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id, undefined, 'v2', api_token);
-                search_helper_obj.update_parsets(base_api_url, 'metadata_platform_list', cohort_id), 'v2';
+                search_helper_obj.update_counts(base_url, 'metadata_counts', cohort_id, undefined, 'v2');
+                search_helper_obj.update_parsets(base_url, 'metadata_platform_list', cohort_id), 'v2';
                 return false;
             });
         } else { // Checkbox unchecked
@@ -152,8 +152,8 @@ require([
             $this.data('create-cohort-form-item').remove();
 
         }
-        search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id, undefined, 'v2', api_token);
-        search_helper_obj.update_parsets(base_api_url, 'metadata_platform_list', cohort_id, 'v2');
+        search_helper_obj.update_counts(base_url, 'metadata_counts', cohort_id, undefined, 'v2');
+        search_helper_obj.update_parsets(base_url, 'metadata_platform_list', cohort_id, 'v2');
     };
 
     $('.search-checkbox-list input[type="checkbox"]').on('change', checkbox_callback);
@@ -188,7 +188,7 @@ require([
             $(this).prop('checked', false);
         });
         $('#create-cohort-form .form-control-static').empty();
-        search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id, undefined, 'v2', api_token);
+        search_helper_obj.update_counts(base_url, 'metadata_counts', cohort_id, undefined, 'v2');
     });
 
     $('#add-filter-btn').on('click', function() {
@@ -320,8 +320,8 @@ require([
         return false;
     });
 
-    search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id, undefined, 'v2', api_token);
-    search_helper_obj.update_parsets(base_api_url, 'metadata_platform_list', cohort_id, 'v2');
+    search_helper_obj.update_counts(base_url, 'metadata_counts', cohort_id, undefined, 'v2');
+    search_helper_obj.update_parsets(base_url, 'metadata_platform_list', cohort_id, 'v2');
 
     $('#shared-with-btn').on('click', function(e){
         var target = $(this).data('target');
