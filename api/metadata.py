@@ -1731,7 +1731,7 @@ class Meta_Endpoints_API_v2(remote.Service):
                                                token=messages.StringField(3),
                                                cohort_id=messages.IntegerField(2))
     @endpoints.method(GET_RESOURCE, MetadataCountsItem,
-                          path='metadata_counts', http_method='GET',
+                          path='metadata_counts', http_method='POST',
                       name='meta.metadata_counts')
     def metadata_counts(self, request):
 
@@ -1944,7 +1944,7 @@ class Meta_Endpoints_API_v2(remote.Service):
                                                filters=messages.StringField(3)
                                                )
     @endpoints.method(GET_RESOURCE, SampleBarcodeList,
-                      path='metadata_sample_list', http_method='GET',
+                      path='metadata_sample_list', http_method='POST',
                       name='meta.metadata_sample_list')
     def metadata_list(self, request):
         filters = {}
@@ -2128,7 +2128,7 @@ class Meta_Endpoints_API_v2(remote.Service):
                                                token=messages.StringField(3),
                                                cohort_id=messages.IntegerField(2))
     @endpoints.method(GET_RESOURCE, MetadataPlatformItemList,
-                      path='metadata_platform_list', http_method='GET',
+                      path='metadata_platform_list', http_method='POST',
                       name='meta.metadata_platform_list')
     def metadata_platform_list(self, request):
         """ Used by the web application."""
