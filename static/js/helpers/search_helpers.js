@@ -22,9 +22,9 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
     var parsets_obj = Object.create(draw_parsets, {});
     return  {
 
-        update_counts: function(base_api_url, endpoint, cohort_id, limit, version, token) {
+        update_counts: function(base_url_domain, endpoint, cohort_id, limit, version) {
             var filters = this.format_filters();
-            var api_url = this.generate_metadata_url(base_api_url, endpoint, filters, cohort_id, limit, version, token);
+            var api_url = this.generate_metadata_url(base_url_domain, endpoint, filters, cohort_id, limit, version);
             var update_filters = this.update_filter_counts;
             $('.clinical-trees .spinner').show();
             $.ajax({
@@ -42,9 +42,9 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             });
         },
 
-        update_parsets: function(base_api_url, endpoint, cohort_id, version, token) {
+        update_parsets: function(base_url_domain, endpoint, cohort_id, version) {
             var filters = this.format_filters();
-            var api_url = this.generate_metadata_url(base_api_url, endpoint, filters, cohort_id, null, version, token);
+            var api_url = this.generate_metadata_url(base_url_domain, endpoint, filters, cohort_id, null, version);
             var context = this;
             $.ajax({
                 type: 'GET',
@@ -106,9 +106,9 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             return list;
         },
 
-        generate_metadata_url: function(base_api_url, endpoint, filters, cohort_id, limit, version, token) {
+        generate_metadata_url: function(base_url_domain, endpoint, filters, cohort_id, limit, version) {
             version = version || 'v1';
-            var api_url = base_api_url + '/_ah/api/meta_api/' + version + '/' + endpoint + '?';
+            var api_url = base_url_domain + '/cohorts/get_metadata_ajax/?version=' + version + '&endpoint=' + endpoint + '&';
 
             if (cohort_id) {
                 api_url += 'cohort_id=' + cohort_id + '&';
@@ -116,9 +116,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             if (limit != null && limit !== undefined) {
                 api_url += 'limit=' + limit + '&';
             }
-            if (token) {
-                api_url += 'token=' + encodeURIComponent(token) + '&';
-            }
+
 
             if (filters) {
                 api_url += 'filters=' + encodeURIComponent(JSON.stringify(filters)) + '&';

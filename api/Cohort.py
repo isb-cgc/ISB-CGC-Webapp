@@ -91,6 +91,7 @@ BUILTIN_ENDPOINTS_PARAMETERS = [
     'userIp'
 ]
 
+MAX_FILTER_VALUE_LENGTH = 496  # max_len of Filter.value is 512, but 507 is too long. 495 is ok.
 
 
 class ReturnJSON(messages.Message):
@@ -230,6 +231,39 @@ def construct_parameter_error_message(request, filter_required):
 
     return err_msg
 
+
+def get_list_of_split_values_for_filter_model(large_value_list):
+    '''
+    :rtype: list
+    :param large_value_list: protorpc.messages.FieldList
+    :return: list of smaller protorpc.messages.FieldLists
+    '''
+
+    return_list = []
+
+    # if length_of_list is larger than 512 characters,
+    # the Filter model will not be able to be saved
+    # with this as the value field
+    length_of_list = len('"' + '", "'.join(large_value_list) + '"')
+    while length_of_list > MAX_FILTER_VALUE_LENGTH:
+        new_smaller_list = []
+        length_of_smaller_list = len('"' + '", "'.join(new_smaller_list) + '"')
+        while length_of_smaller_list < MAX_FILTER_VALUE_LENGTH:
+            try:
+                new_smaller_list.append(large_value_list.pop())
+            except IndexError:
+                break
+            length_of_smaller_list = len('"' + '", "'.join(new_smaller_list) + '"')
+        large_value_list.append(new_smaller_list.pop())
+        return_list.append(new_smaller_list)
+        length_of_list = len('"' + '", "'.join(large_value_list) + '"')
+
+    if len(large_value_list):
+        return_list.append(large_value_list)
+
+    return return_list
+
+
 Cohort_Endpoints = endpoints.api(name='cohort_api', version='v1', description="Get information about "
                                 "cohorts, patients, and samples. Create and delete cohorts.",
                                  allowed_client_ids=[INSTALLED_APP_CLIENT_ID, endpoints.API_EXPLORER_CLIENT_ID])
@@ -284,8 +318,7 @@ class Cohort_Endpoints_API(remote.Service):
                         'auth_user.email, ' \
                         'cohorts_cohort_comments.content as comments, ' \
                         'cohorts_source.type as source_type, ' \
-                        'cohorts_source.notes as source_notes, ' \
-                        'cohorts_source.parent_id ' \
+                        'cohorts_source.notes as source_notes ' \
                         'from cohorts_cohort_perms ' \
                         'join cohorts_cohort ' \
                         'on cohorts_cohort.id=cohorts_cohort_perms.cohort_id ' \
@@ -298,8 +331,18 @@ class Cohort_Endpoints_API(remote.Service):
 
             query_tuple = ()
             if query_dict:
-                query_str += ' where ' + '=%s and '.join(key for key in query_dict.keys()) + '=%s'
+                query_str += ' where ' + '=%s and '.join(key for key in query_dict.keys()) + '=%s '
                 query_tuple = tuple(value for value in query_dict.values())
+
+            query_str += 'group by  ' \
+            'cohorts_cohort.id,  ' \
+            'cohorts_cohort.name,  ' \
+            'cohorts_cohort.last_date_saved,  ' \
+            'cohorts_cohort_perms.perm,  ' \
+            'auth_user.email,  ' \
+            'comments,  ' \
+            'source_type,  ' \
+            'source_notes '
 
             filter_query_str = ''
             row = None
@@ -333,10 +376,14 @@ class Cohort_Endpoints_API(remote.Service):
                         comments=str(row['comments']),
                         source_type=None if row['source_type'] is None else str(row['source_type']),
                         source_notes=None if row['source_notes'] is None else str(row['source_notes']),
-                        parent_id=None if row['parent_id'] is None else int(row['parent_id']),
+                        # parent_id=None if row['parent_id'] is None else int(row['parent_id']),
                         filters=filter_data
                     ))
 
+                if len(data) == 0:
+                    optional_message = " matching cohort id " + str(cohort_id) if cohort_id is not None else ""
+                    raise endpoints.NotFoundException("{} has no active cohorts{}."
+                                                      .format(user_email, optional_message))
                 return CohortsList(items=data, count=len(data))
             except (IndexError, TypeError) as e:
                 raise endpoints.NotFoundException(
@@ -1138,7 +1185,12 @@ class Cohort_Endpoints_API(remote.Service):
 
             # 5. Create filters applied
             for key, val in query_dict.items():
-                Filters.objects.create(resulting_cohort=created_cohort, name=key, value=val).save()
+                if len('", "'.join(val)) > MAX_FILTER_VALUE_LENGTH:
+                    new_val_list = get_list_of_split_values_for_filter_model(val)
+                    for new_val in new_val_list:
+                        Filters.objects.create(resulting_cohort=created_cohort, name=key, value=new_val).save()
+                else:
+                    Filters.objects.create(resulting_cohort=created_cohort, name=key, value=val).save()
 
             # 6. Store cohort to BigQuery
             project_id = settings.BQ_PROJECT_ID

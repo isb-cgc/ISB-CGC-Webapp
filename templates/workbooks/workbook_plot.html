@@ -50,7 +50,7 @@
                     <!-- X Axis selection -->
                     <div class="form-group variable-container" variable="x-axis-select">
                         <label for="{{ plot.id }}-x-select">X Axis Variable <a role="button" class="x-edit-field" data-attribute="x-selector" aria-label="X Field Editor"></a></label>
-                        <select id="x-axis-select" {% if workbook.owner.id != user.id %} disabled {% endif %} plot="{{ plot.id }}" class="form-control search-term-field" style="width: 230px;">
+                        <select {% if workbook.owner.id != user.id %} disabled {% endif %} plot="{{ plot.id }}" class=" x-axis-select form-control search-term-field" style="width: 230px;">
                             {% if plot.x_axis %}
                                 <option value="{{ plot.x_axis.url_code }}" var_id="{{ plot.x_axis.id }}" selected >{{ plot.x_axis.name }}</option>
                             {% else %}
@@ -58,20 +58,17 @@
                             {% endif %}
                             {% for gene in genes %}
                                 {% if not plot or plot.x_axis.id != gene.id %}
-                                    {# TODO {% if var.type == plot.yaxis.type  %}#}
                                     <option type="gene" value="{{ gene.gene }}" var_id="{{ gene.id }}">{{ gene.gene }}</option>
-                                    {# TODO {% endif %}#}
                                 {% endif %}
                             {% endfor %}
                             {% for var in variables %}
                                 {% if not plot or plot.x_axis.id != var.id %}
-                                    {# TODO {% if var.type == plot.yaxis.type  %}#}
-                                    <option type="common" value="{{ var.url_code }}" var_id="{{ var.id }}">{{ var.name }}</option>
-                                    {# TODO {% endif %}#}
+                                    <!-- type is checked via javascript -->
+                                    <option type="common" var_type="{{var.type}}" value="{{ var.url_code }}" var_id="{{ var.id }}">{{ var.name }}</option>
                                 {% endif %}
                             {% endfor %}
                         </select>
-                        <select id="x-gene-attribute-select" class="form-control spec-select datatype-selector" style="display:none; margin-top:5px; width: 230px;">
+                        <select class="x-gene-attribute-select form-control spec-select datatype-selector" style="display:none; margin-top:5px; width: 230px;">
                             <option disabled selected>-- select a specification--</option>
                             {% for type in datatype_list %}
                                 <option value="{{ type.datatype }}">{{ type.label}}</option>
@@ -110,7 +107,7 @@
                     <!-- Y Axis selection -->
                     <div class="form-group variable-container" variable="y-axis-select">
                         <label for="{{ plot.id }}-y-select">Y Axis Variable <a role="button" class="y-edit-field" data-attribute="y-selector" aria-label="Y Field Editor"></a></label>
-                        <select id="y-axis-select" {% if workbook.owner.id != user.id %} disabled {% endif %} plot="{{ plot.id }}" class="form-control search-term-field" style="width: 230px;">
+                        <select {% if workbook.owner.id != user.id %} disabled {% endif %} plot="{{ plot.id }}" class="y-axis-select form-control search-term-field" style="width: 230px;">
                             {% if plot.y_axis %}
                                 <option value="{{ plot.y_axis.url_code }}" var_id="{{ plot.y_axis.id }}" selected >{{ plot.y_axis.name }}</option>
                             {% else %}
@@ -118,20 +115,18 @@
                             {% endif %}
                             {% for gene in genes %}
                                 {% if not plot or plot.y_axis.id != gene.id %}
-                                    {# TODO {% if var.type == plot.yaxis.type  %}#}
                                     <option type="gene" value="{{ gene.gene }}" var_id="{{ gene.id }}">{{ gene.gene }}</option>
                                     {# TODO {% endif %}#}
                                 {% endif %}
                             {% endfor %}
                             {% for var in variables %}
                                 {% if not plot or plot.y_axis.id != var.id %}
-                                    {# TODO {% if var.type == plot.yaxis.type  %}#}
-                                    <option type="common" value="{{ var.url_code }}" var_id="{{ var.id }}">{{ var.name }}</option>
-                                    {# TODO {% endif %}#}
+                                    <!-- type is checked via javascript -->
+                                    <option type="common" var_type='{{var.type}}' value="{{ var.url_code }}" var_id="{{ var.id }}">{{ var.name }}</option>
                                 {% endif %}
                             {% endfor %}
                         </select>
-                        <select id="y-gene-attribute-select" class="form-control spec-select datatype-selector" style="display:none; margin-top:5px; width: 230px;">
+                        <select class="y-gene-attribute-select form-control spec-select datatype-selector" style="display:none; margin-top:5px; width: 230px;">
                             <option disabled selected>-- select a specification--</option>
                             {% for type in datatype_list %}
                                 <option value="{{ type.datatype }}">{{ type.label}}</option>
@@ -229,6 +224,7 @@
             {% endif %}
         </div>
         <div class="legend"></div>
+        <button class="resubmit-button btn btn-primary">Resubmit Plot</button>
         <div class="pairwise-result"></div>
         <div class="save-cohort-card" style="display:none;">
             <p class="selected-samples-count">Number of Samples: 0</p>

@@ -53,12 +53,7 @@
                             </a>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="create-dropdown">
                                 {% if viz_perm == 'OWNER' %}
-{#                                    <li role="menuitem"><a role="button" id="add-plot-btn" data-value="{{ viz.id }}">Add Plot</a></li>#}
-
                                     <li role="menuitem"><a data-toggle="modal" data-target="#save-viz-modal">Save Visualization</a></li>
-                                    {#                    {% if viz %}#}
-
-                                    {#                    {% endif %}#}
                                     <li role="menuitem"><a data-toggle="modal" data-target="#share-viz-modal">Share with Others</a></li>
                                 {% endif %}
                                 <li role="menuitem"><a href="{% url 'clone_viz_id' id=viz.id %}">Make a Copy</a></li>

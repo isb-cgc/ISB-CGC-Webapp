@@ -56,7 +56,7 @@ class VariableFavorite(models.Model):
         variable_favorite_model.save()
 
         for var in variables :
-            Variable.objects.create(name=var['name'], feature_id=var['feature_id'], code=var['code'], variable_favorite=variable_favorite_model)
+            Variable.objects.create(name=var['name'], feature_id=var['feature_id'], type=var['type'], code=var['code'], variable_favorite=variable_favorite_model)
 
         return_obj = {
             'name' : variable_favorite_model.name,
@@ -73,9 +73,9 @@ class VariableFavorite(models.Model):
 
         for var in variables :
             if var['feature_id'] != "None" :
-                Variable.objects.create(name=var['name'], feature_id=var['feature_id'], code=var['code'], variable_favorite_id=self.id)
+                Variable.objects.create(name=var['name'], feature_id=var['feature_id'], type=var['type'], code=var['code'], variable_favorite_id=self.id)
             else :
-                Variable.objects.create(name=var['name'], code=var['code'], variable_favorite_id=self.id)
+                Variable.objects.create(name=var['name'], code=var['code'], type=var['type'], variable_favorite_id=self.id)
 
         self.save()
         return_obj = {
@@ -120,6 +120,7 @@ class VariableManager(models.Manager):
 class Variable(models.Model):
     id                 = models.AutoField(primary_key=True)
     name               = models.TextField(null=False, blank=False)
+    type               = models.CharField(max_length=20, null=True, blank=True)
     variable_favorite  = models.ForeignKey(VariableFavorite, blank=False)
     code               = models.CharField(max_length=2024, blank=False)
     feature            = models.ForeignKey(User_Feature_Definitions, null=True, blank=True)

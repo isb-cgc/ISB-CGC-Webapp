@@ -476,17 +476,19 @@ class Worksheet_variable(models.Model):
     @classmethod
     def create(cls, worksheet, variable):
         if type(variable) is not dict :
-            dict_variable = {'feature_id' : variable.feature_id, 'name' : variable.name, 'code' : variable.code}
+            dict_variable = {'feature_id' : variable.feature_id, 'name' : variable.name, 'code' : variable.code, 'type' : variable.type}
             variable = dict_variable
 
         worksheet_variable_model = cls.objects.create(worksheet_id = worksheet.id,
                                                       name = variable['name'],
-                                                      url_code = variable['code'])
+                                                      url_code = variable['code'],
+                                                      type = variable['type'])
 
         return_obj = {
             'id'            : worksheet_variable_model.id,
             'name'          : worksheet_variable_model.name,
             'code'          : worksheet_variable_model.url_code,
+            'type'          : worksheet_variable_model.type,
             'date_created'  : formats.date_format(worksheet_variable_model.date_created, 'DATETIME_FORMAT')
         }
 

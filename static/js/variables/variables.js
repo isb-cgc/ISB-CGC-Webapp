@@ -114,7 +114,11 @@ require([
             selectbox.empty();
             selectbox.append('<option value="" disabled selected>Please select an option</option>');
             for (var i = 0; i < options.length; i++) {
-                selectbox.append('<option value="'+options[i]['internal_feature_id']+'">'+options[i]['label']+'</option>')
+                if (options[i].hasOwnProperty('type')) {
+                    selectbox.append('<option value="'+options[i]['internal_feature_id']+'" var_type="'+ options[i]['type'] + '">'+options[i]['label']+'</option>')
+                } else { // MIRNA
+                    selectbox.append('<option value="'+options[i]['internal_feature_id']+'" var_type="N">'+options[i]['label']+'</option>')
+                }
             }
         });
     })
@@ -122,11 +126,12 @@ require([
     /*
         Creates a ui pill representing a user selected variable
      */
-    function add_variable_pill(name, code, feature_id) {
+    function add_variable_pill(name, code, feature_id, var_type) {
         var token = $('<span>');
         token.addClass('selected-variable')
             .attr('data-name', name)
             .attr('data-code', code)
+            .attr('data-type', var_type)
             .attr('data-feature-id', feature_id)
             .append(
                 $('<a>').addClass('delete-x filter-label label label-default')
@@ -140,6 +145,10 @@ require([
         $('#create-cohort-form .form-control-static').append(token.data('create-cohort-clone'));
 
         set_pill_deletes();
+
+        $('input[type="checkbox"][value="'+code+'"]').each(function() {
+            $(this).prop('checked', true);
+        });
         return token;
     }
 
@@ -149,6 +158,9 @@ require([
     function remove_variable_pill(code){
         $(".selected-variable[data-code='" + code + "']").remove();
         $('#create-cohort-form .form-control-static [data-code="' + code + '"]').remove();
+        $('input[type="checkbox"][value="'+code+'"]').each(function() {
+            $(this).prop('checked', false);
+        })
     }
 
     /*
@@ -158,9 +170,11 @@ require([
         var $this      = $(this),
             name       = $this.data('text-label'),
             code       = $this.val(),
-            feature_id = $this.data('feature-id');
+            feature_id = $this.data('feature-id'),
+            var_type   = $this.attr('var_type');
+
         if ($this.is(':checked') && $('.selected-filters span[data-code="' + code + '"]').length == 0) { // Checkbox checked and not already in list
-            add_variable_pill(name, code, feature_id);
+            add_variable_pill(name, code, feature_id, var_type);
         } else {
             remove_variable_pill(code);
         }
@@ -170,11 +184,18 @@ require([
         Adds a variable pill when users select a variable from from dropdowns in the TCGA tab
      */
     $('.search-term-field').on('change', function(event){
-        var $this      = $(this),
-            name       = $this.find(":selected").text(),
-            code       = $this.find(":selected").val();
+        if ($(this).attr('id') == 'MIRN-search-term-select') {
+            selectedOption = $(this).find(':selected');
+        } else { // CLIN
+            //find the options specified to be created in the vis_helper.js line 265 select2_formatting function.
+            var selectedOption = $(this).parents('.form-group').find('.select2-selection__rendered').children().first();
+        }
+        var name       = selectedOption.text();
+        var code       = selectedOption.val();
+        var var_type   = selectedOption.attr('var_type');
+
         if ($('.selected-filters span[data-code="' + code + '"]').length == 0) { // Check to see if selected already
-            add_variable_pill(name, code);
+            add_variable_pill(name, code, "", var_type);
         }
     });
 
@@ -234,7 +255,7 @@ require([
     });
 
     /*
-        convenience function for gathering selected variables from the ui pill list
+        Convenience function for gathering selected variables from the ui pill list
      */
     function get_variable_list(){
         var variable_list = [];
@@ -242,7 +263,8 @@ require([
             var variable_name   = this.getAttribute('data-name');
             var code            = this.getAttribute('data-code');
             var feature_id      = this.getAttribute('data-feature-id');
-            variable_list.push({name: variable_name, code : code, feature_id: feature_id});
+            var type            = this.getAttribute('data-type');
+            variable_list.push({name: variable_name, code : code, feature_id: feature_id, type : type});
         });
 
         return variable_list;
@@ -387,6 +409,18 @@ require([
             }
         }
         return cookieValue;
+    }
+
+    /*
+        If there are variables on load, check off the boxes that are already selected
+     */
+    if ($('.selected-filters span').length > 0) {
+        var variable_list = get_variable_list();
+        for (var i = 0; i < variable_list.length; i++ ) {
+            $('input[type="checkbox"][value="'+variable_list[i]['code']+'"]').each(function() {
+                $(this).prop('checked', true);
+            })
+        }
     }
 
 });

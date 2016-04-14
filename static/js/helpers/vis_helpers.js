@@ -263,7 +263,11 @@ define(['jquery'], function($) {
         });
         },
         select2_formatting: function(item) {
-            return '<option value="'+item['id']+'">'+item['text']+'</option>';
+            if (item.hasOwnProperty['type']) {
+                return '<option var_type="'+item['type']+'" value="'+item['id']+'">'+item['text']+'</option>';
+            } else {
+                return '<option var_type="N" value="'+item['id']+'">'+item['text']+'</option>';
+            }
         },
 
         /*  Gather options for a particular variable based on specified parameters
@@ -369,14 +373,13 @@ define(['jquery'], function($) {
                                     var obj = {};
                                     obj.id = item['internal_feature_id'];
                                     obj.text = item['label'];
+                                    obj.type = item['type'];
                                     return obj;
                                 });
                                 return {results: items};
                             } else {
                                 return {results: []};
                             }
-
-
                         }
                     },
                     id: function (item) { return item['id']; },
