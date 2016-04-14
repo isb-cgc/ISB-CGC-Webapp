@@ -516,8 +516,10 @@ require([
             case 'Scatter Plot': //((x_type == 'INTEGER' || x_type == 'FLOAT') && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
                 break;
             case "Violin Plot": //(x_type == 'STRING' && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
+                swap.hide();
                 break;
             case 'Violin Plot with axis swap'://(y_type == 'STRING' && (x_type == 'INTEGER'|| x_type == 'FLOAT')) {
+                swap.hide();
                 break;
             case 'Cubby Hole Plot': //(x_type == 'STRING' && y_type == 'STRING') {
                 c_widgets.hide();
