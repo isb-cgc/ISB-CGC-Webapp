@@ -1051,7 +1051,7 @@ def get_metadata(request):
     if limit:
         # data_url += ('&limit=%s' % (limit,))
         payload['limit'] = limit
-    print >> sys.stderr, payload
+
     results = urlfetch.fetch(data_url, method=urlfetch.POST, payload=json.dumps(payload), deadline=60, headers={'Content-Type': 'application/json'})
     results = json.loads(results.content)
 
