@@ -32,6 +32,7 @@ import logging
 import re
 import json
 import traceback
+import copy
 
 from api_helpers import *
 
@@ -1877,9 +1878,9 @@ class Meta_Endpoints_API_v2(remote.Service):
                         break
 
                 # Build Filter Where Clause
+                filter_copy = copy.deepcopy(filters)
                 key_map = table_key_map[table] if table in table_key_map else False
-                where_clause = build_where_clause(filters, alt_key_map=key_map)
-
+                where_clause = build_where_clause(filter_copy, alt_key_map=key_map)
                 col_name = feature['name']
                 if key_map and key in key_map:
                     col_name = key_map[key]
@@ -2056,7 +2057,8 @@ class Meta_Endpoints_API_v2(remote.Service):
             if not should_be_queried:
                 continue
 
-            where_clause = build_where_clause(filters, table_settings['features'])
+            filter_copy = copy.deepcopy(filters)
+            where_clause = build_where_clause(filter_copy, table_settings['features'])
             query = 'SELECT DISTINCT %s FROM %s' % (table_settings['barcode'], table)
             if where_clause['query_str']:
                 query += ' WHERE ' + where_clause['query_str']
