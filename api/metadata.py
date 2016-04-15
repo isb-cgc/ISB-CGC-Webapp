@@ -32,6 +32,7 @@ import logging
 import re
 import json
 import traceback
+import copy
 
 from api_helpers import *
 
@@ -830,6 +831,10 @@ class IncomingPlatformSelection(messages.Message):
     Mixed_DNASeq_curated                = messages.StringField(29)
     RocheGSFLX_DNASeq                   = messages.StringField(30)
 
+class IncomingMetadataCount(messages.Message):
+    filters     = messages.StringField(1)
+    cohort_id   = messages.IntegerField(2)
+    token       = messages.StringField(3)
 
 def get_current_user(request):
     user_email = None
@@ -1726,12 +1731,9 @@ class Meta_Endpoints_API_v2(remote.Service):
             if db: db.close()
             request_finished.send(self)
 
-    GET_RESOURCE = endpoints.ResourceContainer(
-                                               filters=messages.StringField(1),
-                                               token=messages.StringField(3),
-                                               cohort_id=messages.IntegerField(2))
-    @endpoints.method(GET_RESOURCE, MetadataCountsItem,
-                          path='metadata_counts', http_method='GET',
+    POST_RESOURCE = endpoints.ResourceContainer(IncomingMetadataCount)
+    @endpoints.method(POST_RESOURCE, MetadataCountsItem,
+                          path='metadata_counts', http_method='POST',
                       name='meta.metadata_counts')
     def metadata_counts(self, request):
 
@@ -1745,7 +1747,7 @@ class Meta_Endpoints_API_v2(remote.Service):
         cohort_id = None
         user = get_current_user(request)
 
-        if request.__getattribute__('filters')is not None:
+        if request.__getattribute__('filters') is not None:
             try:
                 tmp = json.loads(request.filters)
                 for filter in tmp:
@@ -1876,9 +1878,9 @@ class Meta_Endpoints_API_v2(remote.Service):
                         break
 
                 # Build Filter Where Clause
+                filter_copy = copy.deepcopy(filters)
                 key_map = table_key_map[table] if table in table_key_map else False
-                where_clause = build_where_clause(filters, alt_key_map=key_map)
-
+                where_clause = build_where_clause(filter_copy, alt_key_map=key_map)
                 col_name = feature['name']
                 if key_map and key in key_map:
                     col_name = key_map[key]
@@ -1938,13 +1940,9 @@ class Meta_Endpoints_API_v2(remote.Service):
         request_finished.send(self)
         return MetadataCountsItem(count=count_list, total=total)
 
-    GET_RESOURCE = endpoints.ResourceContainer(
-                                               cohort_id=messages.IntegerField(1),
-                                               token=messages.StringField(2),
-                                               filters=messages.StringField(3)
-                                               )
-    @endpoints.method(GET_RESOURCE, SampleBarcodeList,
-                      path='metadata_sample_list', http_method='GET',
+    POST_RESOURCE = endpoints.ResourceContainer(IncomingMetadataCount)
+    @endpoints.method(POST_RESOURCE, SampleBarcodeList,
+                      path='metadata_sample_list', http_method='POST',
                       name='meta.metadata_sample_list')
     def metadata_list(self, request):
         filters = {}
@@ -2059,7 +2057,8 @@ class Meta_Endpoints_API_v2(remote.Service):
             if not should_be_queried:
                 continue
 
-            where_clause = build_where_clause(filters, table_settings['features'])
+            filter_copy = copy.deepcopy(filters)
+            where_clause = build_where_clause(filter_copy, table_settings['features'])
             query = 'SELECT DISTINCT %s FROM %s' % (table_settings['barcode'], table)
             if where_clause['query_str']:
                 query += ' WHERE ' + where_clause['query_str']
@@ -2123,12 +2122,9 @@ class Meta_Endpoints_API_v2(remote.Service):
             if db: db.close()
             raise endpoints.NotFoundException('Error in retrieving barcodes.')
 
-    GET_RESOURCE = endpoints.ResourceContainer(
-                                               filters=messages.StringField(1),
-                                               token=messages.StringField(3),
-                                               cohort_id=messages.IntegerField(2))
-    @endpoints.method(GET_RESOURCE, MetadataPlatformItemList,
-                      path='metadata_platform_list', http_method='GET',
+    POST_RESOURCE = endpoints.ResourceContainer(IncomingMetadataCount)
+    @endpoints.method(POST_RESOURCE, MetadataPlatformItemList,
+                      path='metadata_platform_list', http_method='POST',
                       name='meta.metadata_platform_list')
     def metadata_platform_list(self, request):
         """ Used by the web application."""

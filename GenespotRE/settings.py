@@ -38,6 +38,9 @@ PROJECT_ID              = os.environ.get('GCLOUD_PROJECT_ID', '')
 BQ_PROJECT_ID           = os.environ.get('BIGQUERY_PROJECT_ID', PROJECT_ID)
 IGV_PROJECT_ID          = os.environ.get('IGV_PROJECT_ID', '') # This can be PROJECT_ID
 
+# Deployment module
+CRON_MODULE             = os.environ.get('CRON_MODULE')
+
 BASE_URL                = os.environ.get('BASE_URL', 'http://isb-cgc.appspot.com/')
 BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://api-dot-isb-cgc.appspot.com/')
 LOCAL_BASE_URL          = os.environ.get('BASE_URL', 'http://localhost:8080')
@@ -348,6 +351,13 @@ OPEN_ACL_GOOGLE_GROUP                   = os.environ.get('OPEN_ACL_GOOGLE_GROUP'
 ERA_LOGIN_URL                           = os.environ.get('ERA_LOGIN_URL', '')
 IPV4                                    = os.environ.get('IPV4', '')
 SAML_FOLDER                             = os.environ.get('SAML_FOLDER')
+
+# TaskQueue used when users go through the ERA flow
+LOGOUT_WORKER_TASKQUEUE                  = os.environ.get('LOGOUT_WORKER_TASKQUEUE')
+CHECK_NIH_USER_LOGIN_TASK_URI            = os.environ.get('CHECK_NIH_USER_LOGIN_TASK_URI')
+
+# TaskQueue used by the sweep_nih_user_logins task
+LOGOUT_SWEEPER_FALLBACK_TASKQUEUE        = os.environ.get('LOGOUT_SWEEPER_FALLBACK_TASKQUEUE')
 
 ##############################
 #   Start django-finalware   #

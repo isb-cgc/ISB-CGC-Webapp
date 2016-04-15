@@ -268,9 +268,11 @@ def cohort_detail(request, cohort_id=0, workbook_id=0, worksheet_id=0, create_wo
     clin_attr_dsp += clin_attr
 
     token = SocialToken.objects.filter(account__user=request.user, account__provider='Google')[0].token
-    data_url = METADATA_API + ('v2/metadata_counts?token=%s' % (token,))
-
-    results = urlfetch.fetch(data_url, deadline=60)
+    data_url = METADATA_API + 'v2/metadata_counts'
+    payload = {
+        'token': token
+    }
+    results = urlfetch.fetch(data_url, method=urlfetch.POST, payload=json.dumps(payload), deadline=60, headers={'Content-Type': 'application/json'})
     results = json.loads(results.content)
     totals = results['total']
 
@@ -484,12 +486,15 @@ def save_cohort(request, workbook_id=None, worksheet_id=None, create_workbook=Fa
         projects = request.user.project_set.all()
 
         token = SocialToken.objects.filter(account__user=request.user, account__provider='Google')[0].token
-        data_url = METADATA_API + ('v2/metadata_sample_list?token=%s' % (token,))
-
+        data_url = METADATA_API + 'v2/metadata_sample_list'
+        payload = {
+            'token': token
+        }
         # Given cohort_id is the only source id.
         if source:
             # Only ever one source
-            data_url += '&cohort_id=' + source
+            # data_url += '&cohort_id=' + source
+            payload['cohort_id'] = source
             parent = Cohort.objects.get(id=source)
             if deactivate_sources:
                 parent.active = False
@@ -524,9 +529,9 @@ def save_cohort(request, workbook_id=None, worksheet_id=None, create_workbook=Fa
                     })
 
             if len(filter_obj):
-                data_url += '&filters=' + re.sub(r'\s+', '', urllib.quote( json.dumps(filter_obj) ))
-
-        result = urlfetch.fetch(data_url, deadline=60)
+                # data_url += '&filters=' + re.sub(r'\s+', '', urllib.quote( json.dumps(filter_obj) ))
+                payload['filters'] = json.dumps(filter_obj)
+        result = urlfetch.fetch(data_url, method=urlfetch.POST, payload=json.dumps(payload), deadline=60, headers={'Content-Type': 'application/json'})
         items = json.loads(result.content)
 
         #it is possible the the filters are creating a cohort with no samples
@@ -1033,14 +1038,21 @@ def get_metadata(request):
     cohort = request.GET.get('cohort_id', None)
     limit = request.GET.get('limit', None)
     token = SocialToken.objects.filter(account__user=request.user, account__provider='Google')[0].token
-    data_url = METADATA_API + ('%s/%s?token=%s&filter=%s' % (version, endpoint, token, filters))
+
+    payload = {
+        'token': token,
+        'filters': filters
+    }
+    data_url = METADATA_API + ('%s/%s/' % (version, endpoint))
     if cohort:
-        data_url += ('&cohort_id=%s' % (cohort,))
+        # data_url += ('&cohort_id=%s' % (cohort,))
+        payload['cohort_id'] = cohort
 
     if limit:
-        data_url += ('&limit=%s' % (limit,))
+        # data_url += ('&limit=%s' % (limit,))
+        payload['limit'] = limit
 
-    results = urlfetch.fetch(data_url, deadline=60)
+    results = urlfetch.fetch(data_url, method=urlfetch.POST, payload=json.dumps(payload), deadline=60, headers={'Content-Type': 'application/json'})
     results = json.loads(results.content)
 
     return JsonResponse(results)
