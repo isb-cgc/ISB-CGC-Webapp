@@ -99,7 +99,7 @@ class GeneFavorite(models.Model):
 class GeneFavorite_Last_View(models.Model):
     genefavorite = models.ForeignKey(GeneFavorite, blank=False)
     user = models.ForeignKey(User, null=False, blank=False)
-    last_view = models.DateTimeField(auto_now_add=True, auto_now=True)
+    last_view = models.DateTimeField(auto_now=True)
 
 class Gene(models.Model):
     id            = models.AutoField(primary_key=True)
