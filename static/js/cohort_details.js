@@ -354,5 +354,13 @@ require([
             }
         })
     });
+
+    /*
+        Disable comment button if no content
+     */
+    $('.save-comment-btn').prop('disabled', true);
+    $('#comment-content').keyup(function() {
+        $(this).siblings('.save-comment-btn').prop('disabled', this.value == '' ? true : false)
+    })
 });
 

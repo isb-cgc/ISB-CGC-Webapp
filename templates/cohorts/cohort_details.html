@@ -298,8 +298,8 @@
         <div class="flyout-footer">
             <form class="add-comment" action="{% url 'save_cohort_comment' %}" method="POST">
                 {% csrf_token %}
-                <label for="content">Add Comment</label>
-                <textarea id="content" class="form-control space-bottom-10" name="content"></textarea>
+                <label for="comment-content">Add Comment (1000 character limit)</label>
+                <textarea id="comment-content" class="form-control space-bottom-10" name="content" maxlength="1000"></textarea>
                 <input type="hidden" name="cohort_id" value="{{ cohort.id }}" />
                 <button class="btn btn-primary save-comment-btn" type="submit">Comment</button>
             </form>
