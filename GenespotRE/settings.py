@@ -24,7 +24,6 @@ dotenv.read_dotenv(join(dirname(__file__), '../.env'))
 
 BASE_DIR                = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + os.sep
 DEBUG                   = bool(os.environ.get('DEBUG', False))
-TEMPLATE_DEBUG          = DEBUG
 ALLOWED_HOSTS           = [os.environ.get('ALLOWED_HOST', 'localhost')]
 
 SSL_DIR = os.path.abspath(os.path.dirname(__file__))+os.sep
@@ -286,28 +285,30 @@ INSTALLED_APPS += (
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'OPTIONS': {
-            # add any context processors here
-            'context_processors': (
-                'allauth.socialaccount.context_processors.socialaccount',
-                'django.core.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-                'django.core.context_processors.tz',
-                'finalware.context_processors.contextify',
-                'GenespotRE.context_processor.additional_context',
-            ),
-            # add any loaders here
-            'loaders': (
-                'django.template.loaders.filesystem.Loader',
-                'django.template.loaders.app_directories.Loader'
-            ),
-        },
         # add any necessary template paths here
         'DIRS': [
             os.path.join(BASE_DIR, 'templates'),
             os.path.join(BASE_DIR, 'templates', 'accounts'),
         ],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            # add any context processors here
+            'context_processors': (
+                'allauth.socialaccount.context_processors.socialaccount',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.tz',
+                'finalware.context_processors.contextify',
+                'GenespotRE.context_processor.additional_context',
+            ),
+            # add any loaders here; if using the defaults, we can comment it out
+            # 'loaders': (
+            #     'django.template.loaders.filesystem.Loader',
+            #     'django.template.loaders.app_directories.Loader'
+            # ),
+            'debug': DEBUG,
+        },
     },
 ]
 

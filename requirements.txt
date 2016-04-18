@@ -4,7 +4,7 @@ MySQL-python==1.2.5
 pycrypto==2.6.1
 PyYAML==3.11
 WebOb==1.5.0
-django-allauth==0.21.0 #can't use v0.22 because context_processor -> template tags
+django-allauth==0.21
 ecdsa==0.13
 google-api-python-client==1.4.2
 httplib2==0.9.2
