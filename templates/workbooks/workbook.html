@@ -307,8 +307,8 @@
                             <div class="flyout-footer">
                                 <form class="add_worksheet_comment_form">
                                     {% csrf_token %}
-                                    <label for="content">Add Comment</label>
-                                    <textarea id="content" class="form-control space-bottom-10" name="content"></textarea>
+                                    <label for="comment-content">Add Comment (1000 character limit)</label>
+                                    <textarea id="comment-content" class="comment-textarea form-control space-bottom-10" name="content" maxlength="1000"></textarea>
                                     <button class="btn btn-primary save-comment-btn" type="submit">Comment</button>
                                     <input type="hidden" id="workbook_id_input" value="{{ workbook.id }}"/>
                                     <input type="hidden" id="worksheet_id_input" value="{{ worksheet.id }}"/>
