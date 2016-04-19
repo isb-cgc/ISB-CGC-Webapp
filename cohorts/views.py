@@ -997,9 +997,9 @@ def streaming_csv_view(request, cohort_id=0):
         # rows that can be handled by a single sheet in most spreadsheet
         # applications.
         rows = ()
-        rows = (["Sample", "Platform", "Pipeline", "DataLevel", "CloudStorageLocation"],)
+        rows = (["Sample", "Platform", "Pipeline", "DataLevel", "Data Type", "CloudStorageLocation"],)
         for file in file_list:
-            rows += ([file['sample'], file['platform'], file['pipeline'], file['datalevel'], file['cloudstorage_location']],)
+            rows += ([file['sample'], file['platform'], file['pipeline'], file['datalevel'], file['datatype'], file['cloudstorage_location']],)
         pseudo_buffer = Echo()
         writer = csv.writer(pseudo_buffer)
         response = StreamingHttpResponse((writer.writerow(row) for row in rows),

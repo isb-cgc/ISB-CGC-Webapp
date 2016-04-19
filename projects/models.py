@@ -72,7 +72,7 @@ class Project(models.Model):
 class Project_Last_View(models.Model):
     project = models.ForeignKey(Project, blank=False)
     user = models.ForeignKey(User, null=False, blank=False)
-    last_view = models.DateTimeField(auto_now_add=True, auto_now=True)
+    last_view = models.DateTimeField(auto_now=True)
 
 class Study(models.Model):
     name = models.CharField(max_length=255)
@@ -130,7 +130,7 @@ class Study(models.Model):
 class Study_Last_View(models.Model):
     study = models.ForeignKey(Study, blank=False)
     user = models.ForeignKey(User, null=False, blank=False)
-    last_view = models.DateTimeField(auto_now_add=True, auto_now=True)
+    last_view = models.DateTimeField(auto_now=True)
 
 
 class User_Feature_Definitions(models.Model):

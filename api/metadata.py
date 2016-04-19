@@ -1493,7 +1493,7 @@ class Meta_Endpoints_API(remote.Service):
             limit = request.limit
 
         platform_count_query = 'select Platform, count(Platform) as platform_count from cohorts_samples cs join metadata_data md on md.SampleBarcode = cs.sample_id where cohort_id=%s and DatafileUploaded="true" '
-        query = 'select SampleBarcode, DatafileName, DatafileNameKey, Pipeline, Platform, DataLevel, Datatype, GG_readgroupset_id from metadata_data md join cohorts_samples cs on md.SampleBarcode = cs.sample_id where cohort_id=%s and DatafileUploaded="true" '
+        query = 'select SampleBarcode, DatafileName, DatafileNameKey, Pipeline, Platform, DataLevel, Datatype, GG_readgroupset_id, Repository, SecurityProtocol from metadata_data md join cohorts_samples cs on md.SampleBarcode = cs.sample_id where cohort_id=%s and DatafileUploaded="true" '
 
         if not is_dbGaP_authorized:
             platform_count_query += ' and SecurityProtocol="dbGap open-access" group by Platform order by cs.sample_id;'
@@ -1544,6 +1544,18 @@ class Meta_Endpoints_API(remote.Service):
                 cursor.execute(query, query_tuple)
                 if cursor.rowcount > 0:
                     for item in cursor.fetchall():
+                        if 'controlled' not in str(item['SecurityProtocol']).lower() and 'DatafileNameKey' in item and item['DatafileNameKey'] != '':
+                            item['DatafileNameKey'] = "gs://{}{}".format(settings.OPEN_DATA_BUCKET, item['DatafileNameKey'])
+
+                        else:  # not filtering on dbGaP_authorized
+                            bucket_name = ''
+                            if item['Repository'] and item['Repository'].lower() == 'dcc':
+                                bucket_name = settings.DCC_CONTROLLED_DATA_BUCKET
+                            elif item['Repository'] and item['Repository'].lower() == 'cghub':
+                                bucket_name = settings.CGHUB_CONTROLLED_DATA_BUCKET
+                            if 'DatafileNameKey' in item and bucket_name != '':
+                                item['DatafileNameKey'] = "gs://{}{}".format(bucket_name, item['DatafileNameKey'])
+
                         file_list.append(FileDetails(sample=item['SampleBarcode'], cloudstorage_location=item['DatafileNameKey'], filename=item['DatafileName'], pipeline=item['Pipeline'], platform=item['Platform'], datalevel=item['DataLevel'], datatype=item['Datatype'], gg_readgroupset_id=item['GG_readgroupset_id']))
                 else:
                     file_list.append(FileDetails(sample='None', filename='', pipeline='', platform='', datalevel=''))
