@@ -96,3 +96,7 @@ tmp*
 
 #ignore mock visualization data
 static/js/visualizations/mock_histogram_data.js
+
+# ignore Windows-related things
+.npmignore
+DEV_README
