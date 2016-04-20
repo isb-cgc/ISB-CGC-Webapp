@@ -286,10 +286,17 @@ require([
 
                 options.each(function (i, element) {
                     var option = $(element);
+                    var parent = option.parent();
                     option.removeAttr('disabled');
                     if ((option.attr('var_type') == 'C' && plot_settings.axis[axis_index].type == 'NUMERICAL') ||
                         (option.attr('var_type') == 'N' && plot_settings.axis[axis_index].type == 'CATEGORICAL')) {
                         option.attr('disabled','disabled');
+                    }
+
+                    // If the selected option is no longer valid
+                    if (option.prop('value') == parent.find(':selected').val() && option.prop('disabled')) {
+                        // Find first sibling that not disabled
+                        parent.val($(option.siblings('option:enabled')[0]).prop('value'));
                     }
                 });
             }
