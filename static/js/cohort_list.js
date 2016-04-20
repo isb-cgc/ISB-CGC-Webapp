@@ -109,7 +109,7 @@ require([
         if (checked) {
             enable_buttons(tablename);
             var ids = [];
-            $('#cohorts-list tr:not(:first) input[type="checkbox"]').each(function() {
+            $(this).parents('table').find('tr:not(:first) input[type="checkbox"]').each(function() {
                 var token = $('<span class="cohort-label label label-default space-right-5" value="'
                         + $(this).val() + '" name="selected-ids">'
                         + $(this).parents('tr').find('.name-col a').html()
@@ -282,6 +282,9 @@ require([
             $(this).val('');
             $(this).hide();
             return false;
+        },
+        open: function(event, ui) {
+            $('.ui-autocomplete').css('width', $(this).parents('.form-group').width() + 'px')
         }
     }).hide();
 
@@ -401,7 +404,7 @@ require([
         });
 
         if(cohorts.length > 0){
-            var csrftoken = get_cookie('csrftoken');
+            var csrftoken = $.getCookie('csrftoken');
             $.ajax({
                 type: 'POST',
                 dataType :'json',
@@ -420,22 +423,6 @@ require([
                 }
             });
         }
-    })
+    });
 
-    //TODO this should be moved to a shared library
-    function get_cookie(name) {
-        var cookieValue = null;
-        if (document.cookie && document.cookie != '') {
-            var cookies = document.cookie.split(';');
-            for (var i = 0; i < cookies.length; i++) {
-                var cookie = jQuery.trim(cookies[i]);
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
 });

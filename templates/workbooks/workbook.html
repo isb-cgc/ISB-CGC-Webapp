@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% load custom_tags %}
+{% load workbook_custom_tags %}
 
 {% block title %}Workbooks | ISB-CGC{% endblock %}}
 {% block extra_css_libs %}{% endblock %}
@@ -26,7 +27,7 @@
         {% if is_shareable %}
         <li class="separator"></li>
         <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#share-workbook-modal-{{ workbook.id }}">Share</button></li>
-        <li role="menuitem"><button class="btn btn-link" data-toggle="modal" data-target="#share-workbook-modal-{{ workbook.id }}">Shared with ({{ workbook.shared.count }})</button></li>
+        <li role="menuitem"><button class="btn btn-link" data-toggle="modal" data-target="#share-workbook-modal-{{ workbook.id }}">Shared with (<span class="share-count">{{ workbook.shared.all|shared_active_count }}</span>)</button></li>
         {% endif %}
         {% elif workbook.is_public %}
         {# Is a public workbook #}
@@ -36,7 +37,7 @@
         {% else %}
         {# Is a shared workbook #}
         <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#remove-workbook-modal-{{ workbook.id }}">Remove</button></li>
-        <li role="menuitem"><button class="btn btn-link" data-toggle="modal" data-target="#share-workbook-modal-{{ workbook.id }}">Shared with ({{ workbook.shared.count }})</button></li>
+        <li role="menuitem"><button class="btn btn-link" data-toggle="modal" data-target="#share-workbook-modal-{{ workbook.id }}">Shared with (<span class="share-count">{{ workbook.shared.all|shared_active_count }}</span>)</button></li>
         {% endif %}
 
     </ul>
@@ -109,7 +110,7 @@
                      <!-- worksheet description -->
                      <div class="worksheet-header">
                          <p>{{worksheet.description}}</p>
-                        <button class="show-flyout btn btn-default btn-sm pull-right" title="Show Comments">comments ({{ worksheet.comments | length }})</button>
+                        <button class="show-flyout btn btn-default btn-sm pull-right" title="Show Comments">comments (<span class="comment-count">{{ worksheet.comments | length }}</span>)</button>
                      </div>
 
                      <div class="worksheet-body">
@@ -133,21 +134,21 @@
                                                 {% if forlook.counter0 < 6 %}
                                                     <li class="sublist-item">
                                                         {% if shared %}
-                                                            {{ gene.gene|title }}
+                                                            {{ gene.gene }}
                                                         {% else %}
                                                             <form action="{% url 'worksheet_gene_delete' workbook_id=workbook.id worksheet_id=worksheet.id gene_id=gene.id %}" method="POST">
                                                                 {% csrf_token %}
                                                                 {% if workbook.owner.id == user.id %}
                                                                     <button type="submit" class="text-danger workbook-remove-item"><i class="fa fa-close"></i></button>
                                                                 {% endif %}
-                                                                {{ gene.gene|title }}
+                                                                {{ gene.gene }}
                                                             </form>
                                                         {% endif %}
                                                     </li>
                                                 {% elif forloop.counter0 == 6 and num_more > 0 %}
                                                     <a class="show-more">{{num_more}} more</a>
                                                     <li class="extra-values sublist-item">
-                                                        {{ gene.gene|title }}
+                                                        {{ gene.gene }}
                                                     </li>
                                                 {% endif %}
                                             {% endfor %}
@@ -170,21 +171,21 @@
                                                 {% if forlook.counter0 < 6 %}
                                                     <li class="sublist-item">
                                                         {% if shared %}
-                                                            {{ variable.name|title }}
+                                                            {{ variable.name }}
                                                         {% else %}
                                                             <form action="{% url 'worksheet_variables_delete' workbook_id=workbook.id worksheet_id=worksheet.id variable_id=variable.id %}" method="POST">
                                                                 {% csrf_token %}
                                                                 {% if workbook.owner.id == user.id %}
                                                                     <button type="submit" class="text-danger workbook-remove-item"><i class="fa fa-close"></i></button>
                                                                 {% endif %}
-                                                                {{ variable.name|title }}
+                                                                {{ variable.name }}
                                                             </form>
                                                         {% endif %}
                                                     </li>
                                                 {% elif forloop.counter0 == 6 and num_more > 0 %}
                                                     <a class="show-more">{{num_more}} more</a>
                                                     <li class="extra-values sublist-item">
-                                                        {{ variable.name|title }}
+                                                        {{ variable.name }}
                                                     </li>
                                                 {% endif %}
                                             {% endfor %}
@@ -208,14 +209,14 @@
                                                 {% if forlook.counter0 < 6 %}
                                                     <li class="sublist-item">
                                                         {% if shared %}
-                                                            {{ cohort.name|title }}
+                                                            {{ cohort.name }}
                                                         {% else %}
                                                             <form action="{% url 'remove_cohort_from_worksheet' workbook_id=workbook.id worksheet_id=worksheet.id cohort_id=cohort.id %}" method="POST">
                                                                 {% csrf_token %}
                                                                 {% if workbook.owner.id == user.id %}
                                                                     <button type="submit" class="text-danger workbook-remove-item"><i class="fa fa-close"></i></button>
                                                                 {% endif %}
-                                                                <a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name|title }}</a>
+                                                                <a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a>
                                                             </form>
                                                         {% endif %}
                                                     </li>
@@ -223,9 +224,9 @@
                                                     <a class="show-more">{{num_more}} more</a>
                                                     <li class="extra-values sublist-item">
                                                         {% if shared %}
-                                                            {{ cohort.name|title }}
+                                                            {{ cohort.name }}
                                                         {% else %}
-                                                            <a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name|title }}</a>
+                                                            <a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a>
                                                         {% endif %}
                                                     </li>
                                                 {% endif %}
@@ -306,8 +307,8 @@
                             <div class="flyout-footer">
                                 <form class="add_worksheet_comment_form">
                                     {% csrf_token %}
-                                    <label for="content">Add Comment</label>
-                                    <textarea id="content" class="form-control space-bottom-10" name="content"></textarea>
+                                    <label for="comment-content">Add Comment (1000 character limit)</label>
+                                    <textarea id="comment-content" class="comment-textarea form-control space-bottom-10" name="content" maxlength="1000"></textarea>
                                     <button class="btn btn-primary save-comment-btn" type="submit">Comment</button>
                                     <input type="hidden" id="workbook_id_input" value="{{ workbook.id }}"/>
                                     <input type="hidden" id="worksheet_id_input" value="{{ worksheet.id }}"/>

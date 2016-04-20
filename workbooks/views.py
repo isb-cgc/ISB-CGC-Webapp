@@ -92,22 +92,37 @@ def workbook_create_with_project(request):
 
 @login_required
 def workbook_create_with_variables(request):
-    var_list_id    = request.POST.get('variable_list_id')
+    json_data = request.POST.get('json_data')
+    if json_data:
+        data = json.loads(json_data)
+        # TODO: Refactor so that user can create using multiple variable lists
+        var_list_id = data['variable_list_id'][0]
+    else:
+        var_list_id    = request.POST.get('variable_list_id')
+
+
     var_list_model = VariableFavorite.objects.get(id=var_list_id)
     name = request.POST.get('name', var_list_model.name + ' workbook')
     workbook_model = Workbook.create(name=name, description="this is an untitled workbook with all variables of variable favorite list \"" + var_list_model.name + "\" added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
+    workbook_model.save()
     worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
+    worksheet_model.save()
 
+    print workbook_model.id
     for var in var_list_model.get_variables() :
         work_var = Worksheet_variable.objects.create(worksheet_id = worksheet_model.id,
                                           name         = var.name,
                                           url_code     = var.code,
+                                          type         = var.type,
                                           feature_id   = var.feature_id)
 
         work_var.save()
 
     redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_model.id})
-    return redirect(redirect_url)
+    if json_data:
+        return JsonResponse({'workbook_id': workbook_model.id, 'worksheet_id': worksheet_model.id})
+    else:
+        return redirect(redirect_url)
 
 @login_required
 def workbook_create_with_analysis(request):
@@ -219,7 +234,7 @@ def worksheet_display(request, workbook_id=0, worksheet_id=0):
     workbook_model = Workbook.deep_get(workbook_id)
     workbook_model.mark_viewed(request)
     is_shareable = workbook_model.is_shareable(request)
-    print is_shareable
+
     for worksheet in workbook_model.worksheets:
         if str(worksheet.id) == worksheet_id :
             display_worksheet = worksheet
@@ -294,7 +309,7 @@ def worksheet_variables(request, workbook_id=0, worksheet_id=0, variable_id=0):
                     result['error'] = "variable favorite does not exist"
 
             #from Select Page
-            if "var_favorites" in request.body : #{"variables_favorites":[{"id":"6"}]}
+            if "var_favorites" in request.body :
                 variable_fav_list = json.loads(request.body)['var_favorites']
                 json_response = True
                 for fav in variable_fav_list:
@@ -349,8 +364,13 @@ def worksheet_genes(request, workbook_id=0, worksheet_id=0, genes_id=0):
             result['message'] = "genes have been deleted from workbook"
         else :
             genes = []
+            workbook_name = 'Untitled Workbook'
             #from Gene Edit Page
             if request.POST.get("genes-list") :
+                # Get workbook name
+                if request.POST.get('name'):
+                    workbook_name = request.POST.get('name')
+
                 name = request.POST.get("genes-name")
                 gene_list = request.POST.get("genes-list")
                 gene_list = [x.strip() for x in gene_list.split(' ')]
@@ -362,6 +382,10 @@ def worksheet_genes(request, workbook_id=0, worksheet_id=0, genes_id=0):
 
             #from Gene Details Page
             if request.POST.get("gene_list_id") :
+                # Get workbook name
+                if request.POST.get('name'):
+                    workbook_name = request.POST.get('name')
+
                 gene_id = request.POST.get("gene_list_id")
                 try :
                     gene_fav = GeneFavorite.objects.get(id=gene_id)
@@ -385,7 +409,8 @@ def worksheet_genes(request, workbook_id=0, worksheet_id=0, genes_id=0):
                         None
             if len(genes) > 0:
                 if workbook_id is 0:
-                    workbook_model  = Workbook.create(name="Untitled Workbook", description="This workbook was created with genes added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
+
+                    workbook_model  = Workbook.create(name=workbook_name, description="This workbook was created with genes added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
                     worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
                 else :
                     workbook_model = Workbook.objects.get(id=workbook_id)

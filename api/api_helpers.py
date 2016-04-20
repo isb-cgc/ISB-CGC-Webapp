@@ -192,7 +192,7 @@ def applyFilter(field, dict):
 
     return where_clause
 
-def build_where_clause(dict, alt_key_map=False):
+def build_where_clause(filters, alt_key_map=False):
 # this one gets called a lot
 #    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     first = True
@@ -200,19 +200,20 @@ def build_where_clause(dict, alt_key_map=False):
     big_query_str = ''  # todo: make this work for non-string values -- use {}.format
     value_tuple = ()
     key_order = []
-    for key, value in dict.items():
+    for key, value in filters.items():
+        if isinstance(value, dict) and 'values' in value:
+            value = value['values']
+
         if isinstance(value, list) and len(value) == 1:
             value = value[0]
         # Check if we need to map to a different column name for a given key
         if alt_key_map and key in alt_key_map:
             key = alt_key_map[key]
-            if 'values' in value:
-                value = value['values']
+
         # Multitable where's will come in with : in the name. Only grab the column piece for now
         elif ':' in key:
             key = key.split(':')[-1]
-            if 'values' in value:
-                value = value['values']
+
         # Multitable filter lists don't come in as string as they can contain arbitrary text in values
         elif isinstance(value, basestring):
             # If it's a list of values, split it into an array

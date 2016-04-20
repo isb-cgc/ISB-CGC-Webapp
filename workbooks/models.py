@@ -156,7 +156,7 @@ class Workbook_Last_View(models.Model):
     workbook = models.ForeignKey(Workbook, blank=False)
     user = models.ForeignKey(User, null=False, blank=False)
     test = models.DateTimeField(auto_now_add=True, null=True)
-    last_view = models.DateTimeField(auto_now_add=True, auto_now=True)
+    last_view = models.DateTimeField(auto_now=True)
 
 # Deprecated. Left in for the conversion
 class Workbook_Perms(models.Model):
@@ -476,17 +476,19 @@ class Worksheet_variable(models.Model):
     @classmethod
     def create(cls, worksheet, variable):
         if type(variable) is not dict :
-            dict_variable = {'feature_id' : variable.feature_id, 'name' : variable.name, 'code' : variable.code}
+            dict_variable = {'feature_id' : variable.feature_id, 'name' : variable.name, 'code' : variable.code, 'type' : variable.type}
             variable = dict_variable
 
         worksheet_variable_model = cls.objects.create(worksheet_id = worksheet.id,
                                                       name = variable['name'],
-                                                      url_code = variable['code'])
+                                                      url_code = variable['code'],
+                                                      type = variable['type'])
 
         return_obj = {
             'id'            : worksheet_variable_model.id,
             'name'          : worksheet_variable_model.name,
             'code'          : worksheet_variable_model.url_code,
+            'type'          : worksheet_variable_model.type,
             'date_created'  : formats.date_format(worksheet_variable_model.date_created, 'DATETIME_FORMAT')
         }
 
@@ -601,7 +603,7 @@ class Worksheet_plot_cohort(models.Model):
     date_created    = models.DateTimeField(auto_now_add=True)
     modified_date   = models.DateTimeField(auto_now=True)
     plot            = models.ForeignKey(Worksheet_plot, blank=True, null=True, related_name="worksheet_plot")
-    cohort          = models.ForeignKey(Worksheet_cohort, blank=True, null=True, related_name="worksheet_plot.cohort")
+    cohort          = models.ForeignKey(Worksheet_cohort, blank=True, null=True, related_name="worksheet_plot_cohorts")
     objects         = Worksheet_Plot_Cohort_Manager()
 
     def toJSON(self):

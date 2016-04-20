@@ -32,6 +32,7 @@ urlpatterns = patterns('',
     url(r'^clone_cohort/(?P<cohort_id>\d+)/',       views.clone_cohort, name='clone_cohort'),
     url(r'^share_cohort/$',                         views.share_cohort, name='share_cohorts'),
     url(r'^share_cohort/(?P<cohort_id>\d+)/',       views.share_cohort, name='share_cohort'),
+    url(r'^unshare_cohort/(?P<cohort_id>\d+)/',     views.unshare_cohort, name='unshare_cohort'),
     url(r'^set_operation/',                         views.set_operation, name='set_operation'),
     url(r'^save_cohort_comment/',                   views.save_comment, name='save_cohort_comment'),
     url(r'^download_filelist/(?P<cohort_id>\d+)/',  views.streaming_csv_view, name='download_filelist'),
@@ -46,5 +47,7 @@ urlpatterns = patterns('',
     url(r'^select_cohort_and_create_workbook/$',                                   views.cohort_select_for_new_workbook,       name="cohort_select_for_new_workbook"),
     url(r'^create_cohort_and_create_workbook/$',                                   views.cohort_create_for_new_workbook,       name="cohort_create_for_new_workbook"),
     url(r'^save_cohort_for_workbook/$',                                            views.save_cohort_for_existing_workbook,    name="save_cohort_for_existing_workbook"),
-    url(r'^save_cohort_and_workbook/$',                                            views.save_cohort_for_new_workbook,         name="save_cohort_for_new_workbook")
+    url(r'^save_cohort_and_workbook/$',                                            views.save_cohort_for_new_workbook,         name="save_cohort_for_new_workbook"),
+
+    url(r'^get_metadata_ajax/$',                views.get_metadata, name='metadata_count_ajax')
 )

@@ -65,7 +65,15 @@ def sharing_add(request, sharing_id=0):
 
 @login_required
 def sharing_remove(request, sharing_id=0):
-    resc = request.user.shared_resource_set.get(id=sharing_id)
+
+    if request.POST.get('owner'):
+        # The owner of the resource should also be able to remove users they shared with.
+        resc = Shared_Resource.objects.get(id=sharing_id)
+    else:
+        # This allows users to remove resources shared with them
+        resc = request.user.shared_resource_set.get(id=sharing_id)
+
+
     resc.active = False
     resc.save()
 

@@ -37,13 +37,13 @@
         </div>
         <div class="panel-body">
             {% if gene_favorite %}
-                <form method="POST" action="{% url 'gene_fav_update' gene_favorite.id %}">
+                <form class="create-gene-list" method="POST" action="{% url 'gene_fav_update' gene_favorite.id %}">
             {% elif workbook %}
-                <form method="POST" action="{% url 'worksheet_genes_edit' workbook.id worksheet.id %}">
+                <form class="create-gene-list" method="POST" action="{% url 'worksheet_genes_edit' workbook.id worksheet.id %}">
             {% elif new_workbook %}
-                <form method="POST" action="{% url 'worksheet_create_with_genes' %}">
+                <form class="create-gene-list" method="POST" action="{% url 'worksheet_create_with_genes' %}">
             {% else %}
-                <form method="POST" action="{% url 'gene_fav_save' %}">
+                <form class="create-gene-list" method="POST" action="{% url 'gene_fav_save' %}">
             {% endif %}
                 {% csrf_token %}
                 <div class="form-group">
@@ -90,7 +90,7 @@
                         <li role="menuitem">
                             <input type="submit" value="Save as Favorite" class="btn btn-primary"/>
                         </li>
-                        <li role="menuitem"><a href="{% url 'gene_select_for_new_workbook' %}">Cancel</a></li>
+                        <li role="menuitem"><a href="{% url 'genes' %}">Cancel</a></li>
                     {% endif %}
                     <menuitem class="btn btn-link pull-right"><a href="http://www.genenames.org/" target="_blank">View Gene Identifiers</a></menuitem>
                 </ul>

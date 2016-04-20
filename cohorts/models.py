@@ -99,12 +99,12 @@ class Cohort(models.Model):
     '''
     def get_filters(self):
         filter_list = []
-        # Iterate through all parents
         cohort = self
+        # Iterate through all parents if they were are all created through filters (should be a single chain with no branches)
         while cohort:
             filter_list.extend(Filters.objects.filter(resulting_cohort=cohort))
             sources = Source.objects.filter(cohort=cohort)
-            if sources:
+            if sources and len(sources) == 1 and sources[0].type == Source.FILTERS:
                 cohort = sources[0].parent
             else:
                 cohort = None
@@ -210,4 +210,4 @@ class Cohort_Comments(models.Model):
 class Cohort_Last_View(models.Model):
     cohort = models.ForeignKey(Cohort, blank=False)
     user = models.ForeignKey(User, null=False, blank=False)
-    last_view = models.DateTimeField(auto_now_add=True, auto_now=True)
+    last_view = models.DateTimeField(auto_now=True)

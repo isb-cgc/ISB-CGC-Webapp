@@ -16,7 +16,7 @@
 
 {% endcomment %}
 
-<div class="plot panel" id="plot-{{ plot.id }}">
+<div class="plot panel" id="plot-{{ worksheet.id }}">
     <div class="panel-heading">
         <div class="options-bar">
             {% if workbook.owner.id == user.id %}
@@ -40,7 +40,7 @@
         </div>
 
         <!-- Settings Flyout -->
-        <div class="fly-out settings-flyout plot-config" style="overflow-y: scroll;" id="plot-{{ plot.id }}-settings">
+        <div class="fly-out settings-flyout plot-config" style="overflow-y: scroll;" id="plot-{{ worksheet.id }}-settings">
             <div class="flyout-heading">
                 <h5>Plot Settings <a role="button" class="hide-settings-flyout pull-right" aria-label="Hide Settings Flyout"><i class="fa fa-times"></i></a></h5>
             </div>
@@ -49,8 +49,8 @@
 
                     <!-- X Axis selection -->
                     <div class="form-group variable-container" variable="x-axis-select">
-                        <label for="{{ plot.id }}-x-select">X Axis Variable <a role="button" class="x-edit-field" data-attribute="x-selector" aria-label="X Field Editor"></a></label>
-                        <select id="x-axis-select" {% if workbook.owner.id != user.id %} disabled {% endif %} plot="{{ plot.id }}" class="form-control search-term-field" style="width: 230px;">
+                        <label for="{{ worksheet.id }}-x-select">X Axis Variable <a role="button" class="x-edit-field" data-attribute="x-selector" aria-label="X Field Editor"></a></label>
+                        <select {% if workbook.owner.id != user.id %} disabled {% endif %} plot="{{ worksheet.id }}" class=" x-axis-select form-control search-term-field" style="width: 230px;">
                             {% if plot.x_axis %}
                                 <option value="{{ plot.x_axis.url_code }}" var_id="{{ plot.x_axis.id }}" selected >{{ plot.x_axis.name }}</option>
                             {% else %}
@@ -58,20 +58,17 @@
                             {% endif %}
                             {% for gene in genes %}
                                 {% if not plot or plot.x_axis.id != gene.id %}
-                                    {# TODO {% if var.type == plot.yaxis.type  %}#}
                                     <option type="gene" value="{{ gene.gene }}" var_id="{{ gene.id }}">{{ gene.gene }}</option>
-                                    {# TODO {% endif %}#}
                                 {% endif %}
                             {% endfor %}
                             {% for var in variables %}
                                 {% if not plot or plot.x_axis.id != var.id %}
-                                    {# TODO {% if var.type == plot.yaxis.type  %}#}
-                                    <option type="common" value="{{ var.url_code }}" var_id="{{ var.id }}">{{ var.name }}</option>
-                                    {# TODO {% endif %}#}
+                                    <!-- type is checked via javascript -->
+                                    <option type="common" var_type="{{var.type}}" value="{{ var.url_code }}" var_id="{{ var.id }}">{{ var.name }}</option>
                                 {% endif %}
                             {% endfor %}
                         </select>
-                        <select id="x-gene-attribute-select" class="form-control spec-select datatype-selector" style="display:none; margin-top:5px; width: 230px;">
+                        <select class="x-gene-attribute-select form-control spec-select datatype-selector" style="display:none; margin-top:5px; width: 230px;">
                             <option disabled selected>-- select a specification--</option>
                             {% for type in datatype_list %}
                                 <option value="{{ type.datatype }}">{{ type.label}}</option>
@@ -109,8 +106,8 @@
 
                     <!-- Y Axis selection -->
                     <div class="form-group variable-container" variable="y-axis-select">
-                        <label for="{{ plot.id }}-y-select">Y Axis Variable <a role="button" class="y-edit-field" data-attribute="y-selector" aria-label="Y Field Editor"></a></label>
-                        <select id="y-axis-select" {% if workbook.owner.id != user.id %} disabled {% endif %} plot="{{ plot.id }}" class="form-control search-term-field" style="width: 230px;">
+                        <label for="{{ worksheet.id }}-y-select">Y Axis Variable <a role="button" class="y-edit-field" data-attribute="y-selector" aria-label="Y Field Editor"></a></label>
+                        <select {% if workbook.owner.id != user.id %} disabled {% endif %} plot="{{ worksheet.id }}" class="y-axis-select form-control search-term-field" style="width: 230px;">
                             {% if plot.y_axis %}
                                 <option value="{{ plot.y_axis.url_code }}" var_id="{{ plot.y_axis.id }}" selected >{{ plot.y_axis.name }}</option>
                             {% else %}
@@ -118,20 +115,18 @@
                             {% endif %}
                             {% for gene in genes %}
                                 {% if not plot or plot.y_axis.id != gene.id %}
-                                    {# TODO {% if var.type == plot.yaxis.type  %}#}
                                     <option type="gene" value="{{ gene.gene }}" var_id="{{ gene.id }}">{{ gene.gene }}</option>
                                     {# TODO {% endif %}#}
                                 {% endif %}
                             {% endfor %}
                             {% for var in variables %}
                                 {% if not plot or plot.y_axis.id != var.id %}
-                                    {# TODO {% if var.type == plot.yaxis.type  %}#}
-                                    <option type="common" value="{{ var.url_code }}" var_id="{{ var.id }}">{{ var.name }}</option>
-                                    {# TODO {% endif %}#}
+                                    <!-- type is checked via javascript -->
+                                    <option type="common" var_type='{{var.type}}' value="{{ var.url_code }}" var_id="{{ var.id }}">{{ var.name }}</option>
                                 {% endif %}
                             {% endfor %}
                         </select>
-                        <select id="y-gene-attribute-select" class="form-control spec-select datatype-selector" style="display:none; margin-top:5px; width: 230px;">
+                        <select class="y-gene-attribute-select form-control spec-select datatype-selector" style="display:none; margin-top:5px; width: 230px;">
                             <option disabled selected>-- select a specification--</option>
                             {% for type in datatype_list %}
                                 <option value="{{ type.datatype }}">{{ type.label}}</option>
@@ -176,7 +171,7 @@
 
                     <!-- Gene Label for SeqPeek -->
                     <div class="form-group seqpeek-genes">
-                        <label for="{{ plot.id }}-gene-label-select">Gene</label>
+                        <label for="{{ worksheet.id }}-gene-label-select">Gene</label>
                         <select id="gene_label" {% if workbook.owner.id != user.id %} disabled {% endif %} class="form-control search-term-field" style="width: 230px;">
                             {% if plot.gene_label %}
                                 <option value="{{ plot.gene_label }}" selected >{{ plot.gene_label }}</option>
@@ -194,13 +189,13 @@
                     </div>
 
 {#                    <div class="form-group">#}
-{#                        <label for="{{ plot.id }}-color-by-cohort">Color By Cohort</label>#}
+{#                        <label for="{{ worksheet.id }}-color-by-cohort">Color By Cohort</label>#}
 {#                        <input type="checkbox" class="color-by-cohort" id="color-by-cohort" />#}
 {#                    </div>#}
 
                     <div class="form-group">
                         <label>Cohorts</label>
-                        <div class="cohort-listing" plot="{{ plot.id }}">
+                        <div class="cohort-listing" plot="{{ worksheet.id }}">
                             {% for cohort in cohorts %}
                                  <div class="checkbox" style="margin-top: 0px; margin-bottom: 5px;">
                                       <label>
@@ -211,7 +206,7 @@
                             {% endfor %}
                         </div>
                     </div>
-                    <button {% if workbook.owner.id != user.id %} style="display:none" {% endif %} class="update-plot btn btn-primary" worksheet_id="{{ worksheet.id }}" plot_id="{{ plot.id }}">Update Plot</button>
+                    <button {% if workbook.owner.id != user.id %} style="display:none" {% endif %} class="update-plot btn btn-primary" worksheet_id="{{ worksheet.id }}" plot_id="{{ worksheet.id }}">Update Plot</button>
                 </div>
             </div>
         </div>
@@ -222,35 +217,36 @@
                     <p><i class="fa fa-exclamation-circle"></i> To Complete this Analysis: </p>
                     <ul class="ul">
                         <li>You must select an Analysis Type (above)</li>
-                        <li>You must select <a href="{% url 'genes' %}">Genes</a> or <a href="{% url 'variables' %}">Variables</a> (or, optionally, both)</li>
-                        <li>You must select a <a href="{% url 'cohort_list' %}">Cohorts</a></li>
+                        <li>You must select <a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Genes</a> or <a href="{% url 'variable_select_for_existing_workbook' workbook.id worksheet.id %}">Variables</a> (or, optionally, both)</li>
+                        <li>You must select a <a href="{% url 'cohort_select_for_existing_workbook' workbook.id worksheet.id %}%}">Cohorts</a></li>
                     </ul>
                 </div>
             {% endif %}
         </div>
         <div class="legend"></div>
+        <button class="resubmit-button btn btn-primary">Resubmit Plot</button>
         <div class="pairwise-result"></div>
         <div class="save-cohort-card" style="display:none;">
             <p class="selected-samples-count">Number of Samples: 0</p>
             <p class="selected-patients-count">Number of Participants: 0</p>
-            <button class="btn btn-primary" data-toggle="modal" data-target="#save-cohort-{{ plot.id }}-modal" title="Save Cohort">Save Cohort</button>
+            <button class="btn btn-primary" data-toggle="modal" data-target="#save-cohort-{{ worksheet.id }}-modal" title="Save Cohort">Save Cohort</button>
         </div>
         <input type="hidden" name="type" value="genericplot" />
     </div>
 
     <!-- Save Cohort Modal -->
-    <div class="modal fade" id="save-cohort-{{ plot.id }}-modal" tabindex="-1" role="dialog" aria-labelledby="save-cohort-{{ plot.id }}-header" aria-hidden="true">
+    <div class="modal fade" id="save-cohort-{{ worksheet.id }}-modal" tabindex="-1" role="dialog" aria-labelledby="save-cohort-{{ worksheet.id }}-header" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="save-cohort-{{ plot.id }}-header">Save Cohort</h4>
+                    <h4 class="modal-title" id="save-cohort-{{ worksheet.id }}-header">Save Cohort</h4>
                 </div>
-                <form id="save-cohort-{{ plot.id }}" method="POST" action="{% url 'save_cohort_from_plot' %}">
+                <form id="save-cohort-{{ worksheet.id }}" method="POST" action="{% url 'save_cohort_from_plot' %}">
                     <div class="modal-body">
-                        <label class="form-inline" for="{{ plot.id }}-new-cohort-name">New Cohort Name</label>
-                        <input type="text" class="form-control" name="cohort-name" id="{{ plot.id }}-new-cohort-name" placeholder="Enter a name for the new cohort.">
-                        <input type="hidden" id="cohort-plot-id" name="plot-id" value="{{ plot.id }}" />
+                        <label class="form-inline" for="{{ worksheet.id }}-new-cohort-name">New Cohort Name</label>
+                        <input type="text" class="form-control" name="cohort-name" id="{{ worksheet.id }}-new-cohort-name" placeholder="Enter a name for the new cohort.">
+                        <input type="hidden" id="cohort-plot-id" name="plot-id" value="{{ worksheet.id }}" />
                         <input type="hidden" name="samples" value="" />
                     </div>
                     <div class="modal-footer">
