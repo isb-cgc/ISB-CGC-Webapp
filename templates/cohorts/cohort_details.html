@@ -53,7 +53,7 @@
                 <li class="menu-item"><button class="btn btn-info" id="add-filter-btn">Edit</button> </li>
             {% endif %}
             <li class="menu-item"><button class="show-flyout btn btn-info" title="Show Comments">Comments</button></li>
-            <li class="menu-item"><a href="{% url 'clone_cohort' cohort.id %}" class="btn btn-info">Duplicate</a></li>
+            <li class="menu-item"><a href="{% url 'clone_cohort' cohort.id %}" class="btn btn-info clone-cohort-btn">Duplicate</a></li>
             <li class="menu-item"><button class="btn btn-info" data-toggle="modal" data-target="#delete-cohort-modal">
                 {% if cohort.perm.perm == 'OWNER' %}
                     Delete

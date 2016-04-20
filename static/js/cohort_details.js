@@ -386,5 +386,12 @@ require([
     $('#edit-cohort-name').keyup(function() {
         check_changes();
     })
+
+    /*
+        Disable Duplicate Cohort button once clicked
+     */
+    $('.clone-cohort-btn').on('click', function() {
+        $(this).addClass('disabled');
+    })
 });
 
