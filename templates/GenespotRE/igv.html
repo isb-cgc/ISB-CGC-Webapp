@@ -67,7 +67,14 @@
         </script>
 
         {% else %}
+            <div id="igv-div"></div>
+            {% for row in readgroupset_list %}
+            <div class="readgroupset-data" data-sample="{{ row.sample_barcode }}" data-readgroupset="{{ row.readgroupset_id }}"></div>
+            {% endfor %}
 
+            {% for row in bam_list %}
+            <div class="bam-data" data-sample="{{ row.sample_barcode }}" data-gcs="{{ row.gcs_path }}"></div>
+            {% endfor %}
         {% endif %}
 
 
