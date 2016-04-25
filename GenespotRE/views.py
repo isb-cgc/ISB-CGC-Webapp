@@ -174,15 +174,22 @@ def user_detail(request, user_id):
                 logger.warn("Error when retrieving nih_user with user_id {}. {}".format(str(user_id), str(e)))
                 # todo: add code to unlink all accounts?
 
+        era_login_url = "{}?sso&redirect_url={}/accounts/nih_login".format(settings.ERA_LOGIN_URL,
+                                                                            settings.BASE_URL)
+
         return render(request, 'GenespotRE/user_detail.html',
                       {'request': request,
                        'user_details': user_details,
                        'NIH_AUTH_ON': settings.NIH_AUTH_ON,
-                       'ERA_LOGIN_URL': settings.ERA_LOGIN_URL
+                       'ERA_LOGIN_URL': era_login_url
                        })
     else:
         return render(request, '403.html')
 
+
+@login_required
+def nih_login(request):
+    logging.info('at nih_login')
 
 @login_required
 def bucket_object_list(request):
