@@ -19,6 +19,7 @@
 define(['d3', 'd3parsets'], function(d3, d3parsets) {
     return {
         draw_parsets: function(data, features) {
+            var startPlot = new Date().getTime();
             var chart = parsets()
                 .dimensions(features);
 
@@ -34,6 +35,10 @@ define(['d3', 'd3parsets'], function(d3, d3parsets) {
 
             vis[0][0]['children'][0].setAttribute("transform", "translate(0,550)rotate(270)"); // ribbons
             vis[0][0]['children'][1].setAttribute("transform", "translate(0,550)rotate(270)"); // ??
+
+            var stopPlot = new Date().getTime();
+
+            console.debug("[BENCHMARKING] Time to build parallel coords plot: "+(stopPlot-startPlot)+ "ms");
 
         }
     }

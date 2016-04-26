@@ -136,7 +136,7 @@ function($, d3, d3tip, vis_helpers) {
 
             var stopPlot = new Date().getTime();
 
-            console.debug("[BENCHMARKING] Time to build parallel coords plot: "+(stopPlot-startPlot)+ "ms");
+            console.debug("[BENCHMARKING] Time to build tree graphs: "+(stopPlot-startPlot)+ "ms");
         }
     };
 });
