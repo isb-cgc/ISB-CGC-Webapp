@@ -991,7 +991,7 @@ def cohort_samples_patients(request, cohort_id=0):
     # Patient IDs, may be empty!
     patients = Patients.objects.filter(cohort=cohort_id).values_list('patient_id', flat=True)
 
-    rows = (["Sample and Patient List for Cohort "+cohort_name],)
+    rows = (["Sample and Patient List for Cohort '"+cohort_name+"'"],)
     rows += (["ID", "Type"],)
 
     for sample_id in samples:
