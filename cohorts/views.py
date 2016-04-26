@@ -66,7 +66,6 @@ METADATA_API = settings.BASE_API_URL + '/_ah/api/meta_api/'
 # This URL is not used : META_DISCOVERY_URL = settings.BASE_API_URL + '/_ah/api/discovery/v1/apis/meta_api/v1/rest'
 
 
-
 def data_availability_sort(key, value, data_attr, attr_details):
 
     if key == 'has_Illumina_DNASeq':
@@ -970,12 +969,12 @@ def cohort_filelist_ajax(request, cohort_id=0):
 @login_required
 @csrf_protect
 def cohort_samples_patients(request, cohort_id=0):
-    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+    if debug: print >> sys.stderr, 'Called '+sys._getframe().f_code.co_name
     if cohort_id == 0:
         messages.error(request, 'Cohort provided does not exist.')
         return redirect('/user_landing')
 
-    cohort = Cohort.objects.filter(cohort=cohort_id).values_list('name', flat=True)
+    cohort_name = Cohort.objects.filter(id=cohort_id).values_list('name', flat=True)[0].__str__()
 
     # Sample IDs
     samples = Samples.objects.filter(cohort=cohort_id).values_list('sample_id', flat=True)
@@ -983,7 +982,7 @@ def cohort_samples_patients(request, cohort_id=0):
     # Patient IDs, may be empty!
     patients = Patients.objects.filter(cohort=cohort_id).values_list('patient_id', flat=True)
 
-    rows = (["Sample and Patient List for Cohort "+cohort[0].__str__()],)
+    rows = (["Sample and Patient List for Cohort "+cohort_name],)
     rows += (["ID", "Type"],)
 
     for sample_id in samples:

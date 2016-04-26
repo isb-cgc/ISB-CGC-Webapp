@@ -53,7 +53,7 @@
                 <li class="menu-item"><button class="btn btn-info" id="add-filter-btn">Edit</button> </li>
             {% endif %}
             <li class="menu-item"><button class="show-flyout btn btn-info" title="Show Comments">Comments</button></li>
-            <li class="menu-item"><a href="{% url 'clone_cohort' cohort.id %}" class="btn btn-info clone-cohort-btn">Duplicate</a></li>
+            <li class="menu-item"><a href="{% url 'clone_cohort' cohort.id %}" class="btn btn-info clone-cohort-btn" title="Duplicate this cohort">Duplicate</a></li>
             <li class="menu-item"><button class="btn btn-info" data-toggle="modal" data-target="#delete-cohort-modal">
                 {% if cohort.perm.perm == 'OWNER' %}
                     Delete
@@ -66,6 +66,10 @@
             <li class="menu-item"><button class="btn btn-info" data-toggle="modal" data-target="#share-cohort-modal">Share</button></li>
             {% endif %}
             <li class="menu-item"><a data-target="#share-cohort-modal" data-toggle="modal" class="btn btn-link" id="shared-with-btn">Shared with (<span class="share-count">{{ shared_with_users|length}}</span>)</a></li>
+            <li class="separator"></li>
+            <li class="menu-item"><a href="{% url 'cohort_filelist' cohort.id %}" class="btn btn-info view-files-btn" title="View this cohort's file list">View Files</a></li>
+            <li class="separator"></li>
+            <li class="menu-item"><a href="{%  url 'download_ids' cohort.id %}" class="btn btn-info download-ids-btn" title="Download this cohort's patient and sample IDs">Download IDs</a></li>
         </ul>
         <ul id="edit-cohort-menu" style="display: none">
             {% if cohort.perm.perm == 'OWNER' %}
@@ -277,7 +281,6 @@
             </div>
             <div class="panel-body">
                 <div id="multi-categorical"></div>
-                <a href="{% url 'cohort_filelist' cohort.id %}">View File list</a>
             </div>
         </div>
 
