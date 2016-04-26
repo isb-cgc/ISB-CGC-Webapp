@@ -85,6 +85,9 @@ function($, d3, d3tip, vis_helpers) {
             svg.call(tip);
         },
         draw_trees: function(data) {
+
+            var startPlot = new Date().getTime();
+
             var w = 140,
                 h = 140;
 
@@ -130,6 +133,10 @@ function($, d3, d3tip, vis_helpers) {
                     .attr("transform", "translate(.5,.5)");
                 this.draw_tree(tree_data[clin_attr[i]], graph_svg, clin_attr[i], w, h, false);
             }
+
+            var stopPlot = new Date().getTime();
+
+            console.debug("[BENCHMARKING] Time to build tree graphs: "+(stopPlot-startPlot)+ "ms");
         }
     };
 });
