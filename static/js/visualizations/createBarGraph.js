@@ -18,6 +18,17 @@
 
 define (['jquery', 'd3', 'd3tip', 'vizhelpers'],
 function($, d3, d3tip, vizhelpers) {
+
+    // If you want to override the tip coming in from the create call,
+    // do it here
+    var barTip = d3tip()
+        .attr('class', 'd3-tip')
+        .direction('n')
+        .offset([0, 0])
+        .html(function(d) {
+            return d.count;
+        });
+
     return {
 
         dataCounts: function(data, x_attr) {
@@ -42,13 +53,7 @@ function($, d3, d3tip, vizhelpers) {
             return results;
         },
         createBarGraph: function(svg, raw_Data, width, height, bar_width,  x_attr, xLabel, tip, margin, legend) {
-            var tip = d3tip()
-                .attr('class', 'd3-tip')
-                .direction('n')
-                .offset([0, 0])
-                .html(function(d) {
-                    return d.count;
-                });
+            tip = barTip || tip;
             var data = this.dataCounts(raw_Data, x_attr);
             var plot_width = (bar_width+5) * data.length;
 

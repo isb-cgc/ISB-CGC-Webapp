@@ -16,8 +16,8 @@
  *
  */
 
-define (['jquery', 'd3', 'd3tip', 'vizhelpers'],
-function($, d3, d3tip, vizhelpers) {
+define (['jquery', 'd3', 'vizhelpers'],
+function($, d3, vizhelpers) {
     var helpers = Object.create(vizhelpers, {});
     return {
         addViolin: function (svg, raw_data, values_only, height, width, domain, range) {
