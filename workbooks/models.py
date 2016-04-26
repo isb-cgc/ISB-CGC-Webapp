@@ -24,7 +24,7 @@ class Workbook(models.Model):
     name = models.CharField(max_length=2024,null=False)
     description = models.CharField(max_length=2024, null=False)
     date_created = models.DateTimeField(auto_now_add=True)
-    last_date_saved = models.DateTimeField(auto_now_add=True)
+    last_date_saved = models.DateTimeField(auto_now=True)
     objects = WorkbookManager()
     is_public = models.BooleanField(default=False)
     owner = models.ForeignKey(User)
@@ -179,7 +179,7 @@ class Worksheet(models.Model):
     name            = models.CharField(max_length=2024, blank=False)
     description     = models.CharField(max_length=2024, null=False)
     workbook        = models.ForeignKey(Workbook, null=False, blank=False)
-    last_date_saved = models.DateTimeField(auto_now_add=True)
+    last_date_saved = models.DateTimeField(auto_now=True)
     date_created    = models.DateTimeField(auto_now_add=True)
     objects         = WorksheetManager()
 
