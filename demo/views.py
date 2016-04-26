@@ -52,9 +52,9 @@ ACL_GOOGLE_GROUP = settings.ACL_GOOGLE_GROUP
 login_expiration_seconds = settings.LOGIN_EXPIRATION_HOURS * 60 * 60
 COUNTDOWN_SECONDS = login_expiration_seconds + (60 * 15)
 
-LOGOUT_WORKER_TASKQUEUE = settings.LOGOUT_WORKER_TASKQUEUE
-CHECK_NIH_USER_LOGIN_TASK_URI = settings.CHECK_NIH_USER_LOGIN_TASK_URI
-CRON_MODULE = settings.CRON_MODULE
+# LOGOUT_WORKER_TASKQUEUE = settings.LOGOUT_WORKER_TASKQUEUE
+# CHECK_NIH_USER_LOGIN_TASK_URI = settings.CHECK_NIH_USER_LOGIN_TASK_URI
+# CRON_MODULE = settings.CRON_MODULE
 
 
 def init_saml_auth(req):
@@ -193,10 +193,13 @@ def index(request):
                 str(nih_user.NIH_username), str(created)))
 
             # put task in queue to deactivate NIH_User entry after NIH_assertion_expiration has passed
-            task = Task(url=CHECK_NIH_USER_LOGIN_TASK_URI,
-                        params={'user_id': request.user.id, 'deployment': CRON_MODULE},
-                        countdown=COUNTDOWN_SECONDS)
-            task.add(queue_name=LOGOUT_WORKER_TASKQUEUE)
+            # task = Task(url=CHECK_NIH_USER_LOGIN_TASK_URI,
+            #             params={'user_id': request.user.id, 'deployment': CRON_MODULE},
+            #             countdown=COUNTDOWN_SECONDS)
+            # task.add(queue_name=LOGOUT_WORKER_TASKQUEUE)
+
+            task = Task(url='/tasks/check_user_login', params={'user_id': request.user.id}, countdown=COUNTDOWN_SECONDS)
+            task.add(queue_name='logout-worker')
             logger.info('enqueued check_login task for user, {}, for {} hours from now'.format(
                 request.user.id, COUNTDOWN_SECONDS / (60*60)))
 
