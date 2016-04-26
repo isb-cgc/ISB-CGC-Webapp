@@ -16,6 +16,11 @@
  *
  */
 
+/**
+ * Test comment for Test Branch in
+ *
+ */
+
 require.config({
     baseUrl: '/static/js/',
     paths: {
@@ -132,8 +137,8 @@ require([
                     }
                 });
 
-                search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id, undefined, 'v2', api_token);
-                search_helper_obj.update_parsets(base_api_url, 'metadata_platform_list', cohort_id), 'v2';
+                search_helper_obj.update_counts(base_url, 'metadata_counts', cohort_id, undefined, 'v2');
+                search_helper_obj.update_parsets(base_url, 'metadata_platform_list', cohort_id), 'v2';
                 return false;
             });
         } else { // Checkbox unchecked
@@ -147,8 +152,9 @@ require([
             $this.data('create-cohort-form-item').remove();
 
         }
-        search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id, undefined, 'v2', api_token);
-        search_helper_obj.update_parsets(base_api_url, 'metadata_platform_list', cohort_id, 'v2');
+        search_helper_obj.update_counts(base_url, 'metadata_counts', cohort_id, undefined, 'v2');
+        search_helper_obj.update_parsets(base_url, 'metadata_platform_list', cohort_id, 'v2');
+        check_changes();
     };
 
     $('.search-checkbox-list input[type="checkbox"]').on('change', checkbox_callback);
@@ -183,7 +189,8 @@ require([
             $(this).prop('checked', false);
         });
         $('#create-cohort-form .form-control-static').empty();
-        search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id, undefined, 'v2', api_token);
+        search_helper_obj.update_counts(base_url, 'metadata_counts', cohort_id, undefined, 'v2');
+        check_changes()
     });
 
     $('#add-filter-btn').on('click', function() {
@@ -304,6 +311,7 @@ require([
                 $('.comment-flyout .flyout-body').append('<p class="comment-content">' + data['content'] + '</p>');
                 $('.comment-flyout .flyout-body').append('<p class="comment-date">' + data['date_created'] + '</p>');
                 form.reset();
+                $('.save-comment-btn').prop('disabled', true);
             },
             error: function() {
                 console.log('Failed to save comment.')
@@ -315,8 +323,8 @@ require([
         return false;
     });
 
-    search_helper_obj.update_counts(base_api_url, 'metadata_counts', cohort_id, undefined, 'v2', api_token);
-    search_helper_obj.update_parsets(base_api_url, 'metadata_platform_list', cohort_id, 'v2');
+    search_helper_obj.update_counts(base_url, 'metadata_counts', cohort_id, undefined, 'v2');
+    search_helper_obj.update_parsets(base_url, 'metadata_platform_list', cohort_id, 'v2');
 
     $('#shared-with-btn').on('click', function(e){
         var target = $(this).data('target');
@@ -354,5 +362,37 @@ require([
             }
         })
     });
+
+    /*
+        Disable comment button if no content
+     */
+    $('.save-comment-btn').prop('disabled', true);
+    $('#comment-content').keyup(function() {
+        $(this).siblings('.save-comment-btn').prop('disabled', this.value == '' ? true : false)
+    })
+
+    /*
+        Disable save changes if no change to title or no added filters
+     */
+    var original_title = $('#edit-cohort-name').val();
+    var save_changes_btn = $('#apply-filters-form input[type="submit"]');
+    var check_changes = function() {
+        if ($('#edit-cohort-name').val() != original_title || $('.selected-filters span').length > 0) {
+            save_changes_btn.prop('disabled', false)
+        } else {
+            save_changes_btn.prop('disabled', true)
+        }
+    };
+    save_changes_btn.prop('disabled', true);
+    $('#edit-cohort-name').keyup(function() {
+        check_changes();
+    })
+
+    /*
+        Disable Duplicate Cohort button once clicked
+     */
+    $('.clone-cohort-btn').on('click', function() {
+        $(this).addClass('disabled');
+    })
 });
 

@@ -267,7 +267,7 @@ def initialize_variable_selection_page(request,
     common_project  = {"id" : -1, "study" : {"id" :-1, "name" : ""}, "name" : "Common", "variables" : common_variables}
 
     data_url = METADATA_API + '/metadata_counts?'
-    results = urlfetch.fetch(data_url, deadline=60)
+    results = urlfetch.fetch(data_url, method=urlfetch.POST, deadline=60, headers={'Content-Type': 'application/json'})
     results = json.loads(results.content)
     totals  = results['total']
 

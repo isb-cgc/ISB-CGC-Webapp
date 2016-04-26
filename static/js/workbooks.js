@@ -90,7 +90,7 @@ require([
         $(e.target).siblings('a').find('i.fa-caret-down').hide()
     });
 
-    $('#copy-workbook, #delete-workbook').on('submit', function() {
+    $('#copy-workbook, #delete-workbook, form[id^=worksheet_create_form]').on('submit', function() {
         $(this).find('input[type="submit"]').attr('disabled', 'disabled');
     });
 
@@ -167,7 +167,7 @@ require([
                 form.reset();
                 var comment_count = parseInt($(form).parents('.worksheet').find('.comment-count').html());
                 $(form).parents('.worksheet').find('.comment-count').html(comment_count + 1);
-
+                $('.save-comment-btn').prop('disabled', true);
             },
             error: function () {
                 $('.comment-flyout .flyout-body').append('<p class="comment-content error">Fail to save comment. Please try back later.</p>');
@@ -286,10 +286,17 @@ require([
 
                 options.each(function (i, element) {
                     var option = $(element);
+                    var parent = option.parent();
                     option.removeAttr('disabled');
                     if ((option.attr('var_type') == 'C' && plot_settings.axis[axis_index].type == 'NUMERICAL') ||
                         (option.attr('var_type') == 'N' && plot_settings.axis[axis_index].type == 'CATEGORICAL')) {
                         option.attr('disabled','disabled');
+                    }
+
+                    // If the selected option is no longer valid
+                    if (option.prop('value') == parent.find(':selected').val() && option.prop('disabled')) {
+                        // Find first sibling that not disabled
+                        parent.val($(option.siblings('option:enabled')[0]).prop('value'));
                     }
                 });
             }
@@ -516,8 +523,10 @@ require([
             case 'Scatter Plot': //((x_type == 'INTEGER' || x_type == 'FLOAT') && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
                 break;
             case "Violin Plot": //(x_type == 'STRING' && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
+                swap.hide();
                 break;
             case 'Violin Plot with axis swap'://(y_type == 'STRING' && (x_type == 'INTEGER'|| x_type == 'FLOAT')) {
+                swap.hide();
                 break;
             case 'Cubby Hole Plot': //(x_type == 'STRING' && y_type == 'STRING') {
                 c_widgets.hide();
@@ -894,22 +903,11 @@ require([
     });
 
     /*
-        Used for getting the CORS token for submitting data
+        Disable comment button if no content
      */
-    function get_cookie(name) {
-        var cookieValue = null;
-        if (document.cookie && document.cookie != '') {
-            var cookies = document.cookie.split(';');
-            for (var i = 0; i < cookies.length; i++) {
-                var cookie = jQuery.trim(cookies[i]);
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
+    $('.save-comment-btn').prop('disabled', true);
+    $('.comment-textarea').keyup(function() {
+        $(this).siblings('.save-comment-btn').prop('disabled', this.value == '' ? true : false)
+    })
 });
 

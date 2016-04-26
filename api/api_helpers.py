@@ -209,13 +209,11 @@ def build_where_clause(filters, alt_key_map=False):
         # Check if we need to map to a different column name for a given key
         if alt_key_map and key in alt_key_map:
             key = alt_key_map[key]
-            if 'values' in value:
-                value = value['values']
+
         # Multitable where's will come in with : in the name. Only grab the column piece for now
         elif ':' in key:
             key = key.split(':')[-1]
-            if 'values' in value:
-                value = value['values']
+
         # Multitable filter lists don't come in as string as they can contain arbitrary text in values
         elif isinstance(value, basestring):
             # If it's a list of values, split it into an array

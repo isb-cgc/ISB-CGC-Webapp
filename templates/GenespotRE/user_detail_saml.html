@@ -28,6 +28,7 @@
         <p>
             Congratulations, {{ user_details.NIH_username }}! You now have access to ISB-CGC controlled access TCGA data until
             <p id="NIH_expiration">{{ user_details.NIH_assertion_expiration|safe }} GMT</p>
+            <a href="{% url 'demo:saml_index' %}?sso">Extend controlled access period to 24 hours from now.</a>
         </p>
 
 {#        <a href="">How to Access Controlled-Access Data</a>#}

@@ -1,6 +1,6 @@
 """
 
-Copyright 2015, Institute for Systems Biology
+Copyright 2016, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ dotenv.read_dotenv(join(dirname(__file__), '../.env'))
 
 BASE_DIR                = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + os.sep
 DEBUG                   = bool(os.environ.get('DEBUG', False))
-TEMPLATE_DEBUG          = DEBUG
 ALLOWED_HOSTS           = [os.environ.get('ALLOWED_HOST', 'localhost')]
 
 SSL_DIR = os.path.abspath(os.path.dirname(__file__))+os.sep
@@ -37,6 +36,9 @@ REQUEST_PROJECT_EMAIL   = os.environ.get('REQUEST_PROJECT_EMAIL', 'request@examp
 PROJECT_ID              = os.environ.get('GCLOUD_PROJECT_ID', '')
 BQ_PROJECT_ID           = os.environ.get('BIGQUERY_PROJECT_ID', PROJECT_ID)
 IGV_PROJECT_ID          = os.environ.get('IGV_PROJECT_ID', '') # This can be PROJECT_ID
+
+# Deployment module
+CRON_MODULE             = os.environ.get('CRON_MODULE')
 
 BASE_URL                = os.environ.get('BASE_URL', 'http://isb-cgc.appspot.com/')
 BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://api-dot-isb-cgc.appspot.com/')
@@ -175,12 +177,6 @@ STATICFILES_FINDERS = (
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '')
 
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-)
-
 MIDDLEWARE_CLASSES = (
     # For using NDB with Django
     # documentation: https://cloud.google.com/appengine/docs/python/ndb/#integration
@@ -201,13 +197,6 @@ ROOT_URLCONF = 'GenespotRE.urls'
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'GenespotRE.wsgi.application'
 
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    os.path.join(BASE_DIR, 'templates'),
-)
-
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -226,7 +215,8 @@ INSTALLED_APPS = (
     'genes',
     'variables',
     'workbooks',
-    'data_upload'
+    'data_upload',
+    'analysis',
 )
 
 #############################
@@ -291,17 +281,36 @@ INSTALLED_APPS += (
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google')
 
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'allauth.socialaccount.context_processors.socialaccount',
-    'django.core.context_processors.request',
-    'django.contrib.auth.context_processors.auth',
-    'django.contrib.messages.context_processors.messages',
-    'django.core.context_processors.tz'
-)
-
-TEMPLATE_DIRS += (
-    os.path.join(BASE_DIR, 'templates', 'accounts'),
-    )
+# Template Engine Settings
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        # add any necessary template paths here
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates'),
+            os.path.join(BASE_DIR, 'templates', 'accounts'),
+        ],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            # add any context processors here
+            'context_processors': (
+                'allauth.socialaccount.context_processors.socialaccount',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.tz',
+                'finalware.context_processors.contextify',
+                'GenespotRE.context_processor.additional_context',
+            ),
+            # add any loaders here; if using the defaults, we can comment it out
+            # 'loaders': (
+            #     'django.template.loaders.filesystem.Loader',
+            #     'django.template.loaders.app_directories.Loader'
+            # ),
+            'debug': DEBUG,
+        },
+    },
+]
 
 AUTHENTICATION_BACKENDS = (
     # Needed to login by username in Django admin, regardless of `allauth`
@@ -344,14 +353,19 @@ ERA_LOGIN_URL                           = os.environ.get('ERA_LOGIN_URL', '')
 IPV4                                    = os.environ.get('IPV4', '')
 SAML_FOLDER                             = os.environ.get('SAML_FOLDER')
 
+# TaskQueue used when users go through the ERA flow
+LOGOUT_WORKER_TASKQUEUE                  = os.environ.get('LOGOUT_WORKER_TASKQUEUE')
+CHECK_NIH_USER_LOGIN_TASK_URI            = os.environ.get('CHECK_NIH_USER_LOGIN_TASK_URI')
+
+# TaskQueue used by the sweep_nih_user_logins task
+LOGOUT_SWEEPER_FALLBACK_TASKQUEUE        = os.environ.get('LOGOUT_SWEEPER_FALLBACK_TASKQUEUE')
+
 ##############################
 #   Start django-finalware   #
 ##############################
 
 INSTALLED_APPS += (
     'finalware',)
-TEMPLATE_CONTEXT_PROCESSORS += (
-    'finalware.context_processors.contextify', 'GenespotRE.context_processor.additional_context')
 
 SITE_SUPERUSER_USERNAME = os.environ.get('SUPERUSER_USERNAME', '')
 SITE_SUPERUSER_EMAIL = ''

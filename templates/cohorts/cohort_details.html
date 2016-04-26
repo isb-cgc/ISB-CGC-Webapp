@@ -53,7 +53,7 @@
                 <li class="menu-item"><button class="btn btn-info" id="add-filter-btn">Edit</button> </li>
             {% endif %}
             <li class="menu-item"><button class="show-flyout btn btn-info" title="Show Comments">Comments</button></li>
-            <li class="menu-item"><a href="{% url 'clone_cohort' cohort.id %}" class="btn btn-info">Duplicate</a></li>
+            <li class="menu-item"><a href="{% url 'clone_cohort' cohort.id %}" class="btn btn-info clone-cohort-btn">Duplicate</a></li>
             <li class="menu-item"><button class="btn btn-info" data-toggle="modal" data-target="#delete-cohort-modal">
                 {% if cohort.perm.perm == 'OWNER' %}
                     Delete
@@ -298,8 +298,8 @@
         <div class="flyout-footer">
             <form class="add-comment" action="{% url 'save_cohort_comment' %}" method="POST">
                 {% csrf_token %}
-                <label for="content">Add Comment</label>
-                <textarea id="content" class="form-control space-bottom-10" name="content"></textarea>
+                <label for="comment-content">Add Comment (1000 character limit)</label>
+                <textarea id="comment-content" class="form-control space-bottom-10" name="content" maxlength="1000"></textarea>
                 <input type="hidden" name="cohort_id" value="{{ cohort.id }}" />
                 <button class="btn btn-primary save-comment-btn" type="submit">Comment</button>
             </form>
@@ -404,7 +404,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="applyFiltersModal">Apply New Filters</h4>
+                    <h4 class="modal-title" id="applyFiltersModal">Save Changes</h4>
                 </div>
                 <form id="apply-filters-form" method="POST" action="{% url 'save_cohort' %}">
                     <div class="modal-body">
@@ -414,7 +414,7 @@
                     </div>
                     <div class="modal-footer">
                         {% csrf_token %}
-                        <input type="submit" value="Apply Filters" class="btn btn-primary" />
+                        <input type="submit" value="Save Changes" class="btn btn-primary" />
                         <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
                     </div>
                 </form>
@@ -452,7 +452,6 @@
     var base_url = '{{ base_url|safe }}';
     var base_api_url = '{{ base_api_url|safe }}';
     var cohort_id = {{ cohort.id }};
-    var api_token = {{ token|tojson|safe }};
     </script>
 {% endblock %}
 

@@ -156,7 +156,7 @@ class Workbook_Last_View(models.Model):
     workbook = models.ForeignKey(Workbook, blank=False)
     user = models.ForeignKey(User, null=False, blank=False)
     test = models.DateTimeField(auto_now_add=True, null=True)
-    last_view = models.DateTimeField(auto_now_add=True, auto_now=True)
+    last_view = models.DateTimeField(auto_now=True)
 
 # Deprecated. Left in for the conversion
 class Workbook_Perms(models.Model):
@@ -603,7 +603,7 @@ class Worksheet_plot_cohort(models.Model):
     date_created    = models.DateTimeField(auto_now_add=True)
     modified_date   = models.DateTimeField(auto_now=True)
     plot            = models.ForeignKey(Worksheet_plot, blank=True, null=True, related_name="worksheet_plot")
-    cohort          = models.ForeignKey(Worksheet_cohort, blank=True, null=True, related_name="worksheet_plot.cohort")
+    cohort          = models.ForeignKey(Worksheet_cohort, blank=True, null=True, related_name="worksheet_plot_cohorts")
     objects         = Worksheet_Plot_Cohort_Manager()
 
     def toJSON(self):

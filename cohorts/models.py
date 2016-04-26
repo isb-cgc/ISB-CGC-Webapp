@@ -100,18 +100,16 @@ class Cohort(models.Model):
     def get_filters(self):
         filter_list = []
         cohort = self
-        # TODO append list of sources in order to accurately gather all filters from mulitple parents, this only looks up one parent all the way up to the root.
-        # Iterate through all parents
-        #
-        # while cohort:
-        #     filter_list.extend(Filters.objects.filter(resulting_cohort=cohort))
-        #     sources = Source.objects.filter(cohort=cohort)
-        #     if sources:
-        #         cohort = sources[0].parent
-        #     else:
-        #         cohort = None
+        # Iterate through all parents if they were are all created through filters (should be a single chain with no branches)
+        while cohort:
+            filter_list.extend(Filters.objects.filter(resulting_cohort=cohort))
+            sources = Source.objects.filter(cohort=cohort)
+            if sources and len(sources) == 1 and sources[0].type == Source.FILTERS:
+                cohort = sources[0].parent
+            else:
+                cohort = None
 
-        return Filters.objects.filter(resulting_cohort=cohort)
+        return filter_list
 
     '''
     Returns a list of notes from its parents.
@@ -212,4 +210,4 @@ class Cohort_Comments(models.Model):
 class Cohort_Last_View(models.Model):
     cohort = models.ForeignKey(Cohort, blank=False)
     user = models.ForeignKey(User, null=False, blank=False)
-    last_view = models.DateTimeField(auto_now_add=True, auto_now=True)
+    last_view = models.DateTimeField(auto_now=True)
