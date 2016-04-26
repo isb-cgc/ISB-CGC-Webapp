@@ -393,11 +393,5 @@ require([
     $('.clone-cohort-btn').on('click', function() {
         $(this).addClass('disabled');
     })
-    
-    $('#download-ids-btn').on('click', function() {
-        
-    })
-    
-    
 });
 
