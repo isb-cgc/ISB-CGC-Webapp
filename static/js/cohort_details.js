@@ -311,6 +311,7 @@ require([
                 $('.comment-flyout .flyout-body').append('<p class="comment-content">' + data['content'] + '</p>');
                 $('.comment-flyout .flyout-body').append('<p class="comment-date">' + data['date_created'] + '</p>');
                 form.reset();
+                $('.save-comment-btn').prop('disabled', true);
             },
             error: function() {
                 console.log('Failed to save comment.')
