@@ -966,6 +966,39 @@ def cohort_filelist_ajax(request, cohort_id=0):
 
     return HttpResponse(result.content, status=200)
 
+@login_required
+@csrf_protect
+def cohort_samples_patients(request, cohort_id=0):
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+    if cohort_id == 0:
+        messages.error(request, 'Cohort provided does not exist.')
+        return redirect('/user_landing')
+
+    cohort = Cohort.objects.filter(cohort=cohort_id).values_list('namr',flat=True)
+
+    # Sample IDs
+    samples = Samples.objects.filter(cohort=cohort_id).values_list('sample_id', 'study_id')
+    
+    # Patient IDs, may be empty!
+    patients = Patients.objects.filter(cohort=cohort_id).values_list('patient_id', flat=True)
+
+    rows = (["Sample and Patient List for Cohort "+cohort[0]['name]']],)
+    rows += (["ID", "Type"],)
+
+    for sample in samples:
+        rows += ([sample['sample_id'],"Sample"],)
+
+    for patient in patients:
+        rows += ([patient['patient_id'],"Patient"],)
+
+    pseudo_buffer = Echo()
+    writer = csv.writer(pseudo_buffer)
+    response = StreamingHttpResponse((writer.writerow(row) for row in rows),
+                                     content_type="text/csv")
+    response['Content-Disposition'] = 'attachment; filename="samples_patients_in_cohort.csv"'
+    return response
+
+
 class Echo(object):
     """An object that implements just the write method of the file-like
     interface.
