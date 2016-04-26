@@ -16,8 +16,8 @@
  *
  */
 
-define (['jquery', 'd3', 'd3tip', 'vizhelpers'],
-function($, d3, d3tip, vizhelpers) {
+define (['jquery', 'd3', 'vizhelpers'],
+function($, d3, vizhelpers) {
     var helpers = Object.create(vizhelpers, {});
     return {
         create_scatterplot: function(svg, data, domain, range, xLabel, yLabel, xParam, yParam, colorBy, legend, width, height, cohort_set) {

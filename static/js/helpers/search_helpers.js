@@ -27,12 +27,15 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             var api_url = this.generate_metadata_url(base_url_domain, endpoint, filters, cohort_id, limit, version);
             var update_filters = this.update_filter_counts;
             $('.clinical-trees .spinner').show();
+            var startReq = new Date().getTime();
             $.ajax({
                 type: 'GET',
                 url: api_url,
 
                 // On success
                 success: function (results, status, xhr) {
+                    var stopReq = new Date().getTime();
+                    console.debug("[BENCHMARKING] Time for response in update_counts: "+(stopReq-startReq)+ "ms");
                     attr_counts = results['count'];
                     $('.menu-bar .total-samples').html(results['total'] + ' Samples');
                     update_filters(attr_counts);
@@ -46,10 +49,13 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             var filters = this.format_filters();
             var api_url = this.generate_metadata_url(base_url_domain, endpoint, filters, cohort_id, null, version);
             var context = this;
+            var startReq = new Date().getTime();
             $.ajax({
                 type: 'GET',
                 url: api_url,
                 success: function(results, status, xhr) {
+                    var stopReq = new Date().getTime();
+                    console.debug("[BENCHMARKING] Time for response in update_parsets: "+(stopReq-startReq)+ "ms");
                     if (results.hasOwnProperty('items')) {
                         var features = [
                                 'cnvrPlatform',

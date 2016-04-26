@@ -663,6 +663,15 @@ def clone_cohort(request, cohort_id):
         patient_list.append(Patients(cohort=cohort, patient_id=patient_code))
     Patients.objects.bulk_create(patient_list)
 
+    # Clone the filters
+    filters = Filters.objects.filter(resulting_cohort=parent_cohort).values_list('name', 'value')
+    # ...but only if there are any (there may not be)
+    if filters.__len__() > 0:
+        filters_list = []
+        for filter_pair in filters:
+            filters_list.append(Filters(name=filter_pair[0], value=filter_pair[1], resulting_cohort=cohort))
+        Filters.objects.bulk_create(filters_list)
+
     # Set source
     source = Source(parent=parent_cohort, cohort=cohort, type=Source.CLONE)
     source.save()

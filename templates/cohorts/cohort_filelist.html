@@ -71,26 +71,33 @@
                 <h4>File Listing</h4>
             </div>
             <div class="panel-body">
-                <p>Showing 20 files of <span class="file-count">unknown</span>. Page: <span class="page-num">1</span></p>
-                <div>
-                    <a role="button" id="prev-page" class="btn btn-default disabled">Previous Page</a>
-                    <a role="button" id="next-page" class="btn btn-default">Next Page</a>
-                    <span class="spinner"><i class="fa fa-spin fa-spinner hidden"></i></span>
-                </div>
-                <table class="table table-striped" aria-label="File Listing Table">
-                    <thead>
-                    <tr>
-                        <th class="col-barcode">Sample Barcode</th>
-                        <th class="col-pipeline">Pipeline</th>
-                        <th class="col-platform">Platform</th>
-                        <th class="col-datalevel">Data Level</th>
-                        <th class="col-datatype">Data Type</th>
-                        <th class="col-igv">IGV</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
+                <form id="view-igv" method="POST" action="{% url 'igv' %}">
+                    {% csrf_token %}
+                    <p>Showing 20 files of <span class="file-count">unknown</span>. Page: <span class="page-num">1</span></p>
+                    <div>
+                        <a role="button" id="prev-page" class="btn btn-default disabled">Previous Page</a>
+                        <a role="button" id="next-page" class="btn btn-default">Next Page</a>
+                        <span class="spinner"><i class="fa fa-spin fa-spinner hidden"></i></span>
+
+                        <input type="submit" value="View Selected In IGV Viewer" class="btn btn-primary pull-right" />
+                    </div>
+
+                    <table class="table table-striped file-list-table" aria-label="File Listing Table">
+                        <thead>
+                        <tr>
+                            <th class="col-barcode">Sample Barcode</th>
+                            <th class="col-pipeline">Pipeline</th>
+                            <th class="col-platform">Platform</th>
+                            <th class="col-datalevel">Data Level</th>
+                            <th class="col-datatype">Data Type</th>
+                            <th class="col-igv">IGV</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+
+                </form>
             </div>
         </div>
     </div>
