@@ -966,6 +966,7 @@ def cohort_filelist_ajax(request, cohort_id=0):
 
     return HttpResponse(result.content, status=200)
 
+
 @login_required
 @csrf_protect
 def cohort_samples_patients(request, cohort_id=0):
@@ -974,22 +975,22 @@ def cohort_samples_patients(request, cohort_id=0):
         messages.error(request, 'Cohort provided does not exist.')
         return redirect('/user_landing')
 
-    cohort = Cohort.objects.filter(cohort=cohort_id).values_list('namr',flat=True)
+    cohort = Cohort.objects.filter(cohort=cohort_id).values_list('name', flat=True)
 
     # Sample IDs
-    samples = Samples.objects.filter(cohort=cohort_id).values_list('sample_id', 'study_id')
-    
+    samples = Samples.objects.filter(cohort=cohort_id).values_list('sample_id', flat=True)
+
     # Patient IDs, may be empty!
     patients = Patients.objects.filter(cohort=cohort_id).values_list('patient_id', flat=True)
 
-    rows = (["Sample and Patient List for Cohort "+cohort[0]['name]']],)
+    rows = (["Sample and Patient List for Cohort "+cohort[0].__str__()],)
     rows += (["ID", "Type"],)
 
-    for sample in samples:
-        rows += ([sample['sample_id'],"Sample"],)
+    for sample_id in samples:
+        rows += ([sample_id, "Sample"],)
 
-    for patient in patients:
-        rows += ([patient['patient_id'],"Patient"],)
+    for patient_id in patients:
+        rows += ([patient_id, "Patient"],)
 
     pseudo_buffer = Echo()
     writer = csv.writer(pseudo_buffer)
