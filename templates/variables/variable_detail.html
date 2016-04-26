@@ -36,7 +36,7 @@
                 {% endfor %}
             </ul>
             <div>
-                <ul class="page-action-group">
+                <ul class="page-action-group" role="menubar">
                     {% if not workbook and not new_workbook %}
                         <li><a class="btn btn-info" href="{% url 'variable_fav_edit' variables.id %}"><i class="fa fa-pencil"></i> Edit</a></li>
                         <li><a data-toggle="modal" data-target="#delete-favorite-modal" class="btn btn-info">Delete</a></li>
