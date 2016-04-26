@@ -167,7 +167,7 @@ require([
                 form.reset();
                 var comment_count = parseInt($(form).parents('.worksheet').find('.comment-count').html());
                 $(form).parents('.worksheet').find('.comment-count').html(comment_count + 1);
-
+                $('.save-comment-btn').prop('disabled', true);
             },
             error: function () {
                 $('.comment-flyout .flyout-body').append('<p class="comment-content error">Fail to save comment. Please try back later.</p>');
