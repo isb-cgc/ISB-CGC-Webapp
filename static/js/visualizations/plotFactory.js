@@ -117,7 +117,7 @@ define([
 
          var legend = d3.select(legend_selector)
              .append('svg')
-             .attr('width', 200);
+             .attr('width', width);
          var svg = d3.select(plot_selector)
              .append('svg')
              .attr('width', width + 10)
@@ -150,7 +150,7 @@ define([
         var max_n = tmp[1];
         var legend = d3.select(legend_selector)
             .append('svg')
-            .attr('width', 200);
+            .attr('width', width);
 
         var svg = d3.select(plot_selector)
             .append('svg')
@@ -185,7 +185,7 @@ define([
         var max_n = tmp[1];
         var legend = d3.select(legend_selector)
             .append('svg')
-            .attr('width', 200);
+            .attr('width', width);
 
         var svg = d3.select(plot_selector)
             .append('svg')

@@ -999,7 +999,7 @@ class Meta_Endpoints_API(remote.Service):
 
 
 
-
+    # UNUSED ENDPOINT
     GET_RESOURCE = endpoints.ResourceContainer(IncomingMetadataItem,
                                                limit=messages.IntegerField(2),
                                                cohort_id=messages.IntegerField(3),
@@ -1140,7 +1140,7 @@ class Meta_Endpoints_API(remote.Service):
             if db: db.close()
             raise endpoints.NotFoundException('Sample not found.')
 
-
+    # UNUSED ENDPOINT
     GET_RESOURCE = endpoints.ResourceContainer(IncomingMetadataItem,
                                                is_landing=messages.BooleanField(2),
                                                cohort_id=messages.IntegerField(3))
@@ -1294,7 +1294,7 @@ class Meta_Endpoints_API(remote.Service):
 
         return MetadataItemList(count=value_list_item, total=total)
 
-
+    # UNUSED ENDPOINT
     GET_RESOURCE = endpoints.ResourceContainer(
         MetadataAttr)
     @endpoints.method(GET_RESOURCE, MetadataAttrList,
@@ -1338,7 +1338,7 @@ class Meta_Endpoints_API(remote.Service):
             if db: db.close()
             raise endpoints.NotFoundException('Sample %s not found.' % (request.id,))
 
-
+    # UNUSED ENDPOINT
     @endpoints.method(message_types.VoidMessage, MetaDomainsList,
                       path='metadata_domains', http_method='GET',
                       name='meta.metadata_domains')
