@@ -514,9 +514,10 @@
         };
 
         var body = d3.select("body");
-        var tooltip = body.append("div")
+        // s-paquette@ISB: Don't remake the tooltip DOM object if it's already there
+        var tooltip = (!d3.select(".parsets-tooltip").empty() ? d3.select(".parsets-tooltip") : body.append("div")
             .style("display", "none")
-            .attr("class", "parsets-tooltip");
+            .attr("class", "parsets-tooltip"));
 
         // copies event.on to parsets.on and returns parsets
         return d3.rebind(parsets, event, "on").value(1).width(width).height(height);//height was once 600);

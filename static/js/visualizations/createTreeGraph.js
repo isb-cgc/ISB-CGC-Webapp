@@ -19,6 +19,16 @@
 define(['jquery', 'd3', 'd3tip', 'vis_helpers'],
 function($, d3, d3tip, vis_helpers) {
 
+    // If you want to override the tip coming in from the create call,
+    // do it here
+     var treeTip = d3tip()
+        .attr('class', 'd3-tip')
+        .direction('s')
+        .offset([0, 0])
+        .html(function(d) {
+            return '<span>' + d.name + ': ' + d.count + '</span>';
+        });
+
     return {
         get_treemap_ready: function(data, attribute) {
             var children = [];
@@ -28,15 +38,8 @@ function($, d3, d3tip, vis_helpers) {
             return {children: children, name: attribute};
         },
         draw_tree: function(data, svg, attribute, w, h, showtext, tip) {
-            if (!tip) {
-                tip = d3tip()
-                    .attr('class', 'd3-tip')
-                    .direction('s')
-                    .offset([0, 0])
-                    .html(function(d) {
-                        return '<span>' + d.name + ': ' + d.count + '</span>';
-                    });
-            }
+
+            tip = treeTip || tip;
 
             var node = this.get_treemap_ready(data, attribute);
             var treemap = d3.layout.treemap()

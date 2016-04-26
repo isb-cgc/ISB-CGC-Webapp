@@ -18,6 +18,16 @@
 
 define (['jquery', 'd3', 'd3tip', 'vizhelpers'],
 function($, d3, d3tip, vizhelpers) {
+    
+    var tip = d3tip()
+        .attr('class', 'd3-tip')
+        .direction('n')
+        .offset([0, 0])
+        .html(function(d) {
+        return '<span>log<sub>2</sub>(true counts / expected counts)</span><br/>'
+                + '<span>log<sub>2</sub>(' + d['total'] + ' / ' + d['expected_total'].toFixed(4) + ')</span>'
+        });
+
     return {
         data_totals: function(data, x_attr, y_attr, x_domain, y_domain) {
             var results_dict = {};
@@ -273,15 +283,6 @@ function($, d3, d3tip, vizhelpers) {
                 .style('opacity', '0');
 
             zoom_area.call(zoom);
-
-            var tip = d3tip()
-                    .attr('class', 'd3-tip')
-                    .direction('n')
-                    .offset([0, 0])
-                    .html(function(d) {
-                    return '<span>log<sub>2</sub>(true counts / expected counts)</span><br/>'
-                            + '<span>log<sub>2</sub>(' + d['total'] + ' / ' + d['expected_total'].toFixed(4) + ')</span>'
-                    });
 
             plot_area.selectAll('.expected_fill')
                 .data(data_counts)

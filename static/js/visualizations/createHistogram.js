@@ -31,8 +31,15 @@ function($, d3, d3tip, helpers) {
     var min_n;
     var max_n;
 
+    // If you want to override the tip coming in from the create call,
+    // do it here
+    var histoTip = null;
+
     return {
         createHistogramPlot : function (svg_param, raw_Data, values_only, width_param, height_param, x_attr, xLabel, tip, margin_param, legend) {
+
+            tip = histoTip || tip;
+
             svg    = svg_param;
             width  = width_param;
             height = height_param;
