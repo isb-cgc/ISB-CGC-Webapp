@@ -1786,8 +1786,9 @@ class Meta_Endpoints_API_v2(remote.Service):
                 start = time.time()
                 cursor.execute(sample_query_str, (cohort_id,))
                 stop = time.time()
-                logging.debug("[BENCHMARKING] Time to query sample IDs in metadata_counts for cohort '" +
-                              cohort_id + "': " + (stop-start).__str__())
+                log_str = "[BENCHMARKING] Time to query sample IDs in metadata_counts for cohort '" + cohort_id + "': " + (stop-start).__str__()
+                logger.debug(log_str)
+                print >> sys.stderr, log_str
                 sample_ids = {}
 
                 for row in cursor.fetchall():
@@ -2173,8 +2174,9 @@ class Meta_Endpoints_API_v2(remote.Service):
                 start = time.time()
                 cursor.execute(sample_query_str, (cohort_id,))
                 stop = time.time()
-                logging.debug("[BENCHMARKING] Time to query sample IDs in metadata_platform_list for cohort '" +
-                              cohort_id + "': " + (stop - start).__str__())
+                log_str = "[BENCHMARKING] Time to query sample IDs in metadata_platform_list for cohort '" + cohort_id + "': " + (stop - start).__str__()
+                logger.debug(log_str)
+                print >> sys.stderr, log_str
                 sample_ids = ()
 
                 for row in cursor.fetchall():
@@ -2248,8 +2250,9 @@ class Meta_Endpoints_API_v2(remote.Service):
             start = time.time()
             cursor.execute(query_str, value_tuple)
             stop = time.time()
-            logging.debug("[BENCHMARKING] Time to query platforms in metadata_platform_list for cohort '" +
-                          str(request.cohort_id) + "': " + (stop - start).__str__())
+            log_str = "[BENCHMARKING] Time to query platforms in metadata_platform_list for cohort '" + str(request.cohort_id) + "': " + (stop - start).__str__()
+            logger.debug(log_str)
+            print >> sys.stderr, log_str
             data = []
             for row in cursor.fetchall():
 
