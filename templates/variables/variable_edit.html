@@ -35,7 +35,7 @@
         {% if existing_variable_list %}
             <div class="clearfix">
                 <h1 class="page-header pull-left">Edit Variable Favorite</h1>
-                <ul class="page-action-group pull-right">
+                <ul class="page-action-group pull-right" role="menubar">
                     <li role="menuitem"><button class="btn btn-primary" variable_id="{{ existing_variable_list.id }}" id="edit_favorite_list" >Save Changes</button></li>
                     <li role="menuitem"><a class="btn btn-link" href="{% url 'variable_fav_detail' existing_variable_list.id %}">Cancel</a></li>
                 </ul>

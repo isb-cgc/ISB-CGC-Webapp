@@ -17,6 +17,7 @@ limitations under the License.
 """
 
 import endpoints
+import time
 from protorpc import messages
 from protorpc import message_types
 from protorpc import remote
@@ -999,7 +1000,7 @@ class Meta_Endpoints_API(remote.Service):
 
 
 
-
+    # UNUSED ENDPOINT
     GET_RESOURCE = endpoints.ResourceContainer(IncomingMetadataItem,
                                                limit=messages.IntegerField(2),
                                                cohort_id=messages.IntegerField(3),
@@ -1140,7 +1141,7 @@ class Meta_Endpoints_API(remote.Service):
             if db: db.close()
             raise endpoints.NotFoundException('Sample not found.')
 
-
+    # UNUSED ENDPOINT
     GET_RESOURCE = endpoints.ResourceContainer(IncomingMetadataItem,
                                                is_landing=messages.BooleanField(2),
                                                cohort_id=messages.IntegerField(3))
@@ -1294,7 +1295,7 @@ class Meta_Endpoints_API(remote.Service):
 
         return MetadataItemList(count=value_list_item, total=total)
 
-
+    # UNUSED ENDPOINT
     GET_RESOURCE = endpoints.ResourceContainer(
         MetadataAttr)
     @endpoints.method(GET_RESOURCE, MetadataAttrList,
@@ -1338,7 +1339,7 @@ class Meta_Endpoints_API(remote.Service):
             if db: db.close()
             raise endpoints.NotFoundException('Sample %s not found.' % (request.id,))
 
-
+    # UNUSED ENDPOINT
     @endpoints.method(message_types.VoidMessage, MetaDomainsList,
                       path='metadata_domains', http_method='GET',
                       name='meta.metadata_domains')
@@ -1782,7 +1783,12 @@ class Meta_Endpoints_API_v2(remote.Service):
 
             try:
                 cursor = db.cursor(MySQLdb.cursors.DictCursor)
+                start = time.time()
                 cursor.execute(sample_query_str, (cohort_id,))
+                stop = time.time()
+                log_str = "[BENCHMARKING] Time to query sample IDs in metadata_counts for cohort '" + cohort_id + "': " + (stop-start).__str__()
+                logger.debug(log_str)
+                print >> sys.stderr, log_str
                 sample_ids = {}
 
                 for row in cursor.fetchall():
@@ -2165,7 +2171,12 @@ class Meta_Endpoints_API_v2(remote.Service):
 
             try:
                 cursor = db.cursor(MySQLdb.cursors.DictCursor)
+                start = time.time()
                 cursor.execute(sample_query_str, (cohort_id,))
+                stop = time.time()
+                log_str = "[BENCHMARKING] Time to query sample IDs in metadata_platform_list for cohort '" + cohort_id + "': " + (stop - start).__str__()
+                logger.debug(log_str)
+                print >> sys.stderr, log_str
                 sample_ids = ()
 
                 for row in cursor.fetchall():
@@ -2236,7 +2247,12 @@ class Meta_Endpoints_API_v2(remote.Service):
 
         try:
             cursor = db.cursor(MySQLdb.cursors.DictCursor)
+            start = time.time()
             cursor.execute(query_str, value_tuple)
+            stop = time.time()
+            log_str = "[BENCHMARKING] Time to query platforms in metadata_platform_list for cohort '" + str(request.cohort_id) + "': " + (stop - start).__str__()
+            logger.debug(log_str)
+            print >> sys.stderr, log_str
             data = []
             for row in cursor.fetchall():
 
