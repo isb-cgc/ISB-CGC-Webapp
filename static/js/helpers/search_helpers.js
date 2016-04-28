@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2015, Institute for Systems Biology
+ * Copyright 2016, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,12 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                     $('.menu-bar .total-samples').html(results['total'] + ' Samples');
                     update_filters(attr_counts);
                     tree_graph_obj.draw_trees(attr_counts);
-                    $('.clinical-trees .spinner').hide()
+                },
+                error: function(req,status,err){
+                    
+                },
+                complete: function(xhr,status) {
+                    $('.clinical-trees .spinner').hide();
                 }
             });
         },
@@ -84,7 +89,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
 
                         parsets_obj.draw_parsets(results, plot_features);
                     } else {
-                        console.log(results);
+                        console.debug(results);
                     }
                 }
             })
