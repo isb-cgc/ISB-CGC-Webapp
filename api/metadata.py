@@ -17,6 +17,7 @@ limitations under the License.
 """
 
 import endpoints
+import time
 from protorpc import messages
 from protorpc import message_types
 from protorpc import remote
@@ -28,6 +29,7 @@ from cohorts.models import Cohort_Perms,  Cohort as Django_Cohort,Patients, Samp
 from projects.models import Study, User_Feature_Definitions, User_Feature_Counts, User_Data_Tables
 from django.core.signals import request_finished
 import django
+import sys
 import logging
 import re
 import json
@@ -1782,7 +1784,12 @@ class Meta_Endpoints_API_v2(remote.Service):
 
             try:
                 cursor = db.cursor(MySQLdb.cursors.DictCursor)
+                start = time.time()
                 cursor.execute(sample_query_str, (cohort_id,))
+                stop = time.time()
+                log_str = "[BENCHMARKING] Time to query sample IDs in metadata_counts for cohort '" + cohort_id + "': " + (stop-start).__str__()
+                logger.debug(log_str)
+                print >> sys.stderr, log_str
                 sample_ids = {}
 
                 for row in cursor.fetchall():
@@ -2165,7 +2172,12 @@ class Meta_Endpoints_API_v2(remote.Service):
 
             try:
                 cursor = db.cursor(MySQLdb.cursors.DictCursor)
+                start = time.time()
                 cursor.execute(sample_query_str, (cohort_id,))
+                stop = time.time()
+                log_str = "[BENCHMARKING] Time to query sample IDs in metadata_platform_list for cohort '" + cohort_id + "': " + (stop - start).__str__()
+                logger.debug(log_str)
+                print >> sys.stderr, log_str
                 sample_ids = ()
 
                 for row in cursor.fetchall():
@@ -2236,7 +2248,12 @@ class Meta_Endpoints_API_v2(remote.Service):
 
         try:
             cursor = db.cursor(MySQLdb.cursors.DictCursor)
+            start = time.time()
             cursor.execute(query_str, value_tuple)
+            stop = time.time()
+            log_str = "[BENCHMARKING] Time to query platforms in metadata_platform_list for cohort '" + str(request.cohort_id) + "': " + (stop - start).__str__()
+            logger.debug(log_str)
+            print >> sys.stderr, log_str
             data = []
             for row in cursor.fetchall():
 

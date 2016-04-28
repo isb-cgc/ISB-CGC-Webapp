@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2015, Institute for Systems Biology
+ * Copyright 2016, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ require.config({
         assetsresponsive: 'libs/assets.responsive',
         d3: 'libs/d3.min',
         d3tip: 'libs/d3-tip',
-
         search_helpers: 'helpers/search_helpers',
         vis_helpers: 'helpers/vis_helpers',
         tree_graph: 'visualizations/createTreeGraph',
@@ -56,21 +55,19 @@ require([
     'jqueryui',
     'bootstrap',
     'session_security',
-
     'd3',
     'd3tip',
     'search_helpers',
     'vis_helpers',
-
-//    'parallel_sets',
-//    'draw_parsets',
     'tree_graph',
     'stack_bar_chart',
-
     'assetscore',
     'assetsresponsive',
     'base'
-], function ($, jqueryui, bootstrap, session_security, d3, d3tip, search_helpers, vis_helpers, parallel_sets, draw_parsets) {
+], function ($, jqueryui, bootstrap, session_security, d3, d3tip, search_helpers) {
+
+    var SUBSEQUENT_DELAY = 600;
+    var update_displays_thread = null;
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function() {
@@ -81,6 +78,17 @@ require([
     });
 
     var search_helper_obj = Object.create(search_helpers, {});
+
+    var update_displays = function(withoutCheckChanges) {
+
+        (update_displays_thread !== null) && clearTimeout(update_displays_thread);
+
+        update_displays_thread = setTimeout(function(){
+            search_helper_obj.update_counts(base_url, 'metadata_counts', cohort_id, undefined, 'v2');
+            search_helper_obj.update_parsets(base_url, 'metadata_platform_list', cohort_id, 'v2');
+            !withoutCheckChanges && check_changes();
+        },SUBSEQUENT_DELAY);
+    };
 
     var checkbox_callback = function() {
         var $this = $(this);
@@ -137,8 +145,7 @@ require([
                     }
                 });
 
-                search_helper_obj.update_counts(base_url, 'metadata_counts', cohort_id, undefined, 'v2');
-                search_helper_obj.update_parsets(base_url, 'metadata_platform_list', cohort_id), 'v2';
+                update_displays(false);
                 return false;
             });
         } else { // Checkbox unchecked
@@ -152,9 +159,7 @@ require([
             $this.data('create-cohort-form-item').remove();
 
         }
-        search_helper_obj.update_counts(base_url, 'metadata_counts', cohort_id, undefined, 'v2');
-        search_helper_obj.update_parsets(base_url, 'metadata_platform_list', cohort_id, 'v2');
-        check_changes();
+        update_displays();
     };
 
     $('.search-checkbox-list input[type="checkbox"]').on('change', checkbox_callback);
@@ -189,8 +194,7 @@ require([
             $(this).prop('checked', false);
         });
         $('#create-cohort-form .form-control-static').empty();
-        search_helper_obj.update_counts(base_url, 'metadata_counts', cohort_id, undefined, 'v2');
-        check_changes()
+        update_displays();
     });
 
     $('#add-filter-btn').on('click', function() {
@@ -323,8 +327,7 @@ require([
         return false;
     });
 
-    search_helper_obj.update_counts(base_url, 'metadata_counts', cohort_id, undefined, 'v2');
-    search_helper_obj.update_parsets(base_url, 'metadata_platform_list', cohort_id, 'v2');
+    update_displays(false);
 
     $('#shared-with-btn').on('click', function(e){
         var target = $(this).data('target');
