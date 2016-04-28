@@ -1555,7 +1555,7 @@ class Meta_Endpoints_API(remote.Service):
                                 bucket_name = settings.DCC_CONTROLLED_DATA_BUCKET
                             elif item['Repository'] and item['Repository'].lower() == 'cghub':
                                 bucket_name = settings.CGHUB_CONTROLLED_DATA_BUCKET
-                            if 'DatafileNameKey' in item and bucket_name != '':
+                            if 'DatafileNameKey' in item and len(item['DatafileNameKey']) and bucket_name != '':
                                 item['DatafileNameKey'] = "gs://{}{}".format(bucket_name, item['DatafileNameKey'])
 
                         file_list.append(FileDetails(sample=item['SampleBarcode'], cloudstorage_location=item['DatafileNameKey'], filename=item['DatafileName'], pipeline=item['Pipeline'], platform=item['Platform'], datalevel=item['DataLevel'], datatype=item['Datatype'], gg_readgroupset_id=item['GG_readgroupset_id']))
