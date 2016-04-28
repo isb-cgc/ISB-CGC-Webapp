@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2015, Institute for Systems Biology
+ * Copyright 2016, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ require.config({
         assetsresponsive: 'libs/assets.responsive',
         d3: 'libs/d3.min',
         d3tip: 'libs/d3-tip',
-
         search_helpers: 'helpers/search_helpers',
         vis_helpers: 'helpers/vis_helpers',
         tree_graph: 'visualizations/createTreeGraph',
@@ -65,7 +64,7 @@ require([
     'assetscore',
     'assetsresponsive',
     'base'
-], function ($, jqueryui, bootstrap, session_security, d3, d3tip, search_helpers, vis_helpers, parallel_sets, draw_parsets) {
+], function ($, jqueryui, bootstrap, session_security, d3, d3tip, search_helpers) {
 
     var SUBSEQUENT_DELAY = 600;
     var update_displays_thread = null;
