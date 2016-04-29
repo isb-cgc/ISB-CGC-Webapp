@@ -54,6 +54,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             var filters = this.format_filters();
             var api_url = this.generate_metadata_url(base_url_domain, endpoint, filters, cohort_id, null, version);
             var context = this;
+            $('.parallel-sets .spinner').show();
             var startReq = new Date().getTime();
             $.ajax({
                 type: 'GET',
@@ -91,6 +92,11 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                     } else {
                         console.debug(results);
                     }
+                },error: function(req,status,err){
+
+                },
+                complete: function(xhr,status) {
+                    $('.parallel-sets .spinner').hide();
                 }
             })
         },

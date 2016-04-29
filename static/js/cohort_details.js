@@ -145,7 +145,7 @@ require([
                     }
                 });
 
-                update_displays(false);
+                update_displays(true);
                 return false;
             });
         } else { // Checkbox unchecked
@@ -327,7 +327,7 @@ require([
         return false;
     });
 
-    update_displays(false);
+    update_displays(true);
 
     $('#shared-with-btn').on('click', function(e){
         var target = $(this).data('target');
