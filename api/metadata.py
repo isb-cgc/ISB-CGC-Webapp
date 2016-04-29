@@ -669,8 +669,8 @@ class MetadataPlatformItemList(messages.Message):
 
 class MetadataCountsPlatformItem(messages.Message):
     items = messages.MessageField(MetadataPlatformItem, 1, repeated=True)
-    count = messages.MessageField(MetadataAttributeValues, 1, repeated=True)
-    total = messages.IntegerField(2)
+    count = messages.MessageField(MetadataAttributeValues, 2, repeated=True)
+    total = messages.IntegerField(3)
 
 
 def createDataItem(data, selectors):
