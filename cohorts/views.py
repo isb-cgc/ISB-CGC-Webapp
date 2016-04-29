@@ -275,6 +275,42 @@ def cohort_detail(request, cohort_id=0, workbook_id=0, worksheet_id=0, create_wo
     results = json.loads(results.content)
     totals = results['total']
 
+    # Remove metadata Project/Study data from results
+    new_counts = []
+    for item in results['count']:
+        if item['name'] != 'Project' and item['name'] != 'Study':
+            new_counts.append(item)
+    results['count'] = new_counts
+
+    # Get public projects/studies data
+    public_projects = Project.get_public_projects()
+    public_studies = Study.get_public_studies()
+
+    print public_projects
+    print public_studies
+    public_projects_list = []
+    public_studies_list = []
+
+    for project in public_projects:
+        public_projects_list += ({
+                                'count': 0,
+                                'value': project.name,
+                                'id'   : project.id
+                                },)
+    for study in public_studies:
+        public_studies_list += ({
+                            'count': 0,
+                            'value': study.name,
+                            'id'   : study.id
+                          },)
+    results['count'].append({
+            'name': 'Project',
+            'values': public_projects_list
+        })
+    results['count'].append({
+        'name': 'Study',
+        'values': public_studies_list
+    })
     if USER_DATA_ON:
         # Add in user data
         user_attr = ['user_project','user_study']
@@ -330,7 +366,7 @@ def cohort_detail(request, cohort_id=0, workbook_id=0, worksheet_id=0, create_wo
     }
     keys = []
     for item in results['count']:
-        #print item
+        print item['name'], len(item['values'])
         key = item['name']
         values = item['values']
 

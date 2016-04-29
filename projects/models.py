@@ -93,6 +93,11 @@ class Study(models.Model):
 
         return cls.objects.filter(active=True, project__in=projects)
 
+    @classmethod
+    def get_public_studies(cls):
+        projects = Project.get_public_projects()
+        return cls.objects.filter(active=True, project__in=projects)
+
     '''
     Sets the last viewed time for a cohort
     '''
