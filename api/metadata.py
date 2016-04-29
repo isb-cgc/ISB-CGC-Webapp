@@ -2342,7 +2342,7 @@ class Meta_Endpoints_API_v2(remote.Service):
             for row in cursor.fetchall():
                 sample_ids.append(row['sample_id'])
 
-            participant_query = 'SELECT DISTINCT ParticipantBarcode from metadata_data where SampleBarcode in ('
+            participant_query = 'SELECT DISTINCT ParticipantBarcode from metadata_samples where SampleBarcode in ('
             first = True
             value_tuple = ()
             for barcode in sample_ids:
