@@ -324,8 +324,8 @@ def igv(request, sample_barcode=None, readgroupset_id=None):
 
     for item in request.POST.getlist('gcs_bam'):
         id_barcode = item.split(',')
-        readgroupset_list.append({'sample_barcode': id_barcode[1],
-                                  'gcs_path': id_barcode[0]})
+        bam_list.append({'sample_barcode': id_barcode[1],
+                         'gcs_path': id_barcode[0]})
 
     # service, http_auth = get_genomics_resource()
     # datasets = convert(service.datasets().list(projectNumber=settings.IGV_PROJECT_ID).execute())
@@ -381,16 +381,16 @@ def igv(request, sample_barcode=None, readgroupset_id=None):
     context = {}
     context['readgroupset_list'] = readgroupset_list
     context['bam_list'] = bam_list
-    sample_barcode = request.GET.get('sample_barcode')
-    readgroupset_id = request.GET.get('readgroupset_id')
-    bam_location = request.GET.get('bam_location')
-    if sample_barcode:
-        context['sample_barcode'] = sample_barcode
+    # sample_barcode = request.GET.get('sample_barcode')
+    # readgroupset_id = request.GET.get('readgroupset_id')
+    # bam_location = request.GET.get('bam_location')
+    # if sample_barcode:
+    #     context['sample_barcode'] = sample_barcode
 
-    if readgroupset_id and not bam_location:
-        context['readgroupset_id'] = readgroupset_id
-    else:
-        messages.info(request, 'The selected readgroupset id (%s) does not exist.' % readgroupset_id)
+    # if readgroupset_id and not bam_location:
+    #     context['readgroupset_id'] = readgroupset_id
+    # else:
+    #     messages.info(request, 'The selected readgroupset id (%s) does not exist.' % readgroupset_id)
     return render(request, 'GenespotRE/igv.html', context)
 
 def health_check(request):
