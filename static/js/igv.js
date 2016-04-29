@@ -99,14 +99,16 @@ require([
     };
     $('#igv-div').empty();
     igv.browser = null;
-    browser = igv.createBrowser($('#igv-div')[0], options);
 
+    igv.oauth.google.login();
+
+    browser = igv.createBrowser($('#igv-div')[0], options);
     // Testing bq access
     //var config = {
     //    'client_id': clientId,
     //    'scope': 'https://www.googleapis.com/auth/bigquery'
     //};
-
+    //
     //gapi.auth.authorize(config, function (tokenJson) {
     //    gapi.client.load('bigquery', 'v2');
     //    oauth.google.apiKey = 'a717bf753c08ea7293a226014a1134867d6c5884';
