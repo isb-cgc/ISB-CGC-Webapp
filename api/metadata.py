@@ -786,9 +786,11 @@ def normalize_metadata_ages(ages):
         result.append({'count': value, 'value': key})
     return result
 
+
 class PlatformCount(messages.Message):
     platform = messages.StringField(1)
     count = messages.IntegerField(2)
+
 
 class FileDetails(messages.Message):
     sample = messages.StringField(1)
@@ -800,18 +802,22 @@ class FileDetails(messages.Message):
     gg_readgroupset_id = messages.StringField(7)
     cloudstorage_location = messages.StringField(8)
 
+
 class SampleFiles(messages.Message):
     total_file_count = messages.IntegerField(1)
     page = messages.IntegerField(2)
     platform_count_list = messages.MessageField(PlatformCount, 3, repeated=True)
     file_list = messages.MessageField(FileDetails, 4, repeated=True)
 
+
 class SampleFileCount(messages.Message):
     sample_id = messages.StringField(1)
     count = messages.IntegerField(2)
 
+
 class CohortFileCountSampleList(messages.Message):
     sample_list = messages.MessageField(SampleFileCount, 1, repeated=True)
+
 
 class IncomingPlatformSelection(messages.Message):
     ABSOLiD_DNASeq                      = messages.StringField(1)
@@ -845,10 +851,12 @@ class IncomingPlatformSelection(messages.Message):
     Mixed_DNASeq_curated                = messages.StringField(29)
     RocheGSFLX_DNASeq                   = messages.StringField(30)
 
+
 class IncomingMetadataCount(messages.Message):
     filters     = messages.StringField(1)
     cohort_id   = messages.IntegerField(2)
     token       = messages.StringField(3)
+
 
 def get_current_user(request):
     user_email = None
@@ -872,8 +880,104 @@ def get_current_user(request):
 
     return None
 
+
+def count_metadata(user, cohort_id=None, samples_ids_by_study=None, filters=None):
+    counts_and_total = {}
+    sample_tables = {}
+    valid_attrs = {}
+
+    this_shouldnt_be_happening = 'lol'
+
+    if cohort_id is not None:
+        for study in samples_ids_by_study:
+            samples_in_study = samples_ids_by_study[study]
+            samples_ids_by_study[study] = {
+                'SampleBarcode': build_where_clause({'SampleBarcode': samples_in_study}),
+                'sample_barcode': build_where_clause({'sample_barcode': samples_in_study}),
+            }
+    else:
+        samples_ids_by_study = {}
+
+    if filters is None:
+        filters = {}
+
+    try:
+        db = sql_connection()
+        django.setup()
+        cursor = db.cursor(MySQLdb.cursors.DictCursor)
+
+        # Add TCGA attributes to the list of available attributes
+        if 'user_studies' not in filters or 'tcga' in filters['user_studies']['values']:
+            sample_tables[this_shouldnt_be_happening] = {'sample_ids': None}
+            if samples_ids_by_study and None in samples_ids_by_study:
+                sample_tables[this_shouldnt_be_happening]['sample_ids'] = samples_ids_by_study[None]
+
+            cursor = db.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute('SELECT attribute, spec FROM metadata_attr')
+            for row in cursor.fetchall():
+                if row['attribute'] in METADATA_SHORTLIST:
+                    valid_attrs[row['spec'] + ':' + row['attribute']] = {
+                        'name': row['attribute'],
+                        'tables': (this_shouldnt_be_happening,),
+                        'sample_ids': None
+                    }
+            cursor.close()
+
+
+        cursor.close()
+        db.close()
+
+        return counts_and_total
+
+    except (TypeError, IndexError) as e:
+        if cursor: cursor.close()
+        if db: db.close()
+        raise endpoints.NotFoundException('Error in retrieving barcodes.')
+
+
+def query_samples_and_studies(parameter, bucket_by=None):
+
+    query_str = 'SELECT sample_id, study_id FROM cohorts_samples WHERE cohort_id=%s;'
+
+    if bucket_by is not None and bucket_by not in query_str:
+        logging.error("Cannot group barcodes: column '" + bucket_by +
+                      "' not found in query string '"+query_str+"'. Barcodes will not be grouped.")
+        bucket_by = None
+
+    try:
+        db = sql_connection()
+        cursor = db.cursor(MySQLdb.cursors.DictCursor)
+        start = time.time()
+        cursor.execute(query_str, (parameter,))
+        stop = time.time()
+        logger.debug("[BENCHMARKING] Time to query sample IDs for cohort '" + parameter + "': " + (stop-start).__str__())
+
+        samples = ()
+
+        if bucket_by is not None:
+            samples = {}
+
+        for row in cursor.fetchall():
+            if bucket_by is not None:
+                if row[bucket_by] not in samples:
+                    samples[row[bucket_by]] = []
+                samples[row[bucket_by]].append(row['sample_id'])
+            else:
+                samples += (row['sample_id'],)
+        cursor.close()
+        db.close()
+
+        return samples
+
+    except (TypeError, IndexError) as e:
+        if cursor: cursor.close()
+        if db: db.close()
+        raise endpoints.NotFoundException('Error in retrieving barcodes.')
+
+
 Meta_Endpoints = endpoints.api(name='meta_api', version='v1', description='Metadata endpoints used by the web application.',
                                allowed_client_ids=[INSTALLED_APP_CLIENT_ID, endpoints.API_EXPLORER_CLIENT_ID])
+
 
 @Meta_Endpoints.api_class(resource_name='meta_endpoints')
 class Meta_Endpoints_API(remote.Service):
@@ -1166,7 +1270,6 @@ class Meta_Endpoints_API(remote.Service):
         query_dict = {}
         sample_ids = None
         is_landing = False
-
 
         if request.__getattribute__('is_landing') is not None:
             is_landing = request.__getattribute__('is_landing')
@@ -1764,7 +1867,6 @@ class Meta_Endpoints_API_v2(remote.Service):
     def metadata_counts(self, request):
 
         filters = {}
-        query_dict = {}
         valid_attrs = {}
         sample_tables = {}
         table_key_map = {}
@@ -1799,9 +1901,7 @@ class Meta_Endpoints_API_v2(remote.Service):
                 start = time.time()
                 cursor.execute(sample_query_str, (cohort_id,))
                 stop = time.time()
-                log_str = "[BENCHMARKING] Time to query sample IDs in metadata_counts for cohort '" + cohort_id + "': " + (stop-start).__str__()
-                logger.debug(log_str)
-                print >> sys.stderr, log_str
+                logger.debug("[BENCHMARKING] Time to query sample IDs in metadata_counts for cohort '" + cohort_id + "': " + (stop-start).__str__())
                 sample_ids = {}
 
                 for row in cursor.fetchall():
@@ -2188,9 +2288,7 @@ class Meta_Endpoints_API_v2(remote.Service):
                 start = time.time()
                 cursor.execute(sample_query_str, (cohort_id,))
                 stop = time.time()
-                log_str = "[BENCHMARKING] Time to query sample IDs in metadata_platform_list for cohort '" + cohort_id + "': " + (stop - start).__str__()
-                logger.debug(log_str)
-                print >> sys.stderr, log_str
+                logger.debug("[BENCHMARKING] Time to query sample IDs in metadata_platform_list for cohort '" + cohort_id + "': " + (stop - start).__str__())
                 sample_ids = ()
 
                 for row in cursor.fetchall():
@@ -2264,9 +2362,7 @@ class Meta_Endpoints_API_v2(remote.Service):
             start = time.time()
             cursor.execute(query_str, value_tuple)
             stop = time.time()
-            log_str = "[BENCHMARKING] Time to query platforms in metadata_platform_list for cohort '" + str(request.cohort_id) + "': " + (stop - start).__str__()
-            logger.debug(log_str)
-            print >> sys.stderr, log_str
+            logger.debug("[BENCHMARKING] Time to query platforms in metadata_platform_list for cohort '" + str(request.cohort_id) + "': " + (stop - start).__str__())
             data = []
             for row in cursor.fetchall():
 
