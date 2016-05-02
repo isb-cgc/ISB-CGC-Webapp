@@ -326,7 +326,13 @@ require([
         return false;
     });
 
-    update_displays(true);
+    // If this is a new cohort, set TCGA Project selected as default
+    if (window.location.pathname.indexOf('new_cohort') >= 0) {
+        $('a[href="#collapse-Project"]').trigger('click')
+        $('input[type="checkbox"][data-value-name="TCGA"]').trigger('click');
+    } else {
+        update_displays(true);
+    }
 
     $('#shared-with-btn').on('click', function(e){
         var target = $(this).data('target');
