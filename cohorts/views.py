@@ -77,42 +77,42 @@ def data_availability_sort(key, value, data_attr, attr_details):
     if key == 'has_27k':
         attr_details['DNA_methylation'].append({
             'value': '27k',
-            'count': [v['count'] for v in value if v['value'] == 'True'][0]
+            'count': [v['count'] for v in value if v['value'] == 'True']
         })
     if key == 'has_450k':
         attr_details['DNA_methylation'].append({
             'value': '450k',
-            'count': [v['count'] for v in value if v['value'] == 'True'][0]
+            'count': [v['count'] for v in value if v['value'] == 'True']
         })
     if key == 'has_HiSeq_miRnaSeq':
         attr_details['miRNA_sequencing'].append({
             'value': 'Illumina HiSeq',
-            'count': [v['count'] for v in value if v['value'] == 'True'][0]
+            'count': [v['count'] for v in value if v['value'] == 'True']
         })
     if key == 'has_GA_miRNASeq':
         attr_details['miRNA_sequencing'].append({
             'value': 'Illumina GA',
-            'count': [v['count'] for v in value if v['value'] == 'True'][0]
+            'count': [v['count'] for v in value if v['value'] == 'True']
         })
     if key == 'has_UNC_HiSeq_RNASeq':
         attr_details['RNA_sequencing'].append({
             'value': 'UNC Illumina HiSeq',
-            'count': [v['count'] for v in value if v['value'] == 'True'][0]
+            'count': [v['count'] for v in value if v['value'] == 'True']
         })
     if key == 'has_UNC_GA_RNASeq':
         attr_details['RNA_sequencing'].append({
             'value': 'UNC Illumina GA',
-            'count': [v['count'] for v in value if v['value'] == 'True'][0]
+            'count': [v['count'] for v in value if v['value'] == 'True']
         })
     if key == 'has_BCGSC_HiSeq_RNASeq':
         attr_details['RNA_sequencing'].append({
             'value': 'BCGSC Illumina HiSeq',
-            'count': [v['count'] for v in value if v['value'] == 'True'][0]
+            'count': [v['count'] for v in value if v['value'] == 'True']
         })
     if key == 'has_BCGSC_GA_RNASeq':
         attr_details['RNA_sequencing'].append({
             'value': 'BCGSC Illumina GA',
-            'count': [v['count'] for v in value if v['value'] == 'True'][0]
+            'count': [v['count'] for v in value if v['value'] == 'True']
         })
 @login_required
 def public_cohort_list(request):
@@ -276,41 +276,42 @@ def cohort_detail(request, cohort_id=0, workbook_id=0, worksheet_id=0, create_wo
     totals = results['total']
 
     # Remove metadata Project/Study data from results
-    new_counts = []
-    for item in results['count']:
-        if item['name'] != 'Project' and item['name'] != 'Study':
-            new_counts.append(item)
-    results['count'] = new_counts
+    # new_counts = []
+    # for item in results['count']:
+    #     if item['name'] != 'Project' and item['name'] != 'Study':
+    #         new_counts.append(item)
+    # results['count'] = new_counts
 
     # Get public projects/studies data
     public_projects = Project.get_public_projects()
     public_studies = Study.get_public_studies()
 
-    print public_projects
-    print public_studies
+    # print public_projects
+    # print public_studies
     public_projects_list = []
     public_studies_list = []
-
-    for project in public_projects:
-        public_projects_list += ({
-                                'count': 0,
-                                'value': project.name,
-                                'id'   : project.id
-                                },)
-    for study in public_studies:
-        public_studies_list += ({
-                            'count': 0,
-                            'value': study.name,
-                            'id'   : study.id
-                          },)
-    results['count'].append({
-            'name': 'Project',
-            'values': public_projects_list
-        })
-    results['count'].append({
-        'name': 'Study',
-        'values': public_studies_list
-    })
+    project_dict = {}
+    # for project in public_projects:
+    #     public_projects_list += ({
+    #                             'count': 0,
+    #                             'value': project.name,
+    #                             'id'   : project.id
+    #                             },)
+    # # For each public study, add the count to the project
+    # for study in public_studies:
+    #     public_studies_list += ({
+    #                         'count': 0,
+    #                         'value': study.project.name + ': ' + study.name,
+    #                         'id'   : study.id
+    #                       },)
+    # results['count'].append({
+    #         'name': 'Project',
+    #         'values': public_projects_list
+    #     })
+    # results['count'].append({
+    #     'name': 'Study',
+    #     'values': public_studies_list
+    # })
     if USER_DATA_ON:
         # Add in user data
         user_attr = ['user_project','user_study']
@@ -366,7 +367,6 @@ def cohort_detail(request, cohort_id=0, workbook_id=0, worksheet_id=0, create_wo
     }
     keys = []
     for item in results['count']:
-        print item['name'], len(item['values'])
         key = item['name']
         values = item['values']
 

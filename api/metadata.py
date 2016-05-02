@@ -1812,7 +1812,12 @@ class Meta_Endpoints_API_v2(remote.Service):
 
         # Add TCGA attributes to the list of available attributes
         if 'user_studies' not in filters or 'tcga' in filters['user_studies']['values']:
-            sample_tables['metadata_samples'] = {'sample_ids': None}
+
+            # Get all public study metadata_sample tables
+            studies = Study.get_public_studies().values_list('id', flat=True)
+            for tables in User_Data_Tables.objects.filter(study_id__in=studies):
+                sample_tables[tables.metadata_samples_table] = {'sample_ids': None}
+
             if sample_ids and None in sample_ids:
                 sample_tables['metadata_samples']['sample_ids'] = sample_ids[None]
 
@@ -1822,7 +1827,7 @@ class Meta_Endpoints_API_v2(remote.Service):
                 if row['attribute'] in METADATA_SHORTLIST:
                     valid_attrs[row['spec'] + ':' + row['attribute']] = {
                         'name': row['attribute'],
-                        'tables': ('metadata_samples',),
+                        'tables': [],
                         'sample_ids': None
                     }
             cursor.close()
@@ -1874,16 +1879,68 @@ class Meta_Endpoints_API_v2(remote.Service):
         if 'user_studies' in filters:
             del filters['user_studies']
 
-        # For filters with no tables at this point, assume its the TCGA metadata_samples table
+        table_list = []
+        # If using public projects or studies
+        if 'Project' in filters:
+            project_ids = filters['Project']['values']
+            # Get all projects selected, and their studies
+            project_studies = []
+            projects_seen = []
+            # If using Study filter, only select those studies from the projects
+            if 'Study' in filters:
+                studies = Study.objects.filter(id__in=filters['Study']['values'])
+
+                for study in studies:
+                    # Add study to list
+                    project_studies.append(study.id)
+
+                    # Note which projects have been seen by the studies.
+                    if study.project.id in project_ids and study.project.id not in projects_seen:
+                        projects_seen.append(study.project.id)
+
+            for project_id in project_ids:
+                if project_id not in projects_seen: # Project has not been seen by a study yet
+                    # Add all studies from this project
+                    project_studies += Study.objects.filter(project_id=project_id).values_list('id', flat=True)
+            print project_studies
+            # Collect tables for all studies selected
+            for tables in User_Data_Tables.objects.filter(study_id__in=project_studies):
+                table_list.append(tables.metadata_samples_table)
+            print table_list
+
+        # Else if using public studies, but not projects
+        elif 'Study' in filters and 'Project' not in filters:
+            # Collect tables for all studies selected
+            study_ids = filters['Study']['values']
+
+            for tables in User_Data_Tables.objects.filter(study_id__in=study_ids):
+                table_list.append(tables.metadata_samples_table)
+        else: # otherwise, select all the public metadata_sample tables
+            studies = Study.get_public_studies().values_list('id', flat=True)
+            for tables in User_Data_Tables.objects.filter(study_id__in=studies):
+                table_list.append(tables.metadata_samples_table)
+
+        # Delete project and studies from filters
+        if 'Project' in filters:
+            del filters['Project']
+        if 'Study' in filters:
+            del filters['Study']
+
+        # For filters with no tables at this point, assume it's public project/study data, so check for those filters
         for key, obj in filters.items():
             if not obj['tables']:
-                filters[key]['tables'].append('metadata_samples')
+                filters[key]['tables'] = table_list
 
         # Loop through the features
         for key, feature in valid_attrs.items():
             # Get a count for each feature
             table_values = {}
             feature['total'] = 0
+
+            # If there are no tables for this attr, then it's a public attr.
+            if len(feature['tables']) == 0:
+                feature['tables'] = table_list
+
             for table in feature['tables']:
                 # Check if the filters make this table 0 anyway
                 # We do this to avoid SQL errors for columns that don't exist
