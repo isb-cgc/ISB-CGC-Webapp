@@ -84,8 +84,7 @@ require([
         (update_displays_thread !== null) && clearTimeout(update_displays_thread);
 
         update_displays_thread = setTimeout(function(){
-            search_helper_obj.update_counts(base_url, 'metadata_counts', cohort_id, undefined, 'v2');
-            search_helper_obj.update_parsets(base_url, 'metadata_platform_list', cohort_id, 'v2');
+            search_helper_obj.update_counts_parsets(base_url, 'metadata_counts_platform_list', cohort_id, 'v2');
             !withoutCheckChanges && check_changes();
         },SUBSEQUENT_DELAY);
     };
