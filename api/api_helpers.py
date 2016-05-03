@@ -328,7 +328,7 @@ def authorize_credentials_with_google_from_file(credentials_path):
 
 
 def get_user_email_from_token(access_token):
-    print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     user_email = None
     credentials = AccessTokenCredentials(access_token, 'test-user')
     http = credentials.authorize(httplib2.Http())
