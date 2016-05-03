@@ -648,9 +648,11 @@ class MetadataAttrList(messages.Message):
     items = messages.MessageField(MetadataAttr, 1, repeated=True)
     count = messages.IntegerField(2)
 
+
 class SampleBarcodeList(messages.Message):
     items = messages.MessageField(SampleBarcodeItem, 1, repeated=True)
     count = messages.IntegerField(2)
+
 
 class MetadataPlatformItem(messages.Message):
     DNAseq_data = messages.StringField(1)
@@ -660,8 +662,16 @@ class MetadataPlatformItem(messages.Message):
     mirnPlatform = messages.StringField(5)
     rppaPlatform = messages.StringField(6)
 
+
 class MetadataPlatformItemList(messages.Message):
     items = messages.MessageField(MetadataPlatformItem, 1, repeated=True)
+
+
+class MetadataCountsPlatformItem(messages.Message):
+    items = messages.MessageField(MetadataPlatformItem, 1, repeated=True)
+    count = messages.MessageField(MetadataAttributeValues, 2, repeated=True)
+    total = messages.IntegerField(3)
+
 
 def createDataItem(data, selectors):
     if len(selectors):
@@ -679,9 +689,11 @@ def createDataItem(data, selectors):
                 item.__setattr__(attr, None)
         return item
 
+
 class MetadataDomainItem(messages.Message):
     attribute = messages.StringField(1)
     domains = messages.StringField(2, repeated=True)
+
 
 def generateSQLQuery(request):
     db = sql_connection()
@@ -774,9 +786,11 @@ def normalize_metadata_ages(ages):
         result.append({'count': value, 'value': key})
     return result
 
+
 class PlatformCount(messages.Message):
     platform = messages.StringField(1)
     count = messages.IntegerField(2)
+
 
 class FileDetails(messages.Message):
     sample = messages.StringField(1)
@@ -788,18 +802,22 @@ class FileDetails(messages.Message):
     gg_readgroupset_id = messages.StringField(7)
     cloudstorage_location = messages.StringField(8)
 
+
 class SampleFiles(messages.Message):
     total_file_count = messages.IntegerField(1)
     page = messages.IntegerField(2)
     platform_count_list = messages.MessageField(PlatformCount, 3, repeated=True)
     file_list = messages.MessageField(FileDetails, 4, repeated=True)
 
+
 class SampleFileCount(messages.Message):
     sample_id = messages.StringField(1)
     count = messages.IntegerField(2)
 
+
 class CohortFileCountSampleList(messages.Message):
     sample_list = messages.MessageField(SampleFileCount, 1, repeated=True)
+
 
 class IncomingPlatformSelection(messages.Message):
     ABSOLiD_DNASeq                      = messages.StringField(1)
@@ -833,10 +851,12 @@ class IncomingPlatformSelection(messages.Message):
     Mixed_DNASeq_curated                = messages.StringField(29)
     RocheGSFLX_DNASeq                   = messages.StringField(30)
 
+
 class IncomingMetadataCount(messages.Message):
     filters     = messages.StringField(1)
     cohort_id   = messages.IntegerField(2)
     token       = messages.StringField(3)
+
 
 def get_current_user(request):
     user_email = None
@@ -860,8 +880,229 @@ def get_current_user(request):
 
     return None
 
+
+def count_metadata(user, cohort_id=None, sample_ids=None, filters=None):
+    counts_and_total = {}
+    sample_tables = {}
+    valid_attrs = {}
+    study_ids = ()
+    table_key_map = {}
+
+    if filters is None:
+        filters = {}
+
+    if sample_ids is None:
+        sample_ids = {}
+
+    for key in sample_ids:
+        samples_by_study = sample_ids[key]
+        sample_ids[key] = {
+            'SampleBarcode': build_where_clause({'SampleBarcode': samples_by_study}),
+            'sample_barcode': build_where_clause({'sample_barcode': samples_by_study}),
+        }
+
+    db = sql_connection()
+    django.setup()
+
+    try:
+        # Add TCGA attributes to the list of available attributes
+        if 'user_studies' not in filters or 'tcga' in filters['user_studies']['values']:
+            sample_tables['metadata_samples'] = {'sample_ids': None}
+            if sample_ids and None in sample_ids:
+                sample_tables['metadata_samples']['sample_ids'] = sample_ids[None]
+
+            cursor = db.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute('SELECT attribute, spec FROM metadata_attr')
+            for row in cursor.fetchall():
+                if row['attribute'] in METADATA_SHORTLIST:
+                    valid_attrs[row['spec'] + ':' + row['attribute']] = {
+                        'name': row['attribute'],
+                        'tables': ('metadata_samples',),
+                        'sample_ids': None
+                    }
+            cursor.close()
+
+        # If we have a user, get a list of valid studies
+        if user:
+            for study in Study.get_user_studies(user):
+                if 'user_studies' not in filters or study.id in filters['user_studies']['values']:
+                    study_ids += (study.id,)
+
+                    for tables in User_Data_Tables.objects.filter(study=study):
+                        sample_tables[tables.metadata_samples_table] = {'sample_ids': None}
+                        if sample_ids and study.id in sample_ids:
+                            sample_tables[tables.metadata_samples_table]['sample_ids'] = sample_ids[study.id]
+
+            features = User_Feature_Definitions.objects.filter(study__in=study_ids)
+            for feature in features:
+                if ' ' in feature.feature_name:
+                    # It is not a column name and comes from molecular data, ignore it
+                    continue
+
+                name = feature.feature_name
+                key = 'study:' + str(feature.study_id) + ':' + name
+
+                if feature.shared_map_id:
+                    key = feature.shared_map_id
+                    name = feature.shared_map_id.split(':')[-1]
+
+                if key not in valid_attrs:
+                    valid_attrs[key] = {'name': name, 'tables': (), 'sample_ids': None}
+
+                for tables in User_Data_Tables.objects.filter(study_id=feature.study_id):
+                    valid_attrs[key]['tables'] += (tables.metadata_samples_table,)
+
+                    if tables.metadata_samples_table not in table_key_map:
+                        table_key_map[tables.metadata_samples_table] = {}
+                    table_key_map[tables.metadata_samples_table][key] = feature.feature_name
+
+                    if key in filters:
+                        filters[key]['tables'] += (tables.metadata_samples_table,)
+
+                    if sample_ids and feature.study_id in sample_ids:
+                        valid_attrs[key]['sample_ids'] = sample_ids[feature.study_id]
+        else:
+            print "User not authenticated with Metadata Endpoint API"
+
+        # Now that we're through the Studies filtering area, delete it so it doesn't get pulled into a query
+        if 'user_studies' in filters:
+            del filters['user_studies']
+
+        # For filters with no tables at this point, assume its the TCGA metadata_samples table
+        for key, obj in filters.items():
+            if not obj['tables']:
+                filters[key]['tables'].append('metadata_samples')
+
+        # Loop through the features
+        for key, feature in valid_attrs.items():
+            # Get a count for each feature
+            table_values = {}
+            feature['total'] = 0
+            for table in feature['tables']:
+                # Check if the filters make this table 0 anyway
+                # We do this to avoid SQL errors for columns that don't exist
+                should_be_queried = True
+                if cohort_id and sample_tables[table]['sample_ids'] is None:
+                    should_be_queried = False
+
+                for key, filter in filters.items():
+                    if table not in filter['tables']:
+                        should_be_queried = False
+                        break
+
+                # Build Filter Where Clause
+                filter_copy = copy.deepcopy(filters)
+                key_map = table_key_map[table] if table in table_key_map else False
+                where_clause = build_where_clause(filter_copy, alt_key_map=key_map)
+                col_name = feature['name']
+                if key_map and key in key_map:
+                    col_name = key_map[key]
+
+                cursor = db.cursor()
+                if should_be_queried:
+                    # Query the table for counts and values
+                    query = ('SELECT DISTINCT %s, COUNT(1) as count FROM %s') % (col_name, table)
+                    if where_clause['query_str']:
+                        query += ' WHERE ' + where_clause['query_str']
+                    if sample_tables[table]['sample_ids']:
+                        barcode_key = 'SampleBarcode' if table == 'metadata_samples' else 'sample_barcode'
+                        addt_cond = sample_tables[table]['sample_ids'][barcode_key]['query_str']
+                        if addt_cond and where_clause['query_str']:
+                            query += ' AND ' + addt_cond
+                        elif addt_cond:
+                            query += ' WHERE ' + addt_cond
+                        where_clause['value_tuple'] += sample_tables[table]['sample_ids'][barcode_key]['value_tuple']
+                    query += ' GROUP BY %s ' % col_name
+                    cursor.execute(query, where_clause['value_tuple'])
+                    for row in cursor.fetchall():
+                        if not row[0] in table_values:
+                            table_values[row[0]] = 0
+                        table_values[row[0]] += int(row[1])
+                        feature['total'] += int(row[1])
+                else:
+                    # Just get the values so we can have them be 0
+                    cursor.execute(('SELECT DISTINCT %s FROM %s') % (col_name, table))
+                    for row in cursor.fetchall():
+                        if not row[0] in table_values:
+                            table_values[row[0]] = 0
+
+                cursor.close()
+
+            feature['values'] = table_values
+
+        counts_and_total['counts'] = []
+        counts_and_total['total'] = 0
+        for key, feature in valid_attrs.items():
+            value_list = []
+
+            # Special case for age ranges
+            if key == 'CLIN:age_at_initial_pathologic_diagnosis':
+                feature['values'] = normalize_ages(feature['values'])
+
+            for value, count in feature['values'].items():
+                if feature['name'].startswith('has_'):
+                    value = 'True' if value else 'False'
+
+                value_list.append(MetaValueListCount(value=str(value), count=count))
+
+            counts_and_total['counts'].append(
+                MetadataAttributeValues(name=feature['name'], values=value_list, id=key, total=feature['total']))
+            if feature['total'] > counts_and_total['total']:
+                counts_and_total['total'] = feature['total']
+
+        db.close()
+
+        return counts_and_total
+
+    except (TypeError, IndexError) as e:
+        if cursor: cursor.close()
+        if db and db.open: db.close()
+        raise endpoints.NotFoundException('Error in count_metadata.')
+
+
+def query_samples_and_studies(parameter, bucket_by=None):
+
+    query_str = 'SELECT sample_id, study_id FROM cohorts_samples WHERE cohort_id=%s;'
+
+    if bucket_by is not None and bucket_by not in query_str:
+        logging.error("Cannot group barcodes: column '" + bucket_by +
+                      "' not found in query string '"+query_str+"'. Barcodes will not be grouped.")
+        bucket_by = None
+
+    try:
+        db = sql_connection()
+        cursor = db.cursor(MySQLdb.cursors.DictCursor)
+        start = time.time()
+        cursor.execute(query_str, (parameter,))
+        stop = time.time()
+        logger.debug("[BENCHMARKING] Time to query sample IDs for cohort '" + parameter + "': " + (stop-start).__str__())
+
+        samples = ()
+
+        if bucket_by is not None:
+            samples = {}
+
+        for row in cursor.fetchall():
+            if bucket_by is not None:
+                if row[bucket_by] not in samples:
+                    samples[row[bucket_by]] = []
+                samples[row[bucket_by]].append(row['sample_id'])
+            else:
+                samples += ({"sample_id": row['sample_id'], "study_id": row['study_id']},)
+        cursor.close()
+        db.close()
+
+        return samples
+
+    except (TypeError, IndexError) as e:
+        if cursor: cursor.close()
+        if db: db.close()
+        raise endpoints.NotFoundException('Error in retrieving barcodes.')
+
+
 Meta_Endpoints = endpoints.api(name='meta_api', version='v1', description='Metadata endpoints used by the web application.',
                                allowed_client_ids=[INSTALLED_APP_CLIENT_ID, endpoints.API_EXPLORER_CLIENT_ID])
+
 
 @Meta_Endpoints.api_class(resource_name='meta_endpoints')
 class Meta_Endpoints_API(remote.Service):
@@ -1154,7 +1395,6 @@ class Meta_Endpoints_API(remote.Service):
         query_dict = {}
         sample_ids = None
         is_landing = False
-
 
         if request.__getattribute__('is_landing') is not None:
             is_landing = request.__getattribute__('is_landing')
@@ -1747,217 +1987,37 @@ class Meta_Endpoints_API_v2(remote.Service):
 
     POST_RESOURCE = endpoints.ResourceContainer(IncomingMetadataCount)
     @endpoints.method(POST_RESOURCE, MetadataCountsItem,
-                          path='metadata_counts', http_method='POST',
+                      path='metadata_counts', http_method='POST',
                       name='meta.metadata_counts')
     def metadata_counts(self, request):
-
         filters = {}
-        query_dict = {}
-        valid_attrs = {}
-        sample_tables = {}
-        table_key_map = {}
         sample_ids = None
-        study_ids = ()
         cohort_id = None
         user = get_current_user(request)
 
         if request.__getattribute__('filters') is not None:
             try:
                 tmp = json.loads(request.filters)
-                for filter in tmp:
-                    key = filter['key']
+                for reqFilter in tmp:
+                    key = reqFilter['key']
                     if key not in filters:
-                        filters[key] = {'values':[], 'tables':[] }
-                    filters[key]['values'].append(filter['value'])
+                        filters[key] = {'values': [], 'tables': []}
+                    filters[key]['values'].append(reqFilter['value'])
 
             except Exception, e:
                 print traceback.format_exc()
-                raise endpoints.BadRequestException('Filters must be a valid JSON formatted array with objects containing both key and value properties')
-
-        db = sql_connection()
-        django.setup()
+                raise endpoints.BadRequestException(
+                    'Filters must be a valid JSON formatted array with objects containing both key and value properties')
 
         # Check for passed in saved search id
         if request.__getattribute__('cohort_id') is not None:
             cohort_id = str(request.cohort_id)
-            sample_query_str = 'SELECT sample_id, study_id FROM cohorts_samples WHERE cohort_id=%s;'
+            sample_ids = query_samples_and_studies(cohort_id, 'study_id')
 
-            try:
-                cursor = db.cursor(MySQLdb.cursors.DictCursor)
-                start = time.time()
-                cursor.execute(sample_query_str, (cohort_id,))
-                stop = time.time()
-                log_str = "[BENCHMARKING] Time to query sample IDs in metadata_counts for cohort '" + cohort_id + "': " + (stop-start).__str__()
-                logger.debug(log_str)
-                print >> sys.stderr, log_str
-                sample_ids = {}
+        counts_and_totals = count_metadata(user, cohort_id, sample_ids, filters)
 
-                for row in cursor.fetchall():
-                    if row['study_id'] not in sample_ids:
-                        sample_ids[ row['study_id'] ] = []
-                    sample_ids[ row['study_id'] ].append(row['sample_id'])
-                cursor.close()
-
-                for key in sample_ids:
-                    list = sample_ids[key]
-                    sample_ids[key] = {
-                        'SampleBarcode': build_where_clause({'SampleBarcode': list}),
-                        'sample_barcode': build_where_clause({'sample_barcode': list}),
-                    }
-
-            except (TypeError, IndexError) as e:
-                if cursor: cursor.close()
-                if db: db.close()
-                raise endpoints.NotFoundException('Error in retrieving barcodes.')
-
-        # Add TCGA attributes to the list of available attributes
-        if 'user_studies' not in filters or 'tcga' in filters['user_studies']['values']:
-            sample_tables['metadata_samples'] = {'sample_ids': None}
-            if sample_ids and None in sample_ids:
-                sample_tables['metadata_samples']['sample_ids'] = sample_ids[None]
-
-            cursor = db.cursor(MySQLdb.cursors.DictCursor)
-            cursor.execute('SELECT attribute, spec FROM metadata_attr')
-            for row in cursor.fetchall():
-                if row['attribute'] in METADATA_SHORTLIST:
-                    valid_attrs[row['spec'] + ':' + row['attribute']] = {
-                        'name': row['attribute'],
-                        'tables': ('metadata_samples',),
-                        'sample_ids': None
-                    }
-            cursor.close()
-
-        # If we have a user, get a list of valid studies
-        if user:
-            for study in Study.get_user_studies(user):
-                if 'user_studies' not in filters or study.id in filters['user_studies']['values']:
-                    study_ids += (study.id,)
-
-                    for tables in User_Data_Tables.objects.filter(study=study):
-                        sample_tables[tables.metadata_samples_table] = {'sample_ids': None}
-                        if sample_ids and study.id in sample_ids:
-                            sample_tables[tables.metadata_samples_table]['sample_ids'] = sample_ids[study.id]
-
-
-            features = User_Feature_Definitions.objects.filter(study__in=study_ids)
-            for feature in features:
-                if ' ' in feature.feature_name:
-                    # It is not a column name and comes from molecular data, ignore it
-                    continue
-
-                name = feature.feature_name
-                key = 'study:' + str(feature.study_id) + ':' + name
-
-                if feature.shared_map_id:
-                    key = feature.shared_map_id
-                    name = feature.shared_map_id.split(':')[-1]
-
-                if key not in valid_attrs:
-                    valid_attrs[key] = {'name': name,'tables': (), 'sample_ids': None}
-
-                for tables in User_Data_Tables.objects.filter(study_id=feature.study_id):
-                    valid_attrs[key]['tables'] += (tables.metadata_samples_table,)
-
-                    if not tables.metadata_samples_table in table_key_map:
-                        table_key_map[tables.metadata_samples_table] = {}
-                    table_key_map[tables.metadata_samples_table][key] = feature.feature_name
-
-                    if key in filters:
-                        filters[key]['tables'] += (tables.metadata_samples_table,)
-
-                    if sample_ids and feature.study_id in sample_ids:
-                        valid_attrs[key]['sample_ids'] = sample_ids[feature.study_id]
-        else:
-            print "User not authenticated with Metadata Endpoint API"
-
-        # Now that we're through the Studies filtering area, delete it so it doesn't get pulled into a query
-        if 'user_studies' in filters:
-            del filters['user_studies']
-
-        # For filters with no tables at this point, assume its the TCGA metadata_samples table
-        for key, obj in filters.items():
-            if not obj['tables']:
-                filters[key]['tables'].append('metadata_samples')
-
-        # Loop through the features
-        for key, feature in valid_attrs.items():
-            # Get a count for each feature
-            table_values = {}
-            feature['total'] = 0
-            for table in feature['tables']:
-                # Check if the filters make this table 0 anyway
-                # We do this to avoid SQL errors for columns that don't exist
-                should_be_queried = True
-                if cohort_id and sample_tables[table]['sample_ids'] is None:
-                    should_be_queried = False
-
-                for key, filter in filters.items():
-                    if table not in filter['tables']:
-                        should_be_queried = False
-                        break
-
-                # Build Filter Where Clause
-                filter_copy = copy.deepcopy(filters)
-                key_map = table_key_map[table] if table in table_key_map else False
-                where_clause = build_where_clause(filter_copy, alt_key_map=key_map)
-                col_name = feature['name']
-                if key_map and key in key_map:
-                    col_name = key_map[key]
-
-                cursor = db.cursor()
-                if should_be_queried:
-                    # Query the table for counts and values
-                    query = ('SELECT DISTINCT %s, COUNT(1) as count FROM %s') % (col_name, table)
-                    if where_clause['query_str']:
-                        query += ' WHERE ' + where_clause['query_str']
-                    if sample_tables[table]['sample_ids']:
-                        barcode_key = 'SampleBarcode' if table is 'metadata_samples' else 'sample_barcode'
-                        addt_cond = sample_tables[table]['sample_ids'][barcode_key]['query_str']
-                        if addt_cond and where_clause['query_str']:
-                            query += ' AND ' + addt_cond
-                        elif addt_cond:
-                            query += ' WHERE ' + addt_cond
-                        where_clause['value_tuple'] += sample_tables[table]['sample_ids'][barcode_key]['value_tuple']
-                    query += ' GROUP BY %s ' %col_name
-                    cursor.execute(query, where_clause['value_tuple'])
-                    for row in cursor.fetchall():
-                        if not row[0] in table_values:
-                            table_values[row[0]] = 0
-                        table_values[row[0]] += int(row[1])
-                        feature['total'] += int(row[1])
-                else:
-                    # Just get the values so we can have them be 0
-                    cursor.execute(('SELECT DISTINCT %s FROM %s') % (col_name, table))
-                    for row in cursor.fetchall():
-                        if not row[0] in table_values:
-                            table_values[row[0]] = 0
-
-                cursor.close()
-
-            feature['values'] = table_values
-
-        count_list = []
-        total = 0
-        for key, feature in valid_attrs.items():
-            value_list = []
-
-            # Special case for age ranges
-            if key == 'CLIN:age_at_initial_pathologic_diagnosis':
-                feature['values'] = normalize_ages(feature['values'])
-
-            for value, count in feature['values'].items():
-                if feature['name'].startswith('has_'):
-                    value = 'True' if value else 'False'
-
-                value_list.append(MetaValueListCount(value=str(value), count=count))
-
-            count_list.append(MetadataAttributeValues(name=feature['name'], values=value_list, id=key, total=feature['total']))
-            if feature['total'] > total:
-                total = feature['total']
-
-        db.close()
         request_finished.send(self)
-        return MetadataCountsItem(count=count_list, total=total)
+        return MetadataCountsItem(count=counts_and_totals['counts'], total=counts_and_totals['total'])
 
     POST_RESOURCE = endpoints.ResourceContainer(IncomingMetadataCount)
     @endpoints.method(POST_RESOURCE, SampleBarcodeList,
@@ -1993,24 +2053,7 @@ class Meta_Endpoints_API_v2(remote.Service):
         # Check for passed in saved search id
         if request.__getattribute__('cohort_id') is not None:
             cohort_id = str(request.cohort_id)
-            sample_query_str = 'SELECT sample_id, study_id FROM cohorts_samples WHERE cohort_id=%s;'
-
-            try:
-                cursor = db.cursor(MySQLdb.cursors.DictCursor)
-                cursor.execute(sample_query_str, (cohort_id,))
-                sample_ids = {}
-
-                for row in cursor.fetchall():
-                    study_id = row['study_id']
-                    if not study_id in sample_ids:
-                        sample_ids[study_id] = ()
-                    sample_ids[study_id] += (row['sample_id'],)
-                cursor.close()
-
-            except (TypeError, IndexError) as e:
-                if cursor: cursor.close()
-                if db: db.close()
-                raise endpoints.NotFoundException('Error in retrieving barcodes.')
+            sample_ids = query_samples_and_studies(cohort_id, 'study_id')
 
         # Add TCGA attributes to the list of available attributes
         if 'user_studies' not in filters or 'tcga' in filters['user_studies']['values']:
@@ -2035,7 +2078,7 @@ class Meta_Endpoints_API_v2(remote.Service):
                     for tables in User_Data_Tables.objects.filter(study=study):
                         sample_tables[tables.metadata_samples_table] = {
                             'features':{},
-                            'barcode':'SampleBarcode' if tables.metadata_samples_table is 'metadata_samples' else 'sample_barcode',
+                            'barcode':'SampleBarcode' if tables.metadata_samples_table == 'metadata_samples' else 'sample_barcode',
                             'study_id': study.id
                         }
 
@@ -2142,6 +2185,7 @@ class Meta_Endpoints_API_v2(remote.Service):
             raise endpoints.NotFoundException('Error in retrieving barcodes.')
 
     POST_RESOURCE = endpoints.ResourceContainer(IncomingMetadataCount)
+
     @endpoints.method(POST_RESOURCE, MetadataPlatformItemList,
                       path='metadata_platform_list', http_method='POST',
                       name='meta.metadata_platform_list')
@@ -2175,9 +2219,7 @@ class Meta_Endpoints_API_v2(remote.Service):
                 start = time.time()
                 cursor.execute(sample_query_str, (cohort_id,))
                 stop = time.time()
-                log_str = "[BENCHMARKING] Time to query sample IDs in metadata_platform_list for cohort '" + cohort_id + "': " + (stop - start).__str__()
-                logger.debug(log_str)
-                print >> sys.stderr, log_str
+                logger.debug("[BENCHMARKING] Time to query sample IDs in metadata_platform_list for cohort '" + cohort_id + "': " + (stop - start).__str__())
                 sample_ids = ()
 
                 for row in cursor.fetchall():
@@ -2251,9 +2293,7 @@ class Meta_Endpoints_API_v2(remote.Service):
             start = time.time()
             cursor.execute(query_str, value_tuple)
             stop = time.time()
-            log_str = "[BENCHMARKING] Time to query platforms in metadata_platform_list for cohort '" + str(request.cohort_id) + "': " + (stop - start).__str__()
-            logger.debug(log_str)
-            print >> sys.stderr, log_str
+            logger.debug("[BENCHMARKING] Time to query platforms in metadata_platform_list for cohort '" + str(request.cohort_id) + "': " + (stop - start).__str__())
             data = []
             for row in cursor.fetchall():
 
@@ -2274,5 +2314,139 @@ class Meta_Endpoints_API_v2(remote.Service):
 
         except (IndexError, TypeError) as e:
             if cursor: cursor.close()
-            if db: db.close()
+            if db and db.open: db.close()
             raise endpoints.NotFoundException('Sample not found.')
+
+    POST_RESOURCE = endpoints.ResourceContainer(IncomingMetadataCount)
+
+    @endpoints.method(POST_RESOURCE, MetadataCountsPlatformItem,
+                      path='metadata_counts_platform_list', http_method='POST',
+                      name='meta.metadata_counts_platform_list')
+    def metadata_counts_platform_list(self, request):
+        """ Used by the web application."""
+        filters = {}
+        sample_ids = None
+        samples_by_study = None
+        cohort_id = None
+        user = get_current_user(request)
+
+        if request.__getattribute__('filters') is not None:
+            try:
+                tmp = json.loads(request.filters)
+                for filter in tmp:
+                    key = filter['key']
+                    if key not in filters:
+                        filters[key] = {'values': [], 'tables': []}
+                    filters[key]['values'].append(filter['value'])
+
+            except Exception, e:
+                print traceback.format_exc()
+                raise endpoints.BadRequestException(
+                    'Filters must be a valid JSON formatted array with objects containing both key and value properties')
+
+        # Check for passed in saved search id
+        if request.__getattribute__('cohort_id') is not None:
+            cohort_id = str(request.cohort_id)
+            samples = query_samples_and_studies(cohort_id, )
+
+            sample_ids = ()
+            samples_by_study = {}
+
+            for sample in samples:
+                sample_ids += (sample['sample_id'],)
+                if sample['study_id'] not in samples_by_study:
+                    samples_by_study[sample['study_id']] = []
+                samples_by_study[sample['study_id']].append(sample['sample_id'])
+
+        counts_and_total = count_metadata(user, cohort_id, samples_by_study, filters)
+
+        db = sql_connection()
+
+        query_str = "SELECT " \
+                    "IF(has_Illumina_DNASeq=1, " \
+                    "'Yes', 'None'" \
+                    ") AS DNAseq_data," \
+                    "IF (has_SNP6=1, 'Genome_Wide_SNP_6', 'None') as cnvrPlatform," \
+                    "CASE" \
+                    "  WHEN has_BCGSC_HiSeq_RNASeq=1 and has_UNC_HiSeq_RNASeq=0" \
+                    "    THEN 'HiSeq/BCGSC'" \
+                    "  WHEN has_BCGSC_HiSeq_RNASeq=1 and has_UNC_HiSeq_RNASeq=1" \
+                    "    THEN 'HiSeq/BCGSC and UNC V2'" \
+                    "  WHEN has_UNC_HiSeq_RNASeq=1 and has_BCGSC_HiSeq_RNASeq=0 and has_BCGSC_GA_RNASeq=0 and has_UNC_GA_RNASeq=0" \
+                    "    THEN 'HiSeq/UNC V2'" \
+                    "  WHEN has_UNC_HiSeq_RNASeq=1 and has_BCGSC_HiSeq_RNASeq=0 and has_BCGSC_GA_RNASeq=0 and has_UNC_GA_RNASeq=1" \
+                    "    THEN 'GA and HiSeq/UNC V2'" \
+                    "  WHEN has_UNC_HiSeq_RNASeq=1 and has_BCGSC_HiSeq_RNASeq=0 and has_BCGSC_GA_RNASeq=1 and has_UNC_GA_RNASeq=0" \
+                    "    THEN 'HiSeq/UNC V2 and GA/BCGSC'" \
+                    "  WHEN has_UNC_HiSeq_RNASeq=1 and has_BCGSC_HiSeq_RNASeq=1 and has_BCGSC_GA_RNASeq=0 and has_UNC_GA_RNASeq=0" \
+                    "    THEN 'HiSeq/UNC V2 and BCGSC'" \
+                    "  WHEN has_BCGSC_GA_RNASeq=1 and has_UNC_HiSeq_RNASeq=0" \
+                    "    THEN 'GA/BCGSC'" \
+                    "  WHEN has_UNC_GA_RNASeq=1 and has_UNC_HiSeq_RNASeq=0" \
+                    "    THEN 'GA/UNC V2'" \
+                    "  ELSE 'None'" \
+                    "END AS gexpPlatform," \
+                    "CASE " \
+                    "   WHEN has_27k=1 and has_450k=0" \
+                    "     THEN 'HumanMethylation27'" \
+                    "   WHEN has_27k=0 and has_450k=1" \
+                    "     THEN 'HumanMethylation450'" \
+                    "   WHEN has_27k=1 and has_450k=1" \
+                    "     THEN '27k and 450k'" \
+                    "   ELSE 'None'" \
+                    "END AS methPlatform," \
+                    "CASE " \
+                    "   WHEN has_HiSeq_miRnaSeq=1 and has_GA_miRNASeq=0" \
+                    "      THEN 'IlluminaHiSeq_miRNASeq'" \
+                    "   WHEN has_HiSeq_miRnaSeq=0 and has_GA_miRNASeq=1" \
+                    "      THEN 'IlluminaGA_miRNASeq'" \
+                    "   WHEN has_HiSeq_miRnaSeq=1 and has_GA_miRNASeq=1" \
+                    "      THEN 'GA and HiSeq'" \
+                    "   ELSE 'None'" \
+                    "END AS mirnPlatform," \
+                    "IF (has_RPPA=1, 'MDA_RPPA_Core', 'None') AS rppaPlatform " \
+                    "FROM metadata_samples "
+
+        value_tuple = ()
+        if len(filters) > 0:
+            where_clause = build_where_clause(filters)
+            query_str += ' WHERE ' + where_clause['query_str']
+            value_tuple = where_clause['value_tuple']
+
+        if sample_ids:
+            if query_str.rfind('WHERE') >= 0:
+                query_str += ' and SampleBarcode in %s' % (sample_ids,)
+            else:
+                query_str += ' WHERE SampleBarcode in %s' % (sample_ids,)
+
+        query_str += ';'
+
+        data = []
+
+        try:
+            cursor = db.cursor(MySQLdb.cursors.DictCursor)
+            start = time.time()
+            cursor.execute(query_str, value_tuple)
+            stop = time.time()
+            logger.debug("[BENCHMARKING] Time to query platforms in metadata_counts_platform_list for cohort '" + str(
+                request.cohort_id) + "': " + (stop - start).__str__())
+            for row in cursor.fetchall():
+                item = MetadataPlatformItem(
+                    DNAseq_data=str(row['DNAseq_data']),
+                    cnvrPlatform=str(row['cnvrPlatform']),
+                    gexpPlatform=str(row['gexpPlatform']),
+                    methPlatform=str(row['methPlatform']),
+                    mirnPlatform=str(row['mirnPlatform']),
+                    rppaPlatform=str(row['rppaPlatform']),
+                )
+                data.append(item)
+
+            cursor.close()
+            db.close()
+
+            return MetadataCountsPlatformItem(items=data, count=counts_and_total['counts'], total=counts_and_total['total'])
+
+        except (IndexError, TypeError) as e:
+            if cursor: cursor.close()
+            if db and db.open: db.close()
+            raise endpoints.NotFoundException('Exception in metadata_counts_platforms_list.')
