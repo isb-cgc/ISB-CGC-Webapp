@@ -1734,14 +1734,37 @@ class Meta_Endpoints_API(remote.Service):
         if request.__getattribute__('limit') is not None:
             limit = request.limit
 
-        platform_count_query = 'select Platform, count(Platform) as platform_count from cohorts_samples cs join metadata_data md on md.SampleBarcode = cs.sample_id where cohort_id=%s and DatafileUploaded="true" '
-        query = 'select SampleBarcode, DatafileName, DatafileNameKey, Pipeline, Platform, DataLevel, Datatype, GG_readgroupset_id, Repository, SecurityProtocol from metadata_data md join cohorts_samples cs on md.SampleBarcode = cs.sample_id where cohort_id=%s and DatafileUploaded="true" '
+        sample_query = 'select sample_id from cohorts_samples where cohort_id=%s;'
+        sample_list = ()
+        try:
+            db = sql_connection()
+            cursor = db.cursor(MySQLdb.cursors.DictCursor)
+            cursor.execute(sample_query, (cohort_id,))
+            in_clause = '('
+            first = True
+            for row in cursor.fetchall():
+                sample_list += (row['sample_id'],)
+                if first:
+                    in_clause += '%s'
+                    first = False
+                else:
+                    in_clause += ',%s'
+            in_clause += ')'
+        except (IndexError, TypeError):
+            raise endpoints.ServiceException('Error getting sample list')
+        finally:
+            if cursor: cursor.close()
+            if db: db.close()
+            request_finished.send(self)
+
+        platform_count_query = 'select Platform, count(Platform) as platform_count from metadata_data where SampleBarcode in {0} and DatafileUploaded="true" '.format(in_clause)
+        query = 'select SampleBarcode, DatafileName, DatafileNameKey, Pipeline, Platform, DataLevel, Datatype, GG_readgroupset_id, Repository, SecurityProtocol from metadata_data where SampleBarcode in {0} and DatafileUploaded="true" '.format(in_clause)
 
         if not is_dbGaP_authorized:
-            platform_count_query += ' and SecurityProtocol="dbGap open-access" group by Platform order by cs.sample_id;'
+            platform_count_query += ' and SecurityProtocol="dbGap open-access" group by Platform order by SampleBarcode;'
             query += ' and SecurityProtocol="dbGap open-access" '
         else:
-            platform_count_query += ' group by Platform order by cs.sample_id;'
+            platform_count_query += ' group by Platform order by SampleBarcode;'
 
         # Check for incoming platform selectors
         platform_selector_list = []
@@ -1753,7 +1776,7 @@ class Meta_Endpoints_API(remote.Service):
         if len(platform_selector_list):
             query += ' and Platform in ("' + '","'.join(platform_selector_list) + '")'
 
-        query_tuple = (cohort_id,)
+        query_tuple = sample_list
         if limit != -1:
             query += ' limit %s'
             query_tuple += (limit,)
@@ -1766,8 +1789,7 @@ class Meta_Endpoints_API(remote.Service):
         try:
             db = sql_connection()
             cursor = db.cursor(MySQLdb.cursors.DictCursor)
-            cursor.execute(platform_count_query, (cohort_id,))
-
+            cursor.execute(platform_count_query, sample_list)
             platform_count_list = []
             count = 0
             if cursor.rowcount > 0:
