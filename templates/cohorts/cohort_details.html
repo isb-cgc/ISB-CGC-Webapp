@@ -81,7 +81,6 @@
 {% endblock %}
 
 {% block content %}
-    <!-- The Sample Type tooltip relies on this template's structure, see visualizations/createTreeGraph.js -->
     <div id="filter-panel" class="col-lg-4 col-md-4" style="display:none;">
         <div class="tabpanel" role="tabpanel">
             <ul class="nav nav-tabs" role="tablist">
@@ -242,8 +241,8 @@
                 <h4 class="panel-title">Details</h4>
             </div>
             <div class="panel-body">
-                <p>Total Number of Samples: {{ total_samples }}</p>
-                <p>Total Number of Participants: {{ total_patients }}</p>
+                <p>Total Number of Samples: <span id="total-samples">{{ total_samples }}</span></p>
+                <p>Total Number of Participants: <span id="total-participants">{{ total_patients }}</span></p>
                 <p>Your Permissions: {{ cohort.perm.perm }}</p>
                 <p>Revision History:</p>
                 <ul>

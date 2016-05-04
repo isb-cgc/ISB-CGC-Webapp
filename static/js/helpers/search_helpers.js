@@ -23,12 +23,16 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
     return  {
         
         update_counts_parsets: function(base_url_domain, endpoint, cohort_id, version){
+            var context = this;
             var filters = this.format_filters();
             var api_url = this.generate_metadata_url(base_url_domain, endpoint, filters, cohort_id, undefined, version);
             var update_filters = this.update_filter_counts;
+
             $('.clinical-trees .spinner').show();
-            var context = this;
             $('.parallel-sets .spinner').show();
+            $('#total-samples').html("Updating...");
+            $('#total-participants').html("Updating...");
+
             var startReq = new Date().getTime();
             $.ajax({
                 type: 'GET',
@@ -38,9 +42,9 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                 success: function (results, status, xhr) {
                     var stopReq = new Date().getTime();
                     console.debug("[BENCHMARKING] Time for response in update_counts_parsets: "+(stopReq-startReq)+ "ms");
-                    
                     attr_counts = results['count'];
-                    $('.menu-bar .total-samples').html(results['total'] + ' Samples');
+                    $('#total-samples').html(results['total']);
+                    $('#total-participants').html("N/A"); // TODO: Add in participant counts
                     update_filters(attr_counts);
                     tree_graph_obj.draw_trees(attr_counts);
                     
@@ -76,7 +80,8 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                     }
                 },
                 error: function(req,status,err){
-                    
+                    $('#total-samples').html("N/A");
+                    $('#total-participants').html("N/A");
                 },
                 complete: function(xhr,status) {
                     $('.clinical-trees .spinner').hide();
