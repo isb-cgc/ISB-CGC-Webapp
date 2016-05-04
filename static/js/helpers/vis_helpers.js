@@ -263,7 +263,7 @@ define(['jquery'], function($) {
         });
         },
         select2_formatting: function(item) {
-            if (item.hasOwnProperty['type']) {
+            if (item.hasOwnProperty('type')) {
                 return '<option var_type="'+item['type']+'" value="'+item['id']+'">'+item['text']+'</option>';
             } else {
                 return '<option var_type="N" value="'+item['id']+'">'+item['text']+'</option>';
