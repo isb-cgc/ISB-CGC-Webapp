@@ -19,6 +19,13 @@
 define(['jquery', 'd3', 'd3tip', 'vis_helpers'],
 function($, d3, d3tip, vis_helpers) {
 
+    // Note this is relying on the checkbox menu flyout, which is present in the cohorts DOM but
+    // not visible sometimes. If this flyout is ever edited this code must be edited to reflect that
+    var getSampleTypeName = function(sampleTypeCode) {
+        var label = $("#SampleTypeCode input[data-value-name='" + sampleTypeCode + "']").parent()[0].innerHTML;
+        return label.substring(label.indexOf(">")+1);
+    };
+
     // If you want to override the tip coming in from the create call,
     // do it here
      var treeTip = d3tip()
@@ -26,7 +33,8 @@ function($, d3, d3tip, vis_helpers) {
         .direction('s')
         .offset([0, 0])
         .html(function(d) {
-            return '<span>' + d.name + ': ' + d.count + '</span>';
+            var display =  (d.parent.name === "SampleTypeCode") ? getSampleTypeName(d.name) : d.name;
+            return '<span>' + display + ': ' + d.count + '</span>';
         });
 
     return {
