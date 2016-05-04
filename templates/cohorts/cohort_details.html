@@ -241,20 +241,20 @@
                 <h4 class="panel-title">Details</h4>
             </div>
             <div class="panel-body">
-                <div class="row col-md-12 row-spacer-v">
+                <div class="row col-md-12 space-bottom-10">
                     <span class="detail-label">Total Number of Samples:</span>
                     <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
                     <span class="total-values" id="total-samples">{{ total_samples }}</span>
                 </div>
-                <div class="row col-md-12 row-spacer-v">
+                <div class="row col-md-12 space-bottom-10">
                     <span class="detail-label">Total Number of Participants:</span>
                     <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
                     <span class="total-values" id="total-participants">{{ total_patients }}</span>
                 </div>
-                <div class="row col-md-12 row-spacer-v">
+                <div class="row col-md-12 space-bottom-10">
                     <span>Your Permissions: {{ cohort.perm.perm }}</span>
                 </div>
-                <div class="row col-md-12 row-spacer-v">
+                <div class="row col-md-12 space-bottom-10">
                     <span>Revision History:</span>
                     <ul>
                         {% for item in cohort.get_revision_history %}
