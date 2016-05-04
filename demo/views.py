@@ -173,23 +173,6 @@ def index(request):
             # check authenticated NIH username against NIH authentication list
             is_dbGaP_authorized = check_NIH_authorization_list(NIH_username, storage_client)
 
-            # Add task in queue to deactivate NIH_User entry after NIH_assertion_expiration has passed.
-            # If adding the Task fails, then do not add the user to the access control list, nor
-            # modify or create the NIH_User model. Instead, redirect to the user information view.
-            try:
-                task = Task(url=CHECK_NIH_USER_LOGIN_TASK_URI,
-                            params={'user_id': request.user.id, 'deployment': CRON_MODULE},
-                            countdown=COUNTDOWN_SECONDS)
-                task.add(queue_name=LOGOUT_WORKER_TASKQUEUE)
-            except Exception as e:
-                logger.error("Failed to enqueue automatic logout task")
-                logging.exception(e)
-                messages.warning(request, "")
-                return redirect('/users/' + str(request.user.id))
-
-            logger.info('enqueued check_login task for user, {}, for {} hours from now'.format(
-               request.user.id, COUNTDOWN_SECONDS / (60*60)))
-
             saml_response = None if 'SAMLResponse' not in req['post_data'] else req['post_data']['SAMLResponse']
             saml_response = saml_response.replace('\r\n', '')
             NIH_assertion_expiration = datetime.datetime.now() + datetime.timedelta(days=1)
@@ -207,7 +190,6 @@ def index(request):
                                                                   defaults=updated_values)
             logger.info("NIH_User.objects.update_or_create() returned nih_user: {} and created: {}".format(
                 str(nih_user.NIH_username), str(created)))
-
 
             # add or remove user from ACL_GOOGLE_GROUP if they are or are not dbGaP authorized
             directory_client, http_auth = get_directory_resource()
@@ -246,6 +228,18 @@ def index(request):
                     ).execute(http=http_auth)
                     logger.info(result)
                     logger.info("User {} added to {}.".format(user_email, ACL_GOOGLE_GROUP))
+
+            # Add task in queue to deactivate NIH_User entry after NIH_assertion_expiration has passed.
+            try:
+                task = Task(url=CHECK_NIH_USER_LOGIN_TASK_URI,
+                            params={'user_id': request.user.id, 'deployment': CRON_MODULE},
+                            countdown=COUNTDOWN_SECONDS)
+                task.add(queue_name=LOGOUT_WORKER_TASKQUEUE)
+                logger.info('enqueued check_login task for user, {}, for {} hours from now'.format(
+                    request.user.id, COUNTDOWN_SECONDS / (60*60)))
+            except Exception as e:
+                logger.error("Failed to enqueue automatic logout task")
+                logging.exception(e)
 
             messages.info(request, warn_message)
             return HttpResponseRedirect(auth.redirect_to('https://{}'.format(req['http_host'])))
