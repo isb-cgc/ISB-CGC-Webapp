@@ -30,9 +30,9 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
 
             $('.clinical-trees .spinner').show();
             $('.parallel-sets .spinner').show();
-            $('#total-samples').html("Updating...");
-            $('#total-participants').html("Updating...");
-
+            $('.cohort-info .total-values').hide();
+            $('.cohort-info .spinner').show();
+            
             var startReq = new Date().getTime();
             $.ajax({
                 type: 'GET',
@@ -80,12 +80,14 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                     }
                 },
                 error: function(req,status,err){
-                    $('#total-samples').html("N/A");
-                    $('#total-participants').html("N/A");
+                    $('#total-samples').html("Error");
+                    $('#total-participants').html("Error");
                 },
                 complete: function(xhr,status) {
                     $('.clinical-trees .spinner').hide();
                     $('.parallel-sets .spinner').hide();
+                    $('.cohort-info .spinner').hide();
+                    $('.cohort-info .total-values').show();
                 }
             });
         },

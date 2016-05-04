@@ -241,25 +241,36 @@
                 <h4 class="panel-title">Details</h4>
             </div>
             <div class="panel-body">
-                <p>Total Number of Samples: <span id="total-samples">{{ total_samples }}</span></p>
-                <p>Total Number of Participants: <span id="total-participants">{{ total_patients }}</span></p>
-                <p>Your Permissions: {{ cohort.perm.perm }}</p>
-                <p>Revision History:</p>
-                <ul>
-                    {% for item in cohort.get_revision_history %}
-                        <li>{{ item }}</li>
-                    {% endfor %}
-                </ul>
-                {% if shared_with_users and cohort.perm == 'OWNER'%}
-                    <br>
-                    <p><strong>Shared With Users:</strong></p>
+                <div class="single-line">
+                    <span class="detail-label">Total Number of Samples:</span>
+                    <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
+                    <span class="total-values" id="total-samples">{{ total_samples }}</span>
+                </div>
+                <div class="single-line">
+                    <span class="detail-label">Total Number of Participants:</span>
+                    <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
+                    <span class="total-values" id="total-participants">{{ total_patients }}</span>
+                </div>
+                <div class="single-line">
+                    <span>Your Permissions: {{ cohort.perm.perm }}</span>
+                </div>
+                <div>
+                    <span>Revision History:</span>
                     <ul>
-                    {% for user in shared_with_users %}
-                        <li>{{ user.first_name }} {{ user.last_name }} [{{ user.email }}]</li>
-                    {% endfor %}
+                        {% for item in cohort.get_revision_history %}
+                            <li>{{ item }}</li>
+                        {% endfor %}
                     </ul>
-
-                {% endif %}
+                    {% if shared_with_users and cohort.perm == 'OWNER'%}
+                        <br>
+                        <p><strong>Shared With Users:</strong></p>
+                        <ul>
+                        {% for user in shared_with_users %}
+                            <li>{{ user.first_name }} {{ user.last_name }} [{{ user.email }}]</li>
+                        {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
             </div>
         </div>
 
