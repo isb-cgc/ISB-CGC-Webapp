@@ -1077,7 +1077,6 @@ def count_metadata(user, cohort_id=None, sample_ids=None, filters=None):
                     if where_clause['query_str']:
                         query_clause = ' WHERE ' + where_clause['query_str']
                     if sample_tables[table]['sample_ids']:
-                        logger.debug("Samples found!")
                         barcode_key = 'SampleBarcode' if table == 'metadata_samples' else 'sample_barcode'
                         addt_cond = sample_tables[table]['sample_ids'][barcode_key]['query_str']
                         if addt_cond and where_clause['query_str']:
@@ -1113,7 +1112,7 @@ def count_metadata(user, cohort_id=None, sample_ids=None, filters=None):
         for sample in resulting_samples:
             sample_set += (sample,)
 
-        counts_and_total['participants'] = get_participant_count(sample_set)
+        counts_and_total['participants'] = get_participant_count(sample_set) if sample_set.__len__() > 0 else 0
         counts_and_total['counts'] = []
         counts_and_total['total'] = 0
         for key, feature in valid_attrs.items():
