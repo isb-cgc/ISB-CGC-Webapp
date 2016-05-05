@@ -44,7 +44,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                     console.debug("[BENCHMARKING] Time for response in update_counts_parsets: "+(stopReq-startReq)+ "ms");
                     attr_counts = results['count'];
                     $('#total-samples').html(results['total']);
-                    $('#total-participants').html("N/A"); // TODO: Add in participant counts
+                    $('#total-participants').html(results['participants']);
                     update_filters(attr_counts);
                     tree_graph_obj.draw_trees(attr_counts);
                     
