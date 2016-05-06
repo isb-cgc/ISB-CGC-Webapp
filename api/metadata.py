@@ -1841,14 +1841,8 @@ class Meta_Endpoints_API(remote.Service):
             if db: db.close()
             request_finished.send(self)
 
-        platform_count_query = 'select Platform, count(Platform) as platform_count from metadata_data where SampleBarcode in {0} and DatafileUploaded="true" '.format(in_clause)
+        platform_count_query = 'select Platform, count(Platform) as platform_count from metadata_data where SampleBarcode in {0} and DatafileUploaded="true"  group by Platform order by SampleBarcode;'.format(in_clause)
         query = 'select SampleBarcode, DatafileName, DatafileNameKey, Pipeline, Platform, DataLevel, Datatype, GG_readgroupset_id, Repository, SecurityProtocol from metadata_data where SampleBarcode in {0} and DatafileUploaded="true" '.format(in_clause)
-
-        if not is_dbGaP_authorized:
-            platform_count_query += ' and SecurityProtocol="dbGap open-access" group by Platform order by SampleBarcode;'
-            query += ' and SecurityProtocol="dbGap open-access" '
-        else:
-            platform_count_query += ' group by Platform order by SampleBarcode;'
 
         # Check for incoming platform selectors
         platform_selector_list = []
@@ -1901,8 +1895,10 @@ class Meta_Endpoints_API(remote.Service):
                                 bucket_name = settings.DCC_CONTROLLED_DATA_BUCKET
                             elif item['Repository'] and item['Repository'].lower() == 'cghub':
                                 bucket_name = settings.CGHUB_CONTROLLED_DATA_BUCKET
-                            if 'DatafileNameKey' in item and len(item['DatafileNameKey']) and bucket_name != '':
+                            if is_dbGaP_authorized and 'DatafileNameKey' in item and len(item['DatafileNameKey']) and bucket_name != '':
                                 item['DatafileNameKey'] = "gs://{}{}".format(bucket_name, item['DatafileNameKey'])
+                            else:
+                                item['DatafileNameKey'] = ''
 
                         file_list.append(FileDetails(sample=item['SampleBarcode'], cloudstorage_location=item['DatafileNameKey'], filename=item['DatafileName'], pipeline=item['Pipeline'], platform=item['Platform'], datalevel=item['DataLevel'], datatype=item['Datatype'], gg_readgroupset_id=item['GG_readgroupset_id']))
                 else:
