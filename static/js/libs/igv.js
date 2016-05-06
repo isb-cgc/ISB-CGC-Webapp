@@ -17848,6 +17848,12 @@ var oauth = (function (oauth) {
 
             setRedirectUrl: function(url) {
                 REDIRECT = url;
+                _url = OAUTHURL +
+                    "scope=https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/genomics https://www.googleapis.com/auth/devstorage.read_only https://www.googleapis.com/auth/userinfo.profile&" +
+                    "state=%2Fprofile&" +
+                    "redirect_uri=" + encodeURI(REDIRECT) + "&" +
+                    "response_type=token&" +
+                    "client_id=907668440978-j9ec27vhg0e0mmpjvrcelfq7ah9n0ntm.apps.googleusercontent.com";
             }
 
         }
