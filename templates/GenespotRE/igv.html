@@ -59,6 +59,9 @@
         {% endfor %}
 
     </div>
+    <script>
+    var base_url = '{{ base_url }}';
+    </script>
 {% endblock %}
 
 {% block js_file %}{% static 'js/igv.js' %}{% endblock %}
