@@ -670,7 +670,8 @@ class MetadataPlatformItemList(messages.Message):
 class MetadataCountsPlatformItem(messages.Message):
     items = messages.MessageField(MetadataPlatformItem, 1, repeated=True)
     count = messages.MessageField(MetadataAttributeValues, 2, repeated=True)
-    total = messages.IntegerField(3)
+    participants = messages.IntegerField(3)
+    total = messages.IntegerField(4)
 
 
 def createDataItem(data, selectors):
@@ -880,6 +881,73 @@ def get_current_user(request):
 
     return None
 
+# TODO: needs to be refactored to use other samples tables
+def get_participant_list(sample_ids):
+
+    db = sql_connection()
+    cursor = None
+
+    try:
+        cursor = db.cursor(MySQLdb.cursors.DictCursor)
+
+        participant_query = 'SELECT DISTINCT ParticipantBarcode from metadata_samples where SampleBarcode in ('
+        first = True
+        value_tuple = ()
+        for barcode in sample_ids:
+            value_tuple += (barcode,)
+            if first:
+                participant_query += '%s'
+                first = False
+            else:
+                participant_query += ',%s'
+
+        participant_query += ');'
+        results = []
+        cursor.execute(participant_query, value_tuple)
+        for row in cursor.fetchall():
+            results.append(SampleBarcodeItem(sample_barcode=row['ParticipantBarcode'], study_id=0))
+
+        return results
+
+    except (TypeError, IndexError) as e:
+        if cursor: cursor.close()
+        if db and db.open: db.close()
+        raise endpoints.NotFoundException('Error in get_participant_list')
+
+# TODO: needs to be refactored to use other samples tables
+def get_participant_count(sample_ids):
+
+    db = sql_connection()
+    cursor = None
+
+    try:
+        cursor = db.cursor(MySQLdb.cursors.DictCursor)
+
+        participant_query = 'SELECT COUNT(DISTINCT ParticipantBarcode) AS ParticipantCount FROM metadata_samples WHERE SampleBarcode IN ('
+        first = True
+        samples = ()
+        for barcode in sample_ids:
+            samples += (barcode,)
+            if first:
+                participant_query += '%s'
+                first = False
+            else:
+                participant_query += ',%s'
+
+        participant_query += ');'
+        count = 0;
+        cursor.execute(participant_query, samples)
+        for row in cursor.fetchall():
+            count = row['ParticipantCount']
+
+        return count
+
+    except Exception as e:
+        print traceback.format_exc()
+        if cursor: cursor.close()
+        if db and db.open: db.close()
+        raise endpoints.NotFoundException('Error in get_participant_count')
+
 
 def count_metadata(user, cohort_id=None, sample_ids=None, filters=None):
     counts_and_total = {}
@@ -973,6 +1041,8 @@ def count_metadata(user, cohort_id=None, sample_ids=None, filters=None):
             if not obj['tables']:
                 filters[key]['tables'].append('metadata_samples')
 
+        resulting_samples = {}
+
         # Loop through the features
         for key, feature in valid_attrs.items():
             # Get a count for each feature
@@ -1002,23 +1072,31 @@ def count_metadata(user, cohort_id=None, sample_ids=None, filters=None):
                 if should_be_queried:
                     # Query the table for counts and values
                     query = ('SELECT DISTINCT %s, COUNT(1) as count FROM %s') % (col_name, table)
+                    sample_query = ('SELECT DISTINCT %s AS sample_id FROM %s') % ('SampleBarcode' if table == 'metadata_samples' else 'sample_barcode', table)
+                    query_clause = ''
                     if where_clause['query_str']:
-                        query += ' WHERE ' + where_clause['query_str']
+                        query_clause = ' WHERE ' + where_clause['query_str']
                     if sample_tables[table]['sample_ids']:
                         barcode_key = 'SampleBarcode' if table == 'metadata_samples' else 'sample_barcode'
                         addt_cond = sample_tables[table]['sample_ids'][barcode_key]['query_str']
                         if addt_cond and where_clause['query_str']:
-                            query += ' AND ' + addt_cond
+                            query_clause += ' AND ' + addt_cond
                         elif addt_cond:
-                            query += ' WHERE ' + addt_cond
+                            query_clause = ' WHERE ' + addt_cond
                         where_clause['value_tuple'] += sample_tables[table]['sample_ids'][barcode_key]['value_tuple']
-                    query += ' GROUP BY %s ' % col_name
+                    query += query_clause + (' GROUP BY %s ' % col_name)
+                    sample_query += query_clause
+
                     cursor.execute(query, where_clause['value_tuple'])
                     for row in cursor.fetchall():
                         if not row[0] in table_values:
                             table_values[row[0]] = 0
                         table_values[row[0]] += int(row[1])
                         feature['total'] += int(row[1])
+
+                    cursor.execute(sample_query, where_clause['value_tuple'])
+                    for row in cursor.fetchall():
+                        resulting_samples[row[0]] = 1
                 else:
                     # Just get the values so we can have them be 0
                     cursor.execute(('SELECT DISTINCT %s FROM %s') % (col_name, table))
@@ -1030,6 +1108,11 @@ def count_metadata(user, cohort_id=None, sample_ids=None, filters=None):
 
             feature['values'] = table_values
 
+        sample_set = ()
+        for sample in resulting_samples:
+            sample_set += (sample,)
+
+        counts_and_total['participants'] = get_participant_count(sample_set) if sample_set.__len__() > 0 else 0
         counts_and_total['counts'] = []
         counts_and_total['total'] = 0
         for key, feature in valid_attrs.items():
@@ -1054,7 +1137,8 @@ def count_metadata(user, cohort_id=None, sample_ids=None, filters=None):
 
         return counts_and_total
 
-    except (TypeError, IndexError) as e:
+    except (Exception) as e:
+        print traceback.format_exc()
         if cursor: cursor.close()
         if db and db.open: db.close()
         raise endpoints.NotFoundException('Error in count_metadata.')
@@ -1757,14 +1841,8 @@ class Meta_Endpoints_API(remote.Service):
             if db: db.close()
             request_finished.send(self)
 
-        platform_count_query = 'select Platform, count(Platform) as platform_count from metadata_data where SampleBarcode in {0} and DatafileUploaded="true" '.format(in_clause)
+        platform_count_query = 'select Platform, count(Platform) as platform_count from metadata_data where SampleBarcode in {0} and DatafileUploaded="true"  group by Platform order by SampleBarcode;'.format(in_clause)
         query = 'select SampleBarcode, DatafileName, DatafileNameKey, Pipeline, Platform, DataLevel, Datatype, GG_readgroupset_id, Repository, SecurityProtocol from metadata_data where SampleBarcode in {0} and DatafileUploaded="true" '.format(in_clause)
-
-        if not is_dbGaP_authorized:
-            platform_count_query += ' and SecurityProtocol="dbGap open-access" group by Platform order by SampleBarcode;'
-            query += ' and SecurityProtocol="dbGap open-access" '
-        else:
-            platform_count_query += ' group by Platform order by SampleBarcode;'
 
         # Check for incoming platform selectors
         platform_selector_list = []
@@ -1817,8 +1895,10 @@ class Meta_Endpoints_API(remote.Service):
                                 bucket_name = settings.DCC_CONTROLLED_DATA_BUCKET
                             elif item['Repository'] and item['Repository'].lower() == 'cghub':
                                 bucket_name = settings.CGHUB_CONTROLLED_DATA_BUCKET
-                            if 'DatafileNameKey' in item and len(item['DatafileNameKey']) and bucket_name != '':
+                            if is_dbGaP_authorized and 'DatafileNameKey' in item and len(item['DatafileNameKey']) and bucket_name != '':
                                 item['DatafileNameKey'] = "gs://{}{}".format(bucket_name, item['DatafileNameKey'])
+                            else:
+                                item['DatafileNameKey'] = ''
 
                         file_list.append(FileDetails(sample=item['SampleBarcode'], cloudstorage_location=item['DatafileNameKey'], filename=item['DatafileName'], pipeline=item['Pipeline'], platform=item['Platform'], datalevel=item['DataLevel'], datatype=item['Datatype'], gg_readgroupset_id=item['GG_readgroupset_id']))
                 else:
@@ -2350,6 +2430,7 @@ class Meta_Endpoints_API_v2(remote.Service):
         sample_ids = None
         samples_by_study = None
         cohort_id = None
+        participants = 0
         user = get_current_user(request)
 
         if request.__getattribute__('filters') is not None:
@@ -2379,6 +2460,8 @@ class Meta_Endpoints_API_v2(remote.Service):
                 if sample['study_id'] not in samples_by_study:
                     samples_by_study[sample['study_id']] = []
                 samples_by_study[sample['study_id']].append(sample['sample_id'])
+
+            participants = get_participant_count(sample_ids)
 
         counts_and_total = count_metadata(user, cohort_id, samples_by_study, filters)
 
@@ -2466,9 +2549,12 @@ class Meta_Endpoints_API_v2(remote.Service):
             cursor.close()
             db.close()
 
-            return MetadataCountsPlatformItem(items=data, count=counts_and_total['counts'], total=counts_and_total['total'])
+            return MetadataCountsPlatformItem(items=data, count=counts_and_total['counts'],
+                                              participants=counts_and_total['participants'],
+                                              total=counts_and_total['total'])
 
-        except (IndexError, TypeError) as e:
+        except Exception as e:
+            print traceback.format_exc()
             if cursor: cursor.close()
             if db and db.open: db.close()
             raise endpoints.NotFoundException('Exception in metadata_counts_platforms_list.')

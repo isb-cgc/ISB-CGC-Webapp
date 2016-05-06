@@ -48,60 +48,62 @@
 {% endblock %}
 
 {% block content %}
-    <div id="filter-panel" class="col-lg-3">
-        <div class="panel panel-default">
-            <div class="panel-heading" id="heading-platforms">Platforms</div>
-            <div class="panel-body">
-                <ul class="search-checkbox-list" id="{{ attr }}">
-                    {% for platform in platform_counts %}
-                        <li>
-                            <input type="checkbox" name="platform-selected" id="{{ platform.platform }}" >
-                            <label for="{{ platform.platform }}">{{ platform.platform|get_readable_name }}</label>
-                            <span class="count">({{ platform.count }})</span>
-                        </li>
-                    {% endfor %}
-                </ul>
+    <div class="row">
+        <div id="filter-panel" class="col-lg-3">
+            <div class="panel panel-default">
+                <div class="panel-heading" id="heading-platforms">Platforms</div>
+                <div class="panel-body">
+                    <ul class="search-checkbox-list" id="{{ attr }}">
+                        {% for platform in platform_counts %}
+                            <li>
+                                <input type="checkbox" name="platform-selected" id="{{ platform.platform }}" >
+                                <label for="{{ platform.platform }}">{{ platform.platform|get_readable_name }}</label>
+                                <span class="count">({{ platform.count }})</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="content-panel" class="col-md-9">
+            <div class="filelist-panel panel">
+                <div class="panel-heading">
+                    <h4>File Listing</h4>
+                </div>
+                <div class="panel-body">
+                    <form id="view-igv" method="POST" action="{% url 'igv' %}">
+                        {% csrf_token %}
+                        <p>Showing 20 files of <span class="file-count">unknown</span>. Page: <span class="page-num">1</span></p>
+                        <div>
+                            <a role="button" id="prev-page" class="btn btn-default disabled">Previous Page</a>
+                            <a role="button" id="next-page" class="btn btn-default">Next Page</a>
+                            <span class="spinner"><i class="fa fa-spin fa-spinner hidden"></i></span>
+
+                            <input type="submit" value="Launch IGV" class="btn btn-primary pull-right" style="display: none;"/>
+                        </div>
+
+                        <table class="table table-striped file-list-table" aria-label="File Listing Table">
+                            <thead>
+                            <tr>
+                                <th class="col-barcode">Sample Barcode</th>
+                                <th class="col-pipeline">Pipeline</th>
+                                <th class="col-platform">Platform</th>
+                                <th class="col-datalevel">Data Level</th>
+                                <th class="col-datatype">Data Type</th>
+                                <th class="col-igv">IGV</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-
-    <div id="content-panel" class="col-md-9">
-        <div class="filelist-panel panel">
-            <div class="panel-heading">
-                <h4>File Listing</h4>
-            </div>
-            <div class="panel-body">
-                <form id="view-igv" method="POST" action="{% url 'igv' %}">
-                    {% csrf_token %}
-                    <p>Showing 20 files of <span class="file-count">unknown</span>. Page: <span class="page-num">1</span></p>
-                    <div>
-                        <a role="button" id="prev-page" class="btn btn-default disabled">Previous Page</a>
-                        <a role="button" id="next-page" class="btn btn-default">Next Page</a>
-                        <span class="spinner"><i class="fa fa-spin fa-spinner hidden"></i></span>
-
-                        <input type="submit" value="View Selected In IGV Viewer" class="btn btn-primary pull-right" />
-                    </div>
-
-                    <table class="table table-striped file-list-table" aria-label="File Listing Table">
-                        <thead>
-                        <tr>
-                            <th class="col-barcode">Sample Barcode</th>
-                            <th class="col-pipeline">Pipeline</th>
-                            <th class="col-platform">Platform</th>
-                            <th class="col-datalevel">Data Level</th>
-                            <th class="col-datatype">Data Type</th>
-                            <th class="col-igv">IGV</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
-
-                </form>
-            </div>
-        </div>
-    </div>
-
     <!-- Create Cohort Modal -->
     <div class="modal fade" id="create-cohort-modal" tabindex="-1" role="dialog" aria-labelledby="createCohortModal" aria-hidden="true">
         <div class="modal-dialog">
