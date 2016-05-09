@@ -564,6 +564,7 @@ def save_cohort(request, workbook_id=None, worksheet_id=None, create_workbook=Fa
             if len(filter_obj):
                 # data_url += '&filters=' + re.sub(r'\s+', '', urllib.quote( json.dumps(filter_obj) ))
                 payload['filters'] = json.dumps(filter_obj)
+        print payload
         result = urlfetch.fetch(data_url, method=urlfetch.POST, payload=json.dumps(payload), deadline=60, headers={'Content-Type': 'application/json'})
         items = json.loads(result.content)
 
@@ -593,15 +594,14 @@ def save_cohort(request, workbook_id=None, worksheet_id=None, create_workbook=Fa
             # TODO This would be a nice to have if we have a mapped ParticipantBarcode value
             # TODO Also this gets weird with mixed mapped and unmapped ParticipantBarcode columns in cohorts
             # If there are patient ids
-            # If we are *not* using user data, get participant barcodes from metadata_data
-            if not USER_DATA_ON:
-                participant_url = METADATA_API + ('v2/metadata_participant_list?cohort_id=%s' % (str(cohort.id),))
-                participant_result = urlfetch.fetch(participant_url, deadline=120)
-                participant_items = json.loads(participant_result.content)
-                participant_list = []
-                for item in participant_items['items']:
-                    participant_list.append(Patients(cohort=cohort, patient_id=item['sample_barcode']))
-                Patients.objects.bulk_create(participant_list)
+            # TODO: This endpoint uses metadata_samples to get participant count for now
+            participant_url = METADATA_API + ('v2/metadata_participant_list?cohort_id=%s' % (str(cohort.id),))
+            participant_result = urlfetch.fetch(participant_url, deadline=120)
+            participant_items = json.loads(participant_result.content)
+            participant_list = []
+            for item in participant_items['items']:
+                participant_list.append(Patients(cohort=cohort, patient_id=item['sample_barcode']))
+            Patients.objects.bulk_create(participant_list)
 
             # Set permission for user to be owner
             perm = Cohort_Perms(cohort=cohort, user=request.user, perm=Cohort_Perms.OWNER)

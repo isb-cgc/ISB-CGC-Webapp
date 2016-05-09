@@ -1110,10 +1110,9 @@ def count_metadata(user, cohort_id=None, sample_ids=None, filters=None):
                 if cohort_id and sample_tables[table['table_name']]['sample_ids'] is None:
                     should_be_queried = False
 
-
                 for key, filter in filters.items():
                     table_names = [d['table_name'] for d in filter['tables']]
-                    if table not in table_names:
+                    if table['table_name'] not in table_names:
                         should_be_queried = False
                         break
 
