@@ -21,6 +21,76 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
     var tree_graph_obj = Object.create(tree_graph, {});
     var parsets_obj = Object.create(draw_parsets, {});
     return  {
+        
+        update_counts_parsets: function(base_url_domain, endpoint, cohort_id, version){
+            var context = this;
+            var filters = this.format_filters();
+            var api_url = this.generate_metadata_url(base_url_domain, endpoint, filters, cohort_id, undefined, version);
+            var update_filters = this.update_filter_counts;
+
+            $('.clinical-trees .spinner').show();
+            $('.parallel-sets .spinner').show();
+            $('.cohort-info .total-values').hide();
+            $('.cohort-info .spinner').show();
+            
+            var startReq = new Date().getTime();
+            $.ajax({
+                type: 'GET',
+                url: api_url,
+
+                // On success
+                success: function (results, status, xhr) {
+                    var stopReq = new Date().getTime();
+                    console.debug("[BENCHMARKING] Time for response in update_counts_parsets: "+(stopReq-startReq)+ "ms");
+                    attr_counts = results['count'];
+                    $('#total-samples').html(results['total']);
+                    $('#total-participants').html(results['participants']);
+                    update_filters(attr_counts);
+                    tree_graph_obj.draw_trees(attr_counts);
+                    
+                    if (results.hasOwnProperty('items')) {
+                        var features = [
+                                'cnvrPlatform',
+                                'DNAseq_data',
+                                'methPlatform',
+                                'gexpPlatform',
+                                'mirnPlatform',
+                                'rppaPlatform'
+                            ];
+                        var plot_features = [
+                            context.get_readable_name(features[0]),
+                            context.get_readable_name(features[1]),
+                            context.get_readable_name(features[2]),
+                            context.get_readable_name(features[3]),
+                            context.get_readable_name(features[4]),
+                            context.get_readable_name(features[5])
+                        ];
+                        for (var i = 0; i < results['items'].length; i++) {
+                            var new_item = {};
+                            for (var j = 0; j < features.length; j++) {
+                                var item = results['items'][i];
+                                new_item[plot_features[j]] = context.get_readable_name(item[features[j]]);
+                            }
+                            results['items'][i] = new_item;
+                        }
+
+                        parsets_obj.draw_parsets(results, plot_features);
+                    } else {
+                        console.debug(results);
+                    }
+                },
+                error: function(req,status,err){
+                    $('#total-samples').html("Error");
+                    $('#total-participants').html("Error");
+                },
+                complete: function(xhr,status) {
+                    $('.clinical-trees .spinner').hide();
+                    $('.parallel-sets .spinner').hide();
+                    $('.cohort-info .spinner').hide();
+                    $('.cohort-info .total-values').show();
+                }
+            });
+        },
 
         update_counts: function(base_url_domain, endpoint, cohort_id, limit, version) {
             var filters = this.format_filters();
@@ -54,6 +124,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             var filters = this.format_filters();
             var api_url = this.generate_metadata_url(base_url_domain, endpoint, filters, cohort_id, null, version);
             var context = this;
+            $('.parallel-sets .spinner').show();
             var startReq = new Date().getTime();
             $.ajax({
                 type: 'GET',
@@ -91,6 +162,11 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                     } else {
                         console.debug(results);
                     }
+                },error: function(req,status,err){
+
+                },
+                complete: function(xhr,status) {
+                    $('.parallel-sets .spinner').hide();
                 }
             })
         },
