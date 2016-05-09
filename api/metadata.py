@@ -975,9 +975,13 @@ def count_metadata(user, cohort_id=None, sample_ids=None, filters=None):
     try:
         # Add TCGA attributes to the list of available attributes
         if 'user_studies' not in filters or 'tcga' in filters['user_studies']['values']:
-            sample_tables['metadata_samples'] = {'sample_ids': None}
-            if sample_ids and None in sample_ids:
-                sample_tables['metadata_samples']['sample_ids'] = sample_ids[None]
+
+            # Get all public study metadata_sample tables
+            studies = Study.get_public_studies().values_list('id', flat=True)
+            for tables in User_Data_Tables.objects.filter(study_id__in=studies):
+                sample_tables[tables.metadata_samples_table] = {'sample_ids': None}
+                if sample_ids and None in sample_ids:
+                    sample_tables[tables.metadata_samples_table]['sample_ids'] = sample_ids[None]
 
             cursor = db.cursor(MySQLdb.cursors.DictCursor)
             cursor.execute('SELECT attribute, spec FROM metadata_attr')
@@ -985,8 +989,8 @@ def count_metadata(user, cohort_id=None, sample_ids=None, filters=None):
                 if row['attribute'] in METADATA_SHORTLIST:
                     valid_attrs[row['spec'] + ':' + row['attribute']] = {
                         'name': row['attribute'],
-                        'tables': ('metadata_samples',),
-                        'sample_ids': None
+                        'tables': [],
+                        'sample_ids': None,
                     }
             cursor.close()
 
@@ -1015,17 +1019,17 @@ def count_metadata(user, cohort_id=None, sample_ids=None, filters=None):
                     name = feature.shared_map_id.split(':')[-1]
 
                 if key not in valid_attrs:
-                    valid_attrs[key] = {'name': name, 'tables': (), 'sample_ids': None}
+                    valid_attrs[key] = {'name': name, 'tables': [], 'sample_ids': None}
 
                 for tables in User_Data_Tables.objects.filter(study_id=feature.study_id):
-                    valid_attrs[key]['tables'] += (tables.metadata_samples_table,)
+                    valid_attrs[key]['tables'].append({'table_name': tables.metadata_samples_table, 'sample_barcode_column': 'sample_barcode'})
 
-                    if tables.metadata_samples_table not in table_key_map:
+                    if not tables.metadata_samples_table in table_key_map:
                         table_key_map[tables.metadata_samples_table] = {}
                     table_key_map[tables.metadata_samples_table][key] = feature.feature_name
 
                     if key in filters:
-                        filters[key]['tables'] += (tables.metadata_samples_table,)
+                        filters[key]['tables'].append({'table_name': tables.metadata_samples_table, 'sample_barcode_column': 'sample_barcode'})
 
                     if sample_ids and feature.study_id in sample_ids:
                         valid_attrs[key]['sample_ids'] = sample_ids[feature.study_id]
@@ -1036,10 +1040,56 @@ def count_metadata(user, cohort_id=None, sample_ids=None, filters=None):
         if 'user_studies' in filters:
             del filters['user_studies']
 
-        # For filters with no tables at this point, assume its the TCGA metadata_samples table
+        table_list = []
+        # If using public projects or studies
+        if 'Project' in filters:
+            project_ids = filters['Project']['values']
+            # Get all projects selected, and their studies
+            project_studies = []
+            projects_seen = []
+            # If using Study filter, only select those studies from the projects
+            if 'Study' in filters:
+                studies = Study.objects.filter(id__in=filters['Study']['values'])
+
+                for study in studies:
+                    # Add study to list
+                    project_studies.append(study.id)
+
+                    # Note which projects have been seen by the studies.
+                    if study.project.id in project_ids and study.project.id not in projects_seen:
+                        projects_seen.append(study.project.id)
+
+            for project_id in project_ids:
+                if project_id not in projects_seen: # Project has not been seen by a study yet
+                    # Add all studies from this project
+                    project_studies += Study.objects.filter(project_id=project_id).values_list('id', flat=True)
+            # Collect tables for all studies selected
+            for tables in User_Data_Tables.objects.filter(study_id__in=project_studies):
+                table_list.append({'table_name': tables.metadata_samples_table, 'sample_barcode_column': 'SampleBarcode'})
+
+        # Else if using public studies, but not projects
+        elif 'Study' in filters and 'Project' not in filters:
+            # Collect tables for all studies selected
+            study_ids = filters['Study']['values']
+
+            for tables in User_Data_Tables.objects.filter(study_id__in=study_ids):
+                table_list.append({'table_name': tables.metadata_samples_table, 'sample_barcode_column': 'SampleBarcode'})
+        else: # otherwise, select all the public metadata_sample tables
+            studies = Study.get_public_studies().values_list('id', flat=True)
+            for tables in User_Data_Tables.objects.filter(study_id__in=studies):
+                table_list.append({'table_name': tables.metadata_samples_table, 'sample_barcode_column': 'SampleBarcode'})
+
+        # Delete project and studies from filters
+        if 'Project' in filters:
+            del filters['Project']
+        if 'Study' in filters:
+            del filters['Study']
+
+
+        # For filters with no tables at this point, assume it's public project/study data, so check for those filters
         for key, obj in filters.items():
             if not obj['tables']:
-                filters[key]['tables'].append('metadata_samples')
+                filters[key]['tables'] = table_list
 
         resulting_samples = {}
 
@@ -1048,21 +1098,28 @@ def count_metadata(user, cohort_id=None, sample_ids=None, filters=None):
             # Get a count for each feature
             table_values = {}
             feature['total'] = 0
+
+            # If there are no tables for this attr, then it's a public attr.
+            if len(feature['tables']) == 0:
+                feature['tables'] = table_list
+
             for table in feature['tables']:
                 # Check if the filters make this table 0 anyway
                 # We do this to avoid SQL errors for columns that don't exist
                 should_be_queried = True
-                if cohort_id and sample_tables[table]['sample_ids'] is None:
+                if cohort_id and sample_tables[table['table_name']]['sample_ids'] is None:
                     should_be_queried = False
 
+
                 for key, filter in filters.items():
-                    if table not in filter['tables']:
+                    table_names = [d['table_name'] for d in filter['tables']]
+                    if table not in table_names:
                         should_be_queried = False
                         break
 
                 # Build Filter Where Clause
                 filter_copy = copy.deepcopy(filters)
-                key_map = table_key_map[table] if table in table_key_map else False
+                key_map = table_key_map[table['table_name']] if table['table_name'] in table_key_map else False
                 where_clause = build_where_clause(filter_copy, alt_key_map=key_map)
                 col_name = feature['name']
                 if key_map and key in key_map:
@@ -1071,22 +1128,25 @@ def count_metadata(user, cohort_id=None, sample_ids=None, filters=None):
                 cursor = db.cursor()
                 if should_be_queried:
                     # Query the table for counts and values
-                    query = ('SELECT DISTINCT %s, COUNT(1) as count FROM %s') % (col_name, table)
-                    sample_query = ('SELECT DISTINCT %s AS sample_id FROM %s') % ('SampleBarcode' if table == 'metadata_samples' else 'sample_barcode', table)
+                    query = ('SELECT DISTINCT %s, COUNT(1) as count FROM %s') % (col_name, table['table_name'])
+                    sample_query = ('SELECT DISTINCT %s AS sample_id FROM %s') % (table['sample_barcode_column'], table['table_name'])
                     query_clause = ''
                     if where_clause['query_str']:
                         query_clause = ' WHERE ' + where_clause['query_str']
-                    if sample_tables[table]['sample_ids']:
-                        barcode_key = 'SampleBarcode' if table == 'metadata_samples' else 'sample_barcode'
-                        addt_cond = sample_tables[table]['sample_ids'][barcode_key]['query_str']
+
+                    # TODO: I think this is busted - pl
+                    if sample_tables[table['table_name']]['sample_ids']:
+                        # print table
+                        barcode_key = table['sample_barcode_column']
+                        addt_cond = sample_tables[table['table_name']]['sample_ids'][barcode_key]['query_str']
                         if addt_cond and where_clause['query_str']:
                             query_clause += ' AND ' + addt_cond
                         elif addt_cond:
                             query_clause = ' WHERE ' + addt_cond
-                        where_clause['value_tuple'] += sample_tables[table]['sample_ids'][barcode_key]['value_tuple']
+                        where_clause['value_tuple'] += sample_tables[table['table_name']]['sample_ids'][barcode_key]['value_tuple']
                     query += query_clause + (' GROUP BY %s ' % col_name)
                     sample_query += query_clause
-
+                    # print query
                     cursor.execute(query, where_clause['value_tuple'])
                     for row in cursor.fetchall():
                         if not row[0] in table_values:
@@ -1099,7 +1159,7 @@ def count_metadata(user, cohort_id=None, sample_ids=None, filters=None):
                         resulting_samples[row[0]] = 1
                 else:
                     # Just get the values so we can have them be 0
-                    cursor.execute(('SELECT DISTINCT %s FROM %s') % (col_name, table))
+                    cursor.execute(('SELECT DISTINCT %s FROM %s') % (col_name, table['table_name']))
                     for row in cursor.fetchall():
                         if not row[0] in table_values:
                             table_values[row[0]] = 0
@@ -2151,6 +2211,7 @@ class Meta_Endpoints_API_v2(remote.Service):
         db = sql_connection()
         django.setup()
 
+        # TODO: This is working for public data so far.
         # TODO enable filtering based off of this
         # Check for passed in saved search id
         if request.__getattribute__('cohort_id') is not None:
@@ -2159,15 +2220,27 @@ class Meta_Endpoints_API_v2(remote.Service):
 
         # Add TCGA attributes to the list of available attributes
         if 'user_studies' not in filters or 'tcga' in filters['user_studies']['values']:
-            sample_tables['metadata_samples'] = {'features':{}, 'barcode':'SampleBarcode', 'study_id':None}
+
+            # Get all public study metadata_sample tables
+            studies = Study.get_public_studies().values_list('id', flat=True)
+            for tables in User_Data_Tables.objects.filter(study_id__in=studies):
+                sample_tables[tables.metadata_samples_table] = {
+                    'barcode': 'SampleBarcode',
+                    'sample_ids': None,
+                    'study_id': tables.study_id
+                }
+                if sample_ids and None in sample_ids:
+                    sample_tables[tables.metadata_samples_table]['sample_ids'] = sample_ids[None]
+
             cursor = db.cursor(MySQLdb.cursors.DictCursor)
             cursor.execute('SELECT attribute, spec FROM metadata_attr')
             for row in cursor.fetchall():
-                key = row['spec'] + ':' + row['attribute']
-                valid_attrs[key] = {'name': row['attribute']}
-                sample_tables['metadata_samples']['features'][key] = row['attribute']
-                if key in filters:
-                    filters[key]['tables'] += ('metadata_samples',)
+                if row['attribute'] in METADATA_SHORTLIST:
+                    valid_attrs[row['spec'] + ':' + row['attribute']] = {
+                        'name': row['attribute'],
+                        'tables': [],
+                        'sample_ids': None,
+                    }
             cursor.close()
 
         # If we have a user, get a list of valid studies
@@ -2179,8 +2252,8 @@ class Meta_Endpoints_API_v2(remote.Service):
                     # Add all tables from each study
                     for tables in User_Data_Tables.objects.filter(study=study):
                         sample_tables[tables.metadata_samples_table] = {
-                            'features':{},
-                            'barcode':'SampleBarcode' if tables.metadata_samples_table == 'metadata_samples' else 'sample_barcode',
+                            'features': {},
+                            'barcode': 'sample_barcode',
                             'study_id': study.id
                         }
 
@@ -2208,21 +2281,73 @@ class Meta_Endpoints_API_v2(remote.Service):
         if 'user_studies' in filters:
             del filters['user_studies']
 
+        table_list = []
+        # If using public projects or studies
+        if 'Project' in filters:
+            project_ids = filters['Project']['values']
+            # Get all projects selected, and their studies
+            project_studies = []
+            projects_seen = []
+            # If using Study filter, only select those studies from the projects
+            if 'Study' in filters:
+                studies = Study.objects.filter(id__in=filters['Study']['values'])
+
+                for study in studies:
+                    # Add study to list
+                    project_studies.append(study.id)
+
+                    # Note which projects have been seen by the studies.
+                    if study.project.id in project_ids and study.project.id not in projects_seen:
+                        projects_seen.append(study.project.id)
+
+            for project_id in project_ids:
+                if project_id not in projects_seen: # Project has not been seen by a study yet
+                    # Add all studies from this project
+                    project_studies += Study.objects.filter(project_id=project_id).values_list('id', flat=True)
+            # Collect tables for all studies selected
+            for tables in User_Data_Tables.objects.filter(study_id__in=project_studies):
+                table_list.append({'table_name': tables.metadata_samples_table, 'sample_barcode_column': 'SampleBarcode'})
+
+        # Else if using public studies, but not projects
+        elif 'Study' in filters and 'Project' not in filters:
+            # Collect tables for all studies selected
+            study_ids = filters['Study']['values']
+
+            for tables in User_Data_Tables.objects.filter(study_id__in=study_ids):
+                table_list.append({'table_name': tables.metadata_samples_table, 'sample_barcode_column': 'SampleBarcode'})
+        else: # otherwise, select all the public metadata_sample tables
+            studies = Study.get_public_studies().values_list('id', flat=True)
+            for tables in User_Data_Tables.objects.filter(study_id__in=studies):
+                table_list.append({'table_name': tables.metadata_samples_table, 'sample_barcode_column': 'SampleBarcode'})
+
+        # Delete project and studies from filters
+        if 'Project' in filters:
+            del filters['Project']
+        if 'Study' in filters:
+            del filters['Study']
+
+
+        # For filters with no tables at this point, assume it's public project/study data, so check for those filters
+        for key, obj in filters.items():
+            if not obj['tables']:
+                filters[key]['tables'] = table_list
+
         results = []
         # Loop through the sample tables
         for table, table_settings in sample_tables.items():
             # Make sure we should run the query here, or if we have filters that won't return anything, skip
             should_be_queried = True
             for key, filter in filters.items():
-                if table not in filter['tables']:
+                table_names = [d['table_name'] for d in filter['tables']]
+                if table not in table_names:
                     should_be_queried = False
                     break
 
             if not should_be_queried:
                 continue
-
             filter_copy = copy.deepcopy(filters)
-            where_clause = build_where_clause(filter_copy, table_settings['features'])
+            # key_map = table_key_map[table['table_name']] if table['table_name'] in table_key_map else False
+            where_clause = build_where_clause(filter_copy)
             query = 'SELECT DISTINCT %s FROM %s' % (table_settings['barcode'], table)
             if where_clause['query_str']:
                 query += ' WHERE ' + where_clause['query_str']
