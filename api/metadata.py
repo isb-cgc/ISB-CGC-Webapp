@@ -962,7 +962,7 @@ def count_metadata(user, cohort_id=None, sample_ids=None, filters=None):
     if sample_ids is None:
         sample_ids = {}
 
-    for key in sample_ids:
+    for key in sample_ids: # key == study_id
         samples_by_study = sample_ids[key]
         sample_ids[key] = {
             'SampleBarcode': build_where_clause({'SampleBarcode': samples_by_study}),
@@ -980,8 +980,8 @@ def count_metadata(user, cohort_id=None, sample_ids=None, filters=None):
             studies = Study.get_public_studies().values_list('id', flat=True)
             for tables in User_Data_Tables.objects.filter(study_id__in=studies):
                 sample_tables[tables.metadata_samples_table] = {'sample_ids': None}
-                if sample_ids and None in sample_ids:
-                    sample_tables[tables.metadata_samples_table]['sample_ids'] = sample_ids[None]
+                if sample_ids and tables.study.id in sample_ids:
+                    sample_tables[tables.metadata_samples_table]['sample_ids'] = sample_ids[tables.study.id]
 
             cursor = db.cursor(MySQLdb.cursors.DictCursor)
             cursor.execute('SELECT attribute, spec FROM metadata_attr')
@@ -1133,7 +1133,6 @@ def count_metadata(user, cohort_id=None, sample_ids=None, filters=None):
                     if where_clause['query_str']:
                         query_clause = ' WHERE ' + where_clause['query_str']
 
-                    # TODO: I think this is busted - pl
                     if sample_tables[table['table_name']]['sample_ids']:
                         # print table
                         barcode_key = table['sample_barcode_column']
