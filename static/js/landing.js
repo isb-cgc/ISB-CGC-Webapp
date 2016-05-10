@@ -26,6 +26,8 @@ require.config({
         underscore: 'libs/underscore-min',
         assetscore: 'libs/assets.core',
         assetsresponsive: 'libs/assets.responsive',
+        d3: 'libs/d3.min',
+        d3tip: 'libs/d3-tip',
         base: 'base'
     },
     shim: {
@@ -38,16 +40,21 @@ require.config({
 });
 
 require([
+    /*
     'jquery',
     'jqueryui',
     'bootstrap',
     'session_security',
-
-    //'helpers/vis_helpers',
-
-    //'assetscore',
-    //'assetsresponsive',
+    'd3',
+    'd3tip',
+    'visualizations/createTreeGraph',
+    'helpers/vis_helpers',
+    */
+    'assetscore'
+    /*
+    ,'assetsresponsive',
     'base'
-], function($, jqueryui, bootstrap, session_security) {
+    */
+], function(/* $, jqueryui, bootstrap, session_security, d3, d3tip, treegraph, vis_helpers */) {
     A11y.Core();
 });

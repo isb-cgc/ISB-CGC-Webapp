@@ -66,7 +66,6 @@ METADATA_API = settings.BASE_API_URL + '/_ah/api/meta_api/'
 # This URL is not used : META_DISCOVERY_URL = settings.BASE_API_URL + '/_ah/api/discovery/v1/apis/meta_api/v1/rest'
 
 
-
 def data_availability_sort(key, value, data_attr, attr_details):
 
     if key == 'has_Illumina_DNASeq':
@@ -365,8 +364,6 @@ def cohort_detail(request, cohort_id=0, workbook_id=0, worksheet_id=0, create_wo
         'token': token
     }
 
-    print >> sys.stderr, clin_attr_dsp
-
     if USER_DATA_ON:
         template_values['user_attr'] = user_attr
 
@@ -663,6 +660,15 @@ def clone_cohort(request, cohort_id):
     for patient_code in patients:
         patient_list.append(Patients(cohort=cohort, patient_id=patient_code))
     Patients.objects.bulk_create(patient_list)
+
+    # Clone the filters
+    filters = Filters.objects.filter(resulting_cohort=parent_cohort).values_list('name', 'value')
+    # ...but only if there are any (there may not be)
+    if filters.__len__() > 0:
+        filters_list = []
+        for filter_pair in filters:
+            filters_list.append(Filters(name=filter_pair[0], value=filter_pair[1], resulting_cohort=cohort))
+        Filters.objects.bulk_create(filters_list)
 
     # Set source
     source = Source(parent=parent_cohort, cohort=cohort, type=Source.CLONE)
@@ -965,6 +971,40 @@ def cohort_filelist_ajax(request, cohort_id=0):
     result = urlfetch.fetch(data_url, deadline=120)
 
     return HttpResponse(result.content, status=200)
+
+
+@login_required
+@csrf_protect
+def cohort_samples_patients(request, cohort_id=0):
+    if debug: print >> sys.stderr, 'Called '+sys._getframe().f_code.co_name
+    if cohort_id == 0:
+        messages.error(request, 'Cohort provided does not exist.')
+        return redirect('/user_landing')
+
+    cohort_name = Cohort.objects.filter(id=cohort_id).values_list('name', flat=True)[0].__str__()
+
+    # Sample IDs
+    samples = Samples.objects.filter(cohort=cohort_id).values_list('sample_id', flat=True)
+
+    # Patient IDs, may be empty!
+    patients = Patients.objects.filter(cohort=cohort_id).values_list('patient_id', flat=True)
+
+    rows = (["Sample and Patient List for Cohort '"+cohort_name+"'"],)
+    rows += (["ID", "Type"],)
+
+    for sample_id in samples:
+        rows += ([sample_id, "Sample"],)
+
+    for patient_id in patients:
+        rows += ([patient_id, "Patient"],)
+
+    pseudo_buffer = Echo()
+    writer = csv.writer(pseudo_buffer)
+    response = StreamingHttpResponse((writer.writerow(row) for row in rows),
+                                     content_type="text/csv")
+    response['Content-Disposition'] = 'attachment; filename="samples_patients_in_cohort.csv"'
+    return response
+
 
 class Echo(object):
     """An object that implements just the write method of the file-like

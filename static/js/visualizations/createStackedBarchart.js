@@ -18,6 +18,20 @@
 
 define (['jquery', 'd3', 'd3tip', 'vis_helpers'],
 function($, d3, d3tip, vis_helpers) {
+
+    // There is only one tooltip, generated when this module is first loaded
+    var tip = d3tip()
+        .attr('class', 'd3-tip')
+        .direction('n')
+        .offset([0, 0])
+        .html(function (d) {
+            var str = "";
+            if (d.x == "0") {
+                str = "";
+            }
+            return '<span>' + d.name + ': ' + d.value + '</span>';
+        });
+
     return {
         draw_stacked_mutations: function(data) {
             var gene_list = [
@@ -115,18 +129,6 @@ function($, d3, d3tip, vis_helpers) {
                 .attr('class', 'gene')
                 .attr('transform', function (d, i) {
                     return 'translate(' + (i * x.rangeBand()) + ', 0)';
-                });
-
-            var tip = d3tip()
-                .attr('class', 'd3-tip')
-                .direction('n')
-                .offset([0, 0])
-                .html(function (d) {
-                    var str = "";
-                    if (d.x == "0") {
-                        str = "";
-                    }
-                    return '<span>' + d.name + ': ' + d.value + '</span>';
                 });
 
             var rect = gene.selectAll('rect')

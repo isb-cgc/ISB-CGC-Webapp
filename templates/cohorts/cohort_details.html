@@ -53,7 +53,7 @@
                 <li class="menu-item"><button class="btn btn-info" id="add-filter-btn">Edit</button> </li>
             {% endif %}
             <li class="menu-item"><button class="show-flyout btn btn-info" title="Show Comments">Comments</button></li>
-            <li class="menu-item"><a href="{% url 'clone_cohort' cohort.id %}" class="btn btn-info clone-cohort-btn">Duplicate</a></li>
+            <li class="menu-item"><a href="{% url 'clone_cohort' cohort.id %}" class="btn btn-info clone-cohort-btn" title="Duplicate this cohort">Duplicate</a></li>
             <li class="menu-item"><button class="btn btn-info" data-toggle="modal" data-target="#delete-cohort-modal">
                 {% if cohort.perm.perm == 'OWNER' %}
                     Delete
@@ -61,6 +61,9 @@
                     Remove
                 {% endif %}
             </button></li>
+            <li class="separator"></li>
+            <li class="menu-item"><a href="{% url 'cohort_filelist' cohort.id %}" class="btn btn-info view-files-btn" title="View this cohort's file list">View Files</a></li>
+            <li class="menu-item"><a href="{%  url 'download_ids' cohort.id %}" class="btn btn-info download-ids-btn" title="Download this cohort's patient and sample IDs">Download IDs</a></li>
             <li class="separator"></li>
             {% if cohort.perm.perm == 'OWNER' %}
             <li class="menu-item"><button class="btn btn-info" data-toggle="modal" data-target="#share-cohort-modal">Share</button></li>
@@ -145,7 +148,7 @@
                         {% for attr in data_attr %}
                             <li class="list-group-item">
                                 <div class="list-group-item__heading" role="tab" id="heading-{{ attr }}">
-                                    <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-{{ attr }}" aria-expanded="false" aria-controls="collapse-{{ attr }}">
+                                    <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-{{ attr }}" aria-expanded="false" aria-controls="collapse-{{ attr }}" {% if attr == 'miRNA_sequencing' %}style="text-transform:none!important"{% endif %}>
                                         <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ attr|get_readable_name }}
                                     </a>
                                 </div>
@@ -238,25 +241,36 @@
                 <h4 class="panel-title">Details</h4>
             </div>
             <div class="panel-body">
-                <p>Total Number of Samples: {{ total_samples }}</p>
-                <p>Total Number of Participants: {{ total_patients }}</p>
-                <p>Your Permissions: {{ cohort.perm.perm }}</p>
-                <p>Revision History:</p>
-                <ul>
-                    {% for item in cohort.get_revision_history %}
-                        <li>{{ item }}</li>
-                    {% endfor %}
-                </ul>
-                {% if shared_with_users and cohort.perm == 'OWNER'%}
-                    <br>
-                    <p><strong>Shared With Users:</strong></p>
+                <div class="row col-md-12 space-bottom-10">
+                    <span class="detail-label">Total Number of Samples:</span>
+                    <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
+                    <span class="total-values" id="total-samples">{{ total_samples }}</span>
+                </div>
+                <div class="row col-md-12 space-bottom-10">
+                    <span class="detail-label">Total Number of Participants:</span>
+                    <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
+                    <span class="total-values" id="total-participants">{{ total_patients }}</span>
+                </div>
+                <div class="row col-md-12 space-bottom-10">
+                    <span>Your Permissions: {{ cohort.perm.perm }}</span>
+                </div>
+                <div class="row col-md-12 space-bottom-10">
+                    <span>Revision History:</span>
                     <ul>
-                    {% for user in shared_with_users %}
-                        <li>{{ user.first_name }} {{ user.last_name }} [{{ user.email }}]</li>
-                    {% endfor %}
+                        {% for item in cohort.get_revision_history %}
+                            <li>{{ item }}</li>
+                        {% endfor %}
                     </ul>
-
-                {% endif %}
+                    {% if shared_with_users and cohort.perm == 'OWNER'%}
+                        <br>
+                        <p><strong>Shared With Users:</strong></p>
+                        <ul>
+                        {% for user in shared_with_users %}
+                            <li>{{ user.first_name }} {{ user.last_name }} [{{ user.email }}]</li>
+                        {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
             </div>
         </div>
 
@@ -276,8 +290,8 @@
                 <h4>Public Data Availability</h4>
             </div>
             <div class="panel-body">
+                <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
                 <div id="multi-categorical"></div>
-                <a href="{% url 'cohort_filelist' cohort.id %}">View File list</a>
             </div>
         </div>
 
