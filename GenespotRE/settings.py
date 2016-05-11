@@ -44,11 +44,6 @@ BASE_URL                = os.environ.get('BASE_URL', 'http://isb-cgc.appspot.com
 BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://api-dot-isb-cgc.appspot.com/')
 LOCAL_BASE_URL          = os.environ.get('BASE_URL', 'http://localhost:8080')
 
-
-BASE_URL                = os.environ.get('BASE_URL', 'http://isb-cgc.appspot.com/')
-BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://api-dot-isb-cgc.appspot.com/')
-LOCAL_BASE_URL          = os.environ.get('BASE_URL', 'http://localhost:8080')
-
 # Compute services
 PAIRWISE_SERVICE_URL    = os.environ.get('PAIRWISE_SERVICE_URL', None)
 
@@ -359,11 +354,11 @@ IPV4                                    = os.environ.get('IPV4', '')
 SAML_FOLDER                             = os.environ.get('SAML_FOLDER')
 
 # TaskQueue used when users go through the ERA flow
-# LOGOUT_WORKER_TASKQUEUE                  = os.environ.get('LOGOUT_WORKER_TASKQUEUE')
-# CHECK_NIH_USER_LOGIN_TASK_URI            = os.environ.get('CHECK_NIH_USER_LOGIN_TASK_URI')
+LOGOUT_WORKER_TASKQUEUE                  = os.environ.get('LOGOUT_WORKER_TASKQUEUE')
+CHECK_NIH_USER_LOGIN_TASK_URI            = os.environ.get('CHECK_NIH_USER_LOGIN_TASK_URI')
 
-# TaskQueue used by the sweep_nih_user_logins task
-# LOGOUT_SWEEPER_FALLBACK_TASKQUEUE        = os.environ.get('LOGOUT_SWEEPER_FALLBACK_TASKQUEUE')
+TaskQueue used by the sweep_nih_user_logins task
+LOGOUT_SWEEPER_FALLBACK_TASKQUEUE        = os.environ.get('LOGOUT_SWEEPER_FALLBACK_TASKQUEUE')
 
 ##############################
 #   Start django-finalware   #
