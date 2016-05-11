@@ -357,7 +357,7 @@ SAML_FOLDER                             = os.environ.get('SAML_FOLDER')
 LOGOUT_WORKER_TASKQUEUE                  = os.environ.get('LOGOUT_WORKER_TASKQUEUE')
 CHECK_NIH_USER_LOGIN_TASK_URI            = os.environ.get('CHECK_NIH_USER_LOGIN_TASK_URI')
 
-TaskQueue used by the sweep_nih_user_logins task
+# TaskQueue used by the sweep_nih_user_logins task
 LOGOUT_SWEEPER_FALLBACK_TASKQUEUE        = os.environ.get('LOGOUT_SWEEPER_FALLBACK_TASKQUEUE')
 
 ##############################
