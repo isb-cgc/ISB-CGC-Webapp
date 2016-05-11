@@ -726,7 +726,7 @@ def set_operation(request):
                     cohort = cohorts[i]
                     notes += ', ' + cohort.name
 
-                    cohort_patients = cohort_patients.intersection(Patients.objects.filter(cohort=cohort).values_list('patient_id'))
+                    cohort_patients = cohort_patients.intersection(Patients.objects.filter(cohort=cohort).values_list('patient_id', flat=True))
                     cohort_samples = cohort_samples.intersection(Samples.objects.filter(cohort=cohort).values_list('sample_id', 'study_id'))
 
                     # se1 = set(x[0] for x in s1)
