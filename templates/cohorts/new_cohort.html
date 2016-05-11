@@ -120,7 +120,7 @@
                         {% for attr in data_attr %}
                             <li class="list-group-item">
                                 <div class="list-group-item__heading" role="tab" id="heading-{{ attr }}">
-                                    <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-{{ attr }}" aria-expanded="false" aria-controls="collapse-{{ attr }}">
+                                    <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-{{ attr }}" aria-expanded="false" aria-controls="collapse-{{ attr }}" {% if attr == 'miRNA_sequencing' %}style="text-transform:none!important"{% endif %}>
                                         <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ attr|get_readable_name }}
                                     </a>
                                 </div>
@@ -195,6 +195,24 @@
             </div>
         </div>
 
+        <div class="cohort-info panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">Details</h4>
+            </div>
+            <div class="panel-body">
+                <div class="row col-md-6">
+                    <span class="detail-label">Total Number of Samples:</span>
+                    <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
+                    <span class="total-values" id="total-samples">TBD</span>
+                </div>
+                <div class="row col-md-6">
+                    <span class="detail-label">Total Number of Participants:</span>
+                    <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
+                    <span class="total-values" id="total-participants">TBD</span>
+                </div>
+            </div>
+        </div>
+
         <div class="clinical-trees panel panel-default">
             <div class="panel-heading">
                 <h4 class="panel-title">Clinical Features</h4>
@@ -212,6 +230,7 @@
                 <h4 class="panel-title">Public Data Availability</h4>
             </div>
             <div class="panel-body">
+                <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
                 <div id="multi-categorical"></div>
             </div>
         </div>

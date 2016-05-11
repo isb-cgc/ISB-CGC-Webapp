@@ -99,8 +99,9 @@ def get_readable_name(csv_name, attr=None):
         'Project': 'Public Projects',
         'Study': 'Public Studies',
         'user_projects': 'Your Projects',
-        'user_studys': 'Your Studies'
-
+        'user_studys': 'Your Studies',
+        'SNP_CN': 'SNP Copy Number',
+        'miRNA_sequencing': 'miRNA SEQUENCING'
     }
 
     if attr in attr_specific_translation.keys():

@@ -167,7 +167,7 @@ require([
                 form.reset();
                 var comment_count = parseInt($(form).parents('.worksheet').find('.comment-count').html());
                 $(form).parents('.worksheet').find('.comment-count').html(comment_count + 1);
-
+                $('.save-comment-btn').prop('disabled', true);
             },
             error: function () {
                 $('.comment-flyout .flyout-body').append('<p class="comment-content error">Fail to save comment. Please try back later.</p>');
@@ -382,9 +382,11 @@ require([
         var type = $(self).find(":selected").attr('type');
         $(self).parent().find(".attr-options").fadeOut();
         if(type == "gene"){
+            $(self).parent().find('.x-gene-attribute-select option:contains("select a specification")').prop('selected', true);
             $(self).parent().find(".x-gene-attribute-select").fadeIn();
             var gene = $(self).find(":selected").val();
         } else {
+            $(self).parent().find('.x-gene-attribute-select option:contains("select a specification")').prop('selected', true);
             $(self).parent().find(".x-gene-attribute-select").fadeOut();
             $(self).parent().find("#x-axis-data-type-container").fadeOut();
         }
@@ -440,9 +442,11 @@ require([
         $(self).parent().find(".attr-options").fadeOut();
         var type = $(self).find(":selected").attr('type');
         if(type == "gene"){
+            $(self).parent().find('.y-gene-attribute-select option:contains("select a specification")').prop('selected', true);
             $(self).parent().find(".y-gene-attribute-select").fadeIn();
             var gene = $(self).find(":selected").val();
         } else {
+            $(self).parent().find('.y-gene-attribute-select option:contains("select a specification")').prop('selected', true);
             $(self).parent().find(".y-gene-attribute-select").fadeOut();
             $(self).parent().find("#y-data-type-container").fadeOut();
         }

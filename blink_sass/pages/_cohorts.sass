@@ -117,12 +117,48 @@
 
     .parallel-sets
         margin-top: 30px
+        .panel-body
+            position: relative
+            overflow: hidden
+            min-height: 210px
+        .spinner
+            position: absolute
+            width: 100%
+            height: 100%
+            left: 0px
+            background: rgba(0,0,0,.5)
+            z-index: 10
+            i
+                position: absolute
+                left: 45%
+                top: 40%
+                margin: auto
+                font-size: 100px
+
+    .cohort-info
+        .detail-label
+            float: left
+        .total-values
+            margin-left: 10px
+        .spinner
+            width: 50px
+            margin-left: 10px
+            float: left
+        .panel-body
+            span.total-values
+                font-weight: 700
+        ul
+            padding: 5px 0px 0px 20px
+
+        .inline-detail:last-child
+                padding-right: 0px
 
     #create-cohort-form .form-control-static span
         display: inline-block
 
     #multi-categorical
-        overflow-x: scroll
+        overflow-x: hidden
+        min-height: 100px
         svg
             display: block
 

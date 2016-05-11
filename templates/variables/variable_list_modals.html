@@ -1,10 +1,10 @@
 <!-- Delete Variable Favorite Modal -->
-<div class="modal fade" id="delete-favorite-modal-{{ favorite.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-workbook-header" aria-hidden="true">
+<div class="modal fade" id="delete-favorite-modal-{{ favorite.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-var-fave-header" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Delete this variable favorite "{{ favorite.name|title }}"?</h4>
+                <h4 class="modal-title" id="delete-var-fave-header">Delete this variable favorite "{{ favorite.name|title }}"?</h4>
             </div>
             <form id="delete-workbook" method="POST" action="{% url 'variable_fav_delete' favorite.id %}">
                 {% csrf_token %}
@@ -18,12 +18,12 @@
 </div>
 
 <!-- Create new workbook using favorite Modal -->
-<div class="modal fade" id="new-favorite-workbook-modal-{{ favorite.id }}" tabindex="-1" role="dialog" aria-labelledby="edit-workbook-header" aria-hidden="true">
+<div class="modal fade" id="new-favorite-workbook-modal-{{ favorite.id }}" tabindex="-1" role="dialog" aria-labelledby="edit-workbook-var-fave-header" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Create a new workbook using the variable favorite "{{ favorite.name|title }}"</h4>
+                <h4 class="modal-title" id="edit-workbook-var-fave-header">Create a new workbook using the variable favorite "{{ favorite.name|title }}"</h4>
             </div>
             <form id="edit-workbook" method="POST" action="{% url 'worksheet_create_with_variables' %}">
                 {% csrf_token %}
