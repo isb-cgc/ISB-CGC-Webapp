@@ -176,7 +176,8 @@ def user_detail(request, user_id):
 
         era_login_url = "{}?sso&redirect_url={}/accounts/nih_login".format(settings.ERA_LOGIN_URL,
                                                                             settings.BASE_URL)
-
+        print settings.NIH_AUTH_ON
+        print user_details
         return render(request, 'GenespotRE/user_detail.html',
                       {'request': request,
                        'user_details': user_details,
