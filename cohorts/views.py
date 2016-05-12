@@ -758,7 +758,7 @@ def set_operation(request):
             cohorts = Cohort.objects.filter(id__in=cohort_ids, active=True, cohort_perms__in=request.user.cohort_perms_set.all())
             request.user.cohort_perms_set.all()
             if len(cohorts):
-                cohort_patients = set(Patients.objects.filter(cohort=cohorts[0]).values_list('patient_id'))
+                cohort_patients = set(Patients.objects.filter(cohort=cohorts[0]).values_list('patient_id', flat=True))
                 cohort_samples = set(Samples.objects.filter(cohort=cohorts[0]).values_list('sample_id', 'study_id'))
 
                 notes = 'Intersection of ' + cohorts[0].name
@@ -768,7 +768,7 @@ def set_operation(request):
                     cohort = cohorts[i]
                     notes += ', ' + cohort.name
 
-                    cohort_patients = cohort_patients.intersection(Patients.objects.filter(cohort=cohort).values_list('patient_id'))
+                    cohort_patients = cohort_patients.intersection(Patients.objects.filter(cohort=cohort).values_list('patient_id', flat=True))
                     cohort_samples = cohort_samples.intersection(Samples.objects.filter(cohort=cohort).values_list('sample_id', 'study_id'))
 
                     # se1 = set(x[0] for x in s1)
