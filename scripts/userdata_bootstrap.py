@@ -214,10 +214,11 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
                                                      public_feature_table))
         db.commit()
 
-        # Compare the number of studies in the user_data_tables table and in the studies table;
+        # Compare the number of studies in projects_user_data_tables, projects_study, and our study set.
         # if they don't match, something might be wrong.
         study_count = 0
         study_udt_count = 0
+        metadata_samples_study_count = len(studies.keys()) + (1 if "CCLE" not in studies.keys() else 0)
 
         cursor.execute("SELECT COUNT(DISTINCT id) FROM projects_study;")
         for row in cursor.fetchall():
@@ -227,9 +228,7 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
         for row in cursor.fetchall():
             study_udt_count = row[0]
 
-        metadata_samples_studies_count = len(studies.keys()) + 1 # +1 is for CCLE
-
-        if study_udt_count == study_count == metadata_samples_studies_count:
+        if study_udt_count == study_count == metadata_samples_study_count:
             if study_udt_count <= 0:
                 print "[ERROR] No studies found!"
             else:
@@ -239,7 +238,7 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
             print "[WARNING] Unequal number of studies between metadata_samples, projects_study, and " + \
                     "projects_user_data_tables. projects_study: "+study_count.__str__()+", " + \
                     "projects_user_data_tables: " + study_udt_count.__str__()+", metadata_samples: " + \
-                  metadata_samples_studies_count.__str__()
+                  metadata_samples_study_count.__str__()
 
     except Exception as e:
         print e
