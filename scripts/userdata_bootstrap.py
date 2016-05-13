@@ -16,7 +16,6 @@ limitations under the License.
 
 """
 
-import logging
 import os
 import traceback
 import time
@@ -25,10 +24,6 @@ from GenespotRE import secret_settings
 from argparse import ArgumentParser
 
 SUPERUSER_NAME = 'isb'
-
-logging.basicConfig(level=logging.INFO)
-
-logger = logging.getLogger(__name__)
 
 
 def get_mysql_connection():
@@ -97,17 +92,15 @@ def create_study_views(project, source_table, studies):
             # print "Testing creation of view '" + view_name + "'..."
 
             cursor.execute(view_check_sql, (view_name,))
-            if cursor.fetchall()[0] <= 0:
+            if cursor.fetchall()[0][0] <= 0:
                 raise Exception("Unable to create view '" + view_name + "'!")
 
             cursor.execute("SELECT COUNT(*) FROM %s;" % view_name)
-
-            for row in cursor.fetchall():
-                if row[0] <= 0:
-                    print "Creation of view '"+view_name+"' was successful, but no entries are found in " + \
-                        "it. Double-check the "+source_table+" table for valid entries."
-                else:
-                    print "Creation of view '" + view_name + "' was successful."
+            if cursor.fetchall()[0][0] <= 0:
+                print "Creation of view '"+view_name+"' was successful, but no entries are found in " + \
+                    "it. Double-check the "+source_table+" table for valid entries."
+            else:
+                print "Creation of view '" + view_name + "' was successful."
 
             study_names[study] = {"view_name": view_name, "project": project}
 
@@ -215,7 +208,7 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
         db.commit()
 
         # Compare the number of studies in projects_user_data_tables, projects_study, and our study set.
-        # if they don't match, something might be wrong.
+        # If they don't match, something might be wrong.
         study_count = 0
         study_udt_count = 0
         metadata_samples_study_count = len(studies.keys()) + (1 if "CCLE" not in studies.keys() else 0)
