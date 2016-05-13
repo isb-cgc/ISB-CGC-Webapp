@@ -227,7 +227,7 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
         for row in cursor.fetchall():
             study_udt_count = row[0]
 
-        metadata_samples_studies_count = len(studies.keys()) + 1 # +t is for CCLE
+        metadata_samples_studies_count = len(studies.keys()) + 1 # +1 is for CCLE
 
         if study_udt_count == study_count == metadata_samples_studies_count:
             if study_udt_count <= 0:
