@@ -71,15 +71,15 @@ def create_study_views(project, source_table, studies):
 
             # Drop any pre-existing view definition under this name
             if cursor.fetchall()[0][0] > 0:
-                logger.debug("Found pre-existing view '"+view_name+"', attempting to remove it...")
-                cursor.execute("DROP VIEW %s;", (view_name,))
+                print "[WARNING] Found pre-existing view '"+view_name+"', attempting to remove it..."
+                cursor.execute("DROP VIEW %s;" % view_name)
                 # Double-check...
                 cursor.execute(view_check_sql, (view_name,))
                 # If it's still there, there's a problem
                 if cursor.fetchall()[0][0] > 0:
                     raise Exception("Unable to drop pre-existing view '"+view_name+"'!")
 
-            logger.debug("Creating view '"+view_name+"'")
+            # print "Creating view '"+view_name+"'"
 
             # If project and study are the same we assume this is meant to
             # be a one-study project
@@ -94,7 +94,7 @@ def create_study_views(project, source_table, studies):
 
             cursor.execute(makeView, params)
 
-            logger.debug("Testing creation of view '" + view_name + "'...")
+            # print "Testing creation of view '" + view_name + "'..."
 
             cursor.execute(view_check_sql, (view_name,))
             if cursor.fetchall()[0] <= 0:
@@ -104,10 +104,10 @@ def create_study_views(project, source_table, studies):
 
             for row in cursor.fetchall():
                 if row[0] <= 0:
-                    logger.debug("Creation of view '"+view_name+"' was successful, but no entries are found in " +
-                                 "it. Double-check the "+source_table+" table for valid entries.")
+                    print "Creation of view '"+view_name+"' was successful, but no entries are found in " + \
+                        "it. Double-check the "+source_table+" table for valid entries."
                 else:
-                    logger.debug("Creation of view '" + view_name + "' was successful.")
+                    print "Creation of view '" + view_name + "' was successful."
 
             study_names[study] = {"view_name": view_name, "project": project}
 
@@ -181,19 +181,19 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
         for row in cursor.fetchall():
             bucket_id = row[0]
 
-        # Gather up the studies from the samples table, and add in CCLE manually
+        # Gather up the TCGA studies from the samples table
         cursor.execute(fetch_studies)
         for row in cursor.fetchall():
             if row[0] not in studies:
                 studies[row[0]] = 1
 
-        studies["CCLE"] = 1
-
         # Make the views
         for table in tables:
             study_table_views = create_study_views("TCGA", table, studies.keys())
+            # Make CCLE and add it in manually
             ccle_view = create_study_views("CCLE", table, ["CCLE"])
             study_table_views["CCLE"] = ccle_view["CCLE"]
+
             table_study_data[table] = study_table_views
 
         # Add the studies to the study table and store their generated IDs
@@ -219,20 +219,27 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
         study_count = 0
         study_udt_count = 0
 
-        cursor.execute("SELECT COUNT(DISTINCT %s) FROM projects_study;", ("id",))
+        cursor.execute("SELECT COUNT(DISTINCT id) FROM projects_study;")
         for row in cursor.fetchall():
             study_count = row[0]
 
-        cursor.execute("SELECT COUNT(DISTINCT %s) FROM projects_user_data_tables;", ("study_id",))
+        cursor.execute("SELECT COUNT(DISTINCT study_id) FROM projects_user_data_tables;")
         for row in cursor.fetchall():
             study_udt_count = row[0]
 
-        if study_udt_count == study_count:
-            print "[STATUS] Projects and studies appear to have been created successfully: " + study_count.__str__() + \
-                    " studies added."
+        metadata_samples_studies_count = len(studies.keys()) + 1 # +t is for CCLE
+
+        if study_udt_count == study_count == metadata_samples_studies_count:
+            if study_udt_count <= 0:
+                print "[ERROR] No studies found!"
+            else:
+                print "[STATUS] Projects and studies appear to have been created successfully: " + \
+                      study_count.__str__()+" studies added."
         else:
-            print "[WARNING] Unequal number of studies made in the study table as compared to the user_data_table. " + \
-                    study_count+" study entries but " + study_udt_count.__str__() + " user_data_table entries."
+            print "[WARNING] Unequal number of studies between metadata_samples, projects_study, and " + \
+                    "projects_user_data_tables. projects_study: "+study_count.__str__()+", " + \
+                    "projects_user_data_tables: " + study_udt_count.__str__()+", metadata_samples: " + \
+                  metadata_samples_studies_count.__str__()
 
     except Exception as e:
         print e
