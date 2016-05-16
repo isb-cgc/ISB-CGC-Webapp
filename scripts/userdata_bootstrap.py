@@ -223,7 +223,7 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
 
         if study_udt_count == study_count == metadata_samples_study_count:
             if study_udt_count <= 0:
-                print "[ERROR] No studies found!"
+                print "[ERROR] No studies found! Double-check the creation script and databse settings."
             else:
                 print "[STATUS] Projects and studies appear to have been created successfully: " + \
                       study_count.__str__()+" studies added."
