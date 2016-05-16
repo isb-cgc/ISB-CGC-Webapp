@@ -214,12 +214,10 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
         metadata_samples_study_count = len(studies.keys()) + (1 if "CCLE" not in studies.keys() else 0)
 
         cursor.execute("SELECT COUNT(DISTINCT id) FROM projects_study;")
-        for row in cursor.fetchall():
-            study_count = row[0]
+        study_count = cursor.fetchall()[0][0]
 
         cursor.execute("SELECT COUNT(DISTINCT study_id) FROM projects_user_data_tables;")
-        for row in cursor.fetchall():
-            study_udt_count = row[0]
+        study_udt_count = cursor.fetchall()[0][0]
 
         if study_udt_count == study_count == metadata_samples_study_count:
             if study_udt_count <= 0:
