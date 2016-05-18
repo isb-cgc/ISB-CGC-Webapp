@@ -185,6 +185,22 @@ require([
         $(this).parent().prev('.worksheet-nav').toggleClass('closed');
     });
 
+    // Adjust the browser history to note what sheet we were on
+    // when we leave this page, so that if a user comes back via
+    // history traversal, the right sheet will be active
+    $(window).on('beforeunload',function(e){
+        var selSheetAttr = $('li.active>a').attr('href');
+        var selSheetId = selSheetAttr.substring(selSheetAttr.indexOf("#")+1);
+        var url = window.location.pathname;
+        if(!url.match(/worksheets/)) {
+            url +=  "worksheets/" + selSheetId;
+        } else {
+            var urlMatch = url.match(/(^.*worksheets\/)\d+/);
+            url = urlMatch[1]+selSheetId;
+        }
+        history.replaceState({},window.document.title,url);
+    });
+
     // tabs interaction on dropdown selected
     var tabsList = $('#worksheets-tabs a[data-toggle="tab"]');
 
