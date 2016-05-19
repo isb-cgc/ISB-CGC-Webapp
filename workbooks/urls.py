@@ -2,7 +2,7 @@ from django.conf.urls import patterns, url
 
 import views
 
-urlpatterns = patterns('',
+urlpatterns = [
     url(r'^$', views.workbook_list, name='workbooks'),
     url(r'^samples$', views.workbook_samples, name='workbook_samples'),
 
@@ -41,4 +41,4 @@ urlpatterns = patterns('',
     url(r'^(?P<workbook_id>\d+)/worksheets/(?P<worksheet_id>\d+)/comments/create$',                     views.worksheet_comment, name='worksheet_comment_create'),
     url(r'^(?P<workbook_id>\d+)/worksheets/(?P<worksheet_id>\d+)/comments/(?P<comment_id>\d+)/edit$',   views.worksheet_comment, name='worksheet_comment_edit'),
     url(r'^(?P<workbook_id>\d+)/worksheets/(?P<worksheet_id>\d+)/comments/(?P<comment_id>\d+)/delete$', views.worksheet_comment, name='worksheet_comment_delete')
-)
+]

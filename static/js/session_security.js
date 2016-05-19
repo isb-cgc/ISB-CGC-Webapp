@@ -33,6 +33,7 @@ define(['jquery',], function ($) {
     //   leave a page with unsaved form data. Setting this will enable an
     //   onbeforeunload handler that doesn't block expire().
     // - events: a list of event types to watch for activity updates.
+    // - returnToUrl: a url to redirect users to expired sessions to. If this is not defined we just reload the page
     yourlabs.SessionSecurity = function(options) {
         // **HTML element** that should show to warn the user that his session will
         // expire.
@@ -68,7 +69,12 @@ define(['jquery',], function ($) {
         // seconds.
         expire: function() {
             this.expired = true;
-            window.location.reload();
+            if (this.returnToUrl !== undefined) {
+                window.location.href = this.returnToUrl;
+            }
+            else {
+                window.location.reload();
+            }
         },
 
         // Called when there has been no activity for more than warnAfter
