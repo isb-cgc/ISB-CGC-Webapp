@@ -3,4 +3,4 @@ from django.contrib import admin
 
 admin.autodiscover()
 
-urlpatterns = patterns('')
+urlpatterns = []

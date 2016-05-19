@@ -1,20 +1,4 @@
 """
-
-Copyright 2015, Institute for Systems Biology
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-
 SessionSecurityMiddleware is the heart of the security that this application
 attemps to provide.
 
@@ -43,13 +27,11 @@ class SessionSecurityMiddleware(object):
     """
 
     def is_passive_request(self, request):
-        # print '\nis_passive_request is ' + str(request.path in PASSIVE_URLS)
         return request.path in PASSIVE_URLS
 
     def process_request(self, request):
         """ Update last activity time or logout. """
         if not request.user.is_authenticated():
-            # print '\nuser not authenticated in middleware.py process_request'
             return
 
         now = datetime.now()
@@ -57,11 +39,8 @@ class SessionSecurityMiddleware(object):
 
         delta = now - get_last_activity(request.session)
         if delta >= timedelta(seconds=EXPIRE_AFTER):
-            # print '\nlogging out...'
             logout(request)
-            # print 'logged out...'
         elif not self.is_passive_request(request):
-            # print '\nnot a passive request so going to set_last_activity in utils.py'
             set_last_activity(request.session, now)
 
     def update_last_activity(self, request, now):
