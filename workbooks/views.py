@@ -236,7 +236,7 @@ def worksheet_display(request, workbook_id=0, worksheet_id=0):
     is_shareable = workbook_model.is_shareable(request)
 
     for worksheet in workbook_model.worksheets:
-        if str(worksheet.id) == worksheet_id :
+        if str(worksheet.id) == worksheet_id:
             display_worksheet = worksheet
 
     plot_types = Analysis.get_types()
