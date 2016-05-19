@@ -19,7 +19,7 @@ limitations under the License.
 from django.conf.urls import patterns, url
 import views
 
-urlpatterns = patterns('',
+urlpatterns = [
     url(r'^$',                                      views.cohorts_list, name='cohort_list'),
     url(r'^public',                                 views.public_cohort_list, name='public_cohort_list'),
     url(r'^new_cohort/',                            views.cohort_detail, name='cohort'),
@@ -51,4 +51,4 @@ urlpatterns = patterns('',
     url(r'^save_cohort_and_workbook/$',                                            views.save_cohort_for_new_workbook,         name="save_cohort_for_new_workbook"),
 
     url(r'^get_metadata_ajax/$',                views.get_metadata, name='metadata_count_ajax')
-)
+]
