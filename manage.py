@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 
-Copyright 2015, Institute for Systems Biology
+Copyright 2016, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ limitations under the License.
 
 import os
 import sys
-from google.appengine.ext import testbed
 
 if __name__ == "__main__":
     os.environ.setdefault("SETTINGS_VERSION", "prod")
@@ -32,6 +31,8 @@ if __name__ == "__main__":
     # See here for information on the stubs which can be initialized:
     # https://cloud.google.com/appengine/docs/python/tools/localunittesting#Python_Introducing_the_Python_testing_utilities
     if 'migrate' in sys.argv:
+        from google.appengine.ext import testbed
+
         stubBuilder = testbed.Testbed()
         stubBuilder.activate()
         stubBuilder.init_memcache_stub()
