@@ -55,7 +55,7 @@
                             <form action="{% url 'worksheet_genes_edit' workbook.id worksheet.id %}" method="POST">
                                 {% csrf_token %}
                                 <input type="hidden" name="gene_list_id" value="{{ gene_favorite.id }}">
-                                <button class="btn btn-default" type="submit"><i class="fa fa-plus"></i>Apply to Analysis</button>
+                                <button class="btn btn-default" type="submit"><i class="fa fa-plus"></i>Apply to Worksheet</button>
                                 <a class="btn btn-info"  href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Back</a>
                             </form>
                         {% endif %}
