@@ -39,7 +39,7 @@ class RPPAFeatureDef(object):
     # Example ID: RPPA:GYG1:GYG-Glycogenin1
     regex = re_compile("^RPPA:"
                        # gene
-                       "([a-zA-Z0-9]+):"
+                       "([a-zA-Z0-9\-]+):"
                        # protein name
                        "([a-zA-Z0-9._\-]+)$")
 

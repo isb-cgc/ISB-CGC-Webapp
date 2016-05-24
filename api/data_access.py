@@ -289,15 +289,18 @@ class FeatureDataEndpoints(remote.Service):
 
         # TODO Refactor pairwise call to separate function
         # Include pairwise results
-        input_vectors = [PairwiseInputVector(x_id, x_type, x_vec),
-                         PairwiseInputVector(c_id, c_type, c_vec)]
-
+        input_vectors = [PairwiseInputVector(x_id, x_type, x_vec)]
+        if c_id is not None:
+            input_vectors.append(PairwiseInputVector(c_id, c_type, c_vec))
         if y_id is not None:
             input_vectors.append(PairwiseInputVector(y_id, y_type, y_vec))
 
         pairwise_result = None
         try:
-            pairwise_result = self.get_pairwise_result(input_vectors)
+            if len(input_vectors) > 1:
+                pairwise_result = self.get_pairwise_result(input_vectors)
+            else:
+                pairwise_result = None
         except Exception as e:
             logging.warn("Pairwise results not included in returned object")
             logging.exception(e)

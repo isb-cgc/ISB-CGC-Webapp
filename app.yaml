@@ -17,7 +17,7 @@
 ###
 
 runtime: custom
-module: mvm
+module: default
 api_version: 1
 threadsafe: true
 vm: true
