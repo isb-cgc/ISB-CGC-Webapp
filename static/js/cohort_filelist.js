@@ -51,6 +51,9 @@ require([
     'assetscore',
     'assetsresponsive'
 ], function ($, jqueryui, bootstrap, session_security, d3, d3tip) {
+
+    var selFiles = {};
+
     var happy_name = function(input) {
         var dictionary = {
             'DNAseq_data': 'DNAseq',
@@ -113,15 +116,21 @@ require([
                     if (!('datatype' in files[i])) {
                         files[i]['datatype'] = '';
                     }
+
+                    var val = '';
+
                     if (files[i]['gg_readgroupset_id']) {
                         //files[i]['gg_readgroupset_id'] = '<a href="'+ base_url + '/igv/?sample_barcode=' + files[i]['sample'] + '&readgroupset_id=' + files[i]['gg_readgroupset_id'] + '"><i class="fa fa-check"></i> Go to IGV</a>'
                         files[i]['gg_readgroupset_id'] = '<label><input type="checkbox" name="readgroupset_id" data-type="readgroupset_id" value="' + files[i]['gg_readgroupset_id'] + ',' + files[i]['sample'] + '"> GA4GH</label>';
-                    } else if (files[i]['cloudstorage_location'] && files[i]['cloudstorage_location'].split('.').pop() == 'bam') {
+                        val = files[i]['gg_readgroupset_id'] + ',' + files[i]['sample'];
+                    } else if (files[i]['cloudstorage_location'] /*&& files[i]['cloudstorage_location'].split('.').pop() == 'bam'*/) {
                         //files[i]['gg_readgroupset_id'] = '<a href="'+ base_url + '/igv/?sample_barcode=' + files[i]['sample'] + '&bam_location=' + files[i]['cloudstorage_location'] + '"><i class="fa fa-check"></i> Go to IGV</a>'
                         files[i]['gg_readgroupset_id'] = '<label><input type="checkbox" name="gcs_bam" data-type="gcs_bam" value="' + files[i]['cloudstorage_location'] + ',' + files[i]['sample'] + '"> Cloud Storage</label>';
+                        val = files[i]['cloudstorage_location'] + ',' + files[i]['sample'];
                     } else {
-                            files[i]['gg_readgroupset_id'] = '';
+                        files[i]['gg_readgroupset_id'] = '';
                     }
+
                     $('.filelist-panel table tbody').append(
                         '<tr>' +
                         '<td>' + files[i]['sample'] + '</td>' +
@@ -132,23 +141,35 @@ require([
                         '<td>' + files[i]['gg_readgroupset_id'] + '</td>' +
                         '</tr>'
                     )
+
+                    // Remember any previous checks
+                    var thisCheck = $('.filelist-panel input[value="'+val+'"');
+                    selFiles[thisCheck.attr('value')] && thisCheck.attr('checked', true);
                 }
 
-                // If there are checkboxes for igv, show the "Lauch IGV" button
+                // If there are checkboxes for igv, show the "Launch IGV" button
                 if ($('.filelist-panel input[type="checkbox"]').length > 0) {
                     $('#view-igv input[type="submit"]').show();
-
-                    // Bind event handler to checkboxes
-                    $('.filelist-panel input[type="checkbox"]').on('click', function() {
-                        if ($('.filelist-panel input[type="checkbox"]:checked').length > 0) {
-                            $('#view-igv input[type="submit"]').prop('disabled', false);
-                        } else {
-                            $('#view-igv input[type="submit"]').prop('disabled', true);
-                        }
-                    });
                 } else {
                     $('#view-igv input[type="submit"]').hide();
                 }
+
+                // Bind event handler to checkboxes
+                $('.filelist-panel input[type="checkbox"]').on('click', function() {
+                    // Memorize anything being checked or unchecked
+                    var self=$(this);
+                    self.is(':checked') && (selFiles[self.attr('value')] = 1);
+                    !self.is(':checked') && (delete selFiles[self.attr('value')]);
+
+                    $('#readgroup_list').attr('value',("{{"+Object.keys(selFiles).join("}}{{")+"}}"));
+
+                    // Update the submit button
+                    if ($('.filelist-panel input[type="checkbox"]:checked').length > 0) {
+                        $('#view-igv input[type="submit"]').prop('disabled', false);
+                    } else {
+                        $('#view-igv input[type="submit"]').prop('disabled', true);
+                    }
+                });
 
                 $('#prev-page').removeClass('disabled');
                 $('#next-page').removeClass('disabled');

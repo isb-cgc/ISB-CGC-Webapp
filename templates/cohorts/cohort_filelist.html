@@ -74,6 +74,7 @@
                 </div>
                 <div class="panel-body">
                     <form id="view-igv" method="POST" action="{% url 'igv' %}">
+                        <input type="text" id="readgroup_list">
                         {% csrf_token %}
                         <p>Showing 20 files of <span class="file-count">unknown</span>. Page: <span class="page-num">1</span></p>
                         <div>
