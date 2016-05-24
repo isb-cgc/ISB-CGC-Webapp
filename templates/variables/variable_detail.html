@@ -48,7 +48,7 @@
                             <form action="{% url 'worksheet_variables_edit' workbook.id worksheet.id %}" method="POST">
                                 {% csrf_token %}
                                 <input type="hidden" name="variable_list_id" value="{{ variables.id }}">
-                                <button class="btn btn-default" type="submit"><i class="fa fa-plus"></i>Apply to Analysis</button>
+                                <button class="btn btn-default" type="submit"><i class="fa fa-plus"></i>Apply to Worksheet</button>
                                 <a class="btn btn-info"  href="{% url 'variable_select_for_existing_workbook' workbook.id worksheet.id %}">Back</a>
                             </form>
                         {% endif %}

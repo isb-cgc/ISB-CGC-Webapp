@@ -32,7 +32,7 @@ require([
 ], function($, jqueryui, bootstrap, session_security, _) {
     'use strict';
 
-    $('#addToNewAnalysis').on('click', function (event) {
+    $('#addToNewWorksheet').on('click', function (event) {
         //get the selected cohort
         var gene_lists = [];
         $('input[type="checkbox"]').each(function() {
@@ -66,7 +66,7 @@ require([
     });
 
     // Clear all entered genes list on click
-    $('#addToAnalysis').on('click', function (event) {
+    $('#addToWorksheet').on('click', function (event) {
         //get the selected cohort
         var gene_lists = [];
         $('input[type="checkbox"]').each(function() {

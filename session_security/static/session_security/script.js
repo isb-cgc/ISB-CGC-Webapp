@@ -11,13 +11,7 @@ require.config({  //session_security/static/session_security/session_security.js
     }
 });
 
-require([
-    'jquery',
-], function ($) {
-
-
-
-
+require(['jquery',], function ($) {
     // Use 'yourlabs' as namespace.
     if (window.yourlabs == undefined) window.yourlabs = {};
 
@@ -34,7 +28,8 @@ require([
     //   leave a page with unsaved form data. Setting this will enable an
     //   onbeforeunload handler that doesn't block expire().
     // - events: a list of event types to watch for activity updates.
-    yourlabs.SessionSecurity = function(options) {
+    // - returnToUrl: a url to redirect users to expired sessions to. If this is not defined we just reload the page
+    yourlabs.SessionSecurity = function (options) {
         // **HTML element** that should show to warn the user that his session will
         // expire.
         this.$warning = $('#session_security_warning');
@@ -49,7 +44,7 @@ require([
         $.extend(this, options);
 
         // Bind activity events to update this.lastActivity.
-        for(var i=0; i<this.events.length; i++) {
+        for (var i = 0; i < this.events.length; i++) {
             $(document)[this.events[i]]($.proxy(this.activity, this))
         }
 
@@ -67,28 +62,33 @@ require([
     yourlabs.SessionSecurity.prototype = {
         // Called when there has been no activity for more than expireAfter
         // seconds.
-        expire: function() {
+        expire: function () {
             this.expired = true;
-            window.location.reload();
+            if (this.returnToUrl !== undefined) {
+                window.location.href = this.returnToUrl;
+            }
+            else {
+                window.location.reload();
+            }
         },
 
         // Called when there has been no activity for more than warnAfter
         // seconds.
-        showWarning: function() {
+        showWarning: function () {
             this.$warning.fadeIn('slow');
         },
 
         // Called to hide the warning, for example if there has been activity on
         // the server side - in another browser tab.
-        hideWarning: function() {
+        hideWarning: function () {
             this.$warning.hide();
         },
 
         // Called by click, scroll, mousemove, keyup.
-        activity: function() {
+        activity: function () {
             var now = new Date();
             if (now - this.lastActivity < 1000)
-                // Throttle these checks to once per second
+            // Throttle these checks to once per second
                 return;
 
             this.lastActivity = now;
@@ -103,7 +103,7 @@ require([
         },
 
         // Hit the PingView with the number of seconds since last activity.
-        ping: function() {
+        ping: function () {
             var idleFor = Math.floor((new Date() - this.lastActivity) / 1000);
 
             $.ajax(this.pingUrl, {
@@ -119,7 +119,7 @@ require([
         },
 
         // Callback to process PingView response.
-        pong: function(data) {
+        pong: function (data) {
             if (data == 'logout') return this.expire();
 
             this.lastActivity = new Date();
@@ -128,7 +128,7 @@ require([
         },
 
         // Apply warning or expiry, setup next ping
-        apply: function() {
+        apply: function () {
             // Cancel timeout if any, since we're going to make our own
             clearTimeout(this.timeout);
 
@@ -148,24 +148,20 @@ require([
         },
 
         // onbeforeunload handler.
-        onbeforeunload: function(e) {
+        onbeforeunload: function (e) {
             if ($('form[data-dirty]').length && !this.expired) {
                 return this.confirmFormDiscard;
             }
         },
 
         // When an input change, set data-dirty attribute on its form.
-        formChange: function(e) {
+        formChange: function (e) {
             $(e.target).closest('form').attr('data-dirty', true);
         },
 
         // When a form is submitted or resetted, unset data-dirty attribute.
-        formClean: function(e) {
+        formClean: function (e) {
             $(e.target).removeAttr('data-dirty');
         }
     }
-
-
-
-
 });
