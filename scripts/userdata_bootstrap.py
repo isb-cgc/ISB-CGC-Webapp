@@ -25,7 +25,6 @@ from argparse import ArgumentParser
 
 SUPERUSER_NAME = 'isb'
 
-
 def get_mysql_connection():
     env = os.getenv('SERVER_SOFTWARE')
     db_settings = secret_settings.get('DATABASE')['default']
