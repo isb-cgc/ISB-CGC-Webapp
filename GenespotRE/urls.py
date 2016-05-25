@@ -25,7 +25,7 @@ import views
 
 admin.autodiscover()
 
-urlpatterns = patterns('',
+urlpatterns = [
 
     url(r'^$', views.landing_page, name='landing_page'),
     url(r'^user_landing/$', views.user_landing, name='user_landing'),
@@ -59,7 +59,7 @@ urlpatterns = patterns('',
     url(r'^genes/', include('genes.urls')),
     url(r'^variables/', include('variables.urls')),
     url(r'^share/', include('sharing.urls')),
-)
+]
 
 if settings.NIH_AUTH_ON:
     urlpatterns.append(url(r'^demo/', include('demo.urls', namespace='demo')))
