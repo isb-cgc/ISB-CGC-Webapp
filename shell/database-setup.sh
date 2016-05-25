@@ -9,7 +9,7 @@ export HOMEROOT=/home/vagrant/www
 export MYSQL_ROOT_USER=root
 fi
 
-export PYTHONPATH=${HOMEROOT}/lib/:${HOMEROOT}/
+export PYTHONPATH=${HOMEROOT}/lib/:${HOMEROOT}/:${HOME}/google_appengine/:${HOME}/google_appengine/lib/protorpc-1.0/
 echo $PYTHONPATH
 echo "Running Migrations..."
 python ${HOMEROOT}/manage.py migrate --noinput

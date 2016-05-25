@@ -14,24 +14,23 @@ It provides sensible defaults so you could start with just::
 {% if request.user.is_authenticated %}
 
     {# The modal dialog stylesheet, it's pretty light so it should be easy to hack #}
-    <link rel="stylesheet" type="text/css" href="{% static 'session_security/style.css' %}"></link>
+    <link rel="stylesheet" type="text/css" href="{% static 'session_security/style.css' %}">
 
     {# Include the template that actually contains the modal dialog #}
     {% include 'session_security/dialog.html' %}
 
     {# Load SessionSecurity javascript 'class', jquery should be loaded - by you - at this point #}
-    <!--<script type="text/javascript" src="{% static 'session_security/session_security.js' %}"></script>-->
-    <!--<script type="text/javascript" src="{% static 'js/session_security.js' %}"></script>-->
+    <script type="text/javascript" src="{% static 'session_security/script.js' %}"></script>
 
     {# Bootstrap a SessionSecurity instance as the sessionSecurity global variable #}
     {% localize off %}
         <script type="text/javascript">
-//            var sessionSecurity = new yourlabs.SessionSecurity({
-//                pingUrl: '{% url 'session_security_ping' %}',
-//                warnAfter: {{ request|warn_after|unlocalize }},
-//                expireAfter: {{ request|expire_after|unlocalize }},
-//                confirmFormDiscard: "{% trans 'You have unsaved changes in a form of this page.' %}"
-//            });
+            var sessionSecurity = new yourlabs.SessionSecurity({
+                pingUrl: '{% url 'session_security_ping' %}',
+                warnAfter: {{ request|warn_after|unlocalize }},
+                expireAfter: {{ request|expire_after|unlocalize }},
+                confirmFormDiscard: "{% trans 'You have unsaved changes in a form of this page.' %}"
+            });
         </script>
     {% endlocalize %}    
 {% endif %}

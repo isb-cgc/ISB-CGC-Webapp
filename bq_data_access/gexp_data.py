@@ -72,7 +72,7 @@ class GEXPFeatureDef(object):
     # Example ID: GEXP:TP53:mrna_bcgsc_illumina_hiseq
     regex = re_compile("^GEXP:"
                        # gene
-                       "([a-zA-Z0-9]+):"
+                       "([a-zA-Z0-9\-]+):"
                        # table
                        "(" + "|".join([table['id'] for table in TABLES]) +
                        ")$")

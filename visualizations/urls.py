@@ -21,7 +21,7 @@ from django.conf.urls import patterns, url
 import views
 
 
-urlpatterns = patterns('',
+urlpatterns = [
     url(r'^saveviz$', views.save_viz, name='saveviz'),
     url(r'^deleteviz$', views.delete_viz, name='deleteviz'),
     url(r'^share_viz/$', views.share_viz, name='share_viz'),
@@ -36,4 +36,4 @@ urlpatterns = patterns('',
     url(r'^circviz/$', views.circviz, name='circviz'),
     url(r'^circviz/(?P<id>\d+)/$', views.circviz, name='circviz_id'),
     url(r'^save_comment/$', views.save_comment, name='save_comment')
-)
+]

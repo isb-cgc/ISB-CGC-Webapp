@@ -327,7 +327,9 @@ require([
     });
 
     // If this is a new cohort, set TCGA Project selected as default
-    if (window.location.pathname.indexOf('new_cohort') >= 0) {
+    if (window.location.pathname.indexOf('new_cohort') >= 0
+        || window.location.pathname.match(/cohorts\/workbook\/\d+\/worksheet\/\d+\/create/i) !== null
+    ) {
         $('a[href="#collapse-Project"]').trigger('click')
         $('input[type="checkbox"][data-value-name="TCGA"]').trigger('click');
     } else {

@@ -2,7 +2,7 @@ from django.conf.urls import patterns, url
 
 import views
 
-urlpatterns = patterns('',
+urlpatterns = [
     url(r'^$',                                  views.variable_fav_list,    name='variables'),
     url(r'^create/$',                           views.variable_fav_edit,    name="variable_fav_create"),
     url(r'^(?P<variable_fav_id>\d+)/$',         views.variable_fav_detail,  name='variable_fav_detail'),
@@ -19,4 +19,4 @@ urlpatterns = patterns('',
     url(r'^workbook/(?P<workbook_id>\d+)/worksheet/(?P<worksheet_id>\d+)/new$',                       views.variable_fav_edit_for_existing_workbook,   name="variable_create_for_existing_workbook"),
 
     url(r'^(?P<variable_fav_id>\d+)/workbook/(?P<workbook_id>\d+)/worksheet/(?P<worksheet_id>\d+)$',  views.variable_fav_detail, name="variable_detail_for_existing_workbook")
-)
+]
