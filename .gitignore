@@ -19,6 +19,7 @@ parts/
 sdist/
 var/
 ssl/
+.ssl/
 *.egg-info/
 .installed.cfg
 *.egg
