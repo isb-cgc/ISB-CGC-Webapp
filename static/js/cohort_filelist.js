@@ -52,7 +52,12 @@ require([
     'assetsresponsive'
 ], function ($, jqueryui, bootstrap, session_security, d3, d3tip) {
 
-    var selFiles = {};
+    // The data-type/name input checkbox attritbutes below must be reflected here in this map
+    // to properly convey the checked list to IGV
+    var selFiles = {
+        gcs_bam: {},
+        readgroupset_id: {}
+    };
 
     var happy_name = function(input) {
         var dictionary = {
@@ -123,7 +128,7 @@ require([
                         //files[i]['gg_readgroupset_id'] = '<a href="'+ base_url + '/igv/?sample_barcode=' + files[i]['sample'] + '&readgroupset_id=' + files[i]['gg_readgroupset_id'] + '"><i class="fa fa-check"></i> Go to IGV</a>'
                         files[i]['gg_readgroupset_id'] = '<label><input type="checkbox" name="readgroupset_id" data-type="readgroupset_id" value="' + files[i]['gg_readgroupset_id'] + ',' + files[i]['sample'] + '"> GA4GH</label>';
                         val = files[i]['gg_readgroupset_id'] + ',' + files[i]['sample'];
-                    } else if (files[i]['cloudstorage_location'] /*&& files[i]['cloudstorage_location'].split('.').pop() == 'bam'*/) {
+                    } else if (files[i]['cloudstorage_location'] && files[i]['cloudstorage_location'].split('.').pop() == 'bam') {
                         //files[i]['gg_readgroupset_id'] = '<a href="'+ base_url + '/igv/?sample_barcode=' + files[i]['sample'] + '&bam_location=' + files[i]['cloudstorage_location'] + '"><i class="fa fa-check"></i> Go to IGV</a>'
                         files[i]['gg_readgroupset_id'] = '<label><input type="checkbox" name="gcs_bam" data-type="gcs_bam" value="' + files[i]['cloudstorage_location'] + ',' + files[i]['sample'] + '"> Cloud Storage</label>';
                         val = files[i]['cloudstorage_location'] + ',' + files[i]['sample'];
@@ -144,7 +149,7 @@ require([
 
                     // Remember any previous checks
                     var thisCheck = $('.filelist-panel input[value="'+val+'"');
-                    selFiles[thisCheck.attr('value')] && thisCheck.attr('checked', true);
+                    selFiles[thisCheck.attr('data-type')] && selFiles[thisCheck.attr('data-type')][thisCheck.attr('value')] && thisCheck.attr('checked', true);
                 }
 
                 // If there are checkboxes for igv, show the "Launch IGV" button
@@ -158,10 +163,11 @@ require([
                 $('.filelist-panel input[type="checkbox"]').on('click', function() {
                     // Memorize anything being checked or unchecked
                     var self=$(this);
-                    self.is(':checked') && (selFiles[self.attr('value')] = 1);
-                    !self.is(':checked') && (delete selFiles[self.attr('value')]);
+                    self.is(':checked') && (selFiles[self.attr('data-type')][self.attr('value')] = 1);
+                    !self.is(':checked') && delete selFiles[self.attr('data-type')][self.attr('value')];
 
-                    $('#readgroup_list').attr('value',("{{"+Object.keys(selFiles).join("}}{{")+"}}"));
+
+                    $('#checked_list_input').attr('value',JSON.stringify(selFiles));
 
                     // Update the submit button
                     if ($('.filelist-panel input[type="checkbox"]:checked').length > 0) {
