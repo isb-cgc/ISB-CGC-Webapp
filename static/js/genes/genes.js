@@ -111,7 +111,10 @@ require([
             if ($('div.token.invalid.repeat').length < 1) {
                 $('.helper-text__repeat').hide();
             }
-        })
+        }).on('tokenfield:edittoken',function(e){
+            e.preventDefault();
+            return false;
+        });
     }
     createTokenizer();
 
