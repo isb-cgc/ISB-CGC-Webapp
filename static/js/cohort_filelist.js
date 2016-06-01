@@ -55,7 +55,8 @@ require([
 
     var SEL_FILE_MAX = 5;
 
-    // The data-type/name input checkbox attritbutes below must be reflected here in this map
+    // File selection storage object
+    // The data-type/name input checkbox attritbutes in the form below must be reflected here in this map
     // to properly convey the checked list to IGV
     var selFiles = {
         gcs_bam: {},
@@ -83,9 +84,28 @@ require([
                 + Object.keys(this.readgroupset_id).length);
         }
     };
-    
+
+    // Set of display controls to update when we check or uncheck
+    var update_on_selex_change = function() {
+        // Update the hidden form control
+        $('#checked_list_input').attr('value',JSON.stringify(selFiles));
+
+        // Update the submit button
+        $('input[type="submit"]').prop('disabled', (selFiles.count() <= 0));
+
+        // Update the display counter
+        $('#selected-count').text(selFiles.count());
+
+        // Update the limit display
+        $('#selected-file-limit').css('color', (selFiles.count() < SEL_FILE_MAX ? "#000000" : "#BD12CC"));
+
+        // If we've cleared out our tokenfield, re-display the placeholder
+        selFiles.count() <= 0 && $('#selected-files-tokenfield').show();
+    };
+
+    // Our file list tokenizer
     var selFileField = $('#selected-files');
-    
+
     // Build the file tokenizer
     // Bootstrap tokenfield requires 'value' as the datem attribute field
     selFileField.tokenfield({
@@ -106,29 +126,14 @@ require([
 
         delete selFiles[e.attrs.dataType][e.attrs.value];
 
-        $('#checked_list_input').attr('value',JSON.stringify(selFiles));
-
-        // Update the submit button
-        $('input[type="submit"]').prop('disabled', (selFiles.count() <= 0));
-
-        // If we've cleared out our tokenfield, re-display the placeholder
-        selFiles.count() <= 0 && $('#selected-files-tokenfield').show();
-        
-        // Update the display counter
-        $('#selected-count').text(selFiles.count());
-
-        // Update the limit display
-        $('#selected-file-limit').css('color', (
-            selFiles.count() < SEL_FILE_MAX ? "#000000" : (selFiles.count == SEL_FILE_MAX ? "11A633" : "#BD12CC")
-        ));
+        update_on_selex_change();
 
         if(selFiles.count() <= SEL_FILE_MAX) {
             $('.filelist-panel input[type="checkbox"]').attr('disabled',false);
         }
-
     });
 
-    // Prevent user inputs
+    // Prevent direct user input on the tokenfield
     $('#selected-files-tokenfield').prop('disabled','disabled');
 
     var happy_name = function(input) {
@@ -231,6 +236,9 @@ require([
                     selFiles[thisCheck.attr('data-type')] && selFiles[thisCheck.attr('data-type')][thisCheck.attr('value')] && thisCheck.attr('checked', true);
                 }
 
+                // If we're at the max, disable all checkboxes which are not currently checked
+                selFiles.count() >= SEL_FILE_MAX && $('.filelist-panel input[type="checkbox"]:not(:checked)').attr('disabled',true);
+
                 selFileField.tokenfield('setTokens',selFiles.toTokens());
 
                 // If there are checkboxes for igv, show the "Launch IGV" button
@@ -242,26 +250,19 @@ require([
 
                 // Bind event handler to checkboxes
                 $('.filelist-panel input[type="checkbox"]').on('click', function() {
-                    // Memorize anything being checked or unchecked
+
                     var self=$(this);
 
-                    self.is(':checked') && (selFiles[self.attr('data-type')][self.attr('value')] = self.attr('token-label'));
-                    self.is(':checked') && $('#selected-files-tokenfield').hide();
-                    !self.is(':checked') && delete selFiles[self.attr('data-type')][self.attr('value')];
-                    !self.is(':checked') && (selFiles.count() <= 0) && $('#selected-files-tokenfield').show();
-
-                    $('#checked_list_input').attr('value',JSON.stringify(selFiles));
+                    if(self.is(':checked')) {
+                        selFiles[self.attr('data-type')][self.attr('value')] = self.attr('token-label');
+                        $('#selected-files-tokenfield').hide();
+                    } else {
+                        delete selFiles[self.attr('data-type')][self.attr('value')];
+                    }
 
                     selFileField.tokenfield('setTokens',selFiles.toTokens());
 
-                    // Update the submit button
-                    $('input[type="submit"]').prop('disabled', (selFiles.count() <= 0));
-
-                    // Update the display counter
-                    $('#selected-count').text(selFiles.count());
-
-                    // Update the limit display
-                    $('#selected-file-limit').css('color', (selFiles.count() < SEL_FILE_MAX ? "#000000" : "#BD12CC"));
+                    update_on_selex_change();
 
                     if (self.is(':checked') && selFiles.count() >= SEL_FILE_MAX) {
                         $('.filelist-panel input[type="checkbox"]:not(:checked)').attr('disabled',true);
