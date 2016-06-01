@@ -26,6 +26,7 @@ require.config({
         underscore: 'libs/underscore-min',
         assetscore: 'libs/assets.core',
         assetsresponsive: 'libs/assets.responsive',
+        tokenfield: 'libs/bootstrap-tokenfield.min',
         d3: 'libs/d3.min',
         d3tip: 'libs/d3-tip',
 
@@ -35,7 +36,8 @@ require.config({
         'jqueryui': ['jquery'],
         'session_security': ['jquery'],
         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
-        'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui']
+        'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
+        'tokenfield': ['jquery', 'jqueryui']
     }
 });
 
@@ -44,20 +46,72 @@ require([
     'jqueryui',
     'bootstrap',
     'session_security',
-
     'd3',
     'd3tip',
-
     'assetscore',
-    'assetsresponsive'
+    'assetsresponsive',
+    'tokenfield'
 ], function ($, jqueryui, bootstrap, session_security, d3, d3tip) {
 
     // The data-type/name input checkbox attritbutes below must be reflected here in this map
     // to properly convey the checked list to IGV
     var selFiles = {
         gcs_bam: {},
-        readgroupset_id: {}
+        readgroupset_id: {},
+        toTokens: function() {
+            var tokens = [];
+            for(var i in this.gcs_bam) {
+                tokens.push({
+                    label: this.gcs_bam[i],
+                    value: i,
+                    dataType: "gcs_bam"
+                });
+            }
+            for(var i in this.readgroupset_id) {
+                tokens.push({
+                    value: i,
+                    label: this.readgroupset_id[i],
+                    dataType: "readgroupset_id"
+                });
+            }
+            return tokens;
+        },
+        count: function() {
+            return (Object.keys(this.gcs_bam).length
+                + Object.keys(this.readgroupset_id).length);
+        }
     };
+    
+    var selFileField = $('#selected-files');
+    
+    // Build the file tokenizer
+    // Bootstrap tokenfield requires 'value' as the datem attribute field
+    selFileField.tokenfield({
+        delimiter : " ",
+        minLength: 2,
+        limit: 5,
+        tokens: selFiles.toTokens(),
+        placeholder: "Select files"
+    // No creating
+    }).on('tokenfield:edittoken',function(e){
+        e.preventDefault();
+        return false;
+    }).on('tokenfield:removedtoken',function(e){
+        var thisCheck = $('.filelist-panel input[value="'+e.attrs.value+'"');
+        thisCheck.prop('checked',false);
+        delete selFiles[e.attrs.dataType][e.attrs.value];
+        $('#checked_list_input').attr('value',JSON.stringify(selFiles));
+        // Update the submit button
+        $('input[type="submit"]').prop('disabled', (selFiles.count() <= 0));
+
+        if(selFiles.count() <= 0) {
+            $('#selected-files-tokenfield').show();
+        }
+
+    });
+
+    // Prevent user inputs
+    $('#selected-files-tokenfield').prop('disabled','disabled');
 
     var happy_name = function(input) {
         var dictionary = {
@@ -122,19 +176,26 @@ require([
                         files[i]['datatype'] = '';
                     }
 
-                    var val = '';
+                    var val = null;
+                    var dataTypeName = '';
+                    var label = '';
+                    var tokenLabel = files[i]['sample']+", "+files[i]['pipeline']+", "+happy_name(files[i]['platform'])+", "+files[i]['datatype'];
 
                     if (files[i]['gg_readgroupset_id']) {
-                        //files[i]['gg_readgroupset_id'] = '<a href="'+ base_url + '/igv/?sample_barcode=' + files[i]['sample'] + '&readgroupset_id=' + files[i]['gg_readgroupset_id'] + '"><i class="fa fa-check"></i> Go to IGV</a>'
-                        files[i]['gg_readgroupset_id'] = '<label><input type="checkbox" name="readgroupset_id" data-type="readgroupset_id" value="' + files[i]['gg_readgroupset_id'] + ',' + files[i]['sample'] + '"> GA4GH</label>';
                         val = files[i]['gg_readgroupset_id'] + ',' + files[i]['sample'];
-                    } else if (files[i]['cloudstorage_location'] && files[i]['cloudstorage_location'].split('.').pop() == 'bam') {
-                        //files[i]['gg_readgroupset_id'] = '<a href="'+ base_url + '/igv/?sample_barcode=' + files[i]['sample'] + '&bam_location=' + files[i]['cloudstorage_location'] + '"><i class="fa fa-check"></i> Go to IGV</a>'
-                        files[i]['gg_readgroupset_id'] = '<label><input type="checkbox" name="gcs_bam" data-type="gcs_bam" value="' + files[i]['cloudstorage_location'] + ',' + files[i]['sample'] + '"> Cloud Storage</label>';
+                        dataTypeName = "readgroupset_id";
+                        label = "GA4GH";
+                    } else if (files[i]['cloudstorage_location'] /*&& files[i]['cloudstorage_location'].split('.').pop() == 'bam'*/) {
                         val = files[i]['cloudstorage_location'] + ',' + files[i]['sample'];
-                    } else {
-                        files[i]['gg_readgroupset_id'] = '';
+                        dataTypeName = "gcs_bam";
+                        label = "Cloud Storage";
                     }
+
+                    files[i]['gg_readgroupset_id'] = (
+                        val !== null
+                        ? '<label><input type="checkbox" token-label="'+tokenLabel+'"name="'+dataTypeName+'" data-type="'+dataTypeName+'" value="'+val+'"> '+label+'</label>'
+                        : ''
+                    );
 
                     $('.filelist-panel table tbody').append(
                         '<tr>' +
@@ -152,29 +213,32 @@ require([
                     selFiles[thisCheck.attr('data-type')] && selFiles[thisCheck.attr('data-type')][thisCheck.attr('value')] && thisCheck.attr('checked', true);
                 }
 
+                selFileField.tokenfield('setTokens',selFiles.toTokens());
+
                 // If there are checkboxes for igv, show the "Launch IGV" button
-                if ($('.filelist-panel input[type="checkbox"]').length > 0) {
-                    $('#view-igv input[type="submit"]').show();
+                if (selFiles.count() > 0 || $('.filelist-panel input[type="checkbox"]').length > 0) {
+                    $('input[type="submit"]').show();
                 } else {
-                    $('#view-igv input[type="submit"]').hide();
+                    $('input[type="submit"]').hide();
                 }
 
                 // Bind event handler to checkboxes
                 $('.filelist-panel input[type="checkbox"]').on('click', function() {
                     // Memorize anything being checked or unchecked
                     var self=$(this);
-                    self.is(':checked') && (selFiles[self.attr('data-type')][self.attr('value')] = 1);
+                    self.is(':checked') && (selFiles[self.attr('data-type')][self.attr('value')] = self.attr('token-label'));
+                    self.is(':checked') && $('#selected-files-tokenfield').hide();
                     !self.is(':checked') && delete selFiles[self.attr('data-type')][self.attr('value')];
-
+                    !self.is(':checked') && (selFiles.count() <= 0) && $('#selected-files-tokenfield').show();
 
                     $('#checked_list_input').attr('value',JSON.stringify(selFiles));
 
+                    selFileField.tokenfield('setTokens',selFiles.toTokens());
+
                     // Update the submit button
-                    if ($('.filelist-panel input[type="checkbox"]:checked').length > 0) {
-                        $('#view-igv input[type="submit"]').prop('disabled', false);
-                    } else {
-                        $('#view-igv input[type="submit"]').prop('disabled', true);
-                    }
+                    $('input[type="submit"]').prop('disabled', (selFiles.count() <= 0));
+
+
                 });
 
                 $('#prev-page').removeClass('disabled');
@@ -213,7 +277,7 @@ require([
         update_table();
     });
 
-    $('#view-igv input[type="submit"]').prop('disabled', true);
-    $('#view-igv input[type="submit"]').hide();
+    $('input[type="submit"]').prop('disabled', true);
+    $('input[type="submit"]').hide();
     update_table();
 });

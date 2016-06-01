@@ -72,9 +72,10 @@ require([
         geneListField.tokenfield({
             typeahead : [
                 null, {
-                    source : gene_suggestions.ttAdapter(),
+                    source: gene_suggestions.ttAdapter(),
                     display: 'value'
-            }],
+                }
+            ],
             delimiter : " ",
             minLength: 2,
             tokens: geneFavs
