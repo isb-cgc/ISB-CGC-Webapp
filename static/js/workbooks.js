@@ -190,11 +190,22 @@ require([
 
     tabsList.on('shown.bs.tab', function (e) {
         var targetTab = $(this).parent();
-        var targetWorksheetNumber = $(this).attr('href');
+        var targetWorksheetNumber = $(this).attr('href').substring(1);
 
         if ($(this).closest('#more-tabs').length > 0) {
             openTabsfromDropdown(targetTab);
         }
+
+        // Edit the current history entry to store our active tab
+        var url = window.location.pathname;
+        if(!url.match(/worksheets/)) {
+            url +=  "worksheets/" + targetWorksheetNumber;
+        } else {
+            var urlMatch = url.match(/(^.*worksheets\/).*/);
+            url = urlMatch[1]+targetWorksheetNumber;
+        }
+        history.replaceState({url: url, title: window.document.title},window.document.title,url);
+
         e.preventDefault();
     });
 

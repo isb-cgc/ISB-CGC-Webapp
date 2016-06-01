@@ -2,7 +2,7 @@ from django.conf.urls import patterns, url
 
 import views
 
-urlpatterns = patterns('',
+urlpatterns = [
     url(r'^$', views.project_list, name='projects'),
     url(r'^public/$', views.public_project_list, name='public_projects'),
     url(r'^upload/$', views.project_upload, name="project_upload"),
@@ -16,4 +16,4 @@ urlpatterns = patterns('',
     url(r'^(?P<project_id>\d+)/study/(?P<study_id>\d+)/edit/?$', views.study_edit, name="study_edit"),
     url(r'^(?P<project_id>\d+)/study/(?P<study_id>\d+)/data/(?P<dataset_id>\d+)/success/?$', views.study_data_success, name="study_data_success"),
     url(r'^(?P<project_id>\d+)/study/(?P<study_id>\d+)/data/(?P<dataset_id>\d+)/error/?$', views.study_data_error, name="study_data_error"),
-)
+]

@@ -22,6 +22,6 @@ from django.conf import settings
 
 import views
 
-urlpatterns = patterns('',
+urlpatterns = [
     url(r'^samples/', views.sample_analyses, name='sample_analyses')
-)
+]

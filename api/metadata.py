@@ -24,6 +24,7 @@ from protorpc import remote
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.contrib.auth.models import User as Django_User
+from allauth.socialaccount.models import SocialToken, SocialAccount
 from accounts.models import NIH_User
 from cohorts.models import Cohort_Perms,  Cohort as Django_Cohort,Patients, Samples, Filters
 from projects.models import Study, User_Feature_Definitions, User_Feature_Counts, User_Data_Tables
@@ -860,26 +861,30 @@ class IncomingMetadataCount(messages.Message):
 
 
 def get_current_user(request):
+    """
+    Returns a Django_User object from either endpoints.get_current_user() or an access token.
+    Anytime this is used in an endpoint, request_finished.send(self) must be used
+    """
     user_email = None
-    user_id = None
+    access_token = request.__getattribute__('token')
+
     if endpoints.get_current_user() is not None:
         user_email = endpoints.get_current_user().email()
 
-    # users have the option of pasting the access token in the query string
-    # or in the 'token' field in the api explorer
-    # but this is not required
-    access_token = request.__getattribute__('token')
-    if access_token:
-        user_email = get_user_email_from_token(access_token)
-
-    if user_email or user_id:
-        django.setup()
-        try:
+    django.setup()
+    try:
+        if access_token is not None and user_email is None:
+            social_account_id = SocialToken.objects.get(token=access_token).account_id
+            user_id = SocialAccount.objects.get(id=social_account_id).user_id
+            return Django_User.objects.get(id=user_id)
+        elif user_email is not None:
             return Django_User.objects.get(email=user_email)
-        except (ObjectDoesNotExist, MultipleObjectsReturned), e:
-            logger.warn(e)
+        else:
+            return None
+    except (ObjectDoesNotExist, MultipleObjectsReturned), e:
+        logger.warn(e)
+        return None
 
-    return None
 
 # TODO: needs to be refactored to use other samples tables
 def get_participant_list(sample_ids):
