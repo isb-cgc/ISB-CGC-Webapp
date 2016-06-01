@@ -101,7 +101,12 @@ require([
 
         // If we've cleared out our tokenfield, re-display the placeholder
         selFiles.count() <= 0 && $('#selected-files-tokenfield').show();
+
+        selFiles.count() >= 5 ? $('.alert-dismissable').show() : $('.alert-dismissable').hide();
+
     };
+
+    $('.file-limit').text(SEL_FILE_MAX);
 
     // Our file list tokenizer
     var selFileField = $('#selected-files');
@@ -266,8 +271,6 @@ require([
 
                     if (self.is(':checked') && selFiles.count() >= SEL_FILE_MAX) {
                         $('.filelist-panel input[type="checkbox"]:not(:checked)').attr('disabled',true);
-                        alert("The maximum number of files which can be viewed in IGV\n"
-                            + "simultaneously is " + SEL_FILE_MAX + ".");
                     } else {
                         $('.filelist-panel input[type="checkbox"]').attr('disabled',false);
                     }
