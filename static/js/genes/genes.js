@@ -82,7 +82,7 @@ require([
         }).on('tokenfield:createdtoken', function (event) {
             //  Check whether the user enter a repetitive token
             //  If it is a repetitive token, show a message instead
-            var existingGenes = event.currentTarget.value.split(', ');
+            var existingGenes = event.currentTarget.value.split(' ');
             var parentHolder = $('#tokenfield-holder');
             $.each(existingGenes, function (index, gene) {
                 if (gene.toUpperCase() === event.attrs.value.toUpperCase()) {
