@@ -63,15 +63,17 @@
                     <input type="submit" form ="view-igv" value="Launch IGV" class="btn btn-primary pull-right" style="display: none;"/>
                     <h4>Selected Files</h4>
                 </div>
-                <div class="panel-body">
+                <div class="panel-body file-list">
+                    <p><span id="selected-count">0</span> file(s) selected (<span id="selected-file-limit">limit 5</span>)</p>
                     <div id="tokenfield-holder">
                         <!-- "selected files tokenizer" -->
-                        <textarea name="selected-files" class="form-control tokenfield" id="selected-files" placeholder="Select a file"></textarea>
+                        <textarea name="selected-files" class="form-control tokenfield" id="selected-files" placeholder="Select files"></textarea>
                     </div>
                 </div>
             </div>
             <div class="filelist-panel panel">
                 <div class="panel-heading">
+                    <a id="download-link" href="{{ download_url }}" title="Download Files as CSV" class="pull-right"><i class="fa fa-download"></i> Download File List as CSV</a>
                     <h4>File Listing</h4>
                 </div>
                 <div class="panel-body">
@@ -79,7 +81,6 @@
                         <input type="text" class="hidden_form_value" id="checked_list_input" name="checked_list" data-type="checked_list">
                         {% csrf_token %}
                         <p>Showing 20 files of <span class="file-count">unknown</span>. Page: <span class="page-num">1</span></p>
-                        <a id="download-link" href="{{ download_url }}" title="Download Files as CSV" class="pull-right"><i class="fa fa-download"></i> Download File List as CSV</a>
                         <div>
                             <a role="button" id="prev-page" class="btn btn-default disabled">Previous Page</a>
                             <a role="button" id="next-page" class="btn btn-default">Next Page</a>
