@@ -8,7 +8,8 @@ Vagrant.configure(2) do |config|
   
   config.vm.synced_folder ".", "/home/vagrant/www"
   config.vm.synced_folder "../", "/home/vagrant/parentDir"
-  
+  config.vm.synced_folder "../ISB-CGC-Common", "/home/vagrant/www/ISB-CGC-Common"
+
   config.vm.provision "shell", path: 'shell/install-deps.sh'
   config.vm.provision "shell", path: 'shell/create-database.sh'
   config.vm.provision "shell", path: 'shell/database-setup.sh'
