@@ -1905,7 +1905,7 @@ class Meta_Endpoints_API(remote.Service):
                             else:
                                 item['DatafileNameKey'] = ''
 
-                        file_list.append(FileDetails(sample=item['SampleBarcode'], cloudstorage_location=item['DatafileNameKey'], filename=item['DatafileName'], pipeline=item['Pipeline'], platform=item['Platform'], datalevel=item['DataLevel'], datatype=item['Datatype'], gg_readgroupset_id=item['GG_readgroupset_id']))
+                        file_list.append(FileDetails(sample=item['SampleBarcode'], cloudstorage_location=item['DatafileNameKey'], filename=item['DatafileName'], pipeline=item['Pipeline'], platform=item['Platform'], datalevel=item['DataLevel'], datatype=(item['Datatype'] or ""), gg_readgroupset_id=item['GG_readgroupset_id']))
                 else:
                     file_list.append(FileDetails(sample='None', filename='', pipeline='', platform='', datalevel=''))
             return SampleFiles(total_file_count=count, page=page, platform_count_list=platform_count_list, file_list=file_list)
