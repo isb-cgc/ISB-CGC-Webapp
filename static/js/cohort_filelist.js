@@ -203,7 +203,7 @@ require([
                         val = files[i]['gg_readgroupset_id'] + ',' + files[i]['sample'];
                         dataTypeName = "readgroupset_id";
                         label = "GA4GH";
-                    } else if (files[i]['cloudstorage_location'] /*&& files[i]['cloudstorage_location'].split('.').pop() == 'bam'*/) {
+                    } else if (files[i]['cloudstorage_location'] && files[i]['cloudstorage_location'].split('.').pop() == 'bam') {
                         val = files[i]['cloudstorage_location'] + ',' + files[i]['sample'];
                         dataTypeName = "gcs_bam";
                         label = "Cloud Storage";
