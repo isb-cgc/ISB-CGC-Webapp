@@ -19,10 +19,18 @@ limitations under the License.
 # Django settings for GAE_Django17 project.
 import os
 from os.path import join, dirname
+import sys
+
 import dotenv
+
 dotenv.read_dotenv(join(dirname(__file__), '../.env'))
 
 BASE_DIR                = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + os.sep
+
+SHARED_DJANGO_APPS_DIR  = 'ISB-CGC-Common'
+# Add the shared Django application subdirectory to the Python module search path
+sys.path.append(os.path.join(BASE_DIR, SHARED_DJANGO_APPS_DIR))
+
 DEBUG                   = bool(os.environ.get('DEBUG', False))
 ALLOWED_HOSTS           = [os.environ.get('ALLOWED_HOST', 'localhost')]
 
