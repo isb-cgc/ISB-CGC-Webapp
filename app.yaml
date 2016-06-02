@@ -50,10 +50,6 @@ handlers:
   script: google.appengine.ext.deferred.deferred.application
   login: admin
   secure: always
-- url: /tasks/.*
-  script: main.application
-  secure: always
-  login: admin
 - url: /.*
   script: main.application
   secure: always
