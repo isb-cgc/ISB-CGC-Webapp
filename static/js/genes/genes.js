@@ -79,20 +79,20 @@ require([
             delimiter : " ",
             minLength: 2,
             tokens: geneFavs
-        }).on('tokenfield:createdtoken', function (event) {
+        }).on('tokenfield:createtoken',function(event){
             //  Check whether the user enter a repetitive token
             //  If it is a repetitive token, show a message instead
-            var existingGenes = event.currentTarget.value.split(' ');
-            var parentHolder = $('#tokenfield-holder');
+            var existingGenes = geneListField.tokenfield('getTokens');
             $.each(existingGenes, function (index, gene) {
-                if (gene.toUpperCase() === event.attrs.value.toUpperCase()) {
-                    $(event.relatedTarget).addClass('invalid repeat');
+                if (gene.value.toUpperCase() === event.attrs.value.toUpperCase()) {
+                    event.attrs.isRepeatEntry = true;
                     $('.helper-text__repeat').show();
                 }
             });
+        }).on('tokenfield:createdtoken', function (event) {
+            event.attrs.isRepeatEntry && $(event.relatedTarget).addClass('invalid repeat repeat-of-'+event.attrs.value);
 
-            //  check whether user enter a valid gene name
-            //var isValid = true;
+            // Check whether user entered a valid gene name
             validate_genes([event.attrs.value], function validCallback(result){
                 if(!result[event.attrs.value]){
                     $(event.relatedTarget).addClass('invalid error');
@@ -106,6 +106,16 @@ require([
                 }
             })
         }).on('tokenfield:removedtoken', function (event) {
+            // Update duplicate flagging
+            var theseRepeats = [];
+            if($('div.repeat-of-'+event.attrs.value).length > 0) {
+                var firstRepeat = $('div.repeat-of-'+event.attrs.value).first();
+                firstRepeat.removeClass('repeat repeat-of-'+event.attrs.value);
+                if(!firstRepeat.hasClass('error')){
+                    firstRepeat.removeClass('invalid');
+                }
+            }
+
             if ($('div.token.invalid.error').length < 1) {
                 $('.helper-text__invalid').hide();
             }
