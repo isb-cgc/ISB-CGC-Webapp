@@ -11,8 +11,3 @@ if [ -n "${DEV_NIH_AUTH_ON}" ]; then
   ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET}/dev-files/saml/certs/key.pem" ./saml/certs/key.pem
   ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET}/dev-files/NIH_FTP.txt" ./NIH_FTP.txt
 fi
-
-# Clone dependencies
-git clone https://github.com/isb-cgc/ISB-CGC-Common.git
-
-# Use the last commit of the master branch of ISB-CGC-Common, therefore no checkout needed.
