@@ -26,6 +26,8 @@ function($, d3, d3tip, vis_helpers) {
         return label.substring(label.indexOf(">")+1);
     };
 
+    var CURSOR_TOOLTIP_PAD = 20;
+
     // If you want to override the tip coming in from the create call,
     // do it here
      var treeTip = d3tip()
@@ -33,6 +35,13 @@ function($, d3, d3tip, vis_helpers) {
         .direction('s')
         .offset([0, 0])
         .html(function(d) {
+            if (d.dy > CURSOR_TOOLTIP_PAD) {
+                var yOffset = (d.dy < (CURSOR_TOOLTIP_PAD*1.5) ? (CURSOR_TOOLTIP_PAD/2) : 0);
+                treeTip.offset([yOffset, 0]);
+            } else {
+                treeTip.offset([CURSOR_TOOLTIP_PAD, 0]);
+            }
+
             var display =  (d.parent.name === "SampleTypeCode") ? getSampleTypeName(d.name) : d.name;
             return '<span>' + display + ': ' + d.count + '</span>';
         });
