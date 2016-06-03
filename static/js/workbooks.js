@@ -249,6 +249,9 @@ require([
      */
     function get_values(selection){
         var result;
+        if(selection.attr('type') == "label") {
+            return {variable: "", type: "label"};
+        }
         if(selection.attr("type") == "common"){
             result = {variable : selection.val(), text : selection.text(), type : "common"};
         } else {
@@ -322,7 +325,9 @@ require([
         if(data.type == "common"){
             if(data.options){
                 for(var i in data.options){
-                    variable_element.append('<option var_type="'+ data.options[i].type +'" value="' + data.options[i].value + '"> ' + data.options[i].text + '</option>');
+                    if(data.options[i].type !== "label" && variable_element.find('option[value="'+data.options[i].value+'"]').length <= 0) {
+                        variable_element.append('<option var_type="' + data.options[i].type + '" value="' + data.options[i].value + '"> ' + data.options[i].text + '</option>');
+                    }
                 }
             }
 
@@ -422,25 +427,33 @@ require([
             var parent = $(this).parents(".main-settings");
             var x = get_values(parent.find('.x-axis-select').find(":selected"));
             var y = get_values(parent.find('.y-axis-select').find(":selected"));
-            parent.parent().find("#color_by").empty();
-            parent.parent().find("#color_by").append('<option value="" disabled selected>Please select an option</option>');
-            if (x.type == "common") {
-                parent.parent().find("#color_by").append('<option value="' + x.variable + '">' + x.text + '</option>');
-            } else {
-                parent.parent().find("#color_by").append('<option value="' + x.selection.selected + '">' + x.selection.text + '</option>');
+            parent.find(".color_by").empty();
+            parent.find(".color_by").append('<option value="" type="label" disabled selected>Please select an option</option>');
+            if (x.type !== "label") {
+                if(x.type == "common") {
+                    parent.find('.color_by option[value="'+x.variable+'"]').length <= 0 &&
+                        parent.find(".color_by").append('<option value="' + x.variable + '">' + x.text + '</option>');
+                } else {
+                    parent.find('.color_by option[value="'+x.selection.selected+'"]').length <= 0 &&
+                        parent.find(".color_by").append('<option value="' + x.selection.selected + '">' + x.selection.text + '</option>');
+                }
             }
-            if (y.type == "common") {
-                parent.parent().find("#color_by").append('<option value="' + y.variable + '">' + y.text + '</option>');
-            } else {
-                parent.parent().find("#color_by").append('<option value="' + y.selection.selected + '">' + y.selection.text + '</option>');
+            if(y.type !== "label") {
+                if (y.type == "common") {
+                    parent.find('.color_by option[value="'+y.variable+'"]').length <= 0 &&
+                        parent.find(".color_by").append('<option value="' + y.variable + '">' + y.text + '</option>');
+                } else {
+                    parent.find('.color_by option[value="'+y.selection.selected+'"]').length <= 0 &&
+                        parent.find(".color_by").append('<option value="' + y.selection.selected + '">' + y.selection.text + '</option>');
+                }
             }
 
             // Append common variables as well
             var common_vars = parent.find('.x-axis-select option[type="common"]').each(function() {
                 var x = get_values($(this));
                 // Check to see that option does not already exist
-                if (parent.parent().find('#color_by option[value="' + x.variable + '"]').length == 0) {
-                    parent.parent().find("#color_by").append('<option value="' + x.variable + '">' + x.text + '</option>');
+                if (parent.find('.color_by option[value="' + x.variable + '"]').length == 0) {
+                    parent.find(".color_by").append('<option value="' + x.variable + '">' + x.text + '</option>');
                 }
             });
         }
@@ -606,14 +619,14 @@ require([
             selections   : {
                 x_axis   : get_values($(worksheet).find('.x-axis-select').find(":selected")),
                 y_axis   : get_values($(worksheet).find('.y-axis-select').find(":selected")),
-                color_by : get_simple_values(parent.find('#color_by')),
+                color_by : get_simple_values(parent.find('.color_by')),
                 gene_label: get_simple_values(parent.find('#gene_label'))
             },
             attrs : {
                 type    : parent.parentsUntil(".worksheet-body").find(".plot_selection").find(":selected").text(),
                 x_axis  : variable_values('x-axis-select'),
                 y_axis  : variable_values('y-axis-select'),
-                color_by: {url_code: parent.find('#color_by').find(":selected").val()},
+                color_by: {url_code: parent.find('.color_by').find(":selected").val()},
                 cohorts: parent.find('[name="cohort-checkbox"]:checked').map(function () {
                     return {id: this.value, cohort_id: $(this).attr("cohort-id")};
                 }).get(),
@@ -758,7 +771,7 @@ require([
             apply_axis_values(plot_element.find('.y-axis-select'), plot_data.y_axis);
         }
         if(plot_data.color_by) {
-            apply_axis_values(plot_element.find('#color_by'), plot_data.color_by);
+            apply_axis_values(plot_element.find('.color_by'), plot_data.color_by);
         }
         if(plot_data.gene_label) {
             plot_element.find("#gene_label").val(plot_data.gene_label.variable);
