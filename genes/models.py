@@ -13,7 +13,7 @@ class GeneFavorite(models.Model):
     name    = models.TextField(null=True)
     active  = models.BooleanField(default=True)
     user    = models.ForeignKey(User, null=False, blank=False)
-    last_date_saved = models.DateTimeField(auto_now_add=True)
+    last_date_saved = models.DateTimeField(auto_now=True)
     objects = GeneFavoriteManager()
 
     '''
