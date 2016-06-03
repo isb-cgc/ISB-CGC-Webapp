@@ -15,7 +15,7 @@ class VariableFavorite(models.Model):
     name = models.TextField(null=True)
     user = models.ForeignKey(User, null=False, blank=False)
     active = models.BooleanField(default=True)
-    last_date_saved = models.DateTimeField(auto_now_add=True)
+    last_date_saved = models.DateTimeField(auto_now=True)
     objects = FavoriteManager()
 
     '''
