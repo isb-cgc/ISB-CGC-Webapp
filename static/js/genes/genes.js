@@ -180,7 +180,8 @@ require([
                 var fr = new FileReader();
                 var uploaded_gene_list;
                 fr.onload = function(event){
-                    uploaded_gene_list = fr.result.split(/[ \(,\)]+/).filter(Boolean);
+                    var frLine = fr.result.trim();
+                    uploaded_gene_list = frLine.split(/[ \(,\)]+/).filter(Boolean);
 
                     // Send the uploaded gene's list to the backend
                     uploaded_list = checkUploadedGeneListAgainstGeneIdentifier(uploaded_gene_list);
@@ -294,10 +295,10 @@ require([
     function truncateRepeatGenes(genes){
         var genes_count_object = {};
         genes.forEach(function(gene){
-            if(genes_count_object[gene]){
-                genes_count_object[gene] += 1;
+            if(genes_count_object[gene.toUpperCase()]){
+                genes_count_object[gene.toUpperCase()] += 1;
             }else{
-                genes_count_object[gene] = 1;
+                genes_count_object[gene.toUpperCase()] = 1;
             }
         });
         return Object.keys(genes_count_object);
