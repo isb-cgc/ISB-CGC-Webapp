@@ -1,6 +1,6 @@
 """
 
-Copyright 2015, Institute for Systems Biology
+Copyright 2016, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ limitations under the License.
 from sys import argv as cmdline_argv, stdout
 import logging
 
+import click
+
 from scripts.feature_def_gen.feature_def_utils import DataSetConfig, build_bigquery_service, \
     submit_query_async, poll_async_job, download_query_result, write_tsv, \
     load_config_json
@@ -28,7 +30,28 @@ logger.setLevel(logging.DEBUG)
 _ch = logging.StreamHandler(stream=stdout)
 logger.addHandler(_ch)
 
-FIELDNAMES = ['num_search_hits', 'gene_name', 'generating_center', 'platform', 'value_label', 'internal_feature_id']
+MYSQL_SCHEMA = [
+    {
+        'name': 'gene_name',
+        'type': 'string'
+    },
+    {
+        'name': 'generating_center',
+        'type': 'string'
+    },
+    {
+        'name': 'platform',
+        'type': 'string'
+    },
+    {
+        'name': 'value_label',
+        'type': 'string'
+    },
+    {
+        'name': 'internal_feature_id',
+        'type': 'string'
+    },
+]
 
 
 class GEXPTableConfig(object):
@@ -87,8 +110,6 @@ def build_feature_query(config, table_name):
         table_name=table_name
     )
 
-    logger.debug("GEXP SQL:\n" + query)
-
     return query
 
 
@@ -125,9 +146,48 @@ def unpack_rows(row_item_array, table_config):
     return result
 
 
-def main():
-    config_file_path = cmdline_argv[1]
-    config = load_config_json(config_file_path, GEXPFeatureDefConfig)
+def build_queries(config):
+    query_strings = []
+    for table_item in config.data_table_list:
+        query = build_feature_query(config, table_item.table_name)
+        query_strings.append(query)
+
+    return query_strings
+
+
+def merge_queries():
+    pass
+
+
+def download_query_result():
+    pass
+
+
+def run_query():
+    pass
+
+
+def validate_config(config):
+    pass
+
+
+def load_config_from_path(config_json):
+    config = load_config_json(config_json, GEXPFeatureDefConfig)
+    return config
+
+
+@click.command()
+@click.argument('config_json', type=click.Path(exists=True))
+def print_query(config_json):
+    config = load_config_from_path(config_json)
+    query_strings = build_queries(config)
+
+
+@click.command()
+@click.argument('config_json', type=click.Path(exists=True))
+def run(config_json):
+    config_file_path = config_json
+    config = load_config_from_path(config_file_path)
 
     logger.info("Building BigQuery service...")
     bigquery_service = build_bigquery_service()
@@ -150,7 +210,15 @@ def main():
         rows = unpack_rows(query_result, table_item)
         result.extend(rows)
 
-    write_tsv(config.output_csv_path, result, FIELDNAMES)
+    fieldnames = map(lambda x: x['name'], MYSQL_SCHEMA)
+    write_tsv(config.output_csv_path, result, fieldnames)
+
+
+@click.group()
+def main():
+    pass
+
+main.add_command(print_query)
 
 if __name__ == '__main__':
     main()
