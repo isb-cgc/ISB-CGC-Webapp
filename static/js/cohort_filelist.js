@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2015, Institute for Systems Biology
+ * Copyright 2016, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,7 @@ require([
 ], function ($, jqueryui, bootstrap, session_security, d3, d3tip) {
 
     var SEL_FILE_MAX = 5;
+    var FILE_LIST_MAX = 85000;
 
     // File selection storage object
     // The data-type/name input checkbox attritbutes in the form below must be reflected here in this map
@@ -102,8 +103,28 @@ require([
         // If we've cleared out our tokenfield, re-display the placeholder
         selFiles.count() <= 0 && $('#selected-files-tokenfield').show();
 
-        selFiles.count() >= 5 ? $('.alert-dismissable').show() : $('.alert-dismissable').hide();
+        selFiles.count() >= 5 ? $('#file-max-alert').show() : $('#file-max-alert').hide();
+    };
 
+    var update_on_platform_filter_change = function(e) {
+
+        var totalSel = 0;
+
+        if($('input[name="platform-selected"]:checked').length <= 0) {
+            $('input[name="platform-selected"]').each(function(i) {
+               totalSel += parseInt($(this).attr('data-platform-count'));
+            });
+        } else {
+            $('input[name="platform-selected"]:checked').each(function(i) {
+               totalSel += parseInt($(this).attr('data-platform-count'));
+            });
+        }
+        $('.file-list-limit').text(FILE_LIST_MAX);
+        $('.file-list-total').text(totalSel);
+
+        if(totalSel < FILE_LIST_MAX) {
+            $('#file-list-warning').hide();
+        }
     };
 
     $('.file-limit').text(SEL_FILE_MAX);
@@ -309,8 +330,38 @@ require([
     $('#filter-panel input[type="checkbox"]').on('change', function() {
         page = 1;
 
-        //TODO: update download url
+        var totalSel = 0;
+
+        if($('input[name="platform-selected"]:checked').length <= 0) {
+            $('input[name="platform-selected"]').each(function(i) {
+               totalSel += parseInt($(this).attr('data-platform-count'));
+            });
+        } else {
+            $('input[name="platform-selected"]:checked').each(function(i) {
+               totalSel += parseInt($(this).attr('data-platform-count'));
+            });
+        }
+
+        $('.file-list-total').text(totalSel);
+
+        if(totalSel < FILE_LIST_MAX) {
+            $('#file-list-warning').hide();
+        }
+
         update_table();
+    });
+
+    $('#download-link').on('click',function(e) {
+
+        update_on_platform_filter_change();
+
+        if(parseInt($('.file-list-total').text()) > FILE_LIST_MAX) {
+            $('#file-list-warning').show();
+            e.preventDefault();
+            return false;
+        } else {
+            $('#file-list-warning').hide();
+        }
     });
 
     $('input[type="submit"]').prop('disabled', true);
