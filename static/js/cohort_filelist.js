@@ -203,9 +203,9 @@ require([
             for (var selector in selector_list) {
                 url += '&' + selector_list[selector] + '=True';
             }
-            $('.menu-items-right ul li a').attr('href', download_url + '?params=' + selector_list.join(','))
+            $('#download-link').attr('href', download_url + '?params=' + selector_list.join(','))
         } else {
-            $('.menu-items-right ul li a').attr('href', download_url)
+            $('#download-link').attr('href', download_url)
         }
 
         $('#prev-page').addClass('disabled');
