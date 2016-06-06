@@ -54,7 +54,7 @@ require([
 ], function ($, jqueryui, bootstrap, session_security, d3, d3tip) {
 
     var SEL_FILE_MAX = 5;
-    var FILE_LIST_MAX = 15000;
+    var FILE_LIST_MAX = 85000;
 
     // File selection storage object
     // The data-type/name input checkbox attritbutes in the form below must be reflected here in this map
