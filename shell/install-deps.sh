@@ -2,9 +2,8 @@ if [ -n "$CI" ]; then
 export HOME=/home/ubuntu/${CIRCLE_PROJECT_REPONAME}
 export HOMEROOT=/home/ubuntu/${CIRCLE_PROJECT_REPONAME}
 # Clone dependencies
-git clone -b isb-cgc-test https://github.com/isb-cgc/ISB-CGC-Common.git
+git clone -b isb-cgc-prod https://github.com/isb-cgc/ISB-CGC-Common.git
 
-# Use the last commit of the master branch of ISB-CGC-Common, therefore no checkout needed.
 else
 export $(cat /home/vagrant/www/.env | grep -v ^# | xargs) 2> /dev/null
 export HOME=/home/vagrant
