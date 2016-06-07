@@ -107,7 +107,7 @@
                                         ( 0 )
                                     {% endif %}
                                 </td>
-                                <td class="date-col">{{ cohort.last_date_saved|date:"SHORT_DATETIME_FORMAT" }}</td>
+                                <td class="date-col">{{ cohort.last_date_saved|date:'m/d/Y g:i a' }}</td>
                             </tr>
                         {% endif %}
                         {% endfor %}
@@ -148,7 +148,7 @@
                                 <td class="name-col"><a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a></td>
                                 <td class="sample-col">{#{ cohort.num_patients }#} {{ cohort.sample_size }} </td>
                                 <td>{{ cohort.patient_size }}</td>
-                                <td class="date-col">{{ cohort.last_date_saved|date:"SHORT_DATETIME_FORMAT" }}</td>
+                                <td class="date-col">{{ cohort.last_date_saved|date:'m/d/Y g:i a' }}</td>
                             </tr>
                             {% endif %}
 

@@ -2,7 +2,7 @@ from django.conf.urls import patterns, url
 
 import views
 
-urlpatterns = patterns('',
+urlpatterns = [
     url(r'^$',                                  views.gene_fav_list,        name='genes'),
     url(r'^create/$',                           views.gene_fav_edit,        name="gene_fav_create"),
     url(r'^(?P<gene_fav_id>\d+)/$',             views.gene_fav_detail,      name='gene_fav_detail'),
@@ -20,4 +20,4 @@ urlpatterns = patterns('',
 
     url(r'^is_valid/$',                         views.check_gene_list_validity,     name='is_valid'),
     url(r'^suggest/(?P<string>\S+).json',       views.suggest_gene_symbols,         name='suggest')
-)
+]

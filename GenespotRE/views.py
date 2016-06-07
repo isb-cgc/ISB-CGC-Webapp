@@ -312,17 +312,19 @@ def search_cohorts_viz(request):
 
 @login_required
 def igv(request, sample_barcode=None, readgroupset_id=None):
-    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+    if debug: print >> sys.stderr, 'Called '+sys._getframe().f_code.co_name
 
     readgroupset_list = []
     bam_list = []
 
-    for item in request.POST.getlist('readgroupset_id'):
-        id_barcode = item.split(',')
-        readgroupset_list.append({'sample_barcode': id_barcode[1],
-                                  'readgroupset_id': id_barcode[0]})
+    checked_list = json.loads(request.POST.__getitem__('checked_list'))
 
-    for item in request.POST.getlist('gcs_bam'):
+    for item in checked_list['readgroupset_id']:
+       id_barcode = item.split(',')
+       readgroupset_list.append({'sample_barcode': id_barcode[1],
+                                 'readgroupset_id': id_barcode[0]})
+
+    for item in checked_list['gcs_bam']:
         id_barcode = item.split(',')
         bam_list.append({'sample_barcode': id_barcode[1],
                          'gcs_path': id_barcode[0]})
