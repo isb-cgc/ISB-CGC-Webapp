@@ -76,11 +76,6 @@
                 </div>
             </div>
             <div class="filelist-panel panel">
-                <div id="file-list-warning" class="alert alert-warning alert-dismissable" style="display: none;">
-                    <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                    The maximum number of files which can be downloaded in a list is <span class="file-list-limit">#</span>. Your selections currently total
-                    <span class="file-list-total">#</span>. Please filter your list using the platform panel at the left to limit the size of your file download list.
-                </div>
                 <div class="panel-heading">
                     <a id="download-link" href="{{ download_url }}" title="Download Files as CSV" class="pull-right"><i class="fa fa-download"></i> Download File List as CSV</a>
                     <h4>File Listing</h4>
@@ -146,6 +141,7 @@
     var total_files = 0;
     var download_url = '{{ download_url }}';
     var ajax_update_url = '{% url 'cohort_filelist_ajax' cohort.id %}';
+    var SEL_FILE_MAX = '{{  sel_file_max }}';
     </script>
 {% endblock %}
 

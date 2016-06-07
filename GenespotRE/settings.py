@@ -390,3 +390,10 @@ CONN_MAX_AGE = 60
 
 SITE_GOOGLE_ANALYTICS   = os.environ.get('SITE_GOOGLE_ANALYTICS_ID', False)
 SITE_GOOGLE_TAG_MANAGER_ID = os.environ.get('SITE_GOOGLE_TAG_MANAGER_ID', False)
+
+##############################################################
+#   MAXes to prevent size-limited events from causing errors
+##############################################################
+
+MAX_FILE_LIST_REQUEST = 85000
+MAX_FILES_IGV = 5
