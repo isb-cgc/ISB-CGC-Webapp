@@ -25,7 +25,7 @@ from google.appengine.api import modules, urlfetch
 from google.appengine.ext import deferred
 from googleapiclient import discovery, http
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.db.models import Count
 from django.utils import formats
@@ -41,7 +41,7 @@ from visualizations.models import SavedViz, Viz_Perms
 from cohorts.models import Cohort, Cohort_Perms
 from projects.models import Project
 from workbooks.models import Workbook
-from accounts.models import NIH_User
+from accounts.models import NIH_User, GoogleProject
 
 from allauth.socialaccount.models import SocialAccount
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
@@ -176,6 +176,7 @@ def user_detail(request, user_id):
 
         return render(request, 'GenespotRE/user_detail.html',
                       {'request': request,
+                       'user': user,
                        'user_details': user_details,
                        'NIH_AUTH_ON': settings.NIH_AUTH_ON,
                        'ERA_LOGIN_URL': settings.ERA_LOGIN_URL
@@ -183,6 +184,54 @@ def user_detail(request, user_id):
     else:
         return render(request, '403.html')
 
+'''
+Returns page that has user Google Cloud Projects
+'''
+@login_required
+def user_gcp_list(request, user_id):
+    if int(request.user.id) == int(user_id):
+
+        user = User.objects.get(id=user_id)
+        gcp_list = GoogleProject.objects.filter(user=user)
+        social_account = SocialAccount.objects.get(user_id=user_id)
+
+        user_details = {
+            'date_joined': user.date_joined,
+            'email': user.email,
+            'extra_data': social_account.extra_data,
+            'first_name': user.first_name,
+            'id': user.id,
+            'last_login': user.last_login,
+            'last_name': user.last_name
+        }
+
+        context = {'user': user,
+                   'user_details': user_details,
+                   'gcp_list': gcp_list}
+
+        return render(request, 'GenespotRE/user_gcp_list.html', context)
+    else:
+        return render(request, '403.html')
+    pass
+
+@login_required
+def register_gcp(request, user_id):
+    if request.POST:
+        project_id = request.POST.get('project_id', None)
+        project_name = request.POST.get('project_name', None)
+        bq_dataset = request.POST.get('bq_dataset', None)
+        print user_id, project_id, project_name
+        if not user_id or not project_id or not project_name:
+
+            pass
+        else:
+            new_gcp = GoogleProject.objects.create(user_id=user_id,
+                                         project_name=project_name,
+                                         project_id=project_id,
+                                         big_query_dataset=bq_dataset)
+            new_gcp.save()
+
+    return redirect('user_gcp_list', user_id=user_id)
 
 @login_required
 def bucket_object_list(request):
