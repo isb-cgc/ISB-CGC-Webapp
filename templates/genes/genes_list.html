@@ -46,7 +46,7 @@
                                 </td>
                                 <td class="name-col"><a href="{% url 'gene_fav_detail' genes_fav.id %}">{{genes_fav.name}}</a></td>
                                 <td>{{genes_fav.genes | length}}</td>
-                                <td>{{genes_fav.last_date_saved}}</td>
+                                <td>{{genes_fav.last_date_saved|date:'M d, Y, g:i a'}}</td>
                             </tr>
                             {% include "genes/genes_list_modals.html" with favorite=genes_fav %}
                         {% endfor %}
