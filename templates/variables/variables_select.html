@@ -59,7 +59,7 @@
                                 <td class="name-col"><a href="{% url 'variable_detail_for_new_workbook' variable_fav.id %}">{{variable_fav.name}}</a></td>
                             {% endif %}
                             <td>{{variable_fav.variables | length}}</td>
-                            <td>{{variable_fav.last_date_saved |date:'m/d/Y g:i a' }}</td>
+                            <td>{{variable_fav.last_date_saved |date:'M d, Y, g:i a' }}</td>
                         </tr>
                     {% endfor %}
                     <input type="hidden" id="workbook_id" value="{{ workbook.id }}"/>

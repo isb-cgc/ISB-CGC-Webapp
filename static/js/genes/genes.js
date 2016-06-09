@@ -77,7 +77,7 @@ require([
                 }
             ],
             delimiter : " ",
-            minLength: 2,
+            minLength: 2-1,         // Bug #289 in bootstrap-tokenfield, submitted, remove -1 if it gets fixed and we update
             tokens: geneFavs
         }).on('tokenfield:createtoken',function(event){
             //  Check whether the user enter a repetitive token
@@ -90,7 +90,9 @@ require([
                 }
             });
         }).on('tokenfield:createdtoken', function (event) {
-            event.attrs.isRepeatEntry && $(event.relatedTarget).addClass('invalid repeat repeat-of-'+event.attrs.value);
+            event.attrs.isRepeatEntry && $(event.relatedTarget).addClass(
+                'invalid repeat repeat-of-'+event.attrs.value.toUpperCase()
+            );
 
             // Check whether user entered a valid gene name
             validate_genes([event.attrs.value], function validCallback(result){
@@ -108,9 +110,9 @@ require([
         }).on('tokenfield:removedtoken', function (event) {
             // Update duplicate flagging
             var theseRepeats = [];
-            if($('div.repeat-of-'+event.attrs.value).length > 0) {
-                var firstRepeat = $('div.repeat-of-'+event.attrs.value).first();
-                firstRepeat.removeClass('repeat repeat-of-'+event.attrs.value);
+            if($('div.repeat-of-'+event.attrs.value.toUpperCase()).length > 0) {
+                var firstRepeat = $('div.repeat-of-'+event.attrs.value.toUpperCase()).first();
+                firstRepeat.removeClass('repeat repeat-of-'+event.attrs.value.toUpperCase());
                 if(!firstRepeat.hasClass('error')){
                     firstRepeat.removeClass('invalid');
                 }
