@@ -27,9 +27,14 @@ dotenv.read_dotenv(join(dirname(__file__), '../.env'))
 
 BASE_DIR                = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + os.sep
 
-SHARED_DJANGO_APPS_DIR  = 'ISB-CGC-Common'
+SHARED_SOURCE_DIRECTORIES = [
+    'ISB-CGC-Common',
+    'ISB-CGC-API'
+]
+
 # Add the shared Django application subdirectory to the Python module search path
-sys.path.append(os.path.join(BASE_DIR, SHARED_DJANGO_APPS_DIR))
+for directory_name in SHARED_SOURCE_DIRECTORIES:
+    sys.path.append(os.path.join(BASE_DIR, directory_name))
 
 DEBUG                   = bool(os.environ.get('DEBUG', False))
 ALLOWED_HOSTS           = [os.environ.get('ALLOWED_HOST', 'localhost')]
