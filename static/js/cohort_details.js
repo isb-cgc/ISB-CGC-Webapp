@@ -404,5 +404,10 @@ require([
     $('.clone-cohort-btn').on('click', function() {
         $(this).addClass('disabled');
     })
+
+    $('li.applied-filter').each(function(index,elem){
+        $(this).html($(this).text().replace(/\[/g,"<span>").replace(/\]/g,"</span>"));
+    });
+    $('li.applied-filter span').addClass('space-right-5');
 });
 
