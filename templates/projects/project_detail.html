@@ -80,7 +80,7 @@
                 <p>{{ study.description }}</p>
                 <dl>
                     <dt>Created</dt>
-                    <dd>{{ study.last_date_saved }}</dd>
+                    <dd>{{ study.last_date_saved|date:'M d, Y, g:i a' }}</dd>
                     <dt>Number of Files</dt>
                     <dd>{{ study.get_file_count }}</dd>
                 </dl>

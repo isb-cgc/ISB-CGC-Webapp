@@ -72,7 +72,7 @@
                                 {{ project.owner.first_name }} {{ project.owner.last_name }}
                             {% endif %}</td>
                             <td>({{ project.shared.count }})</td>
-                            <td>{{ project.last_date_saved|date:'m/d/Y g:i a' }}</td>
+                            <td>{{ project.last_date_saved|date:'M d, Y, g:i a' }}</td>
                         {% for study in project.study_set.all|active %}
                         </tr>
                         <tr class="study hidden" data-project-id="{{ project.id }}">
@@ -90,7 +90,7 @@
                             <td></td>
                             <td></td>
                             <td></td>
-                            <td>{{ study.last_date_saved|date:'m/d/Y g:i a' }}</td>
+                            <td>{{ study.last_date_saved|date:'M d, Y, g:i a' }}</td>
                         {% endfor %}
                         </tr>
 
@@ -146,7 +146,7 @@
                             <td class="name-col"><a href="{% url 'project_detail' project.id %}">{{ project.name }}</a></td>
                             <td>{{ project.study_set.count }}</td>
                             <td>ISB</td>
-                            <td>{{ project.last_date_saved|date:'m/d/Y g:i a' }}</td>
+                            <td>{{ project.last_date_saved|date:'M d, Y, g:i a' }}</td>
                         {% for study in project.study_set.all %}
                         </tr>
                         <tr class="study hidden" data-project-id="{{ project.id }}">
@@ -163,7 +163,7 @@
                             </td>
                             <td></td>
                             <td></td>
-                            <td>{{ study.last_date_saved|date:'m/d/Y g:i a' }}</td>
+                            <td>{{ study.last_date_saved|date:'M d, Y, g:i a' }}</td>
                         {% endfor %}
                         </tr>
                         {% endfor %}
