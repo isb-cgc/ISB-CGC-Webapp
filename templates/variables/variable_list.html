@@ -50,7 +50,7 @@
                                 </td>
                                 <td><a href="{% url 'variable_fav_detail' favorite.id %}">{{ favorite.name }}</a></td>
                                 <td>{{ favorite.variables | length }}</td>
-                                <td>{{ favorite.last_date_saved }}</td>
+                                <td>{{ favorite.last_date_saved|date:'M d, Y, g:i a'}}</td>
                             </tr>
                             {% include "variables/variable_list_modals.html" with favorite=favorite %}
                         {% endfor %}

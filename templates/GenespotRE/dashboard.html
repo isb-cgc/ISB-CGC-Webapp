@@ -85,7 +85,7 @@
                                 <p>{{ workbook.description }}</p>
                             </div>
                             <div class="list-info">
-                               {{ workbook.last_date_saved }}
+                               {{ workbook.last_date_saved|date:'M d, Y, g:i a' }}
                             </div>
                         </a>
                     </li>
@@ -123,9 +123,8 @@
                                    <div class="list-main">
                                        <span class="list-title">{{ cohort.name }}</span>
                                    </div>
-
                                    <div class="list-info">
-                                       <span>{{ cohort.last_date_saved }}</span>
+                                       <span>{{ cohort.last_date_saved|date:'M d, Y, g:i a' }}</span>
                                    </div>
                                </a>
                            </li>
@@ -153,7 +152,12 @@
                         {% for genefavorite in user.genefavorite_set.all|active|sort_last_view:'genefavorite'|slice:':6' %}
                         <li>
                             <a href="{% url 'gene_fav_detail' genefavorite.id %}">
-                               <p class="list-title">{{ genefavorite.name }}</p>
+                                <div class="list-main">
+                                    <span class="list-title">{{ genefavorite.name }}</span>
+                                </div>
+                               <div class="list-info">
+                                   <span>{{ genefavorite.last_date_saved|date:'M d, Y, g:i a' }}</span>
+                               </div>
                             </a>
                         </li>
                         {% endfor %}
@@ -178,9 +182,12 @@
                         {% for variablefavorite in user.variablefavorite_set.all|active|sort_last_view:'variablefavorite'|slice:':6' %}
                            <li>
                                <a href="{% url 'variable_fav_detail' variablefavorite.id %}">
-                                   <p class="list-title">
-                                       {{ variablefavorite.name }}
-                                   </p>
+                                   <div class="list-main">
+                                       <span class="list-title">{{ variablefavorite.name }}</span>
+                                   </div>
+                                   <div class="list-info">
+                                       <span>{{ variablefavorite.last_date_saved|date:'M d, Y, g:i a' }}</span>
+                                   </div>
                                </a>
                            </li>
                         {% endfor %}

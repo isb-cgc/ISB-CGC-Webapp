@@ -46,7 +46,7 @@
                     <ul class="search-checkbox-list" id="{{ attr }}">
                         {% for platform in platform_counts %}
                             <li>
-                                <input type="checkbox" name="platform-selected" id="{{ platform.platform }}" >
+                                <input data-platform-count="{{ platform.count }}" type="checkbox" name="platform-selected" id="{{ platform.platform }}" >
                                 <label for="{{ platform.platform }}">{{ platform.platform|get_readable_name }}</label>
                                 <span class="count">({{ platform.count }})</span>
                             </li>
@@ -64,7 +64,7 @@
                     <h4>Selected Files</h4>
                 </div>
                 <div class="panel-body file-list">
-                    <div class="alert alert-warning alert-dismissable">
+                    <div id="file-max-alert" class="alert alert-warning alert-dismissable">
                         <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                         The maximum number of files which can be viewed in IGV simultaneously is <span class="file-limit">#</span>.
                     </div>
@@ -141,6 +141,7 @@
     var total_files = 0;
     var download_url = '{{ download_url }}';
     var ajax_update_url = '{% url 'cohort_filelist_ajax' cohort.id %}';
+    var SEL_FILE_MAX = '{{  sel_file_max }}';
     </script>
 {% endblock %}
 
