@@ -98,7 +98,7 @@ class GEXPFeatureDefConfig(object):
 
 def build_feature_query(config, table_name):
     query_template = \
-        'SELECT {gene_label_field} ' \
+        'SELECT \'{table_name}\' AS table_name, {gene_label_field} ' \
         'FROM [{main_project_name}:{main_dataset_name}.{table_name}] ' \
         'WHERE {gene_label_field} IS NOT NULL ' \
         'GROUP BY {gene_label_field}'
@@ -126,7 +126,7 @@ def get_feature_type():
     return 'GEXP'
 
 
-def unpack_rows(row_item_array, table_config):
+def unpack_rows(config, row_item_array):
     feature_type = get_feature_type()
     result = []
     for row in row_item_array:
@@ -146,7 +146,7 @@ def unpack_rows(row_item_array, table_config):
     return result
 
 
-def build_queries(config):
+def build_subqueries_for_tables(config):
     query_strings = []
     for table_item in config.data_table_list:
         query = build_feature_query(config, table_item.table_name)
@@ -155,8 +155,25 @@ def build_queries(config):
     return query_strings
 
 
-def merge_queries():
-    pass
+def merge_queries(gene_label_field, query_strings):
+    # Union of the subqueries
+    result = []
+
+    for subquery in query_strings:
+       result.append("   ({query})".format(query=subquery))
+
+    sq_stmt = ',\n'.join(result)
+    sq_stmt += ';'
+
+    query_tpl = \
+        'SELECT table_name, {gene_label_field} \n' \
+        'FROM \n' \
+        '{subquery_stmt}'
+
+    query = query_tpl.format(gene_label_field=gene_label_field,
+                             subquery_stmt=sq_stmt)
+
+    return query
 
 
 def download_query_result():
@@ -176,11 +193,18 @@ def load_config_from_path(config_json):
     return config
 
 
+def build_query(config):
+    query_strings = build_subqueries_for_tables(config)
+    query = merge_queries(config.gene_label_field, query_strings)
+    return query
+
+
 @click.command()
 @click.argument('config_json', type=click.Path(exists=True))
 def print_query(config_json):
     config = load_config_from_path(config_json)
-    query_strings = build_queries(config)
+    query = build_query(config)
+    print(query)
 
 
 @click.command()
@@ -188,27 +212,29 @@ def print_query(config_json):
 def run(config_json):
     config_file_path = config_json
     config = load_config_from_path(config_file_path)
+    query = build_query(config)
+    print(query)
+
+    return
 
     logger.info("Building BigQuery service...")
     bigquery_service = build_bigquery_service()
 
     result = []
-    for table_item in config.data_table_list:
-        logger.info('GEXP table: \'' + table_item.table_name + '\'')
-        query = build_feature_query(config, table_item.table_name)
 
-        # Insert BigQuery job
-        query_job = submit_query_async(bigquery_service, config.project_id, query)
 
-        # Poll for completion of query
-        job_id = query_job['jobReference']['jobId']
-        logger.info('job_id = "' + str(job_id) + '\"')
+    # Insert BigQuery job
+    query_job = submit_query_async(bigquery_service, config.project_id, query)
 
-        poll_async_job(bigquery_service, config, job_id)
+    # Poll for completion of query
+    job_id = query_job['jobReference']['jobId']
+    logger.info('job_id = "' + str(job_id) + '\"')
 
-        query_result = download_query_result(bigquery_service, query_job)
-        rows = unpack_rows(query_result, table_item)
-        result.extend(rows)
+    poll_async_job(bigquery_service, config, job_id)
+
+    query_result = download_query_result(bigquery_service, query_job)
+    rows = unpack_rows(config, query_result)
+    result.extend(rows)
 
     fieldnames = map(lambda x: x['name'], MYSQL_SCHEMA)
     write_tsv(config.output_csv_path, result, fieldnames)
