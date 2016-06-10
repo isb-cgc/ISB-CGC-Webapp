@@ -127,15 +127,26 @@ def get_feature_type():
 
 
 def unpack_rows(config, row_item_array):
+    table_config_mapping = build_table_mapping(config)
+
     feature_type = get_feature_type()
     result = []
+
+    row_groups = {}
+    for key, _ in table_config_mapping.iteritems():
+        row_groups[key] = {
+            'rows': []
+        }
+
     for row in row_item_array:
-        gene = row['f'][0]['v']
+        table_name = row['f'][0]['v']
+        gene = row['f'][1]['v']
         if gene is None:
             continue
 
-        result.append({
-            'num_search_hits': 0,
+        table_config = table_config_mapping[table_name]
+
+        row_groups['rows'].append({
             'gene_name': gene,
             'generating_center': table_config.generating_center,
             'platform': table_config.platform,
@@ -193,6 +204,13 @@ def load_config_from_path(config_json):
     return config
 
 
+def build_table_mapping(config):
+    result = {}
+    for table_item in config.data_table_list:
+        result[table_item.table_name] = table_item
+    return result
+
+
 def build_query(config):
     query_strings = build_subqueries_for_tables(config)
     query = merge_queries(config.gene_label_field, query_strings)
@@ -213,15 +231,11 @@ def run(config_json):
     config_file_path = config_json
     config = load_config_from_path(config_file_path)
     query = build_query(config)
-    print(query)
-
-    return
 
     logger.info("Building BigQuery service...")
     bigquery_service = build_bigquery_service()
 
     result = []
-
 
     # Insert BigQuery job
     query_job = submit_query_async(bigquery_service, config.project_id, query)
