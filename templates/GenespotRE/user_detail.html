@@ -87,11 +87,7 @@
                     </p>
 
                     <p>Go to the <a href="http://console.cloud.google.com" target="_blank">Google Cloud Console</a>.</p>
-                    {{ user.googleproject_set.all|length }}
-                    {% if user.googleproject_set.all|length > 0 %}
-                        <p><a href="{% url 'user_gcp_list' user.id %}">View Registered Google Cloud Projects</a></p>
-
-                    {% endif %}
+                    <p><a href="{% url 'user_gcp_list' user.id %}">View Registered Google Cloud Projects</a></p>
                 {% else %}
                     <p><i class="fa fa-check-circle"></i> Connected to Google Cloud Platform</p>
                     <hr>

@@ -42,18 +42,65 @@
                     <table class="table" role="presentation">
                         <thead>
                             <tr>
+                                <th></th>
                                 <th>Project Name</th>
                                 <th>Ptoject ID</th>
                                 <th>Associated BigQuery Dataset</th>
+                                <th>Registered Service Accounts</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for project in gcp_list %}
                                 <tr>
+                                    <td>
+                                        <div class="dropdown">
+                                        <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
+                                        <ul class="dropdown-menu">
+                                            <li><a href="{% url 'register_sa' user.id %}?gcp_id={{ project.project_id }}">Register Service Account</a> </li>
+{#                                            <li><a data-toggle="modal" role="button" data-target="#delete-favorite-modal-{{ favorite.id }}" >Delete</a></li>#}
+{#                                            <li><a data-toggle="modal" role="button" data-target="#new-favorite-workbook-modal-{{ favorite.id }}" >Start New Workbook</a></li>#}
+                                        </ul>
+                                        </div>
+                                    </td>
                                     <td>{{ project.project_name }}</td>
                                     <td>{{ project.project_id }}</td>
                                     <td>{% if project.big_query_dataset %}{{ project.big_query_dataset }}{% else %}N/A{% endif %}</td>
+                                    <td>
+                                        {% if project.serviceaccount_set.all|length > 0 %}
+                                        <a role="button" class="show-service-accounts" data-target="{{ project.id }}-expander"><i class="fa fa-caret-right"></i> {{ project.serviceaccount_set.all|length }}</a>
+                                        {% else %}
+                                        {{ project.serviceaccount_set.all|length }}
+                                        {% endif %}
+                                    </td>
                                 </tr>
+
+                                    <tr class="{{ project.id }}-expander" style="display:none;">
+                                        <td></td>
+                                        <td colspan="4">
+
+                                            <div>
+                                                <table class="table" role="presentation">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>Service Account</th>
+                                                        <th>Authorized Dataset</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    {% for service_account in project.serviceaccount_set.all %}
+                                                    <tr>
+                                                        <td>{{ service_account.service_account }}</td>
+                                                        <td>{{ service_account.authorized_dataset.name }}</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                    </tbody>
+                                                </table>
+
+                                            </div>
+
+                                        </td>
+                                    </tr>
+
                             {% endfor %}
                         </tbody>
                     </table>
@@ -121,10 +168,7 @@
             </div>
         </div>
     </div>
-    <script type="text/javascript"> 
-            var last_login_client_time = new Date("{{ user_details.last_login|safe }}".replace(" ","T"));
-            document.getElementById('last_login').innerHTML = last_login_client_time; 
-    </script>
+
 {% endblock %}
 
 {% block js_file %}{% static 'js/user_details.js' %}{% endblock %}

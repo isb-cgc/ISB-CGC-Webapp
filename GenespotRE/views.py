@@ -26,7 +26,7 @@ from google.appengine.ext import deferred
 from googleapiclient import discovery, http
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.db.models import Count
 from django.utils import formats
 from django.contrib import messages
@@ -41,7 +41,7 @@ from visualizations.models import SavedViz, Viz_Perms
 from cohorts.models import Cohort, Cohort_Perms
 from projects.models import Project
 from workbooks.models import Workbook
-from accounts.models import NIH_User, GoogleProject
+from accounts.models import NIH_User, GoogleProject, AuthorizedDataset, UserAuthorizedDatasets, ServiceAccount
 
 from allauth.socialaccount.models import SocialAccount
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
@@ -232,6 +232,57 @@ def register_gcp(request, user_id):
             new_gcp.save()
 
     return redirect('user_gcp_list', user_id=user_id)
+
+@login_required
+def register_sa(request, user_id):
+    if request.GET.get('gcp_id'):
+        authorized_datasets = AuthorizedDataset.objects.all()
+
+        context = {'gcp_id': request.GET.get('gcp_id'),
+                   'authorized_datasets': authorized_datasets}
+        return render(request, 'GenespotRE/register_sa.html', context)
+    else:
+        messages.error('There was no Google Cloud Project provided.')
+        redirect('user_gcp_list', user_id=user_id)
+
+@login_required
+def verify_sa(request, user_id):
+    if request.POST.get('gcp_id'):
+        gcp_id = request.POST.get('gcp_id')
+        user_gcp = GoogleProject.objects.get(project_id=gcp_id)
+        user_sa = request.POST.get('user_sa')
+        datasets = request.POST.getlist('dataset')
+        return_obj = {'user_sa': user_sa}
+
+        '''
+        INSERT CODE TO VERIFY USERS AND DATASETS.
+
+        1. GET ALL USERS ON THE PROJECT.
+        2. VERIFY ALL USERS HAVE A LISTING IN NIH_USERS.
+        3. VERIFY PI IS ON THE PROJECT.
+            IF PI IS NOT ON THE PROJECT, RETURN ERROR
+        4. VERIFY ALL USERS HAVE ACCESS TO THE PROPOSED DATASETS.
+            IF NOT ALL USERES HAVE ACCESS, KEEP LIST OF USERS THAT DO NOT
+
+        RETURN THE LIST OF DATASETS AND WHETHER ALL USERS HAVE ACCESS OR NOT.
+        IF NOT ALL USERS HAVE ACCESS TO A DATASET, LIST THE USERS THAT DO NOT.
+        '''
+
+        dataset_objs = AuthorizedDataset.objects.filter(id__in=datasets)
+        return_obj['user_sa_objs'] = []
+        for dataset in dataset_objs:
+            user_sa_obj = ServiceAccount.objects.create(google_project=user_gcp,
+                                                             service_account=user_sa,
+                                                             authorized_dataset=dataset)
+            return_obj['user_sa_objs'].append({
+                'service_account': user_sa_obj.service_account,
+                'google_project': user_sa_obj.google_project.project_name,
+                'authorized_dataset': user_sa_obj.authorized_dataset.name
+            })
+        return JsonResponse(return_obj, status='200')
+    else:
+        return JsonResponse({'message': 'There was no Google Cloud Project provided.'}, status='404')
+
 
 @login_required
 def bucket_object_list(request):

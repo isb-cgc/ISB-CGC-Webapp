@@ -45,27 +45,33 @@ require([
 ], function($, jqueryui, bootstrap, session_security) {
     A11y.Core();
 
-    $('.show-service-accounts').on('click', function () {
+    $('#verify-sa').on('submit', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
         var $this = $(this);
-        var target = $this.data('target');
-        if ($('.' + target).is(':visible')) {
-            $this.find('i').removeClass('fa-caret-down');
-            $this.find('i').addClass('fa-caret-right');
-            $('.' +target).slideUp();
-        } else {
-            $this.find('i').removeClass('fa-caret-right');
-            $this.find('i').addClass('fa-caret-down');
-            $('.' +target).show('slow');
-        }
+        var fields = $this.serialize();
+
+        var spinner = $this.parent('li').find('.load-spinner');
+        spinner.show();
+
+        $.ajax({
+            url: $this.attr('action'),
+            data: fields,
+            method: 'POST',
+            success: function(data) {
+                spinner.hide();
+                $this.append('<p>' + data['user_sa'] + '</p>');
+                for (var i = 0; i < data['user_sa_objs'].length; i++) {
+                    $this.append('<p>' + data['user_sa_objs'][i]['service_account']
+                        + ': ' + data['user_sa_objs'][i]['authorized_dataset'] + '</p>');
+                }
+            },
+            error: function(e) {
+                console.log(e);
+                spinner.hide();
+            }
+        });
+        return false;
     });
-
-    $('.btn-group button').on('click', function() {
-        $(this).toggleClass('active');
-        $('input[name="credits"]').prop('value', $(this).val());
-        $(this).siblings().each(function() {
-            $(this).removeClass('active');
-        })
-
-    });
-
 });
