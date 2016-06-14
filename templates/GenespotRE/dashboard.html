@@ -77,7 +77,7 @@
             <p>Workbooks store the Analyses you create -- and their related data.</p>
             <ul class="table-list">
             {% if workbooks.count > 0 %}
-                {% for workbook in workbooks|sort_last_view:'workbook'|slice:':6'  %}
+                {% for workbook in workbooks|slice:':6'  %}
                     <li>
                         <a href="{% url 'workbook_detail' workbook.id %}">
                             <div class="list-main">
@@ -117,7 +117,7 @@
                 <div class="panel-body">
                     {% if cohorts.count > 0 %}
                     <ul class="table-list">
-                        {% for cohort in cohorts|sort_last_view:'cohort'|slice:':6' %}
+                        {% for cohort in cohorts|slice:':6' %}
                            <li>
                                <a href="{% url 'cohort_details' cohort.id %}">
                                    <div class="list-main">
@@ -129,7 +129,7 @@
                                </a>
                            </li>
                         {% endfor %}
-                        {% if cohorts.count > 12 %}
+                        {% if cohorts.count > 6 %}
                             <a class="btn btn-link float-right" href="{% url 'cohort_list' %}">View all</a>
                         {% endif %}
                     </ul>
@@ -149,7 +149,7 @@
                 <div class="panel-body">
                     {% if user.genefavorite_set.all|active|length > 0 %}
                     <ul class="table-list">
-                        {% for genefavorite in user.genefavorite_set.all|active|sort_last_view:'genefavorite'|slice:':6' %}
+                        {% for genefavorite in user.genefavorite_set.all|active|sort_last_save|slice:':6' %}
                         <li>
                             <a href="{% url 'gene_fav_detail' genefavorite.id %}">
                                 <div class="list-main">
@@ -179,7 +179,7 @@
                 <div class="panel-body">
                     {% if user.variablefavorite_set.all|active|length > 0 %}
                     <ul class="table-list">
-                        {% for variablefavorite in user.variablefavorite_set.all|active|sort_last_view:'variablefavorite'|slice:':6' %}
+                        {% for variablefavorite in user.variablefavorite_set.all|active|sort_last_save|slice:':6' %}
                            <li>
                                <a href="{% url 'variable_fav_detail' variablefavorite.id %}">
                                    <div class="list-main">
@@ -218,7 +218,7 @@
                     <p>You can upload from your own research projects.</p>
                     {% if projects.count > 0 %}
                     <ul class="table-list">
-                        {% for project in projects|sort_last_view:'project'|slice:':6' %}
+                        {% for project in projects|slice:':6' %}
                            <li>
                                <a href="{% url 'project_detail' project.id %}">
                                    <p class="list-title">{{ project.name }}</p>
