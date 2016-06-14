@@ -315,7 +315,7 @@ require([
                 options.each(function (i, element) {
                     var option = $(element);
                     var parent = option.parent();
-                    option.removeAttr('disabled');
+                    option.attr('type') !== "label" && option.removeAttr('disabled');
                     if ((option.attr('var_type') == 'C' && plot_settings.axis[axis_index].type == 'NUMERICAL') ||
                         (option.attr('var_type') == 'N' && plot_settings.axis[axis_index].type == 'CATEGORICAL')) {
                         option.attr('disabled','disabled');
@@ -615,15 +615,18 @@ require([
         var parent = $(worksheet).find('.update-plot').parent();
 
         function variable_values(label){
-            var result;
-            if(parent.find('.'+label).find(":selected").attr("type") == "gene"){
-                result = {  url_code : parent.find('[variable="'+ label + '"] #search-term-select').find(":selected").val()};
-            } else {
-                result = {  url_code: parent.find('.'+label).find(":selected").val()}
+            var result = {
+                url_code: ""
+            };
+            // All placeholders should be given a type of 'label', and they will never return a url_code
+            if(parent.find('.'+label).find(":selected").attr("type") !== "label") {
+                if(parent.find('.'+label).find(":selected").attr("type") == "gene"){
+                    result = {  url_code : parent.find('[variable="'+ label + '"] #search-term-select').find(":selected").val()};
+                } else {
+                    result = {  url_code: parent.find('.'+label).find(":selected").val()}
+                }
             }
-            if (result.url_code == "-- select a variable--"){
-                result.url_code = "";
-            }
+
             return result;
         }
 
