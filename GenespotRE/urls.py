@@ -68,6 +68,6 @@ urlpatterns = [
     url(r'^share/', include('sharing.urls')),
 ]
 
-
+print settings.NIH_AUTH_ON
 if settings.NIH_AUTH_ON:
     urlpatterns.append(url(r'^demo/', include('demo.urls', namespace='demo')))

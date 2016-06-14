@@ -67,8 +67,10 @@ require([
                         + ': ' + data['user_sa_objs'][i]['authorized_dataset'] + '</p>');
                 }
             },
-            error: function(e) {
-                console.log(e);
+            error: function(xhr, ajaxOptions, thrownError) {
+                var response = $.parseJSON(xhr.responseText);
+                console.log(response['message']);
+                console.log(xhr.status);
                 spinner.hide();
             }
         });

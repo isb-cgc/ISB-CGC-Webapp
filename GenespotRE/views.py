@@ -36,6 +36,7 @@ from django.conf import settings
 debug = settings.DEBUG
 from google_helpers.genomics_service import get_genomics_resource
 from google_helpers.directory_service import get_directory_resource
+from google_helpers.resourcemanager_service import get_special_crm_resource
 from googleapiclient.errors import HttpError
 from visualizations.models import SavedViz, Viz_Perms
 from cohorts.models import Cohort, Cohort_Perms
@@ -252,23 +253,77 @@ def verify_sa(request, user_id):
         user_gcp = GoogleProject.objects.get(project_id=gcp_id)
         user_sa = request.POST.get('user_sa')
         datasets = request.POST.getlist('dataset')
+        dataset_objs = AuthorizedDataset.objects.filter(id__in=datasets)
+
         return_obj = {'user_sa': user_sa}
 
         '''
         INSERT CODE TO VERIFY USERS AND DATASETS.
+        '''
 
-        1. GET ALL USERS ON THE PROJECT.
-        2. VERIFY ALL USERS HAVE A LISTING IN NIH_USERS.
+
+        # 1. GET ALL USERS ON THE PROJECT.
+        try:
+            crm_service = get_special_crm_resource()
+            iam_policy = crm_service.projects().getIamPolicy(
+                resource=gcp_id, body={}).execute()
+            bindings = iam_policy['bindings']
+            roles = {}
+            verify_service_account = False
+            for val in bindings:
+                role = val['role']
+                members = val['members']
+                roles[role] = []
+                for member in members:
+                    if member.startswith('user:'):
+                        roles[role].append(member.split(':')[1])
+                    elif member.startswith('serviceAccount'):
+                        if member.find(':'+user_sa) > 0:
+                            verify_service_account = True
+
+            # 2. VERIFY SERVICE ACCOUNT IS IN THIS PROJECT
+            if not verify_service_account:
+                print 'Provided service account does not exist in project.'
+                # return error that the service account doesn't exist in this project
+                return JsonResponse({'message': 'The provided service account does not exist in the selected project'}, status='400')
+
+
+            # 3. VERIFY ALL USERS HAVE A LISTING IN NIH_USERS.
+            for role, members in roles.items():
+                users = User.objects.filter(email__in=members)
+                # If not all users have logged into the system.
+                if len(users) < len(members):
+                    return JsonResponse({'message': 'Some users in your project have not verified their account in the ISB-CGC webapp. Please have them log in to the webapp.'}, status=400)
+
+                NIH_users = NIH_User.objects.filter(user__in=users)
+
+                # If not all users have linked their eRA Commons ID
+                if len(NIH_users) < len(users):
+                    return JsonResponse({'message': 'Some users in your project have not verified their eRA Commons ID with their ISB-CGC account. Please have them go through the process of linking their eRA Commons ID with their ISB-CGC account.'})
+
+                # Verify dataset access per dataset
+                for dataset in dataset_objs:
+                    user_authorized_datasets = UserAuthorizedDatasets.objects.filter(nih_user__in=NIH_users, authorized_dataset=dataset)
+                    if len(user_authorized_datasets) < NIH_users:
+                        return JsonResponse({'message': 'Some users in your project do not have access to this dataset: {0}'.format(dataset.name)}, status=400)
+
+            # 4. VERIFY PI IS ON THE PROJECT
+
+            # 5. VERIFY ALL USERS HAVE ACCESS TO THE PROPOSED DATASETS
+        except HttpError, e:
+            return JsonResponse({'message': 'There was an error accessing your project. Please verify that you have set the permissions correctly.'}, status='403')
+
+        '''
         3. VERIFY PI IS ON THE PROJECT.
             IF PI IS NOT ON THE PROJECT, RETURN ERROR
         4. VERIFY ALL USERS HAVE ACCESS TO THE PROPOSED DATASETS.
-            IF NOT ALL USERES HAVE ACCESS, KEEP LIST OF USERS THAT DO NOT
+            IF NOT ALL USERS HAVE ACCESS, KEEP LIST OF USERS THAT DO NOT
 
         RETURN THE LIST OF DATASETS AND WHETHER ALL USERS HAVE ACCESS OR NOT.
         IF NOT ALL USERS HAVE ACCESS TO A DATASET, LIST THE USERS THAT DO NOT.
         '''
 
-        dataset_objs = AuthorizedDataset.objects.filter(id__in=datasets)
+
         return_obj['user_sa_objs'] = []
         for dataset in dataset_objs:
             user_sa_obj = ServiceAccount.objects.create(google_project=user_gcp,
