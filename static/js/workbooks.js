@@ -71,6 +71,9 @@ require([
     'assetsresponsive',
     'base'
 ], function ($, plot_factory, vizhelpers) {
+
+    var savingComment = false;
+
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function () {
         var forms = $(this).find('form');
@@ -147,6 +150,14 @@ require([
 
     ////Model communications
     $('.add_worksheet_comment_form').on('submit', function (event) {
+
+        if(savingComment) {
+            event.preventDefault();
+            return false;
+        }
+
+        savingComment = true;
+
         event.preventDefault();
         var form = this;
         var workbookId = $(form).find("#workbook_id_input").val();
@@ -168,10 +179,13 @@ require([
                 var comment_count = parseInt($(form).parents('.worksheet').find('.comment-count').html());
                 $(form).parents('.worksheet').find('.comment-count').html(comment_count + 1);
                 $('.save-comment-btn').prop('disabled', true);
+
+                savingComment = false;
             },
             error: function () {
                 $('.comment-flyout .flyout-body').append('<p class="comment-content error">Fail to save comment. Please try back later.</p>');
                 form.reset()
+                savingComment = false;
             }
         });
 
