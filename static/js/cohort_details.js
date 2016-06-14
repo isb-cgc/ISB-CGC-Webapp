@@ -66,6 +66,8 @@ require([
     'base'
 ], function ($, jqueryui, bootstrap, session_security, d3, d3tip, search_helpers) {
 
+    var savingComment = false;
+
     var SUBSEQUENT_DELAY = 600;
     var update_displays_thread = null;
 
@@ -301,8 +303,12 @@ require([
     });
 
     $('.add-comment').on('submit', function(event) {
+        if(savingComment) {
+            event.preventDefault();
+            return false;
+        }
+        savingComment = true;
         event.preventDefault();
-        console.log(base_url + '/cohorts/save_cohort_comment/');
         var form = this;
         $.ajax({
             type: 'POST',
@@ -315,12 +321,13 @@ require([
                 $('.comment-flyout .flyout-body').append('<p class="comment-date">' + data['date_created'] + '</p>');
                 form.reset();
                 $('.save-comment-btn').prop('disabled', true);
+                savingComment = false;
             },
             error: function() {
-                console.log('Failed to save comment.')
+                console.error('Failed to save comment.')
                 form.reset()
+                savingComment = false;
             }
-
         });
 
         return false;
@@ -404,5 +411,9 @@ require([
     $('.clone-cohort-btn').on('click', function() {
         $(this).addClass('disabled');
     })
+
+    $('li.applied-filter').each(function(index,elem){
+        $(this).html($(this).text().replace(/\[/g,"<span>").replace(/\]/g,"</span>"));
+    });
 });
 

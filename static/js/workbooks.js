@@ -71,6 +71,9 @@ require([
     'assetsresponsive',
     'base'
 ], function ($, plot_factory, vizhelpers) {
+
+    var savingComment = false;
+
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function () {
         var forms = $(this).find('form');
@@ -147,6 +150,14 @@ require([
 
     ////Model communications
     $('.add_worksheet_comment_form').on('submit', function (event) {
+
+        if(savingComment) {
+            event.preventDefault();
+            return false;
+        }
+
+        savingComment = true;
+
         event.preventDefault();
         var form = this;
         var workbookId = $(form).find("#workbook_id_input").val();
@@ -168,10 +179,13 @@ require([
                 var comment_count = parseInt($(form).parents('.worksheet').find('.comment-count').html());
                 $(form).parents('.worksheet').find('.comment-count').html(comment_count + 1);
                 $('.save-comment-btn').prop('disabled', true);
+
+                savingComment = false;
             },
             error: function () {
                 $('.comment-flyout .flyout-body').append('<p class="comment-content error">Fail to save comment. Please try back later.</p>');
                 form.reset()
+                savingComment = false;
             }
         });
 
@@ -301,7 +315,7 @@ require([
                 options.each(function (i, element) {
                     var option = $(element);
                     var parent = option.parent();
-                    option.removeAttr('disabled');
+                    option.attr('type') !== "label" && option.removeAttr('disabled');
                     if ((option.attr('var_type') == 'C' && plot_settings.axis[axis_index].type == 'NUMERICAL') ||
                         (option.attr('var_type') == 'N' && plot_settings.axis[axis_index].type == 'CATEGORICAL')) {
                         option.attr('disabled','disabled');
@@ -601,15 +615,18 @@ require([
         var parent = $(worksheet).find('.update-plot').parent();
 
         function variable_values(label){
-            var result;
-            if(parent.find('.'+label).find(":selected").attr("type") == "gene"){
-                result = {  url_code : parent.find('[variable="'+ label + '"] #search-term-select').find(":selected").val()};
-            } else {
-                result = {  url_code: parent.find('.'+label).find(":selected").val()}
+            var result = {
+                url_code: ""
+            };
+            // All placeholders should be given a type of 'label', and they will never return a url_code
+            if(parent.find('.'+label).find(":selected").attr("type") !== "label") {
+                if(parent.find('.'+label).find(":selected").attr("type") == "gene"){
+                    result = {  url_code : parent.find('[variable="'+ label + '"] #search-term-select').find(":selected").val()};
+                } else {
+                    result = {  url_code: parent.find('.'+label).find(":selected").val()}
+                }
             }
-            if (result.url_code == "-- select a variable--"){
-                result.url_code = "";
-            }
+
             return result;
         }
 

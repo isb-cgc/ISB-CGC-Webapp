@@ -16,14 +16,14 @@ limitations under the License.
 
 """
 
-from django.conf.urls import patterns, url
-
+from django.conf.urls import url
 from django.contrib import admin
+import views
 admin.autodiscover()
 
-urlpatterns = patterns(
+urlpatterns = [
     '',
-    url(r'^$', 'demo.views.index', name='saml_index'),
+    url(r'^$', views.views.index, name='saml_index'),
     # url(r'^attrs/$', 'demo.views.attrs', name='attrs'),
     # url(r'^metadata/$', 'demo.views.metadata', name='metadata'),
-)
+]

@@ -52,9 +52,8 @@ require([
     'assetsresponsive',
     'tokenfield'
 ], function ($, jqueryui, bootstrap, session_security, d3, d3tip) {
-
-    var SEL_FILE_MAX = 5;
-    var FILE_LIST_MAX = 85000;
+        
+    var file_list_total = 0;
 
     // File selection storage object
     // The data-type/name input checkbox attritbutes in the form below must be reflected here in this map
@@ -104,27 +103,6 @@ require([
         selFiles.count() <= 0 && $('#selected-files-tokenfield').show();
 
         selFiles.count() >= 5 ? $('#file-max-alert').show() : $('#file-max-alert').hide();
-    };
-
-    var update_on_platform_filter_change = function(e) {
-
-        var totalSel = 0;
-
-        if($('input[name="platform-selected"]:checked').length <= 0) {
-            $('input[name="platform-selected"]').each(function(i) {
-               totalSel += parseInt($(this).attr('data-platform-count'));
-            });
-        } else {
-            $('input[name="platform-selected"]:checked').each(function(i) {
-               totalSel += parseInt($(this).attr('data-platform-count'));
-            });
-        }
-        $('.file-list-limit').text(FILE_LIST_MAX);
-        $('.file-list-total').text(totalSel);
-
-        if(totalSel < FILE_LIST_MAX) {
-            $('#file-list-warning').hide();
-        }
     };
 
     $('.file-limit').text(SEL_FILE_MAX);
@@ -198,15 +176,30 @@ require([
             selector_list.push($(this).attr('id'));
         });
         var url = ajax_update_url + '?page=' + page;
-
+        
+        file_list_total = 0;
+        
+        if($('input[name="platform-selected"]:checked').length <= 0) {
+             $('input[name="platform-selected"]').each(function(i) {
+               file_list_total += parseInt($(this).attr('data-platform-count'));
+            });
+        } else {
+            $('input[name="platform-selected"]:checked').each(function(i) {
+               file_list_total += parseInt($(this).attr('data-platform-count'));
+            });
+        }        
+        
+        
         if (selector_list.length) {
             for (var selector in selector_list) {
                 url += '&' + selector_list[selector] + '=True';
             }
-            $('#download-link').attr('href', download_url + '?params=' + selector_list.join(','))
+
+            $('#download-link').attr('href', download_url + '?params=' + selector_list.join(',') + '&total=' + file_list_total);
         } else {
-            $('#download-link').attr('href', download_url)
+            $('#download-link').attr('href', download_url + '?total=' + file_list_total)
         }
+
 
         $('#prev-page').addClass('disabled');
         $('#next-page').addClass('disabled');
@@ -330,38 +323,7 @@ require([
     $('#filter-panel input[type="checkbox"]').on('change', function() {
         page = 1;
 
-        var totalSel = 0;
-
-        if($('input[name="platform-selected"]:checked').length <= 0) {
-            $('input[name="platform-selected"]').each(function(i) {
-               totalSel += parseInt($(this).attr('data-platform-count'));
-            });
-        } else {
-            $('input[name="platform-selected"]:checked').each(function(i) {
-               totalSel += parseInt($(this).attr('data-platform-count'));
-            });
-        }
-
-        $('.file-list-total').text(totalSel);
-
-        if(totalSel < FILE_LIST_MAX) {
-            $('#file-list-warning').hide();
-        }
-
         update_table();
-    });
-
-    $('#download-link').on('click',function(e) {
-
-        update_on_platform_filter_change();
-
-        if(parseInt($('.file-list-total').text()) > FILE_LIST_MAX) {
-            $('#file-list-warning').show();
-            e.preventDefault();
-            return false;
-        } else {
-            $('#file-list-warning').hide();
-        }
     });
 
     $('input[type="submit"]').prop('disabled', true);
