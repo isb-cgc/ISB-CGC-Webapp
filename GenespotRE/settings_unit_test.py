@@ -55,6 +55,8 @@ DATABASES = {'default': {
     'PASSWORD': os.environ.get('DATABASE_PASSWORD')
 }}
 
+USE_CLOUD_STORAGE           = os.environ.get('USE_CLOUD_STORAGE', 'False')
+
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
@@ -147,17 +149,17 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django.contrib.admindocs',
-#    'GenespotRE',
-#    'visualizations',
+    'GenespotRE',
+    'visualizations',
     'seqpeek',
     'sharing',
-#    'cohorts',
-#    'projects',
+    'cohorts',
+    'projects',
     'genes',
-#    'variables',
-#    'workbooks',
-#    'data_upload',
-#    'analysis',
+    'variables',
+    'workbooks',
+    'data_upload',
+    'analysis',
 )
 
 #############################
