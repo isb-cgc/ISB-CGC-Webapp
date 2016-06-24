@@ -211,9 +211,18 @@ LOGGING = {
     }
 }
 
+##########################
+#  Start django-allauth  #
+##########################
+
+LOGIN_REDIRECT_URL = '/dashboard/'
 INSTALLED_APPS += (
     'accounts',
-)
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google')
+
 
 # Template Engine Settings
 TEMPLATES = [
@@ -248,6 +257,9 @@ TEMPLATES = [
 AUTHENTICATION_BACKENDS = (
     # Needed to login by username in Django admin, regardless of `allauth`
     "django.contrib.auth.backends.ModelBackend",
+
+    # `allauth` specific authentication methods, such as login by e-mail
+    "allauth.account.auth_backends.AuthenticationBackend",
 )
 
 SOCIALACCOUNT_PROVIDERS = \
@@ -266,3 +278,18 @@ GOOGLE_APPLICATION_CREDENTIALS  = os.path.join(os.path.dirname(os.path.dirname(_
 CLIENT_SECRETS                  = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('CLIENT_SECRETS')) if os.environ.get('CLIENT_SECRETS') else ''
 PEM_FILE                        = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('PEM_FILE')) if os.environ.get('PEM_FILE') else ''
 CLIENT_EMAIL                    = os.environ.get('CLIENT_EMAIL', '') # Client email from client_secrets.json
+
+#################################
+#   For NIH/eRA Commons login   #
+#################################
+
+LOGIN_EXPIRATION_HOURS = 24
+FAKE_DBGAP_AUTHENTICATION_LIST_FILENAME = os.environ.get('FAKE_DBGAP_AUTHENTICATION_LIST_FILENAME', '') # This should be removed in favour of putting the change in .env files
+DBGAP_AUTHENTICATION_LIST_FILENAME      = os.environ.get('DBGAP_AUTHENTICATION_LIST_FILENAME', '')
+DBGAP_AUTHENTICATION_LIST_BUCKET        = os.environ.get('DBGAP_AUTHENTICATION_LIST_BUCKET', '')
+ACL_GOOGLE_GROUP                        = os.environ.get('ACL_GOOGLE_GROUP', '')
+OPEN_ACL_GOOGLE_GROUP                   = os.environ.get('OPEN_ACL_GOOGLE_GROUP', '')
+ERA_LOGIN_URL                           = os.environ.get('ERA_LOGIN_URL', '')
+IPV4                                    = os.environ.get('IPV4', '')
+SAML_FOLDER                             = os.environ.get('SAML_FOLDER')
+
