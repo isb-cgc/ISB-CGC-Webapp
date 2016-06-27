@@ -427,7 +427,12 @@ require([
     function x_attribute_change(self){
         $(self).parent().find(".attr-options").fadeOut();
         var attr = $(self).find(":selected").val();
-        $(self).parent().find("."+attr).fadeIn();
+        var attr_type_div = $(self).parent().find("."+attr);
+        attr_type_div.find('select').each(function(i, item) {
+            $(item).prop('selectedIndex', 0);
+        });
+        attr_type_div.find('.feature-search select option:gt(0)').remove();
+        attr_type_div.fadeIn();
     }
     $(".x-gene-attribute-select").change(function(){
         x_attribute_change(this);
@@ -495,7 +500,12 @@ require([
     function y_attribute_change(self){
         $(self).parent().find(".attr-options").fadeOut();
         var attr = $(self).find(":selected").val();
-        $(self).parent().find("."+attr).fadeIn();
+        var attr_type_div = $(self).parent().find("."+attr);
+        attr_type_div.find('select').each(function(i, item) {
+            $(item).prop('selectedIndex', 0);
+        });
+        attr_type_div.find('.feature-search select option:gt(0)').remove();
+        attr_type_div.fadeIn();
     }
     $(".y-gene-attribute-select").change(function(){
         y_attribute_change(this);
