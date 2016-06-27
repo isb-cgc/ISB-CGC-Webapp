@@ -448,6 +448,7 @@ require([
             var y = get_values(parent.find('.y-axis-select').find(":selected"));
             parent.find(".color_by").empty();
             parent.find(".color_by").append('<option value="" type="label" disabled selected>Please select an option</option>');
+            parent.find(".color_by").append('<option value="cohort" type="label">Cohort</option>');
             if (x.type !== "label") {
                 if(x.type == "common") {
                     parent.find('.color_by option[value="'+x.variable+'"]').length <= 0 &&
@@ -761,6 +762,13 @@ require([
         var plot_selector   = '#' + plot_element.prop('id') + ' .plot-div';
         var legend_selector = '#' + plot_element.prop('id') + ' .legend';
 
+        // Set Color override
+        var color_override = false;
+        if (args.color_by = 'cohort') {
+            args.color_by = '';
+            color_override = true;
+        }
+
         plot_loader.fadeIn();
         plot_element.find('.resubmit-button').hide();
         plotFactory.generate_plot({ plot_selector    : plot_selector,
@@ -772,7 +780,7 @@ require([
                                     color_by         : args.color_by,
                                     gene_label       : args.gene_label,
                                     cohorts          : cohort_ids,
-                                    color_override   : false}, function(result){
+                                    color_override   : color_override}, function(result){
             if(result.error){
                 plot_element.find('.resubmit-button').show();
             }
