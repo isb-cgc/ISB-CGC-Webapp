@@ -105,6 +105,27 @@ require([
         selFiles.count() >= 5 ? $('#file-max-alert').show() : $('#file-max-alert').hide();
     };
 
+    var update_on_platform_filter_change = function(e) {
+
+        var totalSel = 0;
+
+        if($('input[name="platform-selected"]:checked').length <= 0) {
+            $('input[name="platform-selected"]').each(function(i) {
+               totalSel += parseInt($(this).attr('data-platform-count'));
+            });
+        } else {
+            $('input[name="platform-selected"]:checked').each(function(i) {
+               totalSel += parseInt($(this).attr('data-platform-count'));
+            });
+        }
+        $('.file-list-limit').text(FILE_LIST_MAX);
+        $('.file-list-total').text(totalSel);
+
+        if(totalSel < FILE_LIST_MAX) {
+            $('#file-list-warning').hide();
+        }
+    };
+
     $('.file-limit').text(SEL_FILE_MAX);
 
     // Our file list tokenizer
@@ -323,7 +344,38 @@ require([
     $('#filter-panel input[type="checkbox"]').on('change', function() {
         page = 1;
 
+        var totalSel = 0;
+
+        if($('input[name="platform-selected"]:checked').length <= 0) {
+            $('input[name="platform-selected"]').each(function(i) {
+               totalSel += parseInt($(this).attr('data-platform-count'));
+            });
+        } else {
+            $('input[name="platform-selected"]:checked').each(function(i) {
+               totalSel += parseInt($(this).attr('data-platform-count'));
+            });
+        }
+
+        $('.file-list-total').text(totalSel);
+
+        if(totalSel < FILE_LIST_MAX) {
+            $('#file-list-warning').hide();
+        }
+
         update_table();
+    });
+
+    $('#download-link').on('click',function(e) {
+
+        update_on_platform_filter_change();
+
+        if(parseInt($('.file-list-total').text()) > FILE_LIST_MAX) {
+            $('#file-list-warning').show();
+            e.preventDefault();
+            return false;
+        } else {
+            $('#file-list-warning').hide();
+        }
     });
 
     $('input[type="submit"]').prop('disabled', true);
