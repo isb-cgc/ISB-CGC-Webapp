@@ -17,10 +17,14 @@ limitations under the License.
 
 # from django import template
 import string
-
-from django.template.defaulttags import register
 import json
 import re
+
+from django.template.defaulttags import register
+from cohorts.models import Cohort, Cohort_Perms
+from django.contrib.auth.models import User
+from projects.models import Project
+from workbooks.models import Workbook
 
 # register = template.Library()
 
@@ -205,6 +209,34 @@ def get_tooltip_text(value_id, attr):
             return ''
     else:
         return ''
+
+
+@register.filter
+def get_cohorts_this_user(this_user, is_active=True):
+    isb_superuser = User.objects.get(username='isb')
+    public_cohorts = Cohort_Perms.objects.filter(user=isb_superuser,perm=Cohort_Perms.OWNER).values_list('cohort', flat=True)
+    cohort_perms = list(set(Cohort_Perms.objects.filter(user=this_user).values_list('cohort', flat=True).exclude(cohort__id__in=public_cohorts)))
+    cohorts = Cohort.objects.filter(id__in=cohort_perms, active=is_active).order_by('-last_date_saved')
+    return cohorts
+
+
+@register.filter
+def get_projects_this_user(this_user, is_active=True):
+    ownedProjects = this_user.project_set.all().filter(active=True)
+    sharedProjects = Project.objects.filter(shared__matched_user=this_user, shared__active=True, active=is_active)
+    projects = ownedProjects | sharedProjects
+    projects = projects.distinct().order_by('-last_date_saved')
+    return projects
+
+
+@register.filter
+def get_workbooks_this_user(this_user, is_active=True):
+    userWorkbooks = this_user.workbook_set.all().filter(active=is_active)
+    sharedWorkbooks = Workbook.objects.filter(shared__matched_user=this_user, shared__active=True, active=is_active)
+    workbooks = userWorkbooks | sharedWorkbooks
+    workbooks = workbooks.distinct().order_by('-last_date_saved')
+    return workbooks
+
 
 @register.filter
 def get_barcodes_length(barcodes):
