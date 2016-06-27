@@ -763,7 +763,7 @@ require([
         var legend_selector = '#' + plot_element.prop('id') + ' .legend';
 
         // Set Color override
-        var color_override = false
+        var color_override = false;
         if (args.color_by = 'cohort') {
             args.color_by = '';
             color_override = true;
