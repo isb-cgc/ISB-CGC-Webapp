@@ -232,6 +232,10 @@ def is_public(list, key=None):
 def sort_last_view(list, key=''):
     return list.order_by('-' + key + '_last_view__last_view')
 
+@register.filter
+def sort_last_save(list):
+    return list.order_by('-last_date_saved')
+
 def quick_js_bracket_replace(matchobj):
     if matchobj.group(0) == '<':
         return '\u003C'

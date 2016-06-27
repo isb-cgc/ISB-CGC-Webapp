@@ -255,10 +255,19 @@
                     <span>Your Permissions: {{ cohort.perm.perm }}</span>
                 </div>
                 <div class="row col-md-12 space-bottom-10">
-                    <span>Revision History:</span>
+                    <span class="rev-history">Revision History:</span>
                     <ul>
                         {% for item in cohort.get_revision_history %}
-                            <li>{{ item }}</li>
+                            {%  if 'type' in item and item.type == 'filter' %}
+                                 <li class="applied-filters">
+                                    Applied Filters:
+                                     {% for filter in item.vals %}
+                                        <span>{{ filter }}</span>
+                                     {% endfor %}
+                                </li>
+                            {%  else %}
+                                <li>{{ item }}</li>
+                            {%  endif %}
                         {% endfor %}
                     </ul>
                     {% if shared_with_users and cohort.perm == 'OWNER'%}
