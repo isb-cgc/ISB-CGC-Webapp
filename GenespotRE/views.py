@@ -377,6 +377,7 @@ def igv(request, sample_barcode=None, readgroupset_id=None):
     context['readgroupset_list'] = readgroupset_list
     context['bam_list'] = bam_list
     context['base_url'] = settings.BASE_URL
+    context['service_account'] = settings.WEB_CLIENT_ID
     # sample_barcode = request.GET.get('sample_barcode')
     # readgroupset_id = request.GET.get('readgroupset_id')
     # bam_location = request.GET.get('bam_location')
