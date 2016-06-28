@@ -99,7 +99,7 @@ require([
     };
     $('#igv-div').empty();
     igv.browser = null;
-    igv.oauth.google.setRedirectUrl(base_url);
+    igv.oauth.google.setRedirectUrl(base_url, service_account);
     igv.oauth.google.login();
 
     browser = igv.createBrowser($('#igv-div')[0], options);

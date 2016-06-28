@@ -17846,14 +17846,17 @@ var oauth = (function (oauth) {
                     return results[1];
             },
 
-            setRedirectUrl: function(url) {
+            setRedirectUrl: function(url, service_account) {
                 REDIRECT = url;
+                if (url.substr(url.length-1) != '/') {
+                    REDIRECT = REDIRECT + '/';
+                }
                 _url = OAUTHURL +
                     "scope=https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/genomics https://www.googleapis.com/auth/devstorage.read_only https://www.googleapis.com/auth/userinfo.profile&" +
                     "state=%2Fprofile&" +
                     "redirect_uri=" + encodeURI(REDIRECT) + "&" +
                     "response_type=token&" +
-                    "client_id=907668440978-j9ec27vhg0e0mmpjvrcelfq7ah9n0ntm.apps.googleusercontent.com";
+                    "client_id=" + service_account;
             }
 
         }
