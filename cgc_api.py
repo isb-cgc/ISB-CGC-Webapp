@@ -25,7 +25,7 @@ from api.Cohort import Cohort_Endpoints
 from api.metadata import Meta_Endpoints, Meta_Endpoints_v2
 from api.pairwise_api import Pairwise_Endpoints
 from api.seqpeek_view_api import SeqPeekViewDataAccessAPI
-from api.users import User_Endpoints
+# from api.users import User_Endpoints
 
 package = 'isb-cgc-api'
 
