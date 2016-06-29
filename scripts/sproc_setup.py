@@ -138,7 +138,7 @@ def main():
                 SET @table_clause = "FROM metadata_samples ms ";
                 SET @join_clause = '';
 
-                IF NOT(cohort_id_in = '') THEN
+                IF NOT(cohort_id_in = '') AND NOT(cohort_id_in < 0) THEN
                     SET @where_clause = CONCAT("WHERE cs.cohort_id = ",cohort_id_in);
                     SET @and_clause = " AND ";
                     SET @join_clause = 	"JOIN metadata_samples ms ON ms.SampleBarcode = cs.sample_id ";
@@ -201,12 +201,6 @@ def main():
                     END AS mirnPlatform,
                     IF (has_RPPA=1, 'MDA_RPPA_Core', 'None') AS rppaPlatform ";
 
-                    # Make our temporary table, filtered if a filter statement was supplied
-                SET @where_clause = '';
-                SET @and_clause = '';
-                SET @table_clause = "FROM metadata_samples ms ";
-                SET @join_clause = '';
-
                 IF NOT(cohort_id_in = '') AND NOT(cohort_id_in < 0) THEN
                     SET @where_clause = CONCAT("cs.cohort_id = ",cohort_id_in);
                     SET @and_clause = " AND ";
@@ -235,7 +229,6 @@ def main():
         cursor.execute(metadata_counts_sproc_def)
         cursor.execute(participant_count_sproc_def)
         cursor.execute(platforms_sproc_def)
-
 
     except Exception as e:
         print e
