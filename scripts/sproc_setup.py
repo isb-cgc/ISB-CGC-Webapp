@@ -165,8 +165,76 @@ def main():
 
             END"""
 
+        platforms_sproc_def = """CREATE PROCEDURE `get_platforms`(
+                IN filter_statement text
+                ,IN cohort_id_in int(11)
+            )
+            BEGIN
+
+                SET @where_clause = '';
+                SET @and_clause = '';
+                SET @table_clause = "FROM metadata_samples ms ";
+                SET @join_clause = '';
+
+                SET @platform_count_qry =
+                "SELECT IF(has_Illumina_DNASeq=1,'Yes', 'None') AS DNAseq_data,
+                    IF (has_SNP6=1, 'Genome_Wide_SNP_6', 'None') as cnvrPlatform,
+                    CASE
+                        WHEN has_BCGSC_HiSeq_RNASeq=1 and has_UNC_HiSeq_RNASeq=0 THEN 'HiSeq/BCGSC'
+                        WHEN has_BCGSC_HiSeq_RNASeq=1 and has_UNC_HiSeq_RNASeq=1 THEN 'HiSeq/BCGSC and UNC V2'
+                        WHEN has_UNC_HiSeq_RNASeq=1 and has_BCGSC_HiSeq_RNASeq=0 and has_BCGSC_GA_RNASeq=0 and has_UNC_GA_RNASeq=0 THEN 'HiSeq/UNC V2'
+                        WHEN has_UNC_HiSeq_RNASeq=1 and has_BCGSC_HiSeq_RNASeq=0 and has_BCGSC_GA_RNASeq=0 and has_UNC_GA_RNASeq=1 THEN 'GA and HiSeq/UNC V2'
+                        WHEN has_UNC_HiSeq_RNASeq=1 and has_BCGSC_HiSeq_RNASeq=0 and has_BCGSC_GA_RNASeq=1 and has_UNC_GA_RNASeq=0 THEN 'HiSeq/UNC V2 and GA/BCGSC'
+                        WHEN has_UNC_HiSeq_RNASeq=1 and has_BCGSC_HiSeq_RNASeq=1 and has_BCGSC_GA_RNASeq=0 and has_UNC_GA_RNASeq=0 THEN 'HiSeq/UNC V2 and BCGSC'
+                        WHEN has_BCGSC_GA_RNASeq=1 and has_UNC_HiSeq_RNASeq=0 THEN 'GA/BCGSC'
+                        WHEN has_UNC_GA_RNASeq=1 and has_UNC_HiSeq_RNASeq=0 THEN 'GA/UNC V2' ELSE 'None'
+                    END AS gexpPlatform,
+                    CASE
+                        WHEN has_27k=1 and has_450k=0 THEN 'HumanMethylation27'
+                        WHEN has_27k=0 and has_450k=1 THEN 'HumanMethylation450'
+                        WHEN has_27k=1 and has_450k=1 THEN '27k and 450k' ELSE 'None'
+                    END AS methPlatform,
+                    CASE
+                        WHEN has_HiSeq_miRnaSeq=1 and has_GA_miRNASeq=0 THEN 'IlluminaHiSeq_miRNASeq'
+                        WHEN has_HiSeq_miRnaSeq=0 and has_GA_miRNASeq=1 THEN 'IlluminaGA_miRNASeq'
+                        WHEN has_HiSeq_miRnaSeq=1 and has_GA_miRNASeq=1 THEN 'GA and HiSeq'	ELSE 'None'
+                    END AS mirnPlatform,
+                    IF (has_RPPA=1, 'MDA_RPPA_Core', 'None') AS rppaPlatform ";
+
+                    # Make our temporary table, filtered if a filter statement was supplied
+                SET @where_clause = '';
+                SET @and_clause = '';
+                SET @table_clause = "FROM metadata_samples ms ";
+                SET @join_clause = '';
+
+                IF NOT(cohort_id_in = '') AND NOT(cohort_id_in < 0) THEN
+                    SET @where_clause = CONCAT("cs.cohort_id = ",cohort_id_in);
+                    SET @and_clause = " AND ";
+                    SET @join_clause = 	"JOIN metadata_samples ms ON ms.SampleBarcode = cs.sample_id ";
+                    SET @table_clause = "FROM cohorts_samples cs ";
+                END IF;
+
+                IF NOT(filter_statement = '') THEN
+                    SET @where_clause = CONCAT(@where_clause,@and_clause,"(",filter_statement,")");
+                END IF;
+
+                SET @platforms = CONCAT(
+                    @platform_count_qry
+                    ,@table_clause
+                    ,@join_clause
+                    ,"WHERE ",@where_clause
+                );
+
+                PREPARE platform_counts FROM @platforms;
+                EXECUTE platform_counts;
+                DEALLOCATE PREPARE platform_counts;
+
+            END
+        """
+
         cursor.execute(metadata_counts_sproc_def)
         cursor.execute(participant_count_sproc_def)
+        cursor.execute(platforms_sproc_def)
 
 
     except Exception as e:
