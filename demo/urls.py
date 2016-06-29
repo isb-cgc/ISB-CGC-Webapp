@@ -22,8 +22,7 @@ import views
 admin.autodiscover()
 
 urlpatterns = [
-    '',
-    url(r'^$', views.views.index, name='saml_index'),
+    url(r'^$', views.index, name='saml_index'),
     # url(r'^attrs/$', 'demo.views.attrs', name='attrs'),
     # url(r'^metadata/$', 'demo.views.metadata', name='metadata'),
 ]
