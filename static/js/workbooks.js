@@ -427,7 +427,12 @@ require([
     function x_attribute_change(self){
         $(self).parent().find(".attr-options").fadeOut();
         var attr = $(self).find(":selected").val();
-        $(self).parent().find("."+attr).fadeIn();
+        var attr_type_div = $(self).parent().find("."+attr);
+        attr_type_div.find('select').each(function(i, item) {
+            $(item).prop('selectedIndex', 0);
+        });
+        attr_type_div.find('.feature-search select option:gt(0)').remove();
+        attr_type_div.fadeIn();
     }
     $(".x-gene-attribute-select").change(function(){
         x_attribute_change(this);
@@ -443,6 +448,7 @@ require([
             var y = get_values(parent.find('.y-axis-select').find(":selected"));
             parent.find(".color_by").empty();
             parent.find(".color_by").append('<option value="" type="label" disabled selected>Please select an option</option>');
+            parent.find(".color_by").append('<option value="cohort" type="label">Cohort</option>');
             if (x.type !== "label") {
                 if(x.type == "common") {
                     parent.find('.color_by option[value="'+x.variable+'"]').length <= 0 &&
@@ -495,7 +501,12 @@ require([
     function y_attribute_change(self){
         $(self).parent().find(".attr-options").fadeOut();
         var attr = $(self).find(":selected").val();
-        $(self).parent().find("."+attr).fadeIn();
+        var attr_type_div = $(self).parent().find("."+attr);
+        attr_type_div.find('select').each(function(i, item) {
+            $(item).prop('selectedIndex', 0);
+        });
+        attr_type_div.find('.feature-search select option:gt(0)').remove();
+        attr_type_div.fadeIn();
     }
     $(".y-gene-attribute-select").change(function(){
         y_attribute_change(this);
@@ -751,6 +762,13 @@ require([
         var plot_selector   = '#' + plot_element.prop('id') + ' .plot-div';
         var legend_selector = '#' + plot_element.prop('id') + ' .legend';
 
+        // Set Color override
+        var color_override = false;
+        if (args.color_by = 'cohort') {
+            args.color_by = '';
+            color_override = true;
+        }
+
         plot_loader.fadeIn();
         plot_element.find('.resubmit-button').hide();
         plotFactory.generate_plot({ plot_selector    : plot_selector,
@@ -762,7 +780,7 @@ require([
                                     color_by         : args.color_by,
                                     gene_label       : args.gene_label,
                                     cohorts          : cohort_ids,
-                                    color_override   : false}, function(result){
+                                    color_override   : color_override}, function(result){
             if(result.error){
                 plot_element.find('.resubmit-button').show();
             }
