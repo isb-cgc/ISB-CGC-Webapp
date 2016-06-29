@@ -39,6 +39,6 @@ APPLICATION = endpoints.api_server([
     SingleFeatureDataAccess,
     Pairwise_Endpoints,
     SeqPeekViewDataAccessAPI,
-    User_Endpoints
+    # User_Endpoints
 ])
 
