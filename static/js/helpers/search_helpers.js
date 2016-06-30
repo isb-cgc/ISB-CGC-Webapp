@@ -18,10 +18,67 @@
 
 define(['jquery', 'tree_graph', 'stack_bar_chart', 'draw_parsets'],
 function($, tree_graph, stack_bar_chart, draw_parsets) {
+    
     var tree_graph_obj = Object.create(tree_graph, {});
     var parsets_obj = Object.create(draw_parsets, {});
+
     return  {
-        
+
+        update_counts_parsets_direct: function() {
+
+            $('.clinical-trees .spinner').show();
+            $('.parallel-sets .spinner').show();
+            $('.cohort-info .total-values').hide();
+            $('.cohort-info .spinner').show();
+
+            var context = this;
+
+            attr_counts = metadata_counts['count'];
+
+            $('#total-samples').html(metadata_counts['total']);
+            $('#total-participants').html(metadata_counts['participants']);
+
+            this.update_filter_counts(attr_counts);
+            tree_graph_obj.draw_trees(attr_counts);
+
+            if (metadata_counts.hasOwnProperty('items')) {
+                var features = [
+                    'cnvrPlatform',
+                    'DNAseq_data',
+                    'methPlatform',
+                    'gexpPlatform',
+                    'mirnPlatform',
+                    'rppaPlatform'
+                ];
+
+                var plot_features = [
+                    context.get_readable_name(features[0]),
+                    context.get_readable_name(features[1]),
+                    context.get_readable_name(features[2]),
+                    context.get_readable_name(features[3]),
+                    context.get_readable_name(features[4]),
+                    context.get_readable_name(features[5])
+                ];
+                for (var i = 0; i < metadata_counts['items'].length; i++) {
+                    var new_item = {};
+                    for (var j = 0; j < features.length; j++) {
+                        var item = metadata_counts['items'][i];
+                        new_item[plot_features[j]] = context.get_readable_name(item[features[j]]);
+                    }
+                    metadata_counts['items'][i] = new_item;
+                }
+
+                parsets_obj.draw_parsets(metadata_counts, plot_features);
+            } else {
+                console.warn("No 'items' found in metadata_counts: " + metadata_counts);
+            }
+
+            $('.clinical-trees .spinner').hide();
+            $('.parallel-sets .spinner').hide();
+            $('.cohort-info .spinner').hide();
+            $('.cohort-info .total-values').show();
+        },
+
         update_counts_parsets: function(base_url_domain, endpoint, cohort_id, version){
             var context = this;
             var filters = this.format_filters();
