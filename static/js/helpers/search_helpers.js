@@ -218,31 +218,32 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
 
             for(var i=0; i < counts.length; i++) {
                 counts_by_name[counts[i].name] = {
-                    values: counts[i].values,
+                    values: {},
                     total: counts[i].total
                 };
+                for(var k=0; k < counts[i].values.length; k++) {
+                    counts_by_name[counts[i].name].values[counts[i].values[k].value] =  counts[i].values[k].count
+                }
             }
 
             $('#filter-panel li.list-group-item div.cohort-feature-select-block').each(function() {
                 var $this = $(this),
-                    attr = $this.data('feature-name'),
-                    new_count = '';
+                    attr = $this.data('feature-name');
                 $('ul#'+attr+' input').each(function(){
+
                     var $that = $(this),
-                        value = $that.data('value-name');
+                        value = $that.data('value-name'),
+                        new_count = '';
 
                     if (counts_by_name[attr]) {
-                        for (var i = 0; i < counts_by_name[attr].values.length; i++) {
-                            if (counts_by_name[attr].values[i].value.replace(/\s+/g, '_') == value) {
-                                new_count = '(' + counts_by_name[attr].values[i].count + ')';
-                            }
+                        if (counts_by_name[attr].values[value]) {
+                            new_count = '(' + counts_by_name[attr].values[value] + ')';
                         }
-                        if (new_count == '') {
-                            new_count = '(0)';
-                        }
-                        $that.parent().siblings('span').html(new_count);
-                    } // Else we don't get counts from the metadata api yet
-
+                    }
+                    if (new_count == '') {
+                        new_count = '(0)';
+                    }
+                    $that.parent().siblings('span').html(new_count);
                 });
             })
 

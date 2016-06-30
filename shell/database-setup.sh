@@ -25,6 +25,9 @@ fi
 echo "Applying SQL Table File... (may take a while)"
 mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/metadata_featdef_tables.sql
 
+echo "Adding Stored Procedures..."
+python ${HOMEROOT}/scripts/sproc_setup.py
+
 echo "Adding Cohort/Site Data..."
 python ${HOMEROOT}/scripts/add_site_ids.py
 python ${HOMEROOT}/scripts/add_alldata_cohort.py $GCLOUD_PROJECT_ID -o cloudsql
