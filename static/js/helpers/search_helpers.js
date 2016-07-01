@@ -290,11 +290,12 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
 
                     var $that = $(this),
                         value = $that.data('value-name'),
+                        label = $that.parent().text(),
                         new_count = '';
 
                     if (counts_by_name[attr]) {
-                        if (counts_by_name[attr].values[value]) {
-                            new_count = '(' + counts_by_name[attr].values[value] + ')';
+                        if (counts_by_name[attr].values[value] || counts_by_name[attr].values[label]) {
+                            new_count = '(' + (counts_by_name[attr].values[value] || counts_by_name[attr].values[label]) + ')';
                         }
                     }
                     if (new_count == '') {

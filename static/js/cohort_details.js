@@ -361,7 +361,6 @@ require([
 
     $('#shared-with-btn').on('click', function(e){
         var target = $(this).data('target');
-
         $(target + ' a[data-target="#shared-pane"]').tab('show');
     });
 
