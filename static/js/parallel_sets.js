@@ -38,6 +38,9 @@ define(['d3', 'd3parsets'], function(d3, d3parsets) {
 
             var stopPlot = new Date().getTime();
 
+            // Auto-scroll over to center the graph on any redraw
+            $('#multi-categorical').prop('scrollLeft',150);
+
             console.debug("[BENCHMARKING] Time to build parallel coords plot: "+(stopPlot-startPlot)+ "ms");
 
         }
