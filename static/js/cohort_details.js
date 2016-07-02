@@ -207,6 +207,7 @@ require([
         $('#default-cohort-menu').hide();
         $('#edit-cohort-menu').show();
         showHideMoreGraphButton();
+        $('#multi-categorical').prop('scrollLeft',150);
     });
 
     $('#cancel-add-filter-btn').on('click', function() {
