@@ -351,12 +351,17 @@ require([
         $('a[href="#collapse-Project"]').trigger('click')
         $('input[type="checkbox"][data-value-name="TCGA"]').trigger('click');
     } else {
-        update_displays(true);
+        // If there's data passed in from the template, use it and drop it
+        if(metadata_counts !== null) {
+            search_helper_obj.update_counts_parsets_direct();
+            metadata_counts = null;
+        } else {
+            update_displays(true);    
+        }
     }
 
     $('#shared-with-btn').on('click', function(e){
         var target = $(this).data('target');
-
         $(target + ' a[data-target="#shared-pane"]').tab('show');
     });
 
