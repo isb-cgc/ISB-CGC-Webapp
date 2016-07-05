@@ -259,7 +259,7 @@ require([
                         checkbox_inputs += '> '+label+'</label>';
                     }
                     if (files[i]['cloudstorage_location'] && files[i]['cloudstorage_location'].split('.').pop() == 'bam') {
-                        val = files[i]['cloudstorage_location'].toLowerCase() + ',' + files[i]['sample'];
+                        val = files[i]['cloudstorage_location'] + ',' + files[i]['sample'];
                         dataTypeName = "gcs_bam";
                         label = "Cloud Storage";
                         checkbox_inputs += '<label><input type="checkbox" token-label="'+tokenLabel+'"name="'+dataTypeName+'" data-type="'+dataTypeName+'" value="'+val+'"';
