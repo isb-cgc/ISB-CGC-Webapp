@@ -43,7 +43,7 @@
   position: relative
 
   .sub-menu
-    width: 250px
+    width: 275px
     padding: 10px 15px
     > li
       padding: 10px 5px
@@ -54,6 +54,10 @@
         border-bottom: none
     .item-list li:hover
       background: $isb-dark
+    .item-list li button,a
+      overflow: hidden
+      text-overflow: ellipsis
+      white-space: nowrap
 
   &.has-drop-down
     > .drop

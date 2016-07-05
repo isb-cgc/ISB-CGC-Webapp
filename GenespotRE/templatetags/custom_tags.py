@@ -130,9 +130,9 @@ def replace_whitespace(str, chr):
     return result
 
 @register.filter
-def shorter(label):
-    if len(label) > 30:
-        return label[:26] + ' ...'
+def shorter(label, max_length):
+    if len(label) > max_length:
+        return label[:(max_length-4)] + ' ...'
     else:
         return label
 
