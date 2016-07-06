@@ -109,8 +109,8 @@
                                                             <label title="{{ v.value|get_tooltip_text:attr }}">
                                                                 <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}" data-value-id="{% if v.id %}{{ v.id }}{% endif %}">
                                                                 {% if v.value == 'None' %}NA{% else %}{{ v.value|get_readable_name:attr }}{% endif %}
+                                                                <span class="count">({{ v.count }})</span>
                                                             </label>
-                                                            <span class="count">({{ v.count }})</span>
                                                         </li>
                                                     {% elif forloop.counter0 == 6 and num_more > 0 %}
                                                         <a class="show-more">{{ num_more }} more</a>
@@ -118,16 +118,16 @@
                                                             <label title="{{ v.value|get_tooltip_text:attr }}">
                                                                 <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}" data-value-id="{% if v.id %}{{ v.id }}{% endif %}">
                                                                 {% if v.value == 'None' %}NA{% else %}{{ v.value|get_readable_name:attr }}{% endif %}
+                                                                <span class="count">({{ v.count }})</span>
                                                             </label>
-                                                            <span class="count">({{ v.count }})</span>
                                                         </li>
                                                     {% else %}
                                                         <li class="extra-values checkbox" style="display:none;">
                                                             <label title="{{ v.value|get_tooltip_text:attr }}">
                                                                 <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}" data-value-id="{% if v.id %}{{ v.id }}{% endif %}">
                                                                 {% if v.value == 'None' %}NA{% else %}{{ v.value|get_readable_name:attr }}{% endif %}
+                                                                <span class="count">({{ v.count }})</span>
                                                             </label>
-                                                            <span class="count">({{ v.count }})</span>
                                                         </li>
                                                     {% endif %}
                                                 {% endfor %}
