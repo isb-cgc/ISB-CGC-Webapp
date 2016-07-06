@@ -50,6 +50,9 @@ PROJECT_ID              = os.environ.get('GCLOUD_PROJECT_ID', '')
 BQ_PROJECT_ID           = os.environ.get('BIGQUERY_PROJECT_ID', PROJECT_ID)
 IGV_PROJECT_ID          = os.environ.get('IGV_PROJECT_ID', '') # This can be PROJECT_ID
 
+# Deployment module
+CRON_MODULE             = os.environ.get('CRON_MODULE')
+
 BASE_URL                = os.environ.get('BASE_URL', 'http://isb-cgc.appspot.com/')
 BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://api-dot-isb-cgc.appspot.com/')
 LOCAL_BASE_URL          = os.environ.get('BASE_URL', 'http://localhost:8080')
