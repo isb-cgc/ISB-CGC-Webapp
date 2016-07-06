@@ -365,6 +365,14 @@ ERA_LOGIN_URL                           = os.environ.get('ERA_LOGIN_URL', '')
 IPV4                                    = os.environ.get('IPV4', '')
 SAML_FOLDER                             = os.environ.get('SAML_FOLDER')
 
+
+# TaskQueue used when users go through the ERA flow
+LOGOUT_WORKER_TASKQUEUE                  = os.environ.get('LOGOUT_WORKER_TASKQUEUE')
+CHECK_NIH_USER_LOGIN_TASK_URI            = os.environ.get('CHECK_NIH_USER_LOGIN_TASK_URI')
+
+# TaskQueue used by the sweep_nih_user_logins task
+LOGOUT_SWEEPER_FALLBACK_TASKQUEUE        = os.environ.get('LOGOUT_SWEEPER_FALLBACK_TASKQUEUE')
+
 ##############################
 #   Start django-finalware   #
 ##############################
