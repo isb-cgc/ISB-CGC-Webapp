@@ -475,6 +475,7 @@
     var base_url = '{{ base_url|safe }}';
     var base_api_url = '{{ base_api_url|safe }}';
     var cohort_id = {{ cohort.id }};
+    var metadata_counts = {{ metadata_counts|tojson|safe }};
     </script>
 {% endblock %}
 

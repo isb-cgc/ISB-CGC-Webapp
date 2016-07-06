@@ -243,22 +243,33 @@ require([
                     var dataTypeName = '';
                     var label = '';
                     var tokenLabel = files[i]['sample']+", "+files[i]['pipeline']+", "+happy_name(files[i]['platform'])+", "+files[i]['datatype'];
-
+                    var checkbox_inputs = '';
+                    var disable = true;
+                    if (files[i]['access'] != 'dbGap controlled-access' || has_access == 'True') {
+                        disable = false;
+                    }
                     if (files[i]['gg_readgroupset_id']) {
                         val = files[i]['gg_readgroupset_id'] + ',' + files[i]['sample'];
                         dataTypeName = "readgroupset_id";
                         label = "GA4GH";
-                    } else if (files[i]['cloudstorage_location'] && files[i]['cloudstorage_location'].split('.').pop() == 'bam') {
+                        checkbox_inputs += '<label><input type="checkbox" token-label="'+tokenLabel+'"name="'+dataTypeName+'" data-type="'+dataTypeName+'" value="'+val+'"';
+                        if (disable) {
+                            checkbox_inputs += ' disabled="disabled"';
+                        }
+                        checkbox_inputs += '> '+label+'</label>';
+                    }
+                    if (files[i]['cloudstorage_location'] && files[i]['cloudstorage_location'].split('.').pop() == 'bam') {
                         val = files[i]['cloudstorage_location'] + ',' + files[i]['sample'];
                         dataTypeName = "gcs_bam";
                         label = "Cloud Storage";
+                        checkbox_inputs += '<label><input type="checkbox" token-label="'+tokenLabel+'"name="'+dataTypeName+'" data-type="'+dataTypeName+'" value="'+val+'"';
+                        if (disable) {
+                            checkbox_inputs += ' disabled="disabled"';
+                        }
+                        checkbox_inputs += '> '+label+'</label>';
                     }
 
-                    files[i]['gg_readgroupset_id'] = (
-                        val !== null
-                        ? '<label><input type="checkbox" token-label="'+tokenLabel+'"name="'+dataTypeName+'" data-type="'+dataTypeName+'" value="'+val+'"> '+label+'</label>'
-                        : ''
-                    );
+                    files[i]['gg_readgroupset_id'] = checkbox_inputs;
 
                     $('.filelist-panel table tbody').append(
                         '<tr>' +
