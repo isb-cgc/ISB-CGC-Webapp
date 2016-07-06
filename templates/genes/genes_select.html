@@ -28,9 +28,9 @@
                 <div class="page-action-group">
                     <li role="menuitem">
                         {% if workbook %}
-                            <button id="addToAnalysis" class="btn btn-default">Apply to Analysis</button>
+                            <button id="addToWorksheet" class="btn btn-default">Apply to Worksheet</button>
                         {% else %}
-                            <button id="addToNewAnalysis" class="btn btn-default">Apply to New Analysis</button>
+                            <button id="addToNewWorksheet" class="btn btn-default">Apply to New Worksheet</button>
                         {% endif %}
                     </li>
                     <li role="menuitem">
@@ -62,7 +62,7 @@
                                      <td class="name-col"><a href="{% url 'gene_detail_for_new_workbook' genes_fav.id %}">{{genes_fav.name}}</a></td>
                                 {% endif %}
                                 <td>{{genes_fav.genes | length}}</td>
-                                <td>{{genes_fav.last_date_saved}}</td>
+                                <td>{{genes_fav.last_date_saved|date:'M d, Y, g:i a'}}</td>
                             </tr>
                         {% endfor %}
                         <input type="hidden" id="workbook_id" value="{{ workbook.id }}"/>

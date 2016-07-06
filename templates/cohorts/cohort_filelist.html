@@ -32,69 +32,90 @@
                 <div class="cohort-title col-md-8">
                     <h3><a href="{% url 'cohort_details' cohort.id %}" aria-label="Back to Cohort"><i class="fa fa-chevron-left"></i> {{ cohort.name }}</a></h3>
                 </div>
-                <div class="menu-items-right col-md-4">
-                    <div class="dropdown dropdown-menu-right space-top-5">
-                        <a role="button" class="dropdown-toggle " type="button" id="create-dropdown" data-toggle="dropdown" aria-label="Dropdown Menu" aria-expanded="true">
-                            <i class="fa fa-bars"></i>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="create-dropdown">
-                            <li role="menuitem"><a href="{{ download_url }}" title="Download Files as CSV"><i class="fa fa-download"></i> Download File List as CSV</a></li>
-                        </ul>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
 {% endblock %}
 
 {% block content %}
-    <div id="filter-panel" class="col-lg-3">
-        <div class="panel panel-default">
-            <div class="panel-heading" id="heading-platforms">Platforms</div>
-            <div class="panel-body">
-                <ul class="search-checkbox-list" id="{{ attr }}">
-                    {% for platform in platform_counts %}
-                        <li>
-                            <input type="checkbox" name="platform-selected" id="{{ platform.platform }}" >
-                            <label for="{{ platform.platform }}">{{ platform.platform|get_readable_name }}</label>
-                            <span class="count">({{ platform.count }})</span>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <div id="content-panel" class="col-md-9">
-        <div class="filelist-panel panel">
-            <div class="panel-heading">
-                <h4>File Listing</h4>
-            </div>
-            <div class="panel-body">
-                <p>Showing 20 files of <span class="file-count">unknown</span>. Page: <span class="page-num">1</span></p>
-                <div>
-                    <a role="button" id="prev-page" class="btn btn-default disabled">Previous Page</a>
-                    <a role="button" id="next-page" class="btn btn-default">Next Page</a>
-                    <span class="spinner"><i class="fa fa-spin fa-spinner hidden"></i></span>
+    <div class="row">
+        <div id="filter-panel" class="col-lg-3">
+            <div class="panel panel-default">
+                <div class="panel-heading" id="heading-platforms">Platforms</div>
+                <div class="panel-body">
+                    <ul class="search-checkbox-list" id="{{ attr }}">
+                        {% for platform in platform_counts %}
+                            <li>
+                                <input data-platform-count="{{ platform.count }}" type="checkbox" name="platform-selected" id="{{ platform.platform }}" >
+                                <label for="{{ platform.platform }}">{{ platform.platform|get_readable_name }}</label>
+                                <span class="count">({{ platform.count }})</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
                 </div>
-                <table class="table table-striped" aria-label="File Listing Table">
-                    <thead>
-                    <tr>
-                        <th class="col-barcode">Sample Barcode</th>
-                        <th class="col-pipeline">Pipeline</th>
-                        <th class="col-platform">Platform</th>
-                        <th class="col-datalevel">Data Level</th>
-                        <th class="col-datatype">Data Type</th>
-                        <th class="col-igv">IGV</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
+            </div>
+        </div>
+
+
+        <div id="content-panel" class="col-md-9">
+            <div class="panel">
+                <div class="panel-heading">
+                    <input type="submit" form ="view-igv" value="Launch IGV" class="btn btn-primary pull-right" style="display: none;"/>
+                    <h4>Selected Files</h4>
+                </div>
+                <div class="panel-body file-list">
+                    <div id="file-max-alert" class="alert alert-warning alert-dismissable">
+                        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        The maximum number of files which can be viewed in IGV simultaneously is <span class="file-limit">#</span>.
+                    </div>
+                    <p><span id="selected-count">0</span> file(s) selected (<span id="selected-file-limit">limit <span class="file-limit">#</span></span>)</p>
+                    <div id="tokenfield-holder">
+                        <!-- "selected files tokenizer" -->
+                        <textarea name="selected-files" class="form-control tokenfield" id="selected-files" placeholder="Select files"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="filelist-panel panel">
+                <div id="file-list-warning" class="alert alert-warning alert-dismissable" style="display: none;">
+                    <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    The maximum number of files which can be downloaded in a list is <span class="file-list-limit">#</span>. Your selections currently total
+                    <span class="file-list-total">#</span>. Please filter your list using the platform panel at the left (or make a smaller cohort) to limit the size of your file download list.
+                </div>
+                <div class="panel-heading">
+                    <a id="download-link" href="{{ download_url }}" title="Download Files as CSV" class="pull-right"><i class="fa fa-download"></i> Download File List as CSV</a>
+                    <h4>File Listing</h4>
+                </div>
+                <div class="panel-body">
+                    <form id="view-igv" method="POST" action="{% url 'igv' %}">
+                        <input type="text" class="hidden_form_value" id="checked_list_input" name="checked_list" data-type="checked_list">
+                        {% csrf_token %}
+                        <p>Showing 20 files of <span class="file-count">unknown</span>. Page: <span class="page-num">1</span></p>
+                        <div>
+                            <a role="button" id="prev-page" class="btn btn-default disabled">Previous Page</a>
+                            <a role="button" id="next-page" class="btn btn-default">Next Page</a>
+                            <span class="spinner"><i class="fa fa-spin fa-spinner hidden"></i></span>
+                        </div>
+
+                        <table class="table table-striped file-list-table" aria-label="File Listing Table">
+                            <thead>
+                            <tr>
+                                <th class="col-barcode">Sample Barcode</th>
+                                <th class="col-pipeline">Pipeline</th>
+                                <th class="col-platform">Platform</th>
+                                <th class="col-datalevel">Data Level</th>
+                                <th class="col-datatype">Data Type</th>
+                                <th class="col-igv">IGV</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-
     <!-- Create Cohort Modal -->
     <div class="modal fade" id="create-cohort-modal" tabindex="-1" role="dialog" aria-labelledby="createCohortModal" aria-hidden="true">
         <div class="modal-dialog">
@@ -125,6 +146,9 @@
     var total_files = 0;
     var download_url = '{{ download_url }}';
     var ajax_update_url = '{% url 'cohort_filelist_ajax' cohort.id %}';
+    var SEL_FILE_MAX = '{{  sel_file_max }}';
+    var FILE_LIST_MAX = '{{  file_list_max }}';
+    var has_access = '{{ has_access }}';
     </script>
 {% endblock %}
 

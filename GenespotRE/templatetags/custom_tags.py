@@ -17,10 +17,14 @@ limitations under the License.
 
 # from django import template
 import string
-
-from django.template.defaulttags import register
 import json
 import re
+
+from django.template.defaulttags import register
+from cohorts.models import Cohort, Cohort_Perms
+from django.contrib.auth.models import User
+from projects.models import Project
+from workbooks.models import Workbook
 
 # register = template.Library()
 
@@ -99,8 +103,9 @@ def get_readable_name(csv_name, attr=None):
         'Project': 'Public Projects',
         'Study': 'Public Studies',
         'user_projects': 'Your Projects',
-        'user_studys': 'Your Studies'
-
+        'user_studys': 'Your Studies',
+        'SNP_CN': 'SNP Copy Number',
+        'miRNA_sequencing': 'miRNA SEQUENCING'
     }
 
     if attr in attr_specific_translation.keys():
@@ -123,6 +128,13 @@ def remove_whitespace(str):
 def replace_whitespace(str, chr):
     result = re.sub(re.compile(r'\s+'), chr, str)
     return result
+
+@register.filter
+def shorter(label):
+    if len(label) > 30:
+        return label[:26] + ' ...'
+    else:
+        return label
 
 @register.filter
 def get_data_attr_id(value, attr):
@@ -205,6 +217,34 @@ def get_tooltip_text(value_id, attr):
     else:
         return ''
 
+
+@register.filter
+def get_cohorts_this_user(this_user, is_active=True):
+    isb_superuser = User.objects.get(username='isb')
+    public_cohorts = Cohort_Perms.objects.filter(user=isb_superuser,perm=Cohort_Perms.OWNER).values_list('cohort', flat=True)
+    cohort_perms = list(set(Cohort_Perms.objects.filter(user=this_user).values_list('cohort', flat=True).exclude(cohort__id__in=public_cohorts)))
+    cohorts = Cohort.objects.filter(id__in=cohort_perms, active=is_active).order_by('-last_date_saved')
+    return cohorts
+
+
+@register.filter
+def get_projects_this_user(this_user, is_active=True):
+    ownedProjects = this_user.project_set.all().filter(active=True)
+    sharedProjects = Project.objects.filter(shared__matched_user=this_user, shared__active=True, active=is_active)
+    projects = ownedProjects | sharedProjects
+    projects = projects.distinct().order_by('-last_date_saved')
+    return projects
+
+
+@register.filter
+def get_workbooks_this_user(this_user, is_active=True):
+    userWorkbooks = this_user.workbook_set.all().filter(active=is_active)
+    sharedWorkbooks = Workbook.objects.filter(shared__matched_user=this_user, shared__active=True, active=is_active)
+    workbooks = userWorkbooks | sharedWorkbooks
+    workbooks = workbooks.distinct().order_by('-last_date_saved')
+    return workbooks
+
+
 @register.filter
 def get_barcodes_length(barcodes):
     codes = barcodes.replace('[','').replace(']','').split(',')
@@ -230,6 +270,10 @@ def is_public(list, key=None):
 @register.filter
 def sort_last_view(list, key=''):
     return list.order_by('-' + key + '_last_view__last_view')
+
+@register.filter
+def sort_last_save(list):
+    return list.order_by('-last_date_saved')
 
 def quick_js_bracket_replace(matchobj):
     if matchobj.group(0) == '<':

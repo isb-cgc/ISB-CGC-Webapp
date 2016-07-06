@@ -11,12 +11,12 @@ dependencies:
 database:
   post:
     - mysql -u ubuntu -e "USE mysql; SET PASSWORD FOR 'ubuntu'@'localhost' = PASSWORD('isb')"
+    - sudo -E /bin/sh ./shell/gcloud_authenticate.sh
+    - sudo -E /bin/sh ./shell/gcloud-pull-staging-files.sh
     - sudo -E /bin/sh ./shell/database-setup.sh
 deployment:
   staging:
     branch: [isb-cgc-uat]
     commands:
       - sudo -E rm -rf ./lib
-      - sudo -E /bin/sh ./shell/gcloud_authenticate.sh
-      - sudo -E /bin/sh ./shell/gcloud-pull-staging-files.sh
       - sudo -E ./google-cloud-sdk/bin/gcloud preview app deploy app.yaml --promote

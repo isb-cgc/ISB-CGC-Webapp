@@ -38,7 +38,7 @@ require([
              warning = true;
          }
     });
-    $('#addToNewAnalysis').on('click', function (event) {
+    $('#addToNewWorksheet').on('click', function (event) {
         //get the selected cohort
         var variable_lists = [];
         $('input[type="checkbox"]').each(function() {
@@ -71,7 +71,7 @@ require([
     });
 
     // Clear all entered genes list on click
-    $('#addToAnalysis').on('click', function (event) {
+    $('#addToWorksheet').on('click', function (event) {
         //get the selected cohort
         var variable_lists = [];
         $('input[type="checkbox"]').each(function() {

@@ -19,10 +19,23 @@ limitations under the License.
 # Django settings for GAE_Django17 project.
 import os
 from os.path import join, dirname
+import sys
+
 import dotenv
+
 dotenv.read_dotenv(join(dirname(__file__), '../.env'))
 
 BASE_DIR                = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + os.sep
+
+SHARED_SOURCE_DIRECTORIES = [
+    'ISB-CGC-Common',
+    'ISB-CGC-API'
+]
+
+# Add the shared Django application subdirectory to the Python module search path
+for directory_name in SHARED_SOURCE_DIRECTORIES:
+    sys.path.append(os.path.join(BASE_DIR, directory_name))
+
 DEBUG                   = bool(os.environ.get('DEBUG', False))
 ALLOWED_HOSTS           = [os.environ.get('ALLOWED_HOST', 'localhost')]
 
@@ -110,6 +123,9 @@ PROCESSING_JENKINS_URL      = os.environ.get('PROCESSING_JENKINS_URL', 'http://l
 PROCESSING_JENKINS_PROJECT  = os.environ.get('PROCESSING_JENKINS_PROJECT', 'cgc-processing')
 PROCESSING_JENKINS_USER     = os.environ.get('PROCESSING_JENKINS_USER', 'user')
 PROCESSING_JENKINS_PASSWORD = os.environ.get('PROCESSING_JENKINS_PASSWORD', '')
+
+
+CSRF_COOKIE_SECURE = True
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -291,7 +307,6 @@ TEMPLATES = [
         'OPTIONS': {
             # add any context processors here
             'context_processors': (
-                'allauth.socialaccount.context_processors.socialaccount',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -373,3 +388,15 @@ CONN_MAX_AGE = 60
 
 SITE_GOOGLE_ANALYTICS   = os.environ.get('SITE_GOOGLE_ANALYTICS_ID', False)
 SITE_GOOGLE_TAG_MANAGER_ID = os.environ.get('SITE_GOOGLE_TAG_MANAGER_ID', False)
+
+##############################################################
+#   MAXes to prevent size-limited events from causing errors
+##############################################################
+
+# Google App Engine has a response size limit of 32M. ~65k entries from the cohort_filelist view will
+# equal just under the 32M limit. If each individual listing is ever lengthened or shortened this
+# number should be adjusted
+MAX_FILE_LIST_REQUEST = 65000
+
+# IGV limit to prevent users from trying ot open dozens of files
+MAX_FILES_IGV = 5

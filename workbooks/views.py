@@ -236,7 +236,7 @@ def worksheet_display(request, workbook_id=0, worksheet_id=0):
     is_shareable = workbook_model.is_shareable(request)
 
     for worksheet in workbook_model.worksheets:
-        if str(worksheet.id) == worksheet_id :
+        if str(worksheet.id) == worksheet_id:
             display_worksheet = worksheet
 
     plot_types = Analysis.get_types()
@@ -251,6 +251,8 @@ def worksheet(request, workbook_id=0, worksheet_id=0):
     command  = request.path.rsplit('/',1)[1]
 
     if request.method == "POST" :
+        workbook = Workbook.objects.get(id=workbook_id)
+        workbook.save()
         if command == "create" :
             worksheet = Worksheet.create(workbook_id=workbook_id, name=request.POST.get('name'), description=request.POST.get('description'))
             redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet.id})
@@ -269,6 +271,8 @@ def worksheet(request, workbook_id=0, worksheet_id=0):
 @login_required
 def worksheet_variable_delete(request, workbook_id=0, worksheet_id=0, variable_id=0):
     Worksheet.objects.get(id=worksheet_id).remove_variable(variable_id);
+    workbook = Workbook.objects.get(id=workbook_id)
+    workbook.save()
     redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet_id})
     return redirect(redirect_url)
 
@@ -325,6 +329,7 @@ def worksheet_variables(request, workbook_id=0, worksheet_id=0, variable_id=0):
                     worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
                 else :
                     workbook_model  = Workbook.objects.get(id=workbook_id)
+                    workbook_model.save()
                     worksheet_model = Worksheet.objects.get(id=worksheet_id)
 
                 Worksheet_variable.edit_list(workbook_id=workbook_model.id, worksheet_id=worksheet_model.id, variable_list=variables, user=request.user)
@@ -349,6 +354,8 @@ def workbook_create_with_genes(request):
 @login_required
 def worksheet_gene_delete(request, workbook_id=0, worksheet_id=0, gene_id=0):
     Worksheet.objects.get(id=worksheet_id).remove_gene(gene_id);
+    workbook = Workbook.objects.get(id=workbook_id)
+    workbook.save()
     redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet_id})
     return redirect(redirect_url)
 
@@ -414,6 +421,7 @@ def worksheet_genes(request, workbook_id=0, worksheet_id=0, genes_id=0):
                     worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
                 else :
                     workbook_model = Workbook.objects.get(id=workbook_id)
+                    workbook_model.save()
                     worksheet_model = Worksheet.objects.get(id=worksheet_id)
 
                 Worksheet_gene.edit_list(workbook_id=workbook_model.id, worksheet_id=worksheet_model.id, gene_list=genes, user=request.user)
@@ -442,6 +450,8 @@ def worksheet_plots(request, workbook_id=0, worksheet_id=0, plot_id=0):
     result        = {}
 
     if request.method == "POST" :
+        workbook = Workbook.objects.get(id=workbook_id)
+        workbook.save()
         if command == "delete" :
             var = Worksheet_plot.objects.get(id=plot_id).delete()
             result['message'] = "the plot has been deleted from workbook"
@@ -503,6 +513,8 @@ def worksheet_cohorts(request, workbook_id=0, worksheet_id=0, cohort_id=0):
 
     cohorts = json.loads(request.body)['cohorts']
     if request.method == "POST" :
+        workbook = Workbook.objects.get(id=workbook_id)
+        workbook.save()
         if command == "edit" :
             Worksheet_cohort.edit_list(worksheet_id=worksheet_id, id=cohort_id, cohort_ids=cohorts, user=request.user)
         elif command == "delete" :
@@ -516,6 +528,8 @@ def worksheet_comment(request, workbook_id=0, worksheet_id=0, comment_id=0):
     command  = request.path.rsplit('/',1)[1];
 
     if request.method == "POST" :
+        workbook = Workbook.objects.get(id=workbook_id)
+        workbook.save()
         if command == "create" :
             result = Worksheet_comment.create(worksheet_id = worksheet_id,
                                               content = request.POST.get('content'),

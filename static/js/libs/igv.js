@@ -17763,15 +17763,15 @@ var oauth = (function (oauth) {
         var VALIDURL = 'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=';
         var SCOPE = 'https://www.googleapis.com/auth/genomics';
         var CLIENTID = '907668440978-j9ec27vhg0e0mmpjvrcelfq7ah9n0ntm.apps.googleusercontent.com';
-        var REDIRECT = 'http://localhost/igv-web/emptyPage.html'
+        var REDIRECT = '';
         var LOGOUT = 'http://accounts.google.com/Logout';
         var TYPE = 'token';
         var _url = OAUTHURL +
             "scope=https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/genomics https://www.googleapis.com/auth/devstorage.read_only https://www.googleapis.com/auth/userinfo.profile&" +
             "state=%2Fprofile&" +
-            "redirect_uri=http%3A%2F%2Flocalhost%2Figv-web%2FemptyPage.html&" +
+            "redirect_uri=" + encodeURI(REDIRECT) + "&" +
             "response_type=token&" +
-            "client_id=661332306814-8nt29308rppg325bkq372vli8nm3na14.apps.googleusercontent.com";
+            "client_id=907668440978-j9ec27vhg0e0mmpjvrcelfq7ah9n0ntm.apps.googleusercontent.com";
 
         var tokenType;
         var expiresIn;
@@ -17844,7 +17844,21 @@ var oauth = (function (oauth) {
                     return "";
                 else
                     return results[1];
+            },
+
+            setRedirectUrl: function(url, service_account) {
+                REDIRECT = url;
+                if (url.substr(url.length-1) != '/') {
+                    REDIRECT = REDIRECT + '/';
+                }
+                _url = OAUTHURL +
+                    "scope=https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/genomics https://www.googleapis.com/auth/devstorage.read_only https://www.googleapis.com/auth/userinfo.profile&" +
+                    "state=%2Fprofile&" +
+                    "redirect_uri=" + encodeURI(REDIRECT) + "&" +
+                    "response_type=token&" +
+                    "client_id=" + service_account;
             }
+
         }
     }
 

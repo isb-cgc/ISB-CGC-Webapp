@@ -9,7 +9,7 @@ export HOMEROOT=/home/vagrant/www
 export MYSQL_ROOT_USER=root
 fi
 
-export PYTHONPATH=${HOMEROOT}/lib/:${HOMEROOT}/
+export PYTHONPATH=${HOMEROOT}/lib/:${HOMEROOT}/:${HOME}/google_appengine/:${HOME}/google_appengine/lib/protorpc-1.0/
 echo $PYTHONPATH
 echo "Running Migrations..."
 python ${HOMEROOT}/manage.py migrate --noinput
@@ -24,6 +24,9 @@ wget -q https://storage.googleapis.com/sql-table-dumps/metadata_featuredefs_dev_
 fi
 echo "Applying SQL Table File... (may take a while)"
 mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/metadata_featdef_tables.sql
+
+echo "Adding Stored Procedures..."
+python ${HOMEROOT}/scripts/sproc_setup.py
 
 echo "Adding Cohort/Site Data..."
 python ${HOMEROOT}/scripts/add_site_ids.py

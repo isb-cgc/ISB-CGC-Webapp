@@ -40,6 +40,7 @@ require.config({
 });
 
 require([
+    /*
     'jquery',
     'jqueryui',
     'bootstrap',
@@ -47,13 +48,14 @@ require([
     'd3',
     'd3tip',
     'visualizations/createTreeGraph',
-
-    //'helpers/vis_helpers',
-
-    'assetscore',
-    'assetsresponsive',
+    'helpers/vis_helpers',
+    */
+    'assetscore'
+    /*
+    ,'assetsresponsive',
     'base'
-], function($, jqueryui, bootstrap, session_security, d3, d3tip, treegraph) {
+    */
+], function(/* $, jqueryui, bootstrap, session_security, d3, d3tip, treegraph, vis_helpers */) {
     A11y.Core();
 
     //var treegraph_obj = Object.create(treegraph, {});

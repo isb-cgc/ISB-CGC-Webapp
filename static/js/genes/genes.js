@@ -72,26 +72,29 @@ require([
         geneListField.tokenfield({
             typeahead : [
                 null, {
-                    source : gene_suggestions.ttAdapter(),
+                    source: gene_suggestions.ttAdapter(),
                     display: 'value'
-            }],
+                }
+            ],
             delimiter : " ",
-            minLength: 2,
+            minLength: 2-1,         // Bug #289 in bootstrap-tokenfield, submitted, remove -1 if it gets fixed and we update
             tokens: geneFavs
-        }).on('tokenfield:createdtoken', function (event) {
+        }).on('tokenfield:createtoken',function(event){
             //  Check whether the user enter a repetitive token
             //  If it is a repetitive token, show a message instead
-            var existingGenes = event.currentTarget.value.split(', ');
-            var parentHolder = $('#tokenfield-holder');
+            var existingGenes = geneListField.tokenfield('getTokens');
             $.each(existingGenes, function (index, gene) {
-                if (gene.toUpperCase() === event.attrs.value.toUpperCase()) {
-                    $(event.relatedTarget).addClass('invalid repeat');
+                if (gene.value.toUpperCase() === event.attrs.value.toUpperCase()) {
+                    event.attrs.isRepeatEntry = true;
                     $('.helper-text__repeat').show();
                 }
             });
+        }).on('tokenfield:createdtoken', function (event) {
+            event.attrs.isRepeatEntry && $(event.relatedTarget).addClass(
+                'invalid repeat repeat-of-'+event.attrs.value.toUpperCase()
+            );
 
-            //  check whether user enter a valid gene name
-            //var isValid = true;
+            // Check whether user entered a valid gene name
             validate_genes([event.attrs.value], function validCallback(result){
                 if(!result[event.attrs.value]){
                     $(event.relatedTarget).addClass('invalid error');
@@ -105,13 +108,26 @@ require([
                 }
             })
         }).on('tokenfield:removedtoken', function (event) {
+            // Update duplicate flagging
+            var theseRepeats = [];
+            if($('div.repeat-of-'+event.attrs.value.toUpperCase()).length > 0) {
+                var firstRepeat = $('div.repeat-of-'+event.attrs.value.toUpperCase()).first();
+                firstRepeat.removeClass('repeat repeat-of-'+event.attrs.value.toUpperCase());
+                if(!firstRepeat.hasClass('error')){
+                    firstRepeat.removeClass('invalid');
+                }
+            }
+
             if ($('div.token.invalid.error').length < 1) {
                 $('.helper-text__invalid').hide();
             }
             if ($('div.token.invalid.repeat').length < 1) {
                 $('.helper-text__repeat').hide();
             }
-        })
+        }).on('tokenfield:edittoken',function(e){
+            e.preventDefault();
+            return false;
+        });
     }
     createTokenizer();
 
@@ -166,7 +182,8 @@ require([
                 var fr = new FileReader();
                 var uploaded_gene_list;
                 fr.onload = function(event){
-                    uploaded_gene_list = fr.result.split(/[ \(,\)]+/).filter(Boolean);
+                    var frLine = fr.result.trim();
+                    uploaded_gene_list = frLine.split(/[ \(,\)]+/).filter(Boolean);
 
                     // Send the uploaded gene's list to the backend
                     uploaded_list = checkUploadedGeneListAgainstGeneIdentifier(uploaded_gene_list);
@@ -280,10 +297,10 @@ require([
     function truncateRepeatGenes(genes){
         var genes_count_object = {};
         genes.forEach(function(gene){
-            if(genes_count_object[gene]){
-                genes_count_object[gene] += 1;
+            if(genes_count_object[gene.toUpperCase()]){
+                genes_count_object[gene.toUpperCase()] += 1;
             }else{
-                genes_count_object[gene] = 1;
+                genes_count_object[gene.toUpperCase()] = 1;
             }
         });
         return Object.keys(genes_count_object);

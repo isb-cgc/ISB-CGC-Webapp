@@ -19,6 +19,33 @@
 define(['jquery', 'd3', 'd3tip', 'vis_helpers'],
 function($, d3, d3tip, vis_helpers) {
 
+    // Note this is relying on the checkbox menu flyout, which is present in the cohorts DOM but
+    // not visible sometimes. If this flyout is ever edited this code must be edited to reflect that
+    var getSampleTypeName = function(sampleTypeCode) {
+        var label = $("#SampleTypeCode input[data-value-name='" + sampleTypeCode + "']").parent()[0].innerHTML;
+        return label.substring(label.indexOf(">")+1);
+    };
+
+    var CURSOR_TOOLTIP_PAD = 20;
+
+    // If you want to override the tip coming in from the create call,
+    // do it here
+     var treeTip = d3tip()
+        .attr('class', 'd3-tip')
+        .direction('s')
+        .offset([0, 0])
+        .html(function(d) {
+            if (d.dy > CURSOR_TOOLTIP_PAD) {
+                var yOffset = (d.dy < (CURSOR_TOOLTIP_PAD*1.5) ? (CURSOR_TOOLTIP_PAD/2) : 0);
+                treeTip.offset([yOffset, 0]);
+            } else {
+                treeTip.offset([CURSOR_TOOLTIP_PAD, 0]);
+            }
+
+            var display =  (d.parent.name === "SampleTypeCode") ? getSampleTypeName(d.name) : d.name;
+            return '<span>' + display + ': ' + d.count + '</span>';
+        });
+
     return {
         get_treemap_ready: function(data, attribute) {
             var children = [];
@@ -28,15 +55,8 @@ function($, d3, d3tip, vis_helpers) {
             return {children: children, name: attribute};
         },
         draw_tree: function(data, svg, attribute, w, h, showtext, tip) {
-            if (!tip) {
-                tip = d3tip()
-                    .attr('class', 'd3-tip')
-                    .direction('s')
-                    .offset([0, 0])
-                    .html(function(d) {
-                        return '<span>' + d.name + ': ' + d.count + '</span>';
-                    });
-            }
+
+            tip = treeTip || tip;
 
             var node = this.get_treemap_ready(data, attribute);
             var treemap = d3.layout.treemap()
@@ -82,6 +102,9 @@ function($, d3, d3tip, vis_helpers) {
             svg.call(tip);
         },
         draw_trees: function(data) {
+
+            var startPlot = new Date().getTime();
+
             var w = 140,
                 h = 140;
 
@@ -127,6 +150,10 @@ function($, d3, d3tip, vis_helpers) {
                     .attr("transform", "translate(.5,.5)");
                 this.draw_tree(tree_data[clin_attr[i]], graph_svg, clin_attr[i], w, h, false);
             }
+
+            var stopPlot = new Date().getTime();
+
+            console.debug("[BENCHMARKING] Time to build tree graphs: "+(stopPlot-startPlot)+ "ms");
         }
     };
 });

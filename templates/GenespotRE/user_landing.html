@@ -89,7 +89,7 @@
                                         <td class="name-col"><a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a></td>
                                         <td class="sample-col">{{ cohort.num_patients }}</td>
                                         <td class="owner-col">{{ cohort.owner.email }}</td>
-                                        <td class="date-col">{{ cohort.last_date_saved|date:"SHORT_DATETIME_FORMAT" }}</td>
+                                        <td class="date-col">{{ cohort.last_date_saved|date:'M d, Y, g:i a' }}</td>
                                     </tr>
                                 {% endfor %}
                                 </tbody>
@@ -130,7 +130,7 @@
                                         </td>
                                         <td class="sample-col">{{ viz.plot_set.all|length }}</td>
                                         <td class="owner-col">{{ viz.get_owner.email }}</td>
-                                        <td class="date-col">{{ viz.last_date_saved|date:"SHORT_DATETIME_FORMAT" }}</td>
+                                        <td class="date-col">{{ viz.last_date_saved|date:'M d, Y, g:i a' }}</td>
                                     </tr>
                                 {% endfor %}
                                 </tbody>
@@ -171,7 +171,7 @@
                                         </td>
                                         <td class="sample-col">{{ viz.plot_set.all|length }}</td>
                                         <td class="owner-col">{{ viz.get_owner.email }}</td>
-                                        <td class="date-col">{{ viz.last_date_saved|date:"SHORT_DATETIME_FORMAT" }}</td>
+                                        <td class="date-col">{{ viz.last_date_saved|date:'M d, Y, g:i a' }}</td>
                                     </tr>
                                 {% endfor %}
                                 </tbody>

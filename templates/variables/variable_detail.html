@@ -36,7 +36,7 @@
                 {% endfor %}
             </ul>
             <div>
-                <ul class="page-action-group">
+                <ul class="page-action-group" role="menubar">
                     {% if not workbook and not new_workbook %}
                         <li><a class="btn btn-info" href="{% url 'variable_fav_edit' variables.id %}"><i class="fa fa-pencil"></i> Edit</a></li>
                         <li><a data-toggle="modal" data-target="#delete-favorite-modal" class="btn btn-info">Delete</a></li>
@@ -48,7 +48,7 @@
                             <form action="{% url 'worksheet_variables_edit' workbook.id worksheet.id %}" method="POST">
                                 {% csrf_token %}
                                 <input type="hidden" name="variable_list_id" value="{{ variables.id }}">
-                                <button class="btn btn-default" type="submit"><i class="fa fa-plus"></i>Apply to Analysis</button>
+                                <button class="btn btn-default" type="submit"><i class="fa fa-plus"></i>Apply to Worksheet</button>
                                 <a class="btn btn-info"  href="{% url 'variable_select_for_existing_workbook' workbook.id worksheet.id %}">Back</a>
                             </form>
                         {% endif %}

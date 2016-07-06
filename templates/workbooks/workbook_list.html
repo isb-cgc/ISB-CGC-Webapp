@@ -60,7 +60,7 @@
                             {% else %}
                                 {{ workbook.owner.first_name }} {{ workbook.owner.last_name }}
                             {% endif %}</td>
-                            <td> {{ workbook.last_date_saved}}</td>
+                            <td> {{ workbook.last_date_saved|date:'M d, Y, g:i a'}}</td>
                         </tr>
                     {% endfor %}
                 </tbody>

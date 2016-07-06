@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2015, Institute for Systems Biology
+ * Copyright 2016, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,38 +18,93 @@
 
 define(['jquery', 'tree_graph', 'stack_bar_chart', 'draw_parsets'],
 function($, tree_graph, stack_bar_chart, draw_parsets) {
+    
     var tree_graph_obj = Object.create(tree_graph, {});
     var parsets_obj = Object.create(draw_parsets, {});
+
     return  {
 
-        update_counts: function(base_url_domain, endpoint, cohort_id, limit, version) {
-            var filters = this.format_filters();
-            var api_url = this.generate_metadata_url(base_url_domain, endpoint, filters, cohort_id, limit, version);
-            var update_filters = this.update_filter_counts;
+        update_counts_parsets_direct: function() {
+
             $('.clinical-trees .spinner').show();
+            $('.parallel-sets .spinner').show();
+            $('.cohort-info .total-values').hide();
+            $('.cohort-info .spinner').show();
+
+            var context = this;
+
+            attr_counts = metadata_counts['count'];
+
+            $('#total-samples').html(metadata_counts['total']);
+            $('#total-participants').html(metadata_counts['participants']);
+
+            this.update_filter_counts(attr_counts);
+            tree_graph_obj.draw_trees(attr_counts);
+
+            if (metadata_counts.hasOwnProperty('items')) {
+                var features = [
+                    'cnvrPlatform',
+                    'DNAseq_data',
+                    'methPlatform',
+                    'gexpPlatform',
+                    'mirnPlatform',
+                    'rppaPlatform'
+                ];
+
+                var plot_features = [
+                    context.get_readable_name(features[0]),
+                    context.get_readable_name(features[1]),
+                    context.get_readable_name(features[2]),
+                    context.get_readable_name(features[3]),
+                    context.get_readable_name(features[4]),
+                    context.get_readable_name(features[5])
+                ];
+                for (var i = 0; i < metadata_counts['items'].length; i++) {
+                    var new_item = {};
+                    for (var j = 0; j < features.length; j++) {
+                        var item = metadata_counts['items'][i];
+                        new_item[plot_features[j]] = context.get_readable_name(item[features[j]]);
+                    }
+                    metadata_counts['items'][i] = new_item;
+                }
+
+                parsets_obj.draw_parsets(metadata_counts, plot_features);
+            } else {
+                console.warn("No 'items' found in metadata_counts: " + metadata_counts);
+            }
+
+            $('.clinical-trees .spinner').hide();
+            $('.parallel-sets .spinner').hide();
+            $('.cohort-info .spinner').hide();
+            $('.cohort-info .total-values').show();
+        },
+
+        update_counts_parsets: function(base_url_domain, endpoint, cohort_id, version){
+            var context = this;
+            var filters = this.format_filters();
+            var api_url = this.generate_metadata_url(base_url_domain, endpoint, filters, cohort_id, undefined, version);
+            var update_filters = this.update_filter_counts;
+
+            $('.clinical-trees .spinner').show();
+            $('.parallel-sets .spinner').show();
+            $('.cohort-info .total-values').hide();
+            $('.cohort-info .spinner').show();
+            
+            var startReq = new Date().getTime();
             $.ajax({
                 type: 'GET',
                 url: api_url,
 
                 // On success
                 success: function (results, status, xhr) {
+                    var stopReq = new Date().getTime();
+                    console.debug("[BENCHMARKING] Time for response in update_counts_parsets: "+(stopReq-startReq)+ "ms");
                     attr_counts = results['count'];
-                    $('.menu-bar .total-samples').html(results['total'] + ' Samples');
+                    $('#total-samples').html(results['total']);
+                    $('#total-participants').html(results['participants']);
                     update_filters(attr_counts);
                     tree_graph_obj.draw_trees(attr_counts);
-                    $('.clinical-trees .spinner').hide()
-                }
-            });
-        },
-
-        update_parsets: function(base_url_domain, endpoint, cohort_id, version) {
-            var filters = this.format_filters();
-            var api_url = this.generate_metadata_url(base_url_domain, endpoint, filters, cohort_id, null, version);
-            var context = this;
-            $.ajax({
-                type: 'GET',
-                url: api_url,
-                success: function(results, status, xhr) {
+                    
                     if (results.hasOwnProperty('items')) {
                         var features = [
                                 'cnvrPlatform',
@@ -78,8 +133,97 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
 
                         parsets_obj.draw_parsets(results, plot_features);
                     } else {
-                        console.log(results);
+                        console.debug(results);
                     }
+                },
+                error: function(req,status,err){
+                    $('#total-samples').html("Error");
+                    $('#total-participants').html("Error");
+                },
+                complete: function(xhr,status) {
+                    $('.clinical-trees .spinner').hide();
+                    $('.parallel-sets .spinner').hide();
+                    $('.cohort-info .spinner').hide();
+                    $('.cohort-info .total-values').show();
+                }
+            });
+        },
+
+        update_counts: function(base_url_domain, endpoint, cohort_id, limit, version) {
+            var filters = this.format_filters();
+            var api_url = this.generate_metadata_url(base_url_domain, endpoint, filters, cohort_id, limit, version);
+            var update_filters = this.update_filter_counts;
+            $('.clinical-trees .spinner').show();
+            var startReq = new Date().getTime();
+            $.ajax({
+                type: 'GET',
+                url: api_url,
+
+                // On success
+                success: function (results, status, xhr) {
+                    var stopReq = new Date().getTime();
+                    console.debug("[BENCHMARKING] Time for response in update_counts: "+(stopReq-startReq)+ "ms");
+                    attr_counts = results['count'];
+                    $('.menu-bar .total-samples').html(results['total'] + ' Samples');
+                    update_filters(attr_counts);
+                    tree_graph_obj.draw_trees(attr_counts);
+                },
+                error: function(req,status,err){
+                    
+                },
+                complete: function(xhr,status) {
+                    $('.clinical-trees .spinner').hide();
+                }
+            });
+        },
+
+        update_parsets: function(base_url_domain, endpoint, cohort_id, version) {
+            var filters = this.format_filters();
+            var api_url = this.generate_metadata_url(base_url_domain, endpoint, filters, cohort_id, null, version);
+            var context = this;
+            $('.parallel-sets .spinner').show();
+            var startReq = new Date().getTime();
+            $.ajax({
+                type: 'GET',
+                url: api_url,
+                success: function(results, status, xhr) {
+                    var stopReq = new Date().getTime();
+                    console.debug("[BENCHMARKING] Time for response in update_parsets: "+(stopReq-startReq)+ "ms");
+                    if (results.hasOwnProperty('items')) {
+                        var features = [
+                                'cnvrPlatform',
+                                'DNAseq_data',
+                                'methPlatform',
+                                'gexpPlatform',
+                                'mirnPlatform',
+                                'rppaPlatform'
+                            ];
+                        var plot_features = [
+                            context.get_readable_name(features[0]),
+                            context.get_readable_name(features[1]),
+                            context.get_readable_name(features[2]),
+                            context.get_readable_name(features[3]),
+                            context.get_readable_name(features[4]),
+                            context.get_readable_name(features[5])
+                        ];
+                        for (var i = 0; i < results['items'].length; i++) {
+                            var new_item = {};
+                            for (var j = 0; j < features.length; j++) {
+                                var item = results['items'][i];
+                                new_item[plot_features[j]] = context.get_readable_name(item[features[j]]);
+                            }
+                            results['items'][i] = new_item;
+                        }
+
+                        parsets_obj.draw_parsets(results, plot_features);
+                    } else {
+                        console.debug(results);
+                    }
+                },error: function(req,status,err){
+
+                },
+                complete: function(xhr,status) {
+                    $('.parallel-sets .spinner').hide();
                 }
             })
         },
@@ -126,24 +270,39 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
         },
 
         update_filter_counts: function(counts) {
-            $('#filter-panel ul li input').each(function() {
-                var $this = $(this),
-                    attr = $this.data('feature-name'),
-                    value = $this.data('value-name'),
-                    new_count = '';
 
-                if (counts[attr]) {
-                    for (var i = 0; i < counts[attr].length; i++) {
-                        if (counts[attr][i]['value'].replace(/\s+/g, '_') == value) {
-                            new_count = '(' + counts[attr][i]['count'] + ')';
+            counts_by_name = {};
+
+            for(var i=0; i < counts.length; i++) {
+                counts_by_name[counts[i].name] = {
+                    values: {},
+                    total: counts[i].total
+                };
+                for(var k=0; k < counts[i].values.length; k++) {
+                    counts_by_name[counts[i].name].values[counts[i].values[k].value] =  counts[i].values[k].count
+                }
+            }
+
+            $('#filter-panel li.list-group-item div.cohort-feature-select-block').each(function() {
+                var $this = $(this),
+                    attr = $this.data('feature-name');
+                $('ul#'+attr+' input').each(function(){
+
+                    var $that = $(this),
+                        value = $that.data('value-name'),
+                        label = $that.parent().text(),
+                        new_count = '';
+
+                    if (counts_by_name[attr]) {
+                        if (counts_by_name[attr].values[value] || counts_by_name[attr].values[label]) {
+                            new_count = '(' + (counts_by_name[attr].values[value] || counts_by_name[attr].values[label]) + ')';
                         }
                     }
                     if (new_count == '') {
                         new_count = '(0)';
                     }
-                    $(this).siblings('span').html(new_count);
-                } // Else we don't get counts from the metadata api yet
-
+                    $that.parent().siblings('span').html(new_count);
+                });
             })
 
         },
