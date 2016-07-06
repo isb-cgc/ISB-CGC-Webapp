@@ -258,15 +258,13 @@
                     <span class="rev-history">Revision History:</span>
                     <ul>
                         {% for item in cohort.get_revision_history %}
-                            {%  if 'Applied Filters.' in item %}
-                                 {% for filters in cohort.get_filter_history %}
-                                     <li class="applied-filters">
-                                        Applied Filters:
-                                         {%  for filter in filters %}
-                                            <span>{{ filter }}</span>
-                                         {% endfor %}
-                                    </li>
-                                 {%  endfor %}
+                            {%  if 'type' in item and item.type == 'filter' %}
+                                 <li class="applied-filters">
+                                    Applied Filters:
+                                     {% for filter in item.vals %}
+                                        <span>{{ filter }}</span>
+                                     {% endfor %}
+                                </li>
                             {%  else %}
                                 <li>{{ item }}</li>
                             {%  endif %}
@@ -477,6 +475,7 @@
     var base_url = '{{ base_url|safe }}';
     var base_api_url = '{{ base_api_url|safe }}';
     var cohort_id = {{ cohort.id }};
+    var metadata_counts = {{ metadata_counts|tojson|safe }};
     </script>
 {% endblock %}
 

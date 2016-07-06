@@ -105,6 +105,27 @@ require([
         selFiles.count() >= 5 ? $('#file-max-alert').show() : $('#file-max-alert').hide();
     };
 
+    var update_on_platform_filter_change = function(e) {
+
+        var totalSel = 0;
+
+        if($('input[name="platform-selected"]:checked').length <= 0) {
+            $('input[name="platform-selected"]').each(function(i) {
+               totalSel += parseInt($(this).attr('data-platform-count'));
+            });
+        } else {
+            $('input[name="platform-selected"]:checked').each(function(i) {
+               totalSel += parseInt($(this).attr('data-platform-count'));
+            });
+        }
+        $('.file-list-limit').text(FILE_LIST_MAX);
+        $('.file-list-total').text(totalSel);
+
+        if(totalSel < FILE_LIST_MAX) {
+            $('#file-list-warning').hide();
+        }
+    };
+
     $('.file-limit').text(SEL_FILE_MAX);
 
     // Our file list tokenizer
@@ -222,22 +243,33 @@ require([
                     var dataTypeName = '';
                     var label = '';
                     var tokenLabel = files[i]['sample']+", "+files[i]['pipeline']+", "+happy_name(files[i]['platform'])+", "+files[i]['datatype'];
-
+                    var checkbox_inputs = '';
+                    var disable = true;
+                    if (files[i]['access'] != 'dbGap controlled-access' || has_access == 'True') {
+                        disable = false;
+                    }
                     if (files[i]['gg_readgroupset_id']) {
                         val = files[i]['gg_readgroupset_id'] + ',' + files[i]['sample'];
                         dataTypeName = "readgroupset_id";
                         label = "GA4GH";
-                    } else if (files[i]['cloudstorage_location'] && files[i]['cloudstorage_location'].split('.').pop() == 'bam') {
+                        checkbox_inputs += '<label><input type="checkbox" token-label="'+tokenLabel+'"name="'+dataTypeName+'" data-type="'+dataTypeName+'" value="'+val+'"';
+                        if (disable) {
+                            checkbox_inputs += ' disabled="disabled"';
+                        }
+                        checkbox_inputs += '> '+label+'</label>';
+                    }
+                    if (files[i]['cloudstorage_location'] && files[i]['cloudstorage_location'].split('.').pop() == 'bam') {
                         val = files[i]['cloudstorage_location'] + ',' + files[i]['sample'];
                         dataTypeName = "gcs_bam";
                         label = "Cloud Storage";
+                        checkbox_inputs += '<label><input type="checkbox" token-label="'+tokenLabel+'"name="'+dataTypeName+'" data-type="'+dataTypeName+'" value="'+val+'"';
+                        if (disable) {
+                            checkbox_inputs += ' disabled="disabled"';
+                        }
+                        checkbox_inputs += '> '+label+'</label>';
                     }
 
-                    files[i]['gg_readgroupset_id'] = (
-                        val !== null
-                        ? '<label><input type="checkbox" token-label="'+tokenLabel+'"name="'+dataTypeName+'" data-type="'+dataTypeName+'" value="'+val+'"> '+label+'</label>'
-                        : ''
-                    );
+                    files[i]['gg_readgroupset_id'] = checkbox_inputs;
 
                     $('.filelist-panel table tbody').append(
                         '<tr>' +
@@ -323,7 +355,38 @@ require([
     $('#filter-panel input[type="checkbox"]').on('change', function() {
         page = 1;
 
+        var totalSel = 0;
+
+        if($('input[name="platform-selected"]:checked').length <= 0) {
+            $('input[name="platform-selected"]').each(function(i) {
+               totalSel += parseInt($(this).attr('data-platform-count'));
+            });
+        } else {
+            $('input[name="platform-selected"]:checked').each(function(i) {
+               totalSel += parseInt($(this).attr('data-platform-count'));
+            });
+        }
+
+        $('.file-list-total').text(totalSel);
+
+        if(totalSel < FILE_LIST_MAX) {
+            $('#file-list-warning').hide();
+        }
+
         update_table();
+    });
+
+    $('#download-link').on('click',function(e) {
+
+        update_on_platform_filter_change();
+
+        if(parseInt($('.file-list-total').text()) > FILE_LIST_MAX) {
+            $('#file-list-warning').show();
+            e.preventDefault();
+            return false;
+        } else {
+            $('#file-list-warning').hide();
+        }
     });
 
     $('input[type="submit"]').prop('disabled', true);

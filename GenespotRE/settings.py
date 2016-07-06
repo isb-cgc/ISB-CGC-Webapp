@@ -127,6 +127,9 @@ PROCESSING_JENKINS_PROJECT  = os.environ.get('PROCESSING_JENKINS_PROJECT', 'cgc-
 PROCESSING_JENKINS_USER     = os.environ.get('PROCESSING_JENKINS_USER', 'user')
 PROCESSING_JENKINS_PASSWORD = os.environ.get('PROCESSING_JENKINS_PASSWORD', '')
 
+
+CSRF_COOKIE_SECURE = True
+
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
@@ -400,5 +403,10 @@ SITE_GOOGLE_TAG_MANAGER_ID = os.environ.get('SITE_GOOGLE_TAG_MANAGER_ID', False)
 #   MAXes to prevent size-limited events from causing errors
 ##############################################################
 
-MAX_FILE_LIST_REQUEST = 85000
+# Google App Engine has a response size limit of 32M. ~65k entries from the cohort_filelist view will
+# equal just under the 32M limit. If each individual listing is ever lengthened or shortened this
+# number should be adjusted
+MAX_FILE_LIST_REQUEST = 65000
+
+# IGV limit to prevent users from trying ot open dozens of files
 MAX_FILES_IGV = 5

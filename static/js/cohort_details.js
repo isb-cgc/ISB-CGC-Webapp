@@ -66,6 +66,8 @@ require([
     'base'
 ], function ($, jqueryui, bootstrap, session_security, d3, d3tip, search_helpers) {
 
+    var savingComment = false;
+    var savingChanges = false;
     var SUBSEQUENT_DELAY = 600;
     var update_displays_thread = null;
 
@@ -205,6 +207,7 @@ require([
         $('#default-cohort-menu').hide();
         $('#edit-cohort-menu').show();
         showHideMoreGraphButton();
+        $('#multi-categorical').prop('scrollLeft',150);
     });
 
     $('#cancel-add-filter-btn').on('click', function() {
@@ -217,8 +220,17 @@ require([
         $('#edit-cohort-menu').hide();
     });
 
-    $('#create-cohort-form, #apply-filters-form').on('submit', function() {
+    $('#create-cohort-form, #apply-filters-form').on('submit', function(e) {
+
+        if(savingChanges) {
+            e.preventDefault();
+            return false;
+        }
+
         var form = $(this);
+
+        $('#apply-filters-form input[type="submit"]').prop('disabled',true);
+        savingChanges = true;
 
         $('.selected-filters .panel-body span').each(function() {
             var $this = $(this),
@@ -301,8 +313,13 @@ require([
     });
 
     $('.add-comment').on('submit', function(event) {
+        if(savingComment) {
+            event.preventDefault();
+            return false;
+        }
+        $('.save-comment-btn').prop('disabled', true);
+        savingComment = true;
         event.preventDefault();
-        console.log(base_url + '/cohorts/save_cohort_comment/');
         var form = this;
         $.ajax({
             type: 'POST',
@@ -315,12 +332,13 @@ require([
                 $('.comment-flyout .flyout-body').append('<p class="comment-date">' + data['date_created'] + '</p>');
                 form.reset();
                 $('.save-comment-btn').prop('disabled', true);
+                savingComment = false;
             },
             error: function() {
-                console.log('Failed to save comment.')
+                console.error('Failed to save comment.')
                 form.reset()
+                savingComment = false;
             }
-
         });
 
         return false;
@@ -333,12 +351,17 @@ require([
         $('a[href="#collapse-Project"]').trigger('click')
         $('input[type="checkbox"][data-value-name="TCGA"]').trigger('click');
     } else {
-        update_displays(true);
+        // If there's data passed in from the template, use it and drop it
+        if(metadata_counts !== null && metadata_counts !== "") {
+            search_helper_obj.update_counts_parsets_direct();
+            metadata_counts = null;
+        } else {
+            update_displays(true);    
+        }
     }
 
     $('#shared-with-btn').on('click', function(e){
         var target = $(this).data('target');
-
         $(target + ' a[data-target="#shared-pane"]').tab('show');
     });
 

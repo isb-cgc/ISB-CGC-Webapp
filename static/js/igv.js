@@ -94,49 +94,13 @@ require([
         showNavigation: true,
         genome: "hg19",
         locus: "egfr",
-        apiKey: 'AIzaSyDbqoM1bNdaCTn2-OtarruG4NmI8e-qHAk',
         tracks: tracks
     };
     $('#igv-div').empty();
     igv.browser = null;
-    igv.oauth.google.setRedirectUrl(base_url);
+    igv.oauth.google.setRedirectUrl(base_url, service_account);
     igv.oauth.google.login();
 
     browser = igv.createBrowser($('#igv-div')[0], options);
-    // Testing bq access
-    //var config = {
-    //    'client_id': clientId,
-    //    'scope': 'https://www.googleapis.com/auth/bigquery'
-    //};
-    //
-    //gapi.auth.authorize(config, function (tokenJson) {
-    //    gapi.client.load('bigquery', 'v2');
-    //    oauth.google.apiKey = 'a717bf753c08ea7293a226014a1134867d6c5884';
-    //    igv.oauth.google.access_token = tokenJson.access_token;
-    //
-    //    //igv.browser.loadTrack(
-    //    //    {
-    //    //        //autoHeight: false,
-    //    //        sourceType: 'bigquery',
-    //    //        featureType: 'seg',
-    //    //        name: 'BRCA',
-    //    //        cohort: 'SELECT ParticipantBarcode FROM [isb-cgc:tcga_201510_alpha.Clinical_data] WHERE Study = "BRCA"'
-    //    //    }
-    //    //)
-    //});
-
-    //$('#dataset-selector').on('change', function() {
-    //    var id = $(this).prop('value');
-    //    $('.rgselector').hide();
-    //    $('#rgselector-'+id).show();
-    //    $('.generate-btn').show();
-    //});
-    //
-    //if (selected_dataset != '') {
-    //    $('.rgselector').hide();
-    //    $('#rgselector-'+selected_dataset).show();
-    //    $('.generate-btn').show();
-    //    $('.generate-btn').click();
-    //}
 
 });
