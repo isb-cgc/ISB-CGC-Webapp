@@ -157,11 +157,13 @@
         display: inline-block
 
     #multi-categorical
-        overflow-x: hidden
+        overflow-x: auto
         min-height: 100px
         svg
+            padding-left: 150px
             display: block
-
+            width: 100%
+            min-width: 900px
         .dimension
             cursor: ew-resize
         .category
@@ -231,6 +233,16 @@
         .category-0
             fill: #2196F3
             stroke: #2196F3
+    .applied-filters
+        span
+            background-color: #ceeaff
+            padding: 3px 10px 3px 10px
+            border-radius: 10px
+            margin-bottom: 5px
+            display: inline-block
+        span:hover
+            background-color: darken(#ceeaff, 10%)
+
 
 #cohort-filelist
     padding-top: 15px

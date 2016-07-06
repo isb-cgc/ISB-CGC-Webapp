@@ -52,9 +52,8 @@ require([
     'assetsresponsive',
     'tokenfield'
 ], function ($, jqueryui, bootstrap, session_security, d3, d3tip) {
-
-    var SEL_FILE_MAX = 5;
-    var FILE_LIST_MAX = 85000;
+        
+    var file_list_total = 0;
 
     // File selection storage object
     // The data-type/name input checkbox attritbutes in the form below must be reflected here in this map
@@ -198,15 +197,30 @@ require([
             selector_list.push($(this).attr('id'));
         });
         var url = ajax_update_url + '?page=' + page;
-
+        
+        file_list_total = 0;
+        
+        if($('input[name="platform-selected"]:checked').length <= 0) {
+             $('input[name="platform-selected"]').each(function(i) {
+               file_list_total += parseInt($(this).attr('data-platform-count'));
+            });
+        } else {
+            $('input[name="platform-selected"]:checked').each(function(i) {
+               file_list_total += parseInt($(this).attr('data-platform-count'));
+            });
+        }        
+        
+        
         if (selector_list.length) {
             for (var selector in selector_list) {
                 url += '&' + selector_list[selector] + '=True';
             }
-            $('#download-link').attr('href', download_url + '?params=' + selector_list.join(','))
+
+            $('#download-link').attr('href', download_url + '?params=' + selector_list.join(',') + '&total=' + file_list_total);
         } else {
-            $('#download-link').attr('href', download_url)
+            $('#download-link').attr('href', download_url + '?total=' + file_list_total)
         }
+
 
         $('#prev-page').addClass('disabled');
         $('#next-page').addClass('disabled');
@@ -229,22 +243,33 @@ require([
                     var dataTypeName = '';
                     var label = '';
                     var tokenLabel = files[i]['sample']+", "+files[i]['pipeline']+", "+happy_name(files[i]['platform'])+", "+files[i]['datatype'];
-
+                    var checkbox_inputs = '';
+                    var disable = true;
+                    if (files[i]['access'] != 'dbGap controlled-access' || has_access == 'True') {
+                        disable = false;
+                    }
                     if (files[i]['gg_readgroupset_id']) {
                         val = files[i]['gg_readgroupset_id'] + ',' + files[i]['sample'];
                         dataTypeName = "readgroupset_id";
                         label = "GA4GH";
-                    } else if (files[i]['cloudstorage_location'] && files[i]['cloudstorage_location'].split('.').pop() == 'bam') {
+                        checkbox_inputs += '<label><input type="checkbox" token-label="'+tokenLabel+'"name="'+dataTypeName+'" data-type="'+dataTypeName+'" value="'+val+'"';
+                        if (disable) {
+                            checkbox_inputs += ' disabled="disabled"';
+                        }
+                        checkbox_inputs += '> '+label+'</label>';
+                    }
+                    if (files[i]['cloudstorage_location'] && files[i]['cloudstorage_location'].split('.').pop() == 'bam') {
                         val = files[i]['cloudstorage_location'] + ',' + files[i]['sample'];
                         dataTypeName = "gcs_bam";
                         label = "Cloud Storage";
+                        checkbox_inputs += '<label><input type="checkbox" token-label="'+tokenLabel+'"name="'+dataTypeName+'" data-type="'+dataTypeName+'" value="'+val+'"';
+                        if (disable) {
+                            checkbox_inputs += ' disabled="disabled"';
+                        }
+                        checkbox_inputs += '> '+label+'</label>';
                     }
 
-                    files[i]['gg_readgroupset_id'] = (
-                        val !== null
-                        ? '<label><input type="checkbox" token-label="'+tokenLabel+'"name="'+dataTypeName+'" data-type="'+dataTypeName+'" value="'+val+'"> '+label+'</label>'
-                        : ''
-                    );
+                    files[i]['gg_readgroupset_id'] = checkbox_inputs;
 
                     $('.filelist-panel table tbody').append(
                         '<tr>' +
