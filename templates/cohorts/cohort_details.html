@@ -225,13 +225,13 @@
 
         <div class="cohort-selected-filters panel panel-default">
             <div class="panel-heading">
-                <h4 class="panel-title">Selected Filters</h4>
+                <h4 class="panel-title">Current Filters</h4>
             </div>
             <div class="panel-body">
-                {% for filter in cohort.get_filters %}
+                {% for filter in cohort.get_current_filters %}
                     <span class="filter-label label label-default space-right-5">{{ filter.name }}: {{ filter.value }}</span>
                 {% empty %}
-                    <p>There were no filters used to create this cohort.</p>
+                    <p>No filters have been applied to this cohort.</p>
                 {% endfor %}
             </div>
         </div>
@@ -253,6 +253,16 @@
                 </div>
                 <div class="row col-md-12 space-bottom-10">
                     <span>Your Permissions: {{ cohort.perm.perm }}</span>
+                </div>
+                <div class="row col-md-12 space-bottom-10">
+                    <span>Creation Filters: </span>
+                    <span class="applied-filters">
+                     {% for filter in cohort.get_creation_filters %}
+                         <span>{{ filter.name }}: {{ filter.value }}</span>
+                     {% empty %}
+                         There were no filters used to create this cohort.
+                     {% endfor %}
+                     </span>
                 </div>
                 <div class="row col-md-12 space-bottom-10">
                     <span class="rev-history">Revision History:</span>
