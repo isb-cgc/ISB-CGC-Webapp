@@ -1,6 +1,6 @@
 """
 
-Copyright 2015, Institute for Systems Biology
+Copyright 2016, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,108 +26,210 @@ from django.contrib.auth.models import User
 from projects.models import Project
 from workbooks.models import Workbook
 
-# register = template.Library()
+DATA_ATTR_DICTIONARY = {
+    'DNA_sequencing-True': 'has_Illumina_DNASeq-True',
+    'DNA_sequencing-False': 'has_Illumina_DNASeq-False',
+
+    'RNA_sequencing-UNC Illumina HiSeq': 'has_UNC_HiSeq_RNASeq-True',
+    'RNA_sequencing-BCGSC Illumina HiSeq': 'has_BCGSC_HiSeq_RNASeq-True',
+    'RNA_sequencing-UNC Illumina GA': 'has_UNC_GA_RNASeq-True',
+    'RNA_sequencing-BCGSC Illumina GA': 'has_BCGSC_GA_RNASeq-True',
+
+    'miRNA_sequencing-Illumina GA': 'has_GA_miRNASeq-True',
+    'miRNA_sequencing-Illumina HiSeq': 'has_HiSeq_miRnaSeq-True',
+
+    'Protein-False': 'has_RPPA-False',
+    'Protein-True': 'has_RPPA-True',
+
+    'SNP_CN-True': 'has_SNP6-True',
+    'SNP_CN-False': 'has_SNP6-False',
+
+    'DNA_methylation-450k': 'has_450k-True',
+    'DNA_methylation-27k': 'has_27k-True'
+}
+
+ATTR_SPECIFIC_ORDERS = {
+    'bmi': ['underweight', 'normal weight', 'overweight', 'obese', 'None', ],
+    'hpv_status': ['Positive', 'Negative', 'None', ],
+    'age_at_initial_pathologic_diagnosis': ['10 to 39', '40 to 49', '50 to 59', '60 to 69', '70 to 79', 'Over 80', 'None', ]
+}
+
+ATTR_SPECIFIC_TRANSLATION = {
+    'SampleTypeCode': {
+        '01': 'Primary solid Tumor',
+        '02': 'Recurrent Solid Tumor',
+        '03': 'Primary Blood Derived Cancer - Peripheral Blood',
+        '04': 'Recurrent Blood Derived Cancer - Bone Marrow',
+        '05': 'Additional - New Primary',
+        '06': 'Metastatic',
+        '07': 'Additional Metastatic',
+        '08': 'Human Tumor Original Cells',
+        '09': 'Primary Blood Derived Cancer - Bone Marrow',
+        '10': 'Blood Derived Normal',
+        '11': 'Solid Tissue Normal',
+        '12': 'Buccal Cell Normal',
+        '13': 'EBV Immortalized Normal',
+        '14': 'Bone Marrow Normal',
+        '20': 'Control Analyte',
+        '40': 'Recurrent Blood Derived Cancer - Peripheral Blood',
+        '50': 'Cell Lines',
+        '60': 'Primary Xenograft Tissue',
+        '61': 'Cell Line Derived Xenograft Tissue'
+    },
+    'prior_dx': {
+        'Yes': 'Yes',
+        'No': 'No',
+        'Yes, History of Prior Malignancy': 'Yes, History of Prior Malignancy',
+        'Yes, History of Synchronous and or Bilateral Malignancy': 'Yes, History of Synchronous and or Bilateral Malignancy',
+        'Yes, History of Synchronous/Bilateral Malignancy': 'Yes, History of Synchronous/Bilateral Malignancy'
+    },
+    'BMI': {
+        'underweight': 'Underweight: BMI less that 18.5',
+        'normal weight': 'Normal weight: BMI is 18.5 - 24.9',
+        'overweight': 'Overweight: BMI is 25 - 29.9',
+        'obese': 'Obese: BMI is 30 or more'
+    }
+}
+
+TRANSLATION_DICTIONARY = {
+    'DNAseq_data': 'DNAseq',
+    'Yes': 'GA',
+    'No': 'N/A',
+    'mirnPlatform': 'microRNA',
+    'None': 'N/A',
+    'IlluminaHiSeq_miRNASeq': 'HiSeq',
+    'IlluminaGA_miRNASeq': 'GA',
+    'cnvrPlatform': 'SNP/CN',
+    'Genome_Wide_SNP_6': 'SNP6',
+    'methPlatform': 'DNAmeth',
+    'HumanMethylation27': '27k',
+    'HumanMethylation450': '450k',
+    'gexpPlatform': 'mRNA',
+    'IlluminaHiSeq_RNASeq': 'HiSeq/BCGSC',
+    'IlluminaHiSeq_RNASeqV2': 'HiSeq/UNC V2',
+    'IlluminaGA_RNASeq': 'GA/BCGSC',
+    'IlluminaGA_RNASeqV2': 'GA/UNC V2',
+    'rppaPlatform': 'Protein',
+    'MDA_RPPA_Core': 'RPPA',
+    'FEMALE': 'Female',
+    'MALE': 'Male',
+    '0': 'Wild Type',
+    '1': 'Mutant',
+    'age_at_initial_pathologic_diagnosis': 'Age at Diagnosis',
+    'prior_dx': 'Prior Diagnosis',
+    'person_neoplasm_cancer_status': 'Tumor Status',
+    'neoplasm_histologic_grade': 'Histological Grade',
+    'icd_10': 'ICD-10',
+    'icd_o_3_histology': 'ICD-O-3 Histology',
+    'icd_o_3_site': 'ICD-O-3 Site',
+    'SampleTypeCode': 'Sample Type',
+    'Project': 'Public Projects',
+    'Study': 'Public Studies',
+    'user_projects': 'Your Projects',
+    'user_studys': 'Your Studies',
+    'SNP_CN': 'SNP Copy Number',
+    'miRNA_sequencing': 'miRNA SEQUENCING'
+}
+
+DISEASE_DICTIONARY = {
+    'Study': {
+        'LAML': 'Acute Myeloid Leukemia',
+        'ACC': 'Adrenocortical Carcinoma',
+        'BLCA': 'Bladder Urothelial Carcinoma',
+        'LGG': 'Brain Lower Grade Glioma',
+        'BRCA': 'Breast Invasive Carcinoma',
+        'CESC': 'Cervical Squamous Cell Carcinoma and Endocervical Adenocarcinoma',
+        'CHOL': 'Cholangiocarcinoma',
+        'LCML': 'Chronic Myelogenous Leukemia',
+        'COAD': 'Colon Adenocarcinoma',
+        'CNTL': 'Controls',
+        'ESCA': 'Esophageal Carcinoma',
+        'FPPP': 'FFPE Pilot Phase II',
+        'GBM': 'Glioblastoma Multiforme',
+        'HNSC': 'Head and Neck Squamous Cell Carcinoma',
+        'KICH': 'Kidney Chromophobe',
+        'KIRC': 'Kidney Renal Clear Cell Carcinoma',
+        'KIRP': 'Kidney Renal Papillary Cell Carcinoma',
+        'LIHC': 'Liver Hepatocellular Carcinoma',
+        'LUAD': 'Lung Adenocarcinoma',
+        'LUSC': 'Lung Squamous Cell Carcinoma',
+        'DLBC': 'Lymphoid Neoplasm Diffuse Large B-cell Lymphoma',
+        'MESO': 'Mesothelioma',
+        'MISC': 'Miscellaneous',
+        'OV': 'Ovarian Serous Cystadenocarcinoma',
+        'PAAD': 'Pancreatic Adenocarcinoma',
+        'PCPG': 'Pheochromocytoma and Paraganglioma',
+        'PRAD': 'Prostate Adenocarcinoma',
+        'READ': 'Rectum Adenocarcinoma',
+        'SARC': 'Sarcoma',
+        'SKCM': 'Skin Cutaneous Melanoma',
+        'STAD': 'Stomach Adenocarcinoma',
+        'TGCT': 'Testicular Germ Cell Tumors',
+        'THYM': 'Thymoma',
+        'THCA': 'Thyroid Carcinoma',
+        'UCS': 'Uterine Carcinosarcoma',
+        'UCEC': 'Uterine Corpus Endometrial Carcinoma',
+        'UVM': 'Uveal Melanoma',
+    }
+}
+
+
+def quick_js_bracket_replace(matchobj):
+    if matchobj.group(0) == '<':
+        return '\u003C'
+    else:
+        return '\u003E'
+
 
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)
+
+
+@register.filter
+def check_for_order(items, attr):
+    if attr in ATTR_SPECIFIC_ORDERS:
+        item_order = ATTR_SPECIFIC_ORDERS[attr]
+        ordered_items = []
+        for ordinal in item_order:
+            for item in items:
+                if item['value'] == ordinal:
+                    ordered_items.append(item)
+        return ordered_items
+    else:
+        return items
+
 
 @register.filter
 def get_readable_name(csv_name, attr=None):
     # if csv_name.startswith('user_') and csv_name != 'user_project' and csv_name != 'user_study':
     #     csv_name = csv_name[5:]
 
-    attr_specific_translation = {
-        'SampleTypeCode': {
-            '01': 'Primary solid Tumor',
-            '02': 'Recurrent Solid Tumor',
-            '03': 'Primary Blood Derived Cancer - Peripheral Blood',
-            '04': 'Recurrent Blood Derived Cancer - Bone Marrow',
-            '05': 'Additional - New Primary',
-            '06': 'Metastatic',
-            '07': 'Additional Metastatic',
-            '08': 'Human Tumor Original Cells',
-            '09': 'Primary Blood Derived Cancer - Bone Marrow',
-            '10': 'Blood Derived Normal',
-            '11': 'Solid Tissue Normal',
-            '12': 'Buccal Cell Normal',
-            '13': 'EBV Immortalized Normal',
-            '14': 'Bone Marrow Normal',
-            '20': 'Control Analyte',
-            '40': 'Recurrent Blood Derived Cancer - Peripheral Blood',
-            '50': 'Cell Lines',
-            '60': 'Primary Xenograft Tissue',
-            '61': 'Cell Line Derived Xenograft Tissue'
-        },
-        'prior_dx': {
-            'Yes': 'Yes',
-            'No': 'No',
-            'Yes, History of Prior Malignancy': 'Yes, History of Prior Malignancy',
-            'Yes, History of Synchronous and or Bilateral Malignancy': 'Yes, History of Synchronous and or Bilateral Malignancy',
-            'Yes, History of Synchronous/Bilateral Malignancy': 'Yes, History of Synchronous/Bilateral Malignancy'
-        }
-    }
-
-    translation_dictionary = {
-        'DNAseq_data': 'DNAseq',
-        'Yes': 'GA',
-        'No': 'N/A',
-        'mirnPlatform': 'microRNA',
-        'None': 'N/A',
-        'IlluminaHiSeq_miRNASeq': 'HiSeq',
-        'IlluminaGA_miRNASeq': 'GA',
-        'cnvrPlatform': 'SNP/CN',
-        'Genome_Wide_SNP_6': 'SNP6',
-        'methPlatform': 'DNAmeth',
-        'HumanMethylation27': '27k',
-        'HumanMethylation450': '450k',
-        'gexpPlatform': 'mRNA',
-        'IlluminaHiSeq_RNASeq': 'HiSeq/BCGSC',
-        'IlluminaHiSeq_RNASeqV2': 'HiSeq/UNC V2',
-        'IlluminaGA_RNASeq': 'GA/BCGSC',
-        'IlluminaGA_RNASeqV2': 'GA/UNC V2',
-        'rppaPlatform': 'Protein',
-        'MDA_RPPA_Core': 'RPPA',
-        'FEMALE': 'Female',
-        'MALE': 'Male',
-        '0': 'Wild Type',
-        '1': 'Mutant',
-        'age_at_initial_pathologic_diagnosis': 'Age at Diagnosis',
-        'prior_dx': 'Prior Diagnosis',
-        'person_neoplasm_cancer_status': 'Tumor Status',
-        'neoplasm_histologic_grade': 'Histological Grade',
-        'icd_10': 'ICD-10',
-        'icd_o_3_histology': 'ICD-O-3 Histology',
-        'icd_o_3_site': 'ICD-O-3 Site',
-        'SampleTypeCode': 'Sample Type',
-        'Project': 'Public Projects',
-        'Study': 'Public Studies',
-        'user_projects': 'Your Projects',
-        'user_studys': 'Your Studies',
-        'SNP_CN': 'SNP Copy Number',
-        'miRNA_sequencing': 'miRNA SEQUENCING'
-    }
-
-    if attr in attr_specific_translation.keys():
-        return attr_specific_translation[attr][csv_name]
+    if attr in ATTR_SPECIFIC_TRANSLATION.keys():
+        return ATTR_SPECIFIC_TRANSLATION[attr][csv_name]
     elif attr == 'Project' or attr == 'Study':
         return csv_name.upper()
-    elif translation_dictionary.get(csv_name):
-        return translation_dictionary.get(csv_name)
+    elif TRANSLATION_DICTIONARY.get(csv_name):
+        return TRANSLATION_DICTIONARY.get(csv_name)
     else:
         csv_name = csv_name.replace('_', ' ')
-        csv_name = string.capwords(csv_name)
+        # Do not convert the Roman numerals in the stages
+        if attr is not 'pathologic_stage':
+            csv_name = string.capwords(csv_name)
         csv_name = csv_name.replace(' To ', ' to ')
         return csv_name
+
 
 @register.filter
 def remove_whitespace(str):
     return str.replace(' ', '')
 
+
 @register.filter
 def replace_whitespace(str, chr):
     result = re.sub(re.compile(r'\s+'), chr, str)
     return result
+
 
 @register.filter
 def shorter(label, max_length):
@@ -136,82 +238,23 @@ def shorter(label, max_length):
     else:
         return label
 
+
 @register.filter
 def get_data_attr_id(value, attr):
     display_str = attr + '-' + value
-    data_attr_dictionary = {
-        'DNA_sequencing-True': 'has_Illumina_DNASeq-True',
-        'DNA_sequencing-False': 'has_Illumina_DNASeq-False',
 
-        'RNA_sequencing-UNC Illumina HiSeq': 'has_UNC_HiSeq_RNASeq-True',
-        'RNA_sequencing-BCGSC Illumina HiSeq': 'has_BCGSC_HiSeq_RNASeq-True',
-        'RNA_sequencing-UNC Illumina GA': 'has_UNC_GA_RNASeq-True',
-        'RNA_sequencing-BCGSC Illumina GA': 'has_BCGSC_GA_RNASeq-True',
-
-        'miRNA_sequencing-Illumina GA': 'has_GA_miRNASeq-True',
-        'miRNA_sequencing-Illumina HiSeq': 'has_HiSeq_miRnaSeq-True',
-
-        'Protein-False': 'has_RPPA-False',
-        'Protein-True': 'has_RPPA-True',
-
-        'SNP_CN-True': 'has_SNP6-True',
-        'SNP_CN-False': 'has_SNP6-False',
-
-        'DNA_methylation-450k': 'has_450k-True',
-        'DNA_methylation-27k': 'has_27k-True'
-    }
-    if data_attr_dictionary.get(display_str):
-        return data_attr_dictionary[display_str]
+    if DATA_ATTR_DICTIONARY.get(display_str):
+        return DATA_ATTR_DICTIONARY[display_str]
     else:
         return display_str
 
+
 @register.filter
 def get_tooltip_text(value_id, attr):
-    disease_dictionary = {
-        'Study': {
-            'LAML':	'Acute Myeloid Leukemia',
-            'ACC':	'Adrenocortical Carcinoma',
-            'BLCA':	'Bladder Urothelial Carcinoma',
-            'LGG':	'Brain Lower Grade Glioma',
-            'BRCA':	'Breast Invasive Carcinoma',
-            'CESC':	'Cervical Squamous Cell Carcinoma and Endocervical Adenocarcinoma',
-            'CHOL':	'Cholangiocarcinoma',
-            'LCML':	'Chronic Myelogenous Leukemia',
-            'COAD':	'Colon Adenocarcinoma',
-            'CNTL':	'Controls',
-            'ESCA':	'Esophageal Carcinoma',
-            'FPPP':	'FFPE Pilot Phase II',
-            'GBM':	'Glioblastoma Multiforme',
-            'HNSC':	'Head and Neck Squamous Cell Carcinoma',
-            'KICH':	'Kidney Chromophobe',
-            'KIRC':	'Kidney Renal Clear Cell Carcinoma',
-            'KIRP':	'Kidney Renal Papillary Cell Carcinoma',
-            'LIHC':	'Liver Hepatocellular Carcinoma',
-            'LUAD':	'Lung Adenocarcinoma',
-            'LUSC':	'Lung Squamous Cell Carcinoma',
-            'DLBC':	'Lymphoid Neoplasm Diffuse Large B-cell Lymphoma',
-            'MESO':	'Mesothelioma',
-            'MISC':	'Miscellaneous',
-            'OV':	'Ovarian Serous Cystadenocarcinoma',
-            'PAAD':	'Pancreatic Adenocarcinoma',
-            'PCPG':	'Pheochromocytoma and Paraganglioma',
-            'PRAD':	'Prostate Adenocarcinoma',
-            'READ':	'Rectum Adenocarcinoma',
-            'SARC':	'Sarcoma',
-            'SKCM':	'Skin Cutaneous Melanoma',
-            'STAD':	'Stomach Adenocarcinoma',
-            'TGCT':	'Testicular Germ Cell Tumors',
-            'THYM':	'Thymoma',
-            'THCA':	'Thyroid Carcinoma',
-            'UCS':	'Uterine Carcinosarcoma',
-            'UCEC':	'Uterine Corpus Endometrial Carcinoma',
-            'UVM':	'Uveal Melanoma',
-        }
-    }
 
-    if attr in disease_dictionary:
-        if value_id in disease_dictionary[attr]:
-            return disease_dictionary[attr][value_id]
+    if attr in DISEASE_DICTIONARY:
+        if value_id in DISEASE_DICTIONARY[attr]:
+            return DISEASE_DICTIONARY[attr][value_id]
         else:
             return ''
     else:
@@ -251,9 +294,11 @@ def get_barcodes_length(barcodes):
     codes = filter(None, codes)
     return len(codes)
 
+
 @register.filter
 def how_many_more(attr_list, num):
     return len(attr_list) - num
+
 
 @register.filter
 def active(list, key=None):
@@ -261,25 +306,23 @@ def active(list, key=None):
         return list.filter(active=True)
     return list.filter(**{key + '__active':True})
 
+
 @register.filter
 def is_public(list, key=None):
     if not key:
         return list.filter(is_public=True)
     return list.filter(**{key + '__is_public':True})
 
+
 @register.filter
 def sort_last_view(list, key=''):
     return list.order_by('-' + key + '_last_view__last_view')
+
 
 @register.filter
 def sort_last_save(list):
     return list.order_by('-last_date_saved')
 
-def quick_js_bracket_replace(matchobj):
-    if matchobj.group(0) == '<':
-        return '\u003C'
-    else:
-        return '\u003E'
 
 @register.filter
 def tojson(obj, esacpe_html=True):
@@ -288,12 +331,14 @@ def tojson(obj, esacpe_html=True):
         output = re.sub(re.compile(r'(<|>)'), quick_js_bracket_replace, output)
     return output
 
+
 @register.filter
 def list_contains_name(list, value):
     for item in list:
         if item['name'] == value:
             return True
     return False
+
 
 @register.filter
 def get_named_item(list, value):

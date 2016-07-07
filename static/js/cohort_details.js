@@ -352,7 +352,7 @@ require([
         $('input[type="checkbox"][data-value-name="TCGA"]').trigger('click');
     } else {
         // If there's data passed in from the template, use it and drop it
-        if(metadata_counts !== null && metadata_counts != "") {
+        if(metadata_counts !== null && metadata_counts !== "") {
             search_helper_obj.update_counts_parsets_direct();
             metadata_counts = null;
         } else {

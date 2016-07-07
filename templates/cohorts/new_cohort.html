@@ -75,7 +75,7 @@
                                     <div id="collapse-{{ attr }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" aria-labelledby="heading-{{ attr }}" data-feature-name="{{ attr }}" data-feature-id="{% if attr_list_count|get_named_item:attr|get_item:'id' %}{{ attr_list_count|get_named_item:attr|get_item:'id' }}{% endif %}">
                                         <ul class="search-checkbox-list" id="{{ attr }}">
                                             {% with attr_list_count|get_named_item:attr|get_item:'values'|how_many_more:6 as num_more %}
-                                                {% for v in attr_list_count|get_named_item:attr|get_item:'values' %}
+                                                {% for v in attr_list_count|get_named_item:attr|get_item:'values'|check_for_order:attr %}
                                                     {% if forloop.counter0 < 6 %}
                                                         <li class="checkbox">
                                                             <label title="{{ v.value|get_tooltip_text:attr }}">
