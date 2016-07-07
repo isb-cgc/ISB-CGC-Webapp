@@ -83,7 +83,7 @@ ATTR_SPECIFIC_TRANSLATION = {
         'Yes, History of Synchronous and or Bilateral Malignancy': 'Yes, History of Synchronous and or Bilateral Malignancy',
         'Yes, History of Synchronous/Bilateral Malignancy': 'Yes, History of Synchronous/Bilateral Malignancy'
     },
-    'BMI': {
+    'bmi': {
         'underweight': 'Underweight: BMI less that 18.5',
         'normal weight': 'Normal weight: BMI is 18.5 - 24.9',
         'overweight': 'Overweight: BMI is 25 - 29.9',
