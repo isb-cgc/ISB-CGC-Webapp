@@ -16,10 +16,13 @@ limitations under the License.
 
 """
 
-from sys import argv as cmdline_argv, stdout
 import logging
+from sys import argv as cmdline_argv, stdout
+from time import sleep
 
 import click
+
+from feature_def_bq_provider import FeatureDefBigqueryProvider
 
 from scripts.feature_def_gen.feature_def_utils import DataSetConfig, build_bigquery_service, \
     submit_query_async, poll_async_job, download_query_result, write_tsv, \
@@ -126,73 +129,93 @@ def get_feature_type():
     return 'GEXP'
 
 
-def unpack_rows(config, row_item_array):
-    table_config_mapping = build_table_mapping(config)
+class GEXPFeatureDefProvider(FeatureDefBigqueryProvider):
+    def build_subqueries_for_tables(self, config):
+        query_strings = []
+        for table_item in config.data_table_list:
+            query = build_feature_query(config, table_item.table_name)
+            query_strings.append(query)
 
-    feature_type = get_feature_type()
-    result = []
-
-    row_groups = {}
-    for key, _ in table_config_mapping.iteritems():
-        row_groups[key] = {
-            'rows': []
-        }
-
-    for row in row_item_array:
-        table_name = row['f'][0]['v']
-        gene = row['f'][1]['v']
-        if gene is None:
-            continue
-
-        table_config = table_config_mapping[table_name]
-
-        row_groups['rows'].append({
-            'gene_name': gene,
-            'generating_center': table_config.generating_center,
-            'platform': table_config.platform,
-            'value_label': table_config.value_label,
-            'internal_feature_id': build_internal_feature_id(feature_type, gene, table_config.internal_table_id)
-        })
-
-    return result
+        return query_strings
 
 
-def build_subqueries_for_tables(config):
-    query_strings = []
-    for table_item in config.data_table_list:
-        query = build_feature_query(config, table_item.table_name)
-        query_strings.append(query)
+    def merge_queries(self, gene_label_field, query_strings):
+        # Union of the subqueries
+        result = []
 
-    return query_strings
+        for subquery in query_strings:
+            result.append("   ({query})".format(query=subquery))
+
+        sq_stmt = ',\n'.join(result)
+        sq_stmt += ';'
+
+        query_tpl = \
+            'SELECT table_name, {gene_label_field} \n' \
+            'FROM \n' \
+            '{subquery_stmt}'
+
+        query = query_tpl.format(gene_label_field=gene_label_field,
+                                 subquery_stmt=sq_stmt)
+
+        return query
+
+    def build_table_mapping(self, config):
+        result = {}
+        for table_item in config.data_table_list:
+            result[table_item.table_name] = table_item
+        return result
+
+    def build_query(self, config):
+        query_strings = self.build_subqueries_for_tables(config)
+        query = self.merge_queries(config.gene_label_field, query_strings)
+        return query
+
+    def unpack_query_response(self, row_item_array):
+        table_config_mapping = self.build_table_mapping(self.config)
+
+        feature_type = get_feature_type()
+        result = []
+
+        for row in row_item_array:
+            table_name = row['f'][0]['v']
+            gene = row['f'][1]['v']
+            if gene is None:
+                continue
+
+            table_config = table_config_mapping[table_name]
+
+            result.append({
+                'gene_name': gene,
+                'generating_center': table_config.generating_center,
+                'platform': table_config.platform,
+                'value_label': table_config.value_label,
+                'internal_feature_id': build_internal_feature_id(feature_type, gene, table_config.internal_table_id)
+            })
+
+        return result
 
 
-def merge_queries(gene_label_field, query_strings):
-    # Union of the subqueries
-    result = []
+def run_query(project_id, config):
+    provider = GEXPFeatureDefProvider(config)
 
-    for subquery in query_strings:
-       result.append("   ({query})".format(query=subquery))
+    poll_retry_limit = 20
+    all_done = False
+    total_retries = 0
+    poll_count = 0
 
-    sq_stmt = ',\n'.join(result)
-    sq_stmt += ';'
+    # Poll for completion
+    while all_done is True and total_retries < poll_retry_limit:
+        poll_count += 1
+        total_retries += 1
 
-    query_tpl = \
-        'SELECT table_name, {gene_label_field} \n' \
-        'FROM \n' \
-        '{subquery_stmt}'
+        is_finished = provider.is_bigquery_job_finished(project_id)
+        all_done = is_finished
+        sleep(1)
 
-    query = query_tpl.format(gene_label_field=gene_label_field,
-                             subquery_stmt=sq_stmt)
+    logging.debug("Done: {done}    retry: {retry}".format(done=str(all_done), retry=total_retries))
+    query_result = provider.download_and_unpack_query_result()
 
-    return query
-
-
-def download_query_result():
-    pass
-
-
-def run_query():
-    pass
+    return query_result
 
 
 def validate_config(config):
@@ -204,54 +227,23 @@ def load_config_from_path(config_json):
     return config
 
 
-def build_table_mapping(config):
-    result = {}
-    for table_item in config.data_table_list:
-        result[table_item.table_name] = table_item
-    return result
-
-
-def build_query(config):
-    query_strings = build_subqueries_for_tables(config)
-    query = merge_queries(config.gene_label_field, query_strings)
-    return query
-
-
 @click.command()
 @click.argument('config_json', type=click.Path(exists=True))
 def print_query(config_json):
     config = load_config_from_path(config_json)
-    query = build_query(config)
+    provider = GEXPFeatureDefProvider(config)
+    query = provider.build_query(config)
     print(query)
 
 
 @click.command()
+@click.argument('project_id', type=click.INT)
 @click.argument('config_json', type=click.Path(exists=True))
-def run(config_json):
+def run(project_id, config_json):
     config_file_path = config_json
     config = load_config_from_path(config_file_path)
-    query = build_query(config)
 
-    logger.info("Building BigQuery service...")
-    bigquery_service = build_bigquery_service()
-
-    result = []
-
-    # Insert BigQuery job
-    query_job = submit_query_async(bigquery_service, config.project_id, query)
-
-    # Poll for completion of query
-    job_id = query_job['jobReference']['jobId']
-    logger.info('job_id = "' + str(job_id) + '\"')
-
-    poll_async_job(bigquery_service, config, job_id)
-
-    query_result = download_query_result(bigquery_service, query_job)
-    rows = unpack_rows(config, query_result)
-    result.extend(rows)
-
-    fieldnames = map(lambda x: x['name'], MYSQL_SCHEMA)
-    write_tsv(config.output_csv_path, result, fieldnames)
+    run_query(project_id, config)
 
 
 @click.group()
@@ -259,6 +251,7 @@ def main():
     pass
 
 main.add_command(print_query)
+main.add_command(run)
 
 if __name__ == '__main__':
     main()
