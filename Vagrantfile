@@ -16,9 +16,13 @@ Vagrant.configure(2) do |config|
   # Map API and Common for the web application
   config.vm.synced_folder "../ISB-CGC-API", "/home/vagrant/www/ISB-CGC-API"
   config.vm.synced_folder "../ISB-CGC-Common", "/home/vagrant/www/ISB-CGC-Common"
+  config.vm.synced_folder "../ISB-CGC-Cron", "/home/vagrant/www/ISB-CGC-Cron"
 
   # Map Common for API (for running in dev_appserver)
   config.vm.synced_folder "../ISB-CGC-Common", "/home/vagrant/parentDir/ISB-CGC-API/ISB-CGC-Common"
+
+  # Map Common for Cron (for running in dev_appserver)
+  config.vm.synced_folder "../ISB-CGC-Common", "/home/vagrant/parentDir/ISB-CGC-Cron/ISB-CGC-Common"
 
   config.vm.provision "shell", path: 'shell/install-deps.sh'
   config.vm.provision "shell", path: 'shell/create-database.sh'
