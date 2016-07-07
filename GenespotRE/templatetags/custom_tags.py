@@ -1,6 +1,6 @@
 """
 
-Copyright 2015, Institute for Systems Biology
+Copyright 2016, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ limitations under the License.
 import string
 import json
 import re
+import sys
 
 from django.template.defaulttags import register
 from cohorts.models import Cohort, Cohort_Perms
@@ -26,11 +27,31 @@ from django.contrib.auth.models import User
 from projects.models import Project
 from workbooks.models import Workbook
 
+attr_specific_orders = {
+    'BMI': ['underweight', 'normal weight', 'overweight', 'obese', 'None', ],
+    'hpv_status': ['Positive', 'Negative', 'None', ],
+    'age_at_initial_pathologic_diagnosis': ['10 to 39', '40 to 49', '50 to 59', '60 to 69', '70 to 79', 'Over 80', 'None', ]
+}
+
 # register = template.Library()
 
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)
+
+@register.filter
+def check_for_order(items, attr):
+    if attr in attr_specific_orders:
+        item_order = attr_specific_orders[attr]
+        ordered_items = []
+        for ordinal in item_order:
+            for item in items:
+                if item['value'] == ordinal:
+                    ordered_items.append(item)
+        return ordered_items
+    else:
+        return items
+
 
 @register.filter
 def get_readable_name(csv_name, attr=None):
@@ -65,6 +86,12 @@ def get_readable_name(csv_name, attr=None):
             'Yes, History of Prior Malignancy': 'Yes, History of Prior Malignancy',
             'Yes, History of Synchronous and or Bilateral Malignancy': 'Yes, History of Synchronous and or Bilateral Malignancy',
             'Yes, History of Synchronous/Bilateral Malignancy': 'Yes, History of Synchronous/Bilateral Malignancy'
+        },
+        'BMI': {
+            'underweight': 'Underweight: BMI less that 18.5',
+            'normal weight': 'Normal weight: BMI is 18.5 - 24.9',
+            'overweight': 'Overweight: BMI is 25 - 29.9',
+            'obese': 'Obese: BMI is 30 or more'
         }
     }
 
@@ -116,7 +143,9 @@ def get_readable_name(csv_name, attr=None):
         return translation_dictionary.get(csv_name)
     else:
         csv_name = csv_name.replace('_', ' ')
-        csv_name = string.capwords(csv_name)
+        # Do not convert the Roman numerals in the stages
+        if attr is not 'pathologic_stage':
+            csv_name = string.capwords(csv_name)
         csv_name = csv_name.replace(' To ', ' to ')
         return csv_name
 
@@ -128,6 +157,13 @@ def remove_whitespace(str):
 def replace_whitespace(str, chr):
     result = re.sub(re.compile(r'\s+'), chr, str)
     return result
+
+@register.filter
+def shorter(label):
+    if len(label) > 30:
+        return label[:26] + ' ...'
+    else:
+        return label
 
 @register.filter
 def get_data_attr_id(value, attr):
