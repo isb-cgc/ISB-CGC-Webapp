@@ -245,14 +245,6 @@ def replace_whitespace(str, chr):
 
 
 @register.filter
-def shorter(label):
-    if len(label) > 30:
-        return label[:26] + ' ...'
-    else:
-        return label
-
-
-@register.filter
 def get_data_attr_id(value, attr):
     display_str = attr + '-' + value
 
