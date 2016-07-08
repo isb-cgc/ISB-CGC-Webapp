@@ -30,7 +30,7 @@
 {% block page_header %}
     <div class="container">
         <h1 class="page-header pull-left">Registered Google Cloud Projects</h1>
-        <a class="btn btn-primary pull-right" data-toggle="modal" data-target="#add-cloud-project"><i class="fa fa-plus"></i>Register New Google Cloud Project</a></li>
+        <a href="{% url 'register_gcp' user.id %}" class="btn btn-primary pull-right"><i class="fa fa-plus"></i>Register New Google Cloud Project</a>
     </div>
 {% endblock %}
 

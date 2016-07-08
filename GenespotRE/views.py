@@ -216,23 +216,42 @@ def user_gcp_list(request, user_id):
     pass
 
 @login_required
+def verify_gcp(request, user_id):
+    try:
+        crm_service = get_special_crm_resource()
+        iam_policy = crm_service.projects().getIamPolicy(
+            resource=gcp_id, body={}).execute()
+        bindings = iam_policy['bindings']
+        roles = {}
+        for val in bindings:
+            role = val['role']
+            members = val['members']
+            roles[role] = []
+            for member in members:
+                if member.startswith('user:'):
+                    roles[role].append(member.split(':')[1])
+        return JsonResponse(roles, status='200')
+    except HttpError, e:
+        return JsonResponse({'message': 'There was an error accessing your project. Please verify that you have set the permissions correctly.'}, status='403')
+
+@login_required
 def register_gcp(request, user_id):
-    if request.POST:
-        project_id = request.POST.get('project_id', None)
-        project_name = request.POST.get('project_name', None)
-        bq_dataset = request.POST.get('bq_dataset', None)
-        print user_id, project_id, project_name
-        if not user_id or not project_id or not project_name:
+    # if request.POST:
+    #     project_id = request.POST.get('project_id', None)
+    #     project_name = request.POST.get('project_name', None)
+    #     bq_dataset = request.POST.get('bq_dataset', None)
+    #     print user_id, project_id, project_name
+    #     if not user_id or not project_id or not project_name:
+    #
+    #         pass
+    #     else:
+    #         new_gcp = GoogleProject.objects.create(user_id=user_id,
+    #                                      project_name=project_name,
+    #                                      project_id=project_id,
+    #                                      big_query_dataset=bq_dataset)
+    #         new_gcp.save()
 
-            pass
-        else:
-            new_gcp = GoogleProject.objects.create(user_id=user_id,
-                                         project_name=project_name,
-                                         project_id=project_id,
-                                         big_query_dataset=bq_dataset)
-            new_gcp.save()
-
-    return redirect('user_gcp_list', user_id=user_id)
+    return render(request, 'GenespotRE/register_gcp.html', {})
 
 @login_required
 def register_sa(request, user_id):

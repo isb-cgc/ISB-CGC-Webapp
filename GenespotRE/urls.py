@@ -37,6 +37,7 @@ urlpatterns = [
     # Google Cloud Project related
     url(r'^users/(?P<user_id>\d+)/gcp_list/$', views.user_gcp_list, name='user_gcp_list'),
     url(r'^users/(?P<user_id>\d+)/register_gcp/$', views.register_gcp, name='register_gcp'),
+    url(r'^users/(?P<user_id>\d+)/verify_gcp/$', views.register_gcp, name='verify_gcp'),
     url(r'^users/(?P<user_id>\d+)/register_sa/$', views.register_sa, name='register_sa'),
     url(r'^users/(?P<user_id>\d+)/verify_sa/$', views.verify_sa, name='verify_sa'),
 
