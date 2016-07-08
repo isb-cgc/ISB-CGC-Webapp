@@ -301,6 +301,26 @@ def get_barcodes_length(barcodes):
 
 
 @register.filter
+def wrap_text(text, length):
+    if len(text) <= length:
+        return text
+
+    line_feed = '\x0A'
+    split_text = []
+    text_index = 0
+
+    while text_index < len(text):
+        next_split = text.find(' ', length+text_index)
+        if next_split < 0:
+            split_text.append(text[text_index:])
+            text_index = len(text)
+        else:
+            split_text.append(text[text_index:next_split])
+            text_index = next_split+1
+
+    return (line_feed.join(split_text) if len(split_text) > 1 else text)
+
+@register.filter
 def how_many_more(attr_list, num):
     return len(attr_list) - num
 
