@@ -121,7 +121,7 @@
                            <li>
                                <a href="{% url 'cohort_details' cohort.id %}">
                                    <div class="list-main">
-                                       <span class="list-title">{{ cohort.name }}</span>
+                                       <span class="list-title" title="{{ cohort.name|wrap_text }}">{{ cohort.name }}</span>
                                    </div>
                                    <div class="list-info">
                                        <span>{{ cohort.last_date_saved|date:'M d, Y, g:i a' }}</span>
@@ -153,7 +153,7 @@
                         <li>
                             <a href="{% url 'gene_fav_detail' genefavorite.id %}">
                                 <div class="list-main">
-                                    <span class="list-title">{{ genefavorite.name }}</span>
+                                    <span class="list-title" title="{{ genefavorite.name|wrap_text }}">{{ genefavorite.name }}</span>
                                 </div>
                                <div class="list-info">
                                    <span>{{ genefavorite.last_date_saved|date:'M d, Y, g:i a' }}</span>
@@ -183,7 +183,7 @@
                            <li>
                                <a href="{% url 'variable_fav_detail' variablefavorite.id %}">
                                    <div class="list-main">
-                                       <span class="list-title">{{ variablefavorite.name }}</span>
+                                       <span class="list-title" title="{{ variablefavorite.name|wrap_text }}">{{ variablefavorite.name }}</span>
                                    </div>
                                    <div class="list-info">
                                        <span>{{ variablefavorite.last_date_saved|date:'M d, Y, g:i a' }}</span>
