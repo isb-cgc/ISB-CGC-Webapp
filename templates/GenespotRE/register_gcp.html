@@ -46,7 +46,7 @@
                     <ul>
                         <li>
                             <label for="verify-gcp-id">Please enter your Google Cloud Project ID: </label>
-                            <input id="verify-gcp-id" name="gcp-id" type="text" class="form-control" placeholder="Google Cloud Project ID"/>
+                            <input id="verify-gcp-id" name="gcp-id" type="text" class="form-control" placeholder="Google Cloud Project ID" required="required"/>
                         </li>
                         <li>Go to your Google Cloud Project.</li>
                         <li>Select the hamburger menu in the top left corner.</li>
@@ -56,10 +56,26 @@
                         <li>In the Role selection, choose Project > Viewer.</li>
                     </ul>
                     <br>
-                    Once complete, click <input type="submit" value="here" /> to verify that it worked. <span class="verification-span"></span>
+                    Once complete, click <input class="btn btn-default" type="submit" value="here" /> to verify that it worked.
                     <br>
 
                 </p>
+            </form>
+            <form id="register-gcp-form" method="POST" action="{% url 'register_gcp' user.id %}" style="display:none;">
+                <p>
+                    The following people are identified as members of your Google Cloud Project:
+
+                    <ul class="user-list">
+
+                    </ul>
+                    <br>
+                    Users listed with a <i class="fa fa-check"></i> will have this Google Cloud Project registered under
+                    their account as well, if not already done. Users without a <i class="fa fa-check"></i> will have to
+                    register this project themselves.
+
+                </p>
+                <input class="btn btn-primary" type="submit" value="Register"/>
+                {% csrf_token %}
             </form>
 {#            <ul>#}
 {#                <li>#}
@@ -132,4 +148,4 @@
 {#    </div>#}
 {% endblock %}
 
-{% block js_file %}{% static 'js/register_sa.js' %}{% endblock %}
+{% block js_file %}{% static 'js/register_gcp.js' %}{% endblock %}
