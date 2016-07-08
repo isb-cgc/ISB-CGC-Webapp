@@ -51,8 +51,19 @@ DATA_ATTR_DICTIONARY = {
 ATTR_SPECIFIC_ORDERS = {
     'bmi': ['underweight', 'normal weight', 'overweight', 'obese', 'None', ],
     'hpv_status': ['Positive', 'Negative', 'None', ],
-    'age_at_initial_pathologic_diagnosis': ['10 to 39', '40 to 49', '50 to 59', '60 to 69', '70 to 79', 'Over 80', 'None', ]
+    'age_at_initial_pathologic_diagnosis': ['10 to 39', '40 to 49', '50 to 59', '60 to 69', '70 to 79', 'Over 80', 'None', ],
+    'pathologic_stage': ['Stage 0','Stage I','Stage IA','Stage IB','Stage II','Stage IIA','Stage IIB','Stage IIC',
+                           'Stage III','Stage IIIA','Stage IIIB','Stage IIIC','Stage IS','Stage IV','Stage IVA',
+                           'Stage IVB','Stage IVC','Stage X','I or II NOS','None',],
+    'residual_tumor': ['R0','R1','R2','RX','None',],
 }
+
+ALPHANUM_SORT = [
+    'neoplasm_histologic_grade',
+    'icd_10',
+    'icd_o_3_histology',
+    'icd_o_3_site'
+]
 
 ATTR_SPECIFIC_TRANSLATION = {
     'SampleTypeCode': {
@@ -188,7 +199,9 @@ def get_item(dictionary, key):
 
 @register.filter
 def check_for_order(items, attr):
-    if attr in ATTR_SPECIFIC_ORDERS:
+    if attr in ALPHANUM_SORT:
+        return sorted(items, key=lambda k: k['value'])
+    elif attr in ATTR_SPECIFIC_ORDERS:
         item_order = ATTR_SPECIFIC_ORDERS[attr]
         ordered_items = []
         for ordinal in item_order:
@@ -214,7 +227,7 @@ def get_readable_name(csv_name, attr=None):
     else:
         csv_name = csv_name.replace('_', ' ')
         # Do not convert the Roman numerals in the stages
-        if attr is not 'pathologic_stage':
+        if attr is not 'pathologic_stage' and attr is not 'residual_tumor':
             csv_name = string.capwords(csv_name)
         csv_name = csv_name.replace(' To ', ' to ')
         return csv_name
@@ -229,14 +242,6 @@ def remove_whitespace(str):
 def replace_whitespace(str, chr):
     result = re.sub(re.compile(r'\s+'), chr, str)
     return result
-
-
-@register.filter
-def shorter(label, max_length):
-    if len(label) > max_length:
-        return label[:(max_length-4)] + ' ...'
-    else:
-        return label
 
 
 @register.filter
