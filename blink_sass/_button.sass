@@ -23,8 +23,11 @@
   animation: ripple $transition ease-out
 
 .btn-default
+    color: $white !important
+    background-color: darken($isb-warning, 20%) !important
+    border: 1px solid darken($isb-warning, 28%) !important
     &:hover, &:active, &:focus
-        background-color: $isb-warning !important
+        background-color: darken($isb-warning, 28%) !important
         color: $white !important
         border: 1px solid $isb-warning !important
 
