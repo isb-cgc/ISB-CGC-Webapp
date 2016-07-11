@@ -16,7 +16,9 @@ limitations under the License.
 
 """
 
+from csv import DictWriter
 import logging
+from StringIO import StringIO
 from sys import argv as cmdline_argv, stdout
 from time import sleep
 
@@ -24,9 +26,7 @@ import click
 
 from feature_def_bq_provider import FeatureDefBigqueryProvider
 
-from scripts.feature_def_gen.feature_def_utils import DataSetConfig, build_bigquery_service, \
-    submit_query_async, poll_async_job, download_query_result, write_tsv, \
-    load_config_json
+from scripts.feature_def_gen.feature_def_utils import DataSetConfig, load_config_json
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -197,6 +197,7 @@ class GEXPFeatureDefProvider(FeatureDefBigqueryProvider):
 
 def run_query(project_id, config):
     provider = GEXPFeatureDefProvider(config)
+    job_reference = provider.submit_query_and_get_job_ref(project_id)
 
     poll_retry_limit = 20
     all_done = False
@@ -204,7 +205,7 @@ def run_query(project_id, config):
     poll_count = 0
 
     # Poll for completion
-    while all_done is True and total_retries < poll_retry_limit:
+    while all_done is False and total_retries < poll_retry_limit:
         poll_count += 1
         total_retries += 1
 
@@ -227,6 +228,22 @@ def load_config_from_path(config_json):
     return config
 
 
+def get_csv_object(data_rows, include_header=False):
+    fieldnames = [x['name'] for x in MYSQL_SCHEMA]
+    file_obj = StringIO()
+    writer = DictWriter(file_obj, fieldnames=fieldnames)
+    if include_header:
+        writer.writeheader()
+    writer.writerows(data_rows)
+    return file_obj
+
+
+def save_csv(data_rows, csv_path, include_header=False):
+    file_obj = get_csv_object(data_rows, include_header=include_header)
+    with open(csv_path, 'w') as file_handle:
+        file_handle.write(file_obj.getvalue())
+
+
 @click.command()
 @click.argument('config_json', type=click.Path(exists=True))
 def print_query(config_json):
@@ -239,11 +256,13 @@ def print_query(config_json):
 @click.command()
 @click.argument('project_id', type=click.INT)
 @click.argument('config_json', type=click.Path(exists=True))
-def run(project_id, config_json):
+def csv(project_id, config_json):
     config_file_path = config_json
     config = load_config_from_path(config_file_path)
+    csv_path = config.output_csv_path
 
-    run_query(project_id, config)
+    result = run_query(project_id, config)
+    save_csv(result, csv_path, include_header=True)
 
 
 @click.group()
@@ -251,7 +270,7 @@ def main():
     pass
 
 main.add_command(print_query)
-main.add_command(run)
+main.add_command(csv)
 
 if __name__ == '__main__':
     main()
