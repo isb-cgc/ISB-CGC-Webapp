@@ -21,7 +21,7 @@
             <form action="{% url 'worksheet_create_with_projects' %}" method="POST">
                 {% csrf_token %}
                 <input type="hidden" name="project_id" value="{{ project.id }}">
-                <button type="submit" class="btn btn-default" >New Workbook</button>
+                <button type="submit" class="btn btn-primary" >New Workbook</button>
             </form>
         </li>
         <li class="separator"></li>

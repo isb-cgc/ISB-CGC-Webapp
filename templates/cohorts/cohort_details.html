@@ -46,7 +46,7 @@
                 <form action="{% url 'worksheet_create_with_cohort' %}" method="POST">
                     {% csrf_token %}
                     <input type="hidden" name="cohort_id" value="{{ cohort.id}}">
-                    <button class="btn btn-default" type="submit">New Workbook</button>
+                    <button class="btn btn-primary" type="submit">New Workbook</button>
                 </form>
             </li>
             <li class="separator"></li>
