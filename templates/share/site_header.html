@@ -82,13 +82,13 @@
                         <strong>Recent</strong>
                         <ul class="item-list">
                             {% for wlv in user|get_workbooks_this_user|slice:':5' %}
-                            <li class="menu-item" title="{{ wlv.name|wrap_text }}"><a href="{% url 'workbook_detail' wlv.id %}">{{ wlv.name }}</a></li>
+                            <li class="menu-item" title="{{ wlv.name|wrap_text }}"><a class="inline-block" href="{% url 'workbook_detail' wlv.id %}">{{ wlv.name }}</a></li>
                             {% endfor %}
                             {% if user|get_workbooks_this_user|length > 5 %}
                             <li class="menu-item has-drop-down__more"> More
                                 <ul class="drop">
                                     {% for wlv in user|get_workbooks_this_user|slice:'5:' %}
-                                    <li class="menu-item" title="{{ wlv.name|wrap_text }}"><a href="{% url 'workbook_detail' wlv.id %}">{{ wlv.name }}</a></li>
+                                    <li class="menu-item" title="{{ wlv.name|wrap_text }}"><a class="inline-block" href="{% url 'workbook_detail' wlv.id %}">{{ wlv.name }}</a></li>
                                     {% endfor %}
                                 </ul>
                             </li>
