@@ -39,14 +39,11 @@
             <h4>To register service account for {{ gcp_id }}, please follow these instructions:</h4>
             <ul>
                 <li>
-                    Please add this service account as a [VIEWER?] on your Google Cloud Project: [ISB-CGC SERVICE ACCOUNT]
-                </li>
-                <li>
                     <form id="verify-sa" method="POST" action="{% url 'verify_sa' user.id %}">
                         {% csrf_token %}
-                        Once done, please enter the service account you'd like to register to this Google Cloud Project.
+                        <label for="user_sa">Please enter the service account you'd like to register to this Google Cloud Project.</label>
 
-                        <input type="text" name="user_sa" placeholder="Enter Service Account" class="form-control"required/>
+                        <input id="user_sa"type="text" name="user_sa" placeholder="Enter Service Account" class="form-control" required/>
                         <br>
                         Are you going to use this service account to access controlled access? If so, which dataset?
                         <select name="dataset" multiple="multiple" class="form-control">
@@ -60,6 +57,23 @@
                         Click this <input type="submit" class="verify-sa-btn" value="button"/> to allow us to verify who is allowed to use this service account.
                     </form>
                     <i class="fa fa-spinner fa-spin hidden load-spinner"></i>
+                </li>
+                <li>
+                    <div class="user-verification" style="display:none;">
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>User Email</th>
+                                <th>Registered</th>
+                                <th>Verified dbGaP</th>
+                                <th>Authorized Datasets</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table>
+                    </div>
                 </li>
                 <li>
                     Finish

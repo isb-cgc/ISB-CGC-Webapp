@@ -306,13 +306,18 @@ def verify_sa(request, user_id):
             bindings = iam_policy['bindings']
             roles = {}
             verify_service_account = False
+            member_details = {}
             for val in bindings:
                 role = val['role']
                 members = val['members']
                 roles[role] = []
                 for member in members:
                     if member.startswith('user:'):
-                        roles[role].append(member.split(':')[1])
+                        email = member.split(':')[1]
+                        registered_user = bool(User.objects.filter(email=email).first())
+                        roles[role].append({'email': email,
+                                           'registered_user': registered_user})
+
                     elif member.startswith('serviceAccount'):
                         if member.find(':'+user_sa) > 0:
                             verify_service_account = True
@@ -326,26 +331,37 @@ def verify_sa(request, user_id):
 
             # 3. VERIFY ALL USERS HAVE A LISTING IN NIH_USERS.
             for role, members in roles.items():
-                users = User.objects.filter(email__in=members)
-                # If not all users have logged into the system.
-                if len(users) < len(members):
-                    return JsonResponse({'message': 'Some users in your project have not verified their account in the ISB-CGC webapp. Please have them log in to the webapp.'}, status=400)
+                for member in members:
+                    if member['registered_user']:
+                        user = User.objects.filter(email=member['email']).first()
+                        nih_user = NIH_User.objects.filter(user_id=user.id).first()
+                        member['nih_registered'] = bool(nih_user)
+                        if nih_user:
+                            member['dbgap_authorized'] = nih_user.dbGaP_authorized
 
-                NIH_users = NIH_User.objects.filter(user__in=users)
 
-                # If not all users have linked their eRA Commons ID
-                if len(NIH_users) < len(users):
-                    return JsonResponse({'message': 'Some users in your project have not verified their eRA Commons ID with their ISB-CGC account. Please have them go through the process of linking their eRA Commons ID with their ISB-CGC account.'})
+                                # users = User.objects.filter(email__in=members)
+                                # If not all users have logged into the system.
+                                # if len(users) < len(members):
+                                #     return JsonResponse({'message': 'Some users in your project have not verified their account in the ISB-CGC webapp. Please have them log in to the webapp.'}, status=400)
 
-                # Verify dataset access per dataset
-                for dataset in dataset_objs:
-                    user_authorized_datasets = UserAuthorizedDatasets.objects.filter(nih_user__in=NIH_users, authorized_dataset=dataset)
-                    if len(user_authorized_datasets) < NIH_users:
-                        return JsonResponse({'message': 'Some users in your project do not have access to this dataset: {0}'.format(dataset.name)}, status=400)
+                                # for member in members:
+                                #     if member.registered_user:
+                                #         NIH_users = NIH_User.objects.filter(user__in=users)
 
-            # 4. VERIFY PI IS ON THE PROJECT
+                                # If not all users have linked their eRA Commons ID
+                                # if len(NIH_users) < len(users):
+                                #     return JsonResponse({'message': 'Some users in your project have not verified their eRA Commons ID with their ISB-CGC account. Please have them go through the process of linking their eRA Commons ID with their ISB-CGC account.'})
 
-            # 5. VERIFY ALL USERS HAVE ACCESS TO THE PROPOSED DATASETS
+                                # Verify dataset access per dataset
+                                # for dataset in dataset_objs:
+                                #     user_authorized_datasets = UserAuthorizedDatasets.objects.filter(nih_user__in=NIH_users, authorized_dataset=dataset)
+                                #     if len(user_authorized_datasets) < NIH_users:
+                                #         return JsonResponse({'message': 'Some users in your project do not have access to this dataset: {0}'.format(dataset.name)}, status=400)
+
+                                # 4. VERIFY PI IS ON THE PROJECT
+
+                                # 5. VERIFY ALL USERS HAVE ACCESS TO THE PROPOSED DATASETS
         except HttpError, e:
             return JsonResponse({'message': 'There was an error accessing your project. Please verify that you have set the permissions correctly.'}, status='403')
 

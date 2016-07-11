@@ -51,7 +51,7 @@ require([
 
         var $this = $(this);
         var fields = $this.serialize();
-
+        var user_table = $this.parent('li').find('.user-verification table');
         var spinner = $this.parent('li').find('.load-spinner');
         spinner.show();
 
