@@ -16,22 +16,14 @@ limitations under the License.
 
 """
 
-from csv import DictWriter
 import logging
-from StringIO import StringIO
-from sys import argv as cmdline_argv, stdout
 from time import sleep
-
-import click
 
 from feature_def_bq_provider import FeatureDefBigqueryProvider
 
-from scripts.feature_def_gen.feature_def_utils import DataSetConfig, load_config_json
+from scripts.feature_def_gen.feature_def_utils import DataSetConfig
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-_ch = logging.StreamHandler(stream=stdout)
-logger.addHandler(_ch)
+logger = logging
 
 MYSQL_SCHEMA = [
     {
@@ -130,6 +122,9 @@ def get_feature_type():
 
 
 class GEXPFeatureDefProvider(FeatureDefBigqueryProvider):
+    def get_mysql_schema(self):
+        return MYSQL_SCHEMA
+
     def build_subqueries_for_tables(self, config):
         query_strings = []
         for table_item in config.data_table_list:
@@ -137,7 +132,6 @@ class GEXPFeatureDefProvider(FeatureDefBigqueryProvider):
             query_strings.append(query)
 
         return query_strings
-
 
     def merge_queries(self, gene_label_field, query_strings):
         # Union of the subqueries
@@ -217,60 +211,3 @@ def run_query(project_id, config):
     query_result = provider.download_and_unpack_query_result()
 
     return query_result
-
-
-def validate_config(config):
-    pass
-
-
-def load_config_from_path(config_json):
-    config = load_config_json(config_json, GEXPFeatureDefConfig)
-    return config
-
-
-def get_csv_object(data_rows, include_header=False):
-    fieldnames = [x['name'] for x in MYSQL_SCHEMA]
-    file_obj = StringIO()
-    writer = DictWriter(file_obj, fieldnames=fieldnames)
-    if include_header:
-        writer.writeheader()
-    writer.writerows(data_rows)
-    return file_obj
-
-
-def save_csv(data_rows, csv_path, include_header=False):
-    file_obj = get_csv_object(data_rows, include_header=include_header)
-    with open(csv_path, 'w') as file_handle:
-        file_handle.write(file_obj.getvalue())
-
-
-@click.command()
-@click.argument('config_json', type=click.Path(exists=True))
-def print_query(config_json):
-    config = load_config_from_path(config_json)
-    provider = GEXPFeatureDefProvider(config)
-    query = provider.build_query(config)
-    print(query)
-
-
-@click.command()
-@click.argument('project_id', type=click.INT)
-@click.argument('config_json', type=click.Path(exists=True))
-def csv(project_id, config_json):
-    config_file_path = config_json
-    config = load_config_from_path(config_file_path)
-    csv_path = config.output_csv_path
-
-    result = run_query(project_id, config)
-    save_csv(result, csv_path, include_header=True)
-
-
-@click.group()
-def main():
-    pass
-
-main.add_command(print_query)
-main.add_command(csv)
-
-if __name__ == '__main__':
-    main()

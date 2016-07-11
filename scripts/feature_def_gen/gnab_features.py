@@ -16,24 +16,38 @@ limitations under the License.
 
 """
 
-from sys import argv as cmdline_argv, stdout
 import logging
+from sys import stdout
 
-from scripts.feature_def_gen.feature_def_utils import DataSetConfig, build_bigquery_service, \
-    submit_query_async, poll_async_job, download_query_result, write_tsv, \
-    load_config_json
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-_ch = logging.StreamHandler(stream=stdout)
-logger.addHandler(_ch)
+from feature_def_bq_provider import FeatureDefBigqueryProvider
+
+from scripts.feature_def_gen.feature_def_utils import DataSetConfig
+
+logger = logging
+
 
 VALUE_FIELD_NUM_MUTATIONS = 'num_mutations'
 VALUES = frozenset(['variant_classification', 'variant_type', 'sequence_source', VALUE_FIELD_NUM_MUTATIONS])
 FIELDNAMES = ['num_search_hits', 'gene_name', 'value_field', 'internal_feature_id']
 
+MYSQL_SCHEMA = [
+    {
+        'name': 'gene_name',
+        'type': 'string'
+    },
+    {
+        'name': 'value_field',
+        'type': 'string'
+    },
+    {
+        'name': 'internal_feature_id',
+        'type': 'string'
+    },
+]
 
-class MAFFeatureDefConfig(object):
+
+class GNABFeatureDefConfig(object):
     def __init__(self, project_id, target_config, maf_table_name, out_path):
         self.project_id = project_id
         self.target_config = target_config
@@ -50,27 +64,6 @@ class MAFFeatureDefConfig(object):
         return cls(project_id, target_config, maf_table_name, output_csv_path)
 
 
-def build_feature_query(config):
-    query_template = ("SELECT Hugo_Symbol \
-                       FROM [{main_project_name}:{main_dataset_name}.{table_name}] \
-                       GROUP BY Hugo_Symbol")
-
-    query_str = query_template.format(
-        main_project_name=config.target_config.project_name,
-        main_dataset_name=config.target_config.dataset_name,
-        table_name=config.maf_table_name
-    )
-
-    logger.debug("GNAB SQL: " + query_str)
-
-    return query_str
-
-
-# TODO remove duplicate code
-def get_feature_type():
-    return 'GNAB'
-
-
 def build_internal_feature_id(feature_type, gene, value_field):
     return '{feature_type}:{gene}:{value}'.format(
         feature_type=feature_type,
@@ -79,47 +72,41 @@ def build_internal_feature_id(feature_type, gene, value_field):
     )
 
 
-def unpack_rows(row_item_array):
-    feature_type = get_feature_type()
-    result = []
-    for row in row_item_array:
-        gene_name = row['f'][0]['v']
-
-        for value_field in VALUES:
-            result.append({
-                'num_search_hits': 0,
-                'gene_name': gene_name,
-                'value_field': value_field,
-                'internal_feature_id': build_internal_feature_id(feature_type, gene_name, value_field)
-            })
-
-    return result
+# TODO remove duplicate code
+def get_feature_type():
+    return 'GNAB'
 
 
-def main():
-    config_file_path = cmdline_argv[1]
-    config = load_config_json(config_file_path, MAFFeatureDefConfig)
+class GNABFeatureDefProvider(FeatureDefBigqueryProvider):
+    def get_mysql_schema(self):
+        return MYSQL_SCHEMA
 
-    logger.info("Building BigQuery service...")
-    bigquery_service = build_bigquery_service()
+    def build_query(self, config):
+        query_template = \
+            'SELECT Hugo_Symbol ' \
+            'FROM [{main_project_name}:{main_dataset_name}.{table_name}] ' \
+            'GROUP BY Hugo_Symbol'
 
-    result = []
-    query = build_feature_query(config)
+        query_str = query_template.format(
+            main_project_name=config.target_config.project_name,
+            main_dataset_name=config.target_config.dataset_name,
+            table_name=config.maf_table_name
+        )
 
-    # Insert BigQuery job
-    query_job = submit_query_async(bigquery_service, config.project_id, query)
+        return query_str
 
-    # Poll for completion of query
-    job_id = query_job['jobReference']['jobId']
-    logger.info('job_id = "' + str(job_id) + '\"')
+    def unpack_query_response(self, row_item_array):
+        feature_type = get_feature_type()
+        result = []
+        for row in row_item_array:
+            gene_name = row['f'][0]['v']
 
-    poll_async_job(bigquery_service, config, job_id)
+            for value_field in VALUES:
+                result.append({
+                    'gene_name': gene_name,
+                    'value_field': value_field,
+                    'internal_feature_id': build_internal_feature_id(feature_type, gene_name, value_field)
+                })
 
-    query_result = download_query_result(bigquery_service, query_job)
-    rows = unpack_rows(query_result)
-    result.extend(rows)
+        return result
 
-    write_tsv(config.output_csv_path, result, FIELDNAMES)
-
-if __name__ == '__main__':
-    main()
