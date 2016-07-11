@@ -64,7 +64,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Delete this variable favorite "{{ variables.name|title }}"?</h4>
+                <h4 id="delete-favorite-header" class="modal-title">Delete this variable favorite "{{ variables.name|title }}"?</h4>
             </div>
             <form id="delete-workbook" method="POST" action="{% url 'variable_fav_delete' variables.id %}">
                 {% csrf_token %}
@@ -83,13 +83,13 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Create a new workbook using the variable favorite "{{ variables.name|title }}"</h4>
+                <h4 id="edit-workbook-header" class="modal-title">Create a new workbook using the variable favorite "{{ variables.name|title }}"</h4>
             </div>
             <form id="edit-workbook" method="POST" action="{% url 'worksheet_create_with_variables' %}">
                 {% csrf_token %}
                 <div class="modal-body">
-                    <label for="name">Name (required)</label>
-                    <input class="form-control" type="text" name="name" value="{{ variables.name }} workbook"/>
+                    <label id="name-label" for="name-input">Name (required)</label>
+                    <input id="name-input" class="form-control" type="text" name="name" value="{{ variables.name }} workbook" aria-labelledby="name-label"/>
                     <input type="hidden" name="variable_list_id" value="{{ variables.id }}" />
                 </div>
                 <div class="modal-footer">

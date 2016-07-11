@@ -72,7 +72,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Delete this gene favorite "{{ gene_favorite.name|title }}"?</h4>
+                <h4 id="delete-favorite-header" class="modal-title">Delete this gene favorite "{{ gene_favorite.name|title }}"?</h4>
             </div>
             <form id="delete-workbook" method="POST" action="{% url 'gene_fav_delete' gene_favorite.id %}">
                 {% csrf_token %}
@@ -91,13 +91,13 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Create a new workbook using the gene favorite "{{ gene_favorite.name|title }}"</h4>
+                <h4 class="modal-title" id="edit-workbook-header">Create a new workbook using the gene favorite "{{ gene_favorite.name|title }}"</h4>
             </div>
             <form id="edit-workbook" method="POST" action="{% url 'worksheet_create_with_genes' %}">
                 {% csrf_token %}
                 <div class="modal-body">
-                    <label for="name">Name (required)</label>
-                    <input class="form-control" type="text" name="name" value="{{ gene_favorite.name }} workbook"/>
+                    <label id="name-label" for="name-input">Name (required)</label>
+                    <input id="name-input" class="form-control" type="text" name="name" value="{{ gene_favorite.name }} workbook" aria-labelledby="name-label"/>
                     <input type="hidden" name="gene_list_id" value="{{ gene_favorite.id }}" />
                 </div>
                 <div class="modal-footer">
