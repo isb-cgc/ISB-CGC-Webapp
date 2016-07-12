@@ -17,7 +17,6 @@ limitations under the License.
 """
 
 import logging
-from time import sleep
 
 from feature_def_bq_provider import FeatureDefBigqueryProvider
 
@@ -187,27 +186,3 @@ class GEXPFeatureDefProvider(FeatureDefBigqueryProvider):
             })
 
         return result
-
-
-def run_query(project_id, config):
-    provider = GEXPFeatureDefProvider(config)
-    job_reference = provider.submit_query_and_get_job_ref(project_id)
-
-    poll_retry_limit = 20
-    all_done = False
-    total_retries = 0
-    poll_count = 0
-
-    # Poll for completion
-    while all_done is False and total_retries < poll_retry_limit:
-        poll_count += 1
-        total_retries += 1
-
-        is_finished = provider.is_bigquery_job_finished(project_id)
-        all_done = is_finished
-        sleep(1)
-
-    logging.debug("Done: {done}    retry: {retry}".format(done=str(all_done), retry=total_retries))
-    query_result = provider.download_and_unpack_query_result()
-
-    return query_result
