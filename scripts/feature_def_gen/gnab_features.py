@@ -17,8 +17,6 @@ limitations under the License.
 """
 
 import logging
-from sys import stdout
-
 
 from feature_def_bq_provider import FeatureDefBigqueryProvider
 
