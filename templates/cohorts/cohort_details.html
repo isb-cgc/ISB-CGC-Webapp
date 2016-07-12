@@ -109,7 +109,7 @@
                                                         <li class="checkbox">
                                                             <label title="{{ v.value|get_tooltip_text:attr }}">
                                                                 <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}" data-value-id="{% if v.id %}{{ v.id }}{% endif %}">
-                                                                {% if v.value == 'None' %}NA{% else %}{{ v.value|get_readable_name:attr }}{% endif %}
+                                                                {% if v.value == 'None' %}NA{% elif 'displ_name' in v %}{{ v.displ_name|get_readable_name:attr }}{% else %}{{ v.value|get_readable_name:attr }}{% endif %}
                                                                 <span class="count">({{ v.count }})</span>
                                                             </label>
                                                         </li>
@@ -118,7 +118,7 @@
                                                         <li class="extra-values checkbox" style="display:none;">
                                                             <label title="{{ v.value|get_tooltip_text:attr }}">
                                                                 <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}" data-value-id="{% if v.id %}{{ v.id }}{% endif %}">
-                                                                {% if v.value == 'None' %}NA{% else %}{{ v.value|get_readable_name:attr }}{% endif %}
+                                                                {% if v.value == 'None' %}NA{% elif 'displ_name' in v %}{{ v.displ_name|get_readable_name:attr }}{% else %}{{ v.value|get_readable_name:attr }}{% endif %}
                                                                 <span class="count">({{ v.count }})</span>
                                                             </label>
                                                         </li>
@@ -126,7 +126,7 @@
                                                         <li class="extra-values checkbox" style="display:none;">
                                                             <label title="{{ v.value|get_tooltip_text:attr }}">
                                                                 <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}" data-value-id="{% if v.id %}{{ v.id }}{% endif %}">
-                                                                {% if v.value == 'None' %}NA{% else %}{{ v.value|get_readable_name:attr }}{% endif %}
+                                                                {% if v.value == 'None' %}NA{% elif 'displ_name' in v %}{{ v.displ_name|get_readable_name:attr }}{% else %}{{ v.value|get_readable_name:attr }}{% endif %}
                                                                 <span class="count">({{ v.count }})</span>
                                                             </label>
                                                         </li>
