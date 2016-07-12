@@ -25,17 +25,18 @@ import click
 
 from gexp_features import GEXPFeatureDefConfig, GEXPFeatureDefProvider
 from gnab_features import GNABFeatureDefConfig, GNABFeatureDefProvider
+from protein_features import RPPAFeatureDefConfig, RPPAFeatureDefProvider
 from scripts.feature_def_gen.feature_def_utils import load_config_json
 
 
 data_type_registry = {
     'gexp': (GEXPFeatureDefConfig, GEXPFeatureDefProvider),
-    'gnab': (GNABFeatureDefConfig, GNABFeatureDefProvider)
+    'gnab': (GNABFeatureDefConfig, GNABFeatureDefProvider),
+    'rppa': (RPPAFeatureDefConfig, RPPAFeatureDefProvider)
 }
 
 
 def run_query(project_id, provider, config):
-    #provider = GEXPFeatureDefProvider(config)
     job_reference = provider.submit_query_and_get_job_ref(project_id)
 
     poll_retry_limit = 20
