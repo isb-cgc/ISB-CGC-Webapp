@@ -270,125 +270,169 @@ def register_gcp(request, user_id):
         return redirect('user_gcp_list', user_id=request.user.id)
     return render(request, 'GenespotRE/register_gcp.html', {})
 
-@login_required
-def register_sa(request, user_id):
-    if request.GET.get('gcp_id'):
-        authorized_datasets = AuthorizedDataset.objects.all()
 
-        context = {'gcp_id': request.GET.get('gcp_id'),
-                   'authorized_datasets': authorized_datasets}
-        return render(request, 'GenespotRE/register_sa.html', context)
-    else:
-        messages.error('There was no Google Cloud Project provided.')
-        redirect('user_gcp_list', user_id=user_id)
+def verify_service_account(user, gcp_id, service_account, datasets):
+    dataset_objs = AuthorizedDataset.objects.filter(id__in=datasets)
+    dataset_obj_ids = dataset_objs.values_list('id', flat=True)
+    return_obj = {'user_sa': service_account}
+
+    # 1. GET ALL USERS ON THE PROJECT.
+    try:
+        crm_service = get_special_crm_resource()
+        iam_policy = crm_service.projects().getIamPolicy(
+            resource=gcp_id, body={}).execute()
+        bindings = iam_policy['bindings']
+        roles = {}
+        verify_service_account = False
+        member_details = {}
+        for val in bindings:
+            role = val['role']
+            members = val['members']
+            roles[role] = []
+            for member in members:
+                if member.startswith('user:'):
+                    email = member.split(':')[1]
+                    registered_user = bool(User.objects.filter(email=email).first())
+                    roles[role].append({'email': email,
+                                       'registered_user': registered_user})
+
+                elif member.startswith('serviceAccount'):
+                    if member.find(':'+service_account) > 0:
+                        verify_service_account = True
+
+        # 2. VERIFY SERVICE ACCOUNT IS IN THIS PROJECT
+        if not verify_service_account:
+            print 'Provided service account does not exist in project.'
+            # return error that the service account doesn't exist in this project
+            return JsonResponse({'message': 'The provided service account does not exist in the selected project'}, status='400')
+
+
+        # 3. VERIFY ALL USERS ARE REGISTERED AND HAVE ACCESS TO APPROPRIATE DATASETS
+        user_dataset_verified = True
+
+        for role, members in roles.items():
+            for member in members:
+
+                # IF USER IS REGISTERED
+                if member['registered_user']:
+                    user = User.objects.filter(email=member['email']).first()
+
+                    # FIND NIH_USER FOR USER
+                    nih_user = NIH_User.objects.filter(user_id=user.id).first()
+                    member['nih_registered'] = bool(nih_user)
+
+                    # IF USER HAS LINKED ERA COMMONS ID
+                    if nih_user:
+
+                        # FIND ALL DATASETS USER HAS ACCESS TO
+                        user_datasets = UserAuthorizedDatasets.objects.filter(nih_user_id=nih_user.id).values_list('authorized_dataset', flat=True)
+                        user_auth_datasets = AuthorizedDataset.objects.filter(id__in=user_datasets)
+                        member['datasets'] = []
+                        user_auth_dataset_ids = user_auth_datasets.values_list('id', flat=True)
+
+                        # VERIFY THE USER HAS ACCESS TO THE PROPOSED DATASETS
+                        member['datasets_valid'] = False
+                        if set(dataset_obj_ids).issubset(user_auth_dataset_ids):
+                            member['datasets_valid'] = True
+
+                        for item in user_auth_datasets:
+                            member['datasets'].append(item.name)
+
+                        # IF ONE USER DOES NOT HAVE ACCESS, DO NOT ALLOW TO CONTINUE
+                        if not member['datasets_valid']:
+                            user_dataset_verified = False
+
+                # IF USER HAS NEVER LOGGED INTO OUR SYSTEM
+                else:
+                    member['nih_registered'] = False
+                    member['datasets'] = []
+                    if datasets:
+                        user_dataset_verified = False
+
+                # 4. VERIFY PI IS ON THE PROJECT
+
+
+    except HttpError, e:
+        return {'message': 'There was an error accessing your project. Please verify that you have set the permissions correctly.'}
+
+    '''
+    3. VERIFY PI IS ON THE PROJECT.
+        IF PI IS NOT ON THE PROJECT, RETURN ERROR
+    4. VERIFY ALL USERS HAVE ACCESS TO THE PROPOSED DATASETS.
+        IF NOT ALL USERS HAVE ACCESS, KEEP LIST OF USERS THAT DO NOT
+
+    RETURN THE LIST OF DATASETS AND WHETHER ALL USERS HAVE ACCESS OR NOT.
+    IF NOT ALL USERS HAVE ACCESS TO A DATASET, LIST THE USERS THAT DO NOT.
+    '''
+
+    return_obj = {'roles': roles,
+                  'user_dataset_verified': user_dataset_verified}
+    return return_obj
 
 @login_required
 def verify_sa(request, user_id):
     if request.POST.get('gcp_id'):
         gcp_id = request.POST.get('gcp_id')
-        user_gcp = GoogleProject.objects.get(project_id=gcp_id)
         user_sa = request.POST.get('user_sa')
-        datasets = request.POST.getlist('dataset')
-        dataset_objs = AuthorizedDataset.objects.filter(id__in=datasets)
+        datasets = request.POST.getlist('datasets')
+        user = User.objects.get(id=user_id)
+        status = '200'
+        result = verify_service_account(user, gcp_id, user_sa, datasets)
+        if 'message' in result.keys():
+            status='403'
 
-        return_obj = {'user_sa': user_sa}
-
-        '''
-        INSERT CODE TO VERIFY USERS AND DATASETS.
-        '''
-
-
-        # 1. GET ALL USERS ON THE PROJECT.
-        try:
-            crm_service = get_special_crm_resource()
-            iam_policy = crm_service.projects().getIamPolicy(
-                resource=gcp_id, body={}).execute()
-            bindings = iam_policy['bindings']
-            roles = {}
-            verify_service_account = False
-            member_details = {}
-            for val in bindings:
-                role = val['role']
-                members = val['members']
-                roles[role] = []
-                for member in members:
-                    if member.startswith('user:'):
-                        email = member.split(':')[1]
-                        registered_user = bool(User.objects.filter(email=email).first())
-                        roles[role].append({'email': email,
-                                           'registered_user': registered_user})
-
-                    elif member.startswith('serviceAccount'):
-                        if member.find(':'+user_sa) > 0:
-                            verify_service_account = True
-
-            # 2. VERIFY SERVICE ACCOUNT IS IN THIS PROJECT
-            if not verify_service_account:
-                print 'Provided service account does not exist in project.'
-                # return error that the service account doesn't exist in this project
-                return JsonResponse({'message': 'The provided service account does not exist in the selected project'}, status='400')
-
-
-            # 3. VERIFY ALL USERS HAVE A LISTING IN NIH_USERS.
-            for role, members in roles.items():
-                for member in members:
-                    if member['registered_user']:
-                        user = User.objects.filter(email=member['email']).first()
-                        nih_user = NIH_User.objects.filter(user_id=user.id).first()
-                        member['nih_registered'] = bool(nih_user)
-                        if nih_user:
-                            member['dbgap_authorized'] = nih_user.dbGaP_authorized
-
-
-                                # users = User.objects.filter(email__in=members)
-                                # If not all users have logged into the system.
-                                # if len(users) < len(members):
-                                #     return JsonResponse({'message': 'Some users in your project have not verified their account in the ISB-CGC webapp. Please have them log in to the webapp.'}, status=400)
-
-                                # for member in members:
-                                #     if member.registered_user:
-                                #         NIH_users = NIH_User.objects.filter(user__in=users)
-
-                                # If not all users have linked their eRA Commons ID
-                                # if len(NIH_users) < len(users):
-                                #     return JsonResponse({'message': 'Some users in your project have not verified their eRA Commons ID with their ISB-CGC account. Please have them go through the process of linking their eRA Commons ID with their ISB-CGC account.'})
-
-                                # Verify dataset access per dataset
-                                # for dataset in dataset_objs:
-                                #     user_authorized_datasets = UserAuthorizedDatasets.objects.filter(nih_user__in=NIH_users, authorized_dataset=dataset)
-                                #     if len(user_authorized_datasets) < NIH_users:
-                                #         return JsonResponse({'message': 'Some users in your project do not have access to this dataset: {0}'.format(dataset.name)}, status=400)
-
-                                # 4. VERIFY PI IS ON THE PROJECT
-
-                                # 5. VERIFY ALL USERS HAVE ACCESS TO THE PROPOSED DATASETS
-        except HttpError, e:
-            return JsonResponse({'message': 'There was an error accessing your project. Please verify that you have set the permissions correctly.'}, status='403')
-
-        '''
-        3. VERIFY PI IS ON THE PROJECT.
-            IF PI IS NOT ON THE PROJECT, RETURN ERROR
-        4. VERIFY ALL USERS HAVE ACCESS TO THE PROPOSED DATASETS.
-            IF NOT ALL USERS HAVE ACCESS, KEEP LIST OF USERS THAT DO NOT
-
-        RETURN THE LIST OF DATASETS AND WHETHER ALL USERS HAVE ACCESS OR NOT.
-        IF NOT ALL USERS HAVE ACCESS TO A DATASET, LIST THE USERS THAT DO NOT.
-        '''
-
-
-        return_obj['user_sa_objs'] = []
-        for dataset in dataset_objs:
-            user_sa_obj = ServiceAccount.objects.create(google_project=user_gcp,
-                                                             service_account=user_sa,
-                                                             authorized_dataset=dataset)
-            return_obj['user_sa_objs'].append({
-                'service_account': user_sa_obj.service_account,
-                'google_project': user_sa_obj.google_project.project_name,
-                'authorized_dataset': user_sa_obj.authorized_dataset.name
-            })
-        return JsonResponse(return_obj, status='200')
+        result['user_sa'] = user_sa
+        result['datasets'] = datasets
+        return JsonResponse(result, status=status)
     else:
         return JsonResponse({'message': 'There was no Google Cloud Project provided.'}, status='404')
+
+@login_required
+def register_sa(request, user_id):
+    if request.GET.get('gcp_id'):
+        authorized_datasets = AuthorizedDataset.objects.filter(public=False)
+
+        context = {'gcp_id': request.GET.get('gcp_id'),
+                   'authorized_datasets': authorized_datasets}
+        return render(request, 'GenespotRE/register_sa.html', context)
+    elif request.POST.get('gcp_id'):
+        gcp_id = request.POST.get('gcp_id')
+        user_sa = request.POST.get('user_sa')
+        datasets = request.POST.getlist('datasets')
+        user = User.objects.get(id=user_id)
+        user_gcp = GoogleProject.objects.get(project_id=gcp_id)
+        status = '200'
+
+        # VERIFY AGAIN JUST IN CASE USER TRIED TO GAME THE SYSTEM
+        result = verify_service_account(user, gcp_id, user_sa, datasets)
+        if 'message' in result.keys():
+            messages.error(result['message'])
+            return redirect('user_gcp_list', user_id=user_id)
+        elif result['user_dataset_verified']:
+            # Datasets verified, add service accounts to appropriate acl groups
+            protected_datasets = AuthorizedDataset.objects.filter(id__in=datasets)
+
+            # ADD SERVICE ACCOUNT TO ALL PUBLIC DATASET ACL GROUPS
+            public_datasets = AuthorizedDataset.objects.filter(public=True)
+            for dataset in public_datasets:
+                service_account_obj = ServiceAccount(google_project=user_gcp, service_account=user_sa, authorized_dataset=dataset)
+                service_account_obj.save()
+                #TODO: ADD SERVICE ACCOUNT TO PROPER ACL GOOGLE GROUPS HERE
+
+            # ADD SERVICE ACCOUNT TO ALL SPECIFIED PROTECTED DATASET ACL GROUPS
+            for dataset in protected_datasets:
+                service_account_obj = ServiceAccount(google_project=user_gcp, service_account=user_sa, authorized_dataset=dataset)
+                service_account_obj.save()
+                #TODO: ADD SERVICE ACCOUNT TO PROPER ACL GOOGLE GROUPS HERE
+
+            return redirect('user_gcp_list', user_id=user_id)
+        else:
+            # Somehow managed to register even though previous verification failed
+            messages.error('There was an error in processing your service account. Please try again.')
+            return redirect('user_gcp_list', user_id=user_id)
+    else:
+        messages.error('There was no Google Cloud Project provided.')
+        return redirect('user_gcp_list', user_id=user_id)
 
 
 @login_required

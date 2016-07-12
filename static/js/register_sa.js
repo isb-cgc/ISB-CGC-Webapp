@@ -51,7 +51,7 @@ require([
 
         var $this = $(this);
         var fields = $this.serialize();
-        var user_table = $this.parent('li').find('.user-verification table');
+        var user_ver_div = $('.user-verification');
         var spinner = $this.parent('li').find('.load-spinner');
         spinner.show();
 
@@ -60,11 +60,45 @@ require([
             data: fields,
             method: 'POST',
             success: function(data) {
+                console.log(data);
+                var tbody = user_ver_div.find('tbody');
                 spinner.hide();
-                $this.append('<p>' + data['user_sa'] + '</p>');
-                for (var i = 0; i < data['user_sa_objs'].length; i++) {
-                    $this.append('<p>' + data['user_sa_objs'][i]['service_account']
-                        + ': ' + data['user_sa_objs'][i]['authorized_dataset'] + '</p>');
+
+                var register_form = $('form#register-sa');
+                register_form.append('<input type="hidden" name="user_sa" value="' + data['user_sa'] + '"/>');
+                register_form.append('<input type="hidden" name="datsets" value="' + data['datasets'] + '"/>');
+
+                var roles = data['roles'];
+                for (var role in roles) {
+                    var memberlist = roles[role];
+                    for (var i in memberlist) {
+                        var tr = $('<tr></tr>');
+                        tr.append('<td>' + memberlist[i]['email'] + '</td>');
+                        if (memberlist[i]['registered_user']) {
+                            tr.append('<td><i class="fa fa-check"></i></td>');
+                        } else {
+                            tr.append('<td><i class="fa fa-times"></i></td>');
+                        }
+                        if (memberlist[i]['nih_registered']) {
+                            tr.append('<td><i class="fa fa-check"></i></td>');
+                        } else {
+                            tr.append('<td><i class="fa fa-times"></i></td>');
+                        }
+                        if (memberlist[i]['datasets_valid']) {
+                            tr.append('<td><i class="fa fa-check"></i></td>');
+                        } else {
+                            tr.append('<td><i class="fa fa-times"></i> ' + memberlist[i]['datasets'] + '</td>');
+                        }
+                        tbody.append(tr);
+                    }
+                }
+
+                user_ver_div.show();
+
+                if (data['user_dataset_verified']) {
+                    $('.register-sa-div').show();
+                } else {
+                    $('.cannot-register').show();
                 }
             },
             error: function(xhr, ajaxOptions, thrownError) {
