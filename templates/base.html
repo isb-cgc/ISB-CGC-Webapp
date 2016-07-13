@@ -66,7 +66,6 @@
     <script>try{Typekit.load({ async: true });}catch(e){}</script>
 </head>
 <body id="body">
-<a href="#{% block link_page_name %}content{% endblock %}" class="skip-nav">Skip to main content</a>
 <!--Include site main header-->
 {% include 'share/site_header.html'  %}
 
@@ -110,7 +109,7 @@
                     <p>Are you sure you want to sign out?</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
                     {% csrf_token %}
                     {% if redirect_field_value %}
                         <input type="hidden" name="{{redirect_field_name}}" value="{{redirect_field_value}}"/>

@@ -80,8 +80,8 @@
                                                         <li class="checkbox">
                                                             <label title="{{ v.value|get_tooltip_text:attr }}">
                                                                 <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}" data-value-id="{% if v.id %}{{ v.id }}{% endif %}">
-                                                                {% if v.value == 'None' %}NA{% else %}{{v.value|get_readable_name:attr }}{% endif %}
-                                                                <span class="count">({{ v.count }})</span>
+                                                                {% if v.value == 'None' %}NA{% elif 'displ_name' in v %}{{ v.displ_name|get_readable_name:attr }}{% else %}{{ v.value|get_readable_name:attr }}{% endif %}
+                                                                 <span class="count">({{ v.count }})</span>
                                                             </label>
                                                         </li>
                                                     {% elif forloop.counter0 == 6 and num_more > 0 %}
@@ -89,16 +89,16 @@
                                                         <li class="extra-values checkbox" style="display:none;">
                                                             <label title="{{ v.value|get_tooltip_text:attr }}">
                                                                 <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}" data-value-id="{% if v.id %}{{ v.id }}{% endif %}">
-                                                                {% if v.value == 'None' %}NA{% else %}{{ v.value|get_readable_name:attr }}{% endif %}
-                                                                <span class="count">({{ v.count }})</span>
+                                                                {% if v.value == 'None' %}NA{% elif 'displ_name' in v %}{{ v.displ_name|get_readable_name:attr }}{% else %}{{ v.value|get_readable_name:attr }}{% endif %}
+                                                                 <span class="count">({{ v.count }})</span>
                                                             </label>
                                                         </li>
                                                     {% else %}
                                                         <li class="extra-values checkbox" style="display:none;">
                                                             <label title="{{ v.value|get_tooltip_text:attr }}">
                                                                 <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}" data-value-id="{% if v.id %}{{ v.id }}{% endif %}">
-                                                                {% if v.value == 'None' %}NA{% else %}{{ v.value|get_readable_name:attr }}{% endif %}
-                                                                <span class="count">({{ v.count }})</span>
+                                                                {% if v.value == 'None' %}NA{% elif 'displ_name' in v %}{{ v.displ_name|get_readable_name:attr }}{% else %}{{ v.value|get_readable_name:attr }}{% endif %}
+                                                                 <span class="count">({{ v.count }})</span>
                                                             </label>
                                                         </li>
                                                     {% endif %}
@@ -130,8 +130,10 @@
                                             {% for v in attr_list_count|get_named_item:attr|get_item:'values' %}
                                                 <li class="checkbox">
                                                     <!-- todo: make a custom tag for the id for data_attr attributes-->
-                                                    <label><input type="checkbox" name="elements-selected" data-value-name="{{ v.value|get_data_attr_id:attr }}" >{{ v.value }}</label>
-                                                    <span class="count">({{ v.count }})</span>
+                                                    <label>
+                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.value|get_data_attr_id:attr }}" data-displ-name="{{  v.value }}">
+                                                        {{ v.value }} <span class="count">({{ v.count }})</span>
+                                                    </label>
                                                 </li>
                                             {% endfor %}
                                         {% endif %}
@@ -259,7 +261,7 @@
                             <input class="form-control" type="text" id="cohort-name" name="name" required />
                         </div>
                         <div class="form-group">
-                            <label for="filters">Selected Filters:</label>
+                            <h5>Selected Filters:</h5>
                             <p class="form-control-static"></p>
                         </div>
                     </div>

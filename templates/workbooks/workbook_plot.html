@@ -101,7 +101,7 @@
 
                     <!-- Swap selection -->
                     {% if workbook.owner.id == user.id %}
-                        <button class="swap btn btn-default btn-sm inline-block space-bottom-10"><i class="fa fa-exchange fa-rotate-90"></i>Swap Values</button>
+                        <button class="swap btn btn-primary btn-sm inline-block space-bottom-10"><i class="fa fa-exchange fa-rotate-90"></i>Swap Values</button>
                     {% endif %}
 
                     <!-- Y Axis selection -->
@@ -251,7 +251,7 @@
                     </div>
                     <div class="modal-footer">
                         {% csrf_token %}
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
                         <input type="submit" value="Save Cohort" class="btn btn-primary" />
                     </div>
                 </form>

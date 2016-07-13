@@ -67,34 +67,6 @@ ALPHANUM_SORT = [
 ]
 
 ATTR_SPECIFIC_TRANSLATION = {
-    'SampleTypeCode': {
-        '01': 'Primary solid Tumor',
-        '02': 'Recurrent Solid Tumor',
-        '03': 'Primary Blood Derived Cancer - Peripheral Blood',
-        '04': 'Recurrent Blood Derived Cancer - Bone Marrow',
-        '05': 'Additional - New Primary',
-        '06': 'Metastatic',
-        '07': 'Additional Metastatic',
-        '08': 'Human Tumor Original Cells',
-        '09': 'Primary Blood Derived Cancer - Bone Marrow',
-        '10': 'Blood Derived Normal',
-        '11': 'Solid Tissue Normal',
-        '12': 'Buccal Cell Normal',
-        '13': 'EBV Immortalized Normal',
-        '14': 'Bone Marrow Normal',
-        '20': 'Control Analyte',
-        '40': 'Recurrent Blood Derived Cancer - Peripheral Blood',
-        '50': 'Cell Lines',
-        '60': 'Primary Xenograft Tissue',
-        '61': 'Cell Line Derived Xenograft Tissue'
-    },
-    'prior_dx': {
-        'Yes': 'Yes',
-        'No': 'No',
-        'Yes, History of Prior Malignancy': 'Yes, History of Prior Malignancy',
-        'Yes, History of Synchronous and or Bilateral Malignancy': 'Yes, History of Synchronous and or Bilateral Malignancy',
-        'Yes, History of Synchronous/Bilateral Malignancy': 'Yes, History of Synchronous/Bilateral Malignancy'
-    },
     'bmi': {
         'underweight': 'Underweight: BMI less that 18.5',
         'normal weight': 'Normal weight: BMI is 18.5 - 24.9',
@@ -223,12 +195,12 @@ def get_readable_name(csv_name, attr=None):
         return ATTR_SPECIFIC_TRANSLATION[attr][csv_name]
     elif attr == 'Project' or attr == 'Study':
         return csv_name.upper()
-    elif TRANSLATION_DICTIONARY.get(csv_name):
+    elif TRANSLATION_DICTIONARY.get(csv_name) and attr is not 'prior_dx':
         return TRANSLATION_DICTIONARY.get(csv_name)
     else:
         csv_name = csv_name.replace('_', ' ')
         # Do not convert the Roman numerals in the stages
-        if attr is not 'pathologic_stage' and attr is not 'residual_tumor':
+        if attr is not 'pathologic_stage' and attr is not 'residual_tumor' and attr is not 'prior_dx':
             csv_name = string.capwords(csv_name)
         csv_name = csv_name.replace(' To ', ' to ')
         return csv_name
