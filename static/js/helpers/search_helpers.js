@@ -107,13 +107,13 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                     
                     if (results.hasOwnProperty('items')) {
                         var features = [
-                                'cnvrPlatform',
-                                'DNAseq_data',
-                                'methPlatform',
-                                'gexpPlatform',
-                                'mirnPlatform',
-                                'rppaPlatform'
-                            ];
+                            'cnvrPlatform',
+                            'DNAseq_data',
+                            'methPlatform',
+                            'gexpPlatform',
+                            'mirnPlatform',
+                            'rppaPlatform'
+                        ];
                         var plot_features = [
                             context.get_readable_name(features[0]),
                             context.get_readable_name(features[1]),
