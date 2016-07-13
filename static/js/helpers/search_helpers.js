@@ -290,18 +290,18 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
 
                     var $that = $(this),
                         value = $that.data('value-name'),
-                        label = $that.parent().text(),
+                        displ_name = $that.data('displ-name'),
                         new_count = '';
 
                     if (counts_by_name[attr]) {
-                        if (counts_by_name[attr].values[value] || counts_by_name[attr].values[label]) {
-                            new_count = '(' + (counts_by_name[attr].values[value] || counts_by_name[attr].values[label]) + ')';
+                        if (counts_by_name[attr].values[value] || counts_by_name[attr].values[displ_name]) {
+                            new_count = '(' + (counts_by_name[attr].values[value] || counts_by_name[attr].values[displ_name]) + ')';
                         }
                     }
                     if (new_count == '') {
                         new_count = '(0)';
                     }
-                    $that.parent().siblings('span').html(new_count);
+                    $that.siblings('span').html(new_count);
                 });
             })
 
