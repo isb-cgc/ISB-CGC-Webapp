@@ -27,6 +27,7 @@ from gexp_features import GEXPFeatureDefConfig, GEXPFeatureDefProvider
 from gnab_features import GNABFeatureDefConfig, GNABFeatureDefProvider
 from protein_features import RPPAFeatureDefConfig, RPPAFeatureDefProvider
 from methylation_features import METHFeatureDefConfig, METHFeatureDefProvider
+from copynumber_features import CNVFeatureDefConfig, CNVFeatureDefProvider
 
 from scripts.feature_def_gen.feature_def_utils import load_config_json
 
@@ -35,7 +36,8 @@ data_type_registry = {
     'gexp': (GEXPFeatureDefConfig, GEXPFeatureDefProvider),
     'gnab': (GNABFeatureDefConfig, GNABFeatureDefProvider),
     'rppa': (RPPAFeatureDefConfig, RPPAFeatureDefProvider),
-    'meth': (METHFeatureDefConfig, METHFeatureDefProvider)
+    'meth': (METHFeatureDefConfig, METHFeatureDefProvider),
+    'cnv': (CNVFeatureDefConfig, CNVFeatureDefProvider)
 }
 
 
