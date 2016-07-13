@@ -27,7 +27,7 @@ logger = logging
 
 VALUE_FIELD_NUM_MUTATIONS = 'num_mutations'
 VALUES = frozenset(['variant_classification', 'variant_type', 'sequence_source', VALUE_FIELD_NUM_MUTATIONS])
-FIELDNAMES = ['num_search_hits', 'gene_name', 'value_field', 'internal_feature_id']
+FIELDNAMES = ['gene_name', 'value_field', 'internal_feature_id']
 
 MYSQL_SCHEMA = [
     {
