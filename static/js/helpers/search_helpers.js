@@ -107,13 +107,13 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                     
                     if (results.hasOwnProperty('items')) {
                         var features = [
-                                'cnvrPlatform',
-                                'DNAseq_data',
-                                'methPlatform',
-                                'gexpPlatform',
-                                'mirnPlatform',
-                                'rppaPlatform'
-                            ];
+                            'cnvrPlatform',
+                            'DNAseq_data',
+                            'methPlatform',
+                            'gexpPlatform',
+                            'mirnPlatform',
+                            'rppaPlatform'
+                        ];
                         var plot_features = [
                             context.get_readable_name(features[0]),
                             context.get_readable_name(features[1]),
@@ -290,18 +290,18 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
 
                     var $that = $(this),
                         value = $that.data('value-name'),
-                        label = $that.parent().text(),
+                        displ_name = $that.data('displ-name'),
                         new_count = '';
 
                     if (counts_by_name[attr]) {
-                        if (counts_by_name[attr].values[value] || counts_by_name[attr].values[label]) {
-                            new_count = '(' + (counts_by_name[attr].values[value] || counts_by_name[attr].values[label]) + ')';
+                        if (counts_by_name[attr].values[value] || counts_by_name[attr].values[displ_name]) {
+                            new_count = '(' + (counts_by_name[attr].values[value] || counts_by_name[attr].values[displ_name]) + ')';
                         }
                     }
                     if (new_count == '') {
                         new_count = '(0)';
                     }
-                    $that.parent().siblings('span').html(new_count);
+                    $that.siblings('span').html(new_count);
                 });
             })
 
