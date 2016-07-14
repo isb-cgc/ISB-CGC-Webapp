@@ -198,26 +198,30 @@
                                 </div>
                             </div>
                         </li>
+                        <li class="list-group-item">
+                        <select id="mutation-category" class="mutation-category-selector form-control spec-select datatype-selector">
+                            <option value="any" selected>Any</option>
+                            {% for cat in molecular_attr %}
+                                <option value="{{ cat.value }}">{{ cat.name }}</option>
+                            {% endfor %}
+                            <option value="specific">User Specified</option>
+                        </select>
+                        </li>
                         {% for attr in molecular_attr %}
                             <li class="list-group-item">
-                                <div class="list-group-item__heading" role="tab" id="heading-{{ attr }}">
-                                    <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-{{ attr }}" aria-expanded="false" aria-controls="collapse-{{ attr }}" {% if attr == 'miRNA_sequencing' %}style="text-transform:none!important"{% endif %}>
-                                        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ attr|get_readable_name }}
+                                <div class="list-group-item__heading" role="tab" id="heading-{{ attr.value }}">
+                                    <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-{{ attr.value }}" aria-expanded="false" aria-controls="collapse-{{ attr.value }}" >
+                                        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ attr.name }}
                                     </a>
                                 </div>
-                                <div id="collapse-{{ attr }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" aria-labelledby="heading-{{ attr }}" data-feature-name="{{ attr }}" data-feature-type="datatype">
-                                    <ul class="search-checkbox-list" id="{{ attr }}">
-                                        {% if attr_list_count|list_contains_name:attr %}
-                                            {% for v in attr_list_count|get_named_item:attr|get_item:'values' %}
-                                                <li class="checkbox">
-                                                    <!-- todo: make a custom tag for the id for data_attr attributes-->
-                                                    <label>
-                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.value|get_data_attr_id:attr }}" data-displ-name="{{  v.value }}">
-                                                        {{ v.value }} <span class="count">({{ v.count }})</span>
-                                                    </label>
-                                                </li>
-                                            {% endfor %}
-                                        {% endif %}
+                                <div id="collapse-{{ attr.value }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" aria-labelledby="heading-{{ attr.value }}" data-feature-name="{{ attr.value }}" data-feature-type="datatype">
+                                    <ul class="search-checkbox-list" id="{{ attr.value }}">
+                                        <li class="checkbox">
+                                            <label>
+                                                <input class="mutation-checkbox" type="checkbox" name="elements-selected" data-value-name="{{ attr.value }}" data-displ-name="{{ attr.name }}">
+                                                {{ attr.value }} <span class="count">({{ attr.count }})</span>
+                                            </label>
+                                        </li>
                                     </ul>
                                 </div>
                             </li>
@@ -505,6 +509,7 @@
     var base_api_url = '{{ base_api_url|safe }}';
     var cohort_id = {{ cohort.id }};
     var metadata_counts = {{ metadata_counts|tojson|safe }};
+    var mutation_attr = {{ mutation_attr|tojson|safe }};
     </script>
 {% endblock %}
 

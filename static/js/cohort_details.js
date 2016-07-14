@@ -541,5 +541,22 @@ require([
         firstSelect = false;
 
     });
+
+    $('#mutation-category').on('change',function(e){
+        $('.mutation-checkbox').prop('disabled',(e.value !== 'specific'));
+
+        if(e.value === 'Any') {
+            $('.mutation-checkbox').prop('checked', true);
+        } else {
+            $('.mutation-checkbox').each(function () {
+                if (molecular_attr.cat[e.value][$(this).prop('data-value-name')]) {
+                    $(this).prop('checked', true);
+                } else {
+                    $(this).prop('checked', false);
+                }
+            });
+        }
+    });
+
 });
 
