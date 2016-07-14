@@ -25,8 +25,6 @@ from scripts.feature_def_gen.feature_def_utils import DataSetConfig
 logger = logging
 
 
-
-
 class METHFeatureDefConfig(object):
     def __init__(self, project_id, reference, target_config, data_table, feature_id_prefix, annotation_table, out_path):
         self.project_id = project_id
