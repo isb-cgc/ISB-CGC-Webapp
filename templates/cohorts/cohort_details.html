@@ -27,6 +27,8 @@
 {% block page_name %}cohort-details{% endblock %}
 
 {% block page_header %}
+<link type="text/css" rel="stylesheet" href="{% static 'css/token-typeahead.css' %}" />
+
 <div class="container">
     <ol class="breadcrumb">
         <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
@@ -82,12 +84,13 @@
 {% endblock %}
 
 {% block content %}
+
     <div id="filter-panel" class="col-lg-4 col-md-4" style="display:none;">
         <div class="tabpanel" role="tabpanel">
             <ul class="nav nav-tabs" role="tablist">
                 <li role="presentation" class="active"><a href="#clinical-filters" role="tab" data-toggle="tab" title="Donor Filters">Donor</a></li>
-                <li role="presentation" class=""><a href="#data-filters" role="tab" data-toggle="tab" title="Donor Filters">Data Type</a></li>
-{#                <li role="presentation" class=""><a href="#molecular-filters" role="tab" data-toggle="tab" title="Donor Filters">Molecular</a></li>#}
+                <li role="presentation" class=""><a href="#data-filters" role="tab" data-toggle="tab" title="Data Type Filters">Data Type</a></li>
+                <li role="presentation" class=""><a href="#molecular-filters" role="tab" data-toggle="tab" title="Molecular Filters">Molecular</a></li>
             </ul>
             <div class="tab-content">
                 <div role="tabpanel" class="tab-pane active" id="clinical-filters">
@@ -172,45 +175,55 @@
                         {% endfor %}
                     </ul>
                 </div>
-{#                <!-- molecular filters tab -->#}
-{#                <div role="tabpanel" class="tab-pane" id="molecular-filters">#}
-{#                    <div class="panel-group" id="molecular-accordion" role="tablist" aria-multiselectable="true">#}
-{#                        {% for attr in molec_attr %}#}
-{#                            <div class="panel panel-default">#}
-{#                                <a role="button" data-toggle="collapse" data-parent="#clin-accordion" href="#collapse-{{ attr }}" aria-expanded="true" aria-controls="collapse-{{ attr }}">#}
-{#                                    <div class="panel-heading" role="tab" id="heading-{{ attr }}"><i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ attr|get_readable_name }}</div>#}
-{#                                </a>#}
-{#                                <div id="collapse-{{ attr }}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-{{ attr }}">#}
-{#                                    <div class="panel-body">#}
-{#                                        <ul class="search-checkbox-list" id="{{ attr }}">#}
-{#                                            <form action="" method="GET" class="form-horizontal" id="{{ attr }}-form">#}
-{#                                                <div class="form-group">#}
-{#                                                    <div class="col-sm-3"><label for="{{ attr }}-genes" class="control-label">Gene:</label></div>#}
-{#                                                    <div class="col-md-5">#}
-{#                                                        <input class="form-control" type="text" id="{{ attr }}-genes" name="gene">#}
-{#                                                    </div>#}
-{##}
-{#                                                </div>#}
-{#                                                {% if attr == 'mRNA_expression' %}#}
-{#                                                <ul>#}
-{#                                                    <li>#}
-{#                                                    <!--<input type="checkbox" name="RPKM" id="RPKM-check">-->#}
-{#                                                    <label for="RPKM-check">RPKM</label>#}
-{#                                                    </li>#}
-{#                                                    <li>#}
-{#                                                    <!--<input type="checkbox" name="normalized_count" id="normalized_count-check">-->#}
-{#                                                    <label for="normalized_count-check">normalized count</label>#}
-{#                                                    </li>#}
-{#                                                </ul>#}
-{#                                                {% endif %}#}
-{#                                            </form>#}
-{#                                        </ul>#}
-{#                                    </div>#}
-{#                                </div>#}
-{#                            </div>#}
-{#                        {% endfor %}#}
-{#                    </div>#}
-{#                </div>#}
+                <!-- molecular filters tab -->
+                <div role="tabpanel" class="tab-pane" id="molecular-filters">
+                    <ul class="list-group" id="molecular-accordion" role="tablist" aria-multiselectable="true">
+                        <li class="list-group-item">
+                            <div id="molecular-filter-alert" class="alert alert-warning alert-dismissable" style="display: none;">
+                                <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                A large amount of data must be processed to use these filters, which can result in some delays.
+                            </div>
+                            <div class="list-group-item__heading" role="tab" id="heading-gene">
+                                <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-gene" aria-expanded="false" aria-controls="collapse-gene">
+                                    <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> GENE
+                                </a>
+                            </div>
+                            <div id="collapse-gene" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-gene">
+                                <div id="tokenfield-holder">
+                                    <!-- gene selector -->
+                                    <textarea name="genes-list" class="form-control tokenfield" id="paste-in-genes"  placeholder="Enter a gene's name" required></textarea>
+                                </div>
+                                <div class="tokenfield">
+                                    <p class="helper-text__invalid" style="display: none;"><i class="fa fa-exclamation-circle"></i> The following <span class="token invalid">items</span>were not recognized as gene identifiers. You may either correct or delete these items -- or use them as-is.</p>
+                                </div>
+                            </div>
+                        </li>
+                        {% for attr in molecular_attr %}
+                            <li class="list-group-item">
+                                <div class="list-group-item__heading" role="tab" id="heading-{{ attr }}">
+                                    <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-{{ attr }}" aria-expanded="false" aria-controls="collapse-{{ attr }}" {% if attr == 'miRNA_sequencing' %}style="text-transform:none!important"{% endif %}>
+                                        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ attr|get_readable_name }}
+                                    </a>
+                                </div>
+                                <div id="collapse-{{ attr }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" aria-labelledby="heading-{{ attr }}" data-feature-name="{{ attr }}" data-feature-type="datatype">
+                                    <ul class="search-checkbox-list" id="{{ attr }}">
+                                        {% if attr_list_count|list_contains_name:attr %}
+                                            {% for v in attr_list_count|get_named_item:attr|get_item:'values' %}
+                                                <li class="checkbox">
+                                                    <!-- todo: make a custom tag for the id for data_attr attributes-->
+                                                    <label>
+                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.value|get_data_attr_id:attr }}" data-displ-name="{{  v.value }}">
+                                                        {{ v.value }} <span class="count">({{ v.count }})</span>
+                                                    </label>
+                                                </li>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
             </div>
         </div>
     </div>

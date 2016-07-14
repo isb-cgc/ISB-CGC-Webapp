@@ -16,11 +16,6 @@
  *
  */
 
-/**
- * Test comment for Test Branch in
- *
- */
-
 require.config({
     baseUrl: '/static/js/',
     paths: {
@@ -39,14 +34,28 @@ require.config({
         stack_bar_chart: 'visualizations/createStackedBarchart',
         d3parsets: 'libs/d3.parsets',
         draw_parsets: 'parallel_sets',
-        base: 'base'
+        base: 'base',
+        bloodhound: 'libs/bloodhound',
+        typeahead : 'libs/typeahead',
+        tokenfield: 'libs/bootstrap-tokenfield.min'
     },
     shim: {
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
         'session_security': ['jquery'],
         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
-        'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui']
+        'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
+        'tokenfield': ['jquery', 'jqueryui'],
+        'typeahead':{
+            deps: ['jquery'],
+            init: function ($) {
+                return require.s.contexts._.registry['typeahead.js'].factory( $ );
+            }
+        },
+        'bloodhound': {
+           deps: ['jquery'],
+           exports: 'Bloodhound'
+        }
     }
 });
 
@@ -58,18 +67,115 @@ require([
     'd3',
     'd3tip',
     'search_helpers',
+    'bloodhound',
+    'typeahead',
+    'underscore',
+    'tokenfield',
     'vis_helpers',
     'tree_graph',
     'stack_bar_chart',
     'assetscore',
     'assetsresponsive',
     'base'
-], function ($, jqueryui, bootstrap, session_security, d3, d3tip, search_helpers) {
+], function ($, jqueryui, bootstrap, session_security, d3, d3tip, search_helpers, Bloodhound, typeahead, _) {
 
     var savingComment = false;
     var savingChanges = false;
     var SUBSEQUENT_DELAY = 600;
     var update_displays_thread = null;
+
+    var geneListField = $('#paste-in-genes');
+    var geneFavs = [];
+
+    //create bloodhound typeahead engine for gene suggestions
+    var gene_suggestions = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        prefetch : base_url + '/genes/suggest/a.json',
+        remote: {
+            url: base_url + '/genes/suggest/%QUERY.json',
+            wildcard: '%QUERY'
+        }
+    });
+    gene_suggestions.initialize();
+    function createTokenizer() {
+        // be aware bootstrap tokenfield requires 'value' as the datem attribute field : https://github.com/sliptree/bootstrap-tokenfield/issues/189
+        geneListField.tokenfield({
+            typeahead : [
+                null, {
+                    source: gene_suggestions.ttAdapter(),
+                    display: 'value'
+                }
+            ],
+            delimiter : " ",
+            minLength: 2-1,         // Bug #289 in bootstrap-tokenfield, submitted, remove -1 if it gets fixed and we update
+            limit: 1,
+            tokens: geneFavs
+        }).on('tokenfield:createdtoken', function (event) {
+
+            // Check whether user entered a valid gene name
+            validate_genes([event.attrs.value], function validCallback(result){
+                if(!result[event.attrs.value]){
+                    $(event.relatedTarget).addClass('invalid error');
+                    $('.helper-text__invalid').show();
+                }
+                if ($('div.token.invalid.error').length < 1) {
+                    $('.helper-text__invalid').hide();
+                }
+            });
+            $('#paste-in-genes-tokenfield').attr('placeholder',"");
+            $('#paste-in-genes-tokenfield').attr('disabled','disabled');
+        }).on('tokenfield:removedtoken', function(event) {
+            $('#paste-in-genes-tokenfield').attr('placeholder',"Enter a gene's name");
+            $('#paste-in-genes-tokenfield').removeAttr('disabled');
+            if ($('div.token.invalid.error').length < 1) {
+                $('.helper-text__invalid').hide();
+            }
+
+        }).on('tokenfield:edittoken',function(e){
+            e.preventDefault();
+            return false;
+        });
+    }
+    createTokenizer();
+
+    function validate_genes(list, cb){
+        if(list.length > 0){
+            var csrftoken = get_cookie('csrftoken');
+            $.ajax({
+                type        : 'POST',
+                dataType    :'json',
+                url         : base_url + '/genes/is_valid/',
+                data        : JSON.stringify({'genes-list' : list}),
+                beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+                success : function (data) {
+                    if(!data.error) {
+                        cb(data.results);
+                    }
+                },
+                error: function () {
+                    console.log('Failed to check for valid genes');
+                }
+            });
+        }
+    }
+
+    //Used for getting the CORS token for submitting data
+    function get_cookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function() {
@@ -404,9 +510,7 @@ require([
         $(this).siblings('.save-comment-btn').prop('disabled', this.value == '' ? true : false)
     })
 
-    /*
-        Disable save changes if no change to title or no added filters
-     */
+    //Disable save changes if no change to title or no added filters
     var original_title = $('#edit-cohort-name').val();
     var save_changes_btn = $('#apply-filters-form input[type="submit"]');
     var check_changes = function() {
@@ -421,15 +525,21 @@ require([
         check_changes();
     })
 
-    /*
-        Disable Duplicate Cohort button once clicked
-     */
+    // Disable Duplicate Cohort button once clicked
     $('.clone-cohort-btn').on('click', function() {
         $(this).addClass('disabled');
     })
 
     $('li.applied-filter').each(function(index,elem){
         $(this).html($(this).text().replace(/\[/g,"<span>").replace(/\]/g,"</span>"));
+    });
+
+    var firstSelect = true;
+    $('a[href="#molecular-filters"]').on('click',function(e){
+        firstSelect && $('a[href="#collapse-gene"]').trigger('click');
+        $('#molecular-filter-alert').show();
+        firstSelect = false;
+
     });
 });
 
