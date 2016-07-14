@@ -10,17 +10,12 @@
             <div class="col-lg-12">
             <div class="nav navbar-left">
                  <ul class="">
-                     {% if user.is_authenticated %}
-                        <li class="navbar-item"> <a href="{% url 'dashboard' %}"><img class="navbar-brand" src="{% static 'img/isblogo.png' %}" alt="ISB Logo"/><span class="navbar-item">ISB-CGC</span></a></li>
-                     {% else %}
-                        <li class="navbar-item"> <a href="{% url 'landing_page' %}"><img class="navbar-brand" src="{% static 'img/isblogo.png' %}" alt="ISB Logo"/><span class="navbar-item">ISB-CGC</span></a></li>
-                     {% endif %}
-
-                    <li class="navbar-link navbar-item"><a href="{% url 'landing_page' %}">About Us</a></li>
-                    <li class="navbar-link navbar-item">
-                        <a href="http://isb-cancer-genomics-cloud.readthedocs.org/en/latest/" target="_blank">Documentation</a>
-                    </li>
-                    <li class="navbar-link navbar-item">
+                     <li class="navbar-item"> <a href="{% url 'landing_page' %}"><img class="navbar-brand" src="{% static 'img/isblogo.png' %}" alt="ISB Logo"/><span class="navbar-item">ISB-CGC</span></a></li>
+                     <li class="navbar-link navbar-item"><a href="{% url 'landing_page' %}">About Us</a></li>
+                     <li class="navbar-link navbar-item">
+                         <a href="http://isb-cancer-genomics-cloud.readthedocs.org/en/latest/" target="_blank">Documentation</a>
+                     </li>
+                     <li class="navbar-link navbar-item">
                         <div class="dropdown">
                             <a role="button class=dropdown-toggle navbar-item__text" id="help-dropdown" data-toggle="dropdown" aria-label="Help Dropdown" aria-expanded="true">
                                 Feedback <i class="fa fa-caret-down"></i>
@@ -71,9 +66,11 @@
     {% if user.is_authenticated %}
     <nav class="nav subnav collapse" role="navigation" id="subnav">
         <ul class="container">
+            {% if user.is_authenticated %}
             <li>
-                <a href="/dashboard">DASHBOARD</a>
+                <a href="{% url 'dashboard' %}">DASHBOARD</a>
             </li>
+            {%  endif %}
             <li class="menu-item has-drop-down">
                 <a>WORKBOOKS <i class="fa fa-caret-down"></i></a>
                 <ul class="sub-menu drop">
@@ -82,13 +79,13 @@
                         <strong>Recent</strong>
                         <ul class="item-list">
                             {% for wlv in user|get_workbooks_this_user|slice:':5' %}
-                            <li class="menu-item"><a href="{% url 'workbook_detail' wlv.id %}">{{ wlv.name|shorter }}</a></li>
+                            <li class="menu-item" title="{{ wlv.name|wrap_text }}"><a class="inline-block" href="{% url 'workbook_detail' wlv.id %}">{{ wlv.name }}</a></li>
                             {% endfor %}
                             {% if user|get_workbooks_this_user|length > 5 %}
                             <li class="menu-item has-drop-down__more"> More
                                 <ul class="drop">
                                     {% for wlv in user|get_workbooks_this_user|slice:'5:' %}
-                                    <li class="menu-item"><a href="{% url 'workbook_detail' wlv.id %}">{{ wlv.name|shorter }}</a></li>
+                                    <li class="menu-item" title="{{ wlv.name|wrap_text }}"><a class="inline-block" href="{% url 'workbook_detail' wlv.id %}">{{ wlv.name }}</a></li>
                                     {% endfor %}
                                 </ul>
                             </li>
@@ -119,7 +116,7 @@
                                 <form action="{% url 'worksheet_create_with_projects' %}" method="POST">
                                     {% csrf_token %}
                                     <input type="hidden" name="project_id" value="{{ plv.id }}">
-                                    <button type="submit">{{ plv.name|shorter }}</button>
+                                    <button type="submit" title="{{ plv.name|wrap_text }}">{{ plv.name }}</button>
                                 </form>
                             </li>
                             {% endfor %}
@@ -131,7 +128,7 @@
                                         <form action="{% url 'worksheet_create_with_projects' %}">
                                             {% csrf_token %}
                                             <input type="hidden" name="project_id" value="{{ plv.id }}">
-                                            <button type="submit">{{ plv.name|shorter }}</button>
+                                            <button type="submit" title="{{ plv.name|wrap_text }}">{{ plv.name }}</button>
                                         </form>
                                     </li>
                                     {% endfor %}
@@ -219,7 +216,7 @@
                                 <form action="{% url 'worksheet_create_with_genes' %}" method="POST">
                                     {% csrf_token %}
                                     <input type="hidden" name="gene_list_id" value="{{ gflv.id }}">
-                                    <button type="submit">{{ gflv.name|shorter }}</button>
+                                    <button type="submit" title="{{ gflv.name|wrap_text }}">{{ gflv.name }}</button>
                                 </form>
                             </li>
                             {% endfor %}
@@ -231,7 +228,7 @@
                                         <form action="{% url 'worksheet_create_with_genes' %}">
                                             {% csrf_token %}
                                             <input type="hidden" name="gene_list_id" value="{{ gflv.id }}">
-                                            <button type="submit">{{ gflv.name|shorter }}</button>
+                                            <button type="submit" title="{{ gflv.name|wrap_text }}">{{ gflv.name }}</button>
                                         </form>
                                     {% endfor %}
                                 </ul>
@@ -258,7 +255,7 @@
                                 <form action="{% url 'worksheet_create_with_variables' %}" method="POST">
                                     {% csrf_token %}
                                     <input type="hidden" name="variable_list_id" value="{{ vflv.id }}">
-                                    <button type="submit">{{ vflv.name|shorter }}</button>
+                                    <button type="submit" title="{{ vflv.name|wrap_text }}">{{ vflv.name }}</button>
                                 </form>
                             </li>
                             {% endfor %}
@@ -270,7 +267,7 @@
                                         <form action="{% url 'worksheet_create_with_variables' %}" method="POST">
                                             {% csrf_token %}
                                             <input type="hidden" name="variable_list_id" value="{{ vflv.id }}">
-                                            <button type="submit">{{ vflv.name|shorter }}</button>
+                                            <button type="submit" title="{{ vflv.name|wrap_text }}">{{ vflv.name }}</button>
                                         </form>
                                     </li>
                                     {% endfor %}
@@ -297,7 +294,7 @@
                                 <form action="{% url 'worksheet_create_with_cohort' %}" method="POST">
                                     {% csrf_token %}
                                     <input type="hidden" name="cohort_id" value="{{ clv.id}}">
-                                    <button type="submit">{{ clv.name|shorter }}</button>
+                                    <button type="submit" title="{{ clv.name|wrap_text }}">{{ clv.name }}</button>
                                 </form>
                             </li>
                             {% endfor %}
@@ -309,7 +306,7 @@
                                         <form action="{% url 'worksheet_create_with_cohort' %}" method="POST">
                                             {% csrf_token %}
                                             <input type="hidden" name="cohort_id" value="{{ clv.id}}">
-                                            <button type="submit">{{ clv.name|shorter }}</button>
+                                            <button type="submit" title="{{ clv.name|wrap_text }}">{{ clv.name }}</button>
                                         </form>
                                     </li>
                                     {% endfor %}
