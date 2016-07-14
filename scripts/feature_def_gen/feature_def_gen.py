@@ -28,6 +28,7 @@ from gnab_features import GNABFeatureDefConfig, GNABFeatureDefProvider
 from protein_features import RPPAFeatureDefConfig, RPPAFeatureDefProvider
 from methylation_features import METHFeatureDefConfig, METHFeatureDefProvider
 from copynumber_features import CNVFeatureDefConfig, CNVFeatureDefProvider
+from mirna_features import MIRNFeatureDefConfig, MIRNFeatureDefProvider
 
 from scripts.feature_def_gen.feature_def_utils import load_config_json
 
@@ -37,7 +38,8 @@ data_type_registry = {
     'gnab': (GNABFeatureDefConfig, GNABFeatureDefProvider),
     'rppa': (RPPAFeatureDefConfig, RPPAFeatureDefProvider),
     'meth': (METHFeatureDefConfig, METHFeatureDefProvider),
-    'cnv': (CNVFeatureDefConfig, CNVFeatureDefProvider)
+    'cnv': (CNVFeatureDefConfig, CNVFeatureDefProvider),
+    'mirn': (MIRNFeatureDefConfig, MIRNFeatureDefProvider)
 }
 
 
