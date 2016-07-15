@@ -64,7 +64,7 @@ require([
         tracks.push({
             sourceType: 'ga4gh',
             type: 'bam',
-            url: 'https://www.googleapis.com/genomics/v1beta2',
+            url: 'https://www.googleapis.com/genomics/v1',
             readGroupSetIds: readgroupset_id,
             name: sample_barcode + ': Google Genomics',
             referenceName: '1'
