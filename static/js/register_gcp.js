@@ -45,6 +45,14 @@ require([
 ], function($, jqueryui, bootstrap, session_security) {
     A11y.Core();
 
+    // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
+    $('.modal').on('hide.bs.modal', function() {
+        var form = $(this).find('form')[0];
+        if(form){
+            form.reset();
+        }
+    });
+
     $('#verify-gcp').on('submit', function(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -82,5 +90,9 @@ require([
             }
         });
         return false;
+    });
+
+    $('#register-gcp').on('submit', function(e) {
+        $('#verify-gcp')[0].reset();
     });
 });
