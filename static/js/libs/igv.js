@@ -12304,6 +12304,7 @@ var igv = (function (igv) {
 
         headers["Cache-Control"] = "no-cache";
         headers["Access-Control-Allow-Credentials"] = "true";
+        headers["Access-Control-Allow-Origin"] = "*";
         if (acToken) {
       //      headers["Authorization"] = "Bearer " + acToken;
         }
