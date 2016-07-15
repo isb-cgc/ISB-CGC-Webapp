@@ -44,8 +44,8 @@
                             <tr>
                                 <th></th>
                                 <th>Project Name</th>
-                                <th>Ptoject ID</th>
-                                <th>Associated BigQuery Dataset</th>
+                                <th>Project ID</th>
+{#                                <th>Associated BigQuery Dataset</th>#}
                                 <th>Registered Service Accounts</th>
                             </tr>
                         </thead>
@@ -57,14 +57,14 @@
                                         <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
                                         <ul class="dropdown-menu">
                                             <li><a href="{% url 'register_sa' user.id %}?gcp_id={{ project.project_id }}">Register Service Account</a> </li>
-{#                                            <li><a data-toggle="modal" role="button" data-target="#delete-favorite-modal-{{ favorite.id }}" >Delete</a></li>#}
+                                            <li><a data-toggle="modal" role="button" data-target="#delete-project-modal-{{ project.id }}" >Unregister Project</a></li>
 {#                                            <li><a data-toggle="modal" role="button" data-target="#new-favorite-workbook-modal-{{ favorite.id }}" >Start New Workbook</a></li>#}
                                         </ul>
                                         </div>
                                     </td>
                                     <td>{{ project.project_name }}</td>
                                     <td>{{ project.project_id }}</td>
-                                    <td>{% if project.big_query_dataset %}{{ project.big_query_dataset }}{% else %}N/A{% endif %}</td>
+{#                                    <td>{% if project.big_query_dataset %}{{ project.big_query_dataset }}{% else %}N/A{% endif %}</td>#}
                                     <td>
                                         {% if project.serviceaccount_set.all|length > 0 %}
                                         <a role="button" class="show-service-accounts" data-target="{{ project.id }}-expander"><i class="fa fa-caret-right"></i> {{ project.serviceaccount_set.all|length }}</a>
@@ -72,6 +72,7 @@
                                         {{ project.serviceaccount_set.all|length }}
                                         {% endif %}
                                     </td>
+                                {% include "GenespotRE/user_gcp_list_modals.html" with project=project %}
                                 </tr>
 
                                     <tr class="{{ project.id }}-expander" style="display:none;">
@@ -84,6 +85,7 @@
                                                     <tr>
                                                         <th>Service Account</th>
                                                         <th>Authorized Dataset</th>
+                                                        <th></th>
                                                     </tr>
                                                     </thead>
                                                     <tbody>
@@ -91,6 +93,7 @@
                                                     <tr>
                                                         <td>{{ service_account.service_account }}</td>
                                                         <td>{{ service_account.authorized_dataset.name }}</td>
+                                                        <td><a data-toggle="modal" role="button" data-target="#delete-sa-modal-{{ service_account.id }}"><i class="fa fa-trash"></i></a></td>
                                                     </tr>
                                                     {% endfor %}
                                                     </tbody>

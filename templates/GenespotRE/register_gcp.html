@@ -49,11 +49,11 @@
                             <input id="verify-gcp-id" name="gcp-id" type="text" class="form-control" placeholder="Google Cloud Project ID" required="required"/>
                         </li>
                         <li>Go to your <a href="https://console.cloud.google.com/home/dashboard" target="_blank">Google Cloud Project</a>.</li>
-                        <li>Select the hamburger menu in the top left corner.</li>
-                        <li>Select IAM & Admin</li>
-                        <li>Click +Add Member</li>
-                        <li>Paste <code>[service account]</code> in the text box.</li>
-                        <li>In the Role selection, choose Project > Viewer.</li>
+                        <li>Select the hamburger menu in the top left corner. <img src="{% static 'img/select-hamburger.png' %}" alt="Select Hamburger Menu" width="25%"/></li>
+                        <li>Select IAM & Admin. <img src="{% static 'img/select-iam.png' %}" alt="Select IAM & Admin Menu Item" width="25%"/></li>
+                        <li>Click + Add Member. </li>
+                        <li>Paste <code>[service account]</code> in the text box. <img src="{% static 'img/add-members.png' %}" alt="Add Member Modal Window" width="50%"/></li>
+                        <li>In the Role selection, choose Project > Viewer. <img src="{% static 'img/select-role.png' %}" alt="Select Project Viewer" width="50%"/></li>
                     </ul>
                     <br>
                     Once complete, click <input class="btn btn-default" type="submit" value="here" /> to verify that it worked.

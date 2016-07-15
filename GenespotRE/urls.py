@@ -34,13 +34,6 @@ urlpatterns = [
     url(r'^users/$', views.user_list, name='users'),
     url(r'^users/(?P<user_id>\d+)/$', views.user_detail, name='user_detail'),
 
-    # Google Cloud Project related
-    url(r'^users/(?P<user_id>\d+)/gcp_list/$', views.user_gcp_list, name='user_gcp_list'),
-    url(r'^users/(?P<user_id>\d+)/register_gcp/$', views.register_gcp, name='register_gcp'),
-    url(r'^users/(?P<user_id>\d+)/verify_gcp/$', views.verify_gcp, name='verify_gcp'),
-    url(r'^users/(?P<user_id>\d+)/register_sa/$', views.register_sa, name='register_sa'),
-    url(r'^users/(?P<user_id>\d+)/verify_sa/$', views.verify_sa, name='verify_sa'),
-
     url(r'^bucket_object_list/$', views.bucket_object_list, name='bucket_object_list'),
     url(r'^igv/$', views.igv, name='igv'),
 
