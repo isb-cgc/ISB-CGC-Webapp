@@ -12303,6 +12303,7 @@ var igv = (function (igv) {
             acToken = oauth.google.access_token;
 
         headers["Cache-Control"] = "no-cache";
+        headers["Access-Control-Allow-Credentials"] = "true";
         if (acToken) {
       //      headers["Authorization"] = "Bearer " + acToken;
         }
