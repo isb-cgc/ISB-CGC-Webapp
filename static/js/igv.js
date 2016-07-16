@@ -94,7 +94,8 @@ require([
         showNavigation: true,
         genome: "hg19",
         locus: "egfr",
-        tracks: tracks
+        tracks: tracks,
+        withCredentials: true
     };
     $('#igv-div').empty();
     igv.browser = null;
