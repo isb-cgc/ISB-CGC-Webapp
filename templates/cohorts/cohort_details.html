@@ -172,45 +172,6 @@
                         {% endfor %}
                     </ul>
                 </div>
-{#                <!-- molecular filters tab -->#}
-{#                <div role="tabpanel" class="tab-pane" id="molecular-filters">#}
-{#                    <div class="panel-group" id="molecular-accordion" role="tablist" aria-multiselectable="true">#}
-{#                        {% for attr in molec_attr %}#}
-{#                            <div class="panel panel-default">#}
-{#                                <a role="button" data-toggle="collapse" data-parent="#clin-accordion" href="#collapse-{{ attr }}" aria-expanded="true" aria-controls="collapse-{{ attr }}">#}
-{#                                    <div class="panel-heading" role="tab" id="heading-{{ attr }}"><i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ attr|get_readable_name }}</div>#}
-{#                                </a>#}
-{#                                <div id="collapse-{{ attr }}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-{{ attr }}">#}
-{#                                    <div class="panel-body">#}
-{#                                        <ul class="search-checkbox-list" id="{{ attr }}">#}
-{#                                            <form action="" method="GET" class="form-horizontal" id="{{ attr }}-form">#}
-{#                                                <div class="form-group">#}
-{#                                                    <div class="col-sm-3"><label for="{{ attr }}-genes" class="control-label">Gene:</label></div>#}
-{#                                                    <div class="col-md-5">#}
-{#                                                        <input class="form-control" type="text" id="{{ attr }}-genes" name="gene">#}
-{#                                                    </div>#}
-{##}
-{#                                                </div>#}
-{#                                                {% if attr == 'mRNA_expression' %}#}
-{#                                                <ul>#}
-{#                                                    <li>#}
-{#                                                    <!--<input type="checkbox" name="RPKM" id="RPKM-check">-->#}
-{#                                                    <label for="RPKM-check">RPKM</label>#}
-{#                                                    </li>#}
-{#                                                    <li>#}
-{#                                                    <!--<input type="checkbox" name="normalized_count" id="normalized_count-check">-->#}
-{#                                                    <label for="normalized_count-check">normalized count</label>#}
-{#                                                    </li>#}
-{#                                                </ul>#}
-{#                                                {% endif %}#}
-{#                                            </form>#}
-{#                                        </ul>#}
-{#                                    </div>#}
-{#                                </div>#}
-{#                            </div>#}
-{#                        {% endfor %}#}
-{#                    </div>#}
-{#                </div>#}
             </div>
         </div>
     </div>

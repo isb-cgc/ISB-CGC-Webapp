@@ -22,9 +22,55 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
     var tree_graph_obj = Object.create(tree_graph, {});
     var parsets_obj = Object.create(draw_parsets, {});
 
+    var clin_tree_attr = [
+        'Study',
+        'vital_status',
+        'SampleTypeCode',
+        'tumor_tissue_site',
+        'gender',
+        'age_at_initial_pathologic_diagnosis'
+    ];
+
     return  {
 
-        update_counts_parsets_direct: function() {
+        filter_data_for_clin_trees: function(attr_counts) {
+            var filtered_clin_trees = {};
+            var attr_counts_clin_trees = null;
+            var filters = this.format_filters();
+            var clin_tree_attr_map = {};
+
+            clin_tree_attr.map(function(attr){
+                clin_tree_attr_map[attr] = 1;
+            });
+            for(var i=0;i<filters.length;i++) {
+                var fname = filters[i].key.split(/:/)[1];
+                if(clin_tree_attr_map[fname]) {
+                    if(!filtered_clin_trees[fname]) {
+                        filtered_clin_trees[fname] = {};
+                    }
+                    filtered_clin_trees[fname][filters[i].value] = 1;
+                }
+            }
+            if(Object.keys(filtered_clin_trees).length > 0) {
+                attr_counts_clin_trees = JSON.parse(JSON.stringify(attr_counts));
+                for(var i=0; i < attr_counts_clin_trees.length; i++) {
+                    if(filtered_clin_trees[attr_counts_clin_trees[i].name]) {
+                        attr_counts_clin_trees[i].total = 0;
+                        var new_values = [];
+                        for(var j=0; j < attr_counts_clin_trees[i].values.length; j++) {
+                            if(filtered_clin_trees[attr_counts_clin_trees[i].name][attr_counts_clin_trees[i].values[j].value]) {
+                                new_values.push(attr_counts_clin_trees[i].values[j]);
+                                attr_counts_clin_trees[i].total += attr_counts_clin_trees[i].values[j].count;
+                            }
+                        }
+                        attr_counts_clin_trees[i].values = new_values;
+                    }
+                }
+            }
+            return attr_counts_clin_trees;
+        },
+
+        update_counts_parsets_direct: function(filters) {
 
             $('.clinical-trees .spinner').show();
             $('.parallel-sets .spinner').show();
@@ -39,7 +85,12 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             $('#total-participants').html(metadata_counts['participants']);
 
             this.update_filter_counts(attr_counts);
-            tree_graph_obj.draw_trees(attr_counts);
+            // If there were filters, we need to adjust their counts so the barchart reflects what
+            // was actually filtered
+            var filters = this.format_filters();
+            var clin_tree_attr_counts = filters.length > 0 ? this.filter_data_for_clin_trees(attr_counts) : attr_counts;
+
+            tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr);
 
             if (metadata_counts.hasOwnProperty('items')) {
                 var features = [
@@ -103,7 +154,10 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                     $('#total-samples').html(results['total']);
                     $('#total-participants').html(results['participants']);
                     update_filters(attr_counts);
-                    tree_graph_obj.draw_trees(attr_counts);
+
+                    var attr_counts_clin_trees = filters.length > 0 ? context.filter_data_for_clin_trees(attr_counts) : attr_counts;
+
+                    tree_graph_obj.draw_trees(attr_counts_clin_trees,clin_tree_attr);
                     
                     if (results.hasOwnProperty('items')) {
                         var features = [

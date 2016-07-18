@@ -93,7 +93,7 @@ function($, d3, d3tip, vis_helpers) {
 
             svg.call(tip);
         },
-        draw_trees: function(data) {
+        draw_trees: function(data,clin_attr) {
 
             var startPlot = new Date().getTime();
 
@@ -101,14 +101,6 @@ function($, d3, d3tip, vis_helpers) {
                 h = 140;
 
             $('#tree-graph-clinical').empty();
-            var clin_attr = [
-                'Study',
-                'vital_status',
-                'SampleTypeCode',
-                'tumor_tissue_site',
-                'gender',
-                'age_at_initial_pathologic_diagnosis'
-            ];
 
             var clin_attr_titles = [
                 'Study',
