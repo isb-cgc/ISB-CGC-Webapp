@@ -59,7 +59,7 @@ ATTR_SPECIFIC_ORDERS = {
     'residual_tumor': ['R0','R1','R2','RX','None',],
 }
 
-NOT_TITLE_CASE = [
+NOT_CAPWORDS = [
     'pathologic_stage',
     'residual_tumor',
     'histological_type',
@@ -205,8 +205,8 @@ def get_readable_name(csv_name, attr=None):
         return TRANSLATION_DICTIONARY.get(csv_name)
     else:
         csv_name = csv_name.replace('_', ' ')
-        # If something shouldn't be subjected to capwords add its attr name to NOT_TITLE_CASE
-        if attr not in NOT_TITLE_CASE:
+        # If something shouldn't be subjected to capwords add its attr name to NOT_CAPWORDS
+        if attr not in NOT_CAPWORDS:
             csv_name = string.capwords(csv_name)
         csv_name = csv_name.replace(' To ', ' to ')
         return csv_name
