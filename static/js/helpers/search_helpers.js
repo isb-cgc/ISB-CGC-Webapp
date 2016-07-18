@@ -354,6 +354,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                             new_count = '(' + (counts_by_name[attr].values[value] || counts_by_name[attr].values[displ_name]) + ')';
                         }
                     }
+                    // All entries which were not returned are assumed to be zero
                     if (new_count == '') {
                         new_count = '(0)';
                     }
