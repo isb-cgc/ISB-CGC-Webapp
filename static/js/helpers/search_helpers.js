@@ -67,7 +67,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                     }
                 }
             }
-            return attr_counts_clin_trees;
+            return (attr_counts_clin_trees || attr_counts);
         },
 
         update_counts_parsets_direct: function(filters) {
