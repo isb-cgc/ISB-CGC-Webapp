@@ -54,7 +54,7 @@
                             {% if plot.x_axis %}
                                 <option value="{{ plot.x_axis.url_code }}" var_id="{{ plot.x_axis.id }}" selected >{{ plot.x_axis.name }}</option>
                             {% else %}
-                                <option disabled selected>-- select a variable--</option>
+                                <option type="label" value="" disabled selected>-- select a variable --</option>
                             {% endif %}
                             {% for gene in genes %}
                                 {% if not plot or plot.x_axis.id != gene.id %}
@@ -69,7 +69,7 @@
                             {% endfor %}
                         </select>
                         <select class="x-gene-attribute-select form-control spec-select datatype-selector" style="display:none; margin-top:5px; width: 230px;">
-                            <option disabled selected>-- select a specification--</option>
+                            <option value="" type="label" disabled selected>-- select a specification --</option>
                             {% for type in datatype_list %}
                                 <option value="{{ type.datatype }}">{{ type.label}}</option>
                             {% endfor %}
@@ -101,7 +101,7 @@
 
                     <!-- Swap selection -->
                     {% if workbook.owner.id == user.id %}
-                        <button class="swap btn btn-default btn-sm inline-block space-bottom-10"><i class="fa fa-exchange fa-rotate-90"></i>Swap Values</button>
+                        <button class="swap btn btn-primary btn-sm inline-block space-bottom-10"><i class="fa fa-exchange fa-rotate-90"></i>Swap Values</button>
                     {% endif %}
 
                     <!-- Y Axis selection -->
@@ -111,7 +111,7 @@
                             {% if plot.y_axis %}
                                 <option value="{{ plot.y_axis.url_code }}" var_id="{{ plot.y_axis.id }}" selected >{{ plot.y_axis.name }}</option>
                             {% else %}
-                                <option disabled selected>-- select a variable--</option>
+                                <option type="label" value="" disabled selected>-- select a variable --</option>
                             {% endif %}
                             {% for gene in genes %}
                                 {% if not plot or plot.y_axis.id != gene.id %}
@@ -127,7 +127,7 @@
                             {% endfor %}
                         </select>
                         <select class="y-gene-attribute-select form-control spec-select datatype-selector" style="display:none; margin-top:5px; width: 230px;">
-                            <option disabled selected>-- select a specification--</option>
+                            <option type="label" value="" disabled selected>-- select a specification --</option>
                             {% for type in datatype_list %}
                                 <option value="{{ type.datatype }}">{{ type.label}}</option>
                             {% endfor %}
@@ -160,11 +160,11 @@
                     <div class="form-group color-by-group">
                         <label for="color-by">Color By Feature</label>
 {#                        <div class="color-selector filter-label label label-default" type="text" id="color-select" name="color-attr" value="{{ plot.color_by }}">{{ plot.color_by }}</div>#}
-                        <select id="color_by" {% if workbook.owner.id != user.id %} disabled {% endif %} class="form-control search-term-field" style="width: 230px;">
+                        <select class="color_by" {% if workbook.owner.id != user.id %} disabled {% endif %} class="form-control search-term-field" style="width: 230px;">
                             {% if plot.color_by %}
                                 <option value="{{ plot.color_by.url_code }}" var_id="{{ plot.color_by.id }}" selected >{{ plot.color_by.name }}</option>
                             {% else %}
-                                <option disabled selected>-- select a variable--</option>
+                                <option value="" type="label" disabled selected>-- select a variable --</option>
                             {% endif %}
                         </select>
                     </div>
@@ -176,7 +176,7 @@
                             {% if plot.gene_label %}
                                 <option value="{{ plot.gene_label }}" selected >{{ plot.gene_label }}</option>
                             {% else %}
-                                <option disabled selected>-- select a gene--</option>
+                                <option value="" type="label" disabled selected>-- select a gene --</option>
                             {% endif %}
                             {% for gene_item in genes %}
                                 {% if not plot or plot.gene_label != gene_item.gene %}
@@ -251,7 +251,7 @@
                     </div>
                     <div class="modal-footer">
                         {% csrf_token %}
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
                         <input type="submit" value="Save Cohort" class="btn btn-primary" />
                     </div>
                 </form>

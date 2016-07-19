@@ -89,7 +89,7 @@
                                         <td class="name-col"><a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a></td>
                                         <td class="sample-col">{{ cohort.num_patients }}</td>
                                         <td class="owner-col">{{ cohort.owner.email }}</td>
-                                        <td class="date-col">{{ cohort.last_date_saved|date:"SHORT_DATETIME_FORMAT" }}</td>
+                                        <td class="date-col">{{ cohort.last_date_saved|date:'M d, Y, g:i a' }}</td>
                                     </tr>
                                 {% endfor %}
                                 </tbody>
@@ -130,7 +130,7 @@
                                         </td>
                                         <td class="sample-col">{{ viz.plot_set.all|length }}</td>
                                         <td class="owner-col">{{ viz.get_owner.email }}</td>
-                                        <td class="date-col">{{ viz.last_date_saved|date:"SHORT_DATETIME_FORMAT" }}</td>
+                                        <td class="date-col">{{ viz.last_date_saved|date:'M d, Y, g:i a' }}</td>
                                     </tr>
                                 {% endfor %}
                                 </tbody>
@@ -171,7 +171,7 @@
                                         </td>
                                         <td class="sample-col">{{ viz.plot_set.all|length }}</td>
                                         <td class="owner-col">{{ viz.get_owner.email }}</td>
-                                        <td class="date-col">{{ viz.last_date_saved|date:"SHORT_DATETIME_FORMAT" }}</td>
+                                        <td class="date-col">{{ viz.last_date_saved|date:'M d, Y, g:i a' }}</td>
                                     </tr>
                                 {% endfor %}
                                 </tbody>
@@ -239,7 +239,7 @@
 
                         {% csrf_token %}
                         {% if cohorts %}
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
                             <input type="submit" value="Create Visualization" class="btn btn-primary" />
                         {% else %}
                             <button type="button" class="btn btn-primary" data-dismiss="modal">Okay</button>
@@ -312,7 +312,7 @@
                     </div>
                     <div class="modal-footer">
                         {% csrf_token %}
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary">Okay</button>
                     </div>
                 </form>
@@ -335,7 +335,7 @@
                     </div>
                     <div class="modal-footer">
                         {% csrf_token %}
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
                         <input type="submit" value="Delete" class="btn btn-primary" />
                     </div>
                 </form>
@@ -385,7 +385,7 @@
                     </div>
                     <div class="modal-footer">
                         {% csrf_token %}
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
                         <input type="submit" value="Delete Visualization" class="btn btn-primary" />
                     </div>
                 </form>

@@ -452,20 +452,20 @@ class Worksheet_variable(models.Model):
     @classmethod
     def edit_list(cls, workbook_id, worksheet_id, variable_list, user):
         workbook_owner = Workbook.objects.get(id=workbook_id).get_owner()
-        if workbook_owner.id == user.id :
+        if workbook_owner.id == user.id:
             worksheet_model = Worksheet.objects.get(id=worksheet_id)
 
             #TODO delete all then resave not the most efficient
             variables = Worksheet_variable.objects.filter(worksheet=worksheet_model)
-            for var in variables :
-                var.delete();
+            for var in variables:
+                var.delete()
 
             results = []
-            for variable in variable_list :
+            for variable in variable_list:
                 results.append(Worksheet_variable.create(worksheet=worksheet_model, variable=variable))
 
             return_obj = {
-                'variables' : results,
+                'variables': results,
             }
         else :
             return_obj = {
@@ -476,7 +476,7 @@ class Worksheet_variable(models.Model):
     @classmethod
     def create(cls, worksheet, variable):
         if type(variable) is not dict :
-            dict_variable = {'feature_id' : variable.feature_id, 'name' : variable.name, 'code' : variable.code, 'type' : variable.type}
+            dict_variable = {'feature_id': variable.feature_id, 'name': variable.name, 'code': variable.code, 'type': variable.type}
             variable = dict_variable
 
         worksheet_variable_model = cls.objects.create(worksheet_id = worksheet.id,

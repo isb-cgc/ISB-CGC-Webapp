@@ -21,7 +21,7 @@
             <form action="{% url 'worksheet_create_with_projects' %}" method="POST">
                 {% csrf_token %}
                 <input type="hidden" name="project_id" value="{{ project.id }}">
-                <button type="submit" class="btn btn-default" >New Workbook</button>
+                <button type="submit" class="btn btn-primary" >New Workbook</button>
             </form>
         </li>
         <li class="separator"></li>
@@ -80,7 +80,7 @@
                 <p>{{ study.description }}</p>
                 <dl>
                     <dt>Created</dt>
-                    <dd>{{ study.last_date_saved }}</dd>
+                    <dd>{{ study.last_date_saved|date:'M d, Y, g:i a' }}</dd>
                     <dt>Number of Files</dt>
                     <dd>{{ study.get_file_count }}</dd>
                 </dl>

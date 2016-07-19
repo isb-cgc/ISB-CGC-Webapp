@@ -24,6 +24,8 @@
                     border-top-left-radius: 3px
                 &:last-child a
                     border-top-right-radius: 3px
+                span
+                    margin-left: 10px
 
         .tab-content
             padding: 0px
@@ -157,11 +159,13 @@
         display: inline-block
 
     #multi-categorical
-        overflow-x: hidden
+        overflow-x: auto
         min-height: 100px
         svg
+            padding-left: 150px
             display: block
-
+            width: 100%
+            min-width: 900px
         .dimension
             cursor: ew-resize
         .category
@@ -231,6 +235,16 @@
         .category-0
             fill: #2196F3
             stroke: #2196F3
+    .applied-filters
+        span
+            background-color: #ceeaff
+            padding: 3px 10px 3px 10px
+            border-radius: 10px
+            margin-bottom: 5px
+            display: inline-block
+        span:hover
+            background-color: darken(#ceeaff, 10%)
+
 
 #cohort-filelist
     padding-top: 15px
@@ -242,13 +256,34 @@
     .menu-bar a.btn, .menu-bar .dropdown
         float: right
 
+    .hidden_form_value
+        display: none
+
+    .file-list
+        .alert-dismissable
+            display: none
+        #selected-files
+            height: 11em
+            border: none
+            border: none
+            -webkit-box-shadow: none
+            padding: 0
+        div.tokenfield
+            height: 11em
+            scroll: auto
+            border: none
+            -webkit-box-shadow: none
+            padding: 0
+        #selected-files-tokenfield
+            border: none
+
     #filter-panel
         .panel
             .panel-heading
                 background-color: #fff
 
             .panel-body
-                padding: 10px 10px 0px 10px
+                padding: 10px 10px 10px 10px
                 ul
                     list-style: none
                     padding-left: 10px

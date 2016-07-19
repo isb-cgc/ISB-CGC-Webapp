@@ -407,7 +407,7 @@ define(['jquery'], function($) {
                         }
                     },
                     error: function(e) {
-                        //console.log(e['responseText']);
+                        console.error("[ERROR] " + e.status + ": "+ e.statusText);
                     }
                 });
             }

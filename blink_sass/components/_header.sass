@@ -52,6 +52,15 @@ nav, .site-header
     &:hover, &:focus
       color: darken($link-color, 10%)
 
+nav.subnav li.has-drop-down__more ul.drop
+  overflow-y: auto
+  /* Allow for a slightly taller subnav dropdown if the screen is tall enough */
+  @media screen and (max-height: $screen-md-h)
+    max-height: 425px
+
+  @media screen and (min-height: $screen-lg-h)
+    max-height: 525px
+
 
 a.skip-nav
     position: absolute

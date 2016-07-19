@@ -71,6 +71,9 @@ require([
     'assetsresponsive',
     'base'
 ], function ($, plot_factory, vizhelpers) {
+
+    var savingComment = false;
+
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function () {
         var forms = $(this).find('form');
@@ -147,6 +150,14 @@ require([
 
     ////Model communications
     $('.add_worksheet_comment_form').on('submit', function (event) {
+
+        if(savingComment) {
+            event.preventDefault();
+            return false;
+        }
+
+        savingComment = true;
+
         event.preventDefault();
         var form = this;
         var workbookId = $(form).find("#workbook_id_input").val();
@@ -168,10 +179,13 @@ require([
                 var comment_count = parseInt($(form).parents('.worksheet').find('.comment-count').html());
                 $(form).parents('.worksheet').find('.comment-count').html(comment_count + 1);
                 $('.save-comment-btn').prop('disabled', true);
+
+                savingComment = false;
             },
             error: function () {
                 $('.comment-flyout .flyout-body').append('<p class="comment-content error">Fail to save comment. Please try back later.</p>');
                 form.reset()
+                savingComment = false;
             }
         });
 
@@ -249,6 +263,9 @@ require([
      */
     function get_values(selection){
         var result;
+        if(selection.attr('type') == "label") {
+            return {variable: "", type: "label"};
+        }
         if(selection.attr("type") == "common"){
             result = {variable : selection.val(), text : selection.text(), type : "common"};
         } else {
@@ -298,7 +315,7 @@ require([
                 options.each(function (i, element) {
                     var option = $(element);
                     var parent = option.parent();
-                    option.removeAttr('disabled');
+                    option.attr('type') !== "label" && option.removeAttr('disabled');
                     if ((option.attr('var_type') == 'C' && plot_settings.axis[axis_index].type == 'NUMERICAL') ||
                         (option.attr('var_type') == 'N' && plot_settings.axis[axis_index].type == 'CATEGORICAL')) {
                         option.attr('disabled','disabled');
@@ -322,7 +339,9 @@ require([
         if(data.type == "common"){
             if(data.options){
                 for(var i in data.options){
-                    variable_element.append('<option var_type="'+ data.options[i].type +'" value="' + data.options[i].value + '"> ' + data.options[i].text + '</option>');
+                    if(data.options[i].type !== "label" && variable_element.find('option[value="'+data.options[i].value+'"]').length <= 0) {
+                        variable_element.append('<option var_type="' + data.options[i].type + '" value="' + data.options[i].value + '"> ' + data.options[i].text + '</option>');
+                    }
                 }
             }
 
@@ -408,7 +427,12 @@ require([
     function x_attribute_change(self){
         $(self).parent().find(".attr-options").fadeOut();
         var attr = $(self).find(":selected").val();
-        $(self).parent().find("."+attr).fadeIn();
+        var attr_type_div = $(self).parent().find("."+attr);
+        attr_type_div.find('select').each(function(i, item) {
+            $(item).prop('selectedIndex', 0);
+        });
+        attr_type_div.find('.feature-search select option:gt(0)').remove();
+        attr_type_div.fadeIn();
     }
     $(".x-gene-attribute-select").change(function(){
         x_attribute_change(this);
@@ -422,25 +446,34 @@ require([
             var parent = $(this).parents(".main-settings");
             var x = get_values(parent.find('.x-axis-select').find(":selected"));
             var y = get_values(parent.find('.y-axis-select').find(":selected"));
-            parent.parent().find("#color_by").empty();
-            parent.parent().find("#color_by").append('<option value="" disabled selected>Please select an option</option>');
-            if (x.type == "common") {
-                parent.parent().find("#color_by").append('<option value="' + x.variable + '">' + x.text + '</option>');
-            } else {
-                parent.parent().find("#color_by").append('<option value="' + x.selection.selected + '">' + x.selection.text + '</option>');
+            parent.find(".color_by").empty();
+            parent.find(".color_by").append('<option value="" type="label" disabled selected>Please select an option</option>');
+            parent.find(".color_by").append('<option value="cohort" type="label">Cohort</option>');
+            if (x.type !== "label") {
+                if(x.type == "common") {
+                    parent.find('.color_by option[value="'+x.variable+'"]').length <= 0 &&
+                        parent.find(".color_by").append('<option value="' + x.variable + '">' + x.text + '</option>');
+                } else {
+                    parent.find('.color_by option[value="'+x.selection.selected+'"]').length <= 0 &&
+                        parent.find(".color_by").append('<option value="' + x.selection.selected + '">' + x.selection.text + '</option>');
+                }
             }
-            if (y.type == "common") {
-                parent.parent().find("#color_by").append('<option value="' + y.variable + '">' + y.text + '</option>');
-            } else {
-                parent.parent().find("#color_by").append('<option value="' + y.selection.selected + '">' + y.selection.text + '</option>');
+            if(y.type !== "label") {
+                if (y.type == "common") {
+                    parent.find('.color_by option[value="'+y.variable+'"]').length <= 0 &&
+                        parent.find(".color_by").append('<option value="' + y.variable + '">' + y.text + '</option>');
+                } else {
+                    parent.find('.color_by option[value="'+y.selection.selected+'"]').length <= 0 &&
+                        parent.find(".color_by").append('<option value="' + y.selection.selected + '">' + y.selection.text + '</option>');
+                }
             }
 
             // Append common variables as well
             var common_vars = parent.find('.x-axis-select option[type="common"]').each(function() {
                 var x = get_values($(this));
                 // Check to see that option does not already exist
-                if (parent.parent().find('#color_by option[value="' + x.variable + '"]').length == 0) {
-                    parent.parent().find("#color_by").append('<option value="' + x.variable + '">' + x.text + '</option>');
+                if (parent.find('.color_by option[value="' + x.variable + '"]').length == 0) {
+                    parent.find(".color_by").append('<option value="' + x.variable + '">' + x.text + '</option>');
                 }
             });
         }
@@ -468,7 +501,12 @@ require([
     function y_attribute_change(self){
         $(self).parent().find(".attr-options").fadeOut();
         var attr = $(self).find(":selected").val();
-        $(self).parent().find("."+attr).fadeIn();
+        var attr_type_div = $(self).parent().find("."+attr);
+        attr_type_div.find('select').each(function(i, item) {
+            $(item).prop('selectedIndex', 0);
+        });
+        attr_type_div.find('.feature-search select option:gt(0)').remove();
+        attr_type_div.fadeIn();
     }
     $(".y-gene-attribute-select").change(function(){
         y_attribute_change(this);
@@ -588,15 +626,18 @@ require([
         var parent = $(worksheet).find('.update-plot').parent();
 
         function variable_values(label){
-            var result;
-            if(parent.find('.'+label).find(":selected").attr("type") == "gene"){
-                result = {  url_code : parent.find('[variable="'+ label + '"] #search-term-select').find(":selected").val()};
-            } else {
-                result = {  url_code: parent.find('.'+label).find(":selected").val()}
+            var result = {
+                url_code: ""
+            };
+            // All placeholders should be given a type of 'label', and they will never return a url_code
+            if(parent.find('.'+label).find(":selected").attr("type") !== "label") {
+                if(parent.find('.'+label).find(":selected").attr("type") == "gene"){
+                    result = {  url_code : parent.find('[variable="'+ label + '"] #search-term-select').find(":selected").val()};
+                } else {
+                    result = {  url_code: parent.find('.'+label).find(":selected").val()}
+                }
             }
-            if (result.url_code == "-- select a variable--"){
-                result.url_code = "";
-            }
+
             return result;
         }
 
@@ -606,14 +647,14 @@ require([
             selections   : {
                 x_axis   : get_values($(worksheet).find('.x-axis-select').find(":selected")),
                 y_axis   : get_values($(worksheet).find('.y-axis-select').find(":selected")),
-                color_by : get_simple_values(parent.find('#color_by')),
+                color_by : get_simple_values(parent.find('.color_by')),
                 gene_label: get_simple_values(parent.find('#gene_label'))
             },
             attrs : {
                 type    : parent.parentsUntil(".worksheet-body").find(".plot_selection").find(":selected").text(),
                 x_axis  : variable_values('x-axis-select'),
                 y_axis  : variable_values('y-axis-select'),
-                color_by: {url_code: parent.find('#color_by').find(":selected").val()},
+                color_by: {url_code: parent.find('.color_by').find(":selected").val()},
                 cohorts: parent.find('[name="cohort-checkbox"]:checked').map(function () {
                     return {id: this.value, cohort_id: $(this).attr("cohort-id")};
                 }).get(),
@@ -721,6 +762,13 @@ require([
         var plot_selector   = '#' + plot_element.prop('id') + ' .plot-div';
         var legend_selector = '#' + plot_element.prop('id') + ' .legend';
 
+        // Set Color override
+        var color_override = false;
+        if (args.color_by = 'cohort') {
+            args.color_by = '';
+            color_override = true;
+        }
+
         plot_loader.fadeIn();
         plot_element.find('.resubmit-button').hide();
         plotFactory.generate_plot({ plot_selector    : plot_selector,
@@ -732,7 +780,7 @@ require([
                                     color_by         : args.color_by,
                                     gene_label       : args.gene_label,
                                     cohorts          : cohort_ids,
-                                    color_override   : false}, function(result){
+                                    color_override   : color_override}, function(result){
             if(result.error){
                 plot_element.find('.resubmit-button').show();
             }
@@ -758,7 +806,7 @@ require([
             apply_axis_values(plot_element.find('.y-axis-select'), plot_data.y_axis);
         }
         if(plot_data.color_by) {
-            apply_axis_values(plot_element.find('#color_by'), plot_data.color_by);
+            apply_axis_values(plot_element.find('.color_by'), plot_data.color_by);
         }
         if(plot_data.gene_label) {
             plot_element.find("#gene_label").val(plot_data.gene_label.variable);
