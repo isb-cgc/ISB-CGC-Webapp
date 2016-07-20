@@ -102,7 +102,9 @@ require([
         // be aware bootstrap tokenfield requires 'value' as the datem attribute field : https://github.com/sliptree/bootstrap-tokenfield/issues/189
         geneListField.tokenfield({
             typeahead : [
-                null, {
+                {
+                    hint: false
+                }, {
                     source: gene_suggestions.ttAdapter(),
                     display: 'value'
                 }

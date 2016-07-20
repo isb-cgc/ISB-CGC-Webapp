@@ -25,7 +25,8 @@ require.config({
             deps: ['jquery'],
             init: function ($) {
                 return require.s.contexts._.registry['typeahead.js'].factory( $ );
-            }
+            },
+            hint: false
         },
         'bloodhound': {
            deps: ['jquery'],
@@ -71,7 +72,9 @@ require([
         // be aware bootstrap tokenfield requires 'value' as the datem attribute field : https://github.com/sliptree/bootstrap-tokenfield/issues/189
         geneListField.tokenfield({
             typeahead : [
-                null, {
+                {
+                    hint: false
+                }, {
                     source: gene_suggestions.ttAdapter(),
                     display: 'value'
                 }
