@@ -29,7 +29,7 @@
 
 {% block page_header %}
     <div class="container">
-        <h1 class="page-header pull-left">Register a Service Account</h1>
+        <h1 class="page-header pull-left"><a href="{% url 'user_gcp_list' user.id %}" aria-label="Back to Project Listing"><i class="fa fa-chevron-left"></i></a> Register a Service Account</h1>
     </div>
 {% endblock %}
 
@@ -78,6 +78,8 @@
                 <li>
                     <div class="cannot-register" style="display: none;">
                         <p>Some of your users do not have access to the datasets you would like to use. Please try again when they have the proper permissions.</p>
+                        <button class="retry-btn btn btn-primary">Retry</button>
+                        <a href="{% url 'user_gcp_list' user.id %}" class="back-btn btn btn-primary" role="button">Go Back</a>
                     </div>
                     <div class="register-sa-div" style="display: none;">
                         <form id="register-sa" method="POST" action="{% url 'register_sa' user.id %}">

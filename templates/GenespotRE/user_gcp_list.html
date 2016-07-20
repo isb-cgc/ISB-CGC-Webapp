@@ -65,6 +65,7 @@
                                     <td>{{ project.project_name }}</td>
                                     <td>{{ project.project_id }}</td>
 {#                                    <td>{% if project.big_query_dataset %}{{ project.big_query_dataset }}{% else %}N/A{% endif %}</td>#}
+
                                     <td>
                                         {% if project.serviceaccount_set.all|length > 0 %}
                                         <a role="button" class="show-service-accounts" data-target="{{ project.id }}-expander"><i class="fa fa-caret-right"></i> {{ project.serviceaccount_set.all|length }}</a>
@@ -85,6 +86,8 @@
                                                     <tr>
                                                         <th>Service Account</th>
                                                         <th>Authorized Dataset</th>
+                                                        <th>Date Activated</th>
+                                                        <th>Active</th>
                                                         <th></th>
                                                     </tr>
                                                     </thead>
@@ -93,6 +96,8 @@
                                                     <tr>
                                                         <td>{{ service_account.service_account }}</td>
                                                         <td>{{ service_account.authorized_dataset.name }}</td>
+                                                        <td>{{ service_account.authorized_date|date:'M d, Y, g:i a' }}</td>
+                                                        <td>{% if service_account.active %}<i class="fa fa-check"></i>{% endif %}</td>
                                                         <td><a data-toggle="modal" role="button" data-target="#delete-sa-modal-{{ service_account.id }}"><i class="fa fa-trash"></i></a></td>
                                                     </tr>
                                                     {% endfor %}

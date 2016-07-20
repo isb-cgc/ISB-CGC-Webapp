@@ -122,4 +122,15 @@ require([
     $('#register-sa').on('submit', function(e) {
         $('#verify-sa')[0].reset();
     });
+
+    $('.retry-btn').on('click', function(e) {
+        var user_ver_div = $('.user-verification');
+        var table_body = user_ver_div.find('tbody');
+
+        $('.cannot-register').hide();
+        user_ver_div.hide();
+        table_body.empty();
+        $('#verify-sa').submit();
+    });
+
 });
