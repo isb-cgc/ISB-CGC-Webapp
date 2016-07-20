@@ -19,6 +19,7 @@ limitations under the License.
 import os
 import traceback
 import time
+import sys
 from MySQLdb import connect, cursors
 from GenespotRE import secret_settings
 from argparse import ArgumentParser
@@ -65,15 +66,13 @@ def create_study_views(project, source_table, studies):
 
             # Drop any pre-existing view definition under this name
             if cursor.fetchall()[0][0] > 0:
-                print "[WARNING] Found pre-existing view '"+view_name+"', attempting to remove it..."
+                print >> sys.stdout, "[WARNING] Found pre-existing view '"+view_name+"', attempting to remove it..."
                 cursor.execute("DROP VIEW %s;" % view_name)
                 # Double-check...
                 cursor.execute(view_check_sql, (view_name,))
                 # If it's still there, there's a problem
                 if cursor.fetchall()[0][0] > 0:
                     raise Exception("Unable to drop pre-existing view '"+view_name+"'!")
-
-            # print "Creating view '"+view_name+"'"
 
             # If project and study are the same we assume this is meant to
             # be a one-study project
@@ -88,26 +87,84 @@ def create_study_views(project, source_table, studies):
 
             cursor.execute(makeView, params)
 
-            # print "Testing creation of view '" + view_name + "'..."
-
             cursor.execute(view_check_sql, (view_name,))
             if cursor.fetchall()[0][0] <= 0:
                 raise Exception("Unable to create view '" + view_name + "'!")
 
             cursor.execute("SELECT COUNT(*) FROM %s;" % view_name)
             if cursor.fetchall()[0][0] <= 0:
-                print "Creation of view '"+view_name+"' was successful, but no entries are found in " + \
+                print >> sys.stdout, "Creation of view '"+view_name+"' was successful, but no entries are found in " + \
                     "it. Double-check the "+source_table+" table for valid entries."
             else:
-                print "Creation of view '" + view_name + "' was successful."
+                print >> sys.stdout, "Creation of view '" + view_name + "' was successful."
 
             study_names[study] = {"view_name": view_name, "project": project}
 
         return study_names
 
     except Exception as e:
-        print e
-        print traceback.format_exc()
+        print >> sys.stderr, e
+        print >> sys.stderr, traceback.format_exc()
+
+    finally:
+        if cursor: cursor.close()
+        if db and db.open: db.close()
+
+
+def bootstrap_metadata_attr_mapping():
+
+    print >> sys.stdout, "Building attribute mapping table..."
+    
+    make_mapping_table = """
+      CREATE TABLE metadata_attr_map (
+        metadata_attr_name VARCHAR(100), source_attr VARCHAR(100),coalesced_attr VARCHAR(100),
+        CONSTRAINT u_attrSrcCoal UNIQUE (metadata_attr_name,source_attr,coalesced_attr)
+      );
+    """
+
+    insert_mapping_vals = """
+        INSERT INTO metadata_attr_map (metadata_attr_name,source_attr,coalesced_attr) VALUES(%s,%s,%s);
+    """
+
+    test_map_creation = """
+        SELECT * FROM metadata_attr_map;
+    """
+
+    value_maps = [
+        ('tumor_tissue_site', 'central_nervous_system', 'Central nervous system',),
+        ('histological_type', 'leiomyosarcoma', 'Leiomyosarcoma (LMS)',),
+        ('histological_type', 'medullary_carcinoma', 'Medullary Carcinoma',),
+        ('histological_type', 'metaplastic_carcinoma', 'Metaplastic Carcinoma',),
+    ]
+
+    db = get_mysql_connection()
+    cursor = db.cursor()
+
+    try:
+        cursor.execute(make_mapping_table)
+        db.commit()
+
+        for map in value_maps:
+            cursor.execute(insert_mapping_vals,map)
+
+        db.commit()
+
+        cursor.execute(test_map_creation)
+
+        entries = 0
+
+        for row in cursor.fetchall():
+            entries += 1
+
+        if entries <= 0:
+            raise Exception("metadata_attr mapping not successfully generated!")
+        else:
+            print >> sys.stdout, "metadata_attr mapping table successfully generated."
+
+
+    except Exception as e:
+        print >> sys.stderr, e
+        print >> sys.stderr, traceback.format_exc()
 
     finally:
         if cursor: cursor.close()
@@ -220,19 +277,19 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
 
         if study_udt_count == study_count == metadata_samples_study_count:
             if study_udt_count <= 0:
-                print "[ERROR] No studies found! Double-check the creation script and databse settings."
+                print >> sys.stdout, "[ERROR] No studies found! Double-check the creation script and databse settings."
             else:
-                print "[STATUS] Projects and studies appear to have been created successfully: " + \
+                print >> sys.stdout, "[STATUS] Projects and studies appear to have been created successfully: " + \
                       study_count.__str__()+" studies added."
         else:
-            print "[WARNING] Unequal number of studies between metadata_samples, projects_study, and " + \
+            print >> sys.stdout, "[WARNING] Unequal number of studies between metadata_samples, projects_study, and " + \
                     "projects_user_data_tables. projects_study: "+study_count.__str__()+", " + \
                     "projects_user_data_tables: " + study_udt_count.__str__()+", metadata_samples: " + \
                   metadata_samples_study_count.__str__()
 
     except Exception as e:
-        print e
-        print traceback.format_exc()
+        print >> sys.stderr, e
+        print >> sys.stderr, traceback.format_exc()
 
     finally:
         if cursor: cursor.close
@@ -254,6 +311,7 @@ def main():
     args = cmd_line_parser.parse_args()
 
     bootstrap_user_data_schema(args.pub_feat_table, args.bq_dataset, args.bucket_name, args.bucket_perm)
+    bootstrap_metadata_attr_mapping()
 
 if __name__ == "__main__":
     main()
