@@ -225,7 +225,13 @@ require([
     //    console.log(uploaded_list.valid);
     //})
 
-    $('form.create-gene-list').on('submit', function() {
+    $('form.create-gene-list').on('submit', function(e) {
+        // Do not allow white-space only names
+        if($('#genes-list-name').prop('value').match(/^\s*$/)) {
+            $('#genes-list-name').prop('value','');
+            e.preventDefault();
+            return false;
+        }
         $(this).find('input[type="submit"]').attr('disabled', 'disabled');
     });
 
