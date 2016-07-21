@@ -19,4 +19,4 @@ deployment:
     branch: [isb-cgc-uat]
     commands:
       - sudo -E rm -rf ./lib
-      - sudo -E ./google-cloud-sdk/bin/gcloud preview app deploy app.yaml --promote
+      - sudo -E ./google-cloud-sdk/bin/gcloud app deploy

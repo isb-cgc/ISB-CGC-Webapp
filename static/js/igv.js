@@ -64,7 +64,7 @@ require([
         tracks.push({
             sourceType: 'ga4gh',
             type: 'bam',
-            url: 'https://www.googleapis.com/genomics/v1beta2',
+            url: 'https://genomics.googleapis.com/v1',
             readGroupSetIds: readgroupset_id,
             name: sample_barcode + ': Google Genomics',
             referenceName: '1'
@@ -94,7 +94,8 @@ require([
         showNavigation: true,
         genome: "hg19",
         locus: "egfr",
-        tracks: tracks
+        tracks: tracks,
+        withCredentials: true
     };
     $('#igv-div').empty();
     igv.browser = null;

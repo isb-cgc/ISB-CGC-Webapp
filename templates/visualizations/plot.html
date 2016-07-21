@@ -48,7 +48,7 @@
                         <label for="{{ plot.id }}-x-select">X Axis Feature <a role="button" class="x-edit-field" data-attribute="x-selector" aria-label="X Field Editor"><i class="fa fa-pencil"></i></a></label>
                         <div class="x-selector filter-label label label-default" type="text" id="{{ plot.id }}-x-select" name="x-attr" value="{{ plot.x_attr }}">{{ plot.x_attr }}</div>
                     </div>
-                    <button class="swap btn btn-default inline-block space-bottom-10"><i class="fa fa-exchange fa-rotate-90"></i> Swap Values</button>
+                    <button class="swap btn btn-primary inline-block space-bottom-10"><i class="fa fa-exchange fa-rotate-90"></i> Swap Values</button>
 
                     <div class="form-group">
                         <label for="{{ plot.id }}-y-select">Y Axis Feature <a role="button" class="y-edit-field" data-attribute="y-selector" aria-label="Y Field Editor"><i class="fa fa-pencil"></i></a></label>
@@ -120,7 +120,7 @@
                         {% endif %}
                     {% endfor %}
 
-                    <button class="close-field-search btn btn-default space-top-15">Cancel</button>
+                    <button class="close-field-search btn btn-primary space-top-15">Cancel</button>
                     <button class="select-field btn btn-primary space-top-15" data-value="" data-label="">Select Feature</button>
                 </div>
 
@@ -190,7 +190,7 @@
                     </div>
                     <div class="modal-footer">
                         {% csrf_token %}
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
                         <input type="submit" value="Save Cohort" class="btn btn-primary" />
                     </div>
                 </form>
@@ -216,7 +216,7 @@
                     </div>
                     <div class="modal-footer">
                         {% csrf_token %}
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
 {#                        {% if viz and viz.user.id != request.user.id %}#}
 {#                            <input type="submit" value="Clone Visualization" class="btn btn-primary" />#}
 {#                        {% else %}#}
