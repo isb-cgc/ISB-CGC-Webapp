@@ -26,6 +26,8 @@
 {% block page_name %}cohort-details{% endblock %}
 
 {% block page_header %}
+<link type="text/css" rel="stylesheet" href="{% static 'css/token-typeahead.css' %}" />
+
 <div class="container">
     {% if workbook %}
         <ol class="breadcrumb">
@@ -61,6 +63,7 @@
                 <li role="presentation" class=""><a href="#molecular-filters" role="tab" data-toggle="tab" title="Molecular Filters">Molecular</a></li>
             </ul>
             <div class="tab-content">
+                <!-- donor filters tab -->
                 <div role="tabpanel" class="tab-pane active" id="clinical-filters">
                     <ul class="list-group" id="clin-accordion" role="tablist" aria-multiselectable="true">
                         {% for attr in clin_attr %}
@@ -72,7 +75,7 @@
                                         </a>
                                     </div>
 
-                                    <div id="collapse-{{ attr }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" aria-labelledby="heading-{{ attr }}" data-feature-name="{{ attr }}" data-feature-id="{% if attr_list_count|get_named_item:attr|get_item:'id' %}{{ attr_list_count|get_named_item:attr|get_item:'id' }}{% endif %}">
+                                    <div id="collapse-{{ attr }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" aria-labelledby="heading-{{ attr }}" data-feature-name="{{ attr }}" data-feature-type="donor" data-feature-id="{% if attr_list_count|get_named_item:attr|get_item:'id' %}{{ attr_list_count|get_named_item:attr|get_item:'id' }}{% endif %}">
                                         <ul class="search-checkbox-list" id="{{ attr }}">
                                             {% with attr_list_count|get_named_item:attr|get_item:'values'|how_many_more:6 as num_more %}
                                                 {% for v in attr_list_count|get_named_item:attr|get_item:'values'|check_for_order:attr %}
@@ -157,8 +160,8 @@
                                 </a>
                             </div>
                             <div id="collapse-gene" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-gene">
+                                <!-- gene selector -->
                                 <div id="tokenfield-holder">
-                                    <!-- gene selector -->
                                     <textarea name="genes-list" class="form-control tokenfield" id="paste-in-genes" placeholder="Enter a gene's name" required></textarea>
                                 </div>
                                 <div class="tokenfield">
@@ -167,33 +170,40 @@
                             </div>
                         </li>
                         <li class="list-group-item">
-                        <select id="mutation-category" class="mutation-category-selector form-control spec-select datatype-selector">
-                            <option value="any" selected>Any</option>
-                            {% for cat in molecular_attr %}
-                                <option value="{{ cat.value }}">{{ cat.name }}</option>
-                            {% endfor %}
-                            <option value="specific">User Specified</option>
-                        </select>
+                        <div class="list-group-item__heading" role="tab" id="heading-sel-molecular-attr-cat">
+                            <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-sel-molecular-attr-cat" aria-expanded="false" aria-controls="collapse-sel-molecular-attr-cat" >
+                                <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> Mutation Type Categories
+                            </a>
+                        </div>
+                        <div id="collapse-sel-molecular-attr-cat" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" aria-labelledby="heading-sel-molecular-attr-cat" data-feature-name="sel-molecular-attr-cat" data-feature-type="molecular">
+                            <select id="mutation-category" class="mutation-category-selector form-control spec-select datatype-selector">
+                                <option value="any" selected>Any</option>
+                                {% for cat in molecular_attr.categories %}
+                                    <option value="{{ cat.value }}">{{ cat.name }}</option>
+                                {% endfor %}
+                                <option value="user-specified">User Specified</option>
+                            </select>
+                        </div>
                         </li>
-                        {% for attr in molecular_attr %}
-                            <li class="list-group-item">
-                                <div class="list-group-item__heading" role="tab" id="heading-{{ attr.value }}">
-                                    <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-{{ attr.value }}" aria-expanded="false" aria-controls="collapse-{{ attr.value }}" >
-                                        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ attr.name }}
-                                    </a>
-                                </div>
-                                <div id="collapse-{{ attr.value }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" aria-labelledby="heading-{{ attr.value }}" data-feature-name="{{ attr.value }}" data-feature-type="datatype">
-                                    <ul class="search-checkbox-list" id="{{ attr.value }}">
+                        <li class="list-group-item">
+                            <div class="list-group-item__heading" role="tab" id="heading-spec-molecular-attrs">
+                                <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-spec-molecular-attrs" aria-expanded="false" aria-controls="collapse-spec-molecular-attrs" >
+                                    <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> Specific Mutation Types
+                                </a>
+                            </div>
+                            <div id="collapse-spec-molecular-attrs" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" aria-labelledby="heading-spec-molecular-attrs" data-feature-name="spec-molecular-attrs" data-feature-type="molecular">
+                                <ul class="search-checkbox-list" id="{{ attr.value }}">
+                                    {% for attr in molecular_attr.attrs %}
                                         <li class="checkbox">
                                             <label>
                                                 <input class="mutation-checkbox" type="checkbox" name="elements-selected" data-value-name="{{ attr.value }}" data-displ-name="{{ attr.name }}">
-                                                {{ attr.value }} <span class="count">({{ attr.count }})</span>
+                                                {{ attr.name }} <span class="count">({{ attr.count }})</span>
                                             </label>
                                         </li>
-                                    </ul>
-                                </div>
-                            </li>
-                        {% endfor %}
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -296,7 +306,7 @@
     var base_api_url = '{{ base_api_url|safe }}';
     var cohort_id = undefined;
     var metadata_counts = {{ metadata_counts|tojson|safe }};
-    var mutation_attr = {{ mutation_attr|tojson|safe }};
+    var molecular_attr = {{ molecular_attr|tojson|safe }};
     </script>
 {% endblock %}
 

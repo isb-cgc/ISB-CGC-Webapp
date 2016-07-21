@@ -361,7 +361,6 @@
         </div>
     </div>
 
-
     <!-- Share Cohort Modal -->
     <div class="modal fade" id="share-cohort-modal" tabindex="-1" role="dialog" aria-labelledby="shareCohortModal" aria-hidden="true">
         <div class="modal-dialog">
@@ -429,7 +428,6 @@
             </div>
         </div>
     </div>
-
 
     <!-- Create Cohort Modal -->
     <div class="modal fade" id="create-cohort-modal" tabindex="-1" role="dialog" aria-labelledby="createCohortModal" aria-hidden="true">
@@ -508,7 +506,7 @@
     var base_api_url = '{{ base_api_url|safe }}';
     var cohort_id = {{ cohort.id }};
     var metadata_counts = {{ metadata_counts|tojson|safe }};
-    var mutation_attr = {{ mutation_attr|tojson|safe }};
+    var molecular_attr = {{ molecular_attr|tojson|safe }};
     </script>
 {% endblock %}
 
