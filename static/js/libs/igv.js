@@ -15752,6 +15752,12 @@ var igvxhr = (function (igvxhr) {
             // NOTE: using withCredentials with servers that return "*" for access-allowed-origin will fail
             if (withCredentials === true) {
                 xhr.withCredentials = true;
+                var headers = {},
+                    acToken = oauth.google.access_token;
+
+                if (acToken) {
+                    xhr.setRequestHeader("Authorization", "Bearer " + acToken);
+                }
             }
 
             xhr.onload = function (event) {
