@@ -33,6 +33,7 @@ urlpatterns = [
     url(r'^style_guide/', views.css_test),
     url(r'^users/$', views.user_list, name='users'),
     url(r'^users/(?P<user_id>\d+)/$', views.user_detail, name='user_detail'),
+
     url(r'^bucket_object_list/$', views.bucket_object_list, name='bucket_object_list'),
     url(r'^igv/$', views.igv, name='igv'),
 
@@ -61,5 +62,6 @@ urlpatterns = [
     url(r'^share/', include('sharing.urls')),
 ]
 
+print settings.NIH_AUTH_ON
 if settings.NIH_AUTH_ON:
     urlpatterns.append(url(r'^demo/', include('demo.urls', namespace='demo')))
