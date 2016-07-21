@@ -282,7 +282,8 @@ require([
         } else { // Checkbox unchecked
             // Remove create cohort form pill
             $('#create-cohort-form .form-control-static span').each(function() {
-                if ($(this).data('feature-id') == $this.data('create-cohort-form-item').data('feature-id') && $(this).data('value-name') == $this.data('create-cohort-form-item').data('value-name')) {
+                if ($(this).data('feature-id') == $this.data('create-cohort-form-item').data('feature-id') &&
+                    $(this).data('value-name') == $this.data('create-cohort-form-item').data('value-name')) {
                     $(this).remove();
                 }
             });
