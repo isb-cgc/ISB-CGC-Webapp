@@ -25,8 +25,8 @@ from google.appengine.api import modules, urlfetch
 from google.appengine.ext import deferred
 from googleapiclient import discovery, http
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from django.http import HttpResponse
+from django.shortcuts import render, redirect
+from django.http import HttpResponse, JsonResponse
 from django.db.models import Count
 from django.utils import formats
 from django.contrib import messages
@@ -34,14 +34,15 @@ from django.contrib.auth.models import User
 from django.conf import settings
 
 debug = settings.DEBUG
-from google_helpers.genomics_service import get_genomics_resource
+
 from google_helpers.directory_service import get_directory_resource
+from google_helpers.resourcemanager_service import get_special_crm_resource
 from googleapiclient.errors import HttpError
 from visualizations.models import SavedViz, Viz_Perms
 from cohorts.models import Cohort, Cohort_Perms
 from projects.models import Project
 from workbooks.models import Workbook
-from accounts.models import NIH_User
+from accounts.models import NIH_User, GoogleProject, AuthorizedDataset, UserAuthorizedDatasets, ServiceAccount
 
 from allauth.socialaccount.models import SocialAccount
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
@@ -176,13 +177,13 @@ def user_detail(request, user_id):
 
         return render(request, 'GenespotRE/user_detail.html',
                       {'request': request,
+                       'user': user,
                        'user_details': user_details,
                        'NIH_AUTH_ON': settings.NIH_AUTH_ON,
                        'ERA_LOGIN_URL': settings.ERA_LOGIN_URL
                        })
     else:
         return render(request, '403.html')
-
 
 @login_required
 def bucket_object_list(request):
