@@ -43,53 +43,57 @@
                         {% csrf_token %}
                         <label for="user_sa">Please enter the service account you'd like to register to this Google Cloud Project.</label>
 
-                        <input id="user_sa"type="text" name="user_sa" placeholder="Enter Service Account" class="form-control" required/>
+                        <input id="user_sa" type="text" name="user_sa" placeholder="Enter Service Account" class="form-control" required/>
                         <br>
-                        Are you going to use this service account to access controlled access? If so, which dataset?
-                        <select name="datasets" multiple="multiple" class="form-control">
-                            {% for dataset in authorized_datasets %}
-                                <option value="{{ dataset.id }}">{{ dataset.name }}</option>
-                            {% endfor %}
-                        </select>
-
+                        Are you going to use this service account to access controlled access?
+                        <div class="radio">
+                            <label><input type="radio" name="select-datasets" value="no" checked> No</label>
+                        </div>
+                        <div class="radio">
+                            <label><input type="radio" name="select-datasets" value="yes"> Yes</label>
+                        </div>
+                        <div id="datasets-select-div" style="display:none;">
+                            Which dataset(s) would you like to use?
+                            <select name="datasets" multiple="multiple" class="form-control">
+                                {% for dataset in authorized_datasets %}
+                                    <option value="{{ dataset.id }}">{{ dataset.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
                         <input type="hidden" name="gcp_id" value="{{ gcp_id }}"/>
                         <br>
-                        Click this <input type="submit" class="verify-sa-btn" value="button"/> to allow us to verify who is allowed to use this service account.
+                        Click this <input type="submit" class="verify-sa-btn btn btn-default" value="button"/> to allow us to verify who is allowed to use this service account.
                     </form>
                     <i class="fa fa-spinner fa-spin hidden load-spinner"></i>
                 </li>
-                <li>
-                    <div class="user-verification" style="display:none;">
-                        <table class="table">
-                            <thead>
-                            <tr>
-                                <th>User Email</th>
-                                <th>Registered</th>
-                                <th>Has eRA Commons</th>
-                                <th>Authorized Datasets</th>
-                            </tr>
-                            </thead>
-                            <tbody>
+                <div class="user-verification" style="display:none;">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>User Email</th>
+                            <th>Registered</th>
+                            <th>Has eRA Commons</th>
+                            <th>Authorized Datasets</th>
+                        </tr>
+                        </thead>
+                        <tbody>
 
-                            </tbody>
-                        </table>
-                    </div>
-                </li>
-                <li>
-                    <div class="cannot-register" style="display: none;">
-                        <p>Some of your users do not have access to the datasets you would like to use. Please try again when they have the proper permissions.</p>
-                        <button class="retry-btn btn btn-primary">Retry</button>
-                        <a href="{% url 'user_gcp_list' user.id %}" class="back-btn btn btn-primary" role="button">Go Back</a>
-                    </div>
-                    <div class="register-sa-div" style="display: none;">
-                        <form id="register-sa" method="POST" action="{% url 'register_sa' user.id %}">
-                            {% csrf_token %}
-                            <p>We have verified that all of the users in your Google Cloud Project have permission to access the proposed datasets.</p>
-                            <input type="hidden" name="gcp_id" value="{{ gcp_id }}"/>
-                            <input type="submit" class="register-sa-btn" value="Register" />
-                        </form>
-                    </div>
-                </li>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="cannot-register" style="display: none;">
+                    <p>Some of your users do not have access to the datasets you would like to use. Please try again when they have the proper permissions.</p>
+                    <button class="retry-btn btn btn-primary">Retry</button>
+                    <a href="{% url 'user_gcp_list' user.id %}" class="back-btn btn btn-primary" role="button">Go Back</a>
+                </div>
+                <div class="register-sa-div" style="display: none;">
+                    <form id="register-sa" method="POST" action="{% url 'register_sa' user.id %}">
+                        {% csrf_token %}
+                        <p>We have verified that all of the users in your Google Cloud Project have permission to access the proposed datasets.</p>
+                        <input type="hidden" name="gcp_id" value="{{ gcp_id }}"/>
+                        <input type="submit" class="register-sa-btn btn btn-default" value="Register" />
+                    </form>
+                </div>
             </ul>
         </div>
     </div>
