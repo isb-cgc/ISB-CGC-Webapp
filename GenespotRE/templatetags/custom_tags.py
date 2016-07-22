@@ -118,7 +118,7 @@ TRANSLATION_DICTIONARY = {
     'user_projects': 'Your Projects',
     'user_studys': 'Your Studies',
     'SNP_CN': 'SNP Copy Number',
-    'miRNA_sequencing': 'miRNA SEQUENCING'
+    'miRNA_sequencing': 'miRNA SEQUENCING',
 }
 
 DISEASE_DICTIONARY = {

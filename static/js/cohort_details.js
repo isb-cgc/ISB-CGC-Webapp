@@ -107,11 +107,16 @@ require([
 
             if (feature.data('feature-type') == 'datatype') { // Datatype feature
                 var feature_value = value.data('value-name').split('-');
+
+                tokenFeatDisplName = 'SAMP:' + feature_value[0];
+                tokenValDisplName = feature_value[1];
+
                 if (feature_value[1] == 'True') {
                     feature_value[1] = 1;
                 } else {
                     feature_value[1] = 0;
                 }
+
                 var token = $('<span>').data({
                     'feature-id'   : 'SAMP:' + feature_value[0],
                     'feature-name' : feature_value[0],
