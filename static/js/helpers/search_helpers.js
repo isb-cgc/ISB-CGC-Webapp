@@ -330,15 +330,17 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
 
             counts_by_name = {};
 
-            for(var i=0; i < counts.length; i++) {
-                counts_by_name[counts[i].name] = {
+            // Convert the array into a map for easier searching
+            counts.map(function(obj){
+                counts_by_name[obj.name] = {
                     values: {},
-                    total: counts[i].total
-                };
-                for(var k=0; k < counts[i].values.length; k++) {
-                    counts_by_name[counts[i].name].values[counts[i].values[k].value] =  counts[i].values[k].count
+                    total: obj.total
                 }
-            }
+                var values = counts_by_name[obj.name].values;
+                obj.values.map(function(val){
+                    values[val.value] = val.count;
+                });
+            });
 
             $('#filter-panel li.list-group-item div.cohort-feature-select-block').each(function() {
                 var $this = $(this),
@@ -355,6 +357,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                             new_count = '(' + (counts_by_name[attr].values[value] || counts_by_name[attr].values[displ_name]) + ')';
                         }
                     }
+                    // All entries which were not returned are assumed to be zero
                     if (new_count == '') {
                         new_count = '(0)';
                     }

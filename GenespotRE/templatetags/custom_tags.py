@@ -59,6 +59,12 @@ ATTR_SPECIFIC_ORDERS = {
     'residual_tumor': ['R0','R1','R2','RX','None',],
 }
 
+NOT_CAPWORDS = [
+    'pathologic_stage',
+    'residual_tumor',
+    'histological_type',
+]
+
 ALPHANUM_SORT = [
     'neoplasm_histologic_grade',
     'icd_10',
@@ -112,7 +118,7 @@ TRANSLATION_DICTIONARY = {
     'user_projects': 'Your Projects',
     'user_studys': 'Your Studies',
     'SNP_CN': 'SNP Copy Number',
-    'miRNA_sequencing': 'miRNA SEQUENCING'
+    'miRNA_sequencing': 'miRNA SEQUENCING',
 }
 
 DISEASE_DICTIONARY = {
@@ -199,8 +205,8 @@ def get_readable_name(csv_name, attr=None):
         return TRANSLATION_DICTIONARY.get(csv_name)
     else:
         csv_name = csv_name.replace('_', ' ')
-        # Do not convert the Roman numerals in the stages
-        if attr is not 'pathologic_stage' and attr is not 'residual_tumor' and attr is not 'prior_dx':
+        # If something shouldn't be subjected to capwords add its attr name to NOT_CAPWORDS
+        if attr not in NOT_CAPWORDS:
             csv_name = string.capwords(csv_name)
         csv_name = csv_name.replace(' To ', ' to ')
         return csv_name
