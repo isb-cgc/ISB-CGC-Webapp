@@ -101,8 +101,8 @@ require([
 
             var tokenValDisplName = (value.data('value-displ-name') && value.data('value-displ-name').length > 0) ?
                 value.data('value-displ-name') : (value.data('value-name') == 'None' ? 'NA' : value.data('value-name')),
-                tokenFeatDisplName = (feature.data('feature-displ-name') && feature.data('feature-displ-name').length > 0) ?
-                    feature.data('feature-displ-name') : feature.data('feature-name');
+                tokenFeatDisplName = /*(feature.data('feature-displ-name') && feature.data('feature-displ-name').length > 0) ?
+                    feature.data('feature-displ-name') :*/ feature.data('feature-name');
 
 
             if (feature.data('feature-type') == 'datatype') { // Datatype feature
