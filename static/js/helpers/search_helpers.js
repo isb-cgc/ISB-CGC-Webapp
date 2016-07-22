@@ -140,9 +140,12 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             $('.parallel-sets .spinner').show();
             $('.cohort-info .total-values').hide();
             $('.cohort-info .spinner').show();
+
+            $('button[data-target="#apply-filters-modal"]').prop('disabled',true);
+            $('#apply-filters-form input[type="submit"]').prop('disabled',true);
             
             var startReq = new Date().getTime();
-            $.ajax({
+            return $.ajax({
                 type: 'GET',
                 url: api_url,
 

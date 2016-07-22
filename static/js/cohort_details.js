@@ -86,8 +86,9 @@ require([
         (update_displays_thread !== null) && clearTimeout(update_displays_thread);
 
         update_displays_thread = setTimeout(function(){
-            search_helper_obj.update_counts_parsets(base_url, 'metadata_counts_platform_list', cohort_id, 'v2');
-            !withoutCheckChanges && check_changes();
+            search_helper_obj.update_counts_parsets(base_url, 'metadata_counts_platform_list', cohort_id, 'v2').then(
+                function(){!withoutCheckChanges && check_changes();}
+            );
         },SUBSEQUENT_DELAY);
     };
 
@@ -344,6 +345,21 @@ require([
         return false;
     });
 
+    // Disable save changes if no change to title or no added filters
+    var original_title = $('#edit-cohort-name').val();
+    var save_changes_btn_modal = $('#apply-filters-form input[type="submit"]');
+    var save_changes_btn = $('button[data-target="#apply-filters-modal"]');
+    var check_changes = function() {
+        if ($('#edit-cohort-name').val() != original_title || $('.selected-filters span').length > 0) {
+            save_changes_btn.prop('disabled', false)
+            save_changes_btn_modal.prop('disabled',false);
+        } else {
+            save_changes_btn.prop('disabled', true)
+            save_changes_btn_modal.prop('disabled',true);
+        }
+    };
+
+
     // If this is a new cohort, set TCGA Project selected as default
     if (window.location.pathname.indexOf('new_cohort') >= 0
         || window.location.pathname.match(/cohorts\/workbook\/\d+\/worksheet\/\d+\/create/i) !== null
@@ -356,7 +372,7 @@ require([
             search_helper_obj.update_counts_parsets_direct();
             metadata_counts = null;
         } else {
-            update_displays(true);    
+            update_displays(true);
         }
     }
 
@@ -366,7 +382,8 @@ require([
     });
 
     $('#create-cohort-modal form').on('submit', function() {
-        $(this).find('input[type="submit"]').attr('disabled', 'disabled');
+        save_changes_btn.prop('disabled', 'disabled');
+        save_changes_btn_modal.prop('disabled', 'disabled');
     });
 
     /*
@@ -396,34 +413,21 @@ require([
         })
     });
 
-    /*
-        Disable comment button if no content
-     */
+    // Disable comment button if no content
     $('.save-comment-btn').prop('disabled', true);
     $('#comment-content').keyup(function() {
         $(this).siblings('.save-comment-btn').prop('disabled', this.value == '' ? true : false)
     })
 
-    /*
-        Disable save changes if no change to title or no added filters
-     */
-    var original_title = $('#edit-cohort-name').val();
-    var save_changes_btn = $('#apply-filters-form input[type="submit"]');
-    var check_changes = function() {
-        if ($('#edit-cohort-name').val() != original_title || $('.selected-filters span').length > 0) {
-            save_changes_btn.prop('disabled', false)
-        } else {
-            save_changes_btn.prop('disabled', true)
-        }
-    };
+    // Disable the buttons at load because no changes have been made yet
     save_changes_btn.prop('disabled', true);
+    save_changes_btn_modal.prop('disabled', true);
+
     $('#edit-cohort-name').keyup(function() {
         check_changes();
     })
 
-    /*
-        Disable Duplicate Cohort button once clicked
-     */
+    // Disable Duplicate Cohort button once clicked
     $('.clone-cohort-btn').on('click', function() {
         $(this).addClass('disabled');
     })
