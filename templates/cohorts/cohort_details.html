@@ -161,7 +161,7 @@
                                                     <!-- todo: make a custom tag for the id for data_attr attributes-->
                                                     <label>
                                                         <input type="checkbox" name="elements-selected" data-value-name="{{ v.value|get_data_attr_id:attr }}" data-displ-name="{{  v.value }}">
-                                                        {{ v.value }} <span class="count">({{ v.count }})</span>
+                                                        {% if v.value == 'None' %}NA{% else %}{{ v.value }}{% endif %} <span class="count">({{ v.count }})</span>
                                                     </label>
                                                 </li>
                                             {% endfor %}
