@@ -53,6 +53,15 @@ require([
         }
     });
 
+    $('input[name="select-datasets"]:radio').change(function() {
+        if ($('input[name="select-datasets"]:checked').val() === 'yes') {
+            $('#datasets-select-div').show();
+        } else {
+            $('#datasets-select-div').hide();
+            $('#datasets-select-div select option:selected').removeAttr('selected');
+        }
+    });
+
     $('#verify-sa').on('submit', function(e) {
         e.preventDefault();
         e.stopPropagation();
