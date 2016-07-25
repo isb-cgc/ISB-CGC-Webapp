@@ -83,8 +83,18 @@ require([
                 spinner.hide();
 
                 var register_form = $('form#register-sa');
-                register_form.append('<input type="hidden" name="user_sa" value="' + data['user_sa'] + '"/>');
-                register_form.append('<input type="hidden" name="datsets" value="' + data['datasets'] + '"/>');
+                var user_input = register_form.find('input[name="user_sa"]');
+                var dataset_input = register_form.find('input[name="datasets"]');
+                if (user_input.length === 0) {
+                    register_form.append('<input type="hidden" name="user_sa" value="' + data['user_sa'] + '"/>');
+                } else {
+                    user_input.val(data['user_sa']);
+                }
+                if (dataset_input.length === 0) {
+                    register_form.append('<input type="hidden" name="datasets" value="' + data['datasets'] + '"/>');
+                } else {
+                    dataset_input.val(data['datasets']);
+                }
 
                 var roles = data['roles'];
                 for (var role in roles) {
