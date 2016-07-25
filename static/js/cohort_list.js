@@ -294,10 +294,10 @@ require([
         },
         sortList: [[7,1]]
     });
+
     $('#public-cohort-table, #viz-table, #seqpeek-table').tablesorter({
         headers: {
-            0: {sorter:false},
-            4: {sorter:'customDate'}
+            0: {sorter:false}
         },
         sortList: [[4,1]]
     });
