@@ -99,13 +99,24 @@ require([
             var feature = $this.closest('.cohort-feature-select-block'),
                 value = $this;
 
+            var tokenValDisplName = (value.data('value-displ-name') && value.data('value-displ-name').length > 0) ?
+                value.data('value-displ-name') : (value.data('value-name') == 'None' ? 'NA' : value.data('value-name')),
+                tokenFeatDisplName = /*(feature.data('feature-displ-name') && feature.data('feature-displ-name').length > 0) ?
+                    feature.data('feature-displ-name') :*/ feature.data('feature-name');
+
+
             if (feature.data('feature-type') == 'datatype') { // Datatype feature
                 var feature_value = value.data('value-name').split('-');
+
+                tokenFeatDisplName = 'SAMP:' + feature_value[0];
+                tokenValDisplName = feature_value[1];
+
                 if (feature_value[1] == 'True') {
                     feature_value[1] = 1;
                 } else {
                     feature_value[1] = 0;
                 }
+
                 var token = $('<span>').data({
                     'feature-id'   : 'SAMP:' + feature_value[0],
                     'feature-name' : feature_value[0],
@@ -118,13 +129,13 @@ require([
                     'feature-id'   : feature.data('feature-id'),
                     'feature-name' : feature.data('feature-name'),
                     'value-id'     : value.data('value-id'),
-                    'value-name'   : value.data('value-name'),
+                    'value-name'   : value.data('value-name')
                 });
             }
 
             token.append(
                 $('<a>').addClass('delete-x filter-label label label-default')
-                    .text(feature.data('feature-name') + ': ' + value.data('value-name'))
+                    .text(tokenFeatDisplName + ': ' + tokenValDisplName)
                     .append('<i class="fa fa-times">')
             );
             
