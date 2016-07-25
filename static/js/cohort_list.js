@@ -288,35 +288,11 @@ require([
         }
     }).hide();
 
-    $.tablesorter.addParser({
-        id: 'customDate',
-        is: function(s) {
-            //return false;
-            //use the above line if you don't want table sorter to auto detected this parser
-            //21/04/2010 03:54 is the used date/time format
-            return /\d{1,2}\/\d{1,2}\/\d{1,4} \d{1,2}:\d{1,2}/.test(s);
-        },
-        format: function(s) {
-            s = s.replace(/\-/g," ");
-            s = s.replace(/:/g," ");
-            s = s.replace(/\./g," ");
-            s = s.replace(/\//g," ");
-            s = s.split(" ");
-            var ampm = s[5];
-            if (ampm == 'p') {
-                s[3] = (parseInt(s[3]) + 12).toString();
-            }
-            return $.tablesorter.formatFloat(new Date(s[2], s[0], s[1]-1, s[3], s[4]).getTime());
-        },
-        type: 'numeric'
-    });
-
     $('#cohort-table').tablesorter({
         headers: {
-            0: {sorter:false},
-            6: {sorter:'customDate'}
+            0: {sorter:false}
         },
-        sortList: [[6,1]]
+        sortList: [[7,1]]
     });
     $('#public-cohort-table, #viz-table, #seqpeek-table').tablesorter({
         headers: {
