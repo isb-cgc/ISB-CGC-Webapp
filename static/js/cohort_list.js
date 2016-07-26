@@ -288,16 +288,30 @@ require([
         }
     }).hide();
 
+    $.tablesorter.addParser({
+        id: 'fullDate',
+        is: function(s) {
+            return false;
+        },
+        format: function(s) {
+            var date = s.replace(/\./g,"");
+            return new Date(date).getTime();
+        },
+        type: 'numeric'
+    });
+
     $('#cohort-table').tablesorter({
         headers: {
-            0: {sorter:false}
+            0: {sorter:false},
+            7: {sorter: 'fullDate'}
         },
         sortList: [[7,1]]
     });
 
     $('#public-cohort-table, #viz-table, #seqpeek-table').tablesorter({
         headers: {
-            0: {sorter:false}
+            0: {sorter:false},
+            4: {sorter: 'fullDate'}
         },
         sortList: [[4,1]]
     });
