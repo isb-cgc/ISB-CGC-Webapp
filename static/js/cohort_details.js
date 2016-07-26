@@ -210,8 +210,9 @@ require([
         (update_displays_thread !== null) && clearTimeout(update_displays_thread);
 
         update_displays_thread = setTimeout(function(){
-            search_helper_obj.update_counts_parsets(base_url, 'metadata_counts_platform_list', cohort_id, 'v2');
-            !withoutCheckChanges && check_changes();
+            search_helper_obj.update_counts_parsets(base_url, 'metadata_counts_platform_list', cohort_id, 'v2').then(
+                function(){!withoutCheckChanges && check_changes();}
+            );
         },SUBSEQUENT_DELAY);
     };
 
@@ -224,14 +225,29 @@ require([
             var feature = $this.closest('.cohort-feature-select-block'),
                 value = $this;
 
+            var tokenValDisplName = (value.data('value-displ-name') && value.data('value-displ-name').length > 0) ?
+                value.data('value-displ-name') : (value.data('value-name') == 'None' ? 'NA' : value.data('value-name')),
+                tokenFeatDisplName = /*(feature.data('feature-displ-name') && feature.data('feature-displ-name').length > 0) ?
+                    feature.data('feature-displ-name') :*/ feature.data('feature-name');
+
+
             if (feature.data('feature-type') == 'datatype') { // Datatype feature
                 var feature_value = value.data('value-name').split('-');
 
-                token = $('<span>').data({
+                tokenFeatDisplName = 'SAMP:' + feature_value[0];
+                tokenValDisplName = feature_value[1];
+
+                if (feature_value[1] == 'True') {
+                    feature_value[1] = 1;
+                } else {
+                    feature_value[1] = 0;
+                }
+
+                var token = $('<span>').data({
                     'feature-id'   : 'SAMP:' + feature_value[0],
                     'feature-name' : feature_value[0],
                     'value-id'     : value.data('value-id'),
-                    'value-name'   : ((feature_value[1] === 'True') ? 1 : 0)
+                    'value-name'   : feature_value[1]
                 });
 
             } else if (feature.data('feature-type') == 'donor') { // Donor feature
@@ -239,7 +255,7 @@ require([
                     'feature-id'   : feature.data('feature-id'),
                     'feature-name' : feature.data('feature-name'),
                     'value-id'     : value.data('value-id'),
-                    'value-name'   : value.data('value-name'),
+                    'value-name'   : value.data('value-name')
                 });
             } else { // Molecular feature
                 var gene = geneListField.tokenfield('getTokens')[0];
@@ -253,10 +269,10 @@ require([
 
             token.append(
                 $('<a>').addClass('delete-x filter-label label label-default')
-                    .text(feature.data('feature-name') + ': ' + value.data('value-name'))
+                    .text(tokenFeatDisplName + ': ' + tokenValDisplName)
                     .append('<i class="fa fa-times">')
             );
-
+            
             $this.data({
                 'select-filters-item': token.clone(true),
                 'create-cohort-form-item': token.clone(true)
@@ -438,7 +454,6 @@ require([
             right: '-1px'
         }, 800);
     });
-    
     $('.hide-flyout').on('click', function() {
         $(this).parents('.fly-out').animate({
             right: '-300px'
@@ -478,6 +493,21 @@ require([
         return false;
     });
 
+    // Disable save changes if no change to title or no added filters
+    var original_title = $('#edit-cohort-name').val();
+    var save_changes_btn_modal = $('#apply-filters-form input[type="submit"]');
+    var save_changes_btn = $('button[data-target="#apply-filters-modal"]');
+    var check_changes = function() {
+        if ($('#edit-cohort-name').val() != original_title || $('.selected-filters span').length > 0) {
+            save_changes_btn.prop('disabled', false)
+            save_changes_btn_modal.prop('disabled',false);
+        } else {
+            save_changes_btn.prop('disabled', true)
+            save_changes_btn_modal.prop('disabled',true);
+        }
+    };
+
+
     // If this is a new cohort, set TCGA Project selected as default
     if (window.location.pathname.indexOf('new_cohort') >= 0
         || window.location.pathname.match(/cohorts\/workbook\/\d+\/worksheet\/\d+\/create/i) !== null
@@ -490,7 +520,7 @@ require([
             search_helper_obj.update_counts_parsets_direct();
             metadata_counts = null;
         } else {
-            update_displays(true);    
+            update_displays(true);
         }
     }
     
@@ -501,7 +531,8 @@ require([
     });
 
     $('#create-cohort-modal form').on('submit', function() {
-        $(this).find('input[type="submit"]').attr('disabled', 'disabled');
+        save_changes_btn.prop('disabled', 'disabled');
+        save_changes_btn_modal.prop('disabled', 'disabled');
     });
 
     // onClick: Remove shared user
@@ -546,6 +577,8 @@ require([
         }
     };
     save_changes_btn.prop('disabled', true);
+    save_changes_btn_modal.prop('disabled', true);
+
     $('#edit-cohort-name').keyup(function() {
         check_changes();
     })

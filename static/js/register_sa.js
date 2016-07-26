@@ -53,6 +53,15 @@ require([
         }
     });
 
+    $('input[name="select-datasets"]:radio').change(function() {
+        if ($('input[name="select-datasets"]:checked').val() === 'yes') {
+            $('#datasets-select-div').show();
+        } else {
+            $('#datasets-select-div').hide();
+            $('#datasets-select-div select option:selected').removeAttr('selected');
+        }
+    });
+
     $('#verify-sa').on('submit', function(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -62,7 +71,7 @@ require([
         var user_ver_div = $('.user-verification');
         var spinner = $this.parent('li').find('.load-spinner');
         spinner.show();
-
+        $this.find('input[type="submit"]').prop('disabled', 'disabled');
         $.ajax({
             url: $this.attr('action'),
             data: fields,
@@ -70,6 +79,7 @@ require([
             success: function(data) {
                 console.log(data);
                 var tbody = user_ver_div.find('tbody');
+                tbody.empty();
                 spinner.hide();
 
                 var register_form = $('form#register-sa');
@@ -102,7 +112,7 @@ require([
                 }
 
                 user_ver_div.show();
-
+                $this.find('input[type="submit"]').prop('disabled', '');
                 if (data['user_dataset_verified']) {
                     $('.register-sa-div').show();
                 } else {
