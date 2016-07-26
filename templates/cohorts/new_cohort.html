@@ -75,8 +75,7 @@
                                         </a>
                                     </div>
 
-                                    <div id="collapse-{{ attr }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" aria-labelledby="heading-{{ attr }}" data-feature-name="{{ attr }}" data-feature-type="donor" data-feature-id="{% if attr_list_count|get_named_item:attr|get_item:'id' %}{{ attr_list_count|get_named_item:attr|get_item:'id' }}{% endif %}">
-                                    <div id="collapse-{{ attr }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"
+                                    <div id="collapse-{{ attr }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" data-feature-type="donor"
                                          aria-labelledby="heading-{{ attr }}" data-feature-name="{{ attr }}" data-feature-displ-name="{{ attr|get_readable_name }}"
                                          data-feature-id="{% if attr_list_count|get_named_item:attr|get_item:'id' %}{{ attr_list_count|get_named_item:attr|get_item:'id' }}{% endif %}">
                                         <ul class="search-checkbox-list" id="{{ attr }}">
@@ -187,11 +186,14 @@
                                 <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> Mutation Type Categories
                             </a>
                         </div>
-                        <div id="collapse-sel-molecular-attr-cat" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" aria-labelledby="heading-sel-molecular-attr-cat" data-feature-name="sel-molecular-attr-cat" data-feature-type="molecular">
+                        <div id="collapse-sel-molecular-attr-cat" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"
+                             aria-labelledby="heading-sel-molecular-attr-cat" data-feature-displ-name="Mutation Category" data-feature-id="category"
+                             data-feature-name="mutation-category" data-feature-type="molecular">
                             <select id="mutation-category" class="mutation-category-selector form-control spec-select datatype-selector">
-                                <option value="any" selected>Any</option>
+                                <option value="label" selected disabled>-- Select a Mutation Category --</option>
+                                <option value="any" data-value-displ-name="Any" data-value-id="any">Any</option>
                                 {% for cat in molecular_attr.categories %}
-                                    <option value="{{ cat.value }}">{{ cat.name }}</option>
+                                    <option value="{{ cat.value }}" data-value-displ-name="{{ cat.name }}" data-value-id="{{ cat.value }}">{{ cat.name }}</option>
                                 {% endfor %}
                                 <option value="user-specified">User Specified</option>
                             </select>
@@ -203,12 +205,14 @@
                                     <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> Specific Mutation Types
                                 </a>
                             </div>
-                            <div id="collapse-spec-molecular-attrs" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" aria-labelledby="heading-spec-molecular-attrs" data-feature-name="spec-molecular-attrs" data-feature-type="molecular">
+                            <div id="collapse-spec-molecular-attrs" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"
+                                 aria-labelledby="heading-spec-molecular-attrs" data-feature-displ-name="Specific Mutation Type" data-feature-name="specific-mutation"
+                                 data-feature-id="specific" data-feature-type="molecular">
                                 <ul class="search-checkbox-list" id="{{ attr.value }}">
                                     {% for attr in molecular_attr.attrs %}
                                         <li class="checkbox">
                                             <label>
-                                                <input class="mutation-checkbox" type="checkbox" name="elements-selected" data-value-name="{{ attr.value }}" data-displ-name="{{ attr.name }}">
+                                                <input class="mutation-checkbox" type="checkbox" name="elements-selected" data-value-name="{{ attr.value }}" data-value-displ-name="{{ attr.name }}">
                                                 {{ attr.name }} <span class="count">({{ attr.count }})</span>
                                             </label>
                                         </li>

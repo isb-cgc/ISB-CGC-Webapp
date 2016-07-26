@@ -109,16 +109,31 @@ require([
         message_obj.prependTo('main > .container');
     };
 
-    $('#workbook-table').tablesorter({
-        headers: {
-            0: {sorter:false}
+    $.tablesorter.addParser({
+        id: 'fullDate',
+        is: function(s) {
+            return false;
         },
-        sortList: [[4,1]]
+        format: function(s) {
+            var ampm = s.match(/\s+([ap])[\.]m[\.]/)[1];
+            var date = s.split(/\s+[ap][\.]m[\.]/)[0];
+            var hour = s.match(/\s+(\d+)[:]/)[1];
+
+            if(ampm && ampm == 'p' && hour < parseInt(12)) {
+                var mdy = s.split(/\s+\d+[:]/)[0];
+                var min = s.match(/\s+\d+[:](\d+)/)[1];
+                hour = parseInt(hour) + 12;
+                date = mdy + " " + hour + ":" + min;
+            }
+            return new Date(date).getTime();
+        },
+        type: 'numeric'
     });
 
     $('#gene-list-table, #var-list-table').tablesorter({
         headers: {
-            0: {sorter:false}
+            0: {sorter:false},
+            3: {sorter: 'fullDate'}
         },
         sortList: [[3,1]]
     });

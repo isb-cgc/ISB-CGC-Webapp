@@ -92,7 +92,7 @@
                 <li role="presentation" class=""><a href="#molecular-filters" role="tab" data-toggle="tab" title="Molecular Filters">Molecular</a></li>
             </ul>
             <div class="tab-content">
-                <!-- clinical filters tab -->
+                <!-- donor filters tab -->
                 <div role="tabpanel" class="tab-pane active" id="clinical-filters">
                     <ul class="list-group" id="clin-accordion" role="tablist">
                         {% for attr in clin_attr %}
@@ -104,7 +104,7 @@
                                         </a>
                                     </div>
 
-                                    <div id="collapse-{{ attr }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"
+                                    <div id="collapse-{{ attr }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" data-feature-type="donor"
                                          aria-labelledby="heading-{{ attr }}" data-feature-name="{{ attr }}" data-feature-displ-name="{{ attr|get_readable_name }}"
                                          data-feature-id="{% if attr_list_count|get_named_item:attr|get_item:'id' %}{{ attr_list_count|get_named_item:attr|get_item:'id' }}{% endif %}">
                                         <ul class="search-checkbox-list" id="{{ attr }}">
@@ -154,7 +154,7 @@
                         {% endfor %}
                     </ul>
                 </div>
-                <!-- data filters tab -->
+                <!-- data type filters tab -->
                 <div role="tabpanel" class="tab-pane" id="data-filters">
                     <ul class="list-group" id="data-type-accordion" role="tablist" aria-multiselectable="true">
                         {% for attr in data_attr %}
@@ -205,13 +205,16 @@
                                     <textarea name="genes-list" class="form-control tokenfield" id="paste-in-genes"  placeholder="Enter a gene's name" required></textarea>
                                 </div>
                                 <div class="tokenfield">
-                                    <p class="helper-text__invalid" style="display: none;"><i class="fa fa-exclamation-circle"></i> The following <span class="token invalid">items</span>were not recognized as gene identifiers. You may either correct or delete these items -- or use them as-is.</p>
+                                    <p class="helper-text__invalid" style="display: none;"><i class="fa fa-exclamation-circle"></i>
+                                        The following <span class="token invalid">items</span>were not recognized as gene identifiers.
+                                        You may either correct or delete these items -- or use them as-is.</p>
                                 </div>
                             </div>
                         </li>
                         <li class="list-group-item">
                         <select id="mutation-category" class="mutation-category-selector form-control spec-select datatype-selector">
-                            <option value="any" selected>Any</option>
+                            <option value="label" selected disabled>-- Select a Mutation Category --</option>
+                            <option value="any">Any</option>
                             {% for cat in molecular_attr %}
                                 <option value="{{ cat.value }}">{{ cat.name }}</option>
                             {% endfor %}
