@@ -288,16 +288,39 @@ require([
         }
     }).hide();
 
+    $.tablesorter.addParser({
+        id: 'fullDate',
+        is: function(s) {
+            return false;
+        },
+        format: function(s) {
+            var ampm = s.match(/\s+([ap])[\.]m[\.]/)[1];
+            var date = s.split(/\s+[ap][\.]m[\.]/)[0];
+            var hour = s.match(/\s+(\d+)[:]/)[1];
+
+            if(ampm && ampm == 'p' && hour < parseInt(12)) {
+                var mdy = s.split(/\s+\d+[:]/)[0];
+                var min = s.match(/\s+\d+[:](\d+)/)[1];
+                hour = parseInt(hour) + 12;
+                date = mdy + " " + hour + ":" + min;
+            }
+            return new Date(date).getTime();
+        },
+        type: 'numeric'
+    });
+
     $('#cohort-table').tablesorter({
         headers: {
-            0: {sorter:false}
+            0: {sorter:false},
+            7: {sorter: 'fullDate'}
         },
         sortList: [[7,1]]
     });
 
     $('#public-cohort-table, #viz-table, #seqpeek-table').tablesorter({
         headers: {
-            0: {sorter:false}
+            0: {sorter:false},
+            4: {sorter: 'fullDate'}
         },
         sortList: [[4,1]]
     });

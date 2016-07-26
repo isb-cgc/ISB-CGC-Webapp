@@ -41,4 +41,13 @@ require([
                 form.reset();
             });
     });
+    
+    $('#workbook-table').tablesorter({
+        headers: {
+            0: {sorter:false},
+            4: {sorter: 'fullDate'}
+        },
+        sortList: [[4,1]]
+    });
+    
 });
