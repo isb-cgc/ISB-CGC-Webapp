@@ -36,47 +36,54 @@
 {% block content %}
     <div class="container">
         <div class="row">
-            <h4>To register a Google Cloud Project, please follow these instructions:</h4>
-            <form id="verify-gcp" method="GET" action="{% url 'verify_gcp' user.id %}">
-                <p>
-                    In order for the ISB-CGC to verify that all users of your Google Cloud Project have the same access
-                    rights to protected data as you do, we require that you add an ISB-CGC Service Account to your Google
-                    Cloud Project. To do so, please complete the following steps:
-                    <br>
-                    <ul>
-                        <li>
-                            <label for="verify-gcp-id">Please enter your Google Cloud Project ID: </label>
-                            <input id="verify-gcp-id" name="gcp-id" type="text" class="form-control" placeholder="Google Cloud Project ID" required="required"/>
-                        </li>
-                        <li>Go to your <a href="https://console.cloud.google.com/home/dashboard" target="_blank">Google Cloud Project</a>.</li>
-                        <li>Select the hamburger menu in the top left corner. <img src="{% static 'img/select-hamburger.png' %}" alt="Select Hamburger Menu" width="25%"/></li>
-                        <li>Select IAM & Admin. <img src="{% static 'img/select-iam.png' %}" alt="Select IAM & Admin Menu Item" width="25%"/></li>
-                        <li>Click + Add Member. </li>
-                        <li>Paste <code>907668440978-oskt05du3ao083cke14641u35deokgjj@developer.gserviceaccount.com</code> in the text box. <img src="{% static 'img/add-members.png' %}" alt="Add Member Modal Window" width="50%"/></li>
-                        <li>In the Role selection, choose Project > Viewer. <img src="{% static 'img/select-role.png' %}" alt="Select Project Viewer" width="50%"/></li>
-                    </ul>
-                    <br>
-                    Once complete, click <input class="btn btn-default" type="submit" value="here" /> to verify that it worked.
-                    <br>
+            <div class="col-lg-12 verify-error" style="display: none;">
+                <div class="alert alert-warning alert-dismissible">
+                    <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    There was an error accessing your Google Cloud Project. Please ensure that you have followed the instructions correctly and try again.
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-12 col-lg-12">
+                <h4>To register a Google Cloud Project, please follow these instructions:</h4>
+                <form id="verify-gcp" method="GET" action="{% url 'verify_gcp' user.id %}">
+                    <p>
+                        In order for the ISB-CGC to verify that all users of your Google Cloud Project have the same access
+                        rights to protected data as you do, we require that you add an ISB-CGC Service Account to your Google
+                        Cloud Project. To do so, please complete the following steps:
+                        <br>
+                        <ul>
+                            <li>
+                                <label for="verify-gcp-id">Please enter your Google Cloud Project ID: </label>
+                                <input id="verify-gcp-id" name="gcp-id" type="text" class="form-control" placeholder="Google Cloud Project ID" required="required"/>
+                            </li>
+                            <li>Go to your <a href="https://console.cloud.google.com/home/dashboard" target="_blank">Google Cloud Project</a>.</li>
+                            <li>Select the hamburger menu in the top left corner. <img src="{% static 'img/select-hamburger.png' %}" alt="Select Hamburger Menu" width="25%"/></li>
+                            <li>Select IAM & Admin. <img src="{% static 'img/select-iam.png' %}" alt="Select IAM & Admin Menu Item" width="25%"/></li>
+                            <li>Click + Add Member. </li>
+                            <li>Paste <code>907668440978-oskt05du3ao083cke14641u35deokgjj@developer.gserviceaccount.com</code> in the text box. <img src="{% static 'img/add-members.png' %}" alt="Add Member Modal Window" width="50%"/></li>
+                            <li>In the Role selection, choose Project > Viewer. <img src="{% static 'img/select-role.png' %}" alt="Select Project Viewer" width="50%"/></li>
+                        </ul>
+                        <br>
+                        Once complete, click <input class="btn btn-default" type="submit" value="here" /> to verify that it worked.
+                        <br>
+                    </p>
+                </form>
+                <form id="register-gcp-form" method="POST" action="{% url 'register_gcp' user.id %}" style="display:none;">
+                    <p>
+                        The following people are identified as members of your Google Cloud Project:
 
-                </p>
-            </form>
-            <form id="register-gcp-form" method="POST" action="{% url 'register_gcp' user.id %}" style="display:none;">
-                <p>
-                    The following people are identified as members of your Google Cloud Project:
+                        <ul class="user-list">
 
-                    <ul class="user-list">
+                        </ul>
+                        <br>
+                        Users listed with a <i class="fa fa-check"></i> will have this Google Cloud Project registered under
+                        their account as well, if not already done. Users without a <i class="fa fa-check"></i> will have to
+                        register this project themselves.
 
-                    </ul>
-                    <br>
-                    Users listed with a <i class="fa fa-check"></i> will have this Google Cloud Project registered under
-                    their account as well, if not already done. Users without a <i class="fa fa-check"></i> will have to
-                    register this project themselves.
-
-                </p>
-                <input class="btn btn-primary" type="submit" value="Register"/>
-                {% csrf_token %}
-            </form>
+                    </p>
+                    <input class="btn btn-primary" type="submit" value="Register"/>
+                    {% csrf_token %}
+                </form>
+            </div>
         </div>
     </div>
 {% endblock %}
