@@ -109,16 +109,22 @@ require([
         message_obj.prependTo('main > .container');
     };
 
-    $('#workbook-table').tablesorter({
-        headers: {
-            0: {sorter:false}
+    $.tablesorter.addParser({
+        id: 'fullDate',
+        is: function(s) {
+            return false;
         },
-        sortList: [[4,1]]
+        format: function(s) {
+            var date = s.replace(/\./g,"");
+            return new Date(date).getTime();
+        },
+        type: 'numeric'
     });
 
     $('#gene-list-table, #var-list-table').tablesorter({
         headers: {
-            0: {sorter:false}
+            0: {sorter:false},
+            3: {sorter: 'fullDate'}
         },
         sortList: [[3,1]]
     });
