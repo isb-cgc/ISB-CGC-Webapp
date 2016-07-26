@@ -115,7 +115,7 @@ require([
             return false;
         },
         format: function(s) {
-            var date = s.replace("a.m.","am").replace("p.m.","pm");
+            var date = s.replace(/\./g,"");
             return new Date(date).getTime();
         },
         type: 'numeric'
