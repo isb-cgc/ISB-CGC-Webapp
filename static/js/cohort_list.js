@@ -294,16 +294,7 @@ require([
             return false;
         },
         format: function(s) {
-            var ampm = s.match(/\s+([ap])[\.]m[\.]/)[1];
-            var date = s.split(/\s+[ap][\.]m[\.]/)[0];
-            var hour = s.match(/\s+(\d+)[:]/)[1];
-
-            if(ampm && ampm == 'p' && hour < parseInt(12)) {
-                var mdy = s.split(/\s+\d+[:]/)[0];
-                var min = s.match(/\s+\d+[:](\d+)/)[1];
-                hour = parseInt(hour) + 12;
-                date = mdy + " " + hour + ":" + min;
-            }
+            var date = s.replace("a.m.","am").replace("p.m.","pm");
             return new Date(date).getTime();
         },
         type: 'numeric'
