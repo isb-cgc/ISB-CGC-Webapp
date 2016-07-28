@@ -16,6 +16,7 @@ limitations under the License.
 """
 
 # from django import template
+import sys
 import string
 import json
 import re
@@ -30,6 +31,7 @@ from workbooks.models import Workbook
 DATA_ATTR_DICTIONARY = {
     'DNA_sequencing-True': 'has_Illumina_DNASeq-True',
     'DNA_sequencing-False': 'has_Illumina_DNASeq-False',
+    'DNA_sequencing-None': 'has_Illumina_DNASeq-None',
 
     'RNA_sequencing-UNC Illumina HiSeq': 'has_UNC_HiSeq_RNASeq-True',
     'RNA_sequencing-BCGSC Illumina HiSeq': 'has_BCGSC_HiSeq_RNASeq-True',
@@ -41,9 +43,11 @@ DATA_ATTR_DICTIONARY = {
 
     'Protein-False': 'has_RPPA-False',
     'Protein-True': 'has_RPPA-True',
+    'Protein-None': 'has_RPPA-None',
 
     'SNP_CN-True': 'has_SNP6-True',
     'SNP_CN-False': 'has_SNP6-False',
+    'SNP_CN-None': 'has_SNP6-None',
 
     'DNA_methylation-450k': 'has_450k-True',
     'DNA_methylation-27k': 'has_27k-True'

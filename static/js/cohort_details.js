@@ -301,10 +301,16 @@ require([
                     tokenFeatDisplName = 'SAMP:' + feature_value[0];
                     tokenValDisplName = feature_value[1];
 
-                    if (feature_value[1] == 'True') {
-                        feature_value[1] = 1;
-                    } else {
-                        feature_value[1] = 0;
+                    switch(feature_value[1]) {
+                        case 'True':
+                            feature_value[1] = 1;
+                            break;
+                        case 'False':
+                            feature_value[1] = 0;
+                            break;
+                        case 'None':
+                            feature_value[1] = 'None';
+                            break;
                     }
 
                     var token = $('<span>').data({
