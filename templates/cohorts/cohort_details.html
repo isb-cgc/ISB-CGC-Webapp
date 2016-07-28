@@ -220,9 +220,9 @@
                              data-feature-name="mutation-category" data-feature-type="molecular">
                             <select id="mutation-category" class="mutation-category-selector form-control spec-select datatype-selector">
                                 <option value="label" selected disabled>-- Select a Mutation Category --</option>
-                                <option value="any" data-value-displ-name="Any" data-value-id="any">Any</option>
+                                <option value="any" data-value-displ-name="Any" data-value-id="any" data-value-name="Any">Any</option>
                                 {% for cat in molecular_attr.categories %}
-                                    <option value="{{ cat.value }}" data-value-displ-name="{{ cat.name }}" data-value-id="{{ cat.value }}">{{ cat.name }}</option>
+                                    <option value="{{ cat.value }}" data-value-displ-name="{{ cat.name }}" data-value-name="{{ cat.name }}" data-value-id="{{ cat.value }}">{{ cat.name }}</option>
                                 {% endfor %}
                                 <option value="user-specified">User Specified</option>
                             </select>
