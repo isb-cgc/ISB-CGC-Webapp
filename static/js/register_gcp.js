@@ -83,10 +83,8 @@ require([
                 $('#register-gcp-form').show();
             },
             error: function(xhr, ajaxOptions, thrownError) {
-                var response = $.parseJSON(xhr.responseText);
-                console.log(response['message']);
-                console.log(xhr.status);
-                //spinner.hide();
+                $('.verify-error').show();
+                $("html, body").animate({ scrollTop: 0 }, "slow");
             }
         });
         return false;
