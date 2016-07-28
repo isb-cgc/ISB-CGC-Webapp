@@ -345,7 +345,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             $('#filter-panel li.list-group-item div.cohort-feature-select-block').each(function() {
                 var $this = $(this),
                     attr = $this.data('feature-name');
-                if(attr && attr.length > 0) {
+                if(attr && attr.length > 0 && attr !== 'specific-mutation' ) {
                     $('ul#' + attr + ' input').each(function () {
 
                         var $that = $(this),

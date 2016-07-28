@@ -142,6 +142,9 @@ require([
 
             $('a[href="#collapse-spec-molecular-attrs"]').parent().addClass('disabled');
             $('a[href="#collapse-sel-molecular-attr-cat"]').parent().addClass('disabled');
+            $('#mutation-category').val('label');
+            $('a.mol-cat-filter-x').trigger('click');
+            $('a.mol-spec-filter-x').trigger('click');
 
             if($('a[href="#collapse-spec-molecular-attrs"]').attr('aria-expanded') === 'true') {
                 $('a[href="#collapse-spec-molecular-attrs"]').trigger('click');
@@ -267,7 +270,7 @@ require([
                     // When the 'Selected Filters' token is removed, remove this filter from other
                     // locations in which it's stored
                     var mut_cat = $('#mutation-category');
-                    data && !data.forNewVal && mut_cat.prop('value', 'label');
+                    (!data || !data.forNewVal) &&  mut_cat.val('label');
                     $(this).parent('span').remove();
 
                     $('#create-cohort-form .form-control-static span').each(function () {
@@ -331,6 +334,7 @@ require([
                     var gene = geneListField.tokenfield('getTokens')[0];
                     token = $('<span>').data({
                         'feature-id': 'MUT:'+gene.value + ':' + feature.data('feature-id'),
+                        'feature-type': 'molecular',
                         'feature-name': feature.data('feature-name'),
                         'value-id': value.data('value-id'),
                         'value-name': value.data('value-name')
@@ -346,6 +350,10 @@ require([
                         .append('<i class="fa fa-times">')
                 );
 
+                if (feature.data('feature-type') == 'molecular') {
+                    token.find('a.delete-x').addClass('mol-spec-filter-x');
+                }
+
                 $this.data({
                     'select-filters-item': token.clone(true),
                     'create-cohort-form-item': token.clone(true)
@@ -355,7 +363,13 @@ require([
                 $('#create-cohort-form .form-control-static').append($this.data('create-cohort-form-item'));
 
                 $('a.delete-x').on('click', function () {
-                    var checked_box = $('div[data-feature-id="' + $(this).parent('span').data('feature-id') + '"] input[type="checkbox"][data-value-name="' + $(this).parent('span').data('value-name') + '"]');
+                    var checked_box = $('div[data-feature-id="' + $(this).parent('span').data('feature-id')
+                        + '"] input[type="checkbox"][data-value-name="' + $(this).parent('span').data('value-name') + '"]');
+
+                    if($(this).parent('span').data('feature-type') == 'molecular') {
+                        checked_box = $('div[data-feature-id="' + $(this).parent('span').data('feature-id').split(":")[2]
+                            + '"] input[type="checkbox"][data-value-name="' + $(this).parent('span').data('value-name') + '"]');
+                    }
                     checked_box.prop('checked', false);
                     var span_data = $(this).parent('span').data();
                     $(this).parent('span').remove();
@@ -642,16 +656,6 @@ require([
         $(this).siblings('.save-comment-btn').prop('disabled', this.value == '' ? true : false)
     })
 
-    //Disable save changes if no change to title or no added filters
-    var original_title = $('#edit-cohort-name').val();
-    var save_changes_btn = $('#apply-filters-form input[type="submit"]');
-    var check_changes = function() {
-        if ($('#edit-cohort-name').val() != original_title || $('.selected-filters span').length > 0) {
-            save_changes_btn.prop('disabled', false)
-        } else {
-            save_changes_btn.prop('disabled', true)
-        }
-    };
     save_changes_btn.prop('disabled', true);
     save_changes_btn_modal.prop('disabled', true);
 
