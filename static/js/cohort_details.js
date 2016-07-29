@@ -16,11 +16,6 @@
  *
  */
 
-/**
- * Test comment for Test Branch in
- *
- */
-
 require.config({
     baseUrl: '/static/js/',
     paths: {
@@ -39,14 +34,28 @@ require.config({
         stack_bar_chart: 'visualizations/createStackedBarchart',
         d3parsets: 'libs/d3.parsets',
         draw_parsets: 'parallel_sets',
-        base: 'base'
+        base: 'base',
+        bloodhound: 'libs/bloodhound',
+        typeahead : 'libs/typeahead',
+        tokenfield: 'libs/bootstrap-tokenfield.min'
     },
     shim: {
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
         'session_security': ['jquery'],
         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
-        'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui']
+        'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
+        'tokenfield': ['jquery', 'jqueryui'],
+        'typeahead':{
+            deps: ['jquery'],
+            init: function ($) {
+                return require.s.contexts._.registry['typeahead.js'].factory( $ );
+            }
+        },
+        'bloodhound': {
+           deps: ['jquery'],
+           exports: 'Bloodhound'
+        }
     }
 });
 
@@ -58,18 +67,136 @@ require([
     'd3',
     'd3tip',
     'search_helpers',
+    'bloodhound',
+    'typeahead',
+    'underscore',
+    'tokenfield',
     'vis_helpers',
     'tree_graph',
     'stack_bar_chart',
     'assetscore',
     'assetsresponsive',
     'base'
-], function ($, jqueryui, bootstrap, session_security, d3, d3tip, search_helpers) {
+], function ($, jqueryui, bootstrap, session_security, d3, d3tip, search_helpers, Bloodhound, typeahead, _) {
 
     var savingComment = false;
     var savingChanges = false;
     var SUBSEQUENT_DELAY = 600;
     var update_displays_thread = null;
+
+    var geneListField = $('#paste-in-genes');
+    var geneFavs = [];
+
+    //create bloodhound typeahead engine for gene suggestions
+    var gene_suggestions = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        prefetch : base_url + '/genes/suggest/a.json',
+        remote: {
+            url: base_url + '/genes/suggest/%QUERY.json',
+            wildcard: '%QUERY'
+        }
+    });
+    gene_suggestions.initialize();
+    function createTokenizer() {
+        // be aware bootstrap tokenfield requires 'value' as the datem attribute field : https://github.com/sliptree/bootstrap-tokenfield/issues/189
+        geneListField.tokenfield({
+            typeahead : [
+                {
+                    hint: false
+                }, {
+                    source: gene_suggestions.ttAdapter(),
+                    display: 'value'
+                }
+            ],
+            delimiter : " ",
+            minLength: 2-1,         // Bug #289 in bootstrap-tokenfield, submitted, remove -1 if it gets fixed and we update
+            limit: 1,
+            tokens: geneFavs
+        }).on('tokenfield:createdtoken', function (event) {
+
+            // Check whether user entered a valid gene name
+            validate_genes([event.attrs.value], function validCallback(result){
+                if(!result[event.attrs.value]){
+                    $(event.relatedTarget).addClass('invalid error');
+                    $('.helper-text__invalid').show();
+                }
+                if ($('div.token.invalid.error').length < 1) {
+                    $('.helper-text__invalid').hide();
+                }
+            });
+            $('#paste-in-genes-tokenfield').attr('placeholder',"");
+            $('#paste-in-genes-tokenfield').attr('disabled','disabled');
+            $('a[href="#collapse-sel-molecular-attr-cat"]').parent().removeClass('disabled');
+            $('a[href="#collapse-sel-molecular-attr-cat"]').trigger('click');
+
+            // Update filter set
+            // Update counts
+
+        }).on('tokenfield:removedtoken', function(event) {
+            $('#paste-in-genes-tokenfield').attr('placeholder',"Enter a gene's name");
+            $('#paste-in-genes-tokenfield').removeAttr('disabled');
+            if ($('div.token.invalid.error').length < 1) {
+                $('.helper-text__invalid').hide();
+            }
+
+            $('a[href="#collapse-spec-molecular-attrs"]').parent().addClass('disabled');
+            $('a[href="#collapse-sel-molecular-attr-cat"]').parent().addClass('disabled');
+            $('#mutation-category').val('label');
+            $('a.mol-cat-filter-x').trigger('click');
+            $('a.mol-spec-filter-x').trigger('click');
+
+            if($('a[href="#collapse-spec-molecular-attrs"]').attr('aria-expanded') === 'true') {
+                $('a[href="#collapse-spec-molecular-attrs"]').trigger('click');
+            }
+            if($('a[href="#collapse-sel-molecular-attr-cat"]').attr('aria-expanded') === 'true') {
+                $('a[href="#collapse-sel-molecular-attr-cat"]').trigger('click');
+            }
+
+        }).on('tokenfield:edittoken',function(e){
+            e.preventDefault();
+            return false;
+        });
+    }
+    createTokenizer();
+
+    function validate_genes(list, cb){
+        if(list.length > 0){
+            var csrftoken = get_cookie('csrftoken');
+            $.ajax({
+                type        : 'POST',
+                dataType    :'json',
+                url         : base_url + '/genes/is_valid/',
+                data        : JSON.stringify({'genes-list' : list}),
+                beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+                success : function (data) {
+                    if(!data.error) {
+                        cb(data.results);
+                    }
+                },
+                error: function () {
+                    console.log('Failed to check for valid genes');
+                }
+            });
+        }
+    }
+
+    //Used for getting the CORS token for submitting data
+    function get_cookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function() {
@@ -92,90 +219,189 @@ require([
         },SUBSEQUENT_DELAY);
     };
 
-    var checkbox_callback = function() {
+    var filter_change_callback = function() {
         var $this = $(this);
 
-        if ($this.is(':checked')) { // Checkbox checked
-            var feature = $this.closest('.cohort-feature-select-block'),
-                value = $this;
+        var token = null;
 
-            var tokenValDisplName = (value.data('value-displ-name') && value.data('value-displ-name').length > 0) ?
-                value.data('value-displ-name') : (value.data('value-name') == 'None' ? 'NA' : value.data('value-name')),
-                tokenFeatDisplName = /*(feature.data('feature-displ-name') && feature.data('feature-displ-name').length > 0) ?
-                    feature.data('feature-displ-name') :*/ feature.data('feature-name');
+        var feature = $this.closest('.cohort-feature-select-block'),
+            value = $this;
 
+        // Mutation category dropdown
+        if($this.prop('id') == 'mutation-category') {
+            // Remove any previous iterations of this filter by triggering the
+            // 'Selected Filters' token 'X' button
+            $('a.mol-cat-filter-x').trigger('click',[{forNewVal: true}]);
+            value = $this.find('option:selected');
+            if(value.val() !== 'user-specified') {
 
-            if (feature.data('feature-type') == 'datatype') { // Datatype feature
-                var feature_value = value.data('value-name').split('-');
+                var gene = geneListField.tokenfield('getTokens')[0];
 
-                tokenFeatDisplName = 'SAMP:' + feature_value[0];
-                tokenValDisplName = feature_value[1];
-
-                if (feature_value[1] == 'True') {
-                    feature_value[1] = 1;
-                } else {
-                    feature_value[1] = 0;
+                $('a[href="#collapse-spec-molecular-attrs"]').parent().addClass('disabled');
+                $('a.mol-spec-filter-x').trigger('click');
+                if ($('a[href="#collapse-spec-molecular-attrs"]').attr('aria-expanded') === 'true') {
+                    $('a[href="#collapse-spec-molecular-attrs"]').trigger('click');
                 }
 
+                var tokenValDisplName = value.data('value-displ-name'),
+                    tokenFeatDisplName = feature.data('feature-displ-name');
+
                 var token = $('<span>').data({
-                    'feature-id'   : 'SAMP:' + feature_value[0],
-                    'feature-name' : feature_value[0],
-                    'value-id'     : value.data('value-id'),
-                    'value-name'   : feature_value[1]
+                    'feature-id': 'MUT:'+gene.value + ':' + feature.data('feature-id'),
+                    'feature-name': feature.data('feature-name'),
+                    'value-id': value.data('value-id'),
+                    'value-name': value.data('value-name')
                 });
 
+                token.append(
+                    $('<a>').addClass('delete-x filter-label label label-default mol-cat-filter-x')
+                        .text(gene.label + ' [' + tokenFeatDisplName + ': ' + tokenValDisplName + ']')
+                        .append('<i class="fa fa-times">')
+                );
+
+                $this.data({
+                    'select-filters-item': token.clone(true),
+                    'create-cohort-form-item': token.clone(true)
+                });
+
+                $('.selected-filters .panel-body').append($this.data('select-filters-item'));
+                $('#create-cohort-form .form-control-static').append($this.data('create-cohort-form-item'));
+
+                $('a.mol-cat-filter-x').on('click', function (e,data) {
+                    // When the 'Selected Filters' token is removed, remove this filter from other
+                    // locations in which it's stored
+                    var mut_cat = $('#mutation-category');
+                    (!data || !data.forNewVal) &&  mut_cat.val('label');
+                    $(this).parent('span').remove();
+
+                    $('#create-cohort-form .form-control-static span').each(function () {
+                        if ($(this).data('feature-id') == 'MUT:category') {
+                            $(this).remove();
+                        }
+                    });
+
+                    update_displays(true);
+                    return false;
+                });
             } else {
-                var token = $('<span>').data({
-                    'feature-id'   : feature.data('feature-id'),
-                    'feature-name' : feature.data('feature-name'),
-                    'value-id'     : value.data('value-id'),
-                    'value-name'   : value.data('value-name')
-                });
+                $('a.mol-cat-filter-x').trigger('click');
+                $('a[href="#collapse-spec-molecular-attrs"]').parent().removeClass('disabled');
+                $('a[href="#collapse-spec-molecular-attrs"]').trigger('click');
             }
+        } else {
 
-            token.append(
-                $('<a>').addClass('delete-x filter-label label label-default')
-                    .text(tokenFeatDisplName + ': ' + tokenValDisplName)
-                    .append('<i class="fa fa-times">')
-            );
-            
-            $this.data({
-                'select-filters-item': token.clone(true),
-                'create-cohort-form-item': token.clone(true)
-            });
-            $('.selected-filters .panel-body').append( $this.data('select-filters-item') );
-            $('#create-cohort-form .form-control-static').append( $this.data('create-cohort-form-item') );
-            $('a.delete-x').on('click', function() {
-                var checked_box = $('div[data-feature-id="' + $(this).parent('span').data('feature-id') + '"] input[type="checkbox"][data-value-name="' + $(this).parent('span').data('value-name') + '"]');
-                checked_box.prop('checked', false);
-                var span_data = $(this).parent('span').data();
-                $(this).parent('span').remove();
+            // Checkboxes
+            if ($this.is(':checked')) { // Checkbox checked
 
+                var tokenValDisplName = (value.data('value-displ-name') && value.data('value-displ-name').length > 0) ?
+                        value.data('value-displ-name') : (value.data('value-name') == 'None' ? 'NA' : value.data('value-name')),
+                    tokenFeatDisplName = /*(feature.data('feature-displ-name') && feature.data('feature-displ-name').length > 0) ?
+                     feature.data('feature-displ-name') :*/ feature.data('feature-name');
+
+
+                if (feature.data('feature-type') == 'datatype') { // Datatype feature
+                    var feature_value = value.data('value-name').split('-');
+
+                    tokenFeatDisplName = 'SAMP:' + feature_value[0];
+                    tokenValDisplName = feature_value[1];
+
+                    switch(feature_value[1]) {
+                        case 'True':
+                            feature_value[1] = 1;
+                            break;
+                        case 'False':
+                            feature_value[1] = 0;
+                            break;
+                        case 'None':
+                            feature_value[1] = 'None';
+                            break;
+                    }
+
+                    var token = $('<span>').data({
+                        'feature-id': 'SAMP:' + feature_value[0],
+                        'feature-name': feature_value[0],
+                        'value-id': value.data('value-id'),
+                        'value-name': feature_value[1]
+                    });
+
+                } else if (feature.data('feature-type') == 'donor') { // Donor feature
+                    token = $('<span>').data({
+                        'feature-id': feature.data('feature-id'),
+                        'feature-name': feature.data('feature-name'),
+                        'value-id': value.data('value-id'),
+                        'value-name': value.data('value-name')
+                    });
+                } else { // Molecular feature
+                    var gene = geneListField.tokenfield('getTokens')[0];
+                    token = $('<span>').data({
+                        'feature-id': 'MUT:'+gene.value + ':' + feature.data('feature-id'),
+                        'feature-type': 'molecular',
+                        'feature-name': feature.data('feature-name'),
+                        'value-id': value.data('value-id'),
+                        'value-name': value.data('value-name')
+                    });
+
+                    tokenFeatDisplName = gene.label + ' [' + feature.data('feature-displ-name');
+                    tokenValDisplName += ']'
+                }
+
+                token.append(
+                    $('<a>').addClass('delete-x filter-label label label-default')
+                        .text(tokenFeatDisplName + ': ' + tokenValDisplName)
+                        .append('<i class="fa fa-times">')
+                );
+
+                if (feature.data('feature-type') == 'molecular') {
+                    token.find('a.delete-x').addClass('mol-spec-filter-x');
+                }
+
+                $this.data({
+                    'select-filters-item': token.clone(true),
+                    'create-cohort-form-item': token.clone(true)
+                });
+
+                $('.selected-filters .panel-body').append($this.data('select-filters-item'));
+                $('#create-cohort-form .form-control-static').append($this.data('create-cohort-form-item'));
+
+                $('a.delete-x').on('click', function () {
+                    var checked_box = $('div[data-feature-id="' + $(this).parent('span').data('feature-id')
+                        + '"] input[type="checkbox"][data-value-name="' + $(this).parent('span').data('value-name') + '"]');
+
+                    if($(this).parent('span').data('feature-type') == 'molecular') {
+                        checked_box = $('div[data-feature-id="' + $(this).parent('span').data('feature-id').split(":")[2]
+                            + '"] input[type="checkbox"][data-value-name="' + $(this).parent('span').data('value-name') + '"]');
+                    }
+                    checked_box.prop('checked', false);
+                    var span_data = $(this).parent('span').data();
+                    $(this).parent('span').remove();
+
+                    // Remove create cohort form pill
+                    $('#create-cohort-form .form-control-static span').each(function () {
+                        if ($(this).data('feature-id') == span_data['feature-id'] && $(this).data('value-name') == span_data['value-name']) {
+                            $(this).remove();
+                        }
+                    });
+
+                    update_displays(true);
+                    return false;
+                });
+            } else { // Checkbox unchecked
                 // Remove create cohort form pill
-                $('#create-cohort-form .form-control-static span').each(function() {
-                    if ($(this).data('feature-id') == span_data['feature-id'] && $(this).data('value-name') == span_data['value-name']) {
+                $('#create-cohort-form .form-control-static span').each(function () {
+                    if ($(this).data('feature-id') == $this.data('create-cohort-form-item').data('feature-id') &&
+                        $(this).data('value-name') == $this.data('create-cohort-form-item').data('value-name')) {
                         $(this).remove();
                     }
                 });
+                $this.data('select-filters-item').remove();
+                $this.data('create-cohort-form-item').remove();
 
-                update_displays(true);
-                return false;
-            });
-        } else { // Checkbox unchecked
-            // Remove create cohort form pill
-            $('#create-cohort-form .form-control-static span').each(function() {
-                if ($(this).data('feature-id') == $this.data('create-cohort-form-item').data('feature-id') && $(this).data('value-name') == $this.data('create-cohort-form-item').data('value-name')) {
-                    $(this).remove();
-                }
-            });
-            $this.data('select-filters-item').remove();
-            $this.data('create-cohort-form-item').remove();
-
+            }
         }
         update_displays();
     };
 
-    $('.search-checkbox-list input[type="checkbox"]').on('change', checkbox_callback);
+    $('.search-checkbox-list input[type="checkbox"]').on('change', filter_change_callback);
 
     $('.filter-input').autocomplete({
         source: attr_list,
@@ -189,7 +415,7 @@ require([
                     + attr_counts[ui.item.value][i]['value'] + '<span class="count">(' + attr_counts[ui.item.value][i]['count'] + ')</span>'
                     + '</label>';
                 var checkbox_item = $(checkbox_str);
-                checkbox_item.on('change', checkbox_callback);
+                checkbox_item.on('change', filter_change_callback);
                 $('ul#'+ui.item.value).append('<li></li>');
                 $('ul#'+ui.item.value+' li').append(checkbox_item);
                 // After adding item to filters, remove from list
@@ -206,6 +432,7 @@ require([
         $('#filter-panel input:checked').each(function() {
             $(this).prop('checked', false);
         });
+        $('#paste-in-genes').siblings('div.token').find('a.close').trigger('click');
         $('#create-cohort-form .form-control-static').empty();
         update_displays();
     });
@@ -324,6 +551,7 @@ require([
         }, 800);
     });
 
+    // onSubmit: Add Comment
     $('.add-comment').on('submit', function(event) {
         if(savingComment) {
             event.preventDefault();
@@ -375,7 +603,7 @@ require([
     if (window.location.pathname.indexOf('new_cohort') >= 0
         || window.location.pathname.match(/cohorts\/workbook\/\d+\/worksheet\/\d+\/create/i) !== null
     ) {
-        $('a[href="#collapse-Project"]').trigger('click')
+        $('a[href="#collapse-Project"]').trigger('click');
         $('input[type="checkbox"][data-value-name="TCGA"]').trigger('click');
     } else {
         // If there's data passed in from the template, use it and drop it
@@ -386,7 +614,8 @@ require([
             update_displays(true);
         }
     }
-
+    
+    // onClick: Shared With button 
     $('#shared-with-btn').on('click', function(e){
         var target = $(this).data('target');
         $(target + ' a[data-target="#shared-pane"]').tab('show');
@@ -397,9 +626,7 @@ require([
         save_changes_btn_modal.prop('disabled', 'disabled');
     });
 
-    /*
-        Remove shared user
-     */
+    // onClick: Remove shared user
     $('.remove-shared-user').on('click', function() {
         var user_id = $(this).attr('data-user-id');
         var url = base_url + '/cohorts/unshare_cohort/' + cohort_id + '/';
@@ -424,13 +651,12 @@ require([
         })
     });
 
-    // Disable comment button if no content
+    // Disable the comment button if there's no content in the comment
     $('.save-comment-btn').prop('disabled', true);
     $('#comment-content').keyup(function() {
         $(this).siblings('.save-comment-btn').prop('disabled', this.value == '' ? true : false)
     })
 
-    // Disable the buttons at load because no changes have been made yet
     save_changes_btn.prop('disabled', true);
     save_changes_btn_modal.prop('disabled', true);
 
@@ -446,5 +672,22 @@ require([
     $('li.applied-filter').each(function(index,elem){
         $(this).html($(this).text().replace(/\[/g,"<span>").replace(/\]/g,"</span>"));
     });
+
+    var firstSelect = true;
+    $('a[href="#molecular-filters"]').on('click',function(e){
+        firstSelect && $('a[href="#collapse-gene"]').trigger('click');
+        firstSelect && $('a[href="#collapse-sel-molecular-attr-cat"]').parent().addClass('disabled');
+        firstSelect && $('a[href="#collapse-spec-molecular-attrs"]').parent().addClass('disabled');
+        $('#molecular-filter-alert').show();
+        firstSelect = false;
+    });
+
+    var mapped_molecular_categories = {};
+    molecular_attr.categories.map(function(cat){
+        mapped_molecular_categories[cat.value] = cat;
+    });
+
+
+    $('#mutation-category').on('change',filter_change_callback);
 });
 

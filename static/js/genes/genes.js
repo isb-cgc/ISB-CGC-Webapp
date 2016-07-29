@@ -25,7 +25,8 @@ require.config({
             deps: ['jquery'],
             init: function ($) {
                 return require.s.contexts._.registry['typeahead.js'].factory( $ );
-            }
+            },
+            hint: false
         },
         'bloodhound': {
            deps: ['jquery'],

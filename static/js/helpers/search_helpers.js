@@ -345,26 +345,26 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             $('#filter-panel li.list-group-item div.cohort-feature-select-block').each(function() {
                 var $this = $(this),
                     attr = $this.data('feature-name');
-                $('ul#'+attr+' input').each(function(){
+                if(attr && attr.length > 0 && attr !== 'specific-mutation' ) {
+                    $('ul#' + attr + ' input').each(function () {
 
-                    var $that = $(this),
-                        value = $that.data('value-name'),
-                        displ_name = $that.data('displ-name'),
-                        new_count = '';
-
-                    if (counts_by_name[attr]) {
-                        if (counts_by_name[attr].values[value] || counts_by_name[attr].values[displ_name]) {
-                            new_count = '(' + (counts_by_name[attr].values[value] || counts_by_name[attr].values[displ_name]) + ')';
+                        var $that = $(this),
+                            value = $that.data('value-name'),
+                            displ_name = ($that.data('displ-name') == 'NA' ? 'None' : $that.data('displ-name')),
+                            new_count = '';
+                        if (counts_by_name[attr]) {
+                            if (counts_by_name[attr].values[value] || counts_by_name[attr].values[displ_name]) {
+                                new_count = '(' + (counts_by_name[attr].values[value] || counts_by_name[attr].values[displ_name]) + ')';
+                            }
                         }
-                    }
-                    // All entries which were not returned are assumed to be zero
-                    if (new_count == '') {
-                        new_count = '(0)';
-                    }
-                    $that.siblings('span').html(new_count);
-                });
-            })
-
+                        // All entries which were not returned are assumed to be zero
+                        if (new_count == '') {
+                            new_count = '(0)';
+                        }
+                        $that.siblings('span').html(new_count);
+                    });
+                }
+            });
         },
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
