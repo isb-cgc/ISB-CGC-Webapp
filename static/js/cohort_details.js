@@ -238,6 +238,7 @@ require([
                 var gene = geneListField.tokenfield('getTokens')[0];
 
                 $('a[href="#collapse-spec-molecular-attrs"]').parent().addClass('disabled');
+                $('a.mol-spec-filter-x').trigger('click');
                 if ($('a[href="#collapse-spec-molecular-attrs"]').attr('aria-expanded') === 'true') {
                     $('a[href="#collapse-spec-molecular-attrs"]').trigger('click');
                 }
