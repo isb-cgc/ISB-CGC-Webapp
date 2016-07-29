@@ -98,7 +98,10 @@
                                                         <td>{{ service_account.authorized_dataset.name }}</td>
                                                         <td>{{ service_account.authorized_date|date:'M d, Y, g:i a' }}</td>
                                                         <td>{% if service_account.active %}<i class="fa fa-check"></i>{% endif %}</td>
-                                                        <td><a data-toggle="modal" role="button" data-target="#delete-sa-modal-{{ service_account.id }}"><i class="fa fa-trash"></i></a></td>
+                                                        <td>
+                                                            <a data-toggle="modal" role="button" data-target="#refresh-sa-modal-{{ service_account.id }}" class="space-right-5"><i class="fa fa-refresh"></i></a>
+                                                            <a data-toggle="modal" role="button" data-target="#delete-sa-modal-{{ service_account.id }}"><i class="fa fa-trash"></i></a>
+                                                        </td>
                                                     </tr>
                                                     {% endfor %}
                                                     </tbody>
