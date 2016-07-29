@@ -350,7 +350,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
 
                         var $that = $(this),
                             value = $that.data('value-name'),
-                            displ_name = $that.data('displ-name'),
+                            displ_name = ($that.data('displ-name') == 'NA' ? 'None' : $that.data('displ-name')),
                             new_count = '';
                         if (counts_by_name[attr]) {
                             if (counts_by_name[attr].values[value] || counts_by_name[attr].values[displ_name]) {
