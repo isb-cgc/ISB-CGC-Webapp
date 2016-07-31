@@ -79,7 +79,7 @@
             {% if workbooks.count > 0 %}
                 {% for workbook in workbooks|slice:':6'  %}
                     <li>
-                        <a href="{% url 'workbook_detail' workbook.id %}">
+                        <a href="{% url 'workbook_detail' workbook.id %}" title="{{ workbook.name|title|wrap_text }}">
                             <div class="list-main">
                                 <h5 class="list-title">{{ workbook.name|title }}</h5>
                                 <p>{{ workbook.description }}</p>

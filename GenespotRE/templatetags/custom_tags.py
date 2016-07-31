@@ -16,6 +16,7 @@ limitations under the License.
 """
 
 # from django import template
+import sys
 import string
 import json
 import re
@@ -30,6 +31,7 @@ from workbooks.models import Workbook
 DATA_ATTR_DICTIONARY = {
     'DNA_sequencing-True': 'has_Illumina_DNASeq-True',
     'DNA_sequencing-False': 'has_Illumina_DNASeq-False',
+    'DNA_sequencing-None': 'has_Illumina_DNASeq-None',
 
     'RNA_sequencing-UNC Illumina HiSeq': 'has_UNC_HiSeq_RNASeq-True',
     'RNA_sequencing-BCGSC Illumina HiSeq': 'has_BCGSC_HiSeq_RNASeq-True',
@@ -41,9 +43,11 @@ DATA_ATTR_DICTIONARY = {
 
     'Protein-False': 'has_RPPA-False',
     'Protein-True': 'has_RPPA-True',
+    'Protein-None': 'has_RPPA-None',
 
     'SNP_CN-True': 'has_SNP6-True',
     'SNP_CN-False': 'has_SNP6-False',
+    'SNP_CN-None': 'has_SNP6-None',
 
     'DNA_methylation-450k': 'has_450k-True',
     'DNA_methylation-27k': 'has_27k-True'
@@ -58,6 +62,12 @@ ATTR_SPECIFIC_ORDERS = {
                            'Stage IVB','Stage IVC','Stage X','I or II NOS','None',],
     'residual_tumor': ['R0','R1','R2','RX','None',],
 }
+
+NOT_CAPWORDS = [
+    'pathologic_stage',
+    'residual_tumor',
+    'histological_type',
+]
 
 ALPHANUM_SORT = [
     'neoplasm_histologic_grade',
@@ -112,7 +122,7 @@ TRANSLATION_DICTIONARY = {
     'user_projects': 'Your Projects',
     'user_studys': 'Your Studies',
     'SNP_CN': 'SNP Copy Number',
-    'miRNA_sequencing': 'miRNA SEQUENCING'
+    'miRNA_sequencing': 'miRNA SEQUENCING',
 }
 
 DISEASE_DICTIONARY = {
@@ -199,8 +209,8 @@ def get_readable_name(csv_name, attr=None):
         return TRANSLATION_DICTIONARY.get(csv_name)
     else:
         csv_name = csv_name.replace('_', ' ')
-        # Do not convert the Roman numerals in the stages
-        if attr is not 'pathologic_stage' and attr is not 'residual_tumor' and attr is not 'prior_dx':
+        # If something shouldn't be subjected to capwords add its attr name to NOT_CAPWORDS
+        if attr not in NOT_CAPWORDS:
             csv_name = string.capwords(csv_name)
         csv_name = csv_name.replace(' To ', ' to ')
         return csv_name

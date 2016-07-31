@@ -140,9 +140,12 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             $('.parallel-sets .spinner').show();
             $('.cohort-info .total-values').hide();
             $('.cohort-info .spinner').show();
+
+            $('button[data-target="#apply-filters-modal"]').prop('disabled',true);
+            $('#apply-filters-form input[type="submit"]').prop('disabled',true);
             
             var startReq = new Date().getTime();
-            $.ajax({
+            return $.ajax({
                 type: 'GET',
                 url: api_url,
 
@@ -327,38 +330,41 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
 
             counts_by_name = {};
 
-            for(var i=0; i < counts.length; i++) {
-                counts_by_name[counts[i].name] = {
+            // Convert the array into a map for easier searching
+            counts.map(function(obj){
+                counts_by_name[obj.name] = {
                     values: {},
-                    total: counts[i].total
-                };
-                for(var k=0; k < counts[i].values.length; k++) {
-                    counts_by_name[counts[i].name].values[counts[i].values[k].value] =  counts[i].values[k].count
+                    total: obj.total
                 }
-            }
+                var values = counts_by_name[obj.name].values;
+                obj.values.map(function(val){
+                    values[val.value] = val.count;
+                });
+            });
 
             $('#filter-panel li.list-group-item div.cohort-feature-select-block').each(function() {
                 var $this = $(this),
                     attr = $this.data('feature-name');
-                $('ul#'+attr+' input').each(function(){
+                if(attr && attr.length > 0 && attr !== 'specific-mutation' ) {
+                    $('ul#' + attr + ' input').each(function () {
 
-                    var $that = $(this),
-                        value = $that.data('value-name'),
-                        displ_name = $that.data('displ-name'),
-                        new_count = '';
-
-                    if (counts_by_name[attr]) {
-                        if (counts_by_name[attr].values[value] || counts_by_name[attr].values[displ_name]) {
-                            new_count = '(' + (counts_by_name[attr].values[value] || counts_by_name[attr].values[displ_name]) + ')';
+                        var $that = $(this),
+                            value = $that.data('value-name'),
+                            displ_name = ($that.data('displ-name') == 'NA' ? 'None' : $that.data('displ-name')),
+                            new_count = '';
+                        if (counts_by_name[attr]) {
+                            if (counts_by_name[attr].values[value] || counts_by_name[attr].values[displ_name]) {
+                                new_count = '(' + (counts_by_name[attr].values[value] || counts_by_name[attr].values[displ_name]) + ')';
+                            }
                         }
-                    }
-                    if (new_count == '') {
-                        new_count = '(0)';
-                    }
-                    $that.siblings('span').html(new_count);
-                });
-            })
-
+                        // All entries which were not returned are assumed to be zero
+                        if (new_count == '') {
+                            new_count = '(0)';
+                        }
+                        $that.siblings('span').html(new_count);
+                    });
+                }
+            });
         },
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

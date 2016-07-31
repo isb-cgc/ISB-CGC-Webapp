@@ -15754,7 +15754,6 @@ var igvxhr = (function (igvxhr) {
                 xhr.withCredentials = true;
                 var headers = {},
                     acToken = oauth.google.access_token;
-
                 if (acToken) {
                     xhr.setRequestHeader("Authorization", "Bearer " + acToken);
                 }

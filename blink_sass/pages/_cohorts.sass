@@ -8,6 +8,8 @@
     .total-samples
         margin-top: 0px
     #filter-panel
+        #paste-in-genes-tokenfield
+            width: 100% !important
         .tabpanel
             border-top-left-radius: 3px
             border-top-right-radius: 3px
@@ -19,7 +21,7 @@
                 border: none
                 background-color: #fff
                 text-align: center
-                width: (100% / 2)
+                width: (100% / 3)
                 &:first-child a
                     border-top-left-radius: 3px
                 &:last-child a
@@ -67,7 +69,12 @@
                     padding: 0px 15px 0px 15px
             .panel-collapse
                 max-height: 100px
-                overflow-y: scroll
+            #collapse-gene
+                max-height: 300px
+                .tokenfield.form-control
+                    max-height: 49px
+            .alert
+                margin: 10px 0px 10px 0px
 
     .filter-label:hover
         //background-color: $primary-color-light
