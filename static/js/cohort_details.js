@@ -113,8 +113,11 @@ require([
             minLength: 2-1,         // Bug #289 in bootstrap-tokenfield, submitted, remove -1 if it gets fixed and we update
             limit: 1,
             tokens: geneFavs
+        }).on('tokenfield:createtoken', function (event) {
+            // All gene names must in uppercase
+            event.attrs.value = event.attrs.value.toUpperCase();
+            event.attrs.label = event.attrs.label.toUpperCase();
         }).on('tokenfield:createdtoken', function (event) {
-
             // Check whether user entered a valid gene name
             validate_genes([event.attrs.value], function validCallback(result){
                 if(!result[event.attrs.value]){
@@ -127,11 +130,7 @@ require([
             });
             $('#paste-in-genes-tokenfield').attr('placeholder',"");
             $('#paste-in-genes-tokenfield').attr('disabled','disabled');
-            $('a[href="#collapse-sel-molecular-attr-cat"]').parent().removeClass('disabled');
-            $('a[href="#collapse-sel-molecular-attr-cat"]').trigger('click');
-
-            // Update filter set
-            // Update counts
+            $('#mutation-category').parent().parent().removeClass('disabled');
 
         }).on('tokenfield:removedtoken', function(event) {
             $('#paste-in-genes-tokenfield').attr('placeholder',"Enter a gene's name");
@@ -140,18 +139,9 @@ require([
                 $('.helper-text__invalid').hide();
             }
 
-            $('a[href="#collapse-spec-molecular-attrs"]').parent().addClass('disabled');
-            $('a[href="#collapse-sel-molecular-attr-cat"]').parent().addClass('disabled');
+            $('#spec-molecular-attrs').parent().addClass('disabled');
+            $('#mutation-category').parent().parent().addClass('disabled');
             $('#mutation-category').val('label');
-            $('a.mol-cat-filter-x').trigger('click');
-            $('a.mol-spec-filter-x').trigger('click');
-
-            if($('a[href="#collapse-spec-molecular-attrs"]').attr('aria-expanded') === 'true') {
-                $('a[href="#collapse-spec-molecular-attrs"]').trigger('click');
-            }
-            if($('a[href="#collapse-sel-molecular-attr-cat"]').attr('aria-expanded') === 'true') {
-                $('a[href="#collapse-sel-molecular-attr-cat"]').trigger('click');
-            }
 
         }).on('tokenfield:edittoken',function(e){
             e.preventDefault();
@@ -229,19 +219,23 @@ require([
 
         // Mutation category dropdown
         if($this.prop('id') == 'mutation-category') {
+            // Remove prior filters
+            $('a.mol-cat-filter-x').trigger('click',{forNewVal: true});
+            $('a.mol-spec-filter-x').trigger('click');
+
             // Remove any previous iterations of this filter by triggering the
             // 'Selected Filters' token 'X' button
-            $('a.mol-cat-filter-x').trigger('click',[{forNewVal: true}]);
             value = $this.find('option:selected');
-            if(value.val() !== 'user-specified') {
 
+            if(value.val() !== 'user-specified') { // Categorized sets
+
+                // If we've previously been in a user-selected set,
+                // disable that selection set and remove all of its
+                // filter tokens
+                $('#spec-molecular-attrs').parent().addClass('disabled');
+
+                // Generate the new filter token
                 var gene = geneListField.tokenfield('getTokens')[0];
-
-                $('a[href="#collapse-spec-molecular-attrs"]').parent().addClass('disabled');
-                $('a.mol-spec-filter-x').trigger('click');
-                if ($('a[href="#collapse-spec-molecular-attrs"]').attr('aria-expanded') === 'true') {
-                    $('a[href="#collapse-spec-molecular-attrs"]').trigger('click');
-                }
 
                 var tokenValDisplName = value.data('value-displ-name'),
                     tokenFeatDisplName = feature.data('feature-displ-name');
@@ -264,6 +258,11 @@ require([
                     'create-cohort-form-item': token.clone(true)
                 });
 
+                // Check the corresponding checkboxes in the specific set
+                $('.mutation-checkbox').each(function(){
+                    $(this).prop('checked',($(this).data('category') == value.val()));
+                });
+
                 $('.selected-filters .panel-body').append($this.data('select-filters-item'));
                 $('#create-cohort-form .form-control-static').append($this.data('create-cohort-form-item'));
 
@@ -283,10 +282,16 @@ require([
                     update_displays(true);
                     return false;
                 });
-            } else {
-                $('a.mol-cat-filter-x').trigger('click');
-                $('a[href="#collapse-spec-molecular-attrs"]').parent().removeClass('disabled');
-                $('a[href="#collapse-spec-molecular-attrs"]').trigger('click');
+            } else {        // User-specified
+                // Enable the checkbox set
+                $('#spec-molecular-attrs').parent().removeClass('disabled');
+
+                // Any checked boxes from a category won't be in the filter set - add them now
+                $('.mutation-checkbox').each(function(){
+                    if ($(this).is(':checked')) {
+                        $(this).triggerHandler('change');
+                    }
+                });
             }
         } else {
 
@@ -500,16 +505,31 @@ require([
     });
 
     $('.show-more').on('click', function() {
-        $(this).siblings('li.extra-values').show();
-        $(this).siblings('.show-less').show();
-        $(this).hide();
+        $(this).parent().siblings('li.extra-values').show();
+        $(this).parent().siblings('.less-checks').show();
+        $(this).parent().hide();
     });
 
     $('.show-less').on('click', function() {
-        $(this).siblings('li.extra-values').hide();
-        $(this).siblings('.show-more').show();
-        $(this).hide();
+        $(this).parent().siblings('li.extra-values').hide();
+        $(this).parent().siblings('.more-checks').show();
+        $(this).parent().hide();
     });
+
+    $('.check-all').on('click',function(){
+        $(this).parent().parent().siblings('.checkbox').find('input').prop('checked',true);
+        $(this).parent().parent().siblings('.checkbox').find('input').each(function(){
+            $(this).triggerHandler('change');
+        });
+    });
+
+    $('.uncheck-all').on('click',function(){
+        $(this).parent().parent().siblings('.checkbox').find('input').prop('checked',false);
+        $(this).parent().parent().siblings('.checkbox').find('input').each(function(){
+            $(this).triggerHandler('change');
+        });
+    });
+
     if($('.col-lg-8').length == 0){
         showHideMoreGraphButton();
     }
@@ -675,9 +695,9 @@ require([
 
     var firstSelect = true;
     $('a[href="#molecular-filters"]').on('click',function(e){
-        firstSelect && $('a[href="#collapse-gene"]').trigger('click');
-        firstSelect && $('a[href="#collapse-sel-molecular-attr-cat"]').parent().addClass('disabled');
-        firstSelect && $('a[href="#collapse-spec-molecular-attrs"]').parent().addClass('disabled');
+        firstSelect && $('a[href="#collapse-gene-mutation-status"]').trigger('click');
+        firstSelect && $('#mutation-category').parent().parent().addClass('disabled');
+        firstSelect && $('#spec-molecular-attrs').parent().addClass('disabled');
         $('#molecular-filter-alert').show();
         firstSelect = false;
     });
