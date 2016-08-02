@@ -500,16 +500,27 @@ require([
     });
 
     $('.show-more').on('click', function() {
-        $(this).siblings('li.extra-values').show();
-        $(this).siblings('.show-less').show();
-        $(this).hide();
+        $(this).parent().siblings('li.extra-values').show();
+        $('.less-checks').show();
+        $('.more-checks').hide();
     });
 
     $('.show-less').on('click', function() {
-        $(this).siblings('li.extra-values').hide();
-        $(this).siblings('.show-more').show();
-        $(this).hide();
+        $(this).parent().siblings('li.extra-values').hide();
+        $('.more-checks').show();
+        $('.less-checks').hide();
     });
+
+    $('.check-all').on('click',function(){
+        $(this).parent().parent().siblings('.checkbox').find('input').prop('checked',true);
+        $(this).parent().parent().siblings('.checkbox').find('input').triggerHandler('change');
+    });
+
+    $('.uncheck-all').on('click',function(){
+        $(this).parent().parent().siblings('.checkbox').find('input').prop('checked',false);
+        $(this).parent().parent().siblings('.checkbox').find('input').triggerHandler('change');
+    });
+
     if($('.col-lg-8').length == 0){
         showHideMoreGraphButton();
     }
