@@ -143,6 +143,10 @@ require([
             $('#mutation-category').parent().parent().addClass('disabled');
             $('#mutation-category').val('label');
 
+            $('.mol-cat-filter-x').trigger('click');
+            $('.mol-spec-filter-x').trigger('click');
+            $('.mutation-checkbox').prop('checked',false);
+
         }).on('tokenfield:edittoken',function(e){
             e.preventDefault();
             return false;
