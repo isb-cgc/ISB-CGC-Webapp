@@ -764,7 +764,7 @@ require([
 
         // Set Color override
         var color_override = false;
-        if (args.color_by = 'cohort') {
+        if (args.color_by == 'cohort') {
             args.color_by = '';
             color_override = true;
         }
