@@ -64,10 +64,11 @@ require([
         tracks.push({
             sourceType: 'ga4gh',
             type: 'bam',
-            url: 'https://www.googleapis.com/genomics/v1beta2',
+            url: 'https://genomics.googleapis.com/v1',
             readGroupSetIds: readgroupset_id,
             name: sample_barcode + ': Google Genomics',
-            referenceName: '1'
+            referenceName: '1',
+            withCredentials: true
         });
     }
 
@@ -79,7 +80,8 @@ require([
             sourceType: 'gcs',
             type: 'bam',
             url: bam_path, // gs:// url to .bam file. Location must also contain .bai file.
-            name: sample_barcode + ': GCS bam file'
+            name: sample_barcode + ': GCS bam file',
+            withCredentials: true
         });
     }
 
@@ -94,7 +96,8 @@ require([
         showNavigation: true,
         genome: "hg19",
         locus: "egfr",
-        tracks: tracks
+        tracks: tracks,
+        withCredentials: true
     };
     $('#igv-div').empty();
     igv.browser = null;

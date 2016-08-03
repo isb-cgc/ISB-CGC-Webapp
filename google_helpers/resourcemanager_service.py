@@ -18,9 +18,23 @@ limitations under the License.
 
 from oauth2client.client import GoogleCredentials
 from googleapiclient.discovery import build
+from django.conf import settings
+
+CRM_SCOPES = ['https://www.googleapis.com/auth/cloud-platform']
+
 
 def get_crm_resource():
     """Returns a Cloud Resource Manager service client for calling the API.
     """
     credentials = GoogleCredentials.get_application_default()
+    return build('cloudresourcemanager', 'v1beta1', credentials=credentials)
+
+
+def get_special_crm_resource():
+    """Returns a Cloud Resource Manager service client for calling the API on other projects.
+        This service client will be authorized on other projects only if one of our service accounts
+        has the Browser (or Viewer, Editor, Owner) role on the other project.
+    """
+    credentials = GoogleCredentials.from_stream(
+        settings.GOOGLE_APPLICATION_CREDENTIALS).create_scoped(CRM_SCOPES)
     return build('cloudresourcemanager', 'v1beta1', credentials=credentials)

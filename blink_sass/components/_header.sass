@@ -54,7 +54,13 @@ nav, .site-header
 
 nav.subnav li.has-drop-down__more ul.drop
   overflow-y: auto
-  max-height: 425px
+  /* Allow for a slightly taller subnav dropdown if the screen is tall enough */
+  @media screen and (max-height: $screen-md-h)
+    max-height: 425px
+
+  @media screen and (min-height: $screen-lg-h)
+    max-height: 525px
+
 
 a.skip-nav
     position: absolute

@@ -27,13 +27,16 @@
 {% block page_name %}cohort-details{% endblock %}
 
 {% block page_header %}
+<link type="text/css" rel="stylesheet" href="{% static 'css/token-typeahead.css' %}" />
+
 <div class="container">
     <ol class="breadcrumb">
         <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
         <li><a href="{% url 'cohort_list' %}">Saved Cohorts</a></li>
     </ol>
     <h1 class="page-header">{{ cohort.name }} </h1>
-    <input id="edit-cohort-name" type="text" name="cohort-name" value="{{ cohort.name }}" class="form-control input-lg space-top-15" style="display: none"/>
+    <label id="cohort-name-label" for="edit-cohort-name" class="hidden-label">Cohort Name:</label>
+    <input id="edit-cohort-name" type="text" name="cohort-name" value="{{ cohort.name }}" class="form-control input-lg space-top-15" style="display: none" aria-labelledby="cohort-name-label"/>
     <div class="page-action-group">
 
         <ul id="default-cohort-menu">
@@ -45,7 +48,7 @@
                 <form action="{% url 'worksheet_create_with_cohort' %}" method="POST">
                     {% csrf_token %}
                     <input type="hidden" name="cohort_id" value="{{ cohort.id}}">
-                    <button class="btn btn-default" type="submit">New Workbook</button>
+                    <button class="btn btn-primary" type="submit">New Workbook</button>
                 </form>
             </li>
             <li class="separator"></li>
@@ -85,12 +88,13 @@
         <div class="tabpanel" role="tabpanel">
             <ul class="nav nav-tabs" role="tablist">
                 <li role="presentation" class="active"><a href="#clinical-filters" role="tab" data-toggle="tab" title="Donor Filters">Donor</a></li>
-                <li role="presentation" class=""><a href="#data-filters" role="tab" data-toggle="tab" title="Donor Filters">Data Type</a></li>
-{#                <li role="presentation" class=""><a href="#molecular-filters" role="tab" data-toggle="tab" title="Donor Filters">Molecular</a></li>#}
+                <li role="presentation" class=""><a href="#data-filters" role="tab" data-toggle="tab" title="Data Type Filters">Data Type</a></li>
+                <li role="presentation" class=""><a href="#molecular-filters" role="tab" data-toggle="tab" title="Molecular Filters">Molecular</a></li>
             </ul>
             <div class="tab-content">
+                <!-- donor filters tab -->
                 <div role="tabpanel" class="tab-pane active" id="clinical-filters">
-                    <ul class="list-group" id="clin-accordion" role="tablist" aria-multiselectable="true">
+                    <ul class="list-group" id="clin-accordion" role="tablist">
                         {% for attr in clin_attr %}
                             {% if attr_list_count|list_contains_name:attr %}
                                 <li class="list-group-item">
@@ -100,39 +104,47 @@
                                         </a>
                                     </div>
 
-                                    <div id="collapse-{{ attr }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" aria-labelledby="heading-{{ attr }}" data-feature-name="{{ attr }}" data-feature-id="{% if attr_list_count|get_named_item:attr|get_item:'id' %}{{ attr_list_count|get_named_item:attr|get_item:'id' }}{% endif %}">
+                                    <div id="collapse-{{ attr }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" data-feature-type="donor"
+                                         aria-labelledby="heading-{{ attr }}" data-feature-name="{{ attr }}" data-feature-displ-name="{{ attr|get_readable_name }}"
+                                         data-feature-id="{% if attr_list_count|get_named_item:attr|get_item:'id' %}{{ attr_list_count|get_named_item:attr|get_item:'id' }}{% endif %}">
                                         <ul class="search-checkbox-list" id="{{ attr }}">
                                             {% with attr_list_count|get_named_item:attr|get_item:'values'|how_many_more:6 as num_more %}
-                                                {% for v in attr_list_count|get_named_item:attr|get_item:'values' %}
+                                                {% for v in attr_list_count|get_named_item:attr|get_item:'values'|check_for_order:attr %}
                                                     {% if forloop.counter0 < 6 %}
                                                         <li class="checkbox">
                                                             <label title="{{ v.value|get_tooltip_text:attr }}">
-                                                                <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}" data-value-id="{% if v.id %}{{ v.id }}{% endif %}">
-                                                                {% if v.value == 'None' %}NA{% else %}{{ v.value|get_readable_name:attr }}{% endif %}
+                                                                <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}"
+                                                                       data-value-id="{% if v.id %}{{ v.id }}{% endif %}"
+                                                                       data-value-displ-name="{% if v.displ_name %}{{ v.displ_name }}{% endif %}">
+                                                                {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name|get_readable_name:attr }}{% else %}{{ v.value|get_readable_name:attr }}{% endif %}
+                                                                 <span class="count">({{ v.count }})</span>
                                                             </label>
-                                                            <span class="count">({{ v.count }})</span>
                                                         </li>
                                                     {% elif forloop.counter0 == 6 and num_more > 0 %}
-                                                        <a class="show-more">{{ num_more }} more</a>
+                                                        <p class="more-checks"><a class="show-more">{{ num_more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                         <li class="extra-values checkbox" style="display:none;">
                                                             <label title="{{ v.value|get_tooltip_text:attr }}">
-                                                                <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}" data-value-id="{% if v.id %}{{ v.id }}{% endif %}">
-                                                                {% if v.value == 'None' %}NA{% else %}{{ v.value|get_readable_name:attr }}{% endif %}
+                                                                <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}"
+                                                                       data-value-id="{% if v.id %}{{ v.id }}{% endif %}"
+                                                                       data-value-displ-name="{% if v.displ_name %}{{ v.displ_name }}{% endif %}">
+                                                                {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name|get_readable_name:attr }}{% else %}{{ v.value|get_readable_name:attr }}{% endif %}
+                                                                 <span class="count">({{ v.count }})</span>
                                                             </label>
-                                                            <span class="count">({{ v.count }})</span>
                                                         </li>
                                                     {% else %}
                                                         <li class="extra-values checkbox" style="display:none;">
                                                             <label title="{{ v.value|get_tooltip_text:attr }}">
-                                                                <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}" data-value-id="{% if v.id %}{{ v.id }}{% endif %}">
-                                                                {% if v.value == 'None' %}NA{% else %}{{ v.value|get_readable_name:attr }}{% endif %}
+                                                                <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}"
+                                                                       data-value-id="{% if v.id %}{{ v.id }}{% endif %}"
+                                                                       data-value-displ-name="{% if v.displ_name %}{{ v.displ_name }}{% endif %}">
+                                                                {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name|get_readable_name:attr }}{% else %}{{ v.value|get_readable_name:attr }}{% endif %}
+                                                                 <span class="count">({{ v.count }})</span>
                                                             </label>
-                                                            <span class="count">({{ v.count }})</span>
                                                         </li>
                                                     {% endif %}
                                                 {% endfor %}
                                                 {% if num_more > 0 %}
-                                                    <a class="show-less" style="display:none;">less</a>
+                                                    <p class="less-checks" style="display: none;"><a class="show-less">less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                 {% endif %}
                                             {% endwith %}
                                         </ul>
@@ -142,24 +154,29 @@
                         {% endfor %}
                     </ul>
                 </div>
-                <!-- data filters tab -->
+                <!-- data type filters tab -->
                 <div role="tabpanel" class="tab-pane" id="data-filters">
                     <ul class="list-group" id="data-type-accordion" role="tablist" aria-multiselectable="true">
                         {% for attr in data_attr %}
                             <li class="list-group-item">
                                 <div class="list-group-item__heading" role="tab" id="heading-{{ attr }}">
-                                    <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-{{ attr }}" aria-expanded="false" aria-controls="collapse-{{ attr }}" {% if attr == 'miRNA_sequencing' %}style="text-transform:none!important"{% endif %}>
+                                    <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-{{ attr }}"
+                                       aria-expanded="false" aria-controls="collapse-{{ attr }}" {% if attr == 'miRNA_sequencing' %}style="text-transform:none!important"{% endif %}>
                                         <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ attr|get_readable_name }}
                                     </a>
                                 </div>
-                                <div id="collapse-{{ attr }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" aria-labelledby="heading-{{ attr }}" data-feature-name="{{ attr }}" data-feature-type="datatype">
+                                <div id="collapse-{{ attr }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"
+                                     aria-labelledby="heading-{{ attr }}" data-feature-name="{{ attr }}" data-feature-displ-name="{{ attr|get_readable_name }}" data-feature-type="datatype">
                                     <ul class="search-checkbox-list" id="{{ attr }}">
                                         {% if attr_list_count|list_contains_name:attr %}
                                             {% for v in attr_list_count|get_named_item:attr|get_item:'values' %}
                                                 <li class="checkbox">
                                                     <!-- todo: make a custom tag for the id for data_attr attributes-->
-                                                    <label><input type="checkbox" name="elements-selected" data-value-name="{{ v.value|get_data_attr_id:attr }}" >{{ v.value }}</label>
-                                                    <span class="count">({{ v.count }})</span>
+                                                    <label>
+                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.value|get_data_attr_id:attr }}"
+                                                               data-displ-name="{% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.value }}{% endif %}">
+                                                        {% if v.value == 'None' %}NA{% else %}{{ v.value }}{% endif %} <span class="count">({{ v.count }})</span>
+                                                    </label>
                                                 </li>
                                             {% endfor %}
                                         {% endif %}
@@ -169,45 +186,81 @@
                         {% endfor %}
                     </ul>
                 </div>
-{#                <!-- molecular filters tab -->#}
-{#                <div role="tabpanel" class="tab-pane" id="molecular-filters">#}
-{#                    <div class="panel-group" id="molecular-accordion" role="tablist" aria-multiselectable="true">#}
-{#                        {% for attr in molec_attr %}#}
-{#                            <div class="panel panel-default">#}
-{#                                <a role="button" data-toggle="collapse" data-parent="#clin-accordion" href="#collapse-{{ attr }}" aria-expanded="true" aria-controls="collapse-{{ attr }}">#}
-{#                                    <div class="panel-heading" role="tab" id="heading-{{ attr }}"><i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ attr|get_readable_name }}</div>#}
-{#                                </a>#}
-{#                                <div id="collapse-{{ attr }}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-{{ attr }}">#}
-{#                                    <div class="panel-body">#}
-{#                                        <ul class="search-checkbox-list" id="{{ attr }}">#}
-{#                                            <form action="" method="GET" class="form-horizontal" id="{{ attr }}-form">#}
-{#                                                <div class="form-group">#}
-{#                                                    <div class="col-sm-3"><label for="{{ attr }}-genes" class="control-label">Gene:</label></div>#}
-{#                                                    <div class="col-md-5">#}
-{#                                                        <input class="form-control" type="text" id="{{ attr }}-genes" name="gene">#}
-{#                                                    </div>#}
-{##}
-{#                                                </div>#}
-{#                                                {% if attr == 'mRNA_expression' %}#}
-{#                                                <ul>#}
-{#                                                    <li>#}
-{#                                                    <!--<input type="checkbox" name="RPKM" id="RPKM-check">-->#}
-{#                                                    <label for="RPKM-check">RPKM</label>#}
-{#                                                    </li>#}
-{#                                                    <li>#}
-{#                                                    <!--<input type="checkbox" name="normalized_count" id="normalized_count-check">-->#}
-{#                                                    <label for="normalized_count-check">normalized count</label>#}
-{#                                                    </li>#}
-{#                                                </ul>#}
-{#                                                {% endif %}#}
-{#                                            </form>#}
-{#                                        </ul>#}
-{#                                    </div>#}
-{#                                </div>#}
-{#                            </div>#}
-{#                        {% endfor %}#}
-{#                    </div>#}
-{#                </div>#}
+                <!-- molecular filters tab -->
+                <div role="tabpanel" class="tab-pane" id="molecular-filters">
+                    <ul class="list-group" id="molecular-accordion" role="tablist" aria-multiselectable="true">
+                        <li class="list-group-item">
+                            <div id="molecular-filter-alert" class="alert alert-warning alert-dismissable" style="display: none;">
+                                <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                A large amount of data must be processed to use these filters, which can result in some delays.
+                            </div>
+                        </li>
+                        <li class="list-group-item">
+                            <div class="list-group-item__heading" role="tab" id="heading-gene-mutation-status">
+                                <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-gene-mutation-status" aria-expanded="false" aria-controls="collapse-gene-mutation-status">
+                                    <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> GENE MUTATION STATUS
+                                </a>
+                            </div>
+                            <div id="collapse-gene-mutation-status" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel">
+                                <ul class="list">
+                                    <li class="list-item">
+                                        <!-- gene selector -->
+                                        <div class="list-item__heading" role="tab" id="heading-sel-gene">
+                                                Gene
+                                        </div>
+                                        <div id="sel-gene" class="list-group-item__body" role="tabpanel" aria-labelledby="heading-sel-gene">
+                                            <div id="tokenfield-holder">
+                                                <textarea name="genes-list" class="form-control tokenfield" id="paste-in-genes" placeholder="Enter a gene's name" required></textarea>
+                                            </div>
+                                            <div class="tokenfield">
+                                                <p class="helper-text__invalid" style="display: none;"><i class="fa fa-exclamation-circle"></i> The following <span class="token invalid">items</span>were not recognized as gene identifiers. You may either correct or delete these items -- or use them as-is.</p>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="list-item">
+                                        <!-- Mutation Category Selector -->
+                                        <div class="list-item__heading" role="tab" id="heading-sel-molecular-attr-cat">
+                                                Mutation Type Categories
+                                        </div>
+                                        <div id="sel-molecular-attr-cat" class="list-group-item__body cohort-feature-select-block" role="tabpanel"
+                                             aria-labelledby="heading-sel-molecular-attr-cat" data-feature-displ-name="Mutation Category" data-feature-id="category"
+                                             data-feature-name="mutation-category" data-feature-type="molecular">
+                                            <select id="mutation-category" class="mutation-category-selector form-control spec-select datatype-selector">
+                                                <option value="label" selected disabled>-- Select a Mutation Category --</option>
+                                                <option value="any" data-value-displ-name="Any" data-value-name="Any" data-value-id="any">Any</option>
+                                                {% for cat in molecular_attr.categories %}
+                                                    <option value="{{ cat.value }}" data-value-displ-name="{{ cat.name }}" data-value-name="{{ cat.name }}" data-value-id="{{ cat.value }}">{{ cat.name }}</option>
+                                                {% endfor %}
+                                                <option value="user-specified">User Specified</option>
+                                            </select>
+                                        </div>
+                                    </li>
+                                    <li class="list-item">
+                                        <!-- Specific Mutation Type Checkboxes -->
+                                        <div class="list-item__heading" role="tab" id="heading-spec-molecular-attrs">
+                                            Specific Mutation Types
+                                        </div>
+                                        <div id="spec-molecular-attrs" class="list-group-item__body cohort-feature-select-block" role="tabpanel"
+                                             aria-labelledby="heading-spec-molecular-attrs" data-feature-displ-name="Specific Mutation Type" data-feature-name="specific-mutation"
+                                             data-feature-id="specific" data-feature-type="molecular">
+                                            <ul class="search-checkbox-list" id="{{ attr.value }}">
+                                                {% for attr in molecular_attr.attrs %}
+                                                    <li class="checkbox">
+                                                        <label>
+                                                            <input class="mutation-checkbox" type="checkbox" name="elements-selected" data-value-name="{{ attr.value }}"
+                                                                   data-value-displ-name="{{ attr.name }}" data-category="{{ attr.category }}">
+                                                            {{ attr.name }} <!-- <span class="count">({{ attr.count }})</span> -->
+                                                        </label>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -225,13 +278,13 @@
 
         <div class="cohort-selected-filters panel panel-default">
             <div class="panel-heading">
-                <h4 class="panel-title">Selected Filters</h4>
+                <h4 class="panel-title">Current Filters</h4>
             </div>
             <div class="panel-body">
-                {% for filter in cohort.get_filters %}
+                {% for filter in cohort.get_current_filters %}
                     <span class="filter-label label label-default space-right-5">{{ filter.name }}: {{ filter.value }}</span>
                 {% empty %}
-                    <p>There were no filters used to create this cohort.</p>
+                    <p>No filters have been applied to this cohort.</p>
                 {% endfor %}
             </div>
         </div>
@@ -241,6 +294,9 @@
                 <h4 class="panel-title">Details</h4>
             </div>
             <div class="panel-body">
+                <div class="row col-md-12 space-bottom-10">
+                    <span>Internal ISB-CGC Cohort ID: {{ cohort.id }}</span>
+                </div>
                 <div class="row col-md-12 space-bottom-10">
                     <span class="detail-label">Total Number of Samples:</span>
                     <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
@@ -253,6 +309,16 @@
                 </div>
                 <div class="row col-md-12 space-bottom-10">
                     <span>Your Permissions: {{ cohort.perm.perm }}</span>
+                </div>
+                <div class="row col-md-12 space-bottom-10">
+                    <span>Creation Filters: </span>
+                    <span class="applied-filters">
+                     {% for filter in cohort.get_creation_filters %}
+                         <span>{{ filter.name }}: {{ filter.value }}</span>
+                     {% empty %}
+                         There were no filters used to create this cohort.
+                     {% endfor %}
+                     </span>
                 </div>
                 <div class="row col-md-12 space-bottom-10">
                     <span class="rev-history">Revision History:</span>
@@ -329,14 +395,13 @@
         </div>
     </div>
 
-
     <!-- Share Cohort Modal -->
     <div class="modal fade" id="share-cohort-modal" tabindex="-1" role="dialog" aria-labelledby="shareCohortModal" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title"></h4>
+                    <h4 class="modal-title">Cohort Sharing</h4>
                     <ul class="nav nav-tabs" role="tablist">
                         {% if cohort.perm.perm == 'OWNER' %}
                             <li role="presentation" class="active"><a data-target="#share-cohort-pane" data-toggle="tab" aria-controls="home" role="tab" id="shareCohortModal">Share Cohort</a></li>
@@ -398,7 +463,6 @@
         </div>
     </div>
 
-
     <!-- Create Cohort Modal -->
     <div class="modal fade" id="create-cohort-modal" tabindex="-1" role="dialog" aria-labelledby="createCohortModal" aria-hidden="true">
         <div class="modal-dialog">
@@ -455,8 +519,8 @@
                 </div>
                 <form id="delete-cohort-form" method="POST" action="{% url 'delete_cohort' %}">
                     <div class="modal-body">
-                        <label for="cohort-name">Are you sure you want to delete this cohort?</label>
-                        <input type="hidden" id="cohort-id" name="id" value="{{ cohort.id }}"/>
+                        <label id="delete-confirm-label" for="cohort-id">Are you sure you want to delete this cohort?</label>
+                        <input type="hidden" id="cohort-id" name="id" value="{{ cohort.id }}" aria-labelledby="delete-confirm-label"/>
                     </div>
                     <div class="modal-footer">
                         {% csrf_token %}
@@ -476,6 +540,7 @@
     var base_api_url = '{{ base_api_url|safe }}';
     var cohort_id = {{ cohort.id }};
     var metadata_counts = {{ metadata_counts|tojson|safe }};
+    var molecular_attr = {{ molecular_attr|tojson|safe }};
     </script>
 {% endblock %}
 

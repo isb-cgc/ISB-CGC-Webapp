@@ -37,13 +37,13 @@
     font-weight: $medium-font-weight
 
     &:hover
-      background: lighten($isb-dark, 10%)
+      background: $isb-dark
 
 .menu-item
   position: relative
 
   .sub-menu
-    width: 250px
+    width: 275px
     padding: 10px 15px
     > li
       padding: 10px 5px
@@ -53,13 +53,20 @@
       &:last-child
         border-bottom: none
     .item-list li:hover
-      background: $isb-dark
+      background: darken($isb-dark, 10%)
+    .item-list li button,a
+      overflow: hidden
+      text-overflow: ellipsis
+      white-space: nowrap
+    .item-list li a
+      width: 100%
+      display: inline-block
 
   &.has-drop-down
     > .drop
       display: none
       position: absolute
-      background: lighten($isb-dark, 10%)
+      background: $isb-dark
       top: 100%
       left: 0
     &:hover > .drop
@@ -79,11 +86,11 @@
         left: 100%
         top: -10px
         padding: 10px
-        background: $isb-dark
+        background: darken($isb-dark, 10%)
         width: 250px
 
         li:hover
-          background: lighten($isb-dark, 10%)
+          background: $isb-dark
       &:hover > .drop
         display: block
 

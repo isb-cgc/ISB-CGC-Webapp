@@ -8,6 +8,12 @@
     .total-samples
         margin-top: 0px
     #filter-panel
+        .checks
+            float: right
+            display: block
+            width: 50%
+        #paste-in-genes-tokenfield
+            width: 100% !important
         .tabpanel
             border-top-left-radius: 3px
             border-top-right-radius: 3px
@@ -19,11 +25,13 @@
                 border: none
                 background-color: #fff
                 text-align: center
-                width: (100% / 2)
+                width: (100% / 3)
                 &:first-child a
                     border-top-left-radius: 3px
                 &:last-child a
                     border-top-right-radius: 3px
+                span
+                    margin-left: 10px
 
         .tab-content
             padding: 0px
@@ -60,12 +68,23 @@
                 padding: 0px
             .panel
                 margin: 0px
-
                 .panel-body
                     padding: 0px 15px 0px 15px
             .panel-collapse
                 max-height: 100px
-                overflow-y: scroll
+            #sel-gene
+                max-height: 300px
+                .tokenfield.form-control
+                    max-height: 49px
+                >.tokenfield
+                    display: none
+            .alert
+                margin: 10px 0px 10px 0px
+        #molecular-accordion
+            .list-item__heading
+                padding: 10px 0px 10px 0px
+            .list-item
+                border: none
 
     .filter-label:hover
         //background-color: $primary-color-light

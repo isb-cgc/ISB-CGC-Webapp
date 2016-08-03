@@ -50,7 +50,7 @@
                     {% if not from_workbook %}
                         <div class="page-action-group">
                             <li role="menuitem">
-                                <button class="btn btn-default createWorkbookWithCohort">New Workbook</button>
+                                <button class="btn btn-primary createWorkbookWithCohort">New Workbook</button>
                             </li>
                             <li class="separator"></li>
                             <li role="menuitem">
@@ -81,6 +81,7 @@
                             <th># Patients</th>
                             <th class="owner-col">Ownership</th>
                             <th>Shared With</th>
+                            <th>Cohort ID</th>
                             <th class="date-col">Last Modified</th>
                         </tr></thead>
                         <tbody>
@@ -107,6 +108,9 @@
                                         ( 0 )
                                     {% endif %}
                                 </td>
+                                <td>
+                                    {{ cohort.id }}
+                                </td>
                                 <td class="date-col">{{ cohort.last_date_saved|date:'M d, Y, g:i a' }}</td>
                             </tr>
                         {% endif %}
@@ -124,7 +128,7 @@
             <div role="tabpanel" class="tab-pane {% if is_public %} active {% endif %} " id="public-cohorts-list">
                 {% if not from_workbook %}
                 <div class="page-action-group">
-                    <li role="menuitem"><button class="btn btn-default createWorkbookWithCohort">New Workbook</button></li>
+                    <li role="menuitem"><button class="btn btn-primary createWorkbookWithCohort">New Workbook</button></li>
                     <li class="separator"></li>
                     <li role="menuitem"><button class="btn btn-info">Set Operations</button></li>
                 </div>
@@ -146,7 +150,7 @@
                                     <input {% if cohort.id in previously_selected_cohort_ids %}checked{% endif %} type="checkbox" name="id" value="{{ cohort.id }}" title="{{ cohort.name }} Checkbox" aria-label="cohort-checkbox"/>
                                 </td>
                                 <td class="name-col"><a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a></td>
-                                <td class="sample-col">{#{ cohort.num_patients }#} {{ cohort.sample_size }} </td>
+                                <td class="sample-col"> {{ cohort.sample_size }} </td>
                                 <td>{{ cohort.patient_size }}</td>
                                 <td class="date-col">{{ cohort.last_date_saved|date:'M d, Y, g:i a' }}</td>
                             </tr>

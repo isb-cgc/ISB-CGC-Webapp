@@ -19,13 +19,6 @@
 define(['jquery', 'd3', 'd3tip', 'vis_helpers'],
 function($, d3, d3tip, vis_helpers) {
 
-    // Note this is relying on the checkbox menu flyout, which is present in the cohorts DOM but
-    // not visible sometimes. If this flyout is ever edited this code must be edited to reflect that
-    var getSampleTypeName = function(sampleTypeCode) {
-        var label = $("#SampleTypeCode input[data-value-name='" + sampleTypeCode + "']").parent()[0].innerHTML;
-        return label.substring(label.indexOf(">")+1);
-    };
-
     var CURSOR_TOOLTIP_PAD = 20;
 
     // If you want to override the tip coming in from the create call,
@@ -42,15 +35,14 @@ function($, d3, d3tip, vis_helpers) {
                 treeTip.offset([CURSOR_TOOLTIP_PAD, 0]);
             }
 
-            var display =  (d.parent.name === "SampleTypeCode") ? getSampleTypeName(d.name) : d.name;
-            return '<span>' + display + ': ' + d.count + '</span>';
+            return '<span>' + d.name + ': ' + d.count + '</span>';
         });
 
     return {
         get_treemap_ready: function(data, attribute) {
             var children = [];
             for (var i in data) {
-                children.push({name:data[i]['value'].replace(/_/g, ' '), count: data[i]['count']});
+                children.push({name:(data[i]['displ_name'] || data[i]['value'].replace(/_/g, ' ')), count: data[i]['count']});
             }
             return {children: children, name: attribute};
         },
@@ -101,7 +93,7 @@ function($, d3, d3tip, vis_helpers) {
 
             svg.call(tip);
         },
-        draw_trees: function(data) {
+        draw_trees: function(data,clin_attr) {
 
             var startPlot = new Date().getTime();
 
@@ -109,14 +101,6 @@ function($, d3, d3tip, vis_helpers) {
                 h = 140;
 
             $('#tree-graph-clinical').empty();
-            var clin_attr = [
-                'Study',
-                'vital_status',
-                'SampleTypeCode',  //todo: make readable names out of numeric codes
-                'tumor_tissue_site',
-                'gender',
-                'age_at_initial_pathologic_diagnosis'
-            ];
 
             var clin_attr_titles = [
                 'Study',

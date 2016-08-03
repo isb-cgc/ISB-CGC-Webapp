@@ -87,6 +87,7 @@
                     </p>
 
                     <p>Go to the <a href="http://console.cloud.google.com" target="_blank">Google Cloud Console</a>.</p>
+                    <p><a href="{% url 'user_gcp_list' user.id %}">View Registered Google Cloud Projects</a></p>
                 {% else %}
                     <p><i class="fa fa-check-circle"></i> Connected to Google Cloud Platform</p>
                     <hr>
@@ -133,9 +134,9 @@
 {#                            <label for="credits" class="col-sm-3 control-label">Credits Requested</label>#}
 {#                            <div class="col-sm-9">#}
 {#                                <div class="btn-group" role="group">#}
-{#                                    <button type="button" class="btn btn-default" value="1000">$1000</button>#}
-{#                                    <button type="button" class="btn btn-default" value="2000">$2000</button>#}
-{#                                    <button type="button" class="btn btn-default" value="5000">$5000</button>#}
+{#                                    <button type="button" class="btn btn-primary" value="1000">$1000</button>#}
+{#                                    <button type="button" class="btn btn-primary" value="2000">$2000</button>#}
+{#                                    <button type="button" class="btn btn-primary" value="5000">$5000</button>#}
 {#                                </div>#}
 {#                                <input type="hidden" name="credits" value=""/>#}
 {#                            </div>#}
@@ -148,7 +149,7 @@
 {#                        </div>#}
 {#                    </div>#}
 {#                    <div class="modal-footer">#}
-{#                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>#}
+{#                        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>#}
 {#                        {% csrf_token %}#}
 {#                        <input type="submit" value="Submit Request" class="btn btn-primary" />#}
 {#                    </div>#}

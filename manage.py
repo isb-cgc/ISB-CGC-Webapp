@@ -30,7 +30,7 @@ if __name__ == "__main__":
     # address this. So far only memcache has been needed, but there may be others in the future.
     # See here for information on the stubs which can be initialized:
     # https://cloud.google.com/appengine/docs/python/tools/localunittesting#Python_Introducing_the_Python_testing_utilities
-    if 'migrate' in sys.argv:
+    if 'migrate' in sys.argv or 'makemigrations' in sys.argv:
         from google.appengine.ext import testbed
 
         stubBuilder = testbed.Testbed()

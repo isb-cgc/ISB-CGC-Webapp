@@ -44,6 +44,21 @@ require([
     'assetsresponsive'
 ], function($, jqueryui, bootstrap, session_security) {
     A11y.Core();
+
+    $('.show-service-accounts').on('click', function () {
+        var $this = $(this);
+        var target = $this.data('target');
+        if ($('.' + target).is(':visible')) {
+            $this.find('i').removeClass('fa-caret-down');
+            $this.find('i').addClass('fa-caret-right');
+            $('.' +target).slideUp();
+        } else {
+            $this.find('i').removeClass('fa-caret-right');
+            $this.find('i').addClass('fa-caret-down');
+            $('.' +target).show('slow');
+        }
+    });
+
     $('.btn-group button').on('click', function() {
         $(this).toggleClass('active');
         $('input[name="credits"]').prop('value', $(this).val());

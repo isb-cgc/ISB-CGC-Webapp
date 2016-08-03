@@ -25,7 +25,8 @@ require.config({
             deps: ['jquery'],
             init: function ($) {
                 return require.s.contexts._.registry['typeahead.js'].factory( $ );
-            }
+            },
+            hint: false
         },
         'bloodhound': {
            deps: ['jquery'],
@@ -71,7 +72,9 @@ require([
         // be aware bootstrap tokenfield requires 'value' as the datem attribute field : https://github.com/sliptree/bootstrap-tokenfield/issues/189
         geneListField.tokenfield({
             typeahead : [
-                null, {
+                {
+                    hint: false
+                }, {
                     source: gene_suggestions.ttAdapter(),
                     display: 'value'
                 }
@@ -106,7 +109,10 @@ require([
                 if ($('div.token.invalid.repeat').length < 1) {
                     $('.helper-text__repeat').hide();
                 }
-            })
+            });
+            if(geneListField.tokenfield('getTokens').length > 0) {
+                $('.create-gene-list input[type="submit"]').removeAttr('disabled');
+            }
         }).on('tokenfield:removedtoken', function (event) {
             // Update duplicate flagging
             var theseRepeats = [];
@@ -117,12 +123,15 @@ require([
                     firstRepeat.removeClass('invalid');
                 }
             }
-
             if ($('div.token.invalid.error').length < 1) {
                 $('.helper-text__invalid').hide();
             }
             if ($('div.token.invalid.repeat').length < 1) {
                 $('.helper-text__repeat').hide();
+            }
+
+            if(geneListField.tokenfield('getTokens').length <= 0) {
+                $('.create-gene-list input[type="submit"]').attr('disabled', 'disabled');
             }
         }).on('tokenfield:edittoken',function(e){
             e.preventDefault();
@@ -139,9 +148,11 @@ require([
             event.preventDefault();
         }else{
             geneFavs = [];
+            // Bootstrap tokenfield bug #183: there's no easy way to clear out all the tokens. Suggested
+            // solution is to set an empty token array and clear out the underlying text field.
             geneListField.tokenfield('setTokens', []);
-            geneListField.tokenfield('createToken' , 'this is an arbitrary token to get bootstrap to clear the existing tokens');
-            geneListField.tokenfield('setTokens', []);
+            geneListField.val('');
+            $('.create-gene-list input[type="submit"]').attr('disabled', 'disabled');
         }
         return false;
     });
@@ -225,8 +236,19 @@ require([
     //    console.log(uploaded_list.valid);
     //})
 
-    $('form.create-gene-list').on('submit', function() {
-        $(this).find('input[type="submit"]').attr('disabled', 'disabled');
+    $('form.create-gene-list').on('submit', function(e) {
+        // Do not allow white-space only names
+        if($('#genes-list-name').prop('value').match(/^\s*$/)) {
+            $('#genes-list-name').prop('value','');
+            e.preventDefault();
+            return false;
+        }
+        // Do not allow submission of empty gene lists
+        if(geneListField.tokenfield('getTokens').length <= 0) {
+            e.preventDefault();
+            return false;
+        }
+        $('.create-gene-list input[type="submit"]').attr('disabled', 'disabled');
     });
 
     /*

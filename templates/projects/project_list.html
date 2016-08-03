@@ -117,7 +117,7 @@
                 </table>
                 {% else %}
                 <p class="center space-top-10">You don't have any saved projects yet</p>
-                <p class="center"><a href="{% url 'project_upload' %}" class="btn btn-default"><i class="fa fa-cloud-upload"></i>Upload Project Data</a></p>
+                <p class="center"><a href="{% url 'project_upload' %}" class="btn btn-primary"><i class="fa fa-cloud-upload"></i>Upload Project Data</a></p>
                 {% endif %}
             </div>
             <div role="tabpanel" class="tab-pane {% if is_public %} active {% endif %}" id="public-projects-list">
