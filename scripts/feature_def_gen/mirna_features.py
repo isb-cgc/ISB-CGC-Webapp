@@ -96,7 +96,7 @@ class MIRNFeatureDefProvider(FeatureDefBigqueryProvider):
     ]
 
     def get_mysql_schema(self):
-        self.MYSQL_SCHEMA
+        return self.MYSQL_SCHEMA
 
     def build_internal_feature_id(self, feature_type, mirna_name, feature_table_id):
         return '{feature_type}:{mirna_name}:{feature_table_id}'.format(
@@ -106,8 +106,6 @@ class MIRNFeatureDefProvider(FeatureDefBigqueryProvider):
         )
 
     def build_table_query(self, config, table_config):
-        mir_name = None
-
         if table_config.is_expression_table:
             mir_name = 'mirna_id'
             query_template =\
@@ -129,6 +127,12 @@ class MIRNFeatureDefProvider(FeatureDefBigqueryProvider):
         )
 
         return query
+
+    def build_table_mapping(self, config):
+        result = {}
+        for table_item in config.data_table_list:
+            result[table_item.table_name] = table_item
+        return result
 
     def build_subqueries_for_tables(self, config):
         query_strings = []
@@ -168,18 +172,21 @@ class MIRNFeatureDefProvider(FeatureDefBigqueryProvider):
         query = self.merge_queries(query_strings)
         return query
 
-    def unpack_query_response(self, row_item_array, table_config):
+    def unpack_query_response(self, row_item_array):
+        table_config_mapping = self.build_table_mapping(self.config)
+
         feature_type = get_feature_type()
-        platform = table_config.platform
-        value_label = table_config.value_label
         result = []
         for row in row_item_array:
-            mirna_name = row['f'][0]['v']
+            table_name = row['f'][0]['v']
+            mirna_name = row['f'][1]['v']
+
+            table_config = table_config_mapping[table_name]
 
             result.append({
                 'mirna_name': mirna_name,
-                'platform': platform,
-                'value_field': value_label,
+                'platform': table_config.platform,
+                'value_field': table_config.value_label,
                 'internal_feature_id': self.build_internal_feature_id(feature_type, mirna_name, table_config.internal_table_id)
             })
 
