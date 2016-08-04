@@ -31,6 +31,9 @@ def get_bigquery_service():
 
 
 class FeatureDefBigqueryProvider(object):
+    BQ_JOB_POLL_SLEEP_TIME = 1
+    BQ_JOB_POLL_MAX_RETRIES = 20
+
     def __init__(self, config, bigquery_service=None):
         self.config = config
         self.job_reference = None

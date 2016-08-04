@@ -50,6 +50,9 @@ def get_feature_type():
 
 
 class CNVFeatureDefProvider(FeatureDefBigqueryProvider):
+    BQ_JOB_POLL_SLEEP_TIME = 10
+    BQ_JOB_POLL_MAX_RETRIES = 20
+
     MYSQL_SCHEMA = [
         {
             'name': 'gene_name',
@@ -69,7 +72,7 @@ class CNVFeatureDefProvider(FeatureDefBigqueryProvider):
         return self.MYSQL_SCHEMA
 
     def build_query(self, config):
-        query_template = ("SELECT gene_name, seqname, start, end \
+        query_template = ("SELECT gene_name, seq_name, start, end \
                            FROM [{genomic_reference_project_name}:{genomic_reference_dataset_name}.{gencode_table}] \
                            WHERE feature=\'gene\'")
 
@@ -105,7 +108,6 @@ class CNVFeatureDefProvider(FeatureDefBigqueryProvider):
 
             for value_field in VALUES:
                 result.append({
-                    'num_search_hits': 0,
                     'gene_name': gene_name,
                     'value_field': value_field,
                     'internal_feature_id': self.build_internal_feature_id(feature_type, value_field, chromosome, start, end)

@@ -20,6 +20,7 @@ from csv import DictWriter
 import logging
 from StringIO import StringIO
 from time import sleep
+from os.path import join as path_join
 
 import click
 
@@ -33,6 +34,8 @@ from mirna_features import MIRNFeatureDefConfig, MIRNFeatureDefProvider
 from scripts.feature_def_gen.feature_def_utils import load_config_json
 
 
+logging.basicConfig(level=logging.INFO)
+
 data_type_registry = {
     'gexp': (GEXPFeatureDefConfig, GEXPFeatureDefProvider),
     'gnab': (GNABFeatureDefConfig, GNABFeatureDefProvider),
@@ -43,10 +46,12 @@ data_type_registry = {
 }
 
 
+
 def run_query(project_id, provider, config):
     job_reference = provider.submit_query_and_get_job_ref(project_id)
 
-    poll_retry_limit = 20
+    poll_retry_limit = provider.BQ_JOB_POLL_MAX_RETRIES
+    poll_sleep_time = provider.BQ_JOB_POLL_SLEEP_TIME
     all_done = False
     total_retries = 0
     poll_count = 0
@@ -58,7 +63,7 @@ def run_query(project_id, provider, config):
 
         is_finished = provider.is_bigquery_job_finished(project_id)
         all_done = is_finished
-        sleep(1)
+        sleep(poll_sleep_time)
 
     logging.debug("Done: {done}    retry: {retry}".format(done=str(all_done), retry=total_retries))
     query_result = provider.download_and_unpack_query_result()
@@ -102,13 +107,15 @@ def print_query(data_type, config_json):
 @click.command()
 @click.argument('project_id', type=click.INT)
 @click.argument('data_type', type=str)
+@click.argument('base_dir', type=click.Path(exists=True))
 @click.argument('config_json', type=click.Path(exists=True))
-def run(project_id, data_type, config_json):
+def run(project_id, data_type, base_dir, config_json):
     _, provider_class = data_type_registry[data_type]
     config = load_config_from_path(data_type, config_json)
     provider = provider_class(config)
 
-    csv_path = config.output_csv_path
+    csv_path = path_join(base_dir, config.output_csv_path)
+    logging.info("Output CSV: {}".format(csv_path))
     result = run_query(project_id, provider, config)
     save_csv(result, provider.get_mysql_schema(), csv_path, include_header=True)
 
