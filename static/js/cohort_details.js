@@ -131,12 +131,9 @@ require([
             $('#paste-in-genes-tokenfield').attr('placeholder',"");
             $('#paste-in-genes-tokenfield').attr('disabled','disabled');
 
-            $('#mutation-category').parent().parent().removeClass('disabled');
+            $('#mutation-category').removeClass('disabled');
             $('#mutation-category option[value="no-gene"]').hide();
-            $('#mutation-category').val('any');
-            $('#mutation-category').trigger('change');
-            $('#spec-molecular-attrs').parent().removeClass('disabled');
-
+            $('#mutation-category').val('label');
 
         }).on('tokenfield:removedtoken', function(event) {
             $('#paste-in-genes-tokenfield').attr('placeholder',"Enter a gene's name");
@@ -145,7 +142,7 @@ require([
                 $('.helper-text__invalid').hide();
             }
 
-            $('#spec-molecular-attrs').parent().addClass('disabled');
+            $('#spec-molecular-attrs .search-checkbox-list').addClass('disabled');
 
             $('.mol-cat-filter-x').trigger('click');
             $('.mol-spec-filter-x').trigger('click');
@@ -153,7 +150,7 @@ require([
 
             $('#mutation-category option[value="no-gene"]').show();
             $('#mutation-category').val('no-gene');
-            $('#mutation-category').parent().parent().addClass('disabled');
+            $('#mutation-category').addClass('disabled');
 
         }).on('tokenfield:edittoken',function(e){
             e.preventDefault();
@@ -239,7 +236,13 @@ require([
             // 'Selected Filters' token 'X' button
             value = $this.find('option:selected');
 
-            if(value.val() !== 'user-specified') { // Categorized sets
+            if(value.val() !== 'indv-selex') { // Categorized sets
+
+                // If we've previously been in a user-selected set,
+                // disable that selection set and remove all of its
+                // filter tokens
+                $('#spec-molecular-attrs .search-checkbox-list').addClass('disabled');
+                $('#spec-mol-attr-heading-note').show();
 
                 // Generate the new filter token
                 var gene = geneListField.tokenfield('getTokens')[0];
@@ -289,7 +292,10 @@ require([
                     update_displays(true);
                     return false;
                 });
-            } else {        // User-specified
+            } else {        // indv-selex
+                // Enable the checkbox set
+                $('#spec-molecular-attrs .search-checkbox-list').removeClass('disabled');
+                $('#spec-mol-attr-heading-note').hide();
 
                 // Any checked boxes from a category won't be in the filter set - add them now
                 $('.mutation-checkbox').each(function(){
@@ -301,10 +307,10 @@ require([
         } else { // Checkboxes
 
             // If a specific mutation checkbox was checked, check to see if we need to switch
-            // into user-specified mode
-            if(feature.data('feature-type') == 'molecular' && $('#mutation-category').val() !== 'user-specified') {
+            // into indv-selex mode
+            if(feature.data('feature-type') == 'molecular' && $('#mutation-category').val() !== 'indv-selex') {
                 $('a.mol-cat-filter-x').trigger('click');
-                $('#mutation-category').val('user-specified');
+                $('#mutation-category').val('indv-selex');
                 // Any checked boxes from a category won't be in the filter set - add them now
                 $('.mutation-checkbox').each(function(){
                     if(value.data('value-id') !== $(this).data('value-id') && $(this).is(':checked')) {
@@ -715,8 +721,8 @@ require([
     var firstSelect = true;
     $('a[href="#molecular-filters"]').on('click',function(e){
         firstSelect && $('a[href="#collapse-gene-mutation-status"]').trigger('click');
-        firstSelect && $('#mutation-category').parent().parent().addClass('disabled');
-        firstSelect && $('#spec-molecular-attrs').parent().addClass('disabled');
+        firstSelect && $('#mutation-category').addClass('disabled');
+        firstSelect && $('#spec-molecular-attrs .search-checkbox-list').addClass('disabled');
         $('#molecular-filter-alert').show();
         firstSelect = false;
     });
