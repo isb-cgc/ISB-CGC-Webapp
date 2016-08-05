@@ -201,7 +201,8 @@
                                     <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> GENE MUTATION STATUS
                                 </a>
                             </div>
-                            <div id="collapse-gene-mutation-status" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel">
+                            <div id="collapse-gene-mutation-status" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"
+                                 aria-labelledby="heading-gene-mutation-status" data-feature-name="gene-mutation-status" data-feature-displ-name="Gene Mutation Status" data-feature-type="molecular">
                                 <ul class="list">
                                     <li class="list-item">
                                         <!-- gene selector -->
@@ -226,20 +227,22 @@
                                              aria-labelledby="heading-sel-molecular-attr-cat" data-feature-displ-name="Mutation Category" data-feature-id="category"
                                              data-feature-name="mutation-category" data-feature-type="molecular">
                                             <select id="mutation-category" class="mutation-category-selector form-control spec-select datatype-selector">
-                                                <option value="label" selected disabled>-- Select a Mutation Category --</option>
+                                                <option value="no-gene" selected disabled>-- Select a Gene to Enable Categories --</option>
+                                                <option value="label" disabled>-- Select a Mutation Category --</option>
                                                 <option value="any" data-value-displ-name="Any" data-value-name="Any" data-value-id="any">Any</option>
                                                 {% for cat in molecular_attr.categories %}
                                                     <option value="{{ cat.value }}" data-value-displ-name="{{ cat.name }}" data-value-name="{{ cat.name }}" data-value-id="{{ cat.value }}">{{ cat.name }}</option>
                                                 {% endfor %}
-                                                <option value="user-specified">User Specified</option>
+                                                <option value="indv-selex">Individual Selection</option>
                                             </select>
                                         </div>
                                     </li>
                                     <li class="list-item">
                                         <!-- Specific Mutation Type Checkboxes -->
                                         <div class="list-item__heading" role="tab" id="heading-spec-molecular-attrs">
-                                            Specific Mutation Types
+                                            <span title="Choose the 'Individual Selection' category to enable this section">Individual Mutation Types</span>
                                         </div>
+                                        <span class="heading-note" id="spec-mol-attr-heading-note">Choose the 'Individual Selection' category to enable</span>
                                         <div id="spec-molecular-attrs" class="list-group-item__body cohort-feature-select-block" role="tabpanel"
                                              aria-labelledby="heading-spec-molecular-attrs" data-feature-displ-name="Specific Mutation Type" data-feature-name="specific-mutation"
                                              data-feature-id="specific" data-feature-type="molecular">
@@ -248,7 +251,7 @@
                                                     <li class="checkbox">
                                                         <label>
                                                             <input class="mutation-checkbox" type="checkbox" name="elements-selected" data-value-name="{{ attr.value }}"
-                                                                   data-value-displ-name="{{ attr.name }}" data-category="{{ attr.category }}">
+                                                                   data-value-id="{{ attr.value }}" data-value-displ-name="{{ attr.name }}" data-category="{{ attr.category }}">
                                                             {{ attr.name }} <!-- <span class="count">({{ attr.count }})</span> -->
                                                         </label>
                                                     </li>
