@@ -8,6 +8,13 @@
     .total-samples
         margin-top: 0px
     #filter-panel
+        .heading-note
+            font-style: italic
+            color: darken($isb-warning, 20%)
+        .checks
+            float: right
+            display: block
+            width: 50%
         #paste-in-genes-tokenfield
             width: 100% !important
         .tabpanel
@@ -28,6 +35,9 @@
                     border-top-right-radius: 3px
                 span
                     margin-left: 10px
+            >li.active>a
+                color: darken($isb-warning, 20%) !important
+
 
         .tab-content
             padding: 0px
@@ -64,17 +74,23 @@
                 padding: 0px
             .panel
                 margin: 0px
-
                 .panel-body
                     padding: 0px 15px 0px 15px
             .panel-collapse
                 max-height: 100px
-            #collapse-gene
+            #sel-gene
                 max-height: 300px
                 .tokenfield.form-control
                     max-height: 49px
+                >.tokenfield
+                    display: none
             .alert
                 margin: 10px 0px 10px 0px
+        #molecular-accordion
+            .list-item__heading
+                padding: 10px 0px 10px 0px
+            .list-item
+                border: none
 
     .filter-label:hover
         //background-color: $primary-color-light
