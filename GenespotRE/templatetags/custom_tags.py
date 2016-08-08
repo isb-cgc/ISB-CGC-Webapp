@@ -58,8 +58,8 @@ ATTR_SPECIFIC_ORDERS = {
     'hpv_status': ['Positive', 'Negative', 'None', ],
     'age_at_initial_pathologic_diagnosis': ['10 to 39', '40 to 49', '50 to 59', '60 to 69', '70 to 79', 'Over 80', 'None', ],
     'pathologic_stage': ['Stage 0','Stage I','Stage IA','Stage IB','Stage II','Stage IIA','Stage IIB','Stage IIC',
-                           'Stage III','Stage IIIA','Stage IIIB','Stage IIIC','Stage IS','Stage IV','Stage IVA',
-                           'Stage IVB','Stage IVC','Stage X','I or II NOS','None',],
+                         'Stage III','Stage IIIA','Stage IIIB','Stage IIIC','Stage IS','Stage IV','Stage IVA',
+                         'Stage IVB','Stage IVC','Stage X','I or II NOS','None',],
     'residual_tumor': ['R0','R1','R2','RX','None',],
 }
 
@@ -67,6 +67,9 @@ NOT_CAPWORDS = [
     'pathologic_stage',
     'residual_tumor',
     'histological_type',
+    'DNA_sequencing',
+    'RNA_sequencing',
+    'DNA_methylation',
 ]
 
 ALPHANUM_SORT = [
@@ -123,6 +126,17 @@ TRANSLATION_DICTIONARY = {
     'user_studys': 'Your Studies',
     'SNP_CN': 'SNP Copy Number',
     'miRNA_sequencing': 'miRNA SEQUENCING',
+}
+
+FEATURE_DISPLAY_NAMES = {
+    'Project': 'Project',
+    'Study': 'Study',
+    'miRNA_sequencing': 'miRNA Sequencing',
+    'DNA_methylation': 'DNA Methylation',
+    'RNA_sequencing': 'RNA Sequencing',
+    'DNA_sequencing': 'has DNA Sequencing',
+    'SNP_CN': 'has SNP Copy Number',
+    'Protein': 'has RPPA',
 }
 
 DISEASE_DICTIONARY = {
@@ -194,6 +208,15 @@ def check_for_order(items, attr):
         return ordered_items
     else:
         return items
+
+
+# A specific filter for producing readable token names in cohort filter displays
+@register.filter
+def get_feat_displ_name(name):
+    if name in FEATURE_DISPLAY_NAMES.keys():
+        return FEATURE_DISPLAY_NAMES[name]
+    else:
+        return get_readable_name(name)
 
 
 @register.filter
