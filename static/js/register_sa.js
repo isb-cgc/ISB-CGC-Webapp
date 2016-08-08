@@ -71,6 +71,7 @@ require([
         var user_ver_div = $('.user-verification');
         var spinner = $this.parent('li').find('.load-spinner');
         spinner.show();
+
         $this.find('input[type="submit"]').prop('disabled', 'disabled');
         $.ajax({
             url: $this.attr('action'),
@@ -123,6 +124,10 @@ require([
 
                 user_ver_div.show();
                 $this.find('input[type="submit"]').prop('disabled', '');
+
+                $('.register-sa-div').hide();
+                $('.cannot-register').hide();
+
                 if (data['user_dataset_verified']) {
                     $('.register-sa-div').show();
                 } else {
