@@ -126,6 +126,7 @@ TRANSLATION_DICTIONARY = {
     'user_studys': 'Your Studies',
     'SNP_CN': 'SNP Copy Number',
     'miRNA_sequencing': 'miRNA SEQUENCING',
+    'nonsilent': 'Non-silent',
 }
 
 FEATURE_DISPLAY_NAMES = {
@@ -213,7 +214,8 @@ def check_for_order(items, attr):
 # A specific filter for producing readable token names in cohort filter displays
 @register.filter
 def get_feat_displ_name(name):
-    if name in FEATURE_DISPLAY_NAMES.keys():
+    name = name.replace('CLIN:','').replace('SAMP:','')
+    if name in FEATURE_DISPLAY_NAMES:
         return FEATURE_DISPLAY_NAMES[name]
     else:
         return get_readable_name(name)
@@ -224,7 +226,26 @@ def get_readable_name(csv_name, attr=None):
     # if csv_name.startswith('user_') and csv_name != 'user_project' and csv_name != 'user_study':
     #     csv_name = csv_name[5:]
 
-    if attr in ATTR_SPECIFIC_TRANSLATION.keys():
+    is_mutation = False
+
+    if 'MUT:' in csv_name or (attr and 'MUT:' in attr):
+        is_mutation = True
+
+    if attr:
+        attr = attr.replace('CLIN:', '').replace('MUT:', '').replace('SAMP:', '')
+
+    # Mutation Filter case
+    if is_mutation:
+        if not attr:
+            gene = csv_name.split(':')[1].upper()
+            type = string.capwords(csv_name.split(':')[2])
+            return gene + ' [' + type
+        elif TRANSLATION_DICTIONARY.get(csv_name):
+            return TRANSLATION_DICTIONARY.get(csv_name) + ']'
+        else:
+            return string.capwords(csv_name) + ']'
+    # Other filters
+    elif attr in ATTR_SPECIFIC_TRANSLATION.keys():
         return ATTR_SPECIFIC_TRANSLATION[attr][csv_name]
     elif attr == 'Project' or attr == 'Study':
         return csv_name.upper()

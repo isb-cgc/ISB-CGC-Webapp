@@ -285,7 +285,7 @@
             </div>
             <div class="panel-body">
                 {% for filter in cohort.get_current_filters %}
-                    <span class="filter-label label label-default space-right-5">{{ filter.name }}: {{ filter.value }}</span>
+                    <span class="filter-label label label-default space-right-5">{{ filter.name|get_feat_displ_name }}: {{ filter.value|get_readable_name:filter.name }}</span>
                 {% empty %}
                     <p>No filters have been applied to this cohort.</p>
                 {% endfor %}
@@ -317,7 +317,7 @@
                     <span>Creation Filters: </span>
                     <span class="applied-filters">
                      {% for filter in cohort.get_creation_filters %}
-                         <span>{{ filter.name }}: {{ filter.value }}</span>
+                         <span>{{ filter.name|get_feat_displ_name }}: {{ filter.value|get_readable_name:filter.name }}</span>
                      {% empty %}
                          There were no filters used to create this cohort.
                      {% endfor %}
@@ -331,7 +331,7 @@
                                  <li class="applied-filters">
                                     Applied Filters:
                                      {% for filter in item.vals %}
-                                        <span>{{ filter }}</span>
+                                        <span>{{ filter.name|get_feat_displ_name }}: {{ filter.value|get_readable_name:filter.name }}</span>
                                      {% endfor %}
                                 </li>
                             {%  else %}
