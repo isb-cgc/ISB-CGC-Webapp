@@ -369,6 +369,7 @@ DBGAP_AUTHENTICATION_LIST_BUCKET        = os.environ.get('DBGAP_AUTHENTICATION_L
 ACL_GOOGLE_GROUP                        = os.environ.get('ACL_GOOGLE_GROUP', '')
 OPEN_ACL_GOOGLE_GROUP                   = os.environ.get('OPEN_ACL_GOOGLE_GROUP', '')
 GOOGLE_GROUP_WEBAPP_ADMIN               = os.environ.get('GOOGLE_GROUP_WEBAPP_ADMIN', '')
+GOOGLE_GROUP_API_ADMIN                  = os.environ.get('GOOGLE_GROUP_API_ADMIN', '')
 ERA_LOGIN_URL                           = os.environ.get('ERA_LOGIN_URL', '')
 IPV4                                    = os.environ.get('IPV4', '')
 SAML_FOLDER                             = os.environ.get('SAML_FOLDER')
