@@ -110,7 +110,7 @@ TRANSLATION_DICTIONARY = {
     '0': 'Wild Type',
     '1': 'Mutant',
     'age_at_initial_pathologic_diagnosis': 'Age at Diagnosis',
-    'prior_dx': 'Prior Diagnosis',
+    'other_dx': 'Prior Diagnosis',
     'person_neoplasm_cancer_status': 'Tumor Status',
     'neoplasm_histologic_grade': 'Histological Grade',
     'icd_10': 'ICD-10',
@@ -205,7 +205,7 @@ def get_readable_name(csv_name, attr=None):
         return ATTR_SPECIFIC_TRANSLATION[attr][csv_name]
     elif attr == 'Project' or attr == 'Study':
         return csv_name.upper()
-    elif TRANSLATION_DICTIONARY.get(csv_name) and attr is not 'prior_dx':
+    elif TRANSLATION_DICTIONARY.get(csv_name) and attr is not 'other_dx':
         return TRANSLATION_DICTIONARY.get(csv_name)
     else:
         csv_name = csv_name.replace('_', ' ')
