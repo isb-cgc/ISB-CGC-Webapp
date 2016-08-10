@@ -24,6 +24,8 @@ from httplib2 import Http
 
 PEM_FILE = settings.PEM_FILE
 CLIENT_EMAIL = settings.CLIENT_EMAIL
+GOOGLE_GROUP_WEBAPP_ADMIN = settings.GOOGLE_GROUP_WEBAPP_ADMIN
+
 DIRECTORY_SCOPES = [
     'https://www.googleapis.com/auth/admin.directory.group',
     'https://www.googleapis.com/auth/admin.directory.group.member',
@@ -34,15 +36,14 @@ DIRECTORY_SCOPES = [
 
 def get_directory_resource():
 
-    client_email = CLIENT_EMAIL
     with open(PEM_FILE) as f:
         private_key = f.read()
 
     credentials = SignedJwtAssertionCredentials(
-        client_email,
+        CLIENT_EMAIL,
         private_key,
         DIRECTORY_SCOPES,
-        sub='kelly@isb-cgc.org'
+        sub=GOOGLE_GROUP_WEBAPP_ADMIN
         )
 
     http_auth = credentials.authorize(Http())
