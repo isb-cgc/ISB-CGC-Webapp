@@ -37,8 +37,8 @@ RUN dpkg --install /tmp/mysql-apt-config_0.5.3-1_all.deb
 # fetch the updated package metadata (in particular, mysql-server-5.7)
 RUN apt-get update
 
-# aaaand now let's install mysql-server-5.7
-RUN apt-get install -y mysql-server-5.7
+# aaaand now let's install mysql-server
+RUN apt-get install -y mysql-server
 
 RUN apt-get -y install python-mysqldb
 RUN apt-get -y install python-pip

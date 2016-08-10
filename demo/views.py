@@ -183,7 +183,8 @@ def index(request):
                 'NIH_assertion_expiration': pytz.utc.localize(NIH_assertion_expiration),
                 'dbGaP_authorized': is_dbGaP_authorized,
                 'user_id': request.user.id,
-                'active': 1
+                'active': 1,
+                'linked': True
             }
 
             nih_user, created = NIH_User.objects.update_or_create(NIH_username=NIH_username,

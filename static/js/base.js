@@ -8,7 +8,7 @@ require.config({
         underscore: 'libs/underscore-min',
         assetscore: 'libs/assets.core',
         assetsresponsive: 'libs/assets.responsive',
-
+        tablesorter:'libs/jquery.tablesorter.min'
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -16,6 +16,7 @@ require.config({
         'session_security': ['jquery'],
         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
         'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
+        'tablesorter': ['jquery'],
         'underscore': {exports: '_'}
     }
 });
@@ -27,7 +28,8 @@ require([
     'session_security',
     'underscore',
     'assetscore',
-    'assetsresponsive'
+    'assetsresponsive',
+    'tablesorter'
 ], function($, jqueryui, bootstrap, session_security, _) {
     'use strict';
 
@@ -106,6 +108,27 @@ require([
                             + message + '</div></div></div>');
         message_obj.prependTo('main > .container');
     };
+
+    $.tablesorter.addParser({
+        id: 'fullDate',
+        is: function(s) {
+            return false;
+        },
+        format: function(s) {
+            var date = s.replace(/\./g,"");
+            return new Date(date).getTime();
+        },
+        type: 'numeric'
+    });
+
+    $('#gene-list-table, #var-list-table').tablesorter({
+        headers: {
+            0: {sorter:false},
+            3: {sorter: 'fullDate'}
+        },
+        sortList: [[3,1]]
+    });
+
     //function openPublicTabOnUrlHash(targetTabID){
     //     // Open public tabs based on url hash
     //    if(window.location.hash && window.location.hash.slice(1) == 'public') {

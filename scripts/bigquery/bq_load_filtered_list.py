@@ -77,7 +77,7 @@ schema_fm = [
         'type': 'STRING'
     },
     {
-        'name': 'prior_dx',
+        'name': 'other_dx',
         'type': 'STRING'
     },
     {
