@@ -154,7 +154,7 @@ require([
                 "colorectal_cancer": {"displayName": "Colorectal Cancer?","key": "colorectal_cancer","type": "string"},
                 "BMI": {"displayName": "BMI","key": "BMI","type": "float"},
                 "max_percent_lymphocyte_infiltration": {"displayName": "Maximum Percent Lymphocyte Infiltration","key": "max_percent_lymphocyte_infiltration","type": "float"},
-                "prior_dx": {"displayName": "Prior Diagnosis?","key": "prior_dx","type": "string"},
+                "other_dx": {"displayName": "Prior Diagnosis?","key": "other_dx","type": "string"},
                 "histological_type": {"displayName": "Histological Type","key": "histological_type","type": "string"},
                 "Study": {"displayName": "Study","key": "Study","type": "string"},
                 "min_percent_tumor_nuclei": {"displayName": "Minimum Percent Tumor Nuclei","key": "min_percent_tumor_nuclei","type": "float"},

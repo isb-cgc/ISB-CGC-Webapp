@@ -65,7 +65,7 @@ def main():
                 SELECT DISTINCT Project, COUNT(1) as count FROM metadata_samples GROUP BY Project;
                 SELECT DISTINCT pathologic_stage, COUNT(1) as count FROM metadata_samples GROUP BY pathologic_stage;
                 SELECT DISTINCT has_SNP6, COUNT(1) as count FROM metadata_samples GROUP BY has_SNP6;
-                SELECT DISTINCT prior_dx, COUNT(1) as count FROM metadata_samples GROUP BY prior_dx;
+                SELECT DISTINCT other_dx, COUNT(1) as count FROM metadata_samples GROUP BY other_dx;
                 SELECT DISTINCT has_HiSeq_miRnaSeq, COUNT(1) as count FROM metadata_samples GROUP BY has_HiSeq_miRnaSeq;
                 SELECT DISTINCT has_UNC_HiSeq_RNASeq, COUNT(1) as count FROM metadata_samples GROUP BY has_UNC_HiSeq_RNASeq;
                 SELECT DISTINCT Study, COUNT(1) as count FROM metadata_samples GROUP BY Study;
