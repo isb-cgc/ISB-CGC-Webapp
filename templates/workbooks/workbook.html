@@ -139,7 +139,7 @@
                                                             <form action="{% url 'worksheet_gene_delete' workbook_id=workbook.id worksheet_id=worksheet.id gene_id=gene.id %}" method="POST">
                                                                 {% csrf_token %}
                                                                 {% if workbook.owner.id == user.id %}
-                                                                    <button type="submit" class="text-danger workbook-remove-item"><i class="fa fa-close"></i></button>
+                                                                    <button type="submit" class="text-danger workbook-remove-item" aria-label="Remove Gene"><i class="fa fa-close"></i></button>
                                                                 {% endif %}
                                                                 {{ gene.gene }}
                                                             </form>
@@ -176,7 +176,7 @@
                                                             <form action="{% url 'worksheet_variables_delete' workbook_id=workbook.id worksheet_id=worksheet.id variable_id=variable.id %}" method="POST">
                                                                 {% csrf_token %}
                                                                 {% if workbook.owner.id == user.id %}
-                                                                    <button type="submit" class="text-danger workbook-remove-item"><i class="fa fa-close"></i></button>
+                                                                    <button type="submit" class="text-danger workbook-remove-item" aria-label="Remove Variable"><i class="fa fa-close"></i></button>
                                                                 {% endif %}
                                                                 {{ variable.name }}
                                                             </form>
@@ -214,7 +214,7 @@
                                                             <form action="{% url 'remove_cohort_from_worksheet' workbook_id=workbook.id worksheet_id=worksheet.id cohort_id=cohort.id %}" method="POST">
                                                                 {% csrf_token %}
                                                                 {% if workbook.owner.id == user.id %}
-                                                                    <button type="submit" class="text-danger workbook-remove-item"><i class="fa fa-close"></i></button>
+                                                                    <button type="submit" class="text-danger workbook-remove-item" aria-label="Remove Cohort"><i class="fa fa-close"></i></button>
                                                                 {% endif %}
                                                                 <a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a>
                                                             </form>
@@ -252,7 +252,7 @@
                             {% if workbook.owner.id == user.id %}
                                 <h5>Analysis Type</h5>
                                 <div class="form-group gray-area">
-                                    <select worksheet_id="{{ worksheet.id }}" class="form-control plot_selection">
+                                    <select aria-label="Analysis Type" id="analysis-type" worksheet_id="{{ worksheet.id }}" class="form-control plot_selection">
                                         {% if worksheet.active_plot %}
                                             <option value="{{ worksheet.active_plot.type }}" selected >{{ worksheet.active_plot.type }}</option>
                                         {% else %}

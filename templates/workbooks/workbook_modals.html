@@ -10,11 +10,11 @@
             <form id="edit-workbook-{{ workbook.id }}" method="POST" action="{% url 'workbook_edit' workbook.id %}">
                 {% csrf_token %}
                 <div class="modal-body">
-                    <label for="share-viz-users">Name (required)</label>
-                    <input class="form-control" type="text" name="name" value="{{ workbook.name }}" required/>
+                    <label for="edit-workbook-name">Name (required)</label>
+                    <input id="edit-workbook-name" class="form-control" type="text" name="name" value="{{ workbook.name }}" required/>
                     <br>
-                    <label for="share-viz-users">Description (optional, max length is 2000 characters)</label>
-                    <textarea class="form-control" name="description" maxlength="2000">{{workbook.description }}</textarea>
+                    <label for="edit-workbook-desc">Description (optional, max length is 2000 characters)</label>
+                    <textarea id="edit-workbook-desc" class="form-control" name="description" maxlength="2000">{{workbook.description }}</textarea>
                 </div>
                 <div class="modal-footer">
                     <input type="submit" value="Update" class="btn btn-primary" />
@@ -31,7 +31,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title"></h4>
+                <!--<h4 class="modal-title">Delete Workbook</h4>-->
             </div>
             <div class="modal-body" id="delete-workbook-body">Delete this Workbook?</div>
             <form id="delete-workbook-{{ workbook.id }}" method="POST" action="{% url 'workbook_delete' workbook.id %}">
@@ -56,11 +56,11 @@
             <form id="worksheet_create_form-{{ workbook.id }}" method="POST" action="{% url 'worksheet_create' workbook_id=workbook.id %}">
                 {% csrf_token %}
                 <div class="modal-body">
-                    <label for="name">Name (required)</label>
-                    <input class="form-control" type="text" name="name" value="New Worksheet"/>
+                    <label for="create-workbook-name">Name (required)</label>
+                    <input class="form-control" type="text" id="create-workbook-name" name="name" value="New Worksheet"/>
                     <br>
-                    <label for="description">Description (optional, max length is 2000 characters)</label>
-                    <textarea class="form-control" name="description" placeholder="Add a description" maxlength="2000"></textarea>
+                    <label for="create-workbook-desc">Description (optional, max length is 2000 characters)</label>
+                    <textarea class="form-control" id="create-workbook-desc" name="description" placeholder="Add a description" maxlength="2000"></textarea>
                 </div>
                 <div class="modal-footer">
                     <input type="submit" value="Create" class="btn btn-primary" />
@@ -141,8 +141,8 @@
                         <p>
                             This will share the web view of workbooks.
                         </p>
-                        <label for="share_users">Enter email addresses separated by a comma</label>
-                        <textarea class="form-control" name="share_users"></textarea>
+                        <label for="share-share_users">Enter email addresses separated by a comma</label>
+                        <textarea id="share-share_users" class="form-control" name="share_users"></textarea>
                     </div>
                     <div class="modal-footer">
                         <input type="submit" value="Send" class="btn btn-primary" />
