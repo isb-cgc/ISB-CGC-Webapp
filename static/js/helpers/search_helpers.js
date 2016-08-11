@@ -16,6 +16,8 @@
  *
  */
 
+var MAX_URL_LEN = 2000;
+
 define(['jquery', 'tree_graph', 'stack_bar_chart', 'draw_parsets'],
 function($, tree_graph, stack_bar_chart, draw_parsets) {
     
@@ -134,6 +136,15 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             var context = this;
             var filters = this.format_filters();
             var api_url = this.generate_metadata_url(base_url_domain, endpoint, filters, cohort_id, undefined, version);
+
+            if(api_url.length > MAX_URL_LEN) {
+                $('#url-len-max-alert').show();
+                // This method is expected to return a promise, so send back a pre-rejected one
+                return $.Deferred().reject();
+            } else {
+                $('#url-len-max-alert').hide();
+            }
+
             var update_filters = this.update_filter_counts;
 
             $('.clinical-trees .spinner').show();
