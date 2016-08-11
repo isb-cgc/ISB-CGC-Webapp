@@ -286,7 +286,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
         },
 
         format_filters: function() {
-            var list = [];
+            var list = {};
             $('.selected-filters .panel-body span').each(function() {
                 var $this = $(this),
                     key = $this.data('feature-name'),
@@ -299,10 +299,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
 
                 if(!list[key])
                     list[key] = [];
-                list.push({
-                    key: key,
-                    value: val,
-                });
+                list[key].push(val);
             });
             return list;
         },
