@@ -16,30 +16,24 @@ limitations under the License.
 
 """
 
-from oauth2client.client import SignedJwtAssertionCredentials
+from oauth2client.service_account import ServiceAccountCredentials
 from googleapiclient import discovery
 from django.conf import settings
 from httplib2 import Http
 
 
-PEM_FILE = settings.PEM_FILE
-CLIENT_EMAIL = settings.CLIENT_EMAIL
+GOOGLE_APPLICATION_CREDENTIALS = settings.GOOGLE_APPLICATION_CREDENTIALS
+
+SUPERADMIN_FOR_REPORTS = settings.SUPERADMIN_FOR_REPORTS
 
 
 def get_reports_resource():
 
-    client_email = CLIENT_EMAIL
-    with open(PEM_FILE) as f:
-        private_key = f.read()
+    credentials = ServiceAccountCredentials.from_json_keyfile_name(
+        GOOGLE_APPLICATION_CREDENTIALS, 'https://www.googleapis.com/auth/admin.reports.audit.readonly')
+    delegated_credentials = credentials.create_delegated(SUPERADMIN_FOR_REPORTS)
 
-    credentials = SignedJwtAssertionCredentials(
-        client_email,
-        private_key,
-        scope='https://www.googleapis.com/auth/admin.reports.audit.readonly',
-        sub='kelly@isb-cgc.org'
-        )
-
-    http_auth = credentials.authorize(Http())
+    http_auth = delegated_credentials.authorize(Http())
 
     service = discovery.build('admin', 'reports_v1', http=http_auth)
     return service, http_auth

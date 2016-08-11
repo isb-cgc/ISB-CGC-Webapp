@@ -16,14 +16,14 @@ limitations under the License.
 
 """
 
-from oauth2client.client import SignedJwtAssertionCredentials, GoogleCredentials
+from oauth2client.service_account import ServiceAccountCredentials
 from googleapiclient import discovery
 from django.conf import settings
 from httplib2 import Http
 
 
-PEM_FILE = settings.PEM_FILE
-CLIENT_EMAIL = settings.CLIENT_EMAIL
+GOOGLE_APPLICATION_CREDENTIALS = settings.GOOGLE_APPLICATION_CREDENTIALS
+
 
 GENOMICS_SCOPES = [
     'https://www.googleapis.com/auth/genomics',
@@ -32,18 +32,13 @@ GENOMICS_SCOPES = [
 ]
 
 
-# todo: take out http_auth?
 def get_genomics_resource():
-    client_email = CLIENT_EMAIL
-    with open(PEM_FILE) as f:
-        private_key = f.read()
 
-    credentials = SignedJwtAssertionCredentials(
-        client_email,
-        private_key,
-        GENOMICS_SCOPES
-        )
+    credentials = ServiceAccountCredentials.from_json_keyfile_name(
+        GOOGLE_APPLICATION_CREDENTIALS, GENOMICS_SCOPES)
 
     http_auth = credentials.authorize(Http())
     service = discovery.build('genomics', 'v1', http=http_auth)
     return service, http_auth
+
+
