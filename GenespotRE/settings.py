@@ -37,7 +37,12 @@ for directory_name in SHARED_SOURCE_DIRECTORIES:
     sys.path.append(os.path.join(BASE_DIR, directory_name))
 
 DEBUG                   = bool(os.environ.get('DEBUG', False))
-ALLOWED_HOSTS           = [os.environ.get('ALLOWED_HOST', 'localhost')]
+
+allowed_hosts = os.environ.get('ALLOWED_HOST', 'localhost')
+if len(allowed_hosts.split(',')) > 1:
+    ALLOWED_HOSTS = allowed_hosts.split(',')
+else:
+    ALLOWED_HOSTS = [allowed_hosts]
 
 SSL_DIR = os.path.abspath(os.path.dirname(__file__))+os.sep
 
