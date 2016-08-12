@@ -137,37 +137,41 @@ def index(request):
 
             user_email = User.objects.get(id=request.user.id).email
 
-            # check to see if user already has authenticated through
-            # another NIH_username. If so, don't allow the same google email
-            # to be linked to two different NIH usernames
-            nih_usernames_already_linked_to_google_identity = NIH_User.objects.filter(user_id=request.user.id)
-            for nih_user in nih_usernames_already_linked_to_google_identity:
+            # 1. check if this google identity is currently linked to other NIH usernames
+            # note: the NIH username exclusion is case-insensitive so this will not return a false positive
+            # e.g. if this google identity is linked to 'NIHUSERNAME1' but just authenticated with 'nihusername1',
+            # it will still pass this test
+            nih_usernames_already_linked_to_this_google_identity = NIH_User.objects.filter(
+                user_id=request.user.id, linked=True).exclude(NIH_username__iexact=NIH_username)
+            for nih_user in nih_usernames_already_linked_to_this_google_identity:
                 if nih_user.NIH_username.lower() != NIH_username.lower():
                     logger.warn("User {} is already linked to the eRA commons identity {} and attempted authentication"
                                 " with the eRA commons identity {}."
                                 .format(user_email, nih_user.NIH_username, NIH_username))
                     messages.warning(request, "User {} is already linked to the eRA commons identity {}. "
-                                           "Please unlink these before authenticating with the eRA commons identity {}."
-                                     .format(user_email, nih_user.NIH_username, NIH_username))
+                                              "Please unlink these before authenticating with the eRA commons "
+                                              "identity {}.".format(user_email, nih_user.NIH_username, NIH_username))
                     return redirect('/users/' + str(request.user.id))
 
-            # check if there is another google identity with the same NIH_username
-            try:
-                preexisting_nih_user = NIH_User.objects.get(NIH_username=NIH_username)
-                if preexisting_nih_user.user_id != request.user.id:
-                    logger.warn("User id {} tried to log into the NIH account {} that is already linked to user {}".format(
-                        user_email,
-                        NIH_username,
-                        preexisting_nih_user.user_id
-                    ))
-                    messages.warning(request, "You tried to log into an NIH account that is linked to another google email address.")
-                    return redirect('/users/' + str(request.user.id))
+            # 2. check if there are other google identities that are still linked to this NIH_username
+            # note: the NIH username match is case-insensitive so this will not return a false negative.
+            # e.g. if a different google identity is linked to 'NIHUSERNAME1' and this google identity just authenticated with 'nihusername1',
+            # this will fail the test and return to the /users/ url with a warning message
+            preexisting_nih_users = NIH_User.objects.filter(
+                NIH_username__iexact=NIH_username, linked=True).exclude(user_id=request.user.id)
 
-            except (ObjectDoesNotExist, MultipleObjectsReturned), e:
-                # only redirect if there is a MultipleObjectsReturned error
-                if type(e) is MultipleObjectsReturned:
-                    logger.error("Error %s on NIH login: more than one NIH User with NIH_username %s" % (str(e), NIH_username))
-                    return redirect('/users/' + str(request.user.id))
+            if len(preexisting_nih_users) > 0:
+                preexisting_nih_user_user_ids = [preexisting_nih_user.user_id for preexisting_nih_user in preexisting_nih_users]
+                prelinked_user_email_list = [user.email for user in User.objects.filter(id__in=preexisting_nih_user_user_ids)]
+                prelinked_user_emails = ', '.join(prelinked_user_email_list)
+
+                logger.warn("User {} tried to log into the NIH account {} that is already linked to user(s) {}".format(
+                    user_email,
+                    NIH_username,
+                    prelinked_user_emails + '.'
+                ))
+                messages.warning(request, "You tried to log into an NIH account that is linked to another google email address.")
+                return redirect('/users/' + str(request.user.id))
 
             storage_client = get_storage_resource()
             # check authenticated NIH username against NIH authentication list
