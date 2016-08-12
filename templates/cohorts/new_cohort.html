@@ -49,11 +49,16 @@
     {% else %}
         <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal">Save As New Cohort</button>
     {% endif %}
-
 </div>
+
 {% endblock %}
 
 {% block content %}
+
+    <div id="url-len-max-alert" class="alert alert-warning alert-dismissable col-lg-12" style="display: none;">
+        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        You have selected too many filters. The current counts shown will not be accurate until one or more filter options are removed.
+    </div>
 
     <div id="filter-panel" class="col-lg-4" role="tabpanel">
         <div class="tabpanel" role="tabpanel">
