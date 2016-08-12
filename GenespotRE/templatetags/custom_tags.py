@@ -58,8 +58,8 @@ ATTR_SPECIFIC_ORDERS = {
     'hpv_status': ['Positive', 'Negative', 'None', ],
     'age_at_initial_pathologic_diagnosis': ['10 to 39', '40 to 49', '50 to 59', '60 to 69', '70 to 79', 'Over 80', 'None', ],
     'pathologic_stage': ['Stage 0','Stage I','Stage IA','Stage IB','Stage II','Stage IIA','Stage IIB','Stage IIC',
-                           'Stage III','Stage IIIA','Stage IIIB','Stage IIIC','Stage IS','Stage IV','Stage IVA',
-                           'Stage IVB','Stage IVC','Stage X','I or II NOS','None',],
+                         'Stage III','Stage IIIA','Stage IIIB','Stage IIIC','Stage IS','Stage IV','Stage IVA',
+                         'Stage IVB','Stage IVC','Stage X','I or II NOS','None',],
     'residual_tumor': ['R0','R1','R2','RX','None',],
 }
 
@@ -67,6 +67,9 @@ NOT_CAPWORDS = [
     'pathologic_stage',
     'residual_tumor',
     'histological_type',
+    'DNA_sequencing',
+    'RNA_sequencing',
+    'DNA_methylation',
 ]
 
 ALPHANUM_SORT = [
@@ -123,6 +126,18 @@ TRANSLATION_DICTIONARY = {
     'user_studys': 'Your Studies',
     'SNP_CN': 'SNP Copy Number',
     'miRNA_sequencing': 'miRNA SEQUENCING',
+    'nonsilent': 'Non-silent',
+}
+
+FEATURE_DISPLAY_NAMES = {
+    'Project': 'Project',
+    'Study': 'Study',
+    'miRNA_sequencing': 'miRNA Sequencing',
+    'DNA_methylation': 'DNA Methylation',
+    'RNA_sequencing': 'RNA Sequencing',
+    'DNA_sequencing': 'has DNA Sequencing',
+    'SNP_CN': 'has SNP Copy Number',
+    'Protein': 'has RPPA',
 }
 
 DISEASE_DICTIONARY = {
@@ -196,12 +211,41 @@ def check_for_order(items, attr):
         return items
 
 
+# A specific filter for producing readable token names in cohort filter displays
+@register.filter
+def get_feat_displ_name(name):
+    name = name.replace('CLIN:','').replace('SAMP:','')
+    if name in FEATURE_DISPLAY_NAMES:
+        return FEATURE_DISPLAY_NAMES[name]
+    else:
+        return get_readable_name(name)
+
+
 @register.filter
 def get_readable_name(csv_name, attr=None):
     # if csv_name.startswith('user_') and csv_name != 'user_project' and csv_name != 'user_study':
     #     csv_name = csv_name[5:]
 
-    if attr in ATTR_SPECIFIC_TRANSLATION.keys():
+    is_mutation = False
+
+    if 'MUT:' in csv_name or (attr and 'MUT:' in attr):
+        is_mutation = True
+
+    if attr:
+        attr = attr.replace('CLIN:', '').replace('MUT:', '').replace('SAMP:', '')
+
+    # Mutation Filter case
+    if is_mutation:
+        if not attr:
+            gene = csv_name.split(':')[1].upper()
+            type = string.capwords(csv_name.split(':')[2])
+            return gene + ' [' + type
+        elif TRANSLATION_DICTIONARY.get(csv_name):
+            return TRANSLATION_DICTIONARY.get(csv_name) + ']'
+        else:
+            return string.capwords(csv_name) + ']'
+    # Other filters
+    elif attr in ATTR_SPECIFIC_TRANSLATION.keys():
         return ATTR_SPECIFIC_TRANSLATION[attr][csv_name]
     elif attr == 'Project' or attr == 'Study':
         return csv_name.upper()
