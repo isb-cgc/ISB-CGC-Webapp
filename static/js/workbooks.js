@@ -289,10 +289,10 @@ require([
             });
 
             //gather entire list of options for swapping
-            result['selection'] = {selected : options.find('#search-term-select').find(":selected").val(),
-                                   text : options.find('#search-term-select').find(":selected").text(),
+            result['selection'] = {selected : options.find('.search-term-select').find(":selected").val(),
+                                   text : options.find('.search-term-select').find(":selected").text(),
                                    options : []};
-            options.find('#search-term-select').find("option").each(function(i, ele){
+            options.find('.search-term-select').find("option").each(function(i, ele){
                 result['selection'].options.push({value : $(ele).val(), text : $(ele).text()});
             });
         }
@@ -371,13 +371,13 @@ require([
                     }
                 }
             });
-            parent.find('.'+ data.specification).find('#search-term-select').empty();
+            parent.find('.'+ data.specification).find('.search-term-select').empty();
             for(var i in data["selection"].options) {
                 if (data["selection"].options[i].value == data["selection"].selected) {
-                    parent.find('.'+ data.specification).find('#search-term-select').append('<option value="' + data["selection"].options[i].value + '"> ' + data["selection"].options[i].text + '</option>');
+                    parent.find('.'+ data.specification).find('.search-term-select').append('<option value="' + data["selection"].options[i].value + '"> ' + data["selection"].options[i].text + '</option>');
                 }
             }
-            parent.find('.'+ data.specification).find('#search-term-select').val(data["selection"].selected);
+            parent.find('.'+ data.specification).find('.search-term-select').val(data["selection"].selected);
         }
     }
 
@@ -632,7 +632,7 @@ require([
             // All placeholders should be given a type of 'label', and they will never return a url_code
             if(parent.find('.'+label).find(":selected").attr("type") !== "label") {
                 if(parent.find('.'+label).find(":selected").attr("type") == "gene"){
-                    result = {  url_code : parent.find('[variable="'+ label + '"] #search-term-select').find(":selected").val()};
+                    result = {  url_code : parent.find('[variable="'+ label + '"] .search-term-select').find(":selected").val()};
                 } else {
                     result = {  url_code: parent.find('.'+label).find(":selected").val()}
                 }
