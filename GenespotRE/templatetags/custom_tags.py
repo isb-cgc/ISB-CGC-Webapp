@@ -241,7 +241,7 @@ def get_readable_name(csv_name, attr=None):
     if 'MUT:' in csv_name or (attr and 'MUT:' in attr):
         is_mutation = True
 
-    if 'SAMP:' in csv_name or (attr and 'SAMP:' in attr):
+    if 'has_' in csv_name or (attr and 'has_' in attr):
         is_data_type = True
 
     csv_name = csv_name.replace('CLIN:', '').replace('MUT:', '').replace('SAMP:', '')
