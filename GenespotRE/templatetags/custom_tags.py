@@ -145,7 +145,7 @@ FEATURE_DISPLAY_NAMES = {
     'has_Illumina_DNASeq': 'has Illumina DNA Sequencing',
     'has_BCGSC_GA_RNASeq': 'has BCGSC GA RNA Sequencing',
     'has_UNC_GA_RNASeq': 'has UNC GA RNA Sequencing',
-    'has_BCGSC HiSeq_RNASeq': 'has BCGSC HiSeq RNA Sequencing',
+    'has_BCGSC_HiSeq_RNASeq': 'has BCGSC HiSeq RNA Sequencing',
     'has_UNC_HiSeq_RNASeq': 'has UNC HiSeq RNA Sequencing',
 }
 
