@@ -138,6 +138,15 @@ FEATURE_DISPLAY_NAMES = {
     'DNA_sequencing': 'has DNA Sequencing',
     'SNP_CN': 'has SNP Copy Number',
     'Protein': 'has RPPA',
+    'has_HiSeq_miRnaSeq': 'has HiSeq miRNA Sequencing',
+    'has_GA_miRnaSeq': 'has GA miRNA Sequencing',
+    'has_27k': 'has DNA Methylation (27k)',
+    'has_450k': 'has DNA Methylation (450k)',
+    'has_Illumina_DNASeq': 'has Illumina DNA Sequencing',
+    'has_BCGSC_GA_RNASeq': 'has BCGSC GA RNA Sequencing',
+    'has_UNC_GA_RNASeq': 'has UNC GA RNA Sequencing',
+    'has_BCGSC_HiSeq_RNASeq': 'has BCGSC HiSeq RNA Sequencing',
+    'has_UNC_HiSeq_RNASeq': 'has UNC HiSeq RNA Sequencing',
 }
 
 DISEASE_DICTIONARY = {
@@ -214,9 +223,9 @@ def check_for_order(items, attr):
 # A specific filter for producing readable token names in cohort filter displays
 @register.filter
 def get_feat_displ_name(name):
-    name = name.replace('CLIN:','').replace('SAMP:','')
-    if name in FEATURE_DISPLAY_NAMES:
-        return FEATURE_DISPLAY_NAMES[name]
+    feat_name = name.replace('CLIN:','').replace('SAMP:','')
+    if feat_name in FEATURE_DISPLAY_NAMES:
+        return FEATURE_DISPLAY_NAMES[feat_name]
     else:
         return get_readable_name(name)
 
@@ -227,9 +236,15 @@ def get_readable_name(csv_name, attr=None):
     #     csv_name = csv_name[5:]
 
     is_mutation = False
+    is_data_type = False
 
     if 'MUT:' in csv_name or (attr and 'MUT:' in attr):
         is_mutation = True
+
+    if 'has_' in csv_name or (attr and 'has_' in attr):
+        is_data_type = True
+
+    csv_name = csv_name.replace('CLIN:', '').replace('MUT:', '').replace('SAMP:', '')
 
     if attr:
         attr = attr.replace('CLIN:', '').replace('MUT:', '').replace('SAMP:', '')
@@ -237,24 +252,32 @@ def get_readable_name(csv_name, attr=None):
     # Mutation Filter case
     if is_mutation:
         if not attr:
-            gene = csv_name.split(':')[1].upper()
-            type = string.capwords(csv_name.split(':')[2])
+            gene = csv_name.split(':')[0].upper()
+            type = string.capwords(csv_name.split(':')[1])
             return gene + ' [' + type
         elif TRANSLATION_DICTIONARY.get(csv_name):
             return TRANSLATION_DICTIONARY.get(csv_name) + ']'
         else:
             return string.capwords(csv_name) + ']'
-    # Other filters
+    # Data type filters
+    elif is_data_type and attr:
+        if csv_name == '1':
+            return 'True'
+        elif csv_name == '0':
+            return 'False'
+        else:
+            return 'None'
+    # Clinical filters
     elif attr in ATTR_SPECIFIC_TRANSLATION.keys():
         return ATTR_SPECIFIC_TRANSLATION[attr][csv_name]
     elif attr == 'Project' or attr == 'Study':
         return csv_name.upper()
-    elif TRANSLATION_DICTIONARY.get(csv_name) and attr is not 'other_dx':
+    elif TRANSLATION_DICTIONARY.get(csv_name) and attr is not 'other_dx' and not is_data_type:
         return TRANSLATION_DICTIONARY.get(csv_name)
     else:
         csv_name = csv_name.replace('_', ' ')
         # If something shouldn't be subjected to capwords add its attr name to NOT_CAPWORDS
-        if attr not in NOT_CAPWORDS:
+        if attr not in NOT_CAPWORDS and not is_data_type:
             csv_name = string.capwords(csv_name)
         csv_name = csv_name.replace(' To ', ' to ')
         return csv_name
