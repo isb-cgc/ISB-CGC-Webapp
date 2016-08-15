@@ -44,7 +44,7 @@
                                         </ul>
                                     </div>
                                 </td>
-                                <td class="name-col"><a href="{% url 'gene_fav_detail' genes_fav.id %}">{{genes_fav.name}}</a></td>
+                                <td class="name-col"><a href="{% url 'gene_fav_detail' genes_fav.id %}" title="{{genes_fav.name|wrap_text}}">{{genes_fav.name}}</a></td>
                                 <td>{{genes_fav.genes | length}}</td>
                                 <td>{{genes_fav.last_date_saved|date:'M d, Y, g:i a'}}</td>
                             </tr>
