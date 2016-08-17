@@ -22,7 +22,7 @@ from django.conf import settings
 from httplib2 import Http
 
 
-GOOGLE_GROUP_WEBAPP_ADMIN = settings.GOOGLE_GROUP_WEBAPP_ADMIN
+GOOGLE_GROUP_ADMIN = settings.GOOGLE_GROUP_ADMIN
 GOOGLE_APPLICATION_CREDENTIALS = settings.GOOGLE_APPLICATION_CREDENTIALS
 
 DIRECTORY_SCOPES = [
@@ -37,7 +37,7 @@ def get_directory_resource():
 
     credentials = ServiceAccountCredentials.from_json_keyfile_name(
         GOOGLE_APPLICATION_CREDENTIALS, DIRECTORY_SCOPES)
-    delegated_credentials = credentials.create_delegated(GOOGLE_GROUP_WEBAPP_ADMIN)
+    delegated_credentials = credentials.create_delegated(GOOGLE_GROUP_ADMIN)
 
 
     http_auth = delegated_credentials.authorize(Http())
