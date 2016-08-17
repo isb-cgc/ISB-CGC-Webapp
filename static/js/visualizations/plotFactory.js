@@ -179,8 +179,19 @@ define([
     function generate_violin_plot(margin, plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data, logScale) {
         var violin_width = 200;
         var tmp = helpers.get_min_max(data, 'y', logScale);
+
+        if(logScale && (tmp[0] == 0 || (tmp[1] > 0 && tmp[0] < 0))) {
+            // we don't currently support log scales crossing 0 or containing only 0 as a min,
+            // so recalculate min and max with 0s included and fall back to linear
+            // TODO: show warning?
+            $('#y-log-scale').prop('checked',false);
+            logScale = null;
+            tmp = helpers.get_min_max(data, 'y', false);
+        }
+
         var min_n = tmp[0];
         var max_n = tmp[1];
+
         var legend = d3.select(legend_selector)
             .append('svg')
             .attr('width', width);
@@ -215,6 +226,15 @@ define([
     function generate_violin_plot_axis_swap(margin, plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data, logScale) {
         var violin_width = 200;
         var tmp = helpers.get_min_max(data, 'x', logScale);
+
+        if(logScale && (tmp[0] == 0 || (tmp[1] > 0 && tmp[0] < 0))) {
+            // we don't currently support log scales crossing 0 or containing only 0 as a min,
+            // so recalculate min and max with 0s included and fall back to linear
+            // TODO: show warning?
+            $('#x-log-scale').prop('checked',false);
+            logScale = null;
+            tmp = helpers.get_min_max(data, 'x', false);
+        }
         
         // Because we reverse what we send in, we need to reverse our logScale as well, or it will be wrong
         if(helpers.LOG_SCALE.isScaleX(logScale)) {
@@ -223,6 +243,7 @@ define([
         
         var min_n = tmp[0];
         var max_n = tmp[1];
+
         var legend = d3.select(legend_selector)
             .append('svg')
             .attr('width', width);
