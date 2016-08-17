@@ -6,9 +6,24 @@
     color: $base-dark
     font-weight: $medium-font-weight
 
-  .name-col
-    max-width: 600px
-    
+  .name-col, .name-col a
+    max-width: 500px
+    text-overflow: ellipsis
+    white-space: nowrap
+    overflow: hidden
+    a
+      display: inline-block
+      width: 100%
+
+#gene-list-table, #var-list-table
+  .name-col, .name-col a
+    @media screen and (max-width: 1199px)
+      max-width: 600px
+    @media screen and (min-width: $screen-lg)
+      max-width: 750px
+
+
+
 .share-col a
   color: $isb-info
   cursor: pointer
