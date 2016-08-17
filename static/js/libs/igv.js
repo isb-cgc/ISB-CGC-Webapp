@@ -1421,6 +1421,10 @@ var igv = (function (igv) {
 
         var self = this;
 
+        if (self.config.sourceType === 'gcs') {
+            self.config.headers = gcsHeaders();
+        }
+
         return new Promise(function (fulfill, reject) {
 
             getIndex(self).then(function (index) {
@@ -1528,6 +1532,17 @@ var igv = (function (igv) {
 
     function readShort(ba, offset) {
         return (ba[offset + 1] << 8) | (ba[offset]);
+    }
+
+    function gcsHeaders() {
+        var headers = {},
+            acToken = oauth.google.access_token;
+
+        headers["Cache-Control"] = "no-cache";
+        if (acToken) {
+            headers["Authorization"] = "Bearer " + acToken;
+        }
+        return headers;
     }
 
     return igv;

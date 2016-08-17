@@ -1,12 +1,12 @@
 <!-- Duplicate Worksheet Modal -->
-<div class="modal fade" id="copy-worksheet-modal-{{ worksheet.id }}" tabindex="-1" role="dialog" aria-labelledby="copy-workbook-header" aria-hidden="true">
+<div class="modal fade" id="copy-worksheet-modal-{{ worksheet.id }}" tabindex="-1" role="dialog" aria-labelledby="copy-workbook-body" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title"></h4>
+                <!--<h4 class="modal-title"></h4>-->
             </div>
-            <div class="modal-body">
+            <div class="modal-body" id="copy-workbook-body">
                 Duplicate this Worksheet "{{ worksheet.name }}"?
             </div>
             <form id="copy-workbook" method="POST" action="{% url 'worksheet_copy' workbook.id worksheet.id %}">
@@ -21,14 +21,14 @@
 </div>
 
 <!-- Delete Worksheet Modal -->
-<div class="modal fade" id="delete-worksheet-modal-{{ worksheet.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-worksheet-header" aria-hidden="true">
+<div class="modal fade" id="delete-worksheet-modal-{{ worksheet.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-worksheet-body" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title"></h4>
+                <!--<h4 class="modal-title"></h4>-->
             </div>
-            <div class="modal-body">
+            <div class="modal-body" id="delete-worksheet-body">
                 Delete this Worksheet "{{ worksheet.name }}"?
             </div>
             <form id="delete-workbook" method="POST" action="{% url 'worksheet_delete' workbook.id worksheet.id %}">
@@ -53,11 +53,11 @@
             <form id="edit-workbook" method="POST" action="{% url 'worksheet_edit' workbook.id worksheet.id %}">
                 {% csrf_token %}
                 <div class="modal-body">
-                    <label for="name">Name (required)</label>
-                    <input class="form-control" type="text" name="name" value="{{ worksheet.name }}"/>
+                    <label for="edit-sheet-name">Name (required)</label>
+                    <input id="edit-sheet-name" class="form-control" type="text" name="name" value="{{ worksheet.name }}"/>
                     <br>
-                    <label for="description">Description (optional, max length is 2000 characters)</label>
-                    <textarea class="form-control" name="description" maxlength="2000">{{worksheet.description }}</textarea>
+                    <label for="edit-sheet-desc">Description (optional, max length is 2000 characters)</label>
+                    <textarea id="edit-sheet-desc" class="form-control" name="description" maxlength="2000">{{worksheet.description }}</textarea>
                 </div>
                 <div class="modal-footer">
                     <input type="submit" value="Update" class="btn btn-primary" />
