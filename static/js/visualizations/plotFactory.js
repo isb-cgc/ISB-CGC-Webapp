@@ -114,10 +114,40 @@ define([
         Generate scatter plot
     */
     function generate_scatter_plot(margin, plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data, logScale) {
-         var domain = helpers.get_min_max(data, 'x', helpers.LOG_SCALE.isScaleX(logScale));
-         var range = helpers.get_min_max(data, 'y', helpers.LOG_SCALE.isScaleY(logScale));
 
-         var legend = d3.select(legend_selector)
+        var domain = helpers.get_min_max(data, 'x', helpers.LOG_SCALE.isScaleX(logScale));
+        var range = helpers.get_min_max(data, 'y', helpers.LOG_SCALE.isScaleY(logScale));
+
+        if(helpers.LOG_SCALE.isScaleY(logScale) && (range[0] == 0 || (range[0] < 0 && range[1] > 0))) {
+            // we don't currently support log scales crossing 0 or containing only 0,
+            // so we recalculate min and max with 0s included and fall back to linear
+            // TODO: show warning?
+            $('#y-log-scale').prop('checked',false);
+            // This might be a 'both' log scale, if so convert to just X
+            if(helpers.LOG_SCALE.isScaleX(logScale)) {
+                logScale = helpers.LOG_SCALE.X_LOG_SCALE;
+            } else {
+                logScale = null;
+            }
+            range = helpers.get_min_max(data, 'y', false);
+        }
+
+        if(helpers.LOG_SCALE.isScaleX(logScale) && (domain[0] == 0 || (domain[0] < 0 && domain[1] > 0))) {
+            // we don't currently support log scales crossing 0
+            // recalculate min and max with 0s included and
+            // fall back to linear
+            // TODO: show warning?
+            $('#x-log-scale').prop('checked',false);
+            // This might be a 'both' log scale; if so convert to just Y
+            if(helpers.LOG_SCALE.isScaleY(logScale)) {
+                logScale = helpers.LOG_SCALE.Y_LOG_SCALE;
+            } else {
+                logScale = null;
+            }
+            domain = helpers.get_min_max(data, 'x', false);
+        }
+
+        var legend = d3.select(legend_selector)
              .append('svg')
              .attr('width', width);
          var svg = d3.select(plot_selector)
@@ -372,28 +402,28 @@ define([
                     visualization = generate_bar_chart(margin, args.plot_selector, height, width, args.x, data);
                     break;
                 case "Histogram" : //((x_type == 'INTEGER' || x_type == 'FLOAT') && y_type == 'none') {
-                    if($('.log-scale').prop('checked')) {
+                    if($('#x-log-scale').is(':checked')) {
                         logScale = vizhelpers.LOG_SCALE.X_LOG_SCALE;
                     }
                     visualization = generate_histogram(margin, args.plot_selector, height, width, args.x, data, logScale, x_type);
                     break;
                 case 'Scatter Plot': //((x_type == 'INTEGER' || x_type == 'FLOAT') && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
-                    if($('.x-log-scale').prop('checked')) {
+                    if($('#x-log-scale').is(':checked')) {
                         logScale = vizhelpers.LOG_SCALE.X_LOG_SCALE;
                     }
-                    if($('.y-log-scale').prop('checked')) {
+                    if($('#y-log-scale').is(':checked')) {
                         logScale = (logScale == vizhelpers.LOG_SCALE.X_LOG_SCALE ? vizhelpers.LOG_SCALE.BOTH_LOG_SCALE : vizhelpers.LOG_SCALE.Y_LOG_SCALE);
                     }
                     visualization = generate_scatter_plot(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by, cohort_set, data, logScale)
                     break;
                 case "Violin Plot": //(x_type == 'STRING' && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
-                    if($('.log-scale').prop('checked')) {
+                    if($('#y-log-scale').is(':checked')) {
                         logScale = vizhelpers.LOG_SCALE.Y_LOG_SCALE;
                     }
                     visualization = generate_violin_plot(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data, logScale)
                     break;
                 case 'Violin Plot with axis swap'://(y_type == 'STRING' && (x_type == 'INTEGER'|| x_type == 'FLOAT')) {
-                    if($('.log-scale').prop('checked')) {
+                    if($('#x-log-scale').is(':checked')) {
                         logScale = vizhelpers.LOG_SCALE.X_LOG_SCALE;
                     }
                     visualization = generate_violin_plot_axis_swap(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data, logScale)

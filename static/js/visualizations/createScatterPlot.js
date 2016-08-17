@@ -24,28 +24,36 @@ function($, d3, vizhelpers) {
 
             var margin = {top: 10, bottom: 50, left: 50, right: 10};
             var yVal = function(d) {
-                    if (d[yParam] && d[yParam] != 'NA') {
-                        return d[yParam];
-                    } else {
-                        d[yParam] = range[1];
-                        return range[1];
-                    }
-                };
+                if (d[yParam] && d[yParam] !== "NA") {
+                    return d[yParam];
+                } else {
+                    d[yParam] = range[1];
+                    return range[1];
+                }
+            };
             
             var yScale = null;
             if(helpers.LOG_SCALE.isScaleY(logScale)) {
-                yScale = d3.scale.log().clamp[true].range([height-margin.bottom, margin.top]).domain(range);
+                yScale = d3.scale.log().clamp(true).range([height-margin.bottom, margin.top]).domain(range);
             } else {
                 yScale = d3.scale.linear().range([height-margin.bottom, margin.top]).domain(range);
             }
-            var yMap = function(d) { if(typeof(Number(d.y)) == "number"){return yScale(yVal(d));} else { return 0;}};
+
+            var yMap = function(d) {
+                if(typeof(Number(d.y)) == "number"){
+                    return yScale(yVal(d));
+                } else {
+                    return 0;
+                }
+            };
+
             var yAxis = d3.svg.axis()
                     .scale(yScale)
                     .orient("left")
                     .tickSize(-width - margin.left - margin.right, 0, 0);
 
             var xVal = function(d) {
-                    if (d[xParam] && d[xParam] != 'NA') {
+                    if (d[xParam] && d[xParam] !== 'NA') {
                         return d[xParam];
                     } else {
                         d[xParam] = domain[1];

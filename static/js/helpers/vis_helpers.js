@@ -37,23 +37,31 @@ define(['jquery'], function($) {
             var filtered_data = data;
             if(logScale) {
                 filtered_data = data.filter(function(obj){
-                    obj[selector] !== 0;
+                    return (obj[selector] !== "NA" && obj[selector] !== "None" && parseFloat(obj[selector]) !== 0);
                 });
             }
-            return [Math.floor(d3.min(filtered_data, function(d) {
-                if (d[selector] && d[selector] != "NA") {
+
+            var min = d3.min(filtered_data, function(d) {
+                if (d[selector] && d[selector] !== "NA") {
                     return parseFloat(d[selector]);
                 } else {
                     return 0
                 }
-            })),
-                Math.ceil(d3.max(filtered_data, function(d) {
-                if (d[selector] && d[selector] != "NA") {
+            }), max = d3.max(filtered_data, function(d) {
+                if (d[selector] && d[selector] !== "NA") {
                     return parseFloat(d[selector]);
                 } else {
                     return 0
                 }
-            }))];
+            });
+
+            if(filtered_data.length <= 0) {
+                // TODO: alert on 'no valid values in this selector' ?
+                min = 0;
+                max = 0;
+            }
+
+            return [(logScale ? parseFloat(min.toFixed(3)) : Math.floor(min)),Math.ceil(max)];
         },
         values_only: function(data, attr) {
             var result = [];

@@ -54,6 +54,17 @@ function($, d3, d3tip, helpers) {
             min_n = tmp[0];
             max_n = tmp[1];
 
+            if(min_n <= 0 && max_n > 0 && logScale) {
+                // we don't currently support log scales crossing 0 or containing only 0 as a min,
+                // so recalculate min and max with 0s included and fall back to linear
+                // TODO: show warning?
+                $('#x-log-scale').prop('checked',false);
+                logScale = null;
+                tmp = helpers.get_min_max(raw_Data, x_attr, false);
+                min_n = tmp[0];
+                max_n = tmp[1];
+            }
+
             if(helpers.LOG_SCALE.isScaleX(logScale)) {
                 x = d3.scale.log()
                     .clamp(true)

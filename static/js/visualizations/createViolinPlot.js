@@ -34,7 +34,7 @@ function($, d3, vizhelpers) {
                     .clamp(true)
                     .range([width/2, 0])
                     .domain([
-                        d3.min(raw_data.filter(function(d){return d.y !== 0;}),function(d){return d.y;}),
+                        d3.min(raw_data.filter(function(d){return parseFloat(d.y) !== 0;}),function(d){return d.y;}),
                         d3.max(data, function(d) { return d.y; })
                     ]);
             } else {
