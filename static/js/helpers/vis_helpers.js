@@ -17,18 +17,37 @@
  */
 
 define(['jquery'], function($) {
+
     var base_feature_search_url = base_api_url + '/_ah/api/feature_type_api/v1/feature_search?';
     var feature_search_url = base_feature_search_url;
     return {
-        get_min_max: function(data, selector) {
-            return [Math.floor(d3.min(data, function(d) {
+        LOG_SCALE: {
+            NO_LOG_SCALE: 0,
+            X_LOG_SCALE: 1,
+            Y_LOG_SCALE: 2,
+            BOTH_LOG_SCALE: 3,
+            isScaleX: function(logScale) {
+                return (logScale && (logScale === this.BOTH_LOG_SCALE || logScale === this.X_LOG_SCALE));
+            },
+            isScaleY: function(logScale) {
+                return (logScale && (logScale === this.BOTH_LOG_SCALE || logScale === this.Y_LOG_SCALE));
+            }
+        },
+        get_min_max: function(data, selector, logScale) {
+            var filtered_data = data;
+            if(logScale) {
+                filtered_data = data.filter(function(obj){
+                    obj[selector] !== 0;
+                });
+            }
+            return [Math.floor(d3.min(filtered_data, function(d) {
                 if (d[selector] && d[selector] != "NA") {
                     return parseFloat(d[selector]);
                 } else {
                     return 0
                 }
             })),
-                    Math.ceil(d3.max(data, function(d) {
+                Math.ceil(d3.max(filtered_data, function(d) {
                 if (d[selector] && d[selector] != "NA") {
                     return parseFloat(d[selector]);
                 } else {

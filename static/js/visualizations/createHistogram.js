@@ -36,7 +36,7 @@ function($, d3, d3tip, helpers) {
     var histoTip = null;
 
     return {
-        createHistogramPlot : function (svg_param, raw_Data, values_only, width_param, height_param, x_attr, xLabel, tip, margin_param, legend) {
+        createHistogramPlot : function (svg_param, raw_Data, values_only, width_param, height_param, x_attr, xLabel, tip, margin_param, logScale) {
 
             tip = histoTip || tip;
 
@@ -50,14 +50,21 @@ function($, d3, d3tip, helpers) {
                 .bins(num_bins)
                 .frequency(false)(values_only);
             var kde = science.stats.kde().sample(values_only);
-            var tmp = helpers.get_min_max(raw_Data, x_attr);
+            var tmp = helpers.get_min_max(raw_Data, x_attr, helpers.LOG_SCALE.isScaleX(logScale));
             min_n = tmp[0];
             max_n = tmp[1];
 
+            if(helpers.LOG_SCALE.isScaleX(logScale)) {
+                x = d3.scale.log()
+                    .clamp(true)
+                    .range([margin.left, width - margin.right])
+                    .domain([min_n, max_n]);
+            } else {
+                x = d3.scale.linear()
+                    .range([margin.left, width - margin.right])
+                    .domain([min_n, max_n]);
+            }
 
-            x = d3.scale.linear()
-                .range([margin.left, width - margin.right])
-                .domain([min_n, max_n]);
             xAxis = d3.svg.axis()
                 .scale(x)
                 .orient('bottom');

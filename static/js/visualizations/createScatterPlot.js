@@ -20,7 +20,8 @@ define (['jquery', 'd3', 'vizhelpers'],
 function($, d3, vizhelpers) {
     var helpers = Object.create(vizhelpers, {});
     return {
-        create_scatterplot: function(svg, data, domain, range, xLabel, yLabel, xParam, yParam, colorBy, legend, width, height, cohort_set) {
+        create_scatterplot: function(svg, data, domain, range, xLabel, yLabel, xParam, yParam, colorBy, legend, width, height, cohort_set, logScale) {
+
             var margin = {top: 10, bottom: 50, left: 50, right: 10};
             var yVal = function(d) {
                     if (d[yParam] && d[yParam] != 'NA') {
@@ -30,8 +31,13 @@ function($, d3, vizhelpers) {
                         return range[1];
                     }
                 };
-
-            var yScale = d3.scale.linear().range([height-margin.bottom, margin.top]).domain(range);
+            
+            var yScale = null;
+            if(helpers.LOG_SCALE.isScaleY(logScale)) {
+                yScale = d3.scale.log().clamp[true].range([height-margin.bottom, margin.top]).domain(range);
+            } else {
+                yScale = d3.scale.linear().range([height-margin.bottom, margin.top]).domain(range);
+            }
             var yMap = function(d) { if(typeof(Number(d.y)) == "number"){return yScale(yVal(d));} else { return 0;}};
             var yAxis = d3.svg.axis()
                     .scale(yScale)
@@ -47,7 +53,13 @@ function($, d3, vizhelpers) {
                     }
                 };
 
-            var xScale = d3.scale.linear().range([margin.left, width]).domain(domain);
+            var xScale = null;
+            if(helpers.LOG_SCALE.isScaleX(logScale)) {
+                xScale = d3.scale.log().clamp(true).range([margin.left, width]).domain(domain);
+            } else {
+                xScale = d3.scale.linear().range([margin.left, width]).domain(domain);
+            }
+
             var xMap = function(d) {if(typeof(Number(d.x)) == "number"){return xScale(xVal(d));} else { return 0;}};
             var xAxis = d3.svg.axis()
                     .scale(xScale)
