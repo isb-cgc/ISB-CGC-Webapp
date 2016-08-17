@@ -16,15 +16,14 @@ limitations under the License.
 
 """
 
-from oauth2client.client import SignedJwtAssertionCredentials
+from oauth2client.service_account import ServiceAccountCredentials
 from googleapiclient import discovery
 from django.conf import settings
 from httplib2 import Http
 
 
-PEM_FILE = settings.PEM_FILE
-CLIENT_EMAIL = settings.CLIENT_EMAIL
-SUPERADMIN_FOR_REPORTS = settings.SUPERADMIN_FOR_REPORTS
+GOOGLE_GROUP_ADMIN = settings.GOOGLE_GROUP_ADMIN
+GOOGLE_APPLICATION_CREDENTIALS = settings.GOOGLE_APPLICATION_CREDENTIALS
 
 DIRECTORY_SCOPES = [
     'https://www.googleapis.com/auth/admin.directory.group',
@@ -36,17 +35,12 @@ DIRECTORY_SCOPES = [
 
 def get_directory_resource():
 
-    with open(PEM_FILE) as f:
-        private_key = f.read()
+    credentials = ServiceAccountCredentials.from_json_keyfile_name(
+        GOOGLE_APPLICATION_CREDENTIALS, DIRECTORY_SCOPES)
+    delegated_credentials = credentials.create_delegated(GOOGLE_GROUP_ADMIN)
 
-    credentials = SignedJwtAssertionCredentials(
-        CLIENT_EMAIL,
-        private_key,
-        DIRECTORY_SCOPES,
-        sub=SUPERADMIN_FOR_REPORTS
-        )
 
-    http_auth = credentials.authorize(Http())
+    http_auth = delegated_credentials.authorize(Http())
 
     service = discovery.build('admin', 'directory_v1', http=http_auth)
     return service, http_auth

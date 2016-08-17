@@ -16,40 +16,29 @@ limitations under the License.
 
 """
 
-from oauth2client.client import SignedJwtAssertionCredentials
-import oauth2client.gce as gce_oauth2client
-from googleapiclient.discovery import build
-from httplib2 import Http
+from oauth2client.service_account import ServiceAccountCredentials
+from googleapiclient import discovery
 from django.conf import settings
+from httplib2 import Http
 
 
-PEM_FILE = settings.PEM_FILE
-CLIENT_EMAIL = settings.CLIENT_EMAIL
+GOOGLE_APPLICATION_CREDENTIALS = settings.GOOGLE_APPLICATION_CREDENTIALS
+
 
 LOGGING_SCOPES = [
     'https://www.googleapis.com/auth/cloud-platform',
     'https://www.googleapis.com/auth/logging.admin',
-    'https://www.googleapis.com/auth/logging.write' # not necessary?
+    'https://www.googleapis.com/auth/logging.write'
 ]
-# 'https://www.googleapis.com/auth/logging.read'
-# 'https://www.googleapis.com/auth/cloud-platform.read-only'
-
 
 def get_logging_resource():
     """Returns a Cloud Logging service client for calling the API.
     """
 
-    with open(PEM_FILE) as f:
-        private_key = f.read()
-
-    credentials = SignedJwtAssertionCredentials(
-        CLIENT_EMAIL,
-        private_key,
-        scope=LOGGING_SCOPES
-    )
-    # or credentials = gce_oauth2client.AppAssertionCredentials(scope=LOGGING_SCOPES)
+    credentials = ServiceAccountCredentials.from_json_keyfile_name(
+        GOOGLE_APPLICATION_CREDENTIALS, LOGGING_SCOPES)
 
     http_auth = credentials.authorize(Http())
 
-    service = build('logging', 'v1beta3', http=http_auth)
+    service = discovery.build('logging', 'v1beta3', http=http_auth)
     return service, http_auth
