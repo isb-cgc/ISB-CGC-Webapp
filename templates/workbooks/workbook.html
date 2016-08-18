@@ -265,6 +265,11 @@
                                         {% endfor %}
                                     </select>
                                 </div>
+                                <div id="log-scale-alert" class="alert alert-warning alert-dismissable" style="display: none;">
+                                    <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                    No valid domain was found for use of a log scale - this could mean no non-zero data was found, or, the data contained both negative and positive values.
+                                    The scale has been changed back to linear.
+                                </div>
                                 <div class="plot-container">
                                     {% include 'workbooks/workbook_plot.html' with plot=worksheet.active_plot datatype_list=datatypes genes=worksheet.genes variables=worksheet.variables cohorts=worksheet.cohorts %}
                                     <!-- plot needs to indicate saved plot data such as selected variables, cohorts, title, etc -->
