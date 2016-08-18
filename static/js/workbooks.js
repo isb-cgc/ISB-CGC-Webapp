@@ -559,6 +559,11 @@ require([
         var sp_genes = settings_flyout.find('.seqpeek-genes');
         var xLogCheck = $('#x-log-scale').parent();
         var yLogCheck = $('#y-log-scale').parent();
+
+        // Clear selections
+        x_widgets.find('select.x-axis-select option[type="label"]').prop('selected', true);
+        y_widgets.find('select.y-axis-select option[type="label"]').prop('selected', true);
+
         x_widgets.show();
         y_widgets.show();
         c_widgets.show();
