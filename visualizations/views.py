@@ -98,6 +98,7 @@ friendly_name_map = {
 
 numerical_attributes = [
     'age_at_initial_pathologic_diagnosis',
+    'bmi',
     'hsa_miR_146a_5p',
     'hsa_miR_7_7p',
     'CNVR_EGFR',
@@ -174,6 +175,7 @@ fm_numerical_attributes = [
     'percent_tumor_cells',
     'percent_tumor_nuclei',
     'age_at_initial_pathologic_diagnosis',
+    'bmi'
     'days_to_birth',
     'days_to_initial_pathologic_diagnosis',
     'year_of_initial_pathologic_diagnosis',

@@ -557,6 +557,8 @@ require([
         var c_widgets = settings_flyout.find('div.form-group.color-by-group');
         var swap = settings_flyout.find('button.swap');
         var sp_genes = settings_flyout.find('.seqpeek-genes');
+        var xLogCheck = $('#x-log-scale').parent();
+        var yLogCheck = $('#y-log-scale').parent();
         x_widgets.show();
         y_widgets.show();
         c_widgets.show();
@@ -566,29 +568,43 @@ require([
             case "Bar Chart" : //x_type == 'STRING' && y_type == 'none'
                 y_widgets.hide();
                 c_widgets.hide();
+                xLogCheck.hide();
+                yLogCheck.hide();
                 swap.hide();
                 break;
             case "Histogram" : //((x_type == 'INTEGER' || x_type == 'FLOAT') && y_type == 'none') {
                 y_widgets.hide();
                 c_widgets.hide();
+                xLogCheck.show();
+                yLogCheck.hide();
                 swap.hide();
                 break;
             case 'Scatter Plot': //((x_type == 'INTEGER' || x_type == 'FLOAT') && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
+                xLogCheck.show();
+                yLogCheck.show();
                 break;
             case "Violin Plot": //(x_type == 'STRING' && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
+                xLogCheck.hide();
+                yLogCheck.show();
                 swap.hide();
                 break;
             case 'Violin Plot with axis swap'://(y_type == 'STRING' && (x_type == 'INTEGER'|| x_type == 'FLOAT')) {
+                yLogCheck.hide();
+                xLogCheck.show();
                 swap.hide();
                 break;
             case 'Cubby Hole Plot': //(x_type == 'STRING' && y_type == 'STRING') {
                 c_widgets.hide();
+                xLogCheck.hide();
+                yLogCheck.hide();
                 break;
             case 'SeqPeek':
                 sp_genes.show();
                 x_widgets.hide();
                 y_widgets.hide();
                 c_widgets.hide();
+                xLogCheck.hide();
+                yLogCheck.hide();
                 swap.hide();
                 break;
             default :
