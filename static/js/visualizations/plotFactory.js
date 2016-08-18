@@ -118,10 +118,12 @@ define([
         var domain = helpers.get_min_max(data, 'x', helpers.LOG_SCALE.isScaleX(logScale));
         var range = helpers.get_min_max(data, 'y', helpers.LOG_SCALE.isScaleY(logScale));
 
+        $('#log-scale-alert').hide();
+
         if(helpers.LOG_SCALE.isScaleY(logScale) && (range[0] == 0 || (range[0] < 0 && range[1] > 0))) {
             // we don't currently support log scales crossing 0 or containing only 0,
             // so we recalculate min and max with 0s included and fall back to linear
-            // TODO: show warning?
+            $('#log-scale-alert').show();
             $('#y-log-scale').prop('checked',false);
             // This might be a 'both' log scale, if so convert to just X
             if(helpers.LOG_SCALE.isScaleX(logScale)) {
@@ -136,7 +138,7 @@ define([
             // we don't currently support log scales crossing 0
             // recalculate min and max with 0s included and
             // fall back to linear
-            // TODO: show warning?
+            $('#log-scale-alert').show();
             $('#x-log-scale').prop('checked',false);
             // This might be a 'both' log scale; if so convert to just Y
             if(helpers.LOG_SCALE.isScaleY(logScale)) {
