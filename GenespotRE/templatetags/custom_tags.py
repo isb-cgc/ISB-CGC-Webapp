@@ -272,7 +272,7 @@ def get_readable_name(csv_name, attr=None):
         return ATTR_SPECIFIC_TRANSLATION[attr][csv_name]
     elif attr == 'Project' or attr == 'Study':
         return csv_name.upper()
-    elif TRANSLATION_DICTIONARY.get(csv_name) and attr is not 'other_dx' and not is_data_type:
+    elif TRANSLATION_DICTIONARY.get(csv_name) and attr != 'other_dx' and attr != 'tobacco_smoking_history' and not is_data_type:
         return TRANSLATION_DICTIONARY.get(csv_name)
     else:
         csv_name = csv_name.replace('_', ' ')
