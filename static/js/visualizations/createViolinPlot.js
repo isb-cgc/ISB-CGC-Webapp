@@ -92,7 +92,7 @@ function($, d3, vizhelpers) {
             var tmp = xdomain;
             xdomain = [];
             for (var i = 0; i < tmp.length; i++) {
-                xdomain.push(tmp[i].split(':')[0]);
+                xdomain.push(tmp[i].split(/:\d+/)[0]);
             }
 
             // Somehow use the histogram values to determine the x position of the dot
@@ -136,6 +136,9 @@ function($, d3, vizhelpers) {
                 .attr('cx', function(d) {
                     var histogram = histo_dict[x(d[xAttr])/violin_width];
                     var histo_index = 0;
+                    if(histogram == undefined) {
+                        console.log('lol');
+                    }
                     for (var j = 0; j < histogram.length; j++) {
                         var higher = histogram[j][0];
                         var lower = histogram[j][histogram[j].length-1];
