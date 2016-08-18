@@ -185,10 +185,12 @@ define([
         if(logScale && (tmp[0] == 0 || (tmp[1] > 0 && tmp[0] < 0))) {
             // we don't currently support log scales crossing 0 or containing only 0 as a min,
             // so recalculate min and max with 0s included and fall back to linear
-            // TODO: show warning?
+            $('#log-scale-alert').show();
             $('#y-log-scale').prop('checked',false);
             logScale = null;
             tmp = helpers.get_min_max(data, 'y', false);
+        } else {
+            $('#log-scale-alert').hide();
         }
 
         var min_n = tmp[0];
@@ -232,10 +234,12 @@ define([
         if(logScale && (tmp[0] == 0 || (tmp[1] > 0 && tmp[0] < 0))) {
             // we don't currently support log scales crossing 0 or containing only 0 as a min,
             // so recalculate min and max with 0s included and fall back to linear
-            // TODO: show warning?
+            $('#log-scale-alert').show();
             $('#x-log-scale').prop('checked',false);
             logScale = null;
             tmp = helpers.get_min_max(data, 'x', false);
+        } else {
+            $('#log-scale-alert').hide();
         }
         
         // Because we reverse what we send in, we need to reverse our logScale as well, or it will be wrong
