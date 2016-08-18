@@ -21,6 +21,11 @@ define(['jquery'], function($) {
     var base_feature_search_url = base_api_url + '/_ah/api/feature_type_api/v1/feature_search?';
     var feature_search_url = base_feature_search_url;
     return {
+        isValidNumber: function(n) {
+            return (
+                n !== undefined && n !== null && (n.match(/[^\d,\.]/g) === null)
+            );
+        },
         LOG_SCALE: {
             NO_LOG_SCALE: 0,
             X_LOG_SCALE: 1,
@@ -34,21 +39,22 @@ define(['jquery'], function($) {
             }
         },
         get_min_max: function(data, selector, logScale) {
+            var self=this;
             var filtered_data = data;
             if(logScale) {
                 filtered_data = data.filter(function(obj){
-                    return (obj[selector] !== "NA" && obj[selector] !== "None" && parseFloat(obj[selector]) !== 0);
+                    return (self.isValidNumber(obj[selector]) && parseFloat(obj[selector]) !== 0);
                 });
             }
 
             var min = d3.min(filtered_data, function(d) {
-                if (d[selector] && d[selector] !== "NA") {
+                if (self.isValidNumber(d[selector])) {
                     return parseFloat(d[selector]);
                 } else {
                     return 0
                 }
             }), max = d3.max(filtered_data, function(d) {
-                if (d[selector] && d[selector] !== "NA") {
+                if (self.isValidNumber(d[selector])) {
                     return parseFloat(d[selector]);
                 } else {
                     return 0
@@ -66,7 +72,7 @@ define(['jquery'], function($) {
         values_only: function(data, attr) {
             var result = [];
             for (var i = 0; i < data.length; i++ ) {
-                if (data[i][attr] && data[i][attr] != 'None') {
+                if (this.isValidNumber(data[i][attr])) {
                     result.push(data[i][attr]);
                 }
             }

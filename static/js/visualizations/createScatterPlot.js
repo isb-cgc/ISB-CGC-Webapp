@@ -24,7 +24,7 @@ function($, d3, vizhelpers) {
 
             var margin = {top: 10, bottom: 50, left: 50, right: 10};
             var yVal = function(d) {
-                if (d[yParam] && d[yParam] !== "NA") {
+                if (helpers.isValidNumber(d[yParam])){
                     return d[yParam];
                 } else {
                     d[yParam] = range[1];
@@ -40,7 +40,7 @@ function($, d3, vizhelpers) {
             }
 
             var yMap = function(d) {
-                if(typeof(Number(d.y)) == "number"){
+                if(helpers.isValidNumber(d.y)){
                     return yScale(yVal(d));
                 } else {
                     return 0;
@@ -53,7 +53,7 @@ function($, d3, vizhelpers) {
                     .tickSize(-width - margin.left - margin.right, 0, 0);
 
             var xVal = function(d) {
-                    if (d[xParam] && d[xParam] !== 'NA') {
+                    if (helpers.isValidNumber(d[xParam])) {
                         return d[xParam];
                     } else {
                         d[xParam] = domain[1];
@@ -68,7 +68,7 @@ function($, d3, vizhelpers) {
                 xScale = d3.scale.linear().range([margin.left, width]).domain(domain);
             }
 
-            var xMap = function(d) {if(typeof(Number(d.x)) == "number"){return xScale(xVal(d));} else { return 0;}};
+            var xMap = function(d) {if(helpers.isValidNumber(d.x)){return xScale(xVal(d));} else { return 0;}};
             var xAxis = d3.svg.axis()
                     .scale(xScale)
                     .orient("bottom")
