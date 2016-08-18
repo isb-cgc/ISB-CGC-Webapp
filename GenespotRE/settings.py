@@ -416,3 +416,11 @@ MAX_FILE_LIST_REQUEST = 65000
 
 # IGV limit to prevent users from trying ot open dozens of files
 MAX_FILES_IGV = 5
+
+##############################################################
+#   MailGun Email Settings
+##############################################################
+
+EMAIL_SERVICE_API_URL = os.environ.get('EMAIL_SERVICE_API_URL', '')
+EMAIL_SERVICE_API_KEY = os.environ.get('EMAIL_SERVICE_API_KEY', '')
+NOTIFICATION_EMAIL_FROM_ADDRESS = os.environ.get('NOTIFICATOON_EMAIL_FROM_ADDRESS', '')
