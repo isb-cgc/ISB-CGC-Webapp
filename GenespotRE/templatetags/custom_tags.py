@@ -70,6 +70,7 @@ NOT_CAPWORDS = [
     'DNA_sequencing',
     'RNA_sequencing',
     'DNA_methylation',
+    'bmi',
 ]
 
 ALPHANUM_SORT = [
@@ -84,8 +85,30 @@ ATTR_SPECIFIC_TRANSLATION = {
         'underweight': 'Underweight: BMI less that 18.5',
         'normal weight': 'Normal weight: BMI is 18.5 - 24.9',
         'overweight': 'Overweight: BMI is 25 - 29.9',
-        'obese': 'Obese: BMI is 30 or more'
-    }
+        'obese': 'Obese: BMI is 30 or more',
+    },
+    'SampleTypeCode': {
+        '01': 'Primary Solid Tumor',
+        '02': 'Recurrent Solid Tumor',
+        '03': 'Primary Blood Derived Cancer - Peripheral Blood',
+        '04': 'Recurrent Blood Derived Cancer - Bone Marrow',
+        '05': 'Additional - New Primary',
+        '06': 'Metastatic',
+        '07': 'Additional Metastatic',
+        '08': 'Human Tumor Original Cells',
+        '09': 'Primary Blood Derived Cancer - Bone Marrow',
+        '10': 'Blood Derived Normal',
+        '11': 'Solid Tissue Normal',
+        '12': 'Buccal Cell Normal',
+        '13': 'EBV Immortalized Normal',
+        '14': 'Bone Marrow Normal',
+        '20': 'Control Analyte',
+        '40': 'Recurrent Blood Derived Cancer - Peripheral Blood',
+        '50': 'Cell Lines',
+        '60': 'Primary Xenograft Tissue',
+        '61': 'Cell Line Derived Xenograft Tissue',
+        'None': 'N/A',
+    },
 }
 
 TRANSLATION_DICTIONARY = {
@@ -132,6 +155,7 @@ TRANSLATION_DICTIONARY = {
 FEATURE_DISPLAY_NAMES = {
     'Project': 'Project',
     'Study': 'Study',
+    'bmi': 'BMI',
     'miRNA_sequencing': 'miRNA Sequencing',
     'DNA_methylation': 'DNA Methylation',
     'RNA_sequencing': 'RNA Sequencing',
@@ -268,7 +292,7 @@ def get_readable_name(csv_name, attr=None):
         else:
             return 'None'
     # Clinical filters
-    elif attr in ATTR_SPECIFIC_TRANSLATION.keys():
+    elif ATTR_SPECIFIC_TRANSLATION.get(attr) and ATTR_SPECIFIC_TRANSLATION[attr].get(csv_name):
         return ATTR_SPECIFIC_TRANSLATION[attr][csv_name]
     elif attr == 'Project' or attr == 'Study':
         return csv_name.upper()
