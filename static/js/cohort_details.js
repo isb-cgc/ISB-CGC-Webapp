@@ -261,6 +261,7 @@ require([
                     $('<a>').addClass('delete-x filter-label label label-default mol-cat-filter-x')
                         .text(gene.label + ' [' + tokenFeatDisplName + ': ' + tokenValDisplName + ']')
                         .append('<i class="fa fa-times">')
+                        .attr("title",gene.label + ' [' + tokenFeatDisplName + ': ' + tokenValDisplName + ']')
                 );
 
                 $this.data({
@@ -374,6 +375,7 @@ require([
                     $('<a>').addClass('delete-x filter-label label label-default')
                         .text(tokenFeatDisplName + ': ' + tokenValDisplName)
                         .append('<i class="fa fa-times">')
+                        .attr("title",tokenFeatDisplName + ': ' + tokenValDisplName)
                 );
 
                 if (feature.data('feature-type') == 'molecular') {
