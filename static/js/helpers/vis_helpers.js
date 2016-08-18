@@ -23,7 +23,7 @@ define(['jquery'], function($) {
     return {
         isValidNumber: function(n) {
             return (
-                n !== undefined && n !== null && (n.match(/[^\d,\.]/g) === null)
+                n !== undefined && n !== null && (typeof(n) !== "string" || n.match(/[^\d,\.]/g) === null)
             );
         },
         LOG_SCALE: {
