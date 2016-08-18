@@ -87,7 +87,7 @@ define([
     /*
         Generate Histogram
      */
-    function generate_histogram(margin, plot_selector, height, width, x_attr, data){
+    function generate_histogram(margin, plot_selector, height, width, x_attr, data, logScale, scale_type){
         var svg = d3.select(plot_selector)
                 .append('svg')
                 .attr('width', width + 10)
@@ -103,7 +103,9 @@ define([
                 'x',
                 generate_axis_label(x_attr),
                 cubby_tip,
-                margin);
+                margin,
+                logScale,
+                scale_type);
 
         return  {plot : plot, svg : svg}
     }
@@ -111,11 +113,43 @@ define([
     /*
         Generate scatter plot
     */
-    function generate_scatter_plot(margin, plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data) {
-         var domain = helpers.get_min_max(data, 'x');
-         var range = helpers.get_min_max(data, 'y');
+    function generate_scatter_plot(margin, plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data, logScale) {
 
-         var legend = d3.select(legend_selector)
+        var domain = helpers.get_min_max(data, 'x', helpers.LOG_SCALE.isScaleX(logScale));
+        var range = helpers.get_min_max(data, 'y', helpers.LOG_SCALE.isScaleY(logScale));
+
+        $('#log-scale-alert').hide();
+
+        if(helpers.LOG_SCALE.isScaleY(logScale) && (range[0] == 0 || (range[0] < 0 && range[1] > 0))) {
+            // we don't currently support log scales crossing 0 or containing only 0,
+            // so we recalculate min and max with 0s included and fall back to linear
+            $('#log-scale-alert').show();
+            $('#y-log-scale').prop('checked',false);
+            // This might be a 'both' log scale, if so convert to just X
+            if(helpers.LOG_SCALE.isScaleX(logScale)) {
+                logScale = helpers.LOG_SCALE.X_LOG_SCALE;
+            } else {
+                logScale = null;
+            }
+            range = helpers.get_min_max(data, 'y', false);
+        }
+
+        if(helpers.LOG_SCALE.isScaleX(logScale) && (domain[0] == 0 || (domain[0] < 0 && domain[1] > 0))) {
+            // we don't currently support log scales crossing 0
+            // recalculate min and max with 0s included and
+            // fall back to linear
+            $('#log-scale-alert').show();
+            $('#x-log-scale').prop('checked',false);
+            // This might be a 'both' log scale; if so convert to just Y
+            if(helpers.LOG_SCALE.isScaleY(logScale)) {
+                logScale = helpers.LOG_SCALE.Y_LOG_SCALE;
+            } else {
+                logScale = null;
+            }
+            domain = helpers.get_min_max(data, 'x', false);
+        }
+
+        var legend = d3.select(legend_selector)
              .append('svg')
              .attr('width', width);
          var svg = d3.select(plot_selector)
@@ -134,7 +168,8 @@ define([
              legend,
              width,
              height,
-             cohort_set
+             cohort_set,
+             logScale
          );
 
          return  {plot : plot, svg : svg}
@@ -143,11 +178,24 @@ define([
     /*
         Generate violin plot
      */
-    function generate_violin_plot(margin, plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data) {
+    function generate_violin_plot(margin, plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data, logScale) {
         var violin_width = 200;
-        var tmp = helpers.get_min_max(data, 'y');
+        var tmp = helpers.get_min_max(data, 'y', logScale);
+
+        if(logScale && (tmp[0] == 0 || (tmp[1] > 0 && tmp[0] < 0))) {
+            // we don't currently support log scales crossing 0 or containing only 0 as a min,
+            // so recalculate min and max with 0s included and fall back to linear
+            $('#log-scale-alert').show();
+            $('#y-log-scale').prop('checked',false);
+            logScale = null;
+            tmp = helpers.get_min_max(data, 'y', false);
+        } else {
+            $('#log-scale-alert').hide();
+        }
+
         var min_n = tmp[0];
         var max_n = tmp[1];
+
         var legend = d3.select(legend_selector)
             .append('svg')
             .attr('width', width);
@@ -169,7 +217,8 @@ define([
             'y',
             color_by,
             legend,
-            cohort_set
+            cohort_set,
+            logScale
         );
 
         return  {plot : plot, svg : svg}
@@ -178,11 +227,29 @@ define([
     /*
         Generate violin plot with axis swap
      */
-    function generate_violin_plot_axis_swap(margin, plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data) {
+    function generate_violin_plot_axis_swap(margin, plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data, logScale) {
         var violin_width = 200;
-        var tmp = helpers.get_min_max(data, 'x');
+        var tmp = helpers.get_min_max(data, 'x', logScale);
+
+        if(logScale && (tmp[0] == 0 || (tmp[1] > 0 && tmp[0] < 0))) {
+            // we don't currently support log scales crossing 0 or containing only 0 as a min,
+            // so recalculate min and max with 0s included and fall back to linear
+            $('#log-scale-alert').show();
+            $('#x-log-scale').prop('checked',false);
+            logScale = null;
+            tmp = helpers.get_min_max(data, 'x', false);
+        } else {
+            $('#log-scale-alert').hide();
+        }
+        
+        // Because we reverse what we send in, we need to reverse our logScale as well, or it will be wrong
+        if(helpers.LOG_SCALE.isScaleX(logScale)) {
+            logScale = helpers.LOG_SCALE.Y_LOG_SCALE;
+        }
+        
         var min_n = tmp[0];
         var max_n = tmp[1];
+
         var legend = d3.select(legend_selector)
             .append('svg')
             .attr('width', width);
@@ -204,7 +271,8 @@ define([
             'x',
             color_by,
             legend,
-            cohort_set
+            cohort_set,
+            logScale
         );
 
         return  {plot : plot, svg : svg}
@@ -334,8 +402,8 @@ define([
         var width  = $('.worksheet.active .worksheet-panel-body:first').width(), //TODO should be based on size of screen
             height = 700, //TODO ditto
             margin = {top: 0, bottom: 100, left: 70, right: 10},
-            x_type = '',
-            y_type = '';
+            x_type = args.data.types.x,
+            y_type = args.data.types.y;
 
         var data = args.data;
         if (data.hasOwnProperty('pairwise_result')) {
@@ -353,22 +421,39 @@ define([
                 args.color_by = 'c';
             }
 
+            var logScale = vizhelpers.LOG_SCALE.NO_LOG_SCALE;
+
             var visualization;
             switch (args.type){
                 case "Bar Chart" : //x_type == 'STRING' && y_type == 'none'
                     visualization = generate_bar_chart(margin, args.plot_selector, height, width, args.x, data);
                     break;
                 case "Histogram" : //((x_type == 'INTEGER' || x_type == 'FLOAT') && y_type == 'none') {
-                    visualization = generate_histogram(margin, args.plot_selector, height, width, args.x, data);
+                    if($('#x-log-scale').is(':checked')) {
+                        logScale = vizhelpers.LOG_SCALE.X_LOG_SCALE;
+                    }
+                    visualization = generate_histogram(margin, args.plot_selector, height, width, args.x, data, logScale, x_type);
                     break;
                 case 'Scatter Plot': //((x_type == 'INTEGER' || x_type == 'FLOAT') && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
-                    visualization = generate_scatter_plot(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by, cohort_set, data)
+                    if($('#x-log-scale').is(':checked')) {
+                        logScale = vizhelpers.LOG_SCALE.X_LOG_SCALE;
+                    }
+                    if($('#y-log-scale').is(':checked')) {
+                        logScale = (logScale == vizhelpers.LOG_SCALE.X_LOG_SCALE ? vizhelpers.LOG_SCALE.BOTH_LOG_SCALE : vizhelpers.LOG_SCALE.Y_LOG_SCALE);
+                    }
+                    visualization = generate_scatter_plot(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by, cohort_set, data, logScale)
                     break;
                 case "Violin Plot": //(x_type == 'STRING' && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
-                    visualization = generate_violin_plot(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data)
+                    if($('#y-log-scale').is(':checked')) {
+                        logScale = vizhelpers.LOG_SCALE.Y_LOG_SCALE;
+                    }
+                    visualization = generate_violin_plot(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data, logScale)
                     break;
                 case 'Violin Plot with axis swap'://(y_type == 'STRING' && (x_type == 'INTEGER'|| x_type == 'FLOAT')) {
-                    visualization = generate_violin_plot_axis_swap(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data)
+                    if($('#x-log-scale').is(':checked')) {
+                        logScale = vizhelpers.LOG_SCALE.X_LOG_SCALE;
+                    }
+                    visualization = generate_violin_plot_axis_swap(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data, logScale)
                     break;
                 case 'Cubby Hole Plot' : //(x_type == 'STRING' && y_type == 'STRING') {
                     visualization = generate_cubby_hole_plot(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data)
