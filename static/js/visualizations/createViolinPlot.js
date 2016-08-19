@@ -29,18 +29,31 @@ function($, d3, vizhelpers) {
                 .domain(domain)
                 .nice();
 
+            var tmp_raw = helpers.get_min_max(raw_data, 'y', logScale);
+            var tmp = helpers.get_min_max(data, 'y', logScale);
+
+            if(logScale && ((tmp[1] == 0 || (tmp[1] > 0 && tmp[1] < 0))
+                || (tmp_raw[0] == 0 || (tmp_raw[0] > 0 && tmp_raw[0] < 0)))) {
+                // we don't currently support log scales crossing 0 or containing only 0 as a min,
+                // so recalculate min and max with 0s included and fall back to linear
+                $('#log-scale-alert').show();
+                $('#y-log-scale').prop('checked',false);
+                logScale = null;
+                tmp_raw = helpers.get_min_max(raw_data, 'y', false);
+                tmp = helpers.get_min_max(data, 'y', false);
+            } else {
+                $('#log-scale-alert').hide();
+            }
+
             if(helpers.LOG_SCALE.isScaleY(logScale)) {
                  y = d3.scale.log()
                     .clamp(true)
                     .range([width/2, 0])
-                    .domain([
-                        d3.min(raw_data.filter(function(d){return parseFloat(d.y) !== 0;}),function(d){return d.y;}),
-                        d3.max(data, function(d) { return d.y; })
-                    ]);
+                    .domain([tmp_raw[0],tmp[1]]);
             } else {
                  y = d3.scale.linear()
                     .range([width/2, 0])
-                    .domain([0, d3.max(data, function(d) { return d.y; })]);
+                    .domain([0, tmp[1]]);
             }
 
             var line = d3.svg.line()
@@ -79,7 +92,7 @@ function($, d3, vizhelpers) {
             var tmp = xdomain;
             xdomain = [];
             for (var i = 0; i < tmp.length; i++) {
-                xdomain.push(tmp[i].split(':')[0]);
+                xdomain.push(tmp[i].split(/:\d+/)[0]);
             }
 
             // Somehow use the histogram values to determine the x position of the dot
@@ -123,6 +136,9 @@ function($, d3, vizhelpers) {
                 .attr('cx', function(d) {
                     var histogram = histo_dict[x(d[xAttr])/violin_width];
                     var histo_index = 0;
+                    if(histogram == undefined) {
+                        console.log('lol');
+                    }
                     for (var j = 0; j < histogram.length; j++) {
                         var higher = histogram[j][0];
                         var lower = histogram[j][histogram[j].length-1];
