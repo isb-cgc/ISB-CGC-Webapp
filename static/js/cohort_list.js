@@ -221,15 +221,17 @@ require([
         var users = [];
         var userId = [];
         var that = this;
-        var cohort = null
         $('#cohorts-list tr:not(:first) input:checked').each(function(){
-            cohort = $(this).val();
+            var cohort = $(this).val();
             var tempt = shared_users[$(this).val()];
             if(tempt){
                 JSON.parse(tempt).forEach(function(user){
                     if($.inArray(user.pk, userId) < 0){
+                        user.fields.shared_cohorts = [cohort];
                         users.push(user.fields);
                         userId.push(user.pk);
+                    } else {
+                        user.fields.shared_cohorts.push(cohort);
                     }
                 })
             }
@@ -237,12 +239,15 @@ require([
 
         var table = $(that).find('table');
         if(users.length){
-            table.append('<thead><th>Name</th><th>Email</th><th></th></thead>')
+            table.append('<thead><th>Name</th><th>Email</th><th>Cohort ID</th><th></th></thead>')
             users.forEach(function(user){
-                $(that).find('table').append(
-                    '<tr><td>'+ user.first_name + ' ' + user.last_name + '</td>'
-                    +'<td>'+ user.email +'</td>'
-                    +'<td><a class="remove-shared-user" role="button" data-user-id="'+user.pk+'" data-cohort-id="'+cohort+'"><i class="fa fa-times"></i></a></td></tr>')
+                user.shared_cohorts.forEach(function(cohort){
+                    $(that).find('table').append(
+                        '<tr><td>'+ user.first_name + ' ' + user.last_name + '</td>'
+                        +'<td>'+ user.email +'</td>'
+                        +'<td>'+ cohort +'</td>'
+                        +'<td><a class="remove-shared-user" role="button" data-user-id="'+user.pk+'" data-cohort-id="'+cohort+'"><i class="fa fa-times"></i></a></td></tr>')
+                });
             });
             $('.remove-shared-user').on('click', remove_shared_user);
         }else{
