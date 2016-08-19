@@ -188,15 +188,15 @@ require([
     // onClick: Remove shared user
     var remove_shared_user = function() {
         var user_id = $(this).attr('data-user-id');
-        var cohort_id = $(this).attr('data-cohort-id');
-        var url = base_url + '/cohorts/unshare_cohort/' + cohort_id + '/';
+        var cohort_ids = $(this).attr('data-cohort-ids').split(",");
+        var url = base_url + '/cohorts/unshare_cohort/' + cohort_ids[0] + '/';
         var csrftoken = $.getCookie('csrftoken');
         var button = $(this);
         $.ajax({
             type: 'POST',
             url: url,
             dataType: 'json',
-            data: {owner: true, user_id: user_id},
+            data: {owner: true, user_id: user_id, cohorts: cohort_ids},
             beforeSend: function (xhr) {
                 xhr.setRequestHeader("X-CSRFToken", csrftoken);
             },
@@ -239,15 +239,12 @@ require([
 
         var table = $(that).find('table');
         if(users.length){
-            table.append('<thead><th>Name</th><th>Email</th><th>Cohort ID</th><th></th></thead>')
+            table.append('<thead><th>Name</th><th>Email</th><th></th></thead>')
             users.forEach(function(user){
-                user.shared_cohorts.forEach(function(cohort){
-                    $(that).find('table').append(
-                        '<tr><td>'+ user.first_name + ' ' + user.last_name + '</td>'
-                        +'<td>'+ user.email +'</td>'
-                        +'<td>'+ cohort +'</td>'
-                        +'<td><a class="remove-shared-user" role="button" data-user-id="'+user.pk+'" data-cohort-id="'+cohort+'"><i class="fa fa-times"></i></a></td></tr>')
-                });
+                $(that).find('table').append(
+                    '<tr><td>'+ user.first_name + ' ' + user.last_name + '</td>'
+                    +'<td>'+ user.email +'</td>'
+                    +'<td><a title="Remove '+user.first_name+' '+user.last_name+' from all shared Cohorts?" class="remove-shared-user" role="button" data-user-id="'+user.pk+'" data-cohort-ids="'+user.shared_cohorts.join(",")+'"><i class="fa fa-times"></i></a></td></tr>')
             });
             $('.remove-shared-user').on('click', remove_shared_user);
         }else{
