@@ -103,7 +103,7 @@
                                 </td>
                                 <td class="share-col">
                                     {% if cohort.shared_with_users|length %}
-                                        ( <a data-toggle="modal" data-target="#share-cohorts-modal" class="shared">{{cohort.shared_with_users|length}}</a> )
+                                        ( <a data-toggle="modal" data-target="#share-cohorts-modal" data-cohort-id="{{ cohort.id }}" class="shared">{{cohort.shared_with_users|length}}</a> )
                                     {% else %}
                                         ( 0 )
                                     {% endif %}

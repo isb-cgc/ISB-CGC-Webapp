@@ -184,11 +184,46 @@ require([
 
         $(modalName + ' a[data-target="#shared-with-pane"]').tab('show');
     });
+
+    // onClick: Remove shared user
+    var remove_shared_user = function() {
+        var user_id = $(this).attr('data-user-id');
+        var cohort_id = $(this).attr('data-cohort-id');
+        var url = base_url + '/cohorts/unshare_cohort/' + cohort_id + '/';
+        var csrftoken = $.getCookie('csrftoken');
+        var button = $(this);
+        $.ajax({
+            type: 'POST',
+            url: url,
+            dataType: 'json',
+            data: {owner: true, user_id: user_id},
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            },
+            success: function (data) {
+                var count = $('td.share-col a.shared[data-cohort-id="'+cohort_id +'"]').text().replace(/\(\)/g);
+                count -= 1;
+                if(count <= 0) {
+                    var cell = $('td.share-col a.shared[data-cohort-id="'+cohort_id +'"]').parent();
+                    $('td.share-col a.shared[data-cohort-id="'+cohort_id +'"]').remove();
+                    cell.text("( 0 )");
+                } else {
+                    $('td.share-col a.shared[data-cohort-id="'+cohort_id +'"]').text(count);
+                }
+            },
+            error: function () {
+                console.error('Failed to remove user');
+            }
+        })
+    };
+
     $('#share-cohorts-modal').on('show.bs.modal', function () {
         var users = [];
         var userId = [];
         var that = this;
+        var cohort = null
         $('#cohorts-list tr:not(:first) input:checked').each(function(){
+            cohort = $(this).val();
             var tempt = shared_users[$(this).val()];
             if(tempt){
                 JSON.parse(tempt).forEach(function(user){
@@ -199,19 +234,24 @@ require([
                 })
             }
         })
-        console.log(users);
+
         var table = $(that).find('table');
         if(users.length){
-            table.append('<thead><th>Name</th><th>Email</th></thead>')
+            table.append('<thead><th>Name</th><th>Email</th><th></th></thead>')
             users.forEach(function(user){
-                $(that).find('table').append('<tr><td>'+ user.first_name + ' ' + user.last_name + '</td><td>'+ user.email +'</td></tr>')
-            })
+                $(that).find('table').append(
+                    '<tr><td>'+ user.first_name + ' ' + user.last_name + '</td>'
+                    +'<td>'+ user.email +'</td>'
+                    +'<td><a class="remove-shared-user" role="button" data-user-id="'+user.pk+'" data-cohort-id="'+cohort+'"><i class="fa fa-times"></i></a></td></tr>')
+            });
+            $('.remove-shared-user').on('click', remove_shared_user);
         }else{
             table.append('<p class="center">Your List is Empty</p>')
         }
     }).on('hidden.bs.modal', function(){
         $(this).find('table').html('');
     });
+
     $('#set-op-cohort').on('submit', function() {
         var form = $(this);
         $('#selected-ids').children().each(function() {
