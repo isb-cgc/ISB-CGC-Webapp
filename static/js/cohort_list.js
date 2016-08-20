@@ -189,49 +189,42 @@ require([
     var remove_shared_user = function() {
         var user_id = $(this).attr('data-user-id');
         var cohort_ids = $(this).attr('data-cohort-ids').split(",");
-        var url = base_url + '/cohorts/unshare_cohort/' + cohort_ids[0] + '/';
+        var url = base_url + '/cohorts/unshare_cohort/';
         var csrftoken = $.getCookie('csrftoken');
         var button = $(this);
         $.ajax({
             type: 'POST',
             url: url,
             dataType: 'json',
-            data: {owner: true, user_id: user_id, cohorts: cohort_ids},
+            data: {user_id: user_id, cohorts: JSON.stringify(cohort_ids)},
             beforeSend: function (xhr) {
                 xhr.setRequestHeader("X-CSRFToken", csrftoken);
             },
             success: function (data) {
-                var count = $('td.share-col a.shared[data-cohort-id="'+cohort_id +'"]').text().replace(/\(\)/g);
-                count -= 1;
-                if(count <= 0) {
-                    var cell = $('td.share-col a.shared[data-cohort-id="'+cohort_id +'"]').parent();
-                    $('td.share-col a.shared[data-cohort-id="'+cohort_id +'"]').remove();
-                    cell.text("( 0 )");
-                } else {
-                    $('td.share-col a.shared[data-cohort-id="'+cohort_id +'"]').text(count);
-                }
+                window.location.reload(true);
             },
-            error: function () {
-                console.error('Failed to remove user');
+            error: function (e) {
+                console.error('Failed to remove user: ' + JSON.parse(e.responseText).msg);
             }
         })
     };
 
     $('#share-cohorts-modal').on('show.bs.modal', function () {
         var users = [];
-        var userId = [];
+        var user_map = {};
         var that = this;
         $('#cohorts-list tr:not(:first) input:checked').each(function(){
             var cohort = $(this).val();
             var tempt = shared_users[$(this).val()];
             if(tempt){
                 JSON.parse(tempt).forEach(function(user){
-                    if($.inArray(user.pk, userId) < 0){
+                    if(!user_map[user.pk]){
+                        user_map[user.pk] = user.fields;
                         user.fields.shared_cohorts = [cohort];
+                        user.fields.id = user.pk;
                         users.push(user.fields);
-                        userId.push(user.pk);
                     } else {
-                        user.fields.shared_cohorts.push(cohort);
+                        user_map[user.pk].shared_cohorts.push(cohort);
                     }
                 })
             }
@@ -244,7 +237,7 @@ require([
                 $(that).find('table').append(
                     '<tr><td>'+ user.first_name + ' ' + user.last_name + '</td>'
                     +'<td>'+ user.email +'</td>'
-                    +'<td><a title="Remove '+user.first_name+' '+user.last_name+' from all shared Cohorts?" class="remove-shared-user" role="button" data-user-id="'+user.pk+'" data-cohort-ids="'+user.shared_cohorts.join(",")+'"><i class="fa fa-times"></i></a></td></tr>')
+                    +'<td><a title="Remove '+user.first_name+' '+user.last_name+' from all shared Cohorts?" class="remove-shared-user" role="button" data-user-id="'+user.id+'" data-cohort-ids="'+user.shared_cohorts.join(",")+'"><i class="fa fa-times"></i></a></td></tr>')
             });
             $('.remove-shared-user').on('click', remove_shared_user);
         }else{
