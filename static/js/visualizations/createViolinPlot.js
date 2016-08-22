@@ -20,41 +20,18 @@ define (['jquery', 'd3', 'vizhelpers'],
 function($, d3, vizhelpers) {
     var helpers = Object.create(vizhelpers, {});
     return {
-        addViolin: function (svg, raw_data, values_only, height, width, domain, range, logScale) {
+        addViolin: function (svg, raw_data, values_only, height, width, domain, range) {
             var data = d3.layout.histogram()
                 .frequency(0)(values_only.sort(d3.descending));
 
-            var y, x = d3.scale.linear()
+            var y = d3.scale.linear()
+                .range([width/2, 0])
+                .domain([0, d3.max(data, function(d) { return d.y; })]);
+
+            var x = d3.scale.linear()
                 .range(range)
                 .domain(domain)
                 .nice();
-
-            var tmp_raw = helpers.get_min_max(raw_data, 'y', logScale);
-            var tmp = helpers.get_min_max(data, 'y', logScale);
-
-            if(logScale && ((tmp[1] == 0 || (tmp[1] > 0 && tmp[1] < 0))
-                || (tmp_raw[0] == 0 || (tmp_raw[0] > 0 && tmp_raw[0] < 0)))) {
-                // we don't currently support log scales crossing 0 or containing only 0 as a min,
-                // so recalculate min and max with 0s included and fall back to linear
-                $('#log-scale-alert').show();
-                $('#y-log-scale').prop('checked',false);
-                logScale = null;
-                tmp_raw = helpers.get_min_max(raw_data, 'y', false);
-                tmp = helpers.get_min_max(data, 'y', false);
-            } else {
-                $('#log-scale-alert').hide();
-            }
-
-            if(helpers.LOG_SCALE.isScaleY(logScale)) {
-                 y = d3.scale.log()
-                    .clamp(true)
-                    .range([width/2, 0])
-                    .domain([tmp_raw[0],tmp[1]]);
-            } else {
-                 y = d3.scale.linear()
-                    .range([width/2, 0])
-                    .domain([0, tmp[1]]);
-            }
 
             var line = d3.svg.line()
                 .interpolate('basis')
@@ -84,7 +61,7 @@ function($, d3, vizhelpers) {
                 .style('fill', 'none')
                 .attr('transform', 'rotate(90, 0, 0) scale(1, -1)');
         },
-        addPoints: function (svg, raw_data, values_only, height, width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, margin, cohort_set, logScale) {
+        addPoints: function (svg, raw_data, values_only, height, width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, margin, cohort_set) {
             // for each key, value_list in values_only
                 // create a histogram and new dictionary where key=plot_number and value=histogram_values
 
@@ -92,25 +69,17 @@ function($, d3, vizhelpers) {
             var tmp = xdomain;
             xdomain = [];
             for (var i = 0; i < tmp.length; i++) {
-                xdomain.push(tmp[i].split(/:\d+/)[0]);
+                xdomain.push(tmp[i].split(':')[0]);
             }
 
             // Somehow use the histogram values to determine the x position of the dot
+            var y = d3.scale.linear()
+                .range(range)
+                .domain(domain);
 
-            var y,x = d3.scale.ordinal()
+            var x = d3.scale.ordinal()
                 .domain(xdomain)
-                .rangeBands([0, width - (violin_width / 2)]);
-
-            if(helpers.LOG_SCALE.isScaleY(logScale)) {
-                y = d3.scale.log()
-                    .clamp(true)
-                    .range(range)
-                    .domain(domain);
-            } else {
-                y = d3.scale.linear()
-                    .range(range)
-                    .domain(domain);
-            }
+                .rangeBands([0, width-(violin_width/2)]);
 
             var colorVal = function(d) { return d[colorBy]; };
 
@@ -126,7 +95,9 @@ function($, d3, vizhelpers) {
                 histo_dict[key] = d3.layout.histogram()
                     .frequency(0)(values_only[key].sort(d3.descending));
             }
-            
+
+
+
             svg.selectAll('.dot')
                 .data(raw_data)
                 .enter().append('circle')
@@ -136,9 +107,6 @@ function($, d3, vizhelpers) {
                 .attr('cx', function(d) {
                     var histogram = histo_dict[x(d[xAttr])/violin_width];
                     var histo_index = 0;
-                    if(histogram == undefined) {
-                        console.log('lol');
-                    }
                     for (var j = 0; j < histogram.length; j++) {
                         var higher = histogram[j][0];
                         var lower = histogram[j][histogram[j].length-1];
@@ -160,6 +128,8 @@ function($, d3, vizhelpers) {
                     return y(d[yAttr]);
                 })
                 .attr('r', 2);
+
+
 
             legend = legend.attr('height', 20 * color.domain().length + 30);
             legend.append('text')
@@ -198,22 +168,12 @@ function($, d3, vizhelpers) {
                     }
                 });
         },
-        addMedianLine: function(svg, raw_data, values_only, height, width, domain, range, logScale) {
+        addMedianLine: function(svg, raw_data, values_only, height, width, domain, range) {
             var median = d3.median(values_only);
-            
-            var y;
-            
-            if(helpers.LOG_SCALE.isScaleY(logScale)) {
-                y = d3.scale.log()
-                    .clamp(true)
-                    .range(range)
-                    .domain(domain);
-            } else {
-                y = d3.scale.linear()
-                    .range(range)
-                    .domain(domain);                
-            }
-            
+            var y = d3.scale.linear()
+                .range(range)
+                .domain(domain);
+
             var line = d3.svg.line()
                 .interpolate('linear')
                 .x(function(d) { return d.x; })
@@ -229,8 +189,7 @@ function($, d3, vizhelpers) {
                 .style('fill', 'none')
 
         },
-        createViolinPlot: function(svg, raw_Data, height, violin_width, max_y, min_y, xLabel, yLabel, xAttr, yAttr, colorBy, legend, cohort_set, logScale) {
-
+        createViolinPlot: function(svg, raw_Data, height, violin_width, max_y, min_y, xLabel, yLabel, xAttr, yAttr, colorBy, legend, cohort_set) {
             var margin = {top: 0, bottom: 50, left: 50, right: 0};
             var domain = [min_y, max_y];
             var range = [height-margin.bottom, 0];
@@ -300,8 +259,8 @@ function($, d3, vizhelpers) {
 
                 }
 
-                this.addViolin(g, processed_data[key], values_only, height, violin_width, domain, range, logScale);
-                this.addMedianLine(g, processed_data[key], values_only, height, violin_width, domain, range, logScale);
+                this.addViolin(g, processed_data[key], values_only, height, violin_width, domain, range);
+                this.addMedianLine(g, processed_data[key], values_only, height, violin_width, domain, range);
                 i += 1;
             }
 
@@ -317,21 +276,12 @@ function($, d3, vizhelpers) {
                 .attr('width', width)
                 .attr('height', height)
                 .attr('transform', 'translate(' + (margin.left) + ',0)');
-            this.addPoints(plotg, raw_Data, scatter_processed_data, height, width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, margin, cohort_set, logScale);
+            this.addPoints(plotg, raw_Data, scatter_processed_data, height, width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, margin, cohort_set);
 
             // create y axis
-            var y;
-
-            if(helpers.LOG_SCALE.isScaleY(logScale)) {
-                y = d3.scale.log()
-                    .clamp(true)
-                    .range(range)
-                    .domain(domain);
-            } else {
-                y = d3.scale.linear()
-                    .range(range)
-                    .domain(domain);
-            }
+            var y = d3.scale.linear()
+                .range(range)
+                .domain(domain);
 
             var yAxis = d3.svg.axis()
                 .scale(y)
