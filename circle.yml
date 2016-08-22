@@ -14,6 +14,9 @@ database:
     - sudo -E /bin/sh ./shell/gcloud_authenticate.sh
     - sudo -E /bin/sh ./shell/gcloud-pull-staging-files.sh
     - sudo -E /bin/sh ./shell/database-setup.sh
+test:
+  override:
+    - echo 'No Tests'
 deployment:
   staging:
     branch: [isb-cgc-test]

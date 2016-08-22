@@ -300,8 +300,8 @@ function($, d3, vizhelpers) {
 
                 }
 
-                this.addViolin(g, processed_data[key], values_only, height, violin_width, domain, range);
-                this.addMedianLine(g, processed_data[key], values_only, height, violin_width, domain, range);
+                this.addViolin(g, processed_data[key], values_only, height, violin_width, domain, range, logScale);
+                this.addMedianLine(g, processed_data[key], values_only, height, violin_width, domain, range, logScale);
                 i += 1;
             }
 
