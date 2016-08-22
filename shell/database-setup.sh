@@ -28,6 +28,9 @@ mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/s
 echo "Adding Stored Procedures..."
 python ${HOMEROOT}/scripts/sproc_setup.py
 
+echo "Adding New Table Views..."
+python ${HOMEROOT}/scripts/userdata_bootstrap.py
+
 echo "Adding Cohort/Site Data..."
 python ${HOMEROOT}/scripts/add_site_ids.py
 python ${HOMEROOT}/scripts/add_alldata_cohort.py $GCLOUD_PROJECT_ID -o cloudsql
