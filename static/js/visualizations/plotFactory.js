@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2015, Institute for Systems Biology
+ * Copyright 2016, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,8 +56,11 @@ define([
                 return '<span>Mean: ' + mean.toFixed(2) + '</span><br/><span>%: ' + (d.y * 100).toFixed(2) + '%</span>';
             });
 
-    function generate_axis_label(attr) {
-        return $('option[value="' + attr + '"]:first').html()
+    function generate_axis_label(attr, isLogTransform) {
+        if(isLogTransform) {
+            return "log("+$('option[value="' + attr + '"]:first').html()+")";
+        }
+        return $('option[value="' + attr + '"]:first').html();
     }
 
     /*
@@ -101,7 +104,7 @@ define([
                 width,
                 height,
                 'x',
-                generate_axis_label(x_attr),
+                generate_axis_label(x_attr, $('x-log-transform').is(':checked')),
                 cubby_tip,
                 margin);
 
@@ -126,8 +129,8 @@ define([
              data,
              domain,
              range,
-             generate_axis_label(x_attr),  // xLabel
-             generate_axis_label(y_attr),  // yLabel
+             generate_axis_label(x_attr, $('x-log-transform').is(':checked')),  // xLabel
+             generate_axis_label(y_attr, $('y-log-transform').is(':checked')),  // yLabel
              'x',     // xParam
              'y',     // yParam
              color_by,
@@ -164,7 +167,7 @@ define([
             max_n,
             min_n,
             generate_axis_label(x_attr),
-            generate_axis_label(y_attr),
+            generate_axis_label(y_attr, $('y-log-transform').is(':checked')),
             'x',
             'y',
             color_by,
@@ -198,7 +201,7 @@ define([
             violin_width,
             max_n,
             min_n,
-            generate_axis_label(y_attr),
+            generate_axis_label(y_attr, $('y-log-transform').is(':checked')),
             generate_axis_label(x_attr),
             'y',
             'x',
@@ -362,16 +365,16 @@ define([
                     visualization = generate_histogram(margin, args.plot_selector, height, width, args.x, data);
                     break;
                 case 'Scatter Plot': //((x_type == 'INTEGER' || x_type == 'FLOAT') && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
-                    visualization = generate_scatter_plot(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by, cohort_set, data)
+                    visualization = generate_scatter_plot(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by, cohort_set, data);
                     break;
                 case "Violin Plot": //(x_type == 'STRING' && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
-                    visualization = generate_violin_plot(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data)
+                    visualization = generate_violin_plot(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data);
                     break;
                 case 'Violin Plot with axis swap'://(y_type == 'STRING' && (x_type == 'INTEGER'|| x_type == 'FLOAT')) {
-                    visualization = generate_violin_plot_axis_swap(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data)
+                    visualization = generate_violin_plot_axis_swap(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data);
                     break;
                 case 'Cubby Hole Plot' : //(x_type == 'STRING' && y_type == 'STRING') {
-                    visualization = generate_cubby_hole_plot(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data)
+                    visualization = generate_cubby_hole_plot(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data);
                     break;
                 default :
                     break;

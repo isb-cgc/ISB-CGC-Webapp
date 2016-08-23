@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2015, Institute for Systems Biology
+ * Copyright 2016, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -557,8 +557,8 @@ require([
         var c_widgets = settings_flyout.find('div.form-group.color-by-group');
         var swap = settings_flyout.find('button.swap');
         var sp_genes = settings_flyout.find('.seqpeek-genes');
-        var xLogCheck = $('#x-log-scale').parent();
-        var yLogCheck = $('#y-log-scale').parent();
+        var xLogCheck = $('#x-log-transform').parent();
+        var yLogCheck = $('#y-log-transform').parent();
 
         // Clear selections
         x_widgets.find('select.x-axis-select option[type="label"]').prop('selected', true);
