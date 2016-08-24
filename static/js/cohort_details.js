@@ -261,6 +261,7 @@ require([
                     $('<a>').addClass('delete-x filter-label label label-default mol-cat-filter-x')
                         .text(gene.label + ' [' + tokenFeatDisplName + ': ' + tokenValDisplName + ']')
                         .append('<i class="fa fa-times">')
+                        .attr("title",gene.label + ' [' + tokenFeatDisplName + ': ' + tokenValDisplName + ']')
                 );
 
                 $this.data({
@@ -323,15 +324,11 @@ require([
 
                 var tokenValDisplName = (value.data('value-displ-name') && value.data('value-displ-name').length > 0) ?
                         value.data('value-displ-name') : (value.data('value-name') == 'None' ? 'NA' : value.data('value-name')),
-                    tokenFeatDisplName = /*(feature.data('feature-displ-name') && feature.data('feature-displ-name').length > 0) ?
-                     feature.data('feature-displ-name') :*/ feature.data('feature-name');
-
+                    tokenFeatDisplName = (feature.data('feature-displ-name') && feature.data('feature-displ-name').length > 0) ?
+                     feature.data('feature-displ-name') : feature.data('feature-name');
 
                 if (feature.data('feature-type') == 'datatype') { // Datatype feature
                     var feature_value = value.data('value-name').split('-');
-
-                    tokenFeatDisplName = 'SAMP:' + feature_value[0];
-                    tokenValDisplName = feature_value[1];
 
                     switch(feature_value[1]) {
                         case 'True':
@@ -378,6 +375,7 @@ require([
                     $('<a>').addClass('delete-x filter-label label label-default')
                         .text(tokenFeatDisplName + ': ' + tokenValDisplName)
                         .append('<i class="fa fa-times">')
+                        .attr("title",tokenFeatDisplName + ': ' + tokenValDisplName)
                 );
 
                 if (feature.data('feature-type') == 'molecular') {
@@ -681,7 +679,7 @@ require([
             type        :'POST',
             url         : url,
             dataType    :'json',
-            data        : {owner: true, user_id: user_id},
+            data        : {user_id: user_id},
             beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
             success : function (data) {
                 button.parents('tr').remove();

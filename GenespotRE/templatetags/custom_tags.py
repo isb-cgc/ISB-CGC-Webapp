@@ -58,8 +58,8 @@ ATTR_SPECIFIC_ORDERS = {
     'hpv_status': ['Positive', 'Negative', 'None', ],
     'age_at_initial_pathologic_diagnosis': ['10 to 39', '40 to 49', '50 to 59', '60 to 69', '70 to 79', 'Over 80', 'None', ],
     'pathologic_stage': ['Stage 0','Stage I','Stage IA','Stage IB','Stage II','Stage IIA','Stage IIB','Stage IIC',
-                           'Stage III','Stage IIIA','Stage IIIB','Stage IIIC','Stage IS','Stage IV','Stage IVA',
-                           'Stage IVB','Stage IVC','Stage X','I or II NOS','None',],
+                         'Stage III','Stage IIIA','Stage IIIB','Stage IIIC','Stage IS','Stage IV','Stage IVA',
+                         'Stage IVB','Stage IVC','Stage X','I or II NOS','None',],
     'residual_tumor': ['R0','R1','R2','RX','None',],
 }
 
@@ -67,6 +67,10 @@ NOT_CAPWORDS = [
     'pathologic_stage',
     'residual_tumor',
     'histological_type',
+    'DNA_sequencing',
+    'RNA_sequencing',
+    'DNA_methylation',
+    'bmi',
 ]
 
 ALPHANUM_SORT = [
@@ -81,8 +85,30 @@ ATTR_SPECIFIC_TRANSLATION = {
         'underweight': 'Underweight: BMI less that 18.5',
         'normal weight': 'Normal weight: BMI is 18.5 - 24.9',
         'overweight': 'Overweight: BMI is 25 - 29.9',
-        'obese': 'Obese: BMI is 30 or more'
-    }
+        'obese': 'Obese: BMI is 30 or more',
+    },
+    'SampleTypeCode': {
+        '01': 'Primary Solid Tumor',
+        '02': 'Recurrent Solid Tumor',
+        '03': 'Primary Blood Derived Cancer - Peripheral Blood',
+        '04': 'Recurrent Blood Derived Cancer - Bone Marrow',
+        '05': 'Additional - New Primary',
+        '06': 'Metastatic',
+        '07': 'Additional Metastatic',
+        '08': 'Human Tumor Original Cells',
+        '09': 'Primary Blood Derived Cancer - Bone Marrow',
+        '10': 'Blood Derived Normal',
+        '11': 'Solid Tissue Normal',
+        '12': 'Buccal Cell Normal',
+        '13': 'EBV Immortalized Normal',
+        '14': 'Bone Marrow Normal',
+        '20': 'Control Analyte',
+        '40': 'Recurrent Blood Derived Cancer - Peripheral Blood',
+        '50': 'Cell Lines',
+        '60': 'Primary Xenograft Tissue',
+        '61': 'Cell Line Derived Xenograft Tissue',
+        'None': 'N/A',
+    },
 }
 
 TRANSLATION_DICTIONARY = {
@@ -123,6 +149,28 @@ TRANSLATION_DICTIONARY = {
     'user_studys': 'Your Studies',
     'SNP_CN': 'SNP Copy Number',
     'miRNA_sequencing': 'miRNA SEQUENCING',
+    'nonsilent': 'Non-silent',
+}
+
+FEATURE_DISPLAY_NAMES = {
+    'Project': 'Project',
+    'Study': 'Study',
+    'bmi': 'BMI',
+    'miRNA_sequencing': 'miRNA Sequencing',
+    'DNA_methylation': 'DNA Methylation',
+    'RNA_sequencing': 'RNA Sequencing',
+    'DNA_sequencing': 'has DNA Sequencing',
+    'SNP_CN': 'has SNP Copy Number',
+    'Protein': 'has RPPA',
+    'has_HiSeq_miRnaSeq': 'has HiSeq miRNA Sequencing',
+    'has_GA_miRnaSeq': 'has GA miRNA Sequencing',
+    'has_27k': 'has DNA Methylation (27k)',
+    'has_450k': 'has DNA Methylation (450k)',
+    'has_Illumina_DNASeq': 'has Illumina DNA Sequencing',
+    'has_BCGSC_GA_RNASeq': 'has BCGSC GA RNA Sequencing',
+    'has_UNC_GA_RNASeq': 'has UNC GA RNA Sequencing',
+    'has_BCGSC_HiSeq_RNASeq': 'has BCGSC HiSeq RNA Sequencing',
+    'has_UNC_HiSeq_RNASeq': 'has UNC HiSeq RNA Sequencing',
 }
 
 DISEASE_DICTIONARY = {
@@ -196,21 +244,64 @@ def check_for_order(items, attr):
         return items
 
 
+# A specific filter for producing readable token names in cohort filter displays
+@register.filter
+def get_feat_displ_name(name):
+    feat_name = name.replace('CLIN:','').replace('SAMP:','')
+    if feat_name in FEATURE_DISPLAY_NAMES:
+        return FEATURE_DISPLAY_NAMES[feat_name]
+    else:
+        return get_readable_name(name)
+
+
 @register.filter
 def get_readable_name(csv_name, attr=None):
     # if csv_name.startswith('user_') and csv_name != 'user_project' and csv_name != 'user_study':
     #     csv_name = csv_name[5:]
 
-    if attr in ATTR_SPECIFIC_TRANSLATION.keys():
+    is_mutation = False
+    is_data_type = False
+
+    if 'MUT:' in csv_name or (attr and 'MUT:' in attr):
+        is_mutation = True
+
+    if 'has_' in csv_name or (attr and 'has_' in attr):
+        is_data_type = True
+
+    csv_name = csv_name.replace('CLIN:', '').replace('MUT:', '').replace('SAMP:', '')
+
+    if attr:
+        attr = attr.replace('CLIN:', '').replace('MUT:', '').replace('SAMP:', '')
+
+    # Mutation Filter case
+    if is_mutation:
+        if not attr:
+            gene = csv_name.split(':')[0].upper()
+            type = string.capwords(csv_name.split(':')[1])
+            return gene + ' [' + type
+        elif TRANSLATION_DICTIONARY.get(csv_name):
+            return TRANSLATION_DICTIONARY.get(csv_name) + ']'
+        else:
+            return string.capwords(csv_name) + ']'
+    # Data type filters
+    elif is_data_type and attr:
+        if csv_name == '1':
+            return 'True'
+        elif csv_name == '0':
+            return 'False'
+        else:
+            return 'None'
+    # Clinical filters
+    elif ATTR_SPECIFIC_TRANSLATION.get(attr) and ATTR_SPECIFIC_TRANSLATION[attr].get(csv_name):
         return ATTR_SPECIFIC_TRANSLATION[attr][csv_name]
     elif attr == 'Project' or attr == 'Study':
         return csv_name.upper()
-    elif TRANSLATION_DICTIONARY.get(csv_name) and attr is not 'other_dx':
+    elif TRANSLATION_DICTIONARY.get(csv_name) and attr != 'other_dx' and attr != 'tobacco_smoking_history' and not is_data_type:
         return TRANSLATION_DICTIONARY.get(csv_name)
     else:
         csv_name = csv_name.replace('_', ' ')
         # If something shouldn't be subjected to capwords add its attr name to NOT_CAPWORDS
-        if attr not in NOT_CAPWORDS:
+        if attr not in NOT_CAPWORDS and not is_data_type:
             csv_name = string.capwords(csv_name)
         csv_name = csv_name.replace(' To ', ' to ')
         return csv_name

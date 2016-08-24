@@ -84,6 +84,12 @@
 {% endblock %}
 
 {% block content %}
+
+    <div id="url-len-max-alert" class="alert alert-warning alert-dismissable col-lg-12" style="display: none;">
+        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        You have selected too many filters. The current counts shown will not be accurate until one or more filter options are removed.
+    </div>
+
     <div id="filter-panel" class="col-lg-4 col-md-4" style="display:none;">
         <div class="tabpanel" role="tabpanel">
             <ul class="nav nav-tabs" role="tablist">
@@ -105,7 +111,7 @@
                                     </div>
 
                                     <div id="collapse-{{ attr }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" data-feature-type="donor"
-                                         aria-labelledby="heading-{{ attr }}" data-feature-name="{{ attr }}" data-feature-displ-name="{{ attr|get_readable_name }}"
+                                         aria-labelledby="heading-{{ attr }}" data-feature-name="{{ attr }}" data-feature-displ-name="{{ attr|get_feat_displ_name }}"
                                          data-feature-id="{% if attr_list_count|get_named_item:attr|get_item:'id' %}{{ attr_list_count|get_named_item:attr|get_item:'id' }}{% endif %}">
                                         <ul class="search-checkbox-list" id="{{ attr }}">
                                             {% with attr_list_count|get_named_item:attr|get_item:'values'|how_many_more:6 as num_more %}
@@ -174,7 +180,7 @@
                                                     <!-- todo: make a custom tag for the id for data_attr attributes-->
                                                     <label>
                                                         <input type="checkbox" name="elements-selected" data-value-name="{{ v.value|get_data_attr_id:attr }}"
-                                                               data-displ-name="{% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.value }}{% endif %}">
+                                                               data-value-displ-name="{% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.value }}{% endif %}">
                                                         {% if v.value == 'None' %}NA{% else %}{{ v.value }}{% endif %} <span class="count">({{ v.count }})</span>
                                                     </label>
                                                 </li>
@@ -285,7 +291,7 @@
             </div>
             <div class="panel-body">
                 {% for filter in cohort.get_current_filters %}
-                    <span class="filter-label label label-default space-right-5">{{ filter.name }}: {{ filter.value }}</span>
+                    <span class="filter-label label label-default space-right-5">{{ filter.name|get_feat_displ_name }}: {{ filter.value|get_readable_name:filter.name }}</span>
                 {% empty %}
                     <p>No filters have been applied to this cohort.</p>
                 {% endfor %}
@@ -317,7 +323,7 @@
                     <span>Creation Filters: </span>
                     <span class="applied-filters">
                      {% for filter in cohort.get_creation_filters %}
-                         <span>{{ filter.name }}: {{ filter.value }}</span>
+                         <span>{{ filter.name|get_feat_displ_name }}: {{ filter.value|get_readable_name:filter.name }}</span>
                      {% empty %}
                          There were no filters used to create this cohort.
                      {% endfor %}
@@ -331,7 +337,7 @@
                                  <li class="applied-filters">
                                     Applied Filters:
                                      {% for filter in item.vals %}
-                                        <span>{{ filter }}</span>
+                                        <span>{{ filter.name|get_feat_displ_name }}: {{ filter.value|get_readable_name:filter.name }}</span>
                                      {% endfor %}
                                 </li>
                             {%  else %}
@@ -457,11 +463,9 @@
                             {% else %}
                             <p class="center">This list is empty.</p>
                             {% endif %}
-
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>

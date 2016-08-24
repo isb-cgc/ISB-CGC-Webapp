@@ -20,16 +20,22 @@ define(['jquery'], function($) {
     var base_feature_search_url = base_api_url + '/_ah/api/feature_type_api/v1/feature_search?';
     var feature_search_url = base_feature_search_url;
     return {
+        isValidNumber: function(val) {
+            return (
+                val !== null && val !== undefined && (typeof(val) !== "string" ||
+                (val.match(/[^\d+,\.]/g) == null)
+            ));
+        },
         get_min_max: function(data, selector) {
+            var self=this;
             return [Math.floor(d3.min(data, function(d) {
-                if (d[selector] && d[selector] != "NA") {
+                if (self.isValidNumber(d[selector])) {
                     return parseFloat(d[selector]);
                 } else {
                     return 0
                 }
-            })),
-                    Math.ceil(d3.max(data, function(d) {
-                if (d[selector] && d[selector] != "NA") {
+            })), Math.ceil(d3.max(data, function(d) {
+                if (self.isValidNumber(d[selector])) {
                     return parseFloat(d[selector]);
                 } else {
                     return 0
@@ -39,7 +45,7 @@ define(['jquery'], function($) {
         values_only: function(data, attr) {
             var result = [];
             for (var i = 0; i < data.length; i++ ) {
-                if (data[i][attr] && data[i][attr] != 'None') {
+                if (data[i][attr] !== null && data[i][attr] !== undefined && data[i][attr] != "None" && data[i][attr] !== "NA") {
                     result.push(data[i][attr]);
                 }
             }

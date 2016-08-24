@@ -373,6 +373,8 @@ DBGAP_AUTHENTICATION_LIST_FILENAME      = os.environ.get('DBGAP_AUTHENTICATION_L
 DBGAP_AUTHENTICATION_LIST_BUCKET        = os.environ.get('DBGAP_AUTHENTICATION_LIST_BUCKET', '')
 ACL_GOOGLE_GROUP                        = os.environ.get('ACL_GOOGLE_GROUP', '')
 OPEN_ACL_GOOGLE_GROUP                   = os.environ.get('OPEN_ACL_GOOGLE_GROUP', '')
+GOOGLE_GROUP_ADMIN                      = os.environ.get('GOOGLE_GROUP_ADMIN', '')
+SUPERADMIN_FOR_REPORTS                  = os.environ.get('SUPERADMIN_FOR_REPORTS', '')
 ERA_LOGIN_URL                           = os.environ.get('ERA_LOGIN_URL', '')
 IPV4                                    = os.environ.get('IPV4', '')
 SAML_FOLDER                             = os.environ.get('SAML_FOLDER')
@@ -419,3 +421,11 @@ MAX_FILE_LIST_REQUEST = 65000
 
 # IGV limit to prevent users from trying ot open dozens of files
 MAX_FILES_IGV = 5
+
+##############################################################
+#   MailGun Email Settings
+##############################################################
+
+EMAIL_SERVICE_API_URL = os.environ.get('EMAIL_SERVICE_API_URL', '')
+EMAIL_SERVICE_API_KEY = os.environ.get('EMAIL_SERVICE_API_KEY', '')
+NOTIFICATION_EMAIL_FROM_ADDRESS = os.environ.get('NOTIFICATOON_EMAIL_FROM_ADDRESS', '')

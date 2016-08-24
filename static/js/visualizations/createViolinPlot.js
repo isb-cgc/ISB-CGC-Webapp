@@ -62,14 +62,12 @@ function($, d3, vizhelpers) {
                 .attr('transform', 'rotate(90, 0, 0) scale(1, -1)');
         },
         addPoints: function (svg, raw_data, values_only, height, width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, margin, cohort_set) {
-            // for each key, value_list in values_only
-                // create a histogram and new dictionary where key=plot_number and value=histogram_values
 
             // remove counts from xdomain
             var tmp = xdomain;
             xdomain = [];
             for (var i = 0; i < tmp.length; i++) {
-                xdomain.push(tmp[i].split(':')[0]);
+                xdomain.push(tmp[i].split(/:\d+/)[0]);
             }
 
             // Somehow use the histogram values to determine the x position of the dot
@@ -96,10 +94,16 @@ function($, d3, vizhelpers) {
                     .frequency(0)(values_only[key].sort(d3.descending));
             }
 
+            var nonNullData = [];
 
+            raw_data.map(function(d){
+                if(helpers.isValidNumber(d.y)) {
+                    nonNullData.push(d);
+                }
+            });
 
             svg.selectAll('.dot')
-                .data(raw_data)
+                .data(nonNullData)
                 .enter().append('circle')
                 .attr('id', function(d) { return d['sample_id']; })
                 .attr('class', function(d) { return d[colorBy]; })
@@ -128,8 +132,6 @@ function($, d3, vizhelpers) {
                     return y(d[yAttr]);
                 })
                 .attr('r', 2);
-
-
 
             legend = legend.attr('height', 20 * color.domain().length + 30);
             legend.append('text')
@@ -170,6 +172,7 @@ function($, d3, vizhelpers) {
         },
         addMedianLine: function(svg, raw_data, values_only, height, width, domain, range) {
             var median = d3.median(values_only);
+
             var y = d3.scale.linear()
                 .range(range)
                 .domain(domain);
@@ -187,7 +190,6 @@ function($, d3, vizhelpers) {
                 .attr('d', line)
                 .style('stroke', 'green')
                 .style('fill', 'none')
-
         },
         createViolinPlot: function(svg, raw_Data, height, violin_width, max_y, min_y, xLabel, yLabel, xAttr, yAttr, colorBy, legend, cohort_set) {
             var margin = {top: 0, bottom: 50, left: 50, right: 0};
@@ -259,8 +261,10 @@ function($, d3, vizhelpers) {
 
                 }
 
-                this.addViolin(g, processed_data[key], values_only, height, violin_width, domain, range);
-                this.addMedianLine(g, processed_data[key], values_only, height, violin_width, domain, range);
+                if(values_only.length > 0) {
+                    this.addViolin(g, processed_data[key], values_only, height, violin_width, domain, range);
+                    this.addMedianLine(g, processed_data[key], values_only, height, violin_width, domain, range);
+                }
                 i += 1;
             }
 

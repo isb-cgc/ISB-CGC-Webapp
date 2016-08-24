@@ -289,10 +289,10 @@ require([
             });
 
             //gather entire list of options for swapping
-            result['selection'] = {selected : options.find('#search-term-select').find(":selected").val(),
-                                   text : options.find('#search-term-select').find(":selected").text(),
+            result['selection'] = {selected : options.find('.search-term-select').find(":selected").val(),
+                                   text : options.find('.search-term-select').find(":selected").text(),
                                    options : []};
-            options.find('#search-term-select').find("option").each(function(i, ele){
+            options.find('.search-term-select').find("option").each(function(i, ele){
                 result['selection'].options.push({value : $(ele).val(), text : $(ele).text()});
             });
         }
@@ -371,13 +371,13 @@ require([
                     }
                 }
             });
-            parent.find('.'+ data.specification).find('#search-term-select').empty();
+            parent.find('.'+ data.specification).find('.search-term-select').empty();
             for(var i in data["selection"].options) {
                 if (data["selection"].options[i].value == data["selection"].selected) {
-                    parent.find('.'+ data.specification).find('#search-term-select').append('<option value="' + data["selection"].options[i].value + '"> ' + data["selection"].options[i].text + '</option>');
+                    parent.find('.'+ data.specification).find('.search-term-select').append('<option value="' + data["selection"].options[i].value + '"> ' + data["selection"].options[i].text + '</option>');
                 }
             }
-            parent.find('.'+ data.specification).find('#search-term-select').val(data["selection"].selected);
+            parent.find('.'+ data.specification).find('.search-term-select').val(data["selection"].selected);
         }
     }
 
@@ -557,6 +557,13 @@ require([
         var c_widgets = settings_flyout.find('div.form-group.color-by-group');
         var swap = settings_flyout.find('button.swap');
         var sp_genes = settings_flyout.find('.seqpeek-genes');
+        var xLogCheck = $('#x-log-scale').parent();
+        var yLogCheck = $('#y-log-scale').parent();
+
+        // Clear selections
+        x_widgets.find('select.x-axis-select option[type="label"]').prop('selected', true);
+        y_widgets.find('select.y-axis-select option[type="label"]').prop('selected', true);
+
         x_widgets.show();
         y_widgets.show();
         c_widgets.show();
@@ -566,29 +573,43 @@ require([
             case "Bar Chart" : //x_type == 'STRING' && y_type == 'none'
                 y_widgets.hide();
                 c_widgets.hide();
+                xLogCheck.hide();
+                yLogCheck.hide();
                 swap.hide();
                 break;
             case "Histogram" : //((x_type == 'INTEGER' || x_type == 'FLOAT') && y_type == 'none') {
                 y_widgets.hide();
                 c_widgets.hide();
+                xLogCheck.show();
+                yLogCheck.hide();
                 swap.hide();
                 break;
             case 'Scatter Plot': //((x_type == 'INTEGER' || x_type == 'FLOAT') && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
+                xLogCheck.show();
+                yLogCheck.show();
                 break;
             case "Violin Plot": //(x_type == 'STRING' && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
+                xLogCheck.hide();
+                yLogCheck.show();
                 swap.hide();
                 break;
             case 'Violin Plot with axis swap'://(y_type == 'STRING' && (x_type == 'INTEGER'|| x_type == 'FLOAT')) {
+                yLogCheck.hide();
+                xLogCheck.show();
                 swap.hide();
                 break;
             case 'Cubby Hole Plot': //(x_type == 'STRING' && y_type == 'STRING') {
                 c_widgets.hide();
+                xLogCheck.hide();
+                yLogCheck.hide();
                 break;
             case 'SeqPeek':
                 sp_genes.show();
                 x_widgets.hide();
                 y_widgets.hide();
                 c_widgets.hide();
+                xLogCheck.hide();
+                yLogCheck.hide();
                 swap.hide();
                 break;
             default :
@@ -632,7 +653,7 @@ require([
             // All placeholders should be given a type of 'label', and they will never return a url_code
             if(parent.find('.'+label).find(":selected").attr("type") !== "label") {
                 if(parent.find('.'+label).find(":selected").attr("type") == "gene"){
-                    result = {  url_code : parent.find('[variable="'+ label + '"] #search-term-select').find(":selected").val()};
+                    result = {  url_code : parent.find('[variable="'+ label + '"] .search-term-select').find(":selected").val()};
                 } else {
                     result = {  url_code: parent.find('.'+label).find(":selected").val()}
                 }
@@ -671,7 +692,7 @@ require([
         if(plot_type != "-- select an analysis --") {
             get_plot_model(workbook_id, worksheet_id, plot_type, function (data) {
                 if (data.error) {
-                    console.log("Display error");
+                    console.error("Display error");
                     callback(false);
                 } else {
                     load_plot(worksheet_id, data, plot_factory.get_plot_settings(plot_type), function (success) {
