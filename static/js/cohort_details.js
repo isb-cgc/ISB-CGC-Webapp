@@ -679,7 +679,7 @@ require([
             type        :'POST',
             url         : url,
             dataType    :'json',
-            data        : {owner: true, user_id: user_id},
+            data        : {user_id: user_id},
             beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
             success : function (data) {
                 button.parents('tr').remove();
