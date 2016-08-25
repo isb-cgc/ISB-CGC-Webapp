@@ -30,7 +30,7 @@ require([
     'assetscore',
     'assetsresponsive',
     'base'
-], function($, jqueryui, bootstrap, session_security, _, as, asr, base) {
+], function($, jqueryui, bootstrap, session_security, _) {
     'use strict';
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
@@ -41,13 +41,4 @@ require([
                 form.reset();
             });
     });
-    
-    $('#workbook-table').tablesorter({
-        headers: {
-            0: {sorter:false},
-            4: {sorter: 'fullDate'}
-        },
-        sortList: [[4,1]]
-    });
-    
 });
