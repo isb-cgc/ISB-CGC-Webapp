@@ -75,7 +75,7 @@
         </ul>
         <ul id="edit-cohort-menu" style="display: none">
             {% if cohort.perm.perm == 'OWNER' %}
-                <li class="menu-item"><button class="btn btn-primary" data-toggle="modal" data-target="#apply-filters-modal">Save Changes</button></li>
+                <li class="menu-item"><button class="btn btn-primary" data-toggle="modal" data-target="#apply-edits-modal">Save Changes</button></li>
                 <li class="menu-item"><button class="btn btn-link" id="cancel-add-filter-btn">Cancel</button></li>
             {% endif %}
         </ul>
@@ -493,18 +493,17 @@
     </div>
 
     <!-- Apply Filters Modal -->
-    <div class="modal fade" id="apply-filters-modal" tabindex="-1" role="dialog" aria-labelledby="applyFiltersModal" aria-hidden="true">
+    <div class="modal fade" id="apply-edits-modal" tabindex="-1" role="dialog" aria-labelledby="applyFiltersModal" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <h4 class="modal-title" id="applyFiltersModal">Save Changes</h4>
                 </div>
-                <form id="apply-filters-form" method="POST" action="{% url 'save_cohort' %}">
+                <form id="apply-edits-form" method="POST" action="{% url 'save_cohort' %}">
                     <div class="modal-body">
-                        <label for="apply-filter-cohort-name">Saving changes will permanently modify the existing cohort.</label>
-                        <input type="hidden" id="apply-filter-cohort-name" name="name" value="{{ cohort.name }}"/>
-                        <input type="hidden" name="apply-filters" value="True"/>
+                        <label for="apply-edit-cohort-name">Saving changes will permanently modify the existing cohort.</label>
+                        <input type="hidden" id="apply-edit-cohort-name" name="name" value="{{ cohort.name }}"/>
                     </div>
                     <div class="modal-footer">
                         {% csrf_token %}
