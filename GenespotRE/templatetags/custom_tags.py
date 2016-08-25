@@ -111,10 +111,12 @@ ATTR_SPECIFIC_TRANSLATION = {
     },
     'tobacco_smoking_history': {
         '1': 'Lifelong Non-smoker',
-        '2': 'Current smoker',
-        '3': 'Current reformed smoker for > 15 years',
-        '4': 'Current reformed smoker for < or = 15 years',
+        '2': 'Current Smoker',
+        '3': 'Current Reformed Smoker for > 15 years',
+        '4': 'Current Reformed Smoker for <= 15 years',
         '5': 'Current Reformed Smoker, Duration Not Specified',
+        '6': 'Smoker at Diagnosis',
+        '7': 'Smoking History Not Documented',
         'None': 'NA',
     },
 }
