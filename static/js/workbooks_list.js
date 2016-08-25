@@ -9,7 +9,7 @@ require.config({
         assetscore: 'libs/assets.core',
         assetsresponsive: 'libs/assets.responsive',
         base: 'base',
-        text: 'libs/require-text',
+        text: 'libs/require-text'
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -17,7 +17,7 @@ require.config({
         'session_security': ['jquery'],
         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
         'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
-        'underscore': {exports: '_'},
+        'underscore': {exports: '_'}
     }
 });
 
@@ -29,8 +29,8 @@ require([
     'underscore',
     'assetscore',
     'assetsresponsive',
-    'base',
-], function($, jqueryui, bootstrap, session_security, _) {
+    'base'
+], function($, jqueryui, bootstrap, session_security, _, as, asr, base) {
     'use strict';
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
