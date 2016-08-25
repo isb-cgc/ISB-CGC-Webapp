@@ -82,7 +82,7 @@ ALPHANUM_SORT = [
 
 ATTR_SPECIFIC_TRANSLATION = {
     'bmi': {
-        'underweight': 'Underweight: BMI less that 18.5',
+        'underweight': 'Underweight: BMI less than 18.5',
         'normal weight': 'Normal weight: BMI is 18.5 - 24.9',
         'overweight': 'Overweight: BMI is 25 - 29.9',
         'obese': 'Obese: BMI is 30 or more',
@@ -107,7 +107,15 @@ ATTR_SPECIFIC_TRANSLATION = {
         '50': 'Cell Lines',
         '60': 'Primary Xenograft Tissue',
         '61': 'Cell Line Derived Xenograft Tissue',
-        'None': 'N/A',
+        'None': 'NA',
+    },
+    'tobacco_smoking_history': {
+        '1': 'Lifelong Non-smoker',
+        '2': 'Current smoker',
+        '3': 'Current reformed smoker for > 15 years',
+        '4': 'Current reformed smoker for < or = 15 years',
+        '5': 'Current Reformed Smoker, Duration Not Specified',
+        'None': 'NA',
     },
 }
 
