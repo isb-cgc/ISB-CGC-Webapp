@@ -123,7 +123,7 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
                      "VALUES (%s,%s,%s,%s,%s);"
     insert_googleproj = "INSERT INTO accounts_googleproject (project_id, project_name, big_query_dataset) " + \
                         "VALUES (%s,%s,%s);"
-    insert_bucket = "INSERT INTO accounts_bucket (bucket_name, bucket_permissions, user_id) VALUES (%s, %s, %s);"
+    insert_bucket = "INSERT INTO accounts_bucket (bucket_name, bucket_permissions, google_project_id) VALUES (%s, %s, %s);"
     insert_user_data_tables = "INSERT INTO projects_user_data_tables (study_id, user_id, google_project_id, " + \
                               "google_bucket_id, metadata_data_table, metadata_samples_table, " + \
                               "feature_definition_table) VALUES (%s,%s,%s,%s,%s,%s,%s);"
@@ -238,9 +238,72 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
         print traceback.format_exc()
 
     finally:
-        if cursor: cursor.close
+        if cursor: cursor.close()
         if cursorDict: cursorDict.close()
-        if db and db.open: db.close
+        if db and db.open: db.close()
+
+def bootstrap_file_data():
+    DCC_BUCKET = ''
+    CGHUB_BUCKET = ''
+    CCLE_BUCKET = ''
+    insert_userupload = "INSERT INTO data_upload_userupload (status, `key`, owner_id) values ('complete', '', %s);"
+    insert_useruploadedfile_TCGA = "INSERT INTO data_upload_useruploadedfile (upload_id, bucket, file) " \
+                                   "SELECT %s,%s,datafilenamekey from metadata_data " \
+                                   "    where datafileuploaded='true' and datafilenamekey!='' and study=%s and repository=%s;"
+    insert_useruploadedfile_CCLE = "INSERT INTO data_upload_useruploadedfile (upload_id, bucket, file) " \
+                                   "SELECT %s,%s,datafilenamekey from metadata_data " \
+                                   "    where datafileuploaded='true' and datafilenamekey!='' and project=%s;"
+
+    update_projects_study = "UPDATE projects_user_data_tables set data_upload_id=%s where study_id=%s;"
+    get_studies = "SELECT * FROM projects_study;"
+    get_last_userupload = "SELECT * FROM data_upload_userupload order by id desc limit 1;"
+
+    try:
+        db = get_mysql_connection()
+        cursor = db.cursor()
+        cursorDict = db.cursor(cursors.DictCursor)
+
+        cursorDict.execute(get_studies)
+        for study in cursorDict.fetchall():
+            print study
+
+            # Create UserUpload entry
+            cursor.execute(insert_userupload, (int(study['owner_id']),))
+
+            # Get UserUpload Entries
+            cursor.execute(get_last_userupload)
+            last_userupload = cursor.fetchone()
+
+            # Update the projects_study table with new upload id
+            cursor.execute(update_projects_study, (last_userupload[0], study['id']))
+
+
+            if study['name'] != 'CCLE': # TCGA
+
+                # Create array of values to execute
+                useruploadedfile_values = []  # [upload_id, bucket, study_name, repository]
+                useruploadedfile_values.append([last_userupload[0], DCC_BUCKET, study['name'], 'DCC'])
+                useruploadedfile_values.append([last_userupload[0], CGHUB_BUCKET, study['name'], 'CGHUB'])
+
+                # Create UserUploadedFile for the study
+                cursor.executemany(insert_useruploadedfile_TCGA, useruploadedfile_values)
+            else: # CCLE
+
+                # Create UserUploadedFile for the study
+                cursor.execute(insert_useruploadedfile_CCLE, (last_userupload[0], CCLE_BUCKET, study['name'],))
+
+            db.commit()
+
+
+
+        # Create UserUploadedFile for each study
+    except Exception as e:
+        print e
+    finally:
+        if cursor: cursor.close()
+        if cursorDict: cursorDict.close()
+        if db and db.open: db.close()
+
 
 
 def main():
@@ -255,8 +318,8 @@ def main():
                                  help="Bucket access permissions")
 
     args = cmd_line_parser.parse_args()
-
     bootstrap_user_data_schema(args.pub_feat_table, args.bq_dataset, args.bucket_name, args.bucket_perm)
+    bootstrap_file_data()
 
 if __name__ == "__main__":
     main()
