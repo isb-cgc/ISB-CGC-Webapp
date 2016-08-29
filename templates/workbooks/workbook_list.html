@@ -53,7 +53,7 @@
                                 </div>
                                 {% endif %}
                             </td>
-                            <td class="name-col"><a href="{% url 'workbook_detail' workbook.id %}">{{ workbook.name }}</a></td>
+                            <td class="name-col"><a href="{% url 'workbook_detail' workbook.id %}" title="{{ workbook.name|title|wrap_text }}">{{ workbook.name }}</a></td>
                             <td> {{ workbook.worksheet_set.count }}</td>
                             <td>{% if workbook.owner.id == user.id %}
                                 You
@@ -79,7 +79,3 @@
 {% endblock %}
 
 {% block js_file %}{% static 'js/workbooks_list.js' %}{% endblock %}
-
-
-
-

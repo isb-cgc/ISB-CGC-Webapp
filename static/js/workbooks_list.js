@@ -9,7 +9,7 @@ require.config({
         assetscore: 'libs/assets.core',
         assetsresponsive: 'libs/assets.responsive',
         base: 'base',
-        text: 'libs/require-text',
+        text: 'libs/require-text'
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -17,7 +17,7 @@ require.config({
         'session_security': ['jquery'],
         'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
         'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
-        'underscore': {exports: '_'},
+        'underscore': {exports: '_'}
     }
 });
 
@@ -29,7 +29,7 @@ require([
     'underscore',
     'assetscore',
     'assetsresponsive',
-    'base',
+    'base'
 ], function($, jqueryui, bootstrap, session_security, _) {
     'use strict';
 
@@ -41,13 +41,4 @@ require([
                 form.reset();
             });
     });
-    
-    $('#workbook-table').tablesorter({
-        headers: {
-            0: {sorter:false},
-            4: {sorter: 'fullDate'}
-        },
-        sortList: [[4,1]]
-    });
-    
 });
