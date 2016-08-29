@@ -207,7 +207,6 @@ function($, d3, vizhelpers) {
                     if (colorBy == 'cohort'){
                         tmp[colorBy] = item[colorBy][0];
                     } else {
-
                         tmp[colorBy] = item[colorBy];
                     }
                 } else {

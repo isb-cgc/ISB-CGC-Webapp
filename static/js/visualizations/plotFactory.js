@@ -58,7 +58,7 @@ define([
 
     function generate_axis_label(attr, isLogTransform) {
         if(isLogTransform) {
-            return "log("+$('option[value="' + attr + '"]:first').html()+")";
+            return "log(("+$('option[value="' + attr + '"]:first').html()+")) + 1)";
         }
         return $('option[value="' + attr + '"]:first').html();
     }
@@ -104,7 +104,7 @@ define([
                 width,
                 height,
                 'x',
-                generate_axis_label(x_attr, $('x-log-transform').is(':checked')),
+                generate_axis_label(x_attr, $('#x-log-transform').is(':checked')),
                 cubby_tip,
                 margin);
 
@@ -129,8 +129,8 @@ define([
              data,
              domain,
              range,
-             generate_axis_label(x_attr, $('x-log-transform').is(':checked')),  // xLabel
-             generate_axis_label(y_attr, $('y-log-transform').is(':checked')),  // yLabel
+             generate_axis_label(x_attr, $('#x-log-transform').is(':checked')),  // xLabel
+             generate_axis_label(y_attr, $('#y-log-transform').is(':checked')),  // yLabel
              'x',     // xParam
              'y',     // yParam
              color_by,
@@ -167,7 +167,7 @@ define([
             max_n,
             min_n,
             generate_axis_label(x_attr),
-            generate_axis_label(y_attr, $('y-log-transform').is(':checked')),
+            generate_axis_label(y_attr, $('#y-log-transform').is(':checked')),
             'x',
             'y',
             color_by,
@@ -201,7 +201,7 @@ define([
             violin_width,
             max_n,
             min_n,
-            generate_axis_label(y_attr, $('y-log-transform').is(':checked')),
+            generate_axis_label(y_attr, $('#y-log-transform').is(':checked')),
             generate_axis_label(x_attr),
             'y',
             'x',
@@ -270,7 +270,7 @@ define([
     /*
         Generate url for gathering data
      */
-    function get_data_url(base_api_url, cohorts, x_attr, y_attr, color_by){
+    function get_data_url(base_api_url, cohorts, x_attr, y_attr, color_by, logTransform){
         var cohort_str = '';
         for (var i = 0; i < cohorts.length; i++) {
             if (i == 0) {
@@ -282,11 +282,14 @@ define([
         var api_url = base_api_url + '/_ah/api/feature_data_api/v1/feature_data_plot?' + cohort_str;
 
         api_url += '&x_id=' + x_attr;
-        if(color_by && color_by != ''){
+        if(color_by && color_by !== ''){
             api_url += '&c_id=' + color_by;
         }
-        if (y_attr && y_attr != '') {
-            api_url += '&y_id=' + y_attr
+        if (y_attr && y_attr !== '') {
+            api_url += '&y_id=' + y_attr;
+        }
+        if(logTransform) {
+            api_url += "&log_transform="+JSON.stringify(logTransform);
         }
         return api_url;
     }
@@ -450,7 +453,7 @@ define([
             plot_data_url = get_seqpeek_data_url(base_api_url, args.cohorts, args.gene_label);
         }
         else {
-            plot_data_url = get_data_url(base_api_url, args.cohorts, args.x, args.y, args.color_by);
+            plot_data_url = get_data_url(base_api_url, args.cohorts, args.x, args.y, args.color_by, args.logTransform);
         }
 
         $.ajax({
@@ -463,6 +466,7 @@ define([
                              type             : args.type,
                              x                : args.x,
                              y                : args.y,
+                             logTransform     : args.logTransform,
                              color_by         : args.cohorts,
                              cohort_override  : args.color_override,
                              data             : data});
