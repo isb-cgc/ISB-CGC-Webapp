@@ -58,7 +58,7 @@ define([
 
     function generate_axis_label(attr, isLogTransform) {
         if(isLogTransform) {
-            return "log(("+$('option[value="' + attr + '"]:first').html()+")) + 1)";
+            return "log("+$('option[value="' + attr + '"]:first').html()+") + 1)";
         }
         return $('option[value="' + attr + '"]:first').html();
     }
