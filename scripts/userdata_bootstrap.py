@@ -177,9 +177,9 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
                       "VALUES (%s,%s,%s,%s,%s);"
     insert_studies = "INSERT INTO projects_study (name, active, last_date_saved, owner_id, project_id) " + \
                      "VALUES (%s,%s,%s,%s,%s);"
-    insert_googleproj = "INSERT INTO accounts_googleproject (project_id, project_name, big_query_dataset, user_id) " + \
-                        "VALUES (%s,%s,%s,%s);"
-    insert_bucket = "INSERT INTO accounts_bucket (bucket_name, bucket_permissions, user_id) VALUES (%s, %s, %s);"
+    insert_googleproj = "INSERT INTO accounts_googleproject (project_id, project_name, big_query_dataset) " + \
+                        "VALUES (%s,%s,%s);"
+    insert_bucket = "INSERT INTO accounts_bucket (bucket_name, bucket_permissions, google_project_id) VALUES (%s, %s, %s);"
     insert_user_data_tables = "INSERT INTO projects_user_data_tables (study_id, user_id, google_project_id, " + \
                               "google_bucket_id, metadata_data_table, metadata_samples_table, " + \
                               "feature_definition_table) VALUES (%s,%s,%s,%s,%s,%s,%s);"
@@ -214,7 +214,7 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
 
         cursor.execute(insert_projects, ("TCGA", True, insertTime, True, isb_userid,))
         cursor.execute(insert_projects, ("CCLE", True, insertTime, True, isb_userid,))
-        cursor.execute(insert_googleproj, ("isb-cgc", googleproj_name, big_query_dataset, isb_userid,))
+        cursor.execute(insert_googleproj, ("isb-cgc", googleproj_name, big_query_dataset,))
         cursor.execute(insert_bucket, (bucket_name, bucket_permissions, isb_userid,))
         db.commit()
 
