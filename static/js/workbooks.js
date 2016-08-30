@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2015, Institute for Systems Biology
+ * Copyright 2016, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -557,8 +557,8 @@ require([
         var c_widgets = settings_flyout.find('div.form-group.color-by-group');
         var swap = settings_flyout.find('button.swap');
         var sp_genes = settings_flyout.find('.seqpeek-genes');
-        var xLogCheck = $('#x-log-scale').parent();
-        var yLogCheck = $('#y-log-scale').parent();
+        var xLogCheck = $('#x-log-transform').parent();
+        var yLogCheck = $('#y-log-transform').parent();
 
         // Clear selections
         x_widgets.find('select.x-axis-select option[type="label"]').prop('selected', true);
@@ -629,6 +629,7 @@ require([
                                 x            : data.attrs.x_axis.url_code,
                                 y            : data.attrs.y_axis.url_code,
                                 color_by     : data.attrs.color_by.url_code,
+                                logTransform : data.logTransform,
                                 gene_label   : data.attrs.gene_label,
                                 cohorts      : data.attrs.cohorts});
                 hide_plot_settings();
@@ -662,6 +663,8 @@ require([
             return result;
         }
 
+        var xLog = $('#x-log-transform'), yLog = $('#y-log-transform');
+
         var result = {
             worksheet_id : $(worksheet).find('.update-plot').attr("worksheet_id"),
             plot_id      : $(worksheet).find('.update-plot').attr("plot_id"),
@@ -680,6 +683,14 @@ require([
                     return {id: this.value, cohort_id: $(this).attr("cohort-id")};
                 }).get(),
                 gene_label: parent.find('#gene_label').find(":selected").text()
+            },
+            logTransform: {
+                x: (xLog.css('display')!=="none") && xLog.is(':checked'),
+                xBase: 10,
+                xFormula: "n+1",
+                y: (yLog.css('display')!=="none") && yLog.is(':checked'),
+                yBase: 10,
+                yFormula: "n+1"
             }
         }
 
@@ -737,6 +748,7 @@ require([
                                     type         : data.attrs.type,
                                     x            : data.attrs.x_axis.url_code,
                                     y            : data.attrs.y_axis.url_code,
+                                    logTransform : data.logTransform,
                                     gene_label   : data.attrs.gene_label,
                                     color_by     : data.attrs.color_by.url_code,
                                     cohorts      : data.attrs.cohorts});
@@ -798,6 +810,7 @@ require([
                                     type             : args.type,
                                     x                : args.x,
                                     y                : args.y,
+                                    logTransform     : args.logTransform,
                                     color_by         : args.color_by,
                                     gene_label       : args.gene_label,
                                     cohorts          : cohort_ids,

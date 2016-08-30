@@ -84,6 +84,8 @@ require([
     var SUBSEQUENT_DELAY = 600;
     var update_displays_thread = null;
 
+    var original_title = $('#edit-cohort-name').val();
+
     var geneListField = $('#paste-in-genes');
     var geneFavs = [];
 
@@ -487,7 +489,7 @@ require([
         $('#edit-cohort-menu').hide();
     });
 
-    $('#create-cohort-form, #apply-filters-form').on('submit', function(e) {
+    $('#create-cohort-form, #apply-edits-form').on('submit', function(e) {
 
         if(savingChanges) {
             e.preventDefault();
@@ -496,8 +498,16 @@ require([
 
         var form = $(this);
 
-        $('#apply-filters-form input[type="submit"]').prop('disabled',true);
+        $('#apply-edits-form input[type="submit"]').prop('disabled',true);
         savingChanges = true;
+
+        if($('.selected-filters .panel-body span').length > 0) {
+            form.append('<input type="hidden" name="apply-filters" value="true" />');
+        }
+
+        if(cohort_id && original_title !== $('#edit-cohort-name').val()) {
+            form.append('<input type="hidden" name="apply-name" value="true" />');
+        }
 
         $('.selected-filters .panel-body span').each(function() {
             var $this = $(this),
@@ -509,10 +519,9 @@ require([
         });
 
 
-        if (cohort_id) {
-            $('#apply-filter-cohort-name').prop('value', $('#edit-cohort-name').val());
+        if(cohort_id) {
+            $('#apply-edit-cohort-name').prop('value', $('#edit-cohort-name').val());
             form.append('<input type="hidden" name="source" value="' + cohort_id + '" />');
-            form.append('<input type="hidden" name="deactivate_sources" value="' + true + '" />');
         }
     });
 
@@ -628,8 +637,7 @@ require([
     });
 
     // Disable save changes if no change to title or no added filters
-    var original_title = $('#edit-cohort-name').val();
-    var save_changes_btn_modal = $('#apply-filters-form input[type="submit"]');
+    var save_changes_btn_modal = $('#apply-edits-form input[type="submit"]');
     var save_changes_btn = $('button[data-target="#apply-filters-modal"]');
     var check_changes = function() {
         if ($('#edit-cohort-name').val() != original_title || $('.selected-filters span').length > 0) {
