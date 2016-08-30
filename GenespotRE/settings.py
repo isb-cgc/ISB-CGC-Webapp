@@ -122,7 +122,7 @@ class BigQueryCohortStorageSettings(object):
 def GET_BQ_COHORT_SETTINGS():
     return BigQueryCohortStorageSettings(COHORT_DATASET_ID, BIGQUERY_COHORT_TABLE_ID)
 
-USE_CLOUD_STORAGE           = os.environ.get('USE_CLOUD_STORAGE', 'False')
+USE_CLOUD_STORAGE           = os.environ.get('USE_CLOUD_STORAGE', False)
 
 PROCESSING_ENABLED          = os.environ.get('PROCESSING_ENABLED', False)
 PROCESSING_JENKINS_URL      = os.environ.get('PROCESSING_JENKINS_URL', 'http://localhost/jenkins')

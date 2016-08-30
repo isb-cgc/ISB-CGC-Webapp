@@ -129,6 +129,25 @@
             <h3 class="panel-title">Review Files</h3>
         </div>
         <div class="panel-body" id="file-process-list">
+
+            <label for="select-gcp-bucket">Please select a Google Cloud Bucket to upload your files to.</label>
+            <select id="select-gcp-bucket" name="gcp-bucket" class="form-control">
+                {% for google_project in google_projects %}
+                {% for bucket in google_project.bucket_set.all %}
+                <option value="{{ bucket.id }}">{{ bucket.google_project.project_id }} - {{ bucket.bucket_name }}</option>
+                {% endfor %}
+                {% endfor %}
+            </select>
+            <label for="select-gcp-dataset">Please select a BigQuery dataset to upload your data to.</label>
+            <select id="select-gcp-dataset" name="gcp-dataset" class="form-control">
+                {% for google_project in google_projects %}
+                {% for dataset in google_project.bqdataset_set.all %}
+                <option value="{{ dataset.id }}">{{ dataset.google_project.project_id }} - {{ dataset.dataset_name }}</option>
+                {% endfor %}
+                {% endfor %}
+            </select>
+
+            <hr>
             <p>Please refer to the <a href="">system data dictionary</a> for proper naming and data type conventions.</p>
         </div>
         <div class="panel-footer">
