@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2015, Institute for Systems Biology
+ * Copyright 2016, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -203,11 +203,10 @@ function($, d3, vizhelpers) {
                 var item = raw_Data[i];
                 var key = item[xAttr];
                 var tmp = {};
-                if (colorBy) {
+                if (colorBy && tmp[colorBy]) {
                     if (colorBy == 'cohort'){
                         tmp[colorBy] = item[colorBy][0];
                     } else {
-
                         tmp[colorBy] = item[colorBy];
                     }
                 } else {
@@ -258,9 +257,9 @@ function($, d3, vizhelpers) {
                         temp['plot_number'] = i+1;
                         merge_list.push(temp);
                     }
-
                 }
 
+                // Don't try to plot values we don't have
                 if(values_only.length > 0) {
                     this.addViolin(g, processed_data[key], values_only, height, violin_width, domain, range);
                     this.addMedianLine(g, processed_data[key], values_only, height, violin_width, domain, range);
