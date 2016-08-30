@@ -203,7 +203,7 @@ function($, d3, vizhelpers) {
                 var item = raw_Data[i];
                 var key = item[xAttr];
                 var tmp = {};
-                if (colorBy) {
+                if (colorBy && tmp[colorBy]) {
                     if (colorBy == 'cohort'){
                         tmp[colorBy] = item[colorBy][0];
                     } else {

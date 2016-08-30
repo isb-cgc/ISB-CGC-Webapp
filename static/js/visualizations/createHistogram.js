@@ -265,9 +265,7 @@ function($, d3, d3tip, helpers) {
                 }
             };
 
-            /*
-                Update the sample cohort bar update
-             */
+            // Update the sample cohort bar update
             function sample_form_update(extent, total_samples, total_patients, sample_list){
                 var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                 $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + total_samples);
@@ -288,7 +286,6 @@ function($, d3, d3tip, helpers) {
 
             function resize() {
                 width = svg.node().parentNode.offsetWidth - 10;
-                //TODO resize plot
             }
 
             function check_selection_state_wrapper(button){
