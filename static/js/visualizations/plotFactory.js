@@ -56,11 +56,11 @@ define([
                 return '<span>Mean: ' + mean.toFixed(2) + '</span><br/><span>%: ' + (d.y * 100).toFixed(2) + '%</span>';
             });
 
-    function generate_axis_label(attr, isLogTransform) {
+    function generate_axis_label(attr, isLogTransform, units) {
         if(isLogTransform) {
-            return "log("+$('option[value="' + attr + '"]:first').html()+") + 1)";
+            return $('option[value="' + attr + '"]:first').html() + " - log("+units+"+1)";
         }
-        return $('option[value="' + attr + '"]:first').html();
+        return $('option[value="' + attr + '"]:first').html() + " - " + units
     }
 
     /*
