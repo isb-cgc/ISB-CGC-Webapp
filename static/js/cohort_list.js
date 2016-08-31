@@ -83,7 +83,7 @@ require([
         $('#cohort-apply-to-workbook .btn').removeAttr('disabled');
     };
     var repopulate_cohort_selects = function() {
-        $('#cohorts-list tr:not(:first)').each(function() {
+        $('#saved-cohorts-list tr:not(:first)').each(function() {
             var id = $(this).find('input').val();
             var name = $(this).find('.name-col a').html();
             var option = $('<option value="' + id + '">' + name + '</option>');
@@ -132,20 +132,20 @@ require([
         });
     });
 
-    $('#cohorts-list tr:not(:first) input[type="checkbox"]').on('change', function() {
+    $('#saved-cohorts-list tr:not(:first) input[type="checkbox"]').on('change', function() {
         var ids = [];
         clear_objects();
         var tablename = '#' + $(this).closest('table')[0].id;
         // If no checkboxes are selected
-        if ($('#cohorts-list tr:not(:first) input[type="checkbox"]:checked').length == 0) {
-            $('#cohorts-list .select-all').prop('checked', false);
+        if ($('#saved-cohorts-list tr:not(:first) input[type="checkbox"]:checked').length == 0) {
+            $('#saved-cohorts-list .select-all').prop('checked', false);
             //disable_buttons(tablename);
             repopulate_cohort_selects();
 
         } else {
             enable_buttons(tablename);
             var formApply = $('#cohort-apply-to-workbook');
-            $('#cohorts-list input[type="checkbox"]').each(function() {
+            $('#saved-cohorts-list input[type="checkbox"]').each(function() {
                 if ($(this).is(':checked') && $(this).val() != 'on') {
 
                     formApply.append($('<input>', {type: 'hidden', name: 'cohorts', value: $(this).val()}));
@@ -175,7 +175,7 @@ require([
         }
     });
 
-    $('#cohorts-list .shared').on('click', function (e) {
+    $('#saved-cohorts-list .shared').on('click', function (e) {
         var modalName = $(this).data('target');
         var item = $(this).closest('tr').find('input[type="checkbox"]');
 
@@ -213,7 +213,7 @@ require([
         var users = [];
         var user_map = {};
         var that = this;
-        $('#cohorts-list tr:not(:first) input:checked').each(function(){
+        $('#saved-cohorts-list tr:not(:first) input:checked').each(function(){
             var cohort = $(this).val();
             var tempt = shared_users[$(this).val()];
             if(tempt){
@@ -422,7 +422,7 @@ require([
     $(".createWorkbookWithCohort").on("click", function(){
         //get the selected cohort
         var cohorts = [];
-        $('#cohorts-list input[type="checkbox"]').each(function() {
+        $('#saved-cohorts-list input[type="checkbox"]').each(function() {
             if ($(this).is(':checked') && $(this).val() != 'on') {
                 cohorts.push($(this).val());
             }
