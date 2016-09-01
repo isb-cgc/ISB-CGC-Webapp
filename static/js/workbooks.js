@@ -427,6 +427,14 @@ require([
     function x_attribute_change(self){
         $(self).parent().find(".attr-options").fadeOut();
         var attr = $(self).find(":selected").val();
+        if(attr == "GNAB") {
+            $('#x-log-transform').prop("checked", false);
+            $('#x-log-transform').prop("disabled", true);
+        } else {
+            if($('#x-log-transform').prop("disabled")) {
+                $('#x-log-transform').prop("disabled", false);
+            }
+        }
         var attr_type_div = $(self).parent().find("."+attr);
         attr_type_div.find('select').each(function(i, item) {
             $(item).prop('selectedIndex', 0);
@@ -501,6 +509,14 @@ require([
     function y_attribute_change(self){
         $(self).parent().find(".attr-options").fadeOut();
         var attr = $(self).find(":selected").val();
+        if(attr == "GNAB") {
+            $('#x-log-transform').prop("checked", false);
+            $('#x-log-transform').parent().prop("disabled", true);
+        } else {
+            if($('#x-log-transform').parent().prop("disabled")) {
+                $('#x-log-transform').parent().prop("disabled", false);
+            }
+        }
         var attr_type_div = $(self).parent().find("."+attr);
         attr_type_div.find('select').each(function(i, item) {
             $(item).prop('selectedIndex', 0);
