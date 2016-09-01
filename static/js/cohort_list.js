@@ -191,7 +191,6 @@ require([
         var cohort_ids = $(this).attr('data-cohort-ids').split(",");
         var url = base_url + '/cohorts/unshare_cohort/';
         var csrftoken = $.getCookie('csrftoken');
-        var button = $(this);
         $.ajax({
             type: 'POST',
             url: url,
@@ -200,7 +199,7 @@ require([
             beforeSend: function (xhr) {
                 xhr.setRequestHeader("X-CSRFToken", csrftoken);
             },
-            success: function (data) {
+            success: function () {
                 window.location.reload(true);
             },
             error: function (e) {
