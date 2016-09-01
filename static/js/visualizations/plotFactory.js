@@ -58,15 +58,15 @@ define([
 
     function generate_axis_label(attr, isLogTransform, units) {
         if(isLogTransform) {
-            return $('option[value="' + attr + '"]:first').html() + " - log("+units+"+1)";
+            return $('option[value="' + attr + '"]:first').html() + " - log("+(units ? " - " + units : 'n')+"+1)";
         }
-        return $('option[value="' + attr + '"]:first').html() + " - " + units
+        return $('option[value="' + attr + '"]:first').html() + (units ? " - " + units : '')
     }
 
     /*
         Generate bar chart
      */
-    function generate_bar_chart(margin, plot_selector, height, width, x_attr, data){
+    function generate_bar_chart(margin, plot_selector, height, width, x_attr, data, units){
         // Bar Chart
         var svg = d3.select(plot_selector)
             .append('svg')
@@ -80,7 +80,7 @@ define([
             height,
             bar_width,
             'x',
-            generate_axis_label(x_attr),
+            generate_axis_label(x_attr, units.x),
             cubby_tip,
             margin);
 
@@ -90,7 +90,7 @@ define([
     /*
         Generate Histogram
      */
-    function generate_histogram(margin, plot_selector, height, width, x_attr, data){
+    function generate_histogram(margin, plot_selector, height, width, x_attr, data, units){
         var svg = d3.select(plot_selector)
                 .append('svg')
                 .attr('width', width + 10)
@@ -104,7 +104,7 @@ define([
                 width,
                 height,
                 'x',
-                generate_axis_label(x_attr, $('#x-log-transform').is(':checked')),
+                generate_axis_label(x_attr, $('#x-log-transform').is(':checked'), units.x),
                 cubby_tip,
                 margin);
 
@@ -114,7 +114,7 @@ define([
     /*
         Generate scatter plot
     */
-    function generate_scatter_plot(margin, plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data) {
+    function generate_scatter_plot(margin, plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data, units) {
          var domain = helpers.get_min_max(data, 'x');
          var range = helpers.get_min_max(data, 'y');
 
@@ -129,8 +129,8 @@ define([
              data,
              domain,
              range,
-             generate_axis_label(x_attr, $('#x-log-transform').is(':checked')),  // xLabel
-             generate_axis_label(y_attr, $('#y-log-transform').is(':checked')),  // yLabel
+             generate_axis_label(x_attr, $('#x-log-transform').is(':checked'), units.x),  // xLabel
+             generate_axis_label(y_attr, $('#y-log-transform').is(':checked'), units.y),  // yLabel
              'x',     // xParam
              'y',     // yParam
              color_by,
@@ -146,7 +146,7 @@ define([
     /*
         Generate violin plot
      */
-    function generate_violin_plot(margin, plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data) {
+    function generate_violin_plot(margin, plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data, units) {
         var violin_width = 200;
         var tmp = helpers.get_min_max(data, 'y');
         var min_n = tmp[0];
@@ -166,8 +166,8 @@ define([
             violin_width,
             max_n,
             min_n,
-            generate_axis_label(x_attr),
-            generate_axis_label(y_attr, $('#y-log-transform').is(':checked')),
+            generate_axis_label(x_attr, false, units.x),
+            generate_axis_label(y_attr, $('#y-log-transform').is(':checked'), units.y),
             'x',
             'y',
             color_by,
@@ -181,7 +181,7 @@ define([
     /*
         Generate violin plot with axis swap
      */
-    function generate_violin_plot_axis_swap(margin, plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data) {
+    function generate_violin_plot_axis_swap(margin, plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data, units) {
         var violin_width = 200;
         var tmp = helpers.get_min_max(data, 'x');
         var min_n = tmp[0];
@@ -201,8 +201,8 @@ define([
             violin_width,
             max_n,
             min_n,
-            generate_axis_label(y_attr, $('#y-log-transform').is(':checked')),
-            generate_axis_label(x_attr),
+            generate_axis_label(y_attr, $('#y-log-transform').is(':checked'), units.y),
+            generate_axis_label(x_attr, false, units.x),
             'y',
             'x',
             color_by,
@@ -213,7 +213,7 @@ define([
         return  {plot : plot, svg : svg}
     }
 
-    function generate_cubby_hole_plot(margin, plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data) {
+    function generate_cubby_hole_plot(margin, plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data, units) {
         var cubby_size = 100;
         var xdomain = vizhelpers.get_domain(data, 'x');
         var ydomain = vizhelpers.get_domain(data, 'y');
@@ -231,8 +231,8 @@ define([
             data,
             xdomain,
             ydomain,
-            generate_axis_label(x_attr),
-            generate_axis_label(y_attr),
+            generate_axis_label(x_attr, false, units.x),
+            generate_axis_label(y_attr, false, units.y),
             'x',
             'y',
             'c',
@@ -352,7 +352,15 @@ define([
         if (data.hasOwnProperty('items')) {
 
             var cohort_set = data['cohort_set'];
+
+            var units = {
+                x: data.xUnits,
+                y: data.yUnits
+            };
+
             data = data['items'];
+
+
             if (args.cohort_override) {
                 args.color_by = 'cohort';
             } else {
@@ -362,22 +370,22 @@ define([
             var visualization;
             switch (args.type){
                 case "Bar Chart" : //x_type == 'STRING' && y_type == 'none'
-                    visualization = generate_bar_chart(margin, args.plot_selector, height, width, args.x, data);
+                    visualization = generate_bar_chart(margin, args.plot_selector, height, width, args.x, data, units);
                     break;
                 case "Histogram" : //((x_type == 'INTEGER' || x_type == 'FLOAT') && y_type == 'none') {
-                    visualization = generate_histogram(margin, args.plot_selector, height, width, args.x, data);
+                    visualization = generate_histogram(margin, args.plot_selector, height, width, args.x, data, units);
                     break;
                 case 'Scatter Plot': //((x_type == 'INTEGER' || x_type == 'FLOAT') && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
-                    visualization = generate_scatter_plot(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by, cohort_set, data);
+                    visualization = generate_scatter_plot(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by, cohort_set, data, units);
                     break;
                 case "Violin Plot": //(x_type == 'STRING' && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
-                    visualization = generate_violin_plot(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data);
+                    visualization = generate_violin_plot(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data, units);
                     break;
                 case 'Violin Plot with axis swap'://(y_type == 'STRING' && (x_type == 'INTEGER'|| x_type == 'FLOAT')) {
-                    visualization = generate_violin_plot_axis_swap(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data);
+                    visualization = generate_violin_plot_axis_swap(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data, units);
                     break;
                 case 'Cubby Hole Plot' : //(x_type == 'STRING' && y_type == 'STRING') {
-                    visualization = generate_cubby_hole_plot(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data);
+                    visualization = generate_cubby_hole_plot(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data, units);
                     break;
                 default :
                     break;
