@@ -136,7 +136,6 @@ require([
     });
 
     $('#saved-cohorts-list tr:not(:first) input[type="checkbox"]').on('change', function() {
-        var ids = [];
         clear_objects();
         var tablename = '#' + $(this).closest('table')[0].id;
         // If no checkboxes are selected
@@ -151,7 +150,6 @@ require([
                 if ($(this).is(':checked') && $(this).val() !== 'on') {
 
                     formApply.append($('<input>', {type: 'hidden', name: 'cohorts', value: $(this).val()}));
-                    ids.push($(this).val());
                     var option = $('<option value="' + $(this).val() + '">' + $(this).parents('tr').find('.name-col a').html() + '</option>');
                     var token_str = '<span class="cohort-label label label-default space-right-5" value="'
                         + $(this).val() + '" name="selected-ids">'
