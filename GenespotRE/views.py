@@ -275,7 +275,7 @@ def user_landing(request):
                                                             })
 
 '''
-Returns Results from text search
+DEPRECATED - Returns Results from text search
 '''
 @login_required
 def search_cohorts_viz(request):

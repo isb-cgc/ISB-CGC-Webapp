@@ -654,7 +654,7 @@ require([
             // All placeholders should be given a type of 'label', and they will never return a url_code
             if(parent.find('.'+label).find(":selected").attr("type") !== "label") {
                 if(parent.find('.'+label).find(":selected").attr("type") == "gene"){
-                    result = {  url_code : parent.find('[variable="'+ label + '"] .search-term-select').find(":selected").val()};
+                    result = {  url_code : parent.find('[variable="'+ label + '"] .search-term-select:visible').find(":selected").val()};
                 } else {
                     result = {  url_code: parent.find('.'+label).find(":selected").val()}
                 }
