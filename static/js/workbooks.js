@@ -510,11 +510,11 @@ require([
         $(self).parent().find(".attr-options").fadeOut();
         var attr = $(self).find(":selected").val();
         if(attr == "GNAB") {
-            $('#x-log-transform').prop("checked", false);
-            $('#x-log-transform').parent().prop("disabled", true);
+            $('#y-log-transform').prop("checked", false);
+            $('#y-log-transform').prop("disabled", true);
         } else {
-            if($('#x-log-transform').parent().prop("disabled")) {
-                $('#x-log-transform').parent().prop("disabled", false);
+            if($('#y-log-transform').prop("disabled")) {
+                $('#y-log-transform').prop("disabled", false);
             }
         }
         var attr_type_div = $(self).parent().find("."+attr);
