@@ -58,7 +58,7 @@ define([
 
     function generate_axis_label(attr, isLogTransform, units) {
         if(isLogTransform) {
-            return $('option[value="' + attr + '"]:first').html() + " - log("+(units ? " - " + units : 'n')+"+1)";
+            return $('option[value="' + attr + '"]:first').html() + " - log("+(units ? units : 'n')+"+1)";
         }
         return $('option[value="' + attr + '"]:first').html() + (units ? " - " + units : '')
     }
