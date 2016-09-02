@@ -23,7 +23,7 @@ define(['jquery'], function($) {
         isValidNumber: function(val) {
             return (
                 val !== null && val !== undefined && (typeof(val) !== "string" ||
-                (val.match(/[-][^\d+,\.]/g) == null)
+                (val.match(/\^-?\d*,?\d*\.?\d*?\d*$/) !== null)
             ));
         },
         get_min_max: function(data, selector) {
