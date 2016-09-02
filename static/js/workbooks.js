@@ -427,6 +427,14 @@ require([
     function x_attribute_change(self){
         $(self).parent().find(".attr-options").fadeOut();
         var attr = $(self).find(":selected").val();
+        if(attr == "GNAB" && $('#value-GNAB :selected').val() !== "num_mutations") {
+            $('#x-log-transform').prop("checked", false);
+            $('#x-log-transform').prop("disabled", true);
+        } else {
+            if($('#x-log-transform').prop("disabled")) {
+                $('#x-log-transform').prop("disabled", false);
+            }
+        }
         var attr_type_div = $(self).parent().find("."+attr);
         attr_type_div.find('select').each(function(i, item) {
             $(item).prop('selectedIndex', 0);
@@ -501,6 +509,14 @@ require([
     function y_attribute_change(self){
         $(self).parent().find(".attr-options").fadeOut();
         var attr = $(self).find(":selected").val();
+        if(attr == "GNAB" && $('#value-GNAB :selected').val() !== "num_mutations") {
+            $('#y-log-transform').prop("checked", false);
+            $('#y-log-transform').prop("disabled", true);
+        } else {
+            if($('#y-log-transform').prop("disabled")) {
+                $('#y-log-transform').prop("disabled", false);
+            }
+        }
         var attr_type_div = $(self).parent().find("."+attr);
         attr_type_div.find('select').each(function(i, item) {
             $(item).prop('selectedIndex', 0);
@@ -528,6 +544,16 @@ require([
         var gene_selection  = self.parents(".variable-container").find(":selected").val();
         var filters         = [{ filter : 'gene_name',
                                  value  : gene_selection}];
+
+        var axis_transform = (variable_name == "x-axis-select") ? "#x-log-transform" : "#y-log-transform";
+
+        if(datatype == "GNAB" && self.find(':selected').val() !== "num_mutations") {
+            $(axis_transform).prop("disabled", true);
+            $(axis_transform).prop("checked", false);
+        } else {
+            $(axis_transform).prop("disabled", false);
+        }
+
         $.each(filterElements, function(i, ele){
             var value = $(ele).find(":selected").text();
             if(value !== "" && value !== "Please select an option" ){
