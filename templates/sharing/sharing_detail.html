@@ -24,7 +24,7 @@
             <section>
                 <div>
                     {% if user.id %}
-                        <a href="{% url 'dashboard' %}" class="btn btn-primary">Your Dashboard{</a>
+                        <a href="{% url 'dashboard' %}" class="btn btn-primary">Your Dashboard</a>
                     {% else %}
                         <a href="{% url 'account_login' %}" class="btn btn-primary">Sign Up</a>
                         <a href="{% url 'account_login' %}" class="btn btn-primary">Log In</a>
