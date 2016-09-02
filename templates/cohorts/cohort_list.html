@@ -38,14 +38,14 @@
     <div class="panel panel-default">
         <ul class="nav nav-tabs" role="tablist">
             <li role="presentation" {% if not is_public %} class="active" {% endif %} >
-                <a href="#save-cohorts-list" aria-controls="save-cohorts-list" role="tab" data-toggle="tab">Saved Cohorts</a>
+                <a href="#saved-cohorts-list" aria-controls="saved-cohorts-list" role="tab" data-toggle="tab">Saved Cohorts</a>
             </li>
             <li role="presentation" {% if is_public %} class="active" {% endif %} >
                 <a href="#public-cohorts-list" aria-controls="public-cohorts-list" role="tab" data-toggle="tab">Public Cohorts</a>
             </li>
         </ul>
         <div class="tab-content panel-body ">
-            <div role="tabpanel" class="tab-pane {% if not is_public %} active {% endif %} " id="save-cohorts-list">
+            <div role="tabpanel" class="tab-pane {% if not is_public %} active {% endif %} " id="saved-cohorts-list">
                 {% if cohorts.has_private_cohorts %}
                     {% if not from_workbook %}
                         <div class="page-action-group">
