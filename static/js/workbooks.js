@@ -805,21 +805,8 @@ require([
             if (data.attrs.x_axis.url_code === undefined || data.attrs.x_axis.url_code === null || data.attrs.x_axis.url_code.length <= 0) {
                 return false;
             }
-
-            if (data.attrs.type === 'Scatter Plot' || data.attrs.type === 'Violin Plot') {
-                if (data.attrs.y_axis.url_code === undefined || data.attrs.y_axis.url_code === null || data.attrs.y_axis.url_code.length <= 0) {
-                    return false;
-                }
-            }
-
-            if (data.attrs.x_axis.url_code === null || data.attrs.x_axis.url_code === undefined
-                || data.attrs.x_axis.url_code === "") {
-                return false;
-            }
-
-            if (data.attrs.type === 'Scatter Plot' || data.attrs.type === 'Violin Plot' &&
-                (data.attrs.y_axis.url_code === null || data.attrs.y_axis.url_code === undefined
-                || data.attrs.y_axis.url_code === "")) {
+            if ((data.attrs.type === 'Scatter Plot' || data.attrs.type === 'Violin Plot') &&
+                (data.attrs.y_axis.url_code === undefined || data.attrs.y_axis.url_code === null || data.attrs.y_axis.url_code.length <= 0)) {
                 return false;
             }
         } else {
