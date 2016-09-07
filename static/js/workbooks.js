@@ -670,45 +670,52 @@ require([
     /*
      * Gather plot information on the page
      */
-    function get_plot_info_on_page(worksheet){
-        var parent = $(worksheet).find('.update-plot').parent();
+    function get_plot_info_on_page(plot_settings){
+        var worksheet = $('.worksheet.active').find('.worksheet-body');
 
         function variable_values(label){
             var result = {
-                url_code: ""
+                url_code: "",
+                type: ""
             };
             // All placeholders should be given a type of 'label', and they will never return a url_code
-            if(parent.find('.'+label).find(":selected").attr("type") !== "label") {
-                if(parent.find('.'+label).find(":selected").attr("type") == "gene"){
-                    result = {  url_code : parent.find('[variable="'+ label + '"] .search-term-select:visible').find(":selected").val()};
+            if(plot_settings.find('.'+label).find(":selected").attr("type") !== "label") {
+                if(plot_settings.find('.'+label).find(":selected").attr("type") === "gene"){
+                    result = {
+                        url_code : plot_settings.find('[variable="'+ label + '"] .search-term-select:visible').find(":selected").val(),
+                        type: "gene"
+                    };
                 } else {
-                    result = {  url_code: parent.find('.'+label).find(":selected").val()}
+                    result = {
+                        url_code: plot_settings.find('.'+label).find(":selected").val(),
+                        type: "nongene"
+                    }
                 }
             }
 
             return result;
         }
 
-        var xLog = $('#x-log-transform'), yLog = $('#y-log-transform');
+        var xLog = $(plot_settings).find('#x-log-transform'), yLog = $(plot_settings).find('#y-log-transform');
 
         var result = {
-            worksheet_id : $(worksheet).find('.update-plot').attr("worksheet_id"),
-            plot_id      : $(worksheet).find('.update-plot').attr("plot_id"),
+            worksheet_id : $(plot_settings).find('.update-plot').attr("worksheet_id"),
+            plot_id      : $(plot_settings).find('.update-plot').attr("plot_id"),
             selections   : {
-                x_axis   : get_values($(worksheet).find('.x-axis-select').find(":selected")),
-                y_axis   : get_values($(worksheet).find('.y-axis-select').find(":selected")),
-                color_by : get_simple_values(parent.find('.color_by')),
-                gene_label: get_simple_values(parent.find('#gene_label'))
+                x_axis   : get_values($(plot_settings).find('.x-axis-select').find(":selected")),
+                y_axis   : get_values($(plot_settings).find('.y-axis-select').find(":selected")),
+                color_by : get_simple_values(plot_settings.find('.color_by')),
+                gene_label: get_simple_values(plot_settings.find('#gene_label'))
             },
             attrs : {
-                type    : parent.parentsUntil(".worksheet-body").find(".plot_selection").find(":selected").text(),
+                type    : worksheet.find('.plot_selection :selected').val(),
                 x_axis  : variable_values('x-axis-select'),
                 y_axis  : variable_values('y-axis-select'),
-                color_by: {url_code: parent.find('.color_by').find(":selected").val()},
-                cohorts: parent.find('[name="cohort-checkbox"]:checked').map(function () {
+                color_by: {url_code: plot_settings.find('.color_by').find(":selected").val()},
+                cohorts: plot_settings.find('[name="cohort-checkbox"]:checked').map(function () {
                     return {id: this.value, cohort_id: $(this).attr("cohort-id")};
                 }).get(),
-                gene_label: parent.find('#gene_label').find(":selected").text()
+                gene_label: plot_settings.find('#gene_label :selected').val()
             },
             logTransform: {
                 x: (xLog.css('display')!=="none") && xLog.is(':checked'),
@@ -783,21 +790,31 @@ require([
         });
     });
 
+
     /*
      * validate the plot settings before initiating the plot
      */
-    function valid_plot_settings(worksheet){
-        var data = get_plot_info_on_page(worksheet);
-        var is_valid = true;
-        if(typeof(data.attrs.x_axis.id) !== 'undefined' && typeof(data.attrs.y_axis.id) !== 'undefined'){
-            is_valid = false;
-        }
+    function valid_plot_settings(plot_settings){
+        var data = get_plot_info_on_page(plot_settings);
 
         if(data.attrs.cohorts.length == 0){
-            is_valid = false;
+            return false;
         }
-        return is_valid;
-    }
+
+        if(data.attrs.type !== 'SeqPeek') {
+            if (data.attrs.x_axis.url_code === undefined || data.attrs.x_axis.url_code === null || data.attrs.x_axis.url_code.length <= 0) {
+                return false;
+            }
+            if ((data.attrs.type === 'Scatter Plot' || data.attrs.type === 'Violin Plot') &&
+                (data.attrs.y_axis.url_code === undefined || data.attrs.y_axis.url_code === null || data.attrs.y_axis.url_code.length <= 0)) {
+                return false;
+            }
+        } else {
+            return (data.attrs.gene_label !== undefined && data.attrs.gene_label !== null && data.attrs.gene_label !== "");
+        }
+
+        return true;
+    };
 
     /*
      * generates the actual svg plots by accepting the plot settings configured in the settings area
