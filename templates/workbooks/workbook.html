@@ -55,7 +55,7 @@
             {% for worksheet in workbook.worksheets %}
                 {% if forloop.counter < 4 %}
                     <li class="{% if display_worksheet and display_worksheet.id == worksheet.id %} active {% elif not display_worksheet and forloop.counter == 1 %} active {% endif %}">
-                         <a href="#{{ worksheet.id }}" data-toggle="tab">{{ worksheet.name }}</a>
+                         <a href="#{{ worksheet.id }}" data-toggle="tab" title="{{ worksheet.name|wrap_text }}">{{ worksheet.name }}</a>
                          {% if workbook.owner.id == request.user.id %}
                          <div class="dropdown">
                              <a class="dropdown-toggle worksheet-drop" role="button" data-toggle="dropdown"><i class="fa fa-caret-down" ></i></a>
