@@ -671,7 +671,8 @@ require([
      * Gather plot information on the page
      */
     function get_plot_info_on_page(plot_settings){
-        var worksheet = $('.worksheet.active').find('.worksheet-body');
+        
+        var worksheet = plot_settings.parents('.worksheet-body');
 
         function variable_values(label){
             var result = {
@@ -679,8 +680,8 @@ require([
                 type: ""
             };
             // All placeholders should be given a type of 'label', and they will never return a url_code
-            if(plot_settings.find('.'+label).find(":selected").attr("type") !== "label") {
-                if(plot_settings.find('.'+label).find(":selected").attr("type") === "gene"){
+            if(plot_settings.find('.'+label+' :selected').attr("type") !== "label") {
+                if(plot_settings.find('.'+label+' :selected').attr("type") === "gene"){
                     result = {
                         url_code : plot_settings.find('[variable="'+ label + '"] .search-term-select:visible').find(":selected").val(),
                         type: "gene"
@@ -688,7 +689,7 @@ require([
                 } else {
                     result = {
                         url_code: plot_settings.find('.'+label).find(":selected").val(),
-                        type: "nongene"
+                        type: plot_settings.find('.'+label).find(":selected").attr("type")
                     }
                 }
             }
@@ -890,10 +891,10 @@ require([
         }
 
         if(plot_data.cohort) {
-            for(var i in plot_data.cohort){
-                plot_element.find('[name="cohort-checkbox"]').each(function(){
+            for (var i in plot_data.cohort) {
+                plot_element.find('[name="cohort-checkbox"]').each(function () {
                     //comparing worksheet_cohorts model ids
-                    if(plot_data.cohort[i].cohort.id == parseInt(this.value)){
+                    if (plot_data.cohort[i].cohort.id == parseInt(this.value)) {
                         $(this).prop("checked", true);
                     }
                 });
