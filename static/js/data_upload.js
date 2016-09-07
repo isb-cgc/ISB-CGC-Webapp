@@ -604,6 +604,10 @@ require([
         }
         form.append('data-type', uploadDataType);
 
+        // Add BQ Dataset and Bucket information
+        form.append('bucket', $('#select-gcp-bucket').val());
+        form.append('dataset', $('#select-gcp-dataset').val());
+
         var pipelines_valid = true;
         _.each(addedFiles, function (added) {
             form.append('file_'+added.uid, added.file, added.file.name);

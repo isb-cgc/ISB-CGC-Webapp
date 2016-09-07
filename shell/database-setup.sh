@@ -14,8 +14,8 @@ echo $PYTHONPATH
 echo "Running Migrations..."
 python ${HOMEROOT}/manage.py migrate --noinput
 
-echo "Creating django superuser"
-echo "from django.contrib.auth.models import User; User.objects.create_superuser('isb', '', 'password')" | python ${HOMEROOT}/manage.py shell
+#echo "Creating django superuser"
+#echo "from django.contrib.auth.models import User; User.objects.create_superuser('isb', '', 'password')" | python ${HOMEROOT}/manage.py shell
 
 echo "Creating Django User for MySQL database..."
 mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -e "GRANT SELECT, INSERT, UPDATE, DELETE ON $DATABASE_NAME.* TO \"django\"@\"localhost\" IDENTIFIED BY \"PASSWORD\""
@@ -30,6 +30,9 @@ mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/s
 
 echo "Adding Stored Procedures..."
 python ${HOMEROOT}/scripts/sproc_setup.py
+
+echo "Adding New Table Views..."
+python ${HOMEROOT}/scripts/userdata_bootstrap.py
 
 echo "Adding Cohort/Site Data..."
 python ${HOMEROOT}/scripts/add_site_ids.py

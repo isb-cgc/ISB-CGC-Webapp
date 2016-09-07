@@ -53,8 +53,10 @@
                     <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-gear"></i></a>
                     <ul class="dropdown-menu">
                         <li role="menuitem"><a href="">New Workbook</a></li>
+                        {% if shared %}
                         <li role="menuitem"><a data-toggle="modal" data-target="#edit-study-details-modal-{{ study.id }}">Edit Details</a></li>
                         <li role="menuitem"><a data-toggle="modal" data-target="#delete-study-modal-{{ study.id }}" class="study-delete">Delete</a></li>
+                        {% endif %}
                     </ul>
                 </div>
                 <h4 class="panel-title pull-left">{{ study.name }}</h4>
