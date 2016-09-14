@@ -765,31 +765,57 @@ require([
         })
     });
 
-    /*
-     * initialize all plots at the beginning
-     */
-    $(".plot_selection").each(function(){
-        var self = this;
-
-        get_plot_info(this, function(success){
-            if(success) {
-                var flyout = $(self).parentsUntil(".worksheet-body").find('.settings-flyout');
-                var data = get_plot_info_on_page($(self).parentsUntil(".worksheet-body").find('.update-plot').parent());
-                disable_invalid_variable_options($(self).parentsUntil(".worksheet-body").find('.update-plot').parent());
-                hide_show_widgets(data.attrs.type, flyout);
-                if (valid_plot_settings($(self).parentsUntil(".worksheet-body").find('.update-plot').parent())) {
-                    generate_plot({ worksheet_id : data.worksheet_id,
-                                    type         : data.attrs.type,
-                                    x            : data.attrs.x_axis.url_code,
-                                    y            : data.attrs.y_axis.url_code,
-                                    logTransform : data.logTransform,
-                                    gene_label   : data.attrs.gene_label,
-                                    color_by     : data.attrs.color_by.url_code,
-                                    cohorts      : data.attrs.cohorts});
-                }
+    // Only init the active tab
+    var active_sheet = $(".worksheet.active")[0];
+    get_plot_info(active_sheet, function(success){
+        var plot_selex = $(active_sheet).find('.plot_selection')[0];
+        if(success) {
+            var flyout = $(plot_selex).parentsUntil(".worksheet-body").find('.settings-flyout');
+            var data = get_plot_info_on_page($(plot_selex).parentsUntil(".worksheet-body").find('.update-plot').parent());
+            disable_invalid_variable_options($(plot_selex).parentsUntil(".worksheet-body").find('.update-plot').parent());
+            hide_show_widgets(data.attrs.type, flyout);
+            if (valid_plot_settings($(plot_selex).parentsUntil(".worksheet-body").find('.update-plot').parent())) {
+                generate_plot({ worksheet_id : data.worksheet_id,
+                                type         : data.attrs.type,
+                                x            : data.attrs.x_axis.url_code,
+                                y            : data.attrs.y_axis.url_code,
+                                logTransform : data.logTransform,
+                                gene_label   : data.attrs.gene_label,
+                                color_by     : data.attrs.color_by.url_code,
+                                cohorts      : data.attrs.cohorts});
             }
-        });
+            $(active_sheet).attr("is-loaded","true");
+        }
     });
+
+
+    // Prep all unloaded worksheets to load on selection
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        var sheet_id = $(this).data('sheet-id');
+        if($('#'+sheet_id).attr("is-loaded") !== "true") {
+            var self = $(".worksheet.active .plot_selection")[0];
+            get_plot_info(self, function(success){
+                if(success) {
+                    var flyout = $(self).parentsUntil(".worksheet-body").find('.settings-flyout');
+                    var data = get_plot_info_on_page($(self).parentsUntil(".worksheet-body").find('.update-plot').parent());
+                    disable_invalid_variable_options($(self).parentsUntil(".worksheet-body").find('.update-plot').parent());
+                    hide_show_widgets(data.attrs.type, flyout);
+                    if (valid_plot_settings($(self).parentsUntil(".worksheet-body").find('.update-plot').parent())) {
+                        generate_plot({ worksheet_id : data.worksheet_id,
+                                        type         : data.attrs.type,
+                                        x            : data.attrs.x_axis.url_code,
+                                        y            : data.attrs.y_axis.url_code,
+                                        logTransform : data.logTransform,
+                                        gene_label   : data.attrs.gene_label,
+                                        color_by     : data.attrs.color_by.url_code,
+                                        cohorts      : data.attrs.cohorts});
+                    }
+                }
+            });
+            $('#'+sheet_id).attr("is-loaded","true");
+        }
+    });
+
 
 
     /*
