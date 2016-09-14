@@ -80,7 +80,7 @@ define([
             height,
             bar_width,
             'x',
-            generate_axis_label(x_attr, units.x),
+            generate_axis_label(x_attr, false, units.x),
             cubby_tip,
             margin);
 
