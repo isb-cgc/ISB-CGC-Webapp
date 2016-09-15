@@ -146,7 +146,48 @@ require([
         } else {
             enable_buttons(tablename);
             var formApply = $('#cohort-apply-to-workbook');
-            $('#saved-cohorts-list input[type="checkbox"]').each(function() {
+            $('#saved-cohorts-list input[type="checkbox"], #public-cohorts-list input[type="checkbox"]').each(function() {
+                if ($(this).is(':checked') && $(this).val() !== 'on') {
+
+                    formApply.append($('<input>', {type: 'hidden', name: 'cohorts', value: $(this).val()}));
+                    var option = $('<option value="' + $(this).val() + '">' + $(this).parents('tr').find('.name-col a').html() + '</option>');
+                    var token_str = '<span class="cohort-label label label-default space-right-5" value="'
+                        + $(this).val() + '" name="selected-ids">'
+                        + $(this).parents('tr').find('.name-col a').html()
+                        + ' <a href="" class="delete-x"><i class="fa fa-times"></a>'
+                        + '</span>';
+                    var cohort_token = $(token_str);
+                    $('#selected-ids').append(cohort_token.clone());
+                    $('.selected-cohorts').each(function() {
+                        $(this).append(cohort_token.clone());
+                    });
+                    $('.delete-x').on('click', delete_x_callback);
+                    $('.viz-cohort-select').each(function() {
+                        if ($(this).parent().find('.viz-cohort-select:first')[0] != this
+                            && $(this).has('.none-value').length == 0) {
+                            $(this).append($('<option class="none-value" value="">None</option>'));
+                        }
+                        option = option.clone();
+                        $(this).append(option);
+                    });
+                }
+            });
+        }
+    });
+
+
+    $('#public-cohorts-list tr:not(:first) input[type="checkbox"]').on('change', function() {
+        clear_objects();
+        var tablename = '#' + $(this).closest('table')[0].id;
+        // If no checkboxes are selected
+        if ($('#public-cohorts-list tr:not(:first) input[type="checkbox"]:checked').length == 0) {
+            $('#public-cohorts-list .select-all').prop('checked', false);
+            repopulate_cohort_selects();
+
+        } else {
+            enable_buttons(tablename);
+            var formApply = $('#cohort-apply-to-workbook');
+            $('#saved-cohorts-list input[type="checkbox"], #public-cohorts-list input[type="checkbox"]').each(function() {
                 if ($(this).is(':checked') && $(this).val() !== 'on') {
 
                     formApply.append($('<input>', {type: 'hidden', name: 'cohorts', value: $(this).val()}));
