@@ -733,8 +733,8 @@ require([
 
     function get_plot_info(selector, callback){
         var worksheet_id = $(selector).attr("worksheet_id");
-        var plot_type = $(selector).find(":selected").text();
-        if(plot_type != "-- select an analysis --") {
+        var plot_type = $(selector).find(":selected").val();
+        if(plot_type !== "") {
             get_plot_model(workbook_id, worksheet_id, plot_type, function (data) {
                 if (data.error) {
                     console.error("Display error");
@@ -767,8 +767,8 @@ require([
 
     // Only init the active tab
     var active_sheet = $(".worksheet.active")[0];
-    get_plot_info(active_sheet, function(success){
-        var plot_selex = $(active_sheet).find('.plot_selection')[0];
+    var plot_selex = $(active_sheet).find('.plot_selection')[0];
+    get_plot_info(plot_selex, function(success){
         if(success) {
             var flyout = $(plot_selex).parentsUntil(".worksheet-body").find('.settings-flyout');
             var data = get_plot_info_on_page($(plot_selex).parentsUntil(".worksheet-body").find('.update-plot').parent());
@@ -785,6 +785,9 @@ require([
                                 cohorts      : data.attrs.cohorts});
             }
             $(active_sheet).attr("is-loaded","true");
+            // Set the max height of a worksheet plot area, based on the current height of the source data panel
+            $(active_sheet).find('.worksheet-panel-body').css('max-height',$('#source_pane-'+$(active_sheet).attr('id')).height()-
+                ($(active_sheet).find('.worksheet-content').height()-$(active_sheet).find('.worksheet-panel-body').outerHeight()) +'px');
         }
     });
 
@@ -794,6 +797,7 @@ require([
         var sheet_id = $(this).data('sheet-id');
         if($('#'+sheet_id).attr("is-loaded") !== "true") {
             var self = $(".worksheet.active .plot_selection")[0];
+            var active_sheet = $(".worksheet.active")[0];
             get_plot_info(self, function(success){
                 if(success) {
                     var flyout = $(self).parentsUntil(".worksheet-body").find('.settings-flyout');
@@ -813,6 +817,9 @@ require([
                 }
             });
             $('#'+sheet_id).attr("is-loaded","true");
+            // Set the max height of a worksheet plot area, based on the current height of the source data panel
+            $(active_sheet).find('.worksheet-panel-body').css('max-height',$('#source_pane-'+$(active_sheet).attr('id')).outerHeight()-
+                ($(active_sheet).find('.worksheet-content').height()-$(active_sheet).find('.worksheet-panel-body').outerHeight()) +'px');
         }
     });
 
@@ -1075,6 +1082,6 @@ require([
     $('.save-comment-btn').prop('disabled', true);
     $('.comment-textarea').keyup(function() {
         $(this).siblings('.save-comment-btn').prop('disabled', this.value == '' ? true : false)
-    })
+    });
 });
 

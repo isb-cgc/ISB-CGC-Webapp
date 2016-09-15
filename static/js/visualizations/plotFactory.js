@@ -336,7 +336,6 @@ define([
     }
 
     function select_plot(args){//plot_selector, legend_selector, pairwise_element, type, x_attr, y_attr, color_by, cohorts, cohort_override, data){
-
         var width  = $('.worksheet.active .worksheet-panel-body:first').width(), //TODO should be based on size of screen
             height = 700, //TODO ditto
             margin = {top: 0, bottom: 100, left: 70, right: 10},
