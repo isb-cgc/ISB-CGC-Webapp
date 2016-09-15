@@ -321,10 +321,10 @@ require([
                         option.attr('disabled','disabled');
                     }
 
-                    // If the selected option is no longer valid
-                    if (option.prop('value') == parent.find(':selected').val() && option.prop('disabled')) {
+                    // If the selected option is no longer valid - Select the default
+                    if (option.prop('value') == parent.find(':selected').val() && option.prop('disabled') && option.attr('type') !== "label") {
                         // Find first sibling that not disabled
-                        parent.val($(option.siblings('option:enabled')[0]).prop('value'));
+                        parent.val('');
                     }
                 });
             }
@@ -349,6 +349,7 @@ require([
             variable_element.val(data.variable);
             axis_select_change(variable_element);
         } else if(data.type == "gene") {
+            variable_element.find(':selected').removeAttr('selected');
             variable_element.val(data.variable);
             axis_select_change(variable_element);
             var parent = variable_element.parents(".variable-container");
@@ -586,9 +587,11 @@ require([
         var xLogCheck = $('#x-log-transform').parent();
         var yLogCheck = $('#y-log-transform').parent();
 
-        // Clear selections
-        x_widgets.find('select.x-axis-select option[type="label"]').prop('selected', true);
-        y_widgets.find('select.y-axis-select option[type="label"]').prop('selected', true);
+        // Clear selections for plots that are loaded
+        if ($(settings_flyout).parents('.worksheet').attr('is-loaded') === 'true') {
+            x_widgets.find('select.x-axis-select option[type="label"]').prop('selected', true).change();
+            y_widgets.find('select.y-axis-select option[type="label"]').prop('selected', true).change();
+        }
 
         x_widgets.show();
         y_widgets.show();
@@ -767,7 +770,7 @@ require([
 
     // Only init the active tab
     var active_sheet = $(".worksheet.active")[0];
-    get_plot_info(active_sheet, function(success){
+    get_plot_info($(".worksheet.active .plot_selection"), function(success){
         var plot_selex = $(active_sheet).find('.plot_selection')[0];
         if(success) {
             var flyout = $(plot_selex).parentsUntil(".worksheet-body").find('.settings-flyout');
@@ -809,10 +812,10 @@ require([
                                         gene_label   : data.attrs.gene_label,
                                         color_by     : data.attrs.color_by.url_code,
                                         cohorts      : data.attrs.cohorts});
+                        $('#'+sheet_id).attr("is-loaded","true");
                     }
                 }
             });
-            $('#'+sheet_id).attr("is-loaded","true");
         }
     });
 
