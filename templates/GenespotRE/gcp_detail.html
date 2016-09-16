@@ -82,7 +82,7 @@
                                                 <p>
                                                     <em>Note</em>: By refreshing this Service Account, you are extending its access to the specified dataset.
                                                 </p>
-                                                <input type="hidden" name="gcp_id" value="{{ project.project_id }}" />
+                                                <input type="hidden" name="gcp_id" value="{{ gcp.project_id }}" />
                                                 <input type="hidden" name="user_sa" value="{{ service_account.service_account }}" />
                                                 <input type="hidden" name="datasets" value="{{ service_account.authorized_dataset_id }}" />
                                             </div>
@@ -211,10 +211,12 @@
                         {% csrf_token %}
                         <p>
                             By registering this bucket, you are allowing the ISB-CGC project to write to the bucket. Please ensure that the ISB-CGC service account has the proper permissions on this bucket.
+                            <br>
+                            Note: You must register a bucket that already exists in this Google Cloud Project. A new bucket will not be created.
                         </p>
 
                         <label for="bucket_name_input">Bucket Name:</label>
-                        <input type="text" name="bucket_name" id="bucket_name_input" class="form-control"/>
+                        <input type="text" name="bucket_name" id="bucket_name_input" class="form-control" required/>
                         <input type="hidden" name="gcp_id" value="{{ project.project_id }}" />
                     </div>
                     <div class="modal-footer">
@@ -239,10 +241,12 @@
                         {% csrf_token %}
                         <p>
                             By registering this BigQuery dataset, you are allowing the ISB-CGC project to write to the dataset. Please ensure that the ISB-CGC service account has the proper permissions on this BigQuery dataset.
+                            <br>
+                            Note: You must register a dataset that already exists in this Google Cloud Project. A new dataset will not be created.
                         </p>
 
                         <label for="bqdataset_name_input">Dataset Name:</label>
-                        <input type="text" name="bqdataset_name" id="bqdataset_name_input" class="form-control"/>
+                        <input type="text" name="bqdataset_name" id="bqdataset_name_input" class="form-control" required />
                         <input type="hidden" name="gcp_id" value="{{ project.project_id }}" />
                     </div>
                     <div class="modal-footer">
