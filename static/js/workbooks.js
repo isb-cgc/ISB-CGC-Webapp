@@ -768,6 +768,13 @@ require([
         })
     });
 
+    // Because we do not have a fixed height set but won't know our ideal height (per the size of the source panel)
+    // after load, we need to set it manually in JS
+    function setPlotPanelHeight(active_sheet){
+        $(active_sheet).find('.worksheet-panel-body').css('max-height',$('#source_pane-'+$(active_sheet).attr('id')).height()-
+            ($(active_sheet).find('.worksheet-content').height()-$(active_sheet).find('.worksheet-panel-body').outerHeight()) +'px');
+    };
+
     // Only init the active tab
     var active_sheet = $(".worksheet.active")[0];
     get_plot_info($(".worksheet.active .plot_selection"), function(success){
@@ -789,6 +796,7 @@ require([
             }
             $(active_sheet).attr("is-loaded","true");
         }
+        setPlotPanelHeight(active_sheet);
     });
 
 
@@ -817,8 +825,8 @@ require([
                 }
             });
         }
+        setPlotPanelHeight(active_sheet);
     });
-
 
 
     /*
