@@ -674,7 +674,7 @@ require([
      * Gather plot information on the page
      */
     function get_plot_info_on_page(plot_settings){
-        
+
         var worksheet = plot_settings.parents('.worksheet-body');
 
         function variable_values(label){
