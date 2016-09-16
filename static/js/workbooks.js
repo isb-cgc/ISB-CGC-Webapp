@@ -674,7 +674,7 @@ require([
      * Gather plot information on the page
      */
     function get_plot_info_on_page(plot_settings){
-
+        
         var worksheet = plot_settings.parents('.worksheet-body');
 
         function variable_values(label){
@@ -736,8 +736,8 @@ require([
 
     function get_plot_info(selector, callback){
         var worksheet_id = $(selector).attr("worksheet_id");
-        var plot_type = $(selector).find(":selected").text();
-        if(plot_type != "-- select an analysis --") {
+        var plot_type = $(selector).find(":selected").val();
+        if(plot_type !== "") {
             get_plot_model(workbook_id, worksheet_id, plot_type, function (data) {
                 if (data.error) {
                     console.error("Display error");
@@ -768,6 +768,13 @@ require([
         })
     });
 
+    // Because we do not have a fixed height set but won't know our ideal height (per the size of the source panel)
+    // after load, we need to set it manually in JS
+    function setPlotPanelHeight(active_sheet){
+        $(active_sheet).find('.worksheet-panel-body').css('max-height',$('#source_pane-'+$(active_sheet).attr('id')).height()-
+            ($(active_sheet).find('.worksheet-content').height()-$(active_sheet).find('.worksheet-panel-body').outerHeight()) +'px');
+    };
+
     // Only init the active tab
     var active_sheet = $(".worksheet.active")[0];
     get_plot_info($(".worksheet.active .plot_selection"), function(success){
@@ -789,6 +796,7 @@ require([
             }
             $(active_sheet).attr("is-loaded","true");
         }
+        setPlotPanelHeight(active_sheet);
     });
 
 
@@ -797,6 +805,7 @@ require([
         var sheet_id = $(this).data('sheet-id');
         if($('#'+sheet_id).attr("is-loaded") !== "true") {
             var self = $(".worksheet.active .plot_selection")[0];
+            var active_sheet = $(".worksheet.active")[0];
             get_plot_info(self, function(success){
                 if(success) {
                     var flyout = $(self).parentsUntil(".worksheet-body").find('.settings-flyout');
@@ -816,10 +825,10 @@ require([
                     }
                 }
             });
+            setPlotPanelHeight(active_sheet);
         }
     });
-
-
+    
 
     /*
      * validate the plot settings before initiating the plot
@@ -1078,6 +1087,6 @@ require([
     $('.save-comment-btn').prop('disabled', true);
     $('.comment-textarea').keyup(function() {
         $(this).siblings('.save-comment-btn').prop('disabled', this.value == '' ? true : false)
-    })
+    });
 });
 
