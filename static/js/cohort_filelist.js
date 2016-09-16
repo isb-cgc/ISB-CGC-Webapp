@@ -230,7 +230,8 @@ require([
             success: function (data) {
                 data = JSON.parse(data);
                 var total_files = data['total_file_count'];
-                $('.filelist-panel .panel-body .file-count').html(total_files);
+                var total_pages = Math.ceil(total_files / 20);
+                $('.filelist-panel .panel-body .file-count').html(total_pages);
                 $('.filelist-panel .panel-body .page-num').html(page);
                 var files = data['file_list'];
                 $('.filelist-panel table tbody').empty();

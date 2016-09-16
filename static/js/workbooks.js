@@ -770,8 +770,8 @@ require([
 
     // Only init the active tab
     var active_sheet = $(".worksheet.active")[0];
-    var plot_selex = $(active_sheet).find('.plot_selection')[0];
-    get_plot_info(plot_selex, function(success){
+    get_plot_info($(".worksheet.active .plot_selection"), function(success){
+        var plot_selex = $(active_sheet).find('.plot_selection')[0];
         if(success) {
             var flyout = $(plot_selex).parentsUntil(".worksheet-body").find('.settings-flyout');
             var data = get_plot_info_on_page($(plot_selex).parentsUntil(".worksheet-body").find('.update-plot').parent());
@@ -816,10 +816,10 @@ require([
                                         gene_label   : data.attrs.gene_label,
                                         color_by     : data.attrs.color_by.url_code,
                                         cohorts      : data.attrs.cohorts});
+                        $('#'+sheet_id).attr("is-loaded","true");
                     }
                 }
             });
-            $('#'+sheet_id).attr("is-loaded","true");
             // Set the max height of a worksheet plot area, based on the current height of the source data panel
             $(active_sheet).find('.worksheet-panel-body').css('max-height',$('#source_pane-'+$(active_sheet).attr('id')).outerHeight()-
                 ($(active_sheet).find('.worksheet-content').height()-$(active_sheet).find('.worksheet-panel-body').outerHeight()) +'px');

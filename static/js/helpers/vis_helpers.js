@@ -363,6 +363,7 @@ define(['jquery'], function($) {
                 }
             });
 
+            // TODO: This code is only used in the variables page. Consider refactoring out.
             // If it's clinical treat it differently and only use the search-term-field autocomplete
             if (value == 'CLIN') {
                 // Initialize clinical search box
@@ -395,7 +396,7 @@ define(['jquery'], function($) {
                     templateSelection: helpers.select2_formatting,
                     width: '100%'
                 })
-            } else {
+            } else if (value == 'MIRN') {
                 // Initialize select box with new features from feature search url
                 var that = this;
                 $.ajax({
