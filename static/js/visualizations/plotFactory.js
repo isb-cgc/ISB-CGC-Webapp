@@ -213,7 +213,8 @@ define([
         return  {plot : plot, svg : svg}
     }
 
-    function generate_cubby_hole_plot(margin, plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data, units) {
+    function generate_cubby_hole_plot(plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data, units) {
+        var margin = {top: 10, bottom: 50, left: 50, right: 0};
         var cubby_size = 100;
         var xdomain = vizhelpers.get_domain(data, 'x');
         var ydomain = vizhelpers.get_domain(data, 'y');
@@ -228,6 +229,7 @@ define([
 
         var plot = cubby_plot_obj.create_cubbyplot(
             svg,
+            margin,
             data,
             xdomain,
             ydomain,
@@ -384,7 +386,7 @@ define([
                     visualization = generate_violin_plot_axis_swap(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data, units, args.logTransform);
                     break;
                 case 'Cubby Hole Plot' : //(x_type == 'STRING' && y_type == 'STRING') {
-                    visualization = generate_cubby_hole_plot(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data, units);
+                    visualization = generate_cubby_hole_plot(args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data, units);
                     break;
                 default :
                     break;

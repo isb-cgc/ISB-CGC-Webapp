@@ -828,7 +828,6 @@ require([
             setPlotPanelHeight(active_sheet);
         }
     });
-    
 
     /*
      * validate the plot settings before initiating the plot
