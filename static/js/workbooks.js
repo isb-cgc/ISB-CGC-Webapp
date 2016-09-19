@@ -28,6 +28,7 @@ require.config({
         underscore: 'libs/underscore-min',
         d3: 'libs/d3.min',
         d3tip: 'libs/d3-tip',
+        d3textwrap: 'libs/d3-textwrap.min',
         science: 'libs/science.min',
         stats: 'libs/science.stats.min',
         vizhelpers: 'helpers/vis_helpers',
@@ -51,7 +52,13 @@ require.config({
         'select2': ['jquery'],
         'plot_factory':['vizhelpers', 'session_security'],
         'stats':['science'],
-        'histogram_plot' : ['science','stats']
+        'histogram_plot' : ['science','stats'],
+        'underscore': {exports: '_'}
+    },
+    map: {
+        d3textwrap: {
+            'd3-selection': 'd3'
+        }
     }
 });
 
