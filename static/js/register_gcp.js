@@ -23,9 +23,7 @@ require.config({
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
         session_security: 'session_security',
-        underscore: 'libs/underscore-min',
-        assetscore: 'libs/assets.core',
-        assetsresponsive: 'libs/assets.responsive'
+        underscore: 'libs/underscore-min'
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -38,12 +36,8 @@ require([
     'jquery',
     'jqueryui',
     'bootstrap',
-    'session_security',
-
-    'assetscore',
-    'assetsresponsive'
-], function($, jqueryui, bootstrap, session_security) {
-    A11y.Core();
+    'session_security'
+], function($) {
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function() {

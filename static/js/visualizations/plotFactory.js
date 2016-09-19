@@ -31,12 +31,8 @@ define([
     'bar_plot',
     'seqpeek_view/seqpeek_view',
     'select2',
-    'assetscore',
-    'assetsresponsive'
 
 ], function($, jqueryui, bootstrap, session_security, d3, d3tip, vizhelpers, scatter_plot, cubby_plot, violin_plot, histogram, bar_graph, seqpeek_view, mock_histogram_data ) {
-    A11y.Core();
-
     var scatter_plot_obj = Object.create(scatter_plot, {});
     var cubby_plot_obj   = Object.create(cubby_plot, {});
     var violin_plot_obj  = Object.create(violin_plot, {});

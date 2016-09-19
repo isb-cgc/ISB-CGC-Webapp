@@ -26,8 +26,6 @@ require.config({
         jqueryui: 'libs/jquery-ui.min',
         session_security: 'session_security',
         underscore: 'libs/underscore-min',
-        assetscore: 'libs/assets.core',
-        assetsresponsive: 'libs/assets.responsive',
         d3: 'libs/d3.min',
         d3tip: 'libs/d3-tip',
         science: 'libs/science.min',
@@ -67,8 +65,6 @@ require([
     'd3',
     'd3tip',
     'select2',
-    'assetscore',
-    'assetsresponsive',
     'base'
 ], function ($, plot_factory, vizhelpers) {
 

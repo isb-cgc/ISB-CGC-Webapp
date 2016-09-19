@@ -6,8 +6,6 @@ require.config({
         jqueryui: 'libs/jquery-ui.min',
         session_security: 'session_security',
         underscore: 'libs/underscore-min',
-        assetscore: 'libs/assets.core',
-        assetsresponsive: 'libs/assets.responsive',
         base: 'base',
         text: 'libs/require-text'
     },
@@ -15,8 +13,6 @@ require.config({
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
         'session_security': ['jquery'],
-        'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
-        'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
         'underscore': {exports: '_'}
     }
 });
@@ -27,8 +23,6 @@ require([
     'bootstrap',
     'session_security',
     'underscore',
-    'assetscore',
-    'assetsresponsive',
     'base'
 ], function($, jqueryui, bootstrap, session_security, _) {
     'use strict';
