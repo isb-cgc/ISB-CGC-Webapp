@@ -23,6 +23,7 @@ define([
     'session_security',
     'd3',
     'd3tip',
+    'd3textwrap',
     'vizhelpers',
     'scatter_plot',
     'cubby_plot',
@@ -34,7 +35,7 @@ define([
     'assetscore',
     'assetsresponsive'
 
-], function($, jqueryui, bootstrap, session_security, d3, d3tip, vizhelpers, scatter_plot, cubby_plot, violin_plot, histogram, bar_graph, seqpeek_view, mock_histogram_data ) {
+], function($, jqueryui, bootstrap, session_security, d3, d3tip, d3textwrap, vizhelpers, scatter_plot, cubby_plot, violin_plot, histogram, bar_graph, seqpeek_view, mock_histogram_data ) {
     A11y.Core();
 
     var scatter_plot_obj = Object.create(scatter_plot, {});
@@ -214,8 +215,8 @@ define([
     }
 
     function generate_cubby_hole_plot(plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data, units) {
-        var margin = {top: 10, bottom: 50, left: 50, right: 0};
-        var cubby_size = 100;
+        var margin = {top: 10, bottom: 50, left: 125, right: 0};
+        var cubby_size = 115;
         var xdomain = vizhelpers.get_domain(data, 'x');
         var ydomain = vizhelpers.get_domain(data, 'y');
 
@@ -225,7 +226,8 @@ define([
         var svg = d3.select(plot_selector)
             .append('svg')
             .attr('width', cubby_width + 10)
-            .attr('height', cubby_height);
+            .attr('height', cubby_height)
+            .style('padding-left','10px');
 
         var plot = cubby_plot_obj.create_cubbyplot(
             svg,
