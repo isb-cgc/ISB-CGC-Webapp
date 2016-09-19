@@ -6,16 +6,12 @@ require.config({
         jqueryui: 'js/libs/jquery-ui.min',
         session_security: 'js/session_security',
         underscore: 'js/libs/underscore-min',
-        assetscore: 'js/libs/assets.core',
-        assetsresponsive: 'js/libs/assets.responsive',
         base: 'js/base',
     },
     shim: {
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
         'session_security': ['jquery'],
-        'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
-        'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
         'underscore': {exports: '_'},
     }
 });
@@ -26,9 +22,7 @@ require([
     'bootstrap',
     'session_security',
     'underscore',
-    'assetscore',
-    'assetsresponsive',
-    'base',
+    'base'
 ], function($, jqueryui, bootstrap, session_security, _) {
     'use strict';
     var warning = false;

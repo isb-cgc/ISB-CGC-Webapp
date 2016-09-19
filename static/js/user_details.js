@@ -24,13 +24,10 @@ require.config({
         jqueryui: 'libs/jquery-ui.min',
         session_security: 'session_security',
         underscore: 'libs/underscore-min',
-        assetscore: 'libs/assets.core',
-        assetsresponsive: 'libs/assets.responsive'
     },
     shim: {
         'bootstrap': ['jquery'],
         'session_security': ['jquery'],
-        'assetscore': ['jquery']
     }
 });
 
@@ -38,12 +35,8 @@ require([
     'jquery',
     'jqueryui',
     'bootstrap',
-    'session_security',
-
-    'assetscore',
-    'assetsresponsive'
+    'session_security'
 ], function($, jqueryui, bootstrap, session_security) {
-    A11y.Core();
 
     $('.show-service-accounts').on('click', function () {
         var $this = $(this);

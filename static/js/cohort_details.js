@@ -24,8 +24,6 @@ require.config({
         jqueryui: 'libs/jquery-ui.min',
         session_security: 'session_security',
         underscore: 'libs/underscore-min',
-        assetscore: 'libs/assets.core',
-        assetsresponsive: 'libs/assets.responsive',
         d3: 'libs/d3.min',
         d3tip: 'libs/d3-tip',
         search_helpers: 'helpers/search_helpers',
@@ -43,8 +41,6 @@ require.config({
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
         'session_security': ['jquery'],
-        'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
-        'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
         'tokenfield': ['jquery', 'jqueryui'],
         'typeahead':{
             deps: ['jquery'],
@@ -74,8 +70,6 @@ require([
     'vis_helpers',
     'tree_graph',
     'stack_bar_chart',
-    'assetscore',
-    'assetsresponsive',
     'base'
 ], function ($, jqueryui, bootstrap, session_security, d3, d3tip, search_helpers, Bloodhound, typeahead, _) {
 
@@ -706,19 +700,19 @@ require([
     $('.save-comment-btn').prop('disabled', true);
     $('#comment-content').keyup(function() {
         $(this).siblings('.save-comment-btn').prop('disabled', this.value == '' ? true : false)
-    })
+    });
 
     save_changes_btn.prop('disabled', true);
     save_changes_btn_modal.prop('disabled', true);
 
     $('#edit-cohort-name').keyup(function() {
         check_changes();
-    })
+    });
 
     // Disable Duplicate Cohort button once clicked
     $('.clone-cohort-btn').on('click', function() {
         $(this).addClass('disabled');
-    })
+    });
 
     $('li.applied-filter').each(function(index,elem){
         $(this).html($(this).text().replace(/\[/g,"<span>").replace(/\]/g,"</span>"));
