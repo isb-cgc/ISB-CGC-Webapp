@@ -67,6 +67,7 @@ require([
             wildcard: '%QUERY'
         }
     });
+
     gene_suggestions.initialize();
     function createTokenizer() {
         // be aware bootstrap tokenfield requires 'value' as the datem attribute field : https://github.com/sliptree/bootstrap-tokenfield/issues/189
@@ -327,4 +328,9 @@ require([
         });
         return Object.keys(genes_count_object);
     }
+
+    $('.cancel-edit').on('click', function() {
+        window.onbeforeunload = null
+    })
+    
 });
