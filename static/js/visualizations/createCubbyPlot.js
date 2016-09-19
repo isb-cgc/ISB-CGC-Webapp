@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2015, Institute for Systems Biology
+ * Copyright 2016, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,8 +80,7 @@ function($, d3, d3tip, vizhelpers) {
             }
             return results;
         },
-        create_cubbyplot: function(svg, data, domain, range, xLabel, yLabel, xParam, yParam, colourBy, legend, width, height, cubby_size) {
-            var margin = {top: 10, bottom: 50, left: 50, right: 0};
+        create_cubbyplot: function(svg, margin, data, domain, range, xLabel, yLabel, xParam, yParam, colourBy, legend, width, height, cubby_size) {
             var colorVal = function(d) { return d[colorBy]; };
             var color = d3.scale.category20();
             var x_band_width = (width - margin.left) / domain.length;
@@ -294,7 +293,9 @@ function($, d3, d3tip, vizhelpers) {
                 .attr('width', cubby_size + 1)
                 .attr('height', cubby_size)
                 .attr('x', function(d) { return x(d['x']) + 1; })
-                .attr('y', function(d) { return y(d['y']); })
+                .attr('y', function(d) {
+                    return y(d['y']);
+                })
                 .on('click', function() {
                     var obj_class = $(this).attr('class');
                     if (obj_class.indexOf('selected') >= 0) {
@@ -351,7 +352,7 @@ function($, d3, d3tip, vizhelpers) {
             svg.append('text')
                 .attr('class', 'x label')
                 .attr('text-anchor', 'middle')
-                .attr('transform', 'translate(' + (view_width/2) + ',' + (view_height - 10) + ')')
+                .attr('transform', 'translate(' + ((width/2)+(margin.left/2)) + ',' + (view_height - 10) + ')')
                 .text(xLabel);
 
             svg.append('text')
@@ -359,6 +360,7 @@ function($, d3, d3tip, vizhelpers) {
                 .attr('text-anchor', 'middle')
                 .attr('transform', 'rotate(-90) translate(' + (-1 * (view_height/2)) + ',10)')
                 .text(yLabel);
+
 
             var check_selection_state = function(obj) {
                 if (obj) {
