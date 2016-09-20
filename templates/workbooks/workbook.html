@@ -115,7 +115,7 @@
 
                      <div class="worksheet-body">
                         <!-- worksheet data source pane -->
-                        <div id="source_pane" class="worksheet-nav">
+                        <div id="source_pane-{{ worksheet.id }}" class="worksheet-nav">
 
                             <h5>Source Data</h5>
                             <ul class="list">
@@ -256,7 +256,7 @@
                                         {% if worksheet.active_plot %}
                                             <option value="{{ worksheet.active_plot.type }}" selected >{{ worksheet.active_plot.type }}</option>
                                         {% else %}
-                                            <option disabled selected >-- select an analysis --</option>
+                                            <option disabled selected value="" type="label">-- select an analysis --</option>
                                         {% endif %}
                                         {% for plot in plot_types %}
                                             {% if not worksheet.active_plot or plot.name != worksheet.active_plot.type %}
