@@ -812,6 +812,7 @@ require([
         var sheet_id = $(this).data('sheet-id');
         if($('#'+sheet_id).attr("is-loaded") !== "true") {
             var self = $(".worksheet.active .plot_selection")[0];
+            var active_sheet = $(".worksheet.active")[0];
             get_plot_info(self, function(success){
                 if(success) {
                     var flyout = $(self).parentsUntil(".worksheet-body").find('.settings-flyout');
