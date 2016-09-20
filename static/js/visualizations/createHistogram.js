@@ -214,16 +214,19 @@ function($, d3, d3tip, helpers) {
                 .call(xAxis);
 
             // append axes labels
+            var xAxisXPos = (parseInt(svg.attr('width')>width ? width : svg.attr('width'))+margin.left)/2;
+            var xAxisYPos = parseInt(svg.attr('height')>height ? height : svg.attr('height'))-10;
             svg.append('text')
-                .attr('class', 'x label')
+                .attr('class', 'axis-label')
                 .attr('text-anchor', 'middle')
-                .attr('transform', 'translate(' + (width / 2) + ',' + (height - 10) + ')')
+                .attr('transform', 'translate(' + xAxisXPos + ',' + xAxisYPos + ')')
                 .text(xLabel);
 
+            var yAxisXPos = (parseInt(svg.attr('height')>height ? height : svg.attr('height'))-margin.bottom)/2;
             svg.append('text')
-                .attr('class', 'y label')
+                .attr('class', 'axis-label')
                 .attr('text-anchor', 'middle')
-                .attr('transform', 'rotate(-90) translate(' + (-1 * (height/2)) + ',10)')
+                .attr('transform', 'rotate(-90) translate(-' + yAxisXPos + ',10)')
                 .text('Percentage of Samples in Grouping');
 
             function check_selection_state(isActive) {
