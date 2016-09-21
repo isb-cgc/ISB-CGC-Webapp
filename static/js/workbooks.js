@@ -778,7 +778,7 @@ require([
     // Because we do not have a fixed height set but won't know our ideal height (per the size of the source panel)
     // after load, we need to set it manually in JS
     function setPlotPanelHeight(active_sheet){
-        $(active_sheet).find('.worksheet-panel-body').css('max-height',$('#source_pane-'+$(active_sheet).attr('id')).height()-
+        $(active_sheet).find('.worksheet-panel-body').css('height',$('#source_pane-'+$(active_sheet).attr('id')).height()-
             ($(active_sheet).find('.worksheet-content').height()-$(active_sheet).find('.worksheet-panel-body').outerHeight()) +'px');
     };
 
