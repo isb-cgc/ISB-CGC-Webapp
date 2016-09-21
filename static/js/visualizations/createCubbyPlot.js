@@ -16,8 +16,8 @@
  *
  */
 
-define (['jquery', 'd3', 'd3tip', 'vizhelpers'],
-function($, d3, d3tip, vizhelpers) {
+define (['jquery', 'd3', 'd3tip', 'd3textwrap','vizhelpers'],
+function($, d3, d3tip, d3textwrap, vizhelpers) {
     
     var tip = d3tip()
         .attr('class', 'd3-tip')
@@ -80,7 +80,7 @@ function($, d3, d3tip, vizhelpers) {
             }
             return results;
         },
-        create_cubbyplot: function(svg, data, domain, range, xLabel, yLabel, xParam, yParam, colourBy, legend, width, height, cubby_size) {
+        create_cubbyplot: function(svg, margin, data, domain, range, xLabel, yLabel, xParam, yParam, colourBy, legend, width, height, cubby_size) {
             var margin = {top: 10, bottom: 50, left: 50, right: 0};
             var colorVal = function(d) { return d[colorBy]; };
             var color = d3.scale.category20();
@@ -131,7 +131,7 @@ function($, d3, d3tip, vizhelpers) {
                 .append('rect')
                 .attr('height', view_height-margin.top-margin.bottom)
                 .attr('width', margin.left)
-                .attr('transform', 'translate(' + 0 + ',0)');
+                .attr('transform', 'translate(0,0)');
 
             var x_axis_area = svg.append('g')
                 .attr('clip-path', 'url(#x_axis_area_clip)');
@@ -164,7 +164,7 @@ function($, d3, d3tip, vizhelpers) {
             // append axes
             y_axis_area.append('g')
                 .attr('class', 'y axis')
-                .attr('transform', 'translate(' + margin.left + ',0)')
+                .attr('transform', 'translate('+margin.left+',0)')
                 .call(yAxis)
                 .selectAll('text')
                 .style('text-anchor', 'middle')
@@ -201,7 +201,7 @@ function($, d3, d3tip, vizhelpers) {
             // append grid lines
             plot_area.append("g")
                 .attr("class", "y grid")
-                .attr('transform', 'translate(' + margin.left + ',' + y_band_width/2+ ')')
+                .attr('transform', 'translate('+margin.left+',' + y_band_width/2+ ')')
                 .call(make_y_axis()
                     .tickSize(-width, 0, 0)
                     .tickFormat("")
@@ -239,6 +239,8 @@ function($, d3, d3tip, vizhelpers) {
                 svg.select('.y.grid').attr('transform', 'translate(' + margin.left + ',' + (d3.event.translate[1] + y_band_width/2) + ')');
                 plot_area.selectAll('.expected_fill').attr('transform', 'translate(' + 0 + ',' + d3.event.translate[1] + ')');
                 plot_area.selectAll('text').attr('transform', 'translate(' + 0 + ',' + d3.event.translate[1] + ')');
+                d3.select('.y.axis').selectAll('text').call(d3textwrap.textwrap().bounds({width: margin.left*0.85, height: y.rangeBand()}));
+                d3.select('.y.axis').selectAll('foreignObject').attr('style','transform: translate(-'+margin.left*0.85+'px,-'+y.rangeBand()*0.50+'px);');
             };
 
             var zoom_xy = function() {
@@ -256,6 +258,8 @@ function($, d3, d3tip, vizhelpers) {
                 svg.select('.y.grid').attr('transform', 'translate(' + margin.left + ',' + (d3.event.translate[1] + (y_band_width*d3.event.scale)/2) + ') scale(' + d3.event.scale + ',' + d3.event.scale + ')');
                 plot_area.selectAll('.expected_fill').attr('transform', 'translate(' + d3.event.translate[0] + ',' + d3.event.translate[1] + ') scale(' + d3.event.scale + ',' + d3.event.scale + ')');
                 plot_area.selectAll('text').attr('transform', 'translate(' + d3.event.translate[0] + ',' + d3.event.translate[1] + ') scale(' + d3.event.scale + ',' + d3.event.scale + ')');
+                d3.select('.y.axis').selectAll('text').call(d3textwrap.textwrap().bounds({width: margin.left*0.85, height: y.rangeBand()}));
+                d3.select('.y.axis').selectAll('foreignObject').attr('style','transform: translate(-'+margin.left*0.85+'px,-'+y.rangeBand()*0.50+'px);');
             };
 
             var zoom = d3.behavior.zoom();
@@ -294,7 +298,9 @@ function($, d3, d3tip, vizhelpers) {
                 .attr('width', cubby_size + 1)
                 .attr('height', cubby_size)
                 .attr('x', function(d) { return x(d['x']) + 1; })
-                .attr('y', function(d) { return y(d['y']); })
+                .attr('y', function(d) {
+                    return y(d['y']);
+                })
                 .on('click', function() {
                     var obj_class = $(this).attr('class');
                     if (obj_class.indexOf('selected') >= 0) {
@@ -348,17 +354,23 @@ function($, d3, d3tip, vizhelpers) {
             plot_area.call(tip);
 
             // append axes labels
+            var xAxisXPos = ((svg.attr('width')>view_width ? view_width : svg.attr('width'))/2)+(margin.left/2);
+            var xAxisYPos = (svg.attr('height')>view_height ? view_height : svg.attr('height'));
             svg.append('text')
-                .attr('class', 'x label')
+                .attr('class', 'axis-label')
                 .attr('text-anchor', 'middle')
-                .attr('transform', 'translate(' + (view_width/2) + ',' + (view_height - 10) + ')')
+                .attr('transform', 'translate(' + xAxisXPos + ',' + xAxisYPos + ')')
                 .text(xLabel);
 
+            var yAxisYPos = ((svg.attr('height')>view_height ? view_height : svg.attr('height'))/2);
             svg.append('text')
-                .attr('class', 'y label')
+                .attr('class', 'axis-label')
                 .attr('text-anchor', 'middle')
-                .attr('transform', 'rotate(-90) translate(' + (-1 * (view_height/2)) + ',10)')
+                .attr('transform', 'rotate(-90) translate(-' + yAxisYPos + ',10)')
                 .text(yLabel);
+
+            d3.select('.y.axis').selectAll('text').call(d3textwrap.textwrap().bounds({width: margin.left*0.85, height: y.rangeBand()}));
+            d3.select('.y.axis').selectAll('foreignObject').attr('style','transform: translate(-'+margin.left*0.85+'px,-'+y.rangeBand()*0.50+'px);');
 
             var check_selection_state = function(obj) {
                 if (obj) {

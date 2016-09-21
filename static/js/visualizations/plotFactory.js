@@ -23,6 +23,7 @@ define([
     'session_security',
     'd3',
     'd3tip',
+    'd3textwrap',
     'vizhelpers',
     'scatter_plot',
     'cubby_plot',
@@ -34,7 +35,7 @@ define([
     'assetscore',
     'assetsresponsive'
 
-], function($, jqueryui, bootstrap, session_security, d3, d3tip, vizhelpers, scatter_plot, cubby_plot, violin_plot, histogram, bar_graph, seqpeek_view, mock_histogram_data ) {
+], function($, jqueryui, bootstrap, session_security, d3, d3tip, d3textwrap, vizhelpers, scatter_plot, cubby_plot, violin_plot, histogram, bar_graph, seqpeek_view, mock_histogram_data ) {
     A11y.Core();
 
     var scatter_plot_obj = Object.create(scatter_plot, {});
@@ -80,7 +81,7 @@ define([
             height,
             bar_width,
             'x',
-            generate_axis_label(x_attr, units.x),
+            generate_axis_label(x_attr, false, units.x),
             cubby_tip,
             margin);
 
@@ -213,8 +214,9 @@ define([
         return  {plot : plot, svg : svg}
     }
 
-    function generate_cubby_hole_plot(margin, plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data, units) {
-        var cubby_size = 100;
+    function generate_cubby_hole_plot(plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data, units) {
+        var margin = {top: 10, bottom: 50, left: 125, right: 0};
+        var cubby_size = 115;
         var xdomain = vizhelpers.get_domain(data, 'x');
         var ydomain = vizhelpers.get_domain(data, 'y');
 
@@ -224,10 +226,12 @@ define([
         var svg = d3.select(plot_selector)
             .append('svg')
             .attr('width', cubby_width + 10)
-            .attr('height', cubby_height);
+            .attr('height', cubby_height)
+            .style('padding-left','10px');
 
         var plot = cubby_plot_obj.create_cubbyplot(
             svg,
+            margin,
             data,
             xdomain,
             ydomain,
@@ -385,7 +389,7 @@ define([
                     visualization = generate_violin_plot_axis_swap(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data, units, args.logTransform);
                     break;
                 case 'Cubby Hole Plot' : //(x_type == 'STRING' && y_type == 'STRING') {
-                    visualization = generate_cubby_hole_plot(margin, args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data, units);
+                    visualization = generate_cubby_hole_plot(args.plot_selector, args.legend_selector, height, width, args.x, args.y, args.color_by,  cohort_set, data, units);
                     break;
                 default :
                     break;

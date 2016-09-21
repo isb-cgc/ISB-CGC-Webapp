@@ -55,7 +55,7 @@
             {% for worksheet in workbook.worksheets %}
                 {% if forloop.counter < 4 %}
                     <li class="{% if display_worksheet and display_worksheet.id == worksheet.id %} active {% elif not display_worksheet and forloop.counter == 1 %} active {% endif %}">
-                         <a href="#{{ worksheet.id }}" data-toggle="tab" title="{{ worksheet.name|wrap_text }}">{{ worksheet.name }}</a>
+                         <a href="#{{ worksheet.id }}" data-toggle="tab" data-sheet-id="{{ worksheet.id }}" is-loaded="false" title="{{ worksheet.name|wrap_text }}">{{ worksheet.name }}</a>
                          {% if workbook.owner.id == request.user.id %}
                          <div class="dropdown">
                              <a class="dropdown-toggle worksheet-drop" role="button" data-toggle="dropdown"><i class="fa fa-caret-down" ></i></a>
@@ -79,7 +79,7 @@
                     {% for worksheet in workbook.worksheet_set.all  %}
                         {% if forloop.counter >= 4 %}
                         <li class="{% if display_worksheet and display_worksheet.id == worksheet.id %} active {% endif %}">
-                            <a href="#{{ worksheet.id }}" data-toggle="tab">{{ worksheet.name }}</a>
+                            <a href="#{{ worksheet.id }}" data-toggle="tab" data-sheet-id="{{ worksheet.id }}">{{ worksheet.name }}</a>
                             <div class="dropdown">
                                 <a class="dropdown-toggle worksheet-drop" role="button" data-toggle="dropdown"><i class="fa fa-caret-down" ></i></a>
                                 <ul class="dropdown-menu">
@@ -106,7 +106,7 @@
         <div class="tab-content">
              <!-- for each worksheet in workbook -->
              {% for worksheet in workbook.worksheets %}
-                 <div class="worksheet tab-pane fade {% if not display_worksheet and forloop.counter == 1 %} in active{% elif display_worksheet and display_worksheet.id == worksheet.id %} in active {% endif %}" id="{{ worksheet.id }}" >
+                 <div class="worksheet tab-pane fade {% if not display_worksheet and forloop.counter == 1 %} in active{% elif display_worksheet and display_worksheet.id == worksheet.id %} in active {% endif %}" id="{{ worksheet.id }}" is-loaded="false">
                      <!-- worksheet description -->
                      <div class="worksheet-header">
                          <p>{{worksheet.description}}</p>
@@ -115,7 +115,7 @@
 
                      <div class="worksheet-body">
                         <!-- worksheet data source pane -->
-                        <div id="source_pane" class="worksheet-nav">
+                        <div id="source_pane-{{ worksheet.id }}" class="worksheet-nav">
 
                             <h5>Source Data</h5>
                             <ul class="list">
@@ -256,7 +256,7 @@
                                         {% if worksheet.active_plot %}
                                             <option value="{{ worksheet.active_plot.type }}" selected >{{ worksheet.active_plot.type }}</option>
                                         {% else %}
-                                            <option disabled selected >-- select an analysis --</option>
+                                            <option disabled selected value="" type="label">-- select an analysis --</option>
                                         {% endif %}
                                         {% for plot in plot_types %}
                                             {% if not worksheet.active_plot or plot.name != worksheet.active_plot.type %}

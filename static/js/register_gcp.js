@@ -59,13 +59,15 @@ require([
 
         var $this = $(this);
         var fields = $this.serialize();
-
+        var submit_button = $this.find('input[type="submit"]');
+        submit_button.prop('disabled', true);
         $.ajax({
             url: $this.attr('action'),
             data: fields,
             method: 'GET',
             success: function(data) {
-                console.log(data);
+                // console.log(data);
+                $('.user-list').empty();
                 var gcp_id = data['gcp_id'];
                 var roles = data['roles']
                 for (var key in roles) {
@@ -81,10 +83,12 @@ require([
                 }
                 $('#register-gcp-form').append('<input type="hidden" name="gcp_id" value="' + gcp_id + '"/>');
                 $('#register-gcp-form').show();
+                submit_button.prop('disabled', false);
             },
             error: function(xhr, ajaxOptions, thrownError) {
                 $('.verify-error').show();
                 $("html, body").animate({ scrollTop: 0 }, "slow");
+                submit_button.prop('disabled', false);
             }
         });
         return false;
