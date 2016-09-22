@@ -427,9 +427,7 @@ require([
         }
     };
 
-    $('.search-checkbox-list input[type="checkbox"]').on('change', function(e,data){
-            filter_change_callback(e, data);
-    });
+    $('.search-checkbox-list input[type="checkbox"]').on('change', filter_change_callback);
 
     $('.filter-input').autocomplete({
         source: attr_list,
