@@ -21,7 +21,7 @@ function($, d3, vizhelpers) {
     var helpers = Object.create(vizhelpers, {});
     return {
         create_scatterplot: function(svg, data, domain, range, xLabel, yLabel, xParam, yParam, colorBy, legend, width, height, cohort_set) {
-            var margin = {top: 10, bottom: 50, left: 50, right: 10};
+            var margin = {top: 10, bottom: 50, left: 100, right: 10};
             var yVal = function(d) {
                 if (helpers.isValidNumber(d[yParam])) {
                     return d[yParam];
@@ -155,7 +155,7 @@ function($, d3, vizhelpers) {
             svg.append('text')
                 .attr('class', 'x label')
                 .attr('text-anchor', 'middle')
-                .attr('transform', 'translate(' + (width/2) + ',' + (height - 10) + ')')
+                .attr('transform', 'translate(' + ((width+margin.left)/2) + ',' + (height - 10) + ')')
                 .text(xLabel);
 
             svg.append('text')

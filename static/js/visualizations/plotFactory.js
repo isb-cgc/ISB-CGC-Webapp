@@ -402,6 +402,8 @@ define([
             //establish resize call to data
             d3.select(window).on('resize', visualization.plot.resize);
 
+            $('.plot-div').height($('.plot-div').height()+($('.worksheet-panel-body').height()-$(args.legend_selector).outerHeight()-$('.plot-div').outerHeight()));
+
         }
         else if (args.type == "SeqPeek") {
             visualization = generate_seqpeek_plot(args.plot_selector, args.legend_selector, data);
