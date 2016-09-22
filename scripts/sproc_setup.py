@@ -48,46 +48,42 @@ def main():
 
     try:
 
-        raw_counts_sproc_def = """CREATE PROCEDURE `get_raw_counts`()
+        metadata_vals_sproc_def = """CREATE PROCEDURE `get_metadata_values`()
             BEGIN
-
-                SELECT DISTINCT gender, COUNT(1) as gender_count FROM metadata_samples GROUP BY gender;
-                SELECT DISTINCT vital_status, COUNT(1) as count FROM metadata_samples GROUP BY vital_status;
-                SELECT DISTINCT residual_tumor, COUNT(1) as count FROM metadata_samples GROUP BY residual_tumor;
-                SELECT DISTINCT person_neoplasm_cancer_status, COUNT(1) as count FROM metadata_samples GROUP BY person_neoplasm_cancer_status;
-                SELECT DISTINCT age_at_initial_pathologic_diagnosis, COUNT(1) as count FROM metadata_samples GROUP BY age_at_initial_pathologic_diagnosis;
-                SELECT DISTINCT icd_o_3_histology, COUNT(1) as count FROM metadata_samples GROUP BY icd_o_3_histology;
-                SELECT DISTINCT has_GA_miRNASeq, COUNT(1) as count FROM metadata_samples GROUP BY has_GA_miRNASeq;
-                SELECT DISTINCT has_BCGSC_GA_RNASeq, COUNT(1) as count FROM metadata_samples GROUP BY has_BCGSC_GA_RNASeq;
-                SELECT DISTINCT histological_type, COUNT(1) as count FROM metadata_samples GROUP BY histological_type;
-                SELECT DISTINCT race, COUNT(1) as count FROM metadata_samples GROUP BY race;
-                SELECT DISTINCT has_27k, COUNT(1) as count FROM metadata_samples GROUP BY has_27k;
-                SELECT DISTINCT Project, COUNT(1) as count FROM metadata_samples GROUP BY Project;
-                SELECT DISTINCT pathologic_stage, COUNT(1) as count FROM metadata_samples GROUP BY pathologic_stage;
-                SELECT DISTINCT has_SNP6, COUNT(1) as count FROM metadata_samples GROUP BY has_SNP6;
-                SELECT DISTINCT other_dx, COUNT(1) as count FROM metadata_samples GROUP BY other_dx;
-                SELECT DISTINCT has_HiSeq_miRnaSeq, COUNT(1) as count FROM metadata_samples GROUP BY has_HiSeq_miRnaSeq;
-                SELECT DISTINCT has_UNC_HiSeq_RNASeq, COUNT(1) as count FROM metadata_samples GROUP BY has_UNC_HiSeq_RNASeq;
-                SELECT DISTINCT Study, COUNT(1) as count FROM metadata_samples GROUP BY Study;
-                SELECT DISTINCT tumor_type, COUNT(1) as count FROM metadata_samples GROUP BY tumor_type;
-                SELECT DISTINCT icd_o_3_site, COUNT(1) as count FROM metadata_samples GROUP BY icd_o_3_site;
-                SELECT DISTINCT tobacco_smoking_history, COUNT(1) as count FROM metadata_samples GROUP BY tobacco_smoking_history;
-                SELECT DISTINCT has_RPPA, COUNT(1) as count FROM metadata_samples GROUP BY has_RPPA;
-                SELECT DISTINCT icd_10, COUNT(1) as count FROM metadata_samples GROUP BY icd_10;
-                SELECT DISTINCT tumor_tissue_site, COUNT(1) as count FROM metadata_samples GROUP BY tumor_tissue_site;
-                SELECT DISTINCT ethnicity, COUNT(1) as count FROM metadata_samples GROUP BY ethnicity;
-                SELECT DISTINCT has_Illumina_DNASeq, COUNT(1) as count FROM metadata_samples GROUP BY has_Illumina_DNASeq;
-                SELECT DISTINCT neoplasm_histologic_grade, COUNT(1) as count FROM metadata_samples GROUP BY neoplasm_histologic_grade;
-                SELECT DISTINCT country, COUNT(1) as count FROM metadata_samples GROUP BY country;
-                SELECT DISTINCT has_BCGSC_HiSeq_RNASeq, COUNT(1) as count FROM metadata_samples GROUP BY has_BCGSC_HiSeq_RNASeq;
-                SELECT DISTINCT has_UNC_GA_RNASeq, COUNT(1) as count FROM metadata_samples GROUP BY has_UNC_GA_RNASeq;
-                SELECT DISTINCT new_tumor_event_after_initial_treatment, COUNT(1) as count FROM metadata_samples GROUP BY new_tumor_event_after_initial_treatment;
-                SELECT DISTINCT has_450k, COUNT(1) as count FROM metadata_samples GROUP BY has_450k;
-                SELECT DISTINCT SampleTypeCode, COUNT(1) as count FROM metadata_samples GROUP BY SampleTypeCode;
-
+                SELECT DISTINCT bmi FROM metadata_samples;
+                SELECT DISTINCT gender FROM metadata_samples;
+                SELECT DISTINCT vital_status FROM metadata_samples;
+                SELECT DISTINCT residual_tumor FROM metadata_samples;
+                SELECT DISTINCT person_neoplasm_cancer_status FROM metadata_samples;
+                SELECT DISTINCT age_at_initial_pathologic_diagnosis FROM metadata_samples;
+                SELECT DISTINCT icd_o_3_histology FROM metadata_samples;
+                SELECT DISTINCT histological_type FROM metadata_samples;
+                SELECT DISTINCT Project FROM metadata_samples;
+                SELECT DISTINCT pathologic_stage FROM metadata_samples;
+                SELECT DISTINCT Study FROM metadata_samples;
+                SELECT DISTINCT tumor_type FROM metadata_samples;
+                SELECT DISTINCT hpv_status FROM metadata_samples;
+                SELECT DISTINCT icd_o_3_site FROM metadata_samples;
+                SELECT DISTINCT tobacco_smoking_history FROM metadata_samples;
+                SELECT DISTINCT icd_10 FROM metadata_samples;
+                SELECT DISTINCT tumor_tissue_site FROM metadata_samples;
+                SELECT DISTINCT neoplasm_histologic_grade FROM metadata_samples;
+                SELECT DISTINCT new_tumor_event_after_initial_treatment FROM metadata_samples;
+                SELECT DISTINCT SampleTypeCode FROM metadata_samples;
+                SELECT DISTINCT has_Illumina_DNASeq FROM metadata_samples;
+                SELECT DISTINCT has_BCGSC_HiSeq_RNASeq FROM metadata_samples;
+                SELECT DISTINCT has_UNC_HiSeq_RNASeq FROM metadata_samples;
+                SELECT DISTINCT has_BCGSC_GA_RNASeq FROM metadata_samples;
+                SELECT DISTINCT has_UNC_GA_RNASeq FROM metadata_samples;
+                SELECT DISTINCT has_HiSeq_miRnaSeq FROM metadata_samples;
+                SELECT DISTINCT has_GA_miRNASeq FROM metadata_samples;
+                SELECT DISTINCT has_RPPA FROM metadata_samples;
+                SELECT DISTINCT has_SNP6 FROM metadata_samples;
+                SELECT DISTINCT has_27k FROM metadata_samples;
+                SELECT DISTINCT has_450k FROM metadata_samples;
             END"""
 
-        cursor.execute(raw_counts_sproc_def)
+        cursor.execute(metadata_vals_sproc_def)
 
     except Exception as e:
         print e
