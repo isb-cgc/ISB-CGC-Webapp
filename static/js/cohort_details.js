@@ -209,12 +209,12 @@ require([
 
         update_displays_thread = setTimeout(function(){
             search_helper_obj.update_counts_parsets(base_url, 'metadata_counts_platform_list', cohort_id, 'v2').then(
-                function(){!withoutCheckChanges && check_changes();}
+                function(){!withoutCheckChanges && check_for_changes();}
             );
         },SUBSEQUENT_DELAY);
     };
 
-    var filter_change_callback = function() {
+    var filter_change_callback = function(e,data) {
         var $this = $(this);
 
         var token = null;
@@ -286,7 +286,7 @@ require([
                         }
                     });
 
-                    update_displays(true);
+                    (!data || !data.without_update) && update_displays(true);
                     return false;
                 });
             } else {        // indv-selex
@@ -386,7 +386,7 @@ require([
                 $('.selected-filters .panel-body').append($this.data('select-filters-item'));
                 $('#create-cohort-form .form-control-static').append($this.data('create-cohort-form-item'));
 
-                $('a.delete-x').on('click', function () {
+                $('a.delete-x').on('click', function(e,data) {
                     var checked_box = $('div[data-feature-id="' + $(this).parent('span').data('feature-id')
                         + '"] input[type="checkbox"][data-value-name="' + $(this).parent('span').data('value-name') + '"]');
 
@@ -405,7 +405,7 @@ require([
                         }
                     });
 
-                    update_displays(true);
+                    (!data || !data.without_update) && update_displays(true);
                     return false;
                 });
             } else { // Checkbox unchecked
@@ -422,10 +422,14 @@ require([
                 }
             }
         }
-        update_displays();
+        if(!data || !data.without_update) {
+            update_displays();
+        }
     };
 
-    $('.search-checkbox-list input[type="checkbox"]').on('change', filter_change_callback);
+    $('.search-checkbox-list input[type="checkbox"]').on('change', function(e,data){
+            filter_change_callback(e, data);
+    });
 
     $('.filter-input').autocomplete({
         source: attr_list,
@@ -633,8 +637,8 @@ require([
     // Disable save changes if no change to title or no added filters
     var save_changes_btn_modal = $('#apply-edits-form input[type="submit"]');
     var save_changes_btn = $('button[data-target="#apply-filters-modal"]');
-    var check_changes = function() {
-        if ($('#edit-cohort-name').val() != original_title || $('.selected-filters span').length > 0) {
+    var check_for_changes = function() {
+        if ($('#edit-cohort-name').val() !== original_title || $('.selected-filters span').length > 0) {
             save_changes_btn.prop('disabled', false)
             save_changes_btn_modal.prop('disabled',false);
         } else {
@@ -644,22 +648,32 @@ require([
     };
 
 
-    // If this is a new cohort, set TCGA Project selected as default
-    if (window.location.pathname.indexOf('new_cohort') >= 0
-        || window.location.pathname.match(/cohorts\/workbook\/\d+\/worksheet\/\d+\/create/i) !== null
-    ) {
+    // If we received counting data, display it
+    if(metadata_counts !== null && metadata_counts !== "") {
+        search_helper_obj.update_counts_parsets_direct();
+        metadata_counts = null;
+
+        // If this data was filtered, check those filters
+
+        if(metadata_filters !== null && metadata_filters !== "") {
+            $.each(metadata_filters,function(filter_cat){
+                $.each(metadata_filters[filter_cat], function(i, filter_val){
+                    if($('a[href="#collapse-'+filter_cat.split(':')[1]+'"]').attr('aria-expanded') !== 'true') {
+                        $('a[href="#collapse-'+filter_cat.split(':')[1]+'"]').trigger('click');
+                    }
+                    $('div[data-feature-id="'+filter_cat+'"]').find('input[type="checkbox"][data-value-name="'+filter_val+'"]').attr('checked',true);
+                    $('div[data-feature-id="'+filter_cat+'"]').find('input[type="checkbox"][data-value-name="'+filter_val+'"]').trigger('change',{without_update: true});
+                });
+
+            });
+        }
+    } else {
+        // otherwise, induce some by checking TCGA
         $('a[href="#collapse-Project"]').trigger('click');
         $('input[type="checkbox"][data-value-name="TCGA"]').trigger('click');
-    } else {
-        // If there's data passed in from the template, use it and drop it
-        if(metadata_counts !== null && metadata_counts !== "") {
-            search_helper_obj.update_counts_parsets_direct();
-            metadata_counts = null;
-        } else {
-            update_displays(true);
-        }
     }
-    
+
+
     // onClick: Shared With button 
     $('#shared-with-btn').on('click', function(e){
         var target = $(this).data('target');
@@ -706,7 +720,7 @@ require([
     save_changes_btn_modal.prop('disabled', true);
 
     $('#edit-cohort-name').keyup(function() {
-        check_changes();
+        check_for_changes();
     });
 
     // Disable Duplicate Cohort button once clicked
@@ -726,12 +740,6 @@ require([
         $('#molecular-filter-alert').show();
         firstSelect = false;
     });
-
-    var mapped_molecular_categories = {};
-    molecular_attr.categories.map(function(cat){
-        mapped_molecular_categories[cat.value] = cat;
-    });
-
 
     $('#mutation-category').on('change',filter_change_callback);
 });
