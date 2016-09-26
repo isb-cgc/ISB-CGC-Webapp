@@ -28,8 +28,8 @@ fi
 echo "Applying SQL Table File... (may take a while)"
 mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/metadata_featdef_tables.sql
 
-echo "Adding Stored Procedures..."
-python ${HOMEROOT}/scripts/sproc_setup.py
+echo "Adding Stored Procedures/Views and making table alterations.."
+python ${HOMEROOT}/scripts/database_catchup_scripts.py
 
 echo "Adding New Table Views..."
 python ${HOMEROOT}/scripts/userdata_bootstrap.py
