@@ -124,6 +124,9 @@ def main():
 
         cursor.execute(metadata_samples_shortlist_view_def)
 
+        # Until we have a new sql dump, we need to manually update changed columns
+        cursor.execute("UPDATE metadata_attr SET attribute='BMI' WHERE attribute='bmi';")
+
     except Exception as e:
         print e
         print traceback.format_exc()
