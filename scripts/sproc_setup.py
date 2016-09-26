@@ -50,12 +50,10 @@ def main():
 
         metadata_vals_sproc_def = """CREATE PROCEDURE `get_metadata_values`()
             BEGIN
-                SELECT DISTINCT bmi FROM metadata_samples;
                 SELECT DISTINCT gender FROM metadata_samples;
                 SELECT DISTINCT vital_status FROM metadata_samples;
                 SELECT DISTINCT residual_tumor FROM metadata_samples;
                 SELECT DISTINCT person_neoplasm_cancer_status FROM metadata_samples;
-                SELECT DISTINCT age_at_initial_pathologic_diagnosis FROM metadata_samples;
                 SELECT DISTINCT icd_o_3_histology FROM metadata_samples;
                 SELECT DISTINCT histological_type FROM metadata_samples;
                 SELECT DISTINCT Project FROM metadata_samples;
@@ -84,6 +82,50 @@ def main():
             END"""
 
         cursor.execute(metadata_vals_sproc_def)
+
+        metadata_samples_shortlist_view_def = """
+            CREATE VIEW metadata_samples_shortlist AS
+                SELECT
+                    SampleBarcode,
+                    ParticipantBarcode,
+                    age_at_initial_pathologic_diagnosis,
+                    BMI,
+                    Study,
+                    gender,
+                    has_27k,
+                    has_450k,
+                    has_BCGSC_GA_RNASeq,
+                    has_BCGSC_HiSeq_RNASeq,
+                    has_GA_miRNASeq,
+                    has_HiSeq_miRnaSeq,
+                    has_Illumina_DNASeq,
+                    has_RPPA,
+                    has_SNP6,
+                    has_UNC_GA_RNASeq,
+                    has_UNC_HiSeq_RNASeq,
+                    histological_type,
+                    hpv_status,
+                    icd_10,
+                    icd_o_3_histology,
+                    icd_o_3_site,
+                    neoplasm_histologic_grade,
+                    new_tumor_event_after_initial_treatment,
+                    pathologic_stage,
+                    person_neoplasm_cancer_status,
+                    Project,
+                    residual_tumor,
+                    SampleTypeCode,
+                    tobacco_smoking_history,
+                    tumor_tissue_site,
+                    tumor_type,
+                    vital_status
+                FROM metadata_samples;
+        """
+
+        cursor.execute(metadata_samples_shortlist_view_def)
+
+        # Until we have a new sql dump, we need to manually update changed columns
+        cursor.execute("UPDATE metadata_attr SET attribute='BMI' WHERE attribute='bmi';")
 
     except Exception as e:
         print e
