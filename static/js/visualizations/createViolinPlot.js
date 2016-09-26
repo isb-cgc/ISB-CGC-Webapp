@@ -160,7 +160,7 @@ function($, d3, vizhelpers) {
                     if (d != null) {
                         if (colorBy == 'cohort') {
 
-                            if (d.isArray()) {
+                            if (Array.isArray(d)) {
                                 var cohort_name_label = "";
                                 for (var i = 0; i < d.length; i++) {
                                     for (var j = 0; j < cohort_set.length; j++) {
