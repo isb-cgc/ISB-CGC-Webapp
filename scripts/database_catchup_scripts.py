@@ -88,7 +88,10 @@ def main():
                     DECLARE done INT DEFAULT FALSE;
                     DECLARE col VARCHAR(128);
                     DECLARE attr_cur CURSOR FOR SELECT attribute FROM metadata_shortlist WHERE NOT(code='N');
-                    DECLARE CONTINUE HANDLER FOR 1329 SET done = TRUE;
+                    DECLARE CONTINUE HANDLER FOR NOT FOUND
+                    BEGIN
+                      SET done = TRUE;
+                    END;
 
                     OPEN attr_cur;
 
