@@ -62,7 +62,7 @@ def main():
             set_metadata_shortlist_def = """
                 UPDATE metadata_attr
                 SET shortlist=1
-                WHERE name IN ('age_at_initial_pathologic_diagnosis','BMI','Study','gender','has_27k','has_450k',
+                WHERE attribute IN ('age_at_initial_pathologic_diagnosis','BMI','Study','gender','has_27k','has_450k',
                   'has_BCGSC_GA_RNASeq','has_BCGSC_HiSeq_RNASeq','has_GA_miRNASeq','has_HiSeq_miRnaSeq',
                   'has_Illumina_DNASeq','has_RPPA','has_SNP6','has_UNC_GA_RNASeq','has_UNC_HiSeq_RNASeq',
                   'histological_type','hpv_status','icd_10','icd_o_3_histology','icd_o_3_site','neoplasm_histologic_grade',
@@ -87,8 +87,8 @@ def main():
                 BEGIN
                     DECLARE done INT DEFAULT FALSE;
                     DECLARE col VARCHAR(128);
-                    DECLARE attr_cur CURSOR FOR SELECT * FROM metadata_shortlist WHERE NOT(code='N');
-                    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+                    DECLARE attr_cur CURSOR FOR SELECT attribute FROM metadata_shortlist WHERE NOT(code='N');
+                    DECLARE CONTINUE HANDLER FOR 1329 SET done = TRUE;
 
                     OPEN attr_cur;
 
@@ -113,15 +113,15 @@ def main():
         # *** THIS SHOULD BE RERUN ANY TIME AN ATTRIBUTE IS ADDED OR REMOVED FROM THE SHORTLIST ***
         metadata_samples_shortlist_view_def = """
             CREATE OR REPLACE VIEW metadata_samples_shortlist AS
-                SELECT %s FROM metadata_samples;
+                SELECT SampleBarcode,ParticipantBarcode%s FROM metadata_samples;
         """
 
-        cursor.execute("SELECT attribute FROM metadata_attributes WHERE shortlist=1;")
-        view_cols = ""
+        cursor.execute("SELECT attribute FROM metadata_attr WHERE shortlist=1;")
+        view_cols = ''
         for row in cursor.fetchall():
-            view_cols += row[0]+','
+            view_cols += ','+row[0]
 
-        cursor.execute(metadata_samples_shortlist_view_def % view_cols[:-1])
+        cursor.execute(metadata_samples_shortlist_view_def % view_cols)
 
         # Until we have a new sql dump, we need to manually update changed columns
         cursor.execute("UPDATE metadata_attr SET attribute='BMI' WHERE attribute='bmi';")

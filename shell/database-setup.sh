@@ -21,12 +21,17 @@ echo "Creating Django User for MySQL database..."
 mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -e "GRANT SELECT, INSERT, UPDATE, DELETE ON $DATABASE_NAME.* TO \"django\"@\"localhost\" IDENTIFIED BY \"PASSWORD\""
 
 # This is legacy code until these tables can be refactored out of the system
-if [ ! -f ${HOMEROOT}/scripts/metadata_featdef_tables.sql ]; then
-echo "Downloading SQL Table File..."
-wget -q https://storage.googleapis.com/sql-table-dumps/dev_test_dump_08_17_2016.sql -O ${HOMEROOT}/scripts/metadata_featdef_tables.sql
+if [ ! -f ${HOMEROOT}/user_data_dump.sql ]; then
+    if [ ! -f ${HOMEROOT}/scripts/metadata_featdef_tables.sql ]; then
+        echo "Downloading SQL Table File..."
+        wget -q https://storage.googleapis.com/sql-table-dumps/dev_test_dump_08_17_2016.sql -O ${HOMEROOT}/scripts/metadata_featdef_tables.sql
+    fi
+    echo "Applying SQL Table File... (may take a while)"
+    mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/metadata_featdef_tables.sql
+else
+    echo "Applying User Data SQL Table File... (may take a while)"
+    mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/user_data_dump.sql
 fi
-echo "Applying SQL Table File... (may take a while)"
-mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/metadata_featdef_tables.sql
 
 echo "Adding Stored Procedures/Views and making table alterations.."
 python ${HOMEROOT}/scripts/database_catchup_scripts.py
