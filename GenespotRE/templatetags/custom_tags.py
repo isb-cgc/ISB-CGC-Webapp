@@ -54,7 +54,7 @@ DATA_ATTR_DICTIONARY = {
 }
 
 ATTR_SPECIFIC_ORDERS = {
-    'bmi': ['underweight', 'normal weight', 'overweight', 'obese', 'None', ],
+    'BMI': ['underweight', 'normal weight', 'overweight', 'obese', 'None', ],
     'hpv_status': ['Positive', 'Negative', 'None', ],
     'age_at_initial_pathologic_diagnosis': ['10 to 39', '40 to 49', '50 to 59', '60 to 69', '70 to 79', 'Over 80', 'None', ],
     'pathologic_stage': ['Stage 0','Stage I','Stage IA','Stage IB','Stage II','Stage IIA','Stage IIB','Stage IIC',
@@ -70,7 +70,7 @@ NOT_CAPWORDS = [
     'DNA_sequencing',
     'RNA_sequencing',
     'DNA_methylation',
-    'bmi',
+    'BMI',
 ]
 
 ALPHANUM_SORT = [
@@ -81,7 +81,7 @@ ALPHANUM_SORT = [
 ]
 
 ATTR_SPECIFIC_TRANSLATION = {
-    'bmi': {
+    'BMI': {
         'underweight': 'Underweight: BMI less than 18.5',
         'normal weight': 'Normal weight: BMI is 18.5 - 24.9',
         'overweight': 'Overweight: BMI is 25 - 29.9',
@@ -165,7 +165,7 @@ TRANSLATION_DICTIONARY = {
 FEATURE_DISPLAY_NAMES = {
     'Project': 'Project',
     'Study': 'Study',
-    'bmi': 'BMI',
+    'BMI': 'BMI',
     'miRNA_sequencing': 'miRNA Sequencing',
     'DNA_methylation': 'DNA Methylation',
     'RNA_sequencing': 'RNA Sequencing',

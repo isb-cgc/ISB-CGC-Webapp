@@ -49,7 +49,7 @@ function($, d3, d3tip, helpers) {
             var hist_data = d3.layout.histogram()
                 .bins(num_bins)
                 .frequency(false)(values_only);
-            var kde = science.stats.kde().sample(values_only);
+            // var kde = science.stats.kde().sample(values_only);
             var tmp = helpers.get_min_max(raw_Data, x_attr);
             min_n = tmp[0];
             max_n = tmp[1];
@@ -145,23 +145,23 @@ function($, d3, d3tip, helpers) {
                 .on('mouseover.tip', tip.show)
                 .on('mouseout.tip', tip.hide);
 
-            var line = d3.svg.line()
-                .x(function (d) {
-                    return x(d[0]);
-                })
-                .y(function (d) {
-                    return y(d[1]);
-                });
-
-            plot_area.append('path')
-                .data(d3.values(science.stats.bandwidth))
-                .attr('class', 'line')
-                .attr('stroke', 'red')
-                .attr('fill', 'none')
-                .attr('d', function (f) {
-                    return line(kde.bandwidth(f)(d3.range(min_n, max_n, 0.1)));
-                })
-                .attr('transform', 'translate(' + 0 + ',' + margin.top + ')');
+            // var line = d3.svg.line()
+            //     .x(function (d) {
+            //         return x(d[0]);
+            //     })
+            //     .y(function (d) {
+            //         return y(d[1]);
+            //     });
+            //
+            // plot_area.append('path')
+            //     .data(d3.values(science.stats.bandwidth))
+            //     .attr('class', 'line')
+            //     .attr('stroke', 'red')
+            //     .attr('fill', 'none')
+            //     .attr('d', function (f) {
+            //         return line(kde.bandwidth(f)(d3.range(min_n, max_n, 0.1)));
+            //     })
+            //     .attr('transform', 'translate(' + 0 + ',' + margin.top + ')');
 
             // Highlight the selected rectangles.
             var brushmove = function (p) {
