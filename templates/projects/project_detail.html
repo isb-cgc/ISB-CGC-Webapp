@@ -38,7 +38,7 @@
         {% if project.is_public %}
         <li><em>Public Project</em></li>
         {% else %}
-        <li role="menuitem"><button class="btn btn-link" data-toggle="modal" data-target="#share-project-modal">Shared with ({{ project.shared.count }})</button></li>
+        <li role="menuitem"><button class="btn btn-link" data-toggle="modal" data-target="#share-project-modal">Shared with (<span class="share-count">{{ project.shared.count }}</span>)</button></li>
         {% endif %}
     </ul>
 </div>
@@ -94,6 +94,13 @@
     </div>
 
     {% include "projects/project_modals.html" %}
+
+    <script type="text/javascript">
+{#    var base_api_url            = '{{ BASE_API_URL|safe }}';#}
+    var base_url                = '{{ BASE_URL|safe }}';
+{#    var display_worksheet_id    = '{{ display_worksheet.id|safe }}';#}
+{#    var workbook_id             = '{{ workbook.id }}';#}
+</script>
 {% endblock %}
 
 {% block js_file %}{% static 'js/project_details.js' %}{% endblock %}
