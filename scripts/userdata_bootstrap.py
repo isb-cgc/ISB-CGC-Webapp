@@ -54,25 +54,13 @@ def create_study_views(project, source_table, studies):
 
     study_names = {}
 
-    view_check_sql = "SELECT COUNT(TABLE_NAME) FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = %s;"
-    create_view_sql = "CREATE VIEW %s AS SELECT * FROM %s"
+    create_view_sql = "CREATE OR REPLACE VIEW %s AS SELECT * FROM %s"
     where_proj = " WHERE Project=%s"
     where_study = " AND Study=%s;"
 
     try:
         for study in studies:
             view_name = "%s_%s_%s" % (project, study, source_table,)
-            cursor.execute(view_check_sql, (view_name,))
-
-            # Drop any pre-existing view definition under this name
-            if cursor.fetchall()[0][0] > 0:
-                print >> sys.stdout, "[WARNING] Found pre-existing view '"+view_name+"', attempting to remove it..."
-                cursor.execute("DROP VIEW %s;" % view_name)
-                # Double-check...
-                cursor.execute(view_check_sql, (view_name,))
-                # If it's still there, there's a problem
-                if cursor.fetchall()[0][0] > 0:
-                    raise Exception("Unable to drop pre-existing view '"+view_name+"'!")
 
             # If project and study are the same we assume this is meant to
             # be a one-study project
@@ -113,7 +101,10 @@ def create_study_views(project, source_table, studies):
 
 def bootstrap_metadata_attr_mapping():
 
-    print >> sys.stdout, "Building attribute mapping table..."
+    db = get_mysql_connection()
+    cursor = db.cursor()
+
+    table_check_sql = "SELECT COUNT(TABLE_NAME) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = %s;"
 
     make_mapping_table = """
       CREATE TABLE metadata_attr_map (
@@ -137,30 +128,36 @@ def bootstrap_metadata_attr_mapping():
         ('histological_type', 'metaplastic_carcinoma', 'Metaplastic Carcinoma',),
     ]
 
-    db = get_mysql_connection()
-    cursor = db.cursor()
-
     try:
-        cursor.execute(make_mapping_table)
-        db.commit()
 
-        for map in value_maps:
-            cursor.execute(insert_mapping_vals,map)
+        cursor.execute(table_check_sql, ('metadata_attr_map',))
 
-        db.commit()
+        found_map_table = (cursor.fetchall()[0][0] <= 0)
 
-        cursor.execute(test_map_creation)
-
-        entries = 0
-
-        for row in cursor.fetchall():
-            entries += 1
-
-        if entries <= 0:
-            raise Exception("metadata_attr mapping not successfully generated!")
+        if found_map_table:
+            print >> sys.stdout, "[STATUS] metadata_attr_map table found."
         else:
-            print >> sys.stdout, "metadata_attr mapping table successfully generated."
+            print >> sys.stdout, "Building attribute mapping table..."
 
+            cursor.execute(make_mapping_table)
+            db.commit()
+
+            for map in value_maps:
+                cursor.execute(insert_mapping_vals,map)
+
+            db.commit()
+
+            cursor.execute(test_map_creation)
+
+            entries = 0
+
+            for row in cursor.fetchall():
+                entries += 1
+
+            if entries <= 0:
+                raise Exception("metadata_attr mapping not successfully generated!")
+            else:
+                print >> sys.stdout, "metadata_attr mapping table successfully generated."
 
     except Exception as e:
         print >> sys.stderr, e

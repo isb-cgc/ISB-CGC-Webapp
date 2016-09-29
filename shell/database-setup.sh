@@ -20,7 +20,10 @@ python ${HOMEROOT}/manage.py migrate --noinput
 echo "Creating Django User for MySQL database..."
 mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -e "GRANT SELECT, INSERT, UPDATE, DELETE ON $DATABASE_NAME.* TO \"django\"@\"localhost\" IDENTIFIED BY \"PASSWORD\""
 
-# This is legacy code until these tables can be refactored out of the system
+# Load your SQL table file
+# Looks for user_data_dump.sql; if that isn't available, looks for metadata_featdef_tables.sql
+# If metadata_featdef_tables.sql isn't found, it downloads a file from sql-table-dumps/ and saves it
+# as metadata_featdef_tables.sql for future use
 if [ ! -f ${HOMEROOT}/user_data_dump.sql ]; then
     if [ ! -f ${HOMEROOT}/scripts/metadata_featdef_tables.sql ]; then
         echo "Downloading SQL Table File..."

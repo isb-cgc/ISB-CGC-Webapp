@@ -69,8 +69,8 @@ define([
         var svg = d3.select(plot_selector)
             .append('svg')
             .attr('width', width + 10)
-            .attr('height', height);
-        var bar_width = 20;
+            .attr('height', 650);
+        var bar_width = 25;
         var plot = bar_graph_obj.createBarGraph(
             svg,
             data,

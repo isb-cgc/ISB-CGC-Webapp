@@ -113,7 +113,8 @@ def main():
 
         # The primary view used by the WebApp to obtain data for counting and display, so we're not constantly
         # dealing with all of metadata_samples
-        # *** THIS SHOULD BE RERUN ANY TIME AN ATTRIBUTE IS ADDED OR REMOVED FROM THE SHORTLIST ***
+        # *** THIS MUST BE RERUN ANY TIME AN ATTRIBUTE IS ADDED OR REMOVED FROM THE SHORTLIST ***
+        # *** OR THE SHORTLIST WILL NO LONGER BE ACCURATE ***
         metadata_samples_shortlist_view_def = """
             CREATE OR REPLACE VIEW metadata_samples_shortlist AS
                 SELECT SampleBarcode,ParticipantBarcode%s FROM metadata_samples;

@@ -3,7 +3,7 @@
   overflow: hidden
   margin: 0 -10px -5px -10px
 
-  .axis-label
+  .axis-label, .axis-label-container div
     font-weight: 500
     font-size: 1.1em
 
@@ -14,11 +14,18 @@
         text-overflow: ellipsis
         padding: 5px 5px 5px 5px
         line-height: 1.25
+        &.truncated-single
+          white-space: nowrap
+          text-align: end
+    .x-label-container
+      div
+        text-align: center
 
   .panel.plot
     box-shadow: none
     margin: 0
-    overflow-y: scroll
+    overflow-y: auto
+    overflow-x: hidden
 
   .fly-out
     position: absolute
