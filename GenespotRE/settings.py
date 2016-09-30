@@ -47,8 +47,7 @@ MANAGERS                = ADMINS
 REQUEST_PROJECT_EMAIL   = os.environ.get('REQUEST_PROJECT_EMAIL', 'request@example.com')
 
 PROJECT_ID              = os.environ.get('GCLOUD_PROJECT_ID', '')
-BQ_PROJECT_ID           = os.environ.get('BIGQUERY_PROJECT_ID', PROJECT_ID)
-IGV_PROJECT_ID          = os.environ.get('IGV_PROJECT_ID', '') # Not being used
+BQ_PROJECT_ID           = os.environ.get('BIGQUERY_PROJECT_ID', PROJECT_ID) # Replace with PROJECT_ID
 
 # Deployment module
 CRON_MODULE             = os.environ.get('CRON_MODULE')
@@ -363,7 +362,6 @@ INSTALLED_APP_CLIENT_ID         = os.environ.get('INSTALLED_APP_CLIENT_ID', '') 
 #################################
 
 LOGIN_EXPIRATION_HOURS = 24
-FAKE_DBGAP_AUTHENTICATION_LIST_FILENAME = os.environ.get('FAKE_DBGAP_AUTHENTICATION_LIST_FILENAME', '') # This should be removed in favour of putting the change in .env files
 DBGAP_AUTHENTICATION_LIST_FILENAME      = os.environ.get('DBGAP_AUTHENTICATION_LIST_FILENAME', '')
 DBGAP_AUTHENTICATION_LIST_BUCKET        = os.environ.get('DBGAP_AUTHENTICATION_LIST_BUCKET', '')
 ACL_GOOGLE_GROUP                        = os.environ.get('ACL_GOOGLE_GROUP', '')
@@ -371,7 +369,6 @@ OPEN_ACL_GOOGLE_GROUP                   = os.environ.get('OPEN_ACL_GOOGLE_GROUP'
 GOOGLE_GROUP_ADMIN                      = os.environ.get('GOOGLE_GROUP_ADMIN', '')
 SUPERADMIN_FOR_REPORTS                  = os.environ.get('SUPERADMIN_FOR_REPORTS', '')
 ERA_LOGIN_URL                           = os.environ.get('ERA_LOGIN_URL', '')
-IPV4                                    = os.environ.get('IPV4', '')
 SAML_FOLDER                             = os.environ.get('SAML_FOLDER')
 
 # TaskQueue used when users go through the ERA flow
