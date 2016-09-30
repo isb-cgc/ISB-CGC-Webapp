@@ -51,7 +51,7 @@ define([
                     mean += parseFloat(d[i]);
                 }
                 mean /= d.length;
-                return '<span>Mean: ' + mean.toFixed(2) + '</span><br/><span>%: ' + (d.y * 100).toFixed(2) + '%</span>';
+                return '<span>Mean: ' + mean.toFixed(2) + '</span><br /><span>' + (d.y * 100).toFixed(2) + '%</span>';
             });
 
     function generate_axis_label(attr, isLogTransform, units) {
@@ -401,8 +401,6 @@ define([
 
             //establish resize call to data
             d3.select(window).on('resize', visualization.plot.resize);
-
-            $('.plot-div').height($('.plot-div').height()+($('.worksheet-panel-body').height()-$(args.legend_selector).outerHeight()-$('.plot-div').outerHeight()));
 
         }
         else if (args.type == "SeqPeek") {

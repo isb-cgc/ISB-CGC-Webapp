@@ -26,8 +26,10 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
         .direction('n')
         .offset([0, 0])
         .html(function(d) {
-            return d.count;
+            return d.value+': '+d.count;
         });
+
+    var selex_active = false;
 
     return {
 
@@ -72,9 +74,11 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                 .tickSize(-width + margin.right + margin.left, 0, 0);
 
             var zoomer = function() {
-                svg.select('.x.axis').attr('transform', 'translate(' + (d3.event.translate[0]+margin.left) + ',' + (height - margin.bottom) + ')').call(xAxis);
-                svg.selectAll('.x.axis text').style('text-anchor', 'end').attr('transform', 'translate(' + -15 + ',' + 10 + ') rotate(-90)');
-                plot_area.selectAll('.plot-bar').attr('transform', 'translate(' + d3.event.translate[0] + ',0)');
+                if(!selex_active) {
+                    svg.select('.x.axis').attr('transform', 'translate(' + (d3.event.translate[0] + margin.left) + ',' + (height - margin.bottom) + ')').call(xAxis);
+                    svg.selectAll('.x.axis text').style('text-anchor', 'end').attr('transform', 'translate(' + -15 + ',' + 10 + ') rotate(-90)');
+                    plot_area.selectAll('.plot-bar').attr('transform', 'translate(' + d3.event.translate[0] + ',0)');
+                }
             };
 
             var x2 = d3.scale.linear()
@@ -218,8 +222,10 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                 .text('Number of Samples');
 
             var check_selection_state = function(obj) {
-                if (obj) {
 
+                selex_active = !!obj;
+
+                if (obj) {
                     if (svg.select('.brush').empty()) {
                         // Append new brush event listeners to plot area only
                         plot_area.append('g')

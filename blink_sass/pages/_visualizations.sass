@@ -4,14 +4,13 @@
 
 .worksheet-panel-body
 
-  .axis-label
+  .axis-label, .axis-label-container div
     font-weight: 500
     font-size: 1.1em
 
   .plot-div
     overflow-x: hidden
     overflow-y: auto
-    padding-right: 25px
     foreignObject
       div
         overflow: hidden
@@ -19,6 +18,12 @@
         padding: 5px 5px 5px 5px
         line-height: 1.25
         max-height: 100%
+        &.truncated-single
+          white-space: nowrap
+          text-align: end
+    .x-label-container
+      div
+        text-align: center
 
     .axis path, .axis line
         fill: none

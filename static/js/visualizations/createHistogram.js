@@ -35,6 +35,8 @@ function($, d3, d3tip, helpers) {
     // do it here
     var histoTip = null;
 
+    var selex_active = false;
+
     return {
         createHistogramPlot : function (svg_param, raw_Data, values_only, width_param, height_param, x_attr, xLabel, tip, margin_param, legend) {
 
@@ -75,10 +77,12 @@ function($, d3, d3tip, helpers) {
                 .tickSize(-width + margin.right + margin.left, 0, 0);
 
             var zoomer = function () {
-                svg.select('.x.axis').call(xAxis);
-                svg.select('.y.axis').call(yAxis);
-                plot_area.selectAll('.plot-bar').attr('transform', 'translate(' + d3.event.translate[0] + ',' + d3.event.translate[1] + ')scale(' + d3.event.scale + ',' + d3.event.scale + ')');
-                plot_area.selectAll('path.line').attr('transform', 'translate(' + d3.event.translate[0] + ',' + d3.event.translate[1] + ')scale(' + d3.event.scale + ',' + d3.event.scale + ')');
+                if(!selex_active) {
+                    svg.select('.x.axis').call(xAxis);
+                    svg.select('.y.axis').call(yAxis);
+                    plot_area.selectAll('.plot-bar').attr('transform', 'translate(' + d3.event.translate[0] + ',' + d3.event.translate[1] + ')scale(' + d3.event.scale + ',' + d3.event.scale + ')');
+                    plot_area.selectAll('path.line').attr('transform', 'translate(' + d3.event.translate[0] + ',' + d3.event.translate[1] + ')scale(' + d3.event.scale + ',' + d3.event.scale + ')');
+                }
             };
 
             var zoom = d3.behavior.zoom()
@@ -86,12 +90,7 @@ function($, d3, d3tip, helpers) {
                 .y(y)
                 .on('zoom', zoomer);
 
-            zoom_area = svg.append('g')
-                .attr('class', 'zoom_area')
-                .append('rect')
-                .attr('width', width)
-                .attr('height', height)
-                .style('opacity', '0');
+            svg.call(zoom);
 
             var sorted = raw_Data.sort(function (a, b) {
                 if (a[x_attr] > b[x_attr]) {
@@ -230,10 +229,8 @@ function($, d3, d3tip, helpers) {
                 .text('Percentage of Samples in Grouping');
 
             function check_selection_state(isActive) {
+                selex_active = isActive;
                 if (isActive) {
-                    // Remove zoom area
-                    svg.selectAll('.zoom_area').remove();
-
                     // Append new brush event listeners to plot area only
                     plot_area.append('g')
                         .attr('class', 'brush')
@@ -252,19 +249,6 @@ function($, d3, d3tip, helpers) {
                     // Remove brush event listener plot area
                     plot_area.selectAll('.brush').remove();
 
-                    // Append new zoom area
-                    zoom_area = svg.append('g')
-                        .attr('class', 'zoom_area')
-
-                    zoom_rect = zoom_area.append('rect')
-                        .attr('width', width)
-                        .attr('height', height)
-                        .style('opacity', 0);
-
-                    // Register zoom event listeners
-                    zoom.on('zoom', zoomer);
-                    zoom_area.call(zoom)
-                        .on('.zoom', zoomer);
                 }
             };
 

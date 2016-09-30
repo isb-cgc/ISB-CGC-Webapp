@@ -20,7 +20,7 @@
     <div class="panel-heading">
         <div class="options-bar">
             {% if workbook.owner.id == user.id %}
-            <a role="button" aria-label="Toggle Sample Selection"><i class="fa fa-crosshairs"></i> Enable Sample Selection</a>
+            <a role="button" class="toggle-selection" aria-label="Toggle Sample Selection"><i class="fa fa-crosshairs"></i> Enable Sample Selection</a>
             <br />
             <a role="button" class="show-settings-flyout" data-target=".setting-flyout" aria-label="Show Plot Settings"><i class="fa fa-bar-chart"></i> Edit Analysis Settings</a>
             {% else %}
