@@ -18,7 +18,14 @@
 
 define (['jquery', 'd3', 'vizhelpers'],
 function($, d3, vizhelpers) {
+
     var helpers = Object.create(vizhelpers, {});
+    var selex_active = false;
+    var zoom_status = {
+        translation: null,
+        scale: null
+    };
+
     return {
         create_scatterplot: function(svg, data, domain, range, xLabel, yLabel, xParam, yParam, colorBy, legend, width, height, cohort_set) {
             var margin = {top: 10, bottom: 50, left: 100, right: 10};
@@ -113,9 +120,11 @@ function($, d3, vizhelpers) {
             };
 
             var zoomer = function() {
-                svg.select('.x.axis').call(xAxis);
-                svg.select('.y.axis').call(yAxis);
-                plot_area.selectAll('circle').attr('transform', transformer);
+                if(!selex_active) {
+                    svg.select('.x.axis').call(xAxis);
+                    svg.select('.y.axis').call(yAxis);
+                    plot_area.selectAll('circle').attr('transform', transformer);
+                }
             };
 
             var zoom = d3.behavior.zoom()
@@ -123,13 +132,7 @@ function($, d3, vizhelpers) {
                 .y(yScale)
                 .on('zoom', zoomer);
 
-            var zoom_area = svg.append('g')
-                .attr('class', 'zoom_area')
-                .append('rect')
-                .attr('width', width)
-                .attr('height', height)
-                .style('opacity', '0')
-                .call(zoom);
+            svg.call(zoom);
 
             plot_area.selectAll('.dot')
                 .data(data)
@@ -214,16 +217,23 @@ function($, d3, vizhelpers) {
                 });
 
             var check_selection_state = function(obj) {
-                if (obj) {
 
-                    // Remove zoom area
-                    svg.selectAll('.zoom_area').remove();
+                selex_active = !!obj;
+
+                if (obj) {
+                    zoom_status.translation = zoom.translate();
+                    zoom_status.scale = zoom.scale();
 
                     // Append new brush event listeners to plot area only
                     plot_area.append('g')
                         .attr('class', 'brush')
                         .call(brush);
                 } else {
+                    zoom_status.translation && zoom.translate(zoom_status.translation);
+                    zoom_status.scale && zoom.scale(zoom_status.scale);
+                    zoom_status.translation = null;
+                    zoom_status.scale = null;
+
                     var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                     // Clear selections
                     $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + 0);
@@ -231,18 +241,10 @@ function($, d3, vizhelpers) {
                     $('#save-cohort-'+plot_id+'-modal input[name="samples"]').attr('value', []);
                     svg.selectAll('.selected').classed('selected', false);
                     $(svg[0]).parents('.plot').find('.save-cohort-card').hide();
-
+                    // Get rid of the selection rectangle - uncomment if we want to disable selection carry-over
+                    // brush.clear();
                     // Remove brush event listener plot area
                     plot_area.selectAll('.brush').remove();
-
-                    // Append new zoom area
-                    zoom_area = svg.append('g')
-                        .attr('class', 'zoom_area')
-                        .append('rect')
-                        .attr('width', width)
-                        .attr('height', height)
-                        .style('opacity', '0')
-                        .call(zoom);
 
                 }
             };

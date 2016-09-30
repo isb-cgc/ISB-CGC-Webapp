@@ -36,6 +36,10 @@ function($, d3, d3tip, helpers) {
     var histoTip = null;
 
     var selex_active = false;
+    var zoom_status = {
+        translation: null,
+        scale: null
+    };
 
     return {
         createHistogramPlot : function (svg_param, raw_Data, values_only, width_param, height_param, x_attr, xLabel, tip, margin_param, legend) {
@@ -195,7 +199,6 @@ function($, d3, d3tip, helpers) {
 
             var brush = d3.svg.brush()
                 .x(x)
-                .on('brushstart', function(){ svg.selectAll('.extent').style("fill", "rgba(40,130,50,0.5");})
                 .on('brush', brushmove)
                 .on('brushend', brushend);
 
@@ -229,8 +232,11 @@ function($, d3, d3tip, helpers) {
                 .text('Percentage of Samples in Grouping');
 
             function check_selection_state(isActive) {
-                selex_active = isActive;
+                selex_active = !!isActive;
+
                 if (isActive) {
+                    zoom_status.translation = zoom.translate();
+                    zoom_status.scale = zoom.scale();
                     // Append new brush event listeners to plot area only
                     plot_area.append('g')
                         .attr('class', 'brush')
@@ -239,6 +245,10 @@ function($, d3, d3tip, helpers) {
                         .attr('y', 0)
                         .attr('height', height - margin.bottom);
                 } else {
+                    zoom_status.translation && zoom.translate(zoom_status.translation);
+                    zoom_status.scale && zoom.scale(zoom_status.scale);
+                    zoom_status.translation = null;
+                    zoom_status.scale = null;
                     var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                     // Clear selections
                     $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + 0);
@@ -246,9 +256,10 @@ function($, d3, d3tip, helpers) {
                     $('#save-cohort-'+plot_id+'-modal input[name="samples"]').attr('value', []);
                     svg.selectAll('.selected').classed('selected', false);
                     $(svg[0]).parents('.plot').find('.save-cohort-card').hide();
+                    // Get rid of the selection rectangle - uncomment if we want to disable selection carry-over
+                    // brush.clear();
                     // Remove brush event listener plot area
                     plot_area.selectAll('.brush').remove();
-
                 }
             };
 

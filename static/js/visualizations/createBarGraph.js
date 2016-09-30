@@ -30,6 +30,10 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
         });
 
     var selex_active = false;
+    var zoom_status = {
+        translation: null,
+        scale: null
+    };
 
     return {
 
@@ -190,7 +194,6 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
 
             var brush = d3.svg.brush()
                 .x(x2)
-                .on('brushstart', function(){ svg.selectAll('.extent').style("fill", "rgba(40,130,50,0.5");})
                 .on('brush', brushmove)
                 .on('brushend', brushend);
 
@@ -226,17 +229,18 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                 selex_active = !!obj;
 
                 if (obj) {
-                    if (svg.select('.brush').empty()) {
-                        // Append new brush event listeners to plot area only
-                        plot_area.append('g')
-                            .attr('class', 'brush')
-                            .call(brush)
-                            .selectAll('rect')
-                            .attr('y', 0)
-                            .attr('height', height - margin.bottom)
-                            .attr('transform', 'translate(0, 0)');
-                    }
+                    zoom_status.translation = zoom.translate();
+                    // Append new brush event listeners to plot area only
+                    plot_area.append('g')
+                        .attr('class', 'brush')
+                        .call(brush)
+                        .selectAll('rect')
+                        .attr('y', 0)
+                        .attr('height', height - margin.bottom)
+                        .attr('transform', 'translate(0, 0)');
                 } else {
+                    zoom_status.translation && zoom.translate(zoom_status.translation);
+                    zoom_status.translation = null;
                     var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                     // Clear selections
                     $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + 0);
@@ -244,15 +248,13 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                     $('#save-cohort-'+plot_id+'-modal input[name="samples"]').attr('value', []);
                     svg.selectAll('.selected').classed('selected', false);
                     $(svg[0]).parents('.plot').find('.save-cohort-card').hide();
-
-                    // Remove brush event listener plot area
+                    // Remove brush event listener plot area - uncomment if we want to disable selection carry-over
+                    // brush.clear();
                     plot_area.selectAll('.brush').remove();
                 }
             };
 
-            /*
-                Update the sample cohort bar update
-             */
+            //Update the sample cohort bar update
             function sample_form_update(extent, total_samples, total_patients, sample_list){
                 var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                 $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + total_samples);
