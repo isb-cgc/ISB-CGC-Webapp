@@ -241,8 +241,8 @@ function($, d3, vizhelpers) {
                     $('#save-cohort-'+plot_id+'-modal input[name="samples"]').attr('value', []);
                     svg.selectAll('.selected').classed('selected', false);
                     $(svg[0]).parents('.plot').find('.save-cohort-card').hide();
-                    // Get rid of the selection rectangle - uncomment if we want to disable selection carry-over
-                    // brush.clear();
+                    // Get rid of the selection rectangle - comment out if we want to enable selection carry-over
+                    brush.clear();
                     // Remove brush event listener plot area
                     plot_area.selectAll('.brush').remove();
 

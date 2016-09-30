@@ -248,8 +248,8 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                     $('#save-cohort-'+plot_id+'-modal input[name="samples"]').attr('value', []);
                     svg.selectAll('.selected').classed('selected', false);
                     $(svg[0]).parents('.plot').find('.save-cohort-card').hide();
-                    // Remove brush event listener plot area - uncomment if we want to disable selection carry-over
-                    // brush.clear();
+                    // Remove brush event listener plot area - comment out if we want to enable selection carry-over
+                    brush.clear();
                     plot_area.selectAll('.brush').remove();
                 }
             };
