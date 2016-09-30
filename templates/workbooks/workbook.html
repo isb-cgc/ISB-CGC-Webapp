@@ -33,9 +33,10 @@
         {# Is a public workbook #}
         <li><em>Public Workbook</em></li>
         <li class="separator"></li>
-        <li role="menuiem"><button class="btn btn-info" data-toggle="modal" data-target="#copy-workbook-modal-{{ workbook.id }}">Duplicate</button></li>
+        <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#copy-workbook-modal-{{ workbook.id }}">Duplicate</button></li>
         {% else %}
         {# Is a shared workbook #}
+        <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#copy-workbook-modal-{{ workbook.id }}">Duplicate</button></li>
         <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#remove-workbook-modal-{{ workbook.id }}">Remove</button></li>
         <li role="menuitem"><button class="btn btn-link" data-toggle="modal" data-target="#share-workbook-modal-{{ workbook.id }}">Shared with (<span class="share-count">{{ workbook.shared.all|shared_active_count }}</span>)</button></li>
         {% endif %}

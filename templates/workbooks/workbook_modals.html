@@ -45,31 +45,53 @@
     </div>
 </div>
 
-<!-- Create Worksheet modal-->
-<div class="modal fade" id="create-worksheet-modal-{{ workbook.id }}" tabindex="-1" aria-labelledby="create-worksheet-header-{{ workbook.id }}" aria-hidden="true">
+
+{% elif shared %}
+
+<!-- Remove Workbook Modal -->
+<div class="ajax-form-modal modal fade" id="remove-workbook-modal-{{ workbook.id }}" tabindex="-1" role="dialog" aria-labelledby="remove-workbook-header" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="create-worksheet-header-{{ workbook.id }}">Create New Worksheet</h4>
+                <h4 class="modal-title" id="remove-workbook-header">Remove Yourself from this Workbook?</h4>
             </div>
-            <form id="worksheet_create_form-{{ workbook.id }}" method="POST" action="{% url 'worksheet_create' workbook_id=workbook.id %}">
+            <form id="remove-workbook-{{ workbook.id }}" method="POST" action="{% url 'sharing_remove' shared.id %}" data-redirect="{% url 'workbooks' %}">
                 {% csrf_token %}
-                <div class="modal-body">
-                    <label for="create-workbook-name">Name (required)</label>
-                    <input class="form-control" type="text" id="create-workbook-name" name="name" value="New Worksheet"/>
-                    <br>
-                    <label for="create-workbook-desc">Description (optional, max length is 2000 characters)</label>
-                    <textarea class="form-control" id="create-workbook-desc" name="description" placeholder="Add a description" maxlength="2000"></textarea>
-                </div>
                 <div class="modal-footer">
-                    <input type="submit" value="Create" class="btn btn-primary" />
+                    <input type="submit" value="Remove" class="btn btn-primary" />
                     <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+{% elif workbook.shared %}
+
+    {% for shared_item in workbook.shared.all %}
+        {% if shared_item.matched_user == user %}
+        <!-- Remove Workbook Modal -->
+        <div class="ajax-form-modal modal fade" id="remove-workbook-modal-{{ workbook.id }}" tabindex="-1" role="dialog" aria-labelledby="remove-workbook-header" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="remove-workbook-header">Remove Yourself from this Workbook?</h4>
+                    </div>
+                    <form id="remove-workbook-{{ workbook.id }}" method="POST" action="{% url 'sharing_remove' shared_item.id %}" data-redirect="{% url 'workbooks' %}">
+                        {% csrf_token %}
+                        <div class="modal-footer">
+                            <input type="submit" value="Remove" class="btn btn-primary" />
+                            <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    {% endfor %}
+{% endif %}
 
 <!-- Duplicate Workbook Modal -->
 <div class="modal fade" id="copy-workbook-modal-{{ workbook.id }}" tabindex="-1" role="dialog" aria-labelledby="copy-workbook-header" aria-hidden="true">
@@ -95,27 +117,6 @@
         </div>
     </div>
 </div>
-{% elif shared %}
-
-<!-- Remove Workbook Modal -->
-<div class="ajax-form-modal modal fade" id="remove-workbook-modal-{{ workbook.id }}" tabindex="-1" role="dialog" aria-labelledby="remove-workbook-header" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="remove-workbook-header">Remove Yourself from this Workbook?</h4>
-            </div>
-            <form id="remove-workbook-{{ workbook.id }}" method="POST" action="{% url 'sharing_remove' shared.id %}" data-redirect="{% url 'workbooks' %}">
-                {% csrf_token %}
-                <div class="modal-footer">
-                    <input type="submit" value="Remove" class="btn btn-primary" />
-                    <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-{% endif %}
 
 {% if is_shareable or shared %}
 <!-- Share Workbook Modal -->

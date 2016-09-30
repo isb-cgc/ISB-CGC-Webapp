@@ -50,7 +50,9 @@
                         <select class="form-control" required id="project-selection">
                             <option value="" disabled selected hidden>-- Select Project --</option>
                             {% for project in projects %}
-                            <option value="{{ project.id }}">{{ project.name }}</option>
+                                {% if not project.is_public %}
+                                <option value="{{ project.id }}">{{ project.name }}</option>
+                                {% endif %}
                             {% endfor %}
                         </select>
                     </div>

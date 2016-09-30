@@ -45,9 +45,7 @@ import pytz
 debug = settings.DEBUG
 logger = logging.getLogger(__name__)
 DBGAP_AUTHENTICATION_LIST_BUCKET = settings.DBGAP_AUTHENTICATION_LIST_BUCKET
-FAKE_DBGAP_AUTHENTICATION_LIST_FILENAME = settings.FAKE_DBGAP_AUTHENTICATION_LIST_FILENAME
 DBGAP_AUTHENTICATION_LIST_FILENAME = settings.DBGAP_AUTHENTICATION_LIST_FILENAME
-FAKE_DBGAP_AUTHENTICATION_LIST_FILENAME = settings.FAKE_DBGAP_AUTHENTICATION_LIST_FILENAME
 ACL_GOOGLE_GROUP = settings.ACL_GOOGLE_GROUP
 login_expiration_seconds = settings.LOGIN_EXPIRATION_HOURS * 60 * 60
 COUNTDOWN_SECONDS = login_expiration_seconds + (60 * 15)
@@ -80,7 +78,7 @@ def prepare_django_request(request):
 # has a value equal to $nameid; otherwise, return False
 def check_NIH_authorization_list(nameid, storage_client):
     req = storage_client.objects().get_media(
-        bucket=DBGAP_AUTHENTICATION_LIST_BUCKET, object=FAKE_DBGAP_AUTHENTICATION_LIST_FILENAME)
+        bucket=DBGAP_AUTHENTICATION_LIST_BUCKET, object=DBGAP_AUTHENTICATION_LIST_FILENAME)
 
     rows = [row.strip() for row in req.execute().split('\n') if row.strip()]
     return csv_scanner.matching_row_exists(rows, 'login', nameid)
