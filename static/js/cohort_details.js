@@ -352,6 +352,13 @@ require([
                         'value-id': value.data('value-id'),
                         'value-name': value.data('value-name')
                     });
+                } else if (feature.data('feature-type') == 'user-data') { // User data filter
+                    token = $('<span>').data({
+                        'feature-id': feature.data('feature-id'),
+                        'feature-name': feature.data('feature-name'),
+                        'value-id': value.data('value-id'),
+                        'value-name': value.data('value-name')
+                    });
                 } else { // Molecular feature
 
                     var gene = geneListField.tokenfield('getTokens')[0];

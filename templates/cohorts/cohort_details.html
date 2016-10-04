@@ -274,23 +274,30 @@
                 <!-- user data filters tab -->
                 <div role="tabpanel" class="tab-pane" id="user-data-filters">
                     <ul class="list-group" id="data-type-accordion" role="tablist" aria-multiselectable="true">
+                        <li class="list-group-item">
+                            <div id="user-data-filter-alert" class="alert alert-warning alert-dismissable">
+                                <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                Filtering on User Projects and Studies is exclusive to the other filters, and will produce a cohort consisting <i>only</i> of samples from User Data uploads. The Set
+                                operations on the Cohort Editing page can be used to further refine cohorts composed of User Data.
+                            </div>
+                        </li>
                         {% for attr in user_data %}
                             <li class="list-group-item">
                                 <div class="list-group-item__heading" role="tab" id="heading-{{ attr.id }}">
                                     <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-{{ attr.id }}"
                                        aria-expanded="false" aria-controls="collapse-{{ attr.id }}">
-                                        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ attr.name }}
+                                        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {% if attr.displ_name %}{{ attr.displ_name }}{% elif attr.name %}{{ attr.name }}{% else %}{{ attr.id }}{% endif %}
                                     </a>
                                 </div>
                                 <div id="collapse-{{ attr.id }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"
-                                     aria-labelledby="heading-{{ attr.id }}" data-feature-name="{{ attr.id }}" data-feature-displ-name="{{ attr.name }}" data-feature-type="datatype">
+                                     aria-labelledby="heading-{{ attr.id }}" data-feature-name="{{ attr.id }}" data-feature-displ-name="{% if attr.displ_name %}{{ attr.displ_name }}{% elif attr.name %}{{ attr.name }}{% else %}{{ attr.id }}{% endif %}" data-feature-type="user-data">
                                     <ul class="search-checkbox-list" id="{{ attr.id }}">
                                         {% for v in attr.values %}
                                             <li class="checkbox">
                                                 <label>
                                                     <input type="checkbox" name="elements-selected" data-value-name="{{ v.id }}"
-                                                           data-value-displ-name="{% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.value }}{% endif %}">
-                                                    {% if v.value == 'None' %}NA{% else %}{{ v.value }}{% endif %} <span class="count">({{ v.count }})</span>
+                                                           data-value-displ-name="{% if v.display_name %}{{ v.displ_name }}{% elif v.name %}{{ v.name }}{% else %}{{ v.id }}{% endif %}">
+                                                    {% if v.display_name %}{{ v.displ_name }}{% elif v.name %}{{ v.name }}{% else %}{{ v.id }}{% endif %} <span class="count">({{ v.count }})</span>
                                                 </label>
                                             </li>
                                         {% endfor %}
