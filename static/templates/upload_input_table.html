@@ -30,11 +30,6 @@
                                 <option value="sample" <%- column.controlled && column.controlled.key == 'sample_barcode' ? 'selected' : '' %>>Sample Barcode</option>
                                 <option value="participant" <%- column.controlled && column.controlled.key == 'participant_barcode' ? 'selected' : '' %>>Participant Barcode</option>
                             </optgroup>
-                            <optgroup label="Dictionary Datatypes">
-                                <% _.each(dictionary, function (item) { %>
-                                <option value="<%- item.key %>"><%- item.displayName %></option>
-                                <% }) %>
-                            </optgroup>
                         </select>
                     </td>
                 </tr>
