@@ -1,6 +1,6 @@
 """
 
-Copyright 2015, Institute for Systems Biology
+Copyright 2016, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,20 +16,15 @@ limitations under the License.
 
 """
 
-from sys import argv as cmdline_argv, stdout
 import logging
 
-from scripts.feature_def_gen.feature_def_utils import DataSetConfig, build_bigquery_service, \
-    submit_query_async, poll_async_job, download_query_result, write_tsv, \
-    load_config_json
+from feature_def_bq_provider import FeatureDefBigqueryProvider
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-_ch = logging.StreamHandler(stream=stdout)
-logger.addHandler(_ch)
+from scripts.feature_def_gen.feature_def_utils import DataSetConfig
+
+logger = logging
 
 
-FIELDNAMES = ['num_search_hits', 'mirna_name', 'platform', 'value_field', 'internal_feature_id']
 
 
 class MIRNTableConfig(object):
@@ -75,90 +70,125 @@ class MIRNFeatureDefConfig(object):
         return cls(project_id, reference_config, target_config, data_table_list, output_csv_path)
 
 
-def build_internal_feature_id(feature_type, mirna_name, feature_table_id):
-    return '{feature_type}:{mirna_name}:{feature_table_id}'.format(
-        feature_type=feature_type,
-        mirna_name=mirna_name,
-        feature_table_id=feature_table_id
-    )
-
-
 # TODO remove duplicate code
 def get_feature_type():
     return 'MIRN'
 
 
-def build_feature_query(config, table_config):
-    mir_name = None
+class MIRNFeatureDefProvider(FeatureDefBigqueryProvider):
+    MYSQL_SCHEMA = [
+        {
+            'name': 'mirna_name',
+            'type': 'string'
+        },
+        {
+            'name': 'platform',
+            'type': 'string'
+        },
+        {
+            'name': 'value_field',
+            'type': 'string'
+        },
+        {
+            'name': 'internal_feature_id',
+            'type': 'string'
+        },
+    ]
 
-    if table_config.is_expression_table:
-        mir_name = 'mirna_id'
-        query_template = ("SELECT {mir_name}, Platform \
-                           FROM [{main_project_name}:{main_dataset_name}.{table_name}] \
-                           GROUP BY {mir_name}, Platform")
-    else:
-        mir_name = 'miRNA_ID'
-        query_template = ("SELECT {mir_name} \
-                           FROM [{main_project_name}:{main_dataset_name}.{table_name}] \
-                           GROUP BY {mir_name}")
+    def get_mysql_schema(self):
+        return self.MYSQL_SCHEMA
 
-    query = query_template.format(
-        mir_name=mir_name,
-        main_project_name=config.target_config.project_name,
-        main_dataset_name=config.target_config.dataset_name,
-        table_name=table_config.table_name
-    )
+    def build_internal_feature_id(self, feature_type, mirna_name, feature_table_id):
+        return '{feature_type}:{mirna_name}:{feature_table_id}'.format(
+            feature_type=feature_type,
+            mirna_name=mirna_name,
+            feature_table_id=feature_table_id
+        )
 
-    logger.debug("MIRN SQL:\n" + query)
+    def build_table_query(self, config, table_config):
+        if table_config.is_expression_table:
+            mir_name = 'mirna_id'
+            query_template =\
+                'SELECT \'{table_name}\' AS table_name, {mir_name} AS mirna_name, Platform ' \
+                'FROM [{main_project_name}:{main_dataset_name}.{table_name}] ' \
+                'GROUP BY mirna_name, Platform '
+        else:
+            mir_name = 'miRNA_ID'
+            query_template = \
+                'SELECT \'{table_name}\' AS table_name, {mir_name} AS mirna_name ' \
+                'FROM [{main_project_name}:{main_dataset_name}.{table_name}] ' \
+                'GROUP BY mirna_name'
 
-    return query
+        query = query_template.format(
+            mir_name=mir_name,
+            main_project_name=config.target_config.project_name,
+            main_dataset_name=config.target_config.dataset_name,
+            table_name=table_config.table_name
+        )
 
+        return query
 
-def unpack_rows(row_item_array, table_config):
-    feature_type = get_feature_type()
-    platform = table_config.platform
-    value_label = table_config.value_label
-    result = []
-    for row in row_item_array:
-        mirna_name = row['f'][0]['v']
+    def build_table_mapping(self, config):
+        result = {}
+        for table_item in config.data_table_list:
+            result[table_item.table_name] = table_item
+        return result
 
-        result.append({
-            'num_search_hits': 0,
-            'mirna_name': mirna_name,
-            'platform': platform,
-            'value_field': value_label,
-            'internal_feature_id': build_internal_feature_id(feature_type, mirna_name, table_config.internal_table_id)
-        })
+    def build_subqueries_for_tables(self, config):
+        query_strings = []
+        for table_item in config.data_table_list:
+            query = self.build_table_query(config, table_item)
+            query_strings.append(query)
 
-    return result
+        return query_strings
 
+    def merge_queries(self, query_strings):
+        # Union of the subqueries
+        result = []
 
-def main():
-    config_file_path = cmdline_argv[1]
-    config = load_config_json(config_file_path, MIRNFeatureDefConfig)
+        for subquery in query_strings:
+            result.append("   ({query})".format(query=subquery))
 
-    logger.info("Building BigQuery service...")
-    bigquery_service = build_bigquery_service()
+        sq_stmt = ',\n'.join(result)
+        sq_stmt += ';'
 
-    result = []
-    for table_item in config.data_table_list:
-        logger.info('MIRN table: \'' + table_item.table_name + '\'')
-        query = build_feature_query(config, table_item)
+        query_tpl = \
+            'SELECT table_name, mirna_name \n' \
+            'FROM \n' \
+            '{subquery_stmt}'
 
-        # Insert BigQuery job
-        query_job = submit_query_async(bigquery_service, config.project_id, query)
+        query = query_tpl.format(subquery_stmt=sq_stmt)
 
-        # Poll for completion of query
-        job_id = query_job['jobReference']['jobId']
-        logger.info('job_id = "' + str(job_id) + '\"')
+        return query
 
-        poll_async_job(bigquery_service, config, job_id)
+    def build_table_mapping(self, config):
+        result = {}
+        for table_item in config.data_table_list:
+            result[table_item.table_name] = table_item
+        return result
 
-        query_result = download_query_result(bigquery_service, query_job)
-        rows = unpack_rows(query_result, table_item)
-        result.extend(rows)
+    def build_query(self, config):
+        query_strings = self.build_subqueries_for_tables(config)
+        query = self.merge_queries(query_strings)
+        return query
 
-    write_tsv(config.output_csv_path, result, FIELDNAMES)
+    def unpack_query_response(self, row_item_array):
+        table_config_mapping = self.build_table_mapping(self.config)
 
-if __name__ == '__main__':
-    main()
+        feature_type = get_feature_type()
+        result = []
+        for row in row_item_array:
+            table_name = row['f'][0]['v']
+            mirna_name = row['f'][1]['v']
+
+            table_config = table_config_mapping[table_name]
+
+            result.append({
+                'mirna_name': mirna_name,
+                'platform': table_config.platform,
+                'value_field': table_config.value_label,
+                'internal_feature_id': self.build_internal_feature_id(feature_type, mirna_name, table_config.internal_table_id)
+            })
+
+        return result
+
