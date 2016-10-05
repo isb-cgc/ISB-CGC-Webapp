@@ -91,4 +91,8 @@ require([
     $('#register-gcp').on('submit', function(e) {
         $('#verify-gcp')[0].reset();
     });
+
+    $('form#register-bucket, form#register-bqdataset').on('submit', function(e) {
+        $(this).find('input[type="submit"]').prop('disabled', true);
+    });
 });
