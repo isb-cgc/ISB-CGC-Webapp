@@ -44,7 +44,6 @@ MANAGERS                = ADMINS
 
 BASE_URL                = os.environ.get('BASE_URL', 'http://isb-cgc.appspot.com/')
 BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://api-dot-isb-cgc.appspot.com/')
-LOCAL_BASE_URL          = os.environ.get('BASE_URL', 'http://localhost:8080')
 
 DATABASES = {'default': {
     'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.mysql'),

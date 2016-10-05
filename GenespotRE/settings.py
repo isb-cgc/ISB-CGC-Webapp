@@ -57,7 +57,6 @@ SERVICE_ACCOUNT_LOG_NAME = os.environ.get('SERVICE_ACCOUNT_LOG_NAME', 'local_dev
 
 BASE_URL                = os.environ.get('BASE_URL', 'http://isb-cgc.appspot.com')
 BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://api-dot-isb-cgc.appspot.com')
-LOCAL_BASE_URL          = os.environ.get('BASE_URL', 'http://localhost:8080')
 
 # Compute services - Should not be necessary in webapp
 PAIRWISE_SERVICE_URL    = os.environ.get('PAIRWISE_SERVICE_URL', None)
