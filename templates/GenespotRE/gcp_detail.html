@@ -206,7 +206,7 @@
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <h4 class="modal-title">Register Bucket</h4>
                 </div>
-                <form id="delete-project" method="POST" action="{% url 'register_bucket' user.id gcp.id %}">
+                <form id="register-bucket" method="POST" action="{% url 'register_bucket' user.id gcp.id %}">
                     <div class="modal-body">
                         {% csrf_token %}
                         <p>
@@ -236,7 +236,7 @@
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <h4 class="modal-title">Register BigQuery Dataset</h4>
                 </div>
-                <form id="delete-project" method="POST" action="{% url 'register_bqdataset' user.id gcp.id %}">
+                <form id="register-bqdataset" method="POST" action="{% url 'register_bqdataset' user.id gcp.id %}">
                     <div class="modal-body">
                         {% csrf_token %}
                         <p>
