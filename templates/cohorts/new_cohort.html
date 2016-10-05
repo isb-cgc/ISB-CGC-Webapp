@@ -92,7 +92,7 @@
                                                             <label title="{{ v.value|get_tooltip_text:attr }}">
                                                                 <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}"
                                                                        data-value-displ-name="{% if v.displ_name %}{{ v.displ_name }}{% endif %}"
-                                                                       data-value-id="{% if v.id %}{{ v.id }}{% endif %}">
+                                                                       data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">
                                                                 {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name|get_readable_name:attr }}{% else %}{{ v.value|get_readable_name:attr }}{% endif %}
                                                                  <span class="count">({{ v.count }})</span>
                                                             </label>
@@ -103,7 +103,7 @@
                                                             <label title="{{ v.value|get_tooltip_text:attr }}">
                                                                 <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}"
                                                                        data-value-displ-name="{% if v.displ_name %}{{ v.displ_name }}{% endif %}"
-                                                                       data-value-id="{% if v.id %}{{ v.id }}{% endif %}">
+                                                                       data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">
                                                                 {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name|get_readable_name:attr }}{% else %}{{ v.value|get_readable_name:attr }}{% endif %}
                                                                  <span class="count">({{ v.count }})</span>
                                                             </label>
@@ -113,7 +113,7 @@
                                                             <label title="{{ v.value|get_tooltip_text:attr }}">
                                                                 <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}"
                                                                        data-value-displ-name="{% if v.displ_name %}{{ v.displ_name }}{% endif %}"
-                                                                       data-value-id="{% if v.id %}{{ v.id }}{% endif %}">
+                                                                       data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">
                                                                 {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name|get_readable_name:attr }}{% else %}{{ v.value|get_readable_name:attr }}{% endif %}
                                                                  <span class="count">({{ v.count }})</span>
                                                             </label>
@@ -208,7 +208,8 @@
                                                 <option value="label" disabled>-- Select a Mutation Category --</option>
                                                 <option value="any" data-value-displ-name="Any" data-value-name="Any" data-value-id="any">Any</option>
                                                 {% for cat in molecular_attr.categories %}
-                                                    <option value="{{ cat.value }}" data-value-displ-name="{{ cat.name }}" data-value-name="{{ cat.name }}" data-value-id="{{ cat.value }}">{{ cat.name }}</option>
+                                                    <option value="{{ cat.value }}" data-value-displ-name="{{ cat.name }}" data-value-name="{{ cat.name }}"
+                                                            data-value-id="{% if cat.id %}{{ cat.id }}{% else %}{{ cat.value }}{% endif %}">{{ cat.name }}</option>
                                                 {% endfor %}
                                                 <option value="indv-selex">Individual Selection</option>
                                             </select>
@@ -228,7 +229,8 @@
                                                     <li class="checkbox">
                                                         <label>
                                                             <input class="mutation-checkbox" type="checkbox" name="elements-selected" data-value-name="{{ attr.value }}"
-                                                                   data-value-id="{{ attr.value }}" data-value-displ-name="{{ attr.name }}" data-category="{{ attr.category }}">
+                                                                   data-value-id="{% if attr.id %}{{ attr.id }}{% else %}{{ attr.value }}{% endif %}"
+                                                                   data-value-displ-name="{{ attr.name }}" data-category="{{ attr.category }}">
                                                             {{ attr.name }} <!-- <span class="count">({{ attr.count }})</span> -->
                                                         </label>
                                                     </li>
@@ -266,7 +268,8 @@
                                         {% for v in attr.values %}
                                             <li class="checkbox">
                                                 <label>
-                                                    <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}"  data-value-id="{{ v.id }}"
+                                                    <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}"
+                                                           data-value-id="{% if v.id %}{{ v.id }}{% else %}{{ v.name }}{% endif %}"
                                                            data-value-displ-name="{% if v.display_name %}{{ v.displ_name }}{% elif v.name %}{{ v.name }}{% else %}{{ v.id }}{% endif %}">
                                                     {% if v.display_name %}{{ v.displ_name }}{% elif v.name %}{{ v.name }}{% else %}{{ v.id }}{% endif %} <span class="count">({{ v.count }})</span>
                                                 </label>
