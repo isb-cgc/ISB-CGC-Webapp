@@ -305,8 +305,6 @@ def get_readable_name(csv_name, attr=None):
             return 'False'
         else:
             return 'None'
-    elif is_user_data:
-        return csv_name
     # Clinical filters
     elif ATTR_SPECIFIC_TRANSLATION.get(attr) and ATTR_SPECIFIC_TRANSLATION[attr].get(csv_name):
         return ATTR_SPECIFIC_TRANSLATION[attr][csv_name]
