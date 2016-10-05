@@ -129,13 +129,11 @@ require([
         sortList: [[3,1]]
     });
 
-    //function openPublicTabOnUrlHash(targetTabID){
-    //     // Open public tabs based on url hash
-    //    if(window.location.hash && window.location.hash.slice(1) == 'public') {
-    //      // If url hash exist
-    //        var target = $("a[href='" + targetTabID + "']") || $("a[data-target='" + targetTabID + "']");
-    //        target.tab('show');
-    //    }
-    //}
-    //openPublicTabOnUrlHash('#public-cohorts-list');
+    $('#workbook-table').tablesorter({
+        headers: {
+            0: {sorter:false},
+            4: {sorter: 'fullDate'}
+        },
+        sortList: [[4,1]]
+    });
 });

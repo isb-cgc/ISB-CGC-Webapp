@@ -35,6 +35,12 @@ function($, d3, d3tip, helpers) {
     // do it here
     var histoTip = null;
 
+    var selex_active = false;
+    var zoom_status = {
+        translation: null,
+        scale: null
+    };
+
     return {
         createHistogramPlot : function (svg_param, raw_Data, values_only, width_param, height_param, x_attr, xLabel, tip, margin_param, legend) {
 
@@ -49,7 +55,7 @@ function($, d3, d3tip, helpers) {
             var hist_data = d3.layout.histogram()
                 .bins(num_bins)
                 .frequency(false)(values_only);
-            var kde = science.stats.kde().sample(values_only);
+            // var kde = science.stats.kde().sample(values_only);
             var tmp = helpers.get_min_max(raw_Data, x_attr);
             min_n = tmp[0];
             max_n = tmp[1];
@@ -75,10 +81,12 @@ function($, d3, d3tip, helpers) {
                 .tickSize(-width + margin.right + margin.left, 0, 0);
 
             var zoomer = function () {
-                svg.select('.x.axis').call(xAxis);
-                svg.select('.y.axis').call(yAxis);
-                plot_area.selectAll('.plot-bar').attr('transform', 'translate(' + d3.event.translate[0] + ',' + d3.event.translate[1] + ')scale(' + d3.event.scale + ',' + d3.event.scale + ')');
-                plot_area.selectAll('path.line').attr('transform', 'translate(' + d3.event.translate[0] + ',' + d3.event.translate[1] + ')scale(' + d3.event.scale + ',' + d3.event.scale + ')');
+                if(!selex_active) {
+                    svg.select('.x.axis').call(xAxis);
+                    svg.select('.y.axis').call(yAxis);
+                    plot_area.selectAll('.plot-bar').attr('transform', 'translate(' + d3.event.translate[0] + ',' + d3.event.translate[1] + ')scale(' + d3.event.scale + ',' + d3.event.scale + ')');
+                    plot_area.selectAll('path.line').attr('transform', 'translate(' + d3.event.translate[0] + ',' + d3.event.translate[1] + ')scale(' + d3.event.scale + ',' + d3.event.scale + ')');
+                }
             };
 
             var zoom = d3.behavior.zoom()
@@ -86,12 +94,7 @@ function($, d3, d3tip, helpers) {
                 .y(y)
                 .on('zoom', zoomer);
 
-            zoom_area = svg.append('g')
-                .attr('class', 'zoom_area')
-                .append('rect')
-                .attr('width', width)
-                .attr('height', height)
-                .style('opacity', '0');
+            svg.call(zoom);
 
             var sorted = raw_Data.sort(function (a, b) {
                 if (a[x_attr] > b[x_attr]) {
@@ -145,23 +148,23 @@ function($, d3, d3tip, helpers) {
                 .on('mouseover.tip', tip.show)
                 .on('mouseout.tip', tip.hide);
 
-            var line = d3.svg.line()
-                .x(function (d) {
-                    return x(d[0]);
-                })
-                .y(function (d) {
-                    return y(d[1]);
-                });
-
-            plot_area.append('path')
-                .data(d3.values(science.stats.bandwidth))
-                .attr('class', 'line')
-                .attr('stroke', 'red')
-                .attr('fill', 'none')
-                .attr('d', function (f) {
-                    return line(kde.bandwidth(f)(d3.range(min_n, max_n, 0.1)));
-                })
-                .attr('transform', 'translate(' + 0 + ',' + margin.top + ')');
+            // var line = d3.svg.line()
+            //     .x(function (d) {
+            //         return x(d[0]);
+            //     })
+            //     .y(function (d) {
+            //         return y(d[1]);
+            //     });
+            //
+            // plot_area.append('path')
+            //     .data(d3.values(science.stats.bandwidth))
+            //     .attr('class', 'line')
+            //     .attr('stroke', 'red')
+            //     .attr('fill', 'none')
+            //     .attr('d', function (f) {
+            //         return line(kde.bandwidth(f)(d3.range(min_n, max_n, 0.1)));
+            //     })
+            //     .attr('transform', 'translate(' + 0 + ',' + margin.top + ')');
 
             // Highlight the selected rectangles.
             var brushmove = function (p) {
@@ -196,7 +199,6 @@ function($, d3, d3tip, helpers) {
 
             var brush = d3.svg.brush()
                 .x(x)
-                .on('brushstart', function(){ svg.selectAll('.extent').style("fill", "rgba(40,130,50,0.5");})
                 .on('brush', brushmove)
                 .on('brushend', brushend);
 
@@ -214,23 +216,27 @@ function($, d3, d3tip, helpers) {
                 .call(xAxis);
 
             // append axes labels
+            var xAxisXPos = (parseInt(svg.attr('width')>width ? width : svg.attr('width'))+margin.left)/2;
+            var xAxisYPos = parseInt(svg.attr('height')>height ? height : svg.attr('height'))-10;
             svg.append('text')
-                .attr('class', 'x label')
+                .attr('class', 'axis-label')
                 .attr('text-anchor', 'middle')
-                .attr('transform', 'translate(' + (width / 2) + ',' + (height - 10) + ')')
+                .attr('transform', 'translate(' + xAxisXPos + ',' + xAxisYPos + ')')
                 .text(xLabel);
 
+            var yAxisXPos = (parseInt(svg.attr('height')>height ? height : svg.attr('height'))-margin.bottom)/2;
             svg.append('text')
-                .attr('class', 'y label')
+                .attr('class', 'axis-label')
                 .attr('text-anchor', 'middle')
-                .attr('transform', 'rotate(-90) translate(' + (-1 * (height/2)) + ',10)')
+                .attr('transform', 'rotate(-90) translate(-' + yAxisXPos + ',10)')
                 .text('Percentage of Samples in Grouping');
 
             function check_selection_state(isActive) {
-                if (isActive) {
-                    // Remove zoom area
-                    svg.selectAll('.zoom_area').remove();
+                selex_active = !!isActive;
 
+                if (isActive) {
+                    zoom_status.translation = zoom.translate();
+                    zoom_status.scale = zoom.scale();
                     // Append new brush event listeners to plot area only
                     plot_area.append('g')
                         .attr('class', 'brush')
@@ -239,6 +245,10 @@ function($, d3, d3tip, helpers) {
                         .attr('y', 0)
                         .attr('height', height - margin.bottom);
                 } else {
+                    zoom_status.translation && zoom.translate(zoom_status.translation);
+                    zoom_status.scale && zoom.scale(zoom_status.scale);
+                    zoom_status.translation = null;
+                    zoom_status.scale = null;
                     var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                     // Clear selections
                     $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + 0);
@@ -246,28 +256,14 @@ function($, d3, d3tip, helpers) {
                     $('#save-cohort-'+plot_id+'-modal input[name="samples"]').attr('value', []);
                     svg.selectAll('.selected').classed('selected', false);
                     $(svg[0]).parents('.plot').find('.save-cohort-card').hide();
+                    // Get rid of the selection rectangle - comment out if we want to enable selection carry-over
+                    brush.clear();
                     // Remove brush event listener plot area
                     plot_area.selectAll('.brush').remove();
-
-                    // Append new zoom area
-                    zoom_area = svg.append('g')
-                        .attr('class', 'zoom_area')
-
-                    zoom_rect = zoom_area.append('rect')
-                        .attr('width', width)
-                        .attr('height', height)
-                        .style('opacity', 0);
-
-                    // Register zoom event listeners
-                    zoom.on('zoom', zoomer);
-                    zoom_area.call(zoom)
-                        .on('.zoom', zoomer);
                 }
             };
 
-            /*
-                Update the sample cohort bar update
-             */
+            // Update the sample cohort bar update
             function sample_form_update(extent, total_samples, total_patients, sample_list){
                 var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                 $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + total_samples);
@@ -288,7 +284,6 @@ function($, d3, d3tip, helpers) {
 
             function resize() {
                 width = svg.node().parentNode.offsetWidth - 10;
-                //TODO resize plot
             }
 
             function check_selection_state_wrapper(button){

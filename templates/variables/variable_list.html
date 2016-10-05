@@ -48,7 +48,7 @@
                                         </ul>
                                     </div>
                                 </td>
-                                <td><a href="{% url 'variable_fav_detail' favorite.id %}">{{ favorite.name }}</a></td>
+                                <td class="name-col"><a href="{% url 'variable_fav_detail' favorite.id %}" title="{{ favorite.name|wrap_text }}">{{ favorite.name }}</a></td>
                                 <td>{{ favorite.variables | length }}</td>
                                 <td>{{ favorite.last_date_saved|date:'M d, Y, g:i a'}}</td>
                             </tr>

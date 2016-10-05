@@ -16,18 +16,19 @@ limitations under the License.
 
 """
 
-from argparse import ArgumentParser
+import datetime
 import logging
 import os
+import csv
+from argparse import ArgumentParser
 from sys import exit
-import datetime
-import httplib2
 
+from apiclient.discovery import build
+
+import httplib2
+from GenespotRE import secret_settings
 from MySQLdb import connect
 from MySQLdb.cursors import DictCursor
-
-from GenespotRE import secret_settings
-from apiclient.discovery import build
 from oauth2client.client import GoogleCredentials
 
 ALLDATA_COHORT_NAME = 'All TCGA Data'
@@ -173,6 +174,45 @@ def get_patient_barcodes(conn):
     cursor.close()
     return rows
 
+def get_barcodes_from_file(filename):
+    with open(filename) as tsv:
+        header = True
+        patient_barcodes = []
+        sample_barcodes = []
+        for line in csv.reader(tsv, delimiter='\t'):
+            if header:
+                headers = line
+                header = False
+            else:
+
+                codes = line
+
+                # Check if ParticipantBarcode is first
+                if headers[0] == 'ParticipantBarcode':
+                    patient_code_index = 0
+                    sample_code_index = 1
+                else:
+                    patient_code_index = 1
+                    sample_code_index = 0
+
+                if codes[patient_code_index] not in patient_barcodes:
+                    patient_barcodes.append(codes[patient_code_index])
+
+                if codes[sample_code_index] not in sample_barcodes:
+                    sample_barcodes.append(codes[sample_code_index])
+
+        return {'patient_barcodes': patient_barcodes, 'sample_barcodes': sample_barcodes}
+
+    pass
+
+def create_tcga_cohorts_from_files(directory):
+    filelist = os.listdir(directory)
+
+    for file in filelist:
+        filepath = os.path.join(directory, file)
+        file_barcodes = get_barcodes_from_file(filepath)
+        print filepath, len(file_barcodes['sample_barcodes']), len(file_barcodes['patient_barcodes'])
+
 def insert_barcodes_mysql(conn, superuser_id, cohort_name, sample_barcodes, patient_barcodes):
     insert_samples_str = 'INSERT INTO cohorts_samples (sample_id, cohort_id) values (%s, %s);'
     insert_patients_str = 'INSERT INTO cohorts_patients (patient_id, cohort_id) values (%s, %s);'
@@ -253,6 +293,7 @@ def main():
     do_cloudsql = (args.operation == 'all' or args.operation == 'cloudsql')
     do_bigquery = (args.operation == 'all' or args.operation == 'bq')
 
+    # create_tcga_cohorts_from_files('./tcga/')
     if args.cohort_id is None and not do_cloudsql:
         logging.error("Cohort ID must be provided if 'cloudsql' operation is not performed.")
         exit(1)

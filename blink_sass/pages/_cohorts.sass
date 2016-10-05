@@ -8,6 +8,9 @@
     .total-samples
         margin-top: 0px
     #filter-panel
+        .heading-note
+            font-style: italic
+            color: darken($isb-warning, 20%)
         .checks
             float: right
             display: block
@@ -25,13 +28,17 @@
                 border: none
                 background-color: #fff
                 text-align: center
-                width: (100% / 3)
+                width: (100% / 4)
+                font-size: 12.7px
                 &:first-child a
                     border-top-left-radius: 3px
                 &:last-child a
                     border-top-right-radius: 3px
                 span
                     margin-left: 10px
+            >li.active>a
+                color: darken($isb-warning, 20%) !important
+
 
         .tab-content
             padding: 0px
@@ -174,6 +181,7 @@
 
     #create-cohort-form .form-control-static span
         display: inline-block
+        max-width: 90%
 
     #multi-categorical
         overflow-x: auto

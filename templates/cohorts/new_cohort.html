@@ -49,11 +49,16 @@
     {% else %}
         <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal">Save As New Cohort</button>
     {% endif %}
-
 </div>
+
 {% endblock %}
 
 {% block content %}
+
+    <div id="url-len-max-alert" class="alert alert-warning alert-dismissable col-lg-12" style="display: none;">
+        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        You have selected too many filters. The current counts shown will not be accurate until one or more filter options are removed.
+    </div>
 
     <div id="filter-panel" class="col-lg-4" role="tabpanel">
         <div class="tabpanel" role="tabpanel">
@@ -61,6 +66,7 @@
                 <li role="presentation" class="active"><a href="#clinical-filters" role="tab" data-toggle="tab" title="Donor Filters">Donor</a></li>
                 <li role="presentation" class=""><a href="#data-filters" role="tab" data-toggle="tab" title="Donor Filters">Data Type</a></li>
                 <li role="presentation" class=""><a href="#molecular-filters" role="tab" data-toggle="tab" title="Molecular Filters">Molecular</a></li>
+                <li role="presentation" class=""><a href="#user-data-filters" role="tab" data-toggle="tab" title="User Data">User Data</a></li>
             </ul>
             <div class="tab-content">
                 <!-- donor filters tab -->
@@ -76,7 +82,7 @@
                                     </div>
 
                                     <div id="collapse-{{ attr }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" data-feature-type="donor"
-                                         aria-labelledby="heading-{{ attr }}" data-feature-name="{{ attr }}" data-feature-displ-name="{{ attr|get_readable_name }}"
+                                         aria-labelledby="heading-{{ attr }}" data-feature-name="{{ attr }}" data-feature-displ-name="{{ attr|get_feat_displ_name }}"
                                          data-feature-id="{% if attr_list_count|get_named_item:attr|get_item:'id' %}{{ attr_list_count|get_named_item:attr|get_item:'id' }}{% endif %}">
                                         <ul class="search-checkbox-list" id="{{ attr }}">
                                             {% with attr_list_count|get_named_item:attr|get_item:'values'|how_many_more:6 as num_more %}
@@ -137,7 +143,7 @@
                                     </a>
                                 </div>
                                 <div id="collapse-{{ attr }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"
-                                     aria-labelledby="heading-{{ attr }}" data-feature-name="{{ attr }}" data-feature-displ-name="{{ attr|get_readable_name }}" data-feature-type="datatype">
+                                     aria-labelledby="heading-{{ attr }}" data-feature-name="{{ attr }}" data-feature-displ-name="{{ attr|get_feat_displ_name }}" data-feature-type="datatype">
                                     <ul class="search-checkbox-list" id="{{ attr }}">
                                         {% if attr_list_count|list_contains_name:attr %}
                                             {% for v in attr_list_count|get_named_item:attr|get_item:'values' %}
@@ -145,7 +151,7 @@
                                                     <!-- todo: make a custom tag for the id for data_attr attributes-->
                                                     <label>
                                                         <input type="checkbox" name="elements-selected" data-value-name="{{ v.value|get_data_attr_id:attr }}"
-                                                               data-displ-name="{% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.value }}{% endif %}">
+                                                               data-value-displ-name="{% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.value }}{% endif %}">
                                                          {% if v.value == 'None' %}NA{% else %}{{ v.value }}{% endif %} <span class="count">({{ v.count }})</span>
                                                     </label>
                                                 </li>
@@ -172,7 +178,8 @@
                                     <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> GENE MUTATION STATUS
                                 </a>
                             </div>
-                            <div id="collapse-gene-mutation-status" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel">
+                            <div id="collapse-gene-mutation-status" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"
+                                 aria-labelledby="heading-gene-mutation-status" data-feature-name="gene-mutation-status" data-feature-displ-name="Gene Mutation Status" data-feature-type="molecular">
                                 <ul class="list">
                                     <li class="list-item">
                                         <!-- gene selector -->
@@ -197,20 +204,22 @@
                                              aria-labelledby="heading-sel-molecular-attr-cat" data-feature-displ-name="Mutation Category" data-feature-id="category"
                                              data-feature-name="mutation-category" data-feature-type="molecular">
                                             <select id="mutation-category" class="mutation-category-selector form-control spec-select datatype-selector">
-                                                <option value="label" selected disabled>-- Select a Mutation Category --</option>
+                                                <option value="no-gene" selected disabled>-- Select a Gene to Enable Categories --</option>
+                                                <option value="label" disabled>-- Select a Mutation Category --</option>
                                                 <option value="any" data-value-displ-name="Any" data-value-name="Any" data-value-id="any">Any</option>
                                                 {% for cat in molecular_attr.categories %}
                                                     <option value="{{ cat.value }}" data-value-displ-name="{{ cat.name }}" data-value-name="{{ cat.name }}" data-value-id="{{ cat.value }}">{{ cat.name }}</option>
                                                 {% endfor %}
-                                                <option value="user-specified">User Specified</option>
+                                                <option value="indv-selex">Individual Selection</option>
                                             </select>
                                         </div>
                                     </li>
                                     <li class="list-item">
                                         <!-- Specific Mutation Type Checkboxes -->
                                         <div class="list-item__heading" role="tab" id="heading-spec-molecular-attrs">
-                                            Specific Mutation Types
+                                            <span title="Choose the 'Individual Selection' category to enable this section">Individual Mutation Types</span>
                                         </div>
+                                        <span class="heading-note" id="spec-mol-attr-heading-note">Choose the 'Individual Selection' category to enable</span>
                                         <div id="spec-molecular-attrs" class="list-group-item__body cohort-feature-select-block" role="tabpanel"
                                              aria-labelledby="heading-spec-molecular-attrs" data-feature-displ-name="Specific Mutation Type" data-feature-name="specific-mutation"
                                              data-feature-id="specific" data-feature-type="molecular">
@@ -219,7 +228,7 @@
                                                     <li class="checkbox">
                                                         <label>
                                                             <input class="mutation-checkbox" type="checkbox" name="elements-selected" data-value-name="{{ attr.value }}"
-                                                                   data-value-displ-name="{{ attr.name }}" data-category="{{ attr.category }}">
+                                                                   data-value-id="{{ attr.value }}" data-value-displ-name="{{ attr.name }}" data-category="{{ attr.category }}">
                                                             {{ attr.name }} <!-- <span class="count">({{ attr.count }})</span> -->
                                                         </label>
                                                     </li>
@@ -230,6 +239,43 @@
                                 </ul>
                             </div>
                         </li>
+                    </ul>
+                </div>
+                <!-- user data filters tab -->
+                <div role="tabpanel" class="tab-pane" id="user-data-filters">
+                    <ul class="list-group" id="data-type-accordion" role="tablist" aria-multiselectable="true">
+                        <li class="list-group-item">
+                            <div id="user-data-filter-alert" class="alert alert-warning alert-dismissable">
+                                <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                Filtering on User Projects and Studies is exclusive to the other filters, and will produce a cohort consisting <i>only</i> of samples from User Data uploads. The Set
+                                operations on the Cohort Editing page can be used to further refine cohorts composed of User Data.
+                            </div>
+                        </li>
+                        {% for attr in user_data %}
+                            <li class="list-group-item">
+                                <div class="list-group-item__heading" role="tab" id="heading-{{ attr.id }}">
+                                    <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-{{ attr.id }}"
+                                       aria-expanded="false" aria-controls="collapse-{{ attr.id }}">
+                                        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {% if attr.displ_name %}{{ attr.displ_name }}{% elif attr.name %}{{ attr.name }}{% else %}{{ attr.id }}{% endif %}
+                                    </a>
+                                </div>
+                                <div id="collapse-{{ attr.id }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"
+                                     aria-labelledby="heading-{{ attr.id }}" data-feature-name="{{ attr.name }}" data-feature-id="{{ attr.id }}"
+                                     data-feature-displ-name="{% if attr.displ_name %}{{ attr.displ_name }}{% elif attr.name %}{{ attr.name }}{% else %}{{ attr.id }}{% endif %}" data-feature-type="user-data">
+                                    <ul class="search-checkbox-list" id="{{ attr.id }}">
+                                        {% for v in attr.values %}
+                                            <li class="checkbox">
+                                                <label>
+                                                    <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}"  data-value-id="{{ v.id }}"
+                                                           data-value-displ-name="{% if v.display_name %}{{ v.displ_name }}{% elif v.name %}{{ v.name }}{% else %}{{ v.id }}{% endif %}">
+                                                    {% if v.display_name %}{{ v.displ_name }}{% elif v.name %}{{ v.name }}{% else %}{{ v.id }}{% endif %} <span class="count">({{ v.count }})</span>
+                                                </label>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </li>
+                        {% endfor %}
                     </ul>
                 </div>
             </div>
@@ -331,8 +377,9 @@
     var base_url = '{{ base_url|safe }}';
     var base_api_url = '{{ base_api_url|safe }}';
     var cohort_id = undefined;
+    var user_data = {{ user_data|tojson|safe }};
     var metadata_counts = {{ metadata_counts|tojson|safe }};
-    var molecular_attr = {{ molecular_attr|tojson|safe }};
+    var metadata_filters = {{ metadata_filters|tojson|safe }};
     </script>
 {% endblock %}
 

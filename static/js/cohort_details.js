@@ -24,8 +24,6 @@ require.config({
         jqueryui: 'libs/jquery-ui.min',
         session_security: 'session_security',
         underscore: 'libs/underscore-min',
-        assetscore: 'libs/assets.core',
-        assetsresponsive: 'libs/assets.responsive',
         d3: 'libs/d3.min',
         d3tip: 'libs/d3-tip',
         search_helpers: 'helpers/search_helpers',
@@ -43,8 +41,6 @@ require.config({
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
         'session_security': ['jquery'],
-        'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
-        'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
         'tokenfield': ['jquery', 'jqueryui'],
         'typeahead':{
             deps: ['jquery'],
@@ -74,8 +70,6 @@ require([
     'vis_helpers',
     'tree_graph',
     'stack_bar_chart',
-    'assetscore',
-    'assetsresponsive',
     'base'
 ], function ($, jqueryui, bootstrap, session_security, d3, d3tip, search_helpers, Bloodhound, typeahead, _) {
 
@@ -83,6 +77,8 @@ require([
     var savingChanges = false;
     var SUBSEQUENT_DELAY = 600;
     var update_displays_thread = null;
+
+    var original_title = $('#edit-cohort-name').val();
 
     var geneListField = $('#paste-in-genes');
     var geneFavs = [];
@@ -130,7 +126,10 @@ require([
             });
             $('#paste-in-genes-tokenfield').attr('placeholder',"");
             $('#paste-in-genes-tokenfield').attr('disabled','disabled');
-            $('#mutation-category').parent().parent().removeClass('disabled');
+
+            $('#mutation-category').removeClass('disabled');
+            $('#mutation-category option[value="no-gene"]').hide();
+            $('#mutation-category').val('label');
 
         }).on('tokenfield:removedtoken', function(event) {
             $('#paste-in-genes-tokenfield').attr('placeholder',"Enter a gene's name");
@@ -139,13 +138,15 @@ require([
                 $('.helper-text__invalid').hide();
             }
 
-            $('#spec-molecular-attrs').parent().addClass('disabled');
-            $('#mutation-category').parent().parent().addClass('disabled');
-            $('#mutation-category').val('label');
+            $('#spec-molecular-attrs .search-checkbox-list').addClass('disabled');
 
             $('.mol-cat-filter-x').trigger('click');
             $('.mol-spec-filter-x').trigger('click');
             $('.mutation-checkbox').prop('checked',false);
+
+            $('#mutation-category option[value="no-gene"]').show();
+            $('#mutation-category').val('no-gene');
+            $('#mutation-category').addClass('disabled');
 
         }).on('tokenfield:edittoken',function(e){
             e.preventDefault();
@@ -208,12 +209,12 @@ require([
 
         update_displays_thread = setTimeout(function(){
             search_helper_obj.update_counts_parsets(base_url, 'metadata_counts_platform_list', cohort_id, 'v2').then(
-                function(){!withoutCheckChanges && check_changes();}
+                function(){!withoutCheckChanges && check_for_changes();}
             );
         },SUBSEQUENT_DELAY);
     };
 
-    var filter_change_callback = function() {
+    var filter_change_callback = function(e,data) {
         var $this = $(this);
 
         var token = null;
@@ -231,12 +232,13 @@ require([
             // 'Selected Filters' token 'X' button
             value = $this.find('option:selected');
 
-            if(value.val() !== 'user-specified') { // Categorized sets
+            if(value.val() !== 'indv-selex') { // Categorized sets
 
                 // If we've previously been in a user-selected set,
                 // disable that selection set and remove all of its
                 // filter tokens
-                $('#spec-molecular-attrs').parent().addClass('disabled');
+                $('#spec-molecular-attrs .search-checkbox-list').addClass('disabled');
+                $('#spec-mol-attr-heading-note').show();
 
                 // Generate the new filter token
                 var gene = geneListField.tokenfield('getTokens')[0];
@@ -255,6 +257,7 @@ require([
                     $('<a>').addClass('delete-x filter-label label label-default mol-cat-filter-x')
                         .text(gene.label + ' [' + tokenFeatDisplName + ': ' + tokenValDisplName + ']')
                         .append('<i class="fa fa-times">')
+                        .attr("title",gene.label + ' [' + tokenFeatDisplName + ': ' + tokenValDisplName + ']')
                 );
 
                 $this.data({
@@ -283,12 +286,13 @@ require([
                         }
                     });
 
-                    update_displays(true);
+                    (!data || !data.without_update) && update_displays(true);
                     return false;
                 });
-            } else {        // User-specified
+            } else {        // indv-selex
                 // Enable the checkbox set
-                $('#spec-molecular-attrs').parent().removeClass('disabled');
+                $('#spec-molecular-attrs .search-checkbox-list').removeClass('disabled');
+                $('#spec-mol-attr-heading-note').hide();
 
                 // Any checked boxes from a category won't be in the filter set - add them now
                 $('.mutation-checkbox').each(function(){
@@ -297,22 +301,30 @@ require([
                     }
                 });
             }
-        } else {
+        } else { // Checkboxes
 
-            // Checkboxes
+            // If a specific mutation checkbox was checked, check to see if we need to switch
+            // into indv-selex mode
+            if(feature.data('feature-type') == 'molecular' && $('#mutation-category').val() !== 'indv-selex') {
+                $('a.mol-cat-filter-x').trigger('click');
+                $('#mutation-category').val('indv-selex');
+                // Any checked boxes from a category won't be in the filter set - add them now
+                $('.mutation-checkbox').each(function(){
+                    if(value.data('value-id') !== $(this).data('value-id') && $(this).is(':checked')) {
+                        $(this).triggerHandler('change');
+                    }
+                });
+            }
+
             if ($this.is(':checked')) { // Checkbox checked
 
                 var tokenValDisplName = (value.data('value-displ-name') && value.data('value-displ-name').length > 0) ?
                         value.data('value-displ-name') : (value.data('value-name') == 'None' ? 'NA' : value.data('value-name')),
-                    tokenFeatDisplName = /*(feature.data('feature-displ-name') && feature.data('feature-displ-name').length > 0) ?
-                     feature.data('feature-displ-name') :*/ feature.data('feature-name');
-
+                    tokenFeatDisplName = (feature.data('feature-displ-name') && feature.data('feature-displ-name').length > 0) ?
+                     feature.data('feature-displ-name') : feature.data('feature-name');
 
                 if (feature.data('feature-type') == 'datatype') { // Datatype feature
                     var feature_value = value.data('value-name').split('-');
-
-                    tokenFeatDisplName = 'SAMP:' + feature_value[0];
-                    tokenValDisplName = feature_value[1];
 
                     switch(feature_value[1]) {
                         case 'True':
@@ -340,7 +352,15 @@ require([
                         'value-id': value.data('value-id'),
                         'value-name': value.data('value-name')
                     });
+                } else if (feature.data('feature-type') == 'user-data') { // User data filter
+                    token = $('<span>').data({
+                        'feature-id': feature.data('feature-id'),
+                        'feature-name': feature.data('feature-name'),
+                        'value-id': value.data('value-id'),
+                        'value-name': value.data('value-name')
+                    });
                 } else { // Molecular feature
+
                     var gene = geneListField.tokenfield('getTokens')[0];
                     token = $('<span>').data({
                         'feature-id': 'MUT:'+gene.value + ':' + feature.data('feature-id'),
@@ -358,6 +378,7 @@ require([
                     $('<a>').addClass('delete-x filter-label label label-default')
                         .text(tokenFeatDisplName + ': ' + tokenValDisplName)
                         .append('<i class="fa fa-times">')
+                        .attr("title",tokenFeatDisplName + ': ' + tokenValDisplName)
                 );
 
                 if (feature.data('feature-type') == 'molecular') {
@@ -372,7 +393,7 @@ require([
                 $('.selected-filters .panel-body').append($this.data('select-filters-item'));
                 $('#create-cohort-form .form-control-static').append($this.data('create-cohort-form-item'));
 
-                $('a.delete-x').on('click', function () {
+                $('a.delete-x').on('click', function(e,data) {
                     var checked_box = $('div[data-feature-id="' + $(this).parent('span').data('feature-id')
                         + '"] input[type="checkbox"][data-value-name="' + $(this).parent('span').data('value-name') + '"]');
 
@@ -391,23 +412,26 @@ require([
                         }
                     });
 
-                    update_displays(true);
+                    (!data || !data.without_update) && update_displays(true);
                     return false;
                 });
             } else { // Checkbox unchecked
-                // Remove create cohort form pill
-                $('#create-cohort-form .form-control-static span').each(function () {
-                    if ($(this).data('feature-id') == $this.data('create-cohort-form-item').data('feature-id') &&
-                        $(this).data('value-name') == $this.data('create-cohort-form-item').data('value-name')) {
-                        $(this).remove();
-                    }
-                });
-                $this.data('select-filters-item').remove();
-                $this.data('create-cohort-form-item').remove();
-
+                // Remove create cohort form pill if it exists
+                if($this.data('create-cohort-form-item')) {
+                    $('#create-cohort-form .form-control-static span').each(function () {
+                        if ($(this).data('feature-id') == $this.data('create-cohort-form-item').data('feature-id') &&
+                            $(this).data('value-name') == $this.data('create-cohort-form-item').data('value-name')) {
+                            $(this).remove();
+                        }
+                    });
+                    $this.data('select-filters-item').remove();
+                    $this.data('create-cohort-form-item').remove();
+                }
             }
         }
-        update_displays();
+        if(!data || !data.without_update) {
+            update_displays();
+        }
     };
 
     $('.search-checkbox-list input[type="checkbox"]').on('change', filter_change_callback);
@@ -468,7 +492,7 @@ require([
         $('#edit-cohort-menu').hide();
     });
 
-    $('#create-cohort-form, #apply-filters-form').on('submit', function(e) {
+    $('#create-cohort-form, #apply-edits-form').on('submit', function(e) {
 
         if(savingChanges) {
             e.preventDefault();
@@ -477,8 +501,16 @@ require([
 
         var form = $(this);
 
-        $('#apply-filters-form input[type="submit"]').prop('disabled',true);
+        $('#apply-edits-form input[type="submit"]').prop('disabled',true);
         savingChanges = true;
+
+        if($('.selected-filters .panel-body span').length > 0) {
+            form.append('<input type="hidden" name="apply-filters" value="true" />');
+        }
+
+        if(cohort_id && original_title !== $('#edit-cohort-name').val()) {
+            form.append('<input type="hidden" name="apply-name" value="true" />');
+        }
 
         $('.selected-filters .panel-body span').each(function() {
             var $this = $(this),
@@ -490,10 +522,9 @@ require([
         });
 
 
-        if (cohort_id) {
-            $('#apply-filter-cohort-name').prop('value', $('#edit-cohort-name').val());
+        if(cohort_id) {
+            $('#apply-edit-cohort-name').prop('value', $('#edit-cohort-name').val());
             form.append('<input type="hidden" name="source" value="' + cohort_id + '" />');
-            form.append('<input type="hidden" name="deactivate_sources" value="' + true + '" />');
         }
     });
 
@@ -609,11 +640,10 @@ require([
     });
 
     // Disable save changes if no change to title or no added filters
-    var original_title = $('#edit-cohort-name').val();
-    var save_changes_btn_modal = $('#apply-filters-form input[type="submit"]');
+    var save_changes_btn_modal = $('#apply-edits-form input[type="submit"]');
     var save_changes_btn = $('button[data-target="#apply-filters-modal"]');
-    var check_changes = function() {
-        if ($('#edit-cohort-name').val() != original_title || $('.selected-filters span').length > 0) {
+    var check_for_changes = function() {
+        if ($('#edit-cohort-name').val() !== original_title || $('.selected-filters span').length > 0) {
             save_changes_btn.prop('disabled', false)
             save_changes_btn_modal.prop('disabled',false);
         } else {
@@ -623,22 +653,32 @@ require([
     };
 
 
-    // If this is a new cohort, set TCGA Project selected as default
-    if (window.location.pathname.indexOf('new_cohort') >= 0
-        || window.location.pathname.match(/cohorts\/workbook\/\d+\/worksheet\/\d+\/create/i) !== null
-    ) {
+    // If we received counting data, display it
+    if(metadata_counts !== null && metadata_counts !== "") {
+        search_helper_obj.update_counts_parsets_direct();
+        metadata_counts = null;
+
+        // If this data was filtered, check those filters
+
+        if(metadata_filters !== null && metadata_filters !== "") {
+            $.each(metadata_filters,function(filter_cat){
+                $.each(metadata_filters[filter_cat], function(i, filter_val){
+                    if($('a[href="#collapse-'+filter_cat.split(':')[1]+'"]').attr('aria-expanded') !== 'true') {
+                        $('a[href="#collapse-'+filter_cat.split(':')[1]+'"]').trigger('click');
+                    }
+                    $('div[data-feature-id="'+filter_cat+'"]').find('input[type="checkbox"][data-value-name="'+filter_val+'"]').attr('checked',true);
+                    $('div[data-feature-id="'+filter_cat+'"]').find('input[type="checkbox"][data-value-name="'+filter_val+'"]').trigger('change',{without_update: true});
+                });
+
+            });
+        }
+    } else {
+        // otherwise, induce some by checking TCGA
         $('a[href="#collapse-Project"]').trigger('click');
         $('input[type="checkbox"][data-value-name="TCGA"]').trigger('click');
-    } else {
-        // If there's data passed in from the template, use it and drop it
-        if(metadata_counts !== null && metadata_counts !== "") {
-            search_helper_obj.update_counts_parsets_direct();
-            metadata_counts = null;
-        } else {
-            update_displays(true);
-        }
     }
-    
+
+
     // onClick: Shared With button 
     $('#shared-with-btn').on('click', function(e){
         var target = $(this).data('target');
@@ -660,7 +700,7 @@ require([
             type        :'POST',
             url         : url,
             dataType    :'json',
-            data        : {owner: true, user_id: user_id},
+            data        : {user_id: user_id},
             beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
             success : function (data) {
                 button.parents('tr').remove();
@@ -679,19 +719,19 @@ require([
     $('.save-comment-btn').prop('disabled', true);
     $('#comment-content').keyup(function() {
         $(this).siblings('.save-comment-btn').prop('disabled', this.value == '' ? true : false)
-    })
+    });
 
     save_changes_btn.prop('disabled', true);
     save_changes_btn_modal.prop('disabled', true);
 
     $('#edit-cohort-name').keyup(function() {
-        check_changes();
-    })
+        check_for_changes();
+    });
 
     // Disable Duplicate Cohort button once clicked
     $('.clone-cohort-btn').on('click', function() {
         $(this).addClass('disabled');
-    })
+    });
 
     $('li.applied-filter').each(function(index,elem){
         $(this).html($(this).text().replace(/\[/g,"<span>").replace(/\]/g,"</span>"));
@@ -700,17 +740,11 @@ require([
     var firstSelect = true;
     $('a[href="#molecular-filters"]').on('click',function(e){
         firstSelect && $('a[href="#collapse-gene-mutation-status"]').trigger('click');
-        firstSelect && $('#mutation-category').parent().parent().addClass('disabled');
-        firstSelect && $('#spec-molecular-attrs').parent().addClass('disabled');
+        firstSelect && $('#mutation-category').addClass('disabled');
+        firstSelect && $('#spec-molecular-attrs .search-checkbox-list').addClass('disabled');
         $('#molecular-filter-alert').show();
         firstSelect = false;
     });
-
-    var mapped_molecular_categories = {};
-    molecular_attr.categories.map(function(cat){
-        mapped_molecular_categories[cat.value] = cat;
-    });
-
 
     $('#mutation-category').on('change',filter_change_callback);
 });

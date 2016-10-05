@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+{% block title %}System Data Dictionary | ISB-CGC{% endblock %}}
+{% block extra_css_libs %}{% endblock %}
+{% block header %}{% endblock %}
+
+{% block link_page_name %}system_data_dict{% endblock %}
+{% block page_name %}system_data_dict{% endblock %}
+
+{% block page_header %}
+    <div class="container">
+        <ol class="breadcrumb">
+            <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+            <li><a href="{% url 'projects' %}">Saved Projects</a></li>
+        </ol>
+        <h1 class="page-header">System Data Dictionary</h1>
+    </div>
+{% endblock %}
+{% block content %}
+<div class="container">
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>System Attribute Name</th>
+                <th>Type</th>
+                <th>Possible Values</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for attr in attr_list %}
+            <tr>
+                <td>{{ attr.name }}</td>
+                <td>{{ attr.type }}</td>
+                <td>{{ attr.values }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
+
+{% block js_file %}{% static 'js/data_upload.js' %}{% endblock %}

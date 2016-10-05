@@ -11,38 +11,33 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import logging
-import json
 import collections
-import io
-import time
+import json
+import logging
 import os
 import sys
-from datetime import datetime
 
-from oauth2client.client import GoogleCredentials
 from google.appengine.api import modules, urlfetch
-from google.appengine.ext import deferred
-from googleapiclient import discovery, http
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
-from django.http import HttpResponse, JsonResponse
-from django.db.models import Count
-from django.utils import formats
-from django.contrib import messages
-from django.contrib.auth.models import User
+
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.db.models import Count
+from django.http import HttpResponse
+from django.shortcuts import render
+from django.utils import formats
+from googleapiclient import discovery
+from oauth2client.client import GoogleCredentials
 
 debug = settings.DEBUG
 
 from google_helpers.directory_service import get_directory_resource
-from google_helpers.resourcemanager_service import get_special_crm_resource
 from googleapiclient.errors import HttpError
-from visualizations.models import SavedViz, Viz_Perms
+from visualizations.models import SavedViz
 from cohorts.models import Cohort, Cohort_Perms
 from projects.models import Project
 from workbooks.models import Workbook
-from accounts.models import NIH_User, GoogleProject, AuthorizedDataset, UserAuthorizedDatasets, ServiceAccount
+from accounts.models import NIH_User, GoogleProject
 
 from allauth.socialaccount.models import SocialAccount
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
@@ -155,16 +150,19 @@ def user_detail(request, user_id):
         social_account = SocialAccount.objects.get(user_id=user_id)
 
         user_details = {
-            'date_joined': user.date_joined,
-            'email': user.email,
-            'extra_data': social_account.extra_data,
-            'first_name': user.first_name,
-            'id': user.id,
-            'last_login': user.last_login,
-            'last_name': user.last_name
+            'date_joined':  user.date_joined,
+            'email':        user.email,
+            'extra_data':   social_account.extra_data,
+            'first_name':   user.first_name,
+            'id':           user.id,
+            'last_login':   user.last_login,
+            'last_name':    user.last_name
         }
+
+        user_details['gcp_list'] = len(GoogleProject.objects.filter(user=user))
+
         try:
-            nih_user = NIH_User.objects.get(user_id=user_id)
+            nih_user = NIH_User.objects.get(user_id=user_id, linked=True)
             user_details['NIH_username'] = nih_user.NIH_username
             user_details['NIH_assertion_expiration'] = nih_user.NIH_assertion_expiration
             user_details['dbGaP_authorized'] = nih_user.dbGaP_authorized and nih_user.active
@@ -270,7 +268,7 @@ def user_landing(request):
                                                             })
 
 '''
-Returns Results from text search
+DEPRECATED - Returns Results from text search
 '''
 @login_required
 def search_cohorts_viz(request):

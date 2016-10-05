@@ -16,6 +16,8 @@
  *
  */
 
+var MAX_URL_LEN = 2000;
+
 define(['jquery', 'tree_graph', 'stack_bar_chart', 'draw_parsets'],
 function($, tree_graph, stack_bar_chart, draw_parsets) {
     
@@ -134,6 +136,15 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             var context = this;
             var filters = this.format_filters();
             var api_url = this.generate_metadata_url(base_url_domain, endpoint, filters, cohort_id, undefined, version);
+
+            if(api_url.length > MAX_URL_LEN) {
+                $('#url-len-max-alert').show();
+                // This method is expected to return a promise, so send back a pre-rejected one
+                return $.Deferred().reject();
+            } else {
+                $('#url-len-max-alert').hide();
+            }
+
             var update_filters = this.update_filter_counts;
 
             $('.clinical-trees .spinner').show();
@@ -206,87 +217,8 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             });
         },
 
-        update_counts: function(base_url_domain, endpoint, cohort_id, limit, version) {
-            var filters = this.format_filters();
-            var api_url = this.generate_metadata_url(base_url_domain, endpoint, filters, cohort_id, limit, version);
-            var update_filters = this.update_filter_counts;
-            $('.clinical-trees .spinner').show();
-            var startReq = new Date().getTime();
-            $.ajax({
-                type: 'GET',
-                url: api_url,
-
-                // On success
-                success: function (results, status, xhr) {
-                    var stopReq = new Date().getTime();
-                    console.debug("[BENCHMARKING] Time for response in update_counts: "+(stopReq-startReq)+ "ms");
-                    attr_counts = results['count'];
-                    $('.menu-bar .total-samples').html(results['total'] + ' Samples');
-                    update_filters(attr_counts);
-                    tree_graph_obj.draw_trees(attr_counts);
-                },
-                error: function(req,status,err){
-                    
-                },
-                complete: function(xhr,status) {
-                    $('.clinical-trees .spinner').hide();
-                }
-            });
-        },
-
-        update_parsets: function(base_url_domain, endpoint, cohort_id, version) {
-            var filters = this.format_filters();
-            var api_url = this.generate_metadata_url(base_url_domain, endpoint, filters, cohort_id, null, version);
-            var context = this;
-            $('.parallel-sets .spinner').show();
-            var startReq = new Date().getTime();
-            $.ajax({
-                type: 'GET',
-                url: api_url,
-                success: function(results, status, xhr) {
-                    var stopReq = new Date().getTime();
-                    console.debug("[BENCHMARKING] Time for response in update_parsets: "+(stopReq-startReq)+ "ms");
-                    if (results.hasOwnProperty('items')) {
-                        var features = [
-                                'cnvrPlatform',
-                                'DNAseq_data',
-                                'methPlatform',
-                                'gexpPlatform',
-                                'mirnPlatform',
-                                'rppaPlatform'
-                            ];
-                        var plot_features = [
-                            context.get_readable_name(features[0]),
-                            context.get_readable_name(features[1]),
-                            context.get_readable_name(features[2]),
-                            context.get_readable_name(features[3]),
-                            context.get_readable_name(features[4]),
-                            context.get_readable_name(features[5])
-                        ];
-                        for (var i = 0; i < results['items'].length; i++) {
-                            var new_item = {};
-                            for (var j = 0; j < features.length; j++) {
-                                var item = results['items'][i];
-                                new_item[plot_features[j]] = context.get_readable_name(item[features[j]]);
-                            }
-                            results['items'][i] = new_item;
-                        }
-
-                        parsets_obj.draw_parsets(results, plot_features);
-                    } else {
-                        console.debug(results);
-                    }
-                },error: function(req,status,err){
-
-                },
-                complete: function(xhr,status) {
-                    $('.parallel-sets .spinner').hide();
-                }
-            })
-        },
-
         format_filters: function() {
-            var list = [];
+            var list = {};
             $('.selected-filters .panel-body span').each(function() {
                 var $this = $(this),
                     key = $this.data('feature-name'),
@@ -299,10 +231,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
 
                 if(!list[key])
                     list[key] = [];
-                list.push({
-                    key: key,
-                    value: val,
-                });
+                list[key].push(val);
             });
             return list;
         },
@@ -350,11 +279,12 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
 
                         var $that = $(this),
                             value = $that.data('value-name'),
-                            displ_name = ($that.data('displ-name') == 'NA' ? 'None' : $that.data('displ-name')),
+                            id = $that.data('value-id'),
+                            displ_name = ($that.data('value-displ-name') == 'NA' ? 'None' : $that.data('value-displ-name')),
                             new_count = '';
                         if (counts_by_name[attr]) {
-                            if (counts_by_name[attr].values[value] || counts_by_name[attr].values[displ_name]) {
-                                new_count = '(' + (counts_by_name[attr].values[value] || counts_by_name[attr].values[displ_name]) + ')';
+                            if (counts_by_name[attr].values[value] || counts_by_name[attr].values[displ_name] || counts_by_name[attr].values[id]) {
+                                new_count = '(' + (counts_by_name[attr].values[value] || counts_by_name[attr].values[displ_name] || counts_by_name[attr].values[id]) + ')';
                             }
                         }
                         // All entries which were not returned are assumed to be zero
@@ -400,59 +330,8 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                 return translation_dictionary[csv_name];
             } else{
                 csv_name = csv_name.replace(/_/g, ' ');
-                return csv_name.replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });;
+                return csv_name.replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
             }
-        },
-
-        disease_codes_original: [
-            {
-                "id": "BLCA",
-                "label": "Bladder Urothelial Carcinoma"
-            },
-            {
-                "id": "BRCA",
-                "label": "Breast invasive carcinoma"
-            },
-            {
-                "id": "COAD",
-                "label": "Colon adenocarcinoma"
-            },
-            {
-                "id": "GBM",
-                "label": "Glioblastoma Multiforme"
-            },
-            {
-                "id": "HNSC",
-                "label": "Head and Neck squamous cell carcinoma"
-            },
-            {
-                "id": "KIRC",
-                "label": "Kidney renal clear cell carcinoma"
-            },
-            {
-                "id": "LUAD",
-                "label": "Lung adenocarcinoma"
-            },
-            {
-                "id": "LUSC",
-                "label": "Lung squamous cell carcinoma"
-            },
-            {
-                "id": "OV",
-                "label": "Ovarian serous cystadenocarcinoma"
-            },
-            {
-                "id": "READ",
-                "label": "Rectum adenocarcinoma"
-            },
-            {
-                "id": "STAD",
-                "label": "Stomach adenocarcinoma"
-            },
-            {
-                "id": "UCEC",
-                "label": "Uterine Corpus Endometrial Carcinoma"
-            }
-        ]
+        }
     }
 });

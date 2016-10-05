@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2015, Institute for Systems Biology
+ * Copyright 2016, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,25 @@
 
 define (['jquery', 'd3', 'vizhelpers'],
 function($, d3, vizhelpers) {
+
     var helpers = Object.create(vizhelpers, {});
+    var selex_active = false;
+    var zoom_status = {
+        translation: null,
+        scale: null
+    };
+
     return {
         create_scatterplot: function(svg, data, domain, range, xLabel, yLabel, xParam, yParam, colorBy, legend, width, height, cohort_set) {
-            var margin = {top: 10, bottom: 50, left: 50, right: 10};
+            var margin = {top: 10, bottom: 50, left: 100, right: 10};
             var yVal = function(d) {
-                    if (d[yParam] && d[yParam] != 'NA') {
-                        return d[yParam];
-                    } else {
-                        d[yParam] = range[1];
-                        return range[1];
-                    }
-                };
+                if (helpers.isValidNumber(d[yParam])) {
+                    return d[yParam];
+                } else {
+                    d[yParam] = range[1];
+                    return range[1];
+                }
+            };
 
             var yScale = d3.scale.linear().range([height-margin.bottom, margin.top]).domain(range);
             var yMap = function(d) { if(typeof(Number(d.y)) == "number"){return yScale(yVal(d));} else { return 0;}};
@@ -39,7 +46,7 @@ function($, d3, vizhelpers) {
                     .tickSize(-width - margin.left - margin.right, 0, 0);
 
             var xVal = function(d) {
-                    if (d[xParam] && d[xParam] != 'NA') {
+                    if (helpers.isValidNumber(d[xParam])) {
                         return d[xParam];
                     } else {
                         d[xParam] = domain[1];
@@ -113,9 +120,11 @@ function($, d3, vizhelpers) {
             };
 
             var zoomer = function() {
-                svg.select('.x.axis').call(xAxis);
-                svg.select('.y.axis').call(yAxis);
-                plot_area.selectAll('circle').attr('transform', transformer);
+                if(!selex_active) {
+                    svg.select('.x.axis').call(xAxis);
+                    svg.select('.y.axis').call(yAxis);
+                    plot_area.selectAll('circle').attr('transform', transformer);
+                }
             };
 
             var zoom = d3.behavior.zoom()
@@ -123,13 +132,7 @@ function($, d3, vizhelpers) {
                 .y(yScale)
                 .on('zoom', zoomer);
 
-            var zoom_area = svg.append('g')
-                .attr('class', 'zoom_area')
-                .append('rect')
-                .attr('width', width)
-                .attr('height', height)
-                .style('opacity', '0')
-                .call(zoom);
+            svg.call(zoom);
 
             plot_area.selectAll('.dot')
                 .data(data)
@@ -155,7 +158,7 @@ function($, d3, vizhelpers) {
             svg.append('text')
                 .attr('class', 'x label')
                 .attr('text-anchor', 'middle')
-                .attr('transform', 'translate(' + (width/2) + ',' + (height - 10) + ')')
+                .attr('transform', 'translate(' + ((width+margin.left)/2) + ',' + (height - 10) + ')')
                 .text(xLabel);
 
             svg.append('text')
@@ -192,8 +195,18 @@ function($, d3, vizhelpers) {
                 .text(function(d) {
                     if (d != null) {
                         if (colorBy == 'cohort') {
-                            for (var i = 0; i < cohort_set.length; i++) {
-                                if (cohort_set[i]['id'] == d) { return cohort_set[i]['name']; }
+                            if (Array.isArray(d)) {
+                                var cohort_name_label = "";
+                                for (var i = 0; i < d.length; i++) {
+                                    for (var j = 0; j < cohort_set.length; j++) {
+                                        if (cohort_set[j]['id'] == d[i]) { cohort_name_label += cohort_set[i]['name'] + ','; }
+                                    }
+                                }
+                                return cohort_name_label.slice(0,-1);
+                            } else {
+                                for (var i = 0; i < cohort_set.length; i++) {
+                                    if (cohort_set[i]['id'] == d) { return cohort_set[i]['name']; }
+                                }
                             }
                         } else {
                             return d;
@@ -204,16 +217,23 @@ function($, d3, vizhelpers) {
                 });
 
             var check_selection_state = function(obj) {
-                if (obj) {
 
-                    // Remove zoom area
-                    svg.selectAll('.zoom_area').remove();
+                selex_active = !!obj;
+
+                if (obj) {
+                    zoom_status.translation = zoom.translate();
+                    zoom_status.scale = zoom.scale();
 
                     // Append new brush event listeners to plot area only
                     plot_area.append('g')
                         .attr('class', 'brush')
                         .call(brush);
                 } else {
+                    zoom_status.translation && zoom.translate(zoom_status.translation);
+                    zoom_status.scale && zoom.scale(zoom_status.scale);
+                    zoom_status.translation = null;
+                    zoom_status.scale = null;
+
                     var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                     // Clear selections
                     $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + 0);
@@ -221,18 +241,10 @@ function($, d3, vizhelpers) {
                     $('#save-cohort-'+plot_id+'-modal input[name="samples"]').attr('value', []);
                     svg.selectAll('.selected').classed('selected', false);
                     $(svg[0]).parents('.plot').find('.save-cohort-card').hide();
-
+                    // Get rid of the selection rectangle - comment out if we want to enable selection carry-over
+                    brush.clear();
                     // Remove brush event listener plot area
                     plot_area.selectAll('.brush').remove();
-
-                    // Append new zoom area
-                    zoom_area = svg.append('g')
-                        .attr('class', 'zoom_area')
-                        .append('rect')
-                        .attr('width', width)
-                        .attr('height', height)
-                        .style('opacity', '0')
-                        .call(zoom);
 
                 }
             };

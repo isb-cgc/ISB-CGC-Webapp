@@ -24,8 +24,6 @@ require.config({
         jqueryui: 'libs/jquery-ui.min',
         session_security: 'session_security',
         underscore: 'libs/underscore-min',
-        assetscore: 'libs/assets.core',
-        assetsresponsive: 'libs/assets.responsive',
         d3: 'libs/d3.min',
         d3tip: 'libs/d3-tip',
         science: 'libs/science.min',
@@ -38,8 +36,6 @@ require.config({
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
         'session_security': ['jquery'],
-        'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
-        'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
         'select2': ['jquery']
     }
 });
@@ -53,12 +49,8 @@ require([
     'd3tip',
     'vizhelpers',
     'select2',
-    'assetscore',
-    'assetsresponsive',
     'base'
 ], function($, jqueryui, bootstrap, session_security, d3, d3tip, vizhelpers) {
-
-    A11y.Core();
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function() {

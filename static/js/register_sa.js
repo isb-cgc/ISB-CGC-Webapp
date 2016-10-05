@@ -24,13 +24,10 @@ require.config({
         jqueryui: 'libs/jquery-ui.min',
         session_security: 'session_security',
         underscore: 'libs/underscore-min',
-        assetscore: 'libs/assets.core',
-        assetsresponsive: 'libs/assets.responsive'
     },
     shim: {
         'bootstrap': ['jquery'],
         'session_security': ['jquery'],
-        'assetscore': ['jquery']
     }
 });
 
@@ -38,12 +35,8 @@ require([
     'jquery',
     'jqueryui',
     'bootstrap',
-    'session_security',
-
-    'assetscore',
-    'assetsresponsive'
+    'session_security'
 ], function($, jqueryui, bootstrap, session_security) {
-    A11y.Core();
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function() {
@@ -71,6 +64,7 @@ require([
         var user_ver_div = $('.user-verification');
         var spinner = $this.parent('li').find('.load-spinner');
         spinner.show();
+
         $this.find('input[type="submit"]').prop('disabled', 'disabled');
         $.ajax({
             url: $this.attr('action'),
@@ -123,6 +117,10 @@ require([
 
                 user_ver_div.show();
                 $this.find('input[type="submit"]').prop('disabled', '');
+
+                $('.register-sa-div').hide();
+                $('.cannot-register').hide();
+
                 if (data['user_dataset_verified']) {
                     $('.register-sa-div').show();
                 } else {
