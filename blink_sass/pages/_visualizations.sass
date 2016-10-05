@@ -4,6 +4,30 @@
 
 .worksheet-panel-body
 
+  .extent
+    fill: rgba(40, 130, 50, 0.5)
+
+  .axis-label, .axis-label-container div
+    font-weight: 500
+    font-size: 1.1em
+
+  .plot-div
+    overflow-x: hidden
+    overflow-y: auto
+    foreignObject
+      div
+        overflow: hidden
+        text-overflow: ellipsis
+        padding: 5px 5px 5px 5px
+        line-height: 1.25
+        max-height: 100%
+        &.truncated-single
+          white-space: nowrap
+          text-align: end
+    .x-label-container
+      div
+        text-align: center
+
     .axis path, .axis line
         fill: none
         stroke: #000
@@ -50,16 +74,21 @@
                 word-wrap: break-word
                 word-break: break-word
 
-    .legend
-        display: inline-block
-        margin: 20px
-        overflow-y: auto
-        max-height: 650px
-        vertical-align: top
-        .unselected
-            fill-opacity: 0
+  .legend
+      display: inline-block
+      padding: 15px 0px 0px 15px
+      overflow-y: auto
+      max-height: 150px
+      vertical-align: top
+      .unselected
+          fill-opacity: 0
 
 // Plot selector styles
+
+.panel.plot
+  box-shadow: none
+  margin: 0
+
 .plot .panel-heading
     a.toggle-selection
         color: $isb-dark

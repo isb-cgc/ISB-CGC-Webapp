@@ -279,11 +279,12 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
 
                         var $that = $(this),
                             value = $that.data('value-name'),
+                            id = $that.data('value-id'),
                             displ_name = ($that.data('value-displ-name') == 'NA' ? 'None' : $that.data('value-displ-name')),
                             new_count = '';
                         if (counts_by_name[attr]) {
-                            if (counts_by_name[attr].values[value] || counts_by_name[attr].values[displ_name]) {
-                                new_count = '(' + (counts_by_name[attr].values[value] || counts_by_name[attr].values[displ_name]) + ')';
+                            if (counts_by_name[attr].values[value] || counts_by_name[attr].values[displ_name] || counts_by_name[attr].values[id]) {
+                                new_count = '(' + (counts_by_name[attr].values[value] || counts_by_name[attr].values[displ_name] || counts_by_name[attr].values[id]) + ')';
                             }
                         }
                         // All entries which were not returned are assumed to be zero

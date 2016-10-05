@@ -51,7 +51,7 @@ define([
                     mean += parseFloat(d[i]);
                 }
                 mean /= d.length;
-                return '<span>Mean: ' + mean.toFixed(2) + '</span><br/><span>%: ' + (d.y * 100).toFixed(2) + '%</span>';
+                return '<span>Mean: ' + mean.toFixed(2) + '</span><br /><span>' + (d.y * 100).toFixed(2) + '%</span>';
             });
 
     function generate_axis_label(attr, isLogTransform, units) {
@@ -69,8 +69,8 @@ define([
         var svg = d3.select(plot_selector)
             .append('svg')
             .attr('width', width + 10)
-            .attr('height', height);
-        var bar_width = 20;
+            .attr('height', 650);
+        var bar_width = 25;
         var plot = bar_graph_obj.createBarGraph(
             svg,
             data,
@@ -212,7 +212,7 @@ define([
     }
 
     function generate_cubby_hole_plot(plot_selector, legend_selector, height, width, x_attr, y_attr, color_by, cohort_set, data, units) {
-        var margin = {top: 10, bottom: 50, left: 125, right: 0};
+        var margin = {top: 10, bottom: 50, left: 140, right: 0};
         var cubby_size = 115;
         var xdomain = vizhelpers.get_domain(data, 'x');
         var ydomain = vizhelpers.get_domain(data, 'y');
@@ -338,7 +338,7 @@ define([
 
     function select_plot(args){//plot_selector, legend_selector, pairwise_element, type, x_attr, y_attr, color_by, cohorts, cohort_override, data){
         var width  = $('.worksheet.active .worksheet-panel-body:first').width(), //TODO should be based on size of screen
-            height = 700, //TODO ditto
+            height = 625, //TODO ditto
             margin = {top: 0, bottom: 100, left: 70, right: 10},
             x_type = '',
             y_type = '';
