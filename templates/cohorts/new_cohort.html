@@ -263,13 +263,14 @@
                                 </div>
                                 <div id="collapse-{{ attr.id }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"
                                      aria-labelledby="heading-{{ attr.id }}" data-feature-name="{{ attr.name }}" data-feature-id="{{ attr.id }}"
-                                     data-feature-displ-name="{% if attr.displ_name %}{{ attr.displ_name }}{% elif attr.name %}{{ attr.name }}{% else %}{{ attr.id }}{% endif %}" data-feature-type="user-data">
+                                     data-feature-displ-name="{% if attr.displ_name %}{{ attr.displ_name }}{% elif attr.name %}{{ attr.name }}{% else %}{{ attr.id }}{% endif %}"
+                                     data-feature-type="user-data">
                                     <ul class="search-checkbox-list" id="{{ attr.id }}">
                                         {% for v in attr.values %}
                                             <li class="checkbox">
                                                 <label>
                                                     <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}"
-                                                           data-value-id="{% if v.id %}{{ v.id }}{% else %}{{ v.name }}{% endif %}"
+                                                           data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}"
                                                            data-value-displ-name="{% if v.display_name %}{{ v.displ_name }}{% elif v.name %}{{ v.name }}{% else %}{{ v.id }}{% endif %}">
                                                     {% if v.display_name %}{{ v.displ_name }}{% elif v.name %}{{ v.name }}{% else %}{{ v.id }}{% endif %} <span class="count">({{ v.count }})</span>
                                                 </label>
