@@ -44,13 +44,17 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             clin_tree_attr.map(function(attr){
                 clin_tree_attr_map[attr] = 1;
             });
-            for(var i=0;i<filters.length;i++) {
-                var fname = filters[i].key.split(/:/)[1];
-                if(clin_tree_attr_map[fname]) {
-                    if(!filtered_clin_trees[fname]) {
-                        filtered_clin_trees[fname] = {};
+            for(var i in filters) {
+                if(filters.hasOwnProperty(i)) {
+                    var fname = i.split(/:/)[1];
+                    if (clin_tree_attr_map[fname]) {
+                        if (!filtered_clin_trees[fname]) {
+                            filtered_clin_trees[fname] = {};
+                        }
+                        filters[i].map(function(val){
+                            filtered_clin_trees[fname][val] = 1;
+                        });
                     }
-                    filtered_clin_trees[fname][filters[i].value] = 1;
                 }
             }
             if(Object.keys(filtered_clin_trees).length > 0) {
@@ -90,7 +94,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             // If there were filters, we need to adjust their counts so the barchart reflects what
             // was actually filtered
             var filters = this.format_filters();
-            var clin_tree_attr_counts = filters.length > 0 ? this.filter_data_for_clin_trees(attr_counts) : attr_counts;
+            var clin_tree_attr_counts = Object.keys(filters).length > 0 ? this.filter_data_for_clin_trees(attr_counts) : attr_counts;
 
             tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr);
 
@@ -169,7 +173,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                     $('#total-participants').html(results['participants']);
                     update_filters(attr_counts);
 
-                    var attr_counts_clin_trees = filters.length > 0 ? context.filter_data_for_clin_trees(attr_counts) : attr_counts;
+                    var attr_counts_clin_trees = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(attr_counts) : attr_counts;
 
                     tree_graph_obj.draw_trees(attr_counts_clin_trees,clin_tree_attr);
                     

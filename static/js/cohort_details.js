@@ -323,6 +323,8 @@ require([
                     tokenFeatDisplName = (feature.data('feature-displ-name') && feature.data('feature-displ-name').length > 0) ?
                      feature.data('feature-displ-name') : feature.data('feature-name');
 
+                var feature_id = feature.data('feature-id'), value_id =  value.data('value-id');
+
                 if (feature.data('feature-type') == 'datatype') { // Datatype feature
                     var feature_value = value.data('value-name').split('-');
 
@@ -338,83 +340,90 @@ require([
                             break;
                     }
 
+                    feature_id = 'SAMP:' + feature_value[0];
+
+
+
                     var token = $('<span>').data({
-                        'feature-id': 'SAMP:' + feature_value[0],
+                        'feature-id': feature_id,
                         'feature-name': feature_value[0],
-                        'value-id': value.data('value-id'),
+                        'value-id': value_id,
                         'value-name': feature_value[1]
-                    });
+                    }).attr('data-feature-id',feature_id).attr('data-value-id',value_id);
 
                 } else if (feature.data('feature-type') == 'donor') { // Donor feature
                     token = $('<span>').data({
-                        'feature-id': feature.data('feature-id'),
+                        'feature-id': feature_id,
                         'feature-name': feature.data('feature-name'),
-                        'value-id': value.data('value-id'),
+                        'value-id': value_id,
                         'value-name': value.data('value-name')
-                    });
+                    }).attr('data-feature-id',feature_id).attr('data-value-id',value_id);
+
                 } else if (feature.data('feature-type') == 'user-data') { // User data filter
                     token = $('<span>').data({
-                        'feature-id': feature.data('feature-id'),
+                        'feature-id': feature_id,
                         'feature-name': feature.data('feature-name'),
-                        'value-id': value.data('value-id'),
+                        'value-id': value_id,
                         'value-name': value.data('value-name')
-                    });
-                } else { // Molecular feature
+                    }).attr('data-feature-id',feature_id).attr('data-value-id',value_id);
 
+                } else { // Molecular feature
                     var gene = geneListField.tokenfield('getTokens')[0];
+                    feature_id = 'MUT:'+gene.value + ':' + feature.data('feature-id');
+
                     token = $('<span>').data({
-                        'feature-id': 'MUT:'+gene.value + ':' + feature.data('feature-id'),
+                        'feature-id': feature_id,
                         'feature-type': 'molecular',
                         'feature-name': feature.data('feature-name'),
-                        'value-id': value.data('value-id'),
+                        'value-id': value_id,
                         'value-name': value.data('value-name')
-                    });
+                    }).attr('data-feature-id',feature_id).attr('data-value-id',value_id);
 
                     tokenFeatDisplName = gene.label + ' [' + feature.data('feature-displ-name');
                     tokenValDisplName += ']'
                 }
 
-                token.append(
-                    $('<a>').addClass('delete-x filter-label label label-default')
-                        .text(tokenFeatDisplName + ': ' + tokenValDisplName)
-                        .append('<i class="fa fa-times">')
-                        .attr("title",tokenFeatDisplName + ': ' + tokenValDisplName)
-                );
+                // Don't re-add the token and filter if it already exists
+                if($('.selected-filters .panel-body span[data-feature-id="'+feature_id+'"][data-value-id="'+value_id+'"]').length <= 0) {
+                    token.append(
+                        $('<a>').addClass('delete-x filter-label label label-default')
+                            .text(tokenFeatDisplName + ': ' + tokenValDisplName)
+                            .append('<i class="fa fa-times">')
+                            .attr("title",tokenFeatDisplName + ': ' + tokenValDisplName)
+                    );
 
-                if (feature.data('feature-type') == 'molecular') {
-                    token.find('a.delete-x').addClass('mol-spec-filter-x');
-                }
-
-                $this.data({
-                    'select-filters-item': token.clone(true),
-                    'create-cohort-form-item': token.clone(true)
-                });
-
-                $('.selected-filters .panel-body').append($this.data('select-filters-item'));
-                $('#create-cohort-form .form-control-static').append($this.data('create-cohort-form-item'));
-
-                $('a.delete-x').on('click', function(e,data) {
-                    var checked_box = $('div[data-feature-id="' + $(this).parent('span').data('feature-id')
-                        + '"] input[type="checkbox"][data-value-name="' + $(this).parent('span').data('value-name') + '"]');
-
-                    if($(this).parent('span').data('feature-type') == 'molecular') {
-                        checked_box = $('div[data-feature-id="' + $(this).parent('span').data('feature-id').split(":")[2]
-                            + '"] input[type="checkbox"][data-value-name="' + $(this).parent('span').data('value-name') + '"]');
+                    if (feature.data('feature-type') == 'molecular') {
+                        token.find('a.delete-x').addClass('mol-spec-filter-x');
                     }
-                    checked_box.prop('checked', false);
-                    var span_data = $(this).parent('span').data();
-                    $(this).parent('span').remove();
 
-                    // Remove create cohort form pill
-                    $('#create-cohort-form .form-control-static span').each(function () {
-                        if ($(this).data('feature-id') == span_data['feature-id'] && $(this).data('value-name') == span_data['value-name']) {
-                            $(this).remove();
-                        }
+                    $this.data({
+                        'select-filters-item': token.clone(true),
+                        'create-cohort-form-item': token.clone(true)
                     });
 
-                    (!data || !data.without_update) && update_displays(true);
-                    return false;
-                });
+
+                    $('.selected-filters .panel-body').append($this.data('select-filters-item'));
+                    $('#create-cohort-form .form-control-static').append($this.data('create-cohort-form-item'));
+
+                    $('a.delete-x').on('click', function(e,data) {
+                        var checked_box = $('div[data-feature-id="' + $(this).parent('span').data('feature-id')
+                            + '"] input[type="checkbox"][data-value-name="' + $(this).parent('span').data('value-name') + '"]');
+
+                        if($(this).parent('span').data('feature-type') == 'molecular') {
+                            checked_box = $('div[data-feature-id="' + $(this).parent('span').data('feature-id').split(":")[2]
+                                + '"] input[type="checkbox"][data-value-name="' + $(this).parent('span').data('value-name') + '"]');
+                        }
+                        checked_box.prop('checked', false);
+                        var span_data = $(this).parent('span').data();
+
+                        // Remove the filter tokens from their respective containers
+                        $('#create-cohort-form .form-control-static span[data-feature-id="'+span_data['feature-id']+'"][data-value-id="'+span_data['value-id']+'"]').remove();
+                        $('.selected-filters .panel-body span[data-feature-id="'+span_data['feature-id']+'"][data-value-id="'+span_data['value-id']+'"]').remove();
+
+                        (!data || !data.without_update) && update_displays(true);
+                        return false;
+                    });
+                }
             } else { // Checkbox unchecked
                 // Remove create cohort form pill if it exists
                 if($this.data('create-cohort-form-item')) {
