@@ -268,8 +268,8 @@ def initialize_variable_selection_page(request,
     common_project  = {"id" : -1, "study" : {"id" :-1, "name" : ""}, "name" : "Common", "variables" : common_variables}
 
     #Get and sort counts
-    results = count_metadata(request.user)
-    variable_list = convert(results['count'])
+    results = count_metadata(request.user, inc_filters={})
+    variable_list = convert(results['counts'])
     keys = []
     for variable in variable_list:
         keys.append(variable['name'])
