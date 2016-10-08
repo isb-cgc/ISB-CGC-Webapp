@@ -44,8 +44,6 @@ SSL_DIR = os.path.abspath(os.path.dirname(__file__))+os.sep
 ADMINS                  = ()
 MANAGERS                = ADMINS
 
-REQUEST_PROJECT_EMAIL   = os.environ.get('REQUEST_PROJECT_EMAIL', 'request@example.com')
-
 PROJECT_ID              = os.environ.get('GCLOUD_PROJECT_ID', '')
 BQ_PROJECT_ID           = os.environ.get('BIGQUERY_PROJECT_ID', PROJECT_ID) # Replace with PROJECT_ID
 
@@ -63,7 +61,6 @@ PAIRWISE_SERVICE_URL    = os.environ.get('PAIRWISE_SERVICE_URL', None)
 
 # Data Buckets
 OPEN_DATA_BUCKET        = os.environ.get('OPEN_DATA_BUCKET', '')
-CONTROLLED_DATA_BUCKET  = os.environ.get('CONTROLLED_DATA_BUCKET', '') # Not being used
 DCC_CONTROLLED_DATA_BUCKET = os.environ.get('DCC_CONTROLLED_DATA_BUCKET', '')
 CGHUB_CONTROLLED_DATA_BUCKET = os.environ.get('CGHUB_CONTROLLED_DATA_BUCKET', '')
 GCLOUD_BUCKET           = os.environ.get('GOOGLE_STORAGE_BUCKET')
