@@ -1,5 +1,9 @@
 #cohort-details
 
+    .vertical-shim
+        visibility: hidden
+        height: 40px
+
     .menu-bar h3
         margin-top: 0px
 
@@ -7,7 +11,29 @@
         float: right
     .total-samples
         margin-top: 0px
-    #filter-panel
+
+    .tab-content
+        padding: 0
+    ul
+    .nav-tabs
+        li
+            border: none
+            background-color: #fff
+            text-align: center
+            width: (100% / 3)
+            font-size: 12.7px
+            &:first-child a
+                border-top-left-radius: 3px
+            &:last-child a
+                border-top-right-radius: 3px
+            span
+                margin-left: 10px
+        >li.active>a
+            color: darken($isb-warning, 20%) !important
+        &-data, &-ud-filters
+            li
+                width: (100% / 2)
+    #isb-cgc-filter-panel, #user-data-filter-panel
         .heading-note
             font-style: italic
             color: darken($isb-warning, 20%)
@@ -23,22 +49,6 @@
             border: $border
             border-top-color: transparent
             box-shadow: $box-shadow
-        ul.nav-tabs
-            li
-                border: none
-                background-color: #fff
-                text-align: center
-                width: (100% / 4)
-                font-size: 12.7px
-                &:first-child a
-                    border-top-left-radius: 3px
-                &:last-child a
-                    border-top-right-radius: 3px
-                span
-                    margin-left: 10px
-            >li.active>a
-                color: darken($isb-warning, 20%) !important
-
 
         .tab-content
             padding: 0px

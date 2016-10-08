@@ -1,0 +1,130 @@
+<div id="user-data" class="tab-pane" role="tabpanel">
+    <div id="user-data-filter-panel" class="col-lg-4" role="tabpanel">
+        <div class="tabpanel" role="tabpanel">
+            <ul class="nav nav-tabs nav-tabs-ud-filters" role="tablist">
+                <li role="presentation" class="active"><a href="#ud-proj-study-filters" role="tab" data-toggle="tab" title="Donor Filters">Projects & Studies</a></li>
+                <li role="presentation" class=""><a href="#ud-feature-filters" role="tab" data-toggle="tab" title="Donor Filters">Features</a></li>
+            </ul>
+            <div class="tab-content">
+                <!-- user data projects & studies filters tab -->
+                <div role="tabpanel" class="tab-pane active" id="ud-proj-study-filters">
+                    <ul class="list-group" id="data-type-accordion" role="tablist" aria-multiselectable="true">
+                        <li class="list-group-item">
+                            <div id="user-data-filter-alert" class="alert alert-warning alert-dismissable">
+                                <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                Filtering on User Projects and Studies is exclusive to the other filters, and will produce a cohort consisting <i>only</i> of samples from User Data uploads. The Set
+                                operations on the Cohort Editing page can be used to further refine cohorts composed of User Data.
+                            </div>
+                        </li>
+                        {% for attr in user_data %}
+                            <li class="list-group-item">
+                                <div class="list-group-item__heading" role="tab" id="heading-{{ attr.id }}">
+                                    <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-{{ attr.id }}"
+                                       aria-expanded="false" aria-controls="collapse-{{ attr.id }}">
+                                        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {% if attr.displ_name %}{{ attr.displ_name }}{% elif attr.name %}{{ attr.name }}{% else %}{{ attr.id }}{% endif %}
+                                    </a>
+                                </div>
+                                <div id="collapse-{{ attr.id }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"
+                                     aria-labelledby="heading-{{ attr.id }}" data-feature-name="{{ attr.name }}" data-feature-id="{{ attr.id }}"
+                                     data-feature-displ-name="{% if attr.displ_name %}{{ attr.displ_name }}{% elif attr.name %}{{ attr.name }}{% else %}{{ attr.id }}{% endif %}"
+                                     data-feature-type="user-data">
+                                    <ul class="search-checkbox-list" id="{{ attr.id }}">
+                                        {% for v in attr.values %}
+                                            <li class="checkbox">
+                                                <label>
+                                                    <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}"
+                                                           data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}"
+                                                           data-value-displ-name="{% if v.display_name %}{{ v.displ_name }}{% elif v.name %}{{ v.name }}{% else %}{{ v.id }}{% endif %}">
+                                                    {% if v.display_name %}{{ v.displ_name }}{% elif v.name %}{{ v.name }}{% else %}{{ v.id }}{% endif %} <span class="count">({{ v.count }})</span>
+                                                </label>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <!-- user data features filters tab -->
+                <div role="tabpanel" class="tab-pane" id="ud-feature-filters">
+                    <ul class="list-group" id="data-type-accordion" role="tablist" aria-multiselectable="true">
+                        <li class="list-group-item">
+                            <div id="user-data-filter-alert" class="alert alert-warning alert-dismissable">
+                                <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                If a feature is not present across all active user-uploaded studies, it will not be available here for filtering.
+                            </div>
+                        </li>
+                        {% for attr in user_data.features %}
+                            <li class="list-group-item">
+                                <div class="list-group-item__heading" role="tab" id="heading-{{ attr.id }}">
+                                    <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-{{ attr.id }}"
+                                       aria-expanded="false" aria-controls="collapse-{{ attr.id }}">
+                                        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {% if attr.displ_name %}{{ attr.displ_name }}{% elif attr.name %}{{ attr.name }}{% else %}{{ attr.id }}{% endif %}
+                                    </a>
+                                </div>
+                                <div id="collapse-{{ attr.id }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"
+                                     aria-labelledby="heading-{{ attr.id }}" data-feature-name="{{ attr.name }}" data-feature-id="{{ attr.id }}"
+                                     data-feature-displ-name="{% if attr.displ_name %}{{ attr.displ_name }}{% elif attr.name %}{{ attr.name }}{% else %}{{ attr.id }}{% endif %}"
+                                     data-feature-type="user-data">
+                                    <ul class="search-checkbox-list" id="{{ attr.id }}">
+                                        {% for v in attr.values %}
+                                            <li class="checkbox">
+                                                <label>
+                                                    <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}"
+                                                           data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}"
+                                                           data-value-displ-name="{% if v.display_name %}{{ v.displ_name }}{% elif v.name %}{{ v.name }}{% else %}{{ v.id }}{% endif %}">
+                                                    {% if v.display_name %}{{ v.displ_name }}{% elif v.name %}{{ v.name }}{% else %}{{ v.id }}{% endif %} <span class="count">({{ v.count }})</span>
+                                                </label>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="selected-filters panel panel-default">
+            <div class="panel-heading clearfix">
+                <h4 class="panel-title pull-left">Selected Filters</h4>
+                <a class="pull-right" role="button" id="clear-filters">Clear All</a>
+            </div>
+            <div class="panel-body">
+
+            </div>
+        </div>
+
+        <div class="cohort-info panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">Details</h4>
+            </div>
+            <div class="panel-body">
+                <div class="row col-md-6">
+                    <span class="detail-label">Total Number of Samples:</span>
+                    <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
+                    <span class="total-values" id="total-samples">TBD</span>
+                </div>
+                <div class="row col-md-6">
+                    <span class="detail-label">Total Number of Participants:</span>
+                    <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
+                    <span class="total-values" id="total-participants">TBD</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="clinical-trees panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">Clinical Features</h4>
+            </div>
+            <div class="panel-body">
+                <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
+                <div id="tree-graph-clinical"></div>
+            </div>
+            <div id="more-graphs"><button class="btn btn-link" role="button">Show More</button></div>
+            <div id="less-graphs" style="display: none;"><button class="btn btn-link" role="button">Show Less</button></div>
+        </div>
+    </div>
+</div>
