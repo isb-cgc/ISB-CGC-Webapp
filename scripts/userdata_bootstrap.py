@@ -53,7 +53,7 @@ def create_study_views(project, source_table, studies):
     cursor = db.cursor()
 
     study_names = {}
-
+    view_check_sql = "SELECT COUNT(TABLE_NAME) FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = %s;"
     create_view_sql = "CREATE OR REPLACE VIEW %s AS SELECT * FROM %s"
     where_proj = " WHERE Project=%s"
     where_study = " AND Study=%s;"
