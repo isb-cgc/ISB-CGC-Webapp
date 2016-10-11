@@ -87,8 +87,11 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
 
             attr_counts = metadata_counts['count'];
 
-            $('#total-samples').html(metadata_counts['total']);
-            $('#total-participants').html(metadata_counts['participants']);
+            $('#isb-cgc-data-total-samples').html(metadata_counts['total']);
+            $('#isb-cgc-data-total-participants').html(metadata_counts['participants']);
+            $('#user-data-total-samples').html(user_data['total']);
+            $('#user-data-total-participants').html(user_data['participants']);
+
 
             this.update_filter_counts(attr_counts);
             // If there were filters, we need to adjust their counts so the barchart reflects what
@@ -275,7 +278,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                 });
             });
 
-            $('#filter-panel li.list-group-item div.cohort-feature-select-block').each(function() {
+            $('.filter-panel li.list-group-item div.cohort-feature-select-block').each(function() {
                 var $this = $(this),
                     attr = $this.data('feature-name');
                 if(attr && attr.length > 0 && attr !== 'specific-mutation' ) {
