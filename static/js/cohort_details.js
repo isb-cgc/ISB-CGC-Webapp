@@ -486,6 +486,27 @@ require([
         update_displays();
     });
 
+
+
+    $('button[data-target="#create-cohort-modal"]').on('click',function(e){
+        // A user can only make a user data cohort OR an ISB-CGC cohort; if they have
+        // chosen filters for both, the one which was active when they clicked 'save as new'
+        // is the one which is used.
+        // If we see filters for both, warn the user.
+        var activeDataTab = $('.data-tab.active').attr('id');
+        if($('.isb-cgc-data-selected-filters .panel-body span').length > 0 && $('.user-data-selected-filters .panel-body span').length > 0) {
+            $('.one-per-warn').html(activeDataTab == 'isb-cgc-data' ? "ISB-CGC Data" : "User Data");
+            $('#one-cohort-type-per-create-warn').show();
+        }
+        $('#create-cohort-form .form-control-static span').each(function(){
+            if(!$(this).hasClass(activeDataTab+'-token')) {
+                $(this).css('display', 'none');
+            } else {
+                $(this).css('display','inline-block');
+            }
+        });
+    });
+
     // cohort_details: show and hide the filter panel for editing an extant cohort
     $('#add-filter-btn').on('click', function() {
         $('.data-tab-content-panel').removeClass('col-md-12').addClass('col-md-8');
@@ -528,7 +549,8 @@ require([
             form.append('<input type="hidden" name="apply-name" value="true" />');
         }
 
-        $('.selected-filters .panel-body span').each(function() {
+        var activeDataTab = $('.data-tab.active').attr('id');
+        $('.'+activeDataTab+'-selected-filters .panel-body span').each(function() {
             var $this = $(this),
                 value = {
                     'feature': { name: $this.data('feature-name'), id: $this.data('feature-id') },

@@ -92,6 +92,12 @@
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <h4 class="modal-title" id="createCohortModal">Create Cohort</h4>
                 </div>
+                <div id="one-cohort-type-per-create-warn" class="alert alert-warning alert-dismissable" style="display: none;">
+                    <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    A cohort can only be made with ISB-CGC Data <b>or</b> User Data filters, not with both. Because the <span class="one-per-warn"></span> tab was active,
+                    we have chosen those filters. If you wish to create your cohort with the other filter set, cancel this dialog (using the X in the upper-right corner) and
+                    switch to that tab before clicking the <b>Save as New Cohort</b> button.
+                </div>
                 {% if workbook and worksheet %}
                     <form id="create-cohort-form" method="POST" action="{% url 'save_cohort_for_existing_workbook' %}" >
                     <input type="hidden" value="{{ worksheet.id }}" name="worksheet_id" />

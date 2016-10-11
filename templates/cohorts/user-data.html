@@ -9,13 +9,6 @@
                 <!-- user data projects & studies filters tab -->
                 <div role="tabpanel" class="tab-pane active" id="ud-proj-study-filters">
                     <ul class="list-group" id="data-type-accordion" role="tablist" aria-multiselectable="true">
-                        <li class="list-group-item">
-                            <div id="user-data-filter-alert" class="alert alert-warning alert-dismissable">
-                                <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                Filtering on User Projects and Studies is exclusive to the other filters, and will produce a cohort consisting <i>only</i> of samples from User Data uploads. The Set
-                                operations on the Cohort Editing page can be used to further refine cohorts composed of User Data.
-                            </div>
-                        </li>
                         {% for attr in user_data %}
                             <li class="list-group-item">
                                 <div class="list-group-item__heading" role="tab" id="heading-{{ attr.id }}">
@@ -87,7 +80,7 @@
         </div>
     </div>
     <div class="{% if cohort.id %}col-md-12{% else %}col-lg-8{% endif %} data-tab-content-panel">
-        <div class="selected-filters user-data-selected-filters panel panel-default">
+        <div class="selected-filters user-data-selected-filters panel panel-default" {% if cohort.id %}style="display: none;"{% endif %}>
             <div class="panel-heading clearfix">
                 <h4 class="panel-title pull-left">{% if cohort.id %}New Filters{% else %}Selected Filters{% endif %}</h4>
                 <a class="pull-right clear-filters" role="button" id="user-data-clear-filters">Clear All</a>
