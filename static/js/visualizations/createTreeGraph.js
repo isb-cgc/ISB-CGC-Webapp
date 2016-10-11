@@ -113,7 +113,7 @@ function($, d3, d3tip, vis_helpers) {
             var w = 140,
                 h = 140;
 
-            $('#tree-graph-clinical').empty();
+            $('.tree-graph-clinical').empty();
 
             var clin_attr_titles = [
                 'Study',
@@ -137,7 +137,7 @@ function($, d3, d3tip, vis_helpers) {
             var pcount = (total * 0.008) > 1 ? (total * 0.008) : 0;
 
             for (var i = 0; i < clin_attr.length; i++) {
-                var tree_div = d3.select('#tree-graph-clinical')
+                var tree_div = d3.select('.tree-graph-clinical')
                     .append('div')
                     .attr('class', 'tree-graph');
                 var title_div = tree_div.append('p')

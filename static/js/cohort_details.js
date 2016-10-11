@@ -215,6 +215,10 @@ require([
     };
 
     var filter_change_callback = function(e,data) {
+
+        var activeDataTab = $('.data-tab.active').attr('id');
+        var selFilterPanel = '.'+activeDataTab+ '-selected-filters';
+
         var $this = $(this);
 
         var token = null;
@@ -270,7 +274,7 @@ require([
                     $(this).prop('checked',($(this).data('category') == value.val()));
                 });
 
-                $('.selected-filters .panel-body').append($this.data('select-filters-item'));
+                $(selFilterPanel+' .panel-body').append($this.data('select-filters-item'));
                 $('#create-cohort-form .form-control-static').append($this.data('create-cohort-form-item'));
 
                 $('a.mol-cat-filter-x').on('click', function (e,data) {
@@ -342,14 +346,12 @@ require([
 
                     feature_id = 'SAMP:' + feature_value[0];
 
-
-
                     var token = $('<span>').data({
                         'feature-id': feature_id,
                         'feature-name': feature_value[0],
                         'value-id': value_id,
                         'value-name': feature_value[1]
-                    }).attr('data-feature-id',feature_id).attr('data-value-id',value_id);
+                    }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token');
 
                 } else if (feature.data('feature-type') == 'donor') { // Donor feature
                     token = $('<span>').data({
@@ -357,7 +359,7 @@ require([
                         'feature-name': feature.data('feature-name'),
                         'value-id': value_id,
                         'value-name': value.data('value-name')
-                    }).attr('data-feature-id',feature_id).attr('data-value-id',value_id);
+                    }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token');
 
                 } else if (feature.data('feature-type') == 'user-data') { // User data filter
                     token = $('<span>').data({
@@ -365,7 +367,7 @@ require([
                         'feature-name': feature.data('feature-name'),
                         'value-id': value_id,
                         'value-name': value.data('value-name')
-                    }).attr('data-feature-id',feature_id).attr('data-value-id',value_id);
+                    }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token');
 
                 } else { // Molecular feature
                     var gene = geneListField.tokenfield('getTokens')[0];
@@ -376,15 +378,16 @@ require([
                         'feature-type': 'molecular',
                         'feature-name': feature.data('feature-name'),
                         'value-id': value_id,
-                        'value-name': value.data('value-name')
-                    }).attr('data-feature-id',feature_id).attr('data-value-id',value_id);
+                        'value-name': value.data('value-name'),
+                        'class': ''
+                    }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token');
 
                     tokenFeatDisplName = gene.label + ' [' + feature.data('feature-displ-name');
                     tokenValDisplName += ']'
                 }
 
                 // Don't re-add the token and filter if it already exists
-                if($('.selected-filters .panel-body span[data-feature-id="'+feature_id+'"][data-value-id="'+value_id+'"]').length <= 0) {
+                if($(selFilterPanel+' .panel-body span[data-feature-id="'+feature_id+'"][data-value-id="'+value_id+'"]').length <= 0) {
                     token.append(
                         $('<a>').addClass('delete-x filter-label label label-default')
                             .text(tokenFeatDisplName + ': ' + tokenValDisplName)
@@ -402,7 +405,7 @@ require([
                     });
 
 
-                    $('.selected-filters .panel-body').append($this.data('select-filters-item'));
+                    $(selFilterPanel+' .panel-body').append($this.data('select-filters-item'));
                     $('#create-cohort-form .form-control-static').append($this.data('create-cohort-form-item'));
 
                     $('a.delete-x').on('click', function(e,data) {
@@ -418,7 +421,7 @@ require([
 
                         // Remove the filter tokens from their respective containers
                         $('#create-cohort-form .form-control-static span[data-feature-id="'+span_data['feature-id']+'"][data-value-id="'+span_data['value-id']+'"]').remove();
-                        $('.selected-filters .panel-body span[data-feature-id="'+span_data['feature-id']+'"][data-value-id="'+span_data['value-id']+'"]').remove();
+                        $(selFilterPanel+' .panel-body span[data-feature-id="'+span_data['feature-id']+'"][data-value-id="'+span_data['value-id']+'"]').remove();
 
                         (!data || !data.without_update) && update_displays(true);
                         return false;
@@ -469,19 +472,24 @@ require([
         }
     });
 
-    $('#clear-filters').on('click', function() {
-        $('.selected-filters .panel-body').empty();
-        $('#filter-panel input:checked').each(function() {
+    $('.clear-filters').on('click', function() {
+        var filterType = $(this).attr('id').split('-clear-filters')[0];
+        $(this).parents('.selected-filters').find('.panel-body').empty();
+        $(this).parents('.data-tab').find('.filter-panel input:checked').each(function() {
             $(this).prop('checked', false);
         });
-        $('#paste-in-genes').siblings('div.token').find('a.close').trigger('click');
-        $('#create-cohort-form .form-control-static').empty();
+        if(filterType === 'isb-cgc-data') {
+            $('#paste-in-genes').siblings('div.token').find('a.close').trigger('click');
+        }
+
+        $('#create-cohort-form .form-control-static span.'+filterType+'-token').remove();
         update_displays();
     });
 
+    // cohort_details: show and hide the filter panel for editing an extant cohort
     $('#add-filter-btn').on('click', function() {
-        $('#content-panel').removeClass('col-md-12').addClass('col-md-8');
-        $('#filter-panel').show();
+        $('.data-tab-content-panel').removeClass('col-md-12').addClass('col-md-8');
+        $('.filter-panel').show();
         $('.selected-filters').show();
         $('.page-header').hide();
         $('input[name="cohort-name"]').show();
@@ -490,10 +498,9 @@ require([
         showHideMoreGraphButton();
         $('#multi-categorical').prop('scrollLeft',150);
     });
-
     $('#cancel-add-filter-btn').on('click', function() {
-        $('#content-panel').removeClass('col-md-8').addClass('col-md-12');
-        $('#filter-panel').hide();
+        $('.data-tab-content-panel').removeClass('col-md-8').addClass('col-md-12');
+        $('.filter-panel').hide();
         $('.selected-filters').hide();
         $('.page-header').show();
         $('input[name="cohort-name"]').hide();
@@ -530,43 +537,31 @@ require([
             form.append($('<input>').attr({ type: 'hidden', name: 'filters', value: JSON.stringify(value)}));
         });
 
-
         if(cohort_id) {
             $('#apply-edit-cohort-name').prop('value', $('#edit-cohort-name').val());
             form.append('<input type="hidden" name="source" value="' + cohort_id + '" />');
         }
     });
 
-    $('#clin-accordion').on('show.bs.collapse', function (e) {
-        $(e.target).siblings('a').find('i.fa-caret-down').show();
-        $(e.target).siblings('a').find('i.fa-caret-right').hide();
-
-    });
-
-    $('#clin-accordion').on('hide.bs.collapse', function (e) {
-        $(e.target).siblings('a').find('i.fa-caret-right').show();
-        $(e.target).siblings('a').find('i.fa-caret-down').hide()
-    });
-
+    // Show more/less links on categories with >6 fiilters
     $('.show-more').on('click', function() {
         $(this).parent().siblings('li.extra-values').show();
         $(this).parent().siblings('.less-checks').show();
         $(this).parent().hide();
     });
-
     $('.show-less').on('click', function() {
         $(this).parent().siblings('li.extra-values').hide();
         $(this).parent().siblings('.more-checks').show();
         $(this).parent().hide();
     });
 
+    // Click events for 'Check All/Uncheck All' in filter categories
     $('.check-all').on('click',function(){
         $(this).parent().parent().siblings('.checkbox').find('input').prop('checked',true);
         $(this).parent().parent().siblings('.checkbox').find('input').each(function(){
             $(this).triggerHandler('change');
         });
     });
-
     $('.uncheck-all').on('click',function(){
         $(this).parent().parent().siblings('.checkbox').find('input').prop('checked',false);
         $(this).parent().parent().siblings('.checkbox').find('input').each(function(){
@@ -574,31 +569,30 @@ require([
         });
     });
 
+    // Show or hide the 'more' button for the mosaics based on whether it's needed per height
     if($('.col-lg-8').length == 0){
         showHideMoreGraphButton();
     }
-    // Show hide more graph button based on whether there is more tree graph
     function showHideMoreGraphButton(){
-        var containerHeight = $('#cohort-details .clinical-trees .panel-body').outerHeight();
-        var treeGraphActualHeight = $('#tree-graph-clinical').height();
+        var containerHeight = $('.clinical-trees .panel-body').outerHeight();
+        var treeGraphActualHeight = $('.tree-graph-clinical').height();
 
         if(containerHeight >= treeGraphActualHeight){
-            $('#more-graphs').hide();
+            $('.more-graphs').hide();
         }else{
-            $('#more-graphs').show();
+            $('.more-graphs').show();
         }
     }
-    $('#more-graphs button').on('click', function() {
-        $('#more-graphs').hide();
-        $('#less-graphs').show();
+    $('.more-graphs button').on('click', function() {
+        $('.more-graphs').hide();
+        $('.less-graphs').show();
         $('.clinical-trees .panel-body').animate({
             height: '430px'
         }, 800);
     });
-
-    $('#less-graphs button').on('click', function() {
-        $('#less-graphs').hide();
-        $('#more-graphs').show();
+    $('.less-graphs button').on('click', function() {
+        $('.less-graphs').hide();
+        $('.more-graphs').show();
         $('.clinical-trees .panel-body').animate({
             height: '210px'
         }, 800);
@@ -660,7 +654,6 @@ require([
             save_changes_btn_modal.prop('disabled',true);
         }
     };
-
 
     // If we received counting data, display it
     if(metadata_counts !== null && metadata_counts !== "") {
