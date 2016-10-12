@@ -89,8 +89,8 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
 
             $('#isb-cgc-data-total-samples').html(metadata_counts['total']);
             $('#isb-cgc-data-total-participants').html(metadata_counts['participants']);
-            $('#user-data-total-samples').html(user_data['total']);
-            $('#user-data-total-participants').html(user_data['participants']);
+            user_data && $('#user-data-total-samples').html(user_data['total']);
+            user_data && $('#user-data-total-participants').html(user_data['participants']);
 
 
             this.update_filter_counts(attr_counts);
