@@ -127,13 +127,7 @@
                         {% for project in public_projects %}
                         <tr class="row-{% if forloop.counter|divisibleby:2 %}even{% else %}odd{% endif %}" data-project-id="{{ project.id }}">
                             <td class="control-col">
-                                <div class="dropdown">
-                                    <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" class="dropdown-arrow"><i class="fa fa-caret-down"></i></a>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="">New Workbook</a></li>
-                                    </ul>
-                                    <span class="row-expand-button"></span>
-                                </div>
+                                <span class="row-expand-button"></span>
                             </td>
                             <td class="name-col"><a href="{% url 'project_detail' project.id %}">{{ project.name }}</a></td>
                             <td>{{ project.study_set.count }}</td>
@@ -145,13 +139,7 @@
                             <td class="control-col">
                             </td>
                             <td class="name-col">
-                                <div class="dropdown">
-                                    <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
-                                    {{ study.name }}
-                                    <ul class="dropdown-menu">
-                                        <li><a href="">New Workbook</a></li>
-                                    </ul>
-                                </div>
+                                {{ study.name }}
                             </td>
                             <td></td>
                             <td></td>
