@@ -89,8 +89,8 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
 
             $('#isb-cgc-data-total-samples').html(metadata_counts['total']);
             $('#isb-cgc-data-total-participants').html(metadata_counts['participants']);
-            $('#user-data-total-samples').html(user_data ? metadata_counts['user_data_total'] : "NA");
-            $('#user-data-total-participants').html(user_data ? metadata_counts['user_data_participants'] : "NA");
+            $('#user-data-total-samples').html(user_data && metadata_counts['user_data_total'] !== null ? metadata_counts['user_data_total'] : "NA");
+            $('#user-data-total-participants').html(user_data && metadata_counts['user_data_participants'] !== null ? metadata_counts['user_data_participants'] : "NA");
 
 
             this.update_filter_counts(attr_counts);
@@ -174,8 +174,8 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                     attr_counts = results['count'];
                     $('#isb-cgc-data-total-samples').html(results['total']);
                     $('#isb-cgc-data-total-participants').html(results['participants']);
-                    $('#user-data-total-samples').html(results['user_data'] ? results['user_data_total'] : "NA");
-                    $('#user-data-total-participants').html(results['user_data'] ? results['user_data_participants'] : "NA");
+                    $('#user-data-total-samples').html(results['user_data'] && results['user_data_total'] !== null ? results['user_data_total'] : "NA");
+                    $('#user-data-total-participants').html(results['user_data'] && results['user_data_participants'] !== null ? results['user_data_participants'] : "NA");
                     update_filters(attr_counts);
 
                     var attr_counts_clin_trees = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(attr_counts) : attr_counts;

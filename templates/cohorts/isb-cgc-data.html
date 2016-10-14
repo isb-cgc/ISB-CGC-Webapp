@@ -1,4 +1,4 @@
-        <div id="isb-cgc-data" class="tab-pane data-tab {% if not user_data or metadata_counts.user_data_total <= 0 %}active{% endif %}" role="tabpanel">
+        <div id="isb-cgc-data" class="tab-pane data-tab {% if not cohort_id or not user_data or not metadata_counts.user_data_total or metadata_counts.user_data_total <= 0 %}active{% endif %}" role="tabpanel">
             <div id="isb-cgc-data-filter-panel" class="col-lg-4 filter-panel" role="tabpanel" {% if cohort.id %}style="display:none;"{% endif %}>
                 <div class="tabpanel" role="tabpanel">
                     <ul class="nav nav-tabs nav-tabs-filters" role="tablist">
