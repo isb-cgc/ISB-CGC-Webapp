@@ -1,4 +1,4 @@
-<div id="user-data" class="tab-pane data-tab" role="tabpanel">
+<div id="user-data" class="tab-pane data-tab {% if user_data and metadata_counts.user_data_total > 0 %}active{% endif %}" role="tabpanel">
     <div id="user-data-filter-panel" class="col-lg-4 filter-panel" role="tabpanel" {% if cohort.id %}style="display:none;"{% endif %}>
         <div class="tabpanel" role="tabpanel">
             <ul class="nav nav-tabs nav-tabs-ud-filters" role="tablist">
