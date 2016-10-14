@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2015, Institute for Systems Biology
+ * Copyright 2016, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,6 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
             return results;
         },
         create_cubbyplot: function(svg, margin, data, domain, range, xLabel, yLabel, xParam, yParam, colourBy, legend, width, height, cubby_size) {
-            var margin = {top: 10, bottom: 50, left: 50, right: 0};
             var colorVal = function(d) { return d[colorBy]; };
             var color = d3.scale.category20();
             var x_band_width = (width - margin.left) / domain.length;
@@ -239,8 +238,9 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                 svg.select('.y.grid').attr('transform', 'translate(' + margin.left + ',' + (d3.event.translate[1] + y_band_width/2) + ')');
                 plot_area.selectAll('.expected_fill').attr('transform', 'translate(' + 0 + ',' + d3.event.translate[1] + ')');
                 plot_area.selectAll('text').attr('transform', 'translate(' + 0 + ',' + d3.event.translate[1] + ')');
-                d3.select('.y.axis').selectAll('text').call(d3textwrap.textwrap().bounds({width: margin.left*0.85, height: y.rangeBand()}));
-                d3.select('.y.axis').selectAll('foreignObject').attr('style','transform: translate(-'+margin.left*0.85+'px,-'+y.rangeBand()*0.50+'px);');
+                d3.select('.y.axis').selectAll('text').call(d3textwrap.textwrap().bounds({width: margin.left*0.75, height: y.rangeBand()}));
+                d3.select('.y.axis').selectAll('foreignObject').attr('style','transform: translate(-'+margin.left*0.75+'px,-'+y.rangeBand()*0.50+'px);');
+
             };
 
             var zoom_xy = function() {
@@ -258,8 +258,8 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                 svg.select('.y.grid').attr('transform', 'translate(' + margin.left + ',' + (d3.event.translate[1] + (y_band_width*d3.event.scale)/2) + ') scale(' + d3.event.scale + ',' + d3.event.scale + ')');
                 plot_area.selectAll('.expected_fill').attr('transform', 'translate(' + d3.event.translate[0] + ',' + d3.event.translate[1] + ') scale(' + d3.event.scale + ',' + d3.event.scale + ')');
                 plot_area.selectAll('text').attr('transform', 'translate(' + d3.event.translate[0] + ',' + d3.event.translate[1] + ') scale(' + d3.event.scale + ',' + d3.event.scale + ')');
-                d3.select('.y.axis').selectAll('text').call(d3textwrap.textwrap().bounds({width: margin.left*0.85, height: y.rangeBand()}));
-                d3.select('.y.axis').selectAll('foreignObject').attr('style','transform: translate(-'+margin.left*0.85+'px,-'+y.rangeBand()*0.50+'px);');
+                d3.select('.y.axis').selectAll('text').call(d3textwrap.textwrap().bounds({width: margin.left*0.75, height: y.rangeBand()}));
+                d3.select('.y.axis').selectAll('foreignObject').attr('style','transform: translate(-'+margin.left*0.75+'px,-'+y.rangeBand()*0.50+'px);');
             };
 
             var zoom = d3.behavior.zoom();
@@ -354,7 +354,8 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
             plot_area.call(tip);
 
             // append axes labels
-            var xAxisXPos = ((svg.attr('width')>view_width ? view_width : svg.attr('width'))/2)+(margin.left/2);
+            console.debug(svg.attr('width')+margin.left);
+            var xAxisXPos = (parseInt(svg.attr('width')>view_width ? view_width : svg.attr('width'))+margin.left)/2;
             var xAxisYPos = (svg.attr('height')>view_height ? view_height : svg.attr('height'));
             svg.append('text')
                 .attr('class', 'axis-label')
@@ -362,15 +363,15 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                 .attr('transform', 'translate(' + xAxisXPos + ',' + xAxisYPos + ')')
                 .text(xLabel);
 
-            var yAxisYPos = ((svg.attr('height')>view_height ? view_height : svg.attr('height'))/2);
+            var yAxisXPos = (parseInt(svg.attr('height')>view_height ? view_height : svg.attr('height'))-margin.bottom)/2;
             svg.append('text')
                 .attr('class', 'axis-label')
                 .attr('text-anchor', 'middle')
-                .attr('transform', 'rotate(-90) translate(-' + yAxisYPos + ',10)')
+                .attr('transform', 'rotate(-90) translate(-' + yAxisXPos + ',10)')
                 .text(yLabel);
 
-            d3.select('.y.axis').selectAll('text').call(d3textwrap.textwrap().bounds({width: margin.left*0.85, height: y.rangeBand()}));
-            d3.select('.y.axis').selectAll('foreignObject').attr('style','transform: translate(-'+margin.left*0.85+'px,-'+y.rangeBand()*0.50+'px);');
+            d3.select('.y.axis').selectAll('text').call(d3textwrap.textwrap().bounds({width: margin.left*0.75, height: y.rangeBand()}));
+            d3.select('.y.axis').selectAll('foreignObject').attr('style','transform: translate(-'+margin.left*0.75+'px,-'+y.rangeBand()*0.50+'px);');
 
             var check_selection_state = function(obj) {
                 if (obj) {

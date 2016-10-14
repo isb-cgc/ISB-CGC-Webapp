@@ -6,8 +6,6 @@ require.config({
         jqueryui: 'libs/jquery-ui.min',
         session_security: 'session_security',
         underscore: 'libs/underscore-min',
-        assetscore: 'libs/assets.core',
-        assetsresponsive: 'libs/assets.responsive',
         base: 'base',
         text: 'libs/require-text'
     },
@@ -15,8 +13,6 @@ require.config({
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
         'session_security': ['jquery'],
-        'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
-        'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
         'underscore': {exports: '_'}
     }
 });
@@ -27,8 +23,6 @@ require([
     'bootstrap',
     'session_security',
     'underscore',
-    'assetscore',
-    'assetsresponsive',
     'base'
 ], function($, jqueryui, bootstrap, session_security, _) {
     'use strict';
@@ -40,5 +34,39 @@ require([
             _.each(forms, function (form) {
                 form.reset();
             });
+    });
+
+    /*
+     * Ajax submitting forms
+     */
+    $('.ajax-form-modal').find('form').on('submit', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var $this = $(this),
+            fields = $this.serialize();
+
+        $this.find('.btn').addClass('btn-disabled').attr('disabled', true);
+        $.ajax({
+            url: $this.attr('action'),
+            data: fields,
+            method: 'POST'
+        }).then(function () {
+            $this.closest('.modal').modal('hide');
+            if($this.data('redirect')) {
+                window.location = $this.data('redirect');
+            } else {
+                window.location.reload();
+            }
+        }, function () {
+            $this.find('.error-messages').append(
+                $('<p>')
+                    .addClass('alert alert-danger')
+                    .text('There was an error deleting that study. Please reload and try again, or try again later.')
+            );
+        })
+        .always(function () {
+            $this.find('.btn').removeClass('btn-disabled').attr('disabled', false);
+        });
     });
 });

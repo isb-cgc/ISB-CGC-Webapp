@@ -8,8 +8,6 @@ require.config({
         jqueryui: 'libs/jquery-ui.min',
         session_security: 'session_security',
         underscore: 'libs/underscore-min',
-        assetscore: 'libs/assets.core',
-        assetsresponsive: 'libs/assets.responsive',
         tablesorter:'libs/jquery.tablesorter.min',
         base: 'base',
         text: 'libs/require-text',
@@ -18,8 +16,6 @@ require.config({
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
         'session_security': ['jquery'],
-        'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
-        'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
         'tablesorter': ['jquery'],
         'base': ['jquery'],
         'underscore': {
@@ -28,7 +24,12 @@ require.config({
     }
 });
 
-require(['jquery', 'underscore', 'text!../templates/upload_input_table.html', 'bootstrap'], function ($, _, UploadInputTableTempl) {
+require([
+    'jquery',
+    'underscore',
+    'text!../templates/upload_input_table.html',
+    'bootstrap'
+], function ($, _, UploadInputTableTempl) {
 
     var changeNumber = 0,
         restrictiveGauge = ['int', 'float', 'file', 'url', 'string', 'text'],

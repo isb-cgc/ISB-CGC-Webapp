@@ -38,7 +38,7 @@
         {% if project.is_public %}
         <li><em>Public Project</em></li>
         {% else %}
-        <li role="menuitem"><button class="btn btn-link" data-toggle="modal" data-target="#share-project-modal">Shared with ({{ project.shared.count }})</button></li>
+        <li role="menuitem"><button class="btn btn-link" data-toggle="modal" data-target="#share-project-modal">Shared with (<span class="share-count">{{ project.shared.count }}</span>)</button></li>
         {% endif %}
     </ul>
 </div>
@@ -52,9 +52,14 @@
                 <div class="dropdown pull-left">
                     <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-gear"></i></a>
                     <ul class="dropdown-menu">
-                        <li role="menuitem"><a href="">New Workbook</a></li>
-                        <li role="menuitem"><a data-toggle="modal" data-target="#edit-study-details-modal-{{ study.id }}">Edit Details</a></li>
+{#                        <li role="menuitem"><a href="">New Workbook</a></li>#}
+                        {% if project.owner.id == user.id %}
                         <li role="menuitem"><a data-toggle="modal" data-target="#delete-study-modal-{{ study.id }}" class="study-delete">Delete</a></li>
+                        {% endif %}
+                        {% if shared %}
+                        <li role="menuitem"><a data-toggle="modal" data-target="#edit-study-details-modal-{{ study.id }}">Edit Details</a></li>
+{#                        <li role="menuitem"><a data-toggle="modal" data-target="#delete-study-modal-{{ study.id }}" class="study-delete">Delete</a></li>#}
+                        {% endif %}
                     </ul>
                 </div>
                 <h4 class="panel-title pull-left">{{ study.name }}</h4>
@@ -83,6 +88,12 @@
                     <dd>{{ study.last_date_saved|date:'M d, Y, g:i a' }}</dd>
                     <dt>Number of Files</dt>
                     <dd>{{ study.get_file_count }}</dd>
+                    <dt>Cloud Storage Bucket Name</dt>
+                    <dd>{{ study.user_data_tables_set.all.0.google_bucket.bucket_name }}</dd>
+                    <dt>BigQuery Data Table(s)</dt>
+                    {% for item in study.get_bq_tables %}
+                        <dd>{{ item }}</dd>
+                    {% endfor %}
                 </dl>
             </div>
         </section>
@@ -92,6 +103,13 @@
     </div>
 
     {% include "projects/project_modals.html" %}
+
+    <script type="text/javascript">
+{#    var base_api_url            = '{{ BASE_API_URL|safe }}';#}
+    var base_url                = '{{ BASE_URL|safe }}';
+{#    var display_worksheet_id    = '{{ display_worksheet.id|safe }}';#}
+{#    var workbook_id             = '{{ workbook.id }}';#}
+</script>
 {% endblock %}
 
 {% block js_file %}{% static 'js/project_details.js' %}{% endblock %}

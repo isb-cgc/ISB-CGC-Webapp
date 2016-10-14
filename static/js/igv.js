@@ -24,17 +24,12 @@ require.config({
         jqueryui: 'libs/jquery-ui.min',
         session_security: 'session_security',
         underscore: 'libs/underscore-min',
-        assetscore: 'libs/assets.core',
-        assetsresponsive: 'libs/assets.responsive',
-
         igvbeta: 'libs/igv'
     },
     shim: {
         'session_security': ['jquery'],
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
-        'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
-        'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
         'igvbeta': ['jquery', 'jqueryui']
     }
 });
@@ -45,12 +40,9 @@ require([
     'jqueryui',
     'session_security',
     'bootstrap',
-    'igvbeta',
+    'igvbeta'
 
-    'assetscore',
-    'assetsresponsive'
 ], function($, jqueryui, session_security, bs, igvbeta) {
-    A11y.Core();
 
     var browser;
     var tracks = [];

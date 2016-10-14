@@ -26,8 +26,6 @@ require.config({
         jqueryui: 'libs/jquery-ui.min',
         session_security: 'session_security',
         underscore: 'libs/underscore-min',
-        assetscore: 'libs/assets.core',
-        assetsresponsive: 'libs/assets.responsive',
         d3: 'libs/d3.min',
         d3tip: 'libs/d3-tip',
         d3textwrap: 'libs/d3-textwrap.min',
@@ -74,8 +72,6 @@ require([
     'd3',
     'd3tip',
     'select2',
-    'assetscore',
-    'assetsresponsive',
     'base'
 ], function ($, plot_factory, vizhelpers) {
 
@@ -681,7 +677,7 @@ require([
      * Gather plot information on the page
      */
     function get_plot_info_on_page(plot_settings){
-
+        
         var worksheet = plot_settings.parents('.worksheet-body');
 
         function variable_values(label){
@@ -743,8 +739,8 @@ require([
 
     function get_plot_info(selector, callback){
         var worksheet_id = $(selector).attr("worksheet_id");
-        var plot_type = $(selector).find(":selected").text();
-        if(plot_type != "-- select an analysis --") {
+        var plot_type = $(selector).find(":selected").val();
+        if(plot_type !== "") {
             get_plot_model(workbook_id, worksheet_id, plot_type, function (data) {
                 if (data.error) {
                     console.error("Display error");
@@ -778,7 +774,7 @@ require([
     // Because we do not have a fixed height set but won't know our ideal height (per the size of the source panel)
     // after load, we need to set it manually in JS
     function setPlotPanelHeight(active_sheet){
-        $(active_sheet).find('.worksheet-panel-body').css('height',$('#source_pane-'+$(active_sheet).attr('id')).height()-
+        $(active_sheet).find('.worksheet-panel-body').css('max-height',$('#source_pane-'+$(active_sheet).attr('id')).height()-
             ($(active_sheet).find('.worksheet-content').height()-$(active_sheet).find('.worksheet-panel-body').outerHeight()) +'px');
     };
 
@@ -832,10 +828,9 @@ require([
                     }
                 }
             });
+            setPlotPanelHeight(active_sheet);
         }
-        setPlotPanelHeight(active_sheet);
     });
-
 
     /*
      * validate the plot settings before initiating the plot
@@ -1094,6 +1089,6 @@ require([
     $('.save-comment-btn').prop('disabled', true);
     $('.comment-textarea').keyup(function() {
         $(this).siblings('.save-comment-btn').prop('disabled', this.value == '' ? true : false)
-    })
+    });
 });
 
