@@ -118,7 +118,9 @@
                                         {{shared.email}}
                                     </td>
                                     <td>
+                                        {% if project.owner == request.user %}
                                         <a class="remove-shared-user" role="button" data-shared-id="{{ shared.id }}"><i class="fa fa-times"></i></a>
+                                        {% endif %}
                                     </td>
                                 </tr>
                             {% endfor %}
