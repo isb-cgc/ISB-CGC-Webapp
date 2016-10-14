@@ -3,25 +3,11 @@
   overflow: hidden
   margin: 0 -10px -5px -10px
 
-  .worksheet-panel-body
-    overflow-y: scroll
-    overflow-x: hidden
-
   .panel.plot
     box-shadow: none
     margin: 0
-
-  .axis-label
-    font-weight: 500
-    font-size: 1.1em
-
-  .plot-div
-    foreignObject
-      div
-        overflow: hidden
-        text-overflow: ellipsis
-        padding: 5px 5px 5px 5px
-        line-height: 1.25
+    overflow-y: auto
+    overflow-x: hidden
 
   .fly-out
     position: absolute
@@ -48,7 +34,7 @@
     float: left
     width: 25%
     background: darken($white, 8%)
-    min-height: 900px
+    min-height: 829px
     position: relative
     transition: width 0.45s ease-in-out
 
