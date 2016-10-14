@@ -9,6 +9,14 @@
                 <!-- user data projects & studies filters tab -->
                 <div role="tabpanel" class="tab-pane active" id="ud-proj-study-filters">
                     <ul class="list-group" id="data-type-accordion" role="tablist" aria-multiselectable="true">
+                        {% if not user_data or metadata_counts.user_data_total <= 0 %}
+                            <li class="list-group-item">
+                                <div id="user-data-alert" class="alert alert-warning alert-dismissable">
+                                    <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                    There is no user data available to display.
+                                </div>
+                            </li>
+                        {% endif %}
                         {% for attr in user_data %}
                             <li class="list-group-item">
                                 <div class="list-group-item__heading" role="tab" id="heading-{{ attr.id }}">
@@ -111,12 +119,12 @@
                 <div class="row col-md-6">
                     <span class="detail-label">Total Number of Samples:</span>
                     <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                    <span class="total-values" id="user-data-total-samples">TBD</span>
+                    <span class="total-values" id="user-data-total-samples">{% if user_data %}{{ metadata_counts.user_data_total  }}{% else %}NA{% endif %}</span>
                 </div>
                 <div class="row col-md-6">
                     <span class="detail-label">Total Number of Participants:</span>
                     <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                    <span class="total-values" id="user-data-total-participants">TBD</span>
+                    <span class="total-values" id="user-data-total-participants">{% if user_data %}{{ metadata_counts.user_data_participants  }}{% else %}NA{% endif %}</span>
                 </div>
             </div>
         </div>
