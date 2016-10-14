@@ -191,33 +191,6 @@ require([
         }
     });
 
-    /*
-        Adds a filter box when a variable needs an autocomplete
-     */
-    $('.filter-input').autocomplete({
-        source: attr_list,
-        select: function(event, ui) {
-            $('#filter-list-div').append('<h5>'+ ui.item.label + '</h5>');
-            $('#filter-list-div').append('<ul class="search-checkbox-list" id="'+ui.item.value+'"></ul>');
-            for (var i = 0; i < attr_counts[ui.item.value].length; i++) {
-                var checkbox_str = '<input type="checkbox" name="elements-selected" id="'
-                    + ui.item.value + '-' + attr_counts[ui.item.value][i]['value'].replace(/\s+/g, '_') +'" >'
-                    + '<label for="'+ui.item.value + '-' + attr_counts[ui.item.value][i]['value'].replace(/\s+/g, '_') +'">'
-                    + attr_counts[ui.item.value][i]['value'] + '<span class="count">(' + attr_counts[ui.item.value][i]['count'] + ')</span>'
-                    + '</label>';
-                var checkbox_item = $(checkbox_str);
-                checkbox_item.on('change', checkbox_callback);
-                $('ul#'+ui.item.value).append('<li></li>');
-                $('ul#'+ui.item.value+' li').append(checkbox_item);
-                // After adding item to filters, remove from list
-                attr_list.splice(attr_list.indexOf(ui.item.value), 1);
-                $('.filter-input').autocomplete('option', 'source', attr_list);
-            }
-            $(this).val('');
-            return false;
-        }
-    });
-
     $('#clear-filters').on('click', function() {
         $('.selected-filters .panel-body').empty();
         $('#filter-panel input:checked').each(function() {
