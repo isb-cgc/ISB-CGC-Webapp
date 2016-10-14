@@ -516,6 +516,7 @@ require([
         $('input[name="cohort-name"]').show();
         $('#default-cohort-menu').hide();
         $('#edit-cohort-menu').show();
+        $('.row.cgc-user-data-type-tabs').show();
         showHideMoreGraphButton();
         $('#multi-categorical').prop('scrollLeft',150);
     });

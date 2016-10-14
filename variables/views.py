@@ -267,19 +267,10 @@ def initialize_variable_selection_page(request,
     TCGA_project    = {"id" : -1, "study" : {"id" :-1, "name" : ""}, "name" : "TCGA"}
     common_project  = {"id" : -1, "study" : {"id" :-1, "name" : ""}, "name" : "Common", "variables" : common_variables}
 
-    #Get and sort counts
-    results = count_metadata(request.user, inc_filters={})
-    variable_list = convert(results['counts'])
-    keys = []
-    for variable in variable_list:
-        keys.append(variable['name'])
-
     # users can select from their saved variable favorites
     variable_favorites = VariableFavorite.get_list(request.user)
 
     context = {
-        'variable_names'        : keys,
-        'variable_list_count'   : variable_list,
         'favorite_list'         : favorite_list,
         'datatype_list'         : datatype_list,
         'projects'              : projects,
