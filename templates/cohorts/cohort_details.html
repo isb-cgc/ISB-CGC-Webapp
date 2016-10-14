@@ -100,7 +100,7 @@
         <div class="col-lg-4">
             <div class="panel panel-default">
                 <ul class="nav nav-tabs nav-tabs-data" role="tablist">
-                    <li role="presentation" class="{% if not user_data or metadata_counts.user_data_total <= 0 %}active{% endif %}"><a href="#isb-cgc-data" role="tab" data-toggle="tab" title="Donor Filters">ISB-CGC Data</a></li>
+                    <li role="presentation" class="{% if not user_data or not metadata_counts.user_data_total or metadata_counts.user_data_total <= 0 %}active{% endif %}"><a href="#isb-cgc-data" role="tab" data-toggle="tab" title="Donor Filters">ISB-CGC Data</a></li>
                     <li role="presentation" class="{% if user_data and metadata_counts.user_data_total > 0 %}active{% endif %}"><a href="#user-data" role="tab" data-toggle="tab" title="User Data">User Data</a></li>
                 </ul>
             </div>
