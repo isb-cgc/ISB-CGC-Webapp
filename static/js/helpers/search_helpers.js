@@ -89,8 +89,8 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
 
             $('#isb-cgc-data-total-samples').html(metadata_counts['total']);
             $('#isb-cgc-data-total-participants').html(metadata_counts['participants']);
-            user_data && $('#user-data-total-samples').html(user_data['total']);
-            user_data && $('#user-data-total-participants').html(user_data['participants']);
+            $('#user-data-total-samples').html(user_data ? metadata_counts['user_data_total'] : "NA");
+            $('#user-data-total-participants').html(user_data ? metadata_counts['user_data_participants'] : "NA");
 
 
             this.update_filter_counts(attr_counts);
@@ -172,8 +172,10 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                     var stopReq = new Date().getTime();
                     console.debug("[BENCHMARKING] Time for response in update_counts_parsets: "+(stopReq-startReq)+ "ms");
                     attr_counts = results['count'];
-                    $('#total-samples').html(results['total']);
-                    $('#total-participants').html(results['participants']);
+                    $('#isb-cgc-data-total-samples').html(results['total']);
+                    $('#isb-cgc-data-total-participants').html(results['participants']);
+                    $('#user-data-total-samples').html(results['user_data'] ? results['user_data_total'] : "NA");
+                    $('#user-data-total-participants').html(results['user_data'] ? results['user_data_participants'] : "NA");
                     update_filters(attr_counts);
 
                     var attr_counts_clin_trees = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(attr_counts) : attr_counts;
@@ -212,8 +214,10 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                     }
                 },
                 error: function(req,status,err){
-                    $('#total-samples').html("Error");
-                    $('#total-participants').html("Error");
+                    $('#isb-cgc-data-total-samples').html("Error");
+                    $('#isb-cgc-data-total-participants').html("Error");
+                    $('#user-data-total-samples').html("Error");
+                    $('#user-data-total-participants').html("Error");
                 },
                 complete: function(xhr,status) {
                     $('.clinical-trees .spinner').hide();
