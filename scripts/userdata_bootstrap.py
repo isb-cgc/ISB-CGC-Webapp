@@ -168,7 +168,7 @@ def bootstrap_metadata_attr_mapping():
         if db and db.open: db.close()
 
 
-def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_name, bucket_permissions):
+def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_name, bucket_permissions, bqdataset_name):
     fetch_studies = "SELECT DISTINCT Study FROM metadata_samples WHERE Project='TCGA';"
     insert_projects = "INSERT INTO projects_project (name, active, last_date_saved, is_public, owner_id) " + \
                       "VALUES (%s,%s,%s,%s,%s);"
@@ -177,9 +177,10 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
     insert_googleproj = "INSERT INTO accounts_googleproject (project_id, project_name, big_query_dataset) " + \
                         "VALUES (%s,%s,%s);"
     insert_bucket = "INSERT INTO accounts_bucket (bucket_name, bucket_permissions, google_project_id) VALUES (%s, %s, %s);"
+    insert_bqdataset = "INSERT INTO accounts_bqdataset (dataset_name, google_project_id) VALUES (%s, %s);"
     insert_user_data_tables = "INSERT INTO projects_user_data_tables (study_id, user_id, google_project_id, " + \
                               "google_bucket_id, metadata_data_table, metadata_samples_table, " + \
-                              "feature_definition_table) VALUES (%s,%s,%s,%s,%s,%s,%s);"
+                              "feature_definition_table, google_bq_dataset_id) VALUES (%s,%s,%s,%s,%s,%s,%s,%s);"
     googleproj_name = "isb-cgc"
     tables = ['metadata_samples', 'metadata_data']
 
@@ -191,6 +192,7 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
     study_info = {}
     googleproj_id = None
     bucket_id = None
+    bqdataset_id = None
 
     try:
 
@@ -227,6 +229,12 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
         for row in cursor.fetchall():
             bucket_id = row[0]
 
+        cursor.execute(insert_bqdataset, (bqdataset_name, googleproj_id))
+        db.commit()
+        cursor.execute("SELECT id FROM accounts_bqdataset WHERE dataset_name=%s;", (bqdataset_name,))
+        for row in cursor.fetchall():
+            bqdataset_id = row[0]
+
         # Gather up the TCGA studies from the samples table
         cursor.execute(fetch_studies)
         for row in cursor.fetchall():
@@ -257,7 +265,7 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
             cursor.execute(insert_user_data_tables, (study_info[study], isb_userid, googleproj_id, bucket_id,
                                                      table_study_data['metadata_data'][study]['view_name'],
                                                      table_study_data['metadata_samples'][study]['view_name'],
-                                                     public_feature_table))
+                                                     public_feature_table, bqdataset_id))
         db.commit()
 
         # Compare the number of studies in projects_user_data_tables, projects_study, and our study set.
@@ -366,10 +374,12 @@ def main():
                                  help="Name of the bucket the source data came from")
     cmd_line_parser.add_argument('-m', '--bucket-perm', type=str, default='read/write',
                                  help="Bucket access permissions")
+    cmd_line_parser.add_argument('-d', '--bq-dataset-storage', type=str, default='test',
+                                 help="BigQuery Dataset for TCGA Project Data")
 
     args = cmd_line_parser.parse_args()
 
-    bootstrap_user_data_schema(args.pub_feat_table, args.bq_dataset, args.bucket_name, args.bucket_perm)
+    bootstrap_user_data_schema(args.pub_feat_table, args.bq_dataset, args.bucket_name, args.bucket_perm, args.bq_dataset_storage)
     bootstrap_metadata_attr_mapping()
     bootstrap_file_data()
 

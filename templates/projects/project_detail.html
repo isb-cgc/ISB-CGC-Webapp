@@ -88,12 +88,14 @@
                     <dd>{{ study.last_date_saved|date:'M d, Y, g:i a' }}</dd>
                     <dt>Number of Files</dt>
                     <dd>{{ study.get_file_count }}</dd>
-                    <dt>Cloud Storage Bucket Name</dt>
-                    <dd>{{ study.user_data_tables_set.all.0.google_bucket.bucket_name }}</dd>
-                    <dt>BigQuery Data Table(s)</dt>
-                    {% for item in study.get_bq_tables %}
-                        <dd>{{ item }}</dd>
-                    {% endfor %}
+                    {% if not project.is_public %}
+                        <dt>Cloud Storage Bucket Name</dt>
+                        <dd>{{ study.user_data_tables_set.all.0.google_bucket.bucket_name }}</dd>
+                        <dt>BigQuery Data Table(s)</dt>
+                        {% for item in study.get_bq_tables %}
+                            <dd>{{ item }}</dd>
+                        {% endfor %}
+                    {% endif %}
                 </dl>
             </div>
         </section>
