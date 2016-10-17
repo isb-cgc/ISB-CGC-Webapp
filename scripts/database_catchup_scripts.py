@@ -115,11 +115,15 @@ def main():
         # dealing with all of metadata_samples
         # *** THIS MUST BE RERUN ANY TIME AN ATTRIBUTE IS ADDED OR REMOVED FROM THE SHORTLIST ***
         # *** OR THE SHORTLIST WILL NO LONGER BE ACCURATE ***
+
+        # Base VIEW definition
         metadata_samples_shortlist_view_def = """
             CREATE OR REPLACE VIEW metadata_samples_shortlist AS
                 SELECT SampleBarcode,ParticipantBarcode%s FROM metadata_samples;
         """
 
+        # Gather the metadata attribute 'shortlist' from metadata_attributes
+        # and add it to the VIEW definition
         cursor.execute("SELECT attribute FROM metadata_attr WHERE shortlist=1;")
         view_cols = ''
         for row in cursor.fetchall():
