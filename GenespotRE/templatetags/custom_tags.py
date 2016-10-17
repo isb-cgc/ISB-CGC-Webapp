@@ -181,6 +181,7 @@ FEATURE_DISPLAY_NAMES = {
     'has_UNC_GA_RNASeq': 'has UNC GA RNA Sequencing',
     'has_BCGSC_HiSeq_RNASeq': 'has BCGSC HiSeq RNA Sequencing',
     'has_UNC_HiSeq_RNASeq': 'has UNC HiSeq RNA Sequencing',
+    'hpv_status': 'HPV Status',
 }
 
 DISEASE_DICTIONARY = {
