@@ -50,18 +50,56 @@
                         rights to protected data as you do, we require that you add an ISB-CGC Service Account to your Google
                         Cloud Project. To do so, please complete the following steps:
                         <br>
-                        <ul>
-                            <li>
+
+                        <div class="row space-bottom-10">
+                            <div class="col-lg-6">
                                 <label for="verify-gcp-id">Please enter your Google Cloud Project ID: </label>
                                 <input id="verify-gcp-id" name="gcp-id" type="text" class="form-control" placeholder="Google Cloud Project ID" required="required"/>
-                            </li>
-                            <li>Go to your <a href="https://console.cloud.google.com/home/dashboard" target="_blank">Google Cloud Project</a>.</li>
-                            <li>Select the hamburger menu in the top left corner. <img src="{% static 'img/select-hamburger.png' %}" alt="Select Hamburger Menu" width="25%"/></li>
-                            <li>Select IAM & Admin. <img src="{% static 'img/select-iam.png' %}" alt="Select IAM & Admin Menu Item" width="25%"/></li>
-                            <li>Click + Add Member. </li>
-                            <li>Paste <code>907668440978-oskt05du3ao083cke14641u35deokgjj@developer.gserviceaccount.com</code> in the text box. <img src="{% static 'img/add-members.png' %}" alt="Add Member Modal Window" width="50%"/></li>
-                            <li>In the Role selection, choose Project > Editor. <img src="{% static 'img/role-selector-editor.png' %}" alt="Select Project Viewer" width="50%"/></li>
-                        </ul>
+                            </div>
+                        </div>
+                        <div class="row space-bottom-10">
+                            <div class="col-lg-12">
+                                Go to your <a href="https://console.cloud.google.com/home/dashboard" target="_blank">Google Cloud Project</a>.
+                            </div>
+                        </div>
+                        <div class="row space-bottom-10">
+                            <div class="col-lg-6">
+                                Select the hamburger menu in the top left corner.
+                            </div>
+                            <div class="col-lg-6">
+                                <img src="{% static 'img/select-hamburger.png' %}" alt="Select Hamburger Menu" width="50%"/>
+                            </div>
+                        </div>
+                        <div class="row space-bottom-10">
+                            <div class="col-lg-6">
+                                Select IAM & Admin.
+                            </div>
+                            <div class="col-lg-6">
+                                 <img src="{% static 'img/select-iam.png' %}" alt="Select IAM & Admin Menu Item" width="50%"/>
+                            </div>
+                        </div>
+                        <div class="row space-bottom-10">
+                            <div class="col-lg-6">
+                                Click + Add Member.
+                            </div>
+                        </div>
+                        <div class="row space-bottom-10">
+                            <div class="col-lg-6">
+                                Paste <code>907668440978-oskt05du3ao083cke14641u35deokgjj@developer.gserviceaccount.com</code> in the text box.
+                            </div>
+                            <div class="col-lg-6">
+                                 <img src="{% static 'img/add-members.png' %}" alt="Add Member Modal Window" width="100%"/>
+                            </div>
+                        </div>
+                        <div class="row space-bottom-10">
+                            <div class="col-lg-6">
+                                In the Role selection, choose Project > Editor.
+                            </div>
+                            <div class="col-lg-6">
+                                 <img src="{% static 'img/role-selector-editor.png' %}" alt="Select Project Viewer" width="100%"/>
+                            </div>
+                        </div>
+
                         <br>
                         Once complete, click <input class="btn btn-default" type="submit" value="here" /> to verify that it worked.
                         <br>
