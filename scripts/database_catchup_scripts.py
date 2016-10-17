@@ -117,8 +117,42 @@ def main():
         # *** OR THE SHORTLIST WILL NO LONGER BE ACCURATE ***
         metadata_samples_shortlist_view_def = """
             CREATE OR REPLACE VIEW metadata_samples_shortlist AS
-                SELECT SampleBarcode,ParticipantBarcode%s FROM metadata_samples;
-        """
+                SELECT
+                    SampleBarcode,
+                    ParticipantBarcode,
+                    age_at_initial_pathologic_diagnosis,
+                    BMI,
+                    Study,
+                    gender,
+                    has_27k,
+                    has_450k,
+                    has_BCGSC_GA_RNASeq,
+                    has_BCGSC_HiSeq_RNASeq,
+                    has_GA_miRNASeq,
+                    has_HiSeq_miRnaSeq,
+                    has_Illumina_DNASeq,
+                    has_RPPA,
+                    has_SNP6,
+                    has_UNC_GA_RNASeq,
+                    has_UNC_HiSeq_RNASeq,
+                    histological_type,
+                    hpv_status,
+                    icd_10,
+                    icd_o_3_histology,
+                    icd_o_3_site,
+                    neoplasm_histologic_grade,
+                    new_tumor_event_after_initial_treatment,
+                    pathologic_stage,
+                    person_neoplasm_cancer_status,
+                    Project,
+                    residual_tumor,
+                    SampleTypeCode,
+                    tobacco_smoking_history,
+                    tumor_tissue_site,
+                    tumor_type,
+                    vital_status,
+                FROM metadata_samples;
+            """
 
         cursor.execute("SELECT attribute FROM metadata_attr WHERE shortlist=1;")
         view_cols = ''
