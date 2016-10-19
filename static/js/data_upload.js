@@ -378,6 +378,16 @@ require([
                     });
                     table.append(tr);
                 }
+
+                $('.data-type-selector').on('change', function() {
+                    var value = $(this).val();
+
+                    if (value === 'user_gen') {
+                        $(this).siblings('.file-format-check').prop('style','visibility: hidden;');
+                    } else {
+                        $(this).siblings('.file-format-check').prop('style','visibility: visible;');
+                    }
+                })
             }
         });
 
@@ -638,4 +648,13 @@ require([
         });
     });
 
+    $('.data-type-selector').on('change', function() {
+        var value = $(this).val();
+
+        if (value === 'other') {
+            $(this).sibling('.file-format-check').hide();
+        } else {
+            $(this).sibling('.file-format-check').show();
+        }
+    })
 });
