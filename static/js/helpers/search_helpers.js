@@ -24,30 +24,35 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
     var tree_graph_obj = Object.create(tree_graph, {});
     var parsets_obj = Object.create(draw_parsets, {});
 
-    var clin_tree_attr = [
-        'Study',
-        'vital_status',
-        'SampleTypeCode',
-        'tumor_tissue_site',
-        'gender',
-        'age_at_initial_pathologic_diagnosis'
-    ];
+    var clin_tree_attr = {
+        Study: 'Study',
+        vital_status: 'Vital Status',
+        SampleTypeCode: 'Sample Type',
+        tumor_tissue_site: 'Tumor Tissue Site',
+        gender: 'Gender',
+        age_at_initial_pathologic_diagnosis: 'Age at Initial Pathologic Diagnosis'
+    };
+
+    var user_data_attr = {
+        user_project: 'Project',
+        user_study: 'Study'
+    };
 
     return  {
 
-        filter_data_for_clin_trees: function(attr_counts) {
+        filter_data_for_clin_trees: function(attr_counts, these_attr) {
             var filtered_clin_trees = {};
             var attr_counts_clin_trees = null;
             var filters = this.format_filters();
-            var clin_tree_attr_map = {};
+            var tree_attr_map = {};
 
-            clin_tree_attr.map(function(attr){
-                clin_tree_attr_map[attr] = 1;
+            Object.keys(these_attr).map(function(attr){
+                tree_attr_map[attr] = 1;
             });
             for(var i in filters) {
                 if(filters.hasOwnProperty(i)) {
                     var fname = i.split(/:/)[1];
-                    if (clin_tree_attr_map[fname]) {
+                    if (tree_attr_map[fname]) {
                         if (!filtered_clin_trees[fname]) {
                             filtered_clin_trees[fname] = {};
                         }
@@ -79,6 +84,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
         update_counts_parsets_direct: function(filters) {
 
             $('.clinical-trees .spinner').show();
+            $('.user-data-trees .spinner').show();
             $('.parallel-sets .spinner').show();
             $('.cohort-info .total-values').hide();
             $('.cohort-info .spinner').show();
@@ -97,9 +103,11 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             // If there were filters, we need to adjust their counts so the barchart reflects what
             // was actually filtered
             var filters = this.format_filters();
-            var clin_tree_attr_counts = Object.keys(filters).length > 0 ? this.filter_data_for_clin_trees(attr_counts) : attr_counts;
+            var clin_tree_attr_counts = Object.keys(filters).length > 0 ? this.filter_data_for_clin_trees(attr_counts, clin_tree_attr) : attr_counts;
+            var user_data_attr_counts = Object.keys(filters).length > 0 ? this.filter_data_for_clin_trees(user_data, user_data_attr) : user_data;
 
-            tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr);
+            tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,'#isb-cgc-tree-graph-clinical');
+            tree_graph_obj.draw_trees(user_data_attr_counts,user_data_attr,'#user-data-tree-graph');
 
             if (metadata_counts.hasOwnProperty('items')) {
                 var features = [
@@ -134,6 +142,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             }
 
             $('.clinical-trees .spinner').hide();
+            $('.user-data-trees .spinner').hide();
             $('.parallel-sets .spinner').hide();
             $('.cohort-info .spinner').hide();
             $('.cohort-info .total-values').show();
@@ -152,9 +161,8 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                 $('#url-len-max-alert').hide();
             }
 
-            var update_filters = this.update_filter_counts;
-
             $('.clinical-trees .spinner').show();
+            $('.user-data-trees .spinner').show();
             $('.parallel-sets .spinner').show();
             $('.cohort-info .total-values').hide();
             $('.cohort-info .spinner').show();
@@ -176,11 +184,13 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                     $('#isb-cgc-data-total-participants').html(results['participants']);
                     $('#user-data-total-samples').html(results['user_data'] && results['user_data_total'] !== null ? results['user_data_total'] : "NA");
                     $('#user-data-total-participants').html(results['user_data'] && results['user_data_participants'] !== null ? results['user_data_participants'] : "NA");
-                    update_filters(attr_counts);
+                    context.update_filter_counts(attr_counts);
 
-                    var attr_counts_clin_trees = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(attr_counts) : attr_counts;
+                    var clin_tree_attr_counts = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(attr_counts, clin_tree_attr) : attr_counts;
+                    var user_data_attr_counts = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(user_data, user_data_attr) : user_data;
 
-                    tree_graph_obj.draw_trees(attr_counts_clin_trees,clin_tree_attr);
+                    tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,'#isb-cgc-tree-graph-clinical');
+                    tree_graph_obj.draw_trees(user_data_attr_counts,user_data_attr,'#user-data-tree-graph');
                     
                     if (results.hasOwnProperty('items')) {
                         var features = [
@@ -221,6 +231,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                 },
                 complete: function(xhr,status) {
                     $('.clinical-trees .spinner').hide();
+                    $('.user-data-trees .spinner').hide();
                     $('.parallel-sets .spinner').hide();
                     $('.cohort-info .spinner').hide();
                     $('.cohort-info .total-values').show();
