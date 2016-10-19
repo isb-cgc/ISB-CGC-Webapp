@@ -46,7 +46,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             var filters = this.format_filters();
             var tree_attr_map = {};
 
-            these_attr.map(function(attr){
+            Object.keys(these_attr).map(function(attr){
                 tree_attr_map[attr] = 1;
             });
             for(var i in filters) {
@@ -161,8 +161,6 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                 $('#url-len-max-alert').hide();
             }
 
-            var update_filters = this.update_filter_counts;
-
             $('.clinical-trees .spinner').show();
             $('.user-data-trees .spinner').show();
             $('.parallel-sets .spinner').show();
@@ -186,10 +184,10 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                     $('#isb-cgc-data-total-participants').html(results['participants']);
                     $('#user-data-total-samples').html(results['user_data'] && results['user_data_total'] !== null ? results['user_data_total'] : "NA");
                     $('#user-data-total-participants').html(results['user_data'] && results['user_data_participants'] !== null ? results['user_data_participants'] : "NA");
-                    update_filters(attr_counts);
+                    context.update_filter_counts(attr_counts);
 
-                    var clin_tree_attr_counts = Object.keys(filters).length > 0 ? this.filter_data_for_clin_trees(attr_counts, clin_tree_attr) : attr_counts;
-                    var user_data_attr_counts = Object.keys(filters).length > 0 ? this.filter_data_for_clin_trees(user_data, user_data_attr) : user_data;
+                    var clin_tree_attr_counts = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(attr_counts, clin_tree_attr) : attr_counts;
+                    var user_data_attr_counts = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(user_data, user_data_attr) : user_data;
 
                     tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,'#isb-cgc-tree-graph-clinical');
                     tree_graph_obj.draw_trees(user_data_attr_counts,user_data_attr,'#user-data-tree-graph');
