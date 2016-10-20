@@ -42,7 +42,7 @@ function($, d3, d3tip, vis_helpers) {
         get_treemap_ready: function(data, attribute) {
             var children = [];
             for (var i in data) {
-                children.push({name:(data[i]['displ_name'] || data[i]['value'].replace(/_/g, ' ')), count: data[i]['count']});
+                children.push({name:(data[i]['displ_name'] || data[i]['value'].toString().replace(/_/g, ' ')), count: data[i]['count']});
             }
             return {children: children, name: attribute};
         },
@@ -104,7 +104,7 @@ function($, d3, d3tip, vis_helpers) {
 
             svg.call(tip);
         },
-        draw_trees: function(data,clin_attr) {
+        draw_trees: function(data, clin_attr, this_tree) {
 
             var startPlot = new Date().getTime();
 
@@ -113,21 +113,12 @@ function($, d3, d3tip, vis_helpers) {
             var w = 140,
                 h = 140;
 
-            $('.tree-graph-clinical').empty();
-
-            var clin_attr_titles = [
-                'Study',
-                'Vital Status',
-                'Sample Type',
-                'Tumor Tissue Site',
-                'Gender',
-                'Age at Initial Pathologic Diagnosis'
-            ];
+            $(this_tree).empty();
 
             // Munge Data
             var tree_data = {};
             for (var i = 0; i < data.length; i++) {
-                if (clin_attr.indexOf(data[i]['name']) >= 0) {
+                if (clin_attr[data[i]['name']]) {
                     total = data[i].total;
                     tree_data[data[i]['name']] = data[i]['values']
                 }
@@ -136,20 +127,22 @@ function($, d3, d3tip, vis_helpers) {
             // Calculate our pseudocount:
             var pcount = (total * 0.008) > 1 ? (total * 0.008) : 0;
 
-            for (var i = 0; i < clin_attr.length; i++) {
-                var tree_div = d3.select('.tree-graph-clinical')
+            var clin_attr_keys = Object.keys(clin_attr);
+
+            for (var i = 0; i < clin_attr_keys.length; i++) {
+                var tree_div = d3.select(this_tree)
                     .append('div')
                     .attr('class', 'tree-graph');
                 var title_div = tree_div.append('p')
                     .attr('class', 'graph-title')
-                    .html(clin_attr_titles[i]);
+                    .html(clin_attr[clin_attr_keys[i]]);
                 var graph_svg = tree_div.append('svg')
                     .attr("class", "chart")
                     .style("width", w + "px")
                     .style("height", h + "px")
                     .append("svg:g")
                     .attr("transform", "translate(.5,.5)");
-                this.draw_tree(tree_data[clin_attr[i]], graph_svg, clin_attr[i], w, h, false, treeTip, pcount);
+                this.draw_tree(tree_data[clin_attr_keys[i]], graph_svg, clin_attr[clin_attr_keys[i]], w, h, false, treeTip, pcount);
             }
 
             var stopPlot = new Date().getTime();
