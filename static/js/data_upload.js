@@ -292,7 +292,7 @@ require([
     function buildInputTable(fileObj, parentEl) {
 
         var dictionary = _.toArray(types.Dictionary);
-        dictionary = _.sortBy(dictionary, 'displayName')
+        dictionary = _.sortBy(dictionary, 'displayName');
 
         var $el = $(uploadInputTableTemplate({
             file: fileObj.file,
@@ -640,8 +640,8 @@ require([
             } else {
                 errorMessage('Error submitting response : ' + res.message);
             }
-        }).fail(function () {
-            errorMessage('We had an error submitting the response. Please try again later.');
+        }).fail(function (res) {
+            errorMessage('We had an error submitting the response: ' + res.message);
         }).always(function () {
             $('#upload-button, #back-button').removeClass('disabled')
                 .siblings('.progress-message').addClass('hidden');
