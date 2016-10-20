@@ -292,7 +292,7 @@ require([
     function buildInputTable(fileObj, parentEl) {
 
         var dictionary = _.toArray(types.Dictionary);
-        dictionary = _.sortBy(dictionary, 'displayName')
+        dictionary = _.sortBy(dictionary, 'displayName');
 
         var $el = $(uploadInputTableTemplate({
             file: fileObj.file,
