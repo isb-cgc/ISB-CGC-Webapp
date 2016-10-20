@@ -51,10 +51,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             });
             for(var i in filters) {
                 if(filters.hasOwnProperty(i)) {
-                    var fname = i;
-                    if(i.indexOf(":") >= 0) {
-                        fname = i.split(/:/)[1];
-                    }
+                    var fname = (i.indexOf(":") >= 0) ? i.split(/:/)[1] : i;
                     if (tree_attr_map[fname]) {
                         if (!filtered_clin_trees[fname]) {
                             filtered_clin_trees[fname] = {};
