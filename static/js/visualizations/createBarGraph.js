@@ -229,6 +229,8 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                 selex_active = !!obj;
 
                 if (obj) {
+                    // Disable zooming events and store their status
+                    svg.on('.zoom',null);
                     zoom_status.translation = zoom.translate();
                     // Append new brush event listeners to plot area only
                     plot_area.append('g')
@@ -239,6 +241,8 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                         .attr('height', height - margin.bottom)
                         .attr('transform', 'translate(0, 0)');
                 } else {
+                    // Resume zooming, restoring the zoom's last state
+                    svg.call(zoom);
                     zoom_status.translation && zoom.translate(zoom_status.translation);
                     zoom_status.translation = null;
                     var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];

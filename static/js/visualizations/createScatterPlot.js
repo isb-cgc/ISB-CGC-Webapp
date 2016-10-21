@@ -221,6 +221,8 @@ function($, d3, vizhelpers) {
                 selex_active = !!obj;
 
                 if (obj) {
+                    // Disable zooming events and store their status
+                    svg.on('.zoom',null);
                     zoom_status.translation = zoom.translate();
                     zoom_status.scale = zoom.scale();
 
@@ -229,6 +231,8 @@ function($, d3, vizhelpers) {
                         .attr('class', 'brush')
                         .call(brush);
                 } else {
+                    // Resume zooming, restoring the zoom's last state
+                    svg.call(zoom);
                     zoom_status.translation && zoom.translate(zoom_status.translation);
                     zoom_status.scale && zoom.scale(zoom_status.scale);
                     zoom_status.translation = null;

@@ -231,7 +231,7 @@ function($, d3, d3tip, helpers) {
                         .attr('y', 0)
                         .attr('height', height - margin.bottom);
                 } else {
-                    // Resume zooming, restoring their last state
+                    // Resume zooming, restoring the zoom's last state
                     svg.call(zoom);
                     zoom_status.translation && zoom.translate(zoom_status.translation);
                     zoom_status.scale && zoom.scale(zoom_status.scale);
