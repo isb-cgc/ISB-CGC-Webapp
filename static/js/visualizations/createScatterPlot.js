@@ -105,7 +105,10 @@ function($, d3, vizhelpers) {
 
             // If the brush is empty, select all circles.
             var brushend = function() {
-//                if (brush.empty()) svg.selectAll(".hidden").classed("hidden", false);
+                if (brush.empty()) {
+                    svg.selectAll(".hidden").classed("hidden", false);
+                    $(svg[0]).parents('.plot').find('.save-cohort-card').hide();
+                }
             };
 
             var brush = d3.svg.brush()
@@ -221,6 +224,8 @@ function($, d3, vizhelpers) {
                 selex_active = !!obj;
 
                 if (obj) {
+                    // Disable zooming events and store their status
+                    svg.on('.zoom',null);
                     zoom_status.translation = zoom.translate();
                     zoom_status.scale = zoom.scale();
 
@@ -229,6 +234,8 @@ function($, d3, vizhelpers) {
                         .attr('class', 'brush')
                         .call(brush);
                 } else {
+                    // Resume zooming, restoring the zoom's last state
+                    svg.call(zoom);
                     zoom_status.translation && zoom.translate(zoom_status.translation);
                     zoom_status.scale && zoom.scale(zoom_status.scale);
                     zoom_status.translation = null;
@@ -257,17 +264,14 @@ function($, d3, vizhelpers) {
                 $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + total_samples);
                 $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Participants: ' + total_patients);
                 $('#save-cohort-' + plot_id + '-modal input[name="samples"]').attr('value', sample_list);
+                var topVal = Math.min((yScale(extent[1][1]) + 180),(height-$('.save-cohort-card').height()));
+                var leftVal = Math.min((xScale(extent[1][0])+ 40),(width-$('.save-cohort-card').width()));
                 $(svg[0]).parents('.plot')
                     .find('.save-cohort-card').show()
-                    .attr('style', 'position:absolute; top: '+ (yScale(extent[1][1]) + 180) +'px; left:' +(xScale(extent[1][0])+ 40)+'px;');
+                    .attr('style', 'position:absolute; top: '+ topVal +'px; left:' +leftVal+'px;');
 
-                if (total_samples > 0){
-                    $(svg[0]).parents('.plot')
-                        .find('.save-cohort-card').find('.btn').prop('disabled', false);
-                } else {
-                    $(svg[0]).parents('.plot')
-                        .find('.save-cohort-card').find('.btn').prop('disabled', true);
-                }
+                $(svg[0]).parents('.plot')
+                    .find('.save-cohort-card').find('.btn').prop('disabled', (total_samples <= 0));
             }
 
             function resize() {
