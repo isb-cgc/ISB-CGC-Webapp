@@ -189,7 +189,10 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
 
             // If the brush is empty, select all circles.
             var brushend = function() {
-                if (brush.empty()) svg.selectAll(".hidden").classed("hidden", false);
+                if (brush.empty()) {
+                    svg.selectAll(".hidden").classed("hidden", false);
+                    $(svg[0]).parents('.plot').find('.save-cohort-card').hide();
+                }
             };
 
             var brush = d3.svg.brush()
@@ -264,17 +267,14 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                 $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + total_samples);
                 $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Participants: ' + total_patients);
                 $('#save-cohort-' + plot_id + '-modal input[name="samples"]').attr('value', sample_list);
+                var leftVal = Math.min((x2(extent[1]) + 20),(width-$('.save-cohort-card').width()));
                 $(svg[0]).parents('.plot')
                     .find('.save-cohort-card').show()
-                    .attr('style', 'position:relative; top: -' + height + 'px; left:' + (x2(extent[1]) + 80) + 'px;');
+                    .attr('style', 'position:relative; top: -' + height + 'px; left:' + leftVal + 'px;');
 
-                if (total_samples > 0){
-                    $(svg[0]).parents('.plot')
-                        .find('.save-cohort-card').find('.btn').prop('disabled', false);
-                } else {
-                    $(svg[0]).parents('.plot')
-                        .find('.save-cohort-card').find('.btn').prop('disabled', true);
-                }
+                $(svg[0]).parents('.plot')
+                    .find('.save-cohort-card').find('.btn').prop('disabled', (total_samples <= 0));
+
 
             }
 

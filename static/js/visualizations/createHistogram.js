@@ -257,17 +257,13 @@ function($, d3, d3tip, helpers) {
                 $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + total_samples);
                 $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Participants: ' + total_patients);
                 $('#save-cohort-' + plot_id + '-modal input[name="samples"]').attr('value', sample_list);
+                var leftVal = Math.min((x(extent[1]) + 20),(width-$('.save-cohort-card').width()));
                 $(svg[0]).parents('.plot')
                     .find('.save-cohort-card').show()
-                    .attr('style', 'position:relative; top: -600px; left:' + (x(extent[1]) + 10) + 'px;');
+                    .attr('style', 'position:relative; top: -600px; left:' + leftVal + 'px;');
 
-                if (total_samples > 0){
-                    $(svg[0]).parents('.plot')
-                        .find('.save-cohort-card').find('.btn').prop('disabled', false);
-                } else {
-                    $(svg[0]).parents('.plot')
-                        .find('.save-cohort-card').find('.btn').prop('disabled', true);
-                }
+                $(svg[0]).parents('.plot')
+                    .find('.save-cohort-card').find('.btn').prop('disabled', (total_samples <= 0));
             }
 
             function resize() {
