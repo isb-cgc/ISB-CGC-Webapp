@@ -762,6 +762,9 @@ require([
     $(".plot_selection").on("change", function(event){
         var self = this;
         $(this).find(":disabled :selected").remove();
+        if($('.toggle-selection').hasClass('active')) {
+            $('.toggle-selection').click();
+        }
         var plot_type = $(this).val();
         var flyout = $(this).closest('.worksheet-body').find('.settings-flyout');
         hide_show_widgets(plot_type, flyout);

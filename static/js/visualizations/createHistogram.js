@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2015, Institute for Systems Biology
+ * Copyright 2016, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,31 +148,14 @@ function($, d3, d3tip, helpers) {
                 .on('mouseover.tip', tip.show)
                 .on('mouseout.tip', tip.hide);
 
-            // var line = d3.svg.line()
-            //     .x(function (d) {
-            //         return x(d[0]);
-            //     })
-            //     .y(function (d) {
-            //         return y(d[1]);
-            //     });
-            //
-            // plot_area.append('path')
-            //     .data(d3.values(science.stats.bandwidth))
-            //     .attr('class', 'line')
-            //     .attr('stroke', 'red')
-            //     .attr('fill', 'none')
-            //     .attr('d', function (f) {
-            //         return line(kde.bandwidth(f)(d3.range(min_n, max_n, 0.1)));
-            //     })
-            //     .attr('transform', 'translate(' + 0 + ',' + margin.top + ')');
-
-            // Highlight the selected rectangles.
+            // Select the samples as the selection area is sized
             var brushmove = function (p) {
                 var total_samples = 0;
                 var total_patients = 0;
                 var sample_list = [];
                 var patient_list = [];
                 var e = brush.extent();
+                console.debug(e);
                 svg.selectAll('rect.plot-bar').classed("selected", function (d) {
                     return e[0] <= (d['x'] + d['dx']) && d['x'] <= e[1];
                 });
@@ -189,7 +172,8 @@ function($, d3, d3tip, helpers) {
                 sample_form_update(e, total_samples, total_patients, sample_list);
             };
 
-            // If the brush is empty, select all circles.
+            // If the brush's selection area was empty, hide the selection card and unhide anything
+            // which was hidden
             var brushend = function () {
                 if (brush.empty()) {
                     svg.selectAll(".hidden").classed("hidden", false);
@@ -235,6 +219,8 @@ function($, d3, d3tip, helpers) {
                 selex_active = !!isActive;
 
                 if (isActive) {
+                    // Disable zooming events and store their status
+                    svg.on('.zoom',null);
                     zoom_status.translation = zoom.translate();
                     zoom_status.scale = zoom.scale();
                     // Append new brush event listeners to plot area only
@@ -245,6 +231,8 @@ function($, d3, d3tip, helpers) {
                         .attr('y', 0)
                         .attr('height', height - margin.bottom);
                 } else {
+                    // Resume zooming, restoring the zoom's last state
+                    svg.call(zoom);
                     zoom_status.translation && zoom.translate(zoom_status.translation);
                     zoom_status.scale && zoom.scale(zoom_status.scale);
                     zoom_status.translation = null;
@@ -269,17 +257,13 @@ function($, d3, d3tip, helpers) {
                 $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + total_samples);
                 $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Participants: ' + total_patients);
                 $('#save-cohort-' + plot_id + '-modal input[name="samples"]').attr('value', sample_list);
+                var leftVal = Math.min((x(extent[1]) + 20),(width-$('.save-cohort-card').width()));
                 $(svg[0]).parents('.plot')
                     .find('.save-cohort-card').show()
-                    .attr('style', 'position:relative; top: -600px; left:' + (x(extent[1]) + 10) + 'px;');
+                    .attr('style', 'position:relative; top: -600px; left:' + leftVal + 'px;');
 
-                if (total_samples > 0){
-                    $(svg[0]).parents('.plot')
-                        .find('.save-cohort-card').find('.btn').prop('disabled', false);
-                } else {
-                    $(svg[0]).parents('.plot')
-                        .find('.save-cohort-card').find('.btn').prop('disabled', true);
-                }
+                $(svg[0]).parents('.plot')
+                    .find('.save-cohort-card').find('.btn').prop('disabled', (total_samples <= 0));
             }
 
             function resize() {
