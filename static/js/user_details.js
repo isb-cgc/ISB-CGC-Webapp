@@ -24,13 +24,10 @@ require.config({
         jqueryui: 'libs/jquery-ui.min',
         session_security: 'session_security',
         underscore: 'libs/underscore-min',
-        assetscore: 'libs/assets.core',
-        assetsresponsive: 'libs/assets.responsive'
     },
     shim: {
         'bootstrap': ['jquery'],
         'session_security': ['jquery'],
-        'assetscore': ['jquery']
     }
 });
 
@@ -38,12 +35,23 @@ require([
     'jquery',
     'jqueryui',
     'bootstrap',
-    'session_security',
-
-    'assetscore',
-    'assetsresponsive'
+    'session_security'
 ], function($, jqueryui, bootstrap, session_security) {
-    A11y.Core();
+
+    $('.show-service-accounts').on('click', function () {
+        var $this = $(this);
+        var target = $this.data('target');
+        if ($('.' + target).is(':visible')) {
+            $this.find('i').removeClass('fa-caret-down');
+            $this.find('i').addClass('fa-caret-right');
+            $('.' +target).slideUp();
+        } else {
+            $this.find('i').removeClass('fa-caret-right');
+            $this.find('i').addClass('fa-caret-down');
+            $('.' +target).show('slow');
+        }
+    });
+
     $('.btn-group button').on('click', function() {
         $(this).toggleClass('active');
         $('input[name="credits"]').prop('value', $(this).val());

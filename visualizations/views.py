@@ -98,6 +98,7 @@ friendly_name_map = {
 
 numerical_attributes = [
     'age_at_initial_pathologic_diagnosis',
+    'BMI',
     'hsa_miR_146a_5p',
     'hsa_miR_7_7p',
     'CNVR_EGFR',
@@ -140,7 +141,7 @@ fm_friendly_name_map = {
     'gender':'Gender',
     'history_of_neoadjuvant_treatment':'History of Neoadjuvant Treatment',
     'icd_o_3_histology':'ICD-O-3 Code',
-    'prior_dx':'Prior Diagnosis',
+    'other_dx':'Prior Diagnosis',
     'vital_status':'Vital Status',
     'country':'Country',
     'disease_code':'Disease Code',
@@ -174,6 +175,7 @@ fm_numerical_attributes = [
     'percent_tumor_cells',
     'percent_tumor_nuclei',
     'age_at_initial_pathologic_diagnosis',
+    'BMI'
     'days_to_birth',
     'days_to_initial_pathologic_diagnosis',
     'year_of_initial_pathologic_diagnosis',
@@ -188,7 +190,7 @@ fm_categorical_attributes = [
     'gender',
     'history_of_neoadjuvant_treatment',
     'icd_o_3_histology',
-    'prior_dx',
+    'other_dx',
     'vital_status',
     'country',
     'disease_code',

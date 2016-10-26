@@ -24,17 +24,12 @@ require.config({
         jqueryui: 'libs/jquery-ui.min',
         session_security: 'session_security',
         underscore: 'libs/underscore-min',
-        assetscore: 'libs/assets.core',
-        assetsresponsive: 'libs/assets.responsive',
-
         igvbeta: 'libs/igv'
     },
     shim: {
         'session_security': ['jquery'],
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
-        'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
-        'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
         'igvbeta': ['jquery', 'jqueryui']
     }
 });
@@ -45,12 +40,9 @@ require([
     'jqueryui',
     'session_security',
     'bootstrap',
-    'igvbeta',
+    'igvbeta'
 
-    'assetscore',
-    'assetsresponsive'
 ], function($, jqueryui, session_security, bs, igvbeta) {
-    A11y.Core();
 
     var browser;
     var tracks = [];
@@ -67,7 +59,8 @@ require([
             url: 'https://genomics.googleapis.com/v1',
             readGroupSetIds: readgroupset_id,
             name: sample_barcode + ': Google Genomics',
-            referenceName: '1'
+            referenceName: '1',
+            withCredentials: true
         });
     }
 
@@ -79,7 +72,8 @@ require([
             sourceType: 'gcs',
             type: 'bam',
             url: bam_path, // gs:// url to .bam file. Location must also contain .bai file.
-            name: sample_barcode + ': GCS bam file'
+            name: sample_barcode + ': GCS bam file',
+            withCredentials: true
         });
     }
 

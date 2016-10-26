@@ -18,7 +18,7 @@
 {% block content %}
 <div class="container">
 
-    {% if USER_DATA_ON %}
+    {% if False %}
     <section class="panel panel-default">
         <div class="panel-heading">
             <a role="button" data-target="#analysis-body" data-toggle="collapse" aria-expanded="true" aria-controls="analysis-body">
@@ -79,9 +79,9 @@
             {% if workbooks.count > 0 %}
                 {% for workbook in workbooks|slice:':6'  %}
                     <li>
-                        <a href="{% url 'workbook_detail' workbook.id %}">
+                        <a href="{% url 'workbook_detail' workbook.id %}" title="{{ workbook.name|title|wrap_text }}">
                             <div class="list-main">
-                                <h5 class="list-title">{{ workbook.name|title }}</h5>
+                                <h5 class="list-title">{{ workbook.name }}</h5>
                                 <p>{{ workbook.description }}</p>
                             </div>
                             <div class="list-info">
@@ -100,7 +100,7 @@
             <div style="height:40px">
                 <form id="create-workbook" method="POST" action="{% url 'workbook_create' %}" class="pull-left">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-primary" ><i class="fa fa-plus"></i>Create a New Workbook</button>
+                    <button type="submit" class="btn btn-link" ><i class="fa fa-plus"></i>Create a New Workbook</button>
                 </form>
                 {#            <a class="btn btn-link" href="{% url 'workbook_samples' %}">Sample Workbooks</a>#}
             </div>
@@ -235,7 +235,7 @@
                     {% endif %}
                 </div>
                 <div class="panel-footer">
-                    <a href="{% url 'project_upload' %}" class="btn btn-primary"><i class="fa fa-cloud-upload"></i>Upload Project Data</a>
+                    <a href="{% url 'project_upload' %}" class="btn btn-link"><i class="fa fa-cloud-upload"></i>Upload Project Data</a>
                 </div>
             </section>
         </div>

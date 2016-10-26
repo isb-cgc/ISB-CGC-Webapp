@@ -16,39 +16,50 @@
  *
  */
 
+var MAX_URL_LEN = 2000;
+
 define(['jquery', 'tree_graph', 'stack_bar_chart', 'draw_parsets'],
 function($, tree_graph, stack_bar_chart, draw_parsets) {
     
     var tree_graph_obj = Object.create(tree_graph, {});
     var parsets_obj = Object.create(draw_parsets, {});
 
-    var clin_tree_attr = [
-        'Study',
-        'vital_status',
-        'SampleTypeCode',
-        'tumor_tissue_site',
-        'gender',
-        'age_at_initial_pathologic_diagnosis'
-    ];
+    var clin_tree_attr = {
+        Study: 'Study',
+        vital_status: 'Vital Status',
+        SampleTypeCode: 'Sample Type',
+        tumor_tissue_site: 'Tumor Tissue Site',
+        gender: 'Gender',
+        age_at_initial_pathologic_diagnosis: 'Age at Initial Pathologic Diagnosis'
+    };
+
+    var user_data_attr = {
+        user_project: 'Project',
+        user_study: 'Study'
+    };
 
     return  {
 
-        filter_data_for_clin_trees: function(attr_counts) {
+        filter_data_for_clin_trees: function(attr_counts, these_attr) {
             var filtered_clin_trees = {};
             var attr_counts_clin_trees = null;
             var filters = this.format_filters();
-            var clin_tree_attr_map = {};
+            var tree_attr_map = {};
 
-            clin_tree_attr.map(function(attr){
-                clin_tree_attr_map[attr] = 1;
+            Object.keys(these_attr).map(function(attr){
+                tree_attr_map[attr] = 1;
             });
-            for(var i=0;i<filters.length;i++) {
-                var fname = filters[i].key.split(/:/)[1];
-                if(clin_tree_attr_map[fname]) {
-                    if(!filtered_clin_trees[fname]) {
-                        filtered_clin_trees[fname] = {};
+            for(var i in filters) {
+                if(filters.hasOwnProperty(i)) {
+                    var fname = (i.indexOf(":") >= 0) ? i.split(/:/)[1] : i;
+                    if (tree_attr_map[fname]) {
+                        if (!filtered_clin_trees[fname]) {
+                            filtered_clin_trees[fname] = {};
+                        }
+                        filters[i].map(function(val){
+                            filtered_clin_trees[fname][val] = 1;
+                        });
                     }
-                    filtered_clin_trees[fname][filters[i].value] = 1;
                 }
             }
             if(Object.keys(filtered_clin_trees).length > 0) {
@@ -73,6 +84,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
         update_counts_parsets_direct: function(filters) {
 
             $('.clinical-trees .spinner').show();
+            $('.user-data-trees .spinner').show();
             $('.parallel-sets .spinner').show();
             $('.cohort-info .total-values').hide();
             $('.cohort-info .spinner').show();
@@ -81,16 +93,23 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
 
             attr_counts = metadata_counts['count'];
 
-            $('#total-samples').html(metadata_counts['total']);
-            $('#total-participants').html(metadata_counts['participants']);
+            $('#isb-cgc-data-total-samples').html(metadata_counts['total']);
+            $('#isb-cgc-data-total-participants').html(metadata_counts['participants']);
+            $('#user-data-total-samples').html(user_data && metadata_counts['user_data_total'] !== null ? metadata_counts['user_data_total'] : "NA");
+            $('#user-data-total-participants').html(user_data && metadata_counts['user_data_participants'] !== null ? metadata_counts['user_data_participants'] : "NA");
+
 
             this.update_filter_counts(attr_counts);
             // If there were filters, we need to adjust their counts so the barchart reflects what
             // was actually filtered
             var filters = this.format_filters();
-            var clin_tree_attr_counts = filters.length > 0 ? this.filter_data_for_clin_trees(attr_counts) : attr_counts;
+            var clin_tree_attr_counts = Object.keys(filters).length > 0 ? this.filter_data_for_clin_trees(attr_counts, clin_tree_attr) : attr_counts;
+            tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,'#isb-cgc-tree-graph-clinical');
 
-            tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr);
+            if(user_data) {
+                var user_data_attr_counts = Object.keys(filters).length > 0 ? this.filter_data_for_clin_trees(user_data, user_data_attr) : user_data;
+                tree_graph_obj.draw_trees(user_data_attr_counts,user_data_attr,'#user-data-tree-graph');
+            }
 
             if (metadata_counts.hasOwnProperty('items')) {
                 var features = [
@@ -125,6 +144,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             }
 
             $('.clinical-trees .spinner').hide();
+            $('.user-data-trees .spinner').hide();
             $('.parallel-sets .spinner').hide();
             $('.cohort-info .spinner').hide();
             $('.cohort-info .total-values').show();
@@ -134,15 +154,26 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             var context = this;
             var filters = this.format_filters();
             var api_url = this.generate_metadata_url(base_url_domain, endpoint, filters, cohort_id, undefined, version);
-            var update_filters = this.update_filter_counts;
+
+            if(api_url.length > MAX_URL_LEN) {
+                $('#url-len-max-alert').show();
+                // This method is expected to return a promise, so send back a pre-rejected one
+                return $.Deferred().reject();
+            } else {
+                $('#url-len-max-alert').hide();
+            }
 
             $('.clinical-trees .spinner').show();
+            $('.user-data-trees .spinner').show();
             $('.parallel-sets .spinner').show();
             $('.cohort-info .total-values').hide();
             $('.cohort-info .spinner').show();
+
+            $('button[data-target="#apply-filters-modal"]').prop('disabled',true);
+            $('#apply-filters-form input[type="submit"]').prop('disabled',true);
             
             var startReq = new Date().getTime();
-            $.ajax({
+            return $.ajax({
                 type: 'GET',
                 url: api_url,
 
@@ -151,13 +182,19 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                     var stopReq = new Date().getTime();
                     console.debug("[BENCHMARKING] Time for response in update_counts_parsets: "+(stopReq-startReq)+ "ms");
                     attr_counts = results['count'];
-                    $('#total-samples').html(results['total']);
-                    $('#total-participants').html(results['participants']);
-                    update_filters(attr_counts);
+                    $('#isb-cgc-data-total-samples').html(results['total']);
+                    $('#isb-cgc-data-total-participants').html(results['participants']);
+                    $('#user-data-total-samples').html(results['user_data'] && results['user_data_total'] !== null ? results['user_data_total'] : "NA");
+                    $('#user-data-total-participants').html(results['user_data'] && results['user_data_participants'] !== null ? results['user_data_participants'] : "NA");
+                    context.update_filter_counts(attr_counts);
 
-                    var attr_counts_clin_trees = filters.length > 0 ? context.filter_data_for_clin_trees(attr_counts) : attr_counts;
+                    var clin_tree_attr_counts = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(attr_counts, clin_tree_attr) : attr_counts;
+                    tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,'#isb-cgc-tree-graph-clinical');
 
-                    tree_graph_obj.draw_trees(attr_counts_clin_trees,clin_tree_attr);
+                    if(user_data) {
+                        var user_data_attr_counts = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(user_data, user_data_attr) : user_data;
+                        tree_graph_obj.draw_trees(user_data_attr_counts, user_data_attr, '#user-data-tree-graph');
+                    }
                     
                     if (results.hasOwnProperty('items')) {
                         var features = [
@@ -191,11 +228,14 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                     }
                 },
                 error: function(req,status,err){
-                    $('#total-samples').html("Error");
-                    $('#total-participants').html("Error");
+                    $('#isb-cgc-data-total-samples').html("Error");
+                    $('#isb-cgc-data-total-participants').html("Error");
+                    $('#user-data-total-samples').html("Error");
+                    $('#user-data-total-participants').html("Error");
                 },
                 complete: function(xhr,status) {
                     $('.clinical-trees .spinner').hide();
+                    $('.user-data-trees .spinner').hide();
                     $('.parallel-sets .spinner').hide();
                     $('.cohort-info .spinner').hide();
                     $('.cohort-info .total-values').show();
@@ -203,87 +243,8 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             });
         },
 
-        update_counts: function(base_url_domain, endpoint, cohort_id, limit, version) {
-            var filters = this.format_filters();
-            var api_url = this.generate_metadata_url(base_url_domain, endpoint, filters, cohort_id, limit, version);
-            var update_filters = this.update_filter_counts;
-            $('.clinical-trees .spinner').show();
-            var startReq = new Date().getTime();
-            $.ajax({
-                type: 'GET',
-                url: api_url,
-
-                // On success
-                success: function (results, status, xhr) {
-                    var stopReq = new Date().getTime();
-                    console.debug("[BENCHMARKING] Time for response in update_counts: "+(stopReq-startReq)+ "ms");
-                    attr_counts = results['count'];
-                    $('.menu-bar .total-samples').html(results['total'] + ' Samples');
-                    update_filters(attr_counts);
-                    tree_graph_obj.draw_trees(attr_counts);
-                },
-                error: function(req,status,err){
-                    
-                },
-                complete: function(xhr,status) {
-                    $('.clinical-trees .spinner').hide();
-                }
-            });
-        },
-
-        update_parsets: function(base_url_domain, endpoint, cohort_id, version) {
-            var filters = this.format_filters();
-            var api_url = this.generate_metadata_url(base_url_domain, endpoint, filters, cohort_id, null, version);
-            var context = this;
-            $('.parallel-sets .spinner').show();
-            var startReq = new Date().getTime();
-            $.ajax({
-                type: 'GET',
-                url: api_url,
-                success: function(results, status, xhr) {
-                    var stopReq = new Date().getTime();
-                    console.debug("[BENCHMARKING] Time for response in update_parsets: "+(stopReq-startReq)+ "ms");
-                    if (results.hasOwnProperty('items')) {
-                        var features = [
-                                'cnvrPlatform',
-                                'DNAseq_data',
-                                'methPlatform',
-                                'gexpPlatform',
-                                'mirnPlatform',
-                                'rppaPlatform'
-                            ];
-                        var plot_features = [
-                            context.get_readable_name(features[0]),
-                            context.get_readable_name(features[1]),
-                            context.get_readable_name(features[2]),
-                            context.get_readable_name(features[3]),
-                            context.get_readable_name(features[4]),
-                            context.get_readable_name(features[5])
-                        ];
-                        for (var i = 0; i < results['items'].length; i++) {
-                            var new_item = {};
-                            for (var j = 0; j < features.length; j++) {
-                                var item = results['items'][i];
-                                new_item[plot_features[j]] = context.get_readable_name(item[features[j]]);
-                            }
-                            results['items'][i] = new_item;
-                        }
-
-                        parsets_obj.draw_parsets(results, plot_features);
-                    } else {
-                        console.debug(results);
-                    }
-                },error: function(req,status,err){
-
-                },
-                complete: function(xhr,status) {
-                    $('.parallel-sets .spinner').hide();
-                }
-            })
-        },
-
         format_filters: function() {
-            var list = [];
+            var list = {};
             $('.selected-filters .panel-body span').each(function() {
                 var $this = $(this),
                     key = $this.data('feature-name'),
@@ -296,10 +257,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
 
                 if(!list[key])
                     list[key] = [];
-                list.push({
-                    key: key,
-                    value: val,
-                });
+                list[key].push(val);
             });
             return list;
         },
@@ -327,38 +285,42 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
 
             counts_by_name = {};
 
-            for(var i=0; i < counts.length; i++) {
-                counts_by_name[counts[i].name] = {
+            // Convert the array into a map for easier searching
+            counts.map(function(obj){
+                counts_by_name[obj.name] = {
                     values: {},
-                    total: counts[i].total
-                };
-                for(var k=0; k < counts[i].values.length; k++) {
-                    counts_by_name[counts[i].name].values[counts[i].values[k].value] =  counts[i].values[k].count
+                    total: obj.total
                 }
-            }
+                var values = counts_by_name[obj.name].values;
+                obj.values.map(function(val){
+                    values[val.value] = val.count;
+                });
+            });
 
-            $('#filter-panel li.list-group-item div.cohort-feature-select-block').each(function() {
+            $('.filter-panel li.list-group-item div.cohort-feature-select-block').each(function() {
                 var $this = $(this),
                     attr = $this.data('feature-name');
-                $('ul#'+attr+' input').each(function(){
+                if(attr && attr.length > 0 && attr !== 'specific-mutation' ) {
+                    $('ul#' + attr + ' input').each(function () {
 
-                    var $that = $(this),
-                        value = $that.data('value-name'),
-                        displ_name = $that.data('displ-name'),
-                        new_count = '';
-
-                    if (counts_by_name[attr]) {
-                        if (counts_by_name[attr].values[value] || counts_by_name[attr].values[displ_name]) {
-                            new_count = '(' + (counts_by_name[attr].values[value] || counts_by_name[attr].values[displ_name]) + ')';
+                        var $that = $(this),
+                            value = $that.data('value-name'),
+                            id = $that.data('value-id'),
+                            displ_name = ($that.data('value-displ-name') == 'NA' ? 'None' : $that.data('value-displ-name')),
+                            new_count = '';
+                        if (counts_by_name[attr]) {
+                            if (counts_by_name[attr].values[value] || counts_by_name[attr].values[displ_name] || counts_by_name[attr].values[id]) {
+                                new_count = '(' + (counts_by_name[attr].values[value] || counts_by_name[attr].values[displ_name] || counts_by_name[attr].values[id]) + ')';
+                            }
                         }
-                    }
-                    if (new_count == '') {
-                        new_count = '(0)';
-                    }
-                    $that.siblings('span').html(new_count);
-                });
-            })
-
+                        // All entries which were not returned are assumed to be zero
+                        if (new_count == '') {
+                            new_count = '(0)';
+                        }
+                        $that.siblings('span').html(new_count);
+                    });
+                }
+            });
         },
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -394,59 +356,8 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                 return translation_dictionary[csv_name];
             } else{
                 csv_name = csv_name.replace(/_/g, ' ');
-                return csv_name.replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });;
+                return csv_name.replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
             }
-        },
-
-        disease_codes_original: [
-            {
-                "id": "BLCA",
-                "label": "Bladder Urothelial Carcinoma"
-            },
-            {
-                "id": "BRCA",
-                "label": "Breast invasive carcinoma"
-            },
-            {
-                "id": "COAD",
-                "label": "Colon adenocarcinoma"
-            },
-            {
-                "id": "GBM",
-                "label": "Glioblastoma Multiforme"
-            },
-            {
-                "id": "HNSC",
-                "label": "Head and Neck squamous cell carcinoma"
-            },
-            {
-                "id": "KIRC",
-                "label": "Kidney renal clear cell carcinoma"
-            },
-            {
-                "id": "LUAD",
-                "label": "Lung adenocarcinoma"
-            },
-            {
-                "id": "LUSC",
-                "label": "Lung squamous cell carcinoma"
-            },
-            {
-                "id": "OV",
-                "label": "Ovarian serous cystadenocarcinoma"
-            },
-            {
-                "id": "READ",
-                "label": "Rectum adenocarcinoma"
-            },
-            {
-                "id": "STAD",
-                "label": "Stomach adenocarcinoma"
-            },
-            {
-                "id": "UCEC",
-                "label": "Uterine Corpus Endometrial Carcinoma"
-            }
-        ]
+        }
     }
 });

@@ -38,14 +38,14 @@
     <div class="panel panel-default">
         <ul class="nav nav-tabs" role="tablist">
             <li role="presentation" {% if not is_public %} class="active" {% endif %} >
-                <a href="#save-cohorts-list" aria-controls="save-cohorts-list" role="tab" data-toggle="tab">Saved Cohorts</a>
+                <a href="#saved-cohorts-list" aria-controls="saved-cohorts-list" role="tab" data-toggle="tab">Saved Cohorts</a>
             </li>
             <li role="presentation" {% if is_public %} class="active" {% endif %} >
                 <a href="#public-cohorts-list" aria-controls="public-cohorts-list" role="tab" data-toggle="tab">Public Cohorts</a>
             </li>
         </ul>
         <div class="tab-content panel-body ">
-            <div role="tabpanel" class="tab-pane {% if not is_public %} active {% endif %} " id="save-cohorts-list">
+            <div role="tabpanel" class="tab-pane {% if not is_public %} active {% endif %} " id="saved-cohorts-list">
                 {% if cohorts.has_private_cohorts %}
                     {% if not from_workbook %}
                         <div class="page-action-group">
@@ -81,6 +81,7 @@
                             <th># Patients</th>
                             <th class="owner-col">Ownership</th>
                             <th>Shared With</th>
+                            <th>Cohort ID</th>
                             <th class="date-col">Last Modified</th>
                         </tr></thead>
                         <tbody>
@@ -88,9 +89,9 @@
                         {% if cohort.owner.is_superuser == False %}
                             <tr>
                                 <td class="checkbox-col">
-                                    <input {% if cohort.id in previously_selected_cohort_ids %}checked{% endif %} type="checkbox" name="id" value="{{ cohort.id }}" title="{{ cohort.name }} Checkbox" aria-label="cohort-checkbox"/>
+                                    <input {% if cohort.id in previously_selected_cohort_ids %}checked{% endif %} type="checkbox" name="id" value="{{ cohort.id }}" title="Cohort {{ cohort.id }} checkbox" aria-label="cohort-checkbox"/>
                                 </td>
-                                <td class="name-col"><a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a></td>
+                                <td class="name-col"><a href="{% url 'cohort_details' cohort.id %}" title="{{ cohort.name|wrap_text }}">{{ cohort.name }}</a></td>
                                 <td class="sample-col">{#{ cohort.num_patients }#} {{ cohort.sample_size }} </td>
                                 <td>{{ cohort.patient_size }}</td>
                                 <td class="owner-col">
@@ -102,10 +103,13 @@
                                 </td>
                                 <td class="share-col">
                                     {% if cohort.shared_with_users|length %}
-                                        ( <a data-toggle="modal" data-target="#share-cohorts-modal" class="shared">{{cohort.shared_with_users|length}}</a> )
+                                        ( <a data-toggle="modal" data-target="#share-cohorts-modal" data-cohort-id="{{ cohort.id }}" class="shared">{{cohort.shared_with_users|length}}</a> )
                                     {% else %}
                                         ( 0 )
                                     {% endif %}
+                                </td>
+                                <td>
+                                    {{ cohort.id }}
                                 </td>
                                 <td class="date-col">{{ cohort.last_date_saved|date:'M d, Y, g:i a' }}</td>
                             </tr>
@@ -146,7 +150,7 @@
                                     <input {% if cohort.id in previously_selected_cohort_ids %}checked{% endif %} type="checkbox" name="id" value="{{ cohort.id }}" title="{{ cohort.name }} Checkbox" aria-label="cohort-checkbox"/>
                                 </td>
                                 <td class="name-col"><a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a></td>
-                                <td class="sample-col">{#{ cohort.num_patients }#} {{ cohort.sample_size }} </td>
+                                <td class="sample-col"> {{ cohort.sample_size }} </td>
                                 <td>{{ cohort.patient_size }}</td>
                                 <td class="date-col">{{ cohort.last_date_saved|date:'M d, Y, g:i a' }}</td>
                             </tr>

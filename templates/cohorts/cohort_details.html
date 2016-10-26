@@ -27,6 +27,8 @@
 {% block page_name %}cohort-details{% endblock %}
 
 {% block page_header %}
+<link type="text/css" rel="stylesheet" href="{% static 'css/token-typeahead.css' %}" />
+
 <div class="container">
     <ol class="breadcrumb">
         <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
@@ -73,7 +75,7 @@
         </ul>
         <ul id="edit-cohort-menu" style="display: none">
             {% if cohort.perm.perm == 'OWNER' %}
-                <li class="menu-item"><button class="btn btn-primary" data-toggle="modal" data-target="#apply-filters-modal">Save Changes</button></li>
+                <li class="menu-item"><button class="btn btn-primary" data-toggle="modal" data-target="#apply-edits-modal">Save Changes</button></li>
                 <li class="menu-item"><button class="btn btn-link" id="cancel-add-filter-btn">Cancel</button></li>
             {% endif %}
         </ul>
@@ -82,205 +84,34 @@
 {% endblock %}
 
 {% block content %}
-    <div id="filter-panel" class="col-lg-4 col-md-4" style="display:none;">
-        <div class="tabpanel" role="tabpanel">
-            <ul class="nav nav-tabs" role="tablist">
-                <li role="presentation" class="active"><a href="#clinical-filters" role="tab" data-toggle="tab" title="Donor Filters">Donor</a></li>
-                <li role="presentation" class=""><a href="#data-filters" role="tab" data-toggle="tab" title="Donor Filters">Data Type</a></li>
-{#                <li role="presentation" class=""><a href="#molecular-filters" role="tab" data-toggle="tab" title="Donor Filters">Molecular</a></li>#}
-            </ul>
-            <div class="tab-content">
-                <div role="tabpanel" class="tab-pane active" id="clinical-filters">
-                    <ul class="list-group" id="clin-accordion" role="tablist">
-                        {% for attr in clin_attr %}
-                            {% if attr_list_count|list_contains_name:attr %}
-                                <li class="list-group-item">
-                                    <div id="heading-{{attr}}" class="list-group-item__heading">
-                                        <a role="button" data-toggle="collapse" data-parent="#clin-accordion" href="#collapse-{{ attr }}" aria-expanded="false" aria-controls="collapse-{{ attr }}">
-                                            <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr|get_readable_name }}
-                                        </a>
-                                    </div>
 
-                                    <div id="collapse-{{ attr }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" aria-labelledby="heading-{{ attr }}" data-feature-name="{{ attr }}" data-feature-id="{% if attr_list_count|get_named_item:attr|get_item:'id' %}{{ attr_list_count|get_named_item:attr|get_item:'id' }}{% endif %}">
-                                        <ul class="search-checkbox-list" id="{{ attr }}">
-                                            {% with attr_list_count|get_named_item:attr|get_item:'values'|how_many_more:6 as num_more %}
-                                                {% for v in attr_list_count|get_named_item:attr|get_item:'values'|check_for_order:attr %}
-                                                    {% if forloop.counter0 < 6 %}
-                                                        <li class="checkbox">
-                                                            <label title="{{ v.value|get_tooltip_text:attr }}">
-                                                                <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}" data-value-id="{% if v.id %}{{ v.id }}{% endif %}">
-                                                                {% if v.value == 'None' %}NA{% elif 'displ_name' in v %}{{ v.displ_name|get_readable_name:attr }}{% else %}{{ v.value|get_readable_name:attr }}{% endif %}
-                                                                 <span class="count">({{ v.count }})</span>
-                                                            </label>
-                                                        </li>
-                                                    {% elif forloop.counter0 == 6 and num_more > 0 %}
-                                                        <a class="show-more">{{ num_more }} more</a>
-                                                        <li class="extra-values checkbox" style="display:none;">
-                                                            <label title="{{ v.value|get_tooltip_text:attr }}">
-                                                                <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}" data-value-id="{% if v.id %}{{ v.id }}{% endif %}">
-                                                                {% if v.value == 'None' %}NA{% elif 'displ_name' in v %}{{ v.displ_name|get_readable_name:attr }}{% else %}{{ v.value|get_readable_name:attr }}{% endif %}
-                                                                 <span class="count">({{ v.count }})</span>
-                                                            </label>
-                                                        </li>
-                                                    {% else %}
-                                                        <li class="extra-values checkbox" style="display:none;">
-                                                            <label title="{{ v.value|get_tooltip_text:attr }}">
-                                                                <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}" data-value-id="{% if v.id %}{{ v.id }}{% endif %}">
-                                                                {% if v.value == 'None' %}NA{% elif 'displ_name' in v %}{{ v.displ_name|get_readable_name:attr }}{% else %}{{ v.value|get_readable_name:attr }}{% endif %}
-                                                                 <span class="count">({{ v.count }})</span>
-                                                            </label>
-                                                        </li>
-                                                    {% endif %}
-                                                {% endfor %}
-                                                {% if num_more > 0 %}
-                                                    <a class="show-less" style="display:none;">less</a>
-                                                {% endif %}
-                                            {% endwith %}
-                                        </ul>
-                                    </div>
-                                </li>
-                            {% endif %}
-                        {% endfor %}
-                    </ul>
-                </div>
-                <!-- data filters tab -->
-                <div role="tabpanel" class="tab-pane" id="data-filters">
-                    <ul class="list-group" id="data-type-accordion" role="tablist" aria-multiselectable="true">
-                        {% for attr in data_attr %}
-                            <li class="list-group-item">
-                                <div class="list-group-item__heading" role="tab" id="heading-{{ attr }}">
-                                    <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-{{ attr }}" aria-expanded="false" aria-controls="collapse-{{ attr }}" {% if attr == 'miRNA_sequencing' %}style="text-transform:none!important"{% endif %}>
-                                        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ attr|get_readable_name }}
-                                    </a>
-                                </div>
-                                <div id="collapse-{{ attr }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" aria-labelledby="heading-{{ attr }}" data-feature-name="{{ attr }}" data-feature-type="datatype">
-                                    <ul class="search-checkbox-list" id="{{ attr }}">
-                                        {% if attr_list_count|list_contains_name:attr %}
-                                            {% for v in attr_list_count|get_named_item:attr|get_item:'values' %}
-                                                <li class="checkbox">
-                                                    <!-- todo: make a custom tag for the id for data_attr attributes-->
-                                                    <label>
-                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.value|get_data_attr_id:attr }}" data-displ-name="{{  v.value }}">
-                                                        {{ v.value }} <span class="count">({{ v.count }})</span>
-                                                    </label>
-                                                </li>
-                                            {% endfor %}
-                                        {% endif %}
-                                    </ul>
-                                </div>
-                            </li>
-                        {% endfor %}
-                    </ul>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div id="url-len-max-alert" class="alert alert-warning alert-dismissable" style="display: none;">
+                    <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    You have selected too many filters. The current counts shown will not be accurate until one or more filter options are removed.
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="content-panel" class="col-md-12">
-        <div class="selected-filters panel panel-default" style="display:none;">
-            <div class="panel-heading clearfix">
-                <h4 class="panel-title pull-left">New Filters </h4>
-                <a class="pull-right" role="button" id="clear-filters">Clear All</a>
-            </div>
-            <div class="panel-body">
-
-            </div>
-        </div>
-
-        <div class="cohort-selected-filters panel panel-default">
-            <div class="panel-heading">
-                <h4 class="panel-title">Current Filters</h4>
-            </div>
-            <div class="panel-body">
-                {% for filter in cohort.get_current_filters %}
-                    <span class="filter-label label label-default space-right-5">{{ filter.name }}: {{ filter.value }}</span>
-                {% empty %}
-                    <p>No filters have been applied to this cohort.</p>
-                {% endfor %}
+    <div class="row cgc-user-data-type-tabs">
+        <div class="col-lg-4">
+            <div class="panel panel-default">
+                <ul class="nav nav-tabs nav-tabs-data" role="tablist">
+                    <li role="presentation" class="{% if user_data == None or metadata_counts.user_data_total == None or metadata_counts.user_data_total <= 0 %}active{% endif %}"><a href="#isb-cgc-data" role="tab" data-toggle="tab" title="Donor Filters">ISB-CGC Data</a></li>
+                    <li role="presentation" class="{% if user_data and metadata_counts.user_data_total > 0 %}active{% endif %}"><a href="#user-data" role="tab" data-toggle="tab" title="User Data">User Data</a></li>
+                </ul>
             </div>
         </div>
+    </div>
 
-        <div class="cohort-info panel panel-default">
-            <div class="panel-heading">
-                <h4 class="panel-title">Details</h4>
-            </div>
-            <div class="panel-body">
-                <div class="row col-md-12 space-bottom-10">
-                    <span>Internal ISB-CGC Cohort ID: {{ cohort.id }}</span>
-                </div>
-                <div class="row col-md-12 space-bottom-10">
-                    <span class="detail-label">Total Number of Samples:</span>
-                    <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                    <span class="total-values" id="total-samples">{{ total_samples }}</span>
-                </div>
-                <div class="row col-md-12 space-bottom-10">
-                    <span class="detail-label">Total Number of Participants:</span>
-                    <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                    <span class="total-values" id="total-participants">{{ total_patients }}</span>
-                </div>
-                <div class="row col-md-12 space-bottom-10">
-                    <span>Your Permissions: {{ cohort.perm.perm }}</span>
-                </div>
-                <div class="row col-md-12 space-bottom-10">
-                    <span>Creation Filters: </span>
-                    <span class="applied-filters">
-                     {% for filter in cohort.get_creation_filters %}
-                         <span>{{ filter.name }}: {{ filter.value }}</span>
-                     {% empty %}
-                         There were no filters used to create this cohort.
-                     {% endfor %}
-                     </span>
-                </div>
-                <div class="row col-md-12 space-bottom-10">
-                    <span class="rev-history">Revision History:</span>
-                    <ul>
-                        {% for item in cohort.get_revision_history %}
-                            {%  if 'type' in item and item.type == 'filter' %}
-                                 <li class="applied-filters">
-                                    Applied Filters:
-                                     {% for filter in item.vals %}
-                                        <span>{{ filter }}</span>
-                                     {% endfor %}
-                                </li>
-                            {%  else %}
-                                <li>{{ item }}</li>
-                            {%  endif %}
-                        {% endfor %}
-                    </ul>
-                    {% if shared_with_users and cohort.perm == 'OWNER'%}
-                        <br>
-                        <p><strong>Shared With Users:</strong></p>
-                        <ul>
-                        {% for user in shared_with_users %}
-                            <li>{{ user.first_name }} {{ user.last_name }} [{{ user.email }}]</li>
-                        {% endfor %}
-                        </ul>
-                    {% endif %}
-                </div>
-            </div>
+    <div class="row">
+        <div class="tab-content data-tab-content">
+            {% include "cohorts/isb-cgc-data.html" %}
+            {% include "cohorts/user-data.html" %}
         </div>
-
-        <div class="clinical-trees panel panel-default">
-            <div class="panel-heading">
-                <h4 class="panel-title">Clinical Features</h4>
-            </div>
-            <div class="panel-body">
-                <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                <div id="tree-graph-clinical"></div>
-            </div>
-            <div id="more-graphs"><button class="btn btn-link" role="button">Show More</button></div>
-            <div id="less-graphs" style="display: none;"><button class="btn btn-link" role="button">Show Less</button></div>
-        </div>
-        <div class="parallel-sets panel">
-            <div class="panel-heading">
-                <h4>Public Data Availability</h4>
-            </div>
-            <div class="panel-body">
-                <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                <div id="multi-categorical"></div>
-            </div>
-        </div>
-
     </div>
 
     <!-- Comment Flyout -->
@@ -305,7 +136,6 @@
             </form>
         </div>
     </div>
-
 
     <!-- Share Cohort Modal -->
     <div class="modal fade" id="share-cohort-modal" tabindex="-1" role="dialog" aria-labelledby="shareCohortModal" aria-hidden="true">
@@ -366,15 +196,12 @@
                             {% else %}
                             <p class="center">This list is empty.</p>
                             {% endif %}
-
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
-
 
     <!-- Create Cohort Modal -->
     <div class="modal fade" id="create-cohort-modal" tabindex="-1" role="dialog" aria-labelledby="createCohortModal" aria-hidden="true">
@@ -399,18 +226,17 @@
     </div>
 
     <!-- Apply Filters Modal -->
-    <div class="modal fade" id="apply-filters-modal" tabindex="-1" role="dialog" aria-labelledby="applyFiltersModal" aria-hidden="true">
+    <div class="modal fade" id="apply-edits-modal" tabindex="-1" role="dialog" aria-labelledby="applyFiltersModal" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <h4 class="modal-title" id="applyFiltersModal">Save Changes</h4>
                 </div>
-                <form id="apply-filters-form" method="POST" action="{% url 'save_cohort' %}">
+                <form id="apply-edits-form" method="POST" action="{% url 'save_cohort' %}">
                     <div class="modal-body">
-                        <label for="apply-filter-cohort-name">Saving changes will permanently modify the existing cohort.</label>
-                        <input type="hidden" id="apply-filter-cohort-name" name="name" value="{{ cohort.name }}"/>
-                        <input type="hidden" name="apply-filters" value="True"/>
+                        <label for="apply-edit-cohort-name">Saving changes will permanently modify the existing cohort.</label>
+                        <input type="hidden" id="apply-edit-cohort-name" name="name" value="{{ cohort.name }}"/>
                     </div>
                     <div class="modal-footer">
                         {% csrf_token %}
@@ -452,7 +278,9 @@
     var base_url = '{{ base_url|safe }}';
     var base_api_url = '{{ base_api_url|safe }}';
     var cohort_id = {{ cohort.id }};
+    var user_data = {{ user_data|tojson|safe }};
     var metadata_counts = {{ metadata_counts|tojson|safe }};
+    var metadata_filters = {{ metadata_filters|tojson|safe }};
     </script>
 {% endblock %}
 

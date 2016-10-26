@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+{% load tz %}
+{% comment %}
+
+   Copyright 2016, Institute for Systems Biology
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+{% endcomment %}
+
+{% block header %}
+
+{% endblock %}
+
+{% block link_page_name %}user-gcp-list{% endblock %}
+{% block page_name %}user-gcp-list{% endblock %}
+
+{% block page_header %}
+    <div class="container">
+        <h1 class="page-header pull-left">Registered Google Cloud Projects</h1>
+        <a href="{% url 'register_gcp' user.id %}" class="btn btn-primary pull-right"><i class="fa fa-plus"></i>Register New Google Cloud Project</a>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="panel panel-default col-sm-12 col-md-12 col-lg-12">
+                <div class="panel-body">
+                    <table class="table" role="presentation">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Project Name</th>
+                                <th>Project ID</th>
+                                <th>Registered Service Accounts</th>
+                                <th># Storage Buckets</th>
+                                <th># BigQuery Datasets</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for project in gcp_list %}
+                                <tr>
+                                    <td>
+                                        <div class="dropdown">
+                                        <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
+                                        <ul class="dropdown-menu">
+                                            <li><a href="{% url 'register_sa' user.id %}?gcp_id={{ project.project_id }}">Register Service Account</a> </li>
+                                            <li><a data-toggle="modal" role="button" data-target="#delete-project-modal-{{ project.id }}" >Unregister Project</a></li>
+{#                                            <li><a data-toggle="modal" role="button" data-target="#new-favorite-workbook-modal-{{ favorite.id }}" >Start New Workbook</a></li>#}
+                                        </ul>
+                                        </div>
+                                    </td>
+                                    <td><a href="{% url 'gcp_detail' user.id project.id %}">{{ project.project_name }}</a> <a href="https://console.cloud.google.com/home/dashboard?project={{ project.project_name }}"><i class="fa fa-external-link"></i></a></td>
+                                    <td>{{ project.project_id }}</td>
+{#                                    <td>{% if project.big_query_dataset %}{{ project.big_query_dataset }}{% else %}N/A{% endif %}</td>#}
+
+                                    <td>
+                                        {% if project.serviceaccount_set.all|length > 0 %}
+                                        <a role="button" class="show-service-accounts" data-target="{{ project.id }}-expander"><i class="fa fa-caret-right"></i> {{ project.serviceaccount_set.all|length }}</a>
+                                        {% else %}
+                                        {{ project.serviceaccount_set.all|length }}
+                                        {% endif %}
+                                    </td>
+
+                                    <td>{{ project.bucket_set.all|length }}</td>
+                                    <td>{{ project.bqdataset_set.all|length }}</td>
+                                {% include "GenespotRE/user_gcp_list_modals.html" with project=project %}
+                                </tr>
+
+                                    <tr class="{{ project.id }}-expander" style="display:none;">
+                                        <td></td>
+                                        <td colspan="5">
+
+                                            <div>
+                                                <table class="table" role="presentation">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>Service Account</th>
+                                                        <th>Authorized Dataset</th>
+                                                        <th>Date Activated</th>
+                                                        <th>Active</th>
+                                                        <th></th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    {% for service_account in project.serviceaccount_set.all %}
+                                                    <tr>
+                                                        <td>{{ service_account.service_account }}</td>
+                                                        <td>{{ service_account.authorized_dataset.name }}</td>
+                                                        <td>{{ service_account.authorized_date|date:'M d, Y, g:i a' }}</td>
+                                                        <td>{% if service_account.active %}<i class="fa fa-check"></i>{% endif %}</td>
+                                                        <td>
+                                                            <a data-toggle="modal" role="button" data-target="#refresh-sa-modal-{{ service_account.id }}" class="space-right-5"><i class="fa fa-refresh"></i></a>
+                                                            <a data-toggle="modal" role="button" data-target="#delete-sa-modal-{{ service_account.id }}"><i class="fa fa-trash"></i></a>
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                    </tbody>
+                                                </table>
+
+                                            </div>
+
+                                        </td>
+                                    </tr>
+
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+
+    <div class="modal fade" id="add-cloud-project" tabindex="-1" role="dialog" aria-labelledby="AddCloudProject" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="add-gcp-header">Link Google Cloud Project</h4>
+                </div>
+                <form id="add-gcp" method="POST" action="{% url 'register_gcp' user.id %}" class="form-horizontal">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="name" class="control-label col-sm-3">Name (Required)</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" name="project_name" id="name" placeholder="Project Name" required />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="project-id" class="control-label col-sm-3">Project ID (Required)</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" name="project_id" id="project-id" placeholder="Project Id" required />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="project-dataset" class="control-label col-sm-3">Big Query Dataset (Optional)</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" name="bq_dataset" id="project-dataset" placeholder="Project Name" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        {% csrf_token %}
+                        <input type="submit" value="Register" class="btn btn-primary" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="bucket-contents-modal" tabindex="-1" role="dialog" aria-labelledby="ControlledDataTitle" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="ControlledDataTitle">Contents of isb-cgc-mock-cntl Bucket:</h4>
+                </div>
+                <ul>
+                {% for item in object_list %}
+                    <li>
+                    {{ item.name }}
+                    </li>
+                {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block js_file %}{% static 'js/user_details.js' %}{% endblock %}

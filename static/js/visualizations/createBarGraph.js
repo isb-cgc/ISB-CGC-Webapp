@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2015, Institute for Systems Biology
+ * Copyright 2016, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
  *
  */
 
-define (['jquery', 'd3', 'd3tip', 'vizhelpers'],
-function($, d3, d3tip, vizhelpers) {
+define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers'],
+function($, d3, d3tip, d3textwrap, vizhelpers) {
 
     // If you want to override the tip coming in from the create call,
     // do it here
@@ -26,8 +26,14 @@ function($, d3, d3tip, vizhelpers) {
         .direction('n')
         .offset([0, 0])
         .html(function(d) {
-            return d.count;
+            return d.value+': '+d.count;
         });
+
+    var selex_active = false;
+    var zoom_status = {
+        translation: null,
+        scale: null
+    };
 
     return {
 
@@ -72,9 +78,11 @@ function($, d3, d3tip, vizhelpers) {
                 .tickSize(-width + margin.right + margin.left, 0, 0);
 
             var zoomer = function() {
-                svg.select('.x.axis').attr('transform', 'translate(' + (d3.event.translate[0]+margin.left) + ',' + (height - margin.bottom) + ')').call(xAxis);
-                svg.selectAll('.x.axis text').style('text-anchor', 'end').attr('transform', 'translate(' + -15 + ',' + 10 + ') rotate(-90)');
-                plot_area.selectAll('.plot-bar').attr('transform', 'translate(' + d3.event.translate[0] + ',0)');
+                if(!selex_active) {
+                    svg.select('.x.axis').attr('transform', 'translate(' + (d3.event.translate[0] + margin.left) + ',' + (height - margin.bottom) + ')').call(xAxis);
+                    svg.selectAll('.x.axis text').style('text-anchor', 'end').attr('transform', 'translate(' + -15 + ',' + 10 + ') rotate(-90)');
+                    plot_area.selectAll('.plot-bar').attr('transform', 'translate(' + d3.event.translate[0] + ',0)');
+                }
             };
 
             var x2 = d3.scale.linear()
@@ -85,12 +93,7 @@ function($, d3, d3tip, vizhelpers) {
                 .x(x2)
                 .on('zoom', zoomer);
 
-            var zoom_area = svg.append('g')
-                .attr('class', 'zoom_area')
-                .append('rect')
-                .attr('width', width)
-                .attr('height', height)
-                .style('opacity', '0');
+            svg.call(zoom);
 
             var plot_area = svg.append('g')
                 .attr('clip-path', 'url(#plot_area_clip)');
@@ -135,6 +138,27 @@ function($, d3, d3tip, vizhelpers) {
                 .style('text-anchor', 'end')
                 .attr('transform', 'translate(' + -15 + ',' + 10 + ') rotate(-90)');
 
+
+            d3.select('.x.axis').selectAll('text').each(function(){
+                var d = d3.select(this);
+                var label = d.text();
+                var parent = d3.select(d.node().parentNode);
+                d.remove();
+                var fOb = parent.append('foreignObject')
+                    .attr('requiredFeatures', 'http://www.w3.org/TR/SVG11/feature#Extensibility')
+                    .attr('width', margin.bottom-5)
+                    .attr('height', bar_width);
+
+                fOb.append('xhtml:div')
+                    .style('height', bar_width)
+                    .style('width', margin.bottom-5)
+                    .attr('class','truncated-single')
+                    .attr('title',label)
+                    .html(label);
+            });
+
+            d3.select('.x.axis').selectAll('foreignObject').attr('style','transform: translate(-15px,100px) rotate(-90deg);');
+
             // Highlight the selected rectangles whenever the cursor is moved
             var brushmove = function(p) {
                 var total_samples = 0;
@@ -165,12 +189,14 @@ function($, d3, d3tip, vizhelpers) {
 
             // If the brush is empty, select all circles.
             var brushend = function() {
-                if (brush.empty()) svg.selectAll(".hidden").classed("hidden", false);
+                if (brush.empty()) {
+                    svg.selectAll(".hidden").classed("hidden", false);
+                    $(svg[0]).parents('.plot').find('.save-cohort-card').hide();
+                }
             };
 
             var brush = d3.svg.brush()
                 .x(x2)
-                .on('brushstart', function(){ svg.selectAll('.extent').style("fill", "rgba(40,130,50,0.5");})
                 .on('brush', brushmove)
                 .on('brushend', brushend);
 
@@ -183,34 +209,45 @@ function($, d3, d3tip, vizhelpers) {
                 .call(yAxis);
 
             // append axes labels
-            svg.append('text')
-                .attr('class', 'x label')
+            svg.append('g')
+                .attr('class','x-label-container')
+                .append('text')
+                .attr('class', 'x label axis-label')
                 .attr('text-anchor', 'middle')
                 .attr('transform', 'translate(' + (width/2) + ',' + (height - 10) + ')')
                 .text(xLabel);
 
+            d3.select('.x.label').call(d3textwrap.textwrap().bounds({width: (width-margin.left)*0.75, height: 250}));
+            d3.select('.x-label-container').selectAll('foreignObject').attr('style','transform: translate('+((width/2)-(((width-margin.left)*0.75)/2)) + 'px,' + (height - 10)+'px);');
+            d3.select('.x-label-container').selectAll('div').attr('class','axis-label');
+
             svg.append('text')
-                .attr('class', 'y label')
+                .attr('class', 'y label axis-label')
                 .attr('text-anchor', 'middle')
                 .attr('transform', 'rotate(-90) translate(' + (-1 * (height/2)) + ',10)')
                 .text('Number of Samples');
 
             var check_selection_state = function(obj) {
-                if (obj) {
-                    // Remove zoom area
-                    svg.selectAll('.zoom_area').remove();
 
-                    if (svg.select('.brush').empty()) {
-                        // Append new brush event listeners to plot area only
-                        plot_area.append('g')
-                            .attr('class', 'brush')
-                            .call(brush)
-                            .selectAll('rect')
-                            .attr('y', 0)
-                            .attr('height', height - margin.bottom)
-                            .attr('transform', 'translate(0, 0)');
-                    }
+                selex_active = !!obj;
+
+                if (obj) {
+                    // Disable zooming events and store their status
+                    svg.on('.zoom',null);
+                    zoom_status.translation = zoom.translate();
+                    // Append new brush event listeners to plot area only
+                    plot_area.append('g')
+                        .attr('class', 'brush')
+                        .call(brush)
+                        .selectAll('rect')
+                        .attr('y', 0)
+                        .attr('height', height - margin.bottom)
+                        .attr('transform', 'translate(0, 0)');
                 } else {
+                    // Resume zooming, restoring the zoom's last state
+                    svg.call(zoom);
+                    zoom_status.translation && zoom.translate(zoom_status.translation);
+                    zoom_status.translation = null;
                     var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                     // Clear selections
                     $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + 0);
@@ -218,46 +255,26 @@ function($, d3, d3tip, vizhelpers) {
                     $('#save-cohort-'+plot_id+'-modal input[name="samples"]').attr('value', []);
                     svg.selectAll('.selected').classed('selected', false);
                     $(svg[0]).parents('.plot').find('.save-cohort-card').hide();
-
-                    // Remove brush event listener plot area
+                    // Remove brush event listener plot area - comment out if we want to enable selection carry-over
+                    brush.clear();
                     plot_area.selectAll('.brush').remove();
-
-                    if (svg.select('.zoom_area').empty()) {
-                        // Append new zoom area
-                        zoom_area = svg.append('g')
-                            .attr('class', 'zoom_area')
-                            .append('rect')
-                            .attr('width', width)
-                            .attr('height', height)
-                            .style('opacity', 0);
-
-                        // Register zoom event listeners
-                        zoom.on('zoom', zoomer);
-                        zoom_area.call(zoom)
-                            .on('.zoom', zoomer);
-                    }
                 }
             };
 
-            /*
-                Update the sample cohort bar update
-             */
+            //Update the sample cohort bar update
             function sample_form_update(extent, total_samples, total_patients, sample_list){
                 var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                 $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + total_samples);
                 $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Participants: ' + total_patients);
                 $('#save-cohort-' + plot_id + '-modal input[name="samples"]').attr('value', sample_list);
+                var leftVal = Math.min((x2(extent[1]) + 20),(width-$('.save-cohort-card').width()));
                 $(svg[0]).parents('.plot')
                     .find('.save-cohort-card').show()
-                    .attr('style', 'position:relative; top: -' + height + 'px; left:' + (x2(extent[1]) + 80) + 'px;');
+                    .attr('style', 'position:relative; top: -' + height + 'px; left:' + leftVal + 'px;');
 
-                if (total_samples > 0){
-                    $(svg[0]).parents('.plot')
-                        .find('.save-cohort-card').find('.btn').prop('disabled', false);
-                } else {
-                    $(svg[0]).parents('.plot')
-                        .find('.save-cohort-card').find('.btn').prop('disabled', true);
-                }
+                $(svg[0]).parents('.plot')
+                    .find('.save-cohort-card').find('.btn').prop('disabled', (total_samples <= 0));
+
 
             }
 

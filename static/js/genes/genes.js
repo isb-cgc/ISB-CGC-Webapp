@@ -6,8 +6,6 @@ require.config({
         jqueryui: 'libs/jquery-ui.min',
         session_security: 'session_security',
         underscore: 'libs/underscore-min',
-        assetscore: 'libs/assets.core',
-        assetsresponsive: 'libs/assets.responsive',
         base: 'base',
         bloodhound: 'libs/bloodhound',
         typeahead : 'libs/typeahead',
@@ -17,15 +15,14 @@ require.config({
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
         'session_security': ['jquery'],
-        'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
-        'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
         'underscore': {exports: '_'},
         'tokenfield': ['jquery', 'jqueryui'],
         'typeahead':{
             deps: ['jquery'],
             init: function ($) {
                 return require.s.contexts._.registry['typeahead.js'].factory( $ );
-            }
+            },
+            hint: false
         },
         'bloodhound': {
            deps: ['jquery'],
@@ -42,8 +39,6 @@ require([
     'bloodhound',
     'typeahead',
     'underscore',
-    'assetscore',
-    'assetsresponsive',
     'base',
     'tokenfield'
 ], function($, jqueryui, bootstrap, session_security, Bloodhound, typeahead, _) {
@@ -66,12 +61,15 @@ require([
             wildcard: '%QUERY'
         }
     });
+
     gene_suggestions.initialize();
     function createTokenizer() {
         // be aware bootstrap tokenfield requires 'value' as the datem attribute field : https://github.com/sliptree/bootstrap-tokenfield/issues/189
         geneListField.tokenfield({
             typeahead : [
-                null, {
+                {
+                    hint: false
+                }, {
                     source: gene_suggestions.ttAdapter(),
                     display: 'value'
                 }
@@ -106,7 +104,10 @@ require([
                 if ($('div.token.invalid.repeat').length < 1) {
                     $('.helper-text__repeat').hide();
                 }
-            })
+            });
+            if(geneListField.tokenfield('getTokens').length > 0) {
+                $('.create-gene-list input[type="submit"]').removeAttr('disabled');
+            }
         }).on('tokenfield:removedtoken', function (event) {
             // Update duplicate flagging
             var theseRepeats = [];
@@ -117,12 +118,15 @@ require([
                     firstRepeat.removeClass('invalid');
                 }
             }
-
             if ($('div.token.invalid.error').length < 1) {
                 $('.helper-text__invalid').hide();
             }
             if ($('div.token.invalid.repeat').length < 1) {
                 $('.helper-text__repeat').hide();
+            }
+
+            if(geneListField.tokenfield('getTokens').length <= 0) {
+                $('.create-gene-list input[type="submit"]').attr('disabled', 'disabled');
             }
         }).on('tokenfield:edittoken',function(e){
             e.preventDefault();
@@ -139,9 +143,11 @@ require([
             event.preventDefault();
         }else{
             geneFavs = [];
+            // Bootstrap tokenfield bug #183: there's no easy way to clear out all the tokens. Suggested
+            // solution is to set an empty token array and clear out the underlying text field.
             geneListField.tokenfield('setTokens', []);
-            geneListField.tokenfield('createToken' , 'this is an arbitrary token to get bootstrap to clear the existing tokens');
-            geneListField.tokenfield('setTokens', []);
+            geneListField.val('');
+            $('.create-gene-list input[type="submit"]').attr('disabled', 'disabled');
         }
         return false;
     });
@@ -202,29 +208,6 @@ require([
         })
     }
 
-    //$('#paste-upload').on('click', function(){
-    //    var pasted_genes = $($(this).data('target')).val().split(/[ ,]+/).filter(Boolean);
-    //
-    //    uploaded_list = checkUploadedGeneListAgainstGeneIdentifier(pasted_genes);
-    //    console.log(pasted_genes);
-    //})
-
-    //$('#clearAll').on('click', function(){
-    //    $('#paste-in-genes').val('');
-    //})
-    //$('#upload-without-error-genes').on('click', function(){
-    //    // upload valid gene list
-    //    // uploaded_list.valid
-    //    console.log(uploaded_list.valid);
-    //})
-    //$('#upload-with-error-genes').on('click', function(){
-    //    var newlist = $($(this).data('target')).val().split(/[ ,]+/).filter(Boolean);
-    //    newlist = uploaded_list.valid.concat(newlist);
-    //
-    //    // Upload newlist
-    //    console.log(uploaded_list.valid);
-    //})
-
     $('form.create-gene-list').on('submit', function(e) {
         // Do not allow white-space only names
         if($('#genes-list-name').prop('value').match(/^\s*$/)) {
@@ -232,7 +215,12 @@ require([
             e.preventDefault();
             return false;
         }
-        $(this).find('input[type="submit"]').attr('disabled', 'disabled');
+        // Do not allow submission of empty gene lists
+        if(geneListField.tokenfield('getTokens').length <= 0) {
+            e.preventDefault();
+            return false;
+        }
+        $('.create-gene-list input[type="submit"]').attr('disabled', 'disabled');
     });
 
     /*
@@ -287,7 +275,7 @@ require([
             }else{
                 valid_genes.push(gene);
             }
-        })
+        });
         if(invalid_genes.length > 0){
             //If some genes cannot be identified
             //hide default upload panel and show error panel
@@ -311,4 +299,9 @@ require([
         });
         return Object.keys(genes_count_object);
     }
+
+    $('.cancel-edit').on('click', function() {
+        window.onbeforeunload = null
+    })
+    
 });
