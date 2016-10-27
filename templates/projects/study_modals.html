@@ -32,6 +32,11 @@
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title">Delete this Study?</h4>
             </div>
+            <div class="modal-body">
+                <div class="alert alert-warning alert-dismissable">
+                    Deleting this study will not delete underlying Google BigQuery tables or files in Google Cloud Storage. Those must be removed manually.
+                </div>
+            </div>
             <form id="delete-study-{{ study.id }}" method="POST" action="{% url 'study_delete' project.id study.id %}">
                 {% csrf_token %}
                 <div class="modal-footer">

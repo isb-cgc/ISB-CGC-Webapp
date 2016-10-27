@@ -50,16 +50,16 @@
                                     <ul class="dropdown-menu">
                                         <li><a href="{% url 'project_detail' project.id %}">Edit</a> </li>
                                         <li><a role="button" data-toggle="modal" data-target="#delete-project-modal-{{ project.id }}">Delete</a></li>
-                                        <li>
-                                            <a>
-                                                <form action="{% url 'worksheet_create_with_projects' %}" method="POST">
-                                                    {% csrf_token %}
-                                                    <input type="hidden" name="project_id" value="{{ project.id }}">
-                                                    <button type="submit">New Workbook</button>
-                                                </form>
-                                            </a>
+{#                                        <li>#}
+{#                                            <a>#}
+{#                                                <form action="{% url 'worksheet_create_with_projects' %}" method="POST">#}
+{#                                                    {% csrf_token %}#}
+{#                                                    <input type="hidden" name="project_id" value="{{ project.id }}">#}
+{#                                                    <button type="submit">New Workbook</button>#}
+{#                                                </form>#}
+{#                                            </a>#}
 {#                                            <a href="{% url 'create_with_project' project.id %}">New Workbook</a>#}
-                                        </li>
+{#                                        </li>#}
                                     </ul>
                                     <span class="row-expand-button"></span>
                                 </div>
