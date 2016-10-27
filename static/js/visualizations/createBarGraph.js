@@ -191,7 +191,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
             var brushend = function() {
                 if (brush.empty()) {
                     svg.selectAll(".hidden").classed("hidden", false);
-                    $(svg[0]).parents('.plot').find('.save-cohort-card').hide();
+                    $('.save-cohort-card').hide();
                 }
             };
 
@@ -248,13 +248,14 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                     svg.call(zoom);
                     zoom_status.translation && zoom.translate(zoom_status.translation);
                     zoom_status.translation = null;
+
                     var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                     // Clear selections
                     $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + 0);
                     $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Participants: ' + 0);
                     $('#save-cohort-'+plot_id+'-modal input[name="samples"]').attr('value', []);
                     svg.selectAll('.selected').classed('selected', false);
-                    $(svg[0]).parents('.plot').find('.save-cohort-card').hide();
+                    $('.save-cohort-card').hide();
                     // Remove brush event listener plot area - comment out if we want to enable selection carry-over
                     brush.clear();
                     plot_area.selectAll('.brush').remove();
@@ -268,14 +269,10 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                 $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Participants: ' + total_patients);
                 $('#save-cohort-' + plot_id + '-modal input[name="samples"]').attr('value', sample_list);
                 var leftVal = Math.min((x2(extent[1]) + 20),(width-$('.save-cohort-card').width()));
-                $(svg[0]).parents('.plot')
-                    .find('.save-cohort-card').show()
+                $('.save-cohort-card').show()
                     .attr('style', 'position:relative; top: -' + height + 'px; left:' + leftVal + 'px;');
 
-                $(svg[0]).parents('.plot')
-                    .find('.save-cohort-card').find('.btn').prop('disabled', (total_samples <= 0));
-
-
+                $('.save-cohort-card').find('.btn').prop('disabled', (total_samples <= 0));
             }
 
             function resize() {
