@@ -155,7 +155,6 @@ function($, d3, d3tip, helpers) {
                 var sample_list = [];
                 var patient_list = [];
                 var e = brush.extent();
-                console.debug(e);
                 svg.selectAll('rect.plot-bar').classed("selected", function (d) {
                     return e[0] <= (d['x'] + d['dx']) && d['x'] <= e[1];
                 });
