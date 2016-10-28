@@ -69,7 +69,7 @@ define([
         var svg = d3.select(plot_selector)
             .append('svg')
             .attr('width', width + 10)
-            .attr('height', 650);
+            .attr('height', height);
         var bar_width = 25;
         var plot = bar_graph_obj.createBarGraph(
             svg,
@@ -338,8 +338,8 @@ define([
 
     function select_plot(args){//plot_selector, legend_selector, pairwise_element, type, x_attr, y_attr, color_by, cohorts, cohort_override, data){
         var width  = $('.worksheet.active .worksheet-panel-body:first').width(), //TODO should be based on size of screen
-            height = 750, //TODO ditto
-            margin = {top: 0, bottom: 100, left: 70, right: 10},
+            height = 725, //TODO ditto
+            margin = {top: 0, bottom: 150, left: 70, right: 10},
             x_type = '',
             y_type = '';
 
