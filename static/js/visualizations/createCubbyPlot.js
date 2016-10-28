@@ -245,11 +245,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                     svg.select('.y.grid').attr('transform', 'translate(' + margin.left + ',' + (d3.event.translate[1] + (Math.round((-cubby_size) / 2))) + ')');
                     plot_area.selectAll('.expected_fill').attr('transform', 'translate(' + 0 + ',' + d3.event.translate[1] + ')');
                     plot_area.selectAll('text').attr('transform', 'translate(' + 0 + ',' + d3.event.translate[1] + ')');
-                    d3.select('.y.axis').selectAll('text').call(d3textwrap.textwrap().bounds({
-                        width: margin.left * 0.75,
-                        height: y.rangeBand()
-                    }));
-                    d3.select('.y.axis').selectAll('foreignObject').attr('style', 'transform: translate(-' + margin.left * 0.75 + 'px,-' + y.rangeBand() * 0.50 + 'px);');
+                    d3.select('.y.axis').selectAll('foreignObject').attr('style', 'transform: translate(-' + margin.left * 0.75 + 'px,-' + y.rangeBand() * 0.50 + 'px);');;
                 }
             };
 
@@ -269,10 +265,6 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                     svg.select('.y.grid').attr('transform', 'translate(' + margin.left + ',' + (d3.event.translate[1] + (y_band_width * d3.event.scale) / 2) + ') scale(' + d3.event.scale + ',' + d3.event.scale + ')');
                     plot_area.selectAll('.expected_fill').attr('transform', 'translate(' + d3.event.translate[0] + ',' + d3.event.translate[1] + ') scale(' + d3.event.scale + ',' + d3.event.scale + ')');
                     plot_area.selectAll('text').attr('transform', 'translate(' + d3.event.translate[0] + ',' + d3.event.translate[1] + ') scale(' + d3.event.scale + ',' + d3.event.scale + ')');
-                    d3.select('.y.axis').selectAll('text').call(d3textwrap.textwrap().bounds({
-                        width: margin.left * 0.75,
-                        height: y.rangeBand()
-                    }));
                     d3.select('.y.axis').selectAll('foreignObject').attr('style', 'transform: translate(-' + margin.left * 0.75 + 'px,-' + y.rangeBand() * 0.50 + 'px);');
                 }
             };
@@ -386,7 +378,12 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                 .text(yLabel);
 
             d3.select('.y.axis').selectAll('text').call(d3textwrap.textwrap().bounds({width: margin.left*0.75, height: y.rangeBand()}));
-            d3.select('.y.axis').selectAll('foreignObject').attr('style','transform: translate(-'+margin.left*0.75+'px,-'+y.rangeBand()*0.50+'px);');
+            d3.select('.y.axis').selectAll('foreignObject')
+                .attr('style','transform: translate(-'+margin.left*0.75+'px,-'+y.rangeBand()*0.50+'px);');
+
+            $('foreignObject div').each(function(){
+                $(this).attr('title',$(this).html());
+            });
 
             var check_selection_state = function(obj) {
                 selex_active = !!obj;
