@@ -160,16 +160,26 @@ def fix_cohort_studies(cursor):
         WHERE cs.study_id IS NULL;
     """
 
-    cursor.execute("SELECT COUNT(*) FROM cohorts_samples WHERE study_id IS NULL;")
-    print >> sys.stdout,"[STATUS] Number of cohort entries with null study IDs: "+cursor.fetchall()[0][0]
+    null_study_count = """
+        SELECT COUNT(*)
+        FROM cohorts_samples cs
+                JOIN metadata_samples ms
+                        ON ms.SampleBarcode = cs.sample_id
+                JOIN (SELECT id,name FROM projects_study WHERE owner_id = 1) ps
+                        ON ps.name = ms.Study
+        where cs.study_id IS NULL;
+    """
+
+    cursor.execute(null_study_count)
+    print >> sys.stdout,"[STATUS] Number of cohort sample entries from ISB-CGC studies with null study IDs: "+cursor.fetchall()[0][0]
     print >> sys.stdout,"[STATUS] Correcting null study IDs for ISB-CGC cohorts - this could take a while!"
     cursor.execute(fix_study_ids_str)
     print >> sys.stdout, "[STATUS] ...done. Checking for still-null study IDs..."
-    cursor.execute("SELECT COUNT(*) FROM cohorts_samples WHERE study_id IS NULL;")
+    cursor.execute(null_study_count)
     not_fixed = cursor.fetchall()[0][0]
-    print >> sys.stdout, "[STATUS] Number of cohort entries will null study IDs after correction: " + not_fixed
+    print >> sys.stdout, "[STATUS] Number of cohort sample entries from ISB-CGC studies with null study IDs after correction: " + not_fixed
     if not_fixed > 0:
-        print >> sys.stdout, "[STATUS] The rows which still have null study IDs may represent user data cohorts whose studies are null. This process only corrects ISB-CGC samples."
+        print >> sys.stdout, "[WARNING] Some of the samples were not corrected! You should double-check them!"
 
 
 
