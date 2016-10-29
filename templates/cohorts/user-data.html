@@ -114,23 +114,85 @@
                 </div>
             </div>
         {% endif %}
-        <div class="cohort-info panel panel-default">
-            <div class="panel-heading">
-                <h4 class="panel-title">Details</h4>
-            </div>
-            <div class="panel-body">
-                <div class="row col-md-6">
-                    <span class="detail-label">Total Number of Samples:</span>
-                    <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                    <span class="total-values" id="user-data-total-samples">{% if user_data %}{{ metadata_counts.user_data_total  }}{% else %}NA{% endif %}</span>
+        {% if cohort.id %}
+            <div class="cohort-info panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">Details</h4>
                 </div>
-                <div class="row col-md-6">
-                    <span class="detail-label">Total Number of Participants:</span>
-                    <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                    <span class="total-values" id="user-data-total-participants">{% if user_data %}{{ metadata_counts.user_data_participants  }}{% else %}NA{% endif %}</span>
+                <div class="panel-body">
+                    <div class="row col-md-12 space-bottom-10">
+                        <span>Internal ISB-CGC Cohort ID: {{ cohort.id }}</span>
+                    </div>
+                    <div class="row col-md-12 space-bottom-10">
+                        <span class="detail-label">Total Number of Samples:</span>
+                        <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
+                        <span class="total-values" id="total-samples">{{ total_samples }}</span>
+                    </div>
+                    <div class="row col-md-12 space-bottom-10">
+                        <span class="detail-label">Total Number of Participants:</span>
+                        <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
+                        <span class="total-values" id="total-participants">{{ total_patients }}</span>
+                    </div>
+                    <div class="row col-md-12 space-bottom-10">
+                        <span>Your Permissions: {{ cohort.perm.perm }}</span>
+                    </div>
+                    <div class="row col-md-12 space-bottom-10">
+                        <span>Creation Filters: </span>
+                        <span class="applied-filters">
+                         {% for filter in cohort.get_creation_filters %}
+                             <span>{{ filter.name|get_feat_displ_name }}: {{ filter.value|get_readable_name:filter.name }}</span>
+                         {% empty %}
+                             There were no filters used to create this cohort.
+                         {% endfor %}
+                         </span>
+                    </div>
+                    <div class="row col-md-12 space-bottom-10">
+                        <span class="rev-history">Revision History:</span>
+                        <ul>
+                            {% for item in cohort.get_revision_history %}
+                                {%  if 'type' in item and item.type == 'filter' %}
+                                     <li class="applied-filters">
+                                        Applied Filters:
+                                         {% for filter in item.vals %}
+                                            <span>{{ filter.name|get_feat_displ_name }}: {{ filter.value|get_readable_name:filter.name }}</span>
+                                         {% endfor %}
+                                    </li>
+                                {%  else %}
+                                    <li>{{ item }}</li>
+                                {%  endif %}
+                            {% endfor %}
+                        </ul>
+                        {% if shared_with_users and cohort.perm == 'OWNER'%}
+                            <br>
+                            <p><strong>Shared With Users:</strong></p>
+                            <ul>
+                            {% for user in shared_with_users %}
+                                <li>{{ user.first_name }} {{ user.last_name }} [{{ user.email }}]</li>
+                            {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
-        </div>
+        {% else %}
+            <div class="cohort-info panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">Details</h4>
+                </div>
+                <div class="panel-body">
+                    <div class="row col-md-6">
+                        <span class="detail-label">Total Number of Samples:</span>
+                        <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
+                        <span class="total-values" id="user-data-total-samples">{% if user_data %}{{ metadata_counts.user_data_total  }}{% else %}NA{% endif %}</span>
+                    </div>
+                    <div class="row col-md-6">
+                        <span class="detail-label">Total Number of Participants:</span>
+                        <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
+                        <span class="total-values" id="user-data-total-participants">{% if user_data %}{{ metadata_counts.user_data_participants  }}{% else %}NA{% endif %}</span>
+                    </div>
+                </div>
+            </div>
+        {%  endif %}
 
         <div class="user-data-trees panel panel-default">
             <div class="panel-heading">
