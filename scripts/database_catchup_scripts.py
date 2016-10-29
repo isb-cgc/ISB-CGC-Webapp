@@ -179,7 +179,7 @@ def fix_cohort_studies(cursor):
     not_fixed = cursor.fetchall()[0][0]
     print >> sys.stdout, "[STATUS] Number of cohort sample entries from ISB-CGC studies with null study IDs after correction: " + not_fixed
     if not_fixed > 0:
-        print >> sys.stdout, "[WARNING] Some of the samples were not corrected! You should double-check them!"
+        print >> sys.stdout, "[WARNING] Some of the samples were not corrected! You should double-check them."
 
 
 
