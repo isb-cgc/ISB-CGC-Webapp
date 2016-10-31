@@ -141,6 +141,48 @@ def create_samples_shortlist_view(cursor):
 
     cursor.execute(metadata_samples_shortlist_view_def % view_cols)
 
+# Cohorts made prior to the release of user data will have null values in their study IDs for each sample
+# in the cohort. This script assumes that any sample with a null study ID is an ISB-CGC sample from metadata_samples
+# and uses the value of the Study column to look up the appropriate ID in projects_study and apply it to the cohort
+
+def fix_cohort_studies(cursor):
+
+    fix_study_ids_str = """
+        UPDATE cohorts_samples AS cs
+        JOIN (
+                SELECT ms.SampleBarcode AS SampleBarcode,ps.id AS study
+                        FROM metadata_samples ms
+                                JOIN (SELECT id,name FROM projects_study WHERE owner_id = 1) ps
+                        ON ps.name = ms.Study
+        ) AS ss
+        ON ss.SampleBarcode = cs.sample_id
+        SET cs.study_id = ss.study
+        WHERE cs.study_id IS NULL;
+    """
+
+    null_study_count = """
+        SELECT COUNT(*)
+        FROM cohorts_samples cs
+                JOIN metadata_samples ms
+                        ON ms.SampleBarcode = cs.sample_id
+                JOIN (SELECT id,name FROM projects_study WHERE owner_id = 1) ps
+                        ON ps.name = ms.Study
+        where cs.study_id IS NULL;
+    """
+
+    cursor.execute(null_study_count)
+    print >> sys.stdout,"[STATUS] Number of cohort sample entries from ISB-CGC studies with null study IDs: "+cursor.fetchall()[0][0]
+    print >> sys.stdout,"[STATUS] Correcting null study IDs for ISB-CGC cohorts - this could take a while!"
+    cursor.execute(fix_study_ids_str)
+    print >> sys.stdout, "[STATUS] ...done. Checking for still-null study IDs..."
+    cursor.execute(null_study_count)
+    not_fixed = cursor.fetchall()[0][0]
+    print >> sys.stdout, "[STATUS] Number of cohort sample entries from ISB-CGC studies with null study IDs after correction: " + not_fixed
+    if not_fixed > 0:
+        print >> sys.stdout, "[WARNING] Some of the samples were not corrected! You should double-check them."
+
+
+
 """ main """
 
 def main():
@@ -157,6 +199,8 @@ def main():
                                  help="Create the metadata_samples_shortlist view, which acts as a smaller version of metadata_samples for use with the webapp.")
     cmd_line_parser.add_argument('-b', '--fix-bmi-case', type=bool, default=True,
                                  help="Fix the casing of the attribute value for the BMI row in metadata_attributes.")
+    cmd_line_parser.add_argument('-c', '--fix-cohort-studies', type=bool, default=True,
+                                 help="Fix cohorts which have null study IDs for ISB-CGC samples")
 
     args = cmd_line_parser.parse_args()
 
@@ -170,6 +214,7 @@ def main():
         args.create_shortlist_view and create_shortlist_view(cursor)
         args.create_metadata_vals_sproc and create_metadata_vals_sproc(cursor)
         args.create_ms_shortlist_view and create_samples_shortlist_view(cursor)
+        args.fix_cohort_studies and fix_cohort_studies(cursor)
 
         # Until we have a new sql dump, we need to manually update changed columns
         args.fix_bmi_case and cursor.execute("UPDATE metadata_attr SET attribute='BMI' WHERE attribute='bmi';")

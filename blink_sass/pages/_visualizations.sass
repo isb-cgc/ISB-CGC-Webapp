@@ -12,8 +12,8 @@
     font-size: 1.1em
 
   .plot-div
-    overflow-x: hidden
-    overflow-y: auto
+    overflow: hidden
+    max-height: 925px
     foreignObject
       div
         overflow: hidden
@@ -39,22 +39,19 @@
     .grid path
         stroke-width: 0
 
-    .plot-div
-        overflow: hidden
+    .expected_fill.selected
+        stroke: $tooltip-color
+        stroke-width: 5px
 
-        .extent
-            fill: #000
-            fill-opacity: .1
-            stroke: #fff
+    .extent
+        fill: #000
+        fill-opacity: .1
+        stroke: #fff
 
-        .expected_fill.selected
-            stroke: $tooltip-color
-            stroke-width: 5px
-
-        .plot-bar
-            fill: rgba(0,0,0,0.5)
-            &:hover, &.selected
-                fill: rgba(0,0,225,0.5)
+    .plot-bar
+        fill: rgba(0,0,0,0.5)
+        &:hover, &.selected
+            fill: rgba(0,0,225,0.5)
 
     .show-flyout:hover
         cursor: pointer

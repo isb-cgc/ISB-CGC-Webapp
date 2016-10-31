@@ -79,7 +79,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
 
             var zoomer = function() {
                 if(!selex_active) {
-                    svg.select('.x.axis').attr('transform', 'translate(' + (d3.event.translate[0] + margin.left) + ',' + (height - margin.bottom) + ')').call(xAxis);
+                    svg.select('.x.axis').attr('transform', 'translate(' + (d3.event.translate[0] + margin.left) + ',' + (height - margin.bottom - 55) + ')').call(xAxis);
                     svg.selectAll('.x.axis text').style('text-anchor', 'end').attr('transform', 'translate(' + -15 + ',' + 10 + ') rotate(-90)');
                     plot_area.selectAll('.plot-bar').attr('transform', 'translate(' + d3.event.translate[0] + ',0)');
                 }
@@ -132,7 +132,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
 
             x_axis_area.append('g')
                 .attr('class', 'x axis')
-                .attr('transform', 'translate(' + margin.left + ',' + (height - margin.bottom - margin.top) + ')')
+                .attr('transform', 'translate(' + margin.left + ',' + (height - margin.bottom - margin.top - 45) + ')')
                 .call(xAxis)
                 .selectAll('text')
                 .style('text-anchor', 'end')
@@ -146,18 +146,18 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                 d.remove();
                 var fOb = parent.append('foreignObject')
                     .attr('requiredFeatures', 'http://www.w3.org/TR/SVG11/feature#Extensibility')
-                    .attr('width', margin.bottom-5)
+                    .attr('width', margin.bottom-55)
                     .attr('height', bar_width);
 
                 fOb.append('xhtml:div')
                     .style('height', bar_width)
-                    .style('width', margin.bottom-5)
+                    .style('width', margin.bottom-55)
                     .attr('class','truncated-single')
                     .attr('title',label)
                     .html(label);
             });
 
-            d3.select('.x.axis').selectAll('foreignObject').attr('style','transform: translate(-15px,100px) rotate(-90deg);');
+            d3.select('.x.axis').selectAll('foreignObject').attr('style','transform: translate(-15px,'+margin.bottom+'px) rotate(-90deg);');
 
             // Highlight the selected rectangles whenever the cursor is moved
             var brushmove = function(p) {
@@ -191,7 +191,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
             var brushend = function() {
                 if (brush.empty()) {
                     svg.selectAll(".hidden").classed("hidden", false);
-                    $(svg[0]).parents('.plot').find('.save-cohort-card').hide();
+                    $('.save-cohort-card').hide();
                 }
             };
 
@@ -217,8 +217,8 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                 .attr('transform', 'translate(' + (width/2) + ',' + (height - 10) + ')')
                 .text(xLabel);
 
-            d3.select('.x.label').call(d3textwrap.textwrap().bounds({width: (width-margin.left)*0.75, height: 250}));
-            d3.select('.x-label-container').selectAll('foreignObject').attr('style','transform: translate('+((width/2)-(((width-margin.left)*0.75)/2)) + 'px,' + (height - 10)+'px);');
+            d3.select('.x.label').call(d3textwrap.textwrap().bounds({width: (width-margin.left)*0.75, height: 50}));
+            d3.select('.x-label-container').selectAll('foreignObject').attr('style','transform: translate('+((width/2)-(((width-margin.left)*0.75)/2)) + 'px,' + (height - 50)+'px);');
             d3.select('.x-label-container').selectAll('div').attr('class','axis-label');
 
             svg.append('text')
@@ -248,13 +248,14 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                     svg.call(zoom);
                     zoom_status.translation && zoom.translate(zoom_status.translation);
                     zoom_status.translation = null;
+
                     var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                     // Clear selections
                     $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + 0);
                     $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Participants: ' + 0);
                     $('#save-cohort-'+plot_id+'-modal input[name="samples"]').attr('value', []);
                     svg.selectAll('.selected').classed('selected', false);
-                    $(svg[0]).parents('.plot').find('.save-cohort-card').hide();
+                    $('.save-cohort-card').hide();
                     // Remove brush event listener plot area - comment out if we want to enable selection carry-over
                     brush.clear();
                     plot_area.selectAll('.brush').remove();
@@ -268,14 +269,10 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                 $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Participants: ' + total_patients);
                 $('#save-cohort-' + plot_id + '-modal input[name="samples"]').attr('value', sample_list);
                 var leftVal = Math.min((x2(extent[1]) + 20),(width-$('.save-cohort-card').width()));
-                $(svg[0]).parents('.plot')
-                    .find('.save-cohort-card').show()
+                $('.save-cohort-card').show()
                     .attr('style', 'position:relative; top: -' + height + 'px; left:' + leftVal + 'px;');
 
-                $(svg[0]).parents('.plot')
-                    .find('.save-cohort-card').find('.btn').prop('disabled', (total_samples <= 0));
-
-
+                $('.save-cohort-card').find('.btn').prop('disabled', (total_samples <= 0));
             }
 
             function resize() {
