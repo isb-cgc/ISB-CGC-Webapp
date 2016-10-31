@@ -167,7 +167,7 @@ def fix_cohort_studies(cursor):
         FROM cohorts_samples cs
                 JOIN metadata_samples ms
                         ON ms.SampleBarcode = cs.sample_id
-                JOIN (SELECT id,name FROM projects_study WHERE owner_id = 1 AND actice = 1) ps
+                JOIN (SELECT id,name FROM projects_study WHERE owner_id = 1 AND active = 1) ps
                         ON ps.name = ms.Study
                 JOIN cohorts_cohort AS cc
                         ON cc.id = cs.cohort_id
