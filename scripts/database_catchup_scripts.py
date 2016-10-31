@@ -152,12 +152,14 @@ def fix_cohort_studies(cursor):
         JOIN (
                 SELECT ms.SampleBarcode AS SampleBarcode,ps.id AS study
                         FROM metadata_samples ms
-                                JOIN (SELECT id,name FROM projects_study WHERE owner_id = 1) ps
+                                JOIN (SELECT id,name FROM projects_study WHERE owner_id = 1 AND active=1) ps
                         ON ps.name = ms.Study
         ) AS ss
         ON ss.SampleBarcode = cs.sample_id
+        JOIN cohorts_cohort AS cc
+        ON cc.id = cs.cohort_id
         SET cs.study_id = ss.study
-        WHERE cs.study_id IS NULL;
+        WHERE cs.study_id IS NULL AND cc.active = 1;
     """
 
     null_study_count = """
@@ -165,9 +167,11 @@ def fix_cohort_studies(cursor):
         FROM cohorts_samples cs
                 JOIN metadata_samples ms
                         ON ms.SampleBarcode = cs.sample_id
-                JOIN (SELECT id,name FROM projects_study WHERE owner_id = 1) ps
+                JOIN (SELECT id,name FROM projects_study WHERE owner_id = 1 AND actice = 1) ps
                         ON ps.name = ms.Study
-        where cs.study_id IS NULL;
+                JOIN cohorts_cohort AS cc
+                        ON cc.id = cs.cohort_id
+        where cs.study_id IS NULL AND cc.active = 1;
     """
 
     cursor.execute(null_study_count)
