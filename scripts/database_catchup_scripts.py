@@ -193,21 +193,13 @@ def fix_ccle(cursor):
     cursor.execute("SELECT id FROM projects_study WHERE name = 'CCLE' AND active = 1 AND owner_id = 1;")
     ccle_id = cursor.fetchall()[0][0]
 
-    cursor.execute("""
+    count_ccle_cohort_samples = """
         SELECT COUNT(*)
         FROM cohorts_samples cs
         JOIN cohorts_cohort cc
             ON cc.id = cs.cohort_id
         WHERE cc.active = 1 AND cs.sample_id LIKE 'CCLE%' and NOT(cs.study_id = %s);
-    """,(ccle_id,))
-
-    ccle_count = cursor.fetchall()[0][0]
-
-    if ccle_count <= 0:
-        print >> sys.stdout, "[STATUS] No samples with CCLE study IDs which need fixing - exiting."
-        return
-
-    print >> sys.stdout, "[STATUS] There are "+str(ccle_count)+" CCLE samples in the cohorts_samples table with an incorrect study ID. Fixing..."
+    """
 
     fix_ccle_cohorts = """
         UPDATE cohorts_samples AS cs
@@ -217,15 +209,19 @@ def fix_ccle(cursor):
         WHERE cc.active = 1 AND cs.sample_id LIKE 'CCLE%';
     """
 
+    cursor.execute(count_ccle_cohort_samples,(ccle_id,))
+
+    ccle_count = cursor.fetchall()[0][0]
+
+    if ccle_count <= 0:
+        print >> sys.stdout, "[STATUS] No samples with CCLE study IDs which need fixing - exiting."
+        return
+
+    print >> sys.stdout, "[STATUS] There are "+str(ccle_count)+" CCLE samples in the cohorts_samples table with an incorrect study ID. Fixing..."
+
     cursor.execute(fix_ccle_cohorts,(ccle_id,))
 
-    cursor.execute("""
-        SELECT COUNT(*)
-        FROM cohorts_samples cs
-            JOIN cohorts_cohort cc
-                ON cc.id = cs.cohort_id
-        WHERE cc.active = 1 AND cs.sample_id LIKE 'CCLE%' and NOT(cs.study_id = %s);
-    """,(ccle_id,))
+    cursor.execute(count_ccle_cohort_samples,(ccle_id,))
 
     ccle_new_count = cursor.fetchall()[0][0]
     if ccle_new_count > 0:
