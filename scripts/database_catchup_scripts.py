@@ -186,6 +186,51 @@ def fix_cohort_studies(cursor):
         print >> sys.stdout, "[WARNING] Some of the samples were not corrected! You should double-check them."
 
 
+# Query to correct CCLE samples, which ran into the 'disease code' and 'study' collision problem
+
+def fix_ccle(cursor):
+
+    cursor.execute("SELECT id FROM projects_study WHERE name = 'CCLE' AND active = 1 AND owner_id = 1;")
+    ccle_id = cursor.fetchall()[0][0]
+
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM cohorts_samples cs
+        JOIN cohorts_cohort cc
+            ON cc.id = cs.cohort_id
+        WHERE cc.active = 1 AND cs.sample_id LIKE 'CCLE%' and NOT(cs.study_id = %s);
+    """,(ccle_id,))
+
+    ccle_count = cursor.fetchall()[0][0]
+
+    if ccle_count <= 0:
+        print >> sys.stdout, "[STATUS] No samples with CCLE study IDs which need fixing - exiting."
+        return
+
+    print >> sys.stdout, "[STATUS] There are "+str(ccle_count)+" CCLE samples in the cohorts_samples table with an incorrect study ID. Fixing..."
+
+    fix_ccle_cohorts = """
+        UPDATE cohorts_samples AS cs
+            JOIN cohorts_cohort cc
+                ON cc.id = cs.cohort_id
+        SET cs.study_id = %s
+        WHERE cc.active = 1 AND cs.sample_id LIKE 'CCLE%';
+    """
+
+    cursor.execute(fix_ccle_cohorts,(ccle_id,))
+
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM cohorts_samples cs
+            JOIN cohorts_cohort cc
+                ON cc.id = cs.cohort_id
+        WHERE cc.active = 1 AND cs.sample_id LIKE 'CCLE%' and NOT(cs.study_id = %s);
+    """,(ccle_id,))
+
+    ccle_new_count = cursor.fetchall()[0][0]
+    if ccle_new_count > 0:
+        print >> sys.stdout, "[WARNING] Some CCLE samples still have the wrong study ID - double-check your database. (count: "+str(ccle_count)+")"
+
 
 """ main """
 
@@ -205,6 +250,8 @@ def main():
                                  help="Fix the casing of the attribute value for the BMI row in metadata_attributes.")
     cmd_line_parser.add_argument('-c', '--fix-cohort-studies', type=bool, default=True,
                                  help="Fix cohorts which have null study IDs for ISB-CGC samples")
+    cmd_line_parser.add_argument('-e', '--fix-ccle-cohort-studies', type=bool, default=True,
+                                 help="Fix study IDs for CCLE samples in cohorts")
 
     args = cmd_line_parser.parse_args()
 
@@ -219,6 +266,7 @@ def main():
         args.create_metadata_vals_sproc and create_metadata_vals_sproc(cursor)
         args.create_ms_shortlist_view and create_samples_shortlist_view(cursor)
         args.fix_cohort_studies and fix_cohort_studies(cursor)
+        args.fix_ccle_cohort_studies and fix_ccle(cursor)
 
         # Until we have a new sql dump, we need to manually update changed columns
         args.fix_bmi_case and cursor.execute("UPDATE metadata_attr SET attribute='BMI' WHERE attribute='bmi';")
