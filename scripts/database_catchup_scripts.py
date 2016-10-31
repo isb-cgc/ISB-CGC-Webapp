@@ -144,6 +144,8 @@ def create_samples_shortlist_view(cursor):
 # Cohorts made prior to the release of user data will have null values in their study IDs for each sample
 # in the cohort. This script assumes that any sample with a null study ID is an ISB-CGC sample from metadata_samples
 # and uses the value of the Study column to look up the appropriate ID in projects_study and apply it to the cohort
+# *** This will need to be changed when metadata_samples.Study becomes 'disease code' and a study column is added ***
+# *** which is an FK into the projects_study table                                                                ***
 
 def fix_cohort_studies(cursor):
 
@@ -186,7 +188,8 @@ def fix_cohort_studies(cursor):
         print >> sys.stdout, "[WARNING] Some of the samples were not corrected! You should double-check them."
 
 
-# Query to correct CCLE samples, which ran into the 'disease code' and 'study' collision problem
+# Query to correct CCLE samples from fix_cohort_samples, because despite having specific 'Study' values all CCLE samples are
+# part of a single CCLE study
 
 def fix_ccle(cursor):
 
