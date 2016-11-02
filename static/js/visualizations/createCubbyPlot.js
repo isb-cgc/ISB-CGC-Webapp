@@ -267,15 +267,19 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
             if (width > view_width && height> view_height) {
                 zoom = d3.behavior.zoom()
                     .x(x2)
+                    .scaleExtent([1,1])
                     .y(y2)
+                    .scaleExtent([1,1])
                     .on('zoom', zoom_xy);
             } else if (width > view_width) {
                 zoom = d3.behavior.zoom()
                     .x(x2)
+                    .scaleExtent([1,1])
                     .on('zoom', zoom_x);
             } else if (height > view_height) {
                 zoom = d3.behavior.zoom()
                     .y(y2)
+                    .scaleExtent([1,1])
                     .on('zoom', zoom_y);
             }
 

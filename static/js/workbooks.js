@@ -136,6 +136,9 @@ require([
     }
 
     $('.show-settings-flyout').on('click', function () {
+        if($('.toggle-selection').hasClass('active')) {
+            $('.toggle-selection').click();
+        }
         show_plot_settings();
     });
 
