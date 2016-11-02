@@ -656,6 +656,9 @@ require([
      * generate plot upon user click
      */
     $('.update-plot').on('click', function(event){
+        if($('.toggle-selection').hasClass('active')) {
+            $('.toggle-selection').click();
+        }
         if(valid_plot_settings($(this).parent())) {
             var data = get_plot_info_on_page($(this).parent());
             update_plot_model(workbook_id, data.worksheet_id, data.plot_id, data.attrs, data.selections, function(result){
