@@ -17,7 +17,7 @@
  */
 
 define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers'],
-function($, d3, d3tip, d3textwrap, vizhelpers) {
+    function($, d3, d3tip, d3textwrap, vizhelpers) {
 
     // If you want to override the tip coming in from the create call,
     // do it here

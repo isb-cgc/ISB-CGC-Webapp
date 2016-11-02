@@ -16,9 +16,17 @@
  *
  */
 
-define (['jquery', 'd3', 'vizhelpers'],
-function($, d3, vizhelpers) {
+define (['jquery', 'd3', 'd3textwrap', 'vizhelpers'],
+function($, d3, d3textwrap, vizhelpers) {
+
     var helpers = Object.create(vizhelpers, {});
+
+    var selex_active = false;
+    var zoom_status = {
+        translation: null,
+        scale: null
+    };
+
     return {
         addViolin: function (svg, raw_data, values_only, height, width, domain, range) {
             var data = d3.layout.histogram()
@@ -204,7 +212,7 @@ function($, d3, vizhelpers) {
                 .style('fill', 'none')
         },
         createViolinPlot: function(svg, raw_Data, height, violin_width, max_y, min_y, xLabel, yLabel, xAttr, yAttr, colorBy, legend, cohort_set) {
-            var margin = {top: 0, bottom: 50, left: 50, right: 0};
+            var margin = {top: 0, bottom: 100, left: 50, right: 0};
             var domain = [min_y, max_y];
             var range = [height-margin.bottom, 0];
             var view_width = 800;
@@ -231,6 +239,7 @@ function($, d3, vizhelpers) {
                     processed_data[key] = [tmp];
                 }
             }
+
             var plot_area = svg.append('g')
                 .attr('clip-path', 'url(#plot_area_clip)');
 
@@ -317,16 +326,38 @@ function($, d3, vizhelpers) {
             var x2 = d3.scale.linear()
                 .range([0, width])
                 .domain([0, width]);
-            var x2Axis = d3.svg.axis()
-                .scale(x2)
-                .ticks(xdomain.length)
-                .tickFormat('')
-                .orient('bottom');
+
+
+            // append axes
+            svg.append('g')
+                .attr('class', 'y axis')
+                .attr('transform', 'translate(' + margin.left + ',0)')
+                .call(yAxis);
+
+            var x_axis_area = svg.append('g')
+                .attr('clip-path', 'url(#x_axis_area_clip)');
+
+            x_axis_area.append('clipPath')
+                .attr('id', 'x_axis_area_clip')
+                .append('rect')
+                .attr('height', margin.bottom+margin.top)
+                .attr('width', width-margin.left-margin.right)
+                .attr('transform', 'translate(' + margin.left + ',' + (height-margin.top-margin.bottom) + ')');
+
+            x_axis_area.append('g')
+                .attr('class', 'x axis')
+                .attr('transform', 'translate(' + margin.left + ',' + (height - margin.bottom) + ')')
+                .call(xAxis);
+
+            d3.select('.x.axis').selectAll('text').call(d3textwrap.textwrap().bounds({width: violin_width, height: margin.bottom-30}));
+            d3.select('.x.axis').selectAll('foreignObject').attr('style','transform: translate(-'+(violin_width/2)+'px,0px);');
 
             // Highlight the selected circles.
             var brushmove = function(p) {
                 var sample_list = [];
                 var e = brush.extent();
+
+                console.debug(e);
 
                 var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                 plot_area.selectAll("circle").classed("selected", function(d) {
@@ -342,67 +373,50 @@ function($, d3, vizhelpers) {
                 sample_form_update(e, selected_samples.length, patient_list.length, sample_list);
             };
 
-            // If the brush is empty, select all circles.
             var brushend = function() {
-//                if (brush.empty()) plot_area.selectAll(".hidden").classed("hidden", false);
+                if (brush.empty()) {
+                    svg.selectAll(".hidden").classed("hidden", false);
+                    $('.save-cohort-card').hide();
+                }
             };
 
             var brush = d3.svg.brush()
-                .x(x)
+                .x(x2)
                 .y(y)
                 .on('brushstart', function(){ svg.selectAll('.extent').style("fill", "rgba(40,130,50,0.5");})
                 .on('brush', brushmove)
                 .on('brushend', brushend);
 
             var zoomer = function() {
-                svg.select('.x.axis').call(x2Axis);
-                svg.select('.x.axis').attr('transform', 'translate(' + (d3.event.translate[0] + margin.left) + ',' + (height - margin.bottom) + ')').call(xAxis);
-                plot_area.selectAll('circle').attr('transform', 'translate(' + d3.event.translate[0] + ',0)');
-                violin_area.selectAll('.violin-plot').attr('transform', function(d, i) {
-                    return 'translate(' + (i * violin_width + d3.event.translate[0] + margin.left) + ',0)';
-                });
+                console.debug(d3.event.translate);
+                if(!selex_active) {
+                    svg.select('.x.axis').attr('transform', 'translate(' + (d3.event.translate[0] + margin.left) + ',' + (height - margin.bottom) + ')').call(xAxis);
+                    plot_area.selectAll('circle').attr('transform', 'translate(' + d3.event.translate[0] + ',0)');
+                    violin_area.selectAll('.violin-plot').attr('transform', function (d, i) {
+                        return 'translate(' + ((i * violin_width) + d3.event.translate[0] + margin.left) + ',0)';
+                    });
+                }
             };
 
             var zoom = d3.behavior.zoom()
                 .x(x2)
+                .scaleExtent([1,1])
                 .on('zoom', zoomer);
 
-            var zoom_area = svg.append('g')
-                .attr('class', 'zoom_area')
-                .append('rect')
-                .attr('width', width)
-                .attr('height', height)
-                .style('opacity', '0');
+            svg.call(zoom);
 
-            zoom_area.call(zoom);
-
-            // append axes
-            svg.append('g')
-                .attr('class', 'y axis')
-                .attr('transform', 'translate(' + margin.left + ',0)')
-                .call(yAxis);
-
-            var x_axis_area = svg.append('g')
-                .attr('clip-path', 'url(#x_axis_area_clip)');
-
-            x_axis_area.append('clipPath')
-                    .attr('id', 'x_axis_area_clip')
-                    .append('rect')
-                    .attr('height', margin.bottom+margin.top)
-                    .attr('width', width-margin.left-margin.right)
-                    .attr('transform', 'translate(' + margin.left + ',' + (height-margin.top-margin.bottom) + ')');
-
-            x_axis_area.append('g')
-                .attr('class', 'x axis')
-                .attr('transform', 'translate(' + margin.left + ',' + (height - margin.bottom) + ')')
-                .call(xAxis);
 
             // append axes labels
-            svg.append('text')
-                .attr('class', 'x label')
+            svg.append('g')
+                .attr('class', 'x-label-container')
+                .append('text')
+                .attr('class', 'x label axis-label')
                 .attr('text-anchor', 'middle')
                 .attr('transform', 'translate(' + (view_width/2) + ',' + (height - 10) + ')')
                 .text(xLabel);
+            d3.select('.x.label').call(d3textwrap.textwrap().bounds({width: (view_width-margin.left)*0.75, height: 50}));
+            d3.select('.x-label-container').selectAll('foreignObject').attr('style','transform: translate(' + ((view_width/2)-(((view_width-margin.left)*0.75)/2)) + 'px,' + (height - 30) + 'px);');
+            d3.select('.x-label-container').selectAll('div').attr('class','axis-label');
 
             svg.append('text')
                 .attr('class', 'y label')
@@ -410,11 +424,19 @@ function($, d3, vizhelpers) {
                 .attr('transform', 'rotate(-90) translate(' + (-1 * (height/2)) + ',10)')
                 .text(yLabel);
 
-            var check_selection_state = function(obj) {
-                if (obj) {
 
-                    // Remove zoom area
-                    svg.selectAll('.zoom_area').remove();
+            $('foreignObject div').each(function(){
+                $(this).attr('title',$(this).html())
+            });
+
+            var check_selection_state = function(obj) {
+                selex_active = !!obj;
+
+                if (obj) {
+                    // Disable zooming events and store their status
+                    svg.on('.zoom',null);
+                    zoom_status.translation = zoom.translate();
+                    zoom_status.scale = zoom.scale();
 
                     // Append new brush event listeners to plot area only
                     plot_area.append('g')
@@ -424,6 +446,13 @@ function($, d3, vizhelpers) {
                         .attr('height', height)
                         .attr('transform', 'translate(' + margin.left + ',0)');
                 } else {
+                    // Resume zooming, restoring the zoom's last state
+                    svg.call(zoom);
+                    zoom_status.translation && zoom.translate(zoom_status.translation);
+                    zoom_status.scale && zoom.scale(zoom_status.scale);
+                    zoom_status.translation = null;
+                    zoom_status.scale = null;
+
                     var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                     // Clear selections
                     $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + 0);
@@ -434,19 +463,6 @@ function($, d3, vizhelpers) {
 
                     // Remove brush event listener plot area
                     plot_area.selectAll('.brush').remove();
-
-                    // Append new zoom area
-                    zoom_area = svg.append('g')
-                        .attr('class', 'zoom_area')
-                        .append('rect')
-                        .attr('width', width)
-                        .attr('height', height)
-                        .style('opacity', 0);
-
-                    // Register zoom event listeners
-                    zoom.on('zoom', zoomer);
-                    zoom_area.call(zoom)
-                        .on('.zoom', zoomer);
                 }
             };
 
@@ -456,20 +472,15 @@ function($, d3, vizhelpers) {
             function sample_form_update(extent, total_samples, total_patients, sample_list){
                 var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
 
-                $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + total_samples);
-                $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Participants: ' + total_patients);
+                $('.selected-samples-count').html('Number of Samples: ' + total_samples);
+                $('.selected-patients-count').html('Number of Participants: ' + total_patients);
                 $('#save-cohort-' + plot_id + '-modal input[name="samples"]').attr('value', sample_list);
-                $(svg[0]).parents('.plot')
-                    .find('.save-cohort-card').show()
-                    .attr('style', 'position:absolute; top: '+ (y(extent[1][1]) + 180)+'px; left:' +(extent[1][0] + 90)+'px;');
+                var topVal = Math.min((y(extent[1][1]) + 180),(height-$('.save-cohort-card').height()));
+                var leftVal = Math.min((x(extent[1][0])+ 40),(view_width-$('.save-cohort-card').width()));
+                $('.save-cohort-card').show()
+                    .attr('style', 'position:absolute; top: '+ topVal +'px; left:' +leftVal+'px;');
 
-                if (total_samples > 0){
-                    $(svg[0]).parents('.plot')
-                        .find('.save-cohort-card').find('.btn').prop('disabled', false);
-                } else {
-                    $(svg[0]).parents('.plot')
-                        .find('.save-cohort-card').find('.btn').prop('disabled', true);
-                }
+                $('.save-cohort-card').find('.btn').prop('disabled', (total_samples <= 0));
 
             }
 
