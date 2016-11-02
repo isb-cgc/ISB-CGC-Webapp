@@ -24,19 +24,12 @@ require.config({
         jqueryui: 'libs/jquery-ui.min',
         session_security: 'session_security',
         underscore: 'libs/underscore-min',
-        assetscore: 'libs/assets.core',
-        assetsresponsive: 'libs/assets.responsive',
-        tokenfield: 'libs/bootstrap-tokenfield.min',
-        d3: 'libs/d3.min',
-        d3tip: 'libs/d3-tip',
-
+        tokenfield: 'libs/bootstrap-tokenfield.min'
     },
     shim: {
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
         'session_security': ['jquery'],
-        'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
-        'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
         'tokenfield': ['jquery', 'jqueryui']
     }
 });
@@ -46,12 +39,8 @@ require([
     'jqueryui',
     'bootstrap',
     'session_security',
-    'd3',
-    'd3tip',
-    'assetscore',
-    'assetsresponsive',
     'tokenfield'
-], function ($, jqueryui, bootstrap, session_security, d3, d3tip) {
+], function ($) {
         
     var file_list_total = 0;
 

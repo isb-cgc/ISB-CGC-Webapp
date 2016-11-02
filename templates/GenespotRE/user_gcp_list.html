@@ -45,8 +45,9 @@
                                 <th></th>
                                 <th>Project Name</th>
                                 <th>Project ID</th>
-{#                                <th>Associated BigQuery Dataset</th>#}
                                 <th>Registered Service Accounts</th>
+                                <th># Storage Buckets</th>
+                                <th># BigQuery Datasets</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -62,7 +63,7 @@
                                         </ul>
                                         </div>
                                     </td>
-                                    <td>{{ project.project_name }} <a href="https://console.cloud.google.com/home/dashboard?project={{ project.project_name }}"><i class="fa fa-external-link"></i></a></td>
+                                    <td><a href="{% url 'gcp_detail' user.id project.id %}">{{ project.project_name }}</a> <a href="https://console.cloud.google.com/home/dashboard?project={{ project.project_name }}"><i class="fa fa-external-link"></i></a></td>
                                     <td>{{ project.project_id }}</td>
 {#                                    <td>{% if project.big_query_dataset %}{{ project.big_query_dataset }}{% else %}N/A{% endif %}</td>#}
 
@@ -73,12 +74,15 @@
                                         {{ project.serviceaccount_set.all|length }}
                                         {% endif %}
                                     </td>
+
+                                    <td>{{ project.bucket_set.all|length }}</td>
+                                    <td>{{ project.bqdataset_set.all|length }}</td>
                                 {% include "GenespotRE/user_gcp_list_modals.html" with project=project %}
                                 </tr>
 
                                     <tr class="{{ project.id }}-expander" style="display:none;">
                                         <td></td>
-                                        <td colspan="4">
+                                        <td colspan="5">
 
                                             <div>
                                                 <table class="table" role="presentation">

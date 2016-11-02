@@ -159,9 +159,21 @@ function($, d3, vizhelpers) {
                 .text(function(d) {
                     if (d != null) {
                         if (colorBy == 'cohort') {
-                            for (var i = 0; i < cohort_set.length; i++) {
-                                if (cohort_set[i]['id'] == d) { return cohort_set[i]['name']; }
+
+                            if (Array.isArray(d)) {
+                                var cohort_name_label = "";
+                                for (var i = 0; i < d.length; i++) {
+                                    for (var j = 0; j < cohort_set.length; j++) {
+                                        if (cohort_set[j]['id'] == d[i]) { cohort_name_label += cohort_set[i]['name'] + ','; }
+                                    }
+                                }
+                                return cohort_name_label.slice(0,-1);
+                            } else {
+                                for (var i = 0; i < cohort_set.length; i++) {
+                                    if (cohort_set[i]['id'] == d) { return cohort_set[i]['name']; }
+                                }
                             }
+
                         } else {
                             return d;
                         }

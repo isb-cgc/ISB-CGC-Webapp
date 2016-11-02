@@ -4,6 +4,30 @@
 
 .worksheet-panel-body
 
+  .extent
+    fill: rgba(40, 130, 50, 0.5)
+
+  .axis-label, .axis-label-container div
+    font-weight: 500
+    font-size: 1.1em
+
+  .plot-div
+    overflow: hidden
+    max-height: 925px
+    foreignObject
+      div
+        overflow: hidden
+        text-overflow: ellipsis
+        padding: 5px 5px 5px 5px
+        line-height: 1.25
+        max-height: 100%
+        &.truncated-single
+          white-space: nowrap
+          text-align: end
+    .x-label-container
+      div
+        text-align: center
+
     .axis path, .axis line
         fill: none
         stroke: #000
@@ -15,32 +39,22 @@
     .grid path
         stroke-width: 0
 
-    .plot-div
-        overflow: hidden
+    .expected_fill.selected
+        stroke: $tooltip-color
+        stroke-width: 5px
 
-        .extent
-            fill: #000
-            fill-opacity: .1
-            stroke: #fff
+    .extent
+        fill: #000
+        fill-opacity: .1
+        stroke: #fff
 
-        .expected_fill.selected
-            stroke: $tooltip-color
-            stroke-width: 5px
-
-        .plot-bar
-            fill: rgba(0,0,0,0.5)
-            &:hover, &.selected
-                fill: rgba(0,0,225,0.5)
+    .plot-bar
+        fill: rgba(0,0,0,0.5)
+        &:hover, &.selected
+            fill: rgba(0,0,225,0.5)
 
     .show-flyout:hover
         cursor: pointer
-
-    .save-cohort-card
-        background-color: rgba($tooltip-color, 0.8)
-        border-radius: 3px
-        color: #fff
-        padding: 5px
-        width: 210px
 
     .pairwise-result
         .table
@@ -50,16 +64,28 @@
                 word-wrap: break-word
                 word-break: break-word
 
-    .legend
-        display: inline-block
-        margin: 20px
-        overflow-y: auto
-        max-height: 650px
-        vertical-align: top
-        .unselected
-            fill-opacity: 0
+  .save-cohort-card
+    background-color: rgba($tooltip-color, 0.8)
+    border-radius: 3px
+    color: #fff
+    padding: 5px
+    width: 210px
+
+  .legend
+      display: inline-block
+      padding: 15px 0px 0px 15px
+      overflow-y: auto
+      max-height: 150px
+      vertical-align: top
+      .unselected
+          fill-opacity: 0
 
 // Plot selector styles
+
+.panel.plot
+  box-shadow: none
+  margin: 0
+
 .plot .panel-heading
     a.toggle-selection
         color: $isb-dark

@@ -11,6 +11,7 @@ from bq_data_access.feature_search.util import SearchableFieldHelper
 from models import VariableFavorite
 from workbooks.models import Workbook, Worksheet, Worksheet_variable
 from projects.models import Project, Study
+from cohorts.views import count_metadata
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
 from google.appengine.api import urlfetch
@@ -266,28 +267,14 @@ def initialize_variable_selection_page(request,
     TCGA_project    = {"id" : -1, "study" : {"id" :-1, "name" : ""}, "name" : "TCGA"}
     common_project  = {"id" : -1, "study" : {"id" :-1, "name" : ""}, "name" : "Common", "variables" : common_variables}
 
-    data_url = METADATA_API + '/metadata_counts?'
-    results = urlfetch.fetch(data_url, method=urlfetch.POST, deadline=60, headers={'Content-Type': 'application/json'})
-    results = json.loads(results.content)
-    totals  = results['total']
-
-    #Get and sort counts
-    variable_list = convert(results['count'])
-    keys = []
-    for variable in variable_list:
-        keys.append(variable['name'])
-
     # users can select from their saved variable favorites
     variable_favorites = VariableFavorite.get_list(request.user)
 
     context = {
-        'variable_names'        : keys,
-        'variable_list_count'   : variable_list,
         'favorite_list'         : favorite_list,
         'datatype_list'         : datatype_list,
         'projects'              : projects,
         'data_attr'             : data_attr,
-        'total_samples'         : totals,
 
         'base_url'                  : settings.BASE_URL,
         'base_api_url'              : settings.BASE_API_URL,

@@ -294,12 +294,17 @@ def main():
     do_bigquery = (args.operation == 'all' or args.operation == 'bq')
 
     # create_tcga_cohorts_from_files('./tcga/')
-
-
-    if not superuser_id:
-        message = "Superuser \'{name}\' does not exist in MySQL. Quitting.".format(name=SUPERUSER_NAME)
-        logging.error(message)
+    if args.cohort_id is None and not do_cloudsql:
+        logging.error("Cohort ID must be provided if 'cloudsql' operation is not performed.")
         exit(1)
+
+    if do_cloudsql:
+        superuser_id = get_superuser_id(conn, SUPERUSER_NAME)
+
+        if not superuser_id:
+            message = "Superuser \'{name}\' does not exist in MySQL. Quitting.".format(name=SUPERUSER_NAME)
+            logging.error(message)
+            exit(1)
 
         logging.info("Superuser ID: {sid}".format(sid=superuser_id))
         cohort_id = insert_barcodes_mysql(conn, superuser_id, args.cohort_name, sample_barcodes, patient_barcodes)

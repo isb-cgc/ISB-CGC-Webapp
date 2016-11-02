@@ -18,7 +18,7 @@
 {% block content %}
 <div class="container">
 
-    {% if USER_DATA_ON %}
+    {% if False %}
     <section class="panel panel-default">
         <div class="panel-heading">
             <a role="button" data-target="#analysis-body" data-toggle="collapse" aria-expanded="true" aria-controls="analysis-body">
@@ -81,7 +81,7 @@
                     <li>
                         <a href="{% url 'workbook_detail' workbook.id %}" title="{{ workbook.name|title|wrap_text }}">
                             <div class="list-main">
-                                <h5 class="list-title">{{ workbook.name|title }}</h5>
+                                <h5 class="list-title">{{ workbook.name }}</h5>
                                 <p>{{ workbook.description }}</p>
                             </div>
                             <div class="list-info">
@@ -100,7 +100,7 @@
             <div style="height:40px">
                 <form id="create-workbook" method="POST" action="{% url 'workbook_create' %}" class="pull-left">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-primary" ><i class="fa fa-plus"></i>Create a New Workbook</button>
+                    <button type="submit" class="btn btn-link" ><i class="fa fa-plus"></i>Create a New Workbook</button>
                 </form>
                 {#            <a class="btn btn-link" href="{% url 'workbook_samples' %}">Sample Workbooks</a>#}
             </div>
@@ -208,14 +208,14 @@
     {% if USER_DATA_ON %}
         <hr>
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-12">
             <section class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">
                         <a href="{% url 'projects' %}">Saved Projects ({{ projects.count }})</a></h3>
                 </div>
                 <div class="panel-body">
-                    <p>You can upload from your own research projects.</p>
+                    <p>You can upload data from your own research projects.</p>
                     {% if projects.count > 0 %}
                     <ul class="table-list">
                         {% for project in projects|slice:':6' %}
@@ -235,21 +235,22 @@
                     {% endif %}
                 </div>
                 <div class="panel-footer">
-                    <a href="{% url 'project_upload' %}" class="btn btn-primary"><i class="fa fa-cloud-upload"></i>Upload Project Data</a>
+                    <a href="{% url 'project_upload' %}" class="btn btn-link"><i class="fa fa-cloud-upload"></i>Upload Project Data</a>
                 </div>
             </section>
         </div>
-        <div class="col-md-6">
-            <section class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">
-                        <a href="{% url 'public_projects' %}">Public Data ({% public_project_count %})</a></h3>
-                </div>
-                <div class="panel-body">
-                    <p>Browse publicly-available studies and data</p>
-                </div>
-            </section>
-        </div>
+{#      TODO: This div is hidden until we can figure out creating workbooks from projects/studies #}
+{#        <div class="col-md-6">#}
+{#            <section class="panel panel-default">#}
+{#                <div class="panel-heading">#}
+{#                    <h3 class="panel-title">#}
+{#                        <a href="{% url 'public_projects' %}">Public Data ({% public_project_count %})</a></h3>#}
+{#                </div>#}
+{#                <div class="panel-body">#}
+{#                    <p>Browse publicly-available studies and data</p>#}
+{#                </div>#}
+{#            </section>#}
+{#        </div>#}
     </div>
     {% endif %}
 

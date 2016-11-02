@@ -6,8 +6,6 @@ require.config({
         jqueryui: 'libs/jquery-ui.min',
         session_security: 'session_security',
         underscore: 'libs/underscore-min',
-        assetscore: 'libs/assets.core',
-        assetsresponsive: 'libs/assets.responsive',
         base: 'base',
         text: 'libs/require-text',
     },
@@ -15,8 +13,6 @@ require.config({
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
         'session_security': ['jquery'],
-        'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
-        'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
         'underscore': {exports: '_'},
     }
 });
@@ -29,8 +25,6 @@ require([
     'underscore',
     'text!../templates/upload_file_list_item.html',
     'text!../templates/upload_input_table.html',
-    'assetscore',
-    'assetsresponsive',
     'base',
 ], function($, jqueryui, bootstrap, session_security, _, UploadFileListItemTemplate, UploadInputTableTemplate) {
     'use strict';
@@ -298,7 +292,7 @@ require([
     function buildInputTable(fileObj, parentEl) {
 
         var dictionary = _.toArray(types.Dictionary);
-        dictionary = _.sortBy(dictionary, 'displayName')
+        dictionary = _.sortBy(dictionary, 'displayName');
 
         var $el = $(uploadInputTableTemplate({
             file: fileObj.file,
@@ -384,6 +378,16 @@ require([
                     });
                     table.append(tr);
                 }
+
+                $('.data-type-selector').on('change', function() {
+                    var value = $(this).val();
+
+                    if (value === 'user_gen') {
+                        $(this).siblings('.file-format-check').prop('style','visibility: hidden;');
+                    } else {
+                        $(this).siblings('.file-format-check').prop('style','visibility: visible;');
+                    }
+                })
             }
         });
 
@@ -604,6 +608,10 @@ require([
         }
         form.append('data-type', uploadDataType);
 
+        // Add BQ Dataset and Bucket information
+        form.append('bucket', $('#select-gcp-bucket').val());
+        form.append('dataset', $('#select-gcp-dataset').val());
+
         var pipelines_valid = true;
         _.each(addedFiles, function (added) {
             form.append('file_'+added.uid, added.file, added.file.name);
@@ -632,12 +640,21 @@ require([
             } else {
                 errorMessage('Error submitting response : ' + res.message);
             }
-        }).fail(function () {
-            errorMessage('We had an error submitting the response. Please try again later');
+        }).fail(function (res) {
+            errorMessage('We had an error submitting the response: ' + res.message);
         }).always(function () {
             $('#upload-button, #back-button').removeClass('disabled')
                 .siblings('.progress-message').addClass('hidden');
         });
     });
 
+    $('.data-type-selector').on('change', function() {
+        var value = $(this).val();
+
+        if (value === 'other') {
+            $(this).sibling('.file-format-check').hide();
+        } else {
+            $(this).sibling('.file-format-check').show();
+        }
+    })
 });

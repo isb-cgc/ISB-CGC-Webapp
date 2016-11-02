@@ -20,6 +20,32 @@
     </div>
 </div>
 
+<!-- Create Worksheet modal-->
+<div class="modal fade" id="create-worksheet-modal-{{ workbook.id }}" tabindex="-1" aria-labelledby="create-worksheet-header-{{ workbook.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="create-worksheet-header-{{ workbook.id }}">Create New Worksheet</h4>
+            </div>
+            <form id="worksheet_create_form-{{ workbook.id }}" method="POST" action="{% url 'worksheet_create' workbook_id=workbook.id %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <label for="create-workbook-name">Name (required)</label>
+                    <input class="form-control" type="text" id="create-workbook-name" name="name" value="New Worksheet"/>
+                    <br>
+                    <label for="create-workbook-desc">Description (optional, max length is 2000 characters)</label>
+                    <textarea class="form-control" id="create-workbook-desc" name="description" placeholder="Add a description" maxlength="2000"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" value="Create" class="btn btn-primary" />
+                    <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Delete Worksheet Modal -->
 <div class="modal fade" id="delete-worksheet-modal-{{ worksheet.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-worksheet-body" aria-hidden="true">
     <div class="modal-dialog">

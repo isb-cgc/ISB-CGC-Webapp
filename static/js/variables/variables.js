@@ -24,8 +24,6 @@ require.config({
         jqueryui: 'libs/jquery-ui.min',
         session_security: 'session_security',
         underscore: 'libs/underscore-min',
-        assetscore: 'libs/assets.core',
-        assetsresponsive: 'libs/assets.responsive',
         d3: 'libs/d3.min',
         d3tip: 'libs/d3-tip',
         science: 'libs/science.min',
@@ -38,8 +36,6 @@ require.config({
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
         'session_security': ['jquery'],
-        'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
-        'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
         'select2': ['jquery']
     }
 });
@@ -53,12 +49,8 @@ require([
     'd3tip',
     'vizhelpers',
     'select2',
-    'assetscore',
-    'assetsresponsive',
     'base'
 ], function($, jqueryui, bootstrap, session_security, d3, d3tip, vizhelpers) {
-
-    A11y.Core();
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function() {
@@ -196,33 +188,6 @@ require([
 
         if ($('.selected-filters span[data-code="' + code + '"]').length == 0) { // Check to see if selected already
             add_variable_pill(name, code, "", var_type);
-        }
-    });
-
-    /*
-        Adds a filter box when a variable needs an autocomplete
-     */
-    $('.filter-input').autocomplete({
-        source: attr_list,
-        select: function(event, ui) {
-            $('#filter-list-div').append('<h5>'+ ui.item.label + '</h5>');
-            $('#filter-list-div').append('<ul class="search-checkbox-list" id="'+ui.item.value+'"></ul>');
-            for (var i = 0; i < attr_counts[ui.item.value].length; i++) {
-                var checkbox_str = '<input type="checkbox" name="elements-selected" id="'
-                    + ui.item.value + '-' + attr_counts[ui.item.value][i]['value'].replace(/\s+/g, '_') +'" >'
-                    + '<label for="'+ui.item.value + '-' + attr_counts[ui.item.value][i]['value'].replace(/\s+/g, '_') +'">'
-                    + attr_counts[ui.item.value][i]['value'] + '<span class="count">(' + attr_counts[ui.item.value][i]['count'] + ')</span>'
-                    + '</label>';
-                var checkbox_item = $(checkbox_str);
-                checkbox_item.on('change', checkbox_callback);
-                $('ul#'+ui.item.value).append('<li></li>');
-                $('ul#'+ui.item.value+' li').append(checkbox_item);
-                // After adding item to filters, remove from list
-                attr_list.splice(attr_list.indexOf(ui.item.value), 1);
-                $('.filter-input').autocomplete('option', 'source', attr_list);
-            }
-            $(this).val('');
-            return false;
         }
     });
 

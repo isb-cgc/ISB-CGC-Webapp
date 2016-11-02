@@ -20,20 +20,20 @@
             <% _.each(processed.columns, function (column, i) { %>
                 <tr data-index="<%- i %>">
                     <td><i class="fa fa-close text-danger ignore-row-btn"></i></td>
-                    <td><%- column.name %></td>
+                    <td><%- column.name %>
+                        <% if (!column.type) { %>
+                        <span class="empty-column float-right"><i class="fa fa-exclamation-circle"></i> This column is empty.</span>
+                        <% } %>
+                    </td>
                     <td>
                         <select class="form-control type-selection">
+                            <option value="" disabled <%- !column.type ? 'selected' : '' %>>Select an option</option>
                             <option value="int" <%- !column.controlled && column.type == 'int' ? 'selected' : '' %>>Integer</option>
                             <option value="float" <%- !column.controlled && column.type == 'float' ? 'selected' : '' %>>Decimal</option>
-                            <option value="string" <%- !column.controlled && (column.type == 'int' || column.type == 'float') ? '' : 'selected' %>>Categorical</option>
+                            <option value="string" <%- !column.controlled && column.type == 'string' ? 'selected' : '' %>>Categorical</option>
                             <optgroup label="Barcodes">
                                 <option value="sample" <%- column.controlled && column.controlled.key == 'sample_barcode' ? 'selected' : '' %>>Sample Barcode</option>
                                 <option value="participant" <%- column.controlled && column.controlled.key == 'participant_barcode' ? 'selected' : '' %>>Participant Barcode</option>
-                            </optgroup>
-                            <optgroup label="Dictionary Datatypes">
-                                <% _.each(dictionary, function (item) { %>
-                                <option value="<%- item.key %>"><%- item.displayName %></option>
-                                <% }) %>
                             </optgroup>
                         </select>
                     </td>

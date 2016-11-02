@@ -6,8 +6,6 @@ require.config({
         jqueryui: 'libs/jquery-ui.min',
         session_security: 'session_security',
         underscore: 'libs/underscore-min',
-        assetscore: 'libs/assets.core',
-        assetsresponsive: 'libs/assets.responsive',
         base: 'base',
         text: 'libs/require-text',
     },
@@ -15,8 +13,6 @@ require.config({
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
         'session_security': ['jquery'],
-        'assetscore': ['jquery', 'bootstrap', 'jqueryui'],
-        'assetsresponsive': ['jquery', 'bootstrap', 'jqueryui'],
         'underscore': {exports: '_'},
     }
 });
@@ -27,9 +23,7 @@ require([
     'bootstrap',
     'session_security',
     'underscore',
-    'assetscore',
-    'assetsresponsive',
-    'base',
+    'base'
 ], function($, jqueryui, bootstrap, session_security, _) {
     'use strict';
 
@@ -69,5 +63,32 @@ require([
         .always(function () {
             $this.find('.btn').removeClass('btn-disabled').attr('disabled', false);
         });
+    });
+
+    /*
+        Remove shared user
+     */
+    $('.remove-shared-user').on('click', function() {
+        var shared_id = $(this).attr('data-shared-id');
+        var url = base_url + '/share/' + shared_id + '/remove';
+        var csrftoken = $.getCookie('csrftoken');
+        var button = $(this);
+        $.ajax({
+            type        :'POST',
+            url         : url,
+            dataType    :'json',
+            data        : {owner: true},
+            beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+            success : function (data) {
+                button.parents('tr').remove();
+                var count = parseInt($($('.share-count')[0]).html());
+                $('.share-count').each(function() {
+                   $(this).html(count-1);
+                });
+            },
+            error: function () {
+                console.log('Failed to remove user');
+            }
+        })
     });
 });

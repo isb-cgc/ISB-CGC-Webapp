@@ -32,6 +32,11 @@
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title">Delete this Project?</h4>
             </div>
+            <div class="modal-body">
+                <div class="alert alert-warning alert-dismissable">
+                    Deleting this project will not delete underlying Google BigQuery tables or files in Google Cloud Storage. Those must be removed manually.
+                </div>
+            </div>
             <form id="delete-project" method="POST" action="{% url 'project_delete' project.id %}" data-redirect="{% url 'projects' %}">
                 {% csrf_token %}
                 <div class="modal-footer">
@@ -85,9 +90,7 @@
                     <div class="modal-body">
                         <p>
                             This will share the web view of the project.  This will not share the underlying Google cloud project
-                            and big query data needed if you wish to access this project outside of the website.  If you
-                            want to share your Google Cloud project with other users, please enter a support request at the <a href="">Google
-                            group</a>
+                            and big query data needed if you wish to access this project outside of the website.
                         </p>
                         <label for="share-users">Enter email addresses separated by a comma</label>
                         <textarea class="form-control" name="share_users"></textarea>
@@ -118,6 +121,11 @@
                                     </td>
                                     <td>
                                         {{shared.email}}
+                                    </td>
+                                    <td>
+                                        {% if project.owner == request.user %}
+                                        <a class="remove-shared-user" role="button" data-shared-id="{{ shared.id }}"><i class="fa fa-times"></i></a>
+                                        {% endif %}
                                     </td>
                                 </tr>
                             {% endfor %}
