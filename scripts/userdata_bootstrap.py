@@ -176,6 +176,9 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
                      "VALUES (%s,%s,%s,%s,%s);"
     insert_googleproj = "INSERT INTO accounts_googleproject (project_id, project_name, big_query_dataset) " + \
                         "VALUES (%s,%s,%s);"
+    insert_googleproj_user = "INSERT INTO accounts_googleproject_user (user_id, googleproject_id)" \
+                             "VALUES (%s,%s);"
+    get_googleproj_id = "SELECT id from accounts_googleproject where id=%s;"
     insert_bucket = "INSERT INTO accounts_bucket (bucket_name, bucket_permissions, google_project_id) VALUES (%s, %s, %s);"
     insert_bqdataset = "INSERT INTO accounts_bqdataset (dataset_name, google_project_id) VALUES (%s, %s);"
     insert_user_data_tables = "INSERT INTO projects_user_data_tables (study_id, user_id, google_project_id, " + \
@@ -214,16 +217,21 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
         cursor.execute(insert_projects, ("TCGA", True, insertTime, True, isb_userid,))
         cursor.execute(insert_projects, ("CCLE", True, insertTime, True, isb_userid,))
         cursor.execute(insert_googleproj, ("isb-cgc", googleproj_name, big_query_dataset,))
-        cursor.execute(insert_bucket, (bucket_name, bucket_permissions, isb_userid,))
+
+        db.commit()
+
+        cursor.execute("SELECT id FROM accounts_googleproject WHERE project_name=%s;", (googleproj_name,))
+        for row in cursor.fetchall():
+            googleproj_id = row[0]
+
+        cursor.execute(insert_googleproj_user, (isb_userid, googleproj_id))
+        cursor.execute(insert_bucket, (bucket_name, bucket_permissions, googleproj_id,))
         db.commit()
 
         cursorDict.execute("SELECT name, id FROM projects_project;")
         for row in cursorDict.fetchall():
             project_info[row['name']] = row['id']
 
-        cursor.execute("SELECT id FROM accounts_googleproject WHERE project_name=%s;", (googleproj_name,))
-        for row in cursor.fetchall():
-            googleproj_id = row[0]
 
         cursor.execute("SELECT id FROM accounts_bucket WHERE bucket_name=%s;", (bucket_name,))
         for row in cursor.fetchall():
