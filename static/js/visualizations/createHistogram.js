@@ -16,8 +16,9 @@
  *
  */
 
-define(['jquery', 'd3', 'd3tip', 'vizhelpers'],
-function($, d3, d3tip, helpers) {
+define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers'],
+    function($, d3, d3tip, d3textwrap, helpers) {
+
     var svg;
     var margin;
     var zoom_area;

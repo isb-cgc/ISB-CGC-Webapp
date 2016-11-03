@@ -17,7 +17,7 @@
  */
 
 define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers'],
-function($, d3, d3tip, d3textwrap, vizhelpers) {
+    function($, d3, d3tip, d3textwrap, vizhelpers) {
 
     // If you want to override the tip coming in from the create call,
     // do it here
@@ -71,7 +71,8 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                 .orient('bottom');
             var y = d3.scale.linear()
                 .range([height-margin.bottom-margin.top, 0])
-                .domain([0, d3.max(data, function(d) { return d.count; })]);
+                .domain([0, d3.max(data, function(d) { return d.count; })])
+                .nice();
             var yAxis = d3.svg.axis()
                 .scale(y)
                 .orient('left')
@@ -91,6 +92,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
 
             var zoom = d3.behavior.zoom()
                 .x(x2)
+                .scaleExtent([1,1])
                 .on('zoom', zoomer);
 
             svg.call(zoom);
