@@ -362,7 +362,6 @@ define([
 
             data = data['items'];
 
-
             if (args.cohort_override) {
                 args.color_by = 'cohort';
             } else {

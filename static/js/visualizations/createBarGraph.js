@@ -79,7 +79,6 @@ define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers'],
                 .tickSize(-width + margin.right + margin.left, 0, 0);
 
             var zoomer = function() {
-                console.debug(d3.event.translate);
                 if(!selex_active) {
                     svg.select('.x.axis').attr('transform', 'translate(' + (d3.event.translate[0] + margin.left) + ',' + (height - margin.bottom - 55) + ')').call(xAxis);
                     svg.selectAll('.x.axis text').style('text-anchor', 'end').attr('transform', 'translate(' + -15 + ',' + 10 + ') rotate(-90)');
