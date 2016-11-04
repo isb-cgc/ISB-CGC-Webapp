@@ -341,7 +341,7 @@ define([
             height = 725, //TODO ditto
             // Top margin: required to keep top-most Y-axis ticks from being cut off on non-scrolled y axes
             // Bottom margin: takes into account double-wrapped x-axis title and wrapped long-text x-axis labels
-            margin = {top: 15, bottom: 150, left: 70, right: 10},
+            margin = {top: 15, bottom: 150, left: 80, right: 10},
             x_type = '',
             y_type = '';
 
