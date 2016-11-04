@@ -98,7 +98,8 @@ define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers'],
             svg.call(zoom);
 
             var plot_area = svg.append('g')
-                .attr('clip-path', 'url(#plot_area_clip)');
+                .attr('clip-path', 'url(#plot_area_clip)')
+                .attr('transform','translate(0,'+margin.top+')');
 
             plot_area.append('clipPath')
                 .attr('id', 'plot_area_clip')
@@ -226,8 +227,8 @@ define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers'],
             svg.append('text')
                 .attr('class', 'y label axis-label')
                 .attr('text-anchor', 'middle')
-                .attr('transform', 'rotate(-90) translate(' + (-1 * (height/2)) + ',10)')
-                .text('Number of Samples');
+                .text('Number of Samples')
+                .attr('transform', 'rotate(-90) translate(' + ((-1 * (height/2))+($('.y.label.axis-label').outerWidth()/2)) + ',20)');
 
             var check_selection_state = function(obj) {
 
