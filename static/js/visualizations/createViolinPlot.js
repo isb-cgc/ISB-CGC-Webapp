@@ -172,7 +172,7 @@ function($, d3, d3textwrap, vizhelpers) {
                                 var cohort_name_label = "";
                                 for (var i = 0; i < d.length; i++) {
                                     for (var j = 0; j < cohort_set.length; j++) {
-                                        if (cohort_set[j]['id'] == d[i]) { cohort_name_label += cohort_set[i]['name'] + ','; }
+                                        if (cohort_set[j]['id'] == d[i]) { cohort_name_label += cohort_set[j]['name'] + ','; }
                                     }
                                 }
                                 return cohort_name_label.slice(0,-1);
