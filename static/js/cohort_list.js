@@ -372,7 +372,7 @@ require([
     $(".createWorkbookWithCohort").on("click", function(){
         //get the selected cohort
         var cohorts = [];
-        $('#saved-cohorts-list input[type="checkbox"]').each(function() {
+        $('#saved-cohorts-list input[type="checkbox"], #public-cohorts-list input[type="checkbox"]').each(function() {
             if ($(this).is(':checked') && $(this).val() != 'on') {
                 cohorts.push($(this).val());
             }
