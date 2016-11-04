@@ -54,7 +54,11 @@ require([
     });
 
     var delete_x_callback = function () {
+        var parent_form = $(this).parents('#delete-cohort-form');
         $(this).parent('.cohort-label').remove();
+        if (parent_form && !parent_form.find('.label').length) {
+            parent_form.find('input[type="submit"]').prop('disabled', 'disabled')
+        }
         return false;
     };
 
@@ -74,6 +78,7 @@ require([
     var enable_buttons = function(tablename){
         $(tablename).parent().find('.page-action-group .btn').removeAttr('disabled');
         $('#cohort-apply-to-workbook .btn').removeAttr('disabled');
+        $('#delete-cohort-form input[type="submit"]').removeAttr('disabled')
     };
     var repopulate_cohort_selects = function() {
         $('#saved-cohorts-list tr:not(:first)').each(function() {
