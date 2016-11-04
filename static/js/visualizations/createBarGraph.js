@@ -80,7 +80,7 @@ define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers'],
 
             var zoomer = function() {
                 if(!selex_active) {
-                    svg.select('.x.axis').attr('transform', 'translate(' + (d3.event.translate[0] + margin.left) + ',' + (height - margin.bottom - 55) + ')').call(xAxis);
+                    svg.select('.x.axis').attr('transform', 'translate(' + (d3.event.translate[0] + margin.left) + ',' + (height - margin.bottom - margin.top - 40) + ')').call(xAxis);
                     svg.selectAll('.x.axis text').style('text-anchor', 'end').attr('transform', 'translate(' + -15 + ',' + 10 + ') rotate(-90)');
                     plot_area.selectAll('.plot-bar').attr('transform', 'translate(' + d3.event.translate[0] + ',0)');
                 }
@@ -106,7 +106,7 @@ define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers'],
                 .append('rect')
                 .attr({ width: width-margin.left - margin.right,
                         height: height-margin.top - margin.bottom})
-                .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+                .attr('transform', 'translate(' + margin.left + ',0)');
 
             plot_area.selectAll(".plot-bar")
                 .data(data)
@@ -131,11 +131,11 @@ define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers'],
                 .append('rect')
                 .attr('height', margin.bottom+margin.top)
                 .attr('width', width-margin.left-margin.right)
-                .attr('transform', 'translate(' + margin.left + ',' + (height  - margin.bottom - margin.top) + ')');
+                .attr('transform', 'translate(' + margin.left + ',' + (height  - margin.bottom) + ')');
 
             x_axis_area.append('g')
                 .attr('class', 'x axis')
-                .attr('transform', 'translate(' + margin.left + ',' + (height - margin.bottom - margin.top - 45) + ')')
+                .attr('transform', 'translate(' + margin.left + ',' + (height - margin.bottom - margin.top - 40) + ')')
                 .call(xAxis)
                 .selectAll('text')
                 .style('text-anchor', 'end')
