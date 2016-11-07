@@ -26,7 +26,7 @@
 {#        </li>#}
 {#        <li class="separator"></li>#}
         {% if project.owner.id == user.id %}
-        <li role="menuitem"><a href="{% url 'project_upload' %}" class="btn btn-info"><i class="fa fa-cloud-upload"></i>Upload Data</a></li>
+        <li role="menuitem"><a href="{% url 'project_upload_existing' %}?project_id={{ project.id }}" class="btn btn-info"><i class="fa fa-cloud-upload"></i>Upload Data</a></li>
         <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#edit-project-details-modal">Edit Details</button></li>
         <li role="menuitem"><button class="btn btn-info project-delete" data-toggle="modal" data-target="#delete-project-modal">Delete</button></li>
         <li class="separator"></li>
