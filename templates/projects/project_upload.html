@@ -23,10 +23,10 @@
     <!--File upload section-->
     <section class="panel panel-default" id="first-section">
         <ul class="nav nav-tabs" role="tablist">
-            <li class="active" role="presentation">
+            <li {% if not existing_proj %}class="active"{% endif %} role="presentation">
                 <a aria-controls="project-upload" role="tab" data-toggle="tab" data-target="#project-info" data-value="new">A New Project</a>
             </li>
-            <li role="presentation">
+            <li {% if existing_proj %}class="active"{% endif %} role="presentation">
                 <a class="{% if user.project_set.count == 0 %}disabled{% endif %}" aria-controls="project-upload" role="tab" data-value="existing" {% if user.project_set.count > 0 %}data-toggle="tab"{% endif %} data-target="#study-info">A New Study for an Existing Project</a>
             </li>
         </ul>
@@ -35,7 +35,7 @@
             {% csrf_token %}
             <input type="hidden" id="project-tab" value="new">
             <div class="panel-body">
-                <section id="project-info" class="collapse in">
+                <section id="project-info" class="collapse {% if not existing_proj %}in{% endif %}">
                     <div class="form-group">
                         <label for="project-name">Project Name</label>
                         <input class="form-control" type="text" name="project-name" id="project-name">
@@ -46,12 +46,12 @@
                     </div>
                 </section>
                 <section>
-                    <div class="form-group collapse" id="study-info">
+                    <div class="form-group collapse {% if existing_proj %}in{% endif %}" id="study-info">
                         <select class="form-control" required id="project-selection">
-                            <option value="" disabled selected hidden>-- Select Project --</option>
+                            <option value="" disabled hidden {% if not existing_proj and not project_id %} selected {% endif %}>-- Select Project --</option>
                             {% for project in projects %}
                                 {% if not project.is_public %}
-                                <option value="{{ project.id }}">{{ project.name }}</option>
+                                <option value="{{ project.id }}" {% if existing_proj and project_id and project_id == project.id %}selected{% endif %}>{{ project.name }}</option>
                                 {% endif %}
                             {% endfor %}
                         </select>
@@ -162,9 +162,11 @@
             <p>Please refer to the <a href="{% url 'system_data_dict' %}" target="_blank">system data dictionary <i class="fa fa-share-square-o"></i></a> for proper naming and data type conventions.</p>
         </div>
         <div class="panel-footer">
-            <button class="btn btn-primary" id="back-button"><i class="fa fa-chevron-left"></i> Back</button>
-            <button class="btn btn-primary" id="upload-button"><i class="fa fa-cloud-upload"></i> Upload Data</button>
+
+            <button class="btn btn-primary" id="back-button" {% if google_projects and google_projects.0.bucket_set.all|length == 0 and google_projects.0.bqdataset_set.all|length == 0%}disabled="disabled"{% endif %}><i class="fa fa-chevron-left"></i> Back</button>
+            <button class="btn btn-primary" id="upload-button" {% if google_projects and google_projects.0.bucket_set.all|length == 0 and google_projects.0.bqdataset_set.all|length == 0%}disabled="disabled"{% endif %}><i class="fa fa-cloud-upload"></i> Upload Data</button>
             <span class="hidden progress-message"><i class="fa fa-spin fa-circle-o-notch"></i> Uploading</span>
+
         </div>
     </section>
 </div>

@@ -16,10 +16,11 @@
  *
  */
 
-define (['jquery', 'd3', 'vizhelpers'],
-function($, d3, vizhelpers) {
+define (['jquery', 'd3', 'd3textwrap', 'vizhelpers'],
+function($, d3, d3textwrap, vizhelpers) {
 
     var helpers = Object.create(vizhelpers, {});
+
     var selex_active = false;
     var zoom_status = {
         translation: null,
@@ -202,7 +203,7 @@ function($, d3, vizhelpers) {
                                 var cohort_name_label = "";
                                 for (var i = 0; i < d.length; i++) {
                                     for (var j = 0; j < cohort_set.length; j++) {
-                                        if (cohort_set[j]['id'] == d[i]) { cohort_name_label += cohort_set[i]['name'] + ','; }
+                                        if (cohort_set[j]['id'] == d[i]) { cohort_name_label += cohort_set[j]['name'] + ','; }
                                     }
                                 }
                                 return cohort_name_label.slice(0,-1);
@@ -252,7 +253,6 @@ function($, d3, vizhelpers) {
                     brush.clear();
                     // Remove brush event listener plot area
                     plot_area.selectAll('.brush').remove();
-
                 }
             };
 
@@ -266,12 +266,10 @@ function($, d3, vizhelpers) {
                 $('#save-cohort-' + plot_id + '-modal input[name="samples"]').attr('value', sample_list);
                 var topVal = Math.min((yScale(extent[1][1]) + 180),(height-$('.save-cohort-card').height()));
                 var leftVal = Math.min((xScale(extent[1][0])+ 40),(width-$('.save-cohort-card').width()));
-                $(svg[0]).parents('.plot')
-                    .find('.save-cohort-card').show()
+                $('.save-cohort-card').show()
                     .attr('style', 'position:absolute; top: '+ topVal +'px; left:' +leftVal+'px;');
 
-                $(svg[0]).parents('.plot')
-                    .find('.save-cohort-card').find('.btn').prop('disabled', (total_samples <= 0));
+                $('.save-cohort-card').find('.btn').prop('disabled', (total_samples <= 0));
             }
 
             function resize() {

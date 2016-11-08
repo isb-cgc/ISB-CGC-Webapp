@@ -398,7 +398,8 @@ def worksheet_genes(request, workbook_id=0, worksheet_id=0, genes_id=0):
                     gene_fav = GeneFavorite.objects.get(id=gene_id)
                     names = gene_fav.get_gene_name_list()
                     for g in names:
-                        genes.append(g)
+                        if g not  in genes:
+                            genes.append(g)
                 except ObjectDoesNotExist:
                         None
 
@@ -411,7 +412,8 @@ def worksheet_genes(request, workbook_id=0, worksheet_id=0, genes_id=0):
                         fav = GeneFavorite.objects.get(id=id)
                         names = fav.get_gene_name_list()
                         for g in names:
-                            genes.append(g)
+                            if g not in genes:
+                                genes.append(g)
                     except ObjectDoesNotExist:
                         None
             if len(genes) > 0:
