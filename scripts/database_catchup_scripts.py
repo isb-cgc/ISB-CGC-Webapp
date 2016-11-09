@@ -188,6 +188,25 @@ def fix_cohort_studies(cursor):
         print >> sys.stdout, "[WARNING] Some of the samples were not corrected! You should double-check them."
 
 
+# Add the stored procedure "get_tcga_study_set" which fetches the list of all project/study IDs which are owned by
+# the ISB-CGC superuser
+def add_isb_cgc_study_sproc(cursor):
+
+    sproc_def = """
+        CREATE PROCEDURE `get_isbcgc_study_set`()
+        BEGIN
+        SELECT ps.id
+        FROM projects_study ps
+                JOIN auth_user au
+                ON au.id = ps.owner_id
+        WHERE au.username = 'isb' and au.is_superuser = 1 AND au.is_active = 1 AND ps.active = 1;
+        END
+    """
+
+    cursor.execute("DROP PROCEDURE IF EXISTS `get_isbcgc_study_set`;")
+    cursor.execute(sproc_def)
+
+
 # Query to correct CCLE samples from fix_cohort_samples, because despite having specific 'Study' values all CCLE samples are
 # part of a single CCLE study
 
