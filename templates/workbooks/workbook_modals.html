@@ -174,7 +174,9 @@
                                         {{shared.email}}
                                     </td>
                                     <td>
+                                        {% if workbook.owner.id == request.user.id %}
                                         <a class="remove-shared-user" role="button" data-shared-id="{{ shared.id }}"><i class="fa fa-times"></i></a>
+                                        {% endif %}
                                     </td>
                                 </tr>
                             {% endfor %}
