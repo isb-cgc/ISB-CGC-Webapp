@@ -119,14 +119,15 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers'],
             }
 
             var plot_area = svg.append('g')
-                .attr('clip-path', 'url(#plot_area_clip)');
+                .attr('clip-path', 'url(#plot_area_clip)')
+                .attr('transform','translate(0,'+margin.top+')');
 
             plot_area.append('clipPath')
                 .attr('id', 'plot_area_clip')
                 .append('rect')
                 .attr({ width: width - margin.left - margin.right,
                     height: height - margin.top - margin.bottom})
-                .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+                .attr('transform', 'translate(' + margin.left + ',0)');
 
             plot_area.selectAll(".plot-bar")
                 .data(hist_data)
@@ -145,7 +146,6 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers'],
                 .attr("height", function (d) {
                     return height - margin.top - margin.bottom - y(d.y);
                 })
-                .attr('transform', 'translate(0,' + margin.top + ')')
                 .on('mouseover.tip', tip.show)
                 .on('mouseout.tip', tip.hide);
 
