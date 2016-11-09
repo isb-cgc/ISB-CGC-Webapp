@@ -270,6 +270,8 @@ def main():
                                  help="Fix cohorts which have null study IDs for ISB-CGC samples")
     cmd_line_parser.add_argument('-e', '--fix-ccle-cohort-studies', type=bool, default=True,
                                  help="Fix study IDs for CCLE samples in cohorts")
+    cmd_line_parser.add_argument('-i', '--create-isbcgc-study-set-sproc', type=bool, default=True,
+                                 help="Add the 'get_isbcgc_study_set' sproc to the database")
 
     args = cmd_line_parser.parse_args()
 
@@ -285,6 +287,7 @@ def main():
         args.create_ms_shortlist_view and create_samples_shortlist_view(cursor)
         args.fix_cohort_studies and fix_cohort_studies(cursor)
         args.fix_ccle_cohort_studies and fix_ccle(cursor)
+        args.create_isbcgc_study_set_sproc and add_isb_cgc_study_sproc(cursor)
 
         # Until we have a new sql dump, we need to manually update changed columns
         args.fix_bmi_case and cursor.execute("UPDATE metadata_attr SET attribute='BMI' WHERE attribute='bmi';")
