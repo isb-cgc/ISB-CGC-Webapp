@@ -295,9 +295,7 @@ define([
         return api_url;
     }
 
-    /*
-     Generate url for gathering data for a SeqPeek plot
-     */
+    // Generate url for gathering data for a SeqPeek plot
     function get_seqpeek_data_url(base_api_url, cohorts, gene_label){
         var cohort_str = '';
         for (var i = 0; i < cohorts.length; i++) {
