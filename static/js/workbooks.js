@@ -773,11 +773,57 @@ require([
         }
         var plot_type = $(this).val();
         var flyout = $(this).closest('.worksheet-body').find('.settings-flyout');
+        $('#selAnType-'+$('.worksheet.active').attr('id')).prop('checked',true);
         hide_show_widgets(plot_type, flyout);
         get_plot_info(this, function(success){
             disable_invalid_variable_options($(self).parentsUntil(".worksheet-body").find('.update-plot').parent());
             show_plot_settings();
         })
+    });
+
+    var cohort_selex_update = function(e){
+        var cohSel = false;
+        $('.cohort-selex').each(function(ev){
+            if($(this).is(':checked')) {
+                cohSel = true;
+            }
+        });
+        $('#selCoh-' + $('.worksheet.active').attr('id')).prop('checked', cohSel);
+        check_for_plot_rdy();
+    };
+
+    var axis_selex_update = function(e){
+        var axisRdy = true;
+        $('.axis-select').each(function(){
+            if($(this).parent().css('display')!=='none'){
+                if(!$(this).find(':selected').val()) {
+                    axisRdy = false;
+                }
+            }
+        });
+        $('#selGenVar-'+ $('.worksheet.active').attr('id')).prop('checked',axisRdy);
+        check_for_plot_rdy();
+    };
+
+    var check_for_plot_rdy = function(e){
+        var plot_rdy = true;
+
+        $('.plot-ready-check').each(function(){
+            if(!$(this).is(':checked')) {
+                plot_rdy = false;
+            }
+        });
+
+        $('.update-plot.btn').attr('disabled',!plot_rdy);
+        $('.resubmit-button.btn').attr('disabled',!plot_rdy);
+    };
+
+    $('.cohort-selex').on('change',function(e){
+        cohort_selex_update();
+    });
+
+    $('.axis-select').on('change',function(){
+        axis_selex_update();
     });
 
     // Because we do not have a fixed height set but won't know our ideal height (per the size of the source panel)
@@ -1099,5 +1145,12 @@ require([
     $('.comment-textarea').keyup(function() {
         $(this).siblings('.save-comment-btn').prop('disabled', this.value == '' ? true : false)
     });
+
+    // Prep the instructions based on current settings
+    $('#selAnType-'+$('.worksheet.active').attr('id')).prop('checked',!!$('.plot_selection :selected').val());
+    cohort_selex_update();
+    axis_selex_update();
+    check_for_plot_rdy();
+
 });
 

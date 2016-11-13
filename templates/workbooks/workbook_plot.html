@@ -51,7 +51,7 @@
                     <!-- X Axis selection -->
                     <div class="form-group variable-container" variable="x-axis-select">
                         <label for="{{ worksheet.id }}-x-select">X Axis Variable <a role="button" class="x-edit-field" data-attribute="x-selector" aria-label="X Field Editor"></a></label>
-                        <select id="{{ worksheet.id }}-x-select" {% if workbook.owner.id != user.id %} disabled {% endif %} plot="{{ worksheet.id }}" class=" x-axis-select form-control search-term-field" style="width: 230px;">
+                        <select id="{{ worksheet.id }}-x-select" {% if workbook.owner.id != user.id %} disabled {% endif %} plot="{{ worksheet.id }}" class="axis-select x-axis-select form-control search-term-field" style="width: 230px;">
                             {% if plot.x_axis %}
                                 <option value="{{ plot.x_axis.url_code }}" var_id="{{ plot.x_axis.id }}" selected >{{ plot.x_axis.name }}</option>
                             {% else %}
@@ -111,7 +111,7 @@
                     <!-- Y Axis selection -->
                     <div class="form-group variable-container" variable="y-axis-select">
                         <label for="{{ worksheet.id }}-y-select">Y Axis Variable <a role="button" class="y-edit-field" data-attribute="y-selector" aria-label="Y Field Editor"></a></label>
-                        <select id="{{ worksheet.id }}-y-select" {% if workbook.owner.id != user.id %} disabled {% endif %} plot="{{ worksheet.id }}" class="y-axis-select form-control search-term-field" style="width: 230px;">
+                        <select id="{{ worksheet.id }}-y-select" {% if workbook.owner.id != user.id %} disabled {% endif %} plot="{{ worksheet.id }}" class="axis-select y-axis-select form-control search-term-field" style="width: 230px;">
                             {% if plot.y_axis %}
                                 <option value="{{ plot.y_axis.url_code }}" var_id="{{ plot.y_axis.id }}" selected >{{ plot.y_axis.name }}</option>
                             {% else %}
@@ -206,7 +206,7 @@
                             {% for cohort in cohorts %}
                                  <div class="checkbox" style="margin-top: 0px; margin-bottom: 5px;">
                                       <label>
-                                        <input {% if workbook.owner.id != user.id %} disabled {% endif %} class="variable-toggle-checkbox" name="cohort-checkbox" aria-label="cohort-checkbox" type="checkbox" cohort-id="{{ cohort.cohort.id }}" value="{{ cohort.id }}">
+                                        <input {% if workbook.owner.id != user.id %} disabled {% endif %} class="variable-toggle-checkbox cohort-selex" name="cohort-checkbox" aria-label="cohort-checkbox" type="checkbox" cohort-id="{{ cohort.cohort.id }}" value="{{ cohort.id }}">
                                         {{ cohort.cohort.name }}
                                       </label>
                                  </div>
@@ -221,11 +221,11 @@
         <div class="plot-div">
             {% if workbook.owner.id == user.id %}
                 <div class="worksheet-instruction">
-                    <p><i class="fa fa-exclamation-circle"></i> To Complete this Analysis: </p>
-                    <ul class="ul">
-                        <li>You must select an Analysis Type (above)</li>
-                        <li>You must select <a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Genes</a> or <a href="{% url 'variable_select_for_existing_workbook' workbook.id worksheet.id %}">Variables</a> (or, optionally, both)</li>
-                        <li>You must select a <a href="{% url 'cohort_select_for_existing_workbook' workbook.id worksheet.id %}%}">Cohorts</a></li>
+                    <p><i class="fa fa-exclamation-circle"></i> To complete this analysis: </p>
+                    <ul class="ul no-bullet">
+                        <li><input class="plot-ready-check" type="checkbox" id="selAnType-{{ worksheet.id }}" readonly onclick="this.checked=!this.checked;"> Select an Analysis Type (above)</li>
+                        <li><input class="plot-ready-check" type="checkbox" id="selGenVar-{{ worksheet.id }}" readonly onclick="this.checked=!this.checked;"> Select <a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Genes</a> and/or <a href="{% url 'variable_select_for_existing_workbook' workbook.id worksheet.id %}">Variables</a></li>
+                        <li><input class="plot-ready-check" type="checkbox" id="selCoh-{{ worksheet.id }}" readonly onclick="this.checked=!this.checked;"> Select a <a href="{% url 'cohort_select_for_existing_workbook' workbook.id worksheet.id %}%}">Cohort</a></li>
                     </ul>
                 </div>
             {% endif %}
