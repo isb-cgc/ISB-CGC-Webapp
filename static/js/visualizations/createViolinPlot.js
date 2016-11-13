@@ -212,7 +212,7 @@ function($, d3, d3textwrap, vizhelpers) {
                 .style('fill', 'none')
         },
         createViolinPlot: function(svg, raw_Data, height, violin_width, max_y, min_y, xLabel, yLabel, xAttr, yAttr, colorBy, legend, cohort_set) {
-            var margin = {top: 0, bottom: 100, left: 50, right: 0};
+            var margin = {top: 0, bottom: 100, left: 80, right: 0};
             var domain = [min_y, max_y];
             var range = [height-margin.bottom, 0];
             var view_width = 800;
@@ -351,6 +351,7 @@ function($, d3, d3textwrap, vizhelpers) {
 
             d3.select('.x.axis').selectAll('text').call(d3textwrap.textwrap().bounds({width: violin_width, height: margin.bottom-30}));
             d3.select('.x.axis').selectAll('foreignObject').attr('style','transform: translate(-'+(violin_width/2)+'px,0px);');
+            d3.select('.x.axis').selectAll('foreignObject div').attr('class','centered');
 
             // Highlight the selected circles.
             var brushmove = function(p) {
