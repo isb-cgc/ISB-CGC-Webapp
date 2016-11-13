@@ -49,7 +49,6 @@ require([
     // to properly convey the checked list to IGV
     var selFiles = {
         gcs_bam: {},
-        readgroupset_id: {},
         toTokens: function() {
             var tokens = [];
             for(var i in this.gcs_bam) {
@@ -59,18 +58,10 @@ require([
                     dataType: "gcs_bam"
                 });
             }
-            for(var i in this.readgroupset_id) {
-                tokens.push({
-                    value: i,
-                    label: this.readgroupset_id[i],
-                    dataType: "readgroupset_id"
-                });
-            }
             return tokens;
         },
         count: function() {
-            return (Object.keys(this.gcs_bam).length
-                + Object.keys(this.readgroupset_id).length);
+            return (Object.keys(this.gcs_bam).length);
         }
     };
 
@@ -238,16 +229,7 @@ require([
                     if (files[i]['access'] != 'dbGap controlled-access' || has_access == 'True') {
                         disable = false;
                     }
-                    if (files[i]['gg_readgroupset_id']) {
-                        val = files[i]['gg_readgroupset_id'] + ',' + files[i]['sample'];
-                        dataTypeName = "readgroupset_id";
-                        label = "GA4GH";
-                        checkbox_inputs += '<label><input type="checkbox" token-label="'+tokenLabel+'"name="'+dataTypeName+'" data-type="'+dataTypeName+'" value="'+val+'"';
-                        if (disable) {
-                            checkbox_inputs += ' disabled="disabled"';
-                        }
-                        checkbox_inputs += '> '+label+'</label>';
-                    }
+
                     if (files[i]['cloudstorage_location'] && files[i]['cloudstorage_location'].split('.').pop() == 'bam') {
                         val = files[i]['cloudstorage_location'] + ',' + files[i]['sample'];
                         dataTypeName = "gcs_bam";
@@ -259,7 +241,7 @@ require([
                         checkbox_inputs += '> '+label+'</label>';
                     }
 
-                    files[i]['gg_readgroupset_id'] = checkbox_inputs;
+                    files[i]['igv_viewer'] = checkbox_inputs;
 
                     $('.filelist-panel table tbody').append(
                         '<tr>' +
@@ -268,7 +250,7 @@ require([
                         '<td>' + happy_name(files[i]['platform']) + '</td>' +
                         '<td>' + files[i]['datalevel'] + '</td>' +
                         '<td>' + files[i]['datatype'] + '</td>' +
-                        '<td>' + files[i]['gg_readgroupset_id'] + '</td>' +
+                        '<td>' + files[i]['igv_viewer'] + '</td>' +
                         '</tr>'
                     )
 
