@@ -6,7 +6,7 @@
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title">Study Details</h4>
             </div>
-            <form id="edit-study-{{ study.id }}" method="POST" action="{% url 'study_edit' project.id study.id %}">
+            <form id="edit-study-{{ study.id }}" method="POST" action="{% url 'study_edit' program.id study.id %}">
                 {% csrf_token %}
                 <div class="modal-body">
                     <label for="share-viz-users">Name (required)</label>
@@ -37,7 +37,7 @@
                     Deleting this study will not delete underlying Google BigQuery tables or files in Google Cloud Storage. Those must be removed manually.
                 </div>
             </div>
-            <form id="delete-study-{{ study.id }}" method="POST" action="{% url 'study_delete' project.id study.id %}">
+            <form id="delete-study-{{ study.id }}" method="POST" action="{% url 'study_delete' program.id study.id %}">
                 {% csrf_token %}
                 <div class="modal-footer">
                     <input type="submit" value="Delete" class="btn btn-primary" />

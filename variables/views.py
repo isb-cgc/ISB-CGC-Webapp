@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 from bq_data_access.feature_search.util import SearchableFieldHelper
 from models import VariableFavorite
 from workbooks.models import Workbook, Worksheet, Worksheet_variable
-from projects.models import Project, Study
+from projects.models import Program, Study
 from cohorts.views import count_metadata
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
@@ -67,71 +67,6 @@ def variable_fav_list(request, workbook_id=0, worksheet_id=0, new_workbook=0):
             return initialize_variable_selection_page(request, new_workbook=True)
 
     return render(request, template, context)
-
-
-# tests whether parameter is a string, hash or iterable object
-# then returns base type data
-def convert(data):
-    #if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
-    if isinstance(data, basestring):
-        return str(data)
-    elif isinstance(data, collections.Mapping):
-        return dict(map(convert, data.iteritems()))
-    elif isinstance(data, collections.Iterable):
-        return type(data)(map(convert, data))
-    else:
-        return data
-
-# sorts on availability of a key in the feature def table?
-def data_availability_sort(key, value, data_attr, attr_details):
-    #if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
-
-    if key == 'has_Illumina_DNASeq':
-        attr_details['DNA_sequencing'] = sorted(value, key=lambda k: int(k['count']), reverse=True)
-    if key == 'has_SNP6':
-        attr_details['SNP_CN'] = sorted(value, key=lambda k: int(k['count']), reverse=True)
-    if key == 'has_RPPA':
-        attr_details['Protein'] = sorted(value, key=lambda k: int(k['count']), reverse=True)
-    if key == 'has_27k':
-        attr_details['DNA_methylation'].append({
-            'value': '27k',
-            'count': [v['count'] for v in value if v['value'] == 'True'][0]
-        })
-    if key == 'has_450k':
-        attr_details['DNA_methylation'].append({
-            'value': '450k',
-            'count': [v['count'] for v in value if v['value'] == 'True'][0]
-        })
-    if key == 'has_HiSeq_miRnaSeq':
-        attr_details['miRNA_sequencing'].append({
-            'value': 'Illumina HiSeq',
-            'count': [v['count'] for v in value if v['value'] == 'True'][0]
-        })
-    if key == 'has_GA_miRNASeq':
-        attr_details['miRNA_sequencing'].append({
-            'value': 'Illumina GA',
-            'count': [v['count'] for v in value if v['value'] == 'True'][0]
-        })
-    if key == 'has_UNC_HiSeq_RNASeq':
-        attr_details['RNA_sequencing'].append({
-            'value': 'UNC Illumina HiSeq',
-            'count': [v['count'] for v in value if v['value'] == 'True'][0]
-        })
-    if key == 'has_UNC_GA_RNASeq':
-        attr_details['RNA_sequencing'].append({
-            'value': 'UNC Illumina GA',
-            'count': [v['count'] for v in value if v['value'] == 'True'][0]
-        })
-    if key == 'has_BCGSC_HiSeq_RNASeq':
-        attr_details['RNA_sequencing'].append({
-            'value': 'BCGSC Illumina HiSeq',
-            'count': [v['count'] for v in value if v['value'] == 'True'][0]
-        })
-    if key == 'has_BCGSC_GA_RNASeq':
-        attr_details['RNA_sequencing'].append({
-            'value': 'BCGSC Illumina GA',
-            'count': [v['count'] for v in value if v['value'] == 'True'][0]
-        })
 
 
 @login_required
@@ -230,16 +165,15 @@ def initialize_variable_selection_page(request,
         type['label'] = datatype_labels[type['datatype']]
 
         #remove gene in fields
-        if debug: print >> sys.stderr, ' attrs ' + json.dumps(type['fields'])
         for index, field in enumerate(type['fields']):
             if field['label'] == "Gene":
                 del type['fields'][index]
 
-    #get user projects and variables
-    ownedProjects = request.user.project_set.all().filter(active=True)
-    sharedProjects = Project.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
-    projects = ownedProjects | sharedProjects
-    projects = projects.distinct()
+    #get user programs and variables
+    ownedPrograms = request.user.program_set.all().filter(active=True)
+    sharedPrograms = Program.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
+    programs = ownedPrograms | sharedPrograms
+    programs = programs.distinct()
 
     #get user favorites
     favorite_list = VariableFavorite.get_list(user=request.user)
@@ -273,7 +207,7 @@ def initialize_variable_selection_page(request,
     context = {
         'favorite_list'         : favorite_list,
         'datatype_list'         : datatype_list,
-        'projects'              : projects,
+        'programs'              : programs,
         'data_attr'             : data_attr,
 
         'base_url'                  : settings.BASE_URL,

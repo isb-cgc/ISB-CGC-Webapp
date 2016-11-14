@@ -44,7 +44,7 @@ from google_helpers.directory_service import get_directory_resource
 from googleapiclient.errors import HttpError
 from visualizations.models import SavedViz, Viz_Perms
 from cohorts.models import Cohort, Cohort_Perms
-from projects.models import Project
+from projects.models import Program
 from workbooks.models import Workbook
 from accounts.models import NIH_User
 from models import Analysis

@@ -35,7 +35,7 @@ from google_helpers.directory_service import get_directory_resource
 from googleapiclient.errors import HttpError
 from visualizations.models import SavedViz
 from cohorts.models import Cohort, Cohort_Perms
-from projects.models import Project
+from projects.models import Program
 from workbooks.models import Workbook
 from accounts.models import NIH_User, GoogleProject
 
@@ -159,7 +159,7 @@ def user_detail(request, user_id):
             'last_name':    user.last_name
         }
 
-        user_details['gcp_list'] = len(GoogleProject.objects.filter(user=user))
+        user_details['gcp_list'] = len(Googleprogram.objects.filter(user=user))
 
         try:
             nih_user = NIH_User.objects.get(user_id=user_id, linked=True)
@@ -348,11 +348,11 @@ def dashboard_page(request):
     cohort_perms = list(set(Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True).exclude(cohort__id__in=public_cohorts)))
     cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved')
 
-    # Project List
-    ownedProjects = request.user.project_set.all().filter(active=True)
-    sharedProjects = Project.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
-    projects = ownedProjects | sharedProjects
-    projects = projects.distinct().order_by('-last_date_saved')
+    # Program List
+    ownedPrograms = request.user.program_set.all().filter(active=True)
+    sharedPrograms = Program.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
+    programs = ownedPrograms | sharedPrograms
+    programs = programs.distinct().order_by('-last_date_saved')
 
     # Workbook List
     userWorkbooks = request.user.workbook_set.all().filter(active=True)
@@ -363,6 +363,6 @@ def dashboard_page(request):
     return render(request, 'GenespotRE/dashboard.html', {
         'request'  : request,
         'cohorts'  : cohorts,
-        'projects' : projects,
+        'programs' : programs,
         'workbooks': workbooks,
     })

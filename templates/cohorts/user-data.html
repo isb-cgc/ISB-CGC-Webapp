@@ -2,12 +2,12 @@
     <div id="user-data-filter-panel" class="col-lg-4 filter-panel" role="tabpanel" {% if cohort.id %}style="display:none;"{% endif %}>
         <div class="tabpanel" role="tabpanel">
             <ul class="nav nav-tabs nav-tabs-ud-filters" role="tablist">
-                <li role="presentation" class="active"><a href="#ud-proj-study-filters" role="tab" data-toggle="tab" title="User Data Projects & Studies">Projects & Studies</a></li>
+                <li role="presentation" class="active"><a href="#ud-proj-study-filters" role="tab" data-toggle="tab" title="User Data Programs & Studies">Programs & Studies</a></li>
                 {% if user_data.features %}<li role="presentation" class=""><a href="#ud-feature-filters" role="tab" data-toggle="tab" title="User Data Features">Features</a></li>
                 {% else %}<li role="presentation" class="disabled"><a href="" role="tab" data-toggle="tab" title="">&nbsp;</a></li>{% endif %}
             </ul>
             <div class="tab-content">
-                <!-- user data projects & studies filters tab -->
+                <!-- user data programs & studies filters tab -->
                 <div role="tabpanel" class="tab-pane active" id="ud-proj-study-filters">
                     <ul class="list-group" id="data-type-accordion" role="tablist" aria-multiselectable="true">
                         {% if not user_data or metadata_counts.user_data_total <= 0 %}
@@ -196,7 +196,7 @@
 
         <div class="user-data-trees panel panel-default">
             <div class="panel-heading">
-                <h4 class="panel-title">Projects & Studies</h4>
+                <h4 class="panel-title">Programs & Studies</h4>
             </div>
             <div class="panel-body">
                 <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>

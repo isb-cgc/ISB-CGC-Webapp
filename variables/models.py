@@ -4,7 +4,7 @@ import sys
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Q
-from projects.models import Project, Study, User_Feature_Definitions
+from projects.models import Program, Study, User_Feature_Definitions
 from django.conf import settings
 
 class FavoriteManager(models.Manager):

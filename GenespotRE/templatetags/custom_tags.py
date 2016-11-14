@@ -25,7 +25,7 @@ import textwrap
 from django.template.defaulttags import register
 from cohorts.models import Cohort, Cohort_Perms
 from django.contrib.auth.models import User
-from projects.models import Project
+from projects.models import Program
 from workbooks.models import Workbook
 
 DATA_ATTR_DICTIONARY = {
@@ -367,7 +367,7 @@ def get_cohorts_this_user(this_user, is_active=True):
 @register.filter
 def get_projects_this_user(this_user, is_active=True):
     ownedProjects = this_user.project_set.all().filter(active=True)
-    sharedProjects = Project.objects.filter(shared__matched_user=this_user, shared__active=True, active=is_active)
+    sharedProjects = Program.objects.filter(shared__matched_user=this_user, shared__active=True, active=is_active)
     projects = ownedProjects | sharedProjects
     projects = projects.distinct().order_by('-last_date_saved')
     return projects

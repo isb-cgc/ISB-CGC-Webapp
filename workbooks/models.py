@@ -6,7 +6,7 @@ from django.contrib import admin
 from cohorts.models import Cohort
 from variables.models import Variable
 from genes.models import Gene
-from projects.models import Project, Study, User_Feature_Definitions
+from projects.models import Program, Study, User_Feature_Definitions
 from cohorts.models import Cohort, Cohort_Perms
 from sharing.models import Shared_Resource
 from django.utils import formats
@@ -139,10 +139,10 @@ class Workbook(models.Model):
                         is_shareable = False
                         break
 
-                # Check all variables are from projects owned by the user
+                # Check all variables are from programs owned by the user
                 for variable in worksheet.get_variables():
                     if variable.feature: #feature will be null if the variable is from TCGA
-                        if variable.feature.study.project.owner_id != request.user.id and not variable.feature.study.project.is_public:
+                        if variable.feature.study.program.owner_id != request.user.id and not variable.feature.study.program.is_public:
                             is_shareable = False
                             break
 

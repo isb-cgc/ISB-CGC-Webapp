@@ -144,9 +144,9 @@
                         </ul>
                     </li>
                     {% endif %}
-                    <li class="menu-item"><a href="{% url 'projects' %}">Saved Projects ( {% user_project_count %} )</a></li>
-                    <li class="menu-item"><a href="{% url 'project_upload' %}">Upload Project Data</a></li>
-                    <li class="menu-item"><a href="{% url 'public_projects' %}">Public Projects ( {% public_project_count %} )</a></li>
+                    <li class="menu-item"><a href="{% url 'programs' %}">Saved Programs ( {% user_program_count %} )</a></li>
+                    <li class="menu-item"><a href="{% url 'program_upload' %}">Upload Program Data</a></li>
+                    <li class="menu-item"><a href="{% url 'public_programs' %}">Public Program ( {% public_program_count %} )</a></li>
                 </ul>
             </li>
             {% endif %}

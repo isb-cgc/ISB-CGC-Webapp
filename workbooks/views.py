@@ -13,7 +13,7 @@ from models import Cohort, Workbook, Worksheet, Worksheet_comment, Worksheet_var
 from variables.models import VariableFavorite, Variable
 from genes.models import GeneFavorite
 from analysis.models import Analysis
-from projects.models import Project
+from projects.models import Program
 from sharing.service import create_share
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
@@ -71,15 +71,15 @@ def workbook_create_with_cohort_list(request):
 
 #TODO maybe complete
 @login_required
-def workbook_create_with_project(request):
-    project_id = request.POST.get('project_id')
-    project_model = Project.objects.get(id=project_id)
+def workbook_create_with_program(request):
+    program_id = request.POST.get('program_id')
+    program_model = Program.objects.get(id=program_id)
 
-    workbook_model = Workbook.create(name="Untitled Workbook", description="this is an untitled workbook with all variables of project \"" + project_model.name + "\" added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
+    workbook_model = Workbook.create(name="Untitled Workbook", description="this is an untitled workbook with all variables of program \"" + program_model.name + "\" added to the first worksheet. Click Edit Details to change your workbook title and description.", user=request.user)
     worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
 
     #add every variable within the model
-    for study in project_model.study_set.all().filter(active=True) :
+    for study in program_model.study_set.all().filter(active=True) :
         for var in study.user_feature_definitions_set.all() :
             work_var = Worksheet_variable.objects.create(worksheet_id = worksheet_model.id,
                                               name         = var.feature_name,

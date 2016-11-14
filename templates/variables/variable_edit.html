@@ -88,7 +88,7 @@
                             <li role="presentation"><a href="#clinical"  aria-controls="clinical" role="tab" data-toggle="tab">Clinical</a></li>
                             <li role="presentation"><a href="#mirna"     aria-controls="mRNA" role="tab" data-toggle="tab">miRNA</a></li>
                             {% if USER_DATA_ON %}
-                            <li role="presentation"><a href="#uploaded"  aria-controls="Uploaded" role="tab" data-toggle="tab">Projects</a></li>
+                            <li role="presentation"><a href="#uploaded"  aria-controls="Uploaded" role="tab" data-toggle="tab">Programs</a></li>
                             {% endif %}
 {# TODO                     <li role="presentation"><a href="#search"    aria-controls="search" role="tab" data-toggle="tab">Search</a></li>#}
                         </ul>
@@ -192,18 +192,18 @@
                                 </ul>
                             </div>
                             <div role="tabpanel" class="tab-pane" id="uploaded">
-                                <ul class="list-group" id="project-accordion" role="tablist" aria-multiselectable="true">
-                                    {% if projects %}
-                                        {% for project in projects %}
-                                            {% for study in project.study_set.all|active %}
+                                <ul class="list-group" id="program-accordion" role="tablist" aria-multiselectable="true">
+                                    {% if programs %}
+                                        {% for program in programs %}
+                                            {% for study in program.study_set.all|active %}
                                                 <li class="list-group-item">
                                                     <div id="heading-{{ data_type_name }}" class="list-group-item__heading">
-                                                        <a role="button"  data-toggle="collapse" data-parent="#project-accordion" href="#collapse-{{ project.id }}-{{ study.id }}" aria-expanded="false" aria-controls="collapse-{{ attr }}">
-                                                            <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ project.name }} | {{ study.name }}
+                                                        <a role="button"  data-toggle="collapse" data-parent="#program-accordion" href="#collapse-{{ program.id }}-{{ study.id }}" aria-expanded="false" aria-controls="collapse-{{ attr }}">
+                                                            <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ program.name }} | {{ study.name }}
                                                         </a>
                                                     </div>
 
-                                                    <div id="collapse-{{ project.id }}-{{ study.id }}" class="list-group-item__body collapse" role="tabpanel" aria-labelledby="heading-{{ project.id }}-{{ study.id }}">
+                                                    <div id="collapse-{{ program.id }}-{{ study.id }}" class="list-group-item__body collapse" role="tabpanel" aria-labelledby="heading-{{ program.id }}-{{ study.id }}">
                                                         <ul class="search-checkbox-list" id="{{ data_type_name }}">
                                                             {% with study.user_feature_definitions_set.all|how_many_more:6 as num_more %}
                                                                 {% for variable in study.user_feature_definitions_set.all %} {#|get_item:attr %}#}
@@ -238,7 +238,7 @@
                                             {% endfor %}
                                         {% endfor %}
                                     {% else %}
-                                        <div class="space-top-15"><center>No projects available</center></div>
+                                        <div class="space-top-15"><center>No programs available</center></div>
                                     {% endif %}
                                 </ul>
                             </div>

@@ -1,20 +1,20 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% load custom_tags %}
-{% block title %}Projects | ISB-CGC{% endblock %}}
+{% block title %}Programs | ISB-CGC{% endblock %}}
 {% block extra_css_libs %}{% endblock %}
 {% block header %}{% endblock %}
 
-{% block link_page_name %}project_list{% endblock %}
-{% block page_name %}project_list{% endblock %}
+{% block link_page_name %}program_list{% endblock %}
+{% block page_name %}program_list{% endblock %}
 
 {% block page_header %}
 <div class="container">
     <ol class="breadcrumb">
         <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
     </ol>
-    <h1 class="page-header pull-left">Projects</h1>
-    <a href="{% url 'project_upload' %}" class="btn btn-primary pull-right"><i class="fa fa-cloud-upload"></i>Upload Data</a>
+    <h1 class="page-header pull-left">Programs</h1>
+    <a href="{% url 'program_upload' %}" class="btn btn-primary pull-right"><i class="fa fa-cloud-upload"></i>Upload Data</a>
 </div>
 {% endblock %}
 {% block content %}
@@ -22,15 +22,15 @@
     <div class="panel">
          <ul class="nav nav-tabs" role="tablist">
             <li role="presentation" {% if not is_public %} class="active" {% endif %} >
-                <a href="#save-projects-list" aria-controls="save-projects-list" role="tab" data-toggle="tab">Saved Projects</a>
+                <a href="#save-programs-list" aria-controls="save-programs-list" role="tab" data-toggle="tab">Saved Programs</a>
             </li>
             <li role="presentation" {% if is_public %} class="active" {% endif %} >
-                <a href="#public-projects-list" aria-controls="public-projects-list" role="tab" data-toggle="tab">Public Projects</a>
+                <a href="#public-programs-list" aria-controls="public-programs-list" role="tab" data-toggle="tab">Public Programs</a>
             </li>
         </ul>
         <div class="tab-content">
-            <div role="tabpanel" class="tab-pane {% if not is_public %} active {% endif %}" id="save-projects-list">
-                {% if projects %}
+            <div role="tabpanel" class="tab-pane {% if not is_public %} active {% endif %}" id="save-programs-list">
+                {% if programs %}
 
                 <table class="table tablesorter">
                     <thead>
@@ -42,40 +42,40 @@
                         <th>Last Updated</th>
                     </thead>
                     <tbody>
-                        {% for project in projects %}
-                        <tr class="row-{% if forloop.counter|divisibleby:2 %}even{% else %}odd{% endif %}" data-project-id="{{ project.id }}">
+                        {% for program in programs %}
+                        <tr class="row-{% if forloop.counter|divisibleby:2 %}even{% else %}odd{% endif %}" data-program-id="{{ program.id }}">
                             <td class="control-col">
                                 <div class="dropdown">
                                     <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" class="dropdown-arrow"><i class="fa fa-caret-down"></i></a>
                                     <ul class="dropdown-menu">
-                                        <li><a href="{% url 'project_detail' project.id %}">Edit</a> </li>
-                                        <li><a role="button" data-toggle="modal" data-target="#delete-project-modal-{{ project.id }}">Delete</a></li>
+                                        <li><a href="{% url 'program_detail' program.id %}">Edit</a> </li>
+                                        <li><a role="button" data-toggle="modal" data-target="#delete-program-modal-{{ program.id }}">Delete</a></li>
 {#                                        <li>#}
 {#                                            <a>#}
-{#                                                <form action="{% url 'worksheet_create_with_projects' %}" method="POST">#}
+{#                                                <form action="{% url 'worksheet_create_with_programs' %}" method="POST">#}
 {#                                                    {% csrf_token %}#}
-{#                                                    <input type="hidden" name="project_id" value="{{ project.id }}">#}
+{#                                                    <input type="hidden" name="program_id" value="{{ program.id }}">#}
 {#                                                    <button type="submit">New Workbook</button>#}
 {#                                                </form>#}
 {#                                            </a>#}
-{#                                            <a href="{% url 'create_with_project' project.id %}">New Workbook</a>#}
+{#                                            <a href="{% url 'create_with_program' program.id %}">New Workbook</a>#}
 {#                                        </li>#}
                                     </ul>
                                     <span class="row-expand-button"></span>
                                 </div>
                             </td>
-                            <td class="name-col"><a href="{% url 'project_detail' project.id %}">{{ project.name }}</a></td>
-                            <td>{{ project.study_set.all|active|length }}</td>
-                            <td>{% if project.owner.id == user.id %}
+                            <td class="name-col"><a href="{% url 'program_detail' program.id %}">{{ program.name }}</a></td>
+                            <td>{{ program.study_set.all|active|length }}</td>
+                            <td>{% if program.owner.id == user.id %}
                                 You
                             {% else %}
-                                {{ project.owner.first_name }} {{ project.owner.last_name }}
+                                {{ program.owner.first_name }} {{ program.owner.last_name }}
                             {% endif %}</td>
-                            <td>({{ project.shared.count }})</td>
-                            <td>{{ project.last_date_saved|date:'M d, Y, g:i a' }}</td>
-                        {% for study in project.study_set.all|active %}
+                            <td>({{ program.shared.count }})</td>
+                            <td>{{ program.last_date_saved|date:'M d, Y, g:i a' }}</td>
+                        {% for study in program.study_set.all|active %}
                         </tr>
-                        <tr class="study hidden" data-project-id="{{ project.id }}">
+                        <tr class="study hidden" data-program-id="{{ program.id }}">
                             <td class="control-col">
                             </td>
                             <td class="name-col">{{ study.name }}</td>
@@ -86,15 +86,15 @@
                         {% endfor %}
                         </tr>
 
-                        <!-- Delete Project Modal For Each Project-->
-                        <div class="modal fade" id="delete-project-modal-{{ project.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-project-header" aria-hidden="true">
+                        <!-- Delete Program Modal For Each Program-->
+                        <div class="modal fade" id="delete-program-modal-{{ program.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-program-header" aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
                                     <div class="modal-header">
                                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                        <h4 class="modal-title">Delete this Project?</h4>
+                                        <h4 class="modal-title">Delete this Program?</h4>
                                     </div>
-                                    <form id="delete-project" method="POST" action="{% url 'project_delete' project.id %}" data-redirect="{% url 'projects' %}">
+                                    <form id="delete-program" method="POST" action="{% url 'program_delete' program.id %}" data-redirect="{% url 'programs' %}">
                                         {% csrf_token %}
                                         <div class="modal-footer">
                                             <input type="submit" value="Delete" class="btn btn-primary" />
@@ -108,12 +108,12 @@
                     </tbody>
                 </table>
                 {% else %}
-                <p class="center space-top-10">You don't have any saved projects yet</p>
-                <p class="center"><a href="{% url 'project_upload' %}" class="btn btn-primary"><i class="fa fa-cloud-upload"></i>Upload Project Data</a></p>
+                <p class="center space-top-10">You don't have any saved programs yet</p>
+                <p class="center"><a href="{% url 'program_upload' %}" class="btn btn-primary"><i class="fa fa-cloud-upload"></i>Upload Program Data</a></p>
                 {% endif %}
             </div>
-            <div role="tabpanel" class="tab-pane {% if is_public %} active {% endif %}" id="public-projects-list">
-                {% if public_projects %}
+            <div role="tabpanel" class="tab-pane {% if is_public %} active {% endif %}" id="public-programs-list">
+                {% if public_programs %}
 
                 <table class="table tablesorter">
                     <thead>
@@ -124,18 +124,18 @@
                         <th>Last Updated</th>
                     </thead>
                     <tbody>
-                        {% for project in public_projects %}
-                        <tr class="row-{% if forloop.counter|divisibleby:2 %}even{% else %}odd{% endif %}" data-project-id="{{ project.id }}">
+                        {% for program in public_programs %}
+                        <tr class="row-{% if forloop.counter|divisibleby:2 %}even{% else %}odd{% endif %}" data-program-id="{{ program.id }}">
                             <td class="control-col">
                                 <span class="row-expand-button"></span>
                             </td>
-                            <td class="name-col"><a href="{% url 'project_detail' project.id %}">{{ project.name }}</a></td>
-                            <td>{{ project.study_set.count }}</td>
+                            <td class="name-col"><a href="{% url 'program_detail' program.id %}">{{ program.name }}</a></td>
+                            <td>{{ program.study_set.count }}</td>
                             <td>ISB</td>
-                            <td>{{ project.last_date_saved|date:'M d, Y, g:i a' }}</td>
-                        {% for study in project.study_set.all %}
+                            <td>{{ program.last_date_saved|date:'M d, Y, g:i a' }}</td>
+                        {% for study in program.study_set.all %}
                         </tr>
-                        <tr class="study hidden" data-project-id="{{ project.id }}">
+                        <tr class="study hidden" data-program-id="{{ program.id }}">
                             <td class="control-col">
                             </td>
                             <td class="name-col">
@@ -150,7 +150,7 @@
                     </tbody>
                 </table>
                 {% else %}
-                <p class="center space-top-10">There are no public projects available at the moment</p>
+                <p class="center space-top-10">There are no public programs available at the moment</p>
                 {% endif %}
             </div>
         </div>
@@ -160,4 +160,4 @@
 </div>
 {% endblock %}
 
-{% block js_file %}{% static 'js/project_list.js' %}{% endblock %}
+{% block js_file %}{% static 'js/program_list.js' %}{% endblock %}

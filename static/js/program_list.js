@@ -33,7 +33,7 @@ require([
             studies = $this.closest('table').find('.study');
 
         $this.toggleClass('is-expanded');
-        studies.filter('[data-project-id="' + $this.closest('tr').data('project-id') + '"]')
+        studies.filter('[data-program-id="' + $this.closest('tr').data('program-id') + '"]')
             .fadeToggle(300);
 
     })
