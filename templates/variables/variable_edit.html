@@ -97,7 +97,7 @@
                         <div class="tab-content">
                             <div role="tabpanel" class="tab-pane active filter-panel" id="common">
                                 <ul class="list-group" id="common-accordion" role="tablist" aria-multiselectable="true">
-                                    {% for attr in common_project.variables %}
+                                    {% for attr in common_program.variables %}
                                         <li class="list-group-item checkbox">
                                             <div id="heading-{{ attr.name }}" class="list-group-item__heading">
                                                 <label>
@@ -183,7 +183,7 @@
                                                 </div>
                                                 <div class="search-term feature-search space-top-15">
                                                     <label for="{{ type.datatype }}-search-term-select">Select Feature</label>
-                                                    <select id="{{ type.datatype }}-search-term-select" project="{{ TCGA_project.id }}" project_name="{{ TCGA_project.name }}" study="{{ TCGA_project.study.id }}" study_name="{{ TCGA_project.study.name}}" class="search-term-field form-control"></select>
+                                                    <select id="{{ type.datatype }}-search-term-select" program="{{ TCGA_program.id }}" program_name="{{ TCGA_program.name }}" study="{{ TCGA_program.study.id }}" study_name="{{ TCGA_program.study.name}}" class="search-term-field form-control"></select>
                                                 </div>
                                             </div>
                                         {% endif %}

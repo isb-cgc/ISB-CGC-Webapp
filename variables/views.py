@@ -198,8 +198,8 @@ def initialize_variable_selection_page(request,
         {'name' : "icd-o-3_histology",                     'code' : 'CLIN:icd_o_3_histology',                           'type' : 'C'}
     ]
     common_variables = displayed_common_variables
-    TCGA_project    = {"id" : -1, "study" : {"id" :-1, "name" : ""}, "name" : "TCGA"}
-    common_project  = {"id" : -1, "study" : {"id" :-1, "name" : ""}, "name" : "Common", "variables" : common_variables}
+    TCGA_program    = {"id" : -1, "study" : {"id" :-1, "name" : ""}, "name" : "TCGA"}
+    common_program  = {"id" : -1, "study" : {"id" :-1, "name" : ""}, "name" : "Common", "variables" : common_variables}
 
     # users can select from their saved variable favorites
     variable_favorites = VariableFavorite.get_list(request.user)
@@ -212,8 +212,8 @@ def initialize_variable_selection_page(request,
 
         'base_url'                  : settings.BASE_URL,
         'base_api_url'              : settings.BASE_API_URL,
-        'TCGA_project'              : TCGA_project,
-        'common_project'            : common_project,
+        'TCGA_program'              : TCGA_program,
+        'common_program'            : common_program,
         'variable_favorites'        : variable_favorites,
         'workbook'                  : workbook_model,
         'worksheet'                 : worksheet_model,

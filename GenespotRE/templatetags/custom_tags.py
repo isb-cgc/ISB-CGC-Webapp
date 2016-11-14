@@ -154,7 +154,7 @@ TRANSLATION_DICTIONARY = {
     'icd_o_3_site': 'ICD-O-3 Site',
     'SampleTypeCode': 'Sample Type',
     'Project': 'Public Projects',
-    'Study': 'Public Studies',
+    'Study': 'Studies',
     'user_projects': 'Your Projects',
     'user_studys': 'Your Studies',
     'SNP_CN': 'SNP Copy Number',
