@@ -77,6 +77,12 @@ require([
 
     var savingComment = false;
 
+    var plotReady = {
+        axis: false,
+        cohort: false,
+        type: false
+    };
+
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function () {
         var forms = $(this).find('form');
@@ -789,6 +795,7 @@ require([
             }
         });
         $('#selCoh-' + $('.worksheet.active').attr('id')).prop('checked', cohSel);
+        plotReady.cohort = cohSel;
         check_for_plot_rdy();
     };
 
@@ -801,6 +808,7 @@ require([
                 }
             }
         });
+        plotReady.axis = axisRdy;
         $('#selGenVar-'+ $('.worksheet.active').attr('id')).prop('checked',axisRdy);
         check_for_plot_rdy();
     };
@@ -1148,6 +1156,7 @@ require([
 
     // Prep the instructions based on current settings
     $('#selAnType-'+$('.worksheet.active').attr('id')).prop('checked',!!$('.plot_selection :selected').val());
+    plotReady.type = !!$('.plot_selection :selected').val();
     cohort_selex_update();
     axis_selex_update();
     check_for_plot_rdy();
