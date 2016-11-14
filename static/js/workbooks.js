@@ -66,6 +66,7 @@ require([
     'jquery',
     'plot_factory',
     'vizhelpers',
+    'underscore',
     'session_security',
     'jqueryui',
     'bootstrap',
@@ -73,7 +74,7 @@ require([
     'd3tip',
     'select2',
     'base'
-], function ($, plot_factory, vizhelpers) {
+], function ($, plot_factory, vizhelpers, _) {
 
     var savingComment = false;
 
@@ -779,7 +780,7 @@ require([
         }
         var plot_type = $(this).val();
         var flyout = $(this).closest('.worksheet-body').find('.settings-flyout');
-        $('#selAnType-'+$('.worksheet.active').attr('id')).prop('checked',true);
+        plot_type_selex_update();
         hide_show_widgets(plot_type, flyout);
         get_plot_info(this, function(success){
             disable_invalid_variable_options($(self).parentsUntil(".worksheet-body").find('.update-plot').parent());
@@ -813,11 +814,17 @@ require([
         check_for_plot_rdy();
     };
 
+    var plot_type_selex_update = function(e) {
+        $('#selAnType-'+$('.worksheet.active').attr('id')).prop('checked',!!$('.plot_selection :selected').val());
+        plotReady.type = !!$('.plot_selection :selected').val();
+        check_for_plot_rdy();
+    };
+
     var check_for_plot_rdy = function(e){
         var plot_rdy = true;
 
-        $('.plot-ready-check').each(function(){
-            if(!$(this).is(':checked')) {
+        _.each(Object.keys(plotReady),function(key){
+            if(!plotReady[key]) {
                 plot_rdy = false;
             }
         });
@@ -920,9 +927,7 @@ require([
         return true;
     };
 
-    /*
-     * generates the actual svg plots by accepting the plot settings configured in the settings area
-     */
+    // Generates the actual svg plots by accepting the plot settings configured in the settings area
     function generate_plot(args){
         var cohort_ids = [];
         //create list of actual cohort models
@@ -1003,6 +1008,12 @@ require([
                 });
             }
         }
+
+        // Prep the instructions and plot-readiness var based on current settings
+        plot_type_selex_update();
+        cohort_selex_update();
+        axis_selex_update();
+
         callback(true);
     }
 
@@ -1153,13 +1164,5 @@ require([
     $('.comment-textarea').keyup(function() {
         $(this).siblings('.save-comment-btn').prop('disabled', this.value == '' ? true : false)
     });
-
-    // Prep the instructions based on current settings
-    $('#selAnType-'+$('.worksheet.active').attr('id')).prop('checked',!!$('.plot_selection :selected').val());
-    plotReady.type = !!$('.plot_selection :selected').val();
-    cohort_selex_update();
-    axis_selex_update();
-    check_for_plot_rdy();
-
 });
 
