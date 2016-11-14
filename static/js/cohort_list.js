@@ -54,11 +54,11 @@ require([
     });
 
     var delete_x_callback = function () {
-        var parent_form = $(this).parents('#delete-cohort-form');
+        var parent_form = $(this).parents('form');
         $('input[type="checkbox"][value="' + $(this).parent().attr('value') + '"]').prop('checked', false);
         $(this).parent('.cohort-label').remove();
         if (parent_form && !parent_form.find('.label').length) {
-            parent_form.find('input[type="submit"]').prop('disabled', 'disabled')
+            parent_form.find('[type="submit"]').prop('disabled', 'disabled')
         }
         return false;
     };

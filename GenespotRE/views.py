@@ -318,10 +318,10 @@ def igv(request, sample_barcode=None, readgroupset_id=None):
 
     checked_list = json.loads(request.POST.__getitem__('checked_list'))
 
-    for item in checked_list['readgroupset_id']:
-       id_barcode = item.split(',')
-       readgroupset_list.append({'sample_barcode': id_barcode[1],
-                                 'readgroupset_id': id_barcode[0]})
+    # for item in checked_list['readgroupset_id']:
+    #    id_barcode = item.split(',')
+    #    readgroupset_list.append({'sample_barcode': id_barcode[1],
+    #                              'readgroupset_id': id_barcode[0]})
 
     for item in checked_list['gcs_bam']:
         id_barcode = item.split(',')
