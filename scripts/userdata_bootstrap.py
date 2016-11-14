@@ -170,9 +170,9 @@ def bootstrap_metadata_attr_mapping():
 
 def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_name, bucket_permissions, bqdataset_name):
     fetch_studies = "SELECT DISTINCT Study FROM metadata_samples WHERE Project='TCGA';"
-    insert_projects = "INSERT INTO projects_project (name, active, last_date_saved, is_public, owner_id) " + \
+    insert_projects = "INSERT INTO projects_program (name, active, last_date_saved, is_public, owner_id) " + \
                       "VALUES (%s,%s,%s,%s,%s);"
-    insert_studies = "INSERT INTO projects_study (name, active, last_date_saved, owner_id, project_id) " + \
+    insert_studies = "INSERT INTO projects_study (name, active, last_date_saved, owner_id, program_id) " + \
                      "VALUES (%s,%s,%s,%s,%s);"
     insert_googleproj = "INSERT INTO accounts_googleproject (project_id, project_name, big_query_dataset) " + \
                         "VALUES (%s,%s,%s);"
@@ -228,7 +228,7 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
         cursor.execute(insert_bucket, (bucket_name, bucket_permissions, googleproj_id,))
         db.commit()
 
-        cursorDict.execute("SELECT name, id FROM projects_project;")
+        cursorDict.execute("SELECT name, id FROM projects_program;")
         for row in cursorDict.fetchall():
             project_info[row['name']] = row['id']
 
@@ -292,7 +292,7 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
             if study_udt_count <= 0:
                 print >> sys.stdout, "[ERROR] No studies found! Double-check the creation script and databse settings."
             else:
-                print >> sys.stdout, "[STATUS] Projects and studies appear to have been created successfully: " + \
+                print >> sys.stdout, "[STATUS] Programs and studies appear to have been created successfully: " + \
                       study_count.__str__()+" studies added."
         else:
             print >> sys.stdout, "[WARNING] Unequal number of studies between metadata_samples, projects_study, and " + \

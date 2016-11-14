@@ -56,7 +56,7 @@ urlpatterns = [
     url(r'^about/', views.about_page, name='about_page'),
     url(r'^dashboard/', views.dashboard_page, name='dashboard'),
 
-    url(r'^projects/', include('projects.urls')),
+    url(r'^programs/', include('projects.urls')),
     url(r'^genes/', include('genes.urls')),
     url(r'^variables/', include('variables.urls')),
     url(r'^share/', include('sharing.urls')),

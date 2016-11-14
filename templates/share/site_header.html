@@ -1,7 +1,7 @@
 {% load staticfiles %}
 {% load cohort_filters %}
 {% load custom_tags %}
-{% load project_custom_tags %}
+{% load program_custom_tags %}
 {% load workbook_custom_tags %}
 
 <header class="navbar navbar-fixed-top site-header" role="menubar">
@@ -111,29 +111,29 @@
             </li>
             {% if USER_DATA_ON %}
             <li class="menu-item has-drop-down">
-                <a>PROJECTS <i class="fa fa-caret-down"></i></a>
+                <a>PROGRAMS <i class="fa fa-caret-down"></i></a>
                 <ul class="sub-menu drop">
-                    {% if user|get_projects_this_user|length > 0 %}
+                    {% if user|get_programs_this_user|length > 0 %}
                     <li class="menu-item">
                         <strong>Start New Workbook With ...</strong>
                         <ul class="item-list">
-                            {% for plv in user|get_projects_this_user|slice:':5' %}
+                            {% for plv in user|get_programs_this_user|slice:':5' %}
                             <li class="menu-item">
-                                <form action="{% url 'worksheet_create_with_projects' %}" method="POST">
+                                <form action="{% url 'worksheet_create_with_programs' %}" method="POST">
                                     {% csrf_token %}
-                                    <input type="hidden" name="project_id" value="{{ plv.id }}">
+                                    <input type="hidden" name="program_id" value="{{ plv.id }}">
                                     <button type="submit" title="{{ plv.name|wrap_text }}">{{ plv.name }}</button>
                                 </form>
                             </li>
                             {% endfor %}
-                            {% if user|get_projects_this_user|length > 5 %}
+                            {% if user|get_programs_this_user|length > 5 %}
                             <li class="menu-item has-drop-down__more"> More
                                 <ul class="drop">
-                                    {% for plv in user|get_projects_this_user|slice:'5:' %}
+                                    {% for plv in user|get_programs_this_user|slice:'5:' %}
                                     <li class="menu-item">
-                                        <form action="{% url 'worksheet_create_with_projects' %}">
+                                        <form action="{% url 'worksheet_create_with_programs' %}">
                                             {% csrf_token %}
-                                            <input type="hidden" name="project_id" value="{{ plv.id }}">
+                                            <input type="hidden" name="program_id" value="{{ plv.id }}">
                                             <button type="submit" title="{{ plv.name|wrap_text }}">{{ plv.name }}</button>
                                         </form>
                                     </li>

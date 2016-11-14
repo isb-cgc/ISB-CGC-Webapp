@@ -365,12 +365,12 @@ def get_cohorts_this_user(this_user, is_active=True):
 
 
 @register.filter
-def get_projects_this_user(this_user, is_active=True):
-    ownedProjects = this_user.project_set.all().filter(active=True)
-    sharedProjects = Program.objects.filter(shared__matched_user=this_user, shared__active=True, active=is_active)
-    projects = ownedProjects | sharedProjects
-    projects = projects.distinct().order_by('-last_date_saved')
-    return projects
+def get_programs_this_user(this_user, is_active=True):
+    ownedPrograms = this_user.program_set.all().filter(active=True)
+    sharedPrograms = Program.objects.filter(shared__matched_user=this_user, shared__active=True, active=is_active)
+    programs = ownedPrograms | sharedPrograms
+    programs = program.distinct().order_by('-last_date_saved')
+    return programs
 
 
 @register.filter
