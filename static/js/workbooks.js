@@ -831,6 +831,12 @@ require([
 
         $('.update-plot.btn').attr('disabled',!plot_rdy);
         $('.resubmit-button.btn').attr('disabled',!plot_rdy);
+
+        if($('.worksheet-instruction').length <= 0 && !plot_rdy) {
+            $('#missing-plot-reqs-alert').show();
+        } else {
+            $('#missing-plot-reqs-alert').hide();
+        }
     };
 
     $('.cohort-selex').on('change',function(e){

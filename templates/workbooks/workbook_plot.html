@@ -27,6 +27,11 @@
             <a role="button" class="show-settings-flyout" data-target=".setting-flyout" aria-label="Show Plot Settings"><i class="fa fa-tasks"></i></a>
             {% endif %}
         </div>
+        <div id="missing-plot-reqs-alert" class="alert alert-warning alert-dismissable" style="display: none;">
+            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            Some of the settings required to produce a plot are missing. You can check the current plot settings using the <b>Edit Analysis Settings</b> link.
+            Ensure that an Analysis Type and any relevant axis variables have been selected, and that at least one Cohort is chosen.
+        </div>
     </div>
     <div class="worksheet-panel-body panel-body">
         <div class="worksheet-plot-loader plot-loader" style="display:none;">
