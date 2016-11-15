@@ -27,7 +27,7 @@
                 <a aria-controls="program-upload" role="tab" data-toggle="tab" data-target="#program-info" data-value="new">A New Program</a>
             </li>
             <li {% if existing_proj %}class="active"{% endif %} role="presentation">
-                <a class="{% if user.program_set.count == 0 %}disabled{% endif %}" aria-controls="program-upload" role="tab" data-value="existing" {% if user.program_set.count > 0 %}data-toggle="tab"{% endif %} data-target="#study-info">A New Study for an Existing Program</a>
+                <a class="{% if user.program_set.count == 0 %}disabled{% endif %}" aria-controls="program-upload" role="tab" data-value="existing" {% if user.program_set.count > 0 %}data-toggle="tab"{% endif %} data-target="#project-info">A New Project for an Existing Program</a>
             </li>
         </ul>
         <div class="panel-heading"></div>
@@ -46,7 +46,7 @@
                     </div>
                 </section>
                 <section>
-                    <div class="form-group collapse {% if existing_proj %}in{% endif %}" id="study-info">
+                    <div class="form-group collapse {% if existing_proj %}in{% endif %}" id="project-info">
                         <select class="form-control" required id="program-selection">
                             <option value="" disabled hidden {% if not existing_proj and not program_id %} selected {% endif %}>-- Select Program --</option>
                             {% for program in programs %}
@@ -57,12 +57,12 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="study-name">Study Name</label>
-                        <input class="form-control" type="text" name="study-name" id="study-name" required>
+                        <label for="project-name">Project Name</label>
+                        <input class="form-control" type="text" name="project-name" id="project-name" required>
                     </div>
                     <div class="form-group">
-                        <label for="study-description">Study Description (Optional)</label>
-                        <textarea class="form-control" name="study-description" id="study-description" cols="30" rows="5" maxlength="2048"></textarea>
+                        <label for="project-description">Project Description (Optional)</label>
+                        <textarea class="form-control" name="project-description" id="project-description" cols="30" rows="5" maxlength="2048"></textarea>
                     </div>
                 </section>
                 <section id="data-upload-group">
@@ -75,16 +75,16 @@
                             </label>
                             <div class="checkbox sub-checkbox">
                                 <label>
-                                    <input type="checkbox" name="extend" id="high-level-extend"> Extends an existing program's study data
+                                    <input type="checkbox" name="extend" id="high-level-extend"> Extends an existing program's project data
                                 </label>
-                                <select class="form-control inline-block input-sm" id="high-level-extend-study" disabled>
-                                    <option value="" disabled selected hidden>-- Select a Program/Study --</option>
+                                <select class="form-control inline-block input-sm" id="high-level-extend-project" disabled>
+                                    <option value="" disabled selected hidden>-- Select a Program/Project --</option>
 {#                                    <option>All TCGA Data</option>#}
                                     {% for program in programs %}
                                     <optgroup label="{{ program.name }}">
-                                    {% for study in program.study_set.all %}
-                                        {% if study.active %}
-                                        <option value="{{ study.id }}">{{ study.name }}</option>
+                                    {% for project in program.study_set.all %}
+                                        {% if project.active %}
+                                        <option value="{{ project.id }}">{{ project.name }}</option>
                                         {% endif %}
                                     {% endfor %}
                                     </optgroup>
