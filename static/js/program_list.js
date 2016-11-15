@@ -27,10 +27,10 @@ require([
 ], function($, jqueryui, bootstrap, session_security, _) {
     'use strict';
 
-    $('.study').css('display', 'none').removeClass('hidden');
+    $('.project').css('display', 'none').removeClass('hidden');
     $('.row-expand-button').on('click', function (e) {
         var $this = $(this),
-            studies = $this.closest('table').find('.study');
+            studies = $this.closest('table').find('.project');
 
         $this.toggleClass('is-expanded');
         studies.filter('[data-program-id="' + $this.closest('tr').data('program-id') + '"]')
@@ -68,7 +68,7 @@ require([
             $this.find('.error-messages').append(
                 $('<p>')
                     .addClass('alert alert-danger')
-                    .text('There was an error deleting that study. Please reload and try again, or try again later.')
+                    .text('There was an error deleting that project. Please reload and try again, or try again later.')
             );
         })
         .always(function () {

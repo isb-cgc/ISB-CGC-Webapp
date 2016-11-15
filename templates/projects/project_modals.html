@@ -1,19 +1,19 @@
 <!-- Edit Details Modal -->
-<div class="modal fade" id="edit-study-details-modal-{{ study.id }}" tabindex="-1" role="dialog" aria-labelledby="edit-study-header" aria-hidden="true">
+<div class="modal fade" id="edit-project-details-modal-{{ project.id }}" tabindex="-1" role="dialog" aria-labelledby="edit-project-header" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Study Details</h4>
+                <h4 class="modal-title">Project Details</h4>
             </div>
-            <form id="edit-study-{{ study.id }}" method="POST" action="{% url 'study_edit' program.id study.id %}">
+            <form id="edit-project-{{ project.id }}" method="POST" action="{% url 'project_edit' program.id project.id %}">
                 {% csrf_token %}
                 <div class="modal-body">
                     <label for="share-viz-users">Name (required)</label>
-                    <input class="form-control" type="text" name="name" value="{{ study.name }}" required/>
+                    <input class="form-control" type="text" name="name" value="{{ project.name }}" required/>
                     <br>
                     <label for="share-viz-users">Description (optional)</label>
-                    <textarea class="form-control" name="description">{{study.description }}</textarea>
+                    <textarea class="form-control" name="description">{{project.description }}</textarea>
                 </div>
                 <div class="modal-footer">
                     <input type="submit" value="Update" class="btn btn-primary" />
@@ -24,20 +24,20 @@
     </div>
 </div>
 
-<!-- Delete Study Modal -->
-<div class="modal fade" id="delete-study-modal-{{ study.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-study-header" aria-hidden="true">
+<!-- Delete Project Modal -->
+<div class="modal fade" id="delete-project-modal-{{ project.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-project-header" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Delete this Study?</h4>
+                <h4 class="modal-title">Delete this Project?</h4>
             </div>
             <div class="modal-body">
                 <div class="alert alert-warning alert-dismissable">
-                    Deleting this study will not delete underlying Google BigQuery tables or files in Google Cloud Storage. Those must be removed manually.
+                    Deleting this project will not delete underlying Google BigQuery tables or files in Google Cloud Storage. Those must be removed manually.
                 </div>
             </div>
-            <form id="delete-study-{{ study.id }}" method="POST" action="{% url 'study_delete' program.id study.id %}">
+            <form id="delete-project-{{ project.id }}" method="POST" action="{% url 'project_delete' program.id project.id %}">
                 {% csrf_token %}
                 <div class="modal-footer">
                     <input type="submit" value="Delete" class="btn btn-primary" />

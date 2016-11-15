@@ -309,15 +309,15 @@ require([
      * Event Listeners
      */
 
-    // using tabs to toggle project information section
-    $('a[data-target="#project-info"]').on('show.bs.tab', function(e){
+    // using tabs to toggle program information section
+    $('a[data-target="#program-info"]').on('show.bs.tab', function(e){
         if($(this).hasClass('disabled')) {
             e.preventDefault();
             return false;
         }
         var target = $(this).data('target');
 
-        $('#project-tab').val('new');
+        $('#program-tab').val('new');
         $(target).collapse('show');
         $('#study-info').collapse('hide');
     }).on('hide.bs.tab', function(e){
@@ -325,7 +325,7 @@ require([
 
         $(target).collapse('hide');
         $('#study-info').collapse('show');
-        $('#project-tab').val('existing');
+        $('#program-tab').val('existing');
     });
 
     /**
@@ -406,7 +406,7 @@ require([
         clearErrors();
         // Validate form fields selected
         var hasErrors = false,
-            tabSet = $('#project-tab').val();
+            tabSet = $('#program-tab').val();
 
         var fileDataTypes = {};
         _.each(addedFiles, function (addedFile) {
@@ -419,11 +419,11 @@ require([
             fileDataTypes[type]++;
         });
 
-        if( (tabSet == 'new' && !$.trim( $('#project-name').val() )) ||
-            (tabSet == 'existing' && !$.trim( $('#project-selection').val() )) ) {
+        if( (tabSet == 'new' && !$.trim( $('#program-name').val() )) ||
+            (tabSet == 'existing' && !$.trim( $('#program-selection').val() )) ) {
 
             hasErrors = true;
-            errorMessage('Please select an existing project or insert a name for a new project');
+            errorMessage('Please select an existing program or insert a name for a new program');
         }
 
         if( !$.trim($('#study-name').val()) ) {
@@ -588,14 +588,14 @@ require([
             .siblings('.progress-message').removeClass('hidden');
 
         var form = new FormData(),
-            tabSet = $('#project-tab').val();
+            tabSet = $('#program-tab').val();
 
-        form.append('project-type', tabSet);
+        form.append('program-type', tabSet);
         if(tabSet == 'new') {
-            form.append('project-name', $.trim( $('#project-name').val()));
-            form.append('project-description', $.trim( $('#project-description').val()));
+            form.append('program-name', $.trim( $('#program-name').val()));
+            form.append('program-description', $.trim( $('#program-description').val()));
         } else {
-            form.append('project-id', $('#project-selection').val());
+            form.append('program-id', $('#program-selection').val());
         }
 
         form.append('study-name', $('#study-name').val());

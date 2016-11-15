@@ -57,7 +57,7 @@ require([
             $this.find('.error-messages').append(
                 $('<p>')
                     .addClass('alert alert-danger')
-                    .text('There was an error deleting that study. Please reload and try again, or try again later.')
+                    .text('There was an error deleting that project. Please reload and try again, or try again later.')
             );
         })
         .always(function () {

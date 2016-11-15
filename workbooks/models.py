@@ -1,19 +1,13 @@
-import operator
-
-from django.db import models
-from django.contrib.auth.models import User
-from django.contrib import admin
-from cohorts.models import Cohort
-from variables.models import Variable
-from genes.models import Gene
-from projects.models import Program, Study, User_Feature_Definitions
-from cohorts.models import Cohort, Cohort_Perms
-from sharing.models import Shared_Resource
-from django.utils import formats
-from django.core import serializers
-import sys
-import json
 import ast
+
+from cohorts.models import Cohort
+from django.contrib import admin
+from django.contrib.auth.models import User
+from django.db import models
+from django.utils import formats
+from projects.models import User_Feature_Definitions
+from sharing.models import Shared_Resource
+
 
 # Create your models here.
 class WorkbookManager(models.Manager):

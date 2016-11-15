@@ -172,7 +172,7 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
     fetch_studies = "SELECT DISTINCT Study FROM metadata_samples WHERE Project='TCGA';"
     insert_projects = "INSERT INTO projects_program (name, active, last_date_saved, is_public, owner_id) " + \
                       "VALUES (%s,%s,%s,%s,%s);"
-    insert_studies = "INSERT INTO projects_study (name, active, last_date_saved, owner_id, program_id) " + \
+    insert_studies = "INSERT INTO projects_project (name, active, last_date_saved, owner_id, program_id) " + \
                      "VALUES (%s,%s,%s,%s,%s);"
     insert_googleproj = "INSERT INTO accounts_googleproject (project_id, project_name, big_query_dataset) " + \
                         "VALUES (%s,%s,%s);"
@@ -181,7 +181,7 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
     get_googleproj_id = "SELECT id from accounts_googleproject where id=%s;"
     insert_bucket = "INSERT INTO accounts_bucket (bucket_name, bucket_permissions, google_project_id) VALUES (%s, %s, %s);"
     insert_bqdataset = "INSERT INTO accounts_bqdataset (dataset_name, google_project_id) VALUES (%s, %s);"
-    insert_user_data_tables = "INSERT INTO projects_user_data_tables (study_id, user_id, google_project_id, " + \
+    insert_user_data_tables = "INSERT INTO projects_user_data_tables (project_id, user_id, google_project_id, " + \
                               "google_bucket_id, metadata_data_table, metadata_samples_table, " + \
                               "feature_definition_table, google_bq_dataset_id) VALUES (%s,%s,%s,%s,%s,%s,%s,%s);"
     googleproj_name = "isb-cgc"
@@ -264,7 +264,7 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
                                             project_info[study_table_views[study]['project']],))
         db.commit()
 
-        cursorDict.execute("SELECT name, id FROM projects_study;")
+        cursorDict.execute("SELECT name, id FROM projects_project;")
         for row in cursorDict.fetchall():
             study_info[row['name']] = row['id']
 
@@ -282,10 +282,10 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
         study_udt_count = 0
         metadata_samples_study_count = len(studies.keys()) + (1 if "CCLE" not in studies.keys() else 0)
 
-        cursor.execute("SELECT COUNT(DISTINCT id) FROM projects_study;")
+        cursor.execute("SELECT COUNT(DISTINCT id) FROM projects_project;")
         study_count = cursor.fetchall()[0][0]
 
-        cursor.execute("SELECT COUNT(DISTINCT study_id) FROM projects_user_data_tables;")
+        cursor.execute("SELECT COUNT(DISTINCT project_id) FROM projects_user_data_tables;")
         study_udt_count = cursor.fetchall()[0][0]
 
         if study_udt_count == study_count == metadata_samples_study_count:
@@ -295,8 +295,8 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
                 print >> sys.stdout, "[STATUS] Programs and studies appear to have been created successfully: " + \
                       study_count.__str__()+" studies added."
         else:
-            print >> sys.stdout, "[WARNING] Unequal number of studies between metadata_samples, projects_study, and " + \
-                    "projects_user_data_tables. projects_study: "+study_count.__str__()+", " + \
+            print >> sys.stdout, "[WARNING] Unequal number of studies between metadata_samples, projects_project, and " + \
+                    "projects_user_data_tables. projects_project: "+study_count.__str__()+", " + \
                     "projects_user_data_tables: " + study_udt_count.__str__()+", metadata_samples: " + \
                   metadata_samples_study_count.__str__()
 
@@ -316,13 +316,13 @@ def bootstrap_file_data():
     insert_userupload = "INSERT INTO data_upload_userupload (status, `key`, owner_id) values ('complete', '', %s);"
     insert_useruploadedfile_TCGA = "INSERT INTO data_upload_useruploadedfile (upload_id, bucket, file) " \
                                    "SELECT %s,%s,datafilenamekey from metadata_data " \
-                                   "    where datafileuploaded='true' and datafilenamekey!='' and study=%s and repository=%s;"
+                                   "    where datafileuploaded='true' and datafilenamekey!='' and project=%s and repository=%s;"
     insert_useruploadedfile_CCLE = "INSERT INTO data_upload_useruploadedfile (upload_id, bucket, file) " \
                                    "SELECT %s,%s,datafilenamekey from metadata_data " \
                                    "    where datafileuploaded='true' and datafilenamekey!='' and project=%s;"
 
-    update_projects_study = "UPDATE projects_user_data_tables set data_upload_id=%s where study_id=%s;"
-    get_studies = "SELECT * FROM projects_study;"
+    update_projects_study = "UPDATE projects_user_data_tables set data_upload_id=%s where project_id=%s;"
+    get_studies = "SELECT * FROM projects_project;"
     get_last_userupload = "SELECT * FROM data_upload_userupload order by id desc limit 1;"
 
     try:
@@ -331,39 +331,39 @@ def bootstrap_file_data():
         cursorDict = db.cursor(cursors.DictCursor)
 
         cursorDict.execute(get_studies)
-        for study in cursorDict.fetchall():
-            print study
+        for project in cursorDict.fetchall():
+            print project
 
             # Create UserUpload entry
-            cursor.execute(insert_userupload, (int(study['owner_id']),))
+            cursor.execute(insert_userupload, (int(project['owner_id']),))
 
             # Get UserUpload Entries
             cursor.execute(get_last_userupload)
             last_userupload = cursor.fetchone()
 
-            # Update the projects_study table with new upload id
-            cursor.execute(update_projects_study, (last_userupload[0], study['id']))
+            # Update the projects_project table with new upload id
+            cursor.execute(update_projects_study, (last_userupload[0], project['id']))
 
 
-            if study['name'] != 'CCLE': # TCGA
+            if project['name'] != 'CCLE': # TCGA
 
                 # Create array of values to execute
                 useruploadedfile_values = []  # [upload_id, bucket, study_name, repository]
-                useruploadedfile_values.append([last_userupload[0], DCC_BUCKET, study['name'], 'DCC'])
-                useruploadedfile_values.append([last_userupload[0], CGHUB_BUCKET, study['name'], 'CGHUB'])
+                useruploadedfile_values.append([last_userupload[0], DCC_BUCKET, project['name'], 'DCC'])
+                useruploadedfile_values.append([last_userupload[0], CGHUB_BUCKET, project['name'], 'CGHUB'])
 
-                # Create UserUploadedFile for the study
+                # Create UserUploadedFile for the project
                 cursor.executemany(insert_useruploadedfile_TCGA, useruploadedfile_values)
             else: # CCLE
 
-                # Create UserUploadedFile for the study
-                cursor.execute(insert_useruploadedfile_CCLE, (last_userupload[0], CCLE_BUCKET, study['name'],))
+                # Create UserUploadedFile for the project
+                cursor.execute(insert_useruploadedfile_CCLE, (last_userupload[0], CCLE_BUCKET, project['name'],))
 
             db.commit()
 
 
 
-        # Create UserUploadedFile for each study
+        # Create UserUploadedFile for each project
     except Exception as e:
         print e
     finally:

@@ -1,11 +1,7 @@
-import operator
-import json
-import sys
-from django.db import models
 from django.contrib.auth.models import User
-from django.db.models import Q
-from projects.models import Program, Study, User_Feature_Definitions
-from django.conf import settings
+from django.db import models
+from projects.models import User_Feature_Definitions
+
 
 class FavoriteManager(models.Manager):
     content = "null"

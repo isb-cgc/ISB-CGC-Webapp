@@ -1,26 +1,18 @@
 import json
-import collections
-import sys
-# import pexpect
 
 from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
 from bq_data_access.feature_search.util import SearchableFieldHelper
 from models import VariableFavorite
-from workbooks.models import Workbook, Worksheet, Worksheet_variable
-from projects.models import Program, Study
-from cohorts.views import count_metadata
+from workbooks.models import Workbook, Worksheet
+from projects.models import Program
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
 from google.appengine.api import urlfetch
 from django.conf import settings
 debug = settings.DEBUG
 from django.http import HttpResponse
-from django.db import connection
-
-from django.core import serializers
 
 urlfetch.set_default_fetch_deadline(60)
 BIG_QUERY_API_URL   = settings.BASE_API_URL + '/_ah/api/bq_api/v1'

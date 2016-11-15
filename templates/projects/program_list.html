@@ -36,7 +36,7 @@
                     <thead>
                         <th class="control-col"></th>
                         <th class="name-col">Name</th>
-                        <th class="study-col">Studies</th>
+                        <th class="project-col">Projects</th>
                         <th>Ownership</th>
                         <th>Shared with</th>
                         <th>Last Updated</th>
@@ -65,7 +65,7 @@
                                 </div>
                             </td>
                             <td class="name-col"><a href="{% url 'program_detail' program.id %}">{{ program.name }}</a></td>
-                            <td>{{ program.study_set.all|active|length }}</td>
+                            <td>{{ program.project_set.all|active|length }}</td>
                             <td>{% if program.owner.id == user.id %}
                                 You
                             {% else %}
@@ -73,16 +73,16 @@
                             {% endif %}</td>
                             <td>({{ program.shared.count }})</td>
                             <td>{{ program.last_date_saved|date:'M d, Y, g:i a' }}</td>
-                        {% for study in program.study_set.all|active %}
+                        {% for project in program.project_set.all|active %}
                         </tr>
-                        <tr class="study hidden" data-program-id="{{ program.id }}">
+                        <tr class="project hidden" data-program-id="{{ program.id }}">
                             <td class="control-col">
                             </td>
-                            <td class="name-col">{{ study.name }}</td>
+                            <td class="name-col">{{ project.name }}</td>
                             <td></td>
                             <td></td>
                             <td></td>
-                            <td>{{ study.last_date_saved|date:'M d, Y, g:i a' }}</td>
+                            <td>{{ project.last_date_saved|date:'M d, Y, g:i a' }}</td>
                         {% endfor %}
                         </tr>
 
@@ -119,7 +119,7 @@
                     <thead>
                         <th class="control-col"></th>
                         <th class="name-col">Name</th>
-                        <th class="study-col">Studies</th>
+                        <th class="project-col">Projects</th>
                         <th>Ownership</th>
                         <th>Last Updated</th>
                     </thead>
@@ -130,20 +130,20 @@
                                 <span class="row-expand-button"></span>
                             </td>
                             <td class="name-col"><a href="{% url 'program_detail' program.id %}">{{ program.name }}</a></td>
-                            <td>{{ program.study_set.count }}</td>
+                            <td>{{ program.project_set.count }}</td>
                             <td>ISB</td>
                             <td>{{ program.last_date_saved|date:'M d, Y, g:i a' }}</td>
-                        {% for study in program.study_set.all %}
+                        {% for project in program.project_set.all %}
                         </tr>
-                        <tr class="study hidden" data-program-id="{{ program.id }}">
+                        <tr class="project hidden" data-program-id="{{ program.id }}">
                             <td class="control-col">
                             </td>
                             <td class="name-col">
-                                {{ study.name }}
+                                {{ project.name }}
                             </td>
                             <td></td>
                             <td></td>
-                            <td>{{ study.last_date_saved|date:'M d, Y, g:i a' }}</td>
+                            <td>{{ project.last_date_saved|date:'M d, Y, g:i a' }}</td>
                         {% endfor %}
                         </tr>
                         {% endfor %}
