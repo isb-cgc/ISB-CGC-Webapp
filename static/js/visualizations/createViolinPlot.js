@@ -358,8 +358,6 @@ function($, d3, d3textwrap, vizhelpers) {
                 var sample_list = [];
                 var e = brush.extent();
 
-                console.debug(e);
-
                 var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                 plot_area.selectAll("circle").classed("selected", function(d) {
                     return e[0][0] <= $(this).attr('cx') && $(this).attr('cx') <= e[1][0]
@@ -384,12 +382,10 @@ function($, d3, d3textwrap, vizhelpers) {
             var brush = d3.svg.brush()
                 .x(x2)
                 .y(y)
-                .on('brushstart', function(){ svg.selectAll('.extent').style("fill", "rgba(40,130,50,0.5");})
                 .on('brush', brushmove)
                 .on('brushend', brushend);
 
             var zoomer = function() {
-                console.debug(d3.event.translate);
                 if(!selex_active) {
                     svg.select('.x.axis').attr('transform', 'translate(' + (d3.event.translate[0] + margin.left) + ',' + (height - margin.bottom) + ')').call(xAxis);
                     plot_area.selectAll('circle').attr('transform', 'translate(' + d3.event.translate[0] + ',0)');

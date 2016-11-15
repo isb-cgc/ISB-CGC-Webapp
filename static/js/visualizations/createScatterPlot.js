@@ -115,7 +115,6 @@ function($, d3, d3textwrap, vizhelpers) {
             var brush = d3.svg.brush()
                 .x(xScale)
                 .y(yScale)
-                .on('brushstart', function(){ svg.selectAll('.extent').style("fill", "rgba(40,130,50,0.5");})
                 .on('brush', brushmove)
                 .on('brushend', brushend);
 
