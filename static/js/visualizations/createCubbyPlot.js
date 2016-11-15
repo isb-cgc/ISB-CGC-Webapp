@@ -313,15 +313,17 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                         var sample_list = [];
                         var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                         $('rect.expected_fill.selected').each(function () {
-                            var samples = $(this).attr('data-samples').split(',');
-                            total_samples += samples.length;
-                            total_patients += $.map(samples, function (d) {
-                                return d.substr(0, 12);
-                            })
-                                .filter(function (item, i, a) {
-                                    return i == a.indexOf(item)
-                                }).length;
-                            sample_list = sample_list.concat(samples);
+                            if($(this).attr('data-samples') !== null && $(this).attr('data-samples').length > 0) {
+                                var samples = $(this).attr('data-samples').split(',');
+                                total_samples += samples.length;
+                                total_patients += $.map(samples, function (d) {
+                                    return d.substr(0, 12);
+                                })
+                                    .filter(function (item, i, a) {
+                                        return i == a.indexOf(item)
+                                    }).length;
+                                sample_list = sample_list.concat(samples);
+                            }
                         });
 
                         sample_form_update({}, total_samples, total_patients, sample_list);
