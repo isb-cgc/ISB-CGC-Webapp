@@ -202,17 +202,25 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers'],
             // append axes labels
             var xAxisXPos = (parseInt(svg.attr('width')>width ? width : svg.attr('width'))+margin.left)/2;
             var xAxisYPos = parseInt(svg.attr('height')>height ? height : svg.attr('height'))-10;
-            svg.append('text')
-                .attr('class', 'axis-label')
+            svg.append('g')
+                .attr('class','x-label-container')
+                .append('text')
+                .attr('class', 'x label axis-label')
                 .attr('text-anchor', 'middle')
                 .attr('transform', 'translate(' + xAxisXPos + ',' + xAxisYPos + ')')
                 .text(xLabel);
 
+            d3.select('.x.label').call(d3textwrap.textwrap().bounds({width: (width-margin.left)*0.75, height: 80}));
+            d3.select('.x-label-container').selectAll('foreignObject').attr('style','transform: translate('+((width/2)-(((width-margin.left)*0.75)/2)) + 'px,' + (height - 80)+'px);');
+            d3.select('.x-label-container').selectAll('div').attr('class','axis-label');
+
             var yAxisXPos = (parseInt(svg.attr('height')>height ? height : svg.attr('height'))-margin.bottom)/2;
-            svg.append('text')
+            svg.append('g')
+                .attr('class','y-label-container')
+                .append('text')
                 .attr('class', 'axis-label')
                 .attr('text-anchor', 'middle')
-                .attr('transform', 'rotate(-90) translate(-' + yAxisXPos + ',10)')
+                .attr('transform', 'rotate(-90) translate(-' + yAxisXPos + ',15)')
                 .text('Percentage of Samples in Grouping');
 
             function check_selection_state(isActive) {
