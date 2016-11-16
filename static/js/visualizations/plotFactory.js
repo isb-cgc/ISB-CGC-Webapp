@@ -392,10 +392,10 @@ define([
 
             if(!visualization.plot) {
             // Data was not valid
-                $(args.plot_selector).prepend('<div id="log-scale-alert" class="alert alert-warning alert-dismissable">'
+                $(args.plot_selector).empty().prepend('<div id="log-scale-alert" class="alert alert-warning alert-dismissable">'
                     + '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>'
                     + 'No valid data was returned for this plot. Double-check your plot type, '
-                    + 'axis, and cohort selections to make sure they can return valid data. Please note, some data types '
+                    + 'axis variables, and cohorts to make sure they can return valid data. Please note, some data types '
                     + 'cannot be log transformed due to negative values.</div>');
                 return;
             }

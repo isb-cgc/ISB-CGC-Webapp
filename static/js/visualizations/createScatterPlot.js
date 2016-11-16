@@ -30,9 +30,14 @@ function($, d3, d3textwrap, vizhelpers) {
     return {
         create_scatterplot: function(svg, data, domain, range, xLabel, yLabel, xParam, yParam, colorBy, legend, width, height, cohort_set) {
             var margin = {top: 10, bottom: 100, left: 120, right: 10};
+            // We require at least one of the axes to have valid data
+            var checkXvalid = 0;
+            var checkYvalid = 0;
+
             var yVal = function(d) {
                 if (helpers.isValidNumber(d[yParam])) {
                     return d[yParam];
+                    checkYvalid++;
                 } else {
                     d[yParam] = range[1];
                     return range[1];
@@ -47,13 +52,19 @@ function($, d3, d3textwrap, vizhelpers) {
                     .tickSize(-width - margin.left - margin.right, 0, 0);
 
             var xVal = function(d) {
-                    if (helpers.isValidNumber(d[xParam])) {
-                        return d[xParam];
-                    } else {
-                        d[xParam] = domain[1];
-                        return domain[1];
-                    }
-                };
+                if (helpers.isValidNumber(d[xParam])) {
+                    checkXvalid++;
+                    return d[xParam];
+                } else {
+                    d[xParam] = domain[1];
+                    return domain[1];
+                }
+            };
+
+            // If both of our axes have no valid data, we have nothing to plot
+            if(checkXvalid <= 0 && checkYvalid <= 0) {
+                return null;
+            }
 
             var xScale = d3.scale.linear().range([margin.left, width]).domain(domain);
             var xMap = function(d) {if(typeof(Number(d.x)) == "number"){return xScale(xVal(d));} else { return 0;}};
