@@ -339,7 +339,7 @@ require([
     }
 
     function disable_invalid_variable_options(element){
-        var plot_data     = get_plot_info_on_page($(element).parentsUntil(".worksheet-body").find('.update-plot').parent());
+        var plot_data     = get_plot_info_on_page(element);
         var plot_settings = plot_factory.get_plot_settings(plot_data.attrs.type);
         if(plot_settings) {
             for (var axis_index in plot_settings.axis) {
@@ -384,7 +384,7 @@ require([
                 }
             }
 
-            disable_invalid_variable_options(variable_element);
+            disable_invalid_variable_options($('.worksheet.active .main-settings'));
             variable_element.val(data.variable);
             axis_select_change(variable_element);
         } else if(data.type == "gene") {
@@ -809,7 +809,7 @@ require([
         plot_type_selex_update();
         hide_show_widgets(plot_type, flyout);
         get_plot_info(this, function(success){
-            disable_invalid_variable_options($(self).parentsUntil(".worksheet-body").find('.update-plot').parent());
+            disable_invalid_variable_options($('.worksheet.active .main-settings'));
             show_plot_settings();
         })
     });
@@ -886,8 +886,8 @@ require([
         var plot_selex = $(active_sheet).find('.plot_selection')[0];
         if(success) {
             var flyout = $(plot_selex).parentsUntil(".worksheet-body").find('.settings-flyout');
-            var data = get_plot_info_on_page($(plot_selex).parentsUntil(".worksheet-body").find('.update-plot').parent());
-            disable_invalid_variable_options($(plot_selex).parentsUntil(".worksheet-body").find('.update-plot').parent());
+            var data = get_plot_info_on_page($('.worksheet.active .main-settings'));
+            disable_invalid_variable_options($('.worksheet.active .main-settings'));
             hide_show_widgets(data.attrs.type, flyout);
             if (valid_plot_settings($(plot_selex).parentsUntil(".worksheet-body").find('.update-plot').parent())) {
                 generate_plot({ worksheet_id : data.worksheet_id,
@@ -914,8 +914,8 @@ require([
             get_plot_info(self, function(success){
                 if(success) {
                     var flyout = $(self).parentsUntil(".worksheet-body").find('.settings-flyout');
-                    var data = get_plot_info_on_page($(self).parentsUntil(".worksheet-body").find('.update-plot').parent());
-                    disable_invalid_variable_options($(self).parentsUntil(".worksheet-body").find('.update-plot').parent());
+                    var data = get_plot_info_on_page($('.worksheet.active .main-settings'));
+                    disable_invalid_variable_options($('.worksheet.active .main-settings'));
                     hide_show_widgets(data.attrs.type, flyout);
                     if (valid_plot_settings($(self).parentsUntil(".worksheet-body").find('.update-plot').parent())) {
                         generate_plot({ worksheet_id : data.worksheet_id,
