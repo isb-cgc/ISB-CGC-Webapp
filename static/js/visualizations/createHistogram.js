@@ -45,6 +45,18 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers'],
     return {
         createHistogramPlot : function (svg_param, raw_Data, values_only, width_param, height_param, x_attr, xLabel, tip, margin_param, legend) {
 
+            var nonNullData = [];
+
+            raw_Data.map(function(d){
+                if(helpers.isValidNumber(d.x)) {
+                    nonNullData.push(d);
+                }
+            });
+
+            if(nonNullData.length <= 0) {
+                return null;
+            }
+
             tip = histoTip || tip;
 
             svg    = svg_param;
