@@ -190,7 +190,7 @@ function($, d3, d3textwrap, vizhelpers) {
                 .attr('transform', 'rotate(-90) translate(' + (-1 * (height/2)) + ',15)')
                 .text(yLabel);
 
-            d3.select('.y.label').call(d3textwrap.textwrap().bounds({height: 80, width: (height-margin.top-margin.bottom)*0.75}));
+            d3.select('.y.label').call(d3textwrap.textwrap().bounds({height: 60, width: (height-margin.top-margin.bottom)*0.75}));
             d3.select('.y-label-container').selectAll('foreignObject')
                 .attr('style','transform: rotate(-90deg) translate(' + ((-1 * (height-margin.bottom)/2)-(((height-margin.top-margin.bottom)*0.75))/2) + 'px,15px);');
             d3.select('.y-label-container').selectAll('div').attr('class','axis-label');
