@@ -79,9 +79,33 @@ require([
     var savingComment = false;
 
     var plotReady = {
-        axis: false,
-        cohort: false,
-        type: false
+        sheets: {},
+        isPlotReady: function(sheet){
+            if(!this.sheets[sheet]) {
+                this.makeSheet(sheet);
+            }
+            var plotRdy = true;
+            var self=this;
+            _.each(Object.keys(this.sheets[sheet]),function(key) {
+                if(!self.sheets[sheet][key]) {
+                    plotRdy = false;
+                }
+            });
+            return plotRdy;
+        },
+        setReady: function(sheet,elem,rdy) {
+            if(!this.sheets[sheet]) {
+                this.makeSheet(sheet);
+            }
+            this.sheets[sheet][elem] = rdy;
+        },
+        makeSheet: function(sheet) {
+            this.sheets[sheet] = {
+                axis: false,
+                type: false,
+                cohort: false
+            };
+        }
     };
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
@@ -233,6 +257,8 @@ require([
         }
         history.replaceState({url: url, title: window.document.title},window.document.title,url);
 
+        update_plot_elem_rdy();
+
         e.preventDefault();
     });
 
@@ -313,7 +339,7 @@ require([
     }
 
     function disable_invalid_variable_options(element){
-        var plot_data     = get_plot_info_on_page($(element).parentsUntil(".worksheet-body").find('.update-plot').parent());
+        var plot_data     = get_plot_info_on_page(element);
         var plot_settings = plot_factory.get_plot_settings(plot_data.attrs.type);
         if(plot_settings) {
             for (var axis_index in plot_settings.axis) {
@@ -358,7 +384,7 @@ require([
                 }
             }
 
-            disable_invalid_variable_options(variable_element);
+            disable_invalid_variable_options($('.worksheet.active .main-settings'));
             variable_element.val(data.variable);
             axis_select_change(variable_element);
         } else if(data.type == "gene") {
@@ -783,67 +809,67 @@ require([
         plot_type_selex_update();
         hide_show_widgets(plot_type, flyout);
         get_plot_info(this, function(success){
-            disable_invalid_variable_options($(self).parentsUntil(".worksheet-body").find('.update-plot').parent());
+            disable_invalid_variable_options($('.worksheet.active .main-settings'));
             show_plot_settings();
         })
     });
 
     var cohort_selex_update = function(e){
         var cohSel = false;
-        $('.cohort-selex').each(function(ev){
+        $('.worksheet.active').find('.cohort-selex').each(function(ev){
             if($(this).is(':checked')) {
                 cohSel = true;
             }
         });
         $('#selCoh-' + $('.worksheet.active').attr('id')).prop('checked', cohSel);
-        plotReady.cohort = cohSel;
+        plotReady.setReady($('.worksheet.active').attr('id'),'cohort',cohSel);
         check_for_plot_rdy();
     };
 
     var axis_selex_update = function(e){
         var axisRdy = true;
-        $('.axis-select').each(function(){
+        $('.worksheet.active').find('.axis-select').each(function(){
             if($(this).parent().css('display')!=='none'){
                 if(!$(this).find(':selected').val()) {
                     axisRdy = false;
                 }
             }
         });
-        plotReady.axis = axisRdy;
+        plotReady.setReady($('.worksheet.active').attr('id'),'axis',axisRdy);
         $('#selGenVar-'+ $('.worksheet.active').attr('id')).prop('checked',axisRdy);
         check_for_plot_rdy();
     };
 
     var plot_type_selex_update = function(e) {
-        $('#selAnType-'+$('.worksheet.active').attr('id')).prop('checked',!!$('.plot_selection :selected').val());
-        plotReady.type = !!$('.plot_selection :selected').val();
+        $('#selAnType-'+$('.worksheet.active').attr('id')).prop('checked',!!$('.worksheet.active').find('.plot_selection :selected').val());
+        plotReady.setReady($('.worksheet.active').attr('id'),'type',!!$('.worksheet.active').find('.plot_selection :selected').val());
         check_for_plot_rdy();
     };
 
     var check_for_plot_rdy = function(e){
-        var plot_rdy = true;
+        var plot_rdy = plotReady.isPlotReady($('.worksheet.active').attr('id'));
 
-        _.each(Object.keys(plotReady),function(key){
-            if(!plotReady[key]) {
-                plot_rdy = false;
-            }
-        });
+        $('.worksheet.active').find('.update-plot.btn').attr('disabled',!plot_rdy);
+        $('.worksheet.active').find('.resubmit-button.btn').attr('disabled',!plot_rdy);
 
-        $('.update-plot.btn').attr('disabled',!plot_rdy);
-        $('.resubmit-button.btn').attr('disabled',!plot_rdy);
-
-        if($('.worksheet-instruction').length <= 0 && !plot_rdy) {
-            $('#missing-plot-reqs-alert').show();
+        if($('.worksheet.active').find('.worksheet-instruction').length <= 0 && !plot_rdy) {
+            $('.worksheet.active').find('#missing-plot-reqs-alert').show();
         } else {
-            $('#missing-plot-reqs-alert').hide();
+            $('.worksheet.active').find('#missing-plot-reqs-alert').hide();
         }
+    };
+
+    var update_plot_elem_rdy = function(e) {
+        axis_selex_update();
+        plot_type_selex_update();
+        cohort_selex_update();
     };
 
     $('.cohort-selex').on('change',function(e){
         cohort_selex_update();
     });
 
-    $('.axis-select').on('change',function(){
+    $('.axis-select').on('change',function(e){
         axis_selex_update();
     });
 
@@ -860,8 +886,8 @@ require([
         var plot_selex = $(active_sheet).find('.plot_selection')[0];
         if(success) {
             var flyout = $(plot_selex).parentsUntil(".worksheet-body").find('.settings-flyout');
-            var data = get_plot_info_on_page($(plot_selex).parentsUntil(".worksheet-body").find('.update-plot').parent());
-            disable_invalid_variable_options($(plot_selex).parentsUntil(".worksheet-body").find('.update-plot').parent());
+            var data = get_plot_info_on_page($('.worksheet.active .main-settings'));
+            disable_invalid_variable_options($('.worksheet.active .main-settings'));
             hide_show_widgets(data.attrs.type, flyout);
             if (valid_plot_settings($(plot_selex).parentsUntil(".worksheet-body").find('.update-plot').parent())) {
                 generate_plot({ worksheet_id : data.worksheet_id,
@@ -888,8 +914,8 @@ require([
             get_plot_info(self, function(success){
                 if(success) {
                     var flyout = $(self).parentsUntil(".worksheet-body").find('.settings-flyout');
-                    var data = get_plot_info_on_page($(self).parentsUntil(".worksheet-body").find('.update-plot').parent());
-                    disable_invalid_variable_options($(self).parentsUntil(".worksheet-body").find('.update-plot').parent());
+                    var data = get_plot_info_on_page($('.worksheet.active .main-settings'));
+                    disable_invalid_variable_options($('.worksheet.active .main-settings'));
                     hide_show_widgets(data.attrs.type, flyout);
                     if (valid_plot_settings($(self).parentsUntil(".worksheet-body").find('.update-plot').parent())) {
                         generate_plot({ worksheet_id : data.worksheet_id,
@@ -977,6 +1003,8 @@ require([
                 plot_element.find('.resubmit-button').show();
             }
 
+            update_plot_elem_rdy();
+
             plot_loader.fadeOut();
         });
     }
@@ -1015,10 +1043,7 @@ require([
             }
         }
 
-        // Prep the instructions and plot-readiness var based on current settings
-        plot_type_selex_update();
-        cohort_selex_update();
-        axis_selex_update();
+        update_plot_elem_rdy();
 
         callback(true);
     }
@@ -1170,5 +1195,7 @@ require([
     $('.comment-textarea').keyup(function() {
         $(this).siblings('.save-comment-btn').prop('disabled', this.value == '' ? true : false)
     });
+
+    update_plot_elem_rdy();
 });
 

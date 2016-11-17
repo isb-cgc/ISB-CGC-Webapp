@@ -29,10 +29,15 @@ function($, d3, d3textwrap, vizhelpers) {
 
     return {
         create_scatterplot: function(svg, data, domain, range, xLabel, yLabel, xParam, yParam, colorBy, legend, width, height, cohort_set) {
-            var margin = {top: 10, bottom: 50, left: 100, right: 10};
+            var margin = {top: 10, bottom: 100, left: 120, right: 10};
+            // We require at least one of the axes to have valid data
+            var checkXvalid = 0;
+            var checkYvalid = 0;
+
             var yVal = function(d) {
                 if (helpers.isValidNumber(d[yParam])) {
                     return d[yParam];
+                    checkYvalid++;
                 } else {
                     d[yParam] = range[1];
                     return range[1];
@@ -47,13 +52,19 @@ function($, d3, d3textwrap, vizhelpers) {
                     .tickSize(-width - margin.left - margin.right, 0, 0);
 
             var xVal = function(d) {
-                    if (helpers.isValidNumber(d[xParam])) {
-                        return d[xParam];
-                    } else {
-                        d[xParam] = domain[1];
-                        return domain[1];
-                    }
-                };
+                if (helpers.isValidNumber(d[xParam])) {
+                    checkXvalid++;
+                    return d[xParam];
+                } else {
+                    d[xParam] = domain[1];
+                    return domain[1];
+                }
+            };
+
+            // If both of our axes have no valid data, we have nothing to plot
+            if(checkXvalid <= 0 && checkYvalid <= 0) {
+                return null;
+            }
 
             var xScale = d3.scale.linear().range([margin.left, width]).domain(domain);
             var xMap = function(d) {if(typeof(Number(d.x)) == "number"){return xScale(xVal(d));} else { return 0;}};
@@ -115,7 +126,6 @@ function($, d3, d3textwrap, vizhelpers) {
             var brush = d3.svg.brush()
                 .x(xScale)
                 .y(yScale)
-                .on('brushstart', function(){ svg.selectAll('.extent').style("fill", "rgba(40,130,50,0.5");})
                 .on('brush', brushmove)
                 .on('brushend', brushend);
 
@@ -159,17 +169,31 @@ function($, d3, d3textwrap, vizhelpers) {
                 .call(xAxis);
 
             // append axes labels
-            svg.append('text')
-                .attr('class', 'x label')
+            svg.append('g')
+                .attr('class','x-label-container')
+                .append('text')
+                .attr('class', 'x label axis-label')
                 .attr('text-anchor', 'middle')
                 .attr('transform', 'translate(' + ((width+margin.left)/2) + ',' + (height - 10) + ')')
                 .text(xLabel);
 
-            svg.append('text')
-                .attr('class', 'y label')
+            d3.select('.x.label').call(d3textwrap.textwrap().bounds({width: (width-margin.left)*0.75, height: 80}));
+            d3.select('.x-label-container').selectAll('foreignObject')
+                .attr('style','transform: translate('+(((width-margin.left)/2)-(((width-margin.left)*0.75)/2)+margin.left) + 'px,' + (height - 80)+'px);');
+            d3.select('.x-label-container').selectAll('div').attr('class','axis-label');
+
+            svg.append('g')
+                .attr('class','y-label-container')
+                .append('text')
+                .attr('class', 'y label axis-label')
                 .attr('text-anchor', 'middle')
-                .attr('transform', 'rotate(-90) translate(' + (-1 * (height/2)) + ',10)')
+                .attr('transform', 'rotate(-90) translate(' + (-1 * (height/2)) + ',15)')
                 .text(yLabel);
+
+            d3.select('.y.label').call(d3textwrap.textwrap().bounds({height: 60, width: (height-margin.top-margin.bottom)*0.75}));
+            d3.select('.y-label-container').selectAll('foreignObject')
+                .attr('style','transform: rotate(-90deg) translate(' + ((-1 * (height-margin.bottom)/2)-(((height-margin.top-margin.bottom)*0.75))/2) + 'px,15px);');
+            d3.select('.y-label-container').selectAll('div').attr('class','axis-label');
 
             var legend_item_height = 28;
 

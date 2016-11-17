@@ -390,6 +390,16 @@ define([
                     break;
             }
 
+            if(!visualization.plot) {
+            // Data was not valid
+                $(args.plot_selector).empty().prepend('<div id="log-scale-alert" class="alert alert-warning alert-dismissable">'
+                    + '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>'
+                    + 'No valid data was returned for this plot. Double-check your plot type, '
+                    + 'axis variables, and cohorts to make sure they can return valid data. Please note, some data types '
+                    + 'cannot be log transformed due to negative values.</div>');
+                return;
+            }
+
             //establish marquee sample selection
             $(visualization.svg[0]).parents('.plot').find('.toggle-selection').unbind();
             $(visualization.svg[0]).parents('.plot').find('.toggle-selection').on('click', function () {
@@ -416,7 +426,7 @@ define([
                 .style('font-size', 20)
                 .attr('text-anchor', 'middle')
                 .attr('transform', 'translate(' + (width/2) + ',' + (height/2) + ')')
-                .text('Cohort provided has no samples.');
+                .text('No samples were found for this combination of plot type, cohort, and axis variables.');
         }
     };
 
