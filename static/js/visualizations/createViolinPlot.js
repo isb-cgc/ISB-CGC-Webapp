@@ -212,7 +212,7 @@ function($, d3, d3textwrap, vizhelpers) {
                 .style('fill', 'none')
         },
         createViolinPlot: function(svg, raw_Data, height, violin_width, max_y, min_y, xLabel, yLabel, xAttr, yAttr, colorBy, legend, cohort_set) {
-            var margin = {top: 0, bottom: 100, left: 50, right: 0};
+            var margin = {top: 0, bottom: 120, left: 110, right: 0};
             var domain = [min_y, max_y];
             var range = [height-margin.bottom, 0];
             var view_width = 800;
@@ -351,13 +351,12 @@ function($, d3, d3textwrap, vizhelpers) {
 
             d3.select('.x.axis').selectAll('text').call(d3textwrap.textwrap().bounds({width: violin_width, height: margin.bottom-30}));
             d3.select('.x.axis').selectAll('foreignObject').attr('style','transform: translate(-'+(violin_width/2)+'px,0px);');
+            d3.select('.x.axis').selectAll('foreignObject div').attr('class','centered');
 
             // Highlight the selected circles.
             var brushmove = function(p) {
                 var sample_list = [];
                 var e = brush.extent();
-
-                console.debug(e);
 
                 var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                 plot_area.selectAll("circle").classed("selected", function(d) {
@@ -383,12 +382,10 @@ function($, d3, d3textwrap, vizhelpers) {
             var brush = d3.svg.brush()
                 .x(x2)
                 .y(y)
-                .on('brushstart', function(){ svg.selectAll('.extent').style("fill", "rgba(40,130,50,0.5");})
                 .on('brush', brushmove)
                 .on('brushend', brushend);
 
             var zoomer = function() {
-                console.debug(d3.event.translate);
                 if(!selex_active) {
                     svg.select('.x.axis').attr('transform', 'translate(' + (d3.event.translate[0] + margin.left) + ',' + (height - margin.bottom) + ')').call(xAxis);
                     plot_area.selectAll('circle').attr('transform', 'translate(' + d3.event.translate[0] + ',0)');
@@ -415,14 +412,21 @@ function($, d3, d3textwrap, vizhelpers) {
                 .attr('transform', 'translate(' + (view_width/2) + ',' + (height - 10) + ')')
                 .text(xLabel);
             d3.select('.x.label').call(d3textwrap.textwrap().bounds({width: (view_width-margin.left)*0.75, height: 50}));
-            d3.select('.x-label-container').selectAll('foreignObject').attr('style','transform: translate(' + ((view_width/2)-(((view_width-margin.left)*0.75)/2)) + 'px,' + (height - 30) + 'px);');
+            d3.select('.x-label-container').selectAll('foreignObject').attr('style','transform: translate(' + ((view_width/2)-(((view_width-margin.left)*0.75)/2)+margin.left) + 'px,' + (height - 50) + 'px);');
             d3.select('.x-label-container').selectAll('div').attr('class','axis-label');
 
-            svg.append('text')
+            svg.append('g')
+                .attr('class', 'y-label-container')
+                .append('text')
                 .attr('class', 'y label')
                 .attr('text-anchor', 'middle')
                 .attr('transform', 'rotate(-90) translate(' + (-1 * (height/2)) + ',10)')
                 .text(yLabel);
+
+            d3.select('.y.label').call(d3textwrap.textwrap().bounds({height: 60, width: (height-margin.top-margin.bottom)*0.75}));
+            d3.select('.y-label-container').selectAll('foreignObject')
+                .attr('style','transform: rotate(-90deg) translate(' + ((-1 * (height-margin.bottom)/2)-(((height-margin.top-margin.bottom)*0.75))/2) + 'px,15px);');
+            d3.select('.y-label-container').selectAll('div').attr('class','axis-label');
 
 
             $('foreignObject div').each(function(){
