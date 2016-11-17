@@ -73,7 +73,7 @@ def catchup_shortlist(cursor):
             """
             cursor.execute(set_metadata_shortlist_def)
     except Exception as e:
-        print >> "[ERROR] Exception when setting the metadata shortlist in metadata_attr; it may not have been made."
+        print >> sys.stdout, "[ERROR] Exception when setting the metadata shortlist in metadata_attr; it may not have been made."
         print >> sys.stdout, e
         print >> sys.stdout, traceback.format_exc()
 
