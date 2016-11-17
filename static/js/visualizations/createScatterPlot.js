@@ -34,10 +34,23 @@ function($, d3, d3textwrap, vizhelpers) {
             var checkXvalid = 0;
             var checkYvalid = 0;
 
+            data.map(function(d){
+                if(helpers.isValidNumber(d[xParam])) {
+                    checkXvalid++;
+                }
+                if(helpers.isValidNumber(d[yParam])) {
+                    checkYvalid++;
+                }
+            });
+
+            // At least one data point in one axis must be valid
+            if(checkXvalid <= 0 && checkYvalid <= 0) {
+                return null;
+            }
+
             var yVal = function(d) {
                 if (helpers.isValidNumber(d[yParam])) {
                     return d[yParam];
-                    checkYvalid++;
                 } else {
                     d[yParam] = range[1];
                     return range[1];
@@ -53,18 +66,12 @@ function($, d3, d3textwrap, vizhelpers) {
 
             var xVal = function(d) {
                 if (helpers.isValidNumber(d[xParam])) {
-                    checkXvalid++;
                     return d[xParam];
                 } else {
                     d[xParam] = domain[1];
                     return domain[1];
                 }
             };
-
-            // If both of our axes have no valid data, we have nothing to plot
-            if(checkXvalid <= 0 && checkYvalid <= 0) {
-                return null;
-            }
 
             var xScale = d3.scale.linear().range([margin.left, width]).domain(domain);
             var xMap = function(d) {if(typeof(Number(d.x)) == "number"){return xScale(xVal(d));} else { return 0;}};
@@ -190,7 +197,7 @@ function($, d3, d3textwrap, vizhelpers) {
                 .attr('transform', 'rotate(-90) translate(' + (-1 * (height/2)) + ',15)')
                 .text(yLabel);
 
-            d3.select('.y.label').call(d3textwrap.textwrap().bounds({height: 80, width: (height-margin.top-margin.bottom)*0.75}));
+            d3.select('.y.label').call(d3textwrap.textwrap().bounds({height: 60, width: (height-margin.top-margin.bottom)*0.75}));
             d3.select('.y-label-container').selectAll('foreignObject')
                 .attr('style','transform: rotate(-90deg) translate(' + ((-1 * (height-margin.bottom)/2)-(((height-margin.top-margin.bottom)*0.75))/2) + 'px,15px);');
             d3.select('.y-label-container').selectAll('div').attr('class','axis-label');
