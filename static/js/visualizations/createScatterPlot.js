@@ -34,9 +34,22 @@ function($, d3, d3textwrap, vizhelpers) {
             var checkXvalid = 0;
             var checkYvalid = 0;
 
+            data.map(function(d){
+                if(helpers.isValidNumber(d[xParam])) {
+                    checkXvalid++;
+                }
+                if(helpers.isValidNumber(d[yParam])) {
+                    checkYvalid++;
+                }
+            });
+
+            // At least one data point in one axis must be valid
+            if(checkXvalid <= 0 && checkYvalid <= 0) {
+                return null;
+            }
+
             var yVal = function(d) {
                 if (helpers.isValidNumber(d[yParam])) {
-                    checkYvalid++;
                     return d[yParam];
                 } else {
                     d[yParam] = range[1];
@@ -53,18 +66,12 @@ function($, d3, d3textwrap, vizhelpers) {
 
             var xVal = function(d) {
                 if (helpers.isValidNumber(d[xParam])) {
-                    checkXvalid++;
                     return d[xParam];
                 } else {
                     d[xParam] = domain[1];
                     return domain[1];
                 }
             };
-
-            // If both of our axes have no valid data, we have nothing to plot
-            if(checkXvalid <= 0 && checkYvalid <= 0) {
-                return null;
-            }
 
             var xScale = d3.scale.linear().range([margin.left, width]).domain(domain);
             var xMap = function(d) {if(typeof(Number(d.x)) == "number"){return xScale(xVal(d));} else { return 0;}};
