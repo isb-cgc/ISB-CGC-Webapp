@@ -17,16 +17,16 @@
     <h1 class="page-header">{{ project.name }}</h1>
     <p class="project-description">{{ project.description }}</p>
     <ul class="page-action-group">
-        <li role="menuitem">
-            <form action="{% url 'worksheet_create_with_projects' %}" method="POST">
-                {% csrf_token %}
-                <input type="hidden" name="project_id" value="{{ project.id }}">
-                <button type="submit" class="btn btn-primary" >New Workbook</button>
-            </form>
-        </li>
-        <li class="separator"></li>
+{#        <li role="menuitem">#}
+{#            <form action="{% url 'worksheet_create_with_projects' %}" method="POST">#}
+{#                {% csrf_token %}#}
+{#                <input type="hidden" name="project_id" value="{{ project.id }}">#}
+{#                <button type="submit" class="btn btn-primary" >New Workbook</button>#}
+{#            </form>#}
+{#        </li>#}
+{#        <li class="separator"></li>#}
         {% if project.owner.id == user.id %}
-        <li role="menuitem"><a href="{% url 'project_upload' %}" class="btn btn-info"><i class="fa fa-cloud-upload"></i>Upload Data</a></li>
+        <li role="menuitem"><a href="{% url 'project_upload_existing' %}?project_id={{ project.id }}" class="btn btn-info"><i class="fa fa-cloud-upload"></i>Upload Data</a></li>
         <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#edit-project-details-modal">Edit Details</button></li>
         <li role="menuitem"><button class="btn btn-info project-delete" data-toggle="modal" data-target="#delete-project-modal">Delete</button></li>
         <li class="separator"></li>
@@ -50,7 +50,9 @@
         <section class="project-study panel panel-primary" data-study-id="{{ study.id }}">
             <div class="panel-heading clearfix">
                 <div class="dropdown pull-left">
+                    {% if not project.is_public %}
                     <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-gear"></i></a>
+                    {% endif %}
                     <ul class="dropdown-menu">
 {#                        <li role="menuitem"><a href="">New Workbook</a></li>#}
                         {% if project.owner.id == user.id %}

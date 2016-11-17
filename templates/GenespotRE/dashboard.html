@@ -208,14 +208,14 @@
     {% if USER_DATA_ON %}
         <hr>
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-12">
             <section class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">
                         <a href="{% url 'projects' %}">Saved Projects ({{ projects.count }})</a></h3>
                 </div>
                 <div class="panel-body">
-                    <p>You can upload from your own research projects.</p>
+                    <p>You can upload data from your own research projects.</p>
                     {% if projects.count > 0 %}
                     <ul class="table-list">
                         {% for project in projects|slice:':6' %}
@@ -239,17 +239,18 @@
                 </div>
             </section>
         </div>
-        <div class="col-md-6">
-            <section class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">
-                        <a href="{% url 'public_projects' %}">Public Data ({% public_project_count %})</a></h3>
-                </div>
-                <div class="panel-body">
-                    <p>Browse publicly-available studies and data</p>
-                </div>
-            </section>
-        </div>
+{#      TODO: This div is hidden until we can figure out creating workbooks from projects/studies #}
+{#        <div class="col-md-6">#}
+{#            <section class="panel panel-default">#}
+{#                <div class="panel-heading">#}
+{#                    <h3 class="panel-title">#}
+{#                        <a href="{% url 'public_projects' %}">Public Data ({% public_project_count %})</a></h3>#}
+{#                </div>#}
+{#                <div class="panel-body">#}
+{#                    <p>Browse publicly-available studies and data</p>#}
+{#                </div>#}
+{#            </section>#}
+{#        </div>#}
     </div>
     {% endif %}
 

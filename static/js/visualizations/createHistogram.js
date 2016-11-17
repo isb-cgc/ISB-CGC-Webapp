@@ -16,8 +16,9 @@
  *
  */
 
-define(['jquery', 'd3', 'd3tip', 'vizhelpers'],
-function($, d3, d3tip, helpers) {
+define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers'],
+    function($, d3, d3tip, d3textwrap, helpers) {
+
     var svg;
     var margin;
     var zoom_area;
@@ -43,6 +44,18 @@ function($, d3, d3tip, helpers) {
 
     return {
         createHistogramPlot : function (svg_param, raw_Data, values_only, width_param, height_param, x_attr, xLabel, tip, margin_param, legend) {
+
+            var nonNullData = [];
+
+            raw_Data.map(function(d){
+                if(helpers.isValidNumber(d.x)) {
+                    nonNullData.push(d);
+                }
+            });
+
+            if(nonNullData.length <= 0) {
+                return null;
+            }
 
             tip = histoTip || tip;
 
@@ -118,14 +131,15 @@ function($, d3, d3tip, helpers) {
             }
 
             var plot_area = svg.append('g')
-                .attr('clip-path', 'url(#plot_area_clip)');
+                .attr('clip-path', 'url(#plot_area_clip)')
+                .attr('transform','translate(0,'+margin.top+')');
 
             plot_area.append('clipPath')
                 .attr('id', 'plot_area_clip')
                 .append('rect')
                 .attr({ width: width - margin.left - margin.right,
                     height: height - margin.top - margin.bottom})
-                .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+                .attr('transform', 'translate(' + margin.left + ',0)');
 
             plot_area.selectAll(".plot-bar")
                 .data(hist_data)
@@ -144,7 +158,6 @@ function($, d3, d3tip, helpers) {
                 .attr("height", function (d) {
                     return height - margin.top - margin.bottom - y(d.y);
                 })
-                .attr('transform', 'translate(0,' + margin.top + ')')
                 .on('mouseover.tip', tip.show)
                 .on('mouseout.tip', tip.hide);
 
@@ -155,7 +168,6 @@ function($, d3, d3tip, helpers) {
                 var sample_list = [];
                 var patient_list = [];
                 var e = brush.extent();
-                console.debug(e);
                 svg.selectAll('rect.plot-bar').classed("selected", function (d) {
                     return e[0] <= (d['x'] + d['dx']) && d['x'] <= e[1];
                 });
@@ -202,17 +214,25 @@ function($, d3, d3tip, helpers) {
             // append axes labels
             var xAxisXPos = (parseInt(svg.attr('width')>width ? width : svg.attr('width'))+margin.left)/2;
             var xAxisYPos = parseInt(svg.attr('height')>height ? height : svg.attr('height'))-10;
-            svg.append('text')
-                .attr('class', 'axis-label')
+            svg.append('g')
+                .attr('class','x-label-container')
+                .append('text')
+                .attr('class', 'x label axis-label')
                 .attr('text-anchor', 'middle')
                 .attr('transform', 'translate(' + xAxisXPos + ',' + xAxisYPos + ')')
                 .text(xLabel);
 
+            d3.select('.x.label').call(d3textwrap.textwrap().bounds({width: (width-margin.left)*0.75, height: 80}));
+            d3.select('.x-label-container').selectAll('foreignObject').attr('style','transform: translate('+((width/2)-(((width-margin.left)*0.75)/2)) + 'px,' + (height - 80)+'px);');
+            d3.select('.x-label-container').selectAll('div').attr('class','axis-label');
+
             var yAxisXPos = (parseInt(svg.attr('height')>height ? height : svg.attr('height'))-margin.bottom)/2;
-            svg.append('text')
+            svg.append('g')
+                .attr('class','y-label-container')
+                .append('text')
                 .attr('class', 'axis-label')
                 .attr('text-anchor', 'middle')
-                .attr('transform', 'rotate(-90) translate(-' + yAxisXPos + ',10)')
+                .attr('transform', 'rotate(-90) translate(-' + yAxisXPos + ',15)')
                 .text('Percentage of Samples in Grouping');
 
             function check_selection_state(isActive) {
