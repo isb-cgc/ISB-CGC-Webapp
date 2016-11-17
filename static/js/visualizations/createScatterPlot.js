@@ -36,8 +36,8 @@ function($, d3, d3textwrap, vizhelpers) {
 
             var yVal = function(d) {
                 if (helpers.isValidNumber(d[yParam])) {
-                    return d[yParam];
                     checkYvalid++;
+                    return d[yParam];
                 } else {
                     d[yParam] = range[1];
                     return range[1];
