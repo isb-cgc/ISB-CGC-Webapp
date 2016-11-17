@@ -17,7 +17,7 @@
  */
 
 define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers'],
-function($, d3, d3tip, d3textwrap, vizhelpers) {
+    function($, d3, d3tip, d3textwrap, vizhelpers) {
 
     // If you want to override the tip coming in from the create call,
     // do it here
@@ -71,7 +71,8 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                 .orient('bottom');
             var y = d3.scale.linear()
                 .range([height-margin.bottom-margin.top, 0])
-                .domain([0, d3.max(data, function(d) { return d.count; })]);
+                .domain([0, d3.max(data, function(d) { return d.count; })])
+                .nice();
             var yAxis = d3.svg.axis()
                 .scale(y)
                 .orient('left')
@@ -79,7 +80,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
 
             var zoomer = function() {
                 if(!selex_active) {
-                    svg.select('.x.axis').attr('transform', 'translate(' + (d3.event.translate[0] + margin.left) + ',' + (height - margin.bottom - 55) + ')').call(xAxis);
+                    svg.select('.x.axis').attr('transform', 'translate(' + (d3.event.translate[0] + margin.left) + ',' + (height - margin.bottom - margin.top - 40) + ')').call(xAxis);
                     svg.selectAll('.x.axis text').style('text-anchor', 'end').attr('transform', 'translate(' + -15 + ',' + 10 + ') rotate(-90)');
                     plot_area.selectAll('.plot-bar').attr('transform', 'translate(' + d3.event.translate[0] + ',0)');
                 }
@@ -91,19 +92,21 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
 
             var zoom = d3.behavior.zoom()
                 .x(x2)
+                .scaleExtent([1,1])
                 .on('zoom', zoomer);
 
             svg.call(zoom);
 
             var plot_area = svg.append('g')
-                .attr('clip-path', 'url(#plot_area_clip)');
+                .attr('clip-path', 'url(#plot_area_clip)')
+                .attr('transform','translate(0,'+margin.top+')');
 
             plot_area.append('clipPath')
                 .attr('id', 'plot_area_clip')
                 .append('rect')
                 .attr({ width: width-margin.left - margin.right,
                         height: height-margin.top - margin.bottom})
-                .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+                .attr('transform', 'translate(' + margin.left + ',0)');
 
             plot_area.selectAll(".plot-bar")
                 .data(data)
@@ -128,11 +131,11 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                 .append('rect')
                 .attr('height', margin.bottom+margin.top)
                 .attr('width', width-margin.left-margin.right)
-                .attr('transform', 'translate(' + margin.left + ',' + (height  - margin.bottom - margin.top) + ')');
+                .attr('transform', 'translate(' + margin.left + ',' + (height  - margin.bottom) + ')');
 
             x_axis_area.append('g')
                 .attr('class', 'x axis')
-                .attr('transform', 'translate(' + margin.left + ',' + (height - margin.bottom - margin.top - 45) + ')')
+                .attr('transform', 'translate(' + margin.left + ',' + (height - margin.bottom - margin.top - 40) + ')')
                 .call(xAxis)
                 .selectAll('text')
                 .style('text-anchor', 'end')
@@ -224,8 +227,8 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
             svg.append('text')
                 .attr('class', 'y label axis-label')
                 .attr('text-anchor', 'middle')
-                .attr('transform', 'rotate(-90) translate(' + (-1 * (height/2)) + ',10)')
-                .text('Number of Samples');
+                .text('Number of Samples')
+                .attr('transform', 'rotate(-90) translate(' + ((-1 * (height/2))+($('.y.label.axis-label').outerWidth()/2)) + ',20)');
 
             var check_selection_state = function(obj) {
 

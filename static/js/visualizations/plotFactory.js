@@ -295,9 +295,7 @@ define([
         return api_url;
     }
 
-    /*
-     Generate url for gathering data for a SeqPeek plot
-     */
+    // Generate url for gathering data for a SeqPeek plot
     function get_seqpeek_data_url(base_api_url, cohorts, gene_label){
         var cohort_str = '';
         for (var i = 0; i < cohorts.length; i++) {
@@ -339,7 +337,9 @@ define([
     function select_plot(args){//plot_selector, legend_selector, pairwise_element, type, x_attr, y_attr, color_by, cohorts, cohort_override, data){
         var width  = $('.worksheet.active .worksheet-panel-body:first').width(), //TODO should be based on size of screen
             height = 725, //TODO ditto
-            margin = {top: 0, bottom: 150, left: 70, right: 10},
+            // Top margin: required to keep top-most Y-axis ticks from being cut off on non-scrolled y axes
+            // Bottom margin: takes into account double-wrapped x-axis title and wrapped long-text x-axis labels
+            margin = {top: 15, bottom: 150, left: 80, right: 10},
             x_type = '',
             y_type = '';
 
@@ -359,7 +359,6 @@ define([
             };
 
             data = data['items'];
-
 
             if (args.cohort_override) {
                 args.color_by = 'cohort';
@@ -391,6 +390,16 @@ define([
                     break;
             }
 
+            if(!visualization.plot) {
+            // Data was not valid
+                $(args.plot_selector).empty().prepend('<div id="log-scale-alert" class="alert alert-warning alert-dismissable">'
+                    + '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>'
+                    + 'No valid data was returned for this plot. Double-check your plot type, '
+                    + 'axis variables, and cohorts to make sure they can return valid data. Please note, some data types '
+                    + 'cannot be log transformed due to negative values.</div>');
+                return;
+            }
+
             //establish marquee sample selection
             $(visualization.svg[0]).parents('.plot').find('.toggle-selection').unbind();
             $(visualization.svg[0]).parents('.plot').find('.toggle-selection').on('click', function () {
@@ -417,7 +426,7 @@ define([
                 .style('font-size', 20)
                 .attr('text-anchor', 'middle')
                 .attr('transform', 'translate(' + (width/2) + ',' + (height/2) + ')')
-                .text('Cohort provided has no samples.');
+                .text('No samples were found for this combination of plot type, cohort, and axis variables.');
         }
     };
 

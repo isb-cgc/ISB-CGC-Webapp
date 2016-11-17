@@ -214,17 +214,9 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
             var x2 = d3.scale.linear()
                 .range([0, width])
                 .domain([0, width]);
-            var x2Axis = d3.svg.axis()
-                .scale(x2)
-                .ticks(domain.length)
-                .tickFormat('');
             var y2 = d3.scale.linear()
-                .range([0, width])
-                .domain([0, width]);
-            var y2Axis = d3.svg.axis()
-                .scale(y2)
-                .ticks(range.length)
-                .tickFormat('');
+                .range([0, height])
+                .domain([0, height]);
 
             var zoom_x = function() {
                 if(!selex_active) {
@@ -243,9 +235,9 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                         .style('text-anchor', 'middle')
                         .attr('dy', -10);
                     svg.select('.y.grid').attr('transform', 'translate(' + margin.left + ',' + (d3.event.translate[1] + (Math.round((-cubby_size) / 2))) + ')');
+
                     plot_area.selectAll('.expected_fill').attr('transform', 'translate(' + 0 + ',' + d3.event.translate[1] + ')');
                     plot_area.selectAll('text').attr('transform', 'translate(' + 0 + ',' + d3.event.translate[1] + ')');
-                    d3.select('.y.axis').selectAll('foreignObject').attr('style', 'transform: translate(-' + margin.left * 0.75 + 'px,-' + y.rangeBand() * 0.50 + 'px);');;
                 }
             };
 
@@ -257,15 +249,16 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                         svg.select('.x.axis').attr('transform', 'translate(' + d3.event.translate[0] + ',' + (view_height - margin.top - margin.bottom) + ') scale(' + d3.event.scale + ',' + d3.event.scale + ')').call(xAxis);
                     }
                     svg.select('.x.grid').attr('transform', 'translate(' + (d3.event.translate[0] + x_band_width / 2) + ',0) scale(' + d3.event.scale + ',' + d3.event.scale + ')');
+
                     svg.select('.y.axis').attr('transform', 'translate(' + margin.left + ',' + (d3.event.translate[1]) + ') scale(' + d3.event.scale + ',' + d3.event.scale + ')')
                         .call(yAxis)
                         .selectAll('text')
                         .style('text-anchor', 'middle')
                         .attr('dy', -10);
                     svg.select('.y.grid').attr('transform', 'translate(' + margin.left + ',' + (d3.event.translate[1] + (y_band_width * d3.event.scale) / 2) + ') scale(' + d3.event.scale + ',' + d3.event.scale + ')');
+
                     plot_area.selectAll('.expected_fill').attr('transform', 'translate(' + d3.event.translate[0] + ',' + d3.event.translate[1] + ') scale(' + d3.event.scale + ',' + d3.event.scale + ')');
                     plot_area.selectAll('text').attr('transform', 'translate(' + d3.event.translate[0] + ',' + d3.event.translate[1] + ') scale(' + d3.event.scale + ',' + d3.event.scale + ')');
-                    d3.select('.y.axis').selectAll('foreignObject').attr('style', 'transform: translate(-' + margin.left * 0.75 + 'px,-' + y.rangeBand() * 0.50 + 'px);');
                 }
             };
 
@@ -274,15 +267,19 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
             if (width > view_width && height> view_height) {
                 zoom = d3.behavior.zoom()
                     .x(x2)
+                    .scaleExtent([1,1])
                     .y(y2)
+                    .scaleExtent([1,1])
                     .on('zoom', zoom_xy);
             } else if (width > view_width) {
                 zoom = d3.behavior.zoom()
                     .x(x2)
+                    .scaleExtent([1,1])
                     .on('zoom', zoom_x);
             } else if (height > view_height) {
                 zoom = d3.behavior.zoom()
                     .y(y2)
+                    .scaleExtent([1,1])
                     .on('zoom', zoom_y);
             }
 
@@ -316,15 +313,17 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                         var sample_list = [];
                         var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                         $('rect.expected_fill.selected').each(function () {
-                            var samples = $(this).attr('data-samples').split(',');
-                            total_samples += samples.length;
-                            total_patients += $.map(samples, function (d) {
-                                return d.substr(0, 12);
-                            })
-                                .filter(function (item, i, a) {
-                                    return i == a.indexOf(item)
-                                }).length;
-                            sample_list = sample_list.concat(samples);
+                            if($(this).attr('data-samples') !== null && $(this).attr('data-samples').length > 0) {
+                                var samples = $(this).attr('data-samples').split(',');
+                                total_samples += samples.length;
+                                total_patients += $.map(samples, function (d) {
+                                    return d.substr(0, 12);
+                                })
+                                    .filter(function (item, i, a) {
+                                        return i == a.indexOf(item)
+                                    }).length;
+                                sample_list = sample_list.concat(samples);
+                            }
                         });
 
                         sample_form_update({}, total_samples, total_patients, sample_list);
@@ -367,8 +366,6 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                 .attr('text-anchor', 'middle')
                 .attr('transform', 'translate(' + xAxisXPos + ',' + xAxisYPos + ')')
                 .text(xLabel);
-            d3.select('.x.axis').selectAll('text').call(d3textwrap.textwrap().bounds({width: x.rangeBand(), height: margin.bottom*0.75}));
-            d3.select('.x.axis').selectAll('foreignObject').attr('style','transform: translate(-'+(x.rangeBand()*0.5)+'px,0px);');
 
             var yAxisXPos = (parseInt(svg.attr('height')>view_height ? view_height : svg.attr('height'))-margin.bottom)/2;
             svg.append('text')
@@ -377,12 +374,17 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                 .attr('transform', 'rotate(-90) translate(-' + yAxisXPos + ',10)')
                 .text(yLabel);
 
+            // Wrap our value labels
+            d3.select('.x.axis').selectAll('text').call(d3textwrap.textwrap().bounds({width: x.rangeBand(), height: margin.bottom*0.75}));
+            d3.select('.x.axis').selectAll('foreignObject')
+                .attr('style','transform: translate(-'+(x.rangeBand()*0.5)+'px,0px);');
+
             d3.select('.y.axis').selectAll('text').call(d3textwrap.textwrap().bounds({width: margin.left*0.75, height: y.rangeBand()}));
             d3.select('.y.axis').selectAll('foreignObject')
                 .attr('style','transform: translate(-'+margin.left*0.75+'px,-'+y.rangeBand()*0.50+'px);');
 
             $('foreignObject div').each(function(){
-                $(this).attr('title',$(this).html());
+                $(this).attr('title',$(this).html())
             });
 
             var check_selection_state = function(obj) {
