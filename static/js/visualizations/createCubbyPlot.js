@@ -283,9 +283,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                     .on('zoom', zoom_y);
             }
 
-            if (zoom) {
-                svg.call(zoom);
-            }
+            svg.call(zoom);
 
 
             plot_area.selectAll('.expected_fill')
