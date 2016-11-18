@@ -283,7 +283,10 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                     .on('zoom', zoom_y);
             }
 
-            svg.call(zoom);
+            if (zoom) {
+                svg.call(zoom);
+            }
+
 
             plot_area.selectAll('.expected_fill')
                 .data(data_counts)
