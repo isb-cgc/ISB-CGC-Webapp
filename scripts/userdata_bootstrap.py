@@ -310,19 +310,21 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
         if db and db.open: db.close
 
 def bootstrap_file_data():
+    print >> sys.stdout, 'Populating filelistings...'
+
     DCC_BUCKET = ''
     CGHUB_BUCKET = ''
     CCLE_BUCKET = ''
     insert_userupload = "INSERT INTO data_upload_userupload (status, `key`, owner_id) values ('complete', '', %s);"
     insert_useruploadedfile_TCGA = "INSERT INTO data_upload_useruploadedfile (upload_id, bucket, file) " \
                                    "SELECT %s,%s,datafilenamekey from metadata_data " \
-                                   "    where datafileuploaded='true' and datafilenamekey!='' and project=%s and repository=%s;"
+                                   "    where datafileuploaded='true' and datafilenamekey!='' and study=%s and repository=%s;"
     insert_useruploadedfile_CCLE = "INSERT INTO data_upload_useruploadedfile (upload_id, bucket, file) " \
                                    "SELECT %s,%s,datafilenamekey from metadata_data " \
                                    "    where datafileuploaded='true' and datafilenamekey!='' and project=%s;"
 
     update_projects_study = "UPDATE projects_user_data_tables set data_upload_id=%s where project_id=%s;"
-    get_studies = "SELECT * FROM projects_project;"
+    get_projects = "SELECT * FROM projects_project;"
     get_last_userupload = "SELECT * FROM data_upload_userupload order by id desc limit 1;"
 
     try:
@@ -330,7 +332,7 @@ def bootstrap_file_data():
         cursor = db.cursor()
         cursorDict = db.cursor(cursors.DictCursor)
 
-        cursorDict.execute(get_studies)
+        cursorDict.execute(get_projects)
         for project in cursorDict.fetchall():
             print project
 
@@ -365,7 +367,7 @@ def bootstrap_file_data():
 
         # Create UserUploadedFile for each project
     except Exception as e:
-        print e
+        print >> sys.stderr, e
     finally:
         if cursor: cursor.close()
         if cursorDict: cursorDict.close()
