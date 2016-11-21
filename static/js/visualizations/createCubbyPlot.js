@@ -294,6 +294,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
 
             svg.call(zoom);
 
+
             plot_area.selectAll('.expected_fill')
                 .data(data_counts)
                 .enter().append('rect')
