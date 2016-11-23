@@ -160,18 +160,18 @@ def create_samples_shortlist_view(cursor):
         print >> sys.stdout, e
         print >> sys.stdout, traceback.format_exc()
 
-# Cohorts made prior to the release of user data will have null values in their study IDs for each sample
-# in the cohort. This script assumes that any sample with a null study ID is an ISB-CGC sample from metadata_samples
-# and uses the value of the Study column to look up the appropriate ID in projects_study and apply it to the cohort
-# *** This will need to be changed when metadata_samples.Study becomes 'disease code' and a study column is added ***
-# *** which is an FK into the projects_study table                                                                ***
+# Cohorts made prior to the release of user data will have null values in their project IDs for each sample
+# in the cohort. This script assumes that any sample with a null project ID is an ISB-CGC sample from metadata_samples
+# and uses the value of the Study column to look up the appropriate ID in projects_project and apply it to the cohort
+# *** This will need to be changed when metadata_samples.Study becomes 'disease code' and a project column is added ***
+# *** which is an FK into the projects_project table                                                                ***
 
-def fix_cohort_studies(cursor):
+def fix_cohort_projects(cursor):
     try:
-        fix_study_ids_str = """
+        fix_project_ids_str = """
             UPDATE cohorts_samples AS cs
             JOIN (
-                    SELECT ms.SampleBarcode AS SampleBarcode,ps.id AS study
+                    SELECT ms.SampleBarcode AS SampleBarcode,ps.id AS project
                             FROM metadata_samples ms
                             JOIN (
                                 SELECT p.id AS id,p.name AS name
@@ -179,17 +179,17 @@ def fix_cohort_studies(cursor):
                                     JOIN auth_user au ON au.id = p.owner_id
                                 WHERE au.username = 'isb' AND au.is_active = 1 AND p.active=1 AND au.is_superuser = 1
                             ) ps ON ps.name = ms.Study
-            ) AS ss ON ss.SampleBarcode = cs.sample_id
+            ) AS ss ON ss.SampleBarcode = cs.sample_barcode
             JOIN cohorts_cohort AS cc
             ON cc.id = cs.cohort_id
-            SET cs.study_id = ss.study
-            WHERE cs.study_id IS NULL AND cc.active = 1;
+            SET cs.project_id = ss.project
+            WHERE cs.project_id IS NULL AND cc.active = 1;
         """
 
-        null_study_count = """
+        null_project_count = """
             SELECT COUNT(*)
             FROM cohorts_samples cs
-                    JOIN metadata_samples ms ON ms.SampleBarcode = cs.sample_id
+                    JOIN metadata_samples ms ON ms.SampleBarcode = cs.sample_barcode
                     JOIN (
                         SELECT p.id AS id,p.name AS name
                         FROM projects_project p
@@ -197,31 +197,31 @@ def fix_cohort_studies(cursor):
                         WHERE au.username = 'isb' AND au.is_superuser = 1 AND au.is_active = 1 AND p.active = 1
                     ) ps ON ps.name = ms.Study
                     JOIN cohorts_cohort AS cc ON cc.id = cs.cohort_id
-            where cs.study_id IS NULL AND cc.active = 1;
+            where cs.project_id IS NULL AND cc.active = 1;
         """
 
-        cursor.execute(null_study_count)
-        print >> sys.stdout,"[STATUS] Number of cohort sample entries from ISB-CGC studies with null study IDs: "+str(cursor.fetchall()[0][0])
-        print >> sys.stdout,"[STATUS] Correcting null study IDs for ISB-CGC cohorts - this could take a while!"
-        cursor.execute(fix_study_ids_str)
-        print >> sys.stdout, "[STATUS] ...done. Checking for still-null study IDs..."
-        cursor.execute(null_study_count)
+        cursor.execute(null_project_count)
+        print >> sys.stdout,"[STATUS] Number of cohort sample entries from ISB-CGC studies with null project IDs: "+str(cursor.fetchall()[0][0])
+        print >> sys.stdout,"[STATUS] Correcting null project IDs for ISB-CGC cohorts - this could take a while!"
+        cursor.execute(fix_project_ids_str)
+        print >> sys.stdout, "[STATUS] ...done. Checking for still-null project IDs..."
+        cursor.execute(null_project_count)
         not_fixed = cursor.fetchall()[0][0]
-        print >> sys.stdout, "[STATUS] Number of cohort sample entries from ISB-CGC studies with null study IDs after correction: " + str(not_fixed)
+        print >> sys.stdout, "[STATUS] Number of cohort sample entries from ISB-CGC studies with null project IDs after correction: " + str(not_fixed)
         if not_fixed > 0:
             print >> sys.stdout, "[WARNING] Some of the samples were not corrected! You should double-check them."
     except Exception as e:
-        print >> "[ERROR] Exception when fixing cohort study IDs; they may not have been fiixed"
+        print >> "[ERROR] Exception when fixing cohort project IDs; they may not have been fiixed"
         print >> sys.stdout, e
         print >> sys.stdout, traceback.format_exc()
 
 
-# Add the stored procedure "get_tcga_study_set" which fetches the list of all program/project IDs which are owned by
+# Add the stored procedure "get_tcga_project_set" which fetches the list of all program/project IDs which are owned by
 # the ISB-CGC superuser
-def add_isb_cgc_study_sproc(cursor):
+def add_isb_cgc_project_sproc(cursor):
     try:
         sproc_def = """
-            CREATE PROCEDURE `get_isbcgc_study_set`()
+            CREATE PROCEDURE `get_isbcgc_project_set`()
             BEGIN
             SELECT ps.id
             FROM projects_project ps
@@ -231,16 +231,16 @@ def add_isb_cgc_study_sproc(cursor):
             END
         """
 
-        cursor.execute("DROP PROCEDURE IF EXISTS `get_isbcgc_study_set`;")
+        cursor.execute("DROP PROCEDURE IF EXISTS `get_isbcgc_project_set`;")
         cursor.execute(sproc_def)
     except Exception as e:
-        print >> "[ERROR] Exception when adding the get_isbcgc_study_set sproc set; it may not have been added"
+        print >> "[ERROR] Exception when adding the get_isbcgc_project_set sproc set; it may not have been added"
         print >> sys.stdout, e
         print >> sys.stdout, traceback.format_exc()
 
 
 # Query to correct CCLE samples from fix_cohort_samples, because despite having specific 'Study' values all CCLE samples are
-# part of a single CCLE study
+# part of a single CCLE project
 
 def fix_ccle(cursor):
 
@@ -265,15 +265,15 @@ def fix_ccle(cursor):
             FROM cohorts_samples cs
             JOIN cohorts_cohort cc
                 ON cc.id = cs.cohort_id
-            WHERE cc.active = 1 AND cs.sample_id LIKE 'CCLE%' and NOT(cs.study_id = %s);
+            WHERE cc.active = 1 AND cs.sample_barcode LIKE 'CCLE%' and NOT(cs.project_id = %s);
         """
 
         fix_ccle_cohorts = """
             UPDATE cohorts_samples AS cs
                 JOIN cohorts_cohort cc
                     ON cc.id = cs.cohort_id
-            SET cs.study_id = %s
-            WHERE cc.active = 1 AND cs.sample_id LIKE 'CCLE%';
+            SET cs.project_id = %s
+            WHERE cc.active = 1 AND cs.sample_barcode LIKE 'CCLE%';
         """
 
         cursor.execute(count_ccle_cohort_samples, (ccle_id,))
@@ -281,16 +281,16 @@ def fix_ccle(cursor):
         results = cursor.fetchall()
 
         if len(results) <= 0:
-            print >> sys.stdout, "[STATUS] No samples with CCLE study IDs which need fixing - exiting."
+            print >> sys.stdout, "[STATUS] No samples with CCLE project IDs which need fixing - exiting."
             return
 
         ccle_count = results[0][0]
 
         if ccle_count <= 0:
-            print >> sys.stdout, "[STATUS] No samples with CCLE study IDs which need fixing - exiting."
+            print >> sys.stdout, "[STATUS] No samples with CCLE project IDs which need fixing - exiting."
             return
 
-        print >> sys.stdout, "[STATUS] There are " + str(ccle_count) + " CCLE samples in the cohorts_samples table with an incorrect study ID. Fixing..."
+        print >> sys.stdout, "[STATUS] There are " + str(ccle_count) + " CCLE samples in the cohorts_samples table with an incorrect project ID. Fixing..."
 
         cursor.execute(fix_ccle_cohorts, (ccle_id,))
 
@@ -298,7 +298,7 @@ def fix_ccle(cursor):
 
         ccle_new_count = cursor.fetchall()[0][0]
         if ccle_new_count > 0:
-            print >> sys.stdout, "[WARNING] Some CCLE samples still have the wrong study ID - double-check your database. (count: " + str(ccle_count) + ")"
+            print >> sys.stdout, "[WARNING] Some CCLE samples still have the wrong project ID - double-check your database. (count: " + str(ccle_count) + ")"
 
     except Exception as e:
         print >> sys.stdout, "[ERROR] Exception when fixing CCLE cohorts; they may not have been updated!"
@@ -322,12 +322,12 @@ def main():
                                  help="Create the metadata_samples_shortlist view, which acts as a smaller version of metadata_samples for use with the webapp.")
     cmd_line_parser.add_argument('-b', '--fix-bmi-case', type=bool, default=True,
                                  help="Fix the casing of the attribute value for the BMI row in metadata_attributes.")
-    cmd_line_parser.add_argument('-c', '--fix-cohort-studies', type=bool, default=True,
-                                 help="Fix cohorts which have null study IDs for ISB-CGC samples")
+    cmd_line_parser.add_argument('-c', '--fix-cohort-projects', type=bool, default=True,
+                                 help="Fix cohorts which have null project IDs for ISB-CGC samples")
     cmd_line_parser.add_argument('-e', '--fix-ccle-cohort-studies', type=bool, default=True,
-                                 help="Fix study IDs for CCLE samples in cohorts")
-    cmd_line_parser.add_argument('-i', '--create-isbcgc-study-set-sproc', type=bool, default=True,
-                                 help="Add the 'get_isbcgc_study_set' sproc to the database")
+                                 help="Fix project IDs for CCLE samples in cohorts")
+    cmd_line_parser.add_argument('-i', '--create-isbcgc-project-set-sproc', type=bool, default=True,
+                                 help="Add the 'get_isbcgc_project_set' sproc to the database")
 
     args = cmd_line_parser.parse_args()
 
@@ -340,9 +340,9 @@ def main():
         args.create_shortlist_view and create_shortlist_view(cursor)
         args.create_metadata_vals_sproc and create_metadata_vals_sproc(cursor)
         args.create_ms_shortlist_view and create_samples_shortlist_view(cursor)
-        args.fix_cohort_studies and fix_cohort_studies(cursor)
+        args.fix_cohort_projects and fix_cohort_projects(cursor)
         args.fix_ccle_cohort_studies and fix_ccle(cursor)
-        args.create_isbcgc_study_set_sproc and add_isb_cgc_study_sproc(cursor)
+        args.create_isbcgc_project_set_sproc and add_isb_cgc_project_sproc(cursor)
 
         # Until we have a new sql dump, we need to manually update changed columns
         args.fix_bmi_case and cursor.execute("UPDATE metadata_attr SET attribute='BMI' WHERE attribute='bmi';")

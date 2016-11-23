@@ -276,7 +276,7 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
                                                      public_feature_table, bqdataset_id))
         db.commit()
 
-        # Compare the number of studies in projects_user_data_tables, projects_study, and our study set.
+        # Compare the number of studies in projects_user_data_tables, projects_project, and our study set.
         # If they don't match, something might be wrong.
         study_count = 0
         study_udt_count = 0
@@ -321,7 +321,7 @@ def bootstrap_file_data():
                                    "SELECT %s,%s,datafilenamekey from metadata_data " \
                                    "    where datafileuploaded='true' and datafilenamekey!='' and project=%s;"
 
-    update_projects_study = "UPDATE projects_user_data_tables set data_upload_id=%s where project_id=%s;"
+    update_projects_project = "UPDATE projects_user_data_tables set data_upload_id=%s where project_id=%s;"
     get_studies = "SELECT * FROM projects_project;"
     get_last_userupload = "SELECT * FROM data_upload_userupload order by id desc limit 1;"
 
@@ -342,7 +342,7 @@ def bootstrap_file_data():
             last_userupload = cursor.fetchone()
 
             # Update the projects_project table with new upload id
-            cursor.execute(update_projects_study, (last_userupload[0], project['id']))
+            cursor.execute(update_projects_project, (last_userupload[0], project['id']))
 
 
             if project['name'] != 'CCLE': # TCGA
