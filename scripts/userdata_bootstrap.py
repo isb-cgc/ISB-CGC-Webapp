@@ -56,8 +56,8 @@ def create_study_views(project, source_table, studies):
     view_check_sql = "SELECT COUNT(TABLE_NAME) FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = %s;"
     create_view_sql = "CREATE OR REPLACE VIEW %s AS SELECT * FROM %s"
     where_proj = " WHERE Project=%s"
-    where_study = " AND Study=%s;"
-
+    where_study = " AND disease_code=%s;"
+    print source_table
     try:
         for study in studies:
             view_name = "%s_%s_%s" % (project, study, source_table,)
@@ -72,7 +72,7 @@ def create_study_views(project, source_table, studies):
             else:
                 makeView += where_study
                 params += (study,)
-
+            print makeView
             cursor.execute(makeView, params)
 
             cursor.execute(view_check_sql, (view_name,))
@@ -169,7 +169,7 @@ def bootstrap_metadata_attr_mapping():
 
 
 def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_name, bucket_permissions, bqdataset_name):
-    fetch_studies = "SELECT DISTINCT Study FROM metadata_samples WHERE Project='TCGA';"
+    fetch_studies = "SELECT DISTINCT disease_code FROM metadata_samples WHERE Project='TCGA';"
     insert_projects = "INSERT INTO projects_program (name, active, last_date_saved, is_public, owner_id) " + \
                       "VALUES (%s,%s,%s,%s,%s);"
     insert_studies = "INSERT INTO projects_project (name, active, last_date_saved, owner_id, program_id) " + \

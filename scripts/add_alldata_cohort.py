@@ -59,12 +59,12 @@ class BigQueryCohortSupport(object):
             "type": "STRING"
         },
         {
-            "name": "study_id",
+            "name": "project_id",
             "type": "INTEGER"
         }
     ]
 
-    patient_type = 'patient'
+    case_type = 'case'
     sample_type = 'sample'
 
     def __init__(self, service, project_id, dataset_id, table_id):
@@ -97,10 +97,10 @@ class BigQueryCohortSupport(object):
         return response
 
     def _build_cohort_row(self, cohort_id,
-                          patient_barcode=None, sample_barcode=None, aliquot_barcode=None):
+                          case_barcode=None, sample_barcode=None, aliquot_barcode=None):
         return {
             'cohort_id': cohort_id,
-            'patient_barcode': patient_barcode,
+            'patient_barcode': case_barcode,
             'sample_barcode': sample_barcode,
             'aliquot_barcode': aliquot_barcode
         }
@@ -108,8 +108,8 @@ class BigQueryCohortSupport(object):
     def add_cohort_with_sample_barcodes(self, cohort_id, barcodes):
         rows = []
         for sample_barcode in barcodes:
-            patient_barcode = sample_barcode[:12]
-            rows.append(self._build_cohort_row(cohort_id, patient_barcode, sample_barcode, None))
+            case_barcode = sample_barcode[:12]
+            rows.append(self._build_cohort_row(cohort_id, case_barcode, sample_barcode, None))
 
         response = self._streaming_insert(rows)
         return response
@@ -160,21 +160,21 @@ def get_superuser_id(conn, superuser_name):
 def get_sample_barcodes(conn):
     logging.info("Getting list of sample barcodes from MySQL")
     cursor = conn.cursor(DictCursor)
-    select_samples_str = "SELECT distinct SampleBarcode, ParticipantBarcode from metadata_samples where Project='TCGA';"
+    select_samples_str = "SELECT distinct sample_barcode, case_barcode from metadata_samples where Project='TCGA';"
     cursor.execute(select_samples_str)
     rows = cursor.fetchall()
     cursor.close()
-    # TODO: Temporary shim until Project/Study IDs are in metadata_samples
+    # TODO: Temporary shim until Project IDs are in metadata_samples
     for row in rows:
         row['project_id'] = None
-        row['sample_barcode'] = row['SampleBarcode']
-        row['patient_barocde'] = row['ParticipantBarcode']
+        row['sample_barcode'] = row['sample_barcode']
+        row['case_barcode'] = row['case_barcode']
     return rows
 
 def get_barcodes_from_file(filename):
     with open(filename) as tsv:
         header = True
-        patient_barcodes = []
+        case_barcodes = []
         sample_barcodes = []
         for line in csv.reader(tsv, delimiter='\t'):
             if header:
@@ -185,20 +185,20 @@ def get_barcodes_from_file(filename):
                 codes = line
 
                 # Check if ParticipantBarcode is first
-                if headers[0] == 'ParticipantBarcode':
-                    patient_code_index = 0
+                if headers[0] == 'case_barcode':
+                    case_code_index = 0
                     sample_code_index = 1
                 else:
-                    patient_code_index = 1
+                    case_code_index = 1
                     sample_code_index = 0
 
-                if codes[patient_code_index] not in patient_barcodes:
-                    patient_barcodes.append(codes[patient_code_index])
+                if codes[case_code_index] not in case_barcodes:
+                    case_barcodes.append(codes[case_code_index])
 
                 if codes[sample_code_index] not in sample_barcodes:
                     sample_barcodes.append(codes[sample_code_index])
 
-        return {'patient_barcodes': patient_barcodes, 'sample_barcodes': sample_barcodes}
+        return {'case_barcodes': case_barcodes, 'sample_barcodes': sample_barcodes}
 
     pass
 
@@ -208,7 +208,7 @@ def create_tcga_cohorts_from_files(directory):
     for file in filelist:
         filepath = os.path.join(directory, file)
         file_barcodes = get_barcodes_from_file(filepath)
-        print filepath, len(file_barcodes['sample_barcodes']), len(file_barcodes['patient_barcodes'])
+        print filepath, len(file_barcodes['sample_barcodes']), len(file_barcodes['case_barcodes'])
 
 def insert_barcodes_mysql(conn, superuser_id, cohort_name, sample_barcodes):
     insert_samples_str = 'INSERT INTO cohorts_samples (sample_barcode, cohort_id, case_barcode) values (%s, %s, %s);'
@@ -236,7 +236,7 @@ def insert_barcodes_mysql(conn, superuser_id, cohort_name, sample_barcodes):
 
     sample_tuples = []
     for row in sample_barcodes:
-        sample_tuples.append((row['SampleBarcode'], str(cohort_id), row['ParticipantBarcode'],))
+        sample_tuples.append((row['sample_barcode'], str(cohort_id), row['case_barcode'],))
     logging.info('Number of sample barcodes: {num_samples}'.format(num_samples=len(sample_tuples)))
 
     cursor.executemany(insert_samples_str, sample_tuples)
