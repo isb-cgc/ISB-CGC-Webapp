@@ -63,11 +63,11 @@ def catchup_shortlist(cursor):
             set_metadata_shortlist_def = """
                 UPDATE metadata_attr
                 SET shortlist=1
-                WHERE attribute IN ('age_at_initial_pathologic_diagnosis','BMI','Study','gender','has_27k','has_450k',
+                WHERE attribute IN ('age_at_initial_pathologic_diagnosis','BMI','Disease_Code','gender','has_27k','has_450k',
                   'has_BCGSC_GA_RNASeq','has_BCGSC_HiSeq_RNASeq','has_GA_miRNASeq','has_HiSeq_miRnaSeq',
                   'has_Illumina_DNASeq','has_RPPA','has_SNP6','has_UNC_GA_RNASeq','has_UNC_HiSeq_RNASeq',
                   'histological_type','hpv_status','icd_10','icd_o_3_histology','icd_o_3_site','neoplasm_histologic_grade',
-                  'new_tumor_event_after_initial_treatment','pathologic_stage','person_neoplasm_cancer_status','Project',
+                  'new_tumor_event_after_initial_treatment','pathologic_stage','person_neoplasm_cancer_status','program_name',
                   'residual_tumor','SampleTypeCode','tobacco_smoking_history','tumor_tissue_site','tumor_type',
                   'vital_status');
             """
@@ -144,7 +144,7 @@ def create_samples_shortlist_view(cursor):
         # Base VIEW definition
         metadata_samples_shortlist_view_def = """
             CREATE OR REPLACE VIEW metadata_samples_shortlist AS
-                SELECT SampleBarcode,ParticipantBarcode%s FROM metadata_samples;
+                SELECT sample_barcode,case_barcode%s FROM metadata_samples;
         """
 
         # Gather the metadata attribute 'shortlist' from metadata_attributes
@@ -171,15 +171,15 @@ def fix_cohort_projects(cursor):
         fix_project_ids_str = """
             UPDATE cohorts_samples AS cs
             JOIN (
-                    SELECT ms.SampleBarcode AS SampleBarcode,ps.id AS project
+                    SELECT ms.sample_barcode AS sample_barcode,ps.id AS project
                             FROM metadata_samples ms
                             JOIN (
                                 SELECT p.id AS id,p.name AS name
                                 FROM projects_project p
                                     JOIN auth_user au ON au.id = p.owner_id
                                 WHERE au.username = 'isb' AND au.is_active = 1 AND p.active=1 AND au.is_superuser = 1
-                            ) ps ON ps.name = ms.Study
-            ) AS ss ON ss.SampleBarcode = cs.sample_barcode
+                            ) ps ON ps.name = ms.disease_code
+            ) AS ss ON ss.sample_barcode = cs.sample_barcode
             JOIN cohorts_cohort AS cc
             ON cc.id = cs.cohort_id
             SET cs.project_id = ss.project
@@ -189,13 +189,13 @@ def fix_cohort_projects(cursor):
         null_project_count = """
             SELECT COUNT(*)
             FROM cohorts_samples cs
-                    JOIN metadata_samples ms ON ms.SampleBarcode = cs.sample_barcode
+                    JOIN metadata_samples ms ON ms.sample_barcode = cs.sample_barcode
                     JOIN (
                         SELECT p.id AS id,p.name AS name
                         FROM projects_project p
                           JOIN auth_user au ON au.id = p.owner_id
                         WHERE au.username = 'isb' AND au.is_superuser = 1 AND au.is_active = 1 AND p.active = 1
-                    ) ps ON ps.name = ms.Study
+                    ) ps ON ps.name = ms.disease_code
                     JOIN cohorts_cohort AS cc ON cc.id = cs.cohort_id
             where cs.project_id IS NULL AND cc.active = 1;
         """
@@ -306,6 +306,45 @@ def fix_ccle(cursor):
         print >> sys.stdout, traceback.format_exc()
 
 
+def alter_metadata_tables(cursor):
+    print >> sys.stdout, "[STATUS] Altering tables and updating tables."
+
+    alter_metadata_samples_check = '''
+        SELECT EXISTS (select * from INFORMATION_SCHEMA.COLUMNS where table_schema="dev" and table_name="metadata_samples" and column_name="sample_barcode");
+    '''
+    alter_metadata_samples = '''
+            ALTER TABLE metadata_samples change SampleBarcode sample_barcode VARCHAR(45),
+                change ParticipantBarcode case_barcode VARCHAR(45),
+                change Study disease_code VARCHAR(45),
+                change Project program_name VARCHAR(40);
+    '''
+
+    # TODO: This should actually change Study to project_id
+    alter_metadata_data = '''
+            ALTER TABLE metadata_data change SampleBarcode sample_barcode VARCHAR(45),
+                change ParticipantBarcode case_barcode VARCHAR(45),
+                change Study disease_code VARCHAR(45),
+                change Project program_name VARCHAR(40);
+    '''
+
+    update_metadata_attr_project = 'UPDATE metadata_attr set attribute="program_name" where attribute="Project";'
+    remove_metadata_attr_study = 'DELETE FROM metadata_attr where attribute="Study";'
+
+    try:
+        cursor.execute(alter_metadata_samples_check)
+        result = cursor.fetchone()
+        if not result[0]:
+            cursor.execute(alter_metadata_samples)
+            cursor.execute(alter_metadata_data)
+            cursor.execute(update_metadata_attr_project)
+            cursor.execute(remove_metadata_attr_study)
+
+    except Exception as e:
+        print >> sys.stdout, "[ERROR] Exception when altering metadata_samples table!"
+        print >> sys.stdout, e
+        print >> sys.stdout, traceback.format_exc()
+
+
 """ main """
 
 def main():
@@ -328,14 +367,15 @@ def main():
                                  help="Fix project IDs for CCLE samples in cohorts")
     cmd_line_parser.add_argument('-i', '--create-isbcgc-project-set-sproc', type=bool, default=True,
                                  help="Add the 'get_isbcgc_project_set' sproc to the database")
-
+    cmd_line_parser.add_argument('-a', '--alter-metadata-tables', type=bool, default=True,
+                                 help="Alter metadata tables to align with updated metadata tables")
     args = cmd_line_parser.parse_args()
 
     db = get_mysql_connection()
     cursor = db.cursor()
 
     try:
-
+        args.alter_metadata_tables and alter_metadata_tables(cursor)
         args.catchup_shortlist and catchup_shortlist(cursor)
         args.create_shortlist_view and create_shortlist_view(cursor)
         args.create_metadata_vals_sproc and create_metadata_vals_sproc(cursor)
@@ -343,6 +383,7 @@ def main():
         args.fix_cohort_projects and fix_cohort_projects(cursor)
         args.fix_ccle_cohort_studies and fix_ccle(cursor)
         args.create_isbcgc_project_set_sproc and add_isb_cgc_project_sproc(cursor)
+
 
         # Until we have a new sql dump, we need to manually update changed columns
         args.fix_bmi_case and cursor.execute("UPDATE metadata_attr SET attribute='BMI' WHERE attribute='bmi';")
