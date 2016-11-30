@@ -87,7 +87,7 @@ def create_shortlist_view(cursor):
         """
         cursor.execute(metadata_shortlist_view_def)
     except Exception as e:
-        print >> "[ERROR] Exception when creating the metadata shortlist view! It may not have been made."
+        print >> sys.stdout, "[ERROR] Exception when creating the metadata shortlist view! It may not have been made."
         print >> sys.stdout, e
         print >> sys.stdout, traceback.format_exc()
 
@@ -128,7 +128,7 @@ def create_metadata_vals_sproc(cursor):
         cursor.execute("DROP PROCEDURE IF EXISTS `get_metadata_values`;")
         cursor.execute(metadata_vals_sproc_def)
     except Exception as e:
-        print >> "[ERROR] Exception when making the metadata values sproc; it may not have been made"
+        print >> sys.stdout, "[ERROR] Exception when making the metadata values sproc; it may not have been made"
         print >> sys.stdout, e
         print >> sys.stdout, traceback.format_exc()
 
@@ -156,7 +156,7 @@ def create_samples_shortlist_view(cursor):
 
         cursor.execute(metadata_samples_shortlist_view_def % view_cols)
     except Exception as e:
-        print >> "[ERROR] Exception when creating the metadata_samples shortlist view; it may not have been made"
+        print >> sys.stdout, "[ERROR] Exception when creating the metadata_samples shortlist view; it may not have been made"
         print >> sys.stdout, e
         print >> sys.stdout, traceback.format_exc()
 
@@ -211,7 +211,7 @@ def fix_cohort_studies(cursor):
         if not_fixed > 0:
             print >> sys.stdout, "[WARNING] Some of the samples were not corrected! You should double-check them."
     except Exception as e:
-        print >> "[ERROR] Exception when fixing cohort study IDs; they may not have been fiixed"
+        print >> sys.stdout, "[ERROR] Exception when fixing cohort study IDs; they may not have been fiixed"
         print >> sys.stdout, e
         print >> sys.stdout, traceback.format_exc()
 
@@ -234,7 +234,7 @@ def add_isb_cgc_study_sproc(cursor):
         cursor.execute("DROP PROCEDURE IF EXISTS `get_isbcgc_study_set`;")
         cursor.execute(sproc_def)
     except Exception as e:
-        print >> "[ERROR] Exception when adding the get_isbcgc_study_set sproc set; it may not have been added"
+        print >> sys.stdout, "[ERROR] Exception when adding the get_isbcgc_study_set sproc set; it may not have been added"
         print >> sys.stdout, e
         print >> sys.stdout, traceback.format_exc()
 

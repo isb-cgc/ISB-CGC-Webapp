@@ -6,6 +6,10 @@ export HOMEROOT=/home/ubuntu/${CIRCLE_PROJECT_REPONAME}
 git clone -b isb-cgc-prod https://github.com/isb-cgc/ISB-CGC-Common.git
 git clone -b prod https://github.com/isb-cgc/ISB-CGC-API.git
 
+# Remove .pyc files
+find . -type f -name '*.pyc' -delete
+
+# Use the last commit of the master branch of ISB-CGC-Common, therefore no checkout needed.
 else
 export $(cat /home/vagrant/www/.env | grep -v ^# | xargs) 2> /dev/null
 export HOME=/home/vagrant
