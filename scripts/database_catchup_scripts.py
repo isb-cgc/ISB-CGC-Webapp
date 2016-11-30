@@ -260,12 +260,16 @@ def fix_ccle(cursor):
 
         ccle_id = results[0][0]
 
+        if not ccle_id:
+            print >> sys.stdout, "[WARNING] CCLE project was not found, so the cohorts with these samples cannot be corrected."
+            return
+
         count_ccle_cohort_samples = """
             SELECT COUNT(*)
             FROM cohorts_samples cs
             JOIN cohorts_cohort cc
                 ON cc.id = cs.cohort_id
-            WHERE cc.active = 1 AND cs.sample_barcode LIKE 'CCLE%' and NOT(cs.project_id = %s);
+            WHERE cc.active = 1 AND cs.sample_barcode LIKE 'CCLE%%' and NOT(cs.project_id = %s);
         """
 
         fix_ccle_cohorts = """
@@ -273,7 +277,7 @@ def fix_ccle(cursor):
                 JOIN cohorts_cohort cc
                     ON cc.id = cs.cohort_id
             SET cs.project_id = %s
-            WHERE cc.active = 1 AND cs.sample_barcode LIKE 'CCLE%';
+            WHERE cc.active = 1 AND cs.sample_barcode LIKE 'CCLE%%';
         """
 
         cursor.execute(count_ccle_cohort_samples, (ccle_id,))
