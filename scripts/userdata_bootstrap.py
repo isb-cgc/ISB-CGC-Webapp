@@ -55,7 +55,7 @@ def create_study_views(project, source_table, studies):
     study_names = {}
     view_check_sql = "SELECT COUNT(TABLE_NAME) FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = %s;"
     create_view_sql = "CREATE OR REPLACE VIEW %s AS SELECT * FROM %s"
-    where_proj = " WHERE Project=%s"
+    where_proj = " WHERE program_name=%s"
     where_study = " AND disease_code=%s;"
     print source_table
     try:
@@ -169,7 +169,7 @@ def bootstrap_metadata_attr_mapping():
 
 
 def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_name, bucket_permissions, bqdataset_name):
-    fetch_studies = "SELECT DISTINCT disease_code FROM metadata_samples WHERE Project='TCGA';"
+    fetch_studies = "SELECT DISTINCT disease_code FROM metadata_samples WHERE program_name='TCGA';"
     insert_projects = "INSERT INTO projects_program (name, active, last_date_saved, is_public, owner_id) " + \
                       "VALUES (%s,%s,%s,%s,%s);"
     insert_studies = "INSERT INTO projects_project (name, active, last_date_saved, owner_id, program_id) " + \
@@ -318,10 +318,10 @@ def bootstrap_file_data():
     insert_userupload = "INSERT INTO data_upload_userupload (status, `key`, owner_id) values ('complete', '', %s);"
     insert_useruploadedfile_TCGA = "INSERT INTO data_upload_useruploadedfile (upload_id, bucket, file) " \
                                    "SELECT %s,%s,datafilenamekey from metadata_data " \
-                                   "    where datafileuploaded='true' and datafilenamekey!='' and study=%s and repository=%s;"
+                                   "    where datafileuploaded='true' and datafilenamekey!='' and disease_code=%s and repository=%s;"
     insert_useruploadedfile_CCLE = "INSERT INTO data_upload_useruploadedfile (upload_id, bucket, file) " \
                                    "SELECT %s,%s,datafilenamekey from metadata_data " \
-                                   "    where datafileuploaded='true' and datafilenamekey!='' and project=%s;"
+                                   "    where datafileuploaded='true' and datafilenamekey!='' and program_name=%s;"
 
     update_projects_project = "UPDATE projects_user_data_tables set data_upload_id=%s where project_id=%s;"
     get_projects = "SELECT * FROM projects_project;"

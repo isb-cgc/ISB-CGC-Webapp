@@ -67,7 +67,7 @@ def catchup_shortlist(cursor):
                   'has_BCGSC_GA_RNASeq','has_BCGSC_HiSeq_RNASeq','has_GA_miRNASeq','has_HiSeq_miRnaSeq',
                   'has_Illumina_DNASeq','has_RPPA','has_SNP6','has_UNC_GA_RNASeq','has_UNC_HiSeq_RNASeq',
                   'histological_type','hpv_status','icd_10','icd_o_3_histology','icd_o_3_site','neoplasm_histologic_grade',
-                  'new_tumor_event_after_initial_treatment','pathologic_stage','person_neoplasm_cancer_status','Project',
+                  'new_tumor_event_after_initial_treatment','pathologic_stage','person_neoplasm_cancer_status','program_name',
                   'residual_tumor','SampleTypeCode','tobacco_smoking_history','tumor_tissue_site','tumor_type',
                   'vital_status');
             """
@@ -307,26 +307,37 @@ def fix_ccle(cursor):
 
 
 def alter_metadata_tables(cursor):
+    print >> sys.stdout, "[STATUS] Altering tables and updating tables."
+
     alter_metadata_samples_check = '''
         SELECT EXISTS (select * from INFORMATION_SCHEMA.COLUMNS where table_schema="dev" and table_name="metadata_samples" and column_name="sample_barcode");
     '''
     alter_metadata_samples = '''
             ALTER TABLE metadata_samples change SampleBarcode sample_barcode VARCHAR(45),
                 change ParticipantBarcode case_barcode VARCHAR(45),
-                change Study disease_code VARCHAR(45);
+                change Study disease_code VARCHAR(45),
+                change Project program_name VARCHAR(40);
     '''
 
+    # TODO: This should actually change Study to project_id
     alter_metadata_data = '''
             ALTER TABLE metadata_data change SampleBarcode sample_barcode VARCHAR(45),
                 change ParticipantBarcode case_barcode VARCHAR(45),
-                change Study disease_code VARCHAR(45);
+                change Study disease_code VARCHAR(45),
+                change Project program_name VARCHAR(40);
     '''
+
+    update_metadata_attr_project = 'UPDATE metadata_attr set attribute="program_name" where attribute="Project";'
+    remove_metadata_attr_study = 'DELETE FROM metadata_attr where attribute="Study";'
+
     try:
         cursor.execute(alter_metadata_samples_check)
         result = cursor.fetchone()
         if not result[0]:
             cursor.execute(alter_metadata_samples)
             cursor.execute(alter_metadata_data)
+            cursor.execute(update_metadata_attr_project)
+            cursor.execute(remove_metadata_attr_study)
 
     except Exception as e:
         print >> sys.stdout, "[ERROR] Exception when altering metadata_samples table!"

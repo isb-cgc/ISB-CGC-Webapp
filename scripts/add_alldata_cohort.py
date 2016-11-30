@@ -21,7 +21,7 @@ import logging
 import os
 import csv
 from argparse import ArgumentParser
-from sys import exit
+import sys
 
 from apiclient.discovery import build
 
@@ -47,7 +47,7 @@ class BigQueryCohortSupport(object):
             "mode": "REQUIRED"
         },
         {
-            "name": "patient_barcode",
+            "name": "case_barcode",
             "type": "STRING"
         },
         {
@@ -64,11 +64,15 @@ class BigQueryCohortSupport(object):
         }
     ]
 
-    case_type = 'case'
+    patient_type = 'patient'
     sample_type = 'sample'
+    aliquot_type = 'aliquot'
 
-    def __init__(self, service, project_id, dataset_id, table_id):
-        self.service = service
+    @classmethod
+    def get_schema(cls):
+        return deepcopy(cls.cohort_schema)
+
+    def __init__(self, project_id, dataset_id, table_id):
         self.project_id = project_id
         self.dataset_id = dataset_id
         self.table_id = table_id
@@ -85,9 +89,12 @@ class BigQueryCohortSupport(object):
         }
 
     def _streaming_insert(self, rows):
-        table_data = self.service.tabledata()
+        bigquery_service = authorize_and_get_bq_service()
+        table_data = bigquery_service.tabledata()
 
         body = self._build_request_body_from_rows(rows)
+
+        print >> sys.stdout, self.project_id+":"+self.dataset_id+":"+self.table_id
 
         response = table_data.insertAll(projectId=self.project_id,
                                         datasetId=self.dataset_id,
@@ -97,19 +104,45 @@ class BigQueryCohortSupport(object):
         return response
 
     def _build_cohort_row(self, cohort_id,
-                          case_barcode=None, sample_barcode=None, aliquot_barcode=None):
+                          case_barcode=None, sample_barcode=None, aliquot_barcode=None, project_id=None):
         return {
             'cohort_id': cohort_id,
-            'patient_barcode': case_barcode,
+            'case_barcode': case_barcode,
             'sample_barcode': sample_barcode,
-            'aliquot_barcode': aliquot_barcode
+            'aliquot_barcode': aliquot_barcode,
+            'project_id': project_id
         }
 
-    def add_cohort_with_sample_barcodes(self, cohort_id, barcodes):
+    # Create a cohort based on a dictionary of sample, case, and project IDs
+    def add_cohort_to_bq(self, cohort_id, samples):
         rows = []
-        for sample_barcode in barcodes:
-            case_barcode = sample_barcode[:12]
-            rows.append(self._build_cohort_row(cohort_id, case_barcode, sample_barcode, None))
+        for sample in samples:
+            rows.append(self._build_cohort_row(cohort_id, case_barcode=sample['case_barcode'], sample_barcode=sample['sample_barcode'], project_id=sample['project_id']))
+
+        response = self._streaming_insert(rows)
+
+        print >> sys.stdout, response.__str__()
+
+        return response
+
+    # Create a cohort based only on sample and optionally project IDs (case ID is NOT added)
+    def add_cohort_with_sample_barcodes(self, cohort_id, samples):
+        rows = []
+        for sample in samples:
+            # TODO This is REALLY specific to TCGA. This needs to be changed
+            # patient_barcode = sample_barcode[:12]
+            barcode = sample
+            project_id = None
+            if isinstance(sample, tuple):
+                barcode = sample[0]
+                if len(sample) > 1:
+                    project_id = sample[1]
+            elif isinstance(sample, dict):
+                barcode = sample['sample_id']
+                if 'project_id' in sample:
+                    project_id = sample['project_id']
+
+            rows.append(self._build_cohort_row(cohort_id, sample_barcode=barcode, project_id=project_id))
 
         response = self._streaming_insert(rows)
         return response
@@ -160,7 +193,7 @@ def get_superuser_id(conn, superuser_name):
 def get_sample_barcodes(conn):
     logging.info("Getting list of sample barcodes from MySQL")
     cursor = conn.cursor(DictCursor)
-    select_samples_str = "SELECT distinct sample_barcode, case_barcode from metadata_samples where Project='TCGA';"
+    select_samples_str = "SELECT distinct sample_barcode, case_barcode from metadata_samples where program_name='TCGA';"
     cursor.execute(select_samples_str)
     rows = cursor.fetchall()
     cursor.close()
@@ -184,7 +217,7 @@ def get_barcodes_from_file(filename):
 
                 codes = line
 
-                # Check if ParticipantBarcode is first
+                # Check if case_barcode is first
                 if headers[0] == 'case_barcode':
                     case_code_index = 0
                     sample_code_index = 1
@@ -256,7 +289,7 @@ def authorize_and_get_bq_service():
 
 def create_bq_cohort(project_id, dataset_id, table_id, cohort_id, sample_barcodes):
     service = authorize_and_get_bq_service()
-    bqs = BigQueryCohortSupport(service, project_id, dataset_id, table_id)
+    bqs = BigQueryCohortSupport(project_id, dataset_id, table_id)
     bqs.add_cohort_to_bq(cohort_id, sample_barcodes)
 
 def main():
