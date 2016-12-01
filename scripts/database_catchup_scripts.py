@@ -323,7 +323,7 @@ def alter_metadata_tables(cursor):
                 change Project program_name VARCHAR(40);
     '''
 
-    # TODO: This should actually change Study to project_id
+    # TODO: We need to also add projects_project_id, based on Study/disease_code
     alter_metadata_data = '''
             ALTER TABLE metadata_data change SampleBarcode sample_barcode VARCHAR(45),
                 change ParticipantBarcode case_barcode VARCHAR(45),
@@ -337,6 +337,7 @@ def alter_metadata_tables(cursor):
             WHEN 'Study' THEN 'disease_code'
             WHEN 'SampleBarcode' THEN 'sample_barcode'
             WHEN 'ParticipantBarcode' THEN 'case_barcode'
+        END
         WHERE attribute IN ('Project','Study','SampleBarcode','ParticipantBarcode');
     """
 
