@@ -309,7 +309,7 @@ def get_readable_name(csv_name, attr=None):
     # Clinical filters
     elif ATTR_SPECIFIC_TRANSLATION.get(attr) and ATTR_SPECIFIC_TRANSLATION[attr].get(csv_name):
         return ATTR_SPECIFIC_TRANSLATION[attr][csv_name]
-    elif attr == 'Project' or attr == 'Program':
+    elif attr == 'Project' or attr == 'Study':
         return csv_name.upper()
     elif TRANSLATION_DICTIONARY.get(csv_name) and attr != 'other_dx' and attr != 'tobacco_smoking_history' and not is_data_type:
         return TRANSLATION_DICTIONARY.get(csv_name)

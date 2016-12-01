@@ -63,7 +63,7 @@ def catchup_shortlist(cursor):
             set_metadata_shortlist_def = """
                 UPDATE metadata_attr
                 SET shortlist=1
-                WHERE attribute IN ('age_at_initial_pathologic_diagnosis','BMI','Disease_Code','gender','has_27k','has_450k',
+                WHERE attribute IN ('age_at_initial_pathologic_diagnosis','BMI','disease_code','gender','has_27k','has_450k',
                   'has_BCGSC_GA_RNASeq','has_BCGSC_HiSeq_RNASeq','has_GA_miRNASeq','has_HiSeq_miRnaSeq',
                   'has_Illumina_DNASeq','has_RPPA','has_SNP6','has_UNC_GA_RNASeq','has_UNC_HiSeq_RNASeq',
                   'histological_type','hpv_status','icd_10','icd_o_3_histology','icd_o_3_site','neoplasm_histologic_grade',
@@ -311,10 +311,10 @@ def fix_ccle(cursor):
 
 
 def alter_metadata_tables(cursor):
-    print >> sys.stdout, "[STATUS] Altering tables and updating tables."
+    print >> sys.stdout, "[STATUS] Altering and updating tables."
 
     alter_metadata_samples_check = '''
-        SELECT EXISTS (select * from INFORMATION_SCHEMA.COLUMNS where table_schema="dev" and table_name="metadata_samples" and column_name="sample_barcode");
+        SELECT EXISTS (select * from INFORMATION_SCHEMA.COLUMNS where table_schema='dev' and table_name='metadata_samples' and column_name='sample_barcode');
     '''
     alter_metadata_samples = '''
             ALTER TABLE metadata_samples change SampleBarcode sample_barcode VARCHAR(45),
@@ -331,8 +331,14 @@ def alter_metadata_tables(cursor):
                 change Project program_name VARCHAR(40);
     '''
 
-    update_metadata_attr_project = 'UPDATE metadata_attr set attribute="program_name" where attribute="Project";'
-    remove_metadata_attr_study = 'DELETE FROM metadata_attr where attribute="Study";'
+    update_metadata_attr = """
+        UPDATE metadata_attr SET attribute = CASE attribute
+            WHEN 'Project' THEN 'program_name'
+            WHEN 'Study' THEN 'disease_code'
+            WHEN 'SampleBarcode' THEN 'sample_barcode'
+            WHEN 'ParticipantBarcode' THEN 'case_barcode'
+        WHERE attribute IN ('Project','Study','SampleBarcode','ParticipantBarcode');
+    """
 
     try:
         cursor.execute(alter_metadata_samples_check)
@@ -340,11 +346,10 @@ def alter_metadata_tables(cursor):
         if not result[0]:
             cursor.execute(alter_metadata_samples)
             cursor.execute(alter_metadata_data)
-            cursor.execute(update_metadata_attr_project)
-            cursor.execute(remove_metadata_attr_study)
+            cursor.execute(update_metadata_attr)
 
     except Exception as e:
-        print >> sys.stdout, "[ERROR] Exception when altering metadata_samples table!"
+        print >> sys.stdout, "[ERROR] Exception when updating metadata_samples, attr, and data: "
         print >> sys.stdout, e
         print >> sys.stdout, traceback.format_exc()
 
