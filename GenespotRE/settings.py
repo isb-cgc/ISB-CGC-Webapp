@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 
 Copyright 2016, Institute for Systems Biology
@@ -417,3 +419,5 @@ MAX_FILES_IGV = 5
 EMAIL_SERVICE_API_URL = os.environ.get('EMAIL_SERVICE_API_URL', '')
 EMAIL_SERVICE_API_KEY = os.environ.get('EMAIL_SERVICE_API_KEY', '')
 NOTIFICATION_EMAIL_FROM_ADDRESS = os.environ.get('NOTIFICATOON_EMAIL_FROM_ADDRESS', '')
+
+WHITELIST_RE = ur'([^\\\_\|\"\+~@:#\$%\^&\*=\-\.,\(\)0-9a-zA-Z\sÇüéâäàåçêëèïîíìÄÅÉæÆôöòûùÖÜáóúñÑÀÁÂÃÈÊËÌÍÎÏÐÒÓÔÕØÙÚÛÝßãðõøýþÿ])'
