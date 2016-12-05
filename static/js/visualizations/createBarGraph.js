@@ -21,15 +21,11 @@ define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
 
     // The samples in our data, bucketed by their corresponding
     // bar graph value
-    var sampleSet = {
-
-    };
+    var sampleSet = {};
 
     // The currently selected values on the bar graph, corresponding to the buckets
     // in the sampleSet
-    var selectedValues = {
-
-    };
+    var selectedValues = {};
 
     // The samples found in the selected value buckets; this is used to produce the JSON which
     // is submitted by the form
