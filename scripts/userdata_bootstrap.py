@@ -57,23 +57,23 @@ def create_study_views(project, source_table, studies):
     create_view_sql = "CREATE OR REPLACE VIEW %s AS SELECT * FROM %s"
     where_proj = " WHERE program_name=%s"
     where_study = " AND disease_code=%s;"
-    print source_table
+
     try:
         for study in studies:
             view_name = "%s_%s_%s" % (project, study, source_table,)
 
             # If project and study are the same we assume this is meant to
             # be a one-study project
-            makeView = (create_view_sql % (view_name, source_table,)) + where_proj
+            make_view = (create_view_sql % (view_name, source_table,)) + where_proj
             params = (project,)
 
             if project == study:
-                makeView += ";"
+                make_view += ";"
             else:
-                makeView += where_study
+                make_view += where_study
                 params += (study,)
-            print makeView
-            cursor.execute(makeView, params)
+
+            cursor.execute(make_view, params)
 
             cursor.execute(view_check_sql, (view_name,))
             if cursor.fetchall()[0][0] <= 0:
@@ -334,7 +334,6 @@ def bootstrap_file_data():
 
         cursorDict.execute(get_projects)
         for project in cursorDict.fetchall():
-            print project
 
             # Create UserUpload entry
             cursor.execute(insert_userupload, (int(project['owner_id']),))
