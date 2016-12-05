@@ -19,13 +19,20 @@
 define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
     function($, d3, d3tip, d3textwrap, vizhelpers, _) {
 
+    // The samples in our data, bucketed by their corresponding
+    // bar graph value
     var sampleSet = {
 
     };
+
+    // The currently selected values on the bar graph, corresponding to the buckets
+    // in the sampleSet
     var selectedValues = {
 
     };
 
+    // The samples found in the selected value buckets; this is used to produce the JSON which
+    // is submitted by the form
     var selectedSamples = null;
 
     // If you want to override the tip coming in from the create call,
@@ -275,16 +282,15 @@ define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                     zoom_status.translation && zoom.translate(zoom_status.translation);
                     zoom_status.translation = null;
 
-                    selectedValues = {};
-                    selectedSamples = null;
-
                     var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                     // Clear selections
                     $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + 0);
                     $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Participants: ' + 0);
-                    $('#save-cohort-'+plot_id+'-modal input[name="samples"]').attr('value', []);
+                    $('#save-cohort-'+plot_id+'-modal input[name="samples"]').attr('value', "");
                     svg.selectAll('.selected').classed('selected', false);
                     $('.save-cohort-card').hide();
+                    selectedValues = {};
+                    selectedSamples = null;
                     // Remove brush event listener plot area - comment out if we want to enable selection carry-over
                     brush.clear();
                     plot_area.selectAll('.brush').remove();
