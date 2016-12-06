@@ -362,16 +362,17 @@ def breakout_metadata_tables(cursor):
         print >> sys.stdout, traceback.format_exc()
 
 
-# This only needs to be run on cloudSQL instances
+# This only needs to be run on cloudSQL instances - Completed on MVM
 def alter_user_data_tables(cursor):
     get_table_names = 'select distinct table_name from information_schema.columns where column_name="participant_barcode";'
-    alter_table_column = 'ALTER TABLE %s change participant_barcode case_barcode VARCHAR(200);'
+    alter_table_column = 'ALTER TABLE {0} change participant_barcode case_barcode VARCHAR(200);'
     try:
         cursor.execute(get_table_names)
-        tables = []
+        alter_stmts = []
         for item in cursor.fetchall():
-            tables.append(item[0])
-        cursor.executemany(alter_table_column, tables)
+            alter_stmts.append(alter_table_column.format(item[0]))
+
+        cursor.execute(''.join(alter_stmts))
     except Exception as e:
         print >> sys.stdout, "[ERROR] Exception when altering user_metadata_tables!"
         print >> sys.stdout, e
