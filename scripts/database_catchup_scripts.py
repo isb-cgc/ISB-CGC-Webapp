@@ -344,6 +344,39 @@ def alter_metadata_tables(cursor):
         print >> sys.stdout, e
         print >> sys.stdout, traceback.format_exc()
 
+# TODO: This isn't complete and isn't being called anywhere yet
+def breakout_metadata_tables(cursor):
+    create_ccle_metadata_data = 'CREATE TABLE CCLE_metadata_data SELECT * FROM metadata_data WHERE program_name="CCLE";'
+    create_ccle_metadata_samples = 'CREATE TABLE CCLE_metadata_samples SELECT * FROM metadata_samples WHERE program_name="CCLE";'
+
+    rename_metadata_tables = 'RENAME TABLE metadata_samples TO TCGA_metadata_samples,' \
+                             '             metadata_data to TCGA_metadata_data;'
+
+    try:
+        cursor.execute(create_ccle_metadata_data)
+        cursor.execute(create_ccle_metadata_samples)
+        cursor.execute(rename_metadata_tables)
+    except Exception as e:
+        print >> sys.stdout, "[ERROR] Exception in breakout_metadata_tables!"
+        print >> sys.stdout, e
+        print >> sys.stdout, traceback.format_exc()
+
+
+# This only needs to be run on cloudSQL instances
+def alter_user_data_tables(cursor):
+    get_table_names = 'select distinct table_name from information_schema.columns where column_name="participant_barcode";'
+    alter_table_column = 'ALTER TABLE %s change participant_barcode case_barcode VARCHAR(200);'
+    try:
+        cursor.execute(get_table_names)
+        tables = []
+        for item in cursor.fetchall():
+            tables.append(item[0])
+        cursor.executemany(alter_table_column, tables)
+    except Exception as e:
+        print >> sys.stdout, "[ERROR] Exception when altering user_metadata_tables!"
+        print >> sys.stdout, e
+        print >> sys.stdout, traceback.format_exc()
+
 
 """ main """
 

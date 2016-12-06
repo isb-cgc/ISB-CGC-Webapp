@@ -104,11 +104,11 @@ require([
                     type: 'string',
                     key: 'sample_barcode',
                 },
-                'participant': {
-                    'displayName': 'Participant Barcode',
+                'case': {
+                    'displayName': 'Case Barcode',
                     test: function (col) { return !!(col.name.match(/barcode/i) && col.name.match(/participant/i)); },
                     type: 'string',
-                    key: 'participant_barcode',
+                    key: 'case_barcode',
                 },
             },
             'Dictionary': {
