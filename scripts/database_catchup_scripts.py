@@ -63,7 +63,7 @@ def catchup_shortlist(cursor):
             set_metadata_shortlist_def = """
                 UPDATE metadata_attr
                 SET shortlist=1
-                WHERE attribute IN ('age_at_initial_pathologic_diagnosis','BMI','Disease_Code','gender','has_27k','has_450k',
+                WHERE attribute IN ('age_at_initial_pathologic_diagnosis','BMI','disease_code','gender','has_27k','has_450k',
                   'has_BCGSC_GA_RNASeq','has_BCGSC_HiSeq_RNASeq','has_GA_miRNASeq','has_HiSeq_miRnaSeq',
                   'has_Illumina_DNASeq','has_RPPA','has_SNP6','has_UNC_GA_RNASeq','has_UNC_HiSeq_RNASeq',
                   'histological_type','hpv_status','icd_10','icd_o_3_histology','icd_o_3_site','neoplasm_histologic_grade',
@@ -168,24 +168,6 @@ def create_samples_shortlist_view(cursor):
 
 def fix_cohort_projects(cursor):
     try:
-        fix_project_ids_str = """
-            UPDATE cohorts_samples AS cs
-            JOIN (
-                    SELECT ms.sample_barcode AS sample_barcode,ps.id AS project
-                            FROM metadata_samples ms
-                            JOIN (
-                                SELECT p.id AS id,p.name AS name
-                                FROM projects_project p
-                                    JOIN auth_user au ON au.id = p.owner_id
-                                WHERE au.username = 'isb' AND au.is_active = 1 AND p.active=1 AND au.is_superuser = 1
-                            ) ps ON ps.name = ms.disease_code
-            ) AS ss ON ss.sample_barcode = cs.sample_barcode
-            JOIN cohorts_cohort AS cc
-            ON cc.id = cs.cohort_id
-            SET cs.project_id = ss.project
-            WHERE cs.project_id IS NULL AND cc.active = 1;
-        """
-
         null_project_count = """
             SELECT COUNT(*)
             FROM cohorts_samples cs
@@ -201,15 +183,41 @@ def fix_cohort_projects(cursor):
         """
 
         cursor.execute(null_project_count)
-        print >> sys.stdout,"[STATUS] Number of cohort sample entries from ISB-CGC studies with null project IDs: "+str(cursor.fetchall()[0][0])
-        print >> sys.stdout,"[STATUS] Correcting null project IDs for ISB-CGC cohorts - this could take a while!"
-        cursor.execute(fix_project_ids_str)
-        print >> sys.stdout, "[STATUS] ...done. Checking for still-null project IDs..."
-        cursor.execute(null_project_count)
-        not_fixed = cursor.fetchall()[0][0]
-        print >> sys.stdout, "[STATUS] Number of cohort sample entries from ISB-CGC studies with null project IDs after correction: " + str(not_fixed)
-        if not_fixed > 0:
-            print >> sys.stdout, "[WARNING] Some of the samples were not corrected! You should double-check them."
+        count_to_fix = cursor.fetchall()[0][0]
+        if count_to_fix > 0:
+            fix_project_ids_str = """
+                UPDATE cohorts_samples AS cs
+                JOIN (
+                        SELECT ms.sample_barcode AS sample_barcode,ps.id AS project
+                                FROM metadata_samples ms
+                                JOIN (
+                                    SELECT p.id AS id,p.name AS name
+                                    FROM projects_project p
+                                        JOIN auth_user au ON au.id = p.owner_id
+                                    WHERE au.username = 'isb' AND au.is_active = 1 AND p.active=1 AND au.is_superuser = 1
+                                ) ps ON ps.name = ms.disease_code
+                ) AS ss ON ss.sample_barcode = cs.sample_barcode
+                JOIN cohorts_cohort AS cc
+                ON cc.id = cs.cohort_id
+                SET cs.project_id = ss.project
+                WHERE cs.project_id IS NULL AND cc.active = 1;
+            """
+
+            print >> sys.stdout,"[STATUS] Number of cohort sample entries from ISB-CGC projects with null project IDs: "+str(count_to_fix)
+            print >> sys.stdout,"[STATUS] Correcting null project IDs for ISB-CGC cohorts - this could take a while!"
+
+            cursor.execute(fix_project_ids_str)
+
+            print >> sys.stdout, "[STATUS] ...done. Checking for still-null project IDs..."
+
+            cursor.execute(null_project_count)
+            not_fixed = cursor.fetchall()[0][0]
+
+            print >> sys.stdout, "[STATUS] Number of cohort sample entries from ISB-CGC projects with null project IDs after correction: " + str(not_fixed)
+            if not_fixed > 0:
+                print >> sys.stdout, "[WARNING] Some of the samples were not corrected! You should double-check them."
+        else:
+            print >> sys.stdout, "[STATUS] No cohort samples were found with missing project IDs."
     except Exception as e:
         print >> sys.stdout, "[ERROR] Exception when fixing cohort project IDs; they may not have been fiixed"
         print >> sys.stdout, e
@@ -255,17 +263,21 @@ def fix_ccle(cursor):
         results = cursor.fetchall()
 
         if len(results) <= 0:
-            print >> sys.stdout, "[STATUS] The CCLE program was not found, so cohorts containing its stdies cannot be fixed."
+            print >> sys.stdout, "[STATUS] The CCLE project was not found, so cohorts containing its samples cannot be fixed."
             return
 
         ccle_id = results[0][0]
+
+        if not ccle_id:
+            print >> sys.stdout, "[WARNING] The CCLE project was not found, so the cohorts with these samples cannot be corrected."
+            return
 
         count_ccle_cohort_samples = """
             SELECT COUNT(*)
             FROM cohorts_samples cs
             JOIN cohorts_cohort cc
                 ON cc.id = cs.cohort_id
-            WHERE cc.active = 1 AND cs.sample_barcode LIKE 'CCLE%' and NOT(cs.project_id = %s);
+            WHERE cc.active = 1 AND cs.sample_barcode LIKE 'CCLE%%' and NOT(cs.project_id = %s);
         """
 
         fix_ccle_cohorts = """
@@ -273,7 +285,7 @@ def fix_ccle(cursor):
                 JOIN cohorts_cohort cc
                     ON cc.id = cs.cohort_id
             SET cs.project_id = %s
-            WHERE cc.active = 1 AND cs.sample_barcode LIKE 'CCLE%';
+            WHERE cc.active = 1 AND cs.sample_barcode LIKE 'CCLE%%';
         """
 
         cursor.execute(count_ccle_cohort_samples, (ccle_id,))
@@ -307,10 +319,10 @@ def fix_ccle(cursor):
 
 
 def alter_metadata_tables(cursor):
-    print >> sys.stdout, "[STATUS] Altering tables and updating tables."
+    print >> sys.stdout, "[STATUS] Altering and updating tables."
 
     alter_metadata_samples_check = '''
-        SELECT EXISTS (select * from INFORMATION_SCHEMA.COLUMNS where table_schema="dev" and table_name="metadata_samples" and column_name="sample_barcode");
+        SELECT EXISTS (select * from INFORMATION_SCHEMA.COLUMNS where table_schema='dev' and table_name='metadata_samples' and column_name='sample_barcode');
     '''
     alter_metadata_samples = '''
             ALTER TABLE metadata_samples change SampleBarcode sample_barcode VARCHAR(45),
@@ -319,7 +331,7 @@ def alter_metadata_tables(cursor):
                 change Project program_name VARCHAR(40);
     '''
 
-    # TODO: This should actually change Study to project_id
+    # TODO: We need to add projects_project_id, based on Study
     alter_metadata_data = '''
             ALTER TABLE metadata_data change SampleBarcode sample_barcode VARCHAR(45),
                 change ParticipantBarcode case_barcode VARCHAR(45),
@@ -327,8 +339,22 @@ def alter_metadata_tables(cursor):
                 change Project program_name VARCHAR(40);
     '''
 
-    update_metadata_attr_project = 'UPDATE metadata_attr set attribute="program_name" where attribute="Project";'
-    remove_metadata_attr_study = 'DELETE FROM metadata_attr where attribute="Study";'
+    # Change the names of numerous columns
+    update_metadata_attr = """
+        UPDATE metadata_attr SET attribute = CASE attribute
+            WHEN 'Project' THEN 'program_name'
+            WHEN 'SampleBarcode' THEN 'sample_barcode'
+            WHEN 'ParticipantBarcode' THEN 'case_barcode'
+            WHEN 'Disease_Code' THEN 'disease_code'
+        END
+        WHERE attribute IN ('Project','Study','SampleBarcode','ParticipantBarcode');
+    """
+
+    # Drop study from the table completely, since it will no longer be used this way
+    update_metadata_attr_study = """
+        DELETE FROM metadata_attr WHERE attribute='Study';
+    """
+
 
     try:
         cursor.execute(alter_metadata_samples_check)
@@ -336,11 +362,11 @@ def alter_metadata_tables(cursor):
         if not result[0]:
             cursor.execute(alter_metadata_samples)
             cursor.execute(alter_metadata_data)
-            cursor.execute(update_metadata_attr_project)
-            cursor.execute(remove_metadata_attr_study)
+            cursor.execute(update_metadata_attr)
+            cursor.execute(update_metadata_attr_study)
 
     except Exception as e:
-        print >> sys.stdout, "[ERROR] Exception when altering metadata_samples table!"
+        print >> sys.stdout, "[ERROR] Exception when updating metadata_samples, attr, and data: "
         print >> sys.stdout, e
         print >> sys.stdout, traceback.format_exc()
 
@@ -397,7 +423,7 @@ def main():
                                  help="Fix the casing of the attribute value for the BMI row in metadata_attributes.")
     cmd_line_parser.add_argument('-c', '--fix-cohort-projects', type=bool, default=True,
                                  help="Fix cohorts which have null project IDs for ISB-CGC samples")
-    cmd_line_parser.add_argument('-e', '--fix-ccle-cohort-studies', type=bool, default=True,
+    cmd_line_parser.add_argument('-e', '--fix-ccle-cohort-projects', type=bool, default=True,
                                  help="Fix project IDs for CCLE samples in cohorts")
     cmd_line_parser.add_argument('-i', '--create-isbcgc-project-set-sproc', type=bool, default=True,
                                  help="Add the 'get_isbcgc_project_set' sproc to the database")
@@ -415,7 +441,7 @@ def main():
         args.create_metadata_vals_sproc and create_metadata_vals_sproc(cursor)
         args.create_ms_shortlist_view and create_samples_shortlist_view(cursor)
         args.fix_cohort_projects and fix_cohort_projects(cursor)
-        args.fix_ccle_cohort_studies and fix_ccle(cursor)
+        args.fix_ccle_cohort_projects and fix_ccle(cursor)
         args.create_isbcgc_project_set_sproc and add_isb_cgc_project_sproc(cursor)
 
 
