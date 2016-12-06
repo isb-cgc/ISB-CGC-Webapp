@@ -391,7 +391,8 @@ def breakout_metadata_tables(cursor):
 # This only needs to be run on cloudSQL instances - Completed on MVM
 def alter_user_data_tables(cursor):
     get_table_names = 'select distinct table_name from information_schema.columns where column_name="participant_barcode";'
-    alter_table_column = 'ALTER TABLE {0} change participant_barcode case_barcode VARCHAR(200);'
+    alter_table_column = 'ALTER TABLE {0} change participant_barcode case_barcode VARCHAR(200),' \
+                         '                change study_id project_id int(10);'
     try:
         cursor.execute(get_table_names)
         alter_stmts = []
