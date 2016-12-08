@@ -67,14 +67,14 @@ require([
     'plot_factory',
     'vizhelpers',
     'underscore',
+    'base',
     'session_security',
     'jqueryui',
     'bootstrap',
     'd3',
     'd3tip',
-    'select2',
-    'base'
-], function ($, plot_factory, vizhelpers, _) {
+    'select2'
+], function ($, plot_factory, vizhelpers, _, base) {
 
     var savingComment = false;
 
@@ -1126,7 +1126,19 @@ require([
         Saving cohorts from plot,
      */
     $('form[action="/cohorts/save_cohort_from_plot/"]').on('submit', function(event) {
+
         event.preventDefault();
+
+        var name = $('#'+($('.worksheet.active').attr('id'))+'-new-cohort-name').val();
+
+        var unallowed = name.match(base.whitelist);
+
+        if(unallowed) {
+            $('.unallowed-chars').text(unallowed.join(", "));
+            $('#unallowed-chars-alert').show();
+            return false;
+        }
+
         var form = this;
         $(this).find('input[type="submit"]').attr('disabled', 'disabled');
         $.ajax({
