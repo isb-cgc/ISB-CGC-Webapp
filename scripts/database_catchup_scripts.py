@@ -109,9 +109,7 @@ def create_metadata_vals_sproc(cursor):
                     BEGIN
                       SET done = TRUE;
                     END;
-
                     OPEN attr_cur;
-
                     shortlist_loop: LOOP
                         FETCH attr_cur INTO col;
                         IF done THEN
@@ -121,7 +119,6 @@ def create_metadata_vals_sproc(cursor):
                         PREPARE get_vals FROM @s;
                         EXECUTE get_vals;
                     END LOOP;
-
                     CLOSE attr_cur;
                 END"""
 

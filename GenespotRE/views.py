@@ -332,7 +332,7 @@ def igv(request, sample_barcode=None, readgroupset_id=None):
     context['readgroupset_list'] = readgroupset_list
     context['bam_list'] = bam_list
     context['base_url'] = settings.BASE_URL
-    context['service_account'] = settings.WEB_CLIENT_ID
+    context['service_account'] = settings.IGV_WEB_CLIENT_ID
 
     return render(request, 'GenespotRE/igv.html', context)
 
