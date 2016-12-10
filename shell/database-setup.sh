@@ -39,9 +39,6 @@ fi
 echo "Adding Stored Procedures/Views and making table alterations.."
 python ${HOMEROOT}/scripts/database_catchup_scripts.py
 
-echo "Adding New Table Views..."
-python ${HOMEROOT}/scripts/userdata_bootstrap.py
-
 echo "Adding Cohort/Site Data..."
 python ${HOMEROOT}/scripts/add_site_ids.py
 python ${HOMEROOT}/scripts/add_alldata_cohort.py $GCLOUD_PROJECT_ID -o cloudsql
