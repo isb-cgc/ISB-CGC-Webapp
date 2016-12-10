@@ -1124,7 +1124,7 @@ require([
     });
 
     // Check Name and Desc for workbooks and worksheets
-    var check_name_and_desc = function(type) {
+    var check_name_and_desc = function(type, mode) {
         var name = null;
         var desc = null;
         var activeSheet = null;
@@ -1137,10 +1137,14 @@ require([
             name = $('.edit-workbook-name').val();
             desc = $('.edit-workbook-desc').val();
         } else if(type == 'sheet') {
-            activeSheet = $('.worksheet.active').attr('id');
-            thisModal = '#edit-worksheet-details-modal-' + activeSheet + ' ';
-            name = $(thisModal+'.edit-sheet-name').val();
-            desc = $(thisModal+'.edit-sheet-desc').val();
+            if(mode == 'edit') {
+                thisModal = '#edit-worksheet-details-modal-' + $('.worksheet.active').attr('id') + ' ';
+            } else {
+                thisModal = '#create-worksheet-modal-' + workbook_id + ' ';
+            }
+
+            name = $(thisModal+'.' + mode + '-sheet-name').val();
+            desc = $(thisModal+'.' + mode + '-sheet-desc').val();
         }
 
         var unallowed_name = name.match(base.whitelist);
@@ -1166,9 +1170,17 @@ require([
         return true;
     };
 
+    // Creating a worksheet
+    $('form.create-worksheet-form input.btn').on('click',function(e){
+        if(!check_name_and_desc('sheet', 'create')) {
+            e.preventDefault();
+            return false;
+        }
+    });
+
     // Editing a worksheet's details
     $('form.edit-worksheet-details input.btn').on('click',function(e){
-        if(!check_name_and_desc('sheet')) {
+        if(!check_name_and_desc('sheet', 'edit')) {
             e.preventDefault();
             return false;
         }

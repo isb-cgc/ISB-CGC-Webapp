@@ -37,14 +37,18 @@
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title" id="create-worksheet-header-{{ workbook.id }}">Create New Worksheet</h4>
             </div>
-            <form id="worksheet_create_form-{{ workbook.id }}" method="POST" action="{% url 'worksheet_create' workbook_id=workbook.id %}">
+            <form class="create-worksheet-form" id="worksheet_create_form-{{ workbook.id }}" method="POST" action="{% url 'worksheet_create' workbook_id=workbook.id %}">
                 {% csrf_token %}
                 <div class="modal-body">
-                    <label for="create-workbook-name">Name (required)</label>
-                    <input class="form-control" type="text" id="create-workbook-name" name="name" value="New Worksheet"/>
+                    <div class="unallowed-chars-alert-sheet alert alert-warning alert-dismissable" style="display: none;">
+                        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        Your worksheet's <span class="sheet-unallowed"></span> invalid characters (<span class="unallowed-chars-sheet"></span>). Please choose another <span class="sheet-fields"></span>.
+                    </div>
+                    <label for="create-sheet-name">Name (required)</label>
+                    <input type="text" class="form-control create-sheet-name" name="name" value="New Worksheet"/>
                     <br>
-                    <label for="create-workbook-desc">Description (optional, max length is 2000 characters)</label>
-                    <textarea class="form-control" id="create-workbook-desc" name="description" placeholder="Add a description" maxlength="2000"></textarea>
+                    <label for="create-sheet-desc">Description (optional, max length is 2000 characters)</label>
+                    <textarea class="form-control create-sheet-desc" name="description" placeholder="Add a description" maxlength="2000"></textarea>
                 </div>
                 <div class="modal-footer">
                     <input type="submit" value="Create" class="btn btn-primary" />
