@@ -48,9 +48,9 @@ require([
     'd3',
     'd3tip',
     'vizhelpers',
-    'select2',
-    'base'
-], function($, jqueryui, bootstrap, session_security, d3, d3tip, vizhelpers) {
+    'base',
+    'select2'
+], function($, jqueryui, bootstrap, session_security, d3, d3tip, vizhelpers, base) {
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function() {
@@ -240,9 +240,21 @@ require([
      */
     $("#create_favorite_list").on('click', function(event){
         var name = $.trim($("#variable_list_name_input").val());
+
+        var unallowed = name.match(base.whitelist);
+
+        if(unallowed) {
+            $('.unallowed-chars').text(unallowed.join(", "));
+            $('#unallowed-chars-alert').show();
+            event.preventDefault();
+            return false;
+        } else {
+            $('#unallowed-chars-alert').hide();
+        }
+
         var variable_list = get_variable_list();
         if(name=="" || !variable_list.length){
-            $.createMessage('Please check that your variable list name is not empty, and that you have selected at least one variable.', 'warning')
+            $.createMessage('Please check that your variable list name is not empty, and that you have selected at least one variable.', 'warning');
         } else {
             $(this).attr('disabled', 'disabled');
             var csrftoken = get_cookie('csrftoken');
@@ -267,6 +279,18 @@ require([
      */
     $("#edit_favorite_list").on('click', function(event){
         var name = $.trim($("#variable_list_name_input").val());
+
+        var unallowed = name.match(base.whitelist);
+
+        if(unallowed) {
+            $('.unallowed-chars').text(unallowed.join(", "));
+            $('#unallowed-chars-alert').show();
+            event.preventDefault();
+            return false;
+        } else {
+            $('#unallowed-chars-alert').hide();
+        }
+
         var variable_list = get_variable_list();
         var variable_id = this.getAttribute("variable_id");
         if(name && variable_list.length>0){
