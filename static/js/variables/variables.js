@@ -318,6 +318,18 @@ require([
      */
     $("#apply_to_worksheet").on('click', function(event){
         var name = $.trim($("#variable_list_name_input").val());
+
+        var unallowed = name.match(base.whitelist);
+
+        if(unallowed) {
+            $('.unallowed-chars').text(unallowed.join(", "));
+            $('#unallowed-chars-alert').show();
+            event.preventDefault();
+            return false;
+        } else {
+            $('#unallowed-chars-alert').hide();
+        }
+
         var workbook_id  = this.getAttribute("workbook_id");
         var worksheet_id = this.getAttribute("worksheet_id");
         var variable_list = get_variable_list();
