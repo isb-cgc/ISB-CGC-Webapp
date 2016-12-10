@@ -41,7 +41,7 @@ require([
     'underscore',
     'base',
     'tokenfield'
-], function($, jqueryui, bootstrap, session_security, Bloodhound, typeahead, _) {
+], function($, jqueryui, bootstrap, session_security, Bloodhound, typeahead, _, base) {
     'use strict';
 
     var geneListField = $('#paste-in-genes');
@@ -209,12 +209,26 @@ require([
     }
 
     $('form.create-gene-list').on('submit', function(e) {
+        var name = $('#genes-list-name').prop('value');
+
         // Do not allow white-space only names
-        if($('#genes-list-name').prop('value').match(/^\s*$/)) {
+        if(name.match(/^\s*$/)) {
             $('#genes-list-name').prop('value','');
             e.preventDefault();
             return false;
         }
+
+        var unallowed = name.match(base.whitelist);
+
+        if(unallowed) {
+            $('.unallowed-chars').text(unallowed.join(", "));
+            $('#unallowed-chars-alert').show();
+            event.preventDefault();
+            return false;
+        } else {
+            $('#unallowed-chars-alert').hide();
+        }
+
         // Do not allow submission of empty gene lists
         if(geneListField.tokenfield('getTokens').length <= 0) {
             e.preventDefault();
