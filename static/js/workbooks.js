@@ -67,6 +67,7 @@ require([
     'plot_factory',
     'vizhelpers',
     'underscore',
+    'base',
     'session_security',
     'jqueryui',
     'bootstrap',
@@ -74,7 +75,7 @@ require([
     'd3tip',
     'select2',
     'base'
-], function ($, plot_factory, vizhelpers, _) {
+], function ($, plot_factory, vizhelpers, _, base) {
 
     var savingComment = false;
 
@@ -1122,11 +1123,91 @@ require([
         });
     });
 
-    /*
-        Saving cohorts from plot,
-     */
+    // Check Name and Desc for workbooks and worksheets
+    var check_name_and_desc = function(type, mode) {
+        var name = null;
+        var desc = null;
+        var activeSheet = null;
+        var thisModal = '';
+
+        $('#unallowed-chars-alert-sheet').hide();
+        $('#unallowed-chars-alert-book').hide();
+
+        if(type == 'book') {
+            name = $('.edit-workbook-name').val();
+            desc = $('.edit-workbook-desc').val();
+        } else if(type == 'sheet') {
+            if(mode == 'edit') {
+                thisModal = '#edit-worksheet-details-modal-' + $('.worksheet.active').attr('id') + ' ';
+            } else {
+                thisModal = '#create-worksheet-modal-' + workbook_id + ' ';
+            }
+
+            name = $(thisModal+'.' + mode + '-sheet-name').val();
+            desc = $(thisModal+'.' + mode + '-sheet-desc').val();
+        }
+
+        var unallowed_name = name.match(base.whitelist);
+        var unallowed_desc = desc.match(base.whitelist);
+
+        if(unallowed_name || unallowed_desc) {
+            var unalloweds = unallowed_name || [];
+            var msg = (unallowed_name ? 'name contains' : null);
+            var fields = (unallowed_name ? 'name' : null);
+            if (unallowed_desc) {
+                unalloweds = unalloweds.concat(unallowed_desc);
+                msg = (msg ? 'name and description contain' : 'description contains');
+                fields = (fields ? 'name and description' : 'description');
+            }
+
+            $(thisModal + 'span.' + type + '-unallowed').text(msg);
+            $(thisModal + 'span.' + type + '-fields').text(fields);
+            $(thisModal + 'span.unallowed-chars-' + type).text(unalloweds.join(", "));
+            $(thisModal + '.unallowed-chars-alert-' + type).show();
+
+            return false;
+        }
+        return true;
+    };
+
+    // Creating a worksheet
+    $('form.create-worksheet-form input.btn').on('click',function(e){
+        if(!check_name_and_desc('sheet', 'create')) {
+            e.preventDefault();
+            return false;
+        }
+    });
+
+    // Editing a worksheet's details
+    $('form.edit-worksheet-details input.btn').on('click',function(e){
+        if(!check_name_and_desc('sheet', 'edit')) {
+            e.preventDefault();
+            return false;
+        }
+    });
+    // Editing a workbook's details
+    $('form.edit-workbook-details input.btn').on('click',function(e){
+        if(!check_name_and_desc('book')) {
+            e.preventDefault();
+            return false;
+        }
+    });
+
+    // Saving a cohort from a plot selection
     $('form[action="/cohorts/save_cohort_from_plot/"]').on('submit', function(event) {
+
         event.preventDefault();
+
+        var name = $('#'+($('.worksheet.active').attr('id'))+'-new-cohort-name').val();
+
+        var unallowed = name.match(base.whitelist);
+
+        if(unallowed) {
+            $('#unallowed-chars-cohort').text(unallowed.join(", "));
+            $('#unallowed-chars-alert-cohort').show();
+            return false;
+        }
+
         var form = this;
         $(this).find('input[type="submit"]').attr('disabled', 'disabled');
         $.ajax({

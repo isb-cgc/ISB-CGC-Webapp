@@ -1,6 +1,7 @@
 from copy import deepcopy
 import json
 import re
+import logging
 from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
@@ -17,9 +18,15 @@ from projects.models import Program
 from sharing.service import create_share
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+
+logger = logging.getLogger(__name__)
+
 debug = settings.DEBUG
-if settings.DEBUG :
+
+if settings.DEBUG:
     import sys
+
+WHITELIST_RE = settings.WHITELIST_RE
 
 @login_required
 def workbook_list(request):
@@ -167,22 +174,48 @@ def workbook(request, workbook_id=0):
     template = 'workbooks/workbook.html'
     command  = request.path.rsplit('/',1)[1]
 
-    if request.method == "POST" :
-        if command == "create" :
+    if request.method == "POST":
+        if command == "create":
             workbook_model = Workbook.createDefault(name="Untitled Workbook", description="", user=request.user)
-        elif command == "edit" :
-            workbook_model = Workbook.edit(id=workbook_id, name=request.POST.get('name'), description=request.POST.get('description'))
-        elif command == "copy" :
+        elif command == "edit":
+            workbook_name = request.POST.get('name')
+            workbook_desc = request.POST.get('description')
+            whitelist = re.compile(WHITELIST_RE, re.UNICODE)
+            match_name = whitelist.search(unicode(workbook_name))
+            match_desc = whitelist.search(unicode(workbook_desc))
+
+            if match_name or match_desc:
+                # XSS risk, log and fail this cohort save
+                matches = ""
+                fields = ""
+                if match_name:
+                    match_name = whitelist.findall(unicode(workbook_name))
+                    logger.error('[ERROR] While saving a workbook, saw a malformed name: ' + workbook_name + ', characters: ' + match_name.__str__())
+                    matches = "name contains"
+                    fields = "name"
+                if match_desc:
+                    match_desc = whitelist.findall(unicode(workbook_desc))
+                    logger.error('[ERROR] While saving a workbook, saw a malformed description: ' + workbook_desc + ', characters: ' + match_desc.__str__())
+                    matches = "name and description contain" if match_name else "description contains"
+                    fields += (" and description" if match_name else "description")
+
+                err_msg = "Your workbook's %s invalid characters; please choose another %s." % (matches, fields,)
+                messages.error(request, err_msg)
+                redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_id})
+                return redirect(redirect_url)
+
+            workbook_model = Workbook.edit(id=workbook_id, name=workbook_name, description=workbook_desc)
+        elif command == "copy":
             workbook_model = Workbook.copy(id=workbook_id, user=request.user)
-        elif command == "delete" :
+        elif command == "delete":
             Workbook.destroy(id=workbook_id)
 
         if command == "delete":
             redirect_url = reverse('workbooks')
-            return redirect(redirect_url)
-        else :
+        else:
             redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_model.id})
-            return redirect(redirect_url)
+
+        return redirect(redirect_url)
 
     elif request.method == "GET" :
         if workbook_id:
@@ -251,17 +284,42 @@ def worksheet(request, workbook_id=0, worksheet_id=0):
     command  = request.path.rsplit('/',1)[1]
 
     if request.method == "POST" :
-        workbook = Workbook.objects.get(id=workbook_id)
-        workbook.save()
+        this_workbook = Workbook.objects.get(id=workbook_id)
+        this_workbook.save()
         if command == "create" :
-            worksheet = Worksheet.create(workbook_id=workbook_id, name=request.POST.get('name'), description=request.POST.get('description'))
-            redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet.id})
+            this_worksheet = Worksheet.create(workbook_id=workbook_id, name=request.POST.get('name'), description=request.POST.get('description'))
+            redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': this_worksheet.id})
         elif command == "edit" :
-            worksheet = Worksheet.edit(id=worksheet_id, name=request.POST.get('name'), description=request.POST.get('description'))
-            redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet.id})
+            worksheet_name = request.POST.get('name')
+            worksheet_desc = request.POST.get('description')
+            whitelist = re.compile(WHITELIST_RE, re.UNICODE)
+            match_name = whitelist.search(unicode(worksheet_name))
+            match_desc = whitelist.search(unicode(worksheet_desc))
+
+            if match_name or match_desc:
+                # XSS risk, log and fail this cohort save
+                matches = ""
+                fields = ""
+                if match_name:
+                    match_name = whitelist.findall(unicode(worksheet_name))
+                    logger.error('[ERROR] While saving a worksheet, saw a malformed name: ' + worksheet_name + ', characters: ' + match_name.__str__())
+                    matches = "name contains"
+                    fields = "name"
+                if match_desc:
+                    match_desc = whitelist.findall(unicode(worksheet_desc))
+                    logger.error('[ERROR] While saving a worksheet, saw a malformed description: ' + worksheet_desc + ', characters: ' + match_desc.__str__())
+                    matches = "name and description contain" if match_name else "description contains"
+                    fields += (" and description" if match_name else "description")
+
+                err_msg = "Your worksheet's %s invalid characters; please choose another %s." % (matches, fields,)
+                messages.error(request, err_msg)
+            else:
+                Worksheet.edit(id=worksheet_id, name=worksheet_name, description=worksheet_desc)
+
+            redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet_id})
         elif command == "copy" :
-            worksheet = Worksheet.copy(id=worksheet_id)
-            redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet.id})
+            this_worksheet = Worksheet.copy(id=worksheet_id)
+            redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': this_worksheet.id})
         elif command == "delete" :
             Worksheet.destroy(id=worksheet_id)
             redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_id})
