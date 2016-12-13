@@ -1,8 +1,7 @@
 import json
-import collections
+import logging
+import re
 import sys
-# import pexpect
-
 from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
@@ -28,6 +27,9 @@ COHORT_API          = settings.BASE_API_URL + '/_ah/api/cohort_api/v1'
 META_DISCOVERY_URL  = settings.BASE_API_URL + '/_ah/api/discovery/v1/apis/meta_api/v1/rest'
 METADATA_API        = settings.BASE_API_URL + '/_ah/api/meta_api/v2'
 
+WHITELIST_RE = settings.WHITELIST_RE
+
+logger = logging.getLogger(__name__)
 
 @login_required
 def variable_fav_list_for_new_workbook(request):
@@ -230,7 +232,7 @@ def initialize_variable_selection_page(request,
         type['label'] = datatype_labels[type['datatype']]
 
         #remove gene in fields
-        if debug: print >> sys.stderr, ' attrs ' + json.dumps(type['fields'])
+        if debug: print >> sys.stdout, '[STATUS] attrs ' + json.dumps(type['fields'])
         for index, field in enumerate(type['fields']):
             if field['label'] == "Gene":
                 del type['fields'][index]
@@ -325,8 +327,22 @@ def variable_fav_copy(request, variable_fav_id):
 @login_required
 def variable_fav_save(request, variable_fav_id=0):
     data   = json.loads(request.body)
+    print >> sys.stdout, 'vars as received: '+data['variables'].__str__()
     result = {}
-    if variable_fav_id :
+
+    name = data['name']
+    whitelist = re.compile(WHITELIST_RE, re.UNICODE)
+    match = whitelist.search(unicode(name))
+    if match:
+        # XSS risk, log and fail this cohort save
+        match = whitelist.findall(unicode(name))
+        logger.error(
+            '[ERROR] While saving a variable list, saw a malformed name: ' + name + ', characters: ' + match.__str__())
+        messages.error(request, "Your variable list's name contains invalid characters; please choose another name.")
+        result['error'] = "Your variable list's name contains invalid characters; please choose another name."
+        return HttpResponse(json.dumps(result), status=200)
+
+    if variable_fav_id:
         try:
             variable_model = VariableFavorite.objects.get(id=variable_fav_id)
             if variable_model.user == request.user :

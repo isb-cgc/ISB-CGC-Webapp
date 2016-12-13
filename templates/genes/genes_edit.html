@@ -32,6 +32,10 @@
 {% endblock %}
 {% block content %}
 <div class="container">
+    <div id="unallowed-chars-alert" class="alert alert-warning alert-dismissable" style="display: none;">
+        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        Your variable list's name contains invalid characters (<span class="unallowed-chars"></span>). Please choose another name.
+    </div>
     <section class="panel panel-defaul">
         <div class="panel-heading">
         </div>
