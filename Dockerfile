@@ -58,13 +58,14 @@ RUN easy_install -U distribute
 ADD . /app
 
 # We need to recompile some of the items because of differences in compiler versions
-RUN pip install -r /app/requirements.txt -t /app/lib/ --upgrade
+#RUN pip install -r /app/requirements.txt -t /app/lib/ --upgrade
 RUN mkdir /app/lib/endpoints/
 RUN cp /app/google_appengine/lib/endpoints-1.0/endpoints/* /app/lib/endpoints/
 
 ENV PYTHONPATH=/app:/app/lib:/app/google_appengine:/app/google_appengine/lib/protorpc-1.0
 
 RUN python /app/manage.py migrate --noinput
-RUN rm -rf /app/google_appengine
-RUN ls -1 /app/ | wc -l
-RUN ls -1 /app/lib/ | wc -l
+#RUN rm -rf /app/google_appengine
+RUN find . -type f | wc -l
+RUN find /app/ -type f | wc -l
+RUN find /app/lib/ -type f| wc -l
