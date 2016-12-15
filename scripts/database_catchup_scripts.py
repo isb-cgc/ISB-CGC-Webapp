@@ -100,15 +100,27 @@ def create_shortlist_view(cursor):
 def create_metadata_vals_sproc(cursor):
     try:
         metadata_vals_sproc_def = """
-            CREATE PROCEDURE `get_metadata_values`()
+            CREATE PROCEDURE `get_metadata_values`(IN p_program_id VARCHAR(100))
                 BEGIN
+                    DECLARE samples_table VARCHAR(100);
+                    DECLARE attr_table VARCHAR(100);
                     DECLARE done INT DEFAULT FALSE;
                     DECLARE col VARCHAR(128);
-                    DECLARE attr_cur CURSOR FOR SELECT attribute FROM metadata_shortlist WHERE NOT(code='N');
+                    DECLARE attr_cur CURSOR FOR SELECT attribute FROM public_attr_table;
                     DECLARE CONTINUE HANDLER FOR NOT FOUND
                     BEGIN
                       SET done = TRUE;
                     END;
+
+                    SELECT p.samples_table into samples_table from projects_public_data_tables as p where program_id=p_program_id;
+                    SELECT p.attr_table into attr_table from projects_public_data_tables as p where program_id=p_program_id;
+                    set @attr = CONCAT('CREATE VIEW public_attr_table as SELECT attribute FROM ', attr_table, ' WHERE NOT(code="N");');
+
+
+                    PREPARE stmt from @attr;
+                    EXECUTE stmt;
+                    DEALLOCATE PREPARE stmt;
+
 
                     OPEN attr_cur;
 
@@ -117,16 +129,19 @@ def create_metadata_vals_sproc(cursor):
                         IF done THEN
                             LEAVE shortlist_loop;
                         END IF;
-                        SET @s = CONCAT('SELECT DISTINCT ',col,' FROM metadata_samples;');
+                        SET @s = CONCAT('SELECT DISTINCT ',col,' FROM ',samples_table,';');
                         PREPARE get_vals FROM @s;
                         EXECUTE get_vals;
                     END LOOP;
 
                     CLOSE attr_cur;
+                    DROP VIEW public_attr_table;
                 END"""
 
         cursor.execute("DROP PROCEDURE IF EXISTS `get_metadata_values`;")
         cursor.execute(metadata_vals_sproc_def)
+        cursor.callproc('get_metadata_values', ('1',))
+        print cursor.description[0][0]
     except Exception as e:
         print >> sys.stdout, "[ERROR] Exception when making the metadata values sproc; it may not have been made"
         print >> sys.stdout, e
@@ -380,13 +395,13 @@ def breakout_metadata_tables(cursor, db):
     delete_tables = 'DROP TABLE IF EXISTS CCLE_metadata_data, CCLE_metadata_samples, CCLE_metadata_attr, TCGA_metadata_data, ' \
                     '                     TCGA_metadata_samples, TCGA_metadata_attr;'
     create_ccle_metadata_data = 'CREATE TABLE CCLE_metadata_data SELECT * FROM metadata_data WHERE program_name="CCLE";'
-    create_ccle_metadata_samples = 'CREATE TABLE CCLE_metadata_samples SELECT {0} FROM metadata_samples WHERE program_name="CCLE";'.format(','.join(new_shortlist))
+    create_ccle_metadata_samples = 'CREATE TABLE CCLE_metadata_samples SELECT sample_barcode,case_barcode,{0} FROM metadata_samples WHERE program_name="CCLE";'.format(','.join(new_shortlist))
     create_ccle_metadata_attr = 'CREATE TABLE CCLE_metadata_attr (tree_map TinyInt(4)) ' \
-                                '  SELECT attribute, code, spec from metadata_attr where shortlist=1;'
+                                '  SELECT attribute, code, spec from metadata_attr where shortlist=1 and attribute in ("{0}");'.format('","'.join(new_shortlist))
     create_tcga_metadata_data = 'CREATE TABLE TCGA_metadata_data SELECT * FROM metadata_data WHERE program_name="TCGA";'
-    create_tcga_metadata_samples = 'CREATE TABLE TCGA_metadata_samples SELECT {0} FROM metadata_samples WHERE program_name="TCGA";'.format(','.join(new_shortlist))
+    create_tcga_metadata_samples = 'CREATE TABLE TCGA_metadata_samples SELECT sample_barcode,case_barcode,{0} FROM metadata_samples WHERE program_name="TCGA";'.format(','.join(new_shortlist))
     create_tcga_metadata_attr = 'CREATE TABLE TCGA_metadata_attr (tree_map TinyInt(4)) ' \
-                                '  SELECT attribute, code, spec from metadata_attr where shortlist=1;'
+                                '  SELECT attribute, code, spec from metadata_attr where shortlist=1 and attribute in ("{0}");'.format('","'.join(new_shortlist))
 
     remove_ccle_metadata_data = 'DELETE from metadata_data where program_name="CCLE"';
     remove_ccle_metadata_samples = 'DELETE from metadata_samples where program_name="CCLE"';
@@ -416,8 +431,8 @@ def breakout_metadata_tables(cursor, db):
         cursor.execute(get_ccle_program_id)
         result = cursor.fetchone()
         if len(result):
-            cursor.execute(insert_into_public_data_table.format(data_table='CCLE_metadata_data_table',
-                                                                samples_table='CCLE_metadata_samples_table',
+            cursor.execute(insert_into_public_data_table.format(data_table='CCLE_metadata_data',
+                                                                samples_table='CCLE_metadata_samples',
                                                                 attr_table='CCLE_metadata_attr',
                                                                 sample_data_availability_table='',
                                                                 program_id=int(result[0])))
@@ -427,8 +442,8 @@ def breakout_metadata_tables(cursor, db):
         cursor.execute(get_tcga_program_id)
         result = cursor.fetchone()
         if len(result):
-            cursor.execute(insert_into_public_data_table.format(data_table='TCGA_metadata_data_table',
-                                                                samples_table='TCGA_metadata_samples_table',
+            cursor.execute(insert_into_public_data_table.format(data_table='TCGA_metadata_data',
+                                                                samples_table='TCGA_metadata_samples',
                                                                 attr_table='TCGA_metadata_attr',
                                                                 sample_data_availability_table='',
                                                                 program_id=int(result[0])))

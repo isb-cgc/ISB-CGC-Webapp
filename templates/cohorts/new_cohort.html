@@ -67,11 +67,13 @@
     </div>
 
     <div class="row cgc-user-data-type-tabs">
-        <div class="col-lg-4">
+        <div class="col-sm-12 col-md-12 col-lg-12">
             <div class="panel panel-default">
                 <ul class="nav nav-tabs nav-tabs-data" role="tablist">
-                    <li role="presentation" class="active"><a href="#isb-cgc-data" role="tab" data-toggle="tab" title="Donor Filters">ISB-CGC Data</a></li>
-                    <li role="presentation" class=""><a href="#user-data" role="tab" data-toggle="tab" title="User Data">User Data</a></li>
+                    {% for program in programs %}
+                    <li role="presentation" class="{% if forloop.first %}active{% endif %}"><a href="#{{ program.id }}-data" role="tab" data-toggle="tab" title="ISB-CGC Data" data-program-id="{{ program.id }}">{{ program.name }} Data</a></li>
+                    {% endfor %}
+                    <li role="presentation" class=""><a href="#0-data" role="tab" data-toggle="tab" title="User Data" data-program-id="0">User Data</a></li>
                 </ul>
             </div>
         </div>
@@ -79,8 +81,6 @@
 
     <div class="row">
         <div class="tab-content data-tab-content">
-            {% include "cohorts/isb-cgc-data.html" %}
-            {% include "cohorts/user-data.html" %}
         </div>
     </div>
 
@@ -131,15 +131,15 @@
     </div>
 
     <script type="text/javascript">
-    var attr_list = {{ attr_list|tojson|safe }};
-    var total_samples = {{ total_samples|safe }};
-    var attr_counts = {{ attr_list_count|tojson|safe }};
+{#    var attr_list = {{ attr_list|tojson|safe }};#}
+{#    var total_samples = {{ total_samples|safe }};#}
+{#    var attr_counts = {{ attr_list_count|tojson|safe }};#}
     var base_url = '{{ base_url|safe }}';
     var base_api_url = '{{ base_api_url|safe }}';
     var cohort_id = undefined;
-    var user_data = {{ user_data|tojson|safe }};
-    var metadata_counts = {{ metadata_counts|tojson|safe }};
-    var metadata_filters = {{ metadata_filters|tojson|safe }};
+{#    var user_data = {{ user_data|tojson|safe }};#}
+{#    var metadata_counts = {{ metadata_counts|tojson|safe }};#}
+{#    var metadata_filters = {{ metadata_filters|tojson|safe }};#}
     </script>
 {% endblock %}
 
