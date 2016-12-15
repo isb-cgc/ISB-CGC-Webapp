@@ -59,9 +59,9 @@ ADD . /app
 
 # We need to recompile some of the items because of differences in compiler versions
 RUN pip install -r /app/requirements.txt -t /app/lib/ --upgrade
-RUN mkdir /app/lib/endpoints/
-RUN ls
-RUN cp /app/google_appengine/lib/endpoints-1.0/endpoints/* /app/lib/endpoints/
+#RUN mkdir /app/lib/endpoints/
+#RUN ls /app/google_appengine/
+#RUN cp /app/google_appengine/lib/endpoints-1.0/endpoints/* /app/lib/endpoints/
 
 ENV PYTHONPATH=/app:/app/lib:/app/google_appengine:/app/google_appengine/lib/protorpc-1.0
 
