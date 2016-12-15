@@ -60,10 +60,11 @@ ADD . /app
 # We need to recompile some of the items because of differences in compiler versions
 RUN pip install -r /app/requirements.txt -t /app/lib/ --upgrade
 RUN mkdir /app/lib/endpoints/
-RUN ls
-RUN ls/lib
 RUN cp /app/google_appengine/lib/endpoints-1.0/endpoints/* /app/lib/endpoints/
 
 ENV PYTHONPATH=/app:/app/lib:/app/google_appengine:/app/google_appengine/lib/protorpc-1.0
 
 RUN python /app/manage.py migrate --noinput
+RUN rm -rf /app/google_appengine
+RUN ls -1 /app/ | wc -l
+RUN ls -1 /app/lib/ | wc -l
