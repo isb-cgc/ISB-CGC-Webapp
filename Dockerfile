@@ -20,10 +20,13 @@
 # single application.
 FROM gcr.io/google_appengine/python
 
-RUN apt-get update
-ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get install -y wget
-RUN wget "http://dev.mysql.com/get/mysql-apt-config_0.5.3-1_all.deb" -P /tmp
+# Python 2 (explicit)
+RUN virtualenv /env -p python2.7
+
+#RUN apt-get update
+#ENV DEBIAN_FRONTEND=noninteractive
+#RUN apt-get install -y wget
+#RUN wget "http://dev.mysql.com/get/mysql-apt-config_0.5.3-1_all.deb" -P /tmp
 
 # install lsb-release (a dependency of mysql-apt-config), since dpkg doesn't
 # do dependency resolution
@@ -58,14 +61,14 @@ RUN easy_install -U distribute
 ADD . /app
 
 # We need to recompile some of the items because of differences in compiler versions
-#RUN pip install -r /app/requirements.txt -t /app/lib/ --upgrade
+RUN pip install -r /app/requirements.txt -t /app/lib/ --upgrade
 RUN mkdir /app/lib/endpoints/
 RUN cp /app/google_appengine/lib/endpoints-1.0/endpoints/* /app/lib/endpoints/
 
 ENV PYTHONPATH=/app:/app/lib:/app/google_appengine:/app/google_appengine/lib/protorpc-1.0
 
 RUN python /app/manage.py migrate --noinput
-#RUN rm -rf /app/google_appengine
+RUN find / -type d -name "google_appengine" -ls
 RUN find . -type f | wc -l
 RUN find /app/ -type f | wc -l
 RUN find /app/lib/ -type f| wc -l
