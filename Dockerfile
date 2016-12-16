@@ -30,7 +30,7 @@ RUN wget "http://dev.mysql.com/get/mysql-apt-config_0.5.3-1_all.deb" -P /tmp
 
 # install lsb-release (a dependency of mysql-apt-config), since dpkg doesn't
 # do dependency resolution
-#RUN apt-get install -y lsb-release
+RUN apt-get install -y lsb-release
 # add a debconf entry to select mysql-5.7 as the server version when we install
 # the mysql config package
 RUN echo "mysql-apt-config mysql-apt-config/select-server select mysql-5.7" | debconf-set-selections
