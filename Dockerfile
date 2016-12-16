@@ -23,9 +23,9 @@ FROM gcr.io/google_appengine/python
 # Python 2 (explicit)
 RUN virtualenv /env -p python2.7
 
-#RUN apt-get update
-#ENV DEBIAN_FRONTEND=noninteractive
-#RUN apt-get install -y wget
+RUN apt-get update
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get install -y wget
 RUN wget "http://dev.mysql.com/get/mysql-apt-config_0.5.3-1_all.deb" -P /tmp
 
 # install lsb-release (a dependency of mysql-apt-config), since dpkg doesn't
