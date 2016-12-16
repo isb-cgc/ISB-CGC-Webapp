@@ -21,7 +21,7 @@
 FROM gcr.io/google_appengine/python
 
 # Python 2 (explicit)
-RUN virtualenv /env -p python2.7
+#RUN virtualenv /env -p python2.7
 
 RUN apt-get update
 ENV DEBIAN_FRONTEND=noninteractive
@@ -57,7 +57,6 @@ RUN apt-get -y install libffi-dev libssl-dev libmysqlclient-dev python2.7-dev cu
 RUN apt-get -y install git
 RUN easy_install -U distribute
 
-
 ADD . /app
 
 # We need to recompile some of the items because of differences in compiler versions
@@ -68,7 +67,6 @@ RUN cp /app/google_appengine/lib/endpoints-1.0/endpoints/* /app/lib/endpoints/
 ENV PYTHONPATH=/app:/app/lib:/app/google_appengine:/app/google_appengine/lib/protorpc-1.0
 
 RUN python /app/manage.py migrate --noinput
-RUN find / -type d -name "google_appengine" -ls
-RUN find . -type f | wc -l
-RUN find /app/ -type f | wc -l
-RUN find /app/lib/ -type f| wc -l
+
+RUN rm -rf /app/google_appengine/
+RUN rm -rf ./google_appengine/
