@@ -54,7 +54,7 @@ RUN pip install pexpect
 
 
 RUN apt-get -y install libffi-dev libssl-dev libmysqlclient-dev python2.7-dev curl
-RUN apt-get -y install git
+#RUN apt-get -y install git
 RUN easy_install -U distribute
 
 ADD . /app
@@ -70,3 +70,6 @@ RUN python /app/manage.py migrate --noinput
 
 RUN rm -rf /app/google_appengine/
 RUN rm -rf ./google_appengine/
+
+RUN ls /app
+RUN ls .
