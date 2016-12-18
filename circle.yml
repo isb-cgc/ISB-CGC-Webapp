@@ -21,5 +21,5 @@ deployment:
   staging:
     branch: [isb-cgc-test]
     commands:
-      - sudo -E rm -rf ./lib
+#      - sudo -E rm -rf ./lib
       - sudo -E ./google-cloud-sdk/bin/gcloud app deploy
