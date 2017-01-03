@@ -16,7 +16,8 @@
 #
 ###
 
-runtime: custom
+runtime: python
+env: flex
 module: default
 api_version: 1
 threadsafe: true
