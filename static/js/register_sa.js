@@ -129,9 +129,12 @@ require([
             },
             error: function(xhr, ajaxOptions, thrownError) {
                 var response = $.parseJSON(xhr.responseText);
-                console.log(response['message']);
-                console.log(xhr.status);
                 spinner.hide();
+                $('.verify-sa-btn').prop('disabled', '');
+                $('#invalid-sa-error').append('<div class="alert alert-error alert-dismissible">' +
+                    '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>'
+                        + response['message'] + '</div>'
+                );
             }
         });
         return false;
