@@ -66,7 +66,7 @@ RUN cp /app/endpoints/* /app/lib/endpoints/
 
 ENV PYTHONPATH=/app:/app/lib:/app/google_appengine:/app/google_appengine/lib/protorpc-1.0
 
-RUN python /app/manage.py migrate --noinput
+#RUN python /app/manage.py migrate --noinput
 
 #RUN rm -rf /app/google_appengine/
 #RUN rm -rf ./google_appengine/

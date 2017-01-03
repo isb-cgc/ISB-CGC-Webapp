@@ -3,7 +3,6 @@ import json
 import re
 import logging
 import sys
-from google.appengine.api import urlfetch
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.utils.safestring import mark_safe

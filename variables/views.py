@@ -13,7 +13,6 @@ from projects.models import Project, Study
 from cohorts.views import count_metadata
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
-from google.appengine.api import urlfetch
 from django.conf import settings
 debug = settings.DEBUG
 from django.http import HttpResponse
@@ -21,7 +20,6 @@ from django.db import connection
 
 from django.core import serializers
 
-urlfetch.set_default_fetch_deadline(60)
 BIG_QUERY_API_URL   = settings.BASE_API_URL + '/_ah/api/bq_api/v1'
 COHORT_API          = settings.BASE_API_URL + '/_ah/api/cohort_api/v1'
 META_DISCOVERY_URL  = settings.BASE_API_URL + '/_ah/api/discovery/v1/apis/meta_api/v1/rest'
