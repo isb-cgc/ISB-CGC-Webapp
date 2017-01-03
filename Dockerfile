@@ -70,6 +70,7 @@ RUN python /app/manage.py migrate --noinput
 
 #RUN rm -rf /app/google_appengine/
 #RUN rm -rf ./google_appengine/
+RUN rm -rf /app/endpoints/
 
 RUN find . -type f | wc -l
 
