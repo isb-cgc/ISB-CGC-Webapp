@@ -47,7 +47,9 @@ def get_mysql_connection():
 """ double-check to make sure the alteration is necessary to avoid errors if the method is run     """
 """ when the change wasn't needed! Eg. use 'CREATE OR REPLACE VIEW' or check for column existence. """
 
-# Add the shortlist column to metadata_attributes ans set its value.
+# Add the shortlist column to metadata_attributes and set its value.
+# As of data migration all columns in a given program's metadata_attr will by default be the shortlist,
+# but we need this for now to construct those tables
 def catchup_shortlist(cursor):
     try:
         # Add the 'shortlist' column to metadata_attr and set it accordingly, if it's not already there
@@ -78,6 +80,7 @@ def catchup_shortlist(cursor):
         print >> sys.stdout, traceback.format_exc()
 
 # Create the view which lists all members of metadata_attributes with shortlist=1 (i.e. true).
+# As of data migration this is no longer needed as we only store the 'shortlisted' columns in the webapp
 def create_shortlist_view(cursor):
     try:
         # Create the metadata_shortlist view, which is our formal set of attributes displayed in the WebApp
@@ -100,27 +103,22 @@ def create_shortlist_view(cursor):
 def create_metadata_vals_sproc(cursor):
     try:
         metadata_vals_sproc_def = """
-            CREATE PROCEDURE `get_metadata_values`(IN p_program_id VARCHAR(100))
+            CREATE PROCEDURE `get_metadata_values`(IN pid INT(11))
                 BEGIN
-                    DECLARE samples_table VARCHAR(100);
-                    DECLARE attr_table VARCHAR(100);
+                    DECLARE samples_table_var VARCHAR(100);
+                    DECLARE attr_table_var VARCHAR(100);
                     DECLARE done INT DEFAULT FALSE;
                     DECLARE col VARCHAR(128);
-                    DECLARE attr_cur CURSOR FOR SELECT attribute FROM public_attr_table;
-                    DECLARE CONTINUE HANDLER FOR NOT FOUND
-                    BEGIN
-                      SET done = TRUE;
-                    END;
+                    DECLARE attr_cur CURSOR FOR SELECT attribute FROM tmp_attr_view;
+                    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
 
-                    SELECT p.samples_table into samples_table from projects_public_data_tables as p where program_id=p_program_id;
-                    SELECT p.attr_table into attr_table from projects_public_data_tables as p where program_id=p_program_id;
-                    set @attr = CONCAT('CREATE VIEW public_attr_table as SELECT attribute FROM ', attr_table, ' WHERE NOT(code="N");');
-
+                    SELECT samples_table into samples_table_var from projects_public_data_tables where program_id=pid;
+                    SELECT attr_table into attr_table_var from projects_public_data_tables where program_id=pid;
+                    set @attr = CONCAT('CREATE OR REPLACE VIEW tmp_attr_view as SELECT attribute FROM ', attr_table_var,' WHERE NOT(code="N");');
 
                     PREPARE stmt from @attr;
                     EXECUTE stmt;
                     DEALLOCATE PREPARE stmt;
-
 
                     OPEN attr_cur;
 
@@ -129,26 +127,58 @@ def create_metadata_vals_sproc(cursor):
                         IF done THEN
                             LEAVE shortlist_loop;
                         END IF;
-                        SET @s = CONCAT('SELECT DISTINCT ',col,' FROM ',samples_table,';');
+                        SET @s = CONCAT('SELECT DISTINCT ',col,' FROM ',samples_table_var,';');
                         PREPARE get_vals FROM @s;
                         EXECUTE get_vals;
-                    END LOOP;
+                    END LOOP shortlist_loop;
 
                     CLOSE attr_cur;
-                    DROP VIEW public_attr_table;
+
+                    DROP VIEW IF EXISTS tmp_attr_view;
                 END"""
 
         cursor.execute("DROP PROCEDURE IF EXISTS `get_metadata_values`;")
         cursor.execute(metadata_vals_sproc_def)
-        cursor.callproc('get_metadata_values', ('1',))
-        print cursor.description[0][0]
+
     except Exception as e:
         print >> sys.stdout, "[ERROR] Exception when making the metadata values sproc; it may not have been made"
         print >> sys.stdout, e
         print >> sys.stdout, traceback.format_exc()
 
+# Create the get_metadata_values stored procedure, which retrieves all the possible values of the attributes found in
+# metadata_samples for the indicated program.
+#
+# This stored procedure uses the projects_public_data_tables table to determine the name of the program's attribute
+# table
+def create_metadata_attr_sproc(cursor):
+    try:
+        metadata_attr_sproc_def = """
+            CREATE PROCEDURE get_program_attr(IN pid INT(11))
+              BEGIN
+                  DECLARE prog_attr_table VARCHAR(100);
+
+                  SELECT pdt.attr_table INTO prog_attr_table FROM projects_public_data_tables pdt WHERE pdt.program_id = pid;
+
+                  SET @sel = CONCAT('SELECT attribute FROM ',prog_attr_table,';');
+                  PREPARE selstmt FROM @sel; EXECUTE selstmt;
+                  DEALLOCATE PREPARE selstmt;
+              END
+        """
+
+        cursor.execute("DROP PROCEDURE IF EXISTS `get_metadata_attr`;")
+        cursor.execute(metadata_attr_sproc_def)
+
+    except Exception as e:
+        print >> sys.stdout, "[ERROR] Exception when making the metadata attr sproc; it may not have been made"
+        print >> sys.stdout, e
+        print >> sys.stdout, traceback.format_exc()
+
+
 # Create the metadata_samples_shortlist view, which acts as a smaller version of metadata_samples for use with the
 # webapp.
+#
+# Note that as of data migration this view is deprecated due to each program's metadata_samples table only containing
+# the shortlisted attributes
 #
 # The primary view used by the WebApp to obtain data for counting and display, so we're not constantly
 # dealing with all of metadata_samples
@@ -412,8 +442,9 @@ def breakout_metadata_tables(cursor, db):
 
     insert_into_public_data_table = 'INSERT INTO projects_public_data_tables (data_table, samples_table, attr_table, sample_data_availability_table, program_id) ' \
                                     'values("{data_table}", "{samples_table}", "{attr_table}", "{sample_data_availability_table}", {program_id});'
-    get_tcga_program_id = 'SELECT id from projects_program where name="TCGA";'
-    get_ccle_program_id = 'SELECT id from projects_program where name="CCLE";'
+    check_already_exists = 'SELECT * FROM projects_public_data_tables WHERE program_id=%s;'
+    get_tcga_program_id = "SELECT id from projects_program where name='TCGA';"
+    get_ccle_program_id = "SELECT id from projects_program where name='CCLE';"
 
     try:
         cursor.execute(delete_tables)
@@ -431,22 +462,30 @@ def breakout_metadata_tables(cursor, db):
         cursor.execute(get_ccle_program_id)
         result = cursor.fetchone()
         if len(result):
-            cursor.execute(insert_into_public_data_table.format(data_table='CCLE_metadata_data',
-                                                                samples_table='CCLE_metadata_samples',
-                                                                attr_table='CCLE_metadata_attr',
-                                                                sample_data_availability_table='',
-                                                                program_id=int(result[0])))
+            prog_id = int(result[0])
+            cursor.execute(check_already_exists, (prog_id,))
+            result = cursor.fetchone()
+            if not result or not len(result):
+                cursor.execute(insert_into_public_data_table.format(data_table='CCLE_metadata_data',
+                                                                    samples_table='CCLE_metadata_samples',
+                                                                    attr_table='CCLE_metadata_attr',
+                                                                    sample_data_availability_table='',
+                                                                    program_id=prog_id))
         else:
             print >> sys.stdout, "[WARNING] No CCLE program found."
 
         cursor.execute(get_tcga_program_id)
         result = cursor.fetchone()
         if len(result):
-            cursor.execute(insert_into_public_data_table.format(data_table='TCGA_metadata_data',
-                                                                samples_table='TCGA_metadata_samples',
-                                                                attr_table='TCGA_metadata_attr',
-                                                                sample_data_availability_table='',
-                                                                program_id=int(result[0])))
+            prog_id = int(result[0])
+            cursor.execute(check_already_exists, (prog_id,))
+            result = cursor.fetchone()
+            if not result or not len(result):
+                cursor.execute(insert_into_public_data_table.format(data_table='TCGA_metadata_data',
+                                                                    samples_table='TCGA_metadata_samples',
+                                                                    attr_table='TCGA_metadata_attr',
+                                                                    sample_data_availability_table='',
+                                                                    program_id=prog_id))
         else:
             print >> sys.stdout, "[WARNING] No CCLE program found."
 
@@ -851,9 +890,7 @@ def main():
     try:
         args.alter_metadata_tables and alter_metadata_tables(cursor)
         args.catchup_shortlist and catchup_shortlist(cursor)
-        args.create_shortlist_view and create_shortlist_view(cursor)
         args.create_metadata_vals_sproc and create_metadata_vals_sproc(cursor)
-        args.create_ms_shortlist_view and create_samples_shortlist_view(cursor)
         args.fix_cohort_projects and fix_cohort_projects(cursor)
         args.fix_ccle_cohort_projects and fix_ccle(cursor)
         args.create_isbcgc_project_set_sproc and add_isb_cgc_project_sproc(cursor)
