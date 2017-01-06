@@ -18,7 +18,7 @@
 
 # Dockerfile extending the generic Python image with application files for a
 # single application.
-FROM gcr.io/google_appengine/python-compat
+FROM gcr.io/google_appengine/python
 
 RUN apt-get update
 ENV DEBIAN_FRONTEND=noninteractive
