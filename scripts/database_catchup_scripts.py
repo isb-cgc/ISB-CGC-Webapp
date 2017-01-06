@@ -65,10 +65,8 @@ def catchup_shortlist(cursor):
             set_metadata_shortlist_def = """
                 UPDATE metadata_attr
                 SET shortlist=1
-                WHERE attribute IN ('age_at_initial_pathologic_diagnosis','BMI','disease_code','gender','has_27k','has_450k',
-                  'has_BCGSC_GA_RNASeq','has_BCGSC_HiSeq_RNASeq','has_GA_miRNASeq','has_HiSeq_miRnaSeq',
-                  'has_Illumina_DNASeq','has_RPPA','has_SNP6','has_UNC_GA_RNASeq','has_UNC_HiSeq_RNASeq',
-                  'histological_type','hpv_status','icd_10','icd_o_3_histology','icd_o_3_site','neoplasm_histologic_grade',
+                WHERE attribute IN ('age_at_initial_pathologic_diagnosis','BMI','disease_code','gender',
+                  'histological_type','hpv_status','neoplasm_histologic_grade',
                   'new_tumor_event_after_initial_treatment','pathologic_stage','person_neoplasm_cancer_status','program_name',
                   'residual_tumor','SampleTypeCode','tobacco_smoking_history','tumor_tissue_site','tumor_type',
                   'vital_status');
@@ -79,6 +77,7 @@ def catchup_shortlist(cursor):
         print >> sys.stdout, e
         print >> sys.stdout, traceback.format_exc()
 
+# *** DEPRECATED ***
 # Create the view which lists all members of metadata_attributes with shortlist=1 (i.e. true).
 # As of data migration this is no longer needed as we only store the 'shortlisted' columns in the webapp
 def create_shortlist_view(cursor):
@@ -93,6 +92,7 @@ def create_shortlist_view(cursor):
         print >> sys.stdout, "[ERROR] Exception when creating the metadata shortlist view! It may not have been made."
         print >> sys.stdout, e
         print >> sys.stdout, traceback.format_exc()
+# *** DEPRECATED ***
 
 # Create the get_metadata_values stored procedure, which retrieves all the possible values of the metadata shortlist
 # attributes found in metadata_samples.
@@ -127,7 +127,7 @@ def create_metadata_vals_sproc(cursor):
                         IF done THEN
                             LEAVE shortlist_loop;
                         END IF;
-                        SET @s = CONCAT('SELECT DISTINCT ',col,' FROM ',samples_table_var,';');
+                        SET @s = CONCAT('SELECT DISTINCT ',col,' FROM ',samples_table,';');
                         PREPARE get_vals FROM @s;
                         EXECUTE get_vals;
                     END LOOP shortlist_loop;
@@ -141,7 +141,7 @@ def create_metadata_vals_sproc(cursor):
         cursor.execute(metadata_vals_sproc_def)
 
     except Exception as e:
-        print >> sys.stdout, "[ERROR] Exception when making the metadata values sproc; it may not have been made"
+        print >> sys.stdout, "[ERROR] Exception when making the metadata values sproc; it may not have been made!"
         print >> sys.stdout, e
         print >> sys.stdout, traceback.format_exc()
 
@@ -150,9 +150,9 @@ def create_metadata_vals_sproc(cursor):
 #
 # This stored procedure uses the projects_public_data_tables table to determine the name of the program's attribute
 # table
-def create_metadata_attr_sproc(cursor):
+def create_program_attr_sproc(cursor):
     try:
-        metadata_attr_sproc_def = """
+        program_attr_sproc_def = """
             CREATE PROCEDURE get_program_attr(IN pid INT(11))
               BEGIN
                   DECLARE prog_attr_table VARCHAR(100);
@@ -165,15 +165,126 @@ def create_metadata_attr_sproc(cursor):
               END
         """
 
-        cursor.execute("DROP PROCEDURE IF EXISTS `get_metadata_attr`;")
-        cursor.execute(metadata_attr_sproc_def)
+        cursor.execute("DROP PROCEDURE IF EXISTS `get_program_attr`;")
+        cursor.execute(program_attr_sproc_def)
 
     except Exception as e:
-        print >> sys.stdout, "[ERROR] Exception when making the metadata attr sproc; it may not have been made"
+        print >> sys.stdout, "[ERROR] Exception when making the metadata attr sproc; it may not have been made!"
         print >> sys.stdout, e
         print >> sys.stdout, traceback.format_exc()
 
 
+def create_program_display_sproc(cursor):
+    try:
+        prog_displ_sproc_def = """
+            CREATE PROCEDURE get_program_display_strings(IN pid INT(11))
+              BEGIN
+                CASE pid
+                  WHEN 0 THEN SELECT attr_name,value_name,display_string FROM attr_value_display WHERE program_id IS NULL;
+                  ELSE
+                    BEGIN
+                      SELECT attr_name,value_name,display_string FROM attr_value_display WHERE program_id=pid;
+                    END
+                END CASE
+              END
+        """
+
+        cursor.execute("DROP PROCEDURE IF EXISTS `get_program_display_strings`;")
+        cursor.execute(prog_displ_sproc_def)
+
+    except Exception as e:
+        print >> sys.stdout, "[ERROR] Exception when making the program display atring sproc; it may not have been made!"
+        print >> sys.stdout, e
+        print >> sys.stdout, traceback.format_exc()
+
+
+# Create the display-string storage table for attributes and their values which are not displayed as they're stored in the database,
+# eg. Sample Type Code, Smoking History. The attribute is always required (to associate the correct display string for a value), but
+# if this is a display string for an attribute value_name can be null. Program ID is optional, to allow for different programs to have
+# different display values.
+def make_attr_display_table(cursor,db):
+    try:
+        table_create_statement = """
+            CREATE TABLE IF NOT EXISTS attr_value_display (attr_name VARCHAR(100) NOT NULL, value_name VARCHAR(100), display_string VARCHAR(256) NOT NULL, program_id INT(11));
+        """
+
+        cursor.execute(table_create_statement)
+
+        # some test values - will replace with actual LOAD INTO at a later time
+        insert_statement = """
+            INSERT INTO attr_value_display(attr_name,value_name,display_string,program_id) VALUES(%s,%s,%s,%s)
+        """
+
+        # get the ISB superuser ID
+
+        cursor.execute("""
+            SELECT id
+            FROM auth_user
+            WHERE username = 'isb' AND is_superuser = 1 AND is_active = 1 AND active = 1
+        """)
+
+        pid = cursor.fetchall()[0][0]
+
+        displs = {
+            'BMI': {
+                'underweight': 'Underweight: BMI less than 18.5',
+                'normal weight': 'Normal weight: BMI is 18.5 - 24.9',
+                'overweight': 'Overweight: BMI is 25 - 29.9',
+                'obese': 'Obese: BMI is 30 or more',
+            },
+            'SampleTypeCode': {
+                '01': 'Primary Solid Tumor',
+                '02': 'Recurrent Solid Tumor',
+                '03': 'Primary Blood Derived Cancer - Peripheral Blood',
+                '04': 'Recurrent Blood Derived Cancer - Bone Marrow',
+                '05': 'Additional - New Primary',
+                '06': 'Metastatic',
+                '07': 'Additional Metastatic',
+                '08': 'Human Tumor Original Cells',
+                '09': 'Primary Blood Derived Cancer - Bone Marrow',
+                '10': 'Blood Derived Normal',
+                '11': 'Solid Tissue Normal',
+                '12': 'Buccal Cell Normal',
+                '13': 'EBV Immortalized Normal',
+                '14': 'Bone Marrow Normal',
+                '20': 'Control Analyte',
+                '40': 'Recurrent Blood Derived Cancer - Peripheral Blood',
+                '50': 'Cell Lines',
+                '60': 'Primary Xenograft Tissue',
+                '61': 'Cell Line Derived Xenograft Tissue',
+                'None': 'NA',
+            },
+            'tobacco_smoking_history': {
+                '1': 'Lifelong Non-smoker',
+                '2': 'Current Smoker',
+                '3': 'Current Reformed Smoker for > 15 years',
+                '4': 'Current Reformed Smoker for <= 15 years',
+                '5': 'Current Reformed Smoker, Duration Not Specified',
+                '6': 'Smoker at Diagnosis',
+                '7': 'Smoking History Not Documented',
+                'None': 'NA',
+            }
+        }
+
+        for attr in displs:
+            for val in displs[attr]:
+                vals = (attr,val,displs[attr][val],pid,)
+                cursor.execute(insert_statement,vals)
+
+        vals = ('tobacco_smoking_history',None,'Tobacco Smoking History',pid,)
+        cursor.execute(insert_statement,vals)
+        vals = ('SampleTypeCode', None, 'Sample Type', pid,)
+        cursor.execute(insert_statement, vals)
+
+        db.commit()
+
+    except Exception as e:
+        print >> sys.stdout, "[ERROR] Exception when adding the attr_value_display table - it may not have been properly generated!"
+        print >> sys.stdout, e
+        print >> sys.stdout, traceback.format_exc()
+
+
+# *** DEPRECATED ***
 # Create the metadata_samples_shortlist view, which acts as a smaller version of metadata_samples for use with the
 # webapp.
 #
@@ -204,13 +315,14 @@ def create_samples_shortlist_view(cursor):
         print >> sys.stdout, "[ERROR] Exception when creating the metadata_samples shortlist view; it may not have been made"
         print >> sys.stdout, e
         print >> sys.stdout, traceback.format_exc()
+# *** DEPRECATED ***
+
 
 # Cohorts made prior to the release of user data will have null values in their project IDs for each sample
 # in the cohort. This script assumes that any sample with a null project ID is an ISB-CGC sample from metadata_samples
 # and uses the value of the Study column to look up the appropriate ID in projects_project and apply it to the cohort
 # *** This will need to be changed when metadata_samples.Study becomes 'disease code' and a project column is added ***
 # *** which is an FK into the projects_project table                                                                ***
-
 def fix_cohort_projects(cursor):
     try:
         null_project_count = """
@@ -847,16 +959,28 @@ def main():
 
     # To disable any of these by default, change the default to False
     cmd_line_parser = ArgumentParser(description="Script to catch up a database to current deployment needs.")
-    cmd_line_parser.add_argument('-l', '--catchup-shortlist', type=bool, default=True,
-                                 help="Add the shortlist column to metadata_attributes ans set its value.")
-    cmd_line_parser.add_argument('-v', '--create-shortlist-view', type=bool, default=True,
+
+    # These are no longer needed, so they default to false
+    cmd_line_parser.add_argument('-v', '--create-shortlist-view', type=bool, default=False,
                                  help="Create the view which lists all members of metadata_attributes with shortlist=1 (i.e. true).")
-    cmd_line_parser.add_argument('-s', '--create-metadata-vals-sproc', type=bool, default=True,
-                                 help="Create the get_metadata_values stored procedure, which retrieves all the possible values of the metadata shortlist attributes found in metadata_samples.")
-    cmd_line_parser.add_argument('-m', '--create-ms-shortlist-view', type=bool, default=True,
+    cmd_line_parser.add_argument('-m', '--create-ms-shortlist-view', type=bool, default=False,
                                  help="Create the metadata_samples_shortlist view, which acts as a smaller version of metadata_samples for use with the webapp.")
-    cmd_line_parser.add_argument('-b', '--fix-bmi-case', type=bool, default=True,
+    cmd_line_parser.add_argument('-b', '--fix-bmi-case', type=bool, default=False,
                                  help="Fix the casing of the attribute value for the BMI row in metadata_attributes.")
+
+    cmd_line_parser.add_argument('-l', '--catchup-shortlist', type=bool, default=True,
+                                 help="Add the shortlist column to metadata_attributes and set its value.")
+
+    cmd_line_parser.add_argument('-s', '--make-attr-display-table', type=bool, default=True,
+                                 help="Create the attr_value_display table, which stores the display strings for the attributes and values for any program which has them.")
+
+    cmd_line_parser.add_argument('-s', '--create-program-attr-sproc', type=bool, default=True,
+                                 help="Create the get_program_attr stored procedure, which retrieves all the attributes found in a program's metadata_attributes table.")
+    cmd_line_parser.add_argument('-t', '--create-metadata-vals-sproc', type=bool, default=True,
+                                 help="Create the get_metadata_values stored procedure, which retrieves all the possible values of the attributes found in a program's metadata_samples table.")
+    cmd_line_parser.add_argument('-t', '--create-program-display-sproc', type=bool, default=True,
+                                 help="Create the get_program_display_strings stored procedure, which retrieves all display strings of the attributes and their values found in a program's metadata_samples table.")
+
     cmd_line_parser.add_argument('-c', '--fix-cohort-projects', type=bool, default=True,
                                  help="Fix cohorts which have null project IDs for ISB-CGC samples")
     cmd_line_parser.add_argument('-e', '--fix-ccle-cohort-projects', type=bool, default=True,
@@ -890,7 +1014,12 @@ def main():
     try:
         args.alter_metadata_tables and alter_metadata_tables(cursor)
         args.catchup_shortlist and catchup_shortlist(cursor)
+
         args.create_metadata_vals_sproc and create_metadata_vals_sproc(cursor)
+        args.create_program_attr_sproc and create_program_attr_sproc(cursor)
+        args.create_program_display_sproc and create_program_display_sproc(cursor)
+        args.make_attr_display_table and make_attr_display_table(cursor)
+
         args.fix_cohort_projects and fix_cohort_projects(cursor)
         args.fix_ccle_cohort_projects and fix_ccle(cursor)
         args.create_isbcgc_project_set_sproc and add_isb_cgc_project_sproc(cursor)
