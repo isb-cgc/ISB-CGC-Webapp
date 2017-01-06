@@ -40,9 +40,9 @@ handlers:
 #- url: /static
 #  static_dir: static
 #  secure: always
-- url: /_ah/spi/.*
-  script: cgc_api.APPLICATION
-  secure: always
+#- url: /_ah/spi/.*
+#  script: cgc_api.APPLICATION
+#  secure: always
 - url: /remoteapi.*
   script: google.appengine.ext.remote_api.handler.application
   login: admin
