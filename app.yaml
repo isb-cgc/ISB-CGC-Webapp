@@ -32,10 +32,10 @@ builtins:
 - deferred: on
 
 handlers:
-- url: /favicon.ico
-  static_files: static/img/favicon.ico
-  upload: static/imgfavicon.ico
-  secure: always
+#- url: /favicon.ico
+#  static_files: static/img/favicon.ico
+#  upload: static/imgfavicon.ico
+#  secure: always
 #- url: /static
 #  static_dir: static
 #  secure: always
@@ -53,13 +53,13 @@ handlers:
 - url: /.*
   script: main.application
   secure: always
-- url: /static/admin
-  static_dir: static/admin
-  expiration: 0
-  secure: always
-- url: /robots.txt
-  static_files: static/robots.txt
-  upload: static/robots.txt
+#- url: /static/admin
+#  static_dir: static/admin
+#  expiration: 0
+#  secure: always
+#- url: /robots.txt
+#  static_files: static/robots.txt
+#  upload: static/robots.txt
 
 env_variables:
   DJANGO_SETTINGS_MODULE: 'GenespotRE.settings'
