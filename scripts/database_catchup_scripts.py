@@ -179,13 +179,7 @@ def create_program_display_sproc(cursor):
         prog_displ_sproc_def = """
             CREATE PROCEDURE get_program_display_strings(IN pid INT(11))
               BEGIN
-                CASE pid
-                  WHEN 0 THEN SELECT attr_name,value_name,display_string FROM attr_value_display WHERE program_id IS NULL;
-                  ELSE
-                    BEGIN
-                      SELECT attr_name,value_name,display_string FROM attr_value_display WHERE program_id=pid;
-                    END
-                END CASE
+                SELECT attr_name,value_name,display_string FROM attr_value_display WHERE (program_id IS NULL AND pid=0) OR (program_id = pid);
               END
         """
 
@@ -971,12 +965,12 @@ def main():
     cmd_line_parser.add_argument('-l', '--catchup-shortlist', type=bool, default=True,
                                  help="Add the shortlist column to metadata_attributes and set its value.")
 
-    cmd_line_parser.add_argument('-s', '--make-attr-display-table', type=bool, default=True,
+    cmd_line_parser.add_argument('-g', '--make-attr-display-table', type=bool, default=True,
                                  help="Create the attr_value_display table, which stores the display strings for the attributes and values for any program which has them.")
 
     cmd_line_parser.add_argument('-s', '--create-program-attr-sproc', type=bool, default=True,
                                  help="Create the get_program_attr stored procedure, which retrieves all the attributes found in a program's metadata_attributes table.")
-    cmd_line_parser.add_argument('-t', '--create-metadata-vals-sproc', type=bool, default=True,
+    cmd_line_parser.add_argument('-j', '--create-metadata-vals-sproc', type=bool, default=True,
                                  help="Create the get_metadata_values stored procedure, which retrieves all the possible values of the attributes found in a program's metadata_samples table.")
     cmd_line_parser.add_argument('-t', '--create-program-display-sproc', type=bool, default=True,
                                  help="Create the get_program_display_strings stored procedure, which retrieves all display strings of the attributes and their values found in a program's metadata_samples table.")
