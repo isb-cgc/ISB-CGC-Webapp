@@ -67,4 +67,4 @@ ENV PYTHONPATH=/app:/app/lib:/app/google_appengine:/app/google_appengine/lib/pro
 
 RUN python /app/manage.py migrate --noinput
 
-CMD gunicorn -b :$PORT main:application
+#CMD gunicorn -b :$PORT main:application
