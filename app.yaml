@@ -17,10 +17,11 @@
 ###
 
 runtime: custom
+env: flex
 module: default
 api_version: 1
 threadsafe: true
-vm: true
+#vm: true
 
 resources:
   cpu: .5

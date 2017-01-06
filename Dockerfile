@@ -18,10 +18,7 @@
 
 # Dockerfile extending the generic Python image with application files for a
 # single application.
-FROM gcr.io/google_appengine/python
-
-# Python 2 (explicit)
-#RUN virtualenv /env -p python2.7
+FROM gcr.io/google_appengine/python-compat
 
 RUN apt-get update
 ENV DEBIAN_FRONTEND=noninteractive
@@ -44,7 +41,7 @@ RUN apt-get update
 RUN apt-get install -y mysql-server
 
 RUN apt-get -y install python-mysqldb
-#RUN apt-get -y install python-pip
+RUN apt-get -y install python-pip
 RUN apt-get -y install build-essential
 RUN apt-get -y install python-dev
 RUN apt-get -y install --reinstall python-m2crypto python3-crypto
@@ -54,8 +51,9 @@ RUN pip install pexpect
 
 
 RUN apt-get -y install libffi-dev libssl-dev libmysqlclient-dev python2.7-dev curl
-#RUN apt-get -y install git
+RUN apt-get -y install git
 RUN easy_install -U distribute
+
 
 ADD . /app
 
@@ -63,14 +61,9 @@ ADD . /app
 RUN pip install -r /app/requirements.txt -t /app/lib/ --upgrade
 RUN mkdir /app/lib/endpoints/
 RUN cp /app/endpoints/* /app/lib/endpoints/
+#RUN cp /app/google_appengine/lib/endpoints-1.0/endpoints/* /app/lib/endpoints/
 
 ENV PYTHONPATH=/app:/app/lib:/app/google_appengine:/app/google_appengine/lib/protorpc-1.0
 
-#RUN python /app/manage.py migrate --noinput
-
-#RUN rm -rf /app/google_appengine/
-#RUN rm -rf ./google_appengine/
-RUN rm -rf /app/endpoints/
-
-RUN find . -type f | wc -l
+RUN python /app/manage.py migrate --noinput
 
