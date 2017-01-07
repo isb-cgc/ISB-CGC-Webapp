@@ -103,7 +103,7 @@ def create_shortlist_view(cursor):
 def create_metadata_vals_sproc(cursor):
     try:
         metadata_vals_sproc_def = """
-            CREATE PROCEDURE `get_metadata_values`(IN pid INT(11))
+            CREATE PROCEDURE `get_metadata_values`(IN pid INT)
                 BEGIN
                     DECLARE samples_table_var VARCHAR(100);
                     DECLARE attr_table_var VARCHAR(100);
@@ -153,7 +153,7 @@ def create_metadata_vals_sproc(cursor):
 def create_program_attr_sproc(cursor):
     try:
         program_attr_sproc_def = """
-            CREATE PROCEDURE get_program_attr(IN pid INT(11))
+            CREATE PROCEDURE get_program_attr(IN pid INT)
               BEGIN
                   DECLARE prog_attr_table VARCHAR(100);
 
@@ -177,9 +177,9 @@ def create_program_attr_sproc(cursor):
 def create_program_display_sproc(cursor):
     try:
         prog_displ_sproc_def = """
-            CREATE PROCEDURE get_program_display_strings(IN pid INT(11))
+            CREATE PROCEDURE get_program_display_strings(IN pid INT)
               BEGIN
-                SELECT attr_name,value_name,display_string FROM attr_value_display WHERE (program_id IS NULL AND pid=0) OR (program_id = pid);
+                SELECT attr_name,value_name,display_string FROM attr_value_display WHERE (program_id IS NULL AND pid<0) OR (program_id = pid);
               END
         """
 
@@ -199,7 +199,7 @@ def create_program_display_sproc(cursor):
 def make_attr_display_table(cursor,db):
     try:
         table_create_statement = """
-            CREATE TABLE IF NOT EXISTS attr_value_display (attr_name VARCHAR(100) NOT NULL, value_name VARCHAR(100), display_string VARCHAR(256) NOT NULL, program_id INT(11));
+            CREATE TABLE IF NOT EXISTS attr_value_display (attr_name VARCHAR(100) NOT NULL, value_name VARCHAR(100), display_string VARCHAR(256) NOT NULL, program_id INT);
         """
 
         cursor.execute(table_create_statement)
