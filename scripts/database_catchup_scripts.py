@@ -127,7 +127,7 @@ def create_metadata_vals_sproc(cursor):
                         IF done THEN
                             LEAVE shortlist_loop;
                         END IF;
-                        SET @s = CONCAT('SELECT DISTINCT ',col,' FROM ',samples_table,';');
+                        SET @s = CONCAT('SELECT DISTINCT ',col,' FROM ',samples_table_var,';');
                         PREPARE get_vals FROM @s;
                         EXECUTE get_vals;
                     END LOOP shortlist_loop;
@@ -159,7 +159,7 @@ def create_program_attr_sproc(cursor):
 
                   SELECT pdt.attr_table INTO prog_attr_table FROM projects_public_data_tables pdt WHERE pdt.program_id = pid;
 
-                  SET @sel = CONCAT('SELECT attribute FROM ',prog_attr_table,';');
+                  SET @sel = CONCAT('SELECT attribute, code FROM ',prog_attr_table,';');
                   PREPARE selstmt FROM @sel; EXECUTE selstmt;
                   DEALLOCATE PREPARE selstmt;
               END
@@ -214,7 +214,7 @@ def make_attr_display_table(cursor,db):
         cursor.execute("""
             SELECT id
             FROM auth_user
-            WHERE username = 'isb' AND is_superuser = 1 AND is_active = 1 AND active = 1
+            WHERE username = 'isb' AND is_superuser = 1 AND is_active = 1
         """)
 
         pid = cursor.fetchall()[0][0]
@@ -1006,13 +1006,17 @@ def main():
     cursor = db.cursor()
 
     try:
+
+        # Until we have a new sql dump, we need to manually update changed columns
+        args.fix_bmi_case and cursor.execute("UPDATE metadata_attr SET attribute='BMI' WHERE attribute='bmi';")
+
         args.alter_metadata_tables and alter_metadata_tables(cursor)
         args.catchup_shortlist and catchup_shortlist(cursor)
 
         args.create_metadata_vals_sproc and create_metadata_vals_sproc(cursor)
         args.create_program_attr_sproc and create_program_attr_sproc(cursor)
         args.create_program_display_sproc and create_program_display_sproc(cursor)
-        args.make_attr_display_table and make_attr_display_table(cursor)
+        args.make_attr_display_table and make_attr_display_table(cursor,db)
 
         args.fix_cohort_projects and fix_cohort_projects(cursor)
         args.fix_ccle_cohort_projects and fix_ccle(cursor)
@@ -1026,9 +1030,6 @@ def main():
 
         args.breakout_metadata_tables and breakout_metadata_tables(cursor, db)
 
-
-        # Until we have a new sql dump, we need to manually update changed columns
-        args.fix_bmi_case and cursor.execute("UPDATE metadata_attr SET attribute='BMI' WHERE attribute='bmi';")
 
     except Exception as e:
         print e
