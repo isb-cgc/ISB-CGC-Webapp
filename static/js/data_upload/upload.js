@@ -27,6 +27,7 @@ require.config({
 require([
     'jquery',
     'underscore',
+    'base',
     'text!../templates/upload_input_table.html',
     'bootstrap'
 ], function ($, _, UploadInputTableTempl) {
@@ -59,7 +60,7 @@ require([
                 'text': {
                     'displayName': 'Long Text',
                     test: function (val) { return true; }
-                },
+                }
             },
             'Controlled': []
         };
