@@ -15,6 +15,10 @@
             <li><a href="{% url 'programs' %}">Saved Programs</a></li>
         </ol>
         <h1 class="page-header">Data Upload</h1>
+        <div id="unallowed-chars-alert" class="alert alert-warning alert-dismissable" style="display: none;">
+            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            Your <span class="unallowed-fields"></span> contain invalid characters (<span id="unallowed-chars"></span>). Please choose different <span class="unallowed-fields"></span>.
+        </div>
     </div>
 {% endblock %}
 {% block content %}
