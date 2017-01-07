@@ -21,6 +21,7 @@ env: flex
 module: default
 api_version: 1
 threadsafe: true
+entrypoint: gunicorn -b :$PORT GenespotRE.wsgi
 #vm: true
 
 resources:
@@ -73,7 +74,7 @@ skip_files:
 - ^(.*/)?.*/RCS/.*$
 - ^(.*/)?\.(?!env).*$
 #- ^google_appengine/.*$
-- ^google-cloud-sdk/.*$
+#- ^google-cloud-sdk/.*$
 - ^google_appengine\.zip$
 - ^(.*/)?.*\.sql$
 - ^venv/.*$
