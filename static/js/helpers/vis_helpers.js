@@ -17,7 +17,7 @@
  */
 
 define(['jquery'], function($) {
-    var base_feature_search_url = base_api_url + '/_ah/api/feature_type_api/v1/feature_search?';
+    var base_feature_search_url = base_url + '/visualizations/feature_search?';
     return {
         isValidNumber: function(val) {
             return (
@@ -160,7 +160,7 @@ define(['jquery'], function($) {
           */
         get_variable_field_options : function(datatype, filters, callback){
             if(typeof(callback) !== 'undefined'){
-                var base_feature_search_url = base_api_url + '/_ah/api/feature_type_api/v1/feature_search?';
+                var base_feature_search_url = base_url + '/visualizations/feature_search?';
                 var feature_search_url = base_feature_search_url + "datatype=" + datatype;
                 for (var i in filters) {
                     feature_search_url += "&" + filters[i].filter + "=" + filters[i].value; //+ ",";
@@ -205,7 +205,7 @@ define(['jquery'], function($) {
                 if ($(this).hasClass('select2')) {
                     var datatype = value;
                     var field = $(this).attr('data-field');
-                    var feature_search_url = base_api_url + '/_ah/api/feature_type_api/v1/feature_field_search?datatype=' + datatype + '&field=' + field;
+                    var feature_search_url = base_url + '/visualizations/feature_field_search?datatype=' + datatype + '&field=' + field;
                     $(this).select2({
                         ajax: {
                             url: feature_search_url,
