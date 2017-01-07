@@ -47,7 +47,9 @@ def get_mysql_connection():
 """ double-check to make sure the alteration is necessary to avoid errors if the method is run     """
 """ when the change wasn't needed! Eg. use 'CREATE OR REPLACE VIEW' or check for column existence. """
 
-# Add the shortlist column to metadata_attributes ans set its value.
+# Add the shortlist column to metadata_attributes and set its value.
+# As of data migration all columns in a given program's metadata_attr will by default be the shortlist,
+# but we need this for now to construct those tables
 def catchup_shortlist(cursor):
     try:
         # Add the 'shortlist' column to metadata_attr and set it accordingly, if it's not already there
@@ -63,10 +65,8 @@ def catchup_shortlist(cursor):
             set_metadata_shortlist_def = """
                 UPDATE metadata_attr
                 SET shortlist=1
-                WHERE attribute IN ('age_at_initial_pathologic_diagnosis','BMI','disease_code','gender','has_27k','has_450k',
-                  'has_BCGSC_GA_RNASeq','has_BCGSC_HiSeq_RNASeq','has_GA_miRNASeq','has_HiSeq_miRnaSeq',
-                  'has_Illumina_DNASeq','has_RPPA','has_SNP6','has_UNC_GA_RNASeq','has_UNC_HiSeq_RNASeq',
-                  'histological_type','hpv_status','icd_10','icd_o_3_histology','icd_o_3_site','neoplasm_histologic_grade',
+                WHERE attribute IN ('age_at_initial_pathologic_diagnosis','BMI','disease_code','gender',
+                  'histological_type','hpv_status','neoplasm_histologic_grade',
                   'new_tumor_event_after_initial_treatment','pathologic_stage','person_neoplasm_cancer_status','program_name',
                   'residual_tumor','SampleTypeCode','tobacco_smoking_history','tumor_tissue_site','tumor_type',
                   'vital_status');
@@ -77,7 +77,9 @@ def catchup_shortlist(cursor):
         print >> sys.stdout, e
         print >> sys.stdout, traceback.format_exc()
 
+# *** DEPRECATED ***
 # Create the view which lists all members of metadata_attributes with shortlist=1 (i.e. true).
+# As of data migration this is no longer needed as we only store the 'shortlisted' columns in the webapp
 def create_shortlist_view(cursor):
     try:
         # Create the metadata_shortlist view, which is our formal set of attributes displayed in the WebApp
@@ -90,6 +92,7 @@ def create_shortlist_view(cursor):
         print >> sys.stdout, "[ERROR] Exception when creating the metadata shortlist view! It may not have been made."
         print >> sys.stdout, e
         print >> sys.stdout, traceback.format_exc()
+# *** DEPRECATED ***
 
 # Create the get_metadata_values stored procedure, which retrieves all the possible values of the metadata shortlist
 # attributes found in metadata_samples.
@@ -100,27 +103,22 @@ def create_shortlist_view(cursor):
 def create_metadata_vals_sproc(cursor):
     try:
         metadata_vals_sproc_def = """
-            CREATE PROCEDURE `get_metadata_values`(IN p_program_id VARCHAR(100))
+            CREATE PROCEDURE `get_metadata_values`(IN pid INT)
                 BEGIN
-                    DECLARE samples_table VARCHAR(100);
-                    DECLARE attr_table VARCHAR(100);
+                    DECLARE samples_table_var VARCHAR(100);
+                    DECLARE attr_table_var VARCHAR(100);
                     DECLARE done INT DEFAULT FALSE;
                     DECLARE col VARCHAR(128);
-                    DECLARE attr_cur CURSOR FOR SELECT attribute FROM public_attr_table;
-                    DECLARE CONTINUE HANDLER FOR NOT FOUND
-                    BEGIN
-                      SET done = TRUE;
-                    END;
+                    DECLARE attr_cur CURSOR FOR SELECT attribute FROM tmp_attr_view;
+                    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
 
-                    SELECT p.samples_table into samples_table from projects_public_data_tables as p where program_id=p_program_id;
-                    SELECT p.attr_table into attr_table from projects_public_data_tables as p where program_id=p_program_id;
-                    set @attr = CONCAT('CREATE VIEW public_attr_table as SELECT attribute FROM ', attr_table, ' WHERE NOT(code="N");');
-
+                    SELECT samples_table into samples_table_var from projects_public_data_tables where program_id=pid;
+                    SELECT attr_table into attr_table_var from projects_public_data_tables where program_id=pid;
+                    set @attr = CONCAT('CREATE OR REPLACE VIEW tmp_attr_view as SELECT attribute FROM ', attr_table_var,' WHERE NOT(code="N");');
 
                     PREPARE stmt from @attr;
                     EXECUTE stmt;
                     DEALLOCATE PREPARE stmt;
-
 
                     OPEN attr_cur;
 
@@ -129,26 +127,163 @@ def create_metadata_vals_sproc(cursor):
                         IF done THEN
                             LEAVE shortlist_loop;
                         END IF;
-                        SET @s = CONCAT('SELECT DISTINCT ',col,' FROM ',samples_table,';');
+                        SET @s = CONCAT('SELECT DISTINCT ',col,' FROM ',samples_table_var,';');
                         PREPARE get_vals FROM @s;
                         EXECUTE get_vals;
-                    END LOOP;
+                    END LOOP shortlist_loop;
 
                     CLOSE attr_cur;
-                    DROP VIEW public_attr_table;
+
+                    DROP VIEW IF EXISTS tmp_attr_view;
                 END"""
 
         cursor.execute("DROP PROCEDURE IF EXISTS `get_metadata_values`;")
         cursor.execute(metadata_vals_sproc_def)
-        cursor.callproc('get_metadata_values', ('1',))
-        print cursor.description[0][0]
+
     except Exception as e:
-        print >> sys.stdout, "[ERROR] Exception when making the metadata values sproc; it may not have been made"
+        print >> sys.stdout, "[ERROR] Exception when making the metadata values sproc; it may not have been made!"
         print >> sys.stdout, e
         print >> sys.stdout, traceback.format_exc()
 
+# Create the get_metadata_values stored procedure, which retrieves all the possible values of the attributes found in
+# metadata_samples for the indicated program.
+#
+# This stored procedure uses the projects_public_data_tables table to determine the name of the program's attribute
+# table
+def create_program_attr_sproc(cursor):
+    try:
+        program_attr_sproc_def = """
+            CREATE PROCEDURE get_program_attr(IN pid INT)
+              BEGIN
+                  DECLARE prog_attr_table VARCHAR(100);
+
+                  SELECT pdt.attr_table INTO prog_attr_table FROM projects_public_data_tables pdt WHERE pdt.program_id = pid;
+
+                  SET @sel = CONCAT('SELECT attribute, code FROM ',prog_attr_table,';');
+                  PREPARE selstmt FROM @sel; EXECUTE selstmt;
+                  DEALLOCATE PREPARE selstmt;
+              END
+        """
+
+        cursor.execute("DROP PROCEDURE IF EXISTS `get_program_attr`;")
+        cursor.execute(program_attr_sproc_def)
+
+    except Exception as e:
+        print >> sys.stdout, "[ERROR] Exception when making the metadata attr sproc; it may not have been made!"
+        print >> sys.stdout, e
+        print >> sys.stdout, traceback.format_exc()
+
+
+def create_program_display_sproc(cursor):
+    try:
+        prog_displ_sproc_def = """
+            CREATE PROCEDURE get_program_display_strings(IN pid INT)
+              BEGIN
+                SELECT attr_name,value_name,display_string FROM attr_value_display WHERE (program_id IS NULL AND pid<0) OR (program_id = pid);
+              END
+        """
+
+        cursor.execute("DROP PROCEDURE IF EXISTS `get_program_display_strings`;")
+        cursor.execute(prog_displ_sproc_def)
+
+    except Exception as e:
+        print >> sys.stdout, "[ERROR] Exception when making the program display atring sproc; it may not have been made!"
+        print >> sys.stdout, e
+        print >> sys.stdout, traceback.format_exc()
+
+
+# Create the display-string storage table for attributes and their values which are not displayed as they're stored in the database,
+# eg. Sample Type Code, Smoking History. The attribute is always required (to associate the correct display string for a value), but
+# if this is a display string for an attribute value_name can be null. Program ID is optional, to allow for different programs to have
+# different display values.
+def make_attr_display_table(cursor,db):
+    try:
+        table_create_statement = """
+            CREATE TABLE IF NOT EXISTS attr_value_display (attr_name VARCHAR(100) NOT NULL, value_name VARCHAR(100), display_string VARCHAR(256) NOT NULL, program_id INT);
+        """
+
+        cursor.execute(table_create_statement)
+
+        # some test values - will replace with actual LOAD INTO at a later time
+        insert_statement = """
+            INSERT INTO attr_value_display(attr_name,value_name,display_string,program_id) VALUES(%s,%s,%s,%s)
+        """
+
+        # get the ISB superuser ID
+
+        cursor.execute("""
+            SELECT id
+            FROM auth_user
+            WHERE username = 'isb' AND is_superuser = 1 AND is_active = 1
+        """)
+
+        pid = cursor.fetchall()[0][0]
+
+        displs = {
+            'BMI': {
+                'underweight': 'Underweight: BMI less than 18.5',
+                'normal weight': 'Normal weight: BMI is 18.5 - 24.9',
+                'overweight': 'Overweight: BMI is 25 - 29.9',
+                'obese': 'Obese: BMI is 30 or more',
+            },
+            'SampleTypeCode': {
+                '01': 'Primary Solid Tumor',
+                '02': 'Recurrent Solid Tumor',
+                '03': 'Primary Blood Derived Cancer - Peripheral Blood',
+                '04': 'Recurrent Blood Derived Cancer - Bone Marrow',
+                '05': 'Additional - New Primary',
+                '06': 'Metastatic',
+                '07': 'Additional Metastatic',
+                '08': 'Human Tumor Original Cells',
+                '09': 'Primary Blood Derived Cancer - Bone Marrow',
+                '10': 'Blood Derived Normal',
+                '11': 'Solid Tissue Normal',
+                '12': 'Buccal Cell Normal',
+                '13': 'EBV Immortalized Normal',
+                '14': 'Bone Marrow Normal',
+                '20': 'Control Analyte',
+                '40': 'Recurrent Blood Derived Cancer - Peripheral Blood',
+                '50': 'Cell Lines',
+                '60': 'Primary Xenograft Tissue',
+                '61': 'Cell Line Derived Xenograft Tissue',
+                'None': 'NA',
+            },
+            'tobacco_smoking_history': {
+                '1': 'Lifelong Non-smoker',
+                '2': 'Current Smoker',
+                '3': 'Current Reformed Smoker for > 15 years',
+                '4': 'Current Reformed Smoker for <= 15 years',
+                '5': 'Current Reformed Smoker, Duration Not Specified',
+                '6': 'Smoker at Diagnosis',
+                '7': 'Smoking History Not Documented',
+                'None': 'NA',
+            }
+        }
+
+        for attr in displs:
+            for val in displs[attr]:
+                vals = (attr,val,displs[attr][val],pid,)
+                cursor.execute(insert_statement,vals)
+
+        vals = ('tobacco_smoking_history',None,'Tobacco Smoking History',pid,)
+        cursor.execute(insert_statement,vals)
+        vals = ('SampleTypeCode', None, 'Sample Type', pid,)
+        cursor.execute(insert_statement, vals)
+
+        db.commit()
+
+    except Exception as e:
+        print >> sys.stdout, "[ERROR] Exception when adding the attr_value_display table - it may not have been properly generated!"
+        print >> sys.stdout, e
+        print >> sys.stdout, traceback.format_exc()
+
+
+# *** DEPRECATED ***
 # Create the metadata_samples_shortlist view, which acts as a smaller version of metadata_samples for use with the
 # webapp.
+#
+# Note that as of data migration this view is deprecated due to each program's metadata_samples table only containing
+# the shortlisted attributes
 #
 # The primary view used by the WebApp to obtain data for counting and display, so we're not constantly
 # dealing with all of metadata_samples
@@ -174,13 +309,14 @@ def create_samples_shortlist_view(cursor):
         print >> sys.stdout, "[ERROR] Exception when creating the metadata_samples shortlist view; it may not have been made"
         print >> sys.stdout, e
         print >> sys.stdout, traceback.format_exc()
+# *** DEPRECATED ***
+
 
 # Cohorts made prior to the release of user data will have null values in their project IDs for each sample
 # in the cohort. This script assumes that any sample with a null project ID is an ISB-CGC sample from metadata_samples
 # and uses the value of the Study column to look up the appropriate ID in projects_project and apply it to the cohort
 # *** This will need to be changed when metadata_samples.Study becomes 'disease code' and a project column is added ***
 # *** which is an FK into the projects_project table                                                                ***
-
 def fix_cohort_projects(cursor):
     try:
         null_project_count = """
@@ -412,8 +548,9 @@ def breakout_metadata_tables(cursor, db):
 
     insert_into_public_data_table = 'INSERT INTO projects_public_data_tables (data_table, samples_table, attr_table, sample_data_availability_table, program_id) ' \
                                     'values("{data_table}", "{samples_table}", "{attr_table}", "{sample_data_availability_table}", {program_id});'
-    get_tcga_program_id = 'SELECT id from projects_program where name="TCGA";'
-    get_ccle_program_id = 'SELECT id from projects_program where name="CCLE";'
+    check_already_exists = 'SELECT * FROM projects_public_data_tables WHERE program_id=%s;'
+    get_tcga_program_id = "SELECT id from projects_program where name='TCGA';"
+    get_ccle_program_id = "SELECT id from projects_program where name='CCLE';"
 
     try:
         cursor.execute(delete_tables)
@@ -431,22 +568,30 @@ def breakout_metadata_tables(cursor, db):
         cursor.execute(get_ccle_program_id)
         result = cursor.fetchone()
         if len(result):
-            cursor.execute(insert_into_public_data_table.format(data_table='CCLE_metadata_data',
-                                                                samples_table='CCLE_metadata_samples',
-                                                                attr_table='CCLE_metadata_attr',
-                                                                sample_data_availability_table='',
-                                                                program_id=int(result[0])))
+            prog_id = int(result[0])
+            cursor.execute(check_already_exists, (prog_id,))
+            result = cursor.fetchone()
+            if not result or not len(result):
+                cursor.execute(insert_into_public_data_table.format(data_table='CCLE_metadata_data',
+                                                                    samples_table='CCLE_metadata_samples',
+                                                                    attr_table='CCLE_metadata_attr',
+                                                                    sample_data_availability_table='',
+                                                                    program_id=prog_id))
         else:
             print >> sys.stdout, "[WARNING] No CCLE program found."
 
         cursor.execute(get_tcga_program_id)
         result = cursor.fetchone()
         if len(result):
-            cursor.execute(insert_into_public_data_table.format(data_table='TCGA_metadata_data',
-                                                                samples_table='TCGA_metadata_samples',
-                                                                attr_table='TCGA_metadata_attr',
-                                                                sample_data_availability_table='',
-                                                                program_id=int(result[0])))
+            prog_id = int(result[0])
+            cursor.execute(check_already_exists, (prog_id,))
+            result = cursor.fetchone()
+            if not result or not len(result):
+                cursor.execute(insert_into_public_data_table.format(data_table='TCGA_metadata_data',
+                                                                    samples_table='TCGA_metadata_samples',
+                                                                    attr_table='TCGA_metadata_attr',
+                                                                    sample_data_availability_table='',
+                                                                    program_id=prog_id))
         else:
             print >> sys.stdout, "[WARNING] No CCLE program found."
 
@@ -808,16 +953,28 @@ def main():
 
     # To disable any of these by default, change the default to False
     cmd_line_parser = ArgumentParser(description="Script to catch up a database to current deployment needs.")
-    cmd_line_parser.add_argument('-l', '--catchup-shortlist', type=bool, default=True,
-                                 help="Add the shortlist column to metadata_attributes ans set its value.")
-    cmd_line_parser.add_argument('-v', '--create-shortlist-view', type=bool, default=True,
+
+    # These are no longer needed, so they default to false
+    cmd_line_parser.add_argument('-v', '--create-shortlist-view', type=bool, default=False,
                                  help="Create the view which lists all members of metadata_attributes with shortlist=1 (i.e. true).")
-    cmd_line_parser.add_argument('-s', '--create-metadata-vals-sproc', type=bool, default=True,
-                                 help="Create the get_metadata_values stored procedure, which retrieves all the possible values of the metadata shortlist attributes found in metadata_samples.")
-    cmd_line_parser.add_argument('-m', '--create-ms-shortlist-view', type=bool, default=True,
+    cmd_line_parser.add_argument('-m', '--create-ms-shortlist-view', type=bool, default=False,
                                  help="Create the metadata_samples_shortlist view, which acts as a smaller version of metadata_samples for use with the webapp.")
-    cmd_line_parser.add_argument('-b', '--fix-bmi-case', type=bool, default=True,
+    cmd_line_parser.add_argument('-b', '--fix-bmi-case', type=bool, default=False,
                                  help="Fix the casing of the attribute value for the BMI row in metadata_attributes.")
+
+    cmd_line_parser.add_argument('-l', '--catchup-shortlist', type=bool, default=True,
+                                 help="Add the shortlist column to metadata_attributes and set its value.")
+
+    cmd_line_parser.add_argument('-g', '--make-attr-display-table', type=bool, default=True,
+                                 help="Create the attr_value_display table, which stores the display strings for the attributes and values for any program which has them.")
+
+    cmd_line_parser.add_argument('-s', '--create-program-attr-sproc', type=bool, default=True,
+                                 help="Create the get_program_attr stored procedure, which retrieves all the attributes found in a program's metadata_attributes table.")
+    cmd_line_parser.add_argument('-j', '--create-metadata-vals-sproc', type=bool, default=True,
+                                 help="Create the get_metadata_values stored procedure, which retrieves all the possible values of the attributes found in a program's metadata_samples table.")
+    cmd_line_parser.add_argument('-t', '--create-program-display-sproc', type=bool, default=True,
+                                 help="Create the get_program_display_strings stored procedure, which retrieves all display strings of the attributes and their values found in a program's metadata_samples table.")
+
     cmd_line_parser.add_argument('-c', '--fix-cohort-projects', type=bool, default=True,
                                  help="Fix cohorts which have null project IDs for ISB-CGC samples")
     cmd_line_parser.add_argument('-e', '--fix-ccle-cohort-projects', type=bool, default=True,
@@ -849,11 +1006,18 @@ def main():
     cursor = db.cursor()
 
     try:
+
+        # Until we have a new sql dump, we need to manually update changed columns
+        args.fix_bmi_case and cursor.execute("UPDATE metadata_attr SET attribute='BMI' WHERE attribute='bmi';")
+
         args.alter_metadata_tables and alter_metadata_tables(cursor)
         args.catchup_shortlist and catchup_shortlist(cursor)
-        args.create_shortlist_view and create_shortlist_view(cursor)
+
         args.create_metadata_vals_sproc and create_metadata_vals_sproc(cursor)
-        args.create_ms_shortlist_view and create_samples_shortlist_view(cursor)
+        args.create_program_attr_sproc and create_program_attr_sproc(cursor)
+        args.create_program_display_sproc and create_program_display_sproc(cursor)
+        args.make_attr_display_table and make_attr_display_table(cursor,db)
+
         args.fix_cohort_projects and fix_cohort_projects(cursor)
         args.fix_ccle_cohort_projects and fix_ccle(cursor)
         args.create_isbcgc_project_set_sproc and add_isb_cgc_project_sproc(cursor)
@@ -866,9 +1030,6 @@ def main():
 
         args.breakout_metadata_tables and breakout_metadata_tables(cursor, db)
 
-
-        # Until we have a new sql dump, we need to manually update changed columns
-        args.fix_bmi_case and cursor.execute("UPDATE metadata_attr SET attribute='BMI' WHERE attribute='bmi';")
 
     except Exception as e:
         print e
