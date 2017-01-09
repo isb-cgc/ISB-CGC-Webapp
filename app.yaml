@@ -27,7 +27,7 @@ resources:
   memory_gb: 2.2
 
 builtins:
-- remote_api: on
+#- remote_api: on
 - appstats: on
 - deferred: on
 
@@ -39,6 +39,13 @@ handlers:
 - url: /static
   static_dir: static
   secure: always
+#- url: /_ah/spi/.*
+#  script: cgc_api.APPLICATION
+#  secure: always
+#- url: /remoteapi.*
+#  script: google.appengine.ext.remote_api.handler.application
+#  login: admin
+#  secure: always
 - url: /_ah/queue/deferred
   script: google.appengine.ext.deferred.deferred.application
   login: admin

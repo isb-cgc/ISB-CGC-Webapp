@@ -4,7 +4,6 @@ export HOMEROOT=/home/ubuntu/${CIRCLE_PROJECT_REPONAME}
 
 # Clone dependencies
 git clone -b master https://github.com/isb-cgc/ISB-CGC-Common.git
-git clone -b master https://github.com/isb-cgc/ISB-CGC-API.git
 
 # Remove .pyc files
 find . -type f -name '*.pyc' -delete
