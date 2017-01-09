@@ -292,6 +292,69 @@ def create_bq_cohort(project_id, dataset_id, table_id, cohort_id, sample_barcode
     bqs = BigQueryCohortSupport(project_id, dataset_id, table_id)
     bqs.add_cohort_to_bq(cohort_id, sample_barcodes)
 
+
+# TODO: This is a hack until we get project_ids in metadata_samples.
+def fix_cohort_projects(conn):
+    try:
+        cursor = conn.cursor()
+        null_project_count = """
+            SELECT COUNT(*)
+            FROM cohorts_samples cs
+                    JOIN metadata_samples ms ON ms.sample_barcode = cs.sample_barcode
+                    JOIN (
+                        SELECT p.id AS id,p.name AS name
+                        FROM projects_project p
+                          JOIN auth_user au ON au.id = p.owner_id
+                        WHERE au.username = 'isb' AND au.is_superuser = 1 AND au.is_active = 1 AND p.active = 1
+                    ) ps ON ps.name = ms.disease_code
+                    JOIN cohorts_cohort AS cc ON cc.id = cs.cohort_id
+            where cs.project_id IS NULL AND cc.active = 1;
+        """
+
+        cursor.execute(null_project_count)
+        count_to_fix = cursor.fetchall()[0][0]
+        if count_to_fix > 0:
+            fix_project_ids_str = """
+                UPDATE cohorts_samples AS cs
+                JOIN (
+                        SELECT ms.sample_barcode AS sample_barcode,ps.id AS project
+                                FROM metadata_samples ms
+                                JOIN (
+                                    SELECT p.id AS id,p.name AS name
+                                    FROM projects_project p
+                                        JOIN auth_user au ON au.id = p.owner_id
+                                    WHERE au.username = 'isb' AND au.is_active = 1 AND p.active=1 AND au.is_superuser = 1
+                                ) ps ON ps.name = ms.disease_code
+                ) AS ss ON ss.sample_barcode = cs.sample_barcode
+                JOIN cohorts_cohort AS cc
+                ON cc.id = cs.cohort_id
+                SET cs.project_id = ss.project
+                WHERE cs.project_id IS NULL AND cc.active = 1;
+            """
+
+            print >> sys.stdout,"[STATUS] Number of cohort sample entries from ISB-CGC projects with null project IDs: "+str(count_to_fix)
+            print >> sys.stdout,"[STATUS] Correcting null project IDs for ISB-CGC cohorts - this could take a while!"
+
+            cursor.execute(fix_project_ids_str)
+            conn.commit()
+            print >> sys.stdout, "[STATUS] ...done. Checking for still-null project IDs..."
+
+            cursor.execute(null_project_count)
+            not_fixed = cursor.fetchall()[0][0]
+
+            print >> sys.stdout, "[STATUS] Number of cohort sample entries from ISB-CGC projects with null project IDs after correction: " + str(not_fixed)
+            if not_fixed > 0:
+                print >> sys.stdout, "[WARNING] Some of the samples were not corrected! You should double-check them."
+
+
+        else:
+            print >> sys.stdout, "[STATUS] No cohort samples were found with missing project IDs."
+    except Exception as e:
+        print >> sys.stdout, "[ERROR] Exception when fixing cohort project IDs; they may not have been fiixed"
+        print >> sys.stdout, e
+        print >> sys.stdout, traceback.format_exc()
+
+
 def main():
     cmd_line_parser = ArgumentParser(description="Full sample set cohort utility")
     cmd_line_parser.add_argument('PROJECT_ID', type=str, help="Google Cloud project ID")
@@ -329,6 +392,7 @@ def main():
 
         logging.info("Superuser ID: {sid}".format(sid=superuser_id))
         cohort_id = insert_barcodes_mysql(conn, superuser_id, args.cohort_name, sample_barcodes)
+        fix_cohort_projects(conn)
     else:
         cohort_id = args.cohort_id
 

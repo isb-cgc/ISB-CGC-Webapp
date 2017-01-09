@@ -271,7 +271,7 @@ define([
     /*
         Generate url for gathering data
      */
-    function get_data_url(base_api_url, cohorts, x_attr, y_attr, color_by, logTransform){
+    function get_data_url(base_url, cohorts, x_attr, y_attr, color_by, logTransform){
         var cohort_str = '';
         for (var i = 0; i < cohorts.length; i++) {
             if (i == 0) {
@@ -280,7 +280,7 @@ define([
                 cohort_str += '&cohort_id=' + cohorts[i];
             }
         }
-        var api_url = base_api_url + '/_ah/api/feature_data_api/v1/feature_data_plot?' + cohort_str;
+        var api_url = base_url + '/visualizations/feature_data_plot?' + cohort_str;
 
         api_url += '&x_id=' + x_attr;
         if(color_by && color_by !== ''){
@@ -312,7 +312,7 @@ define([
     }
 
     function configure_pairwise_display(element, data){
-        if (data['pairwise_result'].hasOwnProperty('result_vectors')) {
+        if (data['pairwise_result'] && data['pairwise_result'].hasOwnProperty('result_vectors')) {
             var vectors = data['pairwise_result']['result_vectors'];
 
             var output = $('<table class="table"><thead><tr>' +
