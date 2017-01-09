@@ -52,7 +52,6 @@ handlers:
   secure: always
 
 env_variables:
-  GAE_TMP_FORCE_REUSE_API_CONNECTION: true
   DJANGO_SETTINGS_MODULE: 'GenespotRE.settings'
 
 skip_files:

@@ -16,14 +16,11 @@ limitations under the License.
 
 """
 
-from protorpc.messages import Enum
-
-
 def enum(**enums):
     return type('Enum', (), enums)
 
 # TODO decouple from protorpc.messages
-class ValueType(Enum):
+class ValueType(object):
     STRING = 1
     INTEGER = 2
     FLOAT = 3

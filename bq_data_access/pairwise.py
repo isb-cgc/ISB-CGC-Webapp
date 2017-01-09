@@ -21,8 +21,9 @@ import base64
 import logging
 import urllib
 import traceback
+import requests
 
-from google.appengine.api import urlfetch
+# from google.appengine.api import urlfetch
 from django.conf import settings
 
 from bq_data_access.data_access import get_feature_vector
@@ -134,7 +135,7 @@ class Pairwise(object):
         decoded_response = None
 
         try:
-            pairwise_response = urlfetch.fetch(url=url, payload=data, method=urlfetch.POST)
+            pairwise_response = requests.post(url=url, data=data)
             response = pairwise_response.content
             decoded_response = json.loads(base64.b64decode(response))
         except Exception as e:
