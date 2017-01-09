@@ -1,22 +1,17 @@
-from copy import deepcopy
 import json
-import re
 import logging
-import sys
-from google.appengine.api import urlfetch
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from django.utils.safestring import mark_safe
-from django.core import serializers
-from django.core.urlresolvers import reverse
-from django.core.exceptions import ObjectDoesNotExist
-from django.views.decorators.csrf import csrf_protect
+import re
+
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.urlresolvers import reverse
+from django.http import HttpResponse
+from django.shortcuts import render, redirect
+from django.utils.safestring import mark_safe
 from models import GeneFavorite, GeneSymbol
 from workbooks.models import Workbook, Worksheet
-from django.contrib.auth.models import User
-from django.conf import settings
 
 WHITELIST_RE = settings.WHITELIST_RE
 

@@ -31,7 +31,6 @@ urlpatterns = [
     url(r'^user_landing/$', views.user_landing, name='user_landing'),
     url(r'^search_cohorts_viz/$', views.search_cohorts_viz, name='search_cohorts_viz'),
     url(r'^style_guide/', views.css_test),
-    url(r'^users/$', views.user_list, name='users'),
     url(r'^users/(?P<user_id>\d+)/$', views.user_detail, name='user_detail'),
 
     url(r'^bucket_object_list/$', views.bucket_object_list, name='bucket_object_list'),
