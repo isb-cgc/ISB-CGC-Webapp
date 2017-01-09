@@ -959,9 +959,10 @@ def main():
                                  help="Create the view which lists all members of metadata_attributes with shortlist=1 (i.e. true).")
     cmd_line_parser.add_argument('-m', '--create-ms-shortlist-view', type=bool, default=False,
                                  help="Create the metadata_samples_shortlist view, which acts as a smaller version of metadata_samples for use with the webapp.")
-    cmd_line_parser.add_argument('-b', '--fix-bmi-case', type=bool, default=False,
-                                 help="Fix the casing of the attribute value for the BMI row in metadata_attributes.")
 
+    # Still need these two just for build purposes
+    cmd_line_parser.add_argument('-b', '--fix-bmi-case', type=bool, default=True,
+                                 help="Fix the casing of the attribute value for the BMI row in metadata_attributes.")
     cmd_line_parser.add_argument('-l', '--catchup-shortlist', type=bool, default=True,
                                  help="Add the shortlist column to metadata_attributes and set its value.")
 
