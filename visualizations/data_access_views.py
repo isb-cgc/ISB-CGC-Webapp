@@ -21,8 +21,8 @@ import logging
 import math
 import traceback
 
-from api.api_helpers import sql_connection
-from api.pairwise import PairwiseInputVector, Pairwise
+from cohorts.metadata_helpers import get_sql_connection
+from bq_data_access.pairwise import PairwiseInputVector, Pairwise
 from bq_data_access.cohort_cloudsql import CloudSQLCohortAccess
 from bq_data_access.data_access import FeatureIdQueryDescription
 from bq_data_access.data_access import is_valid_feature_identifier, get_feature_vectors_tcga_only
@@ -385,7 +385,7 @@ def data_access_for_plot(request):
 
         cohort_params = cohort_params[:-1]
 
-        db = sql_connection()
+        db = get_sql_connection()
         cursor = db.cursor()
 
         tcga_studies = fetch_isbcgc_project_set()
