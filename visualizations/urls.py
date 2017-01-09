@@ -18,7 +18,7 @@ limitations under the License.
 
 from django.conf.urls import patterns, url
 
-import views
+import views, feature_access_views, data_access_views
 
 
 urlpatterns = [
@@ -35,5 +35,13 @@ urlpatterns = [
     url(r'^stackviz/(?P<id>\d+)/$', views.stackviz, name='stackviz_id'),
     url(r'^circviz/$', views.circviz, name='circviz'),
     url(r'^circviz/(?P<id>\d+)/$', views.circviz, name='circviz_id'),
-    url(r'^save_comment/$', views.save_comment, name='save_comment')
+    url(r'^save_comment/$', views.save_comment, name='save_comment'),
+
+    # Feature access views
+    url(r'^feature_search', feature_access_views.feature_search, name='feature_search'),
+    url(r'^feature_field_search', feature_access_views.feature_field_search, name='feature_field_search'),
+
+    # Feature data access views
+    url(r'^feature_data_plot', data_access_views.data_access_for_plot, name='feature_data_plot')
+
 ]
