@@ -553,7 +553,7 @@ def alter_metadata_tables(cursor):
 # This should only be used on local development environments.
 def breakout_metadata_tables(cursor, db):
     print >> sys.stdout, "[STATUS] Breaking out metadata tables."
-    new_shortlist = ['age_at_initial_pathologic_diagnosis', 'Disease_Code', 'gender', 'histological_type', 'hpv_status',
+    new_shortlist = ['age_at_initial_pathologic_diagnosis', 'disease_code', 'gender', 'histological_type', 'hpv_status',
                      'neoplasm_histologic_grade', 'pathologic_stage', 'person_neoplasm_cancer_status', 'residual_tumor',
                      'SampleTypeCode', 'tobacco_smoking_history', 'tumor_tissue_site', 'tumor_type', 'vital_status', 'bmi']
     delete_tables = 'DROP TABLE IF EXISTS CCLE_metadata_data, CCLE_metadata_samples, CCLE_metadata_attr, TCGA_metadata_data, ' \
@@ -1038,6 +1038,8 @@ def main():
 
         # Until we have a new sql dump, we need to manually update changed columns
         args.fix_bmi_case and cursor.execute("UPDATE metadata_attr SET attribute='BMI' WHERE attribute='bmi';")
+        args.fix_bmi_case and cursor.execute("UPDATE metadata_attr SET attribute='disease_code' WHERE attribute='Disease_Code';")
+        args.fix_bmi_case and cursor.execute("ALTER TABLE metadata_samples CHANGE Disease_Code disease_code varchar(100);")
 
         args.alter_metadata_tables and alter_metadata_tables(cursor)
         args.catchup_shortlist and catchup_shortlist(cursor)
