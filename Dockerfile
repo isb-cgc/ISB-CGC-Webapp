@@ -65,3 +65,5 @@ RUN pip install -r /app/requirements.txt -t /app/lib/ --upgrade
 ENV PYTHONPATH=/app:/app/lib:/app/google_appengine:/app/google_appengine/lib/protorpc-1.0
 
 RUN python /app/manage.py migrate --noinput
+
+CMD gunicorn -b :$PORT GenespotRE.wsgi

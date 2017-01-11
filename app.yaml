@@ -21,7 +21,7 @@ env: flex
 service: mvm
 api_version: 1
 threadsafe: true
-entrypoint: gunicorn -b :$PORT GenespotRE.wsgi
+#entrypoint: gunicorn -b :$PORT GenespotRE.wsgi
 
 #resources:
 #  cpu: .5
