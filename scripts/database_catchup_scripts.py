@@ -199,7 +199,9 @@ def create_program_display_sproc(cursor):
 def make_attr_display_table(cursor,db):
     try:
         table_create_statement = """
-            CREATE TABLE IF NOT EXISTS attr_value_display (attr_name VARCHAR(100) NOT NULL, value_name VARCHAR(100), display_string VARCHAR(256) NOT NULL, program_id INT);
+            CREATE TABLE IF NOT EXISTS attr_value_display (
+              attr_name VARCHAR(100) NOT NULL, value_name VARCHAR(100), display_string VARCHAR(256) NOT NULL, preformatted TINYINT(1) DEFAULT 1 NOT NULL, program_id INT
+            );
         """
 
         cursor.execute(table_create_statement)
@@ -210,7 +212,6 @@ def make_attr_display_table(cursor,db):
         """
 
         # get the ISB superuser ID
-
         cursor.execute("""
             SELECT id
             FROM auth_user
@@ -257,6 +258,31 @@ def make_attr_display_table(cursor,db):
                 '6': 'Smoker at Diagnosis',
                 '7': 'Smoking History Not Documented',
                 'None': 'NA',
+            },
+            'somatic_mutation': {
+                'Missense_Mutation': 'Missense Mutation',
+                'Frame_Shift_Del': 'Frame Shift - Deletion',
+                'Frame_Shift_Ins': 'Frame Shift - Insertion',
+                'De_novo_Start_OutOfFrame': 'De novo Start Out of Frame',
+                'De_novo_Start_InFrame': 'De novo Start In Frame',
+                'In_Frame_Del': 'In Frame Deletion',
+                'In_Frame_Ins': 'In Frame Insertion',
+                'Nonsense_Mutation': 'Nonsense Mutation',
+                'Start_Codon_SNP': 'Start Codon - SNP',
+                'Start_Codon_Del': 'Start Codon - Deletion',
+                'Start_Codon_Ins': 'Start Codon - Insertion',
+                'Stop_Codon_Del': 'Stop Codon - Deletion',
+                'Stop_Codon_Ins': 'Stop Codon - Insertion',
+                'Nonstop_Mutation': 'Nonstop Mutation',
+                'Silent': 'Silent',
+                'RNA': 'RNA',
+                'Intron': 'Intron',
+                'lincRNA': 'lincRNA',
+                'Splice_Site': 'Splice Site',
+                "3'UTR": '3\' UTR',
+                "5'UTR": '5\' UTR',
+                'IGR': 'IGR',
+                "5'Flank": '5\' Flank',
             }
         }
 
@@ -268,6 +294,8 @@ def make_attr_display_table(cursor,db):
         vals = ('tobacco_smoking_history',None,'Tobacco Smoking History',pid,)
         cursor.execute(insert_statement,vals)
         vals = ('SampleTypeCode', None, 'Sample Type', pid,)
+        cursor.execute(insert_statement, vals)
+        vals = ('hpv_status', None, 'HPV Status', pid,)
         cursor.execute(insert_statement, vals)
 
         db.commit()
@@ -532,11 +560,11 @@ def breakout_metadata_tables(cursor, db):
                     '                     TCGA_metadata_samples, TCGA_metadata_attr;'
     create_ccle_metadata_data = 'CREATE TABLE CCLE_metadata_data SELECT * FROM metadata_data WHERE program_name="CCLE";'
     create_ccle_metadata_samples = 'CREATE TABLE CCLE_metadata_samples SELECT sample_barcode,case_barcode,{0} FROM metadata_samples WHERE program_name="CCLE";'.format(','.join(new_shortlist))
-    create_ccle_metadata_attr = 'CREATE TABLE CCLE_metadata_attr (tree_map TinyInt(4)) ' \
+    create_ccle_metadata_attr = 'CREATE TABLE CCLE_metadata_attr (id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY (id)) ' \
                                 '  SELECT attribute, code, spec from metadata_attr where shortlist=1 and attribute in ("{0}");'.format('","'.join(new_shortlist))
     create_tcga_metadata_data = 'CREATE TABLE TCGA_metadata_data SELECT * FROM metadata_data WHERE program_name="TCGA";'
     create_tcga_metadata_samples = 'CREATE TABLE TCGA_metadata_samples SELECT sample_barcode,case_barcode,{0} FROM metadata_samples WHERE program_name="TCGA";'.format(','.join(new_shortlist))
-    create_tcga_metadata_attr = 'CREATE TABLE TCGA_metadata_attr (tree_map TinyInt(4)) ' \
+    create_tcga_metadata_attr = 'CREATE TABLE TCGA_metadata_attr (id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY (id)) ' \
                                 '  SELECT attribute, code, spec from metadata_attr where shortlist=1 and attribute in ("{0}");'.format('","'.join(new_shortlist))
 
     remove_ccle_metadata_data = 'DELETE from metadata_data where program_name="CCLE"';
