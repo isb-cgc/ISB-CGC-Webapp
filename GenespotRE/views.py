@@ -102,7 +102,8 @@ Returns user to landing page.
 '''
 def landing_page(request):
     return render(request, 'GenespotRE/landing.html',
-                  {'request': request})
+                  {'request': request,
+                   'static_url': settings.STATIC_URL})
 
 '''
 Returns css_test page used to test css for general ui elements
