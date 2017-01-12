@@ -195,8 +195,9 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '')
 MIDDLEWARE_CLASSES = (
     # For using NDB with Django
     # documentation: https://cloud.google.com/appengine/docs/python/ndb/#integration
-    'google.appengine.ext.ndb.django_middleware.NdbDjangoMiddleware',
-    'google.appengine.ext.appstats.recording.AppStatsDjangoMiddleware',
+    # WE DON'T SEEM TO BE USING NDB SO I'M COMMENTING THIS OUT - PL
+    # 'google.appengine.ext.ndb.django_middleware.NdbDjangoMiddleware',
+    # 'google.appengine.ext.appstats.recording.AppStatsDjangoMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',

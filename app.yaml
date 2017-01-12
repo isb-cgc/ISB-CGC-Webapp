@@ -17,14 +17,15 @@
 ###
 
 runtime: custom
-module: mvm
+env: flex
+service: mvm
 api_version: 1
 threadsafe: true
-vm: true
+#entrypoint: gunicorn -b :$PORT GenespotRE.wsgi
 
-resources:
-  cpu: .5
-  memory_gb: 2.2
+#resources:
+#  cpu: .5
+#  memory_gb: 2.2
 
 builtins:
 #- remote_api: on
@@ -36,9 +37,9 @@ handlers:
 #  static_files: static/img/favicon.ico
 #  upload: static/imgfavicon.ico
 #  secure: always
-- url: /static
-  static_dir: static
-  secure: always
+#- url: /static
+#  static_dir: static
+#  secure: always
 #- url: /_ah/spi/.*
 #  script: cgc_api.APPLICATION
 #  secure: always

@@ -59,9 +59,12 @@ ADD . /app
 
 # We need to recompile some of the items because of differences in compiler versions
 RUN pip install -r /app/requirements.txt -t /app/lib/ --upgrade
+RUN pip install gunicorn==19.6.0
 # RUN mkdir /app/lib/endpoints/
 # RUN cp /app/google_appengine/lib/endpoints-1.0/endpoints/* /app/lib/endpoints/
 
 ENV PYTHONPATH=/app:/app/lib:/app/google_appengine:/app/google_appengine/lib/protorpc-1.0
 
 RUN python /app/manage.py migrate --noinput
+
+CMD gunicorn -b :$PORT GenespotRE.wsgi

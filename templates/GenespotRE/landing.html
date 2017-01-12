@@ -64,10 +64,10 @@
                     <h2>Partners:</h2>
                     <p style="text-align: center;">
                         <a href="https://cloud.google.com/">
-                            <img class="alignnone wp-image-800 size-full" src="static/img/gcp-logo.png" alt="Google Cloud Platform" />
+                            <img class="alignnone wp-image-800 size-full" src="{% static 'img/gcp-logo.png' %}" alt="Google Cloud Platform" />
                         </a>
                         <a href="https://www.sra.com/">
-                            <img class="alignnone size-full wp-image-801" src="static/img/csra-logo.png" alt="SRA International" />
+                            <img class="alignnone size-full wp-image-801" src="{% static 'img/csra-logo.png' %}" alt="SRA International" />
                         </a>
                     </p>
                 </div>
@@ -99,9 +99,10 @@
 
     </div>
     <script type="text/javascript">
-        {% if tree_data %}
-            var tree_data = {{ tree_data|safe }};
-        {% endif %}
+        var STATIC_URL = '{{ static_url }}';
+{#        {% if tree_data %}#}
+{#            var tree_data = {{ tree_data|safe }};#}
+{#        {% endif %}#}
     </script>
 {% endblock %}
 
