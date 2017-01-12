@@ -21,6 +21,5 @@ deployment:
   staging:
     branch: [master]
     commands:
-      - gsutil rsync -R static/ gs://webapp-dev-static-files/static
       - sudo -E rm -rf ./lib
       - sudo -E ./google-cloud-sdk/bin/gcloud app deploy --verbosity=debug
