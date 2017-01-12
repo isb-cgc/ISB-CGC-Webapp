@@ -218,7 +218,19 @@ def make_attr_display_table(cursor,db):
             WHERE username = 'isb' AND is_superuser = 1 AND is_active = 1
         """)
 
-        pid = cursor.fetchall()[0][0]
+        suid = cursor.fetchall()[0][0]
+
+        public_program_ids = []
+
+        # get the public program IDs
+        cursor.execute("""
+            SELECT id
+            FROM projects_proram
+            WHERE owner_id = %s AND is_public = 1
+        """, (suid,))
+
+        for row in cursor.fetchall():
+            public_program_ids.append(row[0])
 
         displs = {
             'BMI': {
@@ -286,17 +298,18 @@ def make_attr_display_table(cursor,db):
             }
         }
 
-        for attr in displs:
-            for val in displs[attr]:
-                vals = (attr,val,displs[attr][val],pid,)
-                cursor.execute(insert_statement,vals)
+        for pid in public_program_ids:
+            for attr in displs:
+                for val in displs[attr]:
+                    vals = (attr,val,displs[attr][val],pid,)
+                    cursor.execute(insert_statement,vals)
 
-        vals = ('tobacco_smoking_history',None,'Tobacco Smoking History',pid,)
-        cursor.execute(insert_statement,vals)
-        vals = ('SampleTypeCode', None, 'Sample Type', pid,)
-        cursor.execute(insert_statement, vals)
-        vals = ('hpv_status', None, 'HPV Status', pid,)
-        cursor.execute(insert_statement, vals)
+            vals = ('tobacco_smoking_history',None,'Tobacco Smoking History',pid,)
+            cursor.execute(insert_statement,vals)
+            vals = ('SampleTypeCode', None, 'Sample Type', pid,)
+            cursor.execute(insert_statement, vals)
+            vals = ('hpv_status', None, 'HPV Status', pid,)
+            cursor.execute(insert_statement, vals)
 
         db.commit()
 

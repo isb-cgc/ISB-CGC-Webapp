@@ -35,7 +35,7 @@ ALPHANUM_SORT = [
 ]
 
 # If an attribute has a specific order, list it here; these should be the *values* not the display strings
-ATTR_SPECIFIC_ORDERS = {
+VALUE_SPECIFIC_ORDERS = {
     'BMI': ['underweight', 'normal weight', 'overweight', 'obese', 'None', ],
     'hpv_status': ['Positive', 'Negative', 'None', ],
     'age_at_initial_pathologic_diagnosis': ['10 to 39', '40 to 49', '50 to 59', '60 to 69', '70 to 79', 'Over 80', 'None', ],
@@ -44,6 +44,17 @@ ATTR_SPECIFIC_ORDERS = {
                          'Stage IVB','Stage IVC','Stage X','I or II NOS','None',],
     'residual_tumor': ['R0','R1','R2','RX','None',],
 }
+
+ATTR_SPECIFIC_ORDERS = [
+    'project_short_name',
+    'disease_code',
+    'sample_type',
+    'tumor_type',
+    'tumor_tissue_site',
+    'gender',
+    'race',
+    'ethnicity',
+]
 
 
 def quick_js_bracket_replace(matchobj):
@@ -62,8 +73,8 @@ def get_item(dictionary, key):
 def check_for_order(items, attr):
     if attr in ALPHANUM_SORT:
         return sorted(items, key=lambda k: k['value'])
-    elif attr in ATTR_SPECIFIC_ORDERS:
-        item_order = ATTR_SPECIFIC_ORDERS[attr]
+    elif attr in VALUE_SPECIFIC_ORDERS:
+        item_order = VALUE_SPECIFIC_ORDERS[attr]
         ordered_items = []
         for ordinal in item_order:
             for item in items:
@@ -238,3 +249,20 @@ def get_named_item(list, value):
         if item['name'] == value:
             return item
     return None
+
+
+@register.filter
+def get_sorted_items(attr_set):
+    sorted_list = []
+
+    # First load in the ordered attributes, if they exist in the provided set
+    for attr in ATTR_SPECIFIC_ORDERS:
+        if attr in attr_set:
+            sorted_list.append(attr_set[attr])
+
+    # ...then load in anything else which is in the set but not in the ordering list
+    for attr in attr_set:
+        if attr not in ATTR_SPECIFIC_ORDERS:
+            sorted_list.append(attr_set[attr])
+
+    return sorted_list

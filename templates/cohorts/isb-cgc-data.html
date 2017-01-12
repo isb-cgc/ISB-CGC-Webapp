@@ -11,7 +11,7 @@
                 <!-- donor filters tab -->
                 <div role="tabpanel" class="tab-pane active" id="clinical-filters-{{ program.id }}">
                     <ul class="list-group" id="clin-accordion-{{ program.id }}" role="tablist" aria-multiselectable="true">
-                        {% for key,attr in clin_attr.items %}
+                        {% for attr in clin_attr|get_sorted_items %}
                             {% if attr_list_count|list_contains_name:attr.name %}
                                 <li class="list-group-item">
                                     <div id="{{ program.id }}-heading-{{attr.name}}" class="list-group-item__heading">
