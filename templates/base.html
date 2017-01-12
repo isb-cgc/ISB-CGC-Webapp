@@ -133,6 +133,7 @@
         var warnAfter = {{ request|warn_after|unlocalize }};
         var expireAfter = {{ request|expire_after|unlocalize }};
         var confirmFormDiscard = "{% trans 'You have unsaved changes in a form of this page.' %}";
+        var STATIC_FILES_URL = '{{ STATIC_FILES_URL }}';
 
     </script>
     {% endlocalize %}

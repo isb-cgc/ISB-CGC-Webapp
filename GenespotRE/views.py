@@ -101,9 +101,7 @@ Handles login and user creation for new users.
 Returns user to landing page.
 '''
 def landing_page(request):
-    return render(request, 'GenespotRE/landing.html',
-                  {'request': request,
-                   'static_url': settings.STATIC_URL})
+    return render(request, 'GenespotRE/landing.html', {'request': request, })
 
 '''
 Returns css_test page used to test css for general ui elements
