@@ -11,49 +11,49 @@
                 <!-- donor filters tab -->
                 <div role="tabpanel" class="tab-pane active" id="clinical-filters-{{ program.id }}">
                     <ul class="list-group" id="clin-accordion-{{ program.id }}" role="tablist" aria-multiselectable="true">
-                        {% for attr in clin_attr %}
-                            {% if attr_list_count|list_contains_name:attr %}
+                        {% for attr in clin_attr|get_sorted_items %}
+                            {% if attr_list_count|list_contains_name:attr.name %}
                                 <li class="list-group-item">
-                                    <div id="{{ program.id }}-heading-{{attr}}" class="list-group-item__heading">
-                                        <a role="button" data-toggle="collapse" data-parent="#clin-accordion-{{ program.id }}" href="#{{ program.id }}-collapse-{{ attr }}" aria-expanded="false" aria-controls="collapse-{{ attr }}">
-                                            <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr|get_readable_name }}
+                                    <div id="{{ program.id }}-heading-{{attr.name}}" class="list-group-item__heading">
+                                        <a role="button" data-toggle="collapse" data-parent="#clin-accordion-{{ program.id }}" href="#{{ program.id }}-collapse-{{ attr.name }}" aria-expanded="false" aria-controls="collapse-{{ attr.name }}">
+                                            <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr.displ_name }}
                                         </a>
                                     </div>
 
-                                    <div id="{{ program.id }}-collapse-{{ attr }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" data-feature-type="donor"
-                                         aria-labelledby="{{ program.id }}-heading-{{ attr }}" data-feature-name="{{ attr }}" data-feature-displ-name="{{ attr|get_feat_displ_name }}"
-                                         data-feature-id="{% if attr_list_count|get_named_item:attr|get_item:'id' %}{{ attr_list_count|get_named_item:attr|get_item:'id' }}{% endif %}">
-                                        <ul class="search-checkbox-list" id="{{ attr }}">
-                                            {% with attr_list_count|get_named_item:attr|get_item:'values'|how_many_more:6 as num_more %}
-                                                {% for v in attr_list_count|get_named_item:attr|get_item:'values'|check_for_order:attr %}
+                                    <div id="{{ program.id }}-collapse-{{ attr.name }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" data-feature-type="donor"
+                                         aria-labelledby="{{ program.id }}-heading-{{ attr.name }}" data-feature-name="{{ attr.name }}" data-feature-displ-name="{{ attr.displ_name }}"
+                                         data-feature-id="{% if attr_list_count|get_named_item:attr.name|get_item:'id' %}{{ attr_list_count|get_named_item:attr.name|get_item:'id' }}{% endif %}">
+                                        <ul class="search-checkbox-list" id="{{ attr.name }}">
+                                            {% with attr_list_count|get_named_item:attr.name|get_item:'values'|how_many_more:6 as num_more %}
+                                                {% for v in attr_list_count|get_named_item:attr.name|get_item:'values'|check_for_order:attr.name %}
                                                     {% if forloop.counter0 < 6 %}
                                                         <li class="checkbox">
-                                                            <label title="{{ v.value|get_tooltip_text:attr }}">
+                                                            <label title="{% if v.tooltip %}{{ v.tooltip }}{% else %} {% endif %}">
                                                                 <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}"
                                                                        data-value-displ-name="{% if v.displ_name %}{{ v.displ_name }}{% endif %}"
                                                                        data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">
-                                                                {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name|get_readable_name:attr }}{% else %}{{ v.value|get_readable_name:attr }}{% endif %}
+                                                                {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name|get_readable_name:attr.name }}{% else %}{{ v.value|get_readable_name:attr.name }}{% endif %}
                                                                  <span class="count">({{ v.count }})</span>
                                                             </label>
                                                         </li>
                                                     {% elif forloop.counter0 == 6 and num_more > 0 %}
                                                         <p class="more-checks"><a class="show-more">{{ num_more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                         <li class="extra-values checkbox" style="display:none;">
-                                                            <label title="{{ v.value|get_tooltip_text:attr }}">
+                                                            <label title="{% if v.tooltip %}{{ v.tooltip }}{% else %} {% endif %}">
                                                                 <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}"
                                                                        data-value-displ-name="{% if v.displ_name %}{{ v.displ_name }}{% endif %}"
                                                                        data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">
-                                                                {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name|get_readable_name:attr }}{% else %}{{ v.value|get_readable_name:attr }}{% endif %}
+                                                                {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name|get_readable_name:attr.name }}{% else %}{{ v.value|get_readable_name:attr.name }}{% endif %}
                                                                  <span class="count">({{ v.count }})</span>
                                                             </label>
                                                         </li>
                                                     {% else %}
                                                         <li class="extra-values checkbox" style="display:none;">
-                                                            <label title="{{ v.value|get_tooltip_text:attr }}">
+                                                            <label title="{% if v.tooltip %}{{ v.tooltip }}{% else %} {% endif %}">
                                                                 <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}"
                                                                        data-value-displ-name="{% if v.displ_name %}{{ v.displ_name }}{% endif %}"
                                                                        data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">
-                                                                {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name|get_readable_name:attr }}{% else %}{{ v.value|get_readable_name:attr }}{% endif %}
+                                                                {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name|get_readable_name:attr.name }}{% else %}{{ v.value|get_readable_name:attr.name }}{% endif %}
                                                                  <span class="count">({{ v.count }})</span>
                                                             </label>
                                                         </li>
@@ -75,21 +75,21 @@
 {#                    <ul class="list-group" id="data-type-accordion" role="tablist" aria-multiselectable="true">#}
 {#                        {% for attr in data_attr %}#}
 {#                            <li class="list-group-item">#}
-{#                                <div class="list-group-item__heading" role="tab" id="heading-{{ attr }}">#}
-{#                                    <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-{{ attr }}"#}
-{#                                       aria-expanded="false" aria-controls="collapse-{{ attr }}" {% if attr == 'miRNA_sequencing' %}style="text-transform:none!important"{% endif %}>#}
-{#                                        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ attr|get_readable_name }}#}
+{#                                <div class="list-group-item__heading" role="tab" id="heading-{{ attr.name }}">#}
+{#                                    <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-{{ attr.name }}"#}
+{#                                       aria-expanded="false" aria-controls="collapse-{{ attr.name }}" {% if attr.name == 'miRNA_sequencing' %}style="text-transform:none!important"{% endif %}>#}
+{#                                        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ attr.name|get_readable_name }}#}
 {#                                    </a>#}
 {#                                </div>#}
-{#                                <div id="collapse-{{ attr }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"#}
-{#                                     aria-labelledby="heading-{{ attr }}" data-feature-name="{{ attr }}" data-feature-displ-name="{{ attr|get_feat_displ_name }}" data-feature-type="datatype">#}
-{#                                    <ul class="search-checkbox-list" id="{{ attr }}">#}
-{#                                        {% if attr_list_count|list_contains_name:attr %}#}
-{#                                            {% for v in attr_list_count|get_named_item:attr|get_item:'values' %}#}
+{#                                <div id="collapse-{{ attr.name }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"#}
+{#                                     aria-labelledby="heading-{{ attr.name }}" data-feature-name="{{ attr.name }}" data-feature-displ-name="{{ attr.name|get_feat_displ_name }}" data-feature-type="datatype">#}
+{#                                    <ul class="search-checkbox-list" id="{{ attr.name }}">#}
+{#                                        {% if attr_list_count|list_contains_name:attr.name %}#}
+{#                                            {% for v in attr_list_count|get_named_item:attr.name|get_item:'values' %}#}
 {#                                                <li class="checkbox">#}
 {#                                                    <!-- todo: make a custom tag for the id for data_attr attributes-->#}
 {#                                                    <label>#}
-{#                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.value|get_data_attr_id:attr }}"#}
+{#                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.value|get_data_attr_id:attr.name }}"#}
 {#                                                               data-value-displ-name="{% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.value }}{% endif %}">#}
 {#                                                         {% if v.value == 'None' %}NA{% else %}{{ v.value }}{% endif %} <span class="count">({{ v.count }})</span>#}
 {#                                                    </label>#}

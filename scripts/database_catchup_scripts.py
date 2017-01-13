@@ -199,7 +199,9 @@ def create_program_display_sproc(cursor):
 def make_attr_display_table(cursor,db):
     try:
         table_create_statement = """
-            CREATE TABLE IF NOT EXISTS attr_value_display (attr_name VARCHAR(100) NOT NULL, value_name VARCHAR(100), display_string VARCHAR(256) NOT NULL, program_id INT);
+            CREATE TABLE IF NOT EXISTS attr_value_display (
+              attr_name VARCHAR(100) NOT NULL, value_name VARCHAR(100), display_string VARCHAR(256) NOT NULL, preformatted TINYINT(1) DEFAULT 1 NOT NULL, program_id INT
+            );
         """
 
         cursor.execute(table_create_statement)
@@ -210,14 +212,25 @@ def make_attr_display_table(cursor,db):
         """
 
         # get the ISB superuser ID
-
         cursor.execute("""
             SELECT id
             FROM auth_user
             WHERE username = 'isb' AND is_superuser = 1 AND is_active = 1
         """)
 
-        pid = cursor.fetchall()[0][0]
+        suid = cursor.fetchall()[0][0]
+
+        public_program_ids = []
+
+        # get the public program IDs
+        cursor.execute("""
+            SELECT id
+            FROM projects_proram
+            WHERE owner_id = %s AND is_public = 1
+        """, (suid,))
+
+        for row in cursor.fetchall():
+            public_program_ids.append(row[0])
 
         displs = {
             'BMI': {
@@ -257,18 +270,46 @@ def make_attr_display_table(cursor,db):
                 '6': 'Smoker at Diagnosis',
                 '7': 'Smoking History Not Documented',
                 'None': 'NA',
+            },
+            'somatic_mutation': {
+                'Missense_Mutation': 'Missense Mutation',
+                'Frame_Shift_Del': 'Frame Shift - Deletion',
+                'Frame_Shift_Ins': 'Frame Shift - Insertion',
+                'De_novo_Start_OutOfFrame': 'De novo Start Out of Frame',
+                'De_novo_Start_InFrame': 'De novo Start In Frame',
+                'In_Frame_Del': 'In Frame Deletion',
+                'In_Frame_Ins': 'In Frame Insertion',
+                'Nonsense_Mutation': 'Nonsense Mutation',
+                'Start_Codon_SNP': 'Start Codon - SNP',
+                'Start_Codon_Del': 'Start Codon - Deletion',
+                'Start_Codon_Ins': 'Start Codon - Insertion',
+                'Stop_Codon_Del': 'Stop Codon - Deletion',
+                'Stop_Codon_Ins': 'Stop Codon - Insertion',
+                'Nonstop_Mutation': 'Nonstop Mutation',
+                'Silent': 'Silent',
+                'RNA': 'RNA',
+                'Intron': 'Intron',
+                'lincRNA': 'lincRNA',
+                'Splice_Site': 'Splice Site',
+                "3'UTR": '3\' UTR',
+                "5'UTR": '5\' UTR',
+                'IGR': 'IGR',
+                "5'Flank": '5\' Flank',
             }
         }
 
-        for attr in displs:
-            for val in displs[attr]:
-                vals = (attr,val,displs[attr][val],pid,)
-                cursor.execute(insert_statement,vals)
+        for pid in public_program_ids:
+            for attr in displs:
+                for val in displs[attr]:
+                    vals = (attr,val,displs[attr][val],pid,)
+                    cursor.execute(insert_statement,vals)
 
-        vals = ('tobacco_smoking_history',None,'Tobacco Smoking History',pid,)
-        cursor.execute(insert_statement,vals)
-        vals = ('SampleTypeCode', None, 'Sample Type', pid,)
-        cursor.execute(insert_statement, vals)
+            vals = ('tobacco_smoking_history',None,'Tobacco Smoking History',pid,)
+            cursor.execute(insert_statement,vals)
+            vals = ('SampleTypeCode', None, 'Sample Type', pid,)
+            cursor.execute(insert_statement, vals)
+            vals = ('hpv_status', None, 'HPV Status', pid,)
+            cursor.execute(insert_statement, vals)
 
         db.commit()
 
@@ -525,18 +566,18 @@ def alter_metadata_tables(cursor):
 # This should only be used on local development environments.
 def breakout_metadata_tables(cursor, db):
     print >> sys.stdout, "[STATUS] Breaking out metadata tables."
-    new_shortlist = ['age_at_initial_pathologic_diagnosis', 'Disease_Code', 'gender', 'histological_type', 'hpv_status',
+    new_shortlist = ['age_at_initial_pathologic_diagnosis', 'disease_code', 'gender', 'histological_type', 'hpv_status',
                      'neoplasm_histologic_grade', 'pathologic_stage', 'person_neoplasm_cancer_status', 'residual_tumor',
                      'SampleTypeCode', 'tobacco_smoking_history', 'tumor_tissue_site', 'tumor_type', 'vital_status', 'bmi']
     delete_tables = 'DROP TABLE IF EXISTS CCLE_metadata_data, CCLE_metadata_samples, CCLE_metadata_attr, TCGA_metadata_data, ' \
                     '                     TCGA_metadata_samples, TCGA_metadata_attr;'
     create_ccle_metadata_data = 'CREATE TABLE CCLE_metadata_data SELECT * FROM metadata_data WHERE program_name="CCLE";'
     create_ccle_metadata_samples = 'CREATE TABLE CCLE_metadata_samples SELECT sample_barcode,case_barcode,{0} FROM metadata_samples WHERE program_name="CCLE";'.format(','.join(new_shortlist))
-    create_ccle_metadata_attr = 'CREATE TABLE CCLE_metadata_attr (tree_map TinyInt(4)) ' \
+    create_ccle_metadata_attr = 'CREATE TABLE CCLE_metadata_attr (id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY (id)) ' \
                                 '  SELECT attribute, code, spec from metadata_attr where shortlist=1 and attribute in ("{0}");'.format('","'.join(new_shortlist))
     create_tcga_metadata_data = 'CREATE TABLE TCGA_metadata_data SELECT * FROM metadata_data WHERE program_name="TCGA";'
     create_tcga_metadata_samples = 'CREATE TABLE TCGA_metadata_samples SELECT sample_barcode,case_barcode,{0} FROM metadata_samples WHERE program_name="TCGA";'.format(','.join(new_shortlist))
-    create_tcga_metadata_attr = 'CREATE TABLE TCGA_metadata_attr (tree_map TinyInt(4)) ' \
+    create_tcga_metadata_attr = 'CREATE TABLE TCGA_metadata_attr (id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY (id)) ' \
                                 '  SELECT attribute, code, spec from metadata_attr where shortlist=1 and attribute in ("{0}");'.format('","'.join(new_shortlist))
 
     remove_ccle_metadata_data = 'DELETE from metadata_data where program_name="CCLE"';
@@ -959,9 +1000,10 @@ def main():
                                  help="Create the view which lists all members of metadata_attributes with shortlist=1 (i.e. true).")
     cmd_line_parser.add_argument('-m', '--create-ms-shortlist-view', type=bool, default=False,
                                  help="Create the metadata_samples_shortlist view, which acts as a smaller version of metadata_samples for use with the webapp.")
-    cmd_line_parser.add_argument('-b', '--fix-bmi-case', type=bool, default=False,
-                                 help="Fix the casing of the attribute value for the BMI row in metadata_attributes.")
 
+    # Still need these two just for build purposes
+    cmd_line_parser.add_argument('-b', '--fix-bmi-case', type=bool, default=True,
+                                 help="Fix the casing of the attribute value for the BMI row in metadata_attributes.")
     cmd_line_parser.add_argument('-l', '--catchup-shortlist', type=bool, default=True,
                                  help="Add the shortlist column to metadata_attributes and set its value.")
 
@@ -1009,6 +1051,8 @@ def main():
 
         # Until we have a new sql dump, we need to manually update changed columns
         args.fix_bmi_case and cursor.execute("UPDATE metadata_attr SET attribute='BMI' WHERE attribute='bmi';")
+        args.fix_bmi_case and cursor.execute("UPDATE metadata_attr SET attribute='disease_code' WHERE attribute='Disease_Code';")
+        args.fix_bmi_case and cursor.execute("ALTER TABLE metadata_samples CHANGE Disease_Code disease_code varchar(100);")
 
         args.alter_metadata_tables and alter_metadata_tables(cursor)
         args.catchup_shortlist and catchup_shortlist(cursor)
