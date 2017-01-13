@@ -106,11 +106,6 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             var clin_tree_attr_counts = Object.keys(filters).length > 0 ? this.filter_data_for_clin_trees(attr_counts, clin_tree_attr) : attr_counts;
             tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,'#isb-cgc-tree-graph-clinical');
 
-            if(user_data) {
-                var user_data_attr_counts = Object.keys(filters).length > 0 ? this.filter_data_for_clin_trees(user_data, user_data_attr) : user_data;
-                tree_graph_obj.draw_trees(user_data_attr_counts,user_data_attr,'#user-data-tree-graph');
-            }
-
             if (metadata_counts.hasOwnProperty('items')) {
                 var features = [
                     'cnvrPlatform',
@@ -193,13 +188,8 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                     context.update_filter_counts(attr_counts);
 
                     var clin_tree_attr_counts = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(attr_counts, clin_tree_attr) : attr_counts;
-                    tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,'#tree-graph-clinical-'+active_program_id);
+                    clin_tree_attr_counts.length > 0 && tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,'#tree-graph-clinical-'+active_program_id);
 
-                    // if(user_data) {
-                    //     var user_data_attr_counts = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(user_data, user_data_attr) : user_data;
-                    //     tree_graph_obj.draw_trees(user_data_attr_counts, user_data_attr, '#user-data-tree-graph');
-                    // }
-                    
                     if (results.hasOwnProperty('items')) {
                         var features = [
                             'cnvrPlatform',
@@ -270,6 +260,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             return list;
         },
 
+        // TODO: We no longer use the endpoints for this; it can be simplified into just producing the filter set
         generate_metadata_url: function(base_url_domain, endpoint, filters, cohort_id, limit, version, program_id) {
             version = version || 'v1';
             var api_url = base_url_domain + '/cohorts/get_metadata_ajax/?version=' + version + '&endpoint=' + endpoint + '&program_id=' + program_id + '&';
