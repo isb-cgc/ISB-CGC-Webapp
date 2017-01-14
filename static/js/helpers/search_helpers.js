@@ -25,7 +25,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
     var parsets_obj = Object.create(draw_parsets, {});
 
     var clin_tree_attr = {
-        Study: 'Study',
+        Disease_Code: 'Disease Code',
         vital_status: 'Vital Status',
         SampleTypeCode: 'Sample Type',
         tumor_tissue_site: 'Tumor Tissue Site',
@@ -106,11 +106,6 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             var clin_tree_attr_counts = Object.keys(filters).length > 0 ? this.filter_data_for_clin_trees(attr_counts, clin_tree_attr) : attr_counts;
             tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,'#isb-cgc-tree-graph-clinical');
 
-            if(user_data) {
-                var user_data_attr_counts = Object.keys(filters).length > 0 ? this.filter_data_for_clin_trees(user_data, user_data_attr) : user_data;
-                tree_graph_obj.draw_trees(user_data_attr_counts,user_data_attr,'#user-data-tree-graph');
-            }
-
             if (metadata_counts.hasOwnProperty('items')) {
                 var features = [
                     'cnvrPlatform',
@@ -150,10 +145,14 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             $('.cohort-info .total-values').show();
         },
 
-        update_counts_parsets: function(base_url_domain, endpoint, cohort_id, version){
+        update_counts_parsets: function(base_url_domain, endpoint, cohort_id, version, program_id){
             var context = this;
-            var filters = this.format_filters();
-            var api_url = this.generate_metadata_url(base_url_domain, endpoint, filters, cohort_id, undefined, version);
+            var filters = this.format_filters(program_id);
+            var api_url = this.generate_metadata_url(base_url_domain, endpoint, filters, cohort_id, undefined, version, program_id);
+
+            // Get active panel
+            var active_program_id = $('ul.nav-tabs-data li.active a').data('program-id');
+            var active_panel = '' + active_program_id+'-data';
 
             if(api_url.length > MAX_URL_LEN) {
                 $('#url-len-max-alert').show();
@@ -182,20 +181,15 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                     var stopReq = new Date().getTime();
                     console.debug("[BENCHMARKING] Time for response in update_counts_parsets: "+(stopReq-startReq)+ "ms");
                     attr_counts = results['count'];
-                    $('#isb-cgc-data-total-samples').html(results['total']);
-                    $('#isb-cgc-data-total-participants').html(results['cases']);
-                    $('#user-data-total-samples').html(results['user_data'] && results['user_data_total'] !== null ? results['user_data_total'] : "NA");
-                    $('#user-data-total-participants').html(results['user_data'] && results['user_data_participants'] !== null ? results['user_data_participants'] : "NA");
+                    $('#' + active_program_id + '-data-total-samples').html(results['total']);
+                    $('#' + active_program_id + '-data-total-participants').html(results['cases']);
+                    // $('#user-data-total-samples').html(results['user_data'] && results['user_data_total'] !== null ? results['user_data_total'] : "NA");
+                    // $('#user-data-total-participants').html(results['user_data'] && results['user_data_participants'] !== null ? results['user_data_participants'] : "NA");
                     context.update_filter_counts(attr_counts);
 
                     var clin_tree_attr_counts = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(attr_counts, clin_tree_attr) : attr_counts;
-                    tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,'#isb-cgc-tree-graph-clinical');
+                    clin_tree_attr_counts.length > 0 && tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,'#tree-graph-clinical-'+active_program_id);
 
-                    if(user_data) {
-                        var user_data_attr_counts = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(user_data, user_data_attr) : user_data;
-                        tree_graph_obj.draw_trees(user_data_attr_counts, user_data_attr, '#user-data-tree-graph');
-                    }
-                    
                     if (results.hasOwnProperty('items')) {
                         var features = [
                             'cnvrPlatform',
@@ -228,10 +222,10 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                     }
                 },
                 error: function(req,status,err){
-                    $('#isb-cgc-data-total-samples').html("Error");
-                    $('#isb-cgc-data-total-participants').html("Error");
-                    $('#user-data-total-samples').html("Error");
-                    $('#user-data-total-participants').html("Error");
+                    $('#' + active_program_id + '-data-total-samples').html("Error");
+                    $('#' + active_program_id + '-data-total-participants').html("Error");
+                    // $('#user-data-total-samples').html("Error");
+                    // $('#user-data-total-participants').html("Error");
                 },
                 complete: function(xhr,status) {
                     $('.clinical-trees .spinner').hide();
@@ -243,9 +237,13 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             });
         },
 
-        format_filters: function() {
+        format_filters: function(program_id) {
             var list = {};
-            $('.selected-filters .panel-body span').each(function() {
+            var program_selector = '';
+            if (program_id != '0') {
+                program_selector = '#' + program_id + '-data ';
+            }
+            $(program_selector + '.selected-filters .panel-body span').each(function() {
                 var $this = $(this),
                     key = $this.data('feature-name'),
                     val = $this.data('value-name');
@@ -262,9 +260,10 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             return list;
         },
 
-        generate_metadata_url: function(base_url_domain, endpoint, filters, cohort_id, limit, version) {
+        // TODO: We no longer use the endpoints for this; it can be simplified into just producing the filter set
+        generate_metadata_url: function(base_url_domain, endpoint, filters, cohort_id, limit, version, program_id) {
             version = version || 'v1';
-            var api_url = base_url_domain + '/cohorts/get_metadata_ajax/?version=' + version + '&endpoint=' + endpoint + '&';
+            var api_url = base_url_domain + '/cohorts/get_metadata_ajax/?version=' + version + '&endpoint=' + endpoint + '&program_id=' + program_id + '&';
 
             if (cohort_id) {
                 api_url += 'cohort_id=' + cohort_id + '&';
@@ -277,7 +276,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             if (filters) {
                 api_url += 'filters=' + encodeURIComponent(JSON.stringify(filters)) + '&';
             }
-
+            console.log(api_url)
             return api_url;
         },
 

@@ -17,8 +17,6 @@ import logging
 import os
 import sys
 
-from google.appengine.api import modules, urlfetch
-
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -45,8 +43,6 @@ from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 
 debug = settings.DEBUG
 logger = logging.getLogger(__name__)
-
-urlfetch.set_default_fetch_deadline(60)
 
 login_expiration_seconds = settings.LOGIN_EXPIRATION_HOURS * 60 * 60
 # schedule check_login tasks for 15 minutes after the user's login will expire
@@ -105,16 +101,7 @@ Handles login and user creation for new users.
 Returns user to landing page.
 '''
 def landing_page(request):
-    if debug:
-        print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
-        print >> sys.stderr,'App Version: '+modules.get_current_version_name()
-        try:
-            print >> sys.stderr,'App BACKEND_ID: '+os.getenv('BACKEND_ID')
-        except:
-            print >> sys.stderr,"Printing os.getenv('BACKEND_ID') Failed"
-
-    return render(request, 'GenespotRE/landing.html',
-                  {'request': request})
+    return render(request, 'GenespotRE/landing.html', {'request': request, })
 
 '''
 Returns css_test page used to test css for general ui elements
@@ -122,19 +109,6 @@ Returns css_test page used to test css for general ui elements
 def css_test(request):
     # if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     return render(request, 'GenespotRE/css_test.html', {'request': request})
-
-
-'''
-Returns page that lists users
-'''
-@login_required
-def user_list(request):
-    # if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
-    url = USER_API_URL + '/users'
-    result = urlfetch.fetch(url, deadline=60)
-    users = json.loads(str(result.content))
-    return render(request, 'GenespotRE/user_list.html', {'request': request,
-                                                          'users': users})
 
 
 '''
@@ -159,7 +133,7 @@ def user_detail(request, user_id):
             'last_name':    user.last_name
         }
 
-        user_details['gcp_list'] = len(Googleprogram.objects.filter(user=user))
+        user_details['gcp_list'] = len(GoogleProject.objects.filter(user=user))
 
         try:
             nih_user = NIH_User.objects.get(user_id=user_id, linked=True)

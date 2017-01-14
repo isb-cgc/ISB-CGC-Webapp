@@ -60,7 +60,9 @@
         </script>
         <!-- End Google Tag Manager -->
     {%  endif %}
-
+    <script>
+        var STATIC_FILES_URL = '{{ STATIC_FILES_URL }}';
+    </script>
 </head>
 <body id="body">
 <!--Include site main header-->
@@ -133,7 +135,6 @@
         var warnAfter = {{ request|warn_after|unlocalize }};
         var expireAfter = {{ request|expire_after|unlocalize }};
         var confirmFormDiscard = "{% trans 'You have unsaved changes in a form of this page.' %}";
-
     </script>
     {% endlocalize %}
 {% endif %}

@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2016, Institute for Systems Biology
+ * Copyright 2017, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
  */
 
 require.config({
-    baseUrl: '/static/js/',
+    baseUrl: STATIC_FILES_URL+'js/',
     paths: {
         jquery: 'libs/jquery-1.11.1.min',
         bootstrap: 'libs/bootstrap.min',
@@ -192,11 +192,12 @@ require([
         
         
         if (selector_list.length) {
+            var param_list = '';
             for (var selector in selector_list) {
-                url += '&' + selector_list[selector] + '=True';
+                param_list += '&' + selector_list[selector] + '=True';
             }
-
-            $('#download-link').attr('href', download_url + '?params=' + selector_list.join(',') + '&total=' + file_list_total);
+            url += param_list;
+            $('#download-link').attr('href', download_url + '?' + param_list + '&total=' + file_list_total);
         } else {
             $('#download-link').attr('href', download_url + '?total=' + file_list_total)
         }
@@ -208,7 +209,6 @@ require([
         $.ajax({
             url: url,
             success: function (data) {
-                data = JSON.parse(data);
                 var total_files = data['total_file_count'];
                 var total_pages = Math.ceil(total_files / 20);
                 $('.filelist-panel .panel-body .file-count').html(total_pages);

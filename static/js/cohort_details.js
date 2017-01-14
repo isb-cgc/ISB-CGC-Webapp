@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2016, Institute for Systems Biology
+ * Copyright 2017, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
  */
 
 require.config({
-    baseUrl: '/static/js/',
+    baseUrl: STATIC_FILES_URL+'js/',
     paths: {
         jquery: 'libs/jquery-1.11.1.min',
         bootstrap: 'libs/bootstrap.min',
@@ -205,11 +205,11 @@ require([
     var search_helper_obj = Object.create(search_helpers, {});
 
     var update_displays = function(withoutCheckChanges) {
-
+        var active_program_id = $('ul.nav-tabs-data li.active a').data('program-id'); 
         (update_displays_thread !== null) && clearTimeout(update_displays_thread);
 
         update_displays_thread = setTimeout(function(){
-            search_helper_obj.update_counts_parsets(base_url, 'metadata_counts_platform_list', cohort_id, 'v2').then(
+            search_helper_obj.update_counts_parsets(base_url, 'metadata_counts_platform_list', cohort_id, 'v2', active_program_id).then(
                 function(){!withoutCheckChanges && check_for_changes();}
             );
         },SUBSEQUENT_DELAY);
@@ -447,32 +447,6 @@ require([
         }
     };
 
-    $('.search-checkbox-list input[type="checkbox"]').on('change', filter_change_callback);
-
-    $('.filter-input').autocomplete({
-        source: attr_list,
-        select: function(event, ui) {
-            $('#filter-list-div').append('<h5>'+ ui.item.label + '</h5>');
-            $('#filter-list-div').append('<ul class="search-checkbox-list" id="'+ui.item.value+'"></ul>');
-            for (var i = 0; i < attr_counts[ui.item.value].length; i++) {
-                var checkbox_str = '<input type="checkbox" name="elements-selected" id="'
-                    + ui.item.value + '-' + attr_counts[ui.item.value][i]['value'].replace(/\s+/g, '_') +'" >'
-                    + '<label for="'+ui.item.value + '-' + attr_counts[ui.item.value][i]['value'].replace(/\s+/g, '_') +'">'
-                    + attr_counts[ui.item.value][i]['value'] + '<span class="count">(' + attr_counts[ui.item.value][i]['count'] + ')</span>'
-                    + '</label>';
-                var checkbox_item = $(checkbox_str);
-                checkbox_item.on('change', filter_change_callback);
-                $('ul#'+ui.item.value).append('<li></li>');
-                $('ul#'+ui.item.value+' li').append(checkbox_item);
-                // After adding item to filters, remove from list
-                attr_list.splice(attr_list.indexOf(ui.item.value), 1);
-                $('.filter-input').autocomplete('option', 'source', attr_list);
-            }
-            $(this).val('');
-            return false;
-        }
-    });
-
     $('.clear-filters').on('click', function() {
         var filterType = $(this).attr('id').split('-clear-filters')[0];
         $(this).parents('.selected-filters').find('.panel-body').empty();
@@ -574,8 +548,8 @@ require([
             form.append('<input type="hidden" name="apply-name" value="true" />');
         }
 
-        var activeDataTab = $('.data-tab.active').attr('id');
-        $('.'+activeDataTab+'-selected-filters .panel-body span').each(function() {
+        var activeProgramId = $('ul.nav-tabs-data li.active a').data('program-id');
+        $('.'+activeProgramId+'-data-selected-filters .panel-body span').each(function() {
             var $this = $(this),
                 value = {
                     'feature': { name: $this.data('feature-name'), id: $this.data('feature-id') },
@@ -583,66 +557,13 @@ require([
                 };
             form.append($('<input>').attr({ type: 'hidden', name: 'filters', value: JSON.stringify(value)}));
         });
-
+        if (activeProgramId != "0") {
+            form.append($('<input>').attr({ type: 'hidden', name: 'program_id', value: activeProgramId}));
+        }
         if(cohort_id) {
             $('#apply-edit-cohort-name').prop('value', $('#edit-cohort-name').val());
             form.append('<input type="hidden" name="source" value="' + cohort_id + '" />');
         }
-    });
-
-    // Show more/less links on categories with >6 fiilters
-    $('.show-more').on('click', function() {
-        $(this).parent().siblings('li.extra-values').show();
-        $(this).parent().siblings('.less-checks').show();
-        $(this).parent().hide();
-    });
-    $('.show-less').on('click', function() {
-        $(this).parent().siblings('li.extra-values').hide();
-        $(this).parent().siblings('.more-checks').show();
-        $(this).parent().hide();
-    });
-
-    // Click events for 'Check All/Uncheck All' in filter categories
-    $('.check-all').on('click',function(){
-        $(this).parent().parent().siblings('.checkbox').find('input').prop('checked',true);
-        $(this).parent().parent().siblings('.checkbox').find('input').each(function(){
-            $(this).triggerHandler('change');
-        });
-    });
-    $('.uncheck-all').on('click',function(){
-        $(this).parent().parent().siblings('.checkbox').find('input').prop('checked',false);
-        $(this).parent().parent().siblings('.checkbox').find('input').each(function(){
-            $(this).triggerHandler('change');
-        });
-    });
-
-    // Show or hide the 'more' button for the mosaics based on whether it's needed per height
-    if($('.col-lg-8').length == 0){
-        showHideMoreGraphButton();
-    }
-    function showHideMoreGraphButton(){
-        var containerHeight = $('.clinical-trees .panel-body').outerHeight();
-        var treeGraphActualHeight = $('.tree-graph-clinical').height();
-
-        if(containerHeight >= treeGraphActualHeight){
-            $('.more-graphs').hide();
-        }else{
-            $('.more-graphs').show();
-        }
-    }
-    $('.more-graphs button').on('click', function() {
-        $('.more-graphs').hide();
-        $('.less-graphs').show();
-        $('.clinical-trees .panel-body').animate({
-            height: '430px'
-        }, 800);
-    });
-    $('.less-graphs button').on('click', function() {
-        $('.less-graphs').hide();
-        $('.more-graphs').show();
-        $('.clinical-trees .panel-body').animate({
-            height: '210px'
-        }, 800);
     });
 
     $('.show-flyout').on('click', function() {
@@ -703,29 +624,29 @@ require([
     };
 
     // If we received counting data, display it
-    if(metadata_counts !== null && metadata_counts !== "") {
-        search_helper_obj.update_counts_parsets_direct();
-        metadata_counts = null;
-
-        // If this data was filtered, check those filters
-
-        if(metadata_filters !== null && metadata_filters !== "") {
-            $.each(metadata_filters,function(filter_cat){
-                $.each(metadata_filters[filter_cat], function(i, filter_val){
-                    if($('a[href="#collapse-'+filter_cat.split(':')[1]+'"]').attr('aria-expanded') !== 'true') {
-                        $('a[href="#collapse-'+filter_cat.split(':')[1]+'"]').trigger('click');
-                    }
-                    $('div[data-feature-id="'+filter_cat+'"]').find('input[type="checkbox"][data-value-name="'+filter_val+'"]').attr('checked',true);
-                    $('div[data-feature-id="'+filter_cat+'"]').find('input[type="checkbox"][data-value-name="'+filter_val+'"]').trigger('change',{without_update: true});
-                });
-
-            });
-        }
-    } else {
-        // otherwise, induce some by checking TCGA
-        $('a[href="#collapse-Project"]').trigger('click');
-        $('input[type="checkbox"][data-value-name="TCGA"]').trigger('click');
-    }
+    // if(metadata_counts !== null && metadata_counts !== "") {
+    //     search_helper_obj.update_counts_parsets_direct();
+    //     metadata_counts = null;
+    //
+    //     // If this data was filtered, check those filters
+    //
+    //     if(metadata_filters !== null && metadata_filters !== "") {
+    //         $.each(metadata_filters,function(filter_cat){
+    //             $.each(metadata_filters[filter_cat], function(i, filter_val){
+    //                 if($('a[href="#collapse-'+filter_cat.split(':')[1]+'"]').attr('aria-expanded') !== 'true') {
+    //                     $('a[href="#collapse-'+filter_cat.split(':')[1]+'"]').trigger('click');
+    //                 }
+    //                 $('div[data-feature-id="'+filter_cat+'"]').find('input[type="checkbox"][data-value-name="'+filter_val+'"]').attr('checked',true);
+    //                 $('div[data-feature-id="'+filter_cat+'"]').find('input[type="checkbox"][data-value-name="'+filter_val+'"]').trigger('change',{without_update: true});
+    //             });
+    //
+    //         });
+    //     }
+    // } else {
+    //     // otherwise, induce some by checking TCGA
+    //     $('a[href="#collapse-Project"]').trigger('click');
+    //     $('input[type="checkbox"][data-value-name="TCGA"]').trigger('click');
+    // }
 
 
     // onClick: Shared With button 
@@ -786,15 +707,119 @@ require([
         $(this).html($(this).text().replace(/\[/g,"<span>").replace(/\]/g,"</span>"));
     });
 
-    var firstSelect = true;
-    $('a[href="#molecular-filters"]').on('click',function(e){
-        firstSelect && $('a[href="#collapse-gene-mutation-status"]').trigger('click');
-        firstSelect && $('#mutation-category').addClass('disabled');
-        firstSelect && $('#spec-molecular-attrs .search-checkbox-list').addClass('disabled');
-        $('#molecular-filter-alert').show();
-        firstSelect = false;
-    });
 
-    $('#mutation-category').on('change',filter_change_callback);
+
+    var bind_widgets = function(program_data_selector) {
+        $(program_data_selector + ' .search-checkbox-list input[type="checkbox"]').on('change', filter_change_callback);
+
+        $(program_data_selector + ' .clear-filters').on('click', function() {
+            var filterType = $(this).attr('id').split('-clear-filters')[0];
+            $(this).parents('.selected-filters').find('.panel-body').empty();
+            $(this).parents('.data-tab').find('.filter-panel input:checked').each(function() {
+                $(this).prop('checked', false);
+            });
+            if(filterType === 'isb-cgc-data') {
+                $('#paste-in-genes').siblings('div.token').find('a.close').trigger('click');
+            }
+
+            $('#create-cohort-form .form-control-static span.'+filterType+'-token').remove();
+            update_displays();
+        });
+
+        // Show more/less links on categories with >6 fiilters
+        $(program_data_selector + ' .show-more').on('click', function() {
+            $(this).parent().siblings('li.extra-values').show();
+            $(this).parent().siblings('.less-checks').show();
+            $(this).parent().hide();
+        });
+        $(program_data_selector + ' .show-less').on('click', function() {
+            $(this).parent().siblings('li.extra-values').hide();
+            $(this).parent().siblings('.more-checks').show();
+            $(this).parent().hide();
+        });
+
+        // Click events for 'Check All/Uncheck All' in filter categories
+        $(program_data_selector + ' .check-all').on('click',function(){
+            $(this).parent().parent().siblings('.checkbox').find('input').prop('checked',true);
+            $(this).parent().parent().siblings('.checkbox').find('input').each(function(){
+                $(this).triggerHandler('change');
+            });
+        });
+        $(program_data_selector + ' .uncheck-all').on('click',function(){
+            $(this).parent().parent().siblings('.checkbox').find('input').prop('checked',false);
+            $(this).parent().parent().siblings('.checkbox').find('input').each(function(){
+                $(this).triggerHandler('change');
+            });
+        });
+
+        // Show or hide the 'more' button for the mosaics based on whether it's needed per height
+        if($(program_data_selector + ' .col-lg-8').length == 0){
+            showHideMoreGraphButton();
+        }
+
+        $(program_data_selector + ' .more-graphs button').on('click', function() {
+            $('.more-graphs').hide();
+            $('.less-graphs').show();
+            $('.clinical-trees .panel-body').animate({
+                height: '430px'
+            }, 800);
+        });
+        $(program_data_selector + ' .less-graphs button').on('click', function() {
+            $('.less-graphs').hide();
+            $('.more-graphs').show();
+            $('.clinical-trees .panel-body').animate({
+                height: '210px'
+            }, 800);
+        });
+        
+        var firstSelect = true;
+        $(program_data_selector + ' a[href="#molecular-filters"]').on('click',function(e){
+            firstSelect && $('a[href="#collapse-gene-mutation-status"]').trigger('click');
+            firstSelect && $('#mutation-category').addClass('disabled');
+            firstSelect && $('#spec-molecular-attrs .search-checkbox-list').addClass('disabled');
+            $('#molecular-filter-alert').show();
+            firstSelect = false;
+        });
+    
+        $(program_data_selector + ' #mutation-category').on('change',filter_change_callback);
+    };
+
+    var filter_panel_load = function() {
+
+        var active_program_id = $('ul.nav-tabs-data li.active a').data('program-id');
+        var program_data_selector ='#'+active_program_id+'-data';
+        if ($(program_data_selector).length == 0) {
+            var data_tab_content_div = $('div.data-tab-content');
+            var get_panel_url = base_url + '/cohorts/filter_panel/' + active_program_id +'/';
+            console.log(get_panel_url);
+
+            $.ajax({
+                type        :'GET',
+                url         : get_panel_url,
+                success : function (data) {
+                    console.log('Panel Received: '+program_data_selector);
+                    data_tab_content_div.append(data);
+
+                    bind_widgets(program_data_selector);
+                    update_displays();
+
+                    $('.tab-pane.data-tab').each(function() { $(this).removeClass('active'); });
+                    $(program_data_selector).addClass('active');
+                },
+                error: function () {
+                    console.log('Failed to load program panel');
+                }
+            })
+        }
+
+    };
+    
+    // Detect tab change
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        filter_panel_load();
+    });
+    
+    filter_panel_load();
+    
 });
 

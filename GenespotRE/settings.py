@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 
 Copyright 2016, Institute for Systems Biology
@@ -174,7 +172,7 @@ STATIC_ROOT = ''
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
-STATIC_URL = '/static/'
+STATIC_URL = os.environ.get('STATIC_URL', '/static/')
 
 # Additional locations of static files
 STATICFILES_DIRS = (
@@ -197,8 +195,9 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '')
 MIDDLEWARE_CLASSES = (
     # For using NDB with Django
     # documentation: https://cloud.google.com/appengine/docs/python/ndb/#integration
-    'google.appengine.ext.ndb.django_middleware.NdbDjangoMiddleware',
-    'google.appengine.ext.appstats.recording.AppStatsDjangoMiddleware',
+    # WE DON'T SEEM TO BE USING NDB SO I'M COMMENTING THIS OUT - PL
+    # 'google.appengine.ext.ndb.django_middleware.NdbDjangoMiddleware',
+    # 'google.appengine.ext.appstats.recording.AppStatsDjangoMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -274,7 +273,11 @@ LOGGING = {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
-        }
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler'
+        },
     },
     'loggers': {
         'django.request': {
@@ -282,6 +285,11 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
+        'cohorts': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propogate': True,
+        }
     }
 }
 
@@ -420,4 +428,4 @@ EMAIL_SERVICE_API_URL = os.environ.get('EMAIL_SERVICE_API_URL', '')
 EMAIL_SERVICE_API_KEY = os.environ.get('EMAIL_SERVICE_API_KEY', '')
 NOTIFICATION_EMAIL_FROM_ADDRESS = os.environ.get('NOTIFICATOON_EMAIL_FROM_ADDRESS', '')
 
-WHITELIST_RE = ur'([^\\\_\|\"\+~@:#\$%\^&\*=\-\.,\(\)0-9a-zA-Z\sÇüéâäàåçêëèïîíìÄÅÉæÆôöòûùÖÜáóúñÑÀÁÂÃÈÊËÌÍÎÏÐÒÓÔÕØÙÚÛÝßãðõøýþÿ])'
+WHITELIST_RE = ur'([^\\\_\|\"\+~@:#\$%\^&\*=\-\.,\(\)0-9a-zA-Z\s\xc7\xfc\xe9\xe2\xe4\xe0\xe5\xe7\xea\xeb\xe8\xef\xee\xed\xec\xc4\xc5\xc9\xe6\xc6\xf4\xf6\xf2\xfb\xf9\xd6\xdc\xe1\xf3\xfa\xf1\xd1\xc0\xc1\xc2\xc3\xc8\xca\xcb\xcc\xcd\xce\xcf\xd0\xd2\xd3\xd4\xd5\xd8\xd9\xda\xdb\xdd\xdf\xe3\xf0\xf5\xf8\xfd\xfe\xff])'
