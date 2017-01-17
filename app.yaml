@@ -18,11 +18,9 @@
 
 runtime: custom
 env: flex
-module: default
+service: default
 api_version: 1
 threadsafe: true
-entrypoint: gunicorn -b :$PORT GenespotRE.wsgi
-#vm: true
 
 resources:
   cpu: .5
@@ -44,10 +42,10 @@ handlers:
 #- url: /_ah/spi/.*
 #  script: cgc_api.APPLICATION
 #  secure: always
-- url: /remoteapi.*
-  script: google.appengine.ext.remote_api.handler.application
-  login: admin
-  secure: always
+#- url: /remoteapi.*
+#  script: google.appengine.ext.remote_api.handler.application
+#  login: admin
+#  secure: always
 - url: /_ah/queue/deferred
   script: google.appengine.ext.deferred.deferred.application
   login: admin
@@ -74,7 +72,7 @@ skip_files:
 - ^(.*/)?.*/RCS/.*$
 - ^(.*/)?\.(?!env).*$
 #- ^google_appengine/.*$
-#- ^google-cloud-sdk/.*$
+- ^google-cloud-sdk/.*$
 - ^google_appengine\.zip$
 - ^(.*/)?.*\.sql$
 - ^venv/.*$
