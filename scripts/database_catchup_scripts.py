@@ -226,11 +226,13 @@ def make_attr_display_table(cursor, db):
         cursor.execute("""
             SELECT id
             FROM projects_program
-            WHERE owner_id = %s AND is_public = 1
+            WHERE owner_id = %s AND is_public = 1 AND active = 1
         """, (suid,))
 
         for row in cursor.fetchall():
             public_program_ids.append(row[0])
+
+        print >> sys.stdout, "Public program IDs: " + public_program_ids.__str__()
 
         displs = {
             'BMI': {
@@ -1061,7 +1063,6 @@ def main():
         args.create_metadata_vals_sproc and create_metadata_vals_sproc(cursor)
         args.create_program_attr_sproc and create_program_attr_sproc(cursor)
         args.create_program_display_sproc and create_program_display_sproc(cursor)
-        args.make_attr_display_table and make_attr_display_table(cursor,db)
 
         args.fix_cohort_projects and fix_cohort_projects(cursor)
         args.fix_ccle_cohort_projects and fix_ccle(cursor)
@@ -1073,8 +1074,9 @@ def main():
         bootstrap_metadata_attr_mapping()
         bootstrap_file_data()
 
-        args.breakout_metadata_tables and breakout_metadata_tables(cursor, db)
+        args.make_attr_display_table and make_attr_display_table(cursor,db)
 
+        args.breakout_metadata_tables and breakout_metadata_tables(cursor, db)
 
     except Exception as e:
         print e
