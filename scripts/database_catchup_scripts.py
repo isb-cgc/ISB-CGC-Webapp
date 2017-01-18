@@ -196,7 +196,7 @@ def create_program_display_sproc(cursor):
 # eg. Sample Type Code, Smoking History. The attribute is always required (to associate the correct display string for a value), but
 # if this is a display string for an attribute value_name can be null. Program ID is optional, to allow for different programs to have
 # different display values.
-def make_attr_display_table(cursor,db):
+def make_attr_display_table(cursor, db):
     try:
         table_create_statement = """
             CREATE TABLE IF NOT EXISTS attr_value_display (
@@ -225,7 +225,7 @@ def make_attr_display_table(cursor,db):
         # get the public program IDs
         cursor.execute("""
             SELECT id
-            FROM projects_proram
+            FROM projects_program
             WHERE owner_id = %s AND is_public = 1
         """, (suid,))
 
@@ -1004,6 +1004,8 @@ def main():
     # Still need these two just for build purposes
     cmd_line_parser.add_argument('-b', '--fix-bmi-case', type=bool, default=True,
                                  help="Fix the casing of the attribute value for the BMI row in metadata_attributes.")
+    cmd_line_parser.add_argument('-n', '--fix-disease-code', type=bool, default=True,
+                                 help="Fix the casing of the Disease_Code column")
     cmd_line_parser.add_argument('-l', '--catchup-shortlist', type=bool, default=True,
                                  help="Add the shortlist column to metadata_attributes and set its value.")
 
@@ -1051,8 +1053,7 @@ def main():
 
         # Until we have a new sql dump, we need to manually update changed columns
         args.fix_bmi_case and cursor.execute("UPDATE metadata_attr SET attribute='BMI' WHERE attribute='bmi';")
-        args.fix_bmi_case and cursor.execute("UPDATE metadata_attr SET attribute='disease_code' WHERE attribute='Disease_Code';")
-        args.fix_bmi_case and cursor.execute("ALTER TABLE metadata_samples CHANGE Disease_Code disease_code varchar(100);")
+        args.fix_disease_code and cursor.execute("UPDATE metadata_attr SET attribute='disease_code' WHERE attribute='Disease_Code';")
 
         args.alter_metadata_tables and alter_metadata_tables(cursor)
         args.catchup_shortlist and catchup_shortlist(cursor)
