@@ -49,6 +49,10 @@ MYSQL_SCHEMA = [
 
 
 class GEXPTableConfig(object):
+    """
+    Configuration class for a BigQuery table accessible through GEXP feature
+    definitions.
+    """
     def __init__(self, table_name, platform, generating_center, value_label, value_field, internal_table_id):
         self.table_name = table_name
         self.platform = platform
@@ -70,24 +74,23 @@ class GEXPTableConfig(object):
 
 
 class GEXPFeatureDefConfig(object):
-    def __init__(self, project_id, reference, target_config, gene_label_field, tables_array, out_path):
-        self.project_id = project_id
+    """
+    Configuration class for GEXP feature definitions.
+    """
+    def __init__(self, reference, target_config, gene_label_field, tables_array):
         self.reference_config = reference
         self.target_config = target_config
         self.gene_label_field = gene_label_field
         self.data_table_list = tables_array
-        self.output_csv_path = out_path
 
     @classmethod
     def from_dict(cls, param):
-        project_id = param['project_id']
         reference_config = DataSetConfig.from_dict(param['reference_config'])
         target_config = DataSetConfig.from_dict(param['target_config'])
-        output_csv_path = param['output_csv_path']
         gene_label_field = param['gene_label_field']
         data_table_list = [GEXPTableConfig.from_dict(item) for item in param['tables']]
 
-        return cls(project_id, reference_config, target_config, gene_label_field, data_table_list, output_csv_path)
+        return cls(reference_config, target_config, gene_label_field, data_table_list)
 
 
 def build_feature_query(config, table_name):
