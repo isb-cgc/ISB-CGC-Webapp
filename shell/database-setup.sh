@@ -1,12 +1,18 @@
 if [ -n "$CI" ]; then
-export HOME=/home/ubuntu/${CIRCLE_PROJECT_REPONAME}
-export HOMEROOT=/home/ubuntu/${CIRCLE_PROJECT_REPONAME}
-export MYSQL_ROOT_USER=ubuntu
+    export HOME=/home/ubuntu/${CIRCLE_PROJECT_REPONAME}
+    export HOMEROOT=/home/ubuntu/${CIRCLE_PROJECT_REPONAME}
+    export MYSQL_ROOT_USER=ubuntu
 else
-export $(cat /home/vagrant/www/.env | grep -v ^# | xargs) 2> /dev/null
-export HOME=/home/vagrant
-export HOMEROOT=/home/vagrant/www
-export MYSQL_ROOT_USER=root
+    export $(cat /home/vagrant/www/.env | grep -v ^# | xargs) 2> /dev/null
+    export HOME=/home/vagrant
+    export HOMEROOT=/home/vagrant/www
+    export MYSQL_ROOT_USER=root
+    if [ "$1" == "true" ] ; then
+        echo "Dropping database $DATABASE_NAME in prepatation for reload..."
+        mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -e "DROP DATABASE IF EXISTS $DATABASE_NAME"
+        mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -e "CREATE DATABASE $DATABASE_NAME"
+        echo "Database $DATABASE_NAME dropped and re-created."
+    fi
 fi
 
 export PYTHONPATH=${HOMEROOT}/lib/:${HOMEROOT}/:${HOME}/google_appengine/:${HOME}/google_appengine/lib/protorpc-1.0/

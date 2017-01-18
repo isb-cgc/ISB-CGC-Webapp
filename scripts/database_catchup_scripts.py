@@ -196,7 +196,7 @@ def create_program_display_sproc(cursor):
 # eg. Sample Type Code, Smoking History. The attribute is always required (to associate the correct display string for a value), but
 # if this is a display string for an attribute value_name can be null. Program ID is optional, to allow for different programs to have
 # different display values.
-def make_attr_display_table(cursor,db):
+def make_attr_display_table(cursor, db):
     try:
         table_create_statement = """
             CREATE TABLE IF NOT EXISTS attr_value_display (
@@ -225,12 +225,14 @@ def make_attr_display_table(cursor,db):
         # get the public program IDs
         cursor.execute("""
             SELECT id
-            FROM projects_proram
-            WHERE owner_id = %s AND is_public = 1
+            FROM projects_program
+            WHERE owner_id = %s AND is_public = 1 AND active = 1
         """, (suid,))
 
         for row in cursor.fetchall():
             public_program_ids.append(row[0])
+
+        print >> sys.stdout, "Public program IDs: " + public_program_ids.__str__()
 
         displs = {
             'BMI': {
@@ -1004,6 +1006,8 @@ def main():
     # Still need these two just for build purposes
     cmd_line_parser.add_argument('-b', '--fix-bmi-case', type=bool, default=True,
                                  help="Fix the casing of the attribute value for the BMI row in metadata_attributes.")
+    cmd_line_parser.add_argument('-n', '--fix-disease-code', type=bool, default=True,
+                                 help="Fix the casing of the Disease_Code column")
     cmd_line_parser.add_argument('-l', '--catchup-shortlist', type=bool, default=True,
                                  help="Add the shortlist column to metadata_attributes and set its value.")
 
@@ -1051,8 +1055,7 @@ def main():
 
         # Until we have a new sql dump, we need to manually update changed columns
         args.fix_bmi_case and cursor.execute("UPDATE metadata_attr SET attribute='BMI' WHERE attribute='bmi';")
-        args.fix_bmi_case and cursor.execute("UPDATE metadata_attr SET attribute='disease_code' WHERE attribute='Disease_Code';")
-        args.fix_bmi_case and cursor.execute("ALTER TABLE metadata_samples CHANGE Disease_Code disease_code varchar(100);")
+        args.fix_disease_code and cursor.execute("UPDATE metadata_attr SET attribute='disease_code' WHERE attribute='Disease_Code';")
 
         args.alter_metadata_tables and alter_metadata_tables(cursor)
         args.catchup_shortlist and catchup_shortlist(cursor)
@@ -1060,7 +1063,6 @@ def main():
         args.create_metadata_vals_sproc and create_metadata_vals_sproc(cursor)
         args.create_program_attr_sproc and create_program_attr_sproc(cursor)
         args.create_program_display_sproc and create_program_display_sproc(cursor)
-        args.make_attr_display_table and make_attr_display_table(cursor,db)
 
         args.fix_cohort_projects and fix_cohort_projects(cursor)
         args.fix_ccle_cohort_projects and fix_ccle(cursor)
@@ -1072,8 +1074,9 @@ def main():
         bootstrap_metadata_attr_mapping()
         bootstrap_file_data()
 
-        args.breakout_metadata_tables and breakout_metadata_tables(cursor, db)
+        args.make_attr_display_table and make_attr_display_table(cursor,db)
 
+        args.breakout_metadata_tables and breakout_metadata_tables(cursor, db)
 
     except Exception as e:
         print e
