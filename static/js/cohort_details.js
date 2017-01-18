@@ -65,6 +65,7 @@ require([
     'd3tip',
     'search_helpers',
     'bloodhound',
+    'typeahead',
     'underscore',
     'base',
     'typeahead',
@@ -520,6 +521,19 @@ require([
         if(savingChanges) {
             e.preventDefault();
             return false;
+        }
+
+        if(!cohort_id || (original_title !== $('#edit-cohort-name').val())) {
+            var name = $('#create-cohort-name').val() || $('#edit-cohort-name').val();
+
+            var unallowed = name.match(base.whitelist);
+
+            if(unallowed) {
+                $('.unallowed-chars').text(unallowed.join(", "));
+                $('#unallowed-chars-alert').show();
+                e.preventDefault();
+                return false;
+            }
         }
 
         if(!cohort_id || (original_title !== $('#edit-cohort-name').val())) {

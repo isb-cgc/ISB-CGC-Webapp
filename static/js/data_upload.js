@@ -482,6 +482,7 @@ require([
 
     var processListEl = $('#file-process-list');
     $('#next-btn').on('click', function (e) {
+
         e.preventDefault();
         e.stopPropagation();
 
