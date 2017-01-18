@@ -27,7 +27,7 @@ resources:
   memory_gb: 2.2
 
 builtins:
-- remote_api: on
+#- remote_api: on
 - appstats: on
 - deferred: on
 
