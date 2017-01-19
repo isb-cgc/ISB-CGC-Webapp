@@ -388,7 +388,7 @@ def fix_cohort_projects(cursor):
                                     SELECT p.id AS id,p.name AS name
                                     FROM projects_project p
                                         JOIN auth_user au ON au.id = p.owner_id
-                                    WHERE au.username = 'isb' AND au.is_active = 1 AND p.active=1 AND au.is_superuser = 1
+                                    WHERE au.username = 'isb' AND au.is_active=1 AND p.active=1 AND au.is_superuser=1
                                 ) ps ON ps.name = ms.disease_code
                 ) AS ss ON ss.sample_barcode = cs.sample_barcode
                 JOIN cohorts_cohort AS cc
@@ -935,10 +935,10 @@ def bootstrap_file_data():
     insert_userupload = "INSERT INTO data_upload_userupload (status, `key`, owner_id) values ('complete', '', %s);"
     insert_useruploadedfile_TCGA = "INSERT INTO data_upload_useruploadedfile (upload_id, bucket, file) " \
                                    "SELECT %s,%s,datafilenamekey from metadata_data " \
-                                   "    where datafileuploaded='true' and datafilenamekey!='' and disease_code=%s and repository=%s;"
+                                   "    where datafileuploaded='true' and datafilenamekey != '' and disease_code=%s and repository=%s;"
     insert_useruploadedfile_CCLE = "INSERT INTO data_upload_useruploadedfile (upload_id, bucket, file) " \
                                    "SELECT %s,%s,datafilenamekey from metadata_data " \
-                                   "    where datafileuploaded='true' and datafilenamekey!='' and program_name=%s;"
+                                   "    where datafileuploaded='true' and datafilenamekey != '' and program_name=%s;"
 
     update_projects_project = "UPDATE projects_user_data_tables set data_upload_id=%s where project_id=%s;"
     get_projects = "SELECT * FROM projects_project;"
