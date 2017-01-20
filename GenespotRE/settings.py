@@ -80,7 +80,7 @@ DATABASES = {'default': {
 
 DB_SOCKET = DATABASES['default']['HOST'] if 'cloudsql' in DATABASES['default']['HOST'] else None
 
-DEV = bool(os.environ.get('IS_DEV', False))
+IS_DEV = bool(os.environ.get('IS_DEV', False))
 
 if os.environ.has_key('DB_SSL_CERT'):
     DATABASES['default']['OPTIONS'] = {
@@ -90,6 +90,7 @@ if os.environ.has_key('DB_SSL_CERT'):
             'key': os.environ.get('DB_SSL_KEY')
         }
     }
+
 if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):  
     SITE_ID = 4
     NIH_AUTH_ON = True
