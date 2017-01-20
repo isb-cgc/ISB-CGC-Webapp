@@ -65,6 +65,7 @@ RUN pip install gunicorn==19.6.0
 
 ENV PYTHONPATH=/app:/app/lib:/app/google_appengine:/app/google_appengine/lib/protorpc-1.0
 
-RUN python /app/manage.py migrate --noinput
+# Testing...
+# RUN python /app/manage.py migrate --noinput
 
 CMD gunicorn -b :$PORT GenespotRE.wsgi
