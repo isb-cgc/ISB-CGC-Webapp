@@ -18,6 +18,7 @@ limitations under the License.
 
 import datetime
 import logging
+import traceback
 import os
 import csv
 from argparse import ArgumentParser
@@ -350,7 +351,7 @@ def fix_cohort_projects(conn):
         else:
             print >> sys.stdout, "[STATUS] No cohort samples were found with missing project IDs."
     except Exception as e:
-        print >> sys.stdout, "[ERROR] Exception when fixing cohort project IDs; they may not have been fiixed"
+        print >> sys.stdout, "[ERROR] Exception when fixing cohort project IDs; they may not have been fixed."
         print >> sys.stdout, e
         print >> sys.stdout, traceback.format_exc()
 
