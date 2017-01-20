@@ -78,6 +78,10 @@ DATABASES = {'default': {
     'PASSWORD': os.environ.get('DATABASE_PASSWORD')
 }}
 
+DB_SOCKET = DATABASES['default']['HOST'] if 'cloudsql' in DATABASES['default']['HOST'] else None
+
+DEV = bool(os.environ.get('IS_DEV', False))
+
 if os.environ.has_key('DB_SSL_CERT'):
     DATABASES['default']['OPTIONS'] = {
         'ssl': {
