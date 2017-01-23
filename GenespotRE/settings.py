@@ -29,7 +29,7 @@ BASE_DIR                = os.path.abspath(os.path.join(os.path.dirname(__file__)
 
 SHARED_SOURCE_DIRECTORIES = [
     'ISB-CGC-Common',
-    'ISB-CGC-API'
+    'ISB-CGC-API',
 ]
 
 # Add the shared Django application subdirectory to the Python module search path
@@ -96,13 +96,18 @@ if os.environ.has_key('DB_SSL_CERT') and not IS_APP_ENGINE_FLEX:
         }
     }
 
-if IS_APP_ENGINE_FLEX:
-    SITE_ID = 4
-    NIH_AUTH_ON = True
-else:
-    SITE_ID = 3
-    NIH_AUTH_ON = False
+# Default to localhost for the site ID
+SITE_ID = 3
 
+if IS_APP_ENGINE_FLEX:
+    print >> sys.stdout, "[STATUS] Trying to detect host:" + os.getenv('HOST', '')
+    SITE_ID = 4
+
+# Default to no NIH Auth unless we are not on a local dev environment *and* are in AppEngine-Flex
+NIH_AUTH_ON = False
+
+if not IS_DEV and IS_APP_ENGINE_FLEX:
+    NIH_AUTH_ON = True
 
 def get_project_identifier():
     return BQ_PROJECT_ID
