@@ -23,6 +23,8 @@ import dotenv
 
 dotenv.read_dotenv(join(dirname(__file__), '../.env'))
 
+APP_ENGINE_FLEX = 'aef-'
+
 BASE_DIR                = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + os.sep
 
 SHARED_SOURCE_DIRECTORIES = [
@@ -81,10 +83,11 @@ DATABASES = {'default': {
 DB_SOCKET = DATABASES['default']['HOST'] if 'cloudsql' in DATABASES['default']['HOST'] else None
 
 IS_DEV = bool(os.environ.get('IS_DEV', False))
+IS_APP_ENGINE_FLEX = os.getenv('GAE_INSTANCE', '').startswith(APP_ENGINE_FLEX)
 
 # If this is a GAE-Flex deployment, we don't need to specify SSL; the proxy will take
 # care of that for us
-if os.environ.has_key('DB_SSL_CERT') and not os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):
+if os.environ.has_key('DB_SSL_CERT') and not IS_APP_ENGINE_FLEX:
     DATABASES['default']['OPTIONS'] = {
         'ssl': {
             'ca': os.environ.get('DB_SSL_CA'),
@@ -93,10 +96,7 @@ if os.environ.has_key('DB_SSL_CERT') and not os.getenv('SERVER_SOFTWARE', '').st
         }
     }
 
-print >> sys.stdout, "[STATUS] getenv GAE_INSTANCE result: "+os.getenv('GAE_INSTANCE','').__str__()
-print >> sys.stdout, "[STATUS] getenv SERVER_SOFTWARE result: "+os.getenv('SERVER_SOFTWARE','').__str__()
-
-if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):  
+if IS_APP_ENGINE_FLEX:
     SITE_ID = 4
     NIH_AUTH_ON = True
 else:
