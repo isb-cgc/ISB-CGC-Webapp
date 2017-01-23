@@ -96,7 +96,7 @@ if os.environ.has_key('DB_SSL_CERT') and not IS_APP_ENGINE_FLEX:
         }
     }
 
-if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):  
+if IS_APP_ENGINE_FLEX:
     SITE_ID = 4
     NIH_AUTH_ON = True
 else:
