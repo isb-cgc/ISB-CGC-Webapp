@@ -82,7 +82,9 @@ DB_SOCKET = DATABASES['default']['HOST'] if 'cloudsql' in DATABASES['default']['
 
 IS_DEV = bool(os.environ.get('IS_DEV', False))
 
-if os.environ.has_key('DB_SSL_CERT'):
+# If this is a GAE-Flex deployment, we don't need to specify SSL; the proxy will take
+# care of that for us
+if os.environ.has_key('DB_SSL_CERT') and not os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):
     DATABASES['default']['OPTIONS'] = {
         'ssl': {
             'ca': os.environ.get('DB_SSL_CA'),
@@ -90,6 +92,9 @@ if os.environ.has_key('DB_SSL_CERT'):
             'key': os.environ.get('DB_SSL_KEY')
         }
     }
+
+print >> sys.stdout, "[STATUS] getenv GAE_INSTANCE result: "+os.getenv('GAE_INSTANCE','').__str__()
+print >> sys.stdout, "[STATUS] getenv SERVER_SOFTWARE result: "+os.getenv('SERVER_SOFTWARE','').__str__()
 
 if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):  
     SITE_ID = 4
