@@ -101,7 +101,7 @@ SITE_ID = 3
 
 if IS_APP_ENGINE_FLEX:
     print >> sys.stdout, "[STATUS] Trying to detect host:" + os.getenv('HOST', '')
-    SITE_ID = 4
+    SITE_ID = 5
 
 # Default to no NIH Auth unless we are not on a local dev environment *and* are in AppEngine-Flex
 NIH_AUTH_ON = False
