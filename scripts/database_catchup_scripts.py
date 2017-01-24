@@ -235,8 +235,6 @@ def make_attr_display_table(cursor, db):
         for row in cursor.fetchall():
             public_program_ids.append(row[0])
 
-        print >> sys.stdout, "Public program IDs: " + public_program_ids.__str__()
-
         displs = {
             'BMI': {
                 'underweight': 'Underweight: BMI less than 18.5',
@@ -599,6 +597,11 @@ def breakout_metadata_tables(cursor, db):
     ccle_metadata_attr_insertion = 'INSERT INTO CCLE_metadata_attr SELECT attribute, code, spec from metadata_attr where shortlist=1 and attribute in ("{0}");'.format('","'.join(new_shortlist))
     alter_ccle_metadata_attr_id = 'ALTER TABLE CCLE_metadata_attr ADD COLUMN id INT NOT NULL AUTO_INCREMENT, ADD PRIMARY KEY (id);'
 
+    cursor.execute('SELECT * FROM metadata_attr WHERE attribute IS NULL;')
+    res = cursor.fetchall()
+    if len(res) > 0:
+        cursor.execute('DELETE FROM metadata_attr WHERE attribute IS NULL;')
+
     alter_tcga_metadata_attr_ds = 'ALTER TABLE metadata_attr DROP COLUMN shortlist;'
     tcga_metadata_attr_insertion = 'DELETE FROM metadata_attr WHERE attribute NOT IN ("{0}");'.format('","'.join(new_shortlist))
     alter_tcga_metadata_attr_id = 'ALTER TABLE metadata_attr ADD COLUMN id INT NOT NULL AUTO_INCREMENT, ADD PRIMARY KEY (id);'
@@ -704,8 +707,7 @@ def create_study_views(project, source_table, studies):
     study_names = {}
     view_check_sql = "SELECT COUNT(TABLE_NAME) FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = %s;"
     create_view_sql = "CREATE OR REPLACE VIEW %s AS SELECT * FROM %s"
-    where_proj = " WHERE program_name=%s"
-    where_study = " AND disease_code=%s;"
+    where_study = " WHERE disease_code=%s;"
 
     try:
         for study in studies:
@@ -713,16 +715,19 @@ def create_study_views(project, source_table, studies):
 
             # If project and study are the same we assume this is meant to
             # be a one-study project
-            make_view = (create_view_sql % (view_name, source_table,)) + where_proj
-            params = (project,)
+            make_view = (create_view_sql % (view_name, source_table,))
+            params = None
 
             if project == study:
                 make_view += ";"
             else:
                 make_view += where_study
-                params += (study,)
+                params = (study,)
 
-            cursor.execute(make_view, params)
+            if params:
+                cursor.execute(make_view, params)
+            else:
+                cursor.execute(make_view)
 
             cursor.execute(view_check_sql, (view_name,))
             if cursor.fetchall()[0][0] <= 0:
@@ -818,7 +823,7 @@ def bootstrap_metadata_attr_mapping():
 
 
 def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_name, bucket_permissions, bqdataset_name):
-    fetch_studies = "SELECT DISTINCT disease_code FROM metadata_samples WHERE program_name='TCGA';"
+    fetch_studies = "SELECT DISTINCT disease_code FROM TCGA_metadata_samples WHERE program_name='TCGA';"
     insert_projects = "INSERT INTO projects_program (name, active, last_date_saved, is_public, owner_id) " + \
                       "VALUES (%s,%s,%s,%s,%s);"
     insert_studies = "INSERT INTO projects_project (name, active, last_date_saved, owner_id, program_id) " + \
@@ -966,10 +971,10 @@ def bootstrap_file_data():
     CCLE_BUCKET = ''
     insert_userupload = "INSERT INTO data_upload_userupload (status, `key`, owner_id) values ('complete', '', %s);"
     insert_useruploadedfile_TCGA = "INSERT INTO data_upload_useruploadedfile (upload_id, bucket, file) " \
-                                   "SELECT %s,%s,datafilenamekey from metadata_data " \
+                                   "SELECT %s,%s,datafilenamekey from TCGA_metadata_data " \
                                    "    where datafileuploaded='true' and datafilenamekey != '' and disease_code=%s and repository=%s;"
     insert_useruploadedfile_CCLE = "INSERT INTO data_upload_useruploadedfile (upload_id, bucket, file) " \
-                                   "SELECT %s,%s,datafilenamekey from metadata_data " \
+                                   "SELECT %s,%s,datafilenamekey from CCLE_metadata_data " \
                                    "    where datafileuploaded='true' and datafilenamekey != '' and program_name=%s;"
 
     update_projects_project = "UPDATE projects_user_data_tables set data_upload_id=%s where project_id=%s;"
@@ -1011,9 +1016,6 @@ def bootstrap_file_data():
 
             db.commit()
 
-
-
-        # Create UserUploadedFile for each project
     except Exception as e:
         print >> sys.stderr, e
     finally:
@@ -1100,6 +1102,8 @@ def main():
         args.fix_ccle_cohort_projects and fix_ccle(cursor)
         args.create_isbcgc_project_set_sproc and add_isb_cgc_project_sproc(cursor)
 
+        args.breakout_metadata_tables and breakout_metadata_tables(cursor, db)
+
         # From userdata_bootstrap.py
         bootstrap_user_data_schema(args.pub_feat_table, args.bq_dataset, args.bucket_name, args.bucket_perm,
                                    args.bq_dataset_storage)
@@ -1107,8 +1111,7 @@ def main():
         bootstrap_file_data()
 
         args.make_attr_display_table and make_attr_display_table(cursor,db)
-
-        args.breakout_metadata_tables and breakout_metadata_tables(cursor, db)
+        args.create_program_display_sproc and create_program_display_sproc(cursor)
 
     except Exception as e:
         print e
