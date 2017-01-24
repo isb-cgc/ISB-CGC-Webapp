@@ -1,5 +1,5 @@
 """
-Copyright 2016, Institute for Systems Biology
+Copyright 2017, Institute for Systems Biology
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -16,25 +16,28 @@ import traceback
 import sys
 import time
 from MySQLdb import connect, cursors
-from GenespotRE import secret_settings
+from GenespotRE import secret_settings, settings
 from argparse import ArgumentParser
 
 SUPERUSER_NAME = 'isb'
 
 def get_mysql_connection():
-    env = os.getenv('SERVER_SOFTWARE')
-    db_settings = secret_settings.get('DATABASE')['default']
+    db_settings = secret_settings.get('DATABASE')['default'] if settings.IS_DEV else settings.DATABASES['default']
+
     db = None
     ssl = None
+
     if 'OPTIONS' in db_settings and 'ssl' in db_settings['OPTIONS']:
         ssl = db_settings['OPTIONS']['ssl']
 
-    if env and env.startswith('Google App Engine/'):  # or os.getenv('SETTINGS_MODE') == 'prod':
+    if settings.IS_APP_ENGINE_FLEX:
         # Connecting from App Engine
         db = connect(
-            unix_socket='/cloudsql/<YOUR-APP-ID>:<CLOUDSQL-INSTANCE>',
-            db='',
-            user='',
+            host='localhost',
+            unix_socket=settings.DB_SOCKET,
+            db=db_settings['NAME'],
+            user=db_settings['USER'],
+            password=db_settings['PASSWORD']
         )
     else:
         db = connect(host=db_settings['HOST'], port=db_settings['PORT'], db=db_settings['NAME'],
@@ -418,19 +421,19 @@ def fix_cohort_projects(cursor):
         print >> sys.stdout, traceback.format_exc()
 
 
-# Add the stored procedure "get_tcga_project_set" which fetches the list of all program/project IDs which are owned by
+# Add the stored procedure "get_isbcgc_project_set" which fetches the list of all program/project IDs which are owned by
 # the ISB-CGC superuser
 def add_isb_cgc_project_sproc(cursor):
     try:
         sproc_def = """
             CREATE PROCEDURE `get_isbcgc_project_set`()
-            BEGIN
-            SELECT ps.id
-            FROM projects_project ps
-                    JOIN auth_user au
-                    ON au.id = ps.owner_id
-            WHERE au.username = 'isb' and au.is_superuser = 1 AND au.is_active = 1 AND ps.active = 1;
-            END
+                BEGIN
+                SELECT pp.id
+                FROM projects_project ps
+                        JOIN auth_user au
+                        ON au.id = pp.owner_id
+                WHERE au.username = 'isb' and au.is_superuser = 1 AND au.is_active = 1 AND pp.active = 1;
+                END
         """
 
         cursor.execute("DROP PROCEDURE IF EXISTS `get_isbcgc_project_set`;")
@@ -549,7 +552,6 @@ def alter_metadata_tables(cursor):
         DELETE FROM metadata_attr WHERE attribute='Study';
     """
 
-
     try:
         cursor.execute(alter_metadata_samples_check)
         result = cursor.fetchone()
@@ -564,49 +566,79 @@ def alter_metadata_tables(cursor):
         print >> sys.stdout, e
         print >> sys.stdout, traceback.format_exc()
 
+
 # This function will create new metadata_tables for TCGA and CCLE. The old tables will remain while we refactor other code.
 # This should only be used on local development environments.
 def breakout_metadata_tables(cursor, db):
     print >> sys.stdout, "[STATUS] Breaking out metadata tables."
-    new_shortlist = ['age_at_initial_pathologic_diagnosis', 'disease_code', 'gender', 'histological_type', 'hpv_status',
-                     'neoplasm_histologic_grade', 'pathologic_stage', 'person_neoplasm_cancer_status', 'residual_tumor',
-                     'SampleTypeCode', 'tobacco_smoking_history', 'tumor_tissue_site', 'tumor_type', 'vital_status', 'bmi']
-    delete_tables = 'DROP TABLE IF EXISTS CCLE_metadata_data, CCLE_metadata_samples, CCLE_metadata_attr, TCGA_metadata_data, ' \
-                    '                     TCGA_metadata_samples, TCGA_metadata_attr;'
-    create_ccle_metadata_data = 'CREATE TABLE CCLE_metadata_data SELECT * FROM metadata_data WHERE program_name="CCLE";'
-    create_ccle_metadata_samples = 'CREATE TABLE CCLE_metadata_samples SELECT sample_barcode,case_barcode,{0} FROM metadata_samples WHERE program_name="CCLE";'.format(','.join(new_shortlist))
-    create_ccle_metadata_attr = 'CREATE TABLE CCLE_metadata_attr (id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY (id)) ' \
-                                '  SELECT attribute, code, spec from metadata_attr where shortlist=1 and attribute in ("{0}");'.format('","'.join(new_shortlist))
-    create_tcga_metadata_data = 'CREATE TABLE TCGA_metadata_data SELECT * FROM metadata_data WHERE program_name="TCGA";'
-    create_tcga_metadata_samples = 'CREATE TABLE TCGA_metadata_samples SELECT sample_barcode,case_barcode,{0} FROM metadata_samples WHERE program_name="TCGA";'.format(','.join(new_shortlist))
-    create_tcga_metadata_attr = 'CREATE TABLE TCGA_metadata_attr (id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY (id)) ' \
-                                '  SELECT attribute, code, spec from metadata_attr where shortlist=1 and attribute in ("{0}");'.format('","'.join(new_shortlist))
 
-    remove_ccle_metadata_data = 'DELETE from metadata_data where program_name="CCLE"';
-    remove_ccle_metadata_samples = 'DELETE from metadata_samples where program_name="CCLE"';
+    new_shortlist = ['age_at_initial_pathologic_diagnosis', 'country', 'ethnicity', 'menopause_status', 'race',
+        'disease_code', 'gender', 'histological_type', 'hpv_status', 'neoplasm_histologic_grade', 'pathologic_stage',
+        'person_neoplasm_cancer_status', 'residual_tumor','SampleTypeCode', 'tobacco_smoking_history',
+        'tumor_tissue_site', 'tumor_type', 'vital_status', 'BMI', ]
 
-    rename_metadata_tables = 'RENAME TABLE metadata_samples TO TCGA_metadata_samples,' \
-                             '             metadata_data to TCGA_metadata_data,' \
-                             '             metadata_attr to TCGA_metadata_attr;'
+    col_to_drop = []
 
-    insert_into_public_data_table = 'INSERT INTO projects_public_data_tables (data_table, samples_table, attr_table, sample_data_availability_table, program_id) ' \
-                                    'values("{data_table}", "{samples_table}", "{attr_table}", "{sample_data_availability_table}", {program_id});'
+    cursor.execute("SELECT column_name FROM INFORMATION_SCHEMA.columns WHERE table_name = 'metadata_samples';")
+
+    for row in cursor.fetchall():
+        if row[0] not in new_shortlist and not '_barcode' in row[0] and not '_id' in row[0]:
+            col_to_drop.append(row[0])
+
+    delete_tables = 'DROP TABLE IF EXISTS CCLE_metadata_data, CCLE_metadata_samples, CCLE_metadata_attr, TCGA_metadata_data, TCGA_metadata_samples, TCGA_metadata_attr;'
+
+    create_ccle_metadata_data = 'CREATE TABLE CCLE_metadata_data LIKE metadata_data;'
+    ccle_metadata_data_insertion = 'INSERT INTO CCLE_metadata_data SELECT * FROM metadata_data WHERE program_name="CCLE";'
+
+    create_ccle_metadata_samples = 'CREATE TABLE CCLE_metadata_samples LIKE metadata_samples;'
+    ccle_metadata_samples_insertion = 'INSERT INTO CCLE_metadata_samples SELECT * FROM metadata_samples WHERE program_name="CCLE";'
+    alter_ccle_metadata_samples = 'ALTER TABLE CCLE_metadata_samples DROP COLUMN %s;'.format(','.join(col_to_drop))
+
+    create_ccle_metadata_attr = 'CREATE TABLE CCLE_metadata_attr LIKE metadata_attr;'
+    alter_ccle_metadats_attr_ds = 'ALTER TABLE CCLE_metadata_attr DROP COLUMN shortlist;'
+    ccle_metadata_attr_insertion = 'INSERT INTO CCLE_metadata_attr SELECT attribute, code, spec from metadata_attr where shortlist=1 and attribute in ("{0}");'.format('","'.join(new_shortlist))
+    alter_ccle_metadats_attr_id = 'ALTER TABLE CCLE_metadata_attr ADD COLUMN id INT NOT NULL AUTO_INCREMENT, ADD PRIMARY KEY (id);'
+
+    alter_tcga_metadats_attr_ds = 'ALTER TABLE metadata_attr DROP COLUMN shortlist;'
+    tcga_metadata_attr_insertion = 'UPDATE TABLE metadata_attr DELETE WHERE attribute NOT IN ("{0}");'.format('","'.join(new_shortlist))
+    alter_tcga_metadats_attr_id = 'ALTER TABLE metadata_attr ADD COLUMN id INT NOT NULL AUTO_INCREMENT, ADD PRIMARY KEY (id);'
+
+    remove_ccle_metadata_data = 'DELETE from metadata_data where program_name="CCLE";'
+    remove_ccle_metadata_samples = 'DELETE from metadata_samples where program_name="CCLE";'
+
+    rename_metadata_tables = 'RENAME TABLE metadata_samples TO TCGA_metadata_samples, metadata_data to TCGA_metadata_data, metadata_attr to TCGA_metadata_attr;'
+
+    insert_into_public_data_table = """
+      INSERT INTO projects_public_data_tables (data_table, samples_table, attr_table, sample_data_availability_table, program_id)
+      VALUES("{data_table}", "{samples_table}", "{attr_table}", "{sample_data_availability_table}", {program_id});
+    """
+
     check_already_exists = 'SELECT * FROM projects_public_data_tables WHERE program_id=%s;'
     get_tcga_program_id = "SELECT id from projects_program where name='TCGA';"
     get_ccle_program_id = "SELECT id from projects_program where name='CCLE';"
 
     try:
         cursor.execute(delete_tables)
-        cursor.execute(create_ccle_metadata_data)
-        cursor.execute(create_ccle_metadata_samples)
-        cursor.execute(create_ccle_metadata_attr)
-        cursor.execute(create_tcga_metadata_data)
-        cursor.execute(create_tcga_metadata_samples)
-        cursor.execute(create_tcga_metadata_attr)
 
-        # cursor.execute(remove_ccle_metadata_data)
-        # cursor.execute(remove_ccle_metadata_samples)
-        # cursor.execute(rename_metadata_tables)
+        cursor.execute(create_ccle_metadata_data)
+        cursor.execute(ccle_metadata_data_insertion)
+
+        cursor.execute(create_ccle_metadata_samples)
+        cursor.execute(ccle_metadata_samples_insertion)
+        cursor.execute(alter_ccle_metadata_samples)
+
+        cursor.execute(create_ccle_metadata_attr)
+        cursor.execute(alter_ccle_metadats_attr_ds)
+        cursor.execute(ccle_metadata_attr_insertion)
+        cursor.execute(alter_ccle_metadats_attr_id)
+
+        cursor.execute(alter_tcga_metadats_attr_ds)
+        cursor.execute(tcga_metadata_attr_insertion)
+        cursor.execute(alter_tcga_metadats_attr_id)
+
+        cursor.execute(remove_ccle_metadata_data)
+        cursor.execute(remove_ccle_metadata_samples)
+        cursor.execute(rename_metadata_tables)
 
         cursor.execute(get_ccle_program_id)
         result = cursor.fetchone()
@@ -1003,7 +1035,7 @@ def main():
     cmd_line_parser.add_argument('-m', '--create-ms-shortlist-view', type=bool, default=False,
                                  help="Create the metadata_samples_shortlist view, which acts as a smaller version of metadata_samples for use with the webapp.")
 
-    # Still need these two just for build purposes
+    # Still need these three just for build purposes
     cmd_line_parser.add_argument('-b', '--fix-bmi-case', type=bool, default=True,
                                  help="Fix the casing of the attribute value for the BMI row in metadata_attributes.")
     cmd_line_parser.add_argument('-n', '--fix-disease-code', type=bool, default=True,
