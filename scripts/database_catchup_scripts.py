@@ -429,7 +429,7 @@ def add_isb_cgc_project_sproc(cursor):
             CREATE PROCEDURE `get_isbcgc_project_set`()
                 BEGIN
                 SELECT pp.id
-                FROM projects_project ps
+                FROM projects_project pp
                         JOIN auth_user au
                         ON au.id = pp.owner_id
                 WHERE au.username = 'isb' and au.is_superuser = 1 AND au.is_active = 1 AND pp.active = 1;
@@ -592,16 +592,16 @@ def breakout_metadata_tables(cursor, db):
 
     create_ccle_metadata_samples = 'CREATE TABLE CCLE_metadata_samples LIKE metadata_samples;'
     ccle_metadata_samples_insertion = 'INSERT INTO CCLE_metadata_samples SELECT * FROM metadata_samples WHERE program_name="CCLE";'
-    alter_ccle_metadata_samples = 'ALTER TABLE CCLE_metadata_samples DROP COLUMN %s;'.format(','.join(col_to_drop))
+    alter_ccle_metadata_samples = 'ALTER TABLE CCLE_metadata_samples DROP {0};'.format(', DROP '.join(col_to_drop))
 
     create_ccle_metadata_attr = 'CREATE TABLE CCLE_metadata_attr LIKE metadata_attr;'
-    alter_ccle_metadats_attr_ds = 'ALTER TABLE CCLE_metadata_attr DROP COLUMN shortlist;'
+    alter_ccle_metadata_attr_ds = 'ALTER TABLE CCLE_metadata_attr DROP COLUMN shortlist;'
     ccle_metadata_attr_insertion = 'INSERT INTO CCLE_metadata_attr SELECT attribute, code, spec from metadata_attr where shortlist=1 and attribute in ("{0}");'.format('","'.join(new_shortlist))
-    alter_ccle_metadats_attr_id = 'ALTER TABLE CCLE_metadata_attr ADD COLUMN id INT NOT NULL AUTO_INCREMENT, ADD PRIMARY KEY (id);'
+    alter_ccle_metadata_attr_id = 'ALTER TABLE CCLE_metadata_attr ADD COLUMN id INT NOT NULL AUTO_INCREMENT, ADD PRIMARY KEY (id);'
 
-    alter_tcga_metadats_attr_ds = 'ALTER TABLE metadata_attr DROP COLUMN shortlist;'
-    tcga_metadata_attr_insertion = 'UPDATE TABLE metadata_attr DELETE WHERE attribute NOT IN ("{0}");'.format('","'.join(new_shortlist))
-    alter_tcga_metadats_attr_id = 'ALTER TABLE metadata_attr ADD COLUMN id INT NOT NULL AUTO_INCREMENT, ADD PRIMARY KEY (id);'
+    alter_tcga_metadata_attr_ds = 'ALTER TABLE metadata_attr DROP COLUMN shortlist;'
+    tcga_metadata_attr_insertion = 'DELETE FROM metadata_attr WHERE attribute NOT IN ("{0}");'.format('","'.join(new_shortlist))
+    alter_tcga_metadata_attr_id = 'ALTER TABLE metadata_attr ADD COLUMN id INT NOT NULL AUTO_INCREMENT, ADD PRIMARY KEY (id);'
 
     remove_ccle_metadata_data = 'DELETE from metadata_data where program_name="CCLE";'
     remove_ccle_metadata_samples = 'DELETE from metadata_samples where program_name="CCLE";'
@@ -628,13 +628,13 @@ def breakout_metadata_tables(cursor, db):
         cursor.execute(alter_ccle_metadata_samples)
 
         cursor.execute(create_ccle_metadata_attr)
-        cursor.execute(alter_ccle_metadats_attr_ds)
+        cursor.execute(alter_ccle_metadata_attr_ds)
         cursor.execute(ccle_metadata_attr_insertion)
-        cursor.execute(alter_ccle_metadats_attr_id)
+        cursor.execute(alter_ccle_metadata_attr_id)
 
-        cursor.execute(alter_tcga_metadats_attr_ds)
+        cursor.execute(alter_tcga_metadata_attr_ds)
         cursor.execute(tcga_metadata_attr_insertion)
-        cursor.execute(alter_tcga_metadats_attr_id)
+        cursor.execute(alter_tcga_metadata_attr_id)
 
         cursor.execute(remove_ccle_metadata_data)
         cursor.execute(remove_ccle_metadata_samples)
@@ -900,9 +900,9 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
 
         # Make the views
         for table in tables:
-            study_table_views = create_study_views("TCGA", table, studies.keys())
+            study_table_views = create_study_views("TCGA", 'TCGA_'+table, studies.keys())
             # Make CCLE and add it in manually
-            ccle_view = create_study_views("CCLE", table, ["CCLE"])
+            ccle_view = create_study_views("CCLE", 'CCLE_'+table, ["CCLE"])
             study_table_views["CCLE"] = ccle_view["CCLE"]
 
             table_study_data[table] = study_table_views
