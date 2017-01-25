@@ -37,7 +37,7 @@ else
 fi
 
 echo "Adding Stored Procedures/Views and making table alterations.."
-python ${HOMEROOT}/scripts/database_catchup_scripts.py
+python ${HOMEROOT}/scripts/database_catchup_scripts.py -z True
 
 echo "Adding Cohort/Site Data..."
 python ${HOMEROOT}/scripts/add_site_ids.py
