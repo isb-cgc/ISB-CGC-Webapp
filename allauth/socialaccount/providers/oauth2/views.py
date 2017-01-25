@@ -36,6 +36,7 @@ class OAuth2Adapter(object):
         self.request = request
 
     def get_provider(self):
+        print >> sys.stderr, str(self.provider_id)
         return providers.registry.by_id(self.provider_id, self.request)
 
     def complete_login(self, request, app, access_token, **kwargs):

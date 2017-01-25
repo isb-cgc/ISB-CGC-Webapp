@@ -5,6 +5,7 @@ from allauth.account.models import EmailAddress
 
 from ..adapter import get_adapter
 
+import sys
 
 class AuthProcess(object):
     LOGIN = 'login'
@@ -64,6 +65,9 @@ class Provider(object):
         return app_settings.PROVIDERS.get(self.id, {})
 
     def sociallogin_from_response(self, request, response):
+
+        print >> sys.stdout, "[STATUS] In social login from response: "+ response
+
         """
         Instantiates and populates a `SocialLogin` model based on the data
         retrieved in `response`. The method does NOT save the model to the

@@ -19,7 +19,7 @@ class GoogleOAuth2Adapter(OAuth2Adapter):
                             params={'access_token': token.token,
                                     'alt': 'json'})
         print >> sys.stdout, "[STATUS] Trying to log in, result: "
-        print >> sys.stdout, resp.__str__()
+        print >> sys.stdout, resp.json()
         resp.raise_for_status()
         extra_data = resp.json()
         login = self.get_provider() \

@@ -65,7 +65,6 @@ require([
     'd3tip',
     'search_helpers',
     'bloodhound',
-    'typeahead',
     'underscore',
     'base',
     'typeahead',
