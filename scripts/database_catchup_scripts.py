@@ -1,5 +1,5 @@
 """
-Copyright 2016, Institute for Systems Biology
+Copyright 2017, Institute for Systems Biology
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -16,25 +16,28 @@ import traceback
 import sys
 import time
 from MySQLdb import connect, cursors
-from GenespotRE import secret_settings
+from GenespotRE import secret_settings, settings
 from argparse import ArgumentParser
 
 SUPERUSER_NAME = 'isb'
 
 def get_mysql_connection():
-    env = os.getenv('SERVER_SOFTWARE')
-    db_settings = secret_settings.get('DATABASE')['default']
+    db_settings = secret_settings.get('DATABASE')['default'] if settings.IS_DEV else settings.DATABASES['default']
+
     db = None
     ssl = None
+
     if 'OPTIONS' in db_settings and 'ssl' in db_settings['OPTIONS']:
         ssl = db_settings['OPTIONS']['ssl']
 
-    if env and env.startswith('Google App Engine/'):  # or os.getenv('SETTINGS_MODE') == 'prod':
+    if settings.IS_APP_ENGINE_FLEX:
         # Connecting from App Engine
         db = connect(
-            unix_socket='/cloudsql/<YOUR-APP-ID>:<CLOUDSQL-INSTANCE>',
-            db='',
-            user='',
+            host='localhost',
+            unix_socket=settings.DB_SOCKET,
+            db=db_settings['NAME'],
+            user=db_settings['USER'],
+            password=db_settings['PASSWORD']
         )
     else:
         db = connect(host=db_settings['HOST'], port=db_settings['PORT'], db=db_settings['NAME'],
@@ -232,8 +235,6 @@ def make_attr_display_table(cursor, db):
         for row in cursor.fetchall():
             public_program_ids.append(row[0])
 
-        print >> sys.stdout, "Public program IDs: " + public_program_ids.__str__()
-
         displs = {
             'BMI': {
                 'underweight': 'Underweight: BMI less than 18.5',
@@ -418,19 +419,19 @@ def fix_cohort_projects(cursor):
         print >> sys.stdout, traceback.format_exc()
 
 
-# Add the stored procedure "get_tcga_project_set" which fetches the list of all program/project IDs which are owned by
+# Add the stored procedure "get_isbcgc_project_set" which fetches the list of all program/project IDs which are owned by
 # the ISB-CGC superuser
 def add_isb_cgc_project_sproc(cursor):
     try:
         sproc_def = """
             CREATE PROCEDURE `get_isbcgc_project_set`()
-            BEGIN
-            SELECT ps.id
-            FROM projects_project ps
-                    JOIN auth_user au
-                    ON au.id = ps.owner_id
-            WHERE au.username = 'isb' and au.is_superuser = 1 AND au.is_active = 1 AND ps.active = 1;
-            END
+                BEGIN
+                SELECT pp.id
+                FROM projects_project pp
+                        JOIN auth_user au
+                        ON au.id = pp.owner_id
+                WHERE au.username = 'isb' and au.is_superuser = 1 AND au.is_active = 1 AND pp.active = 1;
+                END
         """
 
         cursor.execute("DROP PROCEDURE IF EXISTS `get_isbcgc_project_set`;")
@@ -549,7 +550,6 @@ def alter_metadata_tables(cursor):
         DELETE FROM metadata_attr WHERE attribute='Study';
     """
 
-
     try:
         cursor.execute(alter_metadata_samples_check)
         result = cursor.fetchone()
@@ -564,53 +564,88 @@ def alter_metadata_tables(cursor):
         print >> sys.stdout, e
         print >> sys.stdout, traceback.format_exc()
 
+
 # This function will create new metadata_tables for TCGA and CCLE. The old tables will remain while we refactor other code.
 # This should only be used on local development environments.
 def breakout_metadata_tables(cursor, db):
     print >> sys.stdout, "[STATUS] Breaking out metadata tables."
-    new_shortlist = ['age_at_initial_pathologic_diagnosis', 'disease_code', 'gender', 'histological_type', 'hpv_status',
-                     'neoplasm_histologic_grade', 'pathologic_stage', 'person_neoplasm_cancer_status', 'residual_tumor',
-                     'SampleTypeCode', 'tobacco_smoking_history', 'tumor_tissue_site', 'tumor_type', 'vital_status', 'bmi']
-    delete_tables = 'DROP TABLE IF EXISTS CCLE_metadata_data, CCLE_metadata_samples, CCLE_metadata_attr, TCGA_metadata_data, ' \
-                    '                     TCGA_metadata_samples, TCGA_metadata_attr;'
-    create_ccle_metadata_data = 'CREATE TABLE CCLE_metadata_data SELECT * FROM metadata_data WHERE program_name="CCLE";'
-    create_ccle_metadata_samples = 'CREATE TABLE CCLE_metadata_samples SELECT sample_barcode,case_barcode,{0} FROM metadata_samples WHERE program_name="CCLE";'.format(','.join(new_shortlist))
-    create_ccle_metadata_attr = 'CREATE TABLE CCLE_metadata_attr (id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY (id)) ' \
-                                '  SELECT attribute, code, spec from metadata_attr where shortlist=1 and attribute in ("{0}");'.format('","'.join(new_shortlist))
-    create_tcga_metadata_data = 'CREATE TABLE TCGA_metadata_data SELECT * FROM metadata_data WHERE program_name="TCGA";'
-    create_tcga_metadata_samples = 'CREATE TABLE TCGA_metadata_samples SELECT sample_barcode,case_barcode,{0} FROM metadata_samples WHERE program_name="TCGA";'.format(','.join(new_shortlist))
-    create_tcga_metadata_attr = 'CREATE TABLE TCGA_metadata_attr (id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY (id)) ' \
-                                '  SELECT attribute, code, spec from metadata_attr where shortlist=1 and attribute in ("{0}");'.format('","'.join(new_shortlist))
 
-    remove_ccle_metadata_data = 'DELETE from metadata_data where program_name="CCLE"';
-    remove_ccle_metadata_samples = 'DELETE from metadata_samples where program_name="CCLE"';
+    new_shortlist = ['age_at_initial_pathologic_diagnosis', 'country', 'ethnicity', 'menopause_status', 'race',
+        'disease_code', 'gender', 'histological_type', 'hpv_status', 'neoplasm_histologic_grade', 'pathologic_stage',
+        'person_neoplasm_cancer_status', 'residual_tumor','SampleTypeCode', 'tobacco_smoking_history',
+        'tumor_tissue_site', 'tumor_type', 'vital_status', 'BMI', ]
 
-    rename_metadata_tables = 'RENAME TABLE metadata_samples TO TCGA_metadata_samples,' \
-                             '             metadata_data to TCGA_metadata_data,' \
-                             '             metadata_attr to TCGA_metadata_attr;'
+    col_to_drop = []
 
-    insert_into_public_data_table = 'INSERT INTO projects_public_data_tables (data_table, samples_table, attr_table, sample_data_availability_table, program_id) ' \
-                                    'values("{data_table}", "{samples_table}", "{attr_table}", "{sample_data_availability_table}", {program_id});'
+    cursor.execute("SELECT column_name FROM INFORMATION_SCHEMA.columns WHERE table_name = 'metadata_samples';")
+
+    for row in cursor.fetchall():
+        if row[0] not in new_shortlist and not '_barcode' in row[0] and not '_id' in row[0]:
+            col_to_drop.append(row[0])
+
+    delete_tables = 'DROP TABLE IF EXISTS CCLE_metadata_data, CCLE_metadata_samples, CCLE_metadata_attr, TCGA_metadata_data, TCGA_metadata_samples, TCGA_metadata_attr;'
+
+    create_ccle_metadata_data = 'CREATE TABLE CCLE_metadata_data LIKE metadata_data;'
+    ccle_metadata_data_insertion = 'INSERT INTO CCLE_metadata_data SELECT * FROM metadata_data WHERE program_name="CCLE";'
+
+    create_ccle_metadata_samples = 'CREATE TABLE CCLE_metadata_samples LIKE metadata_samples;'
+    ccle_metadata_samples_insertion = 'INSERT INTO CCLE_metadata_samples SELECT * FROM metadata_samples WHERE program_name="CCLE";'
+    alter_ccle_metadata_samples = 'ALTER TABLE CCLE_metadata_samples DROP {0};'.format(', DROP '.join(col_to_drop))
+
+    create_ccle_metadata_attr = 'CREATE TABLE CCLE_metadata_attr LIKE metadata_attr;'
+    alter_ccle_metadata_attr_ds = 'ALTER TABLE CCLE_metadata_attr DROP COLUMN shortlist;'
+    ccle_metadata_attr_insertion = 'INSERT INTO CCLE_metadata_attr SELECT attribute, code, spec from metadata_attr where shortlist=1 and attribute in ("{0}");'.format('","'.join(new_shortlist))
+    alter_ccle_metadata_attr_id = 'ALTER TABLE CCLE_metadata_attr ADD COLUMN id INT NOT NULL AUTO_INCREMENT, ADD PRIMARY KEY (id);'
+
+    cursor.execute('SELECT * FROM metadata_attr WHERE attribute IS NULL;')
+    res = cursor.fetchall()
+    if len(res) > 0:
+        cursor.execute('DELETE FROM metadata_attr WHERE attribute IS NULL;')
+
+    alter_tcga_metadata_attr_ds = 'ALTER TABLE metadata_attr DROP COLUMN shortlist;'
+    tcga_metadata_attr_insertion = 'DELETE FROM metadata_attr WHERE attribute NOT IN ("{0}");'.format('","'.join(new_shortlist))
+    alter_tcga_metadata_attr_id = 'ALTER TABLE metadata_attr ADD COLUMN id INT NOT NULL AUTO_INCREMENT, ADD PRIMARY KEY (id);'
+
+    remove_ccle_metadata_data = 'DELETE from metadata_data where program_name="CCLE";'
+    remove_ccle_metadata_samples = 'DELETE from metadata_samples where program_name="CCLE";'
+
+    rename_metadata_tables = 'RENAME TABLE metadata_samples TO TCGA_metadata_samples, metadata_data to TCGA_metadata_data, metadata_attr to TCGA_metadata_attr;'
+
+    insert_into_public_data_table = """
+      INSERT INTO projects_public_data_tables (data_table, samples_table, attr_table, sample_data_availability_table, program_id)
+      VALUES("{data_table}", "{samples_table}", "{attr_table}", "{sample_data_availability_table}", {program_id});
+    """
+
     check_already_exists = 'SELECT * FROM projects_public_data_tables WHERE program_id=%s;'
     get_tcga_program_id = "SELECT id from projects_program where name='TCGA';"
     get_ccle_program_id = "SELECT id from projects_program where name='CCLE';"
 
     try:
         cursor.execute(delete_tables)
-        cursor.execute(create_ccle_metadata_data)
-        cursor.execute(create_ccle_metadata_samples)
-        cursor.execute(create_ccle_metadata_attr)
-        cursor.execute(create_tcga_metadata_data)
-        cursor.execute(create_tcga_metadata_samples)
-        cursor.execute(create_tcga_metadata_attr)
 
-        # cursor.execute(remove_ccle_metadata_data)
-        # cursor.execute(remove_ccle_metadata_samples)
-        # cursor.execute(rename_metadata_tables)
+        cursor.execute(create_ccle_metadata_data)
+        cursor.execute(ccle_metadata_data_insertion)
+
+        cursor.execute(create_ccle_metadata_samples)
+        cursor.execute(ccle_metadata_samples_insertion)
+        cursor.execute(alter_ccle_metadata_samples)
+
+        cursor.execute(create_ccle_metadata_attr)
+        cursor.execute(alter_ccle_metadata_attr_ds)
+        cursor.execute(ccle_metadata_attr_insertion)
+        cursor.execute(alter_ccle_metadata_attr_id)
+
+        cursor.execute(alter_tcga_metadata_attr_ds)
+        cursor.execute(tcga_metadata_attr_insertion)
+        cursor.execute(alter_tcga_metadata_attr_id)
+
+        cursor.execute(remove_ccle_metadata_data)
+        cursor.execute(remove_ccle_metadata_samples)
+        cursor.execute(rename_metadata_tables)
 
         cursor.execute(get_ccle_program_id)
         result = cursor.fetchone()
-        if len(result):
+        if result and len(result):
             prog_id = int(result[0])
             cursor.execute(check_already_exists, (prog_id,))
             result = cursor.fetchone()
@@ -672,8 +707,7 @@ def create_study_views(project, source_table, studies):
     study_names = {}
     view_check_sql = "SELECT COUNT(TABLE_NAME) FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = %s;"
     create_view_sql = "CREATE OR REPLACE VIEW %s AS SELECT * FROM %s"
-    where_proj = " WHERE program_name=%s"
-    where_study = " AND disease_code=%s;"
+    where_study = " WHERE disease_code=%s;"
 
     try:
         for study in studies:
@@ -681,16 +715,19 @@ def create_study_views(project, source_table, studies):
 
             # If project and study are the same we assume this is meant to
             # be a one-study project
-            make_view = (create_view_sql % (view_name, source_table,)) + where_proj
-            params = (project,)
+            make_view = (create_view_sql % (view_name, source_table,))
+            params = None
 
             if project == study:
                 make_view += ";"
             else:
                 make_view += where_study
-                params += (study,)
+                params = (study,)
 
-            cursor.execute(make_view, params)
+            if params:
+                cursor.execute(make_view, params)
+            else:
+                cursor.execute(make_view)
 
             cursor.execute(view_check_sql, (view_name,))
             if cursor.fetchall()[0][0] <= 0:
@@ -785,40 +822,24 @@ def bootstrap_metadata_attr_mapping():
         if db and db.open: db.close()
 
 
-def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_name, bucket_permissions, bqdataset_name):
-    fetch_studies = "SELECT DISTINCT disease_code FROM metadata_samples WHERE program_name='TCGA';"
-    insert_projects = "INSERT INTO projects_program (name, active, last_date_saved, is_public, owner_id) " + \
-                      "VALUES (%s,%s,%s,%s,%s);"
-    insert_studies = "INSERT INTO projects_project (name, active, last_date_saved, owner_id, program_id) " + \
-                     "VALUES (%s,%s,%s,%s,%s);"
-    insert_googleproj = "INSERT INTO accounts_googleproject (project_id, project_name, big_query_dataset) " + \
-                        "VALUES (%s,%s,%s);"
-    insert_googleproj_user = "INSERT INTO accounts_googleproject_user (user_id, googleproject_id)" \
-                             "VALUES (%s,%s);"
-    get_googleproj_id = "SELECT id from accounts_googleproject where id=%s;"
-    insert_bucket = "INSERT INTO accounts_bucket (bucket_name, bucket_permissions, google_project_id) VALUES (%s, %s, %s);"
-    insert_bqdataset = "INSERT INTO accounts_bqdataset (dataset_name, google_project_id) VALUES (%s, %s);"
-    insert_user_data_tables = "INSERT INTO projects_user_data_tables (project_id, user_id, google_project_id, " + \
-                              "google_bucket_id, metadata_data_table, metadata_samples_table, " + \
-                              "feature_definition_table, google_bq_dataset_id) VALUES (%s,%s,%s,%s,%s,%s,%s,%s);"
-    googleproj_name = "isb-cgc"
-    tables = ['metadata_samples', 'metadata_data']
-
-    studies = {}
-    isb_userid = None
-    table_study_data = {}
-    study_table_views = None
-    project_info = {}
-    study_info = {}
-    googleproj_id = None
-    bucket_id = None
-    bqdataset_id = None
+def create_public_programs(big_query_dataset, bucket_name, bucket_permissions):
+    db = None
+    cursor = None
 
     try:
-
         db = get_mysql_connection()
         cursor = db.cursor()
-        cursorDict = db.cursor(cursors.DictCursor)
+
+        insert_projects = "INSERT INTO projects_program (name, active, last_date_saved, is_public, owner_id) " + \
+                          "VALUES (%s,%s,%s,%s,%s);"
+        insert_googleproj = "INSERT INTO accounts_googleproject (project_id, project_name, big_query_dataset) " + \
+                            "VALUES (%s,%s,%s);"
+        insert_googleproj_user = "INSERT INTO accounts_googleproject_user (user_id, googleproject_id)" \
+                                 "VALUES (%s,%s);"
+        insert_bucket = "INSERT INTO accounts_bucket (bucket_name, bucket_permissions, google_project_id) VALUES (%s, %s, %s);"
+
+        googleproj_name = "isb-cgc"
+        googleproj_id = None
 
         cursor.execute("SELECT id FROM auth_user WHERE username = %s;", (SUPERUSER_NAME,))
 
@@ -845,10 +866,62 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
         cursor.execute(insert_bucket, (bucket_name, bucket_permissions, googleproj_id,))
         db.commit()
 
+    except Exception as e:
+        print >> sys.stderr, '[ERROR] Exception while making public program entries: '+e.message
+        print >> sys.stderr, traceback.format_exc()
+    finally:
+        if cursor: cursor.close
+        if db and db.open: db.close
+
+
+
+def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_name, bucket_permissions, bqdataset_name):
+    fetch_studies = "SELECT DISTINCT disease_code FROM TCGA_metadata_samples WHERE program_name='TCGA';"
+    insert_studies = "INSERT INTO projects_project (name, active, last_date_saved, owner_id, program_id) " + \
+                     "VALUES (%s,%s,%s,%s,%s);"
+    insert_bqdataset = "INSERT INTO accounts_bqdataset (dataset_name, google_project_id) VALUES (%s, %s);"
+    insert_user_data_tables = "INSERT INTO projects_user_data_tables (project_id, user_id, google_project_id, " + \
+                              "google_bucket_id, metadata_data_table, metadata_samples_table, " + \
+                              "feature_definition_table, google_bq_dataset_id) VALUES (%s,%s,%s,%s,%s,%s,%s,%s);"
+
+    tables = ['metadata_samples', 'metadata_data']
+
+    googleproj_name = "isb-cgc"
+    studies = {}
+    isb_userid = None
+    table_study_data = {}
+    study_table_views = None
+    project_info = {}
+    study_info = {}
+    googleproj_id = None
+    bucket_id = None
+    bqdataset_id = None
+
+    db = None
+    cursor = None
+    cursorDict = None
+
+    try:
+
+        db = get_mysql_connection()
+        cursor = db.cursor()
+        cursorDict = db.cursor(cursors.DictCursor)
+
+        cursor.execute("SELECT id FROM auth_user WHERE username = %s;", (SUPERUSER_NAME,))
+
+        for row in cursor.fetchall():
+            isb_userid = row[0]
+
+        if isb_userid is None:
+            raise Exception("Couldn't retrieve ID for isb user!")
+
         cursorDict.execute("SELECT name, id FROM projects_program;")
         for row in cursorDict.fetchall():
             project_info[row['name']] = row['id']
 
+        cursor.execute("SELECT id FROM accounts_googleproject WHERE project_name=%s;", (googleproj_name,))
+        for row in cursor.fetchall():
+            googleproj_id = row[0]
 
         cursor.execute("SELECT id FROM accounts_bucket WHERE bucket_name=%s;", (bucket_name,))
         for row in cursor.fetchall():
@@ -868,13 +941,14 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
 
         # Make the views
         for table in tables:
-            study_table_views = create_study_views("TCGA", table, studies.keys())
+            study_table_views = create_study_views("TCGA", 'TCGA_'+table, studies.keys())
             # Make CCLE and add it in manually
-            ccle_view = create_study_views("CCLE", table, ["CCLE"])
+            ccle_view = create_study_views("CCLE", 'CCLE_'+table, ["CCLE"])
             study_table_views["CCLE"] = ccle_view["CCLE"]
 
             table_study_data[table] = study_table_views
 
+        insertTime = time.strftime('%Y-%m-%d %H:%M:%S')
         # Add the studies to the study table and store their generated IDs
         for study in study_table_views:
             cursor.execute(insert_studies, (study, True, insertTime, isb_userid,
@@ -934,10 +1008,10 @@ def bootstrap_file_data():
     CCLE_BUCKET = ''
     insert_userupload = "INSERT INTO data_upload_userupload (status, `key`, owner_id) values ('complete', '', %s);"
     insert_useruploadedfile_TCGA = "INSERT INTO data_upload_useruploadedfile (upload_id, bucket, file) " \
-                                   "SELECT %s,%s,datafilenamekey from metadata_data " \
+                                   "SELECT %s,%s,datafilenamekey from TCGA_metadata_data " \
                                    "    where datafileuploaded='true' and datafilenamekey != '' and disease_code=%s and repository=%s;"
     insert_useruploadedfile_CCLE = "INSERT INTO data_upload_useruploadedfile (upload_id, bucket, file) " \
-                                   "SELECT %s,%s,datafilenamekey from metadata_data " \
+                                   "SELECT %s,%s,datafilenamekey from CCLE_metadata_data " \
                                    "    where datafileuploaded='true' and datafilenamekey != '' and program_name=%s;"
 
     update_projects_project = "UPDATE projects_user_data_tables set data_upload_id=%s where project_id=%s;"
@@ -979,9 +1053,6 @@ def bootstrap_file_data():
 
             db.commit()
 
-
-
-        # Create UserUploadedFile for each project
     except Exception as e:
         print >> sys.stderr, e
     finally:
@@ -1003,7 +1074,7 @@ def main():
     cmd_line_parser.add_argument('-m', '--create-ms-shortlist-view', type=bool, default=False,
                                  help="Create the metadata_samples_shortlist view, which acts as a smaller version of metadata_samples for use with the webapp.")
 
-    # Still need these two just for build purposes
+    # Still need these three just for build purposes
     cmd_line_parser.add_argument('-b', '--fix-bmi-case', type=bool, default=True,
                                  help="Fix the casing of the attribute value for the BMI row in metadata_attributes.")
     cmd_line_parser.add_argument('-n', '--fix-disease-code', type=bool, default=True,
@@ -1057,6 +1128,9 @@ def main():
         args.fix_bmi_case and cursor.execute("UPDATE metadata_attr SET attribute='BMI' WHERE attribute='bmi';")
         args.fix_disease_code and cursor.execute("UPDATE metadata_attr SET attribute='disease_code' WHERE attribute='Disease_Code';")
 
+        # Insert the public programs into the projects_program table; they're needed by numerous other things later on
+        create_public_programs(args.bq_dataset, args.bucket_name, args.bucket_perm)
+
         args.alter_metadata_tables and alter_metadata_tables(cursor)
         args.catchup_shortlist and catchup_shortlist(cursor)
 
@@ -1068,6 +1142,8 @@ def main():
         args.fix_ccle_cohort_projects and fix_ccle(cursor)
         args.create_isbcgc_project_set_sproc and add_isb_cgc_project_sproc(cursor)
 
+        args.breakout_metadata_tables and breakout_metadata_tables(cursor, db)
+
         # From userdata_bootstrap.py
         bootstrap_user_data_schema(args.pub_feat_table, args.bq_dataset, args.bucket_name, args.bucket_perm,
                                    args.bq_dataset_storage)
@@ -1075,8 +1151,7 @@ def main():
         bootstrap_file_data()
 
         args.make_attr_display_table and make_attr_display_table(cursor,db)
-
-        args.breakout_metadata_tables and breakout_metadata_tables(cursor, db)
+        args.create_program_display_sproc and create_program_display_sproc(cursor)
 
     except Exception as e:
         print e

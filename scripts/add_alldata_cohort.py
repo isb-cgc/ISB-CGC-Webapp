@@ -194,7 +194,7 @@ def get_superuser_id(conn, superuser_name):
 def get_sample_barcodes(conn):
     logging.info("Getting list of sample barcodes from MySQL")
     cursor = conn.cursor(DictCursor)
-    select_samples_str = "SELECT distinct sample_barcode, case_barcode from metadata_samples where program_name='TCGA';"
+    select_samples_str = "SELECT distinct sample_barcode, case_barcode from TCGA_metadata_samples;"
     cursor.execute(select_samples_str)
     rows = cursor.fetchall()
     cursor.close()
@@ -301,7 +301,7 @@ def fix_cohort_projects(conn):
         null_project_count = """
             SELECT COUNT(*)
             FROM cohorts_samples cs
-                    JOIN metadata_samples ms ON ms.sample_barcode = cs.sample_barcode
+                    JOIN %s_metadata_samples ms ON ms.sample_barcode = cs.sample_barcode
                     JOIN (
                         SELECT p.id AS id,p.name AS name
                         FROM projects_project p
@@ -312,20 +312,23 @@ def fix_cohort_projects(conn):
             where cs.project_id IS NULL AND cc.active = 1;
         """
 
-        cursor.execute(null_project_count)
+        cursor.execute(null_project_count % 'TCGA')
         count_to_fix = cursor.fetchall()[0][0]
+        cursor.execute(null_project_count % 'CCLE')
+        count_to_fix += cursor.fetchall()[0][0]
+
         if count_to_fix > 0:
             fix_project_ids_str = """
                 UPDATE cohorts_samples AS cs
                 JOIN (
-                        SELECT ms.sample_barcode AS sample_barcode,ps.id AS project
-                                FROM metadata_samples ms
-                                JOIN (
-                                    SELECT p.id AS id,p.name AS name
-                                    FROM projects_project p
-                                        JOIN auth_user au ON au.id = p.owner_id
-                                    WHERE au.username = 'isb' AND au.is_active = 1 AND p.active=1 AND au.is_superuser = 1
-                                ) ps ON ps.name = ms.disease_code
+                    SELECT ms.sample_barcode AS sample_barcode,ps.id AS project
+                        FROM %s_metadata_samples ms
+                        JOIN (
+                            SELECT p.id AS id,p.name AS name
+                            FROM projects_project p
+                                JOIN auth_user au ON au.id = p.owner_id
+                            WHERE au.username = 'isb' AND au.is_active = 1 AND p.active=1 AND au.is_superuser = 1
+                        ) ps ON ps.name = ms.disease_code
                 ) AS ss ON ss.sample_barcode = cs.sample_barcode
                 JOIN cohorts_cohort AS cc
                 ON cc.id = cs.cohort_id
@@ -336,12 +339,15 @@ def fix_cohort_projects(conn):
             print >> sys.stdout,"[STATUS] Number of cohort sample entries from ISB-CGC projects with null project IDs: "+str(count_to_fix)
             print >> sys.stdout,"[STATUS] Correcting null project IDs for ISB-CGC cohorts - this could take a while!"
 
-            cursor.execute(fix_project_ids_str)
+            cursor.execute(fix_project_ids_str % 'TCGA')
+            cursor.execute(fix_project_ids_str % 'CCLE')
             conn.commit()
             print >> sys.stdout, "[STATUS] ...done. Checking for still-null project IDs..."
 
-            cursor.execute(null_project_count)
+            cursor.execute(null_project_count % 'TCGA')
             not_fixed = cursor.fetchall()[0][0]
+            cursor.execute(null_project_count % 'CCLE')
+            not_fixed += cursor.fetchall()[0][0]
 
             print >> sys.stdout, "[STATUS] Number of cohort sample entries from ISB-CGC projects with null project IDs after correction: " + str(not_fixed)
             if not_fixed > 0:
