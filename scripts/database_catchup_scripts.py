@@ -645,7 +645,7 @@ def breakout_metadata_tables(cursor, db):
 
         cursor.execute(get_ccle_program_id)
         result = cursor.fetchone()
-        if len(result):
+        if result and len(result):
             prog_id = int(result[0])
             cursor.execute(check_already_exists, (prog_id,))
             result = cursor.fetchone()
@@ -822,40 +822,24 @@ def bootstrap_metadata_attr_mapping():
         if db and db.open: db.close()
 
 
-def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_name, bucket_permissions, bqdataset_name):
-    fetch_studies = "SELECT DISTINCT disease_code FROM TCGA_metadata_samples WHERE program_name='TCGA';"
-    insert_projects = "INSERT INTO projects_program (name, active, last_date_saved, is_public, owner_id) " + \
-                      "VALUES (%s,%s,%s,%s,%s);"
-    insert_studies = "INSERT INTO projects_project (name, active, last_date_saved, owner_id, program_id) " + \
-                     "VALUES (%s,%s,%s,%s,%s);"
-    insert_googleproj = "INSERT INTO accounts_googleproject (project_id, project_name, big_query_dataset) " + \
-                        "VALUES (%s,%s,%s);"
-    insert_googleproj_user = "INSERT INTO accounts_googleproject_user (user_id, googleproject_id)" \
-                             "VALUES (%s,%s);"
-    get_googleproj_id = "SELECT id from accounts_googleproject where id=%s;"
-    insert_bucket = "INSERT INTO accounts_bucket (bucket_name, bucket_permissions, google_project_id) VALUES (%s, %s, %s);"
-    insert_bqdataset = "INSERT INTO accounts_bqdataset (dataset_name, google_project_id) VALUES (%s, %s);"
-    insert_user_data_tables = "INSERT INTO projects_user_data_tables (project_id, user_id, google_project_id, " + \
-                              "google_bucket_id, metadata_data_table, metadata_samples_table, " + \
-                              "feature_definition_table, google_bq_dataset_id) VALUES (%s,%s,%s,%s,%s,%s,%s,%s);"
-    googleproj_name = "isb-cgc"
-    tables = ['metadata_samples', 'metadata_data']
-
-    studies = {}
-    isb_userid = None
-    table_study_data = {}
-    study_table_views = None
-    project_info = {}
-    study_info = {}
-    googleproj_id = None
-    bucket_id = None
-    bqdataset_id = None
+def create_public_programs(big_query_dataset, bucket_name, bucket_permissions):
+    db = None
+    cursor = None
 
     try:
-
         db = get_mysql_connection()
         cursor = db.cursor()
-        cursorDict = db.cursor(cursors.DictCursor)
+
+        insert_projects = "INSERT INTO projects_program (name, active, last_date_saved, is_public, owner_id) " + \
+                          "VALUES (%s,%s,%s,%s,%s);"
+        insert_googleproj = "INSERT INTO accounts_googleproject (project_id, project_name, big_query_dataset) " + \
+                            "VALUES (%s,%s,%s);"
+        insert_googleproj_user = "INSERT INTO accounts_googleproject_user (user_id, googleproject_id)" \
+                                 "VALUES (%s,%s);"
+        insert_bucket = "INSERT INTO accounts_bucket (bucket_name, bucket_permissions, google_project_id) VALUES (%s, %s, %s);"
+
+        googleproj_name = "isb-cgc"
+        googleproj_id = None
 
         cursor.execute("SELECT id FROM auth_user WHERE username = %s;", (SUPERUSER_NAME,))
 
@@ -882,10 +866,62 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
         cursor.execute(insert_bucket, (bucket_name, bucket_permissions, googleproj_id,))
         db.commit()
 
+    except Exception as e:
+        print >> sys.stderr, '[ERROR] Exception while making public program entries: '+e.message
+        print >> sys.stderr, traceback.format_exc()
+    finally:
+        if cursor: cursor.close
+        if db and db.open: db.close
+
+
+
+def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_name, bucket_permissions, bqdataset_name):
+    fetch_studies = "SELECT DISTINCT disease_code FROM TCGA_metadata_samples WHERE program_name='TCGA';"
+    insert_studies = "INSERT INTO projects_project (name, active, last_date_saved, owner_id, program_id) " + \
+                     "VALUES (%s,%s,%s,%s,%s);"
+    insert_bqdataset = "INSERT INTO accounts_bqdataset (dataset_name, google_project_id) VALUES (%s, %s);"
+    insert_user_data_tables = "INSERT INTO projects_user_data_tables (project_id, user_id, google_project_id, " + \
+                              "google_bucket_id, metadata_data_table, metadata_samples_table, " + \
+                              "feature_definition_table, google_bq_dataset_id) VALUES (%s,%s,%s,%s,%s,%s,%s,%s);"
+
+    tables = ['metadata_samples', 'metadata_data']
+
+    googleproj_name = "isb-cgc"
+    studies = {}
+    isb_userid = None
+    table_study_data = {}
+    study_table_views = None
+    project_info = {}
+    study_info = {}
+    googleproj_id = None
+    bucket_id = None
+    bqdataset_id = None
+
+    db = None
+    cursor = None
+    cursorDict = None
+
+    try:
+
+        db = get_mysql_connection()
+        cursor = db.cursor()
+        cursorDict = db.cursor(cursors.DictCursor)
+
+        cursor.execute("SELECT id FROM auth_user WHERE username = %s;", (SUPERUSER_NAME,))
+
+        for row in cursor.fetchall():
+            isb_userid = row[0]
+
+        if isb_userid is None:
+            raise Exception("Couldn't retrieve ID for isb user!")
+
         cursorDict.execute("SELECT name, id FROM projects_program;")
         for row in cursorDict.fetchall():
             project_info[row['name']] = row['id']
 
+        cursor.execute("SELECT id FROM accounts_googleproject WHERE project_name=%s;", (googleproj_name,))
+        for row in cursor.fetchall():
+            googleproj_id = row[0]
 
         cursor.execute("SELECT id FROM accounts_bucket WHERE bucket_name=%s;", (bucket_name,))
         for row in cursor.fetchall():
@@ -912,6 +948,7 @@ def bootstrap_user_data_schema(public_feature_table, big_query_dataset, bucket_n
 
             table_study_data[table] = study_table_views
 
+        insertTime = time.strftime('%Y-%m-%d %H:%M:%S')
         # Add the studies to the study table and store their generated IDs
         for study in study_table_views:
             cursor.execute(insert_studies, (study, True, insertTime, isb_userid,
@@ -1090,6 +1127,9 @@ def main():
         # Until we have a new sql dump, we need to manually update changed columns
         args.fix_bmi_case and cursor.execute("UPDATE metadata_attr SET attribute='BMI' WHERE attribute='bmi';")
         args.fix_disease_code and cursor.execute("UPDATE metadata_attr SET attribute='disease_code' WHERE attribute='Disease_Code';")
+
+        # Insert the public programs into the projects_program table; they're needed by numerous other things later on
+        create_public_programs(args.bq_dataset, args.bucket_name, args.bucket_perm)
 
         args.alter_metadata_tables and alter_metadata_tables(cursor)
         args.catchup_shortlist and catchup_shortlist(cursor)
