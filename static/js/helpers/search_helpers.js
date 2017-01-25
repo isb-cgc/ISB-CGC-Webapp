@@ -25,7 +25,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
     var parsets_obj = Object.create(draw_parsets, {});
 
     var clin_tree_attr = {
-        Disease_Code: 'Disease Code',
+        disease_code: 'Disease Code',
         vital_status: 'Vital Status',
         SampleTypeCode: 'Sample Type',
         tumor_tissue_site: 'Tumor Tissue Site',
@@ -40,10 +40,13 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
 
     return  {
 
-        filter_data_for_clin_trees: function(attr_counts, these_attr) {
+        filter_data_for_clin_trees: function(attr_counts, these_attr, program_id) {
+            if(program_id == null || program_id == undefined) {
+                program_id = $('ul.nav-tabs-data li.active a').data('program-id');
+            }
             var filtered_clin_trees = {};
             var attr_counts_clin_trees = null;
-            var filters = this.format_filters();
+            var filters = this.format_filters(program_id);
             var tree_attr_map = {};
 
             Object.keys(these_attr).map(function(attr){
@@ -81,7 +84,10 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             return (attr_counts_clin_trees || attr_counts);
         },
 
-        update_counts_parsets_direct: function(filters) {
+        update_counts_parsets_direct: function(filters, program_id) {
+            if(program_id == null || program_id == undefined) {
+                program_id = $('ul.nav-tabs-data li.active a').data('program-id');
+            }
 
             $('.clinical-trees .spinner').show();
             $('.user-data-trees .spinner').show();
@@ -102,8 +108,8 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             this.update_filter_counts(attr_counts);
             // If there were filters, we need to adjust their counts so the barchart reflects what
             // was actually filtered
-            var filters = this.format_filters();
-            var clin_tree_attr_counts = Object.keys(filters).length > 0 ? this.filter_data_for_clin_trees(attr_counts, clin_tree_attr) : attr_counts;
+            var filters = this.format_filters(program_id);
+            var clin_tree_attr_counts = Object.keys(filters).length > 0 ? this.filter_data_for_clin_trees(attr_counts, clin_tree_attr, program_id) : attr_counts;
             tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,'#isb-cgc-tree-graph-clinical');
 
             if (metadata_counts.hasOwnProperty('items')) {
@@ -146,12 +152,16 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
         },
 
         update_counts_parsets: function(base_url_domain, endpoint, cohort_id, version, program_id){
+            if(program_id == null || program_id == undefined) {
+                program_id = $('ul.nav-tabs-data li.active a').data('program-id');
+            }
+
             var context = this;
             var filters = this.format_filters(program_id);
             var api_url = this.generate_metadata_url(base_url_domain, endpoint, filters, cohort_id, undefined, version, program_id);
 
             // Get active panel
-            var active_program_id = $('ul.nav-tabs-data li.active a').data('program-id');
+            var active_program_id = program_id || $('ul.nav-tabs-data li.active a').data('program-id');
             var active_panel = '' + active_program_id+'-data';
 
             if(api_url.length > MAX_URL_LEN) {
