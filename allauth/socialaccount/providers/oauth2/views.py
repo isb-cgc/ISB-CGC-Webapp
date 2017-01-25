@@ -20,6 +20,7 @@ from allauth.socialaccount.models import SocialToken, SocialLogin
 from allauth.utils import get_request_param
 from ..base import AuthAction, AuthError
 
+import sys
 
 class OAuth2Adapter(object):
     expires_in_key = 'expires_in'
@@ -99,6 +100,8 @@ class OAuth2LoginView(OAuth2View):
             return HttpResponseRedirect(client.get_redirect_url(
                 auth_url, auth_params))
         except OAuth2Error as e:
+            print >> sys.stderr, "[ERROR] While attempting to log in: "
+            print >> sys.stderr, e.__str__()
             return render_authentication_error(
                 request,
                 provider.id,
