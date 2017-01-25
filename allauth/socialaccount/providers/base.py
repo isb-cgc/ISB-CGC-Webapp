@@ -66,7 +66,7 @@ class Provider(object):
 
     def sociallogin_from_response(self, request, response):
 
-        print >> sys.stdout, "[STATUS] In social login from response: "+ response
+        print >> sys.stdout, "[STATUS] In social login from response: " + response.__str__()
 
         """
         Instantiates and populates a `SocialLogin` model based on the data
