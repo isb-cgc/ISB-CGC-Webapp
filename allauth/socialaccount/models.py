@@ -22,6 +22,7 @@ from . import app_settings
 from . import providers
 from .fields import JSONField
 from ..utils import get_request_param
+
 import sys
 
 
@@ -303,7 +304,8 @@ class SocialLogin(object):
 
     @classmethod
     def stash_state(cls, request):
-        print >> sys.stdout, "[STATUS] Stashing state]"
+        site = get_current_site(request)
+        print >> sys.stdout, "[STATUS] Stashing state for "+ site.name + ":" + site.domain
         state = cls.state_from_request(request)
         verifier = get_random_string()
         request.session['socialaccount_state'] = (state, verifier)
@@ -312,6 +314,8 @@ class SocialLogin(object):
 
     @classmethod
     def unstash_state(cls, request):
+        site = get_current_site(request)
+        print >> sys.stdout, "[STATUS] Unstashing state for "+ site.name + ":" + site.domain
         if 'socialaccount_state' not in request.session:
             raise PermissionDenied()
         state, verifier = request.session.pop('socialaccount_state')
