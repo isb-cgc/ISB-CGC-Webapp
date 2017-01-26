@@ -70,6 +70,8 @@ class OAuth2View(object):
             try:
                 return self.dispatch(request, *args, **kwargs)
             except ImmediateHttpResponse as e:
+                print >> sys.stderr, "[ERROR] Immediate response in callback: "
+                print >> sys.stderr, e.message
                 return e.response
         return view
 
@@ -112,6 +114,8 @@ class OAuth2LoginView(OAuth2View):
 class OAuth2CallbackView(OAuth2View):
     def dispatch(self, request):
         if 'error' in request.GET or 'code' not in request.GET:
+            print >> sys.stderr, "[STATUS] Error or no code in request for dispatch: "
+            print >> sys.stderr, request.__str__()
             # Distinguish cancel from error
             auth_error = request.GET.get('error', None)
             if auth_error == self.adapter.login_cancelled_error:
@@ -122,6 +126,7 @@ class OAuth2CallbackView(OAuth2View):
                 request,
                 self.adapter.provider_id,
                 error=error)
+        print >> sys.stdout, "[STATUS] No error, or a code was found, in request for dispatch"
         app = self.adapter.get_provider().get_app(self.request)
         client = self.get_client(request, app)
         try:
@@ -145,6 +150,8 @@ class OAuth2CallbackView(OAuth2View):
                 OAuth2Error,
                 RequestException,
                 ProviderException) as e:
+            print >> sys.stderr, "[ERROR] Exception in callback dispatch: "
+            print >> sys.stderr, e.message
             return render_authentication_error(
                 request,
                 self.adapter.provider_id,

@@ -1,5 +1,6 @@
 import sys
 import requests
+from requests.exceptions import HTTPError
 
 from allauth.socialaccount.providers.oauth2.views import (OAuth2Adapter,
                                                           OAuth2LoginView,
@@ -20,8 +21,11 @@ class GoogleOAuth2Adapter(OAuth2Adapter):
                                     'alt': 'json'})
         print >> sys.stdout, "[STATUS] Trying to log in, result: "
         print >> sys.stdout, resp.json().__str__()
-        resp.raise_for_status()
-        print >> sys.stdout, "[STATUS] Post raise for status."
+        try:
+            resp.raise_for_status()
+        except HTTPError as e:
+            print >> sys.stderr, "[ERROR] HttpError in complete_login: "+e.message
+            print >> sys.stderr, e
         extra_data = resp.json()
         login = self.get_provider() \
             .sociallogin_from_response(request,

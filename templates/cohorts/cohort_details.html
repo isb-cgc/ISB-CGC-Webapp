@@ -97,11 +97,13 @@
     </div>
 
     <div class="row cgc-user-data-type-tabs">
-        <div class="col-lg-4">
+        <div class="col-sm-12 col-md-12 col-lg-12">
             <div class="panel panel-default">
                 <ul class="nav nav-tabs nav-tabs-data" role="tablist">
-                    <li role="presentation" class="{% if user_data == None or metadata_counts.user_data_total == None or metadata_counts.user_data_total <= 0 %}active{% endif %}"><a href="#isb-cgc-data" role="tab" data-toggle="tab" title="Donor Filters">ISB-CGC Data</a></li>
-                    <li role="presentation" class="{% if user_data and metadata_counts.user_data_total > 0 %}active{% endif %}"><a href="#user-data" role="tab" data-toggle="tab" title="User Data">User Data</a></li>
+                    {% for program in programs %}
+                    <li role="presentation" class="{% if forloop.first %}active{% endif %}"><a href="#{{ program.id }}-data" role="tab" data-toggle="tab" title="ISB-CGC Data" data-program-id="{{ program.id }}">{{ program.name }} Data</a></li>
+                    {% endfor %}
+                    <li role="presentation" class=""><a href="#0-data" role="tab" data-toggle="tab" title="User Data" data-program-id="0">User Data</a></li>
                 </ul>
             </div>
         </div>
@@ -109,8 +111,6 @@
 
     <div class="row">
         <div class="tab-content data-tab-content">
-{#            {% include "cohorts/isb-cgc-data.html" %}#}
-{#            {% include "cohorts/user-data.html" %}#}
         </div>
     </div>
 
