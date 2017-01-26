@@ -101,7 +101,7 @@ SITE_ID = 3
 
 if IS_APP_ENGINE_FLEX:
     print >> sys.stdout, "[STATUS] AppEngine Flex detected."
-    SITE_ID = 4
+    SITE_ID = 5
 
 # Default to no NIH Auth unless we are not on a local dev environment *and* are in AppEngine-Flex
 NIH_AUTH_ON = False
@@ -141,6 +141,10 @@ PROCESSING_JENKINS_PASSWORD = os.environ.get('PROCESSING_JENKINS_PASSWORD', '')
 CSRF_COOKIE_SECURE = bool(os.environ.get('CSRF_COOKIE_SECURE', False))
 SESSION_COOKIE_SECURE = bool(os.environ.get('SESSION_COOKIE_SECURE', False))
 SECURE_SSL_REDIRECT = bool(os.environ.get('SECURE_SSL_REDIRECT', False))
+
+if SECURE_SSL_REDIRECT:
+    os.environ['HTTPS'] = "on"
+    os.environ['wsgi.url_scheme'] = 'https'
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name

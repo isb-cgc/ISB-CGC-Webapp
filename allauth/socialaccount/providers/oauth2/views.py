@@ -37,7 +37,6 @@ class OAuth2Adapter(object):
         self.request = request
 
     def get_provider(self):
-        print >> sys.stderr, str(self.provider_id)
         return providers.registry.by_id(self.provider_id, self.request)
 
     def complete_login(self, request, app, access_token, **kwargs):
@@ -115,8 +114,6 @@ class OAuth2LoginView(OAuth2View):
 class OAuth2CallbackView(OAuth2View):
     def dispatch(self, request):
         if 'error' in request.GET or 'code' not in request.GET:
-            print >> sys.stderr, "[STATUS] Error or no code in request for dispatch: "
-            print >> sys.stderr, request.__str__()
             # Distinguish cancel from error
             auth_error = request.GET.get('error', None)
             if auth_error == self.adapter.login_cancelled_error:
@@ -129,6 +126,7 @@ class OAuth2CallbackView(OAuth2View):
                 error=error)
         app = self.adapter.get_provider().get_app(self.request)
         client = self.get_client(request, app)
+        print >> sys.stdout, "Session key: " + (str(request.session._get_session_key())[:5]+'...'+str(request.session._get_session_key())[-5:] if request.session._get_session_key() is not None else 'None')
         try:
             access_token = client.get_access_token(request.GET['code'])
             token = self.adapter.parse_token(access_token)
