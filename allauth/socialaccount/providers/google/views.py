@@ -19,8 +19,6 @@ class GoogleOAuth2Adapter(OAuth2Adapter):
         resp = requests.get(self.profile_url,
                             params={'access_token': token.token,
                                     'alt': 'json'})
-        print >> sys.stdout, "[STATUS] Trying to log in, result: "
-        print >> sys.stdout, resp.json().__str__()
         try:
             resp.raise_for_status()
         except HTTPError as e:

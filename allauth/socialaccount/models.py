@@ -24,7 +24,7 @@ from .fields import JSONField
 from ..utils import get_request_param
 
 import sys
-
+import traceback
 
 class SocialAppManager(models.Manager):
     def get_current(self, provider, request=None):
@@ -314,7 +314,6 @@ class SocialLogin(object):
     @classmethod
     def unstash_state(cls, request):
         site = get_current_site(request)
-        print >> sys.stdout, "[STATUS] Unstashing state for "+ site.name + ", " + site.domain
         if 'socialaccount_state' not in request.session:
             raise PermissionDenied()
         state, verifier = request.session.pop('socialaccount_state')
@@ -324,6 +323,9 @@ class SocialLogin(object):
     def verify_and_unstash_state(cls, request, verifier):
         site = get_current_site(request)
         print >> sys.stdout, "[STATUS] Unstashing state for " + site.name + ", " + site.domain + ", " + verifier
+        print >> sys.stdout, "Session dict keys: "+request.session.keys().__str__() if request.session.keys() is not None else '[]'
+        print >> sys.stdout, "Session key: " + (
+        str(request.session._get_session_key())[:5] + '...' + str(request.session._get_session_key())[-5:] if request.session._get_session_key() is not None else 'None')
         if 'socialaccount_state' not in request.session:
             raise PermissionDenied('[ERROR] socialaccount_state not found in session!')
         state, verifier2 = request.session.pop('socialaccount_state')

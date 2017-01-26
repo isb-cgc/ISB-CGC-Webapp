@@ -66,8 +66,6 @@ class Provider(object):
 
     def sociallogin_from_response(self, request, response):
 
-        print >> sys.stdout, "[STATUS] In social login from response: " + response.__str__()
-
         """
         Instantiates and populates a `SocialLogin` model based on the data
         retrieved in `response`. The method does NOT save the model to the
