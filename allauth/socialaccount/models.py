@@ -305,7 +305,7 @@ class SocialLogin(object):
     @classmethod
     def stash_state(cls, request):
         site = get_current_site(request)
-        print >> sys.stdout, "[STATUS] Stashing state for "+ site.name + ":" + site.domain
+        print >> sys.stdout, "[STATUS] Stashing state for "+ site.name + ", " + site.domain
         state = cls.state_from_request(request)
         verifier = get_random_string()
         request.session['socialaccount_state'] = (state, verifier)
@@ -315,7 +315,7 @@ class SocialLogin(object):
     @classmethod
     def unstash_state(cls, request):
         site = get_current_site(request)
-        print >> sys.stdout, "[STATUS] Unstashing state for "+ site.name + ":" + site.domain
+        print >> sys.stdout, "[STATUS] Unstashing state for "+ site.name + ", " + site.domain
         if 'socialaccount_state' not in request.session:
             raise PermissionDenied()
         state, verifier = request.session.pop('socialaccount_state')
@@ -323,6 +323,8 @@ class SocialLogin(object):
 
     @classmethod
     def verify_and_unstash_state(cls, request, verifier):
+        site = get_current_site(request)
+        print >> sys.stdout, "[STATUS] Unstashing state for " + site.name + ", " + site.domain
         if 'socialaccount_state' not in request.session:
             raise PermissionDenied()
         state, verifier2 = request.session.pop('socialaccount_state')
