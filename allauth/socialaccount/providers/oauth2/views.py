@@ -21,6 +21,7 @@ from allauth.utils import get_request_param
 from ..base import AuthAction, AuthError
 
 import sys
+import traceback
 
 class OAuth2Adapter(object):
     expires_in_key = 'expires_in'
@@ -150,8 +151,8 @@ class OAuth2CallbackView(OAuth2View):
                 OAuth2Error,
                 RequestException,
                 ProviderException) as e:
-            print >> sys.stderr, "[ERROR] Exception in callback dispatch: "
-            print >> sys.stderr, e.message
+            print >> sys.stderr, "[ERROR] Exception in callback dispatch: "+e.__str__()
+            print >> sys.stderr, traceback.format_exc()
             return render_authentication_error(
                 request,
                 self.adapter.provider_id,
