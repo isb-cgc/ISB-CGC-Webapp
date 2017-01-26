@@ -18,6 +18,8 @@ from . import app_settings
 from . import signals
 from .adapter import get_adapter
 
+import sys
+
 
 def _process_signup(request, sociallogin):
     auto_signup = get_adapter(request).is_auto_signup_allowed(
@@ -145,6 +147,7 @@ def complete_social_login(request, sociallogin):
     except ImmediateHttpResponse as e:
         return e.response
     process = sociallogin.state.get('process')
+    print >> sys.stdout, "[STATUS] In complete_social_login, process: "+process.__str__()
     if process == AuthProcess.REDIRECT:
         return _social_login_redirect(request, sociallogin)
     elif process == AuthProcess.CONNECT:
@@ -154,6 +157,7 @@ def complete_social_login(request, sociallogin):
 
 
 def _social_login_redirect(request, sociallogin):
+    print >> sys.stdout, "[STATUS] Received redirect to "+next_url
     next_url = sociallogin.get_redirect_url(request) or '/'
     return HttpResponseRedirect(next_url)
 
