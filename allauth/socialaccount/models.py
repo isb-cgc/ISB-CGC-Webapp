@@ -22,6 +22,7 @@ from . import app_settings
 from . import providers
 from .fields import JSONField
 from ..utils import get_request_param
+import sys
 
 
 class SocialAppManager(models.Manager):
@@ -302,9 +303,11 @@ class SocialLogin(object):
 
     @classmethod
     def stash_state(cls, request):
+        print >> sys.stdout, "[STATUS] Stashing state]"
         state = cls.state_from_request(request)
         verifier = get_random_string()
         request.session['socialaccount_state'] = (state, verifier)
+        print >> sys.stdout, "[STATUS] Is socialaccount state there: "+str('socialaccount_state' in request.session)
         return verifier
 
     @classmethod
