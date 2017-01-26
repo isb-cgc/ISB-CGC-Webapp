@@ -301,6 +301,11 @@ LOGGING = {
             'handlers': ['console'],
             'level': 'DEBUG',
             'propogate': True,
+        },
+        'allauth': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propogate': True,
         }
     }
 }

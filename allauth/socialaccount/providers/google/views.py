@@ -19,8 +19,9 @@ class GoogleOAuth2Adapter(OAuth2Adapter):
                             params={'access_token': token.token,
                                     'alt': 'json'})
         print >> sys.stdout, "[STATUS] Trying to log in, result: "
-        print >> sys.stdout, resp.json()
+        print >> sys.stdout, resp.json().__str__()
         resp.raise_for_status()
+        print >> sys.stdout, "[STATUS] Post raise for status."
         extra_data = resp.json()
         login = self.get_provider() \
             .sociallogin_from_response(request,
