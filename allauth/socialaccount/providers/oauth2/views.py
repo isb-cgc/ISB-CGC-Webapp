@@ -127,7 +127,6 @@ class OAuth2CallbackView(OAuth2View):
                 request,
                 self.adapter.provider_id,
                 error=error)
-        print >> sys.stdout, "[STATUS] No error, or a code was found, in request for dispatch"
         app = self.adapter.get_provider().get_app(self.request)
         client = self.get_client(request, app)
         try:

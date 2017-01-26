@@ -100,13 +100,14 @@ if os.environ.has_key('DB_SSL_CERT') and not IS_APP_ENGINE_FLEX:
 SITE_ID = 3
 
 if IS_APP_ENGINE_FLEX:
-    print >> sys.stdout, "[STATUS] Trying to detect host:" + os.getenv('HOST', '')
-    SITE_ID = 5
+    print >> sys.stdout, "[STATUS] AppEngine Flex detected."
+    SITE_ID = 4
 
 # Default to no NIH Auth unless we are not on a local dev environment *and* are in AppEngine-Flex
 NIH_AUTH_ON = False
 
 if not IS_DEV and IS_APP_ENGINE_FLEX:
+    print >> sys.stdout, "[STATUS] NIH_AUTH_ON is TRUE"
     NIH_AUTH_ON = True
 
 def get_project_identifier():
@@ -139,7 +140,7 @@ PROCESSING_JENKINS_PASSWORD = os.environ.get('PROCESSING_JENKINS_PASSWORD', '')
 
 CSRF_COOKIE_SECURE = bool(os.environ.get('CSRF_COOKIE_SECURE', False))
 SESSION_COOKIE_SECURE = bool(os.environ.get('SESSION_COOKIE_SECURE', False))
-# SECURE_SSL_REDIRECT = bool(os.environ.get('SECURE_SSL_REDIRECT', False))
+SECURE_SSL_REDIRECT = bool(os.environ.get('SECURE_SSL_REDIRECT', False))
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
