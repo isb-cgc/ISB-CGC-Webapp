@@ -326,8 +326,8 @@ class SocialLogin(object):
         site = get_current_site(request)
         print >> sys.stdout, "[STATUS] Unstashing state for " + site.name + ", " + site.domain
         if 'socialaccount_state' not in request.session:
-            raise PermissionDenied()
+            raise PermissionDenied('[ERROR] socialaccount_state not found in session!')
         state, verifier2 = request.session.pop('socialaccount_state')
         if verifier != verifier2:
-            raise PermissionDenied()
+            raise PermissionDenied("[ERROR] Verifiers don't match: " + verifier.__str__() + ":" + verifier2.__str__())
         return state
