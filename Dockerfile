@@ -49,7 +49,6 @@ RUN apt-get -y install libxml2-dev libxmlsec1-dev swig
 RUN pip install python-saml==2.1.4
 RUN pip install pexpect
 
-
 RUN apt-get -y install libffi-dev libssl-dev libmysqlclient-dev python2.7-dev curl
 RUN apt-get -y install git
 RUN easy_install -U distribute
