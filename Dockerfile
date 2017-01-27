@@ -1,6 +1,6 @@
 ###
 #
-# Copyright 2015, Institute for Systems Biology
+# Copyright 2017, Institute for Systems Biology
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ RUN pip install gunicorn==19.6.0
 
 ENV PYTHONPATH=/app:/app/lib:/app/google_appengine:/app/google_appengine/lib/protorpc-1.0
 
-# Testing...
+# We need to figure out how to SQL proxy this in
 # RUN python /app/manage.py migrate --noinput
 
 CMD gunicorn -b :$PORT GenespotRE.wsgi
