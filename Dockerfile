@@ -54,14 +54,13 @@ RUN apt-get -y install libffi-dev libssl-dev libmysqlclient-dev python2.7-dev cu
 RUN apt-get -y install git
 RUN easy_install -U distribute
 
-
 ADD . /app
 
 # We need to recompile some of the items because of differences in compiler versions
 RUN pip install -r /app/requirements.txt -t /app/lib/ --upgrade
 RUN pip install gunicorn==19.6.0
-# RUN mkdir /app/lib/endpoints/
-# RUN cp /app/google_appengine/lib/endpoints-1.0/endpoints/* /app/lib/endpoints/
+RUN mkdir /app/lib/endpoints/
+RUN cp /app/google_appengine/lib/endpoints-1.0/endpoints/* /app/lib/endpoints/
 
 ENV PYTHONPATH=/app:/app/lib:/app/google_appengine:/app/google_appengine/lib/protorpc-1.0
 
