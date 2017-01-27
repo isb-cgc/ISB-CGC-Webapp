@@ -17,6 +17,7 @@ six==1.10.0  #1.5.2
 uritemplate==0.6
 django-dotenv==1.4.1
 django-finalware==0.1.3
+django-allauth==0.30.0
 pexpect==4.0.1
 gunicorn==19.6.0
 
