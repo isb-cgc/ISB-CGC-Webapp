@@ -373,6 +373,9 @@ SOCIALACCOUNT_PROVIDERS = \
         }
     }
 
+# Trying to force allauth to only use https
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
+
 
 ##########################
 #   End django-allauth   #

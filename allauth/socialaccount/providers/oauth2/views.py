@@ -26,7 +26,7 @@ import traceback
 class OAuth2Adapter(object):
     expires_in_key = 'expires_in'
     supports_state = True
-    redirect_uri_protocol = 'https'
+    redirect_uri_protocol = None
     access_token_method = 'POST'
     login_cancelled_error = 'access_denied'
     scope_delimiter = ' '
