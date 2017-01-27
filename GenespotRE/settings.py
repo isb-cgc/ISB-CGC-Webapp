@@ -1,6 +1,5 @@
 """
-
-Copyright 2016, Institute for Systems Biology
+Copyright 2017, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,7 +12,6 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
 """
 
 # Django settings for GAE_Django17 project.
@@ -25,11 +23,13 @@ import dotenv
 
 dotenv.read_dotenv(join(dirname(__file__), '../.env'))
 
+APP_ENGINE_FLEX = 'aef-'
+
 BASE_DIR                = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + os.sep
 
 SHARED_SOURCE_DIRECTORIES = [
     'ISB-CGC-Common',
-    'ISB-CGC-API'
+    'ISB-CGC-API',
 ]
 
 # Add the shared Django application subdirectory to the Python module search path
@@ -75,13 +75,19 @@ USER_DATA_ON            = bool(os.environ.get('USER_DATA_ON', False))
 DATABASES = {'default': {
     'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.mysql'),
     'HOST': os.environ.get('DATABASE_HOST', '127.0.0.1'),
-    'PORT': os.environ.get('DATABASE_PORT', 3306),
     'NAME': os.environ.get('DATABASE_NAME', ''),
     'USER': os.environ.get('DATABASE_USER'),
     'PASSWORD': os.environ.get('DATABASE_PASSWORD')
 }}
 
-if os.environ.has_key('DB_SSL_CERT'):
+DB_SOCKET = DATABASES['default']['HOST'] if 'cloudsql' in DATABASES['default']['HOST'] else None
+
+IS_DEV = bool(os.environ.get('IS_DEV', False))
+IS_APP_ENGINE_FLEX = os.getenv('GAE_INSTANCE', '').startswith(APP_ENGINE_FLEX)
+
+# If this is a GAE-Flex deployment, we don't need to specify SSL; the proxy will take
+# care of that for us
+if os.environ.has_key('DB_SSL_CERT') and not IS_APP_ENGINE_FLEX:
     DATABASES['default']['OPTIONS'] = {
         'ssl': {
             'ca': os.environ.get('DB_SSL_CA'),
@@ -89,13 +95,20 @@ if os.environ.has_key('DB_SSL_CERT'):
             'key': os.environ.get('DB_SSL_KEY')
         }
     }
-if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):  
-    SITE_ID = 4
-    NIH_AUTH_ON = True
-else:
-    SITE_ID = 3
-    NIH_AUTH_ON = False
 
+# Default to localhost for the site ID
+SITE_ID = 3
+
+if IS_APP_ENGINE_FLEX:
+    print >> sys.stdout, "[STATUS] AppEngine Flex detected."
+    SITE_ID = 5
+
+# Default to no NIH Auth unless we are not on a local dev environment *and* are in AppEngine-Flex
+NIH_AUTH_ON = False
+
+if not IS_DEV and IS_APP_ENGINE_FLEX:
+    print >> sys.stdout, "[STATUS] NIH_AUTH_ON is TRUE"
+    NIH_AUTH_ON = True
 
 def get_project_identifier():
     return BQ_PROJECT_ID
@@ -125,9 +138,13 @@ PROCESSING_JENKINS_PROJECT  = os.environ.get('PROCESSING_JENKINS_PROJECT', 'cgc-
 PROCESSING_JENKINS_USER     = os.environ.get('PROCESSING_JENKINS_USER', 'user')
 PROCESSING_JENKINS_PASSWORD = os.environ.get('PROCESSING_JENKINS_PASSWORD', '')
 
-
 CSRF_COOKIE_SECURE = bool(os.environ.get('CSRF_COOKIE_SECURE', False))
 SESSION_COOKIE_SECURE = bool(os.environ.get('SESSION_COOKIE_SECURE', False))
+SECURE_SSL_REDIRECT = bool(os.environ.get('SECURE_SSL_REDIRECT', False))
+
+if SECURE_SSL_REDIRECT:
+    os.environ['HTTPS'] = "on"
+    os.environ['wsgi.url_scheme'] = 'https'
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -195,6 +212,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '')
 MIDDLEWARE_CLASSES = (
     # For using NDB with Django
     # documentation: https://cloud.google.com/appengine/docs/python/ndb/#integration
+    # WE DON'T SEEM TO BE USING NDB SO I'M COMMENTING THIS OUT - PL
     # 'google.appengine.ext.ndb.django_middleware.NdbDjangoMiddleware',
     # 'google.appengine.ext.appstats.recording.AppStatsDjangoMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -272,7 +290,11 @@ LOGGING = {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
-        }
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler'
+        },
     },
     'loggers': {
         'django.request': {
@@ -280,6 +302,16 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
+        'cohorts': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propogate': True,
+        },
+        'allauth': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propogate': True,
+        }
     }
 }
 
@@ -340,6 +372,9 @@ SOCIALACCOUNT_PROVIDERS = \
           'AUTH_PARAMS': { 'access_type': 'online' }
         }
     }
+
+# Trying to force allauth to only use https
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
 
 
 ##########################
