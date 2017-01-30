@@ -42,12 +42,6 @@ require([
     'base',
     'tokenfield'
 ], function($, jqueryui, bootstrap, session_security, Bloodhound, typeahead, _, base) {
-    var local_base_url = base_url;
-
-    if(location.host.includes('-preview.com') && !base_url.includes("-preview.com")) {
-        local_base_url = base_url.replace('appspot.com','appspot-preview.com');
-    }
-
     'use strict';
 
     var geneListField = $('#paste-in-genes');
@@ -61,9 +55,9 @@ require([
     var gene_suggestions = new Bloodhound({
         datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
         queryTokenizer: Bloodhound.tokenizers.whitespace,
-        prefetch : local_base_url + '/genes/suggest/a.json',
+        prefetch : BASE_URL + '/genes/suggest/a.json',
         remote: {
-            url: local_base_url + '/genes/suggest/%QUERY.json',
+            url: BASE_URL + '/genes/suggest/%QUERY.json',
             wildcard: '%QUERY'
         }
     });
@@ -268,7 +262,7 @@ require([
             $.ajax({
                 type        : 'POST',
                 dataType    :'json',
-                url         : local_base_url + '/genes/is_valid/',
+                url         : BASE_URL + '/genes/is_valid/',
                 data        : JSON.stringify({'genes-list' : list}),
                 beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                 success : function (data) {
