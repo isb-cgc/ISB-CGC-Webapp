@@ -26,12 +26,6 @@ require([
 ], function($, jqueryui, bootstrap, session_security, _) {
     'use strict';
 
-    var local_base_url = base_url;
-
-    if(location.host.includes('-preview.com') && !base_url.includes("-preview.com")) {
-        local_base_url = base_url.replace('appspot.com','appspot-preview.com');
-    }
-
     $('#addToNewWorksheet').on('click', function (event) {
         //get the selected cohort
         var gene_lists = [];
@@ -48,12 +42,12 @@ require([
             $.ajax({
                 type        : 'POST',
                 dataType    :'json',
-                url         : local_base_url + '/workbooks/create_with_genes',
+                url         : BASE_URL + '/workbooks/create_with_genes',
                 data        : JSON.stringify({gene_fav_list : gene_lists}),
                 beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                 success : function (data) {
                     if(!data.error) {
-                        window.location = local_base_url + '/workbooks/' + data.workbook_id + '/worksheets/' + data.worksheet_id + '/';
+                        window.location = BASE_URL + '/workbooks/' + data.workbook_id + '/worksheets/' + data.worksheet_id + '/';
                     } else {
                         console.log('Failed to add gene_lists to workbook');
                     }
@@ -82,12 +76,12 @@ require([
             $.ajax({
                 type        : 'POST',
                 dataType    :'json',
-                url         : local_base_url + '/workbooks/' + workbook_id + '/worksheets/' + worksheet_id + "/genes/edit",
+                url         : BASE_URL + '/workbooks/' + workbook_id + '/worksheets/' + worksheet_id + "/genes/edit",
                 data        : JSON.stringify({gene_fav_list : gene_lists}),
                 beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                 success : function (data) {
                     if(!data.error) {
-                        window.location = local_base_url + '/workbooks/' + workbook_id + '/worksheets/' + worksheet_id + '/';
+                        window.location = BASE_URL + '/workbooks/' + workbook_id + '/worksheets/' + worksheet_id + '/';
                     } else {
                         console.log('Failed to add gene_lists to workbook');
                     }

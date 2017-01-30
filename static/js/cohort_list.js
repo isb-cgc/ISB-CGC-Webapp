@@ -44,12 +44,6 @@ require([
     'tablesorter',
     'base'
 ], function($) {
-    var local_base_url = base_url;
-
-    if(location.host.includes('-preview.com') && !base_url.includes("-preview.com")) {
-        local_base_url = base_url.replace('appspot.com','appspot-preview.com');
-    }
-
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function() {
         var form = $(this).find('form');
@@ -234,7 +228,7 @@ require([
     var remove_shared_user = function() {
         var user_id = $(this).attr('data-user-id');
         var cohort_ids = $(this).attr('data-cohort-ids').split(",");
-        var url = local_base_url + '/cohorts/unshare_cohort/';
+        var url = BASE_URL + '/cohorts/unshare_cohort/';
         var csrftoken = $.getCookie('csrftoken');
         $.ajax({
             type: 'POST',
@@ -395,12 +389,12 @@ require([
             $.ajax({
                 type: 'POST',
                 dataType :'json',
-                url : local_base_url + '/workbooks/create_with_cohort_list',
+                url : BASE_URL + '/workbooks/create_with_cohort_list',
                 data: JSON.stringify({cohorts : cohorts}),
                 beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                 success: function (data) {
                     if(!data.error) {
-                        window.location = local_base_url + '/workbooks/' + data.workbook_id + '/worksheets/' + data.worksheet_id + '/';
+                        window.location = BASE_URL + '/workbooks/' + data.workbook_id + '/worksheets/' + data.worksheet_id + '/';
                     } else {
                         console.log('Failed to create workbook with cohorts.');
                     }

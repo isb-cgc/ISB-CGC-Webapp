@@ -50,12 +50,6 @@ require([
     'tablesorter',
     'base'
 ], function($) {
-    var local_base_url = base_url;
-
-    if(location.host.includes('-preview.com') && !base_url.includes("-preview.com")) {
-        local_base_url = base_url.replace('appspot.com','appspot-preview.com');
-    }
-
     A11y.Core();
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
@@ -359,7 +353,7 @@ require([
         var data = $(this).find('input[type="text"]').val();
         $.ajax({
             type: 'get',
-            url: local_base_url + '/search_cohorts_viz/?q=' + data,
+            url: BASE_URL + '/search_cohorts_viz/?q=' + data,
             success: function(data) {
                 data = JSON.parse(data);
 

@@ -70,7 +70,7 @@ require([
      */
     $('.remove-shared-user').on('click', function() {
         var shared_id = $(this).attr('data-shared-id');
-        var url = base_url + '/share/' + shared_id + '/remove';
+        var url = BASE_URL + '/share/' + shared_id + '/remove';
         var csrftoken = $.getCookie('csrftoken');
         var button = $(this);
         $.ajax({

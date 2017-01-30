@@ -271,7 +271,7 @@ define([
     /*
         Generate url for gathering data
      */
-    function get_data_url(base_api_url, cohorts, x_attr, y_attr, color_by, logTransform){
+    function get_data_url(url, cohorts, x_attr, y_attr, color_by, logTransform){
         var cohort_str = '';
         for (var i = 0; i < cohorts.length; i++) {
             if (i == 0) {
@@ -280,7 +280,7 @@ define([
                 cohort_str += '&cohort_id=' + cohorts[i];
             }
         }
-        var api_url = base_api_url + '/_ah/api/feature_data_api/v1/feature_data_plot?' + cohort_str;
+        var api_url = url + '/_ah/api/feature_data_api/v1/feature_data_plot?' + cohort_str;
 
         api_url += '&x_id=' + x_attr;
         if(color_by && color_by !== ''){
@@ -296,7 +296,7 @@ define([
     }
 
     // Generate url for gathering data for a SeqPeek plot
-    function get_seqpeek_data_url(base_api_url, cohorts, gene_label){
+    function get_seqpeek_data_url(url, cohorts, gene_label){
         var cohort_str = '';
         for (var i = 0; i < cohorts.length; i++) {
             if (i == 0) {
@@ -305,7 +305,7 @@ define([
                 cohort_str += '&cohort_id=' + cohorts[i];
             }
         }
-        var api_url = base_api_url + '/_ah/api/seqpeek_data_api/v1/view_data?' + cohort_str;
+        var api_url = url + '/_ah/api/seqpeek_data_api/v1/view_data?' + cohort_str;
         api_url += "&hugo_symbol=" + gene_label;
 
         return api_url;
@@ -467,10 +467,10 @@ define([
     function generate_plot(args, callback){ //plot_selector, legend_selector, pairwise_element, type, x_attr, y_attr, color_by, cohorts, cohort_override, callback) {
         var plot_data_url;
         if (args.type == "SeqPeek") {
-            plot_data_url = get_seqpeek_data_url(base_api_url, args.cohorts, args.gene_label);
+            plot_data_url = get_seqpeek_data_url(BASE_API_URL, args.cohorts, args.gene_label);
         }
         else {
-            plot_data_url = get_data_url(base_api_url, args.cohorts, args.x, args.y, args.color_by, args.logTransform);
+            plot_data_url = get_data_url(BASE_API_URL, args.cohorts, args.x, args.y, args.color_by, args.logTransform);
         }
 
         $.ajax({
