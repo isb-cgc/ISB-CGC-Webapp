@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2016, Institute for Systems Biology
+ * Copyright 2017, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,6 +74,11 @@ require([
     'tree_graph',
     'stack_bar_chart'
 ], function ($, jqueryui, bootstrap, session_security, d3, d3tip, search_helpers, Bloodhound, _, base) {
+    var local_base_url = base_url;
+
+    if(location.host.includes('-preview.com') && !base_url.includes("-preview.com")) {
+        local_base_url = base_url.replace('appspot.com','appspot-preview.com');
+    }
 
     var savingComment = false;
     var savingChanges = false;
@@ -89,9 +94,9 @@ require([
     var gene_suggestions = new Bloodhound({
         datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
         queryTokenizer: Bloodhound.tokenizers.whitespace,
-        prefetch : base_url + '/genes/suggest/a.json',
+        prefetch : local_base_url + '/genes/suggest/a.json',
         remote: {
-            url: base_url + '/genes/suggest/%QUERY.json',
+            url: local_base_url + '/genes/suggest/%QUERY.json',
             wildcard: '%QUERY'
         }
     });
@@ -163,7 +168,7 @@ require([
             $.ajax({
                 type        : 'POST',
                 dataType    :'json',
-                url         : base_url + '/genes/is_valid/',
+                url         : local_base_url + '/genes/is_valid/',
                 data        : JSON.stringify({'genes-list' : list}),
                 beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                 success : function (data) {
@@ -210,7 +215,7 @@ require([
         (update_displays_thread !== null) && clearTimeout(update_displays_thread);
 
         update_displays_thread = setTimeout(function(){
-            search_helper_obj.update_counts_parsets(base_url, 'metadata_counts_platform_list', cohort_id, 'v2').then(
+            search_helper_obj.update_counts_parsets(local_base_url, 'metadata_counts_platform_list', cohort_id, 'v2').then(
                 function(){!withoutCheckChanges && check_for_changes();}
             );
         },SUBSEQUENT_DELAY);
@@ -669,7 +674,7 @@ require([
         var form = this;
         $.ajax({
             type: 'POST',
-            url: base_url + '/cohorts/save_cohort_comment/',
+            url: local_base_url + '/cohorts/save_cohort_comment/',
             data: $(this).serialize(),
             success: function(data) {
                 data = JSON.parse(data);
@@ -743,7 +748,7 @@ require([
     // onClick: Remove shared user
     $('.remove-shared-user').on('click', function() {
         var user_id = $(this).attr('data-user-id');
-        var url = base_url + '/cohorts/unshare_cohort/' + cohort_id + '/';
+        var url = local_base_url + '/cohorts/unshare_cohort/' + cohort_id + '/';
         var csrftoken = $.getCookie('csrftoken');
         var button = $(this);
         $.ajax({

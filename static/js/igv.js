@@ -43,6 +43,11 @@ require([
     'igvbeta'
 
 ], function($, jqueryui, session_security, bs, igvbeta) {
+    var local_base_url = base_url;
+
+    if(location.host.includes('-preview.com') && !base_url.includes("-preview.com")) {
+        local_base_url = base_url.replace('appspot.com','appspot-preview.com');
+    }
 
     var browser;
     var tracks = [];
@@ -93,7 +98,7 @@ require([
     };
     $('#igv-div').empty();
     igv.browser = null;
-    igv.oauth.google.setRedirectUrl(base_url, service_account);
+    igv.oauth.google.setRedirectUrl(local_base_url, service_account);
     igv.oauth.google.login();
 
     browser = igv.createBrowser($('#igv-div')[0], options);
