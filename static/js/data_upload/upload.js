@@ -39,7 +39,7 @@ require.config({
 require([
     'jquery',
     'underscore',
-    'text!../templates/upload_input_table.html',
+    'text!'+STATIC_FILES_URL+'templates/upload_input_table.html',
     'base',
     'bootstrap'
 ], function ($, _, UploadInputTableTempl) {
