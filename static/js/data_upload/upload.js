@@ -25,13 +25,15 @@ require.config({
     // Per http://jaketrent.com/post/cross-domain-requirejs-text/
     // Because this is a cross-domain text request, we need to force
     // it to succeed
-    text: {
-         useXhr: function (url, protocol, hostname, port) {
-            // allow cross-domain requests
-            // remote server allows CORS
-            return true;
-         }
-     }
+    config: {
+        text: {
+            useXhr: function (url, protocol, hostname, port) {
+                // allow cross-domain requests
+                // remote server allows CORS
+                return true;
+            }
+        }
+    }
 });
 
 require([
