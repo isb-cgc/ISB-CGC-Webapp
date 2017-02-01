@@ -93,10 +93,10 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
 
             attr_counts = metadata_counts['count'];
 
-            $('.total-values .isb-cgc-samples').html(metadata_counts['total']);
-            $('.total-values .isb-cgc-participants').html(metadata_counts['participants']);
-            $('.total-values .user-data-samples').html(user_data && metadata_counts['user_data_total'] !== null ? metadata_counts['user_data_total'] : "NA");
-            $('.total-values .user-data-participants').html(user_data && metadata_counts['user_data_participants'] !== null ? metadata_counts['user_data_participants'] : "NA");
+            $('.total-values.isb-cgc-samples').html(metadata_counts['total']);
+            $('.total-values.isb-cgc-participants').html(metadata_counts['participants']);
+            $('.total-values.user-data-samples').html(user_data && metadata_counts['user_data_total'] !== null ? metadata_counts['user_data_total'] : "NA");
+            $('.total-values.user-data-participants').html(user_data && metadata_counts['user_data_participants'] !== null ? metadata_counts['user_data_participants'] : "NA");
 
 
             this.update_filter_counts(attr_counts);
@@ -182,10 +182,10 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                     var stopReq = new Date().getTime();
                     console.debug("[BENCHMARKING] Time for response in update_counts_parsets: "+(stopReq-startReq)+ "ms");
                     attr_counts = results['count'];
-                    $('.total-values .isb-cgc-samples').html(results['total']);
-                    $('.total-values .isb-cgc-participants').html(results['participants']);
-                    $('.total-values .user-data-samples').html(results['user_data'] && results['user_data_total'] !== null ? results['user_data_total'] : "NA");
-                    $('.total-values .user-data-participants').html(results['user_data'] && results['user_data_participants'] !== null ? results['user_data_participants'] : "NA");
+                    $('.total-values.isb-cgc-samples').html(results['total']);
+                    $('.total-values.isb-cgc-participants').html(results['participants']);
+                    $('.total-values.user-data-samples').html(results['user_data'] && results['user_data_total'] !== null ? results['user_data_total'] : "NA");
+                    $('.total-values.user-data-participants').html(results['user_data'] && results['user_data_participants'] !== null ? results['user_data_participants'] : "NA");
                     context.update_filter_counts(attr_counts);
 
                     var clin_tree_attr_counts = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(attr_counts, clin_tree_attr) : attr_counts;
