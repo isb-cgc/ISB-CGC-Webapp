@@ -37,6 +37,7 @@ from google_helpers.storage_service import get_storage_resource
 from google_helpers.directory_service import get_directory_resource
 from accounts.models import NIH_User
 
+import sys
 import csv_scanner
 import logging
 import datetime
@@ -97,11 +98,14 @@ def index(request):
 
     if 'sso' in req['get_data']:
         if 'redirect_url' in req['get_data']:
+            print >> sys.stdout, "[STATUS] Redirect is: " + req['get_data']['redirect_url'] + " in sso"
             return HttpResponseRedirect(auth.login(return_to=req['get_data']['redirect_url']))
         else:
+            print >> sys.stdout, "[STATUS] No redirect supplied for SAML"
             return HttpResponseRedirect(auth.login())
     elif 'sso2' in req['get_data']:
         return_to = OneLogin_Saml2_Utils.get_self_url(req) + reverse('attrs')
+        print >> "[STATUS] Returning to "+return_to + " in sso2"
         return HttpResponseRedirect(auth.login(return_to))
     elif 'slo' in req['get_data']:
         name_id = None
@@ -128,6 +132,7 @@ def index(request):
         not_auth_warn = not auth.is_authenticated()
 
         if not errors:
+            print >> sys.stdout, "[STATUS] No errors in ACS"
             request.session['samlUserdata'] = auth.get_attributes()
             request.session['samlNameId'] = auth.get_nameid()
             NIH_username = request.session['samlNameId']
@@ -245,6 +250,7 @@ def index(request):
                 logging.exception(e)
 
             messages.info(request, warn_message)
+            print >> sys.stdout, "[STATUS] http_host: "+req['http_host']
             return HttpResponseRedirect(auth.redirect_to('https://{}'.format(req['http_host'])))
 
     elif 'sls' in req['get_data']:
