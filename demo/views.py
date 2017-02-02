@@ -106,7 +106,7 @@ def index(request):
             return HttpResponseRedirect(auth.login())
     elif 'sso2' in req['get_data']:
         return_to = OneLogin_Saml2_Utils.get_self_url(req) + reverse('attrs')
-        print >> "[STATUS] Returning to "+return_to + " in sso2"
+        print >> sys.stdout, "[STATUS] Returning to "+return_to + " in sso2"
         return HttpResponseRedirect(auth.login(return_to))
     elif 'slo' in req['get_data']:
         name_id = None
