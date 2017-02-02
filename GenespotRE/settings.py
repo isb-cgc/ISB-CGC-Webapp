@@ -313,7 +313,27 @@ LOGGING = {
             'handlers': ['console'],
             'level': 'DEBUG',
             'propogate': True,
-        }
+        },
+        'demo': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propogate': True,
+        },
+        'projects': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propogate': True,
+        },
+        'workbooks': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propogate': True,
+        },
+        'accounts': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propogate': True,
+        },
     }
 }
 

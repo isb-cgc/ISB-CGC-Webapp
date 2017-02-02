@@ -37,6 +37,7 @@ from google_helpers.storage_service import get_storage_resource
 from google_helpers.directory_service import get_directory_resource
 from accounts.models import NIH_User
 
+import traceback
 import sys
 import csv_scanner
 import logging
@@ -246,8 +247,8 @@ def index(request):
                 logger.info('enqueued check_login task for user, {}, for {} hours from now'.format(
                     request.user.id, COUNTDOWN_SECONDS / (60*60)))
             except Exception as e:
-                logger.error("Failed to enqueue automatic logout task")
-                logging.exception(e)
+                logger.error("[ERROR] Failed to enqueue automatic logout task: "+e.message)
+                logger.error(traceback.format_exc())
 
             messages.info(request, warn_message)
             print >> sys.stdout, "[STATUS] http_host: "+req['http_host']
