@@ -1,6 +1,5 @@
 """
-
-Copyright 2015, Institute for Systems Biology
+Copyright 2017, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,7 +12,6 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
 """
 
 from django.conf import settings
@@ -59,6 +57,7 @@ CRON_MODULE = settings.CRON_MODULE
 
 def init_saml_auth(req):
     auth = OneLogin_Saml2_Auth(req, custom_base_path=settings.SAML_FOLDER)
+    print >> sys.stdout, "[STATUS] auth: "+auth.__str__()
     return auth
 
 
@@ -73,6 +72,8 @@ def prepare_django_request(request):
         'get_data': request.GET.copy(),
         'post_data': request.POST.copy()
     }
+
+    logger.info("[STATUS] prepared request: "+result.__str__())
     return result
 
 
@@ -99,10 +100,8 @@ def index(request):
 
     if 'sso' in req['get_data']:
         if 'redirect_url' in req['get_data']:
-            print >> sys.stdout, "[STATUS] Redirect is: " + req['get_data']['redirect_url'] + " in sso"
             return HttpResponseRedirect(auth.login(return_to=req['get_data']['redirect_url']))
         else:
-            print >> sys.stdout, "[STATUS] No redirect supplied for SAML"
             return HttpResponseRedirect(auth.login())
     elif 'sso2' in req['get_data']:
         return_to = OneLogin_Saml2_Utils.get_self_url(req) + reverse('attrs')
