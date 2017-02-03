@@ -73,7 +73,7 @@ def prepare_django_request(request):
         'post_data': request.POST.copy()
     }
 
-    print >> sys.stdout, "[STATUS] prepared request: "+result.__str__()
+    logger.info("[STATUS] prepared request: "+result.__str__())
     return result
 
 
