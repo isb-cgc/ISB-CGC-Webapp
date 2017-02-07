@@ -99,6 +99,7 @@ if os.environ.has_key('DB_SSL_CERT') and not IS_APP_ENGINE_FLEX:
 # Default to localhost for the site ID
 SITE_ID = 3
 
+# Swap to appspot.com site ID if we detect AEF
 if IS_APP_ENGINE_FLEX:
     print >> sys.stdout, "[STATUS] AppEngine Flex detected."
     SITE_ID = 4
@@ -138,11 +139,11 @@ PROCESSING_JENKINS_PROJECT  = os.environ.get('PROCESSING_JENKINS_PROJECT', 'cgc-
 PROCESSING_JENKINS_USER     = os.environ.get('PROCESSING_JENKINS_USER', 'user')
 PROCESSING_JENKINS_PASSWORD = os.environ.get('PROCESSING_JENKINS_PASSWORD', '')
 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 CSRF_COOKIE_SECURE = bool(os.environ.get('CSRF_COOKIE_SECURE', False))
 SESSION_COOKIE_SECURE = bool(os.environ.get('SESSION_COOKIE_SECURE', False))
 SECURE_SSL_REDIRECT = bool(os.environ.get('SECURE_SSL_REDIRECT', False))
-
-print >> sys.stdout, "[STATUS] SECURE_SSL_REDIRECT: " + str(SECURE_SSL_REDIRECT)
 
 if SECURE_SSL_REDIRECT:
     os.environ['HTTPS'] = "on"
