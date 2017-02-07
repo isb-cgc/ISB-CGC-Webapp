@@ -44,6 +44,10 @@ require([
 ], function($, jqueryui, bootstrap, session_security, Bloodhound, typeahead, _, base) {
     'use strict';
 
+    window.onbeforeunload = function(){
+        return "You have made changes to your Gene Favorites but not saved them; if you leave now those changes will be lost."
+    };
+
     var geneListField = $('#paste-in-genes');
     var geneFavs = (gene_fav) ? gene_fav.genes : [];
 
@@ -313,9 +317,4 @@ require([
         });
         return Object.keys(genes_count_object);
     }
-
-    $('.cancel-edit').on('click', function() {
-        window.onbeforeunload = null
-    })
-    
 });
