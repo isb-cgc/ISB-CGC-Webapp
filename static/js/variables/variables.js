@@ -53,7 +53,7 @@ require([
 ], function($, jqueryui, bootstrap, session_security, d3, d3tip, vizhelpers, base) {
     // Customize the onbeforeunload message so it makes more sense
     window.onbeforeunload = function(){
-        return "You have made changes to your Variables Favorites; if you leave this page now those changes will be lost."
+        return "You have made changes to your Variables Favorites without saving them. If you leave this page now those changes will be lost."
     };
 
     // Resets forms in modals on cancel so we don't get an onbeforeunload if we started filling one out and
