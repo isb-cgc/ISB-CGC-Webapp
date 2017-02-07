@@ -140,9 +140,6 @@ CSRF_COOKIE_SECURE = bool(os.environ.get('CSRF_COOKIE_SECURE', False))
 SESSION_COOKIE_SECURE = bool(os.environ.get('SESSION_COOKIE_SECURE', False))
 SECURE_SSL_REDIRECT = bool(os.environ.get('SECURE_SSL_REDIRECT', False))
 
-
-print >> sys.stdout, "[STATUS] SECURE_SSL_REDIRECT: " + str(SECURE_SSL_REDIRECT)
-
 if SECURE_SSL_REDIRECT:
     os.environ['HTTPS'] = "on"
     os.environ['wsgi.url_scheme'] = 'https'
