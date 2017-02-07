@@ -99,6 +99,11 @@ if os.environ.has_key('DB_SSL_CERT') and not IS_APP_ENGINE_FLEX:
 # Default to localhost for the site ID
 SITE_ID = 3
 
+# Swap to appspot.com site ID if we detect AEF
+if IS_APP_ENGINE_FLEX:
+    print >> sys.stdout, "[STATUS] AppEngine Flex detected."
+    SITE_ID = 4
+
 # Default to no NIH Auth unless we are not on a local dev environment *and* are in AppEngine-Flex
 NIH_AUTH_ON = False
 
