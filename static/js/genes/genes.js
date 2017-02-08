@@ -49,12 +49,6 @@ require([
         window.onbeforeunload = null
     });
 
-    // Try to reset the form on cancel so we don't get an onbeforeunload if we started filling it out and
-    // changed our mind
-    $('.cancel-edit').on('click', function() {
-        $(this).find('form')[0].reset();
-    });
-
     var geneListField = $('#paste-in-genes');
     var geneFavs = (gene_fav) ? gene_fav.genes : [];
 
