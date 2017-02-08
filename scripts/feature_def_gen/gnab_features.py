@@ -46,20 +46,16 @@ MYSQL_SCHEMA = [
 
 
 class GNABFeatureDefConfig(object):
-    def __init__(self, project_id, target_config, maf_table_name, out_path):
-        self.project_id = project_id
+    def __init__(self, target_config, maf_table_name):
         self.target_config = target_config
         self.maf_table_name = maf_table_name
-        self.output_csv_path = out_path
 
     @classmethod
     def from_dict(cls, param):
-        project_id = param['project_id']
         target_config = DataSetConfig.from_dict(param['target_config'])
         maf_table_name = param['maf_table_name']
-        output_csv_path = param['output_csv_path']
 
-        return cls(project_id, target_config, maf_table_name, output_csv_path)
+        return cls(target_config, maf_table_name)
 
 
 def build_internal_feature_id(feature_type, gene, value_field):
