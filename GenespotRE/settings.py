@@ -144,6 +144,10 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 CSRF_COOKIE_SECURE = bool(os.environ.get('CSRF_COOKIE_SECURE', False))
 SESSION_COOKIE_SECURE = bool(os.environ.get('SESSION_COOKIE_SECURE', False))
 SECURE_SSL_REDIRECT = bool(os.environ.get('SECURE_SSL_REDIRECT', False))
+
+# Due to the behavior of AppEngine Flex and the load balancer, we have to explicitly
+# use SSLify to enforce redirect of http to https even though we're on Django 1.8+
+# --> DO NOT REMOVE THIS OR ITS REQUIREMENTS ENTRY <--
 SSLIFY_DISABLE = True if not SECURE_SSL_REDIRECT else False
 
 if SECURE_SSL_REDIRECT:
@@ -226,6 +230,9 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Due to the behavior of AppEngine Flex and the load balancer, we have to explicitly
+    # use SSLify to enforce redirect of http to https even though we're on Django 1.8+
+    # --> DO NOT REMOVE THIS OR ITS REQUIREMENTS ENTRY <--
     'sslify.middleware.SSLifyMiddleware',
 )
 
