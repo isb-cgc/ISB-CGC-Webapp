@@ -108,13 +108,13 @@ def print_query(data_type, config_json):
 @click.argument('project_id', type=click.INT)
 @click.argument('data_type', type=str)
 @click.argument('base_dir', type=click.Path(exists=True))
+@click.argument('csv_path', type=click.Path())
 @click.argument('config_json', type=click.Path(exists=True))
 def run(project_id, data_type, base_dir, config_json):
     _, provider_class = data_type_registry[data_type]
     config = load_config_from_path(data_type, config_json)
     provider = provider_class(config)
 
-    csv_path = path_join(base_dir, config.output_csv_path)
     logging.info("Output CSV: {}".format(csv_path))
     result = run_query(project_id, provider, config)
     save_csv(result, provider.get_mysql_schema(), csv_path, include_header=True)

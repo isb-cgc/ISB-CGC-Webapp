@@ -52,22 +52,18 @@ class MIRNTableConfig(object):
 
 
 class MIRNFeatureDefConfig(object):
-    def __init__(self, project_id, reference, target_config, tables_array, out_path):
-        self.project_id = project_id
+    def __init__(self, reference, target_config, tables_array):
         self.reference_config = reference
         self.target_config = target_config
         self.data_table_list = tables_array
-        self.output_csv_path = out_path
 
     @classmethod
     def from_dict(cls, param):
-        project_id = param['project_id']
         reference_config = DataSetConfig.from_dict(param['reference_config'])
         target_config = DataSetConfig.from_dict(param['target_config'])
-        output_csv_path = param['output_csv_path']
         data_table_list = [MIRNTableConfig.from_dict(item) for item in param['tables']]
 
-        return cls(project_id, reference_config, target_config, data_table_list, output_csv_path)
+        return cls(reference_config, target_config, data_table_list)
 
 
 # TODO remove duplicate code

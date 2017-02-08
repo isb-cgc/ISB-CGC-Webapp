@@ -28,42 +28,17 @@ VALUES = frozenset(['variant_classification', 'variant_type', 'sequence_source',
 FIELDNAMES = ['gene_name', 'protein_name', 'value_field', 'internal_feature_id']
 
 
-MYSQL_SCHEMA = [
-    {
-        'name': 'gene_name',
-        'type': 'string'
-    },
-    {
-        'name': 'protein_name',
-        'type': 'string'
-    },
-    {
-        'name': 'value_field',
-        'type': 'string'
-    },
-    {
-        'name': 'internal_feature_id',
-        'type': 'string'
-    },
-]
-
-
 class RPPAFeatureDefConfig(object):
-    def __init__(self, project_id, target_config, rppa_table_name, out_path):
-        self.project_id = project_id
+    def __init__(self, target_config, rppa_table_name):
         self.target_config = target_config
         self.rppa_table_name = rppa_table_name
-        self.output_csv_path = out_path
 
     @classmethod
     def from_dict(cls, param):
-        project_id = param['project_id']
         target_config = DataSetConfig.from_dict(param['target_config'])
         table_name = param['rppa_table_name']
-        output_csv_path = param['output_csv_path']
 
-        return cls(project_id, target_config, table_name, output_csv_path)
-
+        return cls(target_config, table_name)
 
 
 # TODO remove duplicate code
@@ -80,9 +55,27 @@ def build_internal_feature_id(feature_type, gene, protein):
 
 
 class RPPAFeatureDefProvider(FeatureDefBigqueryProvider):
-    def get_mysql_schema(self):
-        return MYSQL_SCHEMA
+    MYSQL_SCHEMA = [
+        {
+            'name': 'gene_name',
+            'type': 'string'
+        },
+        {
+            'name': 'protein_name',
+            'type': 'string'
+        },
+        {
+            'name': 'value_field',
+            'type': 'string'
+        },
+        {
+            'name': 'internal_feature_id',
+            'type': 'string'
+        },
+    ]
 
+    def get_mysql_schema(self):
+        return self.MYSQL_SCHEMA
 
     def build_query(self, config):
         query_template = \
