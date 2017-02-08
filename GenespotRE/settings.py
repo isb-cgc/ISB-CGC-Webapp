@@ -286,7 +286,12 @@ LOGGING = {
         'cohorts': {
             'handlers': ['console'],
             'level': 'DEBUG',
-            'propogate': True,
+            'propagate': True,
+        },
+        'visualizations': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
         }
     }
 }
