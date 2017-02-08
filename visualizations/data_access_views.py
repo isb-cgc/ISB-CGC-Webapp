@@ -1,3 +1,4 @@
+# noinspection PyPackageRequirements
 """
 
 Copyright 2015, Institute for Systems Biology
@@ -324,7 +325,8 @@ def get_merged_feature_vectors(x_id, y_id, c_id, cohort_id_array, logTransform, 
     pairwise_result = None
 
     if len(input_vectors) > 1:
-        pairwise_result = get_pairwise_result(input_vectors)
+        pass
+        #pairwise_result = get_pairwise_result(input_vectors)
 
     if pairwise_result is None:
         logger.warn("[WARNING] Pairwise results not included in returned object")
