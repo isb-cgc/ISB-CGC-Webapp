@@ -62,6 +62,11 @@ require([
         $(this).find('form')[0].reset();
     });
 
+    // Clear ALL forms when the Cancel button is clicked
+    $('.cancel-edit').on('click', function() {
+        $('form').reset();
+    });
+
     function set_pill_deletes(){
         $('a.delete-x').off('click');
         $('a.delete-x').on('click', function() {
