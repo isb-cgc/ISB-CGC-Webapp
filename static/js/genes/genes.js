@@ -44,15 +44,9 @@ require([
 ], function($, jqueryui, bootstrap, session_security, Bloodhound, typeahead, _, base) {
     'use strict';
 
-    // Customize the onbeforeunload message so it makes more sense
-    window.onbeforeunload = function(){
-        return "You have made changes to your Gene Favorites without saving them. If you leave this page now those changes will be lost."
-    };
-
-    // Try to reset the form on cancel so we don't get an onbeforeunload if we started filling it out and
-    // changed our mind
+    // Doesn't work for Chrome, may work for other browsers
     $('.cancel-edit').on('click', function() {
-        $('form').reset();
+        window.onbeforeunload = null
     });
 
     var geneListField = $('#paste-in-genes');
