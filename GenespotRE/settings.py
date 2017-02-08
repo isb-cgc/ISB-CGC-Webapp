@@ -234,6 +234,7 @@ MIDDLEWARE_CLASSES = (
     # use SSLify to enforce redirect of http to https even though we're on Django 1.8+
     # --> DO NOT REMOVE THIS OR ITS REQUIREMENTS ENTRY <--
     'sslify.middleware.SSLifyMiddleware',
+    'maintenance_mode.middleware.MaintenanceModeMiddleware',
 )
 
 ROOT_URLCONF = 'GenespotRE.urls'
@@ -261,6 +262,7 @@ INSTALLED_APPS = (
     'workbooks',
     'data_upload',
     'analysis',
+    'maintenance_mode',
 )
 
 #############################
@@ -316,32 +318,32 @@ LOGGING = {
         'cohorts': {
             'handlers': ['console'],
             'level': 'DEBUG',
-            'propogate': True,
+            'propagate': True,
         },
         'allauth': {
             'handlers': ['console'],
             'level': 'DEBUG',
-            'propogate': True,
+            'propagate': True,
         },
         'demo': {
             'handlers': ['console'],
             'level': 'DEBUG',
-            'propogate': True,
+            'propagate': True,
         },
         'projects': {
             'handlers': ['console'],
             'level': 'DEBUG',
-            'propogate': True,
+            'propagate': True,
         },
         'workbooks': {
             'handlers': ['console'],
             'level': 'DEBUG',
-            'propogate': True,
+            'propagate': True,
         },
         'accounts': {
             'handlers': ['console'],
             'level': 'DEBUG',
-            'propogate': True,
+            'propagate': True,
         },
     }
 }
@@ -378,6 +380,7 @@ TEMPLATES = [
                 'django.template.context_processors.tz',
                 'finalware.context_processors.contextify',
                 'GenespotRE.context_processor.additional_context',
+                'maintenance_mode.context_processors.maintenance_mode',
             ),
             # add any loaders here; if using the defaults, we can comment it out
             # 'loaders': (
