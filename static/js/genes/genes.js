@@ -44,14 +44,15 @@ require([
 ], function($, jqueryui, bootstrap, session_security, Bloodhound, typeahead, _, base) {
     'use strict';
 
+    // Doesn't work for Chrome, may work for other browsers
+    $('.cancel-edit').on('click', function() {
+        window.onbeforeunload = null
+    });
+
     // Try to reset the form on cancel so we don't get an onbeforeunload if we started filling it out and
     // changed our mind
     $('.cancel-edit').on('click', function() {
-        // Customize the onbeforeunload message for non-Chrome browsers
-        window.onbeforeunload = function(){
-            return "You have made changes to your Gene Favorites without saving them. If you leave this page now those changes will be lost."
-        };
-        $('form').reset();
+        $(this).find('form')[0].reset();
     });
 
     var geneListField = $('#paste-in-genes');

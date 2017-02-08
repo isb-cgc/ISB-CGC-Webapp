@@ -58,16 +58,6 @@ require([
         $(this).find('form')[0].reset();
     });
 
-    // Clear ALL forms when the Cancel button is clicked
-    $('.cancel-edit').on('click', function() {
-        // Customize the onbeforeunload message for non-Chrome browsers
-        window.onbeforeunload = function(){
-            return "You have made changes to your Variables Favorites without saving them. If you leave this page now those changes will be lost."
-        };
-        // Try to suppress this message
-        $('form').reset();
-    });
-
     function set_pill_deletes(){
         $('a.delete-x').off('click');
         $('a.delete-x').on('click', function() {
