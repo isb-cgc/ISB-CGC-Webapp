@@ -144,6 +144,7 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 CSRF_COOKIE_SECURE = bool(os.environ.get('CSRF_COOKIE_SECURE', False))
 SESSION_COOKIE_SECURE = bool(os.environ.get('SESSION_COOKIE_SECURE', False))
 SECURE_SSL_REDIRECT = bool(os.environ.get('SECURE_SSL_REDIRECT', False))
+SSLIFY_DISABLE = True if not SECURE_SSL_REDIRECT else False
 
 if SECURE_SSL_REDIRECT:
     os.environ['HTTPS'] = "on"
@@ -225,7 +226,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
+    'sslify.middleware.SSLifyMiddleware',
 )
 
 ROOT_URLCONF = 'GenespotRE.urls'
