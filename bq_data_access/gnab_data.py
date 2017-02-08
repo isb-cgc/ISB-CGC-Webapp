@@ -23,6 +23,8 @@ from bq_data_access.errors import FeatureNotFoundException
 from bq_data_access.feature_value_types import ValueType, DataTypes
 from bq_data_access.feature_data_provider import FeatureDataProvider
 from bq_data_access.utils import DurationLogged
+from bq_data_access.data_types.gnab import BIGQUERY_CONFIG
+from scripts.feature_def_gen.gnab_features import GNABFeatureDefConfig
 
 GNAB_FEATURE_TYPE = 'GNAB'
 IDENTIFIER_COLUMN_NAME = 'sample_id'
@@ -33,6 +35,8 @@ def get_feature_type():
 
 
 class GNABFeatureDef(object):
+    VALUE_FIELD_NUM_MUTATIONS = 'num_mutations'
+
     # Regular expression for parsing the feature definition.
     #
     # Example ID: GNAB:SMYD3:sequence_source
@@ -40,7 +44,10 @@ class GNABFeatureDef(object):
                        # gene
                        "([a-zA-Z0-9_.\-]+):"
                        # value field
-                       "(variant_classification|variant_type|sequence_source|num_mutations)$")
+                       "(variant_classification|"
+                       "variant_type|"
+                       "sequence_source|"
+                       "{})$".format(VALUE_FIELD_NUM_MUTATIONS))
 
     def __init__(self, gene, value_field):
         self.gene = gene
@@ -58,21 +65,12 @@ class GNABFeatureDef(object):
 
 
 class GNABFeatureProvider(FeatureDataProvider):
-    TABLES = [
-        {
-            'name': 'Somatic_Mutation_calls',
-            'info': 'MAF',
-            'id': 'maf'
-        }
-    ]
-
-    VALUE_FIELD_NUM_MUTATIONS = 'num_mutations'
-
     def __init__(self, feature_id, **kwargs):
         self.feature_def = None
         self.table_info = None
         self.table_name = ''
         self.parse_internal_feature_id(feature_id)
+        self.config_instance = GNABFeatureDefConfig.from_dict(BIGQUERY_CONFIG)
         super(GNABFeatureProvider, self).__init__(**kwargs)
 
     def get_value_type(self):
@@ -109,7 +107,7 @@ class GNABFeatureProvider(FeatureDataProvider):
 
         value_field_bqsql = self.feature_def.value_field
 
-        if self.feature_def.value_field == self.VALUE_FIELD_NUM_MUTATIONS:
+        if self.feature_def.value_field == GNABFeatureDef.VALUE_FIELD_NUM_MUTATIONS:
             value_field_bqsql = 'count(*)'
             query_template += ("GROUP BY ParticipantBarcode, Tumor_SampleBarcode, Tumor_AliquotBarcode, "
                                "Normal_SampleBarcode, Normal_AliquotBarcode")
@@ -150,17 +148,9 @@ class GNABFeatureProvider(FeatureDataProvider):
 
         return result
 
-    def get_table_info(self):
-        return self.TABLES[0]
-
     def parse_internal_feature_id(self, feature_id):
         self.feature_def = GNABFeatureDef.from_feature_id(feature_id)
-        self.table_info = self.get_table_info()
-
-        if self.table_info is None:
-            raise FeatureNotFoundException(feature_id)
-
-        self.table_name = self.table_info['name']
+        self.table_name = self.config_instance.maf_table_name
 
     @classmethod
     def is_valid_feature_id(cls, feature_id):

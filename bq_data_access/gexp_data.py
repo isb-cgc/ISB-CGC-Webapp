@@ -35,7 +35,6 @@ def get_feature_type():
     return GEXP_FEATURE_TYPE
 
 
-
 def get_table_info(table_id):
     """
     Find a GEXPTableConfig instance for

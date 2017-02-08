@@ -122,6 +122,7 @@ class FeatureDataProvider(object):
         bigquery_service = self.get_bq_service()
 
         query_body = self.build_query(project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array, project_id_array)
+        logging.info(query_body)
         query_job = self.submit_bigquery_job(bigquery_service, project_id, query_body)
 
         # Poll for completion of the query
