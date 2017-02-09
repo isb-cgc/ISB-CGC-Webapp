@@ -41,7 +41,6 @@ urlpatterns = [
     url(r'^cohorts/', include('cohorts.urls')),
     url(r'^visualizations/', include('visualizations.urls')),
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^maintenance-mode/', include('maintenance_mode.urls')),
     url(r'^accounts/', include('accounts.urls')),
     url(r'^seqpeek/', include('seqpeek.urls')),
     url(r'session_security/', include('session_security.urls')),
@@ -62,6 +61,9 @@ urlpatterns = [
     url(r'^share/', include('sharing.urls')),
 ]
 
-print settings.NIH_AUTH_ON
+if settings.IS_DEV:
+    from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+    urlpatterns += staticfiles_urlpatterns()
+
 if settings.NIH_AUTH_ON:
     urlpatterns.append(url(r'^demo/', include('demo.urls', namespace='demo')))

@@ -12,7 +12,7 @@ fi
 export PYTHONPATH=${HOMEROOT}/lib/:${HOMEROOT}/:${HOME}/google_appengine/:${HOME}/google_appengine/lib/protorpc-1.0/
 echo $PYTHONPATH
 echo "Running Migrations..."
-python ${HOMEROOT}/manage.py migrate --noinput
+python ${HOMEROOT}/manage.py migrate --noinput --run-syncdb
 
 #echo "Creating django superuser"
 #echo "from django.contrib.auth.models import User; User.objects.create_superuser('isb', '', 'password')" | python ${HOMEROOT}/manage.py shell
