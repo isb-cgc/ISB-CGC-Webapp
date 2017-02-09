@@ -426,9 +426,9 @@ require([
             errorMessage('Please select an existing program or insert a name for a new program');
         }
 
-        if( !$.trim($('#study-name').val()) ) {
+        if( !$.trim($('#project-name').val()) ) {
             hasErrors = true;
-            errorMessage('Please insert a valid study name');
+            errorMessage('Please insert a valid project name');
         }
 
         if( $('.data-radio:checked').val() === 'high' &&
