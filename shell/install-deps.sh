@@ -6,7 +6,8 @@ export HOMEROOT=/home/ubuntu/${CIRCLE_PROJECT_REPONAME}
 git clone -b isb-cgc-test https://github.com/isb-cgc/ISB-CGC-Common.git
 git clone -b test https://github.com/isb-cgc/ISB-CGC-API.git
 
-# Remove .pyc files
+# Remove .pyc files; these can sometimes stick around and if a
+# model has changed names it will cause various load failures
 find . -type f -name '*.pyc' -delete
 
 # Use the last commit of the master branch of ISB-CGC-Common, therefore no checkout needed.

@@ -234,7 +234,7 @@ MIDDLEWARE_CLASSES = (
     # use SSLify to enforce redirect of http to https even though we're on Django 1.8+
     # --> DO NOT REMOVE THIS OR ITS REQUIREMENTS ENTRY <--
     'sslify.middleware.SSLifyMiddleware',
-    'maintenance_mode.middleware.MaintenanceModeMiddleware',
+    'offline.middleware.OfflineMiddleware',
 )
 
 ROOT_URLCONF = 'GenespotRE.urls'
@@ -262,7 +262,7 @@ INSTALLED_APPS = (
     'workbooks',
     'data_upload',
     'analysis',
-    'maintenance_mode',
+    'offline',
 )
 
 #############################
@@ -380,7 +380,6 @@ TEMPLATES = [
                 'django.template.context_processors.tz',
                 'finalware.context_processors.contextify',
                 'GenespotRE.context_processor.additional_context',
-                'maintenance_mode.context_processors.maintenance_mode',
             ),
             # add any loaders here; if using the defaults, we can comment it out
             # 'loaders': (
@@ -409,6 +408,9 @@ SOCIALACCOUNT_PROVIDERS = \
 
 # Trying to force allauth to only use https
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
+# ...but not if this is a local dev build
+if IS_DEV:
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
 
 
 ##########################

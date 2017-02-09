@@ -17,8 +17,10 @@ from projects.models import Project
 from sharing.service import create_share
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+
 debug = settings.DEBUG
-if settings.DEBUG :
+
+if settings.DEBUG:
     import sys
 
 @login_required
@@ -31,7 +33,7 @@ def workbook_list(request):
     workbooks = userWorkbooks | sharedWorkbooks
     workbooks = workbooks.distinct()
 
-    return render(request, template, {'workbooks' : workbooks})
+    return render(request, template, {'workbooks': workbooks})
 
 def workbook_samples(request):
     template = 'workbooks/workbook_samples.html'
