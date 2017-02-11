@@ -9,6 +9,13 @@ import offline
 from views import offline_view
 import sys
 
+# Customized for ISB-CGC by spaquett@systemsbiology.org
+# Changes:
+#   - Added exception for admin/ and static/ (so pages would load necessary JS and CSS, and so admin can access the
+#     admin app to turn it back off).
+#   - Altered how access is determined for users logged in
+#   - Added sanity check for presence of content-type (since sometimes it wasn't there) to prevent KeyErrors
+
 
 class OfflineMiddleware(object):
 
@@ -18,14 +25,11 @@ class OfflineMiddleware(object):
             return
         # If offline isn't enabled, pass through
         if not offline.is_enabled():
-            print >> sys.stdout, "[STATUS] Returning normal process - offline is off"
             return
 
         # Offline is enabled; double-check for staff users
-        if not (hasattr(request, 'user')) or not request.user.is_authenticated() or not (request.user.is_staff or request.user.is_superuser):
+        if not (hasattr(request, 'user')) or not request.user.is_authenticated() or not (request.user.is_staff and request.user.is_superuser):
             return offline_view(request)
-
-        print >> sys.stdout, "[STATUS] Returning normal process for "+request.path
 
         return
 
@@ -33,9 +37,4 @@ class OfflineMiddleware(object):
         return response
 
     def is_html_response(self, response):
-        print >> sys.stdout, 'Response: ' + (response['Content-Type'].__str__() if 'content-type' in response else 'no content-type found')
         return ('Content-Type' in response and response['Content-Type'].startswith('text/html'))
-
-
-
-			
