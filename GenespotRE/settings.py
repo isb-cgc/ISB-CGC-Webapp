@@ -448,6 +448,9 @@ CHECK_NIH_USER_LOGIN_TASK_URI            = os.environ.get('CHECK_NIH_USER_LOGIN_
 # TaskQueue used by the sweep_nih_user_logins task
 LOGOUT_SWEEPER_FALLBACK_TASKQUEUE        = os.environ.get('LOGOUT_SWEEPER_FALLBACK_TASKQUEUE')
 
+# PubSub topic for ERA login notifications
+PUBSUB_TOPIC_ERA_LOGIN                   = os.environ.get('PUBSUB_TOPIC_ERA_LOGIN')
+
 ##############################
 #   Start django-finalware   #
 ##############################

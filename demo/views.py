@@ -29,7 +29,7 @@ from onelogin.saml2.auth import OneLogin_Saml2_Auth
 from onelogin.saml2.utils import OneLogin_Saml2_Utils
 
 from googleapiclient.errors import HttpError
-from google.appengine.api.taskqueue import Task
+from google.cloud import pubsub
 
 from google_helpers.storage_service import get_storage_resource
 from google_helpers.directory_service import get_directory_resource
@@ -38,6 +38,7 @@ from accounts.models import NIH_User
 import traceback
 import sys
 import csv_scanner
+from json import dumps as json_dumps
 import logging
 import datetime
 import pytz
@@ -53,6 +54,8 @@ COUNTDOWN_SECONDS = login_expiration_seconds + (60 * 15)
 LOGOUT_WORKER_TASKQUEUE = settings.LOGOUT_WORKER_TASKQUEUE
 CHECK_NIH_USER_LOGIN_TASK_URI = settings.CHECK_NIH_USER_LOGIN_TASK_URI
 CRON_MODULE = settings.CRON_MODULE
+
+PUBSUB_TOPIC_ERA_LOGIN = settings.PUBSUB_TOPIC_ERA_LOGIN
 
 
 def init_saml_auth(req):
@@ -239,15 +242,19 @@ def index(request):
 
             # Add task in queue to deactivate NIH_User entry after NIH_assertion_expiration has passed.
             try:
-                task = Task(url=CHECK_NIH_USER_LOGIN_TASK_URI,
-                            params={'user_id': request.user.id, 'deployment': CRON_MODULE},
-                            countdown=COUNTDOWN_SECONDS)
-                task.add(queue_name=LOGOUT_WORKER_TASKQUEUE)
-                logger.info('enqueued check_login task for user, {}, for {} hours from now'.format(
-                    request.user.id, COUNTDOWN_SECONDS / (60*60)))
+                ps = pubsub.Client()
+                topic = ps.topic(PUBSUB_TOPIC_ERA_LOGIN)
+                params = {
+                    'event_type': 'era_login',
+                    'user_id': request.user.id,
+                    'deployment': CRON_MODULE
+                }
+                payload = json_dumps(params)
+                topic.publish(payload)
+
             except Exception as e:
-                logger.error("[ERROR] Failed to enqueue automatic logout task: "+e.message)
-                logger.error(traceback.format_exc())
+                logger.error("[ERROR] Failed to publish to PubSub topic")
+                logger.exception(e)
 
             messages.info(request, warn_message)
             print >> sys.stdout, "[STATUS] http_host: "+req['http_host']
