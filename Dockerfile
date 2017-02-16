@@ -20,6 +20,7 @@
 # single application.
 FROM gcr.io/google_appengine/python
 
+RUN apt-key update
 RUN apt-get update
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get install -y wget
@@ -66,4 +67,4 @@ ENV PYTHONPATH=/app:/app/lib:/app/google_appengine:/app/google_appengine/lib/pro
 # Testing...
 # RUN python /app/manage.py migrate --noinput
 
-CMD gunicorn -c gunicorn.conf.py -b :$PORT GenespotRE.wsgi
+CMD gunicorn -c gunicorn.conf.py -b :$PORT GenespotRE.wsgi -t 60
