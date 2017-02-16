@@ -38,8 +38,10 @@ echo "Dependencies Installed"
 # Install PIP + Dependencies
 echo "Installing Python Libraries..."
 curl --silent https://bootstrap.pypa.io/get-pip.py | python
-# Clean out lib to prevent confusion over multiple builds
-rm -rf "${HOMEROOT}/lib/*"
+if [ -z "$CI" ]; then
+    # Clean out lib to prevent confusion over multiple builds in local development
+    rm -rf "${HOMEROOT}/lib/*"
+fi
 pip install -q -r ${HOMEROOT}/requirements.txt -t ${HOMEROOT}/lib --upgrade --only-binary all
 echo "Libraries Installed"
 
