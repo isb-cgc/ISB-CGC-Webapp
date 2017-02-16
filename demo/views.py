@@ -30,7 +30,6 @@ from onelogin.saml2.auth import OneLogin_Saml2_Auth
 from onelogin.saml2.utils import OneLogin_Saml2_Utils
 
 from googleapiclient.errors import HttpError
-from google.cloud import pubsub
 
 from google_helpers.storage_service import get_storage_resource
 from google_helpers.directory_service import get_directory_resource
@@ -61,7 +60,6 @@ PUBSUB_TOPIC_ERA_LOGIN = settings.PUBSUB_TOPIC_ERA_LOGIN
 
 def init_saml_auth(req):
     auth = OneLogin_Saml2_Auth(req, custom_base_path=settings.SAML_FOLDER)
-    print >> sys.stdout, "[STATUS] auth: "+auth.__str__()
     return auth
 
 
@@ -109,7 +107,6 @@ def index(request):
             return HttpResponseRedirect(auth.login())
     elif 'sso2' in req['get_data']:
         return_to = OneLogin_Saml2_Utils.get_self_url(req) + reverse('attrs')
-        print >> sys.stdout, "[STATUS] Returning to "+return_to + " in sso2"
         return HttpResponseRedirect(auth.login(return_to))
     elif 'slo' in req['get_data']:
         name_id = None
@@ -136,7 +133,6 @@ def index(request):
         not_auth_warn = not auth.is_authenticated()
 
         if not errors:
-            print >> sys.stdout, "[STATUS] No errors in ACS"
             request.session['samlUserdata'] = auth.get_attributes()
             request.session['samlNameId'] = auth.get_nameid()
             NIH_username = request.session['samlNameId']
@@ -242,23 +238,22 @@ def index(request):
                     logger.info("User {} added to {}.".format(user_email, ACL_GOOGLE_GROUP))
 
             # Add task in queue to deactivate NIH_User entry after NIH_assertion_expiration has passed.
-            try:
-                ps = pubsub.Client()
-                topic = ps.topic(PUBSUB_TOPIC_ERA_LOGIN)
-                params = {
-                    'event_type': 'era_login',
-                    'user_id': request.user.id,
-                    'deployment': CRON_MODULE
-                }
-                payload = json_dumps(params)
-                topic.publish(payload)
-
-            except Exception as e:
-                logger.error("[ERROR] Failed to publish to PubSub topic")
-                logger.exception(e)
+            # try:
+            #     ps = pubsub.Client()
+            #     topic = ps.topic(PUBSUB_TOPIC_ERA_LOGIN)
+            #     params = {
+            #         'event_type': 'era_login',
+            #         'user_id': request.user.id,
+            #         'deployment': CRON_MODULE
+            #     }
+            #     payload = json_dumps(params)
+            #     topic.publish(payload)
+            #
+            # except Exception as e:
+            #     logger.error("[ERROR] Failed to publish to PubSub topic")
+            #     logger.exception(e)
 
             messages.info(request, warn_message)
-            print >> sys.stdout, "[STATUS] http_host: "+req['http_host']
             return HttpResponseRedirect(auth.redirect_to('https://{}'.format(req['http_host'])))
 
     elif 'sls' in req['get_data']:
