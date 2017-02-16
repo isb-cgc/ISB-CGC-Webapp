@@ -32,9 +32,10 @@ from googleapiclient.errors import HttpError
 
 from google_helpers.storage_service import get_storage_resource
 from google_helpers.directory_service import get_directory_resource
+from google_helpers.pubsub_service import get_pubsub_service, get_full_topic_name
 from accounts.models import NIH_User
 
-import traceback
+import base64
 import sys
 import csv_scanner
 from json import dumps as json_dumps
@@ -237,22 +238,32 @@ def index(request):
                     logger.info("User {} added to {}.".format(user_email, ACL_GOOGLE_GROUP))
 
             # Add task in queue to deactivate NIH_User entry after NIH_assertion_expiration has passed.
-            # try:
-            #     ps = pubsub.Client()
-            #     topic = ps.topic(PUBSUB_TOPIC_ERA_LOGIN)
-            #     params = {
-            #         'event_type': 'era_login',
-            #         'user_id': request.user.id,
-            #         'deployment': CRON_MODULE
-            #     }
-            #     payload = json_dumps(params)
-            #     topic.publish(payload)
-            #
-            # except Exception as e:
-            #     logger.error("[ERROR] Failed to publish to PubSub topic")
-            #     logger.exception(e)
+            try:
+                full_topic_name = get_full_topic_name(PUBSUB_TOPIC_ERA_LOGIN)
+                logger.info("Full topic name: {}".format(full_topic_name))
+                client = get_pubsub_service()
+                params = {
+                    'event_type': 'era_login',
+                    'user_id': request.user.id,
+                    'deployment': CRON_MODULE
+                }
+                message = json_dumps(params)
+
+                body = {
+                    'messages': [
+                        {
+                            'data': base64.b64encode(message.encode('utf-8'))
+                        }
+                    ]
+                }
+                client.projects().topics().publish(topic=full_topic_name, body=body).execute()
+
+            except Exception as e:
+                logger.error("[ERROR] Failed to publish to PubSub topic")
+                logger.exception(e)
 
             messages.info(request, warn_message)
+            print >> sys.stdout, "[STATUS] http_host: "+req['http_host']
             return HttpResponseRedirect(auth.redirect_to('https://{}'.format(req['http_host'])))
 
     elif 'sls' in req['get_data']:
