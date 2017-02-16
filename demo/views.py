@@ -57,7 +57,7 @@ CHECK_NIH_USER_LOGIN_TASK_URI = settings.CHECK_NIH_USER_LOGIN_TASK_URI
 CRON_MODULE = settings.CRON_MODULE
 
 PUBSUB_TOPIC_ERA_LOGIN = settings.PUBSUB_TOPIC_ERA_LOGIN
-PROJECT_ID = settings.PROJECT_ID
+
 
 def init_saml_auth(req):
     auth = OneLogin_Saml2_Auth(req, custom_base_path=settings.SAML_FOLDER)
@@ -243,7 +243,7 @@ def index(request):
 
             # Add task in queue to deactivate NIH_User entry after NIH_assertion_expiration has passed.
             try:
-                full_topic_name = get_full_topic_name(PROJECT_ID, PUBSUB_TOPIC_ERA_LOGIN)
+                full_topic_name = get_full_topic_name(PUBSUB_TOPIC_ERA_LOGIN)
                 logger.info("Full topic name: {}".format(full_topic_name))
                 client = get_pubsub_service()
                 params = {
