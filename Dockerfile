@@ -20,6 +20,7 @@
 # single application.
 FROM gcr.io/google_appengine/python
 
+RUN apt-key update
 RUN apt-get update
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get install -y wget
