@@ -13,7 +13,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-from __future__ import absolute_import
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -61,7 +60,6 @@ PUBSUB_TOPIC_ERA_LOGIN = settings.PUBSUB_TOPIC_ERA_LOGIN
 
 def init_saml_auth(req):
     auth = OneLogin_Saml2_Auth(req, custom_base_path=settings.SAML_FOLDER)
-    print >> sys.stdout, "[STATUS] auth: "+auth.__str__()
     return auth
 
 
@@ -109,7 +107,6 @@ def index(request):
             return HttpResponseRedirect(auth.login())
     elif 'sso2' in req['get_data']:
         return_to = OneLogin_Saml2_Utils.get_self_url(req) + reverse('attrs')
-        print >> sys.stdout, "[STATUS] Returning to "+return_to + " in sso2"
         return HttpResponseRedirect(auth.login(return_to))
     elif 'slo' in req['get_data']:
         name_id = None
@@ -136,7 +133,6 @@ def index(request):
         not_auth_warn = not auth.is_authenticated()
 
         if not errors:
-            print >> sys.stdout, "[STATUS] No errors in ACS"
             request.session['samlUserdata'] = auth.get_attributes()
             request.session['samlNameId'] = auth.get_nameid()
             NIH_username = request.session['samlNameId']

@@ -1,33 +1,32 @@
 if [ -n "$CI" ]; then
-export HOME=/home/ubuntu/${CIRCLE_PROJECT_REPONAME}
-export HOMEROOT=/home/ubuntu/${CIRCLE_PROJECT_REPONAME}
+    export HOME=/home/ubuntu/${CIRCLE_PROJECT_REPONAME}
+    export HOMEROOT=/home/ubuntu/${CIRCLE_PROJECT_REPONAME}
 
-# Clone dependencies
-git clone -b isb-cgc-test https://github.com/isb-cgc/ISB-CGC-Common.git
-git clone -b test https://github.com/isb-cgc/ISB-CGC-API.git
+    # Clone dependencies
+    git clone -b isb-cgc-test https://github.com/isb-cgc/ISB-CGC-Common.git
+    git clone -b test https://github.com/isb-cgc/ISB-CGC-API.git
 
-# Remove .pyc files; these can sometimes stick around and if a
-# model has changed names it will cause various load failures
-find . -type f -name '*.pyc' -delete
+    # Remove .pyc files; these can sometimes stick around and if a
+    # model has changed names it will cause various load failures
+    find . -type f -name '*.pyc' -delete
 
-# Use the last commit of the master branch of ISB-CGC-Common, therefore no checkout needed.
 else
-export $(cat /home/vagrant/www/.env | grep -v ^# | xargs) 2> /dev/null
-export HOME=/home/vagrant
-export HOMEROOT=/home/vagrant/www
+    export $(cat /home/vagrant/www/.env | grep -v ^# | xargs) 2> /dev/null
+    export HOME=/home/vagrant
+    export HOMEROOT=/home/vagrant/www
 fi
 
 # Install and update apt-get info
 echo "Preparing System..."
 apt-get -y install software-properties-common
 if [ -n "$CI" ]; then
-# CI Takes care of Python update
-apt-get update -qq
+    # CI Takes care of Python update
+    apt-get update -qq
 else
-# Add apt-get repository to update python from 2.7.6 (default) to latest 2.7.x
-add-apt-repository -y ppa:fkrull/deadsnakes-python2.7
-apt-get update -qq
-apt-get install -qq -y python2.7
+    # Add apt-get repository to update python from 2.7.6 (default) to latest 2.7.x
+    add-apt-repository -y ppa:fkrull/deadsnakes-python2.7
+    apt-get update -qq
+    apt-get install -qq -y python2.7
 fi
 
 # Install apt-get dependencies
@@ -38,6 +37,10 @@ echo "Dependencies Installed"
 # Install PIP + Dependencies
 echo "Installing Python Libraries..."
 curl --silent https://bootstrap.pypa.io/get-pip.py | python
+if [ -z "$CI" ]; then
+    # Clean out lib to prevent confusion over multiple builds in local development
+    rm -rf "${HOMEROOT}/lib/*"
+fi
 pip install -q -r ${HOMEROOT}/requirements.txt -t ${HOMEROOT}/lib --upgrade --only-binary all
 echo "Libraries Installed"
 
