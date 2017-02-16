@@ -20,6 +20,7 @@
 # single application.
 FROM gcr.io/google_appengine/python
 
+# Try to fix our key signature problems
 RUN apt-key update
 RUN apt-get update
 ENV DEBIAN_FRONTEND=noninteractive
@@ -39,7 +40,7 @@ RUN dpkg --install /tmp/mysql-apt-config_0.5.3-1_all.deb
 RUN apt-get update
 
 # aaaand now let's install mysql-server
-RUN apt-get install -y mysql-server
+RUN apt-get install -y --force-yes mysql-server
 
 RUN apt-get -y install python-mysqldb
 RUN apt-get -y install python-pip
