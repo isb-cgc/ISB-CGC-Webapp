@@ -30,13 +30,13 @@ from onelogin.saml2.auth import OneLogin_Saml2_Auth
 from onelogin.saml2.utils import OneLogin_Saml2_Utils
 
 from googleapiclient.errors import HttpError
-from google.cloud import pubsub
 
 from google_helpers.storage_service import get_storage_resource
 from google_helpers.directory_service import get_directory_resource
+from google_helpers.pubsub_service import get_pubsub_service, get_full_topic_name
 from accounts.models import NIH_User
 
-import traceback
+import base64
 import sys
 import csv_scanner
 from json import dumps as json_dumps
@@ -57,7 +57,7 @@ CHECK_NIH_USER_LOGIN_TASK_URI = settings.CHECK_NIH_USER_LOGIN_TASK_URI
 CRON_MODULE = settings.CRON_MODULE
 
 PUBSUB_TOPIC_ERA_LOGIN = settings.PUBSUB_TOPIC_ERA_LOGIN
-
+PROJECT_ID = settings.PROJECT_ID
 
 def init_saml_auth(req):
     auth = OneLogin_Saml2_Auth(req, custom_base_path=settings.SAML_FOLDER)
@@ -243,15 +243,24 @@ def index(request):
 
             # Add task in queue to deactivate NIH_User entry after NIH_assertion_expiration has passed.
             try:
-                ps = pubsub.Client()
-                topic = ps.topic(PUBSUB_TOPIC_ERA_LOGIN)
+                full_topic_name = get_full_topic_name(PROJECT_ID, PUBSUB_TOPIC_ERA_LOGIN)
+                logger.info("Full topic name: {}".format(full_topic_name))
+                client = get_pubsub_service()
                 params = {
                     'event_type': 'era_login',
                     'user_id': request.user.id,
                     'deployment': CRON_MODULE
                 }
-                payload = json_dumps(params)
-                topic.publish(payload)
+                message = json_dumps(params)
+
+                body = {
+                    'messages': [
+                        {
+                            'data': base64.b64encode(message.encode('utf-8'))
+                        }
+                    ]
+                }
+                client.projects().topics().publish(topic=full_topic_name, body=body).execute()
 
             except Exception as e:
                 logger.error("[ERROR] Failed to publish to PubSub topic")
