@@ -11,11 +11,11 @@ fi
 
 export PYTHONPATH=${HOMEROOT}/lib/:${HOMEROOT}/:${HOME}/google_appengine/:${HOME}/google_appengine/lib/protorpc-1.0/
 echo $PYTHONPATH
+# If we have migrations which haven't yet been added to the database dump, make them here eg.:
+# python manage.py makemigrations <appname>
+python manage.py makemigrations adminrestrict
+# Now run migrations
 echo "Running Migrations..."
-# We have to make migrations for adminrestrict and offline until we have a new dump which has them already
-python ${HOMEROOT}/manage.py makemigrations adminrestrict
-python ${HOMEROOT}/manage.py makemigrations offline
-# Now we run migrations
 python ${HOMEROOT}/manage.py migrate --noinput
 
 echo "Creating secondary django admin superuser"
