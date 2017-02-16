@@ -11,9 +11,10 @@ fi
 
 export PYTHONPATH=${HOMEROOT}/lib/:${HOMEROOT}/:${HOME}/google_appengine/:${HOME}/google_appengine/lib/protorpc-1.0/
 echo $PYTHONPATH
-# If we have migrations which haven't yet been added to the database dump, make them here eg.:
+# If we have migrations for older, pre-migrations apps which haven't yet been added to the database dump, make them here eg.:
 # python manage.py makemigrations <appname>
-python manage.py makemigrations adminrestrict
+# >>> Once a new dump is available with these models in the database you can remove this <<<
+python ${HOMEROOT}/manage.py makemigrations adminrestrict
 # Now run migrations
 echo "Running Migrations..."
 python ${HOMEROOT}/manage.py migrate --noinput
