@@ -24,11 +24,10 @@ threadsafe: true
 #entrypoint: gunicorn -b :$PORT GenespotRE.wsgi
 
 #resources:
-#  cpu: .5
-#  memory_gb: 2.2
+#  cpu: 2
+#  memory_gb: 7.5
 
 builtins:
-#- remote_api: on
 - appstats: on
 - deferred: on
 
