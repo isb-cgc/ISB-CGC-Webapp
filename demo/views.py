@@ -122,6 +122,9 @@ def index(request):
 
         return HttpResponseRedirect(auth.logout(name_id=name_id, session_index=session_index))
     elif 'acs' in req['get_data']:
+        print >> sys.stdout, "[STATUS] recevied ?acs:"
+        print >> sys.stdout, req.__str__()
+        print >> sys.stdout, req['get_data'].__str__()
         auth.process_response()
         errors = auth.get_errors()
         if errors:
