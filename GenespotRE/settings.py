@@ -95,13 +95,7 @@ if os.environ.has_key('DB_SSL_CERT') and not IS_APP_ENGINE_FLEX:
             'key': os.environ.get('DB_SSL_KEY')
         }
     }
-
-SSL_SETTINGS = {
-    'ca': os.environ.get('DB_SSL_CA'),
-    'cert': os.environ.get('DB_SSL_CERT'),
-    'key': os.environ.get('DB_SSL_KEY')
-}
-
+    
 # Default to localhost for the site ID
 SITE_ID = 3
 
