@@ -96,6 +96,8 @@ if os.environ.has_key('DB_SSL_CERT') and not IS_APP_ENGINE_FLEX:
         }
     }
 
+DATABASE_HOST_IP = os.environ.get('DATABASE_HOST_IP','127.0.0.1')
+
 SSL_SETTINGS = {
     'ca': os.environ.get('DB_SSL_CA'),
     'cert': os.environ.get('DB_SSL_CERT'),
