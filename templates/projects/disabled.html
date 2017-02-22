@@ -14,7 +14,6 @@
         <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
     </ol>
     <h1 class="page-header pull-left">Projects</h1>
-    <a href="{% url 'project_upload' %}" class="btn btn-primary pull-right"><i class="fa fa-cloud-upload"></i>Upload Data</a>
 </div>
 {% endblock %}
 {% comment %}
@@ -34,10 +33,17 @@
 {% endcomment %}
 
 {% block content %}
-    <h4>User data uploads are temporarily disabled. Any projects you have previously uploaded will still be
-        available in your <a href="{% url 'projects' %}">Saved Projects</a> list, and you can continue to
-        work with them, but new data cannot be added at this time.</h4>
+    <h4>User data uploads are temporarily disabled.</h4>
 
-    <p>We apologize for the inconvenience.</p>
+    <p>
+        Any projects you have previously uploaded will continue to be available in your
+        <a href="{% url 'projects' %}">Saved Projects</a> list, and you can continue to work with them, but new data
+        cannot be added at this time.
+    </p>
+    <p>
+        We apologize for the inconvenience, and will have user data uploads back online as soon as possible.
+    </p>
 
 {% endblock %}
+
+{% block js_file %}{% static 'js/base.js' %}{% endblock %}
