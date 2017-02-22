@@ -1,7 +1,7 @@
 ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_TEST}/${TEST_ENV_FILE}" ./.env
-./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_TEST}/${TEST_CERT_FILE}" ./client-cert.pem
-./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_TEST}/${TEST_KEY_FILE}" ./client-key.pem
-./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_TEST}/${TEST_CA_FILE}" ./server-ca.pem
+./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_TEST}/test-ssl/${TEST_CERT_FILE}" ./client-cert.pem
+./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_TEST}/test-ssl/${TEST_KEY_FILE}" ./client-key.pem
+./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_TEST}/test-ssl/${TEST_CA_FILE}" ./server-ca.pem
 ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_TEST}/${TEST_SECRETS_FILE}" ./client_secrets.json
 ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_TEST}/${TEST_PEM_FILE}" ./privatekey.pem
 ./google-cloud-sdk/bin/gsutil rsync -R static/ gs://webapp-test-static-files/static
