@@ -14,7 +14,6 @@
         <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
     </ol>
     <h1 class="page-header pull-left">Projects</h1>
-    <a href="{% url 'project_upload' %}" class="btn btn-primary pull-right"><i class="fa fa-cloud-upload"></i>Upload Data</a>
 </div>
 {% endblock %}
 {% comment %}
@@ -46,3 +45,5 @@
     </p>
 
 {% endblock %}
+
+{% block js_file %}{% static 'js/project_list.js' %}{% endblock %}
