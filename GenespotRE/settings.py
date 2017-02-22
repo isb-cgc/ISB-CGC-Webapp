@@ -95,16 +95,7 @@ if os.environ.has_key('DB_SSL_CERT') and not IS_APP_ENGINE_FLEX:
             'key': os.environ.get('DB_SSL_KEY')
         }
     }
-
-DATABASE_HOST_IP = os.environ.get('DATABASE_HOST_IP', '127.0.0.1')
-DATABASE_HOST_PORT = int(os.environ.get('DATABASE_HOST_PORT', 3306))
-
-SSL_SETTINGS = {
-    'ca': os.environ.get('DB_SSL_CA'),
-    'cert': os.environ.get('DB_SSL_CERT'),
-    'key': os.environ.get('DB_SSL_KEY')
-}
-
+    
 # Default to localhost for the site ID
 SITE_ID = 3
 
