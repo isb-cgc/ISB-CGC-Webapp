@@ -17,20 +17,20 @@
  */
 
 require.config({
-    baseUrl: '/static/js/',
+    baseUrl: STATIC_FILES_URL+'js/',
     paths: {
         jquery: 'libs/jquery-1.11.1.min',
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
         session_security: 'session_security',
         underscore: 'libs/underscore-min',
-        igvbeta: 'libs/igv'
+        igv_lib: 'libs/igv'
     },
     shim: {
         'session_security': ['jquery'],
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
-        'igvbeta': ['jquery', 'jqueryui']
+        'igv_lib': ['jquery', 'jqueryui']
     }
 });
 
@@ -40,10 +40,9 @@ require([
     'jqueryui',
     'session_security',
     'bootstrap',
-    'igvbeta'
+    'igv_lib'
 
-], function($, jqueryui, session_security, bs, igvbeta) {
-
+], function($, jqueryui, session_security, bs, igv_lib) {
     var browser;
     var tracks = [];
     var readgroupset_divs = $('.readgroupset-data');
@@ -92,8 +91,10 @@ require([
         withCredentials: true
     };
     $('#igv-div').empty();
+
+    // Invoking libs/igv creates a global igv var for us to use
     igv.browser = null;
-    igv.oauth.google.setRedirectUrl(base_url, service_account);
+    igv.oauth.google.setRedirectUrl(BASE_URL, service_account);
     igv.oauth.google.login();
 
     browser = igv.createBrowser($('#igv-div')[0], options);

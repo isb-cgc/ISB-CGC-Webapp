@@ -332,7 +332,6 @@ def bootstrap_file_data():
 
         cursorDict.execute(get_studies)
         for study in cursorDict.fetchall():
-            print study
 
             # Create UserUpload entry
             cursor.execute(insert_userupload, (int(study['owner_id']),))

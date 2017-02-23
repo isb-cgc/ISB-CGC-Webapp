@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2016, Institute for Systems Biology
+ * Copyright 2017, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
  */
 
 require.config({
-    baseUrl: '/static/js/',
+    baseUrl: STATIC_FILES_URL+'js/',
     paths: {
         jquery: 'libs/jquery-1.11.1.min',
         bootstrap: 'libs/bootstrap.min',
@@ -51,7 +51,8 @@ require.config({
         'bloodhound': {
            deps: ['jquery'],
            exports: 'Bloodhound'
-        }
+        },
+        'base': ['jquery', 'jqueryui', 'session_security', 'bootstrap', 'underscore']
     }
 });
 
@@ -64,15 +65,15 @@ require([
     'd3tip',
     'search_helpers',
     'bloodhound',
+    'underscore',
+    'base',
     'typeahead',
     'underscore',
     'tokenfield',
     'vis_helpers',
     'tree_graph',
-    'stack_bar_chart',
-    'base'
-], function ($, jqueryui, bootstrap, session_security, d3, d3tip, search_helpers, Bloodhound, typeahead, _) {
-
+    'stack_bar_chart'
+], function ($, jqueryui, bootstrap, session_security, d3, d3tip, search_helpers, Bloodhound, _, base) {
     var savingComment = false;
     var savingChanges = false;
     var SUBSEQUENT_DELAY = 600;
@@ -87,9 +88,9 @@ require([
     var gene_suggestions = new Bloodhound({
         datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
         queryTokenizer: Bloodhound.tokenizers.whitespace,
-        prefetch : base_url + '/genes/suggest/a.json',
+        prefetch : BASE_URL + '/genes/suggest/a.json',
         remote: {
-            url: base_url + '/genes/suggest/%QUERY.json',
+            url: BASE_URL + '/genes/suggest/%QUERY.json',
             wildcard: '%QUERY'
         }
     });
@@ -161,7 +162,7 @@ require([
             $.ajax({
                 type        : 'POST',
                 dataType    :'json',
-                url         : base_url + '/genes/is_valid/',
+                url         : BASE_URL + '/genes/is_valid/',
                 data        : JSON.stringify({'genes-list' : list}),
                 beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                 success : function (data) {
@@ -208,7 +209,7 @@ require([
         (update_displays_thread !== null) && clearTimeout(update_displays_thread);
 
         update_displays_thread = setTimeout(function(){
-            search_helper_obj.update_counts_parsets(base_url, 'metadata_counts_platform_list', cohort_id, 'v2').then(
+            search_helper_obj.update_counts_parsets(BASE_URL, 'metadata_counts_platform_list', cohort_id, 'v2').then(
                 function(){!withoutCheckChanges && check_for_changes();}
             );
         },SUBSEQUENT_DELAY);
@@ -486,9 +487,18 @@ require([
         update_displays();
     });
 
+    $('button[data-target="#apply-edits-modal"]').on('click',function(e){
+        // Clear previous 'bad name' alerts
+        $('#unallowed-chars-alert').hide();
+
+    });
 
 
     $('button[data-target="#create-cohort-modal"]').on('click',function(e){
+
+        // Clear previous 'bad name' alerts
+        $('#unallowed-chars-alert').hide();
+
         // A user can only make a user data cohort OR an ISB-CGC cohort; if they have
         // chosen filters for both, the one which was active when they clicked 'save as new'
         // is the one which is used.
@@ -531,9 +541,24 @@ require([
 
     $('#create-cohort-form, #apply-edits-form').on('submit', function(e) {
 
+        $('#unallowed-chars-alert').hide();
+
         if(savingChanges) {
             e.preventDefault();
             return false;
+        }
+
+        if(!cohort_id || (original_title !== $('#edit-cohort-name').val())) {
+            var name = $('#create-cohort-name').val() || $('#edit-cohort-name').val();
+
+            var unallowed = name.match(base.whitelist);
+
+            if(unallowed) {
+                $('.unallowed-chars').text(unallowed.join(", "));
+                $('#unallowed-chars-alert').show();
+                e.preventDefault();
+                return false;
+            }
         }
 
         var form = $(this);
@@ -643,7 +668,7 @@ require([
         var form = this;
         $.ajax({
             type: 'POST',
-            url: base_url + '/cohorts/save_cohort_comment/',
+            url: BASE_URL + '/cohorts/save_cohort_comment/',
             data: $(this).serialize(),
             success: function(data) {
                 data = JSON.parse(data);
@@ -717,7 +742,7 @@ require([
     // onClick: Remove shared user
     $('.remove-shared-user').on('click', function() {
         var user_id = $(this).attr('data-user-id');
-        var url = base_url + '/cohorts/unshare_cohort/' + cohort_id + '/';
+        var url = BASE_URL + '/cohorts/unshare_cohort/' + cohort_id + '/';
         var csrftoken = $.getCookie('csrftoken');
         var button = $(this);
         $.ajax({

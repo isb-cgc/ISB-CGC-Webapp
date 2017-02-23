@@ -203,29 +203,7 @@
         </div>
     </div>
 
-    <!-- Create Cohort Modal -->
-    <div class="modal fade" id="create-cohort-modal" tabindex="-1" role="dialog" aria-labelledby="createCohortModal" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="createCohortModal">Create Cohort</h4>
-                </div>
-                <form id="create-cohort-form" method="POST" action="{% url 'save_cohort' %}">
-                    <div class="modal-body">
-                        <label for="create-cohort-name">Name:</label>
-                        <input class="form-control" type="text" id="create-cohort-name" name="name" value="{{ cohort.name }}"/>
-                    </div>
-                    <div class="modal-footer">
-                        {% csrf_token %}
-                        <input type="submit" value="Create Cohort" class="btn btn-primary" />
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Apply Filters Modal -->
+    <!-- Apply Edits Modal -->
     <div class="modal fade" id="apply-edits-modal" tabindex="-1" role="dialog" aria-labelledby="applyFiltersModal" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -235,6 +213,10 @@
                 </div>
                 <form id="apply-edits-form" method="POST" action="{% url 'save_cohort' %}">
                     <div class="modal-body">
+                        <div id="unallowed-chars-alert" class="alert alert-warning alert-dismissable" style="display: none;">
+                            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                            Your cohort's name contains invalid characters (<span class="unallowed-chars"></span>). Please choose another name.
+                        </div>
                         <label for="apply-edit-cohort-name">Saving changes will permanently modify the existing cohort.</label>
                         <input type="hidden" id="apply-edit-cohort-name" name="name" value="{{ cohort.name }}"/>
                     </div>
@@ -275,8 +257,6 @@
     var attr_list = {{ attr_list|tojson|safe }};
     var attr_counts = {{ attr_list_count|tojson|safe }};
     var total_samples = {{ total_samples|safe }};
-    var base_url = '{{ base_url|safe }}';
-    var base_api_url = '{{ base_api_url|safe }}';
     var cohort_id = {{ cohort.id }};
     var user_data = {{ user_data|tojson|safe }};
     var metadata_counts = {{ metadata_counts|tojson|safe }};

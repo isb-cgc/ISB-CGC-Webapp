@@ -37,6 +37,10 @@ echo "Dependencies Installed"
 # Install PIP + Dependencies
 echo "Installing Python Libraries..."
 curl --silent https://bootstrap.pypa.io/get-pip.py | python
+if [ -z "$CI" ]; then
+    # Clean out lib to prevent confusion over multiple builds in local development
+    rm -rf "${HOMEROOT}/lib/*"
+fi
 pip install -q -r ${HOMEROOT}/requirements.txt -t ${HOMEROOT}/lib --upgrade --only-binary all
 echo "Libraries Installed"
 
@@ -49,7 +53,10 @@ wget -q https://storage.googleapis.com/appengine-sdks/featured/google_appengine_
 unzip -nq ${HOME}/google_appengine.zip -d $HOME
 export PATH=$PATH:${HOME}/google_appengine/
 mkdir ${HOMEROOT}/lib/endpoints/ 2> /dev/null
+mkdir ${HOMEROOT}/endpoints/ 2> /dev/null
 cp ${HOME}/google_appengine/lib/endpoints-1.0/endpoints/* ${HOMEROOT}/lib/endpoints/
+cp ${HOME}/google_appengine/lib/endpoints-1.0/endpoints/* ${HOMEROOT}/endpoints/
+ls ${HOMEROOT}
 echo "Google App Engine Installed"
 
 # Install Google Cloud SDK
