@@ -17,10 +17,9 @@ import logging
 import os
 import sys
 
-from google.appengine.api import modules, urlfetch
-
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import never_cache
 from django.contrib.auth.models import User
 from django.db.models import Count
 from django.http import HttpResponse
@@ -45,8 +44,6 @@ from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 
 debug = settings.DEBUG
 logger = logging.getLogger(__name__)
-
-urlfetch.set_default_fetch_deadline(60)
 
 login_expiration_seconds = settings.LOGIN_EXPIRATION_HOURS * 60 * 60
 # schedule check_login tasks for 15 minutes after the user's login will expire
@@ -104,15 +101,8 @@ def _decode_dict(data):
 Handles login and user creation for new users.
 Returns user to landing page.
 '''
+@never_cache
 def landing_page(request):
-    if debug:
-        print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
-        print >> sys.stderr,'App Version: '+modules.get_current_version_name()
-        try:
-            print >> sys.stderr,'App BACKEND_ID: '+os.getenv('BACKEND_ID')
-        except:
-            print >> sys.stderr,"Printing os.getenv('BACKEND_ID') Failed"
-
     return render(request, 'GenespotRE/landing.html',
                   {'request': request})
 
@@ -122,19 +112,6 @@ Returns css_test page used to test css for general ui elements
 def css_test(request):
     # if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     return render(request, 'GenespotRE/css_test.html', {'request': request})
-
-
-'''
-Returns page that lists users
-'''
-@login_required
-def user_list(request):
-    # if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
-    url = USER_API_URL + '/users'
-    result = urlfetch.fetch(url, deadline=60)
-    users = json.loads(str(result.content))
-    return render(request, 'GenespotRE/user_list.html', {'request': request,
-                                                          'users': users})
 
 
 '''
@@ -332,7 +309,7 @@ def igv(request, sample_barcode=None, readgroupset_id=None):
     context['readgroupset_list'] = readgroupset_list
     context['bam_list'] = bam_list
     context['base_url'] = settings.BASE_URL
-    context['service_account'] = settings.WEB_CLIENT_ID
+    context['service_account'] = settings.IGV_WEB_CLIENT_ID
 
     return render(request, 'GenespotRE/igv.html', context)
 

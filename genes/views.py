@@ -1,8 +1,8 @@
 from copy import deepcopy
 import json
 import re
+import logging
 import sys
-from google.appengine.api import urlfetch
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.utils.safestring import mark_safe
@@ -16,6 +16,10 @@ from models import GeneFavorite, GeneSymbol
 from workbooks.models import Workbook, Worksheet
 from django.contrib.auth.models import User
 from django.conf import settings
+
+WHITELIST_RE = settings.WHITELIST_RE
+
+logger = logging.getLogger(__name__)
 
 # validates whether each gene is a list of gene symbols are known gene symbols
 # returns a json object keyed on each gene symbol with values of whether or not they are valid
@@ -173,6 +177,16 @@ def gene_fav_save(request, gene_fav_id=0):
 
     gene_list = [x.strip().upper() for x in gene_list.split(' ')]
     gene_list = list(set(gene_list))
+
+    whitelist = re.compile(WHITELIST_RE, re.UNICODE)
+    match = whitelist.search(unicode(name))
+    if match:
+        # XSS risk, log and fail this cohort save
+        match = whitelist.findall(unicode(name))
+        logger.error('[ERROR] While saving a gene list, saw a malformed name: ' + name + ', characters: ' + match.__str__())
+        messages.error(request, "Your gene list's name contains invalid characters; please choose another name.")
+        redirect_url = reverse('genes') if not gene_fav_id else reverse('gene_fav_detail', kwargs={'gene_fav_id':gene_fav_id})
+        return redirect(redirect_url)
 
     if gene_fav_id :
         try:

@@ -32,6 +32,10 @@
 {% endblock %}
 {% block content %}
 <div class="container">
+    <div id="unallowed-chars-alert" class="alert alert-warning alert-dismissable" style="display: none;">
+        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        Your variable list's name contains invalid characters (<span class="unallowed-chars"></span>). Please choose another name.
+    </div>
     <section class="panel panel-defaul">
         <div class="panel-heading">
         </div>
@@ -90,7 +94,7 @@
                         <li role="menuitem">
                             <input type="submit" value="Save as Favorite" class="btn btn-primary"/>
                         </li>
-                        <li role="menuitem"><a class="cencel-edit" href="{% url 'genes' %}">Cancel</a></li>
+                        <li role="menuitem"><a class="cancel-edit" href="{% url 'genes' %}">Cancel</a></li>
                     {% endif %}
                     <menuitem class="btn btn-link pull-right"><a href="http://www.genenames.org/" target="_blank">View Gene Identifiers</a></menuitem>
                 </ul>
@@ -99,7 +103,7 @@
     </section>
 </div>
 <script type="text/javascript">
-    var base_url = '{{ base_url|safe }}';
+
     {% if gene_favorite %}
         var gene_fav = { genes : {{ genes }} };
     {% else %}

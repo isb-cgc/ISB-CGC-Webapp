@@ -17,7 +17,7 @@
  */
 
 require.config({
-    baseUrl: '/static/js/',
+    baseUrl: STATIC_FILES_URL+'js/',
     paths: {
         jquery: 'libs/jquery-1.11.1.min',
         bootstrap: 'libs/bootstrap.min',
@@ -353,7 +353,7 @@ require([
         var data = $(this).find('input[type="text"]').val();
         $.ajax({
             type: 'get',
-            url: base_url + '/search_cohorts_viz/?q=' + data,
+            url: BASE_URL + '/search_cohorts_viz/?q=' + data,
             success: function(data) {
                 data = JSON.parse(data);
 

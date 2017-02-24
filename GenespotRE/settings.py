@@ -1,6 +1,5 @@
 """
-
-Copyright 2016, Institute for Systems Biology
+Copyright 2017, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,7 +12,6 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
 """
 
 # Django settings for GAE_Django17 project.
@@ -25,11 +23,13 @@ import dotenv
 
 dotenv.read_dotenv(join(dirname(__file__), '../.env'))
 
+APP_ENGINE_FLEX = 'aef-'
+
 BASE_DIR                = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + os.sep
 
 SHARED_SOURCE_DIRECTORIES = [
     'ISB-CGC-Common',
-    'ISB-CGC-API'
+    'ISB-CGC-API',
 ]
 
 # Add the shared Django application subdirectory to the Python module search path
@@ -58,7 +58,7 @@ CRON_MODULE             = os.environ.get('CRON_MODULE')
 # Log Names
 SERVICE_ACCOUNT_LOG_NAME = os.environ.get('SERVICE_ACCOUNT_LOG_NAME', 'local_dev_logging')
 
-BASE_URL                = os.environ.get('BASE_URL', 'http://isb-cgc.appspot.com')
+BASE_URL                = os.environ.get('BASE_URL', 'https://isb-cgc.appspot.com')
 BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://api-dot-isb-cgc.appspot.com')
 
 # Compute services - Should not be necessary in webapp
@@ -80,13 +80,19 @@ USER_DATA_ON            = bool(os.environ.get('USER_DATA_ON', False))
 DATABASES = {'default': {
     'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.mysql'),
     'HOST': os.environ.get('DATABASE_HOST', '127.0.0.1'),
-    'PORT': os.environ.get('DATABASE_PORT', 3306),
     'NAME': os.environ.get('DATABASE_NAME', ''),
     'USER': os.environ.get('DATABASE_USER'),
     'PASSWORD': os.environ.get('DATABASE_PASSWORD')
 }}
 
-if os.environ.has_key('DB_SSL_CERT'):
+DB_SOCKET = DATABASES['default']['HOST'] if 'cloudsql' in DATABASES['default']['HOST'] else None
+
+IS_DEV = bool(os.environ.get('IS_DEV', False))
+IS_APP_ENGINE_FLEX = os.getenv('GAE_INSTANCE', '').startswith(APP_ENGINE_FLEX)
+
+# If this is a GAE-Flex deployment, we don't need to specify SSL; the proxy will take
+# care of that for us
+if os.environ.has_key('DB_SSL_CERT') and not IS_APP_ENGINE_FLEX:
     DATABASES['default']['OPTIONS'] = {
         'ssl': {
             'ca': os.environ.get('DB_SSL_CA'),
@@ -94,13 +100,21 @@ if os.environ.has_key('DB_SSL_CERT'):
             'key': os.environ.get('DB_SSL_KEY')
         }
     }
-if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):
-    SITE_ID = 4
-    NIH_AUTH_ON = True
-else:
-    SITE_ID = 3
-    NIH_AUTH_ON = False
 
+# Default to localhost for the site ID
+SITE_ID = 3
+
+# Swap to appspot.com site ID if we detect AEF
+if IS_APP_ENGINE_FLEX:
+    print >> sys.stdout, "[STATUS] AppEngine Flex detected."
+    SITE_ID = 4
+
+# Default to no NIH Auth unless we are not on a local dev environment *and* are in AppEngine-Flex
+NIH_AUTH_ON = False
+
+if not IS_DEV and IS_APP_ENGINE_FLEX:
+    print >> sys.stdout, "[STATUS] NIH_AUTH_ON is TRUE"
+    NIH_AUTH_ON = True
 
 def get_project_identifier():
     return BQ_PROJECT_ID
@@ -130,9 +144,20 @@ PROCESSING_JENKINS_PROJECT  = os.environ.get('PROCESSING_JENKINS_PROJECT', 'cgc-
 PROCESSING_JENKINS_USER     = os.environ.get('PROCESSING_JENKINS_USER', 'user')
 PROCESSING_JENKINS_PASSWORD = os.environ.get('PROCESSING_JENKINS_PASSWORD', '')
 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 CSRF_COOKIE_SECURE = bool(os.environ.get('CSRF_COOKIE_SECURE', False))
 SESSION_COOKIE_SECURE = bool(os.environ.get('SESSION_COOKIE_SECURE', False))
+SECURE_SSL_REDIRECT = bool(os.environ.get('SECURE_SSL_REDIRECT', False))
+
+# Due to the behavior of AppEngine Flex and the load balancer, we have to explicitly
+# use SSLify to enforce redirect of http to https even though we're on Django 1.8+
+# --> DO NOT REMOVE THIS OR ITS REQUIREMENTS ENTRY <--
+SSLIFY_DISABLE = True if not SECURE_SSL_REDIRECT else False
+
+if SECURE_SSL_REDIRECT:
+    os.environ['HTTPS'] = "on"
+    os.environ['wsgi.url_scheme'] = 'https'
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -177,7 +202,7 @@ STATIC_ROOT = ''
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
-STATIC_URL = '/static/'
+STATIC_URL = os.environ.get('STATIC_URL', '/static/')
 
 # Additional locations of static files
 STATICFILES_DIRS = (
@@ -200,16 +225,22 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '')
 MIDDLEWARE_CLASSES = (
     # For using NDB with Django
     # documentation: https://cloud.google.com/appengine/docs/python/ndb/#integration
-    'google.appengine.ext.ndb.django_middleware.NdbDjangoMiddleware',
-    'google.appengine.ext.appstats.recording.AppStatsDjangoMiddleware',
+    # WE DON'T SEEM TO BE USING NDB SO I'M COMMENTING THIS OUT - PL
+    # 'google.appengine.ext.ndb.django_middleware.NdbDjangoMiddleware',
+    # 'google.appengine.ext.appstats.recording.AppStatsDjangoMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'adminrestrict.middleware.AdminPagesRestrictMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
+    # Due to the behavior of AppEngine Flex and the load balancer, we have to explicitly
+    # use SSLify to enforce redirect of http to https even though we're on Django 1.8+
+    # --> DO NOT REMOVE THIS OR ITS REQUIREMENTS ENTRY <--
+    'sslify.middleware.SSLifyMiddleware',
+    'offline.middleware.OfflineMiddleware',
 )
 
 ROOT_URLCONF = 'GenespotRE.urls'
@@ -237,6 +268,8 @@ INSTALLED_APPS = (
     'workbooks',
     'data_upload',
     'analysis',
+    'offline',
+    'adminrestrict',
 )
 
 #############################
@@ -277,12 +310,46 @@ LOGGING = {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
-        }
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler'
+        },
     },
     'loggers': {
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
+            'propagate': True,
+        },
+        'cohorts': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'allauth': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'demo': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'projects': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'workbooks': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'accounts': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
             'propagate': True,
         },
     }
@@ -346,6 +413,12 @@ SOCIALACCOUNT_PROVIDERS = \
         }
     }
 
+# Trying to force allauth to only use https
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
+# ...but not if this is a local dev build
+if IS_DEV:
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
+
 
 ##########################
 #   End django-allauth   #
@@ -356,6 +429,7 @@ CLIENT_SECRETS                  = os.path.join(os.path.dirname(os.path.dirname(_
 PEM_FILE                        = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('PEM_FILE')) if os.environ.get('PEM_FILE') else ''
 CLIENT_EMAIL                    = os.environ.get('CLIENT_EMAIL', '') # Client email from client_secrets.json
 WEB_CLIENT_ID                   = os.environ.get('WEB_CLIENT_ID', '') # Client ID from client_secrets.json
+IGV_WEB_CLIENT_ID               = os.environ.get('IGV_WEB_CLIENT_ID', WEB_CLIENT_ID)
 INSTALLED_APP_CLIENT_ID         = os.environ.get('INSTALLED_APP_CLIENT_ID', '') # Native Client ID
 
 #################################
@@ -378,6 +452,12 @@ CHECK_NIH_USER_LOGIN_TASK_URI            = os.environ.get('CHECK_NIH_USER_LOGIN_
 
 # TaskQueue used by the sweep_nih_user_logins task
 LOGOUT_SWEEPER_FALLBACK_TASKQUEUE        = os.environ.get('LOGOUT_SWEEPER_FALLBACK_TASKQUEUE')
+
+# PubSub topic for ERA login notifications
+PUBSUB_TOPIC_ERA_LOGIN                   = os.environ.get('PUBSUB_TOPIC_ERA_LOGIN')
+
+# User project access key
+USER_GCP_ACCESS_CREDENTIALS              = os.environ.get('USER_GCP_ACCESS_CREDENTIALS')
 
 ##############################
 #   Start django-finalware   #
@@ -422,3 +502,5 @@ MAX_FILES_IGV = 5
 EMAIL_SERVICE_API_URL = os.environ.get('EMAIL_SERVICE_API_URL', '')
 EMAIL_SERVICE_API_KEY = os.environ.get('EMAIL_SERVICE_API_KEY', '')
 NOTIFICATION_EMAIL_FROM_ADDRESS = os.environ.get('NOTIFICATOON_EMAIL_FROM_ADDRESS', '')
+
+WHITELIST_RE = ur'([^\\\_\|\"\+~@:#\$%\^&\*=\-\.,\(\)0-9a-zA-Z\s\xc7\xfc\xe9\xe2\xe4\xe0\xe5\xe7\xea\xeb\xe8\xef\xee\xed\xec\xc4\xc5\xc9\xe6\xc6\xf4\xf6\xf2\xfb\xf9\xd6\xdc\xe1\xf3\xfa\xf1\xd1\xc0\xc1\xc2\xc3\xc8\xca\xcb\xcc\xcd\xce\xcf\xd0\xd2\xd3\xd4\xd5\xd8\xd9\xda\xdb\xdd\xdf\xe3\xf0\xf5\xf8\xfd\xfe\xff])'
