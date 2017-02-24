@@ -456,6 +456,9 @@ LOGOUT_SWEEPER_FALLBACK_TASKQUEUE        = os.environ.get('LOGOUT_SWEEPER_FALLBA
 # PubSub topic for ERA login notifications
 PUBSUB_TOPIC_ERA_LOGIN                   = os.environ.get('PUBSUB_TOPIC_ERA_LOGIN')
 
+# User project access key
+USER_GCP_ACCESS_CREDENTIALS              = os.environ.get('USER_GCP_ACCESS_CREDENTIALS')
+
 ##############################
 #   Start django-finalware   #
 ##############################
