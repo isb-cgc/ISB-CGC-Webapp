@@ -35,11 +35,15 @@ framework.
 # file. This includes Django's development server, if the WSGI_APPLICATION
 # setting points here.
 from django.core.wsgi import get_wsgi_application
+
+forwarded_allow_ips = '*'
+secure_scheme_headers = {'X-APPENGINE-HTTPS': 'on'}
+
 application = get_wsgi_application()
+
+print >> sys.stsout, "[STATUS] Successfully retrieved application in wsgi.py"
 
 # Apply WSGI middleware here.
 # from helloworld.wsgi import HelloWorldApplication
 # application = HelloWorldApplication(application)
 
-forwarded_allow_ips = '*'
-secure_scheme_headers = {'X-APPENGINE-HTTPS': 'on'}
