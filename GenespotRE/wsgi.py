@@ -35,11 +35,30 @@ framework.
 # file. This includes Django's development server, if the WSGI_APPLICATION
 # setting points here.
 from django.core.wsgi import get_wsgi_application
+
+import sys, os
+
+forwarded_allow_ips = '*'
+secure_scheme_headers = {'X-APPENGINE-HTTPS': 'on'}
+
 application = get_wsgi_application()
+
+print >> sys.stdout, "__name__ =", __name__
+print >> sys.stdout, "__file__ =", __file__
+print >> sys.stdout, "os.getpid() =", os.getpid()
+print >> sys.stdout, "os.getcwd() =", os.getcwd()
+print >> sys.stdout, "os.curdir =", os.curdir
+print >> sys.stdout, "sys.path =", repr(sys.path)
+print >> sys.stdout, "sys.modules.keys() =", repr(sys.modules.keys())
+print >> sys.stdout, "sys.modules.has_key('mysite') =", sys.modules.has_key('mysite')
+if sys.modules.has_key('mysite'):
+  print >> sys.stdout, "sys.modules['mysite'].__name__ =", sys.modules['mysite'].__name__
+  print >> sys.stdout, "sys.modules['mysite'].__file__ =", sys.modules['mysite'].__file__
+  print >> sys.stdout, "os.environ['DJANGO_SETTINGS_MODULE'] =", os.environ.get('DJANGO_SETTINGS_MODULE', None)
+
+print >> sys.stdout, "[STATUS] Successfully retrieved application in wsgi.py"
 
 # Apply WSGI middleware here.
 # from helloworld.wsgi import HelloWorldApplication
 # application = HelloWorldApplication(application)
 
-forwarded_allow_ips = '*'
-secure_scheme_headers = {'X-APPENGINE-HTTPS': 'on'}
