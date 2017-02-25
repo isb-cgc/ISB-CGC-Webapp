@@ -311,6 +311,11 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler'
         },
+        'console_all': {
+            'level': 'DEBUG',
+            'filters': ['require_debug_false'],
+            'class': 'logging.StreamHandler'
+        }
     },
     'loggers': {
         'django.request': {
@@ -319,32 +324,32 @@ LOGGING = {
             'propagate': True,
         },
         'cohorts': {
-            'handlers': ['console'],
+            'handlers': ['console_all'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'allauth': {
-            'handlers': ['console'],
+            'handlers': ['console_all'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'demo': {
-            'handlers': ['console'],
+            'handlers': ['console_all'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'projects': {
-            'handlers': ['console'],
+            'handlers': ['console_all'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'workbooks': {
-            'handlers': ['console'],
+            'handlers': ['console_all'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'accounts': {
-            'handlers': ['console'],
+            'handlers': ['console_all'],
             'level': 'DEBUG',
             'propagate': True,
         },
