@@ -66,4 +66,6 @@ ENV PYTHONPATH=/app:/app/lib:/app/google_appengine:/app/google_appengine/lib/pro
 # Testing...
 # RUN python /app/manage.py migrate --noinput
 
+RUN echo "[STATUS] Starting gunicorn, bound to port ${PORT}"
+
 CMD gunicorn -c gunicorn.conf.py -b :$PORT GenespotRE.wsgi -w 3 -t 130
