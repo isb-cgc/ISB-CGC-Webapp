@@ -219,6 +219,10 @@ STATICFILES_FINDERS = (
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '')
 
 MIDDLEWARE_CLASSES = (
+    # Due to the behavior of AppEngine Flex and the load balancer, we have to explicitly
+    # use SSLify to enforce redirect of http to https even though we're on Django 1.8+
+    # --> DO NOT REMOVE THIS OR ITS REQUIREMENTS ENTRY <--
+    'sslify.middleware.SSLifyMiddleware',
     # For using NDB with Django
     # documentation: https://cloud.google.com/appengine/docs/python/ndb/#integration
     # WE DON'T SEEM TO BE USING NDB SO I'M COMMENTING THIS OUT - PL
@@ -232,10 +236,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # Due to the behavior of AppEngine Flex and the load balancer, we have to explicitly
-    # use SSLify to enforce redirect of http to https even though we're on Django 1.8+
-    # --> DO NOT REMOVE THIS OR ITS REQUIREMENTS ENTRY <--
-    'sslify.middleware.SSLifyMiddleware',
     'offline.middleware.OfflineMiddleware',
 )
 
