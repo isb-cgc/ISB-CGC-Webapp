@@ -22,4 +22,4 @@ deployment:
     branch: [isb-cgc-prod]
     commands:
       - sudo -E rm -rf ./lib
-      - sudo -E ./google-cloud-sdk/bin/gcloud app deploy --quiet --verbosity=debug
+      - sudo -E ./google-cloud-sdk/bin/gcloud app deploy --quiet
