@@ -63,7 +63,5 @@ RUN cp /app/endpoints/* /app/lib/endpoints/
 
 ENV PYTHONPATH=/app:/app/lib:/app/google_appengine:/app/google_appengine/lib/protorpc-1.0
 
-# Testing...
-# RUN python /app/manage.py migrate --noinput
-
+# -t to 130 until we can diagnose database response speed issues
 CMD gunicorn -c gunicorn.conf.py -b :$PORT GenespotRE.wsgi -w 3 -t 130
