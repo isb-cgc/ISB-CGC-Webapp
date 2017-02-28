@@ -58,6 +58,10 @@ handlers:
 #  expiration: 0
 #  secure: always
 
+# Disabling health check to see what this shows us
+health_check:
+  enable_health_check: False
+
 beta_settings:
     cloud_sql_instances: isb-cgc:us-central1:production
 
