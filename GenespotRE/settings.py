@@ -154,6 +154,11 @@ SSLIFY_DISABLE = True if not SECURE_SSL_REDIRECT else False
 if SECURE_SSL_REDIRECT:
     os.environ['HTTPS'] = "on"
     os.environ['wsgi.url_scheme'] = 'https'
+    # Exempt the health check so it can go through
+    SECURE_REDIRECT_EXEMPT = [r'^_ah/health$', ]
+    SSLIFY_DISABLE_FOR_REQUEST = [
+        lambda request: request.get_full_path().startswith('/_ah/health')
+    ]
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
