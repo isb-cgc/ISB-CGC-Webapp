@@ -37,7 +37,8 @@ for directory_name in SHARED_SOURCE_DIRECTORIES:
     sys.path.append(os.path.join(BASE_DIR, directory_name))
 
 DEBUG                   = bool(os.environ.get('DEBUG', False))
-ALLOWED_HOSTS           = [os.environ.get('ALLOWED_HOST', 'localhost')]
+
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOST', 'localhost').split(',')
 
 SSL_DIR = os.path.abspath(os.path.dirname(__file__))+os.sep
 
@@ -153,6 +154,11 @@ SSLIFY_DISABLE = True if not SECURE_SSL_REDIRECT else False
 if SECURE_SSL_REDIRECT:
     os.environ['HTTPS'] = "on"
     os.environ['wsgi.url_scheme'] = 'https'
+    # Exempt the health check so it can go through
+    SECURE_REDIRECT_EXEMPT = [r'^_ah/health$', ]
+    SSLIFY_DISABLE_FOR_REQUEST = [
+        lambda request: request.get_full_path().startswith('/_ah/health')
+    ]
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -218,6 +224,10 @@ STATICFILES_FINDERS = (
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '')
 
 MIDDLEWARE_CLASSES = (
+    # Due to the behavior of AppEngine Flex and the load balancer, we have to explicitly
+    # use SSLify to enforce redirect of http to https even though we're on Django 1.8+
+    # --> DO NOT REMOVE THIS OR ITS REQUIREMENTS ENTRY <--
+    'sslify.middleware.SSLifyMiddleware',
     # For using NDB with Django
     # documentation: https://cloud.google.com/appengine/docs/python/ndb/#integration
     # WE DON'T SEEM TO BE USING NDB SO I'M COMMENTING THIS OUT - PL
@@ -231,10 +241,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # Due to the behavior of AppEngine Flex and the load balancer, we have to explicitly
-    # use SSLify to enforce redirect of http to https even though we're on Django 1.8+
-    # --> DO NOT REMOVE THIS OR ITS REQUIREMENTS ENTRY <--
-    'sslify.middleware.SSLifyMiddleware',
     'offline.middleware.OfflineMiddleware',
 )
 
@@ -310,6 +316,11 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler'
         },
+        'console_all': {
+            'level': 'DEBUG',
+            'filters': ['require_debug_false'],
+            'class': 'logging.StreamHandler'
+        }
     },
     'loggers': {
         'django.request': {
@@ -318,32 +329,32 @@ LOGGING = {
             'propagate': True,
         },
         'cohorts': {
-            'handlers': ['console'],
+            'handlers': ['console_all'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'allauth': {
-            'handlers': ['console'],
+            'handlers': ['console_all'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'demo': {
-            'handlers': ['console'],
+            'handlers': ['console_all'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'projects': {
-            'handlers': ['console'],
+            'handlers': ['console_all'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'workbooks': {
-            'handlers': ['console'],
+            'handlers': ['console_all'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'accounts': {
-            'handlers': ['console'],
+            'handlers': ['console_all'],
             'level': 'DEBUG',
             'propagate': True,
         },
