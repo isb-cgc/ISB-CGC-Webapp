@@ -18,6 +18,8 @@ uritemplate==0.6
 django-dotenv==1.4.1
 django-finalware==0.1.3
 django-allauth==0.30.0
+django-sslify==0.2.7
+django-adminrestrict==1.0.2
 pexpect==4.0.1
 gunicorn==19.6.0
 

@@ -38,7 +38,7 @@ RUN dpkg --install /tmp/mysql-apt-config_0.5.3-1_all.deb
 RUN apt-get update
 
 # aaaand now let's install mysql-server
-RUN apt-get install -y mysql-server
+RUN apt-get install -y --force-yes mysql-server
 
 RUN apt-get -y install python-mysqldb
 RUN apt-get -y install python-pip
@@ -49,23 +49,21 @@ RUN apt-get -y install libxml2-dev libxmlsec1-dev swig
 RUN pip install python-saml==2.1.4
 RUN pip install pexpect
 
-
 RUN apt-get -y install libffi-dev libssl-dev libmysqlclient-dev python2.7-dev curl
 RUN apt-get -y install git
 RUN easy_install -U distribute
-
 
 ADD . /app
 
 # We need to recompile some of the items because of differences in compiler versions
 RUN pip install -r /app/requirements.txt -t /app/lib/ --upgrade
 RUN pip install gunicorn==19.6.0
-# RUN mkdir /app/lib/endpoints/
-# RUN cp /app/google_appengine/lib/endpoints-1.0/endpoints/* /app/lib/endpoints/
+RUN mkdir /app/lib/endpoints/
+RUN cp /app/endpoints/* /app/lib/endpoints/
 
 ENV PYTHONPATH=/app:/app/lib:/app/google_appengine:/app/google_appengine/lib/protorpc-1.0
 
-# We need to figure out how to SQL proxy this in
+# Testing...
 # RUN python /app/manage.py migrate --noinput
 
-CMD gunicorn -b :$PORT GenespotRE.wsgi
+CMD gunicorn -c gunicorn.conf.py -b :$PORT GenespotRE.wsgi -w 3 -t 130
