@@ -32,7 +32,7 @@ class SSLifyMiddleware(object):
         per_request_disables = getattr(settings, 'SSLIFY_DISABLE_FOR_REQUEST', [])
         for should_disable in per_request_disables:
             if should_disable(request):
-                print >> sys.stdout, "[STATUS] SSLify is off for this path: " +request.get_full_path()
+                print >> sys.stdout, "[STATUS] SSLify is off for this path: " +str(request.get_full_path())
                 return None
 
         # If we get here, proceed as normal.
