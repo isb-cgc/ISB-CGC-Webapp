@@ -315,7 +315,6 @@ def igv(request, sample_barcode=None, readgroupset_id=None):
 
 def health_check(request):
     print >> sys.stdout, "[STATUS] Health check is secure? "+str(request.is_secure())
-#    print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     return HttpResponse('')
 
 def help_page(request):
