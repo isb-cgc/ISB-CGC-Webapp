@@ -37,7 +37,8 @@ for directory_name in SHARED_SOURCE_DIRECTORIES:
     sys.path.append(os.path.join(BASE_DIR, directory_name))
 
 DEBUG                   = bool(os.environ.get('DEBUG', False))
-ALLOWED_HOSTS           = [os.environ.get('ALLOWED_HOST', 'localhost')]
+
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOST', 'localhost').split(',')
 
 SSL_DIR = os.path.abspath(os.path.dirname(__file__))+os.sep
 
@@ -142,9 +143,19 @@ CSRF_COOKIE_SECURE = bool(os.environ.get('CSRF_COOKIE_SECURE', False))
 SESSION_COOKIE_SECURE = bool(os.environ.get('SESSION_COOKIE_SECURE', False))
 SECURE_SSL_REDIRECT = bool(os.environ.get('SECURE_SSL_REDIRECT', False))
 
+# Due to the behavior of AppEngine Flex and the load balancer, we have to explicitly
+# use SSLify to enforce redirect of http to https even though we're on Django 1.8+
+# --> DO NOT REMOVE THIS OR ITS REQUIREMENTS ENTRY <--
+SSLIFY_DISABLE = True if not SECURE_SSL_REDIRECT else False
+
 if SECURE_SSL_REDIRECT:
     os.environ['HTTPS'] = "on"
     os.environ['wsgi.url_scheme'] = 'https'
+    # Exempt the health check so it can go through
+    SECURE_REDIRECT_EXEMPT = [r'^_ah/health$', ]
+    SSLIFY_DISABLE_FOR_REQUEST = [
+        lambda request: request.get_full_path().startswith('/_ah/health')
+    ]
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -210,6 +221,10 @@ STATICFILES_FINDERS = (
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '')
 
 MIDDLEWARE_CLASSES = (
+    # Due to the behavior of AppEngine Flex and the load balancer, we have to explicitly
+    # use SSLify to enforce redirect of http to https even though we're on Django 1.8+
+    # --> DO NOT REMOVE THIS OR ITS REQUIREMENTS ENTRY <--
+    'sslify.middleware.SSLifyMiddleware',
     # For using NDB with Django
     # documentation: https://cloud.google.com/appengine/docs/python/ndb/#integration
     # WE DON'T SEEM TO BE USING NDB SO I'M COMMENTING THIS OUT - PL
@@ -219,10 +234,11 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'adminrestrict.middleware.AdminPagesRestrictMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
+    'offline.middleware.OfflineMiddleware',
 )
 
 ROOT_URLCONF = 'GenespotRE.urls'
@@ -250,6 +266,8 @@ INSTALLED_APPS = (
     'workbooks',
     'data_upload',
     'analysis',
+    'offline',
+    'adminrestrict',
 )
 
 #############################
@@ -295,6 +313,11 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler'
         },
+        'console_all': {
+            'level': 'DEBUG',
+            'filters': ['require_debug_false'],
+            'class': 'logging.StreamHandler'
+        }
     },
     'loggers': {
         'django.request': {
@@ -303,15 +326,35 @@ LOGGING = {
             'propagate': True,
         },
         'cohorts': {
-            'handlers': ['console'],
+            'handlers': ['console_all'],
             'level': 'DEBUG',
-            'propogate': True,
+            'propagate': True,
         },
         'allauth': {
-            'handlers': ['console'],
+            'handlers': ['console_all'],
             'level': 'DEBUG',
-            'propogate': True,
-        }
+            'propagate': True,
+        },
+        'demo': {
+            'handlers': ['console_all'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'projects': {
+            'handlers': ['console_all'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'workbooks': {
+            'handlers': ['console_all'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'accounts': {
+            'handlers': ['console_all'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
     }
 }
 
@@ -375,7 +418,7 @@ SOCIALACCOUNT_PROVIDERS = \
 
 # Trying to force allauth to only use https
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
-
+# ...but not if this is a local dev build
 if IS_DEV:
     ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
 
@@ -410,6 +453,12 @@ CHECK_NIH_USER_LOGIN_TASK_URI            = os.environ.get('CHECK_NIH_USER_LOGIN_
 
 # TaskQueue used by the sweep_nih_user_logins task
 LOGOUT_SWEEPER_FALLBACK_TASKQUEUE        = os.environ.get('LOGOUT_SWEEPER_FALLBACK_TASKQUEUE')
+
+# PubSub topic for ERA login notifications
+PUBSUB_TOPIC_ERA_LOGIN                   = os.environ.get('PUBSUB_TOPIC_ERA_LOGIN')
+
+# User project access key
+USER_GCP_ACCESS_CREDENTIALS              = os.environ.get('USER_GCP_ACCESS_CREDENTIALS')
 
 ##############################
 #   Start django-finalware   #
