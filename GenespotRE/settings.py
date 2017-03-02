@@ -376,6 +376,9 @@ SOCIALACCOUNT_PROVIDERS = \
 # Trying to force allauth to only use https
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
 
+if IS_DEV:
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
+
 
 ##########################
 #   End django-allauth   #
@@ -383,7 +386,6 @@ ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
 
 GOOGLE_APPLICATION_CREDENTIALS  = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')) if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS') else '' # Path to privatekey.json
 CLIENT_SECRETS                  = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('CLIENT_SECRETS')) if os.environ.get('CLIENT_SECRETS') else ''
-PEM_FILE                        = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('PEM_FILE')) if os.environ.get('PEM_FILE') else ''
 CLIENT_EMAIL                    = os.environ.get('CLIENT_EMAIL', '') # Client email from client_secrets.json
 WEB_CLIENT_ID                   = os.environ.get('WEB_CLIENT_ID', '') # Client ID from client_secrets.json
 INSTALLED_APP_CLIENT_ID         = os.environ.get('INSTALLED_APP_CLIENT_ID', '') # Native Client ID
