@@ -102,7 +102,7 @@ SITE_ID = 3
 
 if IS_APP_ENGINE_FLEX:
     print >> sys.stdout, "[STATUS] AppEngine Flex detected."
-    SITE_ID = 5
+    SITE_ID = 4
 
 # Default to no NIH Auth unless we are not on a local dev environment *and* are in AppEngine-Flex
 NIH_AUTH_ON = False
@@ -138,6 +138,8 @@ PROCESSING_JENKINS_URL      = os.environ.get('PROCESSING_JENKINS_URL', 'http://l
 PROCESSING_JENKINS_PROJECT  = os.environ.get('PROCESSING_JENKINS_PROJECT', 'cgc-processing')
 PROCESSING_JENKINS_USER     = os.environ.get('PROCESSING_JENKINS_USER', 'user')
 PROCESSING_JENKINS_PASSWORD = os.environ.get('PROCESSING_JENKINS_PASSWORD', '')
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 CSRF_COOKIE_SECURE = bool(os.environ.get('CSRF_COOKIE_SECURE', False))
 SESSION_COOKIE_SECURE = bool(os.environ.get('SESSION_COOKIE_SECURE', False))
