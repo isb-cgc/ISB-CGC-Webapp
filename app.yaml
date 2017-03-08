@@ -59,7 +59,7 @@ handlers:
 #  secure: always
 
 beta_settings:
-    cloud_sql_instances: isb-cgc-test:us-central1:test
+    cloud_sql_instances: isb-cgc-uat:us-central1:uat
 
 env_variables:
   DJANGO_SETTINGS_MODULE: 'GenespotRE.settings'

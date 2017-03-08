@@ -54,8 +54,8 @@ CRON_MODULE             = os.environ.get('CRON_MODULE')
 # Log Names
 SERVICE_ACCOUNT_LOG_NAME = os.environ.get('SERVICE_ACCOUNT_LOG_NAME', 'local_dev_logging')
 
-BASE_URL                = os.environ.get('BASE_URL', 'https://isb-cgc-test.appspot.com')
-BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://api-dot-isb-cgc-test.appspot.com')
+BASE_URL                = os.environ.get('BASE_URL', 'https://isb-cgc-uat.appspot.com')
+BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://api-dot-isb-cgc-uat.appspot.com')
 
 # Compute services - Should not be necessary in webapp
 PAIRWISE_SERVICE_URL    = os.environ.get('PAIRWISE_SERVICE_URL', None)
@@ -76,7 +76,7 @@ USER_DATA_ON            = bool(os.environ.get('USER_DATA_ON', False))
 DATABASES = {'default': {
     'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.mysql'),
     'HOST': os.environ.get('DATABASE_HOST', '127.0.0.1'),
-    'NAME': os.environ.get('DATABASE_NAME', ''),
+    'NAME': os.environ.get('DATABASE_NAME', 'test'),
     'USER': os.environ.get('DATABASE_USER'),
     'PASSWORD': os.environ.get('DATABASE_PASSWORD')
 }}
@@ -152,8 +152,6 @@ SECURE_SSL_REDIRECT = bool(os.environ.get('SECURE_SSL_REDIRECT', False))
 SSLIFY_DISABLE = True if not SECURE_SSL_REDIRECT else False
 
 if SECURE_SSL_REDIRECT:
-    os.environ['HTTPS'] = "on"
-    os.environ['wsgi.url_scheme'] = 'https'
     # Exempt the health check so it can go through
     SECURE_REDIRECT_EXEMPT = [r'^_ah/health$', ]
     SSLIFY_DISABLE_FOR_REQUEST = [
