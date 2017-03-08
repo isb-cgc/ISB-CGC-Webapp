@@ -1,5 +1,5 @@
 require.config({
-    baseUrl: '/static/js/',
+    baseUrl: STATIC_FILES_URL+'js/',
     paths: {
         jquery: 'libs/jquery-1.11.1.min',
         bootstrap: 'libs/bootstrap.min',
@@ -41,8 +41,13 @@ require([
     'underscore',
     'base',
     'tokenfield'
-], function($, jqueryui, bootstrap, session_security, Bloodhound, typeahead, _) {
+], function($, jqueryui, bootstrap, session_security, Bloodhound, typeahead, _, base) {
     'use strict';
+
+    // Doesn't work for Chrome, may work for other browsers
+    $('.cancel-edit').on('click', function() {
+        window.onbeforeunload = null
+    });
 
     var geneListField = $('#paste-in-genes');
     var geneFavs = (gene_fav) ? gene_fav.genes : [];
@@ -55,9 +60,9 @@ require([
     var gene_suggestions = new Bloodhound({
         datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
         queryTokenizer: Bloodhound.tokenizers.whitespace,
-        prefetch : base_url + '/genes/suggest/a.json',
+        prefetch : BASE_URL + '/genes/suggest/a.json',
         remote: {
-            url: base_url + '/genes/suggest/%QUERY.json',
+            url: BASE_URL + '/genes/suggest/%QUERY.json',
             wildcard: '%QUERY'
         }
     });
@@ -209,12 +214,26 @@ require([
     }
 
     $('form.create-gene-list').on('submit', function(e) {
+        var name = $('#genes-list-name').prop('value');
+
         // Do not allow white-space only names
-        if($('#genes-list-name').prop('value').match(/^\s*$/)) {
+        if(name.match(/^\s*$/)) {
             $('#genes-list-name').prop('value','');
             e.preventDefault();
             return false;
         }
+
+        var unallowed = name.match(base.whitelist);
+
+        if(unallowed) {
+            $('.unallowed-chars').text(unallowed.join(", "));
+            $('#unallowed-chars-alert').show();
+            event.preventDefault();
+            return false;
+        } else {
+            $('#unallowed-chars-alert').hide();
+        }
+
         // Do not allow submission of empty gene lists
         if(geneListField.tokenfield('getTokens').length <= 0) {
             e.preventDefault();
@@ -248,7 +267,7 @@ require([
             $.ajax({
                 type        : 'POST',
                 dataType    :'json',
-                url         : base_url + '/genes/is_valid/',
+                url         : BASE_URL + '/genes/is_valid/',
                 data        : JSON.stringify({'genes-list' : list}),
                 beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                 success : function (data) {
@@ -299,9 +318,4 @@ require([
         });
         return Object.keys(genes_count_object);
     }
-
-    $('.cancel-edit').on('click', function() {
-        window.onbeforeunload = null
-    })
-    
 });

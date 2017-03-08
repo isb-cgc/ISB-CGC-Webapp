@@ -126,12 +126,12 @@
                     <div class="row col-md-12 space-bottom-10">
                         <span class="detail-label">Total Number of Samples:</span>
                         <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                        <span class="total-values" id="total-samples">{{ total_samples }}</span>
+                        <span class="total-values user-data-samples">{{ total_samples }}</span>
                     </div>
                     <div class="row col-md-12 space-bottom-10">
                         <span class="detail-label">Total Number of Participants:</span>
                         <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                        <span class="total-values" id="total-participants">{{ total_patients }}</span>
+                        <span class="total-values user-data-participants">{{ total_patients }}</span>
                     </div>
                     <div class="row col-md-12 space-bottom-10">
                         <span>Your Permissions: {{ cohort.perm.perm }}</span>
@@ -183,12 +183,12 @@
                     <div class="row col-md-6">
                         <span class="detail-label">Total Number of Samples:</span>
                         <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                        <span class="total-values" id="user-data-total-samples">{% if user_data %}{{ metadata_counts.user_data_total  }}{% else %}NA{% endif %}</span>
+                        <span class="total-values user-data-samples">{% if user_data %}{{ metadata_counts.user_data_total  }}{% else %}NA{% endif %}</span>
                     </div>
                     <div class="row col-md-6">
                         <span class="detail-label">Total Number of Participants:</span>
                         <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                        <span class="total-values" id="user-data-total-participants">{% if user_data %}{{ metadata_counts.user_data_participants  }}{% else %}NA{% endif %}</span>
+                        <span class="total-values user-data-participants">{% if user_data %}{{ metadata_counts.user_data_participants  }}{% else %}NA{% endif %}</span>
                     </div>
                 </div>
             </div>

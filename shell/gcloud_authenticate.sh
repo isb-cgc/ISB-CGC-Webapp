@@ -1,4 +1,4 @@
-touch privatekey.json
+touch test_deployment.key.json
 echo "{\
   \"private_key_id\": \"$GAE_PRIVATE_KEY_ID_UAT\",\
   \"private_key\": \"$GAE_PRIVATE_KEY_UAT\",\

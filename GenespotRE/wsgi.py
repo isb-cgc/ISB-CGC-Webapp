@@ -40,3 +40,6 @@ application = get_wsgi_application()
 # Apply WSGI middleware here.
 # from helloworld.wsgi import HelloWorldApplication
 # application = HelloWorldApplication(application)
+
+forwarded_allow_ips = '*'
+secure_scheme_headers = {'X-APPENGINE-HTTPS': 'on'}

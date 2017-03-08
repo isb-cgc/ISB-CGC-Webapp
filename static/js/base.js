@@ -1,5 +1,5 @@
 require.config({
-    baseUrl: '/static/js/',
+    baseUrl: STATIC_FILES_URL+'js/',
     paths: {
         jquery: 'libs/jquery-1.11.1.min',
         bootstrap: 'libs/bootstrap.min',
@@ -21,6 +21,7 @@ require.config({
     }
 });
 
+// Set up common JS UI actions which span most views
 require([
     'jquery',
     'jqueryui',
@@ -53,7 +54,7 @@ require([
             $(this).remove();
         });
         //return false;
-    })
+    });
     // Radio button controls bootstrap collapse
     toggleRadio('upload');
     function toggleRadio(groupname){
@@ -68,7 +69,7 @@ require([
                 $(collapseTarget).collapse('hide');
             }
         })
-    }
+    };
 
     // Adapted from https://docs.djangoproject.com/en/1.9/ref/csrf/
     $.getCookie = function getCookie(name) {
@@ -90,7 +91,7 @@ require([
     function csrfSafeMethod(method) {
         // these HTTP methods do not require CSRF protection
         return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-    }
+    };
     $.ajaxSetup({
         beforeSend: function(xhr, settings) {
             var csrftoken = $.getCookie('csrftoken');
@@ -136,4 +137,12 @@ require([
         },
         sortList: [[4,1]]
     });
+});
+
+// Return an object for consts/methods used by most views
+define([], function() {
+
+    return {
+        whitelist: /[^\\\_\|\"\+~@:#\$%\^&\*=\-\.,\(\)0-9a-zA-Z\sÇüéâäàåçêëèïîíìÄÅÉæÆôöòûùÖÜáóúñÑÀÁÂÃÈÊËÌÍÎÏÐÒÓÔÕØÙÚÛÝßãðõøýþÿ]/g
+    };
 });
