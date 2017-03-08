@@ -49,14 +49,21 @@ gem install sass
 
 # Install Google App Engine
 echo "Installing Google App Engine..."
-wget -q https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.38.zip -O ${HOME}/google_appengine.zip
-unzip -nq ${HOME}/google_appengine.zip -d $HOME
+wget https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.38.zip -O ${HOME}/google_appengine.zip
+unzip -n ${HOME}/google_appengine.zip -d $HOME
 export PATH=$PATH:${HOME}/google_appengine/
-mkdir ${HOMEROOT}/lib/endpoints/ 2> /dev/null
-mkdir ${HOMEROOT}/endpoints/ 2> /dev/null
-cp ${HOME}/google_appengine/lib/endpoints-1.0/endpoints/* ${HOMEROOT}/lib/endpoints/
-cp ${HOME}/google_appengine/lib/endpoints-1.0/endpoints/* ${HOMEROOT}/endpoints/
+# If we are in circleCI, we place the endpoints library into a directory where the Dockerfile can find it...
+if [ -n "$CI" ]; then
+    mkdir ${HOMEROOT}/endpoints/ 2> /dev/null
+    cp ${HOME}/google_appengine/lib/endpoints-1.0/endpoints/* ${HOMEROOT}/endpoints/
+else
+# ...otherwise, we place it directly into /lib/ with the other libraries
+    mkdir ${HOMEROOT}/lib/endpoints/ 2> /dev/null
+    cp ${HOME}/google_appengine/lib/endpoints-1.0/endpoints/* ${HOMEROOT}/lib/endpoints/
+fi
+
 ls ${HOMEROOT}
+
 echo "Google App Engine Installed"
 
 # Install Google Cloud SDK

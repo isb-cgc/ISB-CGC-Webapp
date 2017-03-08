@@ -314,7 +314,6 @@ def igv(request, sample_barcode=None, readgroupset_id=None):
     return render(request, 'GenespotRE/igv.html', context)
 
 def health_check(request):
-    print >> sys.stdout, "[STATUS] health check is secure: "+str(request.is_secure())
     return HttpResponse('')
 
 def help_page(request):
