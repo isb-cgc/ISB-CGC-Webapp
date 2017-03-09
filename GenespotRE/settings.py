@@ -55,7 +55,7 @@ CRON_MODULE             = os.environ.get('CRON_MODULE')
 SERVICE_ACCOUNT_LOG_NAME = os.environ.get('SERVICE_ACCOUNT_LOG_NAME', 'local_dev_logging')
 
 BASE_URL                = os.environ.get('BASE_URL', 'https://isb-cgc-uat.appspot.com')
-BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://api-dot-isb-cgc-uat.appspot.com')
+BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://api-dot-isb-cgc-test.appspot.com')
 
 # Compute services - Should not be necessary in webapp
 PAIRWISE_SERVICE_URL    = os.environ.get('PAIRWISE_SERVICE_URL', None)
