@@ -1,5 +1,5 @@
 require.config({
-    baseUrl: '/static/js/',
+    baseUrl: STATIC_FILES_URL+'js/',
     paths: {
         jquery: 'libs/jquery-1.11.1.min',
         bootstrap: 'libs/bootstrap.min',
@@ -7,13 +7,25 @@ require.config({
         session_security: 'session_security',
         underscore: 'libs/underscore-min',
         base: 'base',
-        text: 'libs/require-text',
+        text: 'libs/require-text'
     },
     shim: {
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
         'session_security': ['jquery'],
-        'underscore': {exports: '_'},
+        'underscore': {exports: '_'}
+    },
+    // Per http://jaketrent.com/post/cross-domain-requirejs-text/
+    // Because this is a cross-domain text request, we need to force
+    // it to succeed
+    config: {
+        text: {
+            useXhr: function (url, protocol, hostname, port) {
+                // allow cross-domain requests
+                // remote server allows CORS
+                return true;
+            }
+        }
     }
 });
 
@@ -23,10 +35,10 @@ require([
     'bootstrap',
     'session_security',
     'underscore',
-    'text!../templates/upload_file_list_item.html',
-    'text!../templates/upload_input_table.html',
     'base',
-], function($, jqueryui, bootstrap, session_security, _, UploadFileListItemTemplate, UploadInputTableTemplate) {
+    'text!'+STATIC_FILES_URL+'templates/upload_file_list_item.html',
+    'text!'+STATIC_FILES_URL+'templates/upload_input_table.html'
+], function($, jqueryui, bootstrap, session_security, _, base, UploadFileListItemTemplate, UploadInputTableTemplate) {
     'use strict';
 
     var uploadFileListItemTemplate = _.template(UploadFileListItemTemplate),
@@ -482,17 +494,49 @@ require([
 
     var processListEl = $('#file-process-list');
     $('#next-btn').on('click', function (e) {
+
         e.preventDefault();
         e.stopPropagation();
 
         var $next = $(this);
         if($next.hasClass('disabled')) {
-            return;
+            return false;
+        }
+
+        var textInputOk = true;
+
+        var names = $('input#project-name').val() + ' ' + $('input#study-name').val();
+        var descs = $('input#project-description').val() + ' ' + $('input#study-description').val();
+
+        var unallowed_names = names.match(base.whitelist);
+        var unallowed_descs = descs.match(base.whitelist);
+
+        if(unallowed_names || unallowed_descs) {
+            textInputOk = false;
+            var unalloweds = unallowed_names || [];
+            var msg = (unallowed_names ? 'names' : null);
+            if (unallowed_descs) {
+                unalloweds = unalloweds.concat(unallowed_descs);
+                msg = (msg ? msg+' and descriptions' : 'descriptions');
+            }
+
+            $('span.unallowed-fields').text(msg);
+            $('span.unallowed-chars').text(unalloweds.join(", "));
+        }
+
+        if(!textInputOk) {
+            $('#unallowed-chars-alert').show();
+            window.scroll(0,135);
+            return false;
+        } else {
+            $('#unallowed-chars-alert').hide();
+            $('span.unallowed-fields').text('');
+            $('span.unallowed-chars').text('');
         }
 
         if(!validateSectionOne()) {
             window.scroll(0,135);
-            return;
+            return false;
         }
 
         var fileGroupType = inputGroup.filter(':checked').val();

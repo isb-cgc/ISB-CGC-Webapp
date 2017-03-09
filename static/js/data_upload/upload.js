@@ -1,7 +1,7 @@
 'use strict';
 
 require.config({
-    baseUrl: '/static/js/',
+    baseUrl: STATIC_FILES_URL+'js/',
     paths: {
         jquery: 'libs/jquery-1.11.1.min',
         bootstrap: 'libs/bootstrap.min',
@@ -21,13 +21,26 @@ require.config({
         'underscore': {
             exports: '_'
         }
+    },
+    // Per http://jaketrent.com/post/cross-domain-requirejs-text/
+    // Because this is a cross-domain text request, we need to force
+    // it to succeed
+    config: {
+        text: {
+            useXhr: function (url, protocol, hostname, port) {
+                // allow cross-domain requests
+                // remote server allows CORS
+                return true;
+            }
+        }
     }
 });
 
 require([
     'jquery',
     'underscore',
-    'text!../templates/upload_input_table.html',
+    'text!'+STATIC_FILES_URL+'templates/upload_input_table.html',
+    'base',
     'bootstrap'
 ], function ($, _, UploadInputTableTempl) {
 
@@ -59,7 +72,7 @@ require([
                 'text': {
                     'displayName': 'Long Text',
                     test: function (val) { return true; }
-                },
+                }
             },
             'Controlled': []
         };

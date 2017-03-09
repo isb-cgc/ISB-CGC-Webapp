@@ -262,6 +262,8 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                 }
             };
 
+            var zoom_none = function() { return;};
+
             var zoom = null;
 
             if (width > view_width && height> view_height) {
@@ -281,9 +283,17 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                     .y(y2)
                     .scaleExtent([1,1])
                     .on('zoom', zoom_y);
+            } else {
+                zoom = d3.behavior.zoom()
+                    .x(x2)
+                    .scaleExtent([1,1])
+                    .y(y2)
+                    .scaleExtent([1,1])
+                    .on('zoom',zoom_none);
             }
 
             svg.call(zoom);
+
 
             plot_area.selectAll('.expected_fill')
                 .data(data_counts)

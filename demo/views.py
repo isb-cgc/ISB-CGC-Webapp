@@ -1,6 +1,5 @@
 """
-
-Copyright 2015, Institute for Systems Biology
+Copyright 2017, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,7 +12,6 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
 """
 
 from django.conf import settings
@@ -31,13 +29,16 @@ from onelogin.saml2.auth import OneLogin_Saml2_Auth
 from onelogin.saml2.utils import OneLogin_Saml2_Utils
 
 from googleapiclient.errors import HttpError
-from google.appengine.api.taskqueue import Task
 
 from google_helpers.storage_service import get_storage_resource
 from google_helpers.directory_service import get_directory_resource
+from google_helpers.pubsub_service import get_pubsub_service, get_full_topic_name
 from accounts.models import NIH_User
 
+import base64
+import sys
 import csv_scanner
+from json import dumps as json_dumps
 import logging
 import datetime
 import pytz
@@ -53,6 +54,8 @@ COUNTDOWN_SECONDS = login_expiration_seconds + (60 * 15)
 LOGOUT_WORKER_TASKQUEUE = settings.LOGOUT_WORKER_TASKQUEUE
 CHECK_NIH_USER_LOGIN_TASK_URI = settings.CHECK_NIH_USER_LOGIN_TASK_URI
 CRON_MODULE = settings.CRON_MODULE
+
+PUBSUB_TOPIC_ERA_LOGIN = settings.PUBSUB_TOPIC_ERA_LOGIN
 
 
 def init_saml_auth(req):
@@ -71,6 +74,8 @@ def prepare_django_request(request):
         'get_data': request.GET.copy(),
         'post_data': request.POST.copy()
     }
+
+    logger.info("[STATUS] prepared request: "+result.__str__())
     return result
 
 
@@ -117,6 +122,9 @@ def index(request):
 
         return HttpResponseRedirect(auth.logout(name_id=name_id, session_index=session_index))
     elif 'acs' in req['get_data']:
+        print >> sys.stdout, "[STATUS] recevied ?acs:"
+        print >> sys.stdout, req.__str__()
+        print >> sys.stdout, req['get_data'].__str__()
         auth.process_response()
         errors = auth.get_errors()
         if errors:
@@ -234,17 +242,31 @@ def index(request):
 
             # Add task in queue to deactivate NIH_User entry after NIH_assertion_expiration has passed.
             try:
-                task = Task(url=CHECK_NIH_USER_LOGIN_TASK_URI,
-                            params={'user_id': request.user.id, 'deployment': CRON_MODULE},
-                            countdown=COUNTDOWN_SECONDS)
-                task.add(queue_name=LOGOUT_WORKER_TASKQUEUE)
-                logger.info('enqueued check_login task for user, {}, for {} hours from now'.format(
-                    request.user.id, COUNTDOWN_SECONDS / (60*60)))
+                full_topic_name = get_full_topic_name(PUBSUB_TOPIC_ERA_LOGIN)
+                logger.info("Full topic name: {}".format(full_topic_name))
+                client = get_pubsub_service()
+                params = {
+                    'event_type': 'era_login',
+                    'user_id': request.user.id,
+                    'deployment': CRON_MODULE
+                }
+                message = json_dumps(params)
+
+                body = {
+                    'messages': [
+                        {
+                            'data': base64.b64encode(message.encode('utf-8'))
+                        }
+                    ]
+                }
+                client.projects().topics().publish(topic=full_topic_name, body=body).execute()
+
             except Exception as e:
-                logger.error("Failed to enqueue automatic logout task")
-                logging.exception(e)
+                logger.error("[ERROR] Failed to publish to PubSub topic")
+                logger.exception(e)
 
             messages.info(request, warn_message)
+            print >> sys.stdout, "[STATUS] http_host: "+req['http_host']
             return HttpResponseRedirect(auth.redirect_to('https://{}'.format(req['http_host'])))
 
     elif 'sls' in req['get_data']:

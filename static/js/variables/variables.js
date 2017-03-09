@@ -17,7 +17,7 @@
  */
 
 require.config({
-    baseUrl: '/static/js/',
+    baseUrl: STATIC_FILES_URL+'js/',
     paths: {
         jquery: 'libs/jquery-1.11.1.min',
         bootstrap: 'libs/bootstrap.min',
@@ -48,11 +48,12 @@ require([
     'd3',
     'd3tip',
     'vizhelpers',
-    'select2',
-    'base'
-], function($, jqueryui, bootstrap, session_security, d3, d3tip, vizhelpers) {
+    'base',
+    'select2'
+], function($, jqueryui, bootstrap, session_security, d3, d3tip, vizhelpers, base) {
 
-    // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
+    // Resets forms in modals on cancel so we don't get an onbeforeunload if we started filling one out and
+    // changed  our mind
     $('.modal').on('hide.bs.modal', function() {
         $(this).find('form')[0].reset();
     });
@@ -240,19 +241,31 @@ require([
      */
     $("#create_favorite_list").on('click', function(event){
         var name = $.trim($("#variable_list_name_input").val());
+
+        var unallowed = name.match(base.whitelist);
+
+        if(unallowed) {
+            $('.unallowed-chars').text(unallowed.join(", "));
+            $('#unallowed-chars-alert').show();
+            event.preventDefault();
+            return false;
+        } else {
+            $('#unallowed-chars-alert').hide();
+        }
+
         var variable_list = get_variable_list();
         if(name=="" || !variable_list.length){
-            $.createMessage('Please check that your variable list name is not empty, and that you have selected at least one variable.', 'warning')
+            $.createMessage('Please check that your variable list name is not empty, and that you have selected at least one variable.', 'warning');
         } else {
             $(this).attr('disabled', 'disabled');
             var csrftoken = get_cookie('csrftoken');
             $.ajax({
                 type: 'POST',
-                url : base_url + '/variables/save',
+                url : BASE_URL + '/variables/save',
                 data: JSON.stringify({name : name, variables : variable_list}),
                 beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                 success: function (data) {
-                    window.location = base_url + '/variables/';
+                    window.location = BASE_URL + '/variables/';
                 },
                 error: function () {
                     $.createMessage('There was an error in creating your variable list.', 'error');
@@ -267,17 +280,29 @@ require([
      */
     $("#edit_favorite_list").on('click', function(event){
         var name = $.trim($("#variable_list_name_input").val());
+
+        var unallowed = name.match(base.whitelist);
+
+        if(unallowed) {
+            $('.unallowed-chars').text(unallowed.join(", "));
+            $('#unallowed-chars-alert').show();
+            event.preventDefault();
+            return false;
+        } else {
+            $('#unallowed-chars-alert').hide();
+        }
+
         var variable_list = get_variable_list();
         var variable_id = this.getAttribute("variable_id");
         if(name && variable_list.length>0){
             var csrftoken = get_cookie('csrftoken');
             $.ajax({
                 type : 'POST',
-                url  : base_url + '/variables/' + variable_id + '/update',
+                url  : BASE_URL + '/variables/' + variable_id + '/update',
                 data : JSON.stringify({name : name, variables : variable_list}),
                 beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                 success: function (data) {
-                    window.location = base_url + '/variables/';
+                    window.location = BASE_URL + '/variables/';
                 },
                 error: function () {
                     $.createMessage('There was an error in creating your variable list.', 'error');
@@ -294,6 +319,18 @@ require([
      */
     $("#apply_to_worksheet").on('click', function(event){
         var name = $.trim($("#variable_list_name_input").val());
+
+        var unallowed = name.match(base.whitelist);
+
+        if(unallowed) {
+            $('.unallowed-chars').text(unallowed.join(", "));
+            $('#unallowed-chars-alert').show();
+            event.preventDefault();
+            return false;
+        } else {
+            $('#unallowed-chars-alert').hide();
+        }
+
         var workbook_id  = this.getAttribute("workbook_id");
         var worksheet_id = this.getAttribute("worksheet_id");
         var variable_list = get_variable_list();
@@ -301,11 +338,11 @@ require([
             var csrftoken = get_cookie('csrftoken');
             $.ajax({
                 type : 'POST',
-                url  : base_url + '/workbooks/' + workbook_id + '/worksheets/' + worksheet_id + '/variables/edit',
+                url  : BASE_URL + '/workbooks/' + workbook_id + '/worksheets/' + worksheet_id + '/variables/edit',
                 data : JSON.stringify({name : name, variables : variable_list}),
                 beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                 success: function (data) {
-                    window.location = base_url + '/workbooks/' + workbook_id + '/worksheets/' + worksheet_id + '/';
+                    window.location = BASE_URL + '/workbooks/' + workbook_id + '/worksheets/' + worksheet_id + '/';
                 },
                 error: function () {
                     $.createMessage('There was an error in creating your variable list.', 'error');
@@ -327,13 +364,13 @@ require([
             var csrftoken = get_cookie('csrftoken');
             $.ajax({
                 type: 'POST',
-                url : base_url + '/variables/save',
+                url : BASE_URL + '/variables/save',
                 data: JSON.stringify({name : name, variables : variable_list}),
                 beforeSend: function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                 success: function (data) {
                     data = $.parseJSON(data);
                     var form = $('#create-workbook');
-                    form.attr('action', base_url+'/workbooks/create_with_variables');
+                    form.attr('action', BASE_URL+'/workbooks/create_with_variables');
                     form.append('<input name="variable_list_id" value="'+data['model']['id']+'">');
                     form.trigger('submit');
                 },

@@ -11,14 +11,23 @@ fi
 
 export PYTHONPATH=${HOMEROOT}/lib/:${HOMEROOT}/:${HOME}/google_appengine/:${HOME}/google_appengine/lib/protorpc-1.0/
 echo $PYTHONPATH
+# If we have migrations for older, pre-migrations apps which haven't yet been added to the database dump, make them here eg.:
+# python manage.py makemigrations <appname>
+# >>> Once a new dump is available with these models in the database you can remove this <<<
+python ${HOMEROOT}/manage.py makemigrations adminrestrict
+# Now run migrations
 echo "Running Migrations..."
 python ${HOMEROOT}/manage.py migrate --noinput
 
-#echo "Creating django superuser"
-#echo "from django.contrib.auth.models import User; User.objects.create_superuser('isb', '', 'password')" | python ${HOMEROOT}/manage.py shell
+echo "Creating secondary django admin superuser"
+# For local dev only; deployments  have this account already, with its own password
+echo "from django.contrib.auth.models import User; User.objects.create_superuser('django-admin', '', 'password')" | python ${HOMEROOT}/manage.py shell
 
 echo "Creating Django User for MySQL database..."
 mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -e "GRANT SELECT, INSERT, UPDATE, DELETE ON $DATABASE_NAME.* TO \"django\"@\"localhost\" IDENTIFIED BY \"PASSWORD\""
+
+echo "Adding in default Django admin IP allowances for local development"
+mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME -e "INSERT INTO adminrestrict_allowedip (ip_address) VALUES('127.0.0.1'),('10.0.*.*');"
 
 # Load your SQL table file
 # Looks for user_data_dump.sql; if that isn't available, looks for metadata_featdef_tables.sql
