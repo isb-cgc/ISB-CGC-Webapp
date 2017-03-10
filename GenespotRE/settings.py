@@ -152,8 +152,6 @@ SECURE_SSL_REDIRECT = bool(os.environ.get('SECURE_SSL_REDIRECT', False))
 SSLIFY_DISABLE = True if not SECURE_SSL_REDIRECT else False
 
 if SECURE_SSL_REDIRECT:
-    os.environ['HTTPS'] = "on"
-    os.environ['wsgi.url_scheme'] = 'https'
     # Exempt the health check so it can go through
     SECURE_REDIRECT_EXEMPT = [r'^_ah/health$', ]
     SSLIFY_DISABLE_FOR_REQUEST = [
