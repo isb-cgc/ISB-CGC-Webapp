@@ -193,9 +193,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                     attr_counts = results['count'];
                     $('#' + active_program_id + '-data-total-samples').html(results['total']);
                     $('#' + active_program_id + '-data-total-participants').html(results['cases']);
-                    // $('#user-data-total-samples').html(results['user_data'] && results['user_data_total'] !== null ? results['user_data_total'] : "NA");
-                    // $('#user-data-total-participants').html(results['user_data'] && results['user_data_participants'] !== null ? results['user_data_participants'] : "NA");
-                    context.update_filter_counts(attr_counts);
+                    context.update_filter_counts(attr_counts, program_id);
 
                     var clin_tree_attr_counts = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(attr_counts, clin_tree_attr) : attr_counts;
                     clin_tree_attr_counts.length > 0 && tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,'#tree-graph-clinical-'+active_program_id);
@@ -290,7 +288,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             return api_url;
         },
 
-        update_filter_counts: function(counts) {
+        update_filter_counts: function(counts, program_id) {
 
             counts_by_name = {};
 
@@ -306,11 +304,11 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                 });
             });
 
-            $('.filter-panel li.list-group-item div.cohort-feature-select-block').each(function() {
+            $('#'+program_id+'-data-filter-panel li.list-group-item div.cohort-feature-select-block').each(function() {
                 var $this = $(this),
                     attr = $this.data('feature-name');
                 if(attr && attr.length > 0 && attr !== 'specific-mutation' ) {
-                    $('ul#' + attr + ' input').each(function () {
+                    $('#'+program_id+'-data-filter-panel ul#' + attr + ' input').each(function () {
 
                         var $that = $(this),
                             value = $that.data('value-name'),

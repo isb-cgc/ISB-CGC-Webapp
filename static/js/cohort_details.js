@@ -219,13 +219,24 @@ require([
 
         var activeDataTab = $('.data-tab.active').attr('id');
         var selFilterPanel = '.'+activeDataTab+ '-selected-filters';
+        var createFormFilterSet = $('p#'+activeDataTab+'-filters');
 
         var $this = $(this);
 
         var token = null;
 
         var feature = $this.closest('.cohort-feature-select-block'),
+            prog = $this.closest('.filter-panel'),
             value = $this;
+
+        if(createFormFilterSet.length <= 0) {
+            $('#create-cohort-form .form-control-static').append('<p id="'+activeDataTab+'-filters"></p>');
+            createFormFilterSet = $('p#'+activeDataTab+'-filters')
+            createFormFilterSet.append('<h5>'+(prog.data('prog-displ-name'))+'</h5>');
+        }
+
+        var tokenProgDisplName = prog.data('prog-displ-name'),
+            tokenProgId = prog.data('prog-id');
 
         // Mutation category dropdown
         if($this.prop('id') == 'mutation-category') {
@@ -254,6 +265,8 @@ require([
                 var token = $('<span>').data({
                     'feature-id': 'MUT:'+gene.value + ':' + feature.data('feature-id'),
                     'feature-name': feature.data('feature-name'),
+                    'prog-id': tokenProgId,
+                    'prog-name': tokenProgDisplName,
                     'value-id': value.data('value-id'),
                     'value-name': value.data('value-name')
                 });
@@ -276,7 +289,7 @@ require([
                 });
 
                 $(selFilterPanel+' .panel-body').append($this.data('select-filters-item'));
-                $('#create-cohort-form .form-control-static').append($this.data('create-cohort-form-item'));
+                createFormFilterSet.append($this.data('create-cohort-form-item'));
 
                 $('a.mol-cat-filter-x').on('click', function (e,data) {
                     // When the 'Selected Filters' token is removed, remove this filter from other
@@ -285,7 +298,7 @@ require([
                     (!data || !data.forNewVal) &&  mut_cat.val('label');
                     $(this).parent('span').remove();
 
-                    $('#create-cohort-form .form-control-static span').each(function () {
+                    createFormFilterSet.find('span').each(function () {
                         if ($(this).data('feature-id') == 'MUT:category') {
                             $(this).remove();
                         }
@@ -351,7 +364,9 @@ require([
                         'feature-id': feature_id,
                         'feature-name': feature_value[0],
                         'value-id': value_id,
-                        'value-name': feature_value[1]
+                        'value-name': feature_value[1],
+                        'prog-id': tokenProgId,
+                        'prog-name': tokenProgDisplName
                     }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token');
 
                 } else if (feature.data('feature-type') == 'donor') { // Donor feature
@@ -359,7 +374,9 @@ require([
                         'feature-id': feature_id,
                         'feature-name': feature.data('feature-name'),
                         'value-id': value_id,
-                        'value-name': value.data('value-name')
+                        'value-name': value.data('value-name'),
+                        'prog-id': tokenProgId,
+                        'prog-name': tokenProgDisplName
                     }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token');
 
                 } else if (feature.data('feature-type') == 'user-data') { // User data filter
@@ -367,7 +384,9 @@ require([
                         'feature-id': feature_id,
                         'feature-name': feature.data('feature-name'),
                         'value-id': value_id,
-                        'value-name': value.data('value-name')
+                        'value-name': value.data('value-name'),
+                        'prog-id': tokenProgId,
+                        'prog-name': tokenProgDisplName
                     }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token');
 
                 } else { // Molecular feature
@@ -380,7 +399,9 @@ require([
                         'feature-name': feature.data('feature-name'),
                         'value-id': value_id,
                         'value-name': value.data('value-name'),
-                        'class': ''
+                        'class': '',
+                        'prog-id': tokenProgId,
+                        'prog-name': tokenProgDisplName
                     }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token');
 
                     tokenFeatDisplName = gene.label + ' [' + feature.data('feature-displ-name');
@@ -407,7 +428,7 @@ require([
 
 
                     $(selFilterPanel+' .panel-body').append($this.data('select-filters-item'));
-                    $('#create-cohort-form .form-control-static').append($this.data('create-cohort-form-item'));
+                    createFormFilterSet.append($this.data('create-cohort-form-item'));
 
                     $('a.delete-x').on('click', function(e,data) {
                         var checked_box = $('div[data-feature-id="' + $(this).parent('span').data('feature-id')
@@ -421,7 +442,7 @@ require([
                         var span_data = $(this).parent('span').data();
 
                         // Remove the filter tokens from their respective containers
-                        $('#create-cohort-form .form-control-static span[data-feature-id="'+span_data['feature-id']+'"][data-value-id="'+span_data['value-id']+'"]').remove();
+                        createFormFilterSet.find('span[data-feature-id="'+span_data['feature-id']+'"][data-value-id="'+span_data['value-id']+'"]').remove();
                         $(selFilterPanel+' .panel-body span[data-feature-id="'+span_data['feature-id']+'"][data-value-id="'+span_data['value-id']+'"]').remove();
 
                         (!data || !data.without_update) && update_displays(true);
@@ -431,7 +452,7 @@ require([
             } else { // Checkbox unchecked
                 // Remove create cohort form pill if it exists
                 if($this.data('create-cohort-form-item')) {
-                    $('#create-cohort-form .form-control-static span').each(function () {
+                    createFormFilterSet.find('span').each(function () {
                         if ($(this).data('feature-id') == $this.data('create-cohort-form-item').data('feature-id') &&
                             $(this).data('value-name') == $this.data('create-cohort-form-item').data('value-name')) {
                             $(this).remove();
@@ -448,6 +469,7 @@ require([
     };
 
     $('.clear-filters').on('click', function() {
+        var activeDataTab = $('.data-tab.active').attr('id');
         var filterType = $(this).attr('id').split('-clear-filters')[0];
         $(this).parents('.selected-filters').find('.panel-body').empty();
         $(this).parents('.data-tab').find('.filter-panel input:checked').each(function() {
@@ -457,7 +479,7 @@ require([
             $('#paste-in-genes').siblings('div.token').find('a.close').trigger('click');
         }
 
-        $('#create-cohort-form .form-control-static span.'+filterType+'-token').remove();
+        $('p#'+activeDataTab+'-filters span.'+filterType+'-token').remove();
         update_displays();
     });
 
@@ -470,6 +492,7 @@ require([
 
     $('button[data-target="#create-cohort-modal"]').on('click',function(e){
 
+
         // Clear previous 'bad name' alerts
         $('#unallowed-chars-alert').hide();
 
@@ -478,17 +501,15 @@ require([
         // is the one which is used.
         // If we see filters for both, warn the user.
         var activeDataTab = $('.data-tab.active').attr('id');
-        if($('.isb-cgc-data-selected-filters .panel-body span').length > 0 && $('.user-data-selected-filters .panel-body span').length > 0) {
-            $('.one-per-warn').html(activeDataTab == 'isb-cgc-data' ? "ISB-CGC Data" : "User Data");
-            $('#one-cohort-type-per-create-warn').show();
-        }
-        $('#create-cohort-form .form-control-static span').each(function(){
-            if(!$(this).hasClass(activeDataTab+'-token')) {
-                $(this).css('display', 'none');
-            } else {
-                $(this).css('display','inline-block');
+        var progCount = 0;
+        $('.selected-filters .panel-body').each(function(){
+            if($(this).find('span').length > 0) {
+                progCount++;
             }
         });
+        if(progCount > 1) {
+            $('#multi-prog-cohort-create-warn').show();
+        }
     });
 
     // cohort_details: show and hide the filter panel for editing an extant cohort
@@ -561,18 +582,16 @@ require([
             form.append('<input type="hidden" name="apply-name" value="true" />');
         }
 
-        var activeProgramId = $('ul.nav-tabs-data li.active a').data('program-id');
-        $('.'+activeProgramId+'-data-selected-filters .panel-body span').each(function() {
-            var $this = $(this),
-                value = {
-                    'feature': { name: $this.data('feature-name'), id: $this.data('feature-id') },
-                    'value'  : { name: $this.data('value-name')  , id: $this.data('value-id')   }
-                };
+        $('.selected-filters .panel-body span').each(function() {
+            var $this = $(this);
+            var value = {
+                'feature': { name: $this.data('feature-name'), id: $this.data('feature-id') },
+                'value'  : { name: $this.data('value-name')  , id: $this.data('value-id')   },
+                'program': { name: $this.data('prog-name')   , id: $this.data('prog-id')    }
+            };
             form.append($('<input>').attr({ type: 'hidden', name: 'filters', value: JSON.stringify(value)}));
         });
-        if (activeProgramId != "0") {
-            form.append($('<input>').attr({ type: 'hidden', name: 'program_id', value: activeProgramId}));
-        }
+
         if(cohort_id) {
             $('#apply-edit-cohort-name').prop('value', $('#edit-cohort-name').val());
             form.append('<input type="hidden" name="source" value="' + cohort_id + '" />');
