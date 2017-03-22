@@ -137,8 +137,7 @@
         <div class="panel-body" id="file-process-list">
 
             <label for="select-gcp-bucket">Please select a Google Cloud Bucket to upload your files to.</label>
-
-            {% if google_projects and google_projects.0.bucket_set.all|length > 0 %}
+            {% if google_projects and got_bucket %}
             <select id="select-gcp-bucket" name="gcp-bucket" class="form-control">
                 {% for google_project in google_projects %}
                 {% for bucket in google_project.bucket_set.all %}
@@ -150,7 +149,7 @@
                 <div class="alert alert-warning alert-dismissable">You must have at least one Google Cloud Bucket registered with the system.</div>
             {% endif %}
             <label for="select-gcp-dataset">Please select a BigQuery dataset to upload your data to.</label>
-            {% if google_projects and google_projects.0.bqdataset_set.all|length > 0 %}
+            {% if google_projects and got_dataset %}
             <select id="select-gcp-dataset" name="gcp-dataset" class="form-control">
                 {% for google_project in google_projects %}
                 {% for dataset in google_project.bqdataset_set.all %}
@@ -167,8 +166,8 @@
         </div>
         <div class="panel-footer">
 
-            <button class="btn btn-primary" id="back-button" {% if google_projects and google_projects.0.bucket_set.all|length == 0 and google_projects.0.bqdataset_set.all|length == 0%}disabled="disabled"{% endif %}><i class="fa fa-chevron-left"></i> Back</button>
-            <button class="btn btn-primary" id="upload-button" {% if google_projects and google_projects.0.bucket_set.all|length == 0 and google_projects.0.bqdataset_set.all|length == 0%}disabled="disabled"{% endif %}><i class="fa fa-cloud-upload"></i> Upload Data</button>
+            <button class="btn btn-primary" id="back-button"><i class="fa fa-chevron-left"></i> Back</button>
+            <button class="btn btn-primary" id="upload-button" {% if not got_bucket or not got_dataset %}disabled="disabled"{% endif %}><i class="fa fa-cloud-upload"></i> Upload Data</button>
             <span class="hidden progress-message"><i class="fa fa-spin fa-circle-o-notch"></i> Uploading</span>
 
         </div>

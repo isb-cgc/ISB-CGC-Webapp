@@ -14,6 +14,18 @@ require.config({
         'jqueryui': ['jquery'],
         'session_security': ['jquery'],
         'underscore': {exports: '_'}
+    },
+    // Per http://jaketrent.com/post/cross-domain-requirejs-text/
+    // Because this is a cross-domain text request, we need to force
+    // it to succeed
+    config: {
+        text: {
+            useXhr: function (url, protocol, hostname, port) {
+                // allow cross-domain requests
+                // remote server allows CORS
+                return true;
+            }
+        }
     }
 });
 
@@ -24,8 +36,8 @@ require([
     'session_security',
     'underscore',
     'base',
-    'text!../templates/upload_file_list_item.html',
-    'text!../templates/upload_input_table.html'
+    'text!'+STATIC_FILES_URL+'templates/upload_file_list_item.html',
+    'text!'+STATIC_FILES_URL+'templates/upload_input_table.html'
 ], function($, jqueryui, bootstrap, session_security, _, base, UploadFileListItemTemplate, UploadInputTableTemplate) {
     'use strict';
 
@@ -319,12 +331,12 @@ require([
 
         $('#program-tab').val('new');
         $(target).collapse('show');
-        $('#study-info').collapse('hide');
+        $('#project-info').collapse('hide');
     }).on('hide.bs.tab', function(e){
         var target = $(this).data('target');
 
         $(target).collapse('hide');
-        $('#study-info').collapse('show');
+        $('#project-info').collapse('show');
         $('#program-tab').val('existing');
     });
 
@@ -630,8 +642,8 @@ require([
             form.append('program-id', $('#program-selection').val());
         }
 
-        form.append('study-name', $('#study-name').val());
-        form.append('study-description', $('#study-description').val());
+        form.append('project-name', $('#project-name').val());
+        form.append('project-description', $('#project-description').val());
 
         var uploadDataType = $('.data-radio:checked').val();
         if(uploadDataType === 'high' && hleCheckbox.is(':checked')) {
