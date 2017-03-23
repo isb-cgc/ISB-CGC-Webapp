@@ -21,14 +21,26 @@ require.config({
         'underscore': {
             exports: '_'
         }
+    },
+    // Per http://jaketrent.com/post/cross-domain-requirejs-text/
+    // Because this is a cross-domain text request, we need to force
+    // it to succeed
+    config: {
+        text: {
+            useXhr: function (url, protocol, hostname, port) {
+                // allow cross-domain requests
+                // remote server allows CORS
+                return true;
+            }
+        }
     }
 });
 
 require([
     'jquery',
     'underscore',
+    'text!'+STATIC_FILES_URL+'templates/upload_input_table.html',
     'base',
-    'text!../templates/upload_input_table.html',
     'bootstrap'
 ], function ($, _, UploadInputTableTempl) {
 
