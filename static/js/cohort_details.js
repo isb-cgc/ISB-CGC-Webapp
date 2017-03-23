@@ -76,6 +76,7 @@ require([
 
     var savingComment = false;
     var savingChanges = false;
+    var mode = (cohort_id ? 'VIEWING' : 'EDITING');
     var SUBSEQUENT_DELAY = 600;
     var update_displays_thread = null;
 
@@ -512,26 +513,44 @@ require([
         }
     });
 
+    var set_mode = function(from_click) {
+
+        switch(mode){
+            case 'EDITING':
+                $('.data-tab-content-panel').removeClass('col-md-12').addClass('col-md-8');
+                $('.filter-panel').show();
+                $('.selected-filters').show();
+                $('.page-header').hide();
+                $('input[name="cohort-name"]').show();
+                $('#default-cohort-menu').hide();
+                $('#edit-cohort-menu').show();
+                if(from_click) {
+                    //showHideMoreGraphButton();
+                    $('#multi-categorical').prop('scrollLeft',150);
+                }
+                break;
+
+            case 'VIEWING':
+                $('.data-tab-content-panel').removeClass('col-md-8').addClass('col-md-12');
+                $('.filter-panel').hide();
+                $('.selected-filters').hide();
+                $('.page-header').show();
+                $('input[name="cohort-name"]').hide();
+                $('#default-cohort-menu').show();
+                $('#edit-cohort-menu').hide();
+                break;
+        }
+    };
+
     // cohort_details: show and hide the filter panel for editing an extant cohort
-    $('#add-filter-btn').on('click', function() {
-        $('.data-tab-content-panel').removeClass('col-md-12').addClass('col-md-8');
-        $('.filter-panel').show();
-        $('.selected-filters').show();
-        $('.page-header').hide();
-        $('input[name="cohort-name"]').show();
-        $('#default-cohort-menu').hide();
-        $('#edit-cohort-menu').show();
-        showHideMoreGraphButton();
-        $('#multi-categorical').prop('scrollLeft',150);
+    $('#edit-cohort-btn').on('click', function() {
+        mode = "EDITING";
+        set_mode(true);
     });
-    $('#cancel-add-filter-btn').on('click', function() {
-        $('.data-tab-content-panel').removeClass('col-md-8').addClass('col-md-12');
-        $('.filter-panel').hide();
-        $('.selected-filters').hide();
-        $('.page-header').show();
-        $('input[name="cohort-name"]').hide();
-        $('#default-cohort-menu').show();
-        $('#edit-cohort-menu').hide();
+
+    $('#cancel-edit-cohort-btn').on('click', function() {
+        mode = "VIEWING";
+        set_mode(true);
     });
 
     $('#create-cohort-form, #apply-edits-form').on('submit', function(e) {
@@ -786,7 +805,7 @@ require([
 
         // Show or hide the 'more' button for the mosaics based on whether it's needed per height
         if($(program_data_selector + ' .col-lg-8').length == 0){
-            showHideMoreGraphButton();
+            //showHideMoreGraphButton();
         }
 
         $(program_data_selector + ' .more-graphs button').on('click', function() {
@@ -816,13 +835,13 @@ require([
         $(program_data_selector + ' #mutation-category').on('change',filter_change_callback);
     };
 
-    var filter_panel_load = function() {
+    var filter_panel_load = function(cohort) {
 
         var active_program_id = $('ul.nav-tabs-data li.active a').data('program-id');
         var program_data_selector ='#'+active_program_id+'-data';
         if ($(program_data_selector).length == 0) {
             var data_tab_content_div = $('div.data-tab-content');
-            var get_panel_url = base_url + '/cohorts/filter_panel/' + active_program_id +'/';
+            var get_panel_url = base_url + '/cohorts/' + (cohort ? cohort+'/' : '') + 'filter_panel/' + active_program_id +'/';
             console.log(get_panel_url);
 
             $.ajax({
@@ -834,6 +853,8 @@ require([
 
                     bind_widgets(program_data_selector);
                     update_displays();
+
+                    set_mode();
 
                     $('.tab-pane.data-tab').each(function() { $(this).removeClass('active'); });
                     $(program_data_selector).addClass('active');
@@ -848,10 +869,10 @@ require([
     
     // Detect tab change
     $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-        filter_panel_load();
+        filter_panel_load(cohort_id);
     });
-    
-    filter_panel_load();
+
+    filter_panel_load(cohort_id);
     
 });
 

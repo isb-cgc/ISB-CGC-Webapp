@@ -24,18 +24,33 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
     var tree_graph_obj = Object.create(tree_graph, {});
     var parsets_obj = Object.create(draw_parsets, {});
 
-    var clin_tree_attr = {
-        disease_code: 'Disease Code',
-        vital_status: 'Vital Status',
-        SampleTypeCode: 'Sample Type',
-        tumor_tissue_site: 'Tumor Tissue Site',
-        gender: 'Gender',
-        age_at_initial_pathologic_diagnosis: 'Age at Initial Pathologic Diagnosis'
+    var PROG_CLIN_TREES = {
+        'TCGA': {
+            project_disease_type: 'Disease Type',
+            vital_status: 'Vital Status',
+            sample_type: 'Sample Type',
+            tumor_tissue_site: 'Tumor Tissue Site',
+            gender: 'Gender',
+            age_at_initial_pathologic_diagnosis: 'Age at Initial Pathologic Diagnosis'
+        },
+        'CCLE':{
+            project_disease_type: 'Disease Type',
+            gender: 'Gender',
+            site_primary: 'Site Primary',
+            histology: 'Histology',
+            hist_subtype: 'Histoligcal Subtype'
+        },
+        'TARGET':{
+            project_disease_type: 'Disease Type',
+            vital_status: 'Vital Status',
+            gender: 'Gender',
+            age_at_diagnosis: 'Age at Diagnosis'
+        }
     };
 
     var user_data_attr = {
-        user_project: 'Project',
-        user_study: 'Study'
+        user_program: 'Program',
+        user_project: 'Project'
     };
 
     return  {
@@ -85,9 +100,12 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
         },
 
         update_counts_parsets_direct: function(filters, program_id) {
+
             if(program_id == null || program_id == undefined) {
                 program_id = $('ul.nav-tabs-data li.active a').data('program-id');
             }
+
+            var clin_tree_attr = PROG_CLIN_TREES[$('#'+program_id+'-data-filter-panel').data('prog-displ-name')];
 
             $('.clinical-trees .spinner').show();
             $('.user-data-trees .spinner').show();
@@ -152,9 +170,12 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
         },
 
         update_counts_parsets: function(base_url_domain, endpoint, cohort_id, version, program_id){
+
             if(program_id == null || program_id == undefined) {
                 program_id = $('ul.nav-tabs-data li.active a').data('program-id');
             }
+
+            var clin_tree_attr = PROG_CLIN_TREES[$('#'+program_id+'-data-filter-panel').data('prog-displ-name')];
 
             var context = this;
             var filters = this.format_filters(program_id);
