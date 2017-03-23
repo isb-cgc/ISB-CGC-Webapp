@@ -1,5 +1,3 @@
-
-
 if [ -n "$CI" ]; then
     export "[ERROR] Never refresh databases on deployments!"
 else
