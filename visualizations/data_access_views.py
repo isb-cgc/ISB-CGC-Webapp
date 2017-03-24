@@ -1,6 +1,6 @@
 """
 
-Copyright 2015, Institute for Systems Biology
+Copyright 2017, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import json
 import logging
 import math
 import traceback
+import sys
 
 from cohorts.metadata_helpers import get_sql_connection
 from bq_data_access.pairwise import PairwiseInputVector, Pairwise
@@ -148,6 +149,7 @@ def get_pairwise_result(feature_array):
     except Exception as e:
         outputs = None
         results = None
+        print >> sys.stdout, traceback.format_exc()
         logger.error(traceback.format_exc())
 
     return results
@@ -413,6 +415,7 @@ def data_access_for_plot(request):
         return JsonResponse(get_merged_feature_vectors(x_id, y_id, c_id, cohort_id_array, logTransform, confirmed_study_ids))
 
     except Exception as e:
+        print >> sys.stdout, traceback.format_exc()
         logger.exception(e)
         return JsonResponse({'error': str(e)}, status=500)
 
