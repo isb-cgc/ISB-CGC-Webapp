@@ -17,6 +17,8 @@ limitations under the License.
 """
 
 import logging
+import sys
+import traceback
 
 from bq_data_access.clinical_data import CLINICAL_FEATURE_TYPE
 from bq_data_access.copynumber_data import CNVR_FEATURE_TYPE
@@ -98,6 +100,7 @@ def feature_search(request):
     #     raise InternalServerErrorException()
 
     except Exception as e:
+        print >> sys.stdout, traceback.format_exc()
         logging.exception(e)
         return JsonResponse({'error': e}, status=500)
 
@@ -125,5 +128,6 @@ def feature_field_search(request):
     #     raise InternalServerErrorException()
 
     except Exception as e:
+        print >> sys.stdout, traceback.format_exc()
         logging.exception(e)
         raise JsonResponse({'error': e}, status=500)

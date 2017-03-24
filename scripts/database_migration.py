@@ -46,7 +46,7 @@ def get_mysql_connection():
 
     return db
 
-
+# Insert any missing programs and projects into Django tables
 def create_programs_and_projects(debug):
     db = None
     cursor = None
@@ -280,30 +280,47 @@ def create_programs_and_projects(debug):
         if db and db.open: db.close()
 
 
+# Add case barcodes to the cohorts_samples table (currently not present)
 def fix_case_barcodes_in_cohorts(debug):
 
     db = None
     cursor = None
 
-    fix_case_barcodes = """
+    fix_tcga_case_barcodes = """
         UPDATE cohorts_samples cs
-        JOIN {0} ms
+        JOIN TCGA_metadata_samples ms
         ON ms.sample_barcode = cs.sample_barcode
         SET cs.case_barcode = ms.case_barcode
         WHERE cs.case_barcode IS NULL;
     """
 
-    programs_to_fix = ['TCGA','CCLE']
+    fix_ccle_case_barcodes = """
+            UPDATE cohorts_samples cs
+            JOIN (
+                SELECT SampleBarcode AS sms, cms.sample_barcode, cms.case_barcode
+                FROM metadata_samples ms
+                JOIN CCLE_metadata_samples cms
+                ON cms.case_barcode = ms.ParticipantBarcode
+                WHERE SampleBarcode LIKE 'CCLE%'
+            ) ms
+            ON ms.sms = cs.sample_barcode
+            SET cs.sample_barcode = ms.sample_barcode, cs.case_barcode = ms.case_barcode
+            WHERE cs.sample_barcode LIKE 'CCLE%';
+    """
 
     try:
         db = get_mysql_connection()
         cursor = db.cursor()
 
-        for prog in programs_to_fix:
-            if debug:
-                print >> sys.stdout, "Executing statement: "+fix_case_barcodes.format(prog+'_metadata_samples')
-            else:
-                cursor.execute(fix_case_barcodes.format(prog+'_metadata_samples'))
+        if debug:
+            print >> sys.stdout, "Executing statement: "+fix_tcga_case_barcodes
+        else:
+            cursor.execute(fix_tcga_case_barcodes)
+
+        if debug:
+            print >> sys.stdout, "Executing statement: " + fix_ccle_case_barcodes
+        else:
+            cursor.execute(fix_ccle_case_barcodes)
 
     except Exception as e:
         print >> sys.stdout, traceback.format_exc()
@@ -312,7 +329,9 @@ def fix_case_barcodes_in_cohorts(debug):
         if db and db.open: db.close()
 
 
-def fix_ccle_cohort_samples(debug):
+# Currently only CCLE's projects are incorrect (they're all the 'CCLE' project) but if others need to be done they can be added
+# to the program_cohorts_to_update list
+def fix_cohort_projects(debug):
 
     db = None
     cursor = None
@@ -331,31 +350,34 @@ def fix_ccle_cohort_samples(debug):
         if isb_userid is None:
             raise Exception("Couldn't retrieve ID for isb user!")
 
-        cursor.execute("SELECT id FROM projects_project WHERE name='CCLE' and active = 1 and owner_id = %s;", (isb_userid,))
+        program_cohorts_to_update = ['CCLE']
 
-        for row in cursor.fetchall():
-            ccle_project_id = row[0]
+        for prog in program_cohorts_to_update:
+            cursor.execute("SELECT id FROM projects_program WHERE name=%s and active = 1 and owner_id = %s;", (prog, isb_userid,))
 
-        if ccle_project_id is None:
-            raise Exception("Couldn't retrieve ID for CCLE project!")
+            for row in cursor.fetchall():
+                program_id = row[0]
 
-        fix_ccle_projects = """
-            UPDATE cohorts_samples cs
-            JOIN CCLE_metadata_samples cms
-            ON cms.sample_barcode = cs.sample_barcode
-            JOIN projects_project pp
-            ON cms.project_disease_type = pp.name
-            SET cs.project_id = pp.id
-            WHERE cs.project_id = %s;
-        """
+            if program_id is None:
+                raise Exception("Couldn't retrieve ID for {0} program!".format(prog))
 
-        values = (ccle_project_id, )
+            fix_cohort_projects = """
+                UPDATE cohorts_samples cs
+                JOIN {0}_metadata_samples ms
+                ON ms.sample_barcode = cs.sample_barcode
+                JOIN projects_project pp
+                ON ms.project_disease_type = pp.name
+                SET cs.project_id = pp.id
+                WHERE pp.program_id = %s;
+            """
+
+        values = (program_id, )
 
         if debug:
-            print >> sys.stdout, "Executing statement: "+fix_ccle_projects
+            print >> sys.stdout, "Executing statement: "+fix_cohort_projects.format(prog)
             print >> sys.stdout, "Values: "+str(values)
         else:
-            cursor.execute(fix_ccle_projects, values)
+            cursor.execute(fix_cohort_projects.format(prog), values)
 
     except Exception as e:
         print >> sys.stdout, traceback.format_exc()
@@ -419,7 +441,7 @@ def make_attr_display_table(debug):
                 'overweight': 'Overweight: BMI is 25 - 29.9',
                 'obese': 'Obese: BMI is 30 or more',
             },
-            'SampleTypeCode': {
+            'sample_type': {
                 '01': 'Primary Solid Tumor',
                 '02': 'Recurrent Solid Tumor',
                 '03': 'Primary Blood Derived Cancer - Peripheral Blood',
@@ -486,7 +508,7 @@ def make_attr_display_table(debug):
 
             vals = ('tobacco_smoking_history',None,'Tobacco Smoking History',pid,)
             cursor.execute(insert_statement,vals)
-            vals = ('SampleTypeCode', None, 'Sample Type', pid,)
+            vals = ('sample_type', None, 'Sample Type', pid,)
             cursor.execute(insert_statement, vals)
             vals = ('hpv_status', None, 'HPV Status', pid,)
             cursor.execute(insert_statement, vals)
@@ -512,8 +534,8 @@ def main():
     cmd_line_parser.add_argument('-p', '--create-prog-proj', type=bool, default=False,
                                  help="Add the program and project entries to the Django tables.")
 
-    cmd_line_parser.add_argument('-c', '--fix-ccle-cohorts', type=bool, default=False,
-                                 help="Fix all CCLE sample entries in cohorts to list the correct project.")
+    cmd_line_parser.add_argument('-c', '--fix-cohort-projects', type=bool, default=False,
+                                 help="Fix any cohort entries to contain the correct project ID")
 
     cmd_line_parser.add_argument('-b', '--debug-mode', type=bool, default=False,
                                  help="Don't execute statements, just print them with their paramter tuples.")
@@ -528,7 +550,7 @@ def main():
 
     try:
         args.create_prog_proj and create_programs_and_projects(args.debug_mode)
-        args.fix_ccle_cohorts and fix_ccle_cohort_samples(args.debug_mode)
+        args.fix_ccle_cohorts and fix_cohort_projects(args.debug_mode)
         args.attr_displ_table and make_attr_display_table(args.debug_mode)
         args.fix_case_id and fix_case_barcodes_in_cohorts(args.debug_mode)
 
