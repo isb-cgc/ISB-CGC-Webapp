@@ -309,12 +309,12 @@ LOGGING = {
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
         },
-        'console': {
+        'console_dev': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler'
         },
-        'console_all': {
-            'level': 'DEBUG',
+        'console_prod': {
+            'level': 'WARNING',
             'filters': ['require_debug_false'],
             'class': 'logging.StreamHandler'
         }
@@ -326,32 +326,32 @@ LOGGING = {
             'propagate': True,
         },
         'cohorts': {
-            'handlers': ['console_all'],
+            'handlers': ['console_dev','console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'allauth': {
-            'handlers': ['console_all'],
+            'handlers': ['console_dev','console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'demo': {
-            'handlers': ['console_all'],
+            'handlers': ['console_dev','console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'projects': {
-            'handlers': ['console_all'],
+            'handlers': ['console_dev','console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'workbooks': {
-            'handlers': ['console_all'],
+            'handlers': ['console_dev','console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'accounts': {
-            'handlers': ['console_all'],
+            'handlers': ['console_dev','console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
