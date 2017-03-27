@@ -33,6 +33,7 @@ from googleapiclient.errors import HttpError
 from google_helpers.storage_service import get_storage_resource
 from google_helpers.directory_service import get_directory_resource
 from google_helpers.pubsub_service import get_pubsub_service, get_full_topic_name
+from google_helpers.stackdriver import StackDriverLogger
 from accounts.models import NIH_User
 
 import base64
@@ -56,6 +57,7 @@ CHECK_NIH_USER_LOGIN_TASK_URI = settings.CHECK_NIH_USER_LOGIN_TASK_URI
 CRON_MODULE = settings.CRON_MODULE
 
 PUBSUB_TOPIC_ERA_LOGIN = settings.PUBSUB_TOPIC_ERA_LOGIN
+LOG_NAME_ERA_LOGIN_VIEW = settings.LOG_NAME_ERA_LOGIN_VIEW
 
 
 def init_saml_auth(req):
@@ -100,6 +102,8 @@ def index(request):
     attributes = False
     paint_logout = False
 
+    st_logger = StackDriverLogger.build_from_django_settings()
+
     if 'sso' in req['get_data']:
         if 'redirect_url' in req['get_data']:
             return HttpResponseRedirect(auth.login(return_to=req['get_data']['redirect_url']))
@@ -122,98 +126,129 @@ def index(request):
 
         return HttpResponseRedirect(auth.logout(name_id=name_id, session_index=session_index))
     elif 'acs' in req['get_data']:
+        st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[STATUS] received ?acs")
         print >> sys.stdout, "[STATUS] recevied ?acs:"
         print >> sys.stdout, req.__str__()
         print >> sys.stdout, req['get_data'].__str__()
         auth.process_response()
         errors = auth.get_errors()
         if errors:
+            st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[ERROR] executed auth.get_errors(). errors are:")
             logger.info('executed auth.get_errors(). errors are:')
             logger.warn(errors)
+            st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[ERROR] {}".format(repr(errors)))
             logger.info('error is because')
-            logger.warn(auth.get_last_error_reason())
+            auth_last_error = auth.get_last_error_reason()
+            logger.warn(auth_last_error)
+            st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[ERROR] last error: {}".format(str(auth_last_error)))
 
         not_auth_warn = not auth.is_authenticated()
 
+        st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[STATUS] no errors in 'auth' object")
+
         if not errors:
-            request.session['samlUserdata'] = auth.get_attributes()
-            request.session['samlNameId'] = auth.get_nameid()
-            NIH_username = request.session['samlNameId']
-            request.session['samlSessionIndex'] = auth.get_session_index()
+            try:
+                st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[STATUS] processing 'acs' response")
 
-            user_email = User.objects.get(id=request.user.id).email
+                request.session['samlUserdata'] = auth.get_attributes()
+                request.session['samlNameId'] = auth.get_nameid()
+                NIH_username = request.session['samlNameId']
+                request.session['samlSessionIndex'] = auth.get_session_index()
 
-            # 1. check if this google identity is currently linked to other NIH usernames
-            # note: the NIH username exclusion is case-insensitive so this will not return a false positive
-            # e.g. if this google identity is linked to 'NIHUSERNAME1' but just authenticated with 'nihusername1',
-            # it will still pass this test
-            nih_usernames_already_linked_to_this_google_identity = NIH_User.objects.filter(
-                user_id=request.user.id, linked=True).exclude(NIH_username__iexact=NIH_username)
-            for nih_user in nih_usernames_already_linked_to_this_google_identity:
-                if nih_user.NIH_username.lower() != NIH_username.lower():
-                    logger.warn("User {} is already linked to the eRA commons identity {} and attempted authentication"
-                                " with the eRA commons identity {}."
-                                .format(user_email, nih_user.NIH_username, NIH_username))
-                    messages.warning(request, "User {} is already linked to the eRA commons identity {}. "
-                                              "Please unlink these before authenticating with the eRA commons "
-                                              "identity {}.".format(user_email, nih_user.NIH_username, NIH_username))
+                user_email = User.objects.get(id=request.user.id).email
+
+                # 1. check if this google identity is currently linked to other NIH usernames
+                # note: the NIH username exclusion is case-insensitive so this will not return a false positive
+                # e.g. if this google identity is linked to 'NIHUSERNAME1' but just authenticated with 'nihusername1',
+                # it will still pass this test
+                nih_usernames_already_linked_to_this_google_identity = NIH_User.objects.filter(
+                    user_id=request.user.id, linked=True).exclude(NIH_username__iexact=NIH_username)
+                for nih_user in nih_usernames_already_linked_to_this_google_identity:
+                    if nih_user.NIH_username.lower() != NIH_username.lower():
+                        logger.warn("User {} is already linked to the eRA commons identity {} and attempted authentication"
+                                    " with the eRA commons identity {}."
+                                    .format(user_email, nih_user.NIH_username, NIH_username))
+                        st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[STATUS] {}".format(
+                                    "User {} is already linked to the eRA commons identity {} and attempted authentication"
+                                    " with the eRA commons identity {}."
+                                    .format(user_email, nih_user.NIH_username, NIH_username)))
+
+                        messages.warning(request, "User {} is already linked to the eRA commons identity {}. "
+                                                  "Please unlink these before authenticating with the eRA commons "
+                                                  "identity {}.".format(user_email, nih_user.NIH_username, NIH_username))
+                        return redirect('/users/' + str(request.user.id))
+
+                # 2. check if there are other google identities that are still linked to this NIH_username
+                # note: the NIH username match is case-insensitive so this will not return a false negative.
+                # e.g. if a different google identity is linked to 'NIHUSERNAME1' and this google identity just authenticated with 'nihusername1',
+                # this will fail the test and return to the /users/ url with a warning message
+                preexisting_nih_users = NIH_User.objects.filter(
+                    NIH_username__iexact=NIH_username, linked=True).exclude(user_id=request.user.id)
+
+                if len(preexisting_nih_users) > 0:
+                    preexisting_nih_user_user_ids = [preexisting_nih_user.user_id for preexisting_nih_user in preexisting_nih_users]
+                    prelinked_user_email_list = [user.email for user in User.objects.filter(id__in=preexisting_nih_user_user_ids)]
+                    prelinked_user_emails = ', '.join(prelinked_user_email_list)
+
+                    logger.warn("User {} tried to log into the NIH account {} that is already linked to user(s) {}".format(
+                        user_email,
+                        NIH_username,
+                        prelinked_user_emails + '.'
+                    ))
+                    st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "User {} tried to log into the NIH account {} that is already linked to user(s) {}".format(
+                        user_email,
+                        NIH_username,
+                        prelinked_user_emails + '.'
+                    ))
+
+                    messages.warning(request, "You tried to log into an NIH account that is linked to another google email address.")
                     return redirect('/users/' + str(request.user.id))
 
-            # 2. check if there are other google identities that are still linked to this NIH_username
-            # note: the NIH username match is case-insensitive so this will not return a false negative.
-            # e.g. if a different google identity is linked to 'NIHUSERNAME1' and this google identity just authenticated with 'nihusername1',
-            # this will fail the test and return to the /users/ url with a warning message
-            preexisting_nih_users = NIH_User.objects.filter(
-                NIH_username__iexact=NIH_username, linked=True).exclude(user_id=request.user.id)
+            except Exception as e:
+                st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[ERROR] Exception while finding user email: {}".format(str(e)))
+                logger.exception(e)
 
-            if len(preexisting_nih_users) > 0:
-                preexisting_nih_user_user_ids = [preexisting_nih_user.user_id for preexisting_nih_user in preexisting_nih_users]
-                prelinked_user_email_list = [user.email for user in User.objects.filter(id__in=preexisting_nih_user_user_ids)]
-                prelinked_user_emails = ', '.join(prelinked_user_email_list)
+            try:
+                st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[STATUS] Updating Django model")
 
-                logger.warn("User {} tried to log into the NIH account {} that is already linked to user(s) {}".format(
-                    user_email,
-                    NIH_username,
-                    prelinked_user_emails + '.'
-                ))
-                messages.warning(request, "You tried to log into an NIH account that is linked to another google email address.")
-                return redirect('/users/' + str(request.user.id))
+                storage_client = get_storage_resource()
+                # check authenticated NIH username against NIH authentication list
+                is_dbGaP_authorized = check_NIH_authorization_list(NIH_username, storage_client)
 
+                saml_response = None if 'SAMLResponse' not in req['post_data'] else req['post_data']['SAMLResponse']
+                saml_response = saml_response.replace('\r\n', '')
+                NIH_assertion_expiration = datetime.datetime.now() + datetime.timedelta(days=1)
 
-            storage_client = get_storage_resource()
-            # check authenticated NIH username against NIH authentication list
-            is_dbGaP_authorized = check_NIH_authorization_list(NIH_username, storage_client)
+                updated_values = {
+                    'NIH_assertion': saml_response,
+                    'NIH_assertion_expiration': pytz.utc.localize(NIH_assertion_expiration),
+                    'dbGaP_authorized': is_dbGaP_authorized,
+                    'user_id': request.user.id,
+                    'active': 1,
+                    'linked': True
+                }
 
-            saml_response = None if 'SAMLResponse' not in req['post_data'] else req['post_data']['SAMLResponse']
-            saml_response = saml_response.replace('\r\n', '')
-            NIH_assertion_expiration = datetime.datetime.now() + datetime.timedelta(days=1)
+                nih_user, created = NIH_User.objects.update_or_create(NIH_username=NIH_username,
+                                                                      user_id=request.user.id,
+                                                                      defaults=updated_values)
+                logger.info("NIH_User.objects.update_or_create() returned nih_user: {} and created: {}".format(
+                    str(nih_user.NIH_username), str(created)))
 
-            updated_values = {
-                'NIH_assertion': saml_response,
-                'NIH_assertion_expiration': pytz.utc.localize(NIH_assertion_expiration),
-                'dbGaP_authorized': is_dbGaP_authorized,
-                'user_id': request.user.id,
-                'active': 1,
-                'linked': True
-            }
+                # add or remove user from ACL_GOOGLE_GROUP if they are or are not dbGaP authorized
+                directory_client, http_auth = get_directory_resource()
+                # default warn message is for eRA Commons users who are not dbGaP authorized
+                warn_message = '''
+                WARNING NOTICE
+                You are accessing a US Government web site which may contain information that must be protected under the US Privacy Act or other sensitive information and is intended for Government authorized use only.
 
-            nih_user, created = NIH_User.objects.update_or_create(NIH_username=NIH_username,
-                                                                  user_id=request.user.id,
-                                                                  defaults=updated_values)
-            logger.info("NIH_User.objects.update_or_create() returned nih_user: {} and created: {}".format(
-                str(nih_user.NIH_username), str(created)))
+                Unauthorized attempts to upload information, change information, or use of this web site may result in disciplinary action, civil, and/or criminal penalties. Unauthorized users of this website should have no expectation of privacy regarding any communications or data processed by this website.
 
-            # add or remove user from ACL_GOOGLE_GROUP if they are or are not dbGaP authorized
-            directory_client, http_auth = get_directory_resource()
-            # default warn message is for eRA Commons users who are not dbGaP authorized
-            warn_message = '''
-            WARNING NOTICE
-            You are accessing a US Government web site which may contain information that must be protected under the US Privacy Act or other sensitive information and is intended for Government authorized use only.
+                Anyone accessing this website expressly consents to monitoring of their actions and all communications or data transiting or stored on related to this website and is advised that if such monitoring reveals possible evidence of criminal activity, NIH may provide that evidence to law enforcement officials.
+                '''
 
-            Unauthorized attempts to upload information, change information, or use of this web site may result in disciplinary action, civil, and/or criminal penalties. Unauthorized users of this website should have no expectation of privacy regarding any communications or data processed by this website.
-
-            Anyone accessing this website expressly consents to monitoring of their actions and all communications or data transiting or stored on related to this website and is advised that if such monitoring reveals possible evidence of criminal activity, NIH may provide that evidence to law enforcement officials.
-            '''
+            except Exception as e:
+                st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[ERROR] Exception while finding user email: {}".format(str(e)))
+                logger.exception(e)
 
             if is_dbGaP_authorized:
                 # if user is dbGaP authorized, warn message is different
