@@ -63,7 +63,7 @@ env_variables:
   DJANGO_SETTINGS_MODULE: 'GenespotRE.settings'
 
 network:
-  instance_tag: webapp_dev
+  instance_tag: isb_cgc_webapp
 
 skip_files:
 - python-su.sh
