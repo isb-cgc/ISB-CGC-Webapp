@@ -103,13 +103,20 @@
                 <div class="panel-heading">
                     <h4 class="panel-title">Current Filters</h4>
                 </div>
-                <div class="panel-body">
-                    {% for filter in cohort.get_current_filters %}
-                        <span class="filter-label label label-default space-right-5">{{ filter.name|get_feat_displ_name }}: {{ filter.value|get_readable_name:filter.name }}</span>
+                <div class="panel-body curr-filter-panel">
+                    {% for prog, filters in cohort.get_current_filters.items %}
+                        <div class="col-sm-3 prog-filter-set">
+                        <h5>{{ prog }}</h5>
+                        {% for filter in filters %}
+                            <span class="filter-label label label-default space-right-5">{{ filter.name|get_feat_displ_name }}: {{ filter.value|get_readable_name:filter.name }}</span>
+                        {% endfor %}
+                        </div>
                     {% empty %}
                         <p>No filters have been applied to this cohort.</p>
                     {% endfor %}
                 </div>
+                <div class="more-filters"><button class="btn btn-link" role="button">Show More</button></div>
+                <div class="less-filters"><button class="btn btn-link" role="button">Show Less</button></div>
             </div>
             <div class="cohort-info panel panel-default">
                 <div class="panel-heading">

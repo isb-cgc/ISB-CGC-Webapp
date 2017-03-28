@@ -242,7 +242,7 @@ def index(request):
                     request.user.id, COUNTDOWN_SECONDS / (60*60)))
             except Exception as e:
                 logger.error("Failed to enqueue automatic logout task")
-                logging.exception(e)
+                logger.exception(e)
 
             messages.info(request, warn_message)
             return HttpResponseRedirect(auth.redirect_to('https://{}'.format(req['http_host'])))
