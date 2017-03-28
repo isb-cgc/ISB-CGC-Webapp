@@ -105,7 +105,7 @@
                 </div>
                 <div class="panel-body curr-filter-panel">
                     {% for prog, filters in cohort.get_current_filters.items %}
-                        <div class="col-sm-3 prog-filter-set">
+                        <div class="col-sm-{{ cohort.get_current_filters|get_prog_col_size }} prog-filter-set">
                         <h5>{{ prog }}</h5>
                         {% for filter in filters %}
                             <span class="filter-label label label-default space-right-5">{{ filter.name|get_feat_displ_name }}: {{ filter.value|get_readable_name:filter.name }}</span>
@@ -116,7 +116,7 @@
                     {% endfor %}
                 </div>
                 <div class="more-filters"><button class="btn btn-link" role="button">Show More</button></div>
-                <div class="less-filters"><button class="btn btn-link" role="button">Show Less</button></div>
+                <div class="less-filters" style="display: none;"><button class="btn btn-link" role="button">Show Less</button></div>
             </div>
             <div class="cohort-info panel panel-default">
                 <div class="panel-heading">

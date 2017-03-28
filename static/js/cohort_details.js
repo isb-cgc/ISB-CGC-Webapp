@@ -808,6 +808,22 @@ require([
             //showHideMoreGraphButton();
         }
 
+        $('.more-filters button').on('click', function() {
+            $('.more-filters').hide();
+            $('.less-filters').show();
+            $('.curr-filter-panel').animate({
+                height: '430px'
+            }, 800);
+            console.debug($('.curr-filter-panel').outerHeight);
+        });
+        $('.less-filters button').on('click', function() {
+            $('.less-filters').hide();
+            $('.more-filters').show();
+            $('.curr-filter-panel').animate({
+                height: '200px'
+            }, 800);
+        });
+
         $(program_data_selector + ' .more-graphs button').on('click', function() {
             $('.more-graphs').hide();
             $('.less-graphs').show();

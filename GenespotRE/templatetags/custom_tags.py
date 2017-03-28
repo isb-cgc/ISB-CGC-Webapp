@@ -234,6 +234,9 @@ def tojson(obj, esacpe_html=True):
         output = re.sub(re.compile(r'(<|>)'), quick_js_bracket_replace, output)
     return output
 
+@register.filter
+def get_prog_col_size(prog_filters):
+    return (12/len(prog_filters.keys()))
 
 @register.filter
 def list_contains_name(list, value):
