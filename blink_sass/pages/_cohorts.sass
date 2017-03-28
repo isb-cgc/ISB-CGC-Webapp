@@ -1,5 +1,26 @@
 #cohort-details
 
+    .cohort-selected-filters
+        overflow: hidden
+        .more-filters, .less-filters
+            width: 100%
+            height: 36px
+            position: relative
+            button
+                left: 50%
+                transform: translateX(-50%)
+                position: absolute
+                z-index: 20
+
+    .curr-filter-panel
+        overflow: hidden
+        height: 210px
+        .prog-filter-set
+            height: 100%
+            border-left: 2px solid $isb-dark
+        :first-child
+            border-left: none
+
     #one-cohort-type-per-create-warn
         margin: 0px 15px 15px 15px
 

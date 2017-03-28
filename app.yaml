@@ -62,6 +62,9 @@ beta_settings:
 env_variables:
   DJANGO_SETTINGS_MODULE: 'GenespotRE.settings'
 
+network:
+  instance_tag: webapp_dev
+
 skip_files:
 - python-su.sh
 - ^(.*/)?#.*#$
