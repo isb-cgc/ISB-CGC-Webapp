@@ -122,7 +122,7 @@
                 <div class="panel-heading">
                     <h4 class="panel-title">Details</h4>
                 </div>
-                <div class="panel-body">
+                <div class="panel-body details-panel">
                     <div class="row col-md-12 space-bottom-10">
                         <span>Internal ISB-CGC Cohort ID: {{ cohort.id }}</span>
                     </div>
@@ -138,16 +138,6 @@
                     </div>
                     <div class="row col-md-12 space-bottom-10">
                         <span>Your Permissions: {{ cohort.perm.perm }}</span>
-                    </div>
-                    <div class="row col-md-12 space-bottom-10">
-                        <span>Creation Filters: </span>
-                        <span class="applied-filters">
-                         {% for filter in cohort.get_creation_filters %}
-                             <span>{{ filter.name|get_feat_displ_name }}: {{ filter.value|get_readable_name:filter.name }}</span>
-                         {% empty %}
-                             There were no filters used to create this cohort.
-                         {% endfor %}
-                         </span>
                     </div>
                     <div class="row col-md-12 space-bottom-10">
                         <span class="rev-history">Revision History:</span>
@@ -175,7 +165,19 @@
                             </ul>
                         {% endif %}
                     </div>
+                    <div class="row col-md-12 space-bottom-10">
+                        <span>Creation Filters: </span>
+                        <span class="applied-filters">
+                         {% for filter in cohort.get_creation_filters %}
+                             <span>{{ filter.name|get_feat_displ_name }}: {{ filter.value|get_readable_name:filter.name }}</span>
+                         {% empty %}
+                             There were no filters used to create this cohort.
+                         {% endfor %}
+                         </span>
+                    </div>
                 </div>
+                <div class="more-details"><button class="btn btn-link" role="button">Show More</button></div>
+                <div class="less-details" style="display: none;"><button class="btn btn-link" role="button">Show Less</button></div>
             </div>
         </div>
         {% endif %}

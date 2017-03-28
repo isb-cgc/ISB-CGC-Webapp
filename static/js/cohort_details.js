@@ -820,9 +820,26 @@ require([
             $('.less-filters').hide();
             $('.more-filters').show();
             $('.curr-filter-panel').animate({
-                height: '200px'
+                height: '95px'
             }, 800);
         });
+
+        $('.more-details button').on('click', function() {
+            $('.more-details').hide();
+            $('.less-details').show();
+            $('.details-panel').animate({
+                height: '300px'
+            }, 800);
+            console.debug($('.curr-filter-panel').outerHeight);
+        });
+        $('.less-details button').on('click', function() {
+            $('.less-details').hide();
+            $('.more-details').show();
+            $('.details-panel').animate({
+                height: '110px'
+            }, 800);
+        });
+
 
         $(program_data_selector + ' .more-graphs button').on('click', function() {
             $('.more-graphs').hide();
