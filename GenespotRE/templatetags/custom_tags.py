@@ -235,8 +235,16 @@ def tojson(obj, esacpe_html=True):
     return output
 
 @register.filter
-def get_prog_col_size(prog_filters):
-    return (12/len(prog_filters.keys()))
+def get_prog_col_size(programs):
+    return (12/len(programs))
+
+@register.filter
+def program_is_in_cohort(prog, cohort_progs):
+    return (prog in cohort_progs)
+
+@register.filter
+def program_is_first_in_cohort(prog, cohort_progs):
+    return (prog.id == cohort_progs[0].id)
 
 @register.filter
 def list_contains_name(list, value):
