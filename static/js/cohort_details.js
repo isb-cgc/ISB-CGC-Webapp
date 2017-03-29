@@ -550,6 +550,7 @@ require([
 
     $('#cancel-edit-cohort-btn').on('click', function() {
         mode = "VIEWING";
+        $('.selected-filters .delete-x').trigger('click');
         set_mode(true);
     });
 
@@ -808,6 +809,47 @@ require([
             //showHideMoreGraphButton();
         }
 
+        $('.more-filters button').on('click', function() {
+            $('.more-filters').hide();
+            $('.less-filters').show();
+            var max_height = 0;
+            $('.prog-filter-set').each(function(){
+                var this_div = $(this);
+                if(this_div.outerHeight() > max_height) {
+                    max_height = this_div.outerHeight();
+                }
+            });
+
+            $('.curr-filter-panel').animate({
+                height: (max_height+15)+'px'
+            }, 800);
+            console.debug($('.curr-filter-panel').outerHeight);
+        });
+        $('.less-filters button').on('click', function() {
+            $('.less-filters').hide();
+            $('.more-filters').show();
+            $('.curr-filter-panel').animate({
+                height: '95px'
+            }, 800);
+        });
+
+        $('.more-details button').on('click', function() {
+            $('.more-details').hide();
+            $('.less-details').show();
+            $('.details-panel').animate({
+                height: '300px'
+            }, 800);
+            console.debug($('.curr-filter-panel').outerHeight);
+        });
+        $('.less-details button').on('click', function() {
+            $('.less-details').hide();
+            $('.more-details').show();
+            $('.details-panel').animate({
+                height: '110px'
+            }, 800);
+        });
+
+
         $(program_data_selector + ' .more-graphs button').on('click', function() {
             $('.more-graphs').hide();
             $('.less-graphs').show();
@@ -866,7 +908,36 @@ require([
         }
 
     };
-    
+
+    // Check to see if we need 'Show More' buttons for details and filter panels (we may not)
+    var max_height = 0;
+    $('.prog-filter-set').each(function(){
+        var this_div = $(this);
+        if(this_div.outerHeight() > max_height) {
+            max_height = this_div.outerHeight();
+        }
+    });
+    $('.prog-filter-set').each(function(){
+        if($(this).outerHeight() < max_height) {
+            $(this).css('height', '100%');
+        }
+    });
+    if(max_height < $('.curr-filter-panel').innerHeight()){
+        $('.more-filters').hide();
+    }
+
+    // Check to see if we need 'Show More' buttons for details and filter panels (we may not)
+    max_height = 0;
+    $('.prog-filter-set').each(function(){
+        var this_div = $(this);
+        if(this_div.outerHeight() > max_height) {
+            max_height = this_div.outerHeight();
+        }
+    });
+    if(max_height < $('.curr-filter-panel').innerHeight()){
+        $('.more-filters').hide();
+    }
+
     // Detect tab change
     $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
         filter_panel_load(cohort_id);
