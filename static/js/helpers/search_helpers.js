@@ -157,7 +157,9 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                     metadata_counts['items'][i] = new_item;
                 }
 
-                parsets_obj.draw_parsets(metadata_counts, plot_features);
+                if(cohort_id) {
+                    parsets_obj.draw_parsets(metadata_counts, plot_features);
+                }
             } else {
                 console.warn("No 'items' found in metadata_counts: " + metadata_counts);
             }
@@ -245,7 +247,9 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                             results['items'][i] = new_item;
                         }
 
-                        parsets_obj.draw_parsets(results, plot_features);
+                        if(cohort_id) {
+                            parsets_obj.draw_parsets(results, plot_features);
+                        }
                     } else {
                         console.debug(results);
                     }

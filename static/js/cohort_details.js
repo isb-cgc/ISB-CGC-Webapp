@@ -550,6 +550,7 @@ require([
 
     $('#cancel-edit-cohort-btn').on('click', function() {
         mode = "VIEWING";
+        $('.selected-filters .delete-x').trigger('click');
         set_mode(true);
     });
 
@@ -811,8 +812,16 @@ require([
         $('.more-filters button').on('click', function() {
             $('.more-filters').hide();
             $('.less-filters').show();
+            var max_height = 0;
+            $('.prog-filter-set').each(function(){
+                var this_div = $(this);
+                if(this_div.outerHeight() > max_height) {
+                    max_height = this_div.outerHeight();
+                }
+            });
+
             $('.curr-filter-panel').animate({
-                height: '430px'
+                height: (max_height+15)+'px'
             }, 800);
             console.debug($('.curr-filter-panel').outerHeight);
         });
@@ -899,7 +908,36 @@ require([
         }
 
     };
-    
+
+    // Check to see if we need 'Show More' buttons for details and filter panels (we may not)
+    var max_height = 0;
+    $('.prog-filter-set').each(function(){
+        var this_div = $(this);
+        if(this_div.outerHeight() > max_height) {
+            max_height = this_div.outerHeight();
+        }
+    });
+    $('.prog-filter-set').each(function(){
+        if($(this).outerHeight() < max_height) {
+            $(this).css('height', '100%');
+        }
+    });
+    if(max_height < $('.curr-filter-panel').innerHeight()){
+        $('.more-filters').hide();
+    }
+
+    // Check to see if we need 'Show More' buttons for details and filter panels (we may not)
+    max_height = 0;
+    $('.prog-filter-set').each(function(){
+        var this_div = $(this);
+        if(this_div.outerHeight() > max_height) {
+            max_height = this_div.outerHeight();
+        }
+    });
+    if(max_height < $('.curr-filter-panel').innerHeight()){
+        $('.more-filters').hide();
+    }
+
     // Detect tab change
     $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
         filter_panel_load(cohort_id);

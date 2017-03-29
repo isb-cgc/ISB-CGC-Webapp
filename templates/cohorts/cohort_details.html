@@ -185,7 +185,7 @@
             <div class="panel panel-default">
                 <ul class="nav nav-tabs nav-tabs-data" role="tablist">
                     {% for program in programs %}
-                         <li role="presentation" class="{% if program|program_is_first_in_cohort:cohort.get_programs  %}active{% endif %} {% if not program|program_is_in_cohort:cohort.get_programs %}disabled{% endif %}"><a href="#{{ program.id }}-data" role="tab" data-toggle="tab" title="ISB-CGC Data" data-program-id="{{ program.id }}">{{ program.name }} Data</a></li>
+                         <li role="presentation" class="{% if program|program_is_first_in_cohort:cohort.get_programs %}active{% endif %} {% if not program|program_is_in_cohort:cohort.get_programs %}disabled{% endif %}"><a href="#{{ program.id }}-data" role="tab" data-toggle="tab" title="ISB-CGC Data" data-program-id="{{ program.id }}">{{ program.name }} Data</a></li>
                     {% endfor %}
                     <li role="presentation" class=""><a href="#0-data" role="tab" data-toggle="tab" title="User Data" data-program-id="0">User Data</a></li>
                 </ul>

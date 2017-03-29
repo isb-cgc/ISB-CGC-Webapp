@@ -15,9 +15,11 @@
     .curr-filter-panel
         overflow: hidden
         height: 95px
+        padding-bottom: 5px
         .prog-filter-set
-            height: 100%
             border-left: 2px solid $isb-dark
+            h5
+                margin-top: 0
         :first-child
             border-left: none
         .label
@@ -235,6 +237,10 @@
     #create-cohort-form .form-control-static span
         display: inline-block
         max-width: 90%
+
+    #selected-filters
+        max-height: 300px
+        overflow: scroll
 
     #multi-categorical
         overflow-x: auto
