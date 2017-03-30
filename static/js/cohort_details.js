@@ -517,7 +517,7 @@ require([
 
         switch(mode){
             case 'EDITING':
-                $('.data-tab-content-panel').removeClass('col-md-12').addClass('col-md-8');
+                $('.data-tab-content-panel').removeClass('col-md-12').addClass('col-md-9');
                 $('.filter-panel').show();
                 $('.selected-filters').show();
                 $('.page-header').hide();
@@ -531,7 +531,7 @@ require([
                 break;
 
             case 'VIEWING':
-                $('.data-tab-content-panel').removeClass('col-md-8').addClass('col-md-12');
+                $('.data-tab-content-panel').removeClass('col-md-9').addClass('col-md-12');
                 $('.filter-panel').hide();
                 $('.selected-filters').hide();
                 $('.page-header').show();
@@ -805,7 +805,7 @@ require([
         });
 
         // Show or hide the 'more' button for the mosaics based on whether it's needed per height
-        if($(program_data_selector + ' .col-lg-8').length == 0){
+        if($(program_data_selector + ' .col-lg-9').length == 0){
             //showHideMoreGraphButton();
         }
 

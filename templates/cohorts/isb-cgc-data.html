@@ -1,14 +1,14 @@
 {# Public Data Set Filter Template #}
 <div id="{{ program.id }}-data" class="tab-pane data-tab" role="tabpanel">
-    <div id="{{ program.id }}-data-filter-panel" class="col-lg-4 filter-panel" role="tabpanel" {% if cohort.id %}style="display:none;"{% endif %}  data-prog-id="{{ program.id }}" data-prog-displ-name="{{ program.name }}">
+    <div id="{{ program.id }}-data-filter-panel" class="col-lg-3 filter-panel" role="tabpanel" {% if cohort.id %}style="display:none;"{% endif %}  data-prog-id="{{ program.id }}" data-prog-displ-name="{{ program.name }}">
         <div class="tabpanel" role="tabpanel">
             <ul class="nav nav-tabs nav-tabs-filters" role="tablist">
-                <li role="presentation" class="active"><a href="#clinical-filters-{{ program.id }}" role="tab" data-toggle="tab" title="Donor Filters">Donor</a></li>
+                <li role="presentation" class="active"><a href="#clinical-filters-{{ program.id }}" role="tab" data-toggle="tab" title="Case Filters">Case</a></li>
 {#                <li role="presentation" class=""><a href="#data-filters-{{ program.id }}" role="tab" data-toggle="tab" title="Donor Filters">Data Type</a></li>#}
                 <li role="presentation" class=""><a href="#molecular-filters-{{ program.id }}" role="tab" data-toggle="tab" title="Molecular Filters">Molecular</a></li>
             </ul>
             <div class="tab-content">
-                <!-- donor filters tab -->
+                <!-- case filters tab -->
                 <div role="tabpanel" class="tab-pane active" id="clinical-filters-{{ program.id }}">
                     <ul class="list-group" id="clin-accordion-{{ program.id }}" role="tablist" aria-multiselectable="true">
                         {% for attr in clin_attr|get_sorted_items %}
@@ -185,7 +185,7 @@
             </div>
         </div>
     </div>
-    <div class="{% if cohort.id %}col-md-12{% else %}col-lg-8{% endif %} data-tab-content-panel">
+    <div class="{% if cohort.id %}col-md-12{% else %}col-lg-9{% endif %} data-tab-content-panel">
         <div class="selected-filters {{ program.id }}-data-selected-filters panel panel-default" {% if cohort.id %}style="display: none;"{% endif %}>
             <div class="panel-heading clearfix">
                 <h4 class="panel-title pull-left">{% if cohort.id %}New Filters{% else %}Selected Filters{% endif %}</h4>
