@@ -129,12 +129,12 @@
                     <div class="row col-md-12 space-bottom-10">
                         <span class="detail-label">Total Number of Samples:</span>
                         <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                        <span class="total-values" id="{{ program.id }}-data-total-samples">{{ total_samples }}</span>
+                        <span class="total-values" id="c-{{ cohort.id }}-data-total-samples">{{ total_samples }}</span>
                     </div>
                     <div class="row col-md-12 space-bottom-10">
                         <span class="detail-label">Total Number of Participants:</span>
                         <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                        <span class="total-values" id="{{ program.id }}-data-total-participants">{{ total_cases }}</span>
+                        <span class="total-values" id="c-{{ cohort.id }}-data-total-participants">{{ total_cases }}</span>
                     </div>
                     <div class="row col-md-12 space-bottom-10">
                         <span>Your Permissions: {{ cohort.perm.perm }}</span>
@@ -338,15 +338,12 @@
     </div>
 
     <script type="text/javascript">
-    var attr_list = {{ attr_list|tojson|safe }};
-    var attr_counts = {{ attr_list_count|tojson|safe }};
     var total_samples = {{ total_samples|safe }};
     var base_url = '{{ base_url|safe }}';
     var base_api_url = '{{ base_api_url|safe }}';
     var cohort_id = {{ cohort.id }};
     var user_data = {{ user_data|tojson|safe }};
-    var metadata_counts = {{ metadata_counts|tojson|safe }};
-    var metadata_filters = {{ metadata_filters|tojson|safe }};
+    var cohort_programs = {{ cohort_programs|tojson|safe }}
     </script>
 {% endblock %}
 

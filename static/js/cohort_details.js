@@ -205,12 +205,12 @@ require([
 
     var search_helper_obj = Object.create(search_helpers, {});
 
-    var update_displays = function(withoutCheckChanges) {
+    var update_displays = function(withoutCheckChanges,for_panel_load) {
         var active_program_id = $('ul.nav-tabs-data li.active a').data('program-id'); 
         (update_displays_thread !== null) && clearTimeout(update_displays_thread);
 
         update_displays_thread = setTimeout(function(){
-            search_helper_obj.update_counts_parsets(base_url, 'metadata_counts_platform_list', cohort_id, 'v2', active_program_id).then(
+            search_helper_obj.update_counts_parsets(base_url, 'metadata_counts_platform_list', cohort_id, 'v2', active_program_id, for_panel_load).then(
                 function(){!withoutCheckChanges && check_for_changes();}
             );
         },SUBSEQUENT_DELAY);
@@ -823,7 +823,6 @@ require([
             $('.curr-filter-panel').animate({
                 height: (max_height+15)+'px'
             }, 800);
-            console.debug($('.curr-filter-panel').outerHeight);
         });
         $('.less-filters button').on('click', function() {
             $('.less-filters').hide();
@@ -839,7 +838,6 @@ require([
             $('.details-panel').animate({
                 height: '300px'
             }, 800);
-            console.debug($('.curr-filter-panel').outerHeight);
         });
         $('.less-details button').on('click', function() {
             $('.less-details').hide();
@@ -894,7 +892,7 @@ require([
                     data_tab_content_div.append(data);
 
                     bind_widgets(program_data_selector);
-                    update_displays();
+                    update_displays(null,true);
 
                     set_mode();
 
@@ -923,6 +921,7 @@ require([
         }
     });
     if(max_height < $('.curr-filter-panel').innerHeight()){
+        $('.curr-filter-panel').css('height','105px');
         $('.more-filters').hide();
     }
 
