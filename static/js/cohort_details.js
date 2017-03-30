@@ -804,11 +804,6 @@ require([
             });
         });
 
-        // Show or hide the 'more' button for the mosaics based on whether it's needed per height
-        if($(program_data_selector + ' .col-lg-9').length == 0){
-            //showHideMoreGraphButton();
-        }
-
         $('.more-filters button').on('click', function() {
             $('.more-filters').hide();
             $('.less-filters').show();
@@ -879,17 +874,18 @@ require([
 
         var active_program_id = $('ul.nav-tabs-data li.active a').data('program-id');
         var program_data_selector ='#'+active_program_id+'-data';
+        console.debug($(program_data_selector));
         if ($(program_data_selector).length == 0) {
+            $('.tab-pane.data-tab').each(function() { $(this).removeClass('active'); });
+            $('#placeholder').addClass('active');
+            $('#placeholder').show();
             var data_tab_content_div = $('div.data-tab-content');
             var get_panel_url = base_url + '/cohorts/' + (cohort ? cohort+'/' : '') + 'filter_panel/' + active_program_id +'/';
-            console.log(get_panel_url);
 
             $.ajax({
                 type        :'GET',
                 url         : get_panel_url,
                 success : function (data) {
-                    console.log('Panel Received: '+program_data_selector);
-                    data_tab_content_div.empty();
                     data_tab_content_div.append(data);
 
                     bind_widgets(program_data_selector);
@@ -899,6 +895,7 @@ require([
 
                     $('.tab-pane.data-tab').each(function() { $(this).removeClass('active'); });
                     $(program_data_selector).addClass('active');
+                    $('#placeholder').hide();
                 },
                 error: function () {
                     console.log('Failed to load program panel');
