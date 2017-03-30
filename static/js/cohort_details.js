@@ -889,6 +889,7 @@ require([
                 url         : get_panel_url,
                 success : function (data) {
                     console.log('Panel Received: '+program_data_selector);
+                    data_tab_content_div.empty();
                     data_tab_content_div.append(data);
 
                     bind_widgets(program_data_selector);
