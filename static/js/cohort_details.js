@@ -517,7 +517,7 @@ require([
 
         switch(mode){
             case 'EDITING':
-                $('.data-tab-content-panel').removeClass('col-md-12').addClass('col-md-9');
+                $('.data-tab-content-panel:not(.spinner-panel)').removeClass('col-md-12').addClass('col-md-9');
                 $('.filter-panel').show();
                 $('.selected-filters').show();
                 $('.page-header').hide();
