@@ -874,7 +874,6 @@ require([
 
         var active_program_id = $('ul.nav-tabs-data li.active a').data('program-id');
         var program_data_selector ='#'+active_program_id+'-data';
-        console.debug($(program_data_selector));
         if ($(program_data_selector).length == 0) {
             $('.tab-pane.data-tab').each(function() { $(this).removeClass('active'); });
             $('#placeholder').addClass('active');
