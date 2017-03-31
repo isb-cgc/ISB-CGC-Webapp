@@ -1,18 +1,18 @@
 {# Public Data Set Filter Template #}
 <div id="{{ program.id }}-data" class="tab-pane data-tab" role="tabpanel">
-    <div id="{{ program.id }}-data-filter-panel" class="col-lg-4 filter-panel" role="tabpanel" {% if cohort.id %}style="display:none;"{% endif %}  data-prog-id="{{ program.id }}" data-prog-displ-name="{{ program.name }}">
+    <div id="{{ program.id }}-data-filter-panel" class="col-lg-3 filter-panel" role="tabpanel" {% if cohort.id %}style="display:none;"{% endif %}  data-prog-id="{{ program.id }}" data-prog-displ-name="{{ program.name }}">
         <div class="tabpanel" role="tabpanel">
             <ul class="nav nav-tabs nav-tabs-filters" role="tablist">
-                <li role="presentation" class="active"><a href="#clinical-filters-{{ program.id }}" role="tab" data-toggle="tab" title="Donor Filters">Donor</a></li>
+                <li role="presentation" class="active"><a href="#clinical-filters-{{ program.id }}" role="tab" data-toggle="tab" title="Case Filters">Case</a></li>
 {#                <li role="presentation" class=""><a href="#data-filters-{{ program.id }}" role="tab" data-toggle="tab" title="Donor Filters">Data Type</a></li>#}
                 <li role="presentation" class=""><a href="#molecular-filters-{{ program.id }}" role="tab" data-toggle="tab" title="Molecular Filters">Molecular</a></li>
             </ul>
             <div class="tab-content">
-                <!-- donor filters tab -->
+                <!-- case filters tab -->
                 <div role="tabpanel" class="tab-pane active" id="clinical-filters-{{ program.id }}">
                     <ul class="list-group" id="clin-accordion-{{ program.id }}" role="tablist" aria-multiselectable="true">
                         {% for attr in clin_attr|get_sorted_items %}
-                            {% if attr_list_count|list_contains_name:attr.name %}
+                            {% if attr_counts|list_contains_name:attr.name %}
                                 <li class="list-group-item">
                                     <div id="{{ program.id }}-heading-{{attr.name}}" class="list-group-item__heading">
                                         <a role="button" data-toggle="collapse" data-parent="#clin-accordion-{{ program.id }}" href="#{{ program.id }}-collapse-{{ attr.name }}" aria-expanded="false" aria-controls="collapse-{{ attr.name }}">
@@ -22,10 +22,10 @@
 
                                     <div id="{{ program.id }}-collapse-{{ attr.name }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" data-feature-type="donor"
                                          aria-labelledby="{{ program.id }}-heading-{{ attr.name }}" data-feature-name="{{ attr.name }}" data-feature-displ-name="{{ attr.displ_name }}"
-                                         data-feature-id="{% if attr_list_count|get_named_item:attr.name|get_item:'id' %}{{ attr_list_count|get_named_item:attr.name|get_item:'id' }}{% endif %}">
+                                         data-feature-id="{% if attr_counts|get_named_item:attr.name|get_item:'id' %}{{ attr_counts|get_named_item:attr.name|get_item:'id' }}{% endif %}">
                                         <ul class="search-checkbox-list" id="{{ attr.name }}">
-                                            {% with attr_list_count|get_named_item:attr.name|get_item:'values'|how_many_more:6 as num_more %}
-                                                {% for v in attr_list_count|get_named_item:attr.name|get_item:'values'|check_for_order:attr.name %}
+                                            {% with attr_counts|get_named_item:attr.name|get_item:'values'|how_many_more:6 as num_more %}
+                                                {% for v in attr_counts|get_named_item:attr.name|get_item:'values'|check_for_order:attr.name %}
                                                     {% if forloop.counter0 < 6 %}
                                                         <li class="checkbox">
                                                             <label title="{% if v.tooltip %}{{ v.tooltip }}{% else %} {% endif %}">
@@ -84,8 +84,8 @@
 {#                                <div id="collapse-{{ attr.name }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"#}
 {#                                     aria-labelledby="heading-{{ attr.name }}" data-feature-name="{{ attr.name }}" data-feature-displ-name="{{ attr.name|get_feat_displ_name }}" data-feature-type="datatype">#}
 {#                                    <ul class="search-checkbox-list" id="{{ attr.name }}">#}
-{#                                        {% if attr_list_count|list_contains_name:attr.name %}#}
-{#                                            {% for v in attr_list_count|get_named_item:attr.name|get_item:'values' %}#}
+{#                                        {% if attr_counts|list_contains_name:attr.name %}#}
+{#                                            {% for v in attr_counts|get_named_item:attr.name|get_item:'values' %}#}
 {#                                                <li class="checkbox">#}
 {#                                                    <!-- todo: make a custom tag for the id for data_attr attributes-->#}
 {#                                                    <label>#}
@@ -185,7 +185,7 @@
             </div>
         </div>
     </div>
-    <div class="{% if cohort.id %}col-md-12{% else %}col-lg-8{% endif %} data-tab-content-panel">
+    <div class="{% if cohort.id %}col-md-12{% else %}col-lg-9{% endif %} data-tab-content-panel">
         <div class="selected-filters {{ program.id }}-data-selected-filters panel panel-default" {% if cohort.id %}style="display: none;"{% endif %}>
             <div class="panel-heading clearfix">
                 <h4 class="panel-title pull-left">{% if cohort.id %}New Filters{% else %}Selected Filters{% endif %}</h4>
@@ -193,26 +193,23 @@
             </div>
             <div class="panel-body"></div>
         </div>
-        {% if not cohort.id %}
-            <div class="cohort-info panel panel-default">
-                <div class="panel-heading">
-                    <h4 class="panel-title">Details</h4>
+        <div class="cohort-info panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">Details</h4>
+            </div>
+            <div class="panel-body">
+                <div class="row col-md-6">
+                    <span class="detail-label">Total Number of Samples:</span>
+                    <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
+                    <span class="total-values" id="p-{{ program.id }}-data-total-samples">{{ metadata_counts.total }}</span>
                 </div>
-                <div class="panel-body">
-                    <div class="row col-md-6">
-                        <span class="detail-label">Total Number of Samples:</span>
-                        <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                        <span class="total-values" id="{{ program.id }}-data-total-samples">{{ metadata_counts.total }}</span>
-                    </div>
-                    <div class="row col-md-6">
-                        <span class="detail-label">Total Number of Cases:</span>
-                        <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                        <span class="total-values" id="{{ program.id }}-data-total-participants">{{ metadata_counts.cases }}</span>
-                    </div>
+                <div class="row col-md-6">
+                    <span class="detail-label">Total Number of Cases:</span>
+                    <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
+                    <span class="total-values" id="p-{{ program.id }}-data-total-participants">{{ metadata_counts.cases }}</span>
                 </div>
             </div>
-        {% endif %}
-
+        </div>
         <div class="clinical-trees panel panel-default">
             <div class="panel-heading">
                 <h4 class="panel-title">Clinical Features</h4>
@@ -238,9 +235,8 @@
     </div>
 </div>
 <script type="text/javascript">
-    var attr_list = {{ attr_list|tojson|safe }};
     var total_samples = {{ total_samples|safe }};
-    var attr_counts = {{ attr_list_count|tojson|safe }};
     var metadata_counts = {{ metadata_counts|tojson|safe }};
     var metadata_filters = {{ metadata_filters|tojson|safe }};
+    var attr_counts = {{ attr_counts|tojson|safe }};
 </script>

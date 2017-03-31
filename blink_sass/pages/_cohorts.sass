@@ -1,5 +1,25 @@
 #cohort-details
 
+    #placeholder
+        .panel-body
+            height: 210px
+            position: relative
+            overflow: hidden
+        .spinner
+            position: absolute
+            width: 100%
+            height: 100%
+            top: 0px
+            left: 0px
+            background: rgba(0,0,0,.5)
+            z-index: 10
+            i
+                position: absolute
+                left: 45%
+                top: 40%
+                margin: auto
+                font-size: 100px
+
     .cohort-selected-filters
         overflow: hidden
         .more-filters, .less-filters
@@ -17,7 +37,7 @@
         height: 95px
         padding-bottom: 5px
         .prog-filter-set
-            border-left: 2px solid $isb-dark
+            border-left: 2px solid $isb-primary
             h5
                 margin-top: 0
         :first-child
@@ -240,7 +260,8 @@
 
     #selected-filters
         max-height: 300px
-        overflow: scroll
+        overflow-y: auto
+        overflow-x: hidden
 
     #multi-categorical
         overflow-x: auto
