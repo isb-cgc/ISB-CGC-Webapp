@@ -11,6 +11,11 @@ fi
 
 export PYTHONPATH=${HOMEROOT}/lib/:${HOMEROOT}/:${HOME}/google_appengine/:${HOME}/google_appengine/lib/protorpc-1.0/
 echo $PYTHONPATH
+# If we have migrations for older, pre-migrations apps which haven't yet been added to the database dump, make them here eg.:
+# python manage.py makemigrations <appname>
+# >>> Once a new dump is available with these models in the database you can remove this <<<
+python ${HOMEROOT}/manage.py makemigrations adminrestrict
+# Now run migrations
 echo "Running Migrations..."
 python ${HOMEROOT}/manage.py migrate --noinput
 
@@ -19,6 +24,9 @@ python ${HOMEROOT}/manage.py migrate --noinput
 
 echo "Creating Django User for MySQL database..."
 mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -e "GRANT SELECT, INSERT, UPDATE, DELETE ON $DATABASE_NAME.* TO \"django\"@\"localhost\" IDENTIFIED BY \"PASSWORD\""
+
+echo "Adding in default Django admin IP allowances for local development"
+mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME -e "INSERT INTO adminrestrict_allowedip (ip_address) VALUES('127.0.0.1'),('10.0.*.*');"
 
 # Load your SQL table file
 # Looks for user_data_dump.sql; if that isn't available, looks for metadata_featdef_tables.sql
@@ -37,7 +45,7 @@ else
 fi
 
 echo "Adding Stored Procedures/Views and making table alterations.."
-python ${HOMEROOT}/scripts/database_catchup_scripts.py
+python ${HOMEROOT}/scripts/database_catchup_scripts.py -z True
 
 echo "Adding Cohort/Site Data..."
 python ${HOMEROOT}/scripts/add_site_ids.py

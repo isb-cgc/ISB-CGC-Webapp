@@ -1,6 +1,5 @@
 ###
-#
-# Copyright 2015, Institute for Systems Biology
+# Copyright 2017, Institute for Systems Biology
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 ###
 
 runtime: custom
@@ -21,14 +19,13 @@ env: flex
 service: mvm
 api_version: 1
 threadsafe: true
-#entrypoint: gunicorn -b :$PORT GenespotRE.wsgi
+#entrypoint: gunicorn -c gunicorn.conf.py -b :$PORT GenespotRE.wsgi -w 3 -t 130
 
 #resources:
-#  cpu: .5
-#  memory_gb: 2.2
+#  cpu: 2
+#  memory_gb: 7.5
 
 builtins:
-#- remote_api: on
 - appstats: on
 - deferred: on
 
@@ -59,8 +56,14 @@ handlers:
 #  expiration: 0
 #  secure: always
 
+beta_settings:
+    cloud_sql_instances: isb-cgc:us-central1:dev
+
 env_variables:
   DJANGO_SETTINGS_MODULE: 'GenespotRE.settings'
+
+network:
+  instance_tag: isb-cgc-webapp
 
 skip_files:
 - python-su.sh

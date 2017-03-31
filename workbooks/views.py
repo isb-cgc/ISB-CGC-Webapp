@@ -155,7 +155,7 @@ def get_gene_datatypes():
                        'GNAB' : 'Mutation'}
 
     datatype_list = SearchableFieldHelper.get_fields_for_all_datatypes()
-    if debug: print >> sys.stderr, ' attrs ' + json.dumps(datatype_list)
+
     return_list = []
     for type in datatype_list:
         if type['datatype'] != 'CLIN' and type['datatype'] != 'MIRN' :

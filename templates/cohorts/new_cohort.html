@@ -102,11 +102,10 @@
                     <form id="create-cohort-form" method="POST" action="{% url 'save_cohort' %}">
                 {% endif %}
                     <div class="modal-body">
-                        <div id="one-cohort-type-per-create-warn" class="alert alert-warning alert-dismissable" style="display: none;">
+                        <div id="multi-prog-cohort-create-warn" class="alert alert-warning alert-dismissable" style="display: none;">
                             <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                            A cohort can only be filtered with ISB-CGC Data <b>or</b> User Data filters, not with both. Because the <span class="one-per-warn"></span> tab was active,
-                            we have chosen those filters. If you wish to create your cohort with the other filter set, cancel this dialog (using the X in the upper-right corner) and
-                            switch to that tab before clicking the <b>Save as New Cohort</b> button.
+                            Your cohort contains samples from multiple programs. Please note that filters will only apply to samples from the program indicated
+                            by the tab they were chosen on - they will not apply to samples from other programs in this cohort.
                         </div>
                         <div id="unallowed-chars-alert" class="alert alert-warning alert-dismissable" style="display: none;">
                             <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
@@ -118,7 +117,7 @@
                         </div>
                         <div class="form-group">
                             <h5>Selected Filters:</h5>
-                            <p class="form-control-static"></p>
+                            <p id="selected-filters" class="form-control-static"></p>
                         </div>
                     </div>
                     <div class="modal-footer">
