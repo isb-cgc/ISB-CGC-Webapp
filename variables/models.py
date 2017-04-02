@@ -12,6 +12,7 @@ class VariableFavorite(models.Model):
     user = models.ForeignKey(User, null=False, blank=False)
     active = models.BooleanField(default=True)
     last_date_saved = models.DateTimeField(auto_now=True)
+    build = models.CharField(max_length=10, null=True, default='HG38')
     objects = FavoriteManager()
 
     '''
