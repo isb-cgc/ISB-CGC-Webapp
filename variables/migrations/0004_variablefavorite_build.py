@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='variablefavorite',
             name='build',
-            field=models.CharField(default=b'HG38', max_length=10, null=True),
+            field=models.CharField(max_length=10, null=True),
         ),
     ]
