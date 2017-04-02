@@ -38,7 +38,7 @@ class Workbook(models.Model):
 
     @classmethod
     def create(cls, name, description, user):
-        workbook_model = cls.objects.create(name=name, description=description, owner=user)
+        workbook_model = cls.objects.create(name=name, description=description, owner=user, build='HG38')
         workbook_model.save()
 
         return workbook_model

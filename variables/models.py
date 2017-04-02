@@ -53,7 +53,7 @@ class VariableFavorite(models.Model):
         variable_favorite_model.save()
 
         for var in variables :
-            Variable.objects.create(name=var['name'], feature_id=var['feature_id'], type=var['type'], code=var['code'], variable_favorite=variable_favorite_model, build='HG38')
+            Variable.objects.create(name=var['name'], feature_id=var['feature_id'], type=var['type'], code=var['code'], variable_favorite=variable_favorite_model, build=var['build'])
 
         return_obj = {
             'name' : variable_favorite_model.name,
@@ -70,9 +70,9 @@ class VariableFavorite(models.Model):
 
         for var in variables :
             if var['feature_id'] != "None" :
-                Variable.objects.create(name=var['name'], feature_id=var['feature_id'], type=var['type'], code=var['code'], variable_favorite_id=self.id)
+                Variable.objects.create(name=var['name'], feature_id=var['feature_id'], type=var['type'], code=var['code'], variable_favorite_id=self.id, build=var['build'])
             else :
-                Variable.objects.create(name=var['name'], code=var['code'], type=var['type'], variable_favorite_id=self.id)
+                Variable.objects.create(name=var['name'], code=var['code'], type=var['type'], variable_favorite_id=self.id, build=var['build'])
 
         self.save()
         return_obj = {
