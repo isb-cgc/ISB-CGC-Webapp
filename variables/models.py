@@ -12,7 +12,7 @@ class VariableFavorite(models.Model):
     user = models.ForeignKey(User, null=False, blank=False)
     active = models.BooleanField(default=True)
     last_date_saved = models.DateTimeField(auto_now=True)
-    build = models.CharField(max_length=10, null=True, default='HG38')
+    build = models.CharField(max_length=10, null=True)
     objects = FavoriteManager()
 
     '''
@@ -53,7 +53,7 @@ class VariableFavorite(models.Model):
         variable_favorite_model.save()
 
         for var in variables :
-            Variable.objects.create(name=var['name'], feature_id=var['feature_id'], type=var['type'], code=var['code'], variable_favorite=variable_favorite_model)
+            Variable.objects.create(name=var['name'], feature_id=var['feature_id'], type=var['type'], code=var['code'], variable_favorite=variable_favorite_model, build='HG38')
 
         return_obj = {
             'name' : variable_favorite_model.name,
