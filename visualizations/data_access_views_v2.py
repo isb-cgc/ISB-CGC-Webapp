@@ -23,13 +23,13 @@ import traceback
 import sys
 
 from cohorts.metadata_helpers import get_sql_connection
-from bq_data_access.v1.pairwise import PairwiseInputVector, Pairwise
-from bq_data_access.v1.cohort_cloudsql import CloudSQLCohortAccess
-from bq_data_access.v1.data_access import FeatureIdQueryDescription
-from bq_data_access.v1.data_access import is_valid_feature_identifier, get_feature_vectors_tcga_only
-from bq_data_access.v1.feature_value_types import ValueType, is_log_transformable
-from bq_data_access.v1.utils import DurationLogged
-from bq_data_access.v1.utils import VectorMergeSupport
+from bq_data_access.v2.pairwise import PairwiseInputVector, Pairwise
+from bq_data_access.v2.cohort_cloudsql import CloudSQLCohortAccess
+from bq_data_access.v2.data_access import FeatureIdQueryDescription
+from bq_data_access.v2.data_access import is_valid_feature_identifier, get_feature_vectors_tcga_only
+from bq_data_access.v2.feature_value_types import ValueType, is_log_transformable
+from bq_data_access.v2.utils import DurationLogged
+from bq_data_access.v2.utils import VectorMergeSupport
 from cohorts.metadata_helpers import fetch_isbcgc_project_set
 from django.http import JsonResponse
 from projects.models import Project
