@@ -73,13 +73,17 @@ BIGQUERY_COHORT_TABLE_ID    = os.environ.get('BIGQUERY_COHORT_TABLE_ID', 'develo
 NIH_AUTH_ON             = bool(os.environ.get('NIH_AUTH_ON', False))
 USER_DATA_ON            = bool(os.environ.get('USER_DATA_ON', False))
 
-DATABASES = {'default': {
-    'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.mysql'),
-    'HOST': os.environ.get('DATABASE_HOST', '127.0.0.1'),
-    'NAME': os.environ.get('DATABASE_NAME', ''),
-    'USER': os.environ.get('DATABASE_USER'),
-    'PASSWORD': os.environ.get('DATABASE_PASSWORD')
-}}
+DATABASES = {
+    'default': {
+        'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.mysql'),
+        'HOST': os.environ.get('DATABASE_HOST', '127.0.0.1'),
+        'NAME': os.environ.get('DATABASE_NAME', ''),
+        'USER': os.environ.get('DATABASE_USER'),
+        'PASSWORD': os.environ.get('DATABASE_PASSWORD')
+    }
+}
+
+LEGACY_FEATURES_DB_NAME = os.environ.get('LEGACY_FEATURES_DB_NAME', ''),
 
 DB_SOCKET = DATABASES['default']['HOST'] if 'cloudsql' in DATABASES['default']['HOST'] else None
 
@@ -115,6 +119,7 @@ def get_project_identifier():
     return BQ_PROJECT_ID
 
 BIGQUERY_DATASET            = os.environ.get('BIGQUERY_DATASET', '')
+LEGACY_BIGQUERY_DATASET            = os.environ.get('LEGACY_BIGQUERY_DATASET', '')
 
 PROJECT_NAME                = os.environ.get('GCLOUD_PROJECT_NAME')
 BIGQUERY_PROJECT_NAME       = os.environ.get('BIGQUERY_PROJECT_NAME', PROJECT_NAME)
