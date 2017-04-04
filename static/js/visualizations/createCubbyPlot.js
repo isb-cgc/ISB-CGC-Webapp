@@ -442,7 +442,7 @@ function($, d3, d3tip, d3textwrap, _) {
                     var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                     // Clear selections
                     $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + 0);
-                    $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Participants: ' + 0);
+                    $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Cases: ' + 0);
                     $('#save-cohort-'+plot_id+'-modal input[name="samples"]').attr('value', "");
                     selectedCubbies = {};
                     selectedSamples = null;

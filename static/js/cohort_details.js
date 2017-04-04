@@ -205,12 +205,12 @@ require([
 
     var search_helper_obj = Object.create(search_helpers, {});
 
-    var update_displays = function(withoutCheckChanges) {
+    var update_displays = function(withoutCheckChanges,for_panel_load) {
         var active_program_id = $('ul.nav-tabs-data li.active a').data('program-id'); 
         (update_displays_thread !== null) && clearTimeout(update_displays_thread);
 
         update_displays_thread = setTimeout(function(){
-            search_helper_obj.update_counts_parsets(base_url, 'metadata_counts_platform_list', cohort_id, 'v2', active_program_id).then(
+            search_helper_obj.update_counts_parsets(base_url, 'metadata_counts_platform_list', cohort_id, 'v2', active_program_id, for_panel_load).then(
                 function(){!withoutCheckChanges && check_for_changes();}
             );
         },SUBSEQUENT_DELAY);
@@ -517,7 +517,7 @@ require([
 
         switch(mode){
             case 'EDITING':
-                $('.data-tab-content-panel').removeClass('col-md-12').addClass('col-md-8');
+                $('.data-tab-content-panel:not(.spinner-panel)').removeClass('col-md-12').addClass('col-md-9');
                 $('.filter-panel').show();
                 $('.selected-filters').show();
                 $('.page-header').hide();
@@ -531,7 +531,7 @@ require([
                 break;
 
             case 'VIEWING':
-                $('.data-tab-content-panel').removeClass('col-md-8').addClass('col-md-12');
+                $('.data-tab-content-panel').removeClass('col-md-9').addClass('col-md-12');
                 $('.filter-panel').hide();
                 $('.selected-filters').hide();
                 $('.page-header').show();
@@ -804,11 +804,6 @@ require([
             });
         });
 
-        // Show or hide the 'more' button for the mosaics based on whether it's needed per height
-        if($(program_data_selector + ' .col-lg-8').length == 0){
-            //showHideMoreGraphButton();
-        }
-
         $('.more-filters button').on('click', function() {
             $('.more-filters').hide();
             $('.less-filters').show();
@@ -823,7 +818,6 @@ require([
             $('.curr-filter-panel').animate({
                 height: (max_height+15)+'px'
             }, 800);
-            console.debug($('.curr-filter-panel').outerHeight);
         });
         $('.less-filters button').on('click', function() {
             $('.less-filters').hide();
@@ -836,10 +830,17 @@ require([
         $('.more-details button').on('click', function() {
             $('.more-details').hide();
             $('.less-details').show();
+
+            var max_height = 0;
+            $('.creation-prog-filter-set').each(function(){
+                var this_div = $(this);
+                if(this_div.outerHeight() > max_height) {
+                    max_height = this_div.outerHeight();
+                }
+            });
             $('.details-panel').animate({
-                height: '300px'
+                height: ($('.cohort-info').outerHeight() + max_height+15)+'px'
             }, 800);
-            console.debug($('.curr-filter-panel').outerHeight);
         });
         $('.less-details button').on('click', function() {
             $('.less-details').hide();
@@ -882,24 +883,26 @@ require([
         var active_program_id = $('ul.nav-tabs-data li.active a').data('program-id');
         var program_data_selector ='#'+active_program_id+'-data';
         if ($(program_data_selector).length == 0) {
+            $('.tab-pane.data-tab').each(function() { $(this).removeClass('active'); });
+            $('#placeholder').addClass('active');
+            $('#placeholder').show();
             var data_tab_content_div = $('div.data-tab-content');
             var get_panel_url = base_url + '/cohorts/' + (cohort ? cohort+'/' : '') + 'filter_panel/' + active_program_id +'/';
-            console.log(get_panel_url);
 
             $.ajax({
                 type        :'GET',
                 url         : get_panel_url,
                 success : function (data) {
-                    console.log('Panel Received: '+program_data_selector);
                     data_tab_content_div.append(data);
 
                     bind_widgets(program_data_selector);
-                    update_displays();
+                    update_displays(null,true);
 
                     set_mode();
 
                     $('.tab-pane.data-tab').each(function() { $(this).removeClass('active'); });
                     $(program_data_selector).addClass('active');
+                    $('#placeholder').hide();
                 },
                 error: function () {
                     console.log('Failed to load program panel');
@@ -923,18 +926,7 @@ require([
         }
     });
     if(max_height < $('.curr-filter-panel').innerHeight()){
-        $('.more-filters').hide();
-    }
-
-    // Check to see if we need 'Show More' buttons for details and filter panels (we may not)
-    max_height = 0;
-    $('.prog-filter-set').each(function(){
-        var this_div = $(this);
-        if(this_div.outerHeight() > max_height) {
-            max_height = this_div.outerHeight();
-        }
-    });
-    if(max_height < $('.curr-filter-panel').innerHeight()){
+        $('.curr-filter-panel').css('height','105px');
         $('.more-filters').hide();
     }
 

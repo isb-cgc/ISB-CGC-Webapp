@@ -14,9 +14,8 @@ from django.core.urlresolvers import reverse
 from django.utils import formats
 
 from models import SavedViz, Plot, Plot_Cohorts, Viz_Perms, Plot_Comments
-from cohorts.models import Cohort, Cohort_Perms, Patients, Samples
+from cohorts.models import Cohort, Cohort_Perms, Samples
 from plot_enums import PlotEnums
-from bq_data_access.feature_search.util import SearchableFieldHelper
 
 # This factory generates the data objects needed for every visualization
 class PlotFactory(object):
