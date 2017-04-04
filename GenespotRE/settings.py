@@ -83,8 +83,6 @@ DATABASES = {
     }
 }
 
-LEGACY_FEATURES_DB_NAME = os.environ.get('LEGACY_FEATURES_DB_NAME', ''),
-
 DB_SOCKET = DATABASES['default']['HOST'] if 'cloudsql' in DATABASES['default']['HOST'] else None
 
 IS_DEV = bool(os.environ.get('IS_DEV', False))
@@ -119,7 +117,7 @@ def get_project_identifier():
     return BQ_PROJECT_ID
 
 BIGQUERY_DATASET            = os.environ.get('BIGQUERY_DATASET', '')
-LEGACY_BIGQUERY_DATASET            = os.environ.get('LEGACY_BIGQUERY_DATASET', '')
+BIGQUERY_DATASET_V1            = os.environ.get('BIGQUERY_DATASET_V1', '')
 
 PROJECT_NAME                = os.environ.get('GCLOUD_PROJECT_NAME')
 BIGQUERY_PROJECT_NAME       = os.environ.get('BIGQUERY_PROJECT_NAME', PROJECT_NAME)
