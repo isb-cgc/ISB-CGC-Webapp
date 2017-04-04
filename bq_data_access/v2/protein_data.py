@@ -1,6 +1,6 @@
 """
 
-Copyright 2015, Institute for Systems Biology
+Copyright 2017, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ from bq_data_access.v2.errors import FeatureNotFoundException
 from bq_data_access.v2.feature_value_types import ValueType, DataTypes
 from bq_data_access.v2.feature_data_provider import FeatureDataProvider
 from bq_data_access.v2.utils import DurationLogged
+from bq_data_access.data_types.rppa import BIGQUERY_CONFIG
+from scripts.feature_def_gen.protein_features import RPPAFeatureDefConfig
 
 RPPA_FEATURE_TYPE = 'RPPA'
 
@@ -58,18 +60,11 @@ class RPPAFeatureDef(object):
 
 
 class RPPAFeatureProvider(FeatureDataProvider):
-    TABLES = [
-        {
-            'name': 'Protein_RPPA_data',
-            'info': 'Protein',
-            'id': 'protein'
-        }
-    ]
-
     def __init__(self, feature_id, **kwargs):
         self.feature_def = None
         self.table_info = None
         self.table_name = ''
+        self.config_instance = RPPAFeatureDefConfig.from_dict(BIGQUERY_CONFIG)
         self.parse_internal_feature_id(feature_id)
         super(RPPAFeatureProvider, self).__init__(**kwargs)
 
@@ -152,7 +147,7 @@ class RPPAFeatureProvider(FeatureDataProvider):
 
     def parse_internal_feature_id(self, feature_id):
         self.feature_def = RPPAFeatureDef.from_feature_id(feature_id)
-        self.table_name = self.TABLES[0]['name']
+        self.table_name = self.config_instance.rppa_table_name
 
     @classmethod
     def is_valid_feature_id(cls, feature_id):
