@@ -132,7 +132,7 @@
                         <span class="total-values" id="c-{{ cohort.id }}-data-total-samples">{{ total_samples }}</span>
                     </div>
                     <div class="row col-md-12 space-bottom-10">
-                        <span class="detail-label">Total Number of Participants:</span>
+                        <span class="detail-label">Total Number of Cases:</span>
                         <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
                         <span class="total-values" id="c-{{ cohort.id }}-data-total-participants">{{ total_cases }}</span>
                     </div>
@@ -166,14 +166,19 @@
                         {% endif %}
                     </div>
                     <div class="row col-md-12 space-bottom-10">
-                        <span>Creation Filters: </span>
-                        <span class="applied-filters">
-                         {% for filter in cohort.get_creation_filters %}
-                             <span>{{ filter.name|get_feat_displ_name }}: {{ filter.value|get_readable_name:filter.name }}</span>
-                         {% empty %}
-                             There were no filters used to create this cohort.
-                         {% endfor %}
-                         </span>
+                        <span>Creation Filters:</span>
+                        <div class="panel-body creation-filter-panel">
+                            {% for prog, filters in cohort.get_creation_filters.items %}
+                                <div class="col-sm-{{ cohort.get_creation_filters.keys|get_prog_col_size }} creation-prog-filter-set">
+                                <h6>{{ prog }}</h6>
+                                {% for filter in filters %}
+                                    <span class="filter-label label label-default space-right-5">{{ filter.name|get_feat_displ_name }}: {{ filter.value|get_readable_name:filter.name }}</span>
+                                {% endfor %}
+                                </div>
+                            {% empty %}
+                                <p>There were no filters used to create this cohort.</p>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
                 <div class="more-details"><button class="btn btn-link" role="button">Show More</button></div>

@@ -22,7 +22,8 @@ import re
 from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
-from bq_data_access.feature_search.util import SearchableFieldHelper
+from bq_data_access.v1.feature_search.util import SearchableFieldHelper
+from bq_data_access.v2.feature_search.util import SearchableFieldHelper as SearchableFieldHelper_v2
 from models import VariableFavorite
 from workbooks.models import Workbook, Worksheet
 from projects.models import Program

@@ -8,7 +8,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.http import StreamingHttpResponse
-from bq_data_access.feature_search.util import SearchableFieldHelper
+from bq_data_access.v1.feature_search.util import SearchableFieldHelper
+from bq_data_access.v2.feature_search.util import SearchableFieldHelper as SearchableFieldHelper_v2
 from django.http import HttpResponse, JsonResponse
 from models import Cohort, Workbook, Worksheet, Worksheet_comment, Worksheet_variable, Worksheet_gene, Worksheet_cohort, Worksheet_plot, Worksheet_plot_cohort
 from variables.models import VariableFavorite, Variable

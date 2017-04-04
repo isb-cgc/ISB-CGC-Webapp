@@ -35,6 +35,8 @@ define([
 
 ], function($, jqueryui, bootstrap, session_security, d3, d3tip, d3textwrap, vizhelpers, scatter_plot, cubby_plot, violin_plot, histogram, bar_graph, seqpeek_view, mock_histogram_data ) {
 
+    var VERSION = $('#workbook-build :selected').data('plot-version');
+
     var scatter_plot_obj = Object.create(scatter_plot, {});
     var cubby_plot_obj   = Object.create(cubby_plot, {});
     var violin_plot_obj  = Object.create(violin_plot, {});
@@ -280,7 +282,7 @@ define([
                 cohort_str += '&cohort_id=' + cohorts[i];
             }
         }
-        var api_url = base_url + '/visualizations/feature_data_plot?' + cohort_str;
+        var api_url = base_url + '/visualizations/feature_data_plot/'+ VERSION + '?' + cohort_str;
 
         api_url += '&x_id=' + x_attr;
         if(color_by && color_by !== ''){
@@ -305,7 +307,7 @@ define([
                 cohort_str += '&cohort_id=' + cohorts[i];
             }
         }
-        var api_url = base_api_url + '/_ah/api/seqpeek_data_api/v1/view_data?' + cohort_str;
+        var api_url = base_api_url + '/_ah/api/seqpeek_data_api/v1/view_data?' + VERSION + '&' + cohort_str;
         api_url += "&hugo_symbol=" + gene_label;
 
         return api_url;
@@ -467,10 +469,10 @@ define([
     function generate_plot(args, callback){ //plot_selector, legend_selector, pairwise_element, type, x_attr, y_attr, color_by, cohorts, cohort_override, callback) {
         var plot_data_url;
         if (args.type == "SeqPeek") {
-            plot_data_url = get_seqpeek_data_url(base_api_url, args.cohorts, args.gene_label);
+            plot_data_url = get_seqpeek_data_url(base_api_url, args.cohorts, args.gene_label, VERSION);
         }
         else {
-            plot_data_url = get_data_url(base_api_url, args.cohorts, args.x, args.y, args.color_by, args.logTransform);
+            plot_data_url = get_data_url(base_api_url, args.cohorts, args.x, args.y, args.color_by, args.logTransform, VERSION);
         }
 
         $.ajax({

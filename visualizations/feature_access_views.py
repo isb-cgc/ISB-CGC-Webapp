@@ -20,21 +20,21 @@ import logging
 import sys
 import traceback
 
-from bq_data_access.clinical_data import CLINICAL_FEATURE_TYPE
-from bq_data_access.copynumber_data import CNVR_FEATURE_TYPE
-from bq_data_access.feature_search.clinical_searcher import ClinicalSearcher
-from bq_data_access.feature_search.common import InvalidDataTypeException
-from bq_data_access.feature_search.copynumber_search import CNVRSearcher
-from bq_data_access.feature_search.gexp_searcher import GEXPSearcher
-from bq_data_access.feature_search.gnab_searcher import GNABSearcher
-from bq_data_access.feature_search.methylation_searcher import METHSearcher
-from bq_data_access.feature_search.microrna_searcher import MIRNSearcher
-from bq_data_access.feature_search.protein import RPPASearcher
-from bq_data_access.gexp_data import GEXP_FEATURE_TYPE
-from bq_data_access.gnab_data import GNAB_FEATURE_TYPE
-from bq_data_access.methylation_data import METH_FEATURE_TYPE
-from bq_data_access.mirna_data import MIRN_FEATURE_TYPE
-from bq_data_access.protein_data import RPPA_FEATURE_TYPE
+from bq_data_access.v2.clinical_data import CLINICAL_FEATURE_TYPE
+from bq_data_access.v2.copynumber_data import CNVR_FEATURE_TYPE
+from bq_data_access.v2.feature_search.clinical_searcher import ClinicalSearcher
+from bq_data_access.v2.feature_search.common import InvalidDataTypeException
+from bq_data_access.v2.feature_search.copynumber_search import CNVRSearcher
+from bq_data_access.v2.feature_search.gexp_searcher import GEXPSearcher
+from bq_data_access.v2.feature_search.gnab_searcher import GNABSearcher
+from bq_data_access.v2.feature_search.methylation_searcher import METHSearcher
+from bq_data_access.v2.feature_search.microrna_searcher import MIRNSearcher
+from bq_data_access.v2.feature_search.protein import RPPASearcher
+from bq_data_access.v2.gexp_data import GEXP_FEATURE_TYPE
+from bq_data_access.v2.gnab_data import GNAB_FEATURE_TYPE
+from bq_data_access.v2.methylation_data import METH_FEATURE_TYPE
+from bq_data_access.v2.mirna_data import MIRN_FEATURE_TYPE
+from bq_data_access.v2.protein_data import RPPA_FEATURE_TYPE
 from django.http import JsonResponse
 
 

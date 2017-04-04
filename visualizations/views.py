@@ -32,7 +32,7 @@ from django.utils import formats
 
 from models import SavedViz, Plot, Plot_Cohorts, Viz_Perms, Plot_Comments
 from cohorts.models import Cohort, Cohort_Perms, Samples
-from bq_data_access.feature_search.util import SearchableFieldHelper
+from bq_data_access.v2.feature_search.util import SearchableFieldHelper
 
 
 def _decode_list(data):

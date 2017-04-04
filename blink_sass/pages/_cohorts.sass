@@ -32,10 +32,11 @@
                 position: absolute
                 z-index: 20
 
-    .curr-filter-panel
+    .curr-filter-panel, .creation-filter-panel
         overflow: hidden
         height: 95px
-        padding-bottom: 5px
+        .creation-prog-filter-set
+            height: 100%
         .prog-filter-set
             border-left: 2px solid $isb-primary
             h5
@@ -44,6 +45,13 @@
             border-left: none
         .label
             margin: 0
+
+    .creation-filter-panel
+        height: 100%
+
+    .curr-filter-panel
+        padding: 0
+        margin-bottom: 15px
 
     .details-panel
         overflow: hidden

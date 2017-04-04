@@ -25,6 +25,7 @@ class Workbook(models.Model):
     active = models.BooleanField(default=True)
     shared = models.ManyToManyField(Shared_Resource)
     is_public = models.BooleanField(default=False)
+    build = models.CharField(max_length=10, null=True)
 
     @classmethod
     def deep_get(cls, id):
@@ -37,7 +38,7 @@ class Workbook(models.Model):
 
     @classmethod
     def create(cls, name, description, user):
-        workbook_model = cls.objects.create(name=name, description=description, owner=user)
+        workbook_model = cls.objects.create(name=name, description=description, owner=user, build='HG38')
         workbook_model.save()
 
         return workbook_model
@@ -47,7 +48,8 @@ class Workbook(models.Model):
         workbook_model = cls.create(name, description, user)
         worksheet_model = Worksheet.objects.create(name="worksheet 1",
                                                    description="",
-                                                   workbook=workbook_model)
+                                                   workbook=workbook_model,
+                                                   build='HG38')
 
         return workbook_model
 
@@ -144,6 +146,10 @@ class Workbook(models.Model):
                     break
 
         return is_shareable
+
+
+    def get_builds(self):
+        return ["HG19", "HG38"]
 
 
 class Workbook_Last_View(models.Model):

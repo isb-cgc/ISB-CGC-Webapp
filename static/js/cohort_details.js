@@ -830,8 +830,16 @@ require([
         $('.more-details button').on('click', function() {
             $('.more-details').hide();
             $('.less-details').show();
+
+            var max_height = 0;
+            $('.creation-prog-filter-set').each(function(){
+                var this_div = $(this);
+                if(this_div.outerHeight() > max_height) {
+                    max_height = this_div.outerHeight();
+                }
+            });
             $('.details-panel').animate({
-                height: '300px'
+                height: ($('.cohort-info').outerHeight() + max_height+15)+'px'
             }, 800);
         });
         $('.less-details button').on('click', function() {
@@ -919,18 +927,6 @@ require([
     });
     if(max_height < $('.curr-filter-panel').innerHeight()){
         $('.curr-filter-panel').css('height','105px');
-        $('.more-filters').hide();
-    }
-
-    // Check to see if we need 'Show More' buttons for details and filter panels (we may not)
-    max_height = 0;
-    $('.prog-filter-set').each(function(){
-        var this_div = $(this);
-        if(this_div.outerHeight() > max_height) {
-            max_height = this_div.outerHeight();
-        }
-    });
-    if(max_height < $('.curr-filter-panel').innerHeight()){
         $('.more-filters').hide();
     }
 
