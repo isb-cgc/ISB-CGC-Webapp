@@ -19,7 +19,6 @@ limitations under the License.
 import logging
 from re import compile as re_compile
 
-from bq_data_access.v2.feature_data_provider import FeatureDataProvider
 from bq_data_access.v2.errors import FeatureNotFoundException
 from bq_data_access.v2.feature_value_types import ValueType, DataTypes
 from bq_data_access.v2.utils import DurationLogged
@@ -55,7 +54,7 @@ def get_table_info(table_id):
 class GEXPFeatureDef(object):
     # Regular expression for parsing the feature definition.
     #
-    # Example ID: GEXP:TP53:mrna_bcgsc_illumina_hiseq
+    # Example ID: GEXP:TP53:mrna_unc_illumina_hiseq
     config_instance = GEXPFeatureDefConfig.from_dict(BIGQUERY_CONFIG)
 
     regex = re_compile("^GEXP:"
@@ -81,12 +80,11 @@ class GEXPFeatureDef(object):
         return cls(gene_label, value_field, table_id)
 
 
-class GEXPFeatureProvider(FeatureDataProvider):
-    def __init__(self, feature_id, **kwargs):
+class GEXPFeatureProvider(object):
+    def __init__(self, feature_id):
         self.feature_def = None
         self.table_name = ''
         self.parse_internal_feature_id(feature_id)
-        super(GEXPFeatureProvider, self).__init__(**kwargs)
 
     def get_value_type(self):
         return ValueType.FLOAT
@@ -97,7 +95,14 @@ class GEXPFeatureProvider(FeatureDataProvider):
     def process_data_point(self, data_point):
         return data_point['value']
 
-    def build_query(self, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array, project_id_array):
+    def build_query_new(self, cohort_table, cohort_id_array, project_id_array):
+        table_info = get_table_info(self.feature_def.table_id)
+        dataset_name, table_id = table_info.dataset_name, table_info.table_name
+
+        return self.build_query(table_id, self.feature_def,
+                                cohort_table, cohort_id_array, project_id_array)
+
+    def build_query(self, table_name, feature_def, cohort_table, cohort_id_array, project_id_array):
         # Generate the 'IN' statement string: (%s, %s, ..., %s)
         cohort_id_stmt = ', '.join([str(cohort_id) for cohort_id in cohort_id_array])
         project_id_stmt = ''
@@ -105,20 +110,20 @@ class GEXPFeatureProvider(FeatureDataProvider):
             project_id_stmt = ', '.join([str(project_id) for project_id in project_id_array])
 
         query_template = "SELECT ParticipantBarcode AS case_id, SampleBarcode AS sample_id, AliquotBarcode AS aliquot_id, {value_field} AS value " \
-             "FROM [{project_name}:{dataset_name}.{table_name}] AS gexp " \
+             "FROM [{table_name}] AS gexp " \
              "WHERE {gene_label_field}='{gene_symbol}' " \
              "AND SampleBarcode IN ( " \
              "     SELECT sample_barcode " \
-             "     FROM [{project_name}:{cohort_dataset}.{cohort_table}] " \
+             "     FROM [{cohort_dataset_and_table}] " \
              "     WHERE cohort_id IN ({cohort_id_list}) " \
              "          AND (project_id IS NULL"
 
         query_template += (" OR project_id IN ({project_id_list})))" if project_id_array is not None else "))")
 
-        query = query_template.format(dataset_name=dataset_name, project_name=project_name, table_name=table_name,
+        query = query_template.format(table_name=table_name,
                                       gene_label_field=GENE_LABEL_FIELD,
                                       gene_symbol=feature_def.gene, value_field=feature_def.value_field,
-                                      cohort_dataset=cohort_dataset, cohort_table=cohort_table,
+                                      cohort_dataset_and_table=cohort_table,
                                       cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt)
 
         logging.debug("BQ_QUERY_GEXP: " + query)

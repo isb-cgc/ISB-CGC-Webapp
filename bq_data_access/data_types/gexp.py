@@ -11,7 +11,7 @@ BIGQUERY_CONFIG = {
     "gene_label_field": "HGNC_gene_symbol",
     "tables": [
         {
-            "table_id": "mRNA_UNC_GA_RSEM",
+            "table_id": "isb-cgc:2016_07_09_tcga_data_open.mRNA_UNC_GA_RSEM",
             "platform": "Illumina GA",
             "generating_center": "UNC",
             "feature_id": "mrna_unc_illumina_ga",
@@ -19,7 +19,7 @@ BIGQUERY_CONFIG = {
             "value_field": "normalized_count"
         },
         {
-            "table_id": "mRNA_UNC_HiSeq_RSEM",
+            "table_id": "isb-cgc:2016_07_09_tcga_data_open.mRNA_UNC_HiSeq_RSEM",
             "platform": "Illumina HiSeq",
             "generating_center": "UNC",
             "feature_id": "mrna_unc_illumina_hiseq",
