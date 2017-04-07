@@ -1,6 +1,6 @@
 """
 
-Copyright 2016, Institute for Systems Biology
+Copyright 2017, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,100 +17,15 @@ limitations under the License.
 """
 
 import logging
-from re import compile as re_compile
 from time import sleep
 
-from bq_data_access.v2.clinical_data import ClinicalFeatureProvider, CLINICAL_FEATURE_TYPE
-from bq_data_access.v2.copynumber_data import CNVRFeatureProvider, CNVR_FEATURE_TYPE
+from bq_data_access.v2.feature_id_utils import FeatureProviderFactory
 from bq_data_access.v2.errors import FeatureNotFoundException
-from bq_data_access.v2.gexp_data import GEXPFeatureProvider, GEXP_FEATURE_TYPE
-from bq_data_access.v2.gnab_data import GNABFeatureProvider, GNAB_FEATURE_TYPE
-from bq_data_access.v2.methylation_data import METHFeatureProvider, METH_FEATURE_TYPE
-from bq_data_access.v2.mirna_data import MIRNFeatureProvider, MIRN_FEATURE_TYPE
-from bq_data_access.v2.protein_data import RPPAFeatureProvider, RPPA_FEATURE_TYPE
 from bq_data_access.v2.user_data import UserFeatureProvider, USER_FEATURE_TYPE
+
 from cohorts.metadata_helpers import get_sql_connection
 from django.conf import settings
 from google_helpers.bigquery_service import get_bigquery_service
-
-
-class FeatureProviderFactory(object):
-    @classmethod
-    def get_feature_type_string(cls, feature_id):
-        regex = re_compile("^(CLIN|GEXP|METH|CNVR|RPPA|MIRN|GNAB|USER):")
-
-        feature_fields = regex.findall(feature_id)
-        if len(feature_fields) == 0:
-            return None
-
-        feature_type = feature_fields[0]
-        return feature_type
-
-    @classmethod
-    def get_provider_class_from_feature_id(cls, feature_id):
-        """
-        Args:
-            feature_id: Feature identifier
-
-        Returns:
-            Feature data provider class for the datatype defined in the
-            feature identifier.
-
-        Raises:
-            FeatureNotFoundException: If the datatype part of the feature
-            identifier is unknown.
-
-        """
-        feature_type = cls.get_feature_type_string(feature_id)
-        if feature_type is None:
-            logging.debug("FeatureProviderFactory.from_feature_id: invalid feature ID: " + str(feature_id))
-            raise FeatureNotFoundException(feature_id)
-
-        if feature_type == CLINICAL_FEATURE_TYPE:
-            return ClinicalFeatureProvider
-        elif feature_type == GEXP_FEATURE_TYPE:
-            return GEXPFeatureProvider
-        elif feature_type == METH_FEATURE_TYPE:
-            return METHFeatureProvider
-        elif feature_type == CNVR_FEATURE_TYPE:
-            return CNVRFeatureProvider
-        elif feature_type == RPPA_FEATURE_TYPE:
-            return RPPAFeatureProvider
-        elif feature_type == MIRN_FEATURE_TYPE:
-            return MIRNFeatureProvider
-        elif feature_type == GNAB_FEATURE_TYPE:
-            return GNABFeatureProvider
-        elif feature_type == USER_FEATURE_TYPE:
-            return UserFeatureProvider
-
-    @classmethod
-    def from_feature_id(cls, feature_id, **kwargs):
-        provider_class = cls.get_provider_class_from_feature_id(feature_id)
-        return provider_class(feature_id, **kwargs)
-
-    @classmethod
-    def from_parameters(cls, parameters_obj, **kwargs):
-        if isinstance(parameters_obj, FeatureIdQueryDescription):
-            return cls.from_feature_id(parameters_obj.feature_id, **kwargs)
-        elif isinstance(parameters_obj, ProviderClassQueryDescription):
-            class_type = parameters_obj.feature_data_provider_class
-            feature_id = parameters_obj.feature_id
-            return class_type(feature_id, **kwargs)
-
-
-class FeatureIdQueryDescription(object):
-    def __init__(self, feature_id, cohort_id_array, project_id_array):
-        self.feature_id = feature_id
-        self.cohort_id_array = cohort_id_array
-        self.project_id_array = project_id_array
-
-
-class ProviderClassQueryDescription(object):
-    def __init__(self, feature_data_provider_class, feature_id, cohort_id_array, project_id_array):
-        self.feature_data_provider_class = feature_data_provider_class
-        self.feature_id = feature_id
-        self.cohort_id_array = cohort_id_array
-        self.project_id_array = project_id_array
 
 
 def is_valid_feature_identifier(feature_id):
