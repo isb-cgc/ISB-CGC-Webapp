@@ -21,8 +21,6 @@ import sys
 from uuid import uuid4
 from time import sleep
 
-from django.conf import settings
-from google_helpers.bigquery_service import get_bigquery_service
 from bq_data_access.v2.utils import DurationLogged
 
 
@@ -32,11 +30,14 @@ class FeatureDataProvider(object):
 
     TODO: Document interface
     """
-    def __init__(self, bigquery_service=None):
+    def __init__(self, bigquery_service=None, project_id=None, project_name=None):
         self.job_reference = None
         self.bigquery_service = bigquery_service
+        self.project_id = project_id
+        self.project_name = project_name
 
     def get_bq_service(self):
+        from google_helpers.bigquery_service import get_bigquery_service
         if self.bigquery_service is None:
             self.bigquery_service = get_bigquery_service()
 
@@ -137,8 +138,14 @@ class FeatureDataProvider(object):
         project_name = settings.BIGQUERY_PROJECT_NAME
         dataset_name = settings.BIGQUERY_DATASET
 
-        result = self.submit_query_and_get_job_ref(project_id, project_name, dataset_name, self.table_name,
+        result = self.submit_query_and_get_job_ref(self.project_id, project_name, dataset_name, self.table_name,
                                                    self.feature_def, cohort_dataset, cohort_table, cohort_id_array,
                                                    project_id_array)
         return result
 
+
+    @classmethod
+    def build_from_django_settings(cls, **kwargs):
+        # TODO implement
+        from django.conf import settings
+        return cls(**kwargs)
