@@ -246,7 +246,7 @@ def create_programs_and_projects(debug):
 
             prog_id = None
 
-            cursor.execute('SELECT id FROM projects_program WHERE name=%s;', (prog,))
+            cursor.execute('SELECT id FROM projects_program WHERE name=%s and active=1;', (prog,))
             results = cursor.fetchall()
             if len(results):
                 prog_id = results[0][0]
@@ -295,17 +295,17 @@ def fix_case_barcodes_in_cohorts(debug):
     """
 
     fix_ccle_case_barcodes = """
-            UPDATE cohorts_samples cs
-            JOIN (
-                SELECT SampleBarcode AS sms, cms.sample_barcode, cms.case_barcode
-                FROM metadata_samples ms
-                JOIN CCLE_metadata_samples cms
-                ON cms.case_barcode = ms.ParticipantBarcode
-                WHERE SampleBarcode LIKE 'CCLE%'
-            ) ms
-            ON ms.sms = cs.sample_barcode
-            SET cs.sample_barcode = ms.sample_barcode, cs.case_barcode = ms.case_barcode
-            WHERE cs.sample_barcode LIKE 'CCLE%';
+        UPDATE cohorts_samples cs
+        JOIN (
+            SELECT SampleBarcode AS sms, cms.sample_barcode, cms.case_barcode
+            FROM metadata_samples ms
+            JOIN CCLE_metadata_samples cms
+            ON cms.case_barcode = ms.ParticipantBarcode
+            WHERE SampleBarcode LIKE 'CCLE%'
+        ) ms
+        ON ms.sms = cs.sample_barcode
+        SET cs.sample_barcode = ms.sample_barcode, cs.case_barcode = ms.case_barcode
+        WHERE cs.sample_barcode LIKE 'CCLE%';
     """
 
     try:
@@ -524,6 +524,194 @@ def make_attr_display_table(debug):
         if db and db.open: db.close()
 
 
+def fix_filters(debug):
+    db = None
+    cursor = None
+
+    try:
+        db = get_mysql_connection()
+        cursor = db.cursor()
+
+        # Project -> Program
+        fix_filters_program = """
+            UPDATE cohorts_filters
+            SET name='program_name'
+            WHERE name='Project';
+        """
+
+        # Study -> project_short_name
+        fix_filters_project = """
+            UPDATE cohorts_filters
+            SET name='project_short_name'
+            WHERE name='Study';
+        """
+
+        # Remove CLIN: and SAMP:, leave in MUT:
+        fix_filters_names = """
+            UPDATE cohorts_filters
+            SET name=SUBSTR(name,LOCATE(':',name)+1)
+            WHERE name LIKE '%:%' AND name NOT LIKE 'MUT:%';
+        """
+
+        if debug:
+            print >> sys.stdout, "[STATUS] Executing update statement: "+fix_filters_program
+            print >> sys.stdout, "[STATUS] Executing update statement: "+fix_filters_project
+            print >> sys.stdout, "[STATUS] Executing update statement: "+fix_filters_names
+        else:
+            cursor.execute(fix_filters_program)
+            cursor.execute(fix_filters_project)
+            cursor.execute(fix_filters_names)
+
+        get_cohots_tcga_and_ccle = """
+            SELECT DISTINCT ccle.cohort_id
+            FROM cohorts_samples ccle
+            JOIN (
+                SELECT DISTINCT cs.cohort_id
+                FROM cohorts_samples cs
+                WHERE cs.sample_barcode NOT LIKE 'CCLE%'
+            ) tcga
+            ON tcga.cohort_id = ccle.cohort_id
+            WHERE ccle.sample_barcode LIKE 'CCLE%';
+        """
+
+        get_cohots_ccle = """
+            SELECT DISTINCT ccle.cohort_id
+            FROM cohorts_samples ccle
+            LEFT JOIN (
+                SELECT DISTINCT cs.cohort_id
+                FROM cohorts_samples cs
+                WHERE cs.sample_barcode NOT LIKE 'CCLE%'
+            ) tcga
+            ON tcga.cohort_id = ccle.cohort_id
+            WHERE ccle.sample_barcode LIKE 'CCLE%' AND tcga.cohort_id IS NULL;
+        """
+
+        get_cohots_tcga = """
+            SELECT DISTINCT tcga.cohort_id
+            FROM cohorts_samples tcga
+            LEFT JOIN (
+                SELECT DISTINCT cs.cohort_id
+                FROM cohorts_samples cs
+                WHERE cs.sample_barcode LIKE 'CCLE%'
+            ) ccle
+            ON tcga.cohort_id = ccle.cohort_id
+            WHERE tcga.sample_barcode NOT LIKE 'CCLE%' AND ccle.cohort_id IS NULL;
+        """
+
+        get_filters = """
+            SELECT id,name,value,resulting_cohort_id
+            FROM cohorts_filters
+            WHERE program_id IS NULL AND resulting_cohort_id = %s;
+        """
+
+        add_filter_program = """
+            UPDATE cohorts_filters
+            SET program_id = %s
+            WHERE id = %s;
+        """
+
+        insert_filter = """
+            INSERT INTO cohorts_filters(name,value,resulting_cohort_id,program_id)
+            VALUES(%s,%s,%s,%s);
+        """
+        cursor.execute("""
+            SELECT *
+            FROM CCLE_metadata_attrs;
+        """)
+
+        ccle_attr = []
+
+        for row in cursor.fetchall():
+            ccle_attr.append(row[1])
+
+        isb_userid = None
+
+        cursor.execute("SELECT id FROM auth_user WHERE username = %s AND is_active = 1 AND is_superuser = 1;", (SUPERUSER_NAME,))
+
+        for row in cursor.fetchall():
+            isb_userid = row[0]
+
+        if isb_userid is None:
+            raise Exception("Couldn't retrieve ID for isb user!")
+
+        tcga_program_id = None
+        ccle_program_id = None
+
+        cursor.execute("SELECT id FROM projects_program WHERE active=1 AND is_public=1 AND name=%s AND owner_id=%s;", ("TCGA",isb_userid,))
+
+        for row in cursor.fetchall():
+            tcga_program_id = row[0]
+
+        if not tcga_program_id:
+            raise Exception("Could not retrieve TCGA program ID!")
+
+        cursor.execute("SELECT id FROM projects_program WHERE active=1 AND is_public=1 AND name=%s AND owner_id=%s;", ("CCLE", isb_userid,))
+
+        for row in cursor.fetchall():
+            ccle_program_id = row[0]
+
+        if not ccle_program_id:
+            raise Exception("Could not retrieve CCLE program ID!")
+
+        # Fix CCLE-only cohort filters
+        cursor.execute(get_cohots_ccle)
+
+        for row in cursor.fetchall():
+            cursor.execute(get_filters, (row[0],))
+
+            for filter_row in cursor.fetchall():
+                if debug:
+                    print >> sys.stdout, "Executing statement: " + add_filter_program
+                    print >> sys.stdout, "Values: " + str((ccle_program_id, filter_row[0],))
+                else:
+                    cursor.execute(add_filter_program, (ccle_program_id, filter_row[0],))
+
+        # Fix TCGA-only cohort filters
+        cursor.execute(get_cohots_tcga)
+
+        for row in cursor.fetchall():
+            cursor.execute(get_filters, (row[0],))
+
+            for filter_row in cursor.fetchall():
+                if debug:
+                    print >> sys.stdout, "Executing statement: " + add_filter_program
+                    print >> sys.stdout, "Values: " + str((tcga_program_id, filter_row[0],))
+                else:
+                    cursor.execute(add_filter_program, (tcga_program_id, filter_row[0],))
+
+        # Fix mixed TCGA/CCLE cohort filters
+        cursor.execute(get_cohots_tcga_and_ccle)
+
+        for row in cursor.fetchall():
+            cursor.execute(get_filters, (row[0],))
+
+            for filter_row in cursor.fetchall():
+                if debug:
+                    print >> sys.stdout, "Executing statement: " + add_filter_program
+                    print >> sys.stdout, "Values: " + str((tcga_program_id, filter_row[0],))
+
+                    if filter_row[1] in ccle_attr:
+                        print >> sys.stdout, filter_row[1] + " found in ccle_attr"
+                        print >> sys.stdout, "Executing statement: " + insert_filter
+                        print >> sys.stdout, "Values: " + str((filter_row[1], filter_row[2], row[0], ccle_program_id,))
+                else:
+
+                    # First, apply TCGA as the program ID
+                    cursor.execute(add_filter_program, (tcga_program_id, filter_row[0],))
+
+                    # Then, check to see if CCLE has this attr - if yes, duplicate the filter to CCLE
+                    if filter_row[1] in ccle_attr:
+                        cursor.execute(insert_filter, (filter_row[1], filter_row[2], row[0], ccle_program_id,))
+
+        db.commit()
+
+    except Exception as e:
+        print >> sys.stdout, traceback.format_exc()
+    finally:
+        if cursor: cursor.close()
+        if db and db.open: db.close()
+
+
 """ main """
 
 def main():
@@ -546,13 +734,17 @@ def main():
     cmd_line_parser.add_argument('-d', '--fix-case-id', type=bool, default=False,
                                  help="Add case barcodes to the cohorts_samples table for extent cohorts")
 
+    cmd_line_parser.add_argument('-f', '--fix_filters', type=bool, default=False,
+                                 help="Fix the cohorts_filters table to reflext new, multiprogram cohorts")
+
     args = cmd_line_parser.parse_args()
 
     try:
         args.create_prog_proj and create_programs_and_projects(args.debug_mode)
-        args.fix_ccle_cohorts and fix_cohort_projects(args.debug_mode)
+        args.fix_cohort_projects and fix_cohort_projects(args.debug_mode)
         args.attr_displ_table and make_attr_display_table(args.debug_mode)
         args.fix_case_id and fix_case_barcodes_in_cohorts(args.debug_mode)
+        args.fix_filters and fix_filters(args.debug_mode)
 
     except Exception as e:
         print >> sys.stdout, traceback.format_exc()
