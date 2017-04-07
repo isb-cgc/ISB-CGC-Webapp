@@ -46,6 +46,7 @@ VALUE_SPECIFIC_ORDERS = {
 }
 
 ATTR_SPECIFIC_ORDERS = [
+    'program_name',
     'project_short_name',
     'disease_code',
     'sample_type',

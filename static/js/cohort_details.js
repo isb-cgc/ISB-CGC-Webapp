@@ -82,9 +82,6 @@ require([
 
     var original_title = $('#edit-cohort-name').val();
 
-    var geneListField = $('#paste-in-genes');
-    var geneFavs = [];
-
     //create bloodhound typeahead engine for gene suggestions
     var gene_suggestions = new Bloodhound({
         datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
@@ -96,7 +93,8 @@ require([
         }
     });
     gene_suggestions.initialize();
-    function createTokenizer() {
+
+    function createTokenizer(geneListField, geneFavs, program_selector) {
         // be aware bootstrap tokenfield requires 'value' as the datem attribute field : https://github.com/sliptree/bootstrap-tokenfield/issues/189
         geneListField.tokenfield({
             typeahead : [
@@ -126,8 +124,8 @@ require([
                     $('.helper-text__invalid').hide();
                 }
             });
-            $('#paste-in-genes-tokenfield').attr('placeholder',"");
-            $('#paste-in-genes-tokenfield').attr('disabled','disabled');
+            $(program_selector+' .paste-in-genes-tokenfield').attr('placeholder',"");
+            $(program_selector+' .paste-in-genes-tokenfield').attr('disabled','disabled');
 
             $('#mutation-category').removeClass('disabled');
             $('#mutation-category option[value="no-gene"]').hide();
@@ -155,7 +153,6 @@ require([
             return false;
         });
     }
-    createTokenizer();
 
     function validate_genes(list, cb){
         if(list.length > 0){
@@ -775,6 +772,7 @@ require([
             }
 
             $('#create-cohort-form .form-control-static span.'+filterType+'-token').remove();
+
             update_displays();
         });
 
@@ -876,6 +874,8 @@ require([
         });
     
         $(program_data_selector + ' #mutation-category').on('change',filter_change_callback);
+
+        createTokenizer($(program_data_selector+' .paste-in-genes'), [], program_data_selector);
     };
 
     var filter_panel_load = function(cohort) {
