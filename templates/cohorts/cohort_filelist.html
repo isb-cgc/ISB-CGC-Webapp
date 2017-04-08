@@ -41,9 +41,18 @@
     <div class="row">
         <div id="filter-panel" class="col-lg-3">
             <div class="panel panel-default">
-                <div class="panel-heading" id="heading-platforms">Platforms</div>
                 <div class="panel-body">
-                    <ul class="search-checkbox-list" id="{{ attr }}">
+                    <label for="build">Build</label>
+                    <select aria-label="Build" id="build" class="form-control build">
+                        <option value="HG38" {% if build == 'HG38' %}selected{% endif %}>HG38</option>
+                        <option value="HG19" {% if build == 'HG19' %}selected{% endif %}>HG19</option>
+                    </select>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading" id="heading-platforms">Platforms</div>
+                <div class="panel-body" id="platforms-panel">
+                    <ul class="search-checkbox-list platform-counts" id="platform-{{ build }}">
                         {% for platform in platform_counts %}
                             <li>
                                 <input data-platform-count="{{ platform.count }}" type="checkbox" name="platform-selected" id="{{ platform.platform }}" >
@@ -100,9 +109,9 @@
                             <thead>
                             <tr>
                                 <th class="col-barcode">Sample Barcode</th>
-                                <th class="col-pipeline">Pipeline</th>
+                                <th class="col-exp-strategy">Exp. Strategy</th>
                                 <th class="col-platform">Platform</th>
-                                <th class="col-datalevel">Data Level</th>
+                                <th class="col-datacat">Data Category</th>
                                 <th class="col-datatype">Data Type</th>
                                 <th class="col-igv">IGV</th>
                             </tr>
