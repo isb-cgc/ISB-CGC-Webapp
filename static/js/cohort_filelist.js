@@ -216,6 +216,14 @@ require([
                 $('.filelist-panel .panel-body .page-num').html(page);
                 var files = data['file_list'];
                 $('.filelist-panel table tbody').empty();
+
+                if(files.length <= 0) {
+                    $('.filelist-panel table tbody').append(
+                        '<tr>' +
+                        '<td colspan="5"><i>No file listings found in this cohort for this build.</i></td><td></td>'
+                    );
+                }
+
                 for (var i = 0; i < files.length; i++) {
                     if (!('datatype' in files[i])) {
                         files[i]['datatype'] = '';
@@ -253,7 +261,7 @@ require([
                         '<td>' + files[i]['datatype'] + '</td>' +
                         '<td>' + files[i]['igv_viewer'] + '</td>' +
                         '</tr>'
-                    )
+                    );
 
                     // Remember any previous checks
                     var thisCheck = $('.filelist-panel input[value="'+val+'"');
@@ -315,6 +323,11 @@ require([
                         '<ul class="search-checkbox-list platform-counts" id="platform-'+build+'"></ul>'
                     );
 
+                    if(Object.keys(data.platform_count_list).length <= 0) {
+                        $('#platform-'+build).append(
+                            '<i>No platforms available to list.</i>'
+                        );
+                    }
                     for(var i in data.platform_count_list) {
                         if(data.platform_count_list.hasOwnProperty(i)) {
                             var platform = data.platform_count_list[i];

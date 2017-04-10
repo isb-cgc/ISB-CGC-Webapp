@@ -59,12 +59,13 @@
                                 <label for="{{ platform.platform }}">{{ platform.platform|get_readable_name }}</label>
                                 <span class="count">({{ platform.count }})</span>
                             </li>
+                        {% empty %}
+                            <i>No platforms available to list.</i>
                         {% endfor %}
                     </ul>
                 </div>
             </div>
         </div>
-
 
         <div id="content-panel" class="col-md-9">
             <div class="panel">
