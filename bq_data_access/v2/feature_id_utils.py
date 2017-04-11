@@ -41,7 +41,7 @@ class ProviderClassQueryDescription(object):
 class FeatureProviderFactory(object):
     @classmethod
     def get_feature_type_string(cls, feature_id):
-        regex = re_compile("^(CLIN|GEXP|METH|CNVR|RPPA|MIRN|GNAB|USER):")
+        regex = re_compile("^v2:(CLIN|GEXP|METH|CNVR|RPPA|MIRN|GNAB|USER):")
 
         feature_fields = regex.findall(feature_id)
         if len(feature_fields) == 0:

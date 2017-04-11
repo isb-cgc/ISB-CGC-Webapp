@@ -29,6 +29,8 @@ GEXP_FEATURE_TYPE = 'GEXP'
 
 GENE_LABEL_FIELD = 'HGNC_gene_symbol'
 
+logger = logging
+
 
 def get_feature_type():
     return GEXP_FEATURE_TYPE
@@ -51,23 +53,34 @@ def get_table_info(table_id):
     return table_info
 
 
+class GEXPTableFeatureDef(object):
+    def __init__(self, gene, gene_label_field, value_field, table_id):
+        self.gene = gene
+        self.gene_label_field = gene_label_field
+        self.value_field = value_field
+        self.table_id = table_id
+
+    @classmethod
+    def from_table_config(cls, gene, table_config):
+        return cls(gene, table_config.gene_label_field, table_config.value_field, table_config.table_id)
+
+
 class GEXPFeatureDef(object):
     # Regular expression for parsing the feature definition.
     #
-    # Example ID: GEXP:TP53:mrna_unc_illumina_hiseq
+    # Example ID: v2:GEXP:TP53:hg19
     config_instance = GEXPFeatureDefConfig.from_dict(BIGQUERY_CONFIG)
 
-    regex = re_compile("^GEXP:"
+    regex = re_compile("^v2:GEXP:"
                        # gene
                        "([a-zA-Z0-9\-]+):"
-                       # table
-                       "(" + "|".join([table.internal_table_id for table in config_instance.data_table_list]) +
+                       # platform_version 
+                       "mrna_(" + "|".join([version for version in config_instance.supported_platform_versions]) +
                        ")$")
 
-    def __init__(self, gene, value_field, table_id):
+    def __init__(self, gene, platform_version):
         self.gene = gene
-        self.value_field = value_field
-        self.table_id = table_id
+        self.platform_version = platform_version
 
     @classmethod
     def from_feature_id(cls, feature_id):
@@ -75,14 +88,14 @@ class GEXPFeatureDef(object):
         if len(feature_fields) == 0:
             raise FeatureNotFoundException(feature_id)
 
-        gene_label, table_id = feature_fields[0]
-        value_field = get_table_info(table_id).value_field
-        return cls(gene_label, value_field, table_id)
+        gene_label, platform_version = feature_fields[0]
+        return cls(gene_label, platform_version)
 
 
 class GEXPFeatureProvider(object):
     def __init__(self, feature_id):
         self.feature_def = None
+        self.table_feature_def = None
         self.table_name = ''
         self.parse_internal_feature_id(feature_id)
 
@@ -95,39 +108,69 @@ class GEXPFeatureProvider(object):
     def process_data_point(self, data_point):
         return data_point['value']
 
-    def build_query_new(self, cohort_table, cohort_id_array, project_id_array):
-        table_info = get_table_info(self.feature_def.table_id)
-        dataset_name, table_id = table_info.dataset_name, table_info.table_name
-
-        return self.build_query(table_id, self.feature_def,
-                                cohort_table, cohort_id_array, project_id_array)
-
-    def build_query(self, table_name, feature_def, cohort_table, cohort_id_array, project_id_array):
+    def build_query_for_program(self, feature_def, cohort_table, cohort_id_array, project_id_array):
         # Generate the 'IN' statement string: (%s, %s, ..., %s)
         cohort_id_stmt = ', '.join([str(cohort_id) for cohort_id in cohort_id_array])
         project_id_stmt = ''
         if project_id_array is not None:
             project_id_stmt = ', '.join([str(project_id) for project_id in project_id_array])
 
-        query_template = "SELECT ParticipantBarcode AS case_id, SampleBarcode AS sample_id, AliquotBarcode AS aliquot_id, {value_field} AS value " \
-             "FROM [{table_name}] AS gexp " \
-             "WHERE {gene_label_field}='{gene_symbol}' " \
-             "AND SampleBarcode IN ( " \
-             "     SELECT sample_barcode " \
-             "     FROM [{cohort_dataset_and_table}] " \
-             "     WHERE cohort_id IN ({cohort_id_list}) " \
-             "          AND (project_id IS NULL"
+        query_template = "SELECT case_barcode AS case_id, sample_barcode AS sample_id, aliquot_barcode AS aliquot_id, {value_field} AS value {brk}" \
+             "FROM [{table_name}] AS gexp {brk}" \
+             "WHERE {gene_label_field}='{gene_symbol}' {brk}" \
+             "AND sample_barcode IN ( {brk}" \
+             "     SELECT sample_barcode {brk}" \
+             "     FROM [{cohort_dataset_and_table}] {brk}" \
+             "     WHERE cohort_id IN ({cohort_id_list}) {brk}" \
+             "          AND (project_id IS NULL {brk}"
 
         query_template += (" OR project_id IN ({project_id_list})))" if project_id_array is not None else "))")
 
-        query = query_template.format(table_name=table_name,
-                                      gene_label_field=GENE_LABEL_FIELD,
+        query = query_template.format(table_name=feature_def.table_id,
+                                      gene_label_field=feature_def.gene_label_field,
                                       gene_symbol=feature_def.gene, value_field=feature_def.value_field,
                                       cohort_dataset_and_table=cohort_table,
-                                      cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt)
+                                      cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt,
+                                      brk='\n')
 
         logging.debug("BQ_QUERY_GEXP: " + query)
         return query
+
+    def build_query(self, project_set, cohort_table, cohort_id_array, project_id_array):
+        # Find matching tables
+        config_instance = GEXPFeatureDefConfig.from_dict(BIGQUERY_CONFIG)
+        found_tables = []
+
+        for table in config_instance.data_table_list:
+            if (table.project in project_set) and (table.platform_version == self.feature_def.platform_version):
+                logger.info("Found matching table: '{}'".format(table.table_id))
+                found_tables.append(table)
+
+        # Build a BigQuery statement for each found table configuration
+        subqueries = []
+        for table_config in found_tables:
+            # Build the project-specific feature def
+            sub_feature_def = GEXPTableFeatureDef.from_table_config(self.feature_def.gene, table_config)
+            subquery = self.build_query_for_program(sub_feature_def, cohort_table, cohort_id_array, project_id_array)
+            subqueries.append(subquery)
+
+        # Union of subqueries
+        logger.info(len(subqueries))
+        subquery_stmt_template = ",".join(["({})" for x in xrange(len(subqueries))])
+        logger.info(subquery_stmt_template)
+        subquery_stmt = subquery_stmt_template.format(*subqueries)
+        logger.info(subquery_stmt)
+
+        query_template = "SELECT case_id, sample_id, aliquot_id, value {brk}" \
+                         "FROM ( {brk}" \
+                         "{subqueries}" \
+                         ") {brk}" \
+                         ""
+        query = query_template.format(brk='\n', subqueries=subquery_stmt)
+        return query
+
+
+
 
     @DurationLogged('GEXP', 'UNPACK')
     def unpack_query_response(self, query_result_array):
@@ -160,14 +203,11 @@ class GEXPFeatureProvider(object):
     def parse_internal_feature_id(self, feature_id):
         self.feature_def = GEXPFeatureDef.from_feature_id(feature_id)
 
-        table_info = get_table_info(self.feature_def.table_id)
-        self.table_name = table_info.table_name
-
     @classmethod
     def is_valid_feature_id(cls, feature_id):
         is_valid = False
         try:
-            GEXPFeatureDef.from_feature_id(feature_id)
+            GEXPTableFeatureDef.from_feature_id(feature_id)
             is_valid = True
         except Exception:
             # GEXPFeatureDef.from_feature_id raises Exception if the feature identifier
