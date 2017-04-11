@@ -32,34 +32,43 @@ class GEXPTableConfig(object):
         table_name: Full BigQuery table identifier - project-name:dataset_name.table_name 
     
     """
-    def __init__(self, table_name, platform, generating_center, value_label, value_field, internal_table_id):
-        self.table_name = table_name
+    def __init__(self, table_id, platform_version, platform, gene_label_field, generating_center, value_label, value_field,
+                 internal_table_id, project):
+        self.table_id = table_id
         self.platform = platform
+        self.platform_version = platform_version
+        self.gene_label_field = gene_label_field
         self.generating_center = generating_center
         self.value_label = value_label
         self.value_field = value_field
         self.internal_table_id = internal_table_id
+        self.project = project
 
     @classmethod
     def from_dict(cls, param):
-        table_name = param['table_id']
+        table_id = param['table_id']
+        platform_version = param['platform_version']
         platform = param['platform']
+        gene_label_field = param['gene_label_field']
         generating_center = param['generating_center']
         value_label = param['value_label']
         value_field = param['value_field']
-        internal_table_id = param['feature_id']
+        internal_table_id = param['internal_table_id']
+        project = param['project']
 
-        return cls(table_name, platform, generating_center, value_label, value_field, internal_table_id)
+        return cls(table_id, platform_version, platform, gene_label_field, generating_center, value_label, value_field,
+                   internal_table_id, project)
 
 
 class GEXPFeatureDefConfig(object):
     """
     Configuration class for GEXP feature definitions.
     """
-    def __init__(self, reference, target_config, gene_label_field, tables_array):
+    def __init__(self, reference, target_config, gene_label_field, supported_platform_versions, tables_array):
         self.reference_config = reference
         self.target_config = target_config
         self.gene_label_field = gene_label_field
+        self.supported_platform_versions = supported_platform_versions
         self.data_table_list = tables_array
 
     @classmethod
@@ -67,8 +76,9 @@ class GEXPFeatureDefConfig(object):
         reference_config = DataSetConfig.from_dict(param['reference_config'])
         target_config = DataSetConfig.from_dict(param['target_config'])
         gene_label_field = param['gene_label_field']
+        supported_platform_versions = param['supported_platform_versions']
         data_table_list = [GEXPTableConfig.from_dict(item) for item in param['tables']]
 
-        return cls(reference_config, target_config, gene_label_field, data_table_list)
+        return cls(reference_config, target_config, gene_label_field, supported_platform_versions, data_table_list)
 
 
