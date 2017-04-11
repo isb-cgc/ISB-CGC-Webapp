@@ -210,7 +210,7 @@ require([
         $.ajax({
             url: url,
             success: function (data) {
-                var total_files = data['total_file_count'];
+                total_files = data['total_file_count'];
                 var total_pages = Math.ceil(total_files / 20);
                 $('.filelist-panel .panel-body .file-count').html(total_pages);
                 $('.filelist-panel .panel-body .page-num').html(page);
@@ -220,7 +220,7 @@ require([
                 if(files.length <= 0) {
                     $('.filelist-panel table tbody').append(
                         '<tr>' +
-                        '<td colspan="5"><i>No file listings found in this cohort for this build.</i></td><td></td>'
+                        '<td colspan="6"><i>No file listings found in this cohort for this build.</i></td><td></td>'
                     );
                 }
 
@@ -254,6 +254,7 @@ require([
 
                     $('.filelist-panel table tbody').append(
                         '<tr>' +
+                        '<td>' + files[i]['program'] + '</td>' +
                         '<td>' + files[i]['sample'] + '</td>' +
                         '<td>' + files[i]['exp_strat'] + '</td>' +
                         '<td>' + happy_name(files[i]['platform']) + '</td>' +

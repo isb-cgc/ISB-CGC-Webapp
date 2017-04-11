@@ -109,6 +109,7 @@
                         <table class="table table-striped file-list-table" aria-label="File Listing Table">
                             <thead>
                             <tr>
+                                <th class="col-program">Program</th>
                                 <th class="col-barcode">Sample Barcode</th>
                                 <th class="col-exp-strategy">Exp. Strategy</th>
                                 <th class="col-platform">Platform</th>
@@ -153,7 +154,7 @@
     var base_api_url = '{{ base_api_url|safe }}';
     var cohort_id = {{ cohort.id }};
     var page = 1;
-    var total_files = 0;
+    var total_files = {{ total_files }};
     var download_url = '{{ download_url }}';
     var ajax_update_url = '{% url 'cohort_filelist_ajax' cohort.id %}';
     var SEL_FILE_MAX = '{{  sel_file_max }}';
