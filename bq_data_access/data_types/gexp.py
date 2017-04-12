@@ -1,30 +1,42 @@
 BIGQUERY_CONFIG = {
-    "version": 2,
     "reference_config": {
         "project_name": "isb-cgc",
         "dataset_name": "platform_reference"
     },
-    "target_config": {
-        "project_name": "isb-cgc",
-        "dataset_name": "2016_07_09_tcga_data_open"
-    },
-    "gene_label_field": "HGNC_gene_symbol",
+    "supported_platform_versions": ['hg19', 'hg38'],
     "tables": [
         {
-            "table_id": "isb-cgc:2016_07_09_tcga_data_open.mRNA_UNC_GA_RSEM",
-            "platform": "Illumina GA",
+            "table_id": "isb-cgc:TCGA_hg19_data_v0.RNAseq_Gene_Expression_UNC_RSEM",
+            "platform_version": "hg19",
+            "platform": "Illumina HiSeq",
+            "gene_label_field": "gene_name",
             "generating_center": "UNC",
-            "feature_id": "mrna_unc_illumina_ga",
+            "internal_table_id": "rnaseq_unc_rsem",
             "value_label": "RSEM",
-            "value_field": "normalized_count"
+            "value_field": "normalized_count",
+            "project": "tcga"
         },
         {
-            "table_id": "isb-cgc:2016_07_09_tcga_data_open.mRNA_UNC_HiSeq_RSEM",
+            "table_id": "isb-cgc:TCGA_hg38_data_v0.RNAseq_Gene_Expression",
+            "platform_version": "hg38",
             "platform": "Illumina HiSeq",
+            "gene_label_field": "gene_name",
             "generating_center": "UNC",
-            "feature_id": "mrna_unc_illumina_hiseq",
+            "internal_table_id": "rnaseq",
             "value_label": "RSEM",
-            "value_field": "normalized_count"
+            "value_field": "normalized_count",
+            "project": "tcga"
+        },
+        {
+            "table_id": "isb-cgc:TARGET_hg38_data_v0.RNAseq_Gene_Expression",
+            "platform_version": "hg38",
+            "platform": "Illumina HiSeq",
+            "gene_label_field": "gene_name",
+            "generating_center": "TARGET",
+            "internal_table_id": "rnaseq",
+            "value_label": "RSEM",
+            "value_field": "normalized_count",
+            "project": "target"
         }
     ]
 }
