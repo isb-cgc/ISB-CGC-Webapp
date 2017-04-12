@@ -155,11 +155,8 @@ class GEXPFeatureProvider(object):
             subqueries.append(subquery)
 
         # Union of subqueries
-        logger.info(len(subqueries))
         subquery_stmt_template = ",".join(["({})" for x in xrange(len(subqueries))])
-        logger.info(subquery_stmt_template)
         subquery_stmt = subquery_stmt_template.format(*subqueries)
-        logger.info(subquery_stmt)
 
         query_template = "SELECT case_id, sample_id, aliquot_id, value {brk}" \
                          "FROM ( {brk}" \

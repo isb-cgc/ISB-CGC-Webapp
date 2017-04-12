@@ -64,19 +64,17 @@ class GEXPFeatureDefConfig(object):
     """
     Configuration class for GEXP feature definitions.
     """
-    def __init__(self, reference, gene_label_field, supported_platform_versions, tables_array):
+    def __init__(self, reference, supported_platform_versions, tables_array):
         self.reference_config = reference
-        self.gene_label_field = gene_label_field
         self.supported_platform_versions = supported_platform_versions
         self.data_table_list = tables_array
 
     @classmethod
     def from_dict(cls, param):
         reference_config = DataSetConfig.from_dict(param['reference_config'])
-        gene_label_field = param['gene_label_field']
         supported_platform_versions = param['supported_platform_versions']
         data_table_list = [GEXPTableConfig.from_dict(item) for item in param['tables']]
 
-        return cls(reference_config, gene_label_field, supported_platform_versions, data_table_list)
+        return cls(reference_config, supported_platform_versions, data_table_list)
 
 

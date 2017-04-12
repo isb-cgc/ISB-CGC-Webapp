@@ -29,27 +29,26 @@ logger = logging
 @click.command()
 @click.argument('feature_id', type=str)
 @click.argument('cohort_id', type=str)
-@click.option('--TCGA/--no-TCGA', default=True)
-@click.option('--TARGET/--no-TARGET', default=False)
+@click.option('--program', '-p', multiple=True)
 @click.option('--cohort-table', type=str, default="test-project:cohort_dataset.cohorts")
-def print_query(feature_id, cohort_id, tcga, target, cohort_table):
-    project_set = set()
+def print_query(feature_id, cohort_id, program, cohort_table):
+    supported_programs = set(['tcga', 'target'])
+    program_set = set(program).intersection(supported_programs)
 
-    if tcga:
-        project_set.add("tcga")
-    if target:
-        project_set.add("target")
+    logger.info("Selected programs: {}".format(program_set))
+    if len(program_set) == 0:
+        logger.info("No selected programs, quitting.")
+        return
 
-    logger.info("Enabled projects: {}".format(project_set))
     provider = FeatureProviderFactory.from_feature_id(feature_id)
 
-    query_string = provider.build_query(project_set,
+    query_string = provider.build_query(program_set,
                                         cohort_table,
                                         [cohort_id],
                                         None
                                         )
 
-    logger.info("QUERY:\n{}".format(query_string))
+    logger.info("QUERY:\n\n{}".format(query_string))
 
 
 @click.group()
