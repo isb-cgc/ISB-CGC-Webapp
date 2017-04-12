@@ -339,6 +339,12 @@ require([
                     tokenFeatDisplName = (feature.data('feature-displ-name') && feature.data('feature-displ-name').length > 0) ?
                      feature.data('feature-displ-name') : feature.data('feature-name');
 
+                var tokenUserProgId = null;
+
+                if(tokenProgId <= 0){
+                    tokenUserProgId = value.data('user-program-id');
+                }
+
                 var feature_id = feature.data('feature-id'), value_id =  value.data('value-id');
 
                 if (feature.data('feature-type') == 'datatype') { // Datatype feature
@@ -364,7 +370,7 @@ require([
                         'value-id': value_id,
                         'value-name': feature_value[1],
                         'prog-id': tokenProgId,
-                        'prog-name': tokenProgDisplName
+                        'prog-name': tokenProgDisplName,
                     }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token');
 
                 } else if (feature.data('feature-type') == 'donor') { // Donor feature
@@ -384,7 +390,8 @@ require([
                         'value-id': value_id,
                         'value-name': value.data('value-name'),
                         'prog-id': tokenProgId,
-                        'prog-name': tokenProgDisplName
+                        'prog-name': tokenProgDisplName,
+                        'user-program-id': tokenUserProgId,
                     }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token');
 
                 } else { // Molecular feature
@@ -606,6 +613,9 @@ require([
                 'value'  : { name: $this.data('value-name')  , id: $this.data('value-id')   },
                 'program': { name: $this.data('prog-name')   , id: $this.data('prog-id')    }
             };
+            if($this.data('user-program-id')) {
+                value['user_program'] = $this.data('user-program-id');
+            }
             form.append($('<input>').attr({ type: 'hidden', name: 'filters', value: JSON.stringify(value)}));
         });
 
