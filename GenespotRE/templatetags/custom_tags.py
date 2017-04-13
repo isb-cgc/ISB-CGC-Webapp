@@ -283,6 +283,4 @@ def get_sorted_items(attr_set):
         if attr not in ATTR_SPECIFIC_ORDERS:
             sorted_list.append(attr_set[attr])
 
-    print >> sys.stdout, str(sorted_list)
-
     return sorted_list
