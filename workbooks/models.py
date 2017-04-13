@@ -48,8 +48,7 @@ class Workbook(models.Model):
         workbook_model = cls.create(name, description, user)
         worksheet_model = Worksheet.objects.create(name="worksheet 1",
                                                    description="",
-                                                   workbook=workbook_model,
-                                                   build='HG38')
+                                                   workbook=workbook_model)
 
         return workbook_model
 
