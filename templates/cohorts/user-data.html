@@ -24,7 +24,7 @@
                                 <div class="list-group-item__heading" role="tab" id="heading-{{ attr.id }}">
                                     <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-{{ attr.id }}"
                                        aria-expanded="false" aria-controls="collapse-{{ attr.id }}">
-                                        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {% if attr.displ_name %}{{ attr.displ_name }}{% elif attr.name %}{{ attr.name }}{% else %}{{ attr.id }}{% endif %}
+                                        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {% if attr.displ_name %}{{ attr.displ_name }}{% elif attr.name %}{{ attr.name }}{% else %}{{ attr.id }}{% endif %}
                                     </a>
                                 </div>
                                 <div id="collapse-{{ attr.id }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"
@@ -127,12 +127,12 @@
                     <div class="row col-md-12 space-bottom-10">
                         <span class="detail-label">Total Number of Samples:</span>
                         <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                        <span class="total-values" id="total-samples">{{ total_samples }}</span>
+                        <span class="total-values" id="p-0-data-total-samples">{{ total_samples }}</span>
                     </div>
                     <div class="row col-md-12 space-bottom-10">
                         <span class="detail-label">Total Number of Cases:</span>
                         <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                        <span class="total-values" id="total-participants">{{ total_patients }}</span>
+                        <span class="total-values" id="p-0-data-total-participants">{{ total_patients }}</span>
                     </div>
                     <div class="row col-md-12 space-bottom-10">
                         <span>Your Permissions: {{ cohort.perm.perm }}</span>
@@ -184,12 +184,12 @@
                     <div class="row col-md-6">
                         <span class="detail-label">Total Number of Samples:</span>
                         <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                        <span class="total-values" id="0-data-total-samples">{{ total_samples }}</span>
+                        <span class="total-values" id="p-0-data-total-samples">{{ total_samples }}</span>
                     </div>
                     <div class="row col-md-6">
                         <span class="detail-label">Total Number of Cases:</span>
                         <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                        <span class="total-values" id="0-data-total-participants">{{ total_cases }}</span>
+                        <span class="total-values" id="p-0-data-total-participants">{{ total_cases }}</span>
                     </div>
                 </div>
             </div>
