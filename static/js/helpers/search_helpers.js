@@ -26,7 +26,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
 
     var PROG_CLIN_TREES = {
         'TCGA': {
-            project_disease_type: 'Disease Type',
+            disease_code: 'Disease Code',
             vital_status: 'Vital Status',
             sample_type: 'Sample Type',
             tumor_tissue_site: 'Tumor Tissue Site',
