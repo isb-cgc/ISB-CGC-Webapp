@@ -37,8 +37,8 @@ class Workbook(models.Model):
         return workbook_model
 
     @classmethod
-    def create(cls, name, description, user):
-        workbook_model = cls.objects.create(name=name, description=description, owner=user, build='HG38')
+    def create(cls, name, description, user, build='HG38'):
+        workbook_model = cls.objects.create(name=name, description=description, owner=user, build=build)
         workbook_model.save()
 
         return workbook_model
@@ -48,29 +48,33 @@ class Workbook(models.Model):
         workbook_model = cls.create(name, description, user)
         worksheet_model = Worksheet.objects.create(name="worksheet 1",
                                                    description="",
-                                                   workbook=workbook_model,
-                                                   build='HG38')
+                                                   workbook=workbook_model)
 
         return workbook_model
 
     @classmethod
-    def edit(cls, id, name, description):
+    def edit(cls, id, name, description, build=None):
         workbook_model = cls.objects.get(id=id)
         workbook_model.name = name
         workbook_model.description = description
+        # Workbook builds cannot be set to None - that would flag them as Legacy workbooks - and they cannot be
+        # changed from None to a non-Legacy build value
+        if build and workbook_model.build is not None:
+            workbook_model.build = build
+
         workbook_model.save()
         return workbook_model
 
     @classmethod
     def copy(cls, id, user):
         workbook_model = cls.objects.get(id=id)
-        workbook_copy  = cls.create(workbook_model.name + " copy", workbook_model.description, user)
+        workbook_copy  = cls.create(workbook_model.name + " copy", workbook_model.description, user, workbook_model.build)
 
         worksheets = workbook_model.get_worksheets()
         for worksheet in worksheets:
             copy = Worksheet.copy(id=worksheet.id)
-            copy.workbook = workbook_copy;
-            copy.save();
+            copy.workbook = workbook_copy
+            copy.save()
 
         return workbook_copy
 

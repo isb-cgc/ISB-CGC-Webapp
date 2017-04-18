@@ -337,6 +337,7 @@ def get_merged_feature_vectors(x_id, y_id, c_id, cohort_id_array, logTransform, 
         results['pairwise_result'] = [pairwise_result]
     return results
 
+
 def get_feature_id_validity_for_array(feature_id_array):
     """
     For each feature identifier in an array, check whether or not the identifier is

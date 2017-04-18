@@ -26,7 +26,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
 
     var PROG_CLIN_TREES = {
         'TCGA': {
-            project_disease_type: 'Disease Type',
+            disease_code: 'Disease Code',
             vital_status: 'Vital Status',
             sample_type: 'Sample Type',
             tumor_tissue_site: 'Tumor Tissue Site',
@@ -105,7 +105,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                 program_id = $('ul.nav-tabs-data li.active a').data('program-id');
             }
 
-            var clin_tree_attr = PROG_CLIN_TREES[$('#'+program_id+'-data-filter-panel').data('prog-displ-name')];
+            var clin_tree_attr = program_id <= 0 ? user_data_attr : PROG_CLIN_TREES[$('#'+program_id+'-data-filter-panel').data('prog-displ-name')];
 
             var context = this;
             var filters = {};
@@ -214,7 +214,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                         var clin_tree_attr_counts = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(attr_counts, clin_tree_attr) : attr_counts;
                         clin_tree_attr_counts.length > 0 && tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,'#tree-graph-clinical-'+active_program_id);
 
-                        if (results.hasOwnProperty('items')) {
+                        if (metadata_counts.hasOwnProperty('data_avail')) {
                             var features = [
                                 'cnvrPlatform',
                                 'DNAseq_data',
@@ -231,13 +231,13 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                                 context.get_readable_name(features[4]),
                                 context.get_readable_name(features[5])
                             ];
-                            for (var i = 0; i < results['items'].length; i++) {
+                            for (var i = 0; i < metadata_counts['data_avail'].length; i++) {
                                 var new_item = {};
                                 for (var j = 0; j < features.length; j++) {
-                                    var item = results['items'][i];
+                                    var item = metadata_counts['data_avail'][i];
                                     new_item[plot_features[j]] = context.get_readable_name(item[features[j]]);
                                 }
-                                results['items'][i] = new_item;
+                                metadata_counts['data_avail'][i] = new_item;
                             }
 
                             if(cohort_id) {
@@ -250,8 +250,6 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                     error: function(req,status,err){
                         $('#' + active_program_id + '-data-total-samples').html("Error");
                         $('#' + active_program_id + '-data-total-participants').html("Error");
-                        // $('#user-data-total-samples').html("Error");
-                        // $('#user-data-total-participants').html("Error");
                     },
                     complete: function(xhr,status) {
                         $('.clinical-trees .spinner').hide();
@@ -287,7 +285,6 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             return list;
         },
 
-        // TODO: We no longer use the endpoints for this; it can be simplified into just producing the filter set
         generate_metadata_url: function(base_url_domain, endpoint, filters, cohort_id, limit, version, program_id) {
             version = version || 'v1';
             var url = base_url_domain + '/cohorts/get_metadata_ajax/?version=' + version + '&endpoint=' + endpoint + '&program_id=' + program_id + '&';

@@ -181,6 +181,8 @@ def workbook(request, workbook_id=0):
         elif command == "edit":
             workbook_name = request.POST.get('name')
             workbook_desc = request.POST.get('description')
+            workbook_build = request.POST.get('build')
+
             whitelist = re.compile(WHITELIST_RE, re.UNICODE)
             match_name = whitelist.search(unicode(workbook_name))
             match_desc = whitelist.search(unicode(workbook_desc))
@@ -205,7 +207,7 @@ def workbook(request, workbook_id=0):
                 redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_id})
                 return redirect(redirect_url)
 
-            workbook_model = Workbook.edit(id=workbook_id, name=workbook_name, description=workbook_desc)
+            workbook_model = Workbook.edit(id=workbook_id, name=workbook_name, description=workbook_desc, build=workbook_build)
         elif command == "copy":
             workbook_model = Workbook.copy(id=workbook_id, user=request.user)
         elif command == "delete":

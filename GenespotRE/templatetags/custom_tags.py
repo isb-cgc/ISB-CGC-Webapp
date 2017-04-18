@@ -46,7 +46,10 @@ VALUE_SPECIFIC_ORDERS = {
 }
 
 ATTR_SPECIFIC_ORDERS = [
+    'program_name',
     'project_short_name',
+    'user_program',
+    'user_project',
     'disease_code',
     'sample_type',
     'tumor_type',
@@ -265,6 +268,10 @@ def get_named_item(list, value):
 @register.filter
 def get_sorted_items(attr_set):
     sorted_list = []
+
+    if type(attr_set) is list:
+        tmp_set = attr_set
+        attr_set = {x['name']: x for x in tmp_set}
 
     # First load in the ordered attributes, if they exist in the provided set
     for attr in ATTR_SPECIFIC_ORDERS:

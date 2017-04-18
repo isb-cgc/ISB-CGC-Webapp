@@ -91,8 +91,11 @@
             border: none
             background-color: #fff
             text-align: center
-            width: (100% / 4)
             font-size: 12.7px
+            &.program-tab
+                width: (100% / 4)
+            &.filter-tab
+                width: (100% / 3)
             &:first-child a
                 border-top-left-radius: 3px
             &:last-child a
@@ -103,9 +106,9 @@
                     margin: 0
         >li.active>a
             color: darken($isb-warning, 20%) !important
-        &-data, &-ud-filters
+        &-ud-filters
             li
-                //width: (100% / 2)
+                width: 100%
     .filter-panel
         .heading-note
             font-style: italic
@@ -114,8 +117,6 @@
             float: right
             display: block
             width: 50%
-        #paste-in-genes-tokenfield
-            width: 100% !important
         .tabpanel
             border-top-left-radius: 3px
             border-top-right-radius: 3px
@@ -162,15 +163,20 @@
                     padding: 0px 15px 0px 15px
             .panel-collapse
                 max-height: 100px
-            #sel-gene
+            .sel-gene
                 max-height: 300px
-                .tokenfield.form-control
-                    max-height: 49px
+                .tokenfield
+                    &.form-control
+                        max-height: 49px
+                    span
+                        input
+                            width: 100% !important
                 >.tokenfield
                     display: none
+
             .alert
                 margin: 10px 0px 10px 0px
-        #molecular-accordion
+        .molecular-accordion
             .list-item__heading
                 padding: 10px 0px 10px 0px
             .list-item
@@ -400,6 +406,9 @@
                 ul
                     list-style: none
                     padding-left: 10px
+        .platform-counts
+            input
+                margin-right: 5px
 
 
     .filelist-panel
@@ -408,8 +417,7 @@
 
         table
             table-layout: fixed
-            word-break: break-all
-            word-wrap: break-word
+            word-wrap: normal
             .col-barcode, .col-pipeline
                 width: 150px
             .col-datalevel

@@ -202,6 +202,7 @@ require([
             $('#download-link').attr('href', download_url + '?total=' + file_list_total)
         }
 
+        url += '&build='+$('#build :selected').val();
 
         $('#prev-page').addClass('disabled');
         $('#next-page').addClass('disabled');
@@ -209,12 +210,20 @@ require([
         $.ajax({
             url: url,
             success: function (data) {
-                var total_files = data['total_file_count'];
+                total_files = data['total_file_count'];
                 var total_pages = Math.ceil(total_files / 20);
                 $('.filelist-panel .panel-body .file-count').html(total_pages);
                 $('.filelist-panel .panel-body .page-num').html(page);
                 var files = data['file_list'];
                 $('.filelist-panel table tbody').empty();
+
+                if(files.length <= 0) {
+                    $('.filelist-panel table tbody').append(
+                        '<tr>' +
+                        '<td colspan="6"><i>No file listings found in this cohort for this build.</i></td><td></td>'
+                    );
+                }
+
                 for (var i = 0; i < files.length; i++) {
                     if (!('datatype' in files[i])) {
                         files[i]['datatype'] = '';
@@ -223,10 +232,10 @@ require([
                     var val = null;
                     var dataTypeName = '';
                     var label = '';
-                    var tokenLabel = files[i]['sample']+", "+files[i]['pipeline']+", "+happy_name(files[i]['platform'])+", "+files[i]['datatype'];
+                    var tokenLabel = files[i]['sample']+", "+files[i]['exp_strat']+", "+happy_name(files[i]['platform'])+", "+files[i]['datatype'];
                     var checkbox_inputs = '';
                     var disable = true;
-                    if (files[i]['access'] != 'dbGap controlled-access' || has_access == 'True') {
+                    if (files[i]['access'] != 'controlled' || has_access == 'True') {
                         disable = false;
                     }
 
@@ -245,14 +254,15 @@ require([
 
                     $('.filelist-panel table tbody').append(
                         '<tr>' +
+                        '<td>' + files[i]['program'] + '</td>' +
                         '<td>' + files[i]['sample'] + '</td>' +
-                        '<td>' + files[i]['pipeline'] + '</td>' +
+                        '<td>' + files[i]['exp_strat'] + '</td>' +
                         '<td>' + happy_name(files[i]['platform']) + '</td>' +
-                        '<td>' + files[i]['datalevel'] + '</td>' +
+                        '<td>' + files[i]['datacat'] + '</td>' +
                         '<td>' + files[i]['datatype'] + '</td>' +
                         '<td>' + files[i]['igv_viewer'] + '</td>' +
                         '</tr>'
-                    )
+                    );
 
                     // Remember any previous checks
                     var thisCheck = $('.filelist-panel input[value="'+val+'"');
@@ -304,6 +314,33 @@ require([
                     $('#next-page').addClass('disabled');
                 }
                 $('#content-panel .spinner i').addClass('hidden');
+
+
+                var build = $('#build :selected').val();
+                // Update the platform build set
+                if($('#platform-'+build).length <= 0) {
+                    // We need to make this selection set
+                    $('#platforms-panel').append(
+                        '<ul class="search-checkbox-list platform-counts" id="platform-'+build+'"></ul>'
+                    );
+
+                    if(Object.keys(data.platform_count_list).length <= 0) {
+                        $('#platform-'+build).append(
+                            '<i>No platforms available to list.</i>'
+                        );
+                    }
+                    for(var i in data.platform_count_list) {
+                        if(data.platform_count_list.hasOwnProperty(i)) {
+                            var platform = data.platform_count_list[i];
+                            $('#platform-'+build).append(
+                                '<li><input data-platform-count="'+platform['count']+'" type="checkbox" name="platform-selected" '+
+                                    'id="'+platform['platform']+'"><label for="'+platform['platform']+'">'+platform['platform']+'</label><span class="count">('+platform['count']+')</span></li>'
+                            );
+                        }
+                    }
+                }
+                $('.platform-counts').hide();
+                $('#platform-'+build).show();
             },
             error: function(e) {
                 console.log(e);
@@ -322,6 +359,10 @@ require([
     $('#prev-page').on('click', function () {
         page = page - 1;
         update_table();
+    });
+
+    $('#build').on('change',function(){
+       update_table();
     });
 
     $('#filter-panel input[type="checkbox"]').on('change', function() {
