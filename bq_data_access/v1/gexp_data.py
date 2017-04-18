@@ -19,12 +19,31 @@ limitations under the License.
 import logging
 from re import compile as re_compile
 
-from bq_data_access.feature_data_provider import FeatureDataProvider
-from bq_data_access.errors import FeatureNotFoundException
-from bq_data_access.feature_value_types import ValueType, DataTypes
-from bq_data_access.utils import DurationLogged
-from bq_data_access.data_types.gexp import BIGQUERY_CONFIG
-from scripts.feature_def_gen.gexp_features import GEXPFeatureDefConfig
+from bq_data_access.v1.feature_data_provider import FeatureDataProvider
+from bq_data_access.v1.errors import FeatureNotFoundException
+from bq_data_access.v1.feature_value_types import ValueType, DataTypes
+from bq_data_access.v1.utils import DurationLogged
+
+import sys
+
+TABLES = [
+    {
+        'table_id': 'mRNA_UNC_GA_RSEM',
+        'platform': 'Illumina GA',
+        'center': 'UNC',
+        'id': 'mrna_unc_illumina_ga',
+        'value_label': 'RSEM',
+        'value_field': 'normalized_count'
+    },
+    {
+        'table_id': 'mRNA_UNC_HiSeq_RSEM',
+        'platform': 'Illumina HiSeq',
+        'center': 'UNC',
+        'id': 'mrna_unc_illumina_hiseq',
+        'value_label': 'RSEM',
+        'value_field': 'normalized_count'
+    }
+]
 
 GEXP_FEATURE_TYPE = 'GEXP'
 
@@ -35,34 +54,15 @@ def get_feature_type():
     return GEXP_FEATURE_TYPE
 
 
-def get_table_info(table_id):
-    """
-    Find a GEXPTableConfig instance for
-
-    :param table_id: The table identifier from the feature definition.
-    :return:
-    """
-    config_instance = GEXPFeatureDefConfig.from_dict(BIGQUERY_CONFIG)
-    table_info = None
-
-    for table_config in config_instance.data_table_list:
-        if table_config.internal_table_id == table_id:
-            table_info = table_config
-
-    return table_info
-
-
 class GEXPFeatureDef(object):
     # Regular expression for parsing the feature definition.
     #
     # Example ID: GEXP:TP53:mrna_bcgsc_illumina_hiseq
-    config_instance = GEXPFeatureDefConfig.from_dict(BIGQUERY_CONFIG)
-
     regex = re_compile("^GEXP:"
                        # gene
                        "([a-zA-Z0-9\-]+):"
                        # table
-                       "(" + "|".join([table.internal_table_id for table in config_instance.data_table_list]) +
+                       "(" + "|".join([table['id'] for table in TABLES]) +
                        ")$")
 
     def __init__(self, gene, value_field, table_id):
@@ -71,17 +71,28 @@ class GEXPFeatureDef(object):
         self.table_id = table_id
 
     @classmethod
+    def get_table_info(cls, table_id):
+        table_info = None
+        for table_entry in TABLES:
+            if table_id == table_entry['id']:
+                table_info = table_entry
+
+        return table_info
+
+    @classmethod
     def from_feature_id(cls, feature_id):
         feature_fields = cls.regex.findall(feature_id)
         if len(feature_fields) == 0:
             raise FeatureNotFoundException(feature_id)
 
         gene_label, table_id = feature_fields[0]
-        value_field = get_table_info(table_id).value_field
+        value_field = cls.get_table_info(table_id)['value_field']
         return cls(gene_label, value_field, table_id)
 
 
 class GEXPFeatureProvider(FeatureDataProvider):
+    TABLES = TABLES
+
     def __init__(self, feature_id, **kwargs):
         self.feature_def = None
         self.table_name = ''
@@ -152,11 +163,20 @@ class GEXPFeatureProvider(FeatureDataProvider):
 
         return result
 
+    # TODO refactor, duplicate code shared with GEXPFeatureDef
+    def get_table_info(self, table_id):
+        table_info = None
+        for table_entry in self.TABLES:
+            if table_id == table_entry['id']:
+                table_info = table_entry
+
+        return table_info
+
     def parse_internal_feature_id(self, feature_id):
         self.feature_def = GEXPFeatureDef.from_feature_id(feature_id)
 
-        table_info = get_table_info(self.feature_def.table_id)
-        self.table_name = table_info.table_name
+        table_info = self.get_table_info(self.feature_def.table_id)
+        self.table_name = table_info['table_id']
 
     @classmethod
     def is_valid_feature_id(cls, feature_id):

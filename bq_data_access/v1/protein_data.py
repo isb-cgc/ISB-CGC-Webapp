@@ -21,12 +21,10 @@ from re import compile as re_compile
 
 from django.conf import settings
 
-from bq_data_access.errors import FeatureNotFoundException
-from bq_data_access.feature_value_types import ValueType, DataTypes
-from bq_data_access.feature_data_provider import FeatureDataProvider
-from bq_data_access.utils import DurationLogged
-from bq_data_access.data_types.rppa import BIGQUERY_CONFIG
-from scripts.feature_def_gen.protein_features import RPPAFeatureDefConfig
+from bq_data_access.v1.errors import FeatureNotFoundException
+from bq_data_access.v1.feature_value_types import ValueType, DataTypes
+from bq_data_access.v1.feature_data_provider import FeatureDataProvider
+from bq_data_access.v1.utils import DurationLogged
 
 RPPA_FEATURE_TYPE = 'RPPA'
 
@@ -60,11 +58,18 @@ class RPPAFeatureDef(object):
 
 
 class RPPAFeatureProvider(FeatureDataProvider):
+    TABLES = [
+        {
+            'name': 'Protein_RPPA_data',
+            'info': 'Protein',
+            'id': 'protein'
+        }
+    ]
+
     def __init__(self, feature_id, **kwargs):
         self.feature_def = None
         self.table_info = None
         self.table_name = ''
-        self.config_instance = RPPAFeatureDefConfig.from_dict(BIGQUERY_CONFIG)
         self.parse_internal_feature_id(feature_id)
         super(RPPAFeatureProvider, self).__init__(**kwargs)
 
@@ -147,7 +152,7 @@ class RPPAFeatureProvider(FeatureDataProvider):
 
     def parse_internal_feature_id(self, feature_id):
         self.feature_def = RPPAFeatureDef.from_feature_id(feature_id)
-        self.table_name = self.config_instance.rppa_table_name
+        self.table_name = self.TABLES[0]['name']
 
     @classmethod
     def is_valid_feature_id(cls, feature_id):

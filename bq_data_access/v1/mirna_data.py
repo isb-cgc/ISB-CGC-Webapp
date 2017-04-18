@@ -1,6 +1,6 @@
 """
 
-Copyright 2017, Institute for Systems Biology
+Copyright 2015, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,13 +19,36 @@ limitations under the License.
 import logging
 from re import compile as re_compile
 
-from bq_data_access.errors import FeatureNotFoundException
-from bq_data_access.feature_value_types import ValueType, DataTypes
-from bq_data_access.feature_data_provider import FeatureDataProvider
-from bq_data_access.utils import DurationLogged
-from bq_data_access.data_types.mirna import BIGQUERY_CONFIG
-from scripts.feature_def_gen.mirna_features import MIRNFeatureDefConfig
+from bq_data_access.v1.errors import FeatureNotFoundException
+from bq_data_access.v1.feature_value_types import ValueType, DataTypes
+from bq_data_access.v1.feature_data_provider import FeatureDataProvider
+from bq_data_access.v1.utils import DurationLogged
 
+TABLES = [
+    {
+        'name': 'miRNA_BCGSC_GA_mirna',
+        'info': 'miRNA (GA, BCGSC RPM)',
+        'platform': 'IlluminaGA',
+        'feature_id': 'mirna_illumina_ga_rpm',
+        'value_field': 'reads_per_million_miRNA_mapped'
+    },
+    {
+        'name': 'miRNA_BCGSC_HiSeq_mirna',
+        'info': 'miRNA (HiSeq, BCGSC RPM)',
+        'platform': 'IlluminaHiSeq',
+        'feature_id': 'mirna_illumina_hiseq_rpm',
+        'value_field': 'reads_per_million_miRNA_mapped'
+    },
+    {
+        'name': 'miRNA_Expression',
+        'platform': 'both',
+        'info': 'miRNA',
+        'feature_id': 'expression',
+        'value_field': 'normalized_count'
+    }
+]
+
+TABLE_IDX_MIRNA_EXPRESSION = 2
 
 VALUE_READS_PER_MILLION = 'RPM'
 VALUE_NORMALIZED_COUNT = 'normalized_count'
@@ -39,24 +62,17 @@ def get_feature_type():
 
 
 def get_mirna_expression_table_info():
-    config_instance = MIRNFeatureDefConfig.from_dict(BIGQUERY_CONFIG)
+    return TABLES[TABLE_IDX_MIRNA_EXPRESSION]
+
+
+def get_table_info(platform, value):
     table_info = None
-
-    for table_config in config_instance.data_table_list:
-        if table_config.expression_table:
-            table_info = table_config
-
-    return table_info
-
-
-def get_table_info(table_id):
-    config_instance = MIRNFeatureDefConfig.from_dict(BIGQUERY_CONFIG)
-    table_info = None
-
-    for table_config in config_instance.data_table_list:
-        if table_config.internal_table_id == table_id:
-            table_info = table_config
-
+    if value == VALUE_NORMALIZED_COUNT:
+        table_info = get_mirna_expression_table_info()
+    else:
+        for table_entry in TABLES:
+            if platform == table_entry['platform']:
+                table_info = table_entry
     return table_info
 
 
@@ -64,12 +80,11 @@ class MIRNFeatureDef(object):
     # Regular expression for parsing the feature definition.
     #
     # Example ID: MIRN:hsa-mir-1244-1:mirna_illumina_ga_rpm
-    config_instance = MIRNFeatureDefConfig.from_dict(BIGQUERY_CONFIG)
     regex = re_compile("^MIRN:"
                        # mirna name
                        "([a-zA-Z0-9._\-]+):"
                        # table
-                       "(" + "|".join([table.internal_table_id for table in config_instance.data_table_list]) +
+                       "(" + "|".join([table['feature_id'] for table in TABLES]) +
                        ")$")
 
     def __init__(self, mirna_name, platform, value_field, table_id):
@@ -79,20 +94,31 @@ class MIRNFeatureDef(object):
         self.table_id = table_id
 
     @classmethod
+    def get_table_info(cls, table_id):
+        table_info = None
+        for table_entry in TABLES:
+            if table_id == table_entry['feature_id']:
+                table_info = table_entry
+
+        return table_info
+
+    @classmethod
     def from_feature_id(cls, feature_id):
         feature_fields = cls.regex.findall(feature_id)
         if len(feature_fields) == 0:
             raise FeatureNotFoundException(feature_id)
 
         mirna_name, table_id = feature_fields[0]
-        table_info = get_table_info(table_id)
-        platform = table_info.platform
-        value_field = table_info.value_field
+        table_info = cls.get_table_info(table_id)
+        platform = table_info['platform']
+        value_field = table_info['value_field']
 
         return cls(mirna_name, platform, value_field, table_id)
 
 
 class MIRNFeatureProvider(FeatureDataProvider):
+    TABLES = TABLES
+
     def __init__(self, feature_id, **kwargs):
         self.feature_def = None
         self.table_info = None
@@ -122,9 +148,7 @@ class MIRNFeatureProvider(FeatureDataProvider):
              "FROM [{project_name}:{dataset_name}.{table_name}] "
              "WHERE {mirna_name_field}='{mirna_name}' ")
 
-        # TODO If no expression table is configured, table_name will be assigned
-        # None.
-        if table_name == get_mirna_expression_table_info().table_name:
+        if table_name == get_mirna_expression_table_info()['name']:
             mirna_name_field = 'mirna_id'
             query_template += " AND Platform='{platform}' "
         else:
@@ -177,9 +201,17 @@ class MIRNFeatureProvider(FeatureDataProvider):
 
         return result
 
+    def get_table_info(self, table_id):
+        table_info = None
+        for table_entry in self.TABLES:
+            if table_id == table_entry['feature_id']:
+                table_info = table_entry
+
+        return table_info
+
     def parse_internal_feature_id(self, feature_id):
         self.feature_def = MIRNFeatureDef.from_feature_id(feature_id)
-        self.table_info = get_table_info(self.feature_def.table_id)
+        self.table_info = self.get_table_info(self.feature_def.table_id)
         self.table_name = self.table_info['name']
 
     @classmethod
