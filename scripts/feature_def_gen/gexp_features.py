@@ -32,11 +32,11 @@ class GEXPTableConfig(object):
         table_name: Full BigQuery table identifier - project-name:dataset_name.table_name 
     
     """
-    def __init__(self, table_id, platform_version, platform, gene_label_field, generating_center, value_label, value_field,
+    def __init__(self, table_id, genomic_build, platform, gene_label_field, generating_center, value_label, value_field,
                  internal_table_id, program):
         self.table_id = table_id
         self.platform = platform
-        self.platform_version = platform_version
+        self.genomic_build = genomic_build
         self.gene_label_field = gene_label_field
         self.generating_center = generating_center
         self.value_label = value_label
@@ -47,7 +47,7 @@ class GEXPTableConfig(object):
     @classmethod
     def from_dict(cls, param):
         table_id = param['table_id']
-        platform_version = param['platform_version']
+        genomic_build = param['genomic_build']
         platform = param['platform']
         gene_label_field = param['gene_label_field']
         generating_center = param['generating_center']
@@ -56,7 +56,7 @@ class GEXPTableConfig(object):
         internal_table_id = param['internal_table_id']
         program = param['program']
 
-        return cls(table_id, platform_version, platform, gene_label_field, generating_center, value_label, value_field,
+        return cls(table_id, genomic_build, platform, gene_label_field, generating_center, value_label, value_field,
                    internal_table_id, program)
 
 
@@ -64,17 +64,17 @@ class GEXPFeatureDefConfig(object):
     """
     Configuration class for GEXP feature definitions.
     """
-    def __init__(self, reference, supported_platform_versions, tables_array):
+    def __init__(self, reference, supported_genomic_builds, tables_array):
         self.reference_config = reference
-        self.supported_platform_versions = supported_platform_versions
+        self.supported_genomic_builds = supported_genomic_builds
         self.data_table_list = tables_array
 
     @classmethod
     def from_dict(cls, param):
         reference_config = DataSetConfig.from_dict(param['reference_config'])
-        supported_platform_versions = param['supported_platform_versions']
+        supported_genomic_builds = param['supported_genomic_builds']
         data_table_list = [GEXPTableConfig.from_dict(item) for item in param['tables']]
 
-        return cls(reference_config, supported_platform_versions, data_table_list)
+        return cls(reference_config, supported_genomic_builds, data_table_list)
 
 

@@ -3,11 +3,11 @@ BIGQUERY_CONFIG = {
         "project_name": "isb-cgc",
         "dataset_name": "platform_reference"
     },
-    "supported_platform_versions": ['hg19', 'hg38'],
+    "supported_genomic_builds": ['hg19', 'hg38'],
     "tables": [
         {
             "table_id": "isb-cgc:TCGA_hg19_data_v0.RNAseq_Gene_Expression_UNC_RSEM",
-            "platform_version": "hg19",
+            "genomic_build": "hg19",
             "platform": "Illumina HiSeq",
             "gene_label_field": "HGNC_gene_symbol",
             "generating_center": "UNC",
@@ -18,7 +18,7 @@ BIGQUERY_CONFIG = {
         },
         {
             "table_id": "isb-cgc:TCGA_hg38_data_v0.RNAseq_Gene_Expression",
-            "platform_version": "hg38",
+            "genomic_build": "hg38",
             "platform": "Illumina HiSeq",
             "gene_label_field": "gene_name",
             "generating_center": "UNC",
@@ -29,7 +29,7 @@ BIGQUERY_CONFIG = {
         },
         {
             "table_id": "isb-cgc:TARGET_hg38_data_v0.RNAseq_Gene_Expression",
-            "platform_version": "hg38",
+            "genomic_build": "hg38",
             "platform": "Illumina HiSeq",
             "gene_label_field": "gene_name",
             "generating_center": "TARGET",

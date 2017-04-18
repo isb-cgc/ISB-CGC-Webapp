@@ -25,6 +25,10 @@ MYSQL_SCHEMA = [
         'name': 'program_name',
         'type': 'string'
     },
+    {
+        'name': 'genomic_build',
+        'type': 'string'
+    },
 ]
 
 
@@ -114,6 +118,7 @@ class GEXPFeatureDefProvider(FeatureDefBigqueryProvider):
                 'gene_name': gene,
                 'generating_center': table_config.generating_center,
                 'platform': table_config.platform,
+                'genomic_build': table_config.genomic_build,
                 'value_label': table_config.value_label,
                 'program_name': table_config.program,
                 'internal_feature_id': self.build_internal_feature_id(feature_type, gene, table_config.internal_table_id)
