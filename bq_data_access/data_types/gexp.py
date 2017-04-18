@@ -9,12 +9,12 @@ BIGQUERY_CONFIG = {
             "table_id": "isb-cgc:TCGA_hg19_data_v0.RNAseq_Gene_Expression_UNC_RSEM",
             "platform_version": "hg19",
             "platform": "Illumina HiSeq",
-            "gene_label_field": "gene_name",
+            "gene_label_field": "HGNC_gene_symbol",
             "generating_center": "UNC",
             "internal_table_id": "rnaseq_unc_rsem",
             "value_label": "RSEM",
             "value_field": "normalized_count",
-            "project": "tcga"
+            "program": "tcga"
         },
         {
             "table_id": "isb-cgc:TCGA_hg38_data_v0.RNAseq_Gene_Expression",
@@ -25,7 +25,7 @@ BIGQUERY_CONFIG = {
             "internal_table_id": "rnaseq",
             "value_label": "RSEM",
             "value_field": "normalized_count",
-            "project": "tcga"
+            "program": "tcga"
         },
         {
             "table_id": "isb-cgc:TARGET_hg38_data_v0.RNAseq_Gene_Expression",
@@ -36,7 +36,7 @@ BIGQUERY_CONFIG = {
             "internal_table_id": "rnaseq",
             "value_label": "RSEM",
             "value_field": "normalized_count",
-            "project": "target"
+            "program": "target"
         }
     ]
 }

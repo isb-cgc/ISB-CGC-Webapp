@@ -24,12 +24,9 @@ from os.path import join as path_join
 
 import click
 
-from gexp_features import GEXPFeatureDefConfig, GEXPFeatureDefProvider
-from gnab_features import GNABFeatureDefConfig, GNABFeatureDefProvider
-from protein_features import RPPAFeatureDefConfig, RPPAFeatureDefProvider
-from methylation_features import METHFeatureDefConfig, METHFeatureDefProvider
-from copynumber_features import CNVFeatureDefConfig, CNVFeatureDefProvider
-from mirna_features import MIRNFeatureDefConfig, MIRNFeatureDefProvider
+from gexp_features import GEXPFeatureDefConfig
+from gexp_data.gexp_feature_def_provider import GEXPFeatureDefProvider
+from bq_data_access.data_types.gexp import BIGQUERY_CONFIG as GEXP_BIGQUERY_CONFIG
 
 from scripts.feature_def_gen.feature_def_utils import load_config_json
 
@@ -37,14 +34,8 @@ from scripts.feature_def_gen.feature_def_utils import load_config_json
 logging.basicConfig(level=logging.INFO)
 
 data_type_registry = {
-    'gexp': (GEXPFeatureDefConfig, GEXPFeatureDefProvider),
-    'gnab': (GNABFeatureDefConfig, GNABFeatureDefProvider),
-    'rppa': (RPPAFeatureDefConfig, RPPAFeatureDefProvider),
-    'meth': (METHFeatureDefConfig, METHFeatureDefProvider),
-    'cnv': (CNVFeatureDefConfig, CNVFeatureDefProvider),
-    'mirn': (MIRNFeatureDefConfig, MIRNFeatureDefProvider)
+    'gexp': (GEXPFeatureDefConfig, GEXPFeatureDefProvider)
 }
-
 
 
 def run_query(project_id, provider, config):
@@ -95,28 +86,34 @@ def save_csv(data_rows, schema, csv_path, include_header=False):
 
 @click.command()
 @click.argument('data_type', type=str)
-@click.argument('config_json', type=click.Path(exists=True))
+@click.option('--config_json', type=str)
 def print_query(data_type, config_json):
-    config = load_config_from_path(data_type, config_json)
+    if config_json is not None:
+        config_instance = load_config_from_path(data_type, config_json)
+    else:
+        config_instance = GEXPFeatureDefConfig.from_dict(GEXP_BIGQUERY_CONFIG)
+
     _, provider_class = data_type_registry[data_type]
-    provider = provider_class(config)
-    query = provider.build_query(config)
+    provider = provider_class(config_instance)
+    query = provider.build_query(config_instance)
     print(query)
 
 
 @click.command()
 @click.argument('project_id', type=click.INT)
 @click.argument('data_type', type=str)
-@click.argument('base_dir', type=click.Path(exists=True))
-@click.argument('csv_path', type=click.Path())
-@click.argument('config_json', type=click.Path(exists=True))
-def run(project_id, data_type, base_dir, config_json):
+@click.argument('csv_path', type=str)
+@click.option('--config_json', type=str)
+def run(project_id, data_type, csv_path, config_json):
     _, provider_class = data_type_registry[data_type]
-    config = load_config_from_path(data_type, config_json)
-    provider = provider_class(config)
+    if config_json is not None:
+        config_instance = load_config_from_path(data_type, config_json)
+    else:
+        config_instance = GEXPFeatureDefConfig.from_dict(GEXP_BIGQUERY_CONFIG)
+    provider = provider_class(config_instance)
 
     logging.info("Output CSV: {}".format(csv_path))
-    result = run_query(project_id, provider, config)
+    result = run_query(project_id, provider, config_instance)
     save_csv(result, provider.get_mysql_schema(), csv_path, include_header=True)
 
 

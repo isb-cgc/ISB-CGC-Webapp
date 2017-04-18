@@ -33,7 +33,7 @@ class GEXPTableConfig(object):
     
     """
     def __init__(self, table_id, platform_version, platform, gene_label_field, generating_center, value_label, value_field,
-                 internal_table_id, project):
+                 internal_table_id, program):
         self.table_id = table_id
         self.platform = platform
         self.platform_version = platform_version
@@ -42,7 +42,7 @@ class GEXPTableConfig(object):
         self.value_label = value_label
         self.value_field = value_field
         self.internal_table_id = internal_table_id
-        self.project = project
+        self.program = program
 
     @classmethod
     def from_dict(cls, param):
@@ -54,10 +54,10 @@ class GEXPTableConfig(object):
         value_label = param['value_label']
         value_field = param['value_field']
         internal_table_id = param['internal_table_id']
-        project = param['project']
+        program = param['program']
 
         return cls(table_id, platform_version, platform, gene_label_field, generating_center, value_label, value_field,
-                   internal_table_id, project)
+                   internal_table_id, program)
 
 
 class GEXPFeatureDefConfig(object):
