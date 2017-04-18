@@ -26,7 +26,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
 
     var PROG_CLIN_TREES = {
         'TCGA': {
-            project_disease_type: 'Disease Type',
+            disease_code: 'Disease Code',
             vital_status: 'Vital Status',
             sample_type: 'Sample Type',
             tumor_tissue_site: 'Tumor Tissue Site',
@@ -285,7 +285,6 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             return list;
         },
 
-        // TODO: We no longer use the endpoints for this; it can be simplified into just producing the filter set
         generate_metadata_url: function(base_url_domain, endpoint, filters, cohort_id, limit, version, program_id) {
             version = version || 'v1';
             var url = base_url_domain + '/cohorts/get_metadata_ajax/?version=' + version + '&endpoint=' + endpoint + '&program_id=' + program_id + '&';
