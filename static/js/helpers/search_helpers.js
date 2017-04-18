@@ -285,7 +285,6 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             return list;
         },
 
-        // TODO: We no longer use the endpoints for this; it can be simplified into just producing the filter set
         generate_metadata_url: function(base_url_domain, endpoint, filters, cohort_id, limit, version, program_id) {
             version = version || 'v1';
             var url = base_url_domain + '/cohorts/get_metadata_ajax/?version=' + version + '&endpoint=' + endpoint + '&program_id=' + program_id + '&';

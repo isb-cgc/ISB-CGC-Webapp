@@ -212,7 +212,7 @@ def create_programs_and_projects(debug):
             is_update = len(results) > 0
 
             values = (prog + '_metadata_samples', prog + '_metadata_attrs',
-                prog + '_metadata_data_availability', prog + '_metadata_data_type_availability',
+                prog + '_metadata_sample_data_availability', prog + '_metadata_data_type_availability',
                 prog + '_metadata_clinical', prog + '_metadata_biospecimen', data_tables,)
 
             if annot_tables:

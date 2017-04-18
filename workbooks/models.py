@@ -73,8 +73,8 @@ class Workbook(models.Model):
         worksheets = workbook_model.get_worksheets()
         for worksheet in worksheets:
             copy = Worksheet.copy(id=worksheet.id)
-            copy.workbook = workbook_copy;
-            copy.save();
+            copy.workbook = workbook_copy
+            copy.save()
 
         return workbook_copy
 
