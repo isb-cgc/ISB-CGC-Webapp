@@ -19,10 +19,10 @@ limitations under the License.
 import logging
 from re import compile as re_compile
 
-from bq_data_access.errors import FeatureNotFoundException
-from bq_data_access.feature_value_types import ValueType, DataTypes
-from bq_data_access.feature_data_provider import FeatureDataProvider
-from bq_data_access.utils import DurationLogged
+from bq_data_access.v2.errors import FeatureNotFoundException
+from bq_data_access.v2.feature_value_types import ValueType, DataTypes
+from bq_data_access.v2.feature_data_provider import FeatureDataProvider
+from bq_data_access.v2.utils import DurationLogged
 from bq_data_access.data_types.gnab import BIGQUERY_CONFIG
 from scripts.feature_def_gen.gnab_features import GNABFeatureDefConfig
 

@@ -74,13 +74,13 @@ class GEXPFeatureDef(object):
     regex = re_compile("^v2:GEXP:"
                        # gene
                        "([a-zA-Z0-9\-]+):"
-                       # platform_version 
-                       "mrna_(" + "|".join([version for version in config_instance.supported_platform_versions]) +
+                       # genomic_build 
+                       "mrna_(" + "|".join([version for version in config_instance.supported_genomic_builds]) +
                        ")$")
 
-    def __init__(self, gene, platform_version):
+    def __init__(self, gene, genomic_build):
         self.gene = gene
-        self.platform_version = platform_version
+        self.genomic_build = genomic_build
 
     @classmethod
     def from_feature_id(cls, feature_id):
@@ -88,8 +88,8 @@ class GEXPFeatureDef(object):
         if len(feature_fields) == 0:
             raise FeatureNotFoundException(feature_id)
 
-        gene_label, platform_version = feature_fields[0]
-        return cls(gene_label, platform_version)
+        gene_label, genomic_build = feature_fields[0]
+        return cls(gene_label, genomic_build)
 
 
 class GEXPFeatureProvider(object):
@@ -142,7 +142,7 @@ class GEXPFeatureProvider(object):
         found_tables = []
 
         for table in config_instance.data_table_list:
-            if (table.project in project_set) and (table.platform_version == self.feature_def.platform_version):
+            if (table.program in project_set) and (table.genomic_build == self.feature_def.genomic_build):
                 logger.info("Found matching table: '{}'".format(table.table_id))
                 found_tables.append(table)
 

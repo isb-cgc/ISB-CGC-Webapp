@@ -21,10 +21,10 @@ BIGQUERY_CONFIG = {
             "genomic_build": "hg38",
             "platform": "Illumina HiSeq",
             "gene_label_field": "gene_name",
-            "generating_center": "UNC",
+            "generating_center": "GDC",
             "internal_table_id": "rnaseq",
-            "value_label": "RSEM",
-            "value_field": "normalized_count",
+            "value_label": "HTSeq counts",
+            "value_field": "HTSeq__Counts",
             "program": "tcga"
         },
         {
@@ -32,10 +32,10 @@ BIGQUERY_CONFIG = {
             "genomic_build": "hg38",
             "platform": "Illumina HiSeq",
             "gene_label_field": "gene_name",
-            "generating_center": "TARGET",
+            "generating_center": "GDC",
             "internal_table_id": "rnaseq",
-            "value_label": "RSEM",
-            "value_field": "normalized_count",
+            "value_label": "HTSeq counts",
+            "value_field": "HTSeq__Counts",
             "program": "target"
         }
     ]
