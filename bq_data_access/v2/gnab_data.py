@@ -21,7 +21,6 @@ from re import compile as re_compile
 
 from bq_data_access.v2.errors import FeatureNotFoundException
 from bq_data_access.v2.feature_value_types import ValueType, DataTypes
-from bq_data_access.v2.feature_data_provider import FeatureDataProvider
 from bq_data_access.v2.utils import DurationLogged
 from bq_data_access.data_types.gnab import BIGQUERY_CONFIG
 from scripts.feature_def_gen.gnab_features import GNABFeatureDefConfig
@@ -36,22 +35,27 @@ def get_feature_type():
 
 class GNABFeatureDef(object):
     VALUE_FIELD_NUM_MUTATIONS = 'num_mutations'
+    config_instance = GNABFeatureDefConfig.from_dict(BIGQUERY_CONFIG)
 
     # Regular expression for parsing the feature definition.
     #
-    # Example ID: GNAB:SMYD3:sequence_source
-    regex = re_compile("^GNAB:"
+    # Example ID: v2:GNAB:SMYD3:hg19_mc3:Variant_Classification
+    regex = re_compile("^v2:GNAB:"
                        # gene
                        "([a-zA-Z0-9_.\-]+):"
+                       "(" + "|".join([table.internal_table_id for table in config_instance.data_table_list]) + "):"
                        # value field
-                       "(variant_classification|"
-                       "variant_type|"
-                       "sequence_source|"
-                       "{})$".format(VALUE_FIELD_NUM_MUTATIONS))
+                       "(Variant_Classification|Variant_Type|{})$".format(VALUE_FIELD_NUM_MUTATIONS))
 
-    def __init__(self, gene, value_field):
+    def __init__(self, gene, internal_table_id, value_field):
         self.gene = gene
+        self.internal_table_id = internal_table_id
         self.value_field = value_field
+
+    def get_table_configuration(self):
+        for table_config in self.config_instance.data_table_list:
+            if table_config.internal_table_id == self.internal_table_id:
+                return table_config
 
     @classmethod
     def from_feature_id(cls, feature_id):
@@ -59,19 +63,18 @@ class GNABFeatureDef(object):
         if len(feature_fields) == 0:
             raise FeatureNotFoundException(feature_id)
 
-        gene_label, value_field = feature_fields[0]
+        gene_label, internal_table_id, value_field = feature_fields[0]
 
-        return cls(gene_label, value_field)
+        return cls(gene_label, internal_table_id, value_field)
 
 
-class GNABFeatureProvider(FeatureDataProvider):
+class GNABFeatureProvider(object):
     def __init__(self, feature_id, **kwargs):
         self.feature_def = None
         self.table_info = None
         self.table_name = ''
         self.parse_internal_feature_id(feature_id)
         self.config_instance = GNABFeatureDefConfig.from_dict(BIGQUERY_CONFIG)
-        super(GNABFeatureProvider, self).__init__(**kwargs)
 
     def get_value_type(self):
         if self.feature_def.value_field == self.VALUE_FIELD_NUM_MUTATIONS:
@@ -86,38 +89,47 @@ class GNABFeatureProvider(FeatureDataProvider):
     def process_data_point(cls, data_point):
         return data_point['value']
 
-    def build_query(self, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array, project_id_array):
+    def build_query_for_program(self, feature_def, cohort_table, cohort_id_array, project_id_array):
         # Generate the 'IN' statement string: (%s, %s, ..., %s)
         cohort_id_stmt = ', '.join([str(cohort_id) for cohort_id in cohort_id_array])
         project_id_stmt = ''
         if project_id_array is not None:
             project_id_stmt = ', '.join([str(project_id) for project_id in project_id_array])
 
-        query_template = "SELECT ParticipantBarcode, Tumor_SampleBarcode, Tumor_AliquotBarcode, " \
-             "{value_field} AS value " \
-             "FROM [{project_name}:{dataset_name}.{table_name}] " \
-             "WHERE Hugo_Symbol='{gene}' " \
-             "AND Tumor_SampleBarcode IN ( " \
-             "    SELECT sample_barcode " \
-             "    FROM [{project_name}:{cohort_dataset}.{cohort_table}] " \
-             "    WHERE cohort_id IN ({cohort_id_list})" \
-             "         AND (project_id IS NULL"
+        query_template = "SELECT case_barcode, sample_barcode_tumor, aliquot_barcode_tumor, " \
+             "{value_field} AS value {brk}" \
+             "FROM [{table_name}] AS gnab {brk}" \
+             "WHERE {gene_label_field}='{gene_symbol}' {brk}" \
+             "AND sample_barcode_tumor IN ( {brk}" \
+             "    SELECT sample_barcode {brk}" \
+             "    FROM [{cohort_dataset_and_table}] {brk}" \
+             "    WHERE cohort_id IN ({cohort_id_list}) {brk}" \
+             "         AND (project_id IS NULL {brk}"
 
-        query_template += (" OR project_id IN ({project_id_list})))" if project_id_array is not None else "))")
+        query_template += (" OR project_id IN ({project_id_list}))) {brk}" if project_id_array is not None else ")) {brk}")
 
         value_field_bqsql = self.feature_def.value_field
 
         if self.feature_def.value_field == GNABFeatureDef.VALUE_FIELD_NUM_MUTATIONS:
             value_field_bqsql = 'count(*)'
-            query_template += ("GROUP BY ParticipantBarcode, Tumor_SampleBarcode, Tumor_AliquotBarcode, "
-                               "Normal_SampleBarcode, Normal_AliquotBarcode")
+            query_template += ("GROUP BY case_barcode, sample_barcode_tumor, aliquot_barcode_tumor {brk}")
 
-        query = query_template.format(dataset_name=dataset_name, project_name=project_name, table_name=table_name,
-                                      gene=feature_def.gene, value_field=value_field_bqsql,
-                                      cohort_dataset=cohort_dataset, cohort_table=cohort_table,
-                                      cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt)
+        table_config = feature_def.get_table_configuration()
+
+        query = query_template.format(table_name=table_config.table_id,
+                                      gene_label_field=table_config.gene_label_field,
+                                      gene_symbol=feature_def.gene,
+                                      value_field=value_field_bqsql,
+                                      cohort_dataset_and_table=cohort_table,
+                                      cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt,
+                                      brk='\n')
+
 
         logging.debug("BQ_QUERY_GNAB: " + query)
+        return query
+
+    def build_query(self, project_set, cohort_table, cohort_id_array, project_id_array):
+        query = self.build_query_for_program(self.feature_def, cohort_table, cohort_id_array, project_id_array)
         return query
 
     @DurationLogged('GNAB', 'UNPACK')
@@ -150,7 +162,6 @@ class GNABFeatureProvider(FeatureDataProvider):
 
     def parse_internal_feature_id(self, feature_id):
         self.feature_def = GNABFeatureDef.from_feature_id(feature_id)
-        self.table_name = self.config_instance.maf_table_name
 
     @classmethod
     def is_valid_feature_id(cls, feature_id):

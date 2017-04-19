@@ -20,7 +20,18 @@ from re import compile as re_compile
 import logging as logger
 
 from bq_data_access.v2.errors import FeatureNotFoundException
-from bq_data_access.v2.gexp_data import GEXPFeatureProvider, GEXP_FEATURE_TYPE
+
+# Import all supported datatypes
+# ==============================
+from bq_data_access.data_types.definitions import PlottableDataType, FEATURE_ID_TO_TYPE_MAP
+from bq_data_access.v2.gexp_data import GEXPFeatureProvider
+from bq_data_access.v2.gnab_data import GNABFeatureProvider
+
+
+FEATURE_TYPE_TO_PROVIDER_MAP = {
+    PlottableDataType.GEXP: GEXPFeatureProvider,
+    PlottableDataType.GNAB: GNABFeatureProvider
+}
 
 
 class FeatureIdQueryDescription(object):
@@ -41,7 +52,10 @@ class ProviderClassQueryDescription(object):
 class FeatureProviderFactory(object):
     @classmethod
     def get_feature_type_string(cls, feature_id):
-        regex = re_compile("^v2:(CLIN|GEXP|METH|CNVR|RPPA|MIRN|GNAB|USER):")
+        # Build a regexp set of supported feature types, for example:
+        # "CLIN|GEXP|METH".
+        supported_feature_types = "|".join(FEATURE_ID_TO_TYPE_MAP.keys())
+        regex = re_compile("^v2:({}):".format(supported_feature_types))
 
         feature_fields = regex.findall(feature_id)
         if len(feature_fields) == 0:
@@ -65,13 +79,17 @@ class FeatureProviderFactory(object):
             identifier is unknown.
 
         """
-        feature_type = cls.get_feature_type_string(feature_id)
-        if feature_type is None:
-            logger.debug("FeatureProviderFactory.from_feature_id: invalid feature ID: " + str(feature_id))
+        feature_type_prefix = cls.get_feature_type_string(feature_id)
+        if feature_type_prefix is None:
+            logger.error("FeatureProviderFactory.from_feature_id: invalid feature ID: " + str(feature_id))
             raise FeatureNotFoundException(feature_id)
 
-        if feature_type == GEXP_FEATURE_TYPE:
-            return GEXPFeatureProvider
+        if feature_type_prefix not in FEATURE_ID_TO_TYPE_MAP:
+            logger.error("FeatureProviderFactory.from_feature_id: invalid feature ID: " + str(feature_id))
+            raise FeatureNotFoundException(feature_id)
+
+        feature_type = FEATURE_ID_TO_TYPE_MAP[feature_type_prefix]
+        return FEATURE_TYPE_TO_PROVIDER_MAP[feature_type]
 
     @classmethod
     def from_feature_id(cls, feature_id, **kwargs):

@@ -1,7 +1,12 @@
 BIGQUERY_CONFIG = {
-    "target_config": {
-        "project_name": "isb-cgc",
-        "dataset_name": "2016_07_09_tcga_data_open"
-    },
-    "maf_table_name": "Somatic_Mutation_calls"
+    "supported_genomic_builds": ['hg19'],
+    "tables": [
+        {
+            "genomic_build": "hg19",
+            "table_id": "isb-cgc:TCGA_hg19_data_v0:Somatic_Mutation_MC3",
+            "gene_label_field": "Hugo_Symbol",
+            "internal_table_id": "hg19_mc3",
+            "program": "tcga"
+        }
+    ]
 }
