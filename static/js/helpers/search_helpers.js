@@ -34,14 +34,14 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             age_at_initial_pathologic_diagnosis: 'Age at Initial Pathologic Diagnosis'
         },
         'CCLE':{
-            project_disease_type: 'Disease Type',
+            disease_code: 'Disease Code',
             gender: 'Gender',
             site_primary: 'Site Primary',
             histology: 'Histology',
             hist_subtype: 'Histoligcal Subtype'
         },
         'TARGET':{
-            project_disease_type: 'Disease Type',
+            disease_code: 'Disease Code',
             vital_status: 'Vital Status',
             gender: 'Gender',
             age_at_diagnosis: 'Age at Diagnosis'

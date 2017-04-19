@@ -574,28 +574,48 @@ def fix_filters(debug):
             WHERE ccle.sample_barcode LIKE 'CCLE%';
         """
 
-        get_cohots_ccle = """
-            SELECT DISTINCT ccle.cohort_id
-            FROM cohorts_samples ccle
-            LEFT JOIN (
-                SELECT DISTINCT cs.cohort_id
-                FROM cohorts_samples cs
-                WHERE cs.sample_barcode NOT LIKE 'CCLE%'
-            ) tcga
-            ON tcga.cohort_id = ccle.cohort_id
-            WHERE ccle.sample_barcode LIKE 'CCLE%' AND tcga.cohort_id IS NULL;
+        fix_tcga_only_filters = """
+            UPDATE cohorts_filters cf
+            JOIN (
+                SELECT id
+                FROM cohorts_filters
+                WHERE program_id IS NULL AND resulting_cohort_id IN (
+                    SELECT DISTINCT tcga.cohort_id
+                    FROM cohorts_samples tcga
+                    LEFT JOIN (
+                        SELECT DISTINCT cs.cohort_id
+                        FROM cohorts_samples cs
+                        WHERE cs.sample_barcode LIKE 'CCLE%'
+                    ) ccle
+                    ON tcga.cohort_id = ccle.cohort_id
+                    WHERE tcga.sample_barcode NOT LIKE 'CCLE%' AND ccle.cohort_id IS NULL
+                )
+            ) tcga_cf
+            ON tcga_cf.id = cf.id
+            SET program_id = %s
+            WHERE program_id IS NULL;
         """
 
-        get_cohots_tcga = """
-            SELECT DISTINCT tcga.cohort_id
-            FROM cohorts_samples tcga
-            LEFT JOIN (
-                SELECT DISTINCT cs.cohort_id
-                FROM cohorts_samples cs
-                WHERE cs.sample_barcode LIKE 'CCLE%'
-            ) ccle
-            ON tcga.cohort_id = ccle.cohort_id
-            WHERE tcga.sample_barcode NOT LIKE 'CCLE%' AND ccle.cohort_id IS NULL;
+        fix_ccle_only_filters = """
+            UPDATE cohorts_filters cf
+            JOIN (
+                SELECT id
+                FROM cohorts_filters
+                WHERE program_id IS NULL AND resulting_cohort_id IN (
+                    SELECT DISTINCT ccle.cohort_id
+                    FROM cohorts_samples ccle
+                    LEFT JOIN (
+                        SELECT DISTINCT cs.cohort_id
+                        FROM cohorts_samples cs
+                        WHERE cs.sample_barcode NOT LIKE 'CCLE%'
+                    ) tcga
+                    ON tcga.cohort_id = ccle.cohort_id
+                    WHERE ccle.sample_barcode LIKE 'CCLE%' AND tcga.cohort_id IS NULL
+                )
+            ) ccle_cf
+            ON ccle_cf.id = cf.id
+            SET program_id = %s
+            WHERE program_id IS NULL;
         """
 
         get_filters = """
@@ -654,30 +674,18 @@ def fix_filters(debug):
             raise Exception("Could not retrieve CCLE program ID!")
 
         # Fix CCLE-only cohort filters
-        cursor.execute(get_cohots_ccle)
-
-        for row in cursor.fetchall():
-            cursor.execute(get_filters, (row[0],))
-
-            for filter_row in cursor.fetchall():
-                if debug:
-                    print >> sys.stdout, "Executing statement: " + add_filter_program
-                    print >> sys.stdout, "Values: " + str((ccle_program_id, filter_row[0],))
-                else:
-                    cursor.execute(add_filter_program, (ccle_program_id, filter_row[0],))
+        if debug:
+            print >> sys.stdout, "Executing statement: " + fix_ccle_only_filters
+            print >> sys.stdout, "Values: " + str((ccle_program_id,))
+        else:
+            cursor.execute(fix_ccle_only_filters, (ccle_program_id,))
 
         # Fix TCGA-only cohort filters
-        cursor.execute(get_cohots_tcga)
-
-        for row in cursor.fetchall():
-            cursor.execute(get_filters, (row[0],))
-
-            for filter_row in cursor.fetchall():
-                if debug:
-                    print >> sys.stdout, "Executing statement: " + add_filter_program
-                    print >> sys.stdout, "Values: " + str((tcga_program_id, filter_row[0],))
-                else:
-                    cursor.execute(add_filter_program, (tcga_program_id, filter_row[0],))
+        if debug:
+            print >> sys.stdout, "Executing statement: " + fix_tcga_only_filters
+            print >> sys.stdout, "Values: " + str((tcga_program_id,))
+        else:
+            cursor.execute(fix_tcga_only_filters, (tcga_program_id,))
 
         # Fix mixed TCGA/CCLE cohort filters
         cursor.execute(get_cohots_tcga_and_ccle)
