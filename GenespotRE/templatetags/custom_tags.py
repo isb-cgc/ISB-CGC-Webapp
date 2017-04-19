@@ -155,6 +155,16 @@ def get_data_attr_id(value, attr):
 
 
 @register.filter
+def has_user_data(programs):
+    for prog in programs:
+        print >> sys.stdout, "program: "+str(prog)
+        if prog['type'] == 'user-data':
+            print >> sys.stdout, "is user data!"
+            return True
+    return False
+
+
+@register.filter
 def get_cohorts_this_user(this_user, is_active=True):
     isb_superuser = User.objects.get(username='isb')
     public_cohorts = Cohort_Perms.objects.filter(user=isb_superuser,perm=Cohort_Perms.OWNER).values_list('cohort', flat=True)
