@@ -1,6 +1,6 @@
 """
 
-Copyright 2016, Institute for Systems Biology
+Copyright 2017, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,9 +18,12 @@ limitations under the License.
 
 import logging
 
+from bq_data_access.data_types.definitions import PlottableDataType
 from scripts.feature_def_gen.feature_def_utils import DataSetConfig
 
 logger = logging
+
+GEXP_FEATURE_TYPE = PlottableDataType.GEXP
 
 
 class GEXPTableConfig(object):
