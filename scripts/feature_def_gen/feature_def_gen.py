@@ -29,6 +29,7 @@ from gexp_data.gexp_feature_def_provider import GEXPFeatureDefProvider
 from bq_data_access.data_types.gexp import BIGQUERY_CONFIG as GEXP_BIGQUERY_CONFIG
 
 from scripts.feature_def_gen.feature_def_utils import load_config_json
+from bq_data_access.v2.feature_id_utils import FeatureDataTypeHelper
 
 
 logging.basicConfig(level=logging.INFO)
@@ -105,11 +106,17 @@ def print_query(data_type, config_json):
 @click.argument('csv_path', type=str)
 @click.option('--config_json', type=str)
 def run(project_id, data_type, csv_path, config_json):
-    _, provider_class = data_type_registry[data_type]
+    feature_type = FeatureDataTypeHelper.get_type(data_type)
+    logging.info("Feature type: {}".format(str(feature_type)))
+    config_class = FeatureDataTypeHelper.get_feature_def_config_from_data_type(feature_type)
+    provider_class = FeatureDataTypeHelper.get_feature_def_provider_from_data_type(feature_type)
+
     if config_json is not None:
         config_instance = load_config_from_path(data_type, config_json)
     else:
-        config_instance = GEXPFeatureDefConfig.from_dict(GEXP_BIGQUERY_CONFIG)
+        config_dict = FeatureDataTypeHelper.get_feature_def_default_config_dict_from_data_type(feature_type)
+        config_instance = config_class.from_dict(config_dict)
+
     provider = provider_class(config_instance)
 
     logging.info("Output CSV: {}".format(csv_path))

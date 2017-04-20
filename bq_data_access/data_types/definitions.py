@@ -27,6 +27,7 @@ class PlottableDataType(Enum):
 
 
 FEATURE_ID_TO_TYPE_MAP = {
-    'GEXP': PlottableDataType.GEXP,
-    'GNAB': PlottableDataType.GNAB
+    'gexp': PlottableDataType.GEXP,
+    'gnab': PlottableDataType.GNAB
 }
+

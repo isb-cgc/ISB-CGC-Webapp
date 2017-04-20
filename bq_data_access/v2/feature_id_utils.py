@@ -21,16 +21,29 @@ import logging as logger
 
 from bq_data_access.v2.errors import FeatureNotFoundException
 
-# Import all supported datatypes
-# ==============================
+# Import all supported data types
+# ===============================
 from bq_data_access.data_types.definitions import PlottableDataType, FEATURE_ID_TO_TYPE_MAP
+# GEXP
 from bq_data_access.v2.gexp_data import GEXPFeatureProvider
+from bq_data_access.data_types.gexp import BIGQUERY_CONFIG as GEXP_BIGQUERY_CONFIG
+from scripts.feature_def_gen.gexp_data.gexp_feature_def_provider import GEXPFeatureDefProvider
+from scripts.feature_def_gen.gexp_features import GEXPFeatureDefConfig
+# GNAB
 from bq_data_access.v2.gnab_data import GNABFeatureProvider
-
+from bq_data_access.data_types.gnab import BIGQUERY_CONFIG as GNAB_BIGQUERY_CONFIG
+from scripts.feature_def_gen.gnab_data.gnab_feature_def_provider import GNABFeatureDefProvider
+from scripts.feature_def_gen.gnab_features import GNABFeatureDefConfig
 
 FEATURE_TYPE_TO_PROVIDER_MAP = {
     PlottableDataType.GEXP: GEXPFeatureProvider,
     PlottableDataType.GNAB: GNABFeatureProvider
+}
+
+# noinspection PyPackageRequirements
+FEATURE_TYPE_TO_FEATURE_DEF_PROVIDER_MAP = {
+    PlottableDataType.GEXP: (GEXPFeatureDefConfig, GEXPFeatureDefProvider, GEXP_BIGQUERY_CONFIG),
+    PlottableDataType.GNAB: (GNABFeatureDefConfig, GNABFeatureDefProvider, GNAB_BIGQUERY_CONFIG)
 }
 
 
@@ -54,8 +67,12 @@ class FeatureProviderFactory(object):
     def get_feature_type_string(cls, feature_id):
         # Build a regexp set of supported feature types, for example:
         # "CLIN|GEXP|METH".
-        supported_feature_types = "|".join(FEATURE_ID_TO_TYPE_MAP.keys())
-        regex = re_compile("^v2:({}):".format(supported_feature_types))
+        supported_feature_types = []
+        for data_type_key in FEATURE_ID_TO_TYPE_MAP.keys():
+            supported_feature_types.append(data_type_key.upper())
+
+        types_regexp = "|".join(supported_feature_types)
+        regex = re_compile("^v2:({}):".format(types_regexp))
 
         feature_fields = regex.findall(feature_id)
         if len(feature_fields) == 0:
@@ -104,3 +121,25 @@ class FeatureProviderFactory(object):
             class_type = parameters_obj.feature_data_provider_class
             feature_id = parameters_obj.feature_id
             return class_type(feature_id, **kwargs)
+
+
+class FeatureDataTypeHelper(object):
+    @classmethod
+    def get_type(cls, param):
+        return FEATURE_ID_TO_TYPE_MAP[param.lower()]
+
+    @classmethod
+    def get_feature_def_config_from_data_type(cls, data_type):
+        config_class, _, _ = FEATURE_TYPE_TO_FEATURE_DEF_PROVIDER_MAP[data_type]
+        return config_class
+
+    @classmethod
+    def get_feature_def_provider_from_data_type(cls, data_type):
+        _, provider_class, _ = FEATURE_TYPE_TO_FEATURE_DEF_PROVIDER_MAP[data_type]
+        return provider_class
+
+    @classmethod
+    def get_feature_def_default_config_dict_from_data_type(cls, data_type):
+        _, _, config_dict = FEATURE_TYPE_TO_FEATURE_DEF_PROVIDER_MAP[data_type]
+        return config_dict
+

@@ -36,23 +36,6 @@ def get_feature_type():
     return GEXP_FEATURE_TYPE
 
 
-def get_table_info(table_id):
-    """
-    Find a GEXPTableConfig instance for
-
-    :param table_id: The table identifier from the feature definition.
-    :return:
-    """
-    config_instance = GEXPFeatureDefConfig.from_dict(BIGQUERY_CONFIG)
-    table_info = None
-
-    for table_config in config_instance.data_table_list:
-        if table_config.internal_table_id == table_id:
-            table_info = table_config
-
-    return table_info
-
-
 class GEXPTableFeatureDef(object):
     def __init__(self, gene, gene_label_field, value_field, table_id):
         self.gene = gene
@@ -75,7 +58,7 @@ class GEXPFeatureDef(object):
                        # gene
                        "([a-zA-Z0-9\-]+):"
                        # genomic_build 
-                       "mrna_(" + "|".join([version for version in config_instance.supported_genomic_builds]) +
+                       "mrna_(" + "|".join([build for build in config_instance.supported_genomic_builds]) +
                        ")$")
 
     def __init__(self, gene, genomic_build):
