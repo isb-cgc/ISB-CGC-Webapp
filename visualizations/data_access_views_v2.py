@@ -22,7 +22,7 @@ import traceback
 import sys
 
 from cohorts.metadata_helpers import get_sql_connection
-from bq_data_access.v2.data_access_views_v2 import get_merged_feature_vectors, get_feature_id_validity_for_array
+from bq_data_access.v2.plot_data_support import get_merged_feature_vectors, get_feature_id_validity_for_array
 from cohorts.metadata_helpers import fetch_isbcgc_project_set
 from django.http import JsonResponse
 from projects.models import Project
