@@ -21,9 +21,7 @@ from time import sleep
 
 from bq_data_access.v2.feature_id_utils import FeatureProviderFactory
 from bq_data_access.v2.errors import FeatureNotFoundException
-from bq_data_access.v2.user_data import UserFeatureProvider, USER_FEATURE_TYPE
 
-from cohorts.metadata_helpers import get_sql_connection
 from django.conf import settings
 from google_helpers.bigquery_service import get_bigquery_service
 
@@ -104,49 +102,6 @@ def submit_tcga_job(param_obj, bigquery_service, cohort_settings):
     return job_item
 
 
-def submit_jobs_with_user_data(params_array):
-    bigquery_service = get_bigquery_service()
-    provider_array = []
-
-    cohort_settings = settings.GET_BQ_COHORT_SETTINGS()
-
-    # Submit jobs
-    for parameter_object in params_array:
-        feature_id = parameter_object.feature_id
-        cohort_id_array = parameter_object.cohort_id_array
-
-        user_data = user_feature_handler(feature_id, cohort_id_array)
-
-        if user_data['include_tcga']:
-            job_item = submit_tcga_job(parameter_object, bigquery_service, cohort_settings)
-            provider_array.append(job_item)
-
-        if len(user_data['user_studies']) > 0:
-            converted_feature_id = user_data['converted_feature_id']
-            user_feature_id = user_data['user_feature_id']
-            logging.debug("user_feature_id: {0}".format(user_feature_id))
-            provider = UserFeatureProvider(converted_feature_id, user_feature_id=user_feature_id)
-
-            # The UserFeatureProvider instance might not generate a BigQuery query and job at all given the combination
-            # of cohort(s) and feature identifiers. The provider is not added to the array, and therefore to the
-            # polling loop below, if it would not submit a BigQuery job.
-            if provider.is_queryable(cohort_id_array):
-                job_reference = provider.get_data_job_reference(cohort_id_array, cohort_settings.dataset_id, cohort_settings.table_id)
-
-                logging.info("Submitted USER {job_id}: {fid} - {cohorts}".format(job_id=job_reference['jobId'], fid=feature_id,
-                                                                                 cohorts=str(cohort_id_array)))
-                provider_array.append({
-                    'feature_id': feature_id,
-                    'provider': provider,
-                    'ready': False,
-                    'job_reference': job_reference
-                })
-            else:
-                logging.debug("No UserFeatureDefs for '{0}'".format(converted_feature_id))
-
-    return provider_array
-
-
 def get_submitted_job_results(provider_array, project_id, poll_retry_limit, skip_formatting_for_plot):
     result = {}
     all_done = False
@@ -212,15 +167,6 @@ def format_query_result_for_plot(provider_instance, query_result):
     return data
 
 
-def get_feature_vectors_with_user_data(params_array, poll_retry_limit=20, skip_formatting_for_plot=False):
-    provider_array = submit_jobs_with_user_data(params_array)
-
-    project_id = settings.BQ_PROJECT_ID
-    result = get_submitted_job_results(provider_array, project_id, poll_retry_limit, skip_formatting_for_plot)
-
-    return result
-
-
 def get_feature_vectors_tcga_only(params_array, poll_retry_limit=20, skip_formatting_for_plot=False):
     bigquery_service = get_bigquery_service()
     provider_array = []
@@ -238,110 +184,5 @@ def get_feature_vectors_tcga_only(params_array, poll_retry_limit=20, skip_format
     return result
 
 
-def user_feature_handler(feature_id, cohort_id_array):
-    include_tcga = False
-    user_studies = ()
-    for cohort_id in cohort_id_array:
-        try:
-            db = get_sql_connection()
-            cursor = db.cursor(MySQLdb.cursors.DictCursor)
-
-            cursor.execute("SELECT project_id FROM cohorts_samples WHERE cohort_id = %s GROUP BY project_id", (cohort_id,))
-            for row in cursor.fetchall():
-                if row['project_id'] is None:
-                    include_tcga = True
-                else:
-                    user_studies += (row['project_id'],)
-
-        except Exception as e:
-            if db: db.close()
-            if cursor: cursor.close()
-            raise e
-
-    user_feature_id = None
-    if feature_id.startswith('USER:'):
-        # Try and convert it with a shared ID to a TCGA queryable id
-        user_feature_id = feature_id
-        feature_id = UserFeatureProvider.convert_user_feature_id(feature_id)
-        if feature_id is None:
-            # Querying user specific data, don't include TCGA
-            include_tcga = False
-
-    return {
-        'converted_feature_id': feature_id,
-        'include_tcga': include_tcga,
-        'user_studies': user_studies,
-        'user_feature_id': user_feature_id
-    }
 
 
-def get_feature_vector(feature_id, cohort_id_array):
-    include_tcga = False
-    user_studies = ()
-    for cohort_id in cohort_id_array:
-        try:
-            db = get_sql_connection()
-            cursor = db.cursor(MySQLdb.cursors.DictCursor)
-
-            cursor.execute("SELECT project_id FROM cohorts_samples WHERE cohort_id = %s GROUP BY project_id", (cohort_id,))
-            for row in cursor.fetchall():
-                if row['project_id'] is None:
-                    include_tcga = True
-                else:
-                    user_studies += (row['project_id'],)
-
-        except Exception as e:
-            if db: db.close()
-            if cursor: cursor.close()
-            raise e
-
-    #  ex: feature_id 'CLIN:Disease_Code'
-    user_feature_id = None
-    if feature_id.startswith('USER:'):
-        # Try and convert it with a shared ID to a TCGA queryable id
-        user_feature_id = feature_id
-        feature_id = UserFeatureProvider.convert_user_feature_id(feature_id)
-        if feature_id is None:
-            # Querying user specific data, don't include TCGA
-            include_tcga = False
-
-    items = []
-    type = None
-    result = []
-    cohort_settings = settings.GET_BQ_COHORT_SETTINGS()
-    if include_tcga:
-        provider = FeatureProviderFactory.from_feature_id(feature_id)
-        result = provider.get_data(cohort_id_array, cohort_settings.dataset_id, cohort_settings.table_id)
-
-        # ex: result[0]
-        # {'aliquot_id': None, 'case_id': u'TCGA-BH-A0B1', 'sample_id': u'TCGA-BH-A0B1-10A', 'value': u'BRCA'}
-        for data_point in result:
-            data_item = {key: data_point[key] for key in ['case_id', 'sample_id', 'aliquot_id']}
-            value = provider.process_data_point(data_point)
-            # TODO refactor missing value logic
-            if value is None:
-                value = 'NA'
-            data_item['value'] = value
-            items.append(data_item)
-
-        type = provider.get_value_type()
-
-    if len(user_studies) > 0:
-        # Query User Data
-        user_provider = UserFeatureProvider(feature_id, user_feature_id=user_feature_id)
-        user_result = user_provider.get_data(cohort_id_array, cohort_settings.dataset_id, cohort_settings.table_id)
-        result.extend(user_result)
-
-        for data_point in user_result:
-            data_item = {key: data_point[key] for key in ['case_id', 'sample_id', 'aliquot_id']}
-            value = provider.process_data_point(data_point)
-            # TODO refactor missing value logic
-            if value is None:
-                value = 'NA'
-            data_item['value'] = value
-            items.append(data_item)
-
-        if not type:
-            type = user_provider.get_value_type()
-
-    return type, items
