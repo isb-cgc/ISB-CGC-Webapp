@@ -18,10 +18,7 @@ limitations under the License.
 
 import logging
 import math
-import traceback
-import sys
 
-from bq_data_access.v2.pairwise import PairwiseInputVector, Pairwise
 from bq_data_access.v2.cohort_cloudsql import CloudSQLCohortAccess
 from bq_data_access.v2.feature_id_utils import FeatureIdQueryDescription
 from bq_data_access.v2.data_access import is_valid_feature_identifier, get_feature_vectors_tcga_only
@@ -73,6 +70,7 @@ def get_axis_units(xAttr, yAttr):
 
 DATAPOINT_COHORT_THRESHOLD = 1
 
+
 def get_counts(data):
     total_num_patients = []
     total_num_samples = []
@@ -112,42 +110,6 @@ def get_counts(data):
     result['num_samples_wo_y'] = len(set(num_samples_wo_y))
 
     return result
-
-# TODO refactor to separate module
-@DurationLogged('PAIRWISE', 'GET')
-def get_pairwise_result(feature_array):
-    # Format the feature vectors for pairwise
-    input_vectors = Pairwise.prepare_feature_vector(feature_array)
-    outputs = None
-    results = None
-
-    try:
-        outputs = Pairwise.run_pairwise(input_vectors)
-
-        if outputs is not None:
-            results = {'result_vectors': [], 'filter_messages': []}
-            for row_label, row in outputs.items():
-                if type(row) is dict:
-                    results['result_vectors'].append({'feature_1':                 row['feature_A'],
-                                                      'feature_2':                 row['feature_B'],
-                                                      'comparison_type':           row['comparison_type'],
-                                                      'correlation_coefficient':   row['correlation_coefficient'],
-                                                      'n':                         int(row['n']),
-                                                      '_logp':                     float(row['_logp']),
-                                                      'n_A':                       int(row['n_A']),
-                                                      'p_A':                       float(row['p_A']),
-                                                      'n_B':                       int(row['n_B']),
-                                                      'p_B':                       float(row['p_B']),
-                                                      'exclusion_rules':           row['exclusion_rules']})
-                elif type(row) is unicode:
-                    results['filter_messages'].append({'filter_message': row[0]})
-    except Exception as e:
-        outputs = None
-        results = None
-        print >> sys.stdout, traceback.format_exc()
-        logger.error(traceback.format_exc())
-
-    return results
 
 
 @DurationLogged('FEATURE', 'VECTOR_MERGE')
@@ -303,14 +265,6 @@ def get_merged_feature_vectors(x_id, y_id, c_id, cohort_id_array, logTransform, 
     # TODO assign label for y if y_id is None, as in that case the y-field will be missing from the response
     label_message = {'x': x_id, 'y': y_id, 'c': c_id}
 
-    # TODO Refactor pairwise call to separate function
-    # Include pairwise results
-    input_vectors = [PairwiseInputVector(x_id, x_type, x_vec)]
-    if c_id is not None:
-        input_vectors.append(PairwiseInputVector(c_id, c_type, c_vec))
-    if y_id is not None:
-        input_vectors.append(PairwiseInputVector(y_id, y_type, y_vec))
-
     results = {'types':            type_message,
                 'labels':           label_message,
                 'items':            items,
@@ -320,16 +274,6 @@ def get_merged_feature_vectors(x_id, y_id, c_id, cohort_id_array, logTransform, 
                 'xUnits':           units['x'],
                 'yUnits':           units['y']}
 
-    pairwise_result = None
-
-    if len(input_vectors) > 1:
-        pairwise_result = get_pairwise_result(input_vectors)
-
-    if pairwise_result is None:
-        logger.warn("[WARNING] Pairwise results not included in returned object")
-        results['pairwise_result'] = {}
-    else:
-        results['pairwise_result'] = [pairwise_result]
     return results
 
 
