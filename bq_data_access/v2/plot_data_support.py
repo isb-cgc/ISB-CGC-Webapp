@@ -234,6 +234,32 @@ def get_merged_feature_vectors(x_id, y_id, c_id, cohort_id_array, logTransform, 
     vms.add_dict_array(c_vec, 'c', 'value')
     merged = get_merged_dict_timed(vms)
 
+    items = []
+    for value_bundle in merged:
+        items.append(value_bundle)
+
+    count_message = get_counts(merged)
+    type_message = {'x': str(x_type), 'y': str(y_type), 'c': str(c_type)}
+
+    results = {'types':            type_message,
+               'items':            items,
+               'counts':           count_message,
+               'xUnits':           units['x'],
+               'yUnits':           units['y']}
+
+    return results
+
+
+def add_cohort_info_to_merged_vectors(target, x_id, y_id, c_id, cohort_id_array):
+    """
+    Adds cohort information to a plot data query result (dict).
+     
+    Args: 
+        target: Plot data query result (from get_merged_feature_vectors)
+    
+    Returns: 
+        None
+    """
     # Resolve which (requested) cohorts each datapoint belongs to.
     cohort_set_dict = CloudSQLCohortAccess.get_cohorts_for_datapoints(cohort_id_array)
 
@@ -244,8 +270,8 @@ def get_merged_feature_vectors(x_id, y_id, c_id, cohort_id_array, logTransform, 
         cohort_info_obj_array.append({'id': item['id'], 'name': item['name']})
 
     items = []
-    for value_bundle in merged:
-        sample_id = value_bundle['sample_id']
+    for item in target['items']:
+        sample_id = item['sample_id']
 
         # Add an array of cohort
         # only if the number of containing cohort exceeds the configured threshold.
@@ -255,26 +281,16 @@ def get_merged_feature_vectors(x_id, y_id, c_id, cohort_id_array, logTransform, 
             cohort_set = cohort_set_dict[sample_id]
 
         if len(cohort_set) >= DATAPOINT_COHORT_THRESHOLD:
-            value_bundle['cohort'] = cohort_set
-
-        items.append(value_bundle)
-
-    count_message = get_counts(merged)
-    type_message = {'x': str(x_type), 'y': str(y_type), 'c': str(c_type)}
+            item['cohort'] = cohort_set
 
     # TODO assign label for y if y_id is None, as in that case the y-field will be missing from the response
     label_message = {'x': x_id, 'y': y_id, 'c': c_id}
 
-    results = {'types':            type_message,
-                'labels':           label_message,
-                'items':            items,
-                'cohort_set':       cohort_info_obj_array,
-                'counts':           count_message,
-
-                'xUnits':           units['x'],
-                'yUnits':           units['y']}
-
-    return results
+    target.update({
+        'labels':           label_message,
+        'items':            items,
+        'cohort_set':       cohort_info_obj_array,
+    })
 
 
 def get_feature_id_validity_for_array(feature_id_array):
