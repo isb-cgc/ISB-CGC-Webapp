@@ -113,6 +113,7 @@ def get_merged_dict_timed(vms):
     return vms.get_merged_dict()
 
 
+
 # TODO refactor missing value logic out of this module
 @DurationLogged('FEATURE', 'GET_VECTORS')
 def get_merged_feature_vectors(x_id, y_id, c_id, cohort_id_array, logTransform, study_id_array):
@@ -171,58 +172,12 @@ def get_merged_feature_vectors(x_id, y_id, c_id, cohort_id_array, logTransform, 
         c_type, c_vec = async_result[c_id]['type'], async_result[c_id]['data']
     if y_id is not None:
         y_type, y_vec = async_result[y_id]['type'], async_result[y_id]['data']
-        if logTransform is not None and logTransform['y'] and y_vec and is_log_transformable(y_type):
-            # If we opt to use a transform that attempts to account for values out of range for log transformation,
-            # this is the code to get the minimum y-value
-            '''
-            yvals = []
-            for yd in y_vec:
-                if 'value' in yd and yd['value'] is not None and yd['value'] != "NA" and yd['value'] != "None":
-                    yvals.append(float(yd['value']))
-            y_min = min(yvals)
-            '''
-            for ydata in y_vec:
-                if 'value' in ydata and ydata['value'] is not None and ydata['value'] != "NA" and ydata['value'] != "None":
-                    if float(ydata['value']) < 0:
-                        ydata['value'] = "NA"
-                    elif logTransform['yBase'] == 10:
-                        ydata['value'] = str(math.log10((float(ydata['value']) + 1)))
-                    elif logTransform['yBase'] == 'e':
-                        ydata['value'] = str(math.log((float(ydata['value']) + 1)))
-                    elif type(logTransform['yBase']) is int:
-                        ydata['value'] = str(math.log((float(ydata['value']) + 1), logTransform['yBase']))
-                    else:
-                        logger.warn(
-                            "[WARNING] No valid log base was supplied - log transformation will not be applied!"
-                        )
+        if logTransform and logTransform['y'] and is_log_transformable(y_type):
+            log_transform_vector(y_vec, logTransform['yBase'])
 
     x_type, x_vec = async_result[x_id]['type'], async_result[x_id]['data']
-
-    if logTransform is not None and logTransform['x'] and x_vec and is_log_transformable(x_type):
-        # If we opt to use a transform that attempts to account for values out of range for log transformation,
-        # this is the code to get the minimum x-value
-        '''
-        xvals = []
-        for xd in x_vec:
-            if 'value' in xd and xd['value'] is not None and xd['value'] != "NA" and xd['value'] != "None":
-                xvals.append(float(xd['value']))
-        x_min = min(xvals)
-        '''
-
-        for xdata in x_vec:
-            if 'value' in xdata and xdata['value'] is not None and xdata['value'] != "NA" and xdata['value'] != "None":
-                if float(xdata['value']) < 0:
-                    xdata['value'] = "NA"
-                elif logTransform['xBase'] == 10:
-                    xdata['value'] = str(math.log10((float(xdata['value']) + 1)))
-                elif logTransform['xBase'] == 'e':
-                    xdata['value'] = str(math.log((float(xdata['value']) + 1)))
-                elif type(logTransform['xBase']) is int:
-                    xdata['value'] = str(math.log((float(xdata['value']) + 1), logTransform['xBase']))
-                else:
-                    logger.warn(
-                        "[WARNING] No valid log base was supplied - log transformation will not be applied!"
-                    )
+    if logTransform and logTransform['x'] and is_log_transformable(x_type):
+        log_transform_vector(x_vec, logTransform['xBase'])
 
     vms = VectorMergeSupport('NA', 'sample_id', 'case_id', ['x', 'y', 'c']) # changed so that it plots per sample not patient
     vms.add_dict_array(x_vec, 'x', 'value')
@@ -244,6 +199,23 @@ def get_merged_feature_vectors(x_id, y_id, c_id, cohort_id_array, logTransform, 
                'yUnits':           units['y']}
 
     return results
+
+
+def log_transform_vector(data_vector, log_transform_base):
+    for d in data_vector:
+        if 'value' in d and d['value'] is not None and d['value'] != "NA" and d['value'] != "None":
+            if float(d['value']) < 0:
+                d['value'] = "NA"
+            elif log_transform_base == 10:
+                d['value'] = str(math.log10((float(d['value']) + 1)))
+            elif log_transform_base == 'e':
+                d['value'] = str(math.log((float(d['value']) + 1)))
+            elif type(log_transform_base) is int:
+                d['value'] = str(math.log((float(d['value']) + 1), log_transform_base))
+            else:
+                logger.warn(
+                    "[WARNING] No valid log base was supplied - log transformation will not be applied!"
+                )
 
 
 def get_feature_id_validity_for_array(feature_id_array):
