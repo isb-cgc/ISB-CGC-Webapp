@@ -22,8 +22,11 @@ from sys import exit as sys_exit
 import click
 
 from bq_data_access.v2.feature_id_utils import FeatureProviderFactory
-#from bq_data_access.v2.plot_data_support import get_merged_feature_vectors
+from bq_data_access.v2.data_access import FeatureVectorBigQueryBuilder
 from bq_data_access.bigquery_cohorts import BigQueryCohortStorageSettings
+from bq_data_access.v2.plot_data_support import get_merged_feature_vectors
+from google_helpers.bigquery_service_v2 import BigQueryServiceSupport
+
 logging.basicConfig(level=logging.INFO)
 logger = logging
 
@@ -52,7 +55,10 @@ def run_query(project_id, x, y, cohort_id, program, cohort_table, log_transform)
         sys_exit(0)
 
     cohort_settings = BigQueryCohortStorageSettings.build_from_full_table_id(cohort_table)
+    bqss = BigQueryServiceSupport.build_from_application_default()
+    fvb = FeatureVectorBigQueryBuilder(project_id, cohort_settings, bqss)
 
+    data = get_merged_feature_vectors(fvb, x, y, None, [cohort_id], None, None, program_set=program_set)
 
 
 @click.command()
