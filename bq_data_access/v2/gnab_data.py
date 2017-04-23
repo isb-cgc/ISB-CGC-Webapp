@@ -77,7 +77,7 @@ class GNABFeatureProvider(object):
         self.config_instance = GNABFeatureDefConfig.from_dict(BIGQUERY_CONFIG)
 
     def get_value_type(self):
-        if self.feature_def.value_field == self.VALUE_FIELD_NUM_MUTATIONS:
+        if self.feature_def.value_field == GNABFeatureDef.VALUE_FIELD_NUM_MUTATIONS:
             return ValueType.FLOAT
         else:
             return ValueType.STRING
@@ -152,7 +152,7 @@ class GNABFeatureProvider(object):
 
         for row in query_result_array:
             result.append({
-                'patient_id': row['f'][0]['v'],
+                'case_id': row['f'][0]['v'],
                 'sample_id': row['f'][1]['v'],
                 'aliquot_id': row['f'][2]['v'],
                 'value': row['f'][3]['v'],
