@@ -69,7 +69,7 @@ class GNABFeatureDef(object):
 
 
 class GNABFeatureProvider(object):
-    def __init__(self, feature_id, **kwargs):
+    def __init__(self, feature_id):
         self.feature_def = None
         self.parse_internal_feature_id(feature_id)
         self.config_instance = GNABFeatureDefConfig.from_dict(BIGQUERY_CONFIG)
