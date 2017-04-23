@@ -82,7 +82,7 @@ def get_feature_vector(feature_id, cohort_id_array, cohort_settings):
 
 
 def submit_tcga_job(param_obj, project_id_number, bigquery_client, cohort_settings):
-    query_provider = FeatureProviderFactory.from_parameters(param_obj, bigquery_service=bigquery_client)
+    query_provider = FeatureProviderFactory.from_parameters(param_obj)
     bigquery_runner = FeatureDataProvider(
         query_provider, bigquery_service=bigquery_client, project_id_number=project_id_number)
 
