@@ -23,7 +23,7 @@ from bq_data_access.v2.errors import FeatureNotFoundException
 from bq_data_access.v2.feature_value_types import ValueType, DataTypes
 from bq_data_access.v2.utils import DurationLogged
 from bq_data_access.data_types.gnab import BIGQUERY_CONFIG
-from scripts.feature_def_gen.gnab_features import GNABFeatureDefConfig
+from scripts.feature_def_gen.gnab_features import GNABDataSourceConfig
 
 GNAB_FEATURE_TYPE = 'GNAB'
 IDENTIFIER_COLUMN_NAME = 'sample_id'
@@ -35,7 +35,7 @@ def get_feature_type():
 
 class GNABFeatureDef(object):
     VALUE_FIELD_NUM_MUTATIONS = 'num_mutations'
-    config_instance = GNABFeatureDefConfig.from_dict(BIGQUERY_CONFIG)
+    config_instance = GNABDataSourceConfig.from_dict(BIGQUERY_CONFIG)
 
     # Regular expression for parsing the feature definition.
     #
@@ -68,11 +68,11 @@ class GNABFeatureDef(object):
         return cls(gene_label, internal_table_id, value_field)
 
 
-class GNABFeatureProvider(object):
+class GNABDataQueryHandler(object):
     def __init__(self, feature_id):
         self.feature_def = None
         self.parse_internal_feature_id(feature_id)
-        self.config_instance = GNABFeatureDefConfig.from_dict(BIGQUERY_CONFIG)
+        self.config_instance = GNABDataSourceConfig.from_dict(BIGQUERY_CONFIG)
 
     def get_value_type(self):
         if self.feature_def.value_field == GNABFeatureDef.VALUE_FIELD_NUM_MUTATIONS:

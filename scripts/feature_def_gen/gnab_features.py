@@ -58,7 +58,7 @@ class GNABTableConfig(object):
         return cls(table_id, genomic_build, gene_label_field, internal_table_id, program)
 
 
-class GNABFeatureDefConfig(object):
+class GNABDataSourceConfig(object):
     """
     Configuration class for GNAB feature definitions.
     """

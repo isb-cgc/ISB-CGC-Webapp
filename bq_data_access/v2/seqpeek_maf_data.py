@@ -18,13 +18,13 @@ limitations under the License.
 
 import logging
 
-from bq_data_access.v2.gnab_data import GNABFeatureProvider
+from bq_data_access.v2.gnab_data import GNABDataQueryHandler
 from bq_data_access.v2.utils import DurationLogged
 
 SEQPEEK_FEATURE_TYPE = 'SEQPEEK'
 
 
-class SeqPeekDataProvider(GNABFeatureProvider):
+class SeqPeekDataProvider(GNABDataQueryHandler):
     def __init__(self, feature_id, **kwargs):
         super(SeqPeekDataProvider, self).__init__(feature_id, **kwargs)
 

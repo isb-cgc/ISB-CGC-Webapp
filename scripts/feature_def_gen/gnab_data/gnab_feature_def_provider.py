@@ -50,7 +50,7 @@ MYSQL_SCHEMA = [
 ]
 
 
-class GNABFeatureDefProvider(FeatureDefBigqueryProvider):
+class GNABFeatureDefBuilder(FeatureDefBigqueryProvider):
     def get_mysql_schema(self):
         return MYSQL_SCHEMA
 
