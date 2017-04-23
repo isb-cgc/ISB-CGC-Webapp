@@ -70,7 +70,7 @@ class METHFeatureDefConfig(object):
             table_config = {key: table_template[key] for key in ['genomic_build', 'value_field', 'program']}
             table_config.update({
                 "table_id": table_template['table_id_prefix'] + c,
-                "internal_table_id": "chr" + c.lower()
+                "internal_table_id": table_template['genomic_build'] + '_chr' + c.lower()
             })
 
             self.data_table_list.append(METHTableConfig.from_dict(table_config))
