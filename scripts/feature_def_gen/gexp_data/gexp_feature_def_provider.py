@@ -37,7 +37,7 @@ def get_feature_type():
     return 'GEXP'
 
 
-class GEXPFeatureDefProvider(FeatureDefBigqueryProvider):
+class GEXPFeatureDefBuilder(FeatureDefBigqueryProvider):
     def get_mysql_schema(self):
         return MYSQL_SCHEMA
 

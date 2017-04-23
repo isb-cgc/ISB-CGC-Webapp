@@ -63,7 +63,7 @@ class GEXPTableConfig(object):
                    internal_table_id, program)
 
 
-class GEXPFeatureDefConfig(object):
+class GEXPDataSourceConfig(object):
     """
     Configuration class for GEXP feature definitions.
     """

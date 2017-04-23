@@ -23,7 +23,7 @@ from bq_data_access.v2.errors import FeatureNotFoundException
 from bq_data_access.v2.feature_value_types import ValueType, DataTypes
 from bq_data_access.v2.utils import DurationLogged
 from bq_data_access.data_types.gexp import BIGQUERY_CONFIG
-from scripts.feature_def_gen.gexp_features import GEXPFeatureDefConfig
+from scripts.feature_def_gen.gexp_features import GEXPDataSourceConfig
 
 GEXP_FEATURE_TYPE = 'GEXP'
 
@@ -52,7 +52,7 @@ class GEXPFeatureDef(object):
     # Regular expression for parsing the feature definition.
     #
     # Example ID: v2:GEXP:TP53:hg19
-    config_instance = GEXPFeatureDefConfig.from_dict(BIGQUERY_CONFIG)
+    config_instance = GEXPDataSourceConfig.from_dict(BIGQUERY_CONFIG)
 
     regex = re_compile("^v2:GEXP:"
                        # gene
@@ -75,7 +75,7 @@ class GEXPFeatureDef(object):
         return cls(gene_label, genomic_build)
 
 
-class GEXPFeatureProvider(object):
+class GEXPDataQueryHandler(object):
     def __init__(self, feature_id):
         self.feature_def = None
         self.table_feature_def = None
@@ -121,7 +121,7 @@ class GEXPFeatureProvider(object):
 
     def build_query(self, project_set, cohort_table, cohort_id_array, project_id_array):
         # Find matching tables
-        config_instance = GEXPFeatureDefConfig.from_dict(BIGQUERY_CONFIG)
+        config_instance = GEXPDataSourceConfig.from_dict(BIGQUERY_CONFIG)
         found_tables = []
 
         for table in config_instance.data_table_list:
