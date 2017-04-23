@@ -17,13 +17,42 @@ limitations under the License.
 """
 
 import logging
+from sys import exit as sys_exit
 
 import click
 
 from bq_data_access.v2.feature_id_utils import FeatureProviderFactory
-
+#from bq_data_access.v2.plot_data_support import get_merged_feature_vectors
+from bq_data_access.bigquery_cohorts import BigQueryCohortStorageSettings
 logging.basicConfig(level=logging.INFO)
 logger = logging
+
+
+def get_bq_program_set(program_array):
+    supported_programs = set(['tcga', 'target'])
+    return set(program_array).intersection(supported_programs)
+
+
+@click.command()
+# Google Cloud Platform project number
+@click.argument('project_id', type=click.INT)
+# Feature identifier for x-axis
+@click.argument('x', type=str)
+# Feature identifier for y-axis
+@click.argument('y', type=str)
+@click.argument('cohort_id', type=str)
+@click.option('--program', '-p', multiple=True)
+@click.option('--cohort-table', type=str, default="test-project:cohort_dataset.cohorts")
+@click.option('--log-transform', type=str, help="Log transform JSON object")
+def run_query(project_id, x, y, cohort_id, program, cohort_table, log_transform):
+    program_set = get_bq_program_set(program)
+    logger.info("Selected programs: {}".format(program_set))
+    if len(program_set) == 0:
+        logger.info("No selected programs, quitting.")
+        sys_exit(0)
+
+    cohort_settings = BigQueryCohortStorageSettings.build_from_full_table_id(cohort_table)
+
 
 
 @click.command()
@@ -32,13 +61,11 @@ logger = logging
 @click.option('--program', '-p', multiple=True)
 @click.option('--cohort-table', type=str, default="test-project:cohort_dataset.cohorts")
 def print_query(feature_id, cohort_id, program, cohort_table):
-    supported_programs = set(['tcga', 'target'])
-    program_set = set(program).intersection(supported_programs)
-
+    program_set = get_bq_program_set(program)
     logger.info("Selected programs: {}".format(program_set))
     if len(program_set) == 0:
         logger.info("No selected programs, quitting.")
-        return
+        sys_exit(0)
 
     provider = FeatureProviderFactory.from_feature_id(feature_id)
 
@@ -56,6 +83,7 @@ def main():
     pass
 
 main.add_command(print_query)
+main.add_command(run_query)
 
 if __name__ == '__main__':
     main()
