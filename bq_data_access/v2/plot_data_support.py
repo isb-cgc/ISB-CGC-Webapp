@@ -20,7 +20,7 @@ import logging
 import math
 
 from bq_data_access.v2.feature_id_utils import FeatureIdQueryDescription
-from bq_data_access.v2.data_access import is_valid_feature_identifier, get_feature_vectors_tcga_only
+from bq_data_access.v2.data_access import is_valid_feature_identifier
 from bq_data_access.v2.feature_value_types import ValueType, is_log_transformable
 from bq_data_access.v2.utils import DurationLogged
 from bq_data_access.v2.utils import VectorMergeSupport
@@ -113,10 +113,9 @@ def get_merged_dict_timed(vms):
     return vms.get_merged_dict()
 
 
-
 # TODO refactor missing value logic out of this module
 @DurationLogged('FEATURE', 'GET_VECTORS')
-def get_merged_feature_vectors(x_id, y_id, c_id, cohort_id_array, logTransform, study_id_array):
+def get_merged_feature_vectors(fvb, x_id, y_id, c_id, cohort_id_array, logTransform, study_id_array, program_set):
     """
     Fetches and merges data for two or three feature vectors (see parameter documentation below).
     The vectors have to be an array of dictionaries, with each dictionary containing a 'value' field
@@ -154,7 +153,7 @@ def get_merged_feature_vectors(x_id, y_id, c_id, cohort_id_array, logTransform, 
     :return: PlotDataResponse
     """
 
-    async_params = [FeatureIdQueryDescription(x_id, cohort_id_array, study_id_array)]
+    async_params = [FeatureIdQueryDescription(x_id, cohort_id_array, study_id_array, program_set)]
 
     c_type, c_vec = ValueType.STRING, []
     y_type, y_vec = ValueType.STRING, []
@@ -162,11 +161,11 @@ def get_merged_feature_vectors(x_id, y_id, c_id, cohort_id_array, logTransform, 
     units = get_axis_units(x_id, y_id)
 
     if c_id is not None:
-        async_params.append(FeatureIdQueryDescription(c_id, cohort_id_array, study_id_array))
+        async_params.append(FeatureIdQueryDescription(c_id, cohort_id_array, study_id_array, program_set))
     if y_id is not None:
-        async_params.append(FeatureIdQueryDescription(y_id, cohort_id_array, study_id_array))
+        async_params.append(FeatureIdQueryDescription(y_id, cohort_id_array, study_id_array, program_set))
 
-    async_result = get_feature_vectors_tcga_only(async_params)
+    async_result = fvb.get_feature_vectors_tcga_only(async_params)
 
     if c_id is not None:
         c_type, c_vec = async_result[c_id]['type'], async_result[c_id]['data']
