@@ -19,10 +19,11 @@ limitations under the License.
 import logging
 from re import compile as re_compile
 
-from bq_data_access.v2.feature_data_provider import FeatureDataProvider
 from bq_data_access.v2.errors import FeatureNotFoundException
 from bq_data_access.v2.feature_value_types import ValueType, DataTypes
 from bq_data_access.v2.utils import DurationLogged
+from bq_data_access.data_types.methylation import BIGQUERY_CONFIG
+from scripts.feature_def_gen.methylation_features import METHFeatureDefConfig
 
 METH_FEATURE_TYPE = 'METH'
 IDENTIFIER_COLUMN_NAME = 'sample_id'
@@ -32,121 +33,6 @@ TABLES = [
         'name': 'DNA_Methylation_chr1',
         'info': 'Methylation chr1',
         'id': 'methylation_chr1'
-    },
-    {
-        'name': 'DNA_Methylation_chr2',
-        'info': 'Methylation chr2',
-        'id': 'methylation_chr2'
-    },
-    {
-        'name': 'DNA_Methylation_chr3',
-        'info': 'Methylation chr3',
-        'id': 'methylation_chr3'
-    },
-    {
-        'name': 'DNA_Methylation_chr4',
-        'info': 'Methylation chr4',
-        'id': 'methylation_chr4'
-    },
-    {
-        'name': 'DNA_Methylation_chr5',
-        'info': 'Methylation chr5',
-        'id': 'methylation_chr5'
-    },
-    {
-        'name': 'DNA_Methylation_chr6',
-        'info': 'Methylation chr6',
-        'id': 'methylation_chr6'
-    },
-    {
-        'name': 'DNA_Methylation_chr7',
-        'info': 'Methylation chr7',
-        'id': 'methylation_chr7'
-    },
-    {
-        'name': 'DNA_Methylation_chr8',
-        'info': 'Methylation chr8',
-        'id': 'methylation_chr8'
-    },
-    {
-        'name': 'DNA_Methylation_chr9',
-        'info': 'Methylation chr9',
-        'id': 'methylation_chr9'
-    },
-    {
-        'name': 'DNA_Methylation_chr10',
-        'info': 'Methylation chr10',
-        'id': 'methylation_chr10'
-    },
-    {
-        'name': 'DNA_Methylation_chr11',
-        'info': 'Methylation chr11',
-        'id': 'methylation_chr11'
-    },
-    {
-        'name': 'DNA_Methylation_chr12',
-        'info': 'Methylation chr12',
-        'id': 'methylation_chr12'
-    },
-    {
-        'name': 'DNA_Methylation_chr13',
-        'info': 'Methylation chr13',
-        'id': 'methylation_chr13'
-    },
-    {
-        'name': 'DNA_Methylation_chr14',
-        'info': 'Methylation chr14',
-        'id': 'methylation_chr14'
-    },
-    {
-        'name': 'DNA_Methylation_chr15',
-        'info': 'Methylation chr15',
-        'id': 'methylation_chr15'
-    },
-    {
-        'name': 'DNA_Methylation_chr16',
-        'info': 'Methylation chr16',
-        'id': 'methylation_chr16'
-    },
-    {
-        'name': 'DNA_Methylation_chr17',
-        'info': 'Methylation chr17',
-        'id': 'methylation_chr17'
-    },
-    {
-        'name': 'DNA_Methylation_chr18',
-        'info': 'Methylation chr18',
-        'id': 'methylation_chr18'
-    },
-    {
-        'name': 'DNA_Methylation_chr19',
-        'info': 'Methylation chr19',
-        'id': 'methylation_chr19'
-    },
-    {
-        'name': 'DNA_Methylation_chr20',
-        'info': 'Methylation chr20',
-        'id': 'methylation_chr20'
-    },
-    {
-        'name': 'DNA_Methylation_chr21',
-        'info': 'Methylation chr21',
-        'id': 'methylation_chr21'
-    },
-    {
-        'name': 'DNA_Methylation_chr22',
-        'info': 'Methylation chr22',
-        'id': 'methylation_chr22'
-    },
-    {
-        'name': 'DNA_Methylation_chrX',
-        'info': 'Methylation chrX',
-        'id': 'methylation_chrX'
-    },
-    {
-        'name': 'DNA_Methylation_chrY',
-        'info': 'Methylation chrY',
-        'id': 'methylation_chrY'
     }
 ]
 
@@ -158,32 +44,38 @@ def get_feature_type():
 
 
 class METHFeatureDef(object):
-    def __init__(self, probe, platform, chromosome):
+    config_instance = METHFeatureDefConfig.from_dict(BIGQUERY_CONFIG)
+
+    def __init__(self, probe, platform, internal_table_id):
         self.probe = probe
         self.platform = platform
-        self.chromosome = chromosome
+        self.internal_table_id = internal_table_id
+
+    def get_table_configuration(self):
+        for table_config in self.config_instance.data_table_list:
+            if table_config.internal_table_id == self.internal_table_id:
+                return table_config
 
     @classmethod
     def from_feature_id(cls, feature_id):
-        # Example ID: METH:cg08246323:HumanMethylation450:methylation_chr16
-        regex = re_compile("^METH:"
+        config_instance = METHFeatureDefConfig.from_dict(BIGQUERY_CONFIG)
+
+        # Example ID: METH:cg08246323:HumanMethylation450:hg19_chr16
+        regex = re_compile("^v2:METH:"
                            # TODO better validation for probe name
                            "([a-zA-Z0-9_.\-]+):"
                            # platform
                            "(HumanMethylation27|HumanMethylation450):"
-                           # validate outside - chromosome 1-23, X, Y, M
-                           "methylation_chr(\d|\d\d|X|Y|M)$")
+                           # internal table ID: 'hg19_chr1', 'hg19_chrx', etc
+                           "(" + "|".join([table.internal_table_id for table in config_instance.data_table_list]) +
+                           ")$")
 
         feature_fields = regex.findall(feature_id)
         if len(feature_fields) == 0:
             raise FeatureNotFoundException(feature_id)
-        probe, platform, chromosome = feature_fields[0]
+        probe, platform, internal_table_id = feature_fields[0]
 
-        valid_chr_set = frozenset([str(x) for x in xrange(1, 24)] + ['X', 'Y', 'M'])
-        if chromosome not in valid_chr_set:
-            raise FeatureNotFoundException(feature_id)
-
-        return cls(probe, platform, chromosome)
+        return cls(probe, platform, internal_table_id)
 
     def __str__(self):
         return "METH:{probe}:{platform}:methylation_chr{chr}".format(
@@ -193,17 +85,13 @@ class METHFeatureDef(object):
         )
 
 
-class METHFeatureProvider(FeatureDataProvider):
+class METHFeatureProvider(object):
     TABLES = TABLES
 
-    def __init__(self, feature_id, **kwargs):
-        self.feature_type = ''
-        self.cpg_probe = ''
+    def __init__(self, feature_id):
         self.feature_def = None
-        self.table_name = ''
-        self.platform = ''
         self.parse_internal_feature_id(feature_id)
-        super(METHFeatureProvider, self).__init__(**kwargs)
+        self.config_instance = METHFeatureDefConfig.from_dict(BIGQUERY_CONFIG)
 
     def get_value_type(self):
         return ValueType.FLOAT
@@ -215,7 +103,7 @@ class METHFeatureProvider(FeatureDataProvider):
     def process_data_point(cls, data_point):
         return data_point['beta_value']
 
-    def build_query(self, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array, project_id_array):
+    def build_query_for_program(self, feature_def, cohort_table, cohort_id_array, project_id_array):
         # Generate the 'IN' statement string: (%s, %s, ..., %s)
         cohort_id_stmt = ', '.join([str(cohort_id) for cohort_id in cohort_id_array])
         project_id_stmt = ''
@@ -223,23 +111,31 @@ class METHFeatureProvider(FeatureDataProvider):
             project_id_stmt = ', '.join([str(project_id) for project_id in project_id_array])
 
         query_template = \
-            ("SELECT ParticipantBarcode, SampleBarcode, AliquotBarcode, beta_value "
-             "FROM [{project_name}:{dataset_name}.{table_name}] "
-             "WHERE ( Probe_Id='{probe_id}' AND Platform='{platform}') "
-             "AND SampleBarcode IN ( "
-             "    SELECT sample_barcode "
-             "    FROM [{project_name}:{cohort_dataset}.{cohort_table}] "
-             "    WHERE cohort_id IN ({cohort_id_list})"
-             "         AND (project_id IS NULL")
+            ("SELECT case_barcode AS case_id, sample_barcode AS sample_id, aliquot_barcode AS aliquot_id, {value_field} AS value {brk} "
+             "FROM [{table_name}] {brk}"
+             "WHERE ( Probe_Id='{probe_id}' AND Platform='{platform}') {brk}"
+             "AND sample_barcode IN ( {brk}"
+             "    SELECT sample_barcode {brk}"
+             "    FROM [{cohort_dataset_and_table}] {brk}"
+             "    WHERE cohort_id IN ({cohort_id_list}) {brk}"
+             "         AND (project_id IS NULL {brk}")
 
         query_template += (" OR project_id IN ({project_id_list})))" if project_id_array is not None else "))")
 
-        query = query_template.format(dataset_name=dataset_name, project_name=project_name, table_name=table_name,
+        table_config = feature_def.get_table_configuration()
+
+        query = query_template.format(table_name=table_config.table_id,
                                       probe_id=feature_def.probe, platform=feature_def.platform,
-                                      cohort_dataset=cohort_dataset, cohort_table=cohort_table,
-                                      cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt)
+                                      value_field=table_config.value_field,
+                                      cohort_dataset_and_table=cohort_table,
+                                      cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt,
+                                      brk='\n')
 
         logging.debug("BQ_QUERY_METH: " + query)
+        return query
+
+    def build_query(self, project_set, cohort_table, cohort_id_array, project_id_array):
+        query = self.build_query_for_program(self.feature_def, cohort_table, cohort_id_array, project_id_array)
         return query
 
     @DurationLogged('METH', 'UNPACK')
@@ -265,21 +161,13 @@ class METHFeatureProvider(FeatureDataProvider):
                 'patient_id': row['f'][0]['v'],
                 'sample_id': row['f'][1]['v'],
                 'aliquot_id': row['f'][2]['v'],
-                'beta_value': float(row['f'][3]['v'])
+                'value': float(row['f'][3]['v'])
             })
 
         return result
 
-    def get_table_name_from_feature_def(self, feature_def):
-        for table_info in self.TABLES:
-            if table_info['id'].endswith(feature_def.chromosome):
-                return table_info['name']
-
-        raise Exception("Table not found for " + str(feature_def))
-
     def parse_internal_feature_id(self, feature_id):
         self.feature_def = METHFeatureDef.from_feature_id(feature_id)
-        self.table_name = self.get_table_name_from_feature_def(self.feature_def)
 
     @classmethod
     def is_valid_feature_id(cls, feature_id):
