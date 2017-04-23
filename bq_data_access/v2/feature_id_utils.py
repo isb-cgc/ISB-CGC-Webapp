@@ -34,16 +34,23 @@ from bq_data_access.v2.gnab_data import GNABFeatureProvider
 from bq_data_access.data_types.gnab import BIGQUERY_CONFIG as GNAB_BIGQUERY_CONFIG
 from scripts.feature_def_gen.gnab_data.gnab_feature_def_provider import GNABFeatureDefProvider
 from scripts.feature_def_gen.gnab_features import GNABFeatureDefConfig
+# METH
+from bq_data_access.v2.methylation_data import METHFeatureProvider
+from bq_data_access.data_types.methylation import BIGQUERY_CONFIG as METH_BIGQUERY_CONFIG
+from scripts.feature_def_gen.methylation_data.methylation_feature_def_provider import METHFeatureDefProvider
+from scripts.feature_def_gen.methylation_features import METHFeatureDefConfig
 
 FEATURE_TYPE_TO_PROVIDER_MAP = {
     PlottableDataType.GEXP: GEXPFeatureProvider,
-    PlottableDataType.GNAB: GNABFeatureProvider
+    PlottableDataType.GNAB: GNABFeatureProvider,
+    PlottableDataType.METH: METHFeatureProvider
 }
 
 # noinspection PyPackageRequirements
 FEATURE_TYPE_TO_FEATURE_DEF_PROVIDER_MAP = {
     PlottableDataType.GEXP: (GEXPFeatureDefConfig, GEXPFeatureDefProvider, GEXPFeatureProvider, GEXP_BIGQUERY_CONFIG),
-    PlottableDataType.GNAB: (GNABFeatureDefConfig, GNABFeatureDefProvider, GNABFeatureProvider, GNAB_BIGQUERY_CONFIG)
+    PlottableDataType.GNAB: (GNABFeatureDefConfig, GNABFeatureDefProvider, GNABFeatureProvider, GNAB_BIGQUERY_CONFIG),
+    PlottableDataType.METH: (METHFeatureDefConfig, METHFeatureDefProvider, METHFeatureProvider, METH_BIGQUERY_CONFIG)
 }
 
 

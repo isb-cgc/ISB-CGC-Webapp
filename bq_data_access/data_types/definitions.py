@@ -24,10 +24,12 @@ from enum import Enum
 class PlottableDataType(Enum):
     GEXP = 1
     GNAB = 2
+    METH = 3
 
 
 FEATURE_ID_TO_TYPE_MAP = {
     'gexp': PlottableDataType.GEXP,
-    'gnab': PlottableDataType.GNAB
+    'gnab': PlottableDataType.GNAB,
+    'meth': PlottableDataType.METH
 }
 
