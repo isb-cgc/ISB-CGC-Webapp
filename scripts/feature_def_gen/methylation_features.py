@@ -53,7 +53,7 @@ class METHTableConfig(object):
         return cls(table_id, genomic_build, value_field, internal_table_id, program)
 
 
-class METHFeatureDefConfig(object):
+class METHDataSourceConfig(object):
     """
     Configuration class for METH feature definitions.
     """

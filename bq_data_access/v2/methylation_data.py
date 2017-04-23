@@ -23,7 +23,7 @@ from bq_data_access.v2.errors import FeatureNotFoundException
 from bq_data_access.v2.feature_value_types import ValueType, DataTypes
 from bq_data_access.v2.utils import DurationLogged
 from bq_data_access.data_types.methylation import BIGQUERY_CONFIG
-from scripts.feature_def_gen.methylation_features import METHFeatureDefConfig
+from scripts.feature_def_gen.methylation_features import METHDataSourceConfig
 
 METH_FEATURE_TYPE = 'METH'
 IDENTIFIER_COLUMN_NAME = 'sample_id'
@@ -44,7 +44,7 @@ def get_feature_type():
 
 
 class METHFeatureDef(object):
-    config_instance = METHFeatureDefConfig.from_dict(BIGQUERY_CONFIG)
+    config_instance = METHDataSourceConfig.from_dict(BIGQUERY_CONFIG)
 
     def __init__(self, probe, platform, internal_table_id):
         self.probe = probe
@@ -58,7 +58,7 @@ class METHFeatureDef(object):
 
     @classmethod
     def from_feature_id(cls, feature_id):
-        config_instance = METHFeatureDefConfig.from_dict(BIGQUERY_CONFIG)
+        config_instance = METHDataSourceConfig.from_dict(BIGQUERY_CONFIG)
 
         # Example ID: METH:cg08246323:HumanMethylation450:hg19_chr16
         regex = re_compile("^v2:METH:"
@@ -85,13 +85,13 @@ class METHFeatureDef(object):
         )
 
 
-class METHFeatureProvider(object):
+class METHDataQueryHandler(object):
     TABLES = TABLES
 
     def __init__(self, feature_id):
         self.feature_def = None
         self.parse_internal_feature_id(feature_id)
-        self.config_instance = METHFeatureDefConfig.from_dict(BIGQUERY_CONFIG)
+        self.config_instance = METHDataSourceConfig.from_dict(BIGQUERY_CONFIG)
 
     def get_value_type(self):
         return ValueType.FLOAT

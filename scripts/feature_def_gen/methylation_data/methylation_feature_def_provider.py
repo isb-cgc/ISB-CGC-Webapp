@@ -39,7 +39,7 @@ def build_internal_feature_id(feature_type, probe, platform, chromosome, table_c
     )
 
 
-class METHFeatureDefProvider(FeatureDefBigqueryProvider):
+class METHFeatureDefBuilder(FeatureDefBigqueryProvider):
     VALUES = ['beta_value']
     MYSQL_SCHEMA = [
         {
