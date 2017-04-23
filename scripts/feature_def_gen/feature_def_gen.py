@@ -89,12 +89,17 @@ def save_csv(data_rows, schema, csv_path, include_header=False):
 @click.argument('data_type', type=str)
 @click.option('--config_json', type=str)
 def print_query(data_type, config_json):
+    feature_type = FeatureDataTypeHelper.get_type(data_type)
+    logging.info("Feature type: {}".format(str(feature_type)))
+    config_class = FeatureDataTypeHelper.get_feature_def_config_from_data_type(feature_type)
+    provider_class = FeatureDataTypeHelper.get_feature_def_provider_from_data_type(feature_type)
+
     if config_json is not None:
         config_instance = load_config_from_path(data_type, config_json)
     else:
-        config_instance = GEXPFeatureDefConfig.from_dict(GEXP_BIGQUERY_CONFIG)
+        config_dict = FeatureDataTypeHelper.get_feature_def_default_config_dict_from_data_type(feature_type)
+        config_instance = config_class.from_dict(config_dict)
 
-    _, provider_class = data_type_registry[data_type]
     provider = provider_class(config_instance)
     query = provider.build_query(config_instance)
     print(query)
