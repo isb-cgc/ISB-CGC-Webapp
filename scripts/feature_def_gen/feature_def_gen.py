@@ -17,26 +17,17 @@ limitations under the License.
 """
 
 from csv import DictWriter
+from json import load as load_json
 import logging
 from StringIO import StringIO
 from time import sleep
-from os.path import join as path_join
 
 import click
 
-from gexp_features import GEXPFeatureDefConfig
-from gexp_data.gexp_feature_def_provider import GEXPFeatureDefProvider
-from bq_data_access.data_types.gexp import BIGQUERY_CONFIG as GEXP_BIGQUERY_CONFIG
-
-from scripts.feature_def_gen.feature_def_utils import load_config_json
 from bq_data_access.v2.feature_id_utils import FeatureDataTypeHelper
 
 
 logging.basicConfig(level=logging.INFO)
-
-data_type_registry = {
-    'gexp': (GEXPFeatureDefConfig, GEXPFeatureDefProvider)
-}
 
 
 def run_query(project_id, provider, config):
@@ -63,10 +54,9 @@ def run_query(project_id, provider, config):
     return query_result
 
 
-def load_config_from_path(data_type, config_json):
-    config_class, _ = data_type_registry[data_type]
-    config = load_config_json(config_json, config_class)
-    return config
+def load_config_from_path(config_class, config_json_path):
+    config_dict = load_json(open(config_json_path, 'r'))
+    return config_class.from_dict(config_dict)
 
 
 def get_csv_object(data_rows, schema, include_header=False):
@@ -95,7 +85,7 @@ def print_query(data_type, config_json):
     provider_class = FeatureDataTypeHelper.get_feature_def_provider_from_data_type(feature_type)
 
     if config_json is not None:
-        config_instance = load_config_from_path(data_type, config_json)
+        config_instance = load_config_from_path(config_class, config_json)
     else:
         config_dict = FeatureDataTypeHelper.get_feature_def_default_config_dict_from_data_type(feature_type)
         config_instance = config_class.from_dict(config_dict)
@@ -117,7 +107,7 @@ def run(project_id, data_type, csv_path, config_json):
     provider_class = FeatureDataTypeHelper.get_feature_def_provider_from_data_type(feature_type)
 
     if config_json is not None:
-        config_instance = load_config_from_path(data_type, config_json)
+        config_instance = load_config_from_path(config_class, config_json)
     else:
         config_dict = FeatureDataTypeHelper.get_feature_def_default_config_dict_from_data_type(feature_type)
         config_instance = config_class.from_dict(config_dict)
