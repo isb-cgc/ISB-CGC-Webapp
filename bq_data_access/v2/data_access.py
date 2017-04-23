@@ -19,11 +19,10 @@ limitations under the License.
 import logging
 from time import sleep
 
+from bq_data_access.bigquery_cohorts import BigQueryCohortStorageSettings
+from bq_data_access.v2.feature_data_provider import FeatureDataProvider
 from bq_data_access.v2.feature_id_utils import FeatureProviderFactory
 from bq_data_access.v2.errors import FeatureNotFoundException
-
-from django.conf import settings
-from google_helpers.bigquery_service import get_bigquery_service
 
 
 def is_valid_feature_identifier(feature_id):
@@ -49,7 +48,7 @@ def is_valid_feature_identifier(feature_id):
         return is_valid
 
 
-def get_feature_vector(feature_id, cohort_id_array):
+def get_feature_vector(feature_id, cohort_id_array, cohort_settings):
     """
     Fetches the data from BigQuery tables for a given feature identifier and
     one or more stored cohorts. Returns the intersection of the samples defined
@@ -66,7 +65,6 @@ def get_feature_vector(feature_id, cohort_id_array):
         Data as an array of dicts.
     """
     provider = FeatureProviderFactory.from_feature_id(feature_id)
-    cohort_settings = settings.GET_BQ_COHORT_SETTINGS()
 
     result = provider.get_data(cohort_id_array, cohort_settings.dataset_id, cohort_settings.table_id)
 
@@ -83,18 +81,28 @@ def get_feature_vector(feature_id, cohort_id_array):
     return provider.get_value_type(), items
 
 
-def submit_tcga_job(param_obj, bigquery_service, cohort_settings):
-    provider = FeatureProviderFactory.from_parameters(param_obj, bigquery_service=bigquery_service)
+def submit_tcga_job(param_obj, project_id_number, bigquery_client, cohort_settings):
+    query_provider = FeatureProviderFactory.from_parameters(param_obj, bigquery_service=bigquery_client)
+    bigquery_runner = FeatureDataProvider(
+        query_provider, bigquery_service=bigquery_client, project_id_number=project_id_number)
+
     feature_id = param_obj.feature_id
     cohort_id_array = param_obj.cohort_id_array
     project_id_array = param_obj.project_id_array
-    job_reference = provider.get_data_job_reference(cohort_id_array, cohort_settings.dataset_id, cohort_settings.table_id, project_id_array)
+    program_set = param_obj.program_set
 
-    logging.info("Submitted TCGA {job_id}: {fid} - {cohorts}".format(job_id=job_reference['jobId'], fid=feature_id,
-                                                                             cohorts=str(cohort_id_array)))
+    job_reference = bigquery_runner.get_data_job_reference(
+        program_set, cohort_settings.table_id, cohort_id_array, project_id_array
+    )
+
+    logging.info("Submitted TCGA {job_id}: {fid} - {cohorts}".format(
+        job_id=job_reference['jobId'], fid=feature_id, cohorts=str(cohort_id_array))
+    )
+
     job_item = {
         'feature_id': feature_id,
-        'provider': provider,
+        'provider': bigquery_runner,
+        'query_support': query_provider,
         'ready': False,
         'job_reference': job_reference
     }
@@ -115,6 +123,7 @@ def get_submitted_job_results(provider_array, project_id, poll_retry_limit, skip
 
         for item in provider_array:
             provider = item['provider']
+            query_support = item['query_support']
             feature_id = item['feature_id']
             is_finished = provider.is_bigquery_job_finished(project_id)
             logging.info("Status {job_id}: {status}".format(job_id=item['job_reference']['jobId'],
@@ -125,9 +134,9 @@ def get_submitted_job_results(provider_array, project_id, poll_retry_limit, skip
                 query_result = provider.download_and_unpack_query_result()
 
                 if not skip_formatting_for_plot:
-                    data = format_query_result_for_plot(provider, query_result)
+                    data = format_query_result_for_plot(query_support, query_result)
 
-                    value_type = provider.get_value_type()
+                    value_type = query_support.get_value_type()
                     if feature_id not in result:
                         result[feature_id] = {
                             'type': value_type,
@@ -152,12 +161,12 @@ def get_submitted_job_results(provider_array, project_id, poll_retry_limit, skip
     return result
 
 
-def format_query_result_for_plot(provider_instance, query_result):
+def format_query_result_for_plot(query_support_instance, query_result):
     data = []
 
     for data_point in query_result:
         data_item = {key: data_point[key] for key in ['case_id', 'sample_id', 'aliquot_id']}
-        value = str(provider_instance.process_data_point(data_point))
+        value = str(query_support_instance.process_data_point(data_point))
 
         if value is None:
             value = 'NA'
@@ -167,21 +176,41 @@ def format_query_result_for_plot(provider_instance, query_result):
     return data
 
 
-def get_feature_vectors_tcga_only(params_array, poll_retry_limit=20, skip_formatting_for_plot=False):
-    bigquery_service = get_bigquery_service()
-    provider_array = []
+class FeatureVectorBigQueryBuilder(object):
+    def __init__(self, project_id_number, cohort_settings, big_query_service_support):
+        self.project_id_number = project_id_number
+        self.cohort_settings = cohort_settings
+        self.big_query_service_support = big_query_service_support
 
-    cohort_settings = settings.GET_BQ_COHORT_SETTINGS()
+    def get_feature_vectors_tcga_only(self, params_array, poll_retry_limit=20, skip_formatting_for_plot=False):
+        bigquery_client = self.big_query_service_support.get_client()
+        provider_array = []
 
-    # Submit jobs
-    for parameter_object in params_array:
-        job_item = submit_tcga_job(parameter_object, bigquery_service, cohort_settings)
-        provider_array.append(job_item)
+        # Submit jobs
+        for parameter_object in params_array:
+            job_item = submit_tcga_job(parameter_object, self.project_id_number, bigquery_client, self.cohort_settings)
+            provider_array.append(job_item)
 
-    project_id = settings.BQ_PROJECT_ID
-    result = get_submitted_job_results(provider_array, project_id, poll_retry_limit, skip_formatting_for_plot)
+        result = get_submitted_job_results(provider_array, self.project_id_number, poll_retry_limit, skip_formatting_for_plot)
 
-    return result
+        return result
+
+    @classmethod
+    def build_from_django_settings(cls):
+        from django.conf import settings as django_settings
+        project_id_number = django_settings.BQ_PROJECT_ID
+        bigquery_cohort_dataset = django_settings.COHORT_DATASET_ID
+        biquery_cohort_table = django_settings.BIGQUERY_COHORT_TABLE_ID
+
+        cohort_settings = BigQueryCohortStorageSettings(
+            bigquery_cohort_dataset,
+            biquery_cohort_table
+        )
+
+        return cls(project_id_number, cohort_settings)
+
+
+
 
 
 
