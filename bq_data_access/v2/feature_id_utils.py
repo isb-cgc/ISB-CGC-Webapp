@@ -42,16 +42,17 @@ FEATURE_TYPE_TO_PROVIDER_MAP = {
 
 # noinspection PyPackageRequirements
 FEATURE_TYPE_TO_FEATURE_DEF_PROVIDER_MAP = {
-    PlottableDataType.GEXP: (GEXPFeatureDefConfig, GEXPFeatureDefProvider, GEXP_BIGQUERY_CONFIG),
-    PlottableDataType.GNAB: (GNABFeatureDefConfig, GNABFeatureDefProvider, GNAB_BIGQUERY_CONFIG)
+    PlottableDataType.GEXP: (GEXPFeatureDefConfig, GEXPFeatureDefProvider, GEXPFeatureProvider, GEXP_BIGQUERY_CONFIG),
+    PlottableDataType.GNAB: (GNABFeatureDefConfig, GNABFeatureDefProvider, GNABFeatureProvider, GNAB_BIGQUERY_CONFIG)
 }
 
 
 class FeatureIdQueryDescription(object):
-    def __init__(self, feature_id, cohort_id_array, project_id_array):
+    def __init__(self, feature_id, cohort_id_array, project_id_array, program_set):
         self.feature_id = feature_id
         self.cohort_id_array = cohort_id_array
         self.project_id_array = project_id_array
+        self.program_set = program_set
 
 
 class ProviderClassQueryDescription(object):
@@ -98,15 +99,15 @@ class FeatureProviderFactory(object):
         """
         feature_type_prefix = cls.get_feature_type_string(feature_id)
         if feature_type_prefix is None:
+            logger.error("FeatureProviderFactory.from_feature_id: Unknown type: " + str(feature_id))
+            raise FeatureNotFoundException(feature_id)
+
+        if feature_type_prefix.lower() not in FEATURE_ID_TO_TYPE_MAP:
             logger.error("FeatureProviderFactory.from_feature_id: invalid feature ID: " + str(feature_id))
             raise FeatureNotFoundException(feature_id)
 
-        if feature_type_prefix not in FEATURE_ID_TO_TYPE_MAP:
-            logger.error("FeatureProviderFactory.from_feature_id: invalid feature ID: " + str(feature_id))
-            raise FeatureNotFoundException(feature_id)
-
-        feature_type = FEATURE_ID_TO_TYPE_MAP[feature_type_prefix]
-        return FEATURE_TYPE_TO_PROVIDER_MAP[feature_type]
+        feature_type = FEATURE_ID_TO_TYPE_MAP[feature_type_prefix.lower()]
+        return FeatureDataTypeHelper.get_feature_data_provider_from_data_type(feature_type)
 
     @classmethod
     def from_feature_id(cls, feature_id, **kwargs):
@@ -130,16 +131,20 @@ class FeatureDataTypeHelper(object):
 
     @classmethod
     def get_feature_def_config_from_data_type(cls, data_type):
-        config_class, _, _ = FEATURE_TYPE_TO_FEATURE_DEF_PROVIDER_MAP[data_type]
+        config_class, _, _, _ = FEATURE_TYPE_TO_FEATURE_DEF_PROVIDER_MAP[data_type]
         return config_class
 
     @classmethod
     def get_feature_def_provider_from_data_type(cls, data_type):
-        _, provider_class, _ = FEATURE_TYPE_TO_FEATURE_DEF_PROVIDER_MAP[data_type]
+        _, provider_class, _, _ = FEATURE_TYPE_TO_FEATURE_DEF_PROVIDER_MAP[data_type]
         return provider_class
 
     @classmethod
     def get_feature_def_default_config_dict_from_data_type(cls, data_type):
-        _, _, config_dict = FEATURE_TYPE_TO_FEATURE_DEF_PROVIDER_MAP[data_type]
+        _, _, _, config_dict = FEATURE_TYPE_TO_FEATURE_DEF_PROVIDER_MAP[data_type]
         return config_dict
 
+    @classmethod
+    def get_feature_data_provider_from_data_type(cls, data_type):
+        _, _, data_provider_class, _ = FEATURE_TYPE_TO_FEATURE_DEF_PROVIDER_MAP[data_type]
+        return data_provider_class
