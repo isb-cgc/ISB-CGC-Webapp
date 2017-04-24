@@ -44,6 +44,11 @@ from bq_data_access.v2.protein_data import RPPADataQueryHandler
 from bq_data_access.data_types.rppa import BIGQUERY_CONFIG as RPPA_BIGQUERY_CONFIG
 from scripts.feature_def_gen.protein_data.protein_feature_def_builder import RPPAFeatureDefBuilder
 from scripts.feature_def_gen.protein_features import RPPADataSourceConfig
+# CNVR
+from bq_data_access.v2.copynumber_data import CNVRDataQueryHandler
+from bq_data_access.data_types.cnvr import BIGQUERY_CONFIG as CNVR_BIGQUERY_CONFIG
+from scripts.feature_def_gen.copynumber_data.copynumber_feature_def_builder import CNVRFeatureDefBuilder
+from scripts.feature_def_gen.copynumber_features import CNVRDataSourceConfig
 
 FEATURE_TYPE_TO_PROVIDER_MAP = {
     PlottableDataType.GEXP: GEXPDataQueryHandler,
@@ -57,7 +62,8 @@ FEATURE_TYPE_TO_FEATURE_DEF_PROVIDER_MAP = {
     PlottableDataType.GEXP: (GEXPDataSourceConfig, GEXPFeatureDefBuilder, GEXPDataQueryHandler, GEXP_BIGQUERY_CONFIG),
     PlottableDataType.GNAB: (GNABDataSourceConfig, GNABFeatureDefBuilder, GNABDataQueryHandler, GNAB_BIGQUERY_CONFIG),
     PlottableDataType.METH: (METHDataSourceConfig, METHFeatureDefBuilder, METHDataQueryHandler, METH_BIGQUERY_CONFIG),
-    PlottableDataType.RPPA: (RPPADataSourceConfig, RPPAFeatureDefBuilder, RPPADataQueryHandler, RPPA_BIGQUERY_CONFIG)
+    PlottableDataType.RPPA: (RPPADataSourceConfig, RPPAFeatureDefBuilder, RPPADataQueryHandler, RPPA_BIGQUERY_CONFIG),
+    PlottableDataType.CNVR: (CNVRDataSourceConfig, CNVRFeatureDefBuilder, CNVRDataQueryHandler, CNVR_BIGQUERY_CONFIG)
 }
 
 

@@ -26,12 +26,14 @@ class PlottableDataType(Enum):
     GNAB = 2
     METH = 3
     RPPA = 4
+    CNVR = 5
 
 
 FEATURE_ID_TO_TYPE_MAP = {
     'gexp': PlottableDataType.GEXP,
     'gnab': PlottableDataType.GNAB,
     'meth': PlottableDataType.METH,
-    'rppa': PlottableDataType.RPPA
+    'rppa': PlottableDataType.RPPA,
+    'cnvr': PlottableDataType.CNVR
 }
 

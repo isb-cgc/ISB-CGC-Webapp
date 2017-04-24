@@ -25,31 +25,12 @@ from scripts.feature_def_gen.feature_def_utils import DataSetConfig
 logger = logging
 
 
-class CNVFeatureDefConfig(object):
-    def __init__(self, project_id, genomic_reference, gencode_table, target_config, out_path):
-        self.project_id = project_id
-        self.genomic_reference_config = genomic_reference
-        self.gencode_table = gencode_table
-        self.target_config = target_config
-        self.output_csv_path = out_path
-
-    @classmethod
-    def from_dict(cls, param):
-        project_id = param['project_id']
-        genomic_reference_config = DataSetConfig.from_dict(param['genomic_reference_config'])
-        gencode_table = param['gencode_table']
-        target_config = DataSetConfig.from_dict(param['target_config'])
-        output_csv_path = param['output_csv_path']
-
-        return cls(project_id, genomic_reference_config, gencode_table, target_config,  output_csv_path)
-
-
 # TODO remove duplicate code
 def get_feature_type():
     return 'CNVR'
 
 
-class CNVFeatureDefBuilder(FeatureDefBigqueryProvider):
+class CNVRFeatureDefBuilder(FeatureDefBigqueryProvider):
     BQ_JOB_POLL_SLEEP_TIME = 10
     BQ_JOB_POLL_MAX_RETRIES = 20
 
@@ -66,6 +47,14 @@ class CNVFeatureDefBuilder(FeatureDefBigqueryProvider):
             'name': 'internal_feature_id',
             'type': 'string'
         },
+        {
+            'name': 'program_name',
+            'type': 'string'
+        },
+        {
+            'name': 'genomic_build',
+            'type': 'string'
+        },
     ]
 
     def get_mysql_schema(self):
@@ -73,24 +62,23 @@ class CNVFeatureDefBuilder(FeatureDefBigqueryProvider):
 
     def build_query(self, config):
         query_template = ("SELECT gene_name, seq_name, start, end \
-                           FROM [{genomic_reference_project_name}:{genomic_reference_dataset_name}.{gencode_table}] \
+                           FROM [{gencode_reference_table_id}] \
                            WHERE feature=\'gene\'")
 
         query_str = query_template.format(
-            genomic_reference_project_name=config.genomic_reference_config.project_name,
-            genomic_reference_dataset_name=config.genomic_reference_config.dataset_name,
-            gencode_table=config.gencode_table
+            gencode_reference_table_id=config.gencode_reference_table_id
         )
 
         return query_str
 
-    def build_internal_feature_id(self, feature_type, value_field, chromosome, start, end):
-        return '{feature_type}:{value}:{chr}:{start}:{end}'.format(
+    def build_internal_feature_id(self, feature_type, value_field, chromosome, start, end, table_config):
+        return 'v2:{feature_type}:{value}:{chr}:{start}:{end}:{internal_table_id}'.format(
             feature_type=feature_type,
             value=value_field,
             chr=chromosome,
             start=start,
-            end=end
+            end=end,
+            internal_table_id=table_config.internal_table_id
         )
 
     def unpack_query_response(self, row_item_array):
@@ -101,17 +89,19 @@ class CNVFeatureDefBuilder(FeatureDefBigqueryProvider):
         for row in row_item_array:
             gene_name = row['f'][0]['v']
             seqname = row['f'][1]['v']
-            # TODO validation
             chromosome = seqname[3:]
             start = row['f'][2]['v']
             end = row['f'][3]['v']
 
-            for value_field in VALUES:
-                result.append({
-                    'gene_name': gene_name,
-                    'value_field': value_field,
-                    'internal_feature_id': self.build_internal_feature_id(feature_type, value_field, chromosome, start, end)
-                })
+            for table_config in self.config.data_table_list:
+                for value_field in VALUES:
+                    result.append({
+                        'gene_name': gene_name,
+                        'value_field': value_field,
+                        'genomic_build': table_config.genomic_build,
+                        'program_name': table_config.program,
+                        'internal_feature_id': self.build_internal_feature_id(feature_type, value_field, chromosome, start, end, table_config)
+                    })
 
         return result
 
