@@ -18,27 +18,13 @@ limitations under the License.
 
 import logging
 
-from feature_def_bq_provider import FeatureDefBigqueryProvider
+from scripts.feature_def_gen.feature_def_bq_provider import FeatureDefBigqueryProvider
+from bq_data_access.data_types.definitions import PlottableDataType
 
-from scripts.feature_def_gen.feature_def_utils import DataSetConfig
 
 logger = logging
-VALUE_FIELD_NUM_MUTATIONS = 'num_mutations'
-VALUES = frozenset(['variant_classification', 'variant_type', 'sequence_source', VALUE_FIELD_NUM_MUTATIONS])
-FIELDNAMES = ['gene_name', 'protein_name', 'value_field', 'internal_feature_id']
 
-
-class RPPAFeatureDefConfig(object):
-    def __init__(self, target_config, rppa_table_name):
-        self.target_config = target_config
-        self.rppa_table_name = rppa_table_name
-
-    @classmethod
-    def from_dict(cls, param):
-        target_config = DataSetConfig.from_dict(param['target_config'])
-        table_name = param['rppa_table_name']
-
-        return cls(target_config, table_name)
+RPPA_FEATURE_TYPE = PlottableDataType.RPPA
 
 
 # TODO remove duplicate code
@@ -46,15 +32,16 @@ def get_feature_type():
     return 'RPPA'
 
 
-def build_internal_feature_id(feature_type, gene, protein):
-    return '{feature_type}:{gene}:{protein}'.format(
+def build_internal_feature_id(feature_type, gene, protein, table_config):
+    return 'v2:{feature_type}:{gene}:{protein}:{internal_table_id}'.format(
         feature_type=feature_type,
         gene=gene,
-        protein=protein
+        protein=protein,
+        internal_table_id=table_config.internal_table_id
     )
 
 
-class RPPAFeatureDefBuilder(object):
+class RPPAFeatureDefBuilder(FeatureDefBigqueryProvider):
     MYSQL_SCHEMA = [
         {
             'name': 'gene_name',
@@ -82,41 +69,65 @@ class RPPAFeatureDefBuilder(object):
         },
     ]
 
+    TABLE_ID_FIELD = "internal_feature_id"
+
     def get_mysql_schema(self):
         return self.MYSQL_SCHEMA
 
     def build_query(self, config):
-        query_template = \
-            'SELECT gene_name, protein_name ' \
-            'FROM [{main_project_name}:{main_dataset_name}.{table_name}] ' \
-            'WHERE gene_name IS NOT NULL ' \
-            'GROUP BY gene_name, protein_name'
+        outer_template = \
+            'SELECT internal_table_id, gene_label, protein_name \n' \
+            'FROM \n' \
+            '{subquery_stmt}'
 
-        query_str = query_template.format(
-            main_project_name=config.target_config.project_name,
-            main_dataset_name=config.target_config.dataset_name,
-            table_name=config.rppa_table_name
-        )
+        table_queries = []
+        for table_config in config.data_table_list:
+            query_template = \
+                '( ' \
+                'SELECT \'{table_id_field}\' AS internal_table_id, {gene_label_field} AS gene_label, protein_name ' \
+                'FROM [{table_id}] ' \
+                'WHERE {gene_label_field} IS NOT NULL ' \
+                'GROUP BY gene_label, protein_name' \
+                ')'
 
-        feature_type = get_feature_type()
-        logger.debug(str(feature_type) + " SQL: " + query_str)
+            query_str = query_template.format(
+                table_id=table_config.table_id,
+                table_id_field=table_config.internal_table_id,
+                gene_label_field=table_config.gene_label_field
+            )
 
-        return query_str
+            table_queries.append(query_str)
+
+        sq_stmt = ',\n'.join(table_queries)
+        sq_stmt += ';'
+
+        outer_query = outer_template.format(subquery_stmt=sq_stmt)
+        return outer_query
+
+    def build_table_mapping(self, config):
+        result = {}
+        for table_item in config.data_table_list:
+            result[table_item.internal_table_id] = table_item
+        return result
 
     def unpack_query_response(self, row_item_array):
+        table_config_mapping = self.build_table_mapping(self.config)
         feature_type = get_feature_type()
         result = []
         for row in row_item_array:
-            gene_name = row['f'][0]['v']
-            protein_name = row['f'][1]['v']
+            internal_table_id = row['f'][0]['v']
+            gene_name = row['f'][1]['v']
+            protein_name = row['f'][2]['v']
+            table_config = table_config_mapping[internal_table_id]
 
-            for value_field in VALUES:
-                result.append({
-                    'gene_name': gene_name,
-                    'protein_name': protein_name,
-                    'value_field': value_field,
-                    'internal_feature_id': build_internal_feature_id(feature_type, gene_name, protein_name)
-                })
+            result.append({
+                'gene_name': gene_name,
+                'protein_name': protein_name,
+                'value_field': table_config.value_field,
+                'internal_feature_id': build_internal_feature_id(feature_type, gene_name, protein_name, table_config),
+                'genomic_build': table_config.genomic_build,
+                'program_name': table_config.program
+            })
 
         return result
 

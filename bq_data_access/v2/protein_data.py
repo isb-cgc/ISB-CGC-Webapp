@@ -19,14 +19,12 @@ limitations under the License.
 import logging
 from re import compile as re_compile
 
-from django.conf import settings
-
 from bq_data_access.v2.errors import FeatureNotFoundException
 from bq_data_access.v2.feature_value_types import ValueType, DataTypes
-from bq_data_access.v2.feature_data_provider import FeatureDataProvider
 from bq_data_access.v2.utils import DurationLogged
 from bq_data_access.data_types.rppa import BIGQUERY_CONFIG
-from scripts.feature_def_gen.protein_features import RPPAFeatureDefConfig
+from scripts.feature_def_gen.protein_features import RPPADataSourceConfig
+
 
 RPPA_FEATURE_TYPE = 'RPPA'
 
@@ -59,14 +57,13 @@ class RPPAFeatureDef(object):
         return cls(gene_label, protein_name)
 
 
-class RPPAFeatureProvider(FeatureDataProvider):
-    def __init__(self, feature_id, **kwargs):
+class RPPADataQueryHandler(object):
+    def __init__(self, feature_id):
         self.feature_def = None
         self.table_info = None
         self.table_name = ''
-        self.config_instance = RPPAFeatureDefConfig.from_dict(BIGQUERY_CONFIG)
+        self.config_instance = RPPADataSourceConfig.from_dict(BIGQUERY_CONFIG)
         self.parse_internal_feature_id(feature_id)
-        super(RPPAFeatureProvider, self).__init__(**kwargs)
 
     def get_value_type(self):
         return ValueType.FLOAT

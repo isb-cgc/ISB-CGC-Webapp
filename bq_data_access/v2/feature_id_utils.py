@@ -39,18 +39,25 @@ from bq_data_access.v2.methylation_data import METHDataQueryHandler
 from bq_data_access.data_types.methylation import BIGQUERY_CONFIG as METH_BIGQUERY_CONFIG
 from scripts.feature_def_gen.methylation_data.methylation_feature_def_provider import METHFeatureDefBuilder
 from scripts.feature_def_gen.methylation_features import METHDataSourceConfig
+# RPPA
+from bq_data_access.v2.protein_data import RPPADataQueryHandler
+from bq_data_access.data_types.rppa import BIGQUERY_CONFIG as RPPA_BIGQUERY_CONFIG
+from scripts.feature_def_gen.protein_data.protein_feature_def_builder import RPPAFeatureDefBuilder
+from scripts.feature_def_gen.protein_features import RPPADataSourceConfig
 
 FEATURE_TYPE_TO_PROVIDER_MAP = {
     PlottableDataType.GEXP: GEXPDataQueryHandler,
     PlottableDataType.GNAB: GNABDataQueryHandler,
-    PlottableDataType.METH: METHDataQueryHandler
+    PlottableDataType.METH: METHDataQueryHandler,
+    PlottableDataType.RPPA: RPPADataQueryHandler
 }
 
 # noinspection PyPackageRequirements
 FEATURE_TYPE_TO_FEATURE_DEF_PROVIDER_MAP = {
     PlottableDataType.GEXP: (GEXPDataSourceConfig, GEXPFeatureDefBuilder, GEXPDataQueryHandler, GEXP_BIGQUERY_CONFIG),
     PlottableDataType.GNAB: (GNABDataSourceConfig, GNABFeatureDefBuilder, GNABDataQueryHandler, GNAB_BIGQUERY_CONFIG),
-    PlottableDataType.METH: (METHDataSourceConfig, METHFeatureDefBuilder, METHDataQueryHandler, METH_BIGQUERY_CONFIG)
+    PlottableDataType.METH: (METHDataSourceConfig, METHFeatureDefBuilder, METHDataQueryHandler, METH_BIGQUERY_CONFIG),
+    PlottableDataType.RPPA: (RPPADataSourceConfig, RPPAFeatureDefBuilder, RPPADataQueryHandler, RPPA_BIGQUERY_CONFIG)
 }
 
 
