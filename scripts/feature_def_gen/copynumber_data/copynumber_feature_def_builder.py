@@ -49,7 +49,7 @@ def get_feature_type():
     return 'CNVR'
 
 
-class CNVFeatureDefProvider(FeatureDefBigqueryProvider):
+class CNVFeatureDefBuilder(FeatureDefBigqueryProvider):
     BQ_JOB_POLL_SLEEP_TIME = 10
     BQ_JOB_POLL_MAX_RETRIES = 20
 
