@@ -19,12 +19,9 @@ limitations under the License.
 import logging
 
 from scripts.feature_def_gen.feature_def_bq_provider import FeatureDefBigqueryProvider
-from bq_data_access.data_types.definitions import PlottableDataType
 
 
 logger = logging
-
-RPPA_FEATURE_TYPE = PlottableDataType.RPPA
 
 
 # TODO remove duplicate code
