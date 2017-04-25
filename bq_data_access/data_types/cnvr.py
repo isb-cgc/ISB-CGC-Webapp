@@ -1,7 +1,7 @@
 BIGQUERY_CONFIG = {
-    "gencode_reference_table_id": "isb-cgc:genome_reference.GENCODE_v19",
     "tables": [
         {
+            "gencode_reference_table_id": "isb-cgc:genome_reference.GENCODE_v19",
             "genomic_build": "hg19",
             "value_field": "segment_mean",
             "table_id": "isb-cgc:TCGA_hg19_data_v0.Copy_Number_Segment_Masked",
@@ -10,6 +10,7 @@ BIGQUERY_CONFIG = {
             "program": "tcga"
         },
         {
+            "gencode_reference_table_id": "isb-cgc:genome_reference.GENCODE_v22",
             "genomic_build": "hg38",
             "value_field": "segment_mean",
             "table_id": "isb-cgc:TCGA_hg38_data_v0.Copy_Number_Segment_Masked",

@@ -18,9 +18,8 @@ limitations under the License.
 
 import logging
 
-from feature_def_bq_provider import FeatureDefBigqueryProvider
+from scripts.feature_def_gen.feature_def_bq_provider import FeatureDefBigqueryProvider
 
-from scripts.feature_def_gen.feature_def_utils import DataSetConfig
 
 logger = logging
 
@@ -57,19 +56,42 @@ class CNVRFeatureDefBuilder(FeatureDefBigqueryProvider):
         },
     ]
 
+    def __init__(self, config, **kwargs):
+        super(CNVRFeatureDefBuilder, self).__init__(config, **kwargs)
+
+        self.table_mapping = {}
+        for index, table_item in enumerate(self.config.data_table_list):
+            self.table_mapping[index] = table_item
+
     def get_mysql_schema(self):
         return self.MYSQL_SCHEMA
 
     def build_query(self, config):
-        query_template = ("SELECT gene_name, seq_name, start, end \
-                           FROM [{gencode_reference_table_id}] \
-                           WHERE feature=\'gene\'")
+        outer_template = \
+            'SELECT table_index, gene_name, seq_name, start, end \n' \
+            'FROM \n' \
+            '{subquery_stmt}'
 
-        query_str = query_template.format(
-            gencode_reference_table_id=config.gencode_reference_table_id
-        )
+        table_queries = []
+        for index, table_config in enumerate(config.data_table_list):
+            query_template = ("("
+                              "SELECT {index} AS table_index, gene_name, seq_name, start, end \
+                               FROM [{gencode_reference_table_id}] \
+                               WHERE feature=\'gene\'"
+                              ")")
 
-        return query_str
+            query_str = query_template.format(
+                index=index,
+                gencode_reference_table_id=table_config.gencode_reference_table_id
+            )
+
+            table_queries.append(query_str)
+
+        sq_stmt = ',\n'.join(table_queries)
+        sq_stmt += ';'
+
+        outer_query = outer_template.format(subquery_stmt=sq_stmt)
+        return outer_query
 
     def build_internal_feature_id(self, feature_type, value_field, chromosome, start, end, table_config):
         return 'v2:{feature_type}:{value}:{chr}:{start}:{end}:{internal_table_id}'.format(
@@ -83,25 +105,27 @@ class CNVRFeatureDefBuilder(FeatureDefBigqueryProvider):
 
     def unpack_query_response(self, row_item_array):
         feature_type = get_feature_type()
-        VALUES = ['avg_segment_mean', 'std_dev_segment_mean', 'min_segment_mean', 'max_segment_mean', 'num_segments']
+        VALUES = ['avg_segment_mean', 'min_segment_mean', 'max_segment_mean', 'num_segments']
 
         result = []
         for row in row_item_array:
-            gene_name = row['f'][0]['v']
-            seqname = row['f'][1]['v']
+            table_index = int(row['f'][0]['v'])
+            gene_name = row['f'][1]['v']
+            seqname = row['f'][2]['v']
             chromosome = seqname[3:]
-            start = row['f'][2]['v']
-            end = row['f'][3]['v']
+            start = row['f'][3]['v']
+            end = row['f'][4]['v']
 
-            for table_config in self.config.data_table_list:
-                for value_field in VALUES:
-                    result.append({
-                        'gene_name': gene_name,
-                        'value_field': value_field,
-                        'genomic_build': table_config.genomic_build,
-                        'program_name': table_config.program,
-                        'internal_feature_id': self.build_internal_feature_id(feature_type, value_field, chromosome, start, end, table_config)
-                    })
+            table_config = self.table_mapping[table_index]
+
+            for value_field in VALUES:
+                result.append({
+                    'gene_name': gene_name,
+                    'value_field': value_field,
+                    'genomic_build': table_config.genomic_build,
+                    'program_name': table_config.program,
+                    'internal_feature_id': self.build_internal_feature_id(feature_type, value_field, chromosome, start, end, table_config)
+                })
 
         return result
 
