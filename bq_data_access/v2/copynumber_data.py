@@ -41,7 +41,7 @@ class CNVRFeatureDef(object):
     # Example ID: CNVR:max_segment_mean:X:133276258:133276370:cnvr_masked_hg19
     regex = re_compile("^v2:CNVR:"
                        # value
-                       "(avg_segment_mean|std_dev_segment_mean|min_segment_mean|max_segment_mean|num_segments):"
+                       "(avg_segment_mean|min_segment_mean|max_segment_mean|num_segments):"
                        # validate outside - chromosome 1-23, X, Y, M
                        "(\d|\d\d|X|Y|M):"
                        # coordinates start:end
@@ -96,7 +96,6 @@ class CNVRDataQueryHandler(object):
 
         value_field_bqsql = {
             'avg_segment_mean': 'AVG(segment_mean)',
-            'std_dev_segment_mean': 'STDDEV(segment_mean)',
             'min_segment_mean': 'MIN(segment_mean)',
             'max_segment_mean': 'MAX(segment_mean)',
             'num_segments': 'COUNT(*)'
