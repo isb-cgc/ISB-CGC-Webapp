@@ -34,10 +34,6 @@ class MIRNFeatureDefBuilder(FeatureDefBigqueryProvider):
             'type': 'string'
         },
         {
-            'name': 'platform',
-            'type': 'string'
-        },
-        {
             'name': 'value_field',
             'type': 'string'
         },
