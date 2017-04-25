@@ -58,43 +58,54 @@
 {% endblock %}
 {% block content %}
 {% csrf_token %}
-    <section class="col-lg-12">
-        <div id="unallowed-chars-alert" class="alert alert-warning alert-dismissable" style="display: none;">
-            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-            Your variable list's name contains invalid characters (<span class="unallowed-chars"></span>). Please choose another name.
+    <div class="row">
+        <section class="col-lg-12">
+            <div id="unallowed-chars-alert" class="alert alert-warning alert-dismissable" style="display: none;">
+                <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                Your variable list's name contains invalid characters (<span class="unallowed-chars"></span>). Please choose another name.
+            </div>
+             <div class="panel form-group panel-default">
+                {% if existing_variable_list %}
+                    <div class="panel-heading">
+                        <label for="variable-name" class="panel-title">Name of Favorite (Required)</label>
+                    </div>
+                    <div class="panel-body">
+                        <input type="text" id="variable_list_name_input" placeholder="My new favorite variable" class="form-control" value="{{ existing_variable_list.name }}" required>
+                    </div>
+                {% else %}
+                    <div class="panel-heading">
+                        <label for="variable-name" class="panel-title">Name of Favorite (Required)</label>
+                    </div>
+                    <div class="panel-body">
+                        <input type="text" id="variable_list_name_input" placeholder="My new favorite variable" class="form-control" value="" required>
+                    </div>
+                {% endif %}
+             </div>
+        </section>
+    </div>
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="panel panel-default">
+                <ul class="nav nav-tabs" role="tablist">
+                    {% for program in public_programs %}
+                         <li role="presentation" class="program-tab"><a href="#{{ program.id }}-data" role="tab" data-toggle="tab" title="ISB-CGC Data" data-program-id="{{ program.id }}">{{ program.name }} Data</a></li>
+                    {% endfor %}
+                    <li role="presentation" class="program-tab {% if favorite_list|length <= 0 %}disabled{% endif %}"><a href="#favorites" aria-controls="favorites" role="tab" data-toggle="tab" titles="Favorites">Favorites ({{ favorite_list | length }})</a></li>
+                    <li role="presentation" class="program-tab {% if not user_programs %}disabled{% endif %}"><a href="#0-data" role="tab" data-toggle="tab" title="User Data" data-program-id="0">User Data</a></li>
+                </ul>
+            </div>
         </div>
-         <div class="panel form-group panel-default">
-            {% if existing_variable_list %}
-                <div class="panel-heading">
-                    <label for="variable-name" class="panel-title">Name of Favorite (Required)</label>
-                </div>
-                <div class="panel-body">
-                    <input type="text" id="variable_list_name_input" placeholder="My new favorite variable" class="form-control" value="{{ existing_variable_list.name }}" required>
-                </div>
-            {% else %}
-                <div class="panel-heading">
-                    <label for="variable-name" class="panel-title">Name of Favorite (Required)</label>
-                </div>
-                <div class="panel-body">
-                    <input type="text" id="variable_list_name_input" placeholder="My new favorite variable" class="form-control" value="" required>
-                </div>
-            {% endif %}
-         </div>
-    </section>
-    <div class="col-lg-6" id="filter-panel">
+    </div>
+    <div class="row">
+        <div class="col-lg-6" id="filter-panel">
         <section class="panel panel-default">
             <div class="panel-body">
                 <div class="row">
                     <div class="tabpanel" role="tabpanel">
                         <ul class="nav nav-tabs" role="tablist">
                             <li role="presentation" class="active"><a href="#common" aria-controls="common" role="tab" data-toggle="tab">Common</a></li>
-                            <li role="presentation"><a href="#favorites" aria-controls="favorites" role="tab" data-toggle="tab">Favorites ({{ favorite_list | length }})</a></li>
-                            <li role="presentation"><a href="#clinical"  aria-controls="clinical" role="tab" data-toggle="tab">Clinical</a></li>
-                            <li role="presentation"><a href="#mirna"     aria-controls="mRNA" role="tab" data-toggle="tab">miRNA</a></li>
-                            {% if USER_DATA_ON %}
-                            <li role="presentation"><a href="#uploaded"  aria-controls="Uploaded" role="tab" data-toggle="tab">Programs</a></li>
-                            {% endif %}
-{# TODO                     <li role="presentation"><a href="#search"    aria-controls="search" role="tab" data-toggle="tab">Search</a></li>#}
+                            <li role="presentation"><a href="#clinical" aria-controls="clinical" role="tab" data-toggle="tab">Clinical</a></li>
+                            <li role="presentation"><a href="#mirna" aria-controls="mRNA" role="tab" data-toggle="tab">miRNA</a></li>
                         </ul>
 
                         <!-- Tab panes -->
@@ -199,35 +210,35 @@
                                 <ul class="list-group" id="program-accordion" role="tablist" aria-multiselectable="true">
                                     {% if programs %}
                                         {% for program in programs %}
-                                            {% for study in program.study_set.all|active %}
+                                            {% for project in program.project_set.all|active %}
                                                 <li class="list-group-item">
                                                     <div id="heading-{{ data_type_name }}" class="list-group-item__heading">
-                                                        <a role="button"  data-toggle="collapse" data-parent="#program-accordion" href="#collapse-{{ program.id }}-{{ study.id }}" aria-expanded="false" aria-controls="collapse-{{ attr }}">
-                                                            <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ program.name }} | {{ study.name }}
+                                                        <a role="button"  data-toggle="collapse" data-parent="#program-accordion" href="#collapse-{{ program.id }}-{{ project.id }}" aria-expanded="false" aria-controls="collapse-{{ attr }}">
+                                                            <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ program.name }} | {{ project.name }}
                                                         </a>
                                                     </div>
 
-                                                    <div id="collapse-{{ program.id }}-{{ study.id }}" class="list-group-item__body collapse" role="tabpanel" aria-labelledby="heading-{{ program.id }}-{{ study.id }}">
+                                                    <div id="collapse-{{ program.id }}-{{ project.id }}" class="list-group-item__body collapse" role="tabpanel" aria-labelledby="heading-{{ program.id }}-{{ project.id }}">
                                                         <ul class="search-checkbox-list" id="{{ data_type_name }}">
-                                                            {% with study.user_feature_definitions_set.all|how_many_more:6 as num_more %}
-                                                                {% for variable in study.user_feature_definitions_set.all %} {#|get_item:attr %}#}
+                                                            {% with project.user_feature_definitions_set.all|how_many_more:6 as num_more %}
+                                                                {% for variable in project.user_feature_definitions_set.all %} {#|get_item:attr %}#}
                                                                     {% if forloop.counter0 < 6 %}
                                                                         <li class="checkbox">
                                                                             <label>
-                                                                                <input class="variable-toggle-checkbox" type="checkbox" name="elements-selected" var_type="{% if variable.is_numeric %}N{% else %}C{% endif %}" value="{% if variable.shared_map_id %}{{ variable.shared_map_id }}{% else %}USER:{{ study.id }}:{{ variable.id }}{% endif %}" data-text-label="{{ study.name }}: {{ variable.feature_name|get_readable_name }}" data-feature-id="{{ variable.id }}" > {{ variable.feature_name|get_readable_name }}
+                                                                                <input class="variable-toggle-checkbox" type="checkbox" name="elements-selected" var_type="{% if variable.is_numeric %}N{% else %}C{% endif %}" value="{% if variable.shared_map_id %}{{ variable.shared_map_id }}{% else %}USER:{{ project.id }}:{{ variable.id }}{% endif %}" data-text-label="{{ project.name }}: {{ variable.feature_name|get_readable_name }}" data-feature-id="{{ variable.id }}" > {{ variable.feature_name|get_readable_name }}
                                                                             </label>
                                                                         </li>
                                                                     {% elif forloop.counter0 == 6 and num_more > 0 %}
                                                                         <a class="show-more">{{ num_more }} more</a>
                                                                         <li class="extra-values checkbox" style="display:none;">
                                                                             <label>
-                                                                                <input class="variable-toggle-checkbox" type="checkbox" name="elements-selected" var_type="{% if variable.is_numeric %}N{% else %}C{% endif %}" value="{% if variable.shared_map_id %}{{ variable.shared_map_id }}{% else %}USER:{{ study.id }}:{{ variable.id }}{% endif %}" data-text-label="{{ study.name }}: {{ variable.feature_name|get_readable_name }}" data-feature-id="{{ variable.id }}" > {{ variable.feature_name|get_readable_name }}
+                                                                                <input class="variable-toggle-checkbox" type="checkbox" name="elements-selected" var_type="{% if variable.is_numeric %}N{% else %}C{% endif %}" value="{% if variable.shared_map_id %}{{ variable.shared_map_id }}{% else %}USER:{{ project.id }}:{{ variable.id }}{% endif %}" data-text-label="{{ project.name }}: {{ variable.feature_name|get_readable_name }}" data-feature-id="{{ variable.id }}" > {{ variable.feature_name|get_readable_name }}
                                                                             </label>
                                                                         </li>
                                                                     {% else %}
                                                                         <li class="extra-values checkbox" style="display:none;">
                                                                             <label>
-                                                                                <input class="variable-toggle-checkbox" type="checkbox" name="elements-selected" var_type="{% if variable.is_numeric %}N{% else %}C{% endif %}" value="{% if variable.shared_map_id %}{{ variable.shared_map_id }}{% else %}USER:{{ study.id }}:{{ variable.id }}{% endif %}" data-text-label="{{ study.name }}: {{ variable.feature_name|get_readable_name }}" data-feature-id="{{ variable.id }}" > {{ variable.feature_name|get_readable_name }}
+                                                                                <input class="variable-toggle-checkbox" type="checkbox" name="elements-selected" var_type="{% if variable.is_numeric %}N{% else %}C{% endif %}" value="{% if variable.shared_map_id %}{{ variable.shared_map_id }}{% else %}USER:{{ project.id }}:{{ variable.id }}{% endif %}" data-text-label="{{ project.name }}: {{ variable.feature_name|get_readable_name }}" data-feature-id="{{ variable.id }}" > {{ variable.feature_name|get_readable_name }}
                                                                             </label>
                                                                         </li>
                                                                     {% endif %}
@@ -258,7 +269,7 @@
             </div>
         </section>
     </div>
-    <div class="col-lg-6">
+        <div class="col-lg-6">
         <section class="panel">
             <form action="">
                 <div class="form-group selected-filters panel-default">
@@ -283,6 +294,7 @@
                 </div>
             </form>
         </section>
+    </div>
     </div>
 
     <!-- Hidden form for creating a workbook from the variable list -->

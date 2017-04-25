@@ -30,8 +30,10 @@ from projects.models import Program
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
 from django.conf import settings
-debug = settings.DEBUG
+from django.contrib.auth.models import User as Django_User
 from django.http import HttpResponse
+
+debug = settings.DEBUG
 
 WHITELIST_RE = settings.WHITELIST_RE
 
@@ -177,15 +179,20 @@ def initialize_variable_selection_page(request,
             if field['label'] == "Gene":
                 del type['fields'][index]
 
-    #get user programs and variables
+
+    # Public programs
+    isb_user = Django_User.objects.filter(username='isb').first()
+    public_programs = Program.objects.filter(active=True, is_public=True, owner=isb_user)
+
+    # User programs
     ownedPrograms = request.user.program_set.all().filter(active=True)
     sharedPrograms = Program.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
     programs = ownedPrograms | sharedPrograms
-    programs = programs.distinct()
+    user_programs = programs.distinct()
 
-    #get user favorites
+    # User favorites
     favorite_list = VariableFavorite.get_list(user=request.user)
-    for fav in favorite_list :
+    for fav in favorite_list:
         fav.variables = fav.get_variables()
 
     #TODO common variables need to be refactored into an adaptive list based on common used
@@ -215,9 +222,9 @@ def initialize_variable_selection_page(request,
     context = {
         'favorite_list'         : favorite_list,
         'datatype_list'         : datatype_list,
-        'programs'              : programs,
         'data_attr'             : data_attr,
-
+        'public_programs'       : public_programs,
+        'user_programs'         : programs,
         'base_url'                  : settings.BASE_URL,
         'base_api_url'              : settings.BASE_API_URL,
         'TCGA_program'              : TCGA_program,

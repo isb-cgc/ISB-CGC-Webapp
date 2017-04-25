@@ -4,8 +4,8 @@
         <div class="tabpanel" role="tabpanel">
             <ul class="nav nav-tabs nav-tabs-filters" role="tablist">
                 <li role="presentation" class="filter-tab active"><a href="#clinical-filters-{{ program.id }}" role="tab" data-toggle="tab" title="Case Filters">Case</a></li>
-{#                <li role="presentation" class="filter-tab"><a href="#data-filters-{{ program.id }}" role="tab" data-toggle="tab" title="Data Type Filters">Data Type</a></li>#}
-                <li role="presentation" class="filter-tab {% if molecular_attr.keys|length <= 0 %}disabled{% endif %}"><a class="molecular-filters" href="#p-{{ program.id }}-molecular-filters" role="tab" data-toggle="tab" title="Molecular Filters">Molecular</a></li>
+                <li role="presentation" class="filter-tab {% if data_types.keys|length <= 0 %}disabled{% endif %}"><a href="#data-filters-{{ program.id }}" role="tab" data-toggle="tab" title="Data Type Filters">Data</a></li>
+                <li role="presentation" class="filter-tab {% if molecular_attr.keys|length <= 0 %}disabled{% endif %}"><a class="molecular-filters" href="#p-{{ program.id }}-molecular-filters" role="tab" data-toggle="tab" title="Molecular Filters">Molec.</a></li>
             </ul>
             <div class="tab-content">
                 <!-- case filters tab -->
@@ -23,7 +23,7 @@
                                     <div id="{{ program.id }}-collapse-{{ attr.name }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" data-feature-type="donor"
                                          aria-labelledby="{{ program.id }}-heading-{{ attr.name }}" data-feature-name="{{ attr.name }}" data-feature-displ-name="{{ attr.displ_name }}"
                                          data-feature-id="{% if attr_counts|get_named_item:attr.name|get_item:'id' %}{{ attr_counts|get_named_item:attr.name|get_item:'id' }}{% endif %}">
-                                        <ul class="search-checkbox-list" id="{{ attr.name }}">
+                                        <ul class="search-checkbox-list" id="{{ program.id }}-{{ attr.name }}">
                                             {% with attr_counts|get_named_item:attr.name|get_item:'values'|how_many_more:6 as num_more %}
                                                 {% for v in attr_counts|get_named_item:attr.name|get_item:'values'|check_for_order:attr.name %}
                                                     {% if forloop.counter0 < 6 %}
@@ -70,38 +70,38 @@
                         {% endfor %}
                     </ul>
                 </div>
-{#                <!-- data filters tab -->#}
-{#                <div role="tabpanel" class="tab-pane" id="data-filters-{{ program.id }}">#}
-{#                    <ul class="list-group" id="data-type-accordion" role="tablist" aria-multiselectable="true">#}
-{#                        {% for attr in data_attr %}#}
-{#                            <li class="list-group-item">#}
-{#                                <div class="list-group-item__heading" role="tab" id="heading-{{ attr.name }}">#}
-{#                                    <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-{{ attr.name }}"#}
-{#                                       aria-expanded="false" aria-controls="collapse-{{ attr.name }}" {% if attr.name == 'miRNA_sequencing' %}style="text-transform:none!important"{% endif %}>#}
-{#                                        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ attr.name|get_readable_name }}#}
-{#                                    </a>#}
-{#                                </div>#}
-{#                                <div id="collapse-{{ attr.name }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"#}
-{#                                     aria-labelledby="heading-{{ attr.name }}" data-feature-name="{{ attr.name }}" data-feature-displ-name="{{ attr.name|get_feat_displ_name }}" data-feature-type="datatype">#}
-{#                                    <ul class="search-checkbox-list" id="{{ attr.name }}">#}
-{#                                        {% if attr_counts|list_contains_name:attr.name %}#}
-{#                                            {% for v in attr_counts|get_named_item:attr.name|get_item:'values' %}#}
-{#                                                <li class="checkbox">#}
-{#                                                    <!-- todo: make a custom tag for the id for data_attr attributes-->#}
-{#                                                    <label>#}
-{#                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.value|get_data_attr_id:attr.name }}"#}
-{#                                                               data-value-displ-name="{% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.value }}{% endif %}">#}
-{#                                                         {% if v.value == 'None' %}NA{% else %}{{ v.value }}{% endif %} <span class="count">({{ v.count }})</span>#}
-{#                                                    </label>#}
-{#                                                </li>#}
-{#                                            {% endfor %}#}
-{#                                        {% endif %}#}
-{#                                    </ul>#}
-{#                                </div>#}
-{#                            </li>#}
-{#                        {% endfor %}#}
-{#                    </ul>#}
-{#                </div>#}
+{#              <!-- data filters tab -->#}
+                <div role="tabpanel" class="tab-pane" id="data-filters-{{ program.id }}">
+                    <ul class="list-group" id="data-type-accordion" role="tablist" aria-multiselectable="true">
+                        {% for attr in data_types|get_sorted_items %}
+                            <li class="list-group-item">
+                                <div class="list-group-item__heading" role="tab" id="{{ program.id }}-heading-{{ attr.name }}">
+                                    <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#{{ program.id }}-collapse-{{ attr.name }}"
+                                       aria-expanded="false" aria-controls="collapse-{{ attr.name }}" {% if 'mRNA' in attr.name or 'miRNA' in attr.name %}style="text-transform:none!important"{% endif %}>
+                                        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr.displ_name|check_special_casing }}
+                                    </a>
+                                </div>
+                                <div id="{{ program.id }}-collapse-{{ attr.name }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"
+                                     aria-labelledby="heading-{{ attr.name }}" data-feature-name="{{ attr.name }}" data-feature-displ-name="{{ attr.displ_name }}" data-feature-type="datatype">
+                                    <ul class="search-checkbox-list" id="{{ program.id }}-{{ attr.name }}">
+                                        {% if data_type_counts|list_contains_name:attr.name %}
+                                            {% for v in data_type_counts|get_named_item:attr.name|get_item:'values' %}
+                                                <li class="checkbox">
+                                                    <label>
+                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}"
+                                                               data-value-displ-name="{% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.value }}{% endif %}"
+                                                               data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">
+                                                         {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.value }}{% endif %} <span class="count">({{ v.count }})</span>
+                                                    </label>
+                                                </li>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
 {#                <!-- molecular filters tab -->#}
                 {% if molecular_attr.keys|length > 0 %}
                 <div role="tabpanel" class="tab-pane" id="p-{{ program.id }}-molecular-filters">
@@ -197,7 +197,7 @@
         </div>
         <div class="cohort-info panel panel-default">
             <div class="panel-heading">
-                <h4 class="panel-title">Details</h4>
+                <h4 class="panel-title">Program Details</h4>
             </div>
             <div class="panel-body">
                 <div class="row col-md-6">

@@ -37,7 +37,7 @@
         <div class="panel-heading"></div>
         <form action="{% url 'program_file_upload' %}" id="base-data-form">
             {% csrf_token %}
-            <input type="hidden" id="program-tab" value="new">
+            <input type="hidden" id="program-tab" value="{% if existing_proj %}existing{% else %}new{% endif %}">
             <div class="panel-body">
                 <section id="program-info" class="collapse {% if not existing_proj %}in{% endif %}">
                     <div class="form-group">
@@ -55,7 +55,7 @@
                             <option value="" disabled hidden {% if not existing_proj and not program_id %} selected {% endif %}>-- Select Program --</option>
                             {% for program in programs %}
                                 {% if not program.is_public %}
-                                <option value="{{ program.id }}" {% if existing_proj and program_id and program_id == program.id %}selected{% endif %}>{{ program.name }}</option>
+                                    <option value="{{ program.id }}" {% if existing_proj and program_id and program_id|slugify == program.id|slugify %} selected {% endif %}>{{ program.name }}</option>
                                 {% endif %}
                             {% endfor %}
                         </select>
@@ -86,7 +86,7 @@
 {#                                    <option>All TCGA Data</option>#}
                                     {% for program in programs %}
                                     <optgroup label="{{ program.name }}">
-                                    {% for project in program.study_set.all %}
+                                    {% for project in program.project_set.all %}
                                         {% if project.active %}
                                         <option value="{{ project.id }}">{{ project.name }}</option>
                                         {% endif %}

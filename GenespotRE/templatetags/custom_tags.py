@@ -34,11 +34,18 @@ ALPHANUM_SORT = [
 
 ]
 
+simple_day_sort = ['1 to 500','501 to 1000','1001 to 1500','1501 to 2000','2001 to 2500','2501 to 3000',
+    '3001 to 3500','3501 to 4000','4001 to 4500','4501 to 5000','5001 to 5500','5501 to 6000', 'None',]
+
 # If an attribute has a specific order, list it here; these should be the *values* not the display strings
 VALUE_SPECIFIC_ORDERS = {
     'BMI': ['underweight', 'normal weight', 'overweight', 'obese', 'None', ],
     'hpv_status': ['Positive', 'Negative', 'None', ],
     'age_at_initial_pathologic_diagnosis': ['10 to 39', '40 to 49', '50 to 59', '60 to 69', '70 to 79', 'Over 80', 'None', ],
+    'year_of_diagnosis': ['1976 to 1980', '1981 to 1985', '1986 to 1990', '1991 to 1995', '1996 to 2000', '2001 to 2005', '2006 to 2010', '2011 to 2015', 'None',],
+    'overall_survival': simple_day_sort,
+    'event_free_survival': simple_day_sort,
+    'days_to_death': simple_day_sort,
     'pathologic_stage': ['Stage 0','Stage I','Stage IA','Stage IB','Stage II','Stage IIA','Stage IIB','Stage IIC',
                          'Stage III','Stage IIIA','Stage IIIB','Stage IIIC','Stage IS','Stage IV','Stage IVA',
                          'Stage IVB','Stage IVC','Stage X','I or II NOS','None',],
@@ -155,6 +162,16 @@ def get_data_attr_id(value, attr):
 
 
 @register.filter
+def has_user_data(programs):
+    for prog in programs:
+        print >> sys.stdout, "program: "+str(prog)
+        if prog['type'] == 'user-data':
+            print >> sys.stdout, "is user data!"
+            return True
+    return False
+
+
+@register.filter
 def get_cohorts_this_user(this_user, is_active=True):
     isb_superuser = User.objects.get(username='isb')
     public_cohorts = Cohort_Perms.objects.filter(user=isb_superuser,perm=Cohort_Perms.OWNER).values_list('cohort', flat=True)
@@ -263,6 +280,13 @@ def get_named_item(list, value):
         if item['name'] == value:
             return item
     return None
+
+
+@register.filter
+def check_special_casing(attr):
+    if 'miRNA' in attr or 'mRNA' in attr:
+        return attr.upper().replace('MIRNA','miRNA').replace('MRNA','mRNA')
+    return attr
 
 
 @register.filter

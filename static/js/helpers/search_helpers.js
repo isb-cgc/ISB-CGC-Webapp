@@ -34,14 +34,14 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             age_at_initial_pathologic_diagnosis: 'Age at Initial Pathologic Diagnosis'
         },
         'CCLE':{
-            project_disease_type: 'Disease Type',
+            disease_code: 'Disease Code',
             gender: 'Gender',
             site_primary: 'Site Primary',
             histology: 'Histology',
             hist_subtype: 'Histoligcal Subtype'
         },
         'TARGET':{
-            project_disease_type: 'Disease Type',
+            disease_code: 'Disease Code',
             vital_status: 'Vital Status',
             gender: 'Gender',
             age_at_diagnosis: 'Age at Diagnosis'
@@ -131,11 +131,6 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             var startReq = new Date().getTime();
 
             if(filter_panel_load) {
-                $('#p-'+program_id+'-data-total-samples').html(total_samples);
-                $('#p-'+program_id+'-data-total-participants').html(metadata_counts['cases']);
-
-                context.update_filter_counts(attr_counts, program_id);
-
                 var clin_tree_attr_counts = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(attr_counts, clin_tree_attr) : attr_counts;
                 clin_tree_attr_counts.length > 0 && tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,'#tree-graph-clinical-'+active_program_id);
 
@@ -199,7 +194,9 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                         metadata_counts = results;
                         var stopReq = new Date().getTime();
                         console.debug("[BENCHMARKING] Time for response in update_counts_parsets: "+(stopReq-startReq)+ "ms");
-                        attr_counts = results['count'];
+                        case_counts = results['count'];
+                        data_counts = results['data_counts'];
+
 
                         $('#p-'+program_id+'-data-total-samples').html(metadata_counts['total']);
                         $('#p-'+program_id+'-data-total-participants').html(metadata_counts['cases']);
@@ -209,9 +206,9 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                             $('#c-'+cohort_id+'-data-total-participants').html(metadata_counts['cohort-cases']);
                         }
 
-                        context.update_filter_counts(attr_counts, program_id);
+                        context.update_filter_counts(case_counts, data_counts, program_id);
 
-                        var clin_tree_attr_counts = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(attr_counts, clin_tree_attr) : attr_counts;
+                        var clin_tree_attr_counts = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(case_counts, clin_tree_attr) : case_counts;
                         clin_tree_attr_counts.length > 0 && tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,'#tree-graph-clinical-'+active_program_id);
 
                         if (metadata_counts.hasOwnProperty('data_avail')) {
@@ -304,12 +301,23 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             return url;
         },
 
-        update_filter_counts: function(counts, program_id) {
+        update_filter_counts: function(case_counts, data_counts, program_id) {
 
             counts_by_name = {};
 
-            // Convert the array into a map for easier searching
-            counts.map(function(obj){
+            // Convert the arrays into a map for easier searching
+            case_counts.map(function(obj){
+                counts_by_name[obj.name] = {
+                    values: {},
+                    total: obj.total
+                }
+                var values = counts_by_name[obj.name].values;
+                obj.values.map(function(val){
+                    values[val.value] = val.count;
+                });
+            });
+
+            data_counts.map(function(obj){
                 counts_by_name[obj.name] = {
                     values: {},
                     total: obj.total
@@ -324,7 +332,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                 var $this = $(this),
                     attr = $this.data('feature-name');
                 if(attr && attr.length > 0 && attr !== 'specific-mutation' ) {
-                    $('#'+program_id+'-data-filter-panel ul#' + attr + ' input').each(function () {
+                    $('#'+program_id+'-data-filter-panel ul#'+program_id+'-'+attr+' input').each(function () {
 
                         var $that = $(this),
                             value = $that.data('value-name'),
