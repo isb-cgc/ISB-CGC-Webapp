@@ -112,7 +112,7 @@ class CNVRDataQueryHandler(object):
              "    SELECT sample_barcode {brk}"
              "    FROM [{cohort_dataset_and_table}] {brk}"
              "    WHERE cohort_id IN ({cohort_id_list}) {brk}"
-             ") "
+             ") {brk}"
              "GROUP BY case_id, sample_id, aliquot_id {brk}")
 
         table_config = feature_def.get_table_configuration()

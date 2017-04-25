@@ -1,6 +1,6 @@
 """
 
-Copyright 2016, Institute for Systems Biology
+Copyright 2017, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -35,12 +35,12 @@ class GNABTableConfig(object):
     """
     Configuration class for a BigQuery table accessible through GNAB feature
     definitions.
-    
-    Args:
-        table_id: Full BigQuery table identifier - project-name:dataset_name.table_name 
-    
     """
     def __init__(self, table_id, genomic_build, gene_label_field, internal_table_id, program):
+        """
+        Args:
+            table_id: Full BigQuery table identifier - project-name:dataset_name.table_name 
+        """
         self.table_id = table_id
         self.genomic_build = genomic_build
         self.gene_label_field = gene_label_field
