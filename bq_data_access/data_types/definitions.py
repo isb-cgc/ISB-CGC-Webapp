@@ -27,6 +27,7 @@ class PlottableDataType(Enum):
     METH = 3
     RPPA = 4
     CNVR = 5
+    MIRN = 6
 
 
 FEATURE_ID_TO_TYPE_MAP = {
@@ -34,6 +35,7 @@ FEATURE_ID_TO_TYPE_MAP = {
     'gnab': PlottableDataType.GNAB,
     'meth': PlottableDataType.METH,
     'rppa': PlottableDataType.RPPA,
-    'cnvr': PlottableDataType.CNVR
+    'cnvr': PlottableDataType.CNVR,
+    'mirn': PlottableDataType.MIRN
 }
 
