@@ -58,53 +58,54 @@
 {% endblock %}
 {% block content %}
 {% csrf_token %}
-    <section class="col-lg-12">
-        <div id="unallowed-chars-alert" class="alert alert-warning alert-dismissable" style="display: none;">
-            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-            Your variable list's name contains invalid characters (<span class="unallowed-chars"></span>). Please choose another name.
-        </div>
-         <div class="panel form-group panel-default">
-            {% if existing_variable_list %}
-                <div class="panel-heading">
-                    <label for="variable-name" class="panel-title">Name of Favorite (Required)</label>
-                </div>
-                <div class="panel-body">
-                    <input type="text" id="variable_list_name_input" placeholder="My new favorite variable" class="form-control" value="{{ existing_variable_list.name }}" required>
-                </div>
-            {% else %}
-                <div class="panel-heading">
-                    <label for="variable-name" class="panel-title">Name of Favorite (Required)</label>
-                </div>
-                <div class="panel-body">
-                    <input type="text" id="variable_list_name_input" placeholder="My new favorite variable" class="form-control" value="" required>
-                </div>
-            {% endif %}
-         </div>
-    </section>
-    <div class="col-sm-12 col-md-12 col-lg-12">
-        <div class="panel panel-default">
-            <ul class="nav nav-tabs nav-tabs-data" role="tablist">
-                {% for program in public_programs %}
-                     <li role="presentation" class="program-tab"><a href="#{{ program.id }}-data" role="tab" data-toggle="tab" title="ISB-CGC Data" data-program-id="{{ program.id }}">{{ program.name }} Data</a></li>
-                {% endfor %}
-                <li role="presentation" class="program-tab {% if not user_programs %}disabled{% endif %}"><a href="#0-data" role="tab" data-toggle="tab" title="User Data" data-program-id="0">User Data</a></li>
-            </ul>
+    <div class="row">
+        <section class="col-lg-12">
+            <div id="unallowed-chars-alert" class="alert alert-warning alert-dismissable" style="display: none;">
+                <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                Your variable list's name contains invalid characters (<span class="unallowed-chars"></span>). Please choose another name.
+            </div>
+             <div class="panel form-group panel-default">
+                {% if existing_variable_list %}
+                    <div class="panel-heading">
+                        <label for="variable-name" class="panel-title">Name of Favorite (Required)</label>
+                    </div>
+                    <div class="panel-body">
+                        <input type="text" id="variable_list_name_input" placeholder="My new favorite variable" class="form-control" value="{{ existing_variable_list.name }}" required>
+                    </div>
+                {% else %}
+                    <div class="panel-heading">
+                        <label for="variable-name" class="panel-title">Name of Favorite (Required)</label>
+                    </div>
+                    <div class="panel-body">
+                        <input type="text" id="variable_list_name_input" placeholder="My new favorite variable" class="form-control" value="" required>
+                    </div>
+                {% endif %}
+             </div>
+        </section>
+    </div>
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="panel panel-default">
+                <ul class="nav nav-tabs" role="tablist">
+                    {% for program in public_programs %}
+                         <li role="presentation" class="program-tab"><a href="#{{ program.id }}-data" role="tab" data-toggle="tab" title="ISB-CGC Data" data-program-id="{{ program.id }}">{{ program.name }} Data</a></li>
+                    {% endfor %}
+                    <li role="presentation" class="program-tab {% if favorite_list|length <= 0 %}disabled{% endif %}"><a href="#favorites" aria-controls="favorites" role="tab" data-toggle="tab" titles="Favorites">Favorites ({{ favorite_list | length }})</a></li>
+                    <li role="presentation" class="program-tab {% if not user_programs %}disabled{% endif %}"><a href="#0-data" role="tab" data-toggle="tab" title="User Data" data-program-id="0">User Data</a></li>
+                </ul>
+            </div>
         </div>
     </div>
-    <div class="col-lg-6" id="filter-panel">
+    <div class="row">
+        <div class="col-lg-6" id="filter-panel">
         <section class="panel panel-default">
             <div class="panel-body">
                 <div class="row">
                     <div class="tabpanel" role="tabpanel">
                         <ul class="nav nav-tabs" role="tablist">
                             <li role="presentation" class="active"><a href="#common" aria-controls="common" role="tab" data-toggle="tab">Common</a></li>
-                            <li role="presentation"><a href="#favorites" aria-controls="favorites" role="tab" data-toggle="tab">Favorites ({{ favorite_list | length }})</a></li>
-                            <li role="presentation"><a href="#clinical"  aria-controls="clinical" role="tab" data-toggle="tab">Clinical</a></li>
-                            <li role="presentation"><a href="#mirna"     aria-controls="mRNA" role="tab" data-toggle="tab">miRNA</a></li>
-                            {% if USER_DATA_ON %}
-                            <li role="presentation"><a href="#uploaded"  aria-controls="Uploaded" role="tab" data-toggle="tab">Programs</a></li>
-                            {% endif %}
-{# TODO                     <li role="presentation"><a href="#search"    aria-controls="search" role="tab" data-toggle="tab">Search</a></li>#}
+                            <li role="presentation"><a href="#clinical" aria-controls="clinical" role="tab" data-toggle="tab">Clinical</a></li>
+                            <li role="presentation"><a href="#mirna" aria-controls="mRNA" role="tab" data-toggle="tab">miRNA</a></li>
                         </ul>
 
                         <!-- Tab panes -->
@@ -268,7 +269,7 @@
             </div>
         </section>
     </div>
-    <div class="col-lg-6">
+        <div class="col-lg-6">
         <section class="panel">
             <form action="">
                 <div class="form-group selected-filters panel-default">
@@ -293,6 +294,7 @@
                 </div>
             </form>
         </section>
+    </div>
     </div>
 
     <!-- Hidden form for creating a workbook from the variable list -->

@@ -276,6 +276,13 @@ def get_named_item(list, value):
 
 
 @register.filter
+def check_special_casing(attr):
+    if 'miRNA' in attr or 'mRNA' in attr:
+        return attr.upper().replace('MIRNA','miRNA').replace('MRNA','mRNA')
+    return attr
+
+
+@register.filter
 def get_sorted_items(attr_set):
     sorted_list = []
 

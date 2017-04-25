@@ -348,33 +348,18 @@ require([
 
                 var feature_id = feature.data('feature-id'), value_id =  value.data('value-id');
 
-                if (feature.data('feature-type') == 'datatype') { // Datatype feature
-                    var feature_value = value.data('value-name').split('-');
-
-                    switch(feature_value[1]) {
-                        case 'True':
-                            feature_value[1] = 1;
-                            break;
-                        case 'False':
-                            feature_value[1] = 0;
-                            break;
-                        case 'None':
-                            feature_value[1] = 'None';
-                            break;
-                    }
-
-                    feature_id = 'SAMP:' + feature_value[0];
+                if (feature.data('feature-type') == 'datatype') { // Datatype filter
 
                     var token = $('<span>').data({
-                        'feature-id': feature_id,
-                        'feature-name': feature_value[0],
+                        'feature-id': 'data_type',
+                        'feature-name': 'data_type',
                         'value-id': value_id,
-                        'value-name': feature_value[1],
+                        'value-name': value.data('value-name'),
                         'prog-id': tokenProgId,
                         'prog-name': tokenProgDisplName,
                     }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token');
 
-                } else if (feature.data('feature-type') == 'donor') { // Donor feature
+                } else if (feature.data('feature-type') == 'donor') { // Case filter
                     token = $('<span>').data({
                         'feature-id': feature_id,
                         'feature-name': feature.data('feature-name'),
@@ -682,32 +667,6 @@ require([
             save_changes_btn_modal.prop('disabled',true);
         }
     };
-
-    // If we received counting data, display it
-    // if(metadata_counts !== null && metadata_counts !== "") {
-    //     search_helper_obj.update_counts_parsets_direct();
-    //     metadata_counts = null;
-    //
-    //     // If this data was filtered, check those filters
-    //
-    //     if(metadata_filters !== null && metadata_filters !== "") {
-    //         $.each(metadata_filters,function(filter_cat){
-    //             $.each(metadata_filters[filter_cat], function(i, filter_val){
-    //                 if($('a[href="#collapse-'+filter_cat.split(':')[1]+'"]').attr('aria-expanded') !== 'true') {
-    //                     $('a[href="#collapse-'+filter_cat.split(':')[1]+'"]').trigger('click');
-    //                 }
-    //                 $('div[data-feature-id="'+filter_cat+'"]').find('input[type="checkbox"][data-value-name="'+filter_val+'"]').attr('checked',true);
-    //                 $('div[data-feature-id="'+filter_cat+'"]').find('input[type="checkbox"][data-value-name="'+filter_val+'"]').trigger('change',{without_update: true});
-    //             });
-    //
-    //         });
-    //     }
-    // } else {
-    //     // otherwise, induce some by checking TCGA
-    //     $('a[href="#collapse-Project"]').trigger('click');
-    //     $('input[type="checkbox"][data-value-name="TCGA"]').trigger('click');
-    // }
-
 
     // onClick: Shared With button 
     $('#shared-with-btn').on('click', function(e){

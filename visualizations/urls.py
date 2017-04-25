@@ -43,6 +43,5 @@ urlpatterns = [
 
     # Feature data access views
     url(r'^feature_data_plot/v1', data_access_views.data_access_for_plot, name='feature_data_plot'),
-    url(r'^feature_data_plot/v2', data_access_views_v2.data_access_for_plot, name='feature_data_plot_v2')
-
+    url(r'^feature_data_plot/v2', data_access_views_v2.data_access_for_plot, name='feature_data_plot_v2'),
 ]
