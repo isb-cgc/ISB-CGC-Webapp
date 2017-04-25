@@ -34,11 +34,18 @@ ALPHANUM_SORT = [
 
 ]
 
+simple_day_sort = ['1 to 500','501 to 1000','1001 to 1500','1501 to 2000','2001 to 2500','2501 to 3000',
+    '3001 to 3500','3501 to 4000','4001 to 4500','4501 to 5000','5001 to 5500','5501 to 6000', 'None',]
+
 # If an attribute has a specific order, list it here; these should be the *values* not the display strings
 VALUE_SPECIFIC_ORDERS = {
     'BMI': ['underweight', 'normal weight', 'overweight', 'obese', 'None', ],
     'hpv_status': ['Positive', 'Negative', 'None', ],
     'age_at_initial_pathologic_diagnosis': ['10 to 39', '40 to 49', '50 to 59', '60 to 69', '70 to 79', 'Over 80', 'None', ],
+    'year_of_diagnosis': ['1976 to 1980', '1981 to 1985', '1986 to 1990', '1991 to 1995', '1996 to 2000', '2001 to 2005', '2006 to 2010', '2011 to 2015', 'None',],
+    'overall_survival': simple_day_sort,
+    'event_free_survival': simple_day_sort,
+    'days_to_death': simple_day_sort,
     'pathologic_stage': ['Stage 0','Stage I','Stage IA','Stage IB','Stage II','Stage IIA','Stage IIB','Stage IIC',
                          'Stage III','Stage IIIA','Stage IIIB','Stage IIIC','Stage IS','Stage IV','Stage IVA',
                          'Stage IVB','Stage IVC','Stage X','I or II NOS','None',],
