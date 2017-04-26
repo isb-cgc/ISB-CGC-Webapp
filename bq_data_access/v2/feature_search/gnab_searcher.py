@@ -47,7 +47,7 @@ class GNABSearcher(object):
             'name': 'genomic_build',
             'label': 'Genomic Build',
             'static': True,
-            'values': ['hg19', 'hg38']
+            'values': ['hg19']
         },
         {
             'name': 'program_name',
