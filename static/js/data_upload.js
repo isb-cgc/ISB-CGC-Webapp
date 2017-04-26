@@ -445,10 +445,10 @@ require([
 
         if( $('.data-radio:checked').val() === 'high' &&
             hleCheckbox.is(':checked') &&
-            !$.trim($('#high-level-extend-study').val()) ) {
+            !$.trim($('#high-level-extend-project').val()) ) {
 
             hasErrors = true;
-            errorMessage('Please select a study your data is extending');
+            errorMessage('Please select a project your data is extending');
         }
 
         if(!addedFiles.length) {
@@ -648,7 +648,7 @@ require([
         var uploadDataType = $('.data-radio:checked').val();
         if(uploadDataType === 'high' && hleCheckbox.is(':checked')) {
             uploadDataType = 'extend';
-            form.append('extend-study-id', $('#high-level-extend-study').val());
+            form.append('extend-project-id', $('#high-level-extend-project').val());
         }
         form.append('data-type', uploadDataType);
 
