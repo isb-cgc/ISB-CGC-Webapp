@@ -1,6 +1,6 @@
 touch uat_deployment.key.json
 
-echo "[STATUS] Attemptin to build key for $UAT_CLIENT_EMAIL..."
+echo "[STATUS] Attempting to build key for $UAT_CLIENT_EMAIL..."
 
 echo "{\
   \"private_key_id\": \"$UAT_PRIVATE_KEY_ID\",\
