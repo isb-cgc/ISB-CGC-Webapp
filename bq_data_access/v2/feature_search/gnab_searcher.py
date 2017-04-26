@@ -115,14 +115,14 @@ class GNABSearcher(object):
             raise EmptyQueryException(self.get_datatype_identifier())
 
     def build_feature_label(self, row):
-        # Example: 'Mutation | Gene:EGFR, Value:variant_classification'
-        label = "Mutation | Gene:" + row['gene_name'] + ", Value:" + row['value_field']
+        # Example: 'Mutation | Build:hg19, Gene:EGFR, Value:variant_classification'
+        label = "Mutation | Build:" + row['genomic_build'] + ", Gene:" + row['gene_name'] + ", Value:" + row['value_field']
         return label
 
     def search(self, parameters):
         self.validate_feature_search_input(parameters)
 
-        query = 'SELECT gene_name, value_field, internal_feature_id' \
+        query = 'SELECT gene_name, genomic_build, value_field, internal_feature_id' \
                 ' FROM {table_name}' \
                 ' WHERE gene_name=%s'\
                 ' AND value_field LIKE %s' \
