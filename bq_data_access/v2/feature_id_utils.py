@@ -32,7 +32,7 @@ from scripts.feature_def_gen.gexp_features import GEXPDataSourceConfig
 # GNAB
 from bq_data_access.v2.gnab_data import GNABDataQueryHandler
 from bq_data_access.data_types.gnab import BIGQUERY_CONFIG as GNAB_BIGQUERY_CONFIG
-from scripts.feature_def_gen.gnab_data.gnab_feature_def_provider import GNABFeatureDefBuilder
+from scripts.feature_def_gen.gnab_data.gnab_feature_def_builder import GNABFeatureDefBuilder
 from scripts.feature_def_gen.gnab_features import GNABDataSourceConfig
 # METH
 from bq_data_access.v2.methylation_data import METHDataQueryHandler

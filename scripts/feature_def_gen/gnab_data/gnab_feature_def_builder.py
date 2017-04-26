@@ -56,10 +56,10 @@ class GNABFeatureDefBuilder(FeatureDefBigqueryProvider):
 
     def build_internal_feature_id(self, feature_type, gene, value_field, table_config):
         # Example ID: v2:GNAB:SMYD3:hg19_mc3:Variant_Classification
-        return 'v2:{feature_type}:{gene}:{genomic_build}:{value_field}'.format(
+        return 'v2:{feature_type}:{gene}:{internal_table_id}:{value_field}'.format(
             feature_type=feature_type,
             gene=gene,
-            genomic_build=table_config.genomic_build,
+            internal_table_id=table_config.internal_table_id,
             value_field=value_field
         )
 

@@ -32,13 +32,29 @@ class GNABSearcher(object):
     field_search_valid_fields = set(['gene_name'])
 
     searchable_fields = [
-        {'name': 'gene_name',
-         'label': 'Gene',
-         'static': False},
-        {'name': 'value_field',
-         'label': 'Value',
-         'static': True,
-         'values': ['variant_classification', 'variant_type', 'sequence_source', 'num_mutations']}
+        {
+            'name': 'gene_name',
+            'label': 'Gene',
+            'static': False
+        },
+        {
+            'name': 'value_field',
+            'label': 'Value',
+            'static': True,
+            'values': ['variant_classification', 'variant_type', 'num_mutations']
+        },
+        {
+            'name': 'genomic_build',
+            'label': 'Genomic Build',
+            'static': True,
+            'values': ['hg19', 'hg38']
+        },
+        {
+            'name': 'program_name',
+            'label': 'Program Name',
+            'static': True,
+            'values': ['tcga']
+        }
     ]
 
     @classmethod
@@ -51,7 +67,7 @@ class GNABSearcher(object):
 
     @classmethod
     def get_table_name(cls):
-        return "feature_defs_gnab"
+        return "feature_defs_gnab_v2"
 
     def validate_field_search_input(self, keyword, field):
         if field not in self.field_search_valid_fields:
