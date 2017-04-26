@@ -51,6 +51,7 @@
                 </section>
                 <section>
                     <div class="form-group collapse {% if existing_proj %}in{% endif %}" id="project-info">
+                        <label for="program-name">Program Name</label>
                         <select class="form-control" required id="program-selection">
                             <option value="" disabled hidden {% if not existing_proj and not program_id %} selected {% endif %}>-- Select Program --</option>
                             {% for program in programs %}
