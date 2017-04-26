@@ -30,28 +30,32 @@
             {% endwith %}
         </ul>
         <div class="tab-content">
-            {% for key, values in attr_list_all.items %}
-            <div role="tabpanel" class="tab-pane active" id="dict-{{ key }}">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th nowrap>System Attribute Name</th>
-                            <th>Type</th>
-                            <th>Possible Values</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for attr in values %}
-                        <tr>
-                            <td>{{ attr.name }}</td>
-                            <td>{{ attr.type }}</td>
-                            <td>{{ attr.values }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% endfor %}
+            {% with attr_list_all.items|first as first_object %}
+                {% with first_object.0 as first_key %}
+                    {% for key, values in attr_list_all.items %}
+                    <div role="tabpanel" class="tab-pane {% if key == first_key %}active{% endif %}" id="dict-{{ key }}">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th nowrap>System Attribute Name</th>
+                                    <th>Type</th>
+                                    <th>Possible Values</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for attr in values %}
+                                <tr>
+                                    <td>{{ attr.name }}</td>
+                                    <td>{{ attr.type }}</td>
+                                    <td>{{ attr.values }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endfor %}
+                {% endwith %}
+            {% endwith %}
         </div>
     </div>
 </div>
