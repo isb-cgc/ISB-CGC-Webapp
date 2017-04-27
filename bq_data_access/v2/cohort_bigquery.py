@@ -87,8 +87,6 @@ class BigQueryCohortSupport(object):
 
         body = self._build_request_body_from_rows(rows)
 
-        print >> sys.stdout, self.project_id+":"+self.dataset_id+":"+self.table_id
-
         response = table_data.insertAll(projectId=self.project_id,
                                         datasetId=self.dataset_id,
                                         tableId=self.table_id,

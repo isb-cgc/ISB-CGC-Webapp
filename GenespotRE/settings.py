@@ -105,7 +105,7 @@ if os.environ.has_key('DB_SSL_CERT') and not IS_APP_ENGINE_FLEX:
 # Default to localhost for the site ID
 SITE_ID = 3
 
-if IS_APP_ENGINE_FLEX:
+if IS_APP_ENGINE_FLEX or IS_APP_ENGINE:
     print >> sys.stdout, "[STATUS] AppEngine Flex detected."
     SITE_ID = 4
 
