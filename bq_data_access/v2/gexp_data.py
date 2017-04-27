@@ -51,7 +51,7 @@ class GEXPTableFeatureDef(object):
 class GEXPFeatureDef(object):
     # Regular expression for parsing the feature definition.
     #
-    # Example ID: v2:GEXP:TP53:hg19
+    # Example ID: v2:GEXP:TP53:mrna_hg19
     config_instance = GEXPDataSourceConfig.from_dict(BIGQUERY_CONFIG)
 
     regex = re_compile("^v2:GEXP:"

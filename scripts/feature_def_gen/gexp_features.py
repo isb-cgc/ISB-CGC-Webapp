@@ -35,13 +35,11 @@ class GEXPTableConfig(object):
         table_name: Full BigQuery table identifier - project-name:dataset_name.table_name 
     
     """
-    def __init__(self, table_id, genomic_build, platform, gene_label_field, generating_center, value_label, value_field,
+    def __init__(self, table_id, genomic_build, gene_label_field, value_label, value_field,
                  internal_table_id, program):
         self.table_id = table_id
-        self.platform = platform
         self.genomic_build = genomic_build
         self.gene_label_field = gene_label_field
-        self.generating_center = generating_center
         self.value_label = value_label
         self.value_field = value_field
         self.internal_table_id = internal_table_id
@@ -51,15 +49,13 @@ class GEXPTableConfig(object):
     def from_dict(cls, param):
         table_id = param['table_id']
         genomic_build = param['genomic_build']
-        platform = param['platform']
         gene_label_field = param['gene_label_field']
-        generating_center = param['generating_center']
         value_label = param['value_label']
         value_field = param['value_field']
         internal_table_id = param['internal_table_id']
         program = param['program']
 
-        return cls(table_id, genomic_build, platform, gene_label_field, generating_center, value_label, value_field,
+        return cls(table_id, genomic_build, gene_label_field, value_label, value_field,
                    internal_table_id, program)
 
 
