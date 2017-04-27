@@ -6,6 +6,7 @@ echo "{\
   \"client_id\": \"$DEV_CLIENT_ID\",\
   \"type\": \"service_account\"\
 }" | tee dev_deployment.key.json > /dev/null 2> /dev/null
+
 /home/ubuntu/${CIRCLE_PROJECT_REPONAME}/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file dev_deployment.key.json
 /home/ubuntu/${CIRCLE_PROJECT_REPONAME}/google-cloud-sdk/bin/gcloud config set account $DEV_CLIENT_EMAIL
 /home/ubuntu/${CIRCLE_PROJECT_REPONAME}/google-cloud-sdk/bin/gcloud config set project "$DEV_PROJECT_ID"
