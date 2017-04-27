@@ -27,7 +27,7 @@ from bq_data_access.data_types.definitions import PlottableDataType, FEATURE_ID_
 # GEXP
 from bq_data_access.v2.gexp_data import GEXPDataQueryHandler
 from bq_data_access.data_types.gexp import BIGQUERY_CONFIG as GEXP_BIGQUERY_CONFIG
-from scripts.feature_def_gen.gexp_data.gexp_feature_def_provider import GEXPFeatureDefBuilder
+from scripts.feature_def_gen.gexp_data.gexp_feature_def_builder import GEXPFeatureDefBuilder
 from scripts.feature_def_gen.gexp_features import GEXPDataSourceConfig
 # GNAB
 from bq_data_access.v2.gnab_data import GNABDataQueryHandler
