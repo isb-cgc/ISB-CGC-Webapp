@@ -1,6 +1,6 @@
 """
 
-Copyright 2015, Institute for Systems Biology
+Copyright 2017, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ from cohorts.metadata_helpers import get_sql_connection
 
 
 class GNABSearcher(object):
-    feature_search_valid_fields = set(['gene_name', 'value_field'])
+    feature_search_valid_fields = set(['gene_name', 'value_field', 'genomic_build'])
     field_search_valid_fields = set(['gene_name'])
 
     searchable_fields = [
@@ -124,7 +124,8 @@ class GNABSearcher(object):
 
         query = 'SELECT gene_name, genomic_build, value_field, internal_feature_id' \
                 ' FROM {table_name}' \
-                ' WHERE gene_name=%s'\
+                ' WHERE gene_name=%s' \
+                ' AND genomic_build=%s' \
                 ' AND value_field LIKE %s' \
                 ' LIMIT %s'.format(table_name=self.get_table_name()
         )
@@ -135,6 +136,7 @@ class GNABSearcher(object):
         # Format the keyword for MySQL string matching
         # sql_keyword = '%' + keyword + '%'
         query_args = [input['gene_name'],
+                      input['genomic_build'],
                       '%' + input['value_field'] + '%',
                       FOUND_FEATURE_LIMIT]
 
