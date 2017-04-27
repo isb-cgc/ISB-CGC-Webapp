@@ -101,9 +101,10 @@ def print_query(feature_id, cohort_id_array, program_array, project_id_array, co
 
     # Verify the project ID array
     # ---------------------------
+    logger.info("Selected projects: {}".format(project_id_array))
     if len(project_id_array) == 0:
-        logger.info("No project IDs set. Please include at least one project ID.")
-        sys_exit(0)
+        logger.info("No project IDs set. Using NULL.")
+        project_id_array = None
 
     provider = FeatureProviderFactory.from_feature_id(feature_id)
 
