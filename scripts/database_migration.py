@@ -552,32 +552,88 @@ def fix_gene_symbols(debug):
         WHERE type IS NULL
     """
 
-    query = bq_query_template.format(table_name='mirna_gene_symbols',project_name='isb-cgc',dataset_name='test',type_name='miRNA')
+    db = None
+    cursor = None
 
-    print >> sys.stdout, query
+    try:
 
-    bq_service = authorize_credentials_with_Google()
-    query_job = submit_bigquery_job(bq_service, 'isb-cgc', query)
-    job_is_done = is_bigquery_job_finished(bq_service, 'isb-cgc', query_job['jobReference']['jobId'])
+        db = get_mysql_connection()
+        cursor = db.cursor()
 
-    mirnas = []
-    retries = 0
+        query = bq_query_template.format(table_name='mirna_gene_symbols',project_name='isb-cgc',dataset_name='test',type_name='miRNA')
 
-    while not job_is_done and retries < BQ_ATTEMPT_MAX:
-        retries += 1
-        time.sleep(1)
+        bq_service = authorize_credentials_with_Google()
+        query_job = submit_bigquery_job(bq_service, 'isb-cgc', query)
         job_is_done = is_bigquery_job_finished(bq_service, 'isb-cgc', query_job['jobReference']['jobId'])
 
-    results = get_bq_job_results(bq_service, query_job['jobReference'])
+        mirnas = []
+        retries = 0
 
-    if len(results) > 0:
-        for mirna in results:
-            mirnas.append(mirna['f'][0]['v'])
+        while not job_is_done and retries < BQ_ATTEMPT_MAX:
+            retries += 1
+            time.sleep(1)
+            job_is_done = is_bigquery_job_finished(bq_service, 'isb-cgc', query_job['jobReference']['jobId'])
 
-    
+        results = get_bq_job_results(bq_service, query_job['jobReference'])
 
-    else:
-        print >> sys.stdout, "[WARNING] miRNA/gene symbol query returned no results"
+        if len(results) > 0:
+            for mirna in results:
+                mirnas.append(mirna['f'][0]['v'])
+        else:
+            print >> sys.stdout, "[WARNING] miRNA/gene symbol query returned no results"
+
+        cursor.execute(fix_current_genes)
+
+        mirna_gene_symbols = []
+
+        for mirna in mirnas:
+            mirna_gene_symbols.append(GeneSymbol(symbol=mirna,type='miRNA'))
+
+        GeneSymbol.objects.bulk_create(mirna_gene_symbols)
+
+        query = bq_query_template.format(table_name='mirna_gene_symbols', project_name='isb-cgc', dataset_name='test',
+                                         type_name='gene')
+
+        bq_service = authorize_credentials_with_Google()
+        query_job = submit_bigquery_job(bq_service, 'isb-cgc', query)
+        job_is_done = is_bigquery_job_finished(bq_service, 'isb-cgc', query_job['jobReference']['jobId'])
+
+        genes = {}
+        retries = 0
+
+        while not job_is_done and retries < BQ_ATTEMPT_MAX:
+            retries += 1
+            time.sleep(1)
+            job_is_done = is_bigquery_job_finished(bq_service, 'isb-cgc', query_job['jobReference']['jobId'])
+
+        results = get_bq_job_results(bq_service, query_job['jobReference'])
+
+        if len(results) > 0:
+            for gene in results:
+                genes[gene['f'][0]['v']] = 1
+        else:
+            print >> sys.stdout, "[WARNING] miRNA/gene symbol query returned no results"
+
+        cursor.execute('SELECT * FROM genes_genesymbols WHERE type=%s;',('gene',))
+
+        new_genes = []
+
+        for row in cursor.fetchall():
+            if row[0] not in genes:
+                new_genes.append(row[0])
+
+        if len(new_genes) > 0:
+            genes_to_add = [GeneSymbol(symbol=x,type='gene') for x in new_genes]
+            GeneSymbol.objects.bulk_create(genes_to_add)
+
+
+    except Exception as e:
+        print >> sys.stdout, "[ERROR] Exception encountered in fix_gene_symbols:"
+        print >> sys.stdout, traceback.format_exc()
+    finally:
+        if cursor: cursor.close()
+        if db and db.open: db.close()
+
 
 
 def fix_filters(debug):
