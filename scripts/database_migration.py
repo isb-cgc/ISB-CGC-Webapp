@@ -12,15 +12,23 @@ limitations under the License.
 """
 
 import os
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "GenespotRE.settings")
+import django
+django.setup()
+
 import traceback
 import sys
 import time
+
 from MySQLdb import connect, cursors
 from GenespotRE import secret_settings, settings
 from argparse import ArgumentParser
+from cohorts.metadata_helpers import submit_bigquery_job, is_bigquery_job_finished, get_bq_job_results
+from google_helpers.bigquery_service import authorize_credentials_with_Google
+from genes.models import GeneSymbol
+from cohorts.views import BQ_ATTEMPT_MAX
 
 SUPERUSER_NAME = 'isb'
-
 
 def get_mysql_connection():
     db_settings = secret_settings.get('DATABASE')['default'] if settings.IS_DEV else settings.DATABASES['default']
@@ -524,6 +532,54 @@ def make_attr_display_table(debug):
         if db and db.open: db.close()
 
 
+def fix_gene_symbols(debug):
+
+    bq_query_template = (
+        "SELECT *"
+        " FROM [{project_name}:{dataset_name}.{table_name}]"
+        " WHERE type='{type_name}'"
+    )
+
+    insertion_stmt = """
+        INSERT INTO genes_genesymbols
+        (symbol,type)
+        VALUES
+    """
+
+    fix_current_genes = """
+        UPDATE genes_genesymbols
+        SET type='gene'
+        WHERE type IS NULL
+    """
+
+    query = bq_query_template.format(table_name='mirna_gene_symbols',project_name='isb-cgc',dataset_name='test',type_name='miRNA')
+
+    print >> sys.stdout, query
+
+    bq_service = authorize_credentials_with_Google()
+    query_job = submit_bigquery_job(bq_service, 'isb-cgc', query)
+    job_is_done = is_bigquery_job_finished(bq_service, 'isb-cgc', query_job['jobReference']['jobId'])
+
+    mirnas = []
+    retries = 0
+
+    while not job_is_done and retries < BQ_ATTEMPT_MAX:
+        retries += 1
+        time.sleep(1)
+        job_is_done = is_bigquery_job_finished(bq_service, 'isb-cgc', query_job['jobReference']['jobId'])
+
+    results = get_bq_job_results(bq_service, query_job['jobReference'])
+
+    if len(results) > 0:
+        for mirna in results:
+            mirnas.append(mirna['f'][0]['v'])
+
+    
+
+    else:
+        print >> sys.stdout, "[WARNING] miRNA/gene symbol query returned no results"
+
+
 def fix_filters(debug):
     db = None
     cursor = None
@@ -745,6 +801,9 @@ def main():
     cmd_line_parser.add_argument('-f', '--fix_filters', type=bool, default=False,
                                  help="Fix the cohorts_filters table to reflext new, multiprogram cohorts")
 
+    cmd_line_parser.add_argument('-g', '--fix_genes', type=bool, default=False,
+                                 help="Fix the genes_genesymbols table to include a type setting and add in miRNAs")
+
     args = cmd_line_parser.parse_args()
 
     try:
@@ -753,6 +812,7 @@ def main():
         args.attr_displ_table and make_attr_display_table(args.debug_mode)
         args.fix_case_id and fix_case_barcodes_in_cohorts(args.debug_mode)
         args.fix_filters and fix_filters(args.debug_mode)
+        args.fix_genes and fix_gene_symbols(args.debug_mode)
 
     except Exception as e:
         print >> sys.stdout, traceback.format_exc()
