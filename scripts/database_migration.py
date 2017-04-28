@@ -598,6 +598,8 @@ def fix_gene_symbols(debug):
         job_is_done = is_bigquery_job_finished(bq_service, 'isb-cgc', query_job['jobReference']['jobId'])
 
         genes = {}
+        bq_genes = []
+        new_genes = []
         retries = 0
 
         while not job_is_done and retries < BQ_ATTEMPT_MAX:
@@ -609,17 +611,18 @@ def fix_gene_symbols(debug):
 
         if len(results) > 0:
             for gene in results:
-                genes[gene['f'][0]['v']] = 1
+                bq_genes.append(gene['f'][0]['v'])
         else:
             print >> sys.stdout, "[WARNING] miRNA/gene symbol query returned no results"
 
         cursor.execute('SELECT * FROM genes_genesymbols WHERE type=%s;',('gene',))
 
-        new_genes = []
-
         for row in cursor.fetchall():
-            if row[0] not in genes:
-                new_genes.append(row[0])
+            genes[row[0]] = 1
+
+        for new_gene in bq_genes:
+            if new_gene not in genes:
+                new_genes.append(new_gene)
 
         if len(new_genes) > 0:
             genes_to_add = [GeneSymbol(symbol=x,type='gene') for x in new_genes]
