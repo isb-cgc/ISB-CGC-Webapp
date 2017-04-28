@@ -594,7 +594,6 @@ def fix_gene_symbols(debug):
         query = bq_query_template.format(table_name='mirna_gene_symbols', project_name='isb-cgc', dataset_name='test',
                                          type_name='gene')
 
-        bq_service = authorize_credentials_with_Google()
         query_job = submit_bigquery_job(bq_service, 'isb-cgc', query)
         job_is_done = is_bigquery_job_finished(bq_service, 'isb-cgc', query_job['jobReference']['jobId'])
 
