@@ -16,7 +16,7 @@ limitations under the License.
 
 """
 
-import logging
+import logging as logger
 
 from MySQLdb.cursors import DictCursor
 from _mysql_exceptions import MySQLError
@@ -30,21 +30,35 @@ from bq_data_access.v2.feature_search.common import BackendException, InvalidFie
 
 from bq_data_access.v2.copynumber_data import CNVR_FEATURE_TYPE
 
-logger = logging
-
 
 class CNVRSearcher(object):
     feature_search_valid_fields = set(['gene_name', 'value_field', 'genomic_build'])
     field_search_valid_fields = set(['gene_name'])
 
     searchable_fields = [
-        {'name': 'gene_name',
-         'label': 'Gene',
-         'static': False},
-        {'name': 'value_field',
-         'label': 'Value',
-         'static': True,
-         'values': ['avg_segment_mean', 'min_segment_mean', 'max_segment_mean', 'num_segments']}
+        {
+            'name': 'gene_name',
+            'label': 'Gene',
+            'static': False},
+        {
+            'name': 'value_field',
+            'label': 'Value',
+            'static': True,
+            'values': ['avg_segment_mean', 'min_segment_mean', 'max_segment_mean', 'num_segments']
+        },
+        {
+            'name': 'genomic_build',
+            'label': 'Genomic Build',
+            'static': True,
+            'values': ['hg19']
+        },
+        {
+            'name': 'program_name',
+            'label': 'Program Name',
+            'static': True,
+            'values': ['tcga']
+        }
+
     ]
 
     @classmethod
@@ -107,7 +121,7 @@ class CNVRSearcher(object):
 
     def build_feature_label(self, row):
         # Example: 'Copy Number | Build:hg19, Gene:EGFR, Value:avg_segment_mean'
-        label = "Copy Number | Build:{build_id}, Gene: {gene_label}, Value:{value_field}".format(
+        label = "Copy Number | Build:{build_id}, Gene:{gene_label}, Value:{value_field}".format(
             build_id=row['genomic_build'],
             gene_label=row['gene_name'],
             value_field=row['value_field']
