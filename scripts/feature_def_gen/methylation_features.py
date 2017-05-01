@@ -34,9 +34,10 @@ class METHTableConfig(object):
         table_name: Full BigQuery table identifier - project-name:dataset_name.table_name 
     
     """
-    def __init__(self, table_id, genomic_build, value_field,
+    def __init__(self, table_id, chromosome, genomic_build, value_field,
                  internal_table_id, program):
         self.table_id = table_id
+        self.chromosome = chromosome
         self.genomic_build = genomic_build
         self.value_field = value_field
         self.internal_table_id = internal_table_id
@@ -45,12 +46,13 @@ class METHTableConfig(object):
     @classmethod
     def from_dict(cls, param):
         table_id = param['table_id']
+        chromosome = param['chromosome']
         genomic_build = param['genomic_build']
         value_field = param['value_field']
         internal_table_id = param['internal_table_id']
         program = param['program']
 
-        return cls(table_id, genomic_build, value_field, internal_table_id, program)
+        return cls(table_id, chromosome, genomic_build, value_field, internal_table_id, program)
 
 
 class METHDataSourceConfig(object):
@@ -70,6 +72,7 @@ class METHDataSourceConfig(object):
             table_config = {key: table_template[key] for key in ['genomic_build', 'value_field', 'program']}
             table_config.update({
                 "table_id": table_template['table_id_prefix'] + c,
+                "chromosome": c,
                 "internal_table_id": table_template['genomic_build'] + '_chr' + c.lower()
             })
 

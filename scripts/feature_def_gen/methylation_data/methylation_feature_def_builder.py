@@ -80,6 +80,10 @@ class METHFeatureDefBuilder(FeatureDefBigqueryProvider):
         },
     ]
 
+    def __init__(self, config, chromosome_array=[]):
+        super(METHFeatureDefBuilder, self).__init__(config)
+        self.chromosome_array = chromosome_array
+
     def get_mysql_schema(self):
         return self.MYSQL_SCHEMA
 
@@ -90,8 +94,17 @@ class METHFeatureDefBuilder(FeatureDefBigqueryProvider):
             'FROM \n' \
             '{subquery_stmt}'
 
+        matching_tables = []
+        for chromosome in self.chromosome_array:
+            for table_config in config.data_table_list:
+                if table_config.chromosome == chromosome:
+                    logger.info("Found matching table for chromosome {c}: {table_id}".format(
+                        c=chromosome, table_id=table_config.table_id
+                    ))
+                    matching_tables.append(table_config)
+
         table_queries = []
-        for table_config in config.data_table_list:
+        for table_config in matching_tables:
             query_template = (
                 "( \
                  SELECT '{methylation_table_id}' AS table_id, GENEcpg.UCSC.RefGene_Name, GENEcpg.UCSC.RefGene_Group, \

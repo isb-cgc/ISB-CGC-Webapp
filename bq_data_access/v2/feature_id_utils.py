@@ -37,7 +37,7 @@ from scripts.feature_def_gen.gnab_features import GNABDataSourceConfig
 # METH
 from bq_data_access.v2.methylation_data import METHDataQueryHandler
 from bq_data_access.data_types.methylation import BIGQUERY_CONFIG as METH_BIGQUERY_CONFIG
-from scripts.feature_def_gen.methylation_data.methylation_feature_def_provider import METHFeatureDefBuilder
+from scripts.feature_def_gen.methylation_data.methylation_feature_def_builder import METHFeatureDefBuilder
 from scripts.feature_def_gen.methylation_features import METHDataSourceConfig
 # RPPA
 from bq_data_access.v2.protein_data import RPPADataQueryHandler
