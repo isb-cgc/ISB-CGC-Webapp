@@ -1,6 +1,6 @@
 """
 
-Copyright 2015, Institute for Systems Biology
+Copyright 2017, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ limitations under the License.
 
 from collections import defaultdict
 from copy import deepcopy
+import logging as logger
 
 from MySQLdb.cursors import DictCursor
 from _mysql_exceptions import MySQLError
@@ -28,16 +29,33 @@ from cohorts.metadata_helpers import get_sql_connection
 
 
 class RPPASearcher(object):
-    feature_search_valid_fields = set(['gene_name', 'protein_name'])
+    feature_search_valid_fields = set(['gene_name', 'protein_name', 'genomic_build'])
     field_search_valid_fields = set(['gene_name', 'probe_name', 'protein_name'])
 
     searchable_fields = [
-        {'name': 'gene_name',
-         'label': 'Gene',
-         'static': False},
-        {'name': 'protein_name',
-         'label': 'Protein',
-         'static': False}
+        {
+            'name': 'gene_name',
+            'label': 'Gene',
+            'static': False
+        },
+        {
+            'name': 'protein_name',
+            'label': 'Protein',
+            'static': False
+        },
+        {
+            'name': 'genomic_build',
+            'label': 'Genomic Build',
+            'static': True,
+            'values': ['hg19']
+        },
+        {
+            'name': 'program_name',
+            'label': 'Program Name',
+            'static': True,
+            'values': ['tcga']
+        }
+
     ]
 
     @classmethod
@@ -50,7 +68,7 @@ class RPPASearcher(object):
 
     @classmethod
     def get_table_name(cls):
-        return "feature_defs_rppa"
+        return "feature_defs_rppa_v2"
 
     def validate_field_search_input(self, keyword, field):
         if field not in self.field_search_valid_fields:
@@ -79,6 +97,7 @@ class RPPASearcher(object):
             return items
 
         except MySQLError as mse:
+            logger.exception(mse)
             raise BackendException('database error: ' + str(mse))
 
     def validate_feature_search_input(self, parameters):
@@ -98,17 +117,23 @@ class RPPASearcher(object):
             raise EmptyQueryException(self.get_datatype_identifier())
 
     def build_feature_label(self, row):
-        # Example: 'Protein | Gene:EGFR, Protein:EGFR_pY1068, Value:protein_expression'
-        label = "Protein | Gene:" + row['gene_name'] + ", Protein:" + row['protein_name'] + ", Value:" + row['value_field']
+        # Example: 'Protein | Build:19, Gene:EGFR, Protein:EGFR_pY1068, Value:protein_expression'
+        label = "Protein | Build:{build_id}, Gene:{gene_label}, Protein:{protein_name}, Value:{value_field}".format(
+            build_id=row['genomic_build'],
+            gene_label=row['gene_name'],
+            protein_name=row['protein_name'],
+            value_field=row['value_field']
+        )
         return label
 
     def search(self, parameters):
         self.validate_feature_search_input(parameters)
 
-        query = 'SELECT gene_name, protein_name, value_field, internal_feature_id ' \
+        query = 'SELECT gene_name, protein_name, value_field, genomic_build, internal_feature_id ' \
                 'FROM {table_name} ' \
                 'WHERE gene_name=%s ' \
                 'AND protein_name LIKE %s ' \
+                'AND genomic_build=%s' \
                 'LIMIT %s'.format(table_name=self.get_table_name()
         )
 
@@ -118,6 +143,7 @@ class RPPASearcher(object):
         # Format the keyword for MySQL string matching
         query_args = [input['gene_name'],
                       '%' + input['protein_name'] + '%',
+                      input['genomic_build'],
                       FOUND_FEATURE_LIMIT]
 
         try:
@@ -136,5 +162,6 @@ class RPPASearcher(object):
 
             return items
 
-        except MySQLError:
+        except MySQLError as mse:
+            logger.exception(mse)
             raise BackendException('database error')

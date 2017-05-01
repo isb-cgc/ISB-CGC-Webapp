@@ -20,7 +20,7 @@ from bq_data_access.v2.feature_search.gexp_searcher import GEXPSearcher
 from bq_data_access.v2.feature_search.clinical_searcher import ClinicalSearcher
 from bq_data_access.v2.feature_search.methylation_searcher import METHSearcher
 from bq_data_access.v2.feature_search.copynumber_search import CNVRSearcher
-from bq_data_access.v2.feature_search.protein import RPPASearcher
+from bq_data_access.v2.feature_search.protein_search import RPPASearcher
 from bq_data_access.v2.feature_search.microrna_searcher import MIRNSearcher
 from bq_data_access.v2.feature_search.gnab_searcher import GNABSearcher
 
