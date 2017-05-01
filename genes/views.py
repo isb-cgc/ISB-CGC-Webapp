@@ -171,7 +171,7 @@ def gene_fav_save(request, gene_fav_id=0):
     name = request.POST.get("genes-name")
     gene_list = request.POST.get("genes-list")
 
-    gene_list = [x.strip().upper() for x in gene_list.split(' ')]
+    gene_list = [x.strip() for x in gene_list.split(' ')]
     gene_list = list(set(gene_list))
 
     whitelist = re.compile(WHITELIST_RE, re.UNICODE)

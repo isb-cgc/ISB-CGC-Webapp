@@ -256,7 +256,7 @@ require([
         return cookieValue;
     }
 
-    function validate_genes(list, cb){
+    function validate_genes(list, callback){
         if(list.length > 0){
             var csrftoken = get_cookie('csrftoken');
             $.ajax({
@@ -267,7 +267,7 @@ require([
                 beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                 success : function (data) {
                     if(!data.error) {
-                        cb(data.results);
+                        callback(data.results);
                     }
                 },
                 error: function () {

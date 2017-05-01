@@ -540,16 +540,10 @@ def fix_gene_symbols(debug):
         " WHERE type='{type_name}'"
     )
 
-    insertion_stmt = """
-        INSERT INTO genes_genesymbols
-        (symbol,type)
-        VALUES
-    """
-
     fix_current_genes = """
-        UPDATE genes_genesymbols
+        UPDATE genes_genesymbol
         SET type='gene'
-        WHERE type IS NULL
+        WHERE type IS NULL;
     """
 
     db = None
@@ -558,6 +552,7 @@ def fix_gene_symbols(debug):
     try:
 
         db = get_mysql_connection()
+        db.autocommit(True)
         cursor = db.cursor()
 
         query = bq_query_template.format(table_name='mirna_gene_symbols',project_name='isb-cgc',dataset_name='test',type_name='miRNA')
@@ -582,14 +577,24 @@ def fix_gene_symbols(debug):
         else:
             print >> sys.stdout, "[WARNING] miRNA/gene symbol query returned no results"
 
-        cursor.execute(fix_current_genes)
+        if debug:
+            print >> sys.stdout, "[STATUS] Executing statement: "+fix_current_genes
+        else:
+            print >> sys.stdout, "[STATUS] Fixing current genes..."
+            cursor.execute(fix_current_genes)
+            print >> sys.stdout, "...done."
 
         mirna_gene_symbols = []
 
         for mirna in mirnas:
             mirna_gene_symbols.append(GeneSymbol(symbol=mirna,type='miRNA'))
 
-        GeneSymbol.objects.bulk_create(mirna_gene_symbols)
+        if debug:
+            print >> sys.stdout, "[STATUS] Bulk create for %s miRNAs"%str(len(mirna_gene_symbols))
+        else:
+            print >> sys.stdout, "[STATUS] Attempting to bulk create %s miRNAs..."%str(len(mirna_gene_symbols))
+            GeneSymbol.objects.bulk_create(mirna_gene_symbols)
+            print >> sys.stdout, "...done."
 
         query = bq_query_template.format(table_name='mirna_gene_symbols', project_name='isb-cgc', dataset_name='test',
                                          type_name='gene')
@@ -598,6 +603,8 @@ def fix_gene_symbols(debug):
         job_is_done = is_bigquery_job_finished(bq_service, 'isb-cgc', query_job['jobReference']['jobId'])
 
         genes = {}
+        bq_genes = []
+        new_genes = []
         retries = 0
 
         while not job_is_done and retries < BQ_ATTEMPT_MAX:
@@ -609,22 +616,27 @@ def fix_gene_symbols(debug):
 
         if len(results) > 0:
             for gene in results:
-                genes[gene['f'][0]['v']] = 1
+                bq_genes.append(gene['f'][0]['v'])
         else:
             print >> sys.stdout, "[WARNING] miRNA/gene symbol query returned no results"
 
-        cursor.execute('SELECT * FROM genes_genesymbols WHERE type=%s;',('gene',))
-
-        new_genes = []
+        cursor.execute('SELECT * FROM genes_genesymbol WHERE type=%s;',('gene',))
 
         for row in cursor.fetchall():
-            if row[0] not in genes:
-                new_genes.append(row[0])
+            genes[row[1]] = 1
+
+        for new_gene in bq_genes:
+            if new_gene not in genes:
+                new_genes.append(new_gene)
 
         if len(new_genes) > 0:
             genes_to_add = [GeneSymbol(symbol=x,type='gene') for x in new_genes]
-            GeneSymbol.objects.bulk_create(genes_to_add)
-
+            if debug:
+                print >> sys.stdout, "[STATUS] Bulk create for %s genes" % str(len(genes_to_add))
+            else:
+                print >> sys.stdout, "[STATUS] Attempting to bulk create %s genes..." % str(len(genes_to_add))
+                GeneSymbol.objects.bulk_create(genes_to_add)
+                print >> sys.stdout, "[STATUS] ...done."
 
     except Exception as e:
         print >> sys.stdout, "[ERROR] Exception encountered in fix_gene_symbols:"
