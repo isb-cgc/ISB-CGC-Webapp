@@ -30,9 +30,27 @@ from bq_data_access.v2.plot_data_support import get_merged_feature_vectors
 from google_helpers.bigquery_service_v2 import BigQueryServiceSupport
 
 from django.http import JsonResponse
+from cohorts.models import Cohort
 from projects.models import Project
 
 logger = logging.getLogger(__name__)
+
+
+def get_program_name_set_for_cohorts(cohort_id_array):
+    """
+    Returns the set of names of programs that are referred to by the samples
+    in a list of cohorts.
+    
+    Returns:
+        Set of program names in lower case.
+    """
+    program_set = set()
+    result = Cohort.objects.filter(id__in=cohort_id_array)
+    for cohort in result:
+        cohort_programs = cohort.get_programs()
+        program_set.update([p.name.lower() for p in cohort_programs])
+
+    return program_set
 
 
 def data_access_for_plot(request):
@@ -42,7 +60,12 @@ def data_access_for_plot(request):
         x_id = request.GET.get('x_id', None)
         y_id = request.GET.get('y_id', None)
         c_id = request.GET.get('c_id', None)
-        logTransform = json.loads(request.GET.get('log_transform', None))
+        try:
+            logTransform = json.loads(request.GET.get('log_transform', None))
+        except Exception as e:
+            logger.info("No logTransform parameter supplied")
+            logTransform = None
+
         cohort_id_array = request.GET.getlist('cohort_id', None)
 
         # Check that all requested feature identifiers are valid. Do not check for y_id if it is not
@@ -98,10 +121,10 @@ def data_access_for_plot(request):
 
         bqss = BigQueryServiceSupport.build_from_django_settings()
         fvb = FeatureVectorBigQueryBuilder.build_from_django_settings(bqss)
-        program_set = set(['tcga'])
 
+        program_set = get_program_name_set_for_cohorts(cohort_id_array)
         data = get_merged_feature_vectors(fvb, x_id, y_id, None, cohort_id_array, logTransform, confirmed_study_ids, program_set=program_set)
-        return data
+        return JsonResponse(data)
 
     except Exception as e:
         print >> sys.stdout, traceback.format_exc()
