@@ -64,12 +64,6 @@ class METHSearcher(object):
             'label': 'Genomic Build',
             'static': True,
             'values': ['hg19']
-        },
-        {
-            'name': 'program_name',
-            'label': 'Program Name',
-            'static': True,
-            'values': ['tcga']
         }
     ]
 

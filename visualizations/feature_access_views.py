@@ -29,7 +29,7 @@ from bq_data_access.v2.feature_search.gexp_searcher import GEXPSearcher
 from bq_data_access.v2.feature_search.gnab_searcher import GNABSearcher
 from bq_data_access.v2.feature_search.methylation_searcher import METHSearcher
 from bq_data_access.v2.feature_search.microrna_searcher import MIRNSearcher
-from bq_data_access.v2.feature_search.protein_search import RPPASearcher
+from bq_data_access.v2.feature_search.protein_searcher import RPPASearcher
 from bq_data_access.v2.gexp_data import GEXP_FEATURE_TYPE
 from bq_data_access.v2.gnab_data import GNAB_FEATURE_TYPE
 from bq_data_access.v2.methylation_data import METH_FEATURE_TYPE
