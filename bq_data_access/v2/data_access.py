@@ -39,11 +39,14 @@ def is_valid_feature_identifier(feature_id):
     try:
         provider_class = FeatureProviderFactory.get_provider_class_from_feature_id(feature_id)
         is_valid = provider_class.is_valid_feature_id(feature_id)
-    except FeatureNotFoundException:
+    except FeatureNotFoundException as e:
+        logging.exception(e)
         # FeatureProviderFactory.get_provider_class_from_feature_id raises FeatureNotFoundException
         # if the feature identifier does not look valid. Nothing needs to be done here,
         # since is_valid is already False.
         pass
+    except Exception as e:
+        print >> sys.stdout, traceback.format_exc()
     finally:
         return is_valid
 
@@ -199,13 +202,17 @@ class FeatureVectorBigQueryBuilder(object):
     def build_from_django_settings(cls, bqss):
         from django.conf import settings as django_settings
         project_id_number = django_settings.BQ_PROJECT_ID
+        project_name = django_settings.PROJECT_NAME
         bigquery_cohort_dataset = django_settings.COHORT_DATASET_ID
         biquery_cohort_table = django_settings.BIGQUERY_COHORT_TABLE_ID
 
-        cohort_settings = BigQueryCohortStorageSettings(
-            bigquery_cohort_dataset,
-            biquery_cohort_table
+        cohort_table_id = "{project_name}:{dataset_id}.{table_id}".format(
+            project_name=project_name,
+            dataset_id=bigquery_cohort_dataset,
+            table_id=biquery_cohort_table
         )
+
+        cohort_settings = BigQueryCohortStorageSettings(cohort_table_id)
 
         return cls(project_id_number, cohort_settings, bqss)
 
