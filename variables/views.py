@@ -19,6 +19,8 @@ limitations under the License.
 import json
 import logging
 import re
+import sys
+
 from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
@@ -32,6 +34,8 @@ from django.contrib import messages
 from django.conf import settings
 from django.contrib.auth.models import User as Django_User
 from django.http import HttpResponse
+
+from cohorts.metadata_helpers import fetch_program_attr
 
 debug = settings.DEBUG
 
@@ -195,26 +199,12 @@ def initialize_variable_selection_page(request,
     for fav in favorite_list:
         fav.variables = fav.get_variables()
 
-    #TODO common variables need to be refactored into an adaptive list based on common used
-    displayed_common_variables = [
-        {'name' : "vital_status",                          'code' : 'CLIN:vital_status',                                'type' : 'C'},
-        {'name' : "gender",                                'code' : 'CLIN:gender',                                      'type' : 'C'},
-        {'name' : "age_at_initial_pathologic_diagnosis",   'code' : 'CLIN:age_at_initial_pathologic_diagnosis',         'type' : 'N'},
-        {'name' : "tumor_tissue_site",                     'code' : 'CLIN:tumor_tissue_site',                           'type' : 'C'},
-        {'name' : "histological_type",                     'code' : 'CLIN:histological_type',                           'type' : 'C'},
-        {'name' : "other_diagnosis",                       'code' : 'CLIN:other_dx',                                    'type' : 'C'},
-        {'name' : "tumor_status",                          'code' : 'CLIN:person_neoplasm_cancer_status',               'type' : 'C'},
-        {'name' : "new_tumor_event_after_initial_treatment", 'code' : 'CLIN:new_tumor_event_after_initial_treatment',   'type' : 'C'},
-        {'name' : "histological_grade",                    'code' : 'CLIN:neoplasm_histologic_grade',                   'type' : 'C'},
-        {'name' : "residual_tumor",                        'code' : 'CLIN:residual_tumor',                              'type' : 'C'},
-        {'name' : "tobacco_smoking_history",               'code' : 'CLIN:tobacco_smoking_history',                     'type' : 'C'},
-        {'name' : "icd-10",                                'code' : 'CLIN:icd_10',                                      'type' : 'C'},
-        {'name' : "icd-o-3_site",                          'code' : 'CLIN:icd_o_3_site',                                'type' : 'C'},
-        {'name' : "icd-o-3_histology",                     'code' : 'CLIN:icd_o_3_histology',                           'type' : 'C'}
-    ]
-    common_variables = displayed_common_variables
-    TCGA_program    = {"id" : -1, "study" : {"id" :-1, "name" : ""}, "name" : "TCGA"}
-    common_program  = {"id" : -1, "study" : {"id" :-1, "name" : ""}, "name" : "Common", "variables" : common_variables}
+    program_attrs = {}
+
+    for prog in public_programs:
+        program_attrs[prog.id] = fetch_program_attr(prog.id)
+
+    print >> sys.stdout, str(program_attrs)
 
     # users can select from their saved variable favorites
     variable_favorites = VariableFavorite.get_list(request.user)
@@ -227,13 +217,12 @@ def initialize_variable_selection_page(request,
         'user_programs'         : programs,
         'base_url'                  : settings.BASE_URL,
         'base_api_url'              : settings.BASE_API_URL,
-        'TCGA_program'              : TCGA_program,
-        'common_program'            : common_program,
         'variable_favorites'        : variable_favorites,
         'workbook'                  : workbook_model,
         'worksheet'                 : worksheet_model,
         'existing_variable_list'    : existing_variable_list,
-        'new_workbook'              : new_workbook
+        'new_workbook'              : new_workbook,
+        'program_attrs'         : program_attrs
     }
 
     return render(request, template, context)
@@ -300,7 +289,7 @@ def variable_fav_save(request, variable_fav_id=0):
         except ObjectDoesNotExist:
             messages.error(request, 'The gene list you want does not exist.')
             result['error'] = 'You do not have permission to update this gene favorite list'
-    else :
+    else:
         variable_model = VariableFavorite.create(name        = data['name'],
                                                  variables   = data['variables'],
                                                  user        = request.user)

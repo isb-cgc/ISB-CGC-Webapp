@@ -24,6 +24,7 @@ import dotenv
 dotenv.read_dotenv(join(dirname(__file__), '../.env'))
 
 APP_ENGINE_FLEX = 'aef-'
+APP_ENGINE = 'Google App Engine/'
 
 BASE_DIR                = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + os.sep
 
@@ -88,6 +89,7 @@ DB_SOCKET = DATABASES['default']['HOST'] if 'cloudsql' in DATABASES['default']['
 
 IS_DEV = bool(os.environ.get('IS_DEV', False))
 IS_APP_ENGINE_FLEX = os.getenv('GAE_INSTANCE', '').startswith(APP_ENGINE_FLEX)
+IS_APP_ENGINE = os.getenv('SERVER_SOFTWARE', '').startswith(APP_ENGINE)
 
 # If this is a GAE-Flex deployment, we don't need to specify SSL; the proxy will take
 # care of that for us
@@ -103,7 +105,7 @@ if os.environ.has_key('DB_SSL_CERT') and not IS_APP_ENGINE_FLEX:
 # Default to localhost for the site ID
 SITE_ID = 3
 
-if IS_APP_ENGINE_FLEX:
+if IS_APP_ENGINE_FLEX or IS_APP_ENGINE:
     print >> sys.stdout, "[STATUS] AppEngine Flex detected."
     SITE_ID = 4
 

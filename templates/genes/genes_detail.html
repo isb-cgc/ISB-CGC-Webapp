@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% load custom_tags %}
-{% block title %}Genes Favorite Details | ISB-CGC{% endblock %}}
+{% block title %}Gene & miRNA Favorites Details | ISB-CGC{% endblock %}}
 {% block extra_css_libs %}{% endblock %}
 {% block header %}{% endblock %}
 
@@ -18,12 +18,12 @@
             <li><a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Saved Gene Favorites</a></li>
         {% elif new_workbook %}
             <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
-            <li><a href="{% url 'gene_select_for_new_workbook' %}">Saved Gene Favorites</a></li>
+            <li><a href="{% url 'gene_select_for_new_workbook' %}">Saved Gene & miRNA Favorites</a></li>
         {% else %}
-            <li><a href="{% url 'genes' %}">Saved Gene Favorites</a></li>
+            <li><a href="{% url 'genes' %}">Saved Gene & miRNA Favorites</a></li>
         {% endif %}
     </ol>
-    <h1 class="page-header">Gene Favorite Details</h1>
+    <h1 class="page-header">Gene & miRNA Favorite Details</h1>
 </div>
 {% endblock %}
 {% block content %}
@@ -35,7 +35,7 @@
         </div>
         <div class="panel-body">
             <div>
-                <h5>Selected Genes</h5>
+                <h5>Selected Genes & miRNAs</h5>
                 <ul>
                     {% for gene in gene_favorite.genes  %}
                         <li class="delete-x filter-label label label-default">{{gene.name}}</li>
@@ -72,7 +72,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 id="delete-favorite-header" class="modal-title">Delete this gene favorite "{{ gene_favorite.name|title }}"?</h4>
+                <h4 id="delete-favorite-header" class="modal-title">Delete this gene & miRNA favorite "{{ gene_favorite.name|title }}"?</h4>
             </div>
             <form id="delete-workbook" method="POST" action="{% url 'gene_fav_delete' gene_favorite.id %}">
                 {% csrf_token %}
@@ -91,7 +91,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="edit-workbook-header">Create a new workbook using the gene favorite "{{ gene_favorite.name|title }}"</h4>
+                <h4 class="modal-title" id="edit-workbook-header">Create a new workbook using the gene & miRNA favorite "{{ gene_favorite.name|title }}"</h4>
             </div>
             <form id="edit-workbook" method="POST" action="{% url 'worksheet_create_with_genes' %}">
                 {% csrf_token %}

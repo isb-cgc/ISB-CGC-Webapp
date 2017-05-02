@@ -1,10 +1,10 @@
-<!-- Delete Gene Favorite Modal -->
+<!-- Delete Favorite Modal -->
 <div class="modal fade" id="delete-favorite-modal-{{ favorite.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-workbook-header" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Delete this variable favorite "{{ favorite.name|title }}"?</h4>
+                <h4 class="modal-title">Delete the gene & miRNA favorite "{{ favorite.name|title }}"?</h4>
             </div>
             <form id="delete-workbook" method="POST" action="{% url 'gene_fav_delete' favorite.id %}">
                 {% csrf_token %}
@@ -23,7 +23,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Create a new workbook using the gene favorite "{{ favorite.name|title }}"</h4>
+                <h4 class="modal-title">Create a new workbook using the gene & miRNA favorite "{{ favorite.name|title }}"</h4>
             </div>
             <form id="edit-workbook" method="POST" action="{% url 'worksheet_create_with_genes' %}">
                 {% csrf_token %}

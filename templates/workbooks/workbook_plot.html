@@ -64,7 +64,7 @@
                             {% endif %}
                             {% for gene in genes %}
                                 {% if not plot or plot.x_axis.id != gene.id %}
-                                    <option type="gene" value="{{ gene.gene }}" var_id="{{ gene.id }}">{{ gene.gene }}</option>
+                                    <option type="{{ gene.type }}" value="{{ gene.gene }}" var_id="{{ gene.id }}">{{ gene.gene }}</option>
                                 {% endif %}
                             {% endfor %}
                             {% for var in variables %}
@@ -98,8 +98,8 @@
                                     {% endfor %}
                                 </div>
                                 <div class="search-term feature-search space-top-15">
-                                    <label for="search-term-select-x-{{ type.datatype }}">Select Feature</label>
-                                    <select id="search-term-select-x-{{ type.datatype }}" project="{{ TCGA_project.id }}" project_name="{{ TCGA_project.name }}" study="{{ TCGA_project.study.id }}" study_name="{{ TCGA_project.study.name}}" class="search-term-field search-term-select form-control"></select>
+                                    <label for="search-term-select-x-{{ type.datatype }}" disabled selected>Select Feature</label>
+                                    <select id="search-term-select-x-{{ type.datatype }}" class="search-term-field search-term-select form-control"></select>
                                 </div>
                             </div>
                         {% endfor %}
@@ -124,7 +124,7 @@
                             {% endif %}
                             {% for gene in genes %}
                                 {% if not plot or plot.y_axis.id != gene.id %}
-                                    <option type="gene" value="{{ gene.gene }}" var_id="{{ gene.id }}">{{ gene.gene }}</option>
+                                    <option type="{{ gene.type }}" value="{{ gene.gene }}" var_id="{{ gene.id }}">{{ gene.gene }}</option>
                                     {# TODO {% endif %}#}
                                 {% endif %}
                             {% endfor %}
@@ -159,7 +159,7 @@
                                 </div>
                                 <div class="search-term feature-search space-top-15">
                                     <label for="search-term-select-y">Select Feature</label>
-                                    <select id="search-term-select-y" project="{{ TCGA_project.id }}" project_name="{{ TCGA_project.name }}" study="{{ TCGA_project.study.id }}" study_name="{{ TCGA_project.study.name}}" class="search-term-field search-term-select form-control"></select>
+                                    <select id="search-term-select-y" class="search-term-field search-term-select form-control"></select>
                                 </div>
                             </div>
                         {% endfor %}
@@ -183,7 +183,7 @@
 
                     <!-- Gene Label for SeqPeek -->
                     <div class="form-group seqpeek-genes">
-                        <label for="gene_label">Gene</label>
+                        <label for="gene_label">Gene or miRNA</label>
                         <select id="gene_label" {% if workbook.owner.id != user.id %} disabled {% endif %} class="form-control search-term-field" style="width: 230px;">
                             {% if plot.gene_label %}
                                 <option value="{{ plot.gene_label }}" selected >{{ plot.gene_label }}</option>
@@ -229,7 +229,7 @@
                     <p><i class="fa fa-exclamation-circle"></i> To complete this analysis: </p>
                     <ul class="ul no-bullet">
                         <li><input class="plot-ready-check" type="checkbox" id="selAnType-{{ worksheet.id }}" readonly onclick="this.checked=!this.checked;"> Select an Analysis Type (above)</li>
-                        <li><input class="plot-ready-check" type="checkbox" id="selGenVar-{{ worksheet.id }}" readonly onclick="this.checked=!this.checked;"> Select <a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Genes</a> and/or <a href="{% url 'variable_select_for_existing_workbook' workbook.id worksheet.id %}">Variables</a></li>
+                        <li><input class="plot-ready-check" type="checkbox" id="selGenVar-{{ worksheet.id }}" readonly onclick="this.checked=!this.checked;"> Select <a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Genes & miRNAs</a> and/or <a href="{% url 'variable_select_for_existing_workbook' workbook.id worksheet.id %}">Variables</a></li>
                         <li><input class="plot-ready-check" type="checkbox" id="selCoh-{{ worksheet.id }}" readonly onclick="this.checked=!this.checked;"> Select a <a href="{% url 'cohort_select_for_existing_workbook' workbook.id worksheet.id %}%}">Cohort</a></li>
                     </ul>
                 </div>

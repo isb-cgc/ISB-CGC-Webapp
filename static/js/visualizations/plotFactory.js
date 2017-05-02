@@ -469,10 +469,10 @@ define([
     function generate_plot(args, callback){ //plot_selector, legend_selector, pairwise_element, type, x_attr, y_attr, color_by, cohorts, cohort_override, callback) {
         var plot_data_url;
         if (args.type == "SeqPeek") {
-            plot_data_url = get_seqpeek_data_url(base_api_url, args.cohorts, args.gene_label, VERSION);
+            plot_data_url = get_seqpeek_data_url(base_url, args.cohorts, args.gene_label, VERSION);
         }
         else {
-            plot_data_url = get_data_url(base_api_url, args.cohorts, args.x, args.y, args.color_by, args.logTransform, VERSION);
+            plot_data_url = get_data_url(base_url, args.cohorts, args.x, args.y, args.color_by, args.logTransform, VERSION);
         }
 
         $.ajax({

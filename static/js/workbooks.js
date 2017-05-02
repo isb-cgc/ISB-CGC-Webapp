@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2016, Institute for Systems Biology
+ * Copyright 2017, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -602,7 +602,7 @@ require([
             }
         });
 
-        vizhelpers.get_variable_field_options(datatype, filters, function(options){
+        vizhelpers.get_variable_field_options(datatype, filters, $('#workbook-build :selected').data('plot-version'), function(options){
             var selectbox = parent.parent('.search-field').find('.feature-search .search-term-field');
             selectbox.empty();
 

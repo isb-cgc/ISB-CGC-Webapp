@@ -82,7 +82,8 @@
                                     </a>
                                 </div>
                                 <div id="{{ program.id }}-collapse-{{ attr.name }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"
-                                     aria-labelledby="heading-{{ attr.name }}" data-feature-name="{{ attr.name }}" data-feature-displ-name="{{ attr.displ_name }}" data-feature-type="datatype">
+                                     aria-labelledby="heading-{{ attr.name }}" data-feature-name="{{ attr.name }}" data-feature-displ-name="{{ attr.displ_name }}"
+                                     data-feature-type="datatype" data-feature-id="data_type">
                                     <ul class="search-checkbox-list" id="{{ program.id }}-{{ attr.name }}">
                                         {% if data_type_counts|list_contains_name:attr.name %}
                                             {% for v in data_type_counts|get_named_item:attr.name|get_item:'values' %}
