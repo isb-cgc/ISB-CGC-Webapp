@@ -22,7 +22,7 @@ from _mysql_exceptions import MySQLError
 from copy import deepcopy
 from collections import defaultdict
 
-import logging
+import logging as logger
 
 from cohorts.metadata_helpers import get_sql_connection
 from bq_data_access.v2.feature_search.common import FOUND_FEATURE_LIMIT
@@ -46,12 +46,6 @@ class GEXPSearcher(object):
             'label': 'Genomic Build',
             'static': True,
             'values': ['hg19', 'hg38']
-        },
-        {
-            'name': 'program_name',
-            'label': 'Program Name',
-            'static': True,
-            'values': ['tcga']
         }
     ]
 
@@ -94,6 +88,7 @@ class GEXPSearcher(object):
             return items
 
         except MySQLError as mse:
+            logger.exception(mse)
             raise BackendException("MySQLError: {}".format(str(mse)))
 
     def validate_feature_search_input(self, parameters):
@@ -129,7 +124,6 @@ class GEXPSearcher(object):
                 ' AND genomic_build=%s' \
                 ' LIMIT %s'.format(table_name=self.get_table_name()
         )
-        logging.debug("CLOUDSQL_QUERY_GEXP_SEARCH: {}".format(query))
 
         # Fills in '' for fields that were not specified in the parameters
         input = defaultdict(lambda: '', parameters)
@@ -157,5 +151,6 @@ class GEXPSearcher(object):
             return items
 
         except MySQLError as mse:
+            logger.exception(mse)
             raise BackendException("MySQLError: {}".format(str(mse)))
 
