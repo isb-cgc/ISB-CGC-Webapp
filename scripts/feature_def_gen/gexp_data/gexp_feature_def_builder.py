@@ -74,7 +74,7 @@ class GEXPFeatureDefBuilder(FeatureDefBigqueryProvider):
         return outer_query
 
     def build_internal_feature_id(self, feature_type, gene, genomic_build):
-        return '{feature_type}:{gene}:mrna_{genomic_build}'.format(
+        return 'v2:{feature_type}:{gene}:mrna_{genomic_build}'.format(
             feature_type=feature_type,
             gene=gene,
             genomic_build=genomic_build
