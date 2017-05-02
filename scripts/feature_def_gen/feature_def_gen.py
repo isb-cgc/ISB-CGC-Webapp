@@ -78,7 +78,8 @@ def save_csv(data_rows, schema, csv_path, include_header=False):
 @click.command()
 @click.argument('data_type', type=str)
 @click.option('--config_json', type=str)
-def print_query(data_type, config_json):
+@click.option('-chr', "chromosome_array", type=str, multiple=True, help="Chromosome (required for methylation)")
+def print_query(data_type, config_json, chromosome_array):
     feature_type = FeatureDataTypeHelper.get_type(data_type)
     logging.info("Feature type: {}".format(str(feature_type)))
     config_class = FeatureDataTypeHelper.get_feature_def_config_from_data_type(feature_type)
@@ -90,7 +91,7 @@ def print_query(data_type, config_json):
         config_dict = FeatureDataTypeHelper.get_feature_def_default_config_dict_from_data_type(feature_type)
         config_instance = config_class.from_dict(config_dict)
 
-    provider = provider_class(config_instance)
+    provider = provider_class(config_instance, chromosome_array=chromosome_array)
     query = provider.build_query(config_instance)
     print(query)
 

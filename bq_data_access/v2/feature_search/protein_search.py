@@ -117,9 +117,8 @@ class RPPASearcher(object):
             raise EmptyQueryException(self.get_datatype_identifier())
 
     def build_feature_label(self, row):
-        # Example: 'Protein | Build:19, Gene:EGFR, Protein:EGFR_pY1068, Value:protein_expression'
-        label = "Protein | Build:{build_id}, Gene:{gene_label}, Protein:{protein_name}, Value:{value_field}".format(
-            build_id=row['genomic_build'],
+        # Example: 'Protein | Gene:EGFR, Protein:EGFR_pY1068, Value:protein_expression'
+        label = "Protein | Gene:{gene_label}, Protein:{protein_name}".format(
             gene_label=row['gene_name'],
             protein_name=row['protein_name'],
             value_field=row['value_field']
