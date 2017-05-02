@@ -71,7 +71,7 @@ class CNVRSearcher(object):
         query_args = [sql_keyword, FOUND_FEATURE_LIMIT]
 
         try:
-            db = sql_connection()
+            db = get_sql_connection()
             cursor = db.cursor(DictCursor)
             cursor.execute(query, tuple(query_args))
             items = []
@@ -125,7 +125,7 @@ class CNVRSearcher(object):
                       FOUND_FEATURE_LIMIT]
 
         try:
-            db = sql_connection()
+            db = get_sql_connection()
             cursor = db.cursor(DictCursor)
             cursor.execute(query, tuple(query_args))
             items = []

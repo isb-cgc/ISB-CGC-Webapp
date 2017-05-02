@@ -1,6 +1,6 @@
 """
 
-Copyright 2015, Institute for Systems Biology
+Copyright 2017, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ limitations under the License.
 
 from django.conf.urls import patterns, url
 
-import views, feature_access_views, data_access_views, data_access_views_v2
+import views, feature_access_views, feature_access_views_v2, data_access_views, data_access_views_v2
 
 
 urlpatterns = [
@@ -38,8 +38,9 @@ urlpatterns = [
     url(r'^save_comment/$', views.save_comment, name='save_comment'),
 
     # Feature access views
-    url(r'^feature_search', feature_access_views.feature_search, name='feature_search'),
-    url(r'^feature_field_search', feature_access_views.feature_field_search, name='feature_field_search'),
+    url(r'^feature_search/v1', feature_access_views.feature_search, name='feature_search'),
+    url(r'^feature_search/v2', feature_access_views_v2.feature_search, name='feature_search'),
+    url(r'^feature_field_search', feature_access_views_v2.feature_field_search, name='feature_field_search'),
 
     # Feature data access views
     url(r'^feature_data_plot/v1', data_access_views.data_access_for_plot, name='feature_data_plot'),
