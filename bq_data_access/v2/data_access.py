@@ -196,7 +196,7 @@ class FeatureVectorBigQueryBuilder(object):
         return result
 
     @classmethod
-    def build_from_django_settings(cls):
+    def build_from_django_settings(cls, bqss):
         from django.conf import settings as django_settings
         project_id_number = django_settings.BQ_PROJECT_ID
         bigquery_cohort_dataset = django_settings.COHORT_DATASET_ID
@@ -207,7 +207,7 @@ class FeatureVectorBigQueryBuilder(object):
             biquery_cohort_table
         )
 
-        return cls(project_id_number, cohort_settings)
+        return cls(project_id_number, cohort_settings, bqss)
 
 
 
