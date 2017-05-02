@@ -78,15 +78,14 @@ require([
         return false;
     });
 
-    // set up the search bars for Clinical and MiRNA tabs
-    vizhelpers.get_datatype_search_interfaces($("#mirna-accordion"), "MIRN");
-    vizhelpers.get_datatype_search_interfaces($("#clinical-accordion"), "CLIN");
+    vizhelpers.get_datatype_search_interfaces($(".clinical-accordion"), "CLIN");
 
     // Field Editing
     $('.x-edit-field, .y-edit-field, .color-edit-field').on('click', function() { vizhelpers.show_field_search_panel(this); });
     $('.feature-search').on('change', function() { vizhelpers.field_search_change_callback(this); });
     $('.select-field').on('click', function() { vizhelpers.select_field_callback(this); });
     $('.close-field-search').on('click', function() { vizhelpers.close_field_search_callback(this); });
+
     $('.field-options').on('change', function(event) {
         var self            = $(this);
         var parent          = self.parent();
@@ -108,8 +107,6 @@ require([
             for (var i = 0; i < options.length; i++) {
                 if (options[i].hasOwnProperty('type')) {
                     selectbox.append('<option value="'+options[i]['internal_feature_id']+'" var_type="'+ options[i]['type'] + '">'+options[i]['label']+'</option>')
-                } else { // MIRNA
-                    selectbox.append('<option value="'+options[i]['internal_feature_id']+'" var_type="N">'+options[i]['label']+'</option>')
                 }
             }
         });
@@ -172,16 +169,8 @@ require([
         }
     });
 
-    /*
-        Adds a variable pill when users select a variable from from dropdowns in the TCGA tab
-     */
     $('.search-term-field').on('change', function(event){
-        if ($(this).attr('id') == 'MIRN-search-term-select') {
-            selectedOption = $(this).find(':selected');
-        } else { // CLIN
-            //find the options specified to be created in the vis_helper.js line 265 select2_formatting function.
-            var selectedOption = $(this).parents('.form-group').find('.select2-selection__rendered').children().first();
-        }
+        var selectedOption = $(this).parents('.form-group').find('.select2-selection__rendered').children().first();
         var name       = selectedOption.text();
         var code       = selectedOption.val();
         var var_type   = selectedOption.attr('var_type');
