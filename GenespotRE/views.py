@@ -161,7 +161,7 @@ def user_detail(request, user_id):
 def bucket_object_list(request):
     if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     credentials = GoogleCredentials.get_application_default()
-    service = discovery.build('storage', 'v1', credentials=credentials)
+    service = discovery.build('storage', 'v1', credentials=credentials, cache_discovery=False)
 
     req = service.objects().list(bucket='isb-cgc-dev')
     resp = req.execute()
