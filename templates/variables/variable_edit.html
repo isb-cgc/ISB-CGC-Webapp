@@ -87,11 +87,13 @@
         <div class="col-lg-6">
             <div class="panel panel-default">
                 <ul class="nav nav-tabs" role="tablist">
-                    {% for program in public_programs %}
-                         <li role="presentation" class="program-tab"><a href="#{{ program.id }}-data" role="tab" data-toggle="tab" title="ISB-CGC Data" data-program-id="{{ program.id }}">{{ program.name }}</a></li>
-                    {% endfor %}
-                    <li role="presentation" class="program-tab {% if favorite_list|length <= 0 %}disabled{% endif %}"><a href="#favorites" aria-controls="favorites" role="tab" data-toggle="tab" titles="Favorites">Favorites ({{ favorite_list | length }})</a></li>
-                    <li role="presentation" class="program-tab {% if not user_programs %}disabled{% endif %}"><a href="#0-data" role="tab" data-toggle="tab" title="User Data" data-program-id="0">User Data</a></li>
+                    {% with public_programs|first as first_prog %}
+                        {% for program in public_programs %}
+                             <li role="presentation" class="program-tab{% if program.id == first_prog.id %} active{% endif %}"><a href="#{{ program.id }}-data" role="tab" data-toggle="tab" title="ISB-CGC Data" data-program-id="{{ program.id }}">{{ program.name }}</a></li>
+                        {% endfor %}
+                        <li role="presentation" class="program-tab {% if favorite_list|length <= 0 %}disabled{% endif %}"><a href="#favorites" aria-controls="favorites" role="tab" data-toggle="tab" titles="Favorites">Favorites ({{ favorite_list | length }})</a></li>
+                        <li role="presentation" class="program-tab {% if not user_programs %}disabled{% endif %}"><a href="#0-data" role="tab" data-toggle="tab" title="User Data" data-program-id="0">User Data</a></li>
+                    {% endwith %}
                 </ul>
             </div>
         </div>
@@ -120,7 +122,7 @@
                                                         <li class="list-group-item checkbox">
                                                             <div id="heading-{{ attr.name }}" class="list-group-item__heading">
                                                                 <label>
-                                                                    <input class="variable-toggle-checkbox" type="checkbox" var_type="{{ attr.type }}" name="elements-selected" data-text-label="{{ attr.displ_name }}">
+                                                                    <input class="variable-toggle-checkbox" value="{{ attr.name }}" type="checkbox" var_type="{{ attr.type }}" name="elements-selected" data-text-label="{{ attr.displ_name }}">
                                                                     {{ attr.displ_name }}
                                                                 </label>
                                                             </div>
@@ -129,7 +131,7 @@
                                                 </ul>
                                             </div>
                                             <div role="tabpanel" class="tab-pane filter-panel" id="{{ program.id }}-clinical">
-                                                <ul class="list-group" id="{{ program.id }}-clinical-accordion" data-field="CLIN" role="tablist" aria-multiselectable="true">
+                                                <ul class="list-group clinical-accordion" id="{{ program.id }}-clinical-accordion" data-field="CLIN" role="tablist" aria-multiselectable="true">
                                                     <li class="list-group-item">
                                                         {% for type in datatype_list %}
                                                             {% if type.datatype == 'CLIN' %}

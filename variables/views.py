@@ -289,7 +289,7 @@ def variable_fav_save(request, variable_fav_id=0):
         except ObjectDoesNotExist:
             messages.error(request, 'The gene list you want does not exist.')
             result['error'] = 'You do not have permission to update this gene favorite list'
-    else :
+    else:
         variable_model = VariableFavorite.create(name        = data['name'],
                                                  variables   = data['variables'],
                                                  user        = request.user)

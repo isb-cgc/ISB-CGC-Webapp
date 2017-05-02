@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2015, Institute for Systems Biology
+ * Copyright 2017, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -158,10 +158,14 @@ define(['jquery'], function($) {
           *     filters     : an array of filters unique to the data type, eg [{filter : "", value : ""}, {},..]
           *     callback    : the return call on success
           */
-        get_variable_field_options : function(datatype, filters, callback){
+        get_variable_field_options : function(datatype, filters, version, callback){
             if(typeof(callback) !== 'undefined'){
-                var base_feature_search_url = base_url + '/visualizations/feature_search?';
+                var base_feature_search_url = base_url + '/visualizations/feature_search/'+version+'?';
+                if(version == 'v2') {
+                    filters.push({filter: 'build', value: $('#workbook-build :selected').val()});
+                }
                 var feature_search_url = base_feature_search_url + "datatype=" + datatype;
+
                 for (var i in filters) {
                     feature_search_url += "&" + filters[i].filter + "=" + filters[i].value; //+ ",";
                 }

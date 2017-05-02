@@ -1,6 +1,6 @@
 """
 
-Copyright 2015, Institute for Systems Biology
+Copyright 2017, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ class GEXPSearcher(object):
         logging.debug("CLOUDSQL_QUERY_GEXP_FIELDS: {}".format(query))
 
         try:
-            db = sql_connection()
+            db = get_sql_connection()
             cursor = db.cursor(DictCursor)
             cursor.execute(query, tuple(query_args))
             items = []
@@ -135,7 +135,7 @@ class GEXPSearcher(object):
                       FOUND_FEATURE_LIMIT]
 
         try:
-            db = sql_connection()
+            db = get_sql_connection()
             cursor = db.cursor(DictCursor)
             cursor.execute(query, tuple(query_args))
             items = []

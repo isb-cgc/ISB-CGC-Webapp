@@ -7,6 +7,7 @@ from django.db import models
 from django.utils import formats
 from projects.models import User_Feature_Definitions
 from sharing.models import Shared_Resource
+from genes.models import GeneSymbol
 
 
 # Create your models here.
@@ -384,12 +385,13 @@ class Worksheet_gene(models.Model):
     date_created    = models.DateTimeField(auto_now_add=True)
     modified_date   = models.DateTimeField(auto_now=True)
     gene            = models.CharField(max_length=2024, blank=False)
+    type            = models.CharField(max_length=16, blank=False, default='gene')
     objects         = Worksheet_Gene_Manager()
 
     @classmethod
     def edit_list(cls, workbook_id, worksheet_id, gene_list, user):
         workbook_owner = Workbook.objects.get(id=workbook_id).get_owner()
-        if workbook_owner.id == user.id :
+        if workbook_owner.id == user.id:
             worksheet_model = Worksheet.objects.get(id=worksheet_id)
 
             genes = Worksheet_gene.objects.filter(worksheet=worksheet_model)
@@ -397,26 +399,28 @@ class Worksheet_gene(models.Model):
                 gene.destroy();
 
             results = []
-            for gene in gene_list :
+            for gene in gene_list:
                 results.append(Worksheet_gene.create(worksheet_id=worksheet_model.id, gene=gene))
 
             return_obj = {
-                'variables' : results,
+                'variables': results,
             }
-        else :
+        else:
             return_obj = {
-                'error'     : "you do not have access to update this worksheet",
+                'error': "You do not have access to update this worksheet.",
             }
         return return_obj
 
     @classmethod
     def create(cls, worksheet_id, gene):
-        worksheet_gene_model = cls.objects.create(worksheet_id = worksheet_id, gene = gene)
+        gene_type = GeneSymbol.get_type(gene) or 'gene'
+        worksheet_gene_model = cls.objects.create(worksheet_id = worksheet_id, gene = gene, type=gene_type)
         worksheet_gene_model.save()
 
         return_obj = {
             'id'            : worksheet_gene_model.id,
             'gene'          : worksheet_gene_model.gene,
+            'type'          : worksheet_gene_model.type,
             'date_created'  : formats.date_format(worksheet_gene_model.date_created, 'DATETIME_FORMAT')
         }
         return return_obj
