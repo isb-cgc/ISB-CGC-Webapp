@@ -23,7 +23,6 @@ import urllib
 import traceback
 import requests
 
-# from google.appengine.api import urlfetch
 from django.conf import settings
 
 from bq_data_access.v1.data_access import get_feature_vector

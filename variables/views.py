@@ -1,5 +1,4 @@
 """
-
 Copyright 2017, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +12,6 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
 """
 
 import json
@@ -43,9 +41,11 @@ WHITELIST_RE = settings.WHITELIST_RE
 
 logger = logging.getLogger(__name__)
 
+
 @login_required
 def variable_fav_list_for_new_workbook(request):
     return variable_fav_list(request=request, new_workbook=True)
+
 
 @login_required
 def variable_fav_list(request, workbook_id=0, worksheet_id=0, new_workbook=0):
@@ -87,6 +87,7 @@ def variable_fav_list(request, workbook_id=0, worksheet_id=0, new_workbook=0):
 def variable_fav_detail_for_new_workbook(request, variable_fav_id):
     return variable_fav_detail(request=request, variable_fav_id=variable_fav_id, new_workbook=True)
 
+
 @login_required
 def variable_fav_detail(request, variable_fav_id, workbook_id=0, worksheet_id=0, new_workbook=0):
     template = 'variables/variable_detail.html'
@@ -113,17 +114,21 @@ def variable_fav_detail(request, variable_fav_id, workbook_id=0, worksheet_id=0,
 
     return render(request, template, context)
 
+
 @login_required
 def variable_fav_edit_for_new_workbook(request):
     return initialize_variable_selection_page(request, new_workbook=True)
+
 
 @login_required
 def variable_fav_edit_for_existing_workbook(request, workbook_id=0, worksheet_id=0, variable_fav_id=0):
     return initialize_variable_selection_page(request, workbook_id=workbook_id, worksheet_id=worksheet_id)
 
+
 @login_required
 def variable_fav_edit(request, variable_fav_id=0):
     return initialize_variable_selection_page(request, variable_list_id=variable_fav_id)
+
 
 @login_required
 def initialize_variable_selection_page(request,
@@ -227,6 +232,7 @@ def initialize_variable_selection_page(request,
 
     return render(request, template, context)
 
+
 @login_required
 def variable_fav_delete(request, variable_fav_id):
     redirect_url = reverse('variables')
@@ -244,6 +250,7 @@ def variable_fav_delete(request, variable_fav_id):
 
     return redirect(redirect_url)
 
+
 @login_required
 def variable_fav_copy(request, variable_fav_id):
     redirect_url = reverse('variables')
@@ -259,6 +266,7 @@ def variable_fav_copy(request, variable_fav_id):
             messages.error(request, 'The variable list you want does not exist.')
 
     return redirect(redirect_url)
+
 
 @login_required
 def variable_fav_save(request, variable_fav_id=0):
