@@ -127,7 +127,7 @@ class GNABFeatureProvider(FeatureDataProvider):
         """
         Unpacks values from a BigQuery response object into a flat array. The array will contain dicts with
         the following fields:
-        - 'patient_id': Patient barcode
+        - 'case_id': Patient barcode
         - 'sample_id': Sample barcode
         - 'aliquot_id': Aliquot barcode
         - 'value': Value of the selected column from the MAF data table
@@ -142,7 +142,7 @@ class GNABFeatureProvider(FeatureDataProvider):
 
         for row in query_result_array:
             result.append({
-                'patient_id': row['f'][0]['v'],
+                'case_id': row['f'][0]['v'],
                 'sample_id': row['f'][1]['v'],
                 'aliquot_id': row['f'][2]['v'],
                 'value': row['f'][3]['v'],
