@@ -27,8 +27,6 @@ from scripts.feature_def_gen.gexp_features import GEXPDataSourceConfig
 
 GEXP_FEATURE_TYPE = 'GEXP'
 
-GENE_LABEL_FIELD = 'HGNC_gene_symbol'
-
 logger = logging
 
 
@@ -149,9 +147,6 @@ class GEXPDataQueryHandler(object):
         query = query_template.format(brk='\n', subqueries=subquery_stmt)
         return query
 
-
-
-
     @DurationLogged('GEXP', 'UNPACK')
     def unpack_query_response(self, query_result_array):
         """
@@ -187,7 +182,7 @@ class GEXPDataQueryHandler(object):
     def is_valid_feature_id(cls, feature_id):
         is_valid = False
         try:
-            GEXPTableFeatureDef.from_feature_id(feature_id)
+            GEXPFeatureDef.from_feature_id(feature_id)
             is_valid = True
         except Exception:
             # GEXPFeatureDef.from_feature_id raises Exception if the feature identifier
