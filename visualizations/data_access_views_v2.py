@@ -22,8 +22,13 @@ import traceback
 import sys
 
 from cohorts.metadata_helpers import get_sql_connection
-from bq_data_access.v2.plot_data_support import get_merged_feature_vectors, get_feature_id_validity_for_array
+from bq_data_access.v2.plot_data_support import get_feature_id_validity_for_array
 from cohorts.metadata_helpers import fetch_isbcgc_project_set
+
+from bq_data_access.v2.data_access import FeatureVectorBigQueryBuilder
+from bq_data_access.v2.plot_data_support import get_merged_feature_vectors
+from google_helpers.bigquery_service_v2 import BigQueryServiceSupport
+
 from django.http import JsonResponse
 from projects.models import Project
 
@@ -91,7 +96,12 @@ def data_access_for_plot(request):
                 if project.get_my_root_and_depth()['root'] in tcga_studies:
                     confirmed_study_ids.append(project.id)
 
-        return JsonResponse(get_merged_feature_vectors(x_id, y_id, c_id, cohort_id_array, logTransform, confirmed_study_ids))
+        bqss = BigQueryServiceSupport.build_from_django_settings()
+        fvb = FeatureVectorBigQueryBuilder.build_from_django_settings(bqss)
+        program_set = set(['tcga'])
+
+        data = get_merged_feature_vectors(fvb, x_id, y_id, None, cohort_id_array, logTransform, confirmed_study_ids, program_set=program_set)
+        return data
 
     except Exception as e:
         print >> sys.stdout, traceback.format_exc()
