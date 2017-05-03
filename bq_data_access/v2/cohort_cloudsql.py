@@ -187,6 +187,8 @@ def add_cohort_info_to_merged_vectors(target, x_id, y_id, c_id, cohort_id_array)
         if len(cohort_set) >= DATAPOINT_COHORT_THRESHOLD:
             item['cohort'] = cohort_set
 
+        items.append(item)
+
     # TODO assign label for y if y_id is None, as in that case the y-field will be missing from the response
     label_message = {'x': x_id, 'y': y_id, 'c': c_id}
 
@@ -195,3 +197,4 @@ def add_cohort_info_to_merged_vectors(target, x_id, y_id, c_id, cohort_id_array)
         'items':            items,
         'cohort_set':       cohort_info_obj_array,
     })
+

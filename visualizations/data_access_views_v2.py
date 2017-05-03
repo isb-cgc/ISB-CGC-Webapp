@@ -25,9 +25,10 @@ from cohorts.metadata_helpers import get_sql_connection
 from bq_data_access.v2.plot_data_support import get_feature_id_validity_for_array
 from cohorts.metadata_helpers import fetch_isbcgc_project_set
 
+from google_helpers.bigquery_service_v2 import BigQueryServiceSupport
 from bq_data_access.v2.data_access import FeatureVectorBigQueryBuilder
 from bq_data_access.v2.plot_data_support import get_merged_feature_vectors
-from google_helpers.bigquery_service_v2 import BigQueryServiceSupport
+from bq_data_access.v2.cohort_cloudsql import add_cohort_info_to_merged_vectors
 
 from django.http import JsonResponse
 from cohorts.models import Cohort
@@ -140,6 +141,7 @@ def data_access_for_plot(request):
         data = get_merged_feature_vectors(fvb, x_id, y_id, None, cohort_id_array, logTransform, confirmed_study_ids, program_set=program_set)
 
         # Annotate each data point with cohort information
+        add_cohort_info_to_merged_vectors(data, x_id, y_id, c_id, cohort_id_array)
 
         return JsonResponse(data)
 
