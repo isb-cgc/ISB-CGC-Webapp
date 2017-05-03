@@ -34,7 +34,7 @@ class RPPASearcher(object):
 
     searchable_fields = [
         {
-            'name'"MicroRNA | Build:hg19, miRNA Name:hsa-mir-548av, Value:RPM": 'gene_name',
+            'name': 'gene_name',
             'label': 'Gene',
             'static': False
         },
