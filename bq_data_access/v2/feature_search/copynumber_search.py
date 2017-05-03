@@ -1,6 +1,6 @@
 """
 
-Copyright 2015, Institute for Systems Biology
+Copyright 2017, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@ limitations under the License.
 
 """
 
+import logging as logger
+
 from MySQLdb.cursors import DictCursor
 from _mysql_exceptions import MySQLError
 
@@ -30,17 +32,26 @@ from bq_data_access.v2.copynumber_data import CNVR_FEATURE_TYPE
 
 
 class CNVRSearcher(object):
-    feature_search_valid_fields = set(['gene_name', 'value_field'])
+    feature_search_valid_fields = set(['gene_name', 'value_field', 'genomic_build'])
     field_search_valid_fields = set(['gene_name'])
 
     searchable_fields = [
-        {'name': 'gene_name',
-         'label': 'Gene',
-         'static': False},
-        {'name': 'value_field',
-         'label': 'Value',
-         'static': True,
-         'values': ['avg_segment_mean', 'std_dev_segment_mean', 'min_segment_mean', 'max_segment_mean', 'num_segments']}
+        {
+            'name': 'gene_name',
+            'label': 'Gene',
+            'static': False},
+        {
+            'name': 'value_field',
+            'label': 'Value',
+            'static': True,
+            'values': ['avg_segment_mean', 'min_segment_mean', 'max_segment_mean', 'num_segments']
+        },
+        {
+            'name': 'genomic_build',
+            'label': 'Genomic Build',
+            'static': True,
+            'values': ['hg19']
+        }
     ]
 
     @classmethod
@@ -53,7 +64,7 @@ class CNVRSearcher(object):
 
     @classmethod
     def get_table_name(cls):
-        return "feature_defs_cnvr"
+        return "feature_defs_cnvr_v2"
 
     def validate_field_search_input(self, keyword, field):
         if field not in self.field_search_valid_fields:
@@ -71,7 +82,7 @@ class CNVRSearcher(object):
         query_args = [sql_keyword, FOUND_FEATURE_LIMIT]
 
         try:
-            db = sql_connection()
+            db = get_sql_connection()
             cursor = db.cursor(DictCursor)
             cursor.execute(query, tuple(query_args))
             items = []
@@ -82,6 +93,7 @@ class CNVRSearcher(object):
             return items
 
         except MySQLError as mse:
+            logger.exception(mse)
             raise BackendException('database error: ' + str(mse))
 
     def validate_feature_search_input(self, parameters):
@@ -101,17 +113,22 @@ class CNVRSearcher(object):
             raise EmptyQueryException(self.get_datatype_identifier())
 
     def build_feature_label(self, row):
-        # Example: 'Copy Number | Gene:EGFR, Value:avg_segment_mean'
-        label = "Copy Number | Gene:" + row['gene_name'] + ", Value:" + row['value_field']
+        # Example: 'Copy Number | Build:hg19, Gene:EGFR, Value:avg_segment_mean'
+        label = "Copy Number | Build:{build_id}, Gene:{gene_label}, Value:{value_field}".format(
+            build_id=row['genomic_build'],
+            gene_label=row['gene_name'],
+            value_field=row['value_field']
+        )
         return label
 
     def search(self, parameters):
         self.validate_feature_search_input(parameters)
 
-        query = 'SELECT gene_name, value_field, internal_feature_id' \
+        query = 'SELECT gene_name, value_field, genomic_build, internal_feature_id' \
                 ' FROM {table_name}' \
                 ' WHERE gene_name=%s'\
                 ' AND value_field LIKE %s' \
+                ' AND genomic_build=%s' \
                 ' LIMIT %s'.format(table_name=self.get_table_name()
         )
 
@@ -122,10 +139,11 @@ class CNVRSearcher(object):
         # sql_keyword = '%' + keyword + '%'
         query_args = [input['gene_name'],
                       '%' + input['value_field'] + '%',
+                      input['genomic_build'],
                       FOUND_FEATURE_LIMIT]
 
         try:
-            db = sql_connection()
+            db = get_sql_connection()
             cursor = db.cursor(DictCursor)
             cursor.execute(query, tuple(query_args))
             items = []
@@ -141,5 +159,6 @@ class CNVRSearcher(object):
             return items
 
         except MySQLError as mse:
+            logger.exception(mse)
             raise BackendException('database error')
 

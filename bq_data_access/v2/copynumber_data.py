@@ -21,8 +21,9 @@ from re import compile as re_compile
 
 from bq_data_access.v2.errors import FeatureNotFoundException
 from bq_data_access.v2.feature_value_types import ValueType, DataTypes
-from bq_data_access.v2.feature_data_provider import FeatureDataProvider
 from bq_data_access.v2.utils import DurationLogged
+from bq_data_access.data_types.cnvr import BIGQUERY_CONFIG
+from scripts.feature_def_gen.copynumber_features import CNVRDataSourceConfig
 
 CNVR_FEATURE_TYPE = 'CNVR'
 IDENTIFIER_COLUMN_NAME = 'sample_id'
@@ -33,52 +34,51 @@ def get_feature_type():
 
 
 class CNVRFeatureDef(object):
+    config_instance = CNVRDataSourceConfig.from_dict(BIGQUERY_CONFIG)
+
     # Regular expression for parsing the feature definition.
     #
-    # Example ID: CNVR:max_segment_mean:X:133276258:133276370
-    regex = re_compile("^CNVR:"
+    # Example ID: CNVR:max_segment_mean:X:133276258:133276370:cnvr_masked_hg19
+    regex = re_compile("^v2:CNVR:"
                        # value
-                       "(avg_segment_mean|std_dev_segment_mean|min_segment_mean|max_segment_mean|num_segments):"
+                       "(avg_segment_mean|min_segment_mean|max_segment_mean|num_segments):"
                        # validate outside - chromosome 1-23, X, Y, M
                        "(\d|\d\d|X|Y|M):"
                        # coordinates start:end
-                       "(\d+):(\d+)$")
+                       "(\d+):(\d+):"
+                       # Table identifier
+                       "(" + "|".join([table.internal_table_id for table in config_instance.data_table_list]) + ")$")
 
-    def __init__(self, value_field, chromosome, start, end):
+    def __init__(self, value_field, chromosome, start, end, internal_table_id):
         self.value_field = value_field
         self.chromosome = chromosome
         self.start = start
         self.end = end
+        self.internal_table_id = internal_table_id
+
+    def get_table_configuration(self):
+        for table_config in self.config_instance.data_table_list:
+            if table_config.internal_table_id == self.internal_table_id:
+                return table_config
 
     @classmethod
     def from_feature_id(cls, feature_id):
         feature_fields = cls.regex.findall(feature_id)
         if len(feature_fields) == 0:
             raise FeatureNotFoundException(feature_id)
-        logging.debug(feature_fields)
-        value_field, chromosome, start, end = feature_fields[0]
+        value_field, chromosome, start, end, internal_table_id = feature_fields[0]
 
         valid_chr_set = frozenset([str(x) for x in xrange(1, 24)] + ['X', 'Y', 'M'])
         if chromosome not in valid_chr_set:
             raise FeatureNotFoundException(feature_id)
 
-        return cls(value_field, chromosome, start, end)
+        return cls(value_field, chromosome, start, end, internal_table_id)
 
 
-class CNVRFeatureProvider(FeatureDataProvider):
-    TABLES = [
-        {
-            'name': 'Copy_Number_segments',
-            'info': 'CNV',
-            'id': 'cnv'
-        }
-    ]
-
-    def __init__(self, feature_id, **kwargs):
-        self.table_name = ''
+class CNVRDataQueryHandler(object):
+    def __init__(self, feature_id):
         self.feature_def = None
         self.parse_internal_feature_id(feature_id)
-        super(CNVRFeatureProvider, self).__init__(**kwargs)
 
     def get_value_type(self):
         return ValueType.FLOAT
@@ -90,39 +90,45 @@ class CNVRFeatureProvider(FeatureDataProvider):
     def process_data_point(cls, data_point):
         return data_point['value']
 
-    def build_query(self, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array):
+    def build_query_for_program(self, feature_def, cohort_table, cohort_id_array, project_id_array):
         # Generate the 'IN' statement string: (%s, %s, ..., %s)
         cohort_id_stmt = ', '.join([str(cohort_id) for cohort_id in cohort_id_array])
 
         value_field_bqsql = {
-            'avg_segment_mean': 'AVG(Segment_Mean)',
-            'std_dev_segment_mean': 'STDDEV(Segment_Mean)',
-            'min_segment_mean': 'MIN(Segment_Mean)',
-            'max_segment_mean': 'MAX(Segment_Mean)',
+            'avg_segment_mean': 'AVG(segment_mean)',
+            'min_segment_mean': 'MIN(segment_mean)',
+            'max_segment_mean': 'MAX(segment_mean)',
             'num_segments': 'COUNT(*)'
         }
 
         query_template = \
-            ("SELECT ParticipantBarcode, SampleBarcode, AliquotBarcode, {value_field} AS value "
-             "FROM [{project_name}:{dataset_name}.{table_name}] "
-             "WHERE ( Chromosome='{chr}' AND ( "
-             "        ( Start<{start} AND End>{start} ) OR "
-             "        ( Start>{start}-1 AND Start<{end}+1 ) ) ) "
-             "AND SampleBarcode IN ( "
-             "    SELECT sample_barcode "
-             "    FROM [{project_name}:{cohort_dataset}.{cohort_table}] "
-             "    WHERE cohort_id IN ({cohort_id_list})"
-             ") "
-             "GROUP BY ParticipantBarcode, SampleBarcode, AliquotBarcode")
+            ("SELECT case_barcode AS case_id, sample_barcode AS sample_id, aliquot_barcode AS aliquot_id, {value_field} AS value {brk}"
+             "FROM [{table_id}] {brk}"
+             "WHERE ( chromosome='{chr}' AND ( {brk}"
+             "        ( start_pos<{start} AND end_pos>{start} ) OR {brk}"
+             "        ( start_pos>{start}-1 AND start_pos<{end}+1 ) ) ) {brk}"
+             "AND sample_barcode IN ( {brk}"
+             "    SELECT sample_barcode {brk}"
+             "    FROM [{cohort_dataset_and_table}] {brk}"
+             "    WHERE cohort_id IN ({cohort_id_list}) {brk}"
+             ") {brk}"
+             "GROUP BY case_id, sample_id, aliquot_id {brk}")
 
-        query = query_template.format(dataset_name=dataset_name, project_name=project_name, table_name=table_name,
+        table_config = feature_def.get_table_configuration()
+
+        query = query_template.format(table_id=table_config.table_id,
                                       value_field=value_field_bqsql[feature_def.value_field],
                                       chr=feature_def.chromosome,
                                       start=feature_def.start, end=feature_def.end,
-                                      cohort_dataset=cohort_dataset, cohort_table=cohort_table,
-                                      cohort_id_list=cohort_id_stmt)
+                                      cohort_dataset_and_table=cohort_table,
+                                      cohort_id_list=cohort_id_stmt,
+                                      brk='\n')
 
         logging.debug("BQ_QUERY_CNVR: " + query)
+        return query
+
+    def build_query(self, project_set, cohort_table, cohort_id_array, project_id_array):
+        query = self.build_query_for_program(self.feature_def, cohort_table, cohort_id_array, project_id_array)
         return query
 
     @DurationLogged('CNVR', 'UNPACK')
@@ -139,12 +145,8 @@ class CNVRFeatureProvider(FeatureDataProvider):
 
         return result
 
-    def get_table_name(self):
-        return self.TABLES[0]['name']
-
     def parse_internal_feature_id(self, feature_id):
         self.feature_def = CNVRFeatureDef.from_feature_id(feature_id)
-        self.table_name = self.get_table_name()
 
     @classmethod
     def is_valid_feature_id(cls, feature_id):

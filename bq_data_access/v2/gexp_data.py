@@ -1,6 +1,6 @@
 """
 
-Copyright 2015, Institute for Systems Biology
+Copyright 2017, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,65 +19,49 @@ limitations under the License.
 import logging
 from re import compile as re_compile
 
-from bq_data_access.v2.feature_data_provider import FeatureDataProvider
 from bq_data_access.v2.errors import FeatureNotFoundException
 from bq_data_access.v2.feature_value_types import ValueType, DataTypes
 from bq_data_access.v2.utils import DurationLogged
-
-import sys
-
-TABLES = [
-    {
-        'table_id': 'mRNA_UNC_GA_RSEM',
-        'platform': 'Illumina GA',
-        'center': 'UNC',
-        'id': 'mrna_unc_illumina_ga',
-        'value_label': 'RSEM',
-        'value_field': 'normalized_count'
-    },
-    {
-        'table_id': 'mRNA_UNC_HiSeq_RSEM',
-        'platform': 'Illumina HiSeq',
-        'center': 'UNC',
-        'id': 'mrna_unc_illumina_hiseq',
-        'value_label': 'RSEM',
-        'value_field': 'normalized_count'
-    }
-]
+from bq_data_access.data_types.gexp import BIGQUERY_CONFIG
+from scripts.feature_def_gen.gexp_features import GEXPDataSourceConfig
 
 GEXP_FEATURE_TYPE = 'GEXP'
 
-GENE_LABEL_FIELD = 'HGNC_gene_symbol'
+logger = logging
 
 
 def get_feature_type():
     return GEXP_FEATURE_TYPE
 
 
-class GEXPFeatureDef(object):
-    # Regular expression for parsing the feature definition.
-    #
-    # Example ID: GEXP:TP53:mrna_bcgsc_illumina_hiseq
-    regex = re_compile("^GEXP:"
-                       # gene
-                       "([a-zA-Z0-9\-]+):"
-                       # table
-                       "(" + "|".join([table['id'] for table in TABLES]) +
-                       ")$")
-
-    def __init__(self, gene, value_field, table_id):
+class GEXPTableFeatureDef(object):
+    def __init__(self, gene, gene_label_field, value_field, table_id):
         self.gene = gene
+        self.gene_label_field = gene_label_field
         self.value_field = value_field
         self.table_id = table_id
 
     @classmethod
-    def get_table_info(cls, table_id):
-        table_info = None
-        for table_entry in TABLES:
-            if table_id == table_entry['id']:
-                table_info = table_entry
+    def from_table_config(cls, gene, table_config):
+        return cls(gene, table_config.gene_label_field, table_config.value_field, table_config.table_id)
 
-        return table_info
+
+class GEXPFeatureDef(object):
+    # Regular expression for parsing the feature definition.
+    #
+    # Example ID: v2:GEXP:TP53:mrna_hg19
+    config_instance = GEXPDataSourceConfig.from_dict(BIGQUERY_CONFIG)
+
+    regex = re_compile("^v2:GEXP:"
+                       # gene
+                       "([a-zA-Z0-9\-]+):"
+                       # genomic_build 
+                       "mrna_(" + "|".join([build for build in config_instance.supported_genomic_builds]) +
+                       ")$")
+
+    def __init__(self, gene, genomic_build):
+        self.gene = gene
+        self.genomic_build = genomic_build
 
     @classmethod
     def from_feature_id(cls, feature_id):
@@ -85,19 +69,16 @@ class GEXPFeatureDef(object):
         if len(feature_fields) == 0:
             raise FeatureNotFoundException(feature_id)
 
-        gene_label, table_id = feature_fields[0]
-        value_field = cls.get_table_info(table_id)['value_field']
-        return cls(gene_label, value_field, table_id)
+        gene_label, genomic_build = feature_fields[0]
+        return cls(gene_label, genomic_build)
 
 
-class GEXPFeatureProvider(FeatureDataProvider):
-    TABLES = TABLES
-
-    def __init__(self, feature_id, **kwargs):
+class GEXPDataQueryHandler(object):
+    def __init__(self, feature_id):
         self.feature_def = None
+        self.table_feature_def = None
         self.table_name = ''
         self.parse_internal_feature_id(feature_id)
-        super(GEXPFeatureProvider, self).__init__(**kwargs)
 
     def get_value_type(self):
         return ValueType.FLOAT
@@ -108,31 +89,62 @@ class GEXPFeatureProvider(FeatureDataProvider):
     def process_data_point(self, data_point):
         return data_point['value']
 
-    def build_query(self, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array, project_id_array):
+    def build_query_for_program(self, feature_def, cohort_table, cohort_id_array, project_id_array):
         # Generate the 'IN' statement string: (%s, %s, ..., %s)
         cohort_id_stmt = ', '.join([str(cohort_id) for cohort_id in cohort_id_array])
         project_id_stmt = ''
         if project_id_array is not None:
             project_id_stmt = ', '.join([str(project_id) for project_id in project_id_array])
 
-        query_template = "SELECT ParticipantBarcode AS case_id, SampleBarcode AS sample_id, AliquotBarcode AS aliquot_id, {value_field} AS value " \
-             "FROM [{project_name}:{dataset_name}.{table_name}] AS gexp " \
-             "WHERE {gene_label_field}='{gene_symbol}' " \
-             "AND SampleBarcode IN ( " \
-             "     SELECT sample_barcode " \
-             "     FROM [{project_name}:{cohort_dataset}.{cohort_table}] " \
-             "     WHERE cohort_id IN ({cohort_id_list}) " \
-             "          AND (project_id IS NULL"
+        query_template = "SELECT case_barcode AS case_id, sample_barcode AS sample_id, aliquot_barcode AS aliquot_id, {value_field} AS value {brk}" \
+             "FROM [{table_name}] AS gexp {brk}" \
+             "WHERE {gene_label_field}='{gene_symbol}' {brk}" \
+             "AND sample_barcode IN ( {brk}" \
+             "     SELECT sample_barcode {brk}" \
+             "     FROM [{cohort_dataset_and_table}] {brk}" \
+             "     WHERE cohort_id IN ({cohort_id_list}) {brk}" \
+             "          AND (project_id IS NULL {brk}"
 
         query_template += (" OR project_id IN ({project_id_list})))" if project_id_array is not None else "))")
 
-        query = query_template.format(dataset_name=dataset_name, project_name=project_name, table_name=table_name,
-                                      gene_label_field=GENE_LABEL_FIELD,
+        query = query_template.format(table_name=feature_def.table_id,
+                                      gene_label_field=feature_def.gene_label_field,
                                       gene_symbol=feature_def.gene, value_field=feature_def.value_field,
-                                      cohort_dataset=cohort_dataset, cohort_table=cohort_table,
-                                      cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt)
+                                      cohort_dataset_and_table=cohort_table,
+                                      cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt,
+                                      brk='\n')
 
         logging.debug("BQ_QUERY_GEXP: " + query)
+        return query
+
+    def build_query(self, project_set, cohort_table, cohort_id_array, project_id_array):
+        # Find matching tables
+        config_instance = GEXPDataSourceConfig.from_dict(BIGQUERY_CONFIG)
+        found_tables = []
+
+        for table in config_instance.data_table_list:
+            if (table.program in project_set) and (table.genomic_build == self.feature_def.genomic_build):
+                logger.info("Found matching table: '{}'".format(table.table_id))
+                found_tables.append(table)
+
+        # Build a BigQuery statement for each found table configuration
+        subqueries = []
+        for table_config in found_tables:
+            # Build the project-specific feature def
+            sub_feature_def = GEXPTableFeatureDef.from_table_config(self.feature_def.gene, table_config)
+            subquery = self.build_query_for_program(sub_feature_def, cohort_table, cohort_id_array, project_id_array)
+            subqueries.append(subquery)
+
+        # Union of subqueries
+        subquery_stmt_template = ",".join(["({})" for x in xrange(len(subqueries))])
+        subquery_stmt = subquery_stmt_template.format(*subqueries)
+
+        query_template = "SELECT case_id, sample_id, aliquot_id, value {brk}" \
+                         "FROM ( {brk}" \
+                         "{subqueries}" \
+                         ") {brk}" \
+                         ""
+        query = query_template.format(brk='\n', subqueries=subquery_stmt)
         return query
 
     @DurationLogged('GEXP', 'UNPACK')
@@ -163,20 +175,8 @@ class GEXPFeatureProvider(FeatureDataProvider):
 
         return result
 
-    # TODO refactor, duplicate code shared with GEXPFeatureDef
-    def get_table_info(self, table_id):
-        table_info = None
-        for table_entry in self.TABLES:
-            if table_id == table_entry['id']:
-                table_info = table_entry
-
-        return table_info
-
     def parse_internal_feature_id(self, feature_id):
         self.feature_def = GEXPFeatureDef.from_feature_id(feature_id)
-
-        table_info = self.get_table_info(self.feature_def.table_id)
-        self.table_name = table_info['table_id']
 
     @classmethod
     def is_valid_feature_id(cls, feature_id):

@@ -1,6 +1,6 @@
 """
 
-Copyright 2015, Institute for Systems Biology
+Copyright 2017, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ limitations under the License.
 
 """
 
-import logging
+import logging as logger
 from collections import defaultdict
 from copy import deepcopy
 
@@ -29,20 +29,26 @@ from cohorts.metadata_helpers import get_sql_connection
 
 
 class MIRNSearcher(object):
-    feature_search_valid_fields = set(['mirna_name', 'platform', 'value_field'])
+    feature_search_valid_fields = set(['mirna_name', 'value_field', 'genomic_build'])
     field_search_valid_fields = set(['mirna_name'])
 
     searchable_fields = [
-        {'name': 'mirna_name',
-         'label': 'miRNA Name',
-         'static': False},
-        {'name': 'platform',
-         'label': 'Platform',
-         'static': True,
-         'values': ['IlluminaGA', 'IlluminaHiSeq']},
-        {'name': 'value_field',
-         'label': 'Value',
-         'static': True, 'values': ['RPM', 'normalized_count']}
+        {
+            'name': 'mirna_name',
+            'label': 'miRNA Name',
+            'static': False
+        },
+        {
+            'name': 'value_field',
+            'label': 'Value',
+            'static': True, 'values': ['RPM', 'normalized_count']
+        },
+        {
+            'name': 'genomic_build',
+            'label': 'Genomic Build',
+            'static': True,
+            'values': ['hg19']
+        }
     ]
 
     @classmethod
@@ -55,7 +61,7 @@ class MIRNSearcher(object):
 
     @classmethod
     def get_table_name(cls):
-        return "feature_defs_mirna"
+        return "feature_defs_mirn_v2"
 
     def validate_field_search_input(self, keyword, field):
         if field not in self.field_search_valid_fields:
@@ -84,6 +90,7 @@ class MIRNSearcher(object):
             return items
 
         except MySQLError as mse:
+            logger.exception(mse)
             raise BackendException('database error: ' + str(mse))
 
     def validate_feature_search_input(self, parameters):
@@ -103,28 +110,30 @@ class MIRNSearcher(object):
             raise EmptyQueryException(self.get_datatype_identifier())
 
     def build_feature_label(self, row):
-        # Example: 'MicroRNA | miRNA Name:hsa-mir-126, Platform:IlluminaGA, Value:RPM'
-        label = "MicroRNA | miRNA Name:" + row['mirna_name'] + ", Platform:" + row['platform'] + ", Value:" + row['value_field']
+        # Example: 'MicroRNA | Build:hg19, miRNA Name:hsa-mir-126, Value:RPM'
+        # TODO: Get "value" for label from table configuration.
+        label = "MicroRNA | Build:{build_id}, miRNA Name:{mirna_name}, Value:RPM".format(
+            build_id=row['genomic_build'],
+            mirna_name=row['mirna_name']
+        )
+
         return label
 
     def search(self, parameters):
         self.validate_feature_search_input(parameters)
 
-        query = 'SELECT mirna_name, platform, value_field, internal_feature_id ' \
+        query = 'SELECT mirna_name, genomic_build, internal_feature_id ' \
                 'FROM {table_name} ' \
                 'WHERE mirna_name LIKE %s ' \
-                'AND platform LIKE %s ' \
-                'AND value_field LIKE %s ' \
+                'AND genomic_build=%s' \
                 'LIMIT %s'.format(table_name=self.get_table_name()
         )
-        logging.debug(query)
         # Fills in '' for fields that were not specified in the parameters
         input = defaultdict(lambda: '', parameters)
 
         # Format the keyword for MySQL string matching
         query_args = ['%' + input['mirna_name'] + '%',
-                      '%' + input['platform'] + '%',
-                      '%' + input['value_field'] + '%',
+                      input['genomic_build'],
                       FOUND_FEATURE_LIMIT]
 
         try:
@@ -143,5 +152,6 @@ class MIRNSearcher(object):
 
             return items
 
-        except MySQLError:
+        except MySQLError as mse:
+            logger.exception(mse)
             raise BackendException('database error')

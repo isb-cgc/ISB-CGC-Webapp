@@ -21,3 +21,4 @@ django-allauth==0.30.0
 django-sslify==0.2.7
 django-adminrestrict==1.0.2
 pexpect==4.0.1
+enum34==1.1.6

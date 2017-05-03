@@ -29,6 +29,8 @@ DJANGO_COHORT_SAMPLES_TABLE = 'cohorts_samples'
 
 logger = logging
 
+DATAPOINT_COHORT_THRESHOLD = 1
+
 
 class CohortException(Exception):
     def __init__(self, message):
@@ -36,6 +38,7 @@ class CohortException(Exception):
 
     def __str__(self):
         return 'Cohort error: ' + self.message
+
 
 class CloudSQLCohortAccess(object):
     @classmethod
@@ -149,3 +152,49 @@ class CloudSQLCohortAccess(object):
             raise CohortException('get_cohort_info CloudSQL error, cohort IDs {cohort_ids}: {message}'.format(
                 cohort_ids=cohort_id_array,
                 message=str(e.message)))
+
+
+def add_cohort_info_to_merged_vectors(target, x_id, y_id, c_id, cohort_id_array):
+    """
+    Adds cohort information to a plot data query result (dict).
+     
+    Args: 
+        target: Plot data query result (from get_merged_feature_vectors)
+    
+    Returns: 
+        None
+    """
+    # Resolve which (requested) cohorts each datapoint belongs to.
+    cohort_set_dict = CloudSQLCohortAccess.get_cohorts_for_datapoints(cohort_id_array)
+
+    # Get the name and ID for every requested cohort.
+    cohort_info_array = CloudSQLCohortAccess.get_cohort_info(cohort_id_array)
+    cohort_info_obj_array = []
+    for item in cohort_info_array:
+        cohort_info_obj_array.append({'id': item['id'], 'name': item['name']})
+
+    items = []
+    for item in target['items']:
+        sample_id = item['sample_id']
+
+        # Add an array of cohort
+        # only if the number of containing cohort exceeds the configured threshold.
+        cohort_set = []
+        # TODO FIX - this check shouldn't be needed
+        if sample_id in cohort_set_dict:
+            cohort_set = cohort_set_dict[sample_id]
+
+        if len(cohort_set) >= DATAPOINT_COHORT_THRESHOLD:
+            item['cohort'] = cohort_set
+
+        items.append(item)
+
+    # TODO assign label for y if y_id is None, as in that case the y-field will be missing from the response
+    label_message = {'x': x_id, 'y': y_id, 'c': c_id}
+
+    target.update({
+        'labels':           label_message,
+        'items':            items,
+        'cohort_set':       cohort_info_obj_array,
+    })
+

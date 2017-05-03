@@ -1,6 +1,6 @@
 """
 
-Copyright 2015, Institute for Systems Biology
+Copyright 2017, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ limitations under the License.
 
 from collections import defaultdict
 from copy import deepcopy
+import logging as logger
 
 from MySQLdb.cursors import DictCursor
 from _mysql_exceptions import MySQLError
@@ -28,26 +29,42 @@ from cohorts.metadata_helpers import get_sql_connection
 
 
 class METHSearcher(object):
-    feature_search_valid_fields = set(['gene_name', 'probe_name', 'platform', 'relation_to_gene', 'relation_to_island'])
+    feature_search_valid_fields = set(['gene_name', 'probe_name', 'platform', 'relation_to_gene', 'relation_to_island', 'genomic_build'])
     field_search_valid_fields = set(['gene_name', 'probe_name'])
 
     searchable_fields = [
-        {'name': 'gene_name',
-         'label': 'Gene',
-         'static': False},
-        {'name': 'probe_name',
-         'label': 'CpG Probe',
-         'static': False},
-        {'name': 'platform',
-         'label': 'Platform',
-         'static': True,
-         'values': ['HumanMethylation27', 'HumanMethylation450']},
-        {'name': 'relation_to_gene',
-         'label': 'Gene region',
-         'static': True, 'values': ['Body', '5\'UTR', '1stExon', 'TSS200', 'TSS1500', '3\'UTR']},
-        {'name': 'relation_to_island',
-         'label': 'CpG Island region',
-         'static': True, 'values': ['Island', 'N_Shelf', 'N_Shore', 'S_Shore', 'S_Shelf']}
+        {
+            'name': 'gene_name',
+            'label': 'Gene',
+            'static': False
+        },
+        {
+            'name': 'probe_name',
+            'label': 'CpG Probe',
+            'static': False
+        },
+        {
+            'name': 'platform',
+            'label': 'Platform',
+            'static': True,
+            'values': ['HumanMethylation27', 'HumanMethylation450']
+        },
+        {
+            'name': 'relation_to_gene',
+            'label': 'Gene region',
+            'static': True, 'values': ['Body', '5\'UTR', '1stExon', 'TSS200', 'TSS1500', '3\'UTR']
+        },
+        {
+            'name': 'relation_to_island',
+            'label': 'CpG Island region',
+            'static': True, 'values': ['Island', 'N_Shelf', 'N_Shore', 'S_Shore', 'S_Shelf']
+        },
+        {
+            'name': 'genomic_build',
+            'label': 'Genomic Build',
+            'static': True,
+            'values': ['hg19']
+        }
     ]
 
     @classmethod
@@ -60,7 +77,7 @@ class METHSearcher(object):
 
     @classmethod
     def get_table_name(cls):
-        return "feature_defs_meth"
+        return "feature_defs_meth_v2"
 
     def validate_field_search_input(self, keyword, field):
         if field not in self.field_search_valid_fields:
@@ -89,6 +106,7 @@ class METHSearcher(object):
             return items
 
         except MySQLError as mse:
+            logger.exception(mse)
             raise BackendException('database error: ' + str(mse))
 
     def validate_feature_search_input(self, parameters):
@@ -108,7 +126,7 @@ class METHSearcher(object):
             raise EmptyQueryException(self.get_datatype_identifier())
 
     def build_feature_label(self, row):
-        # Example: 'Methylation | Probe:cg07311521, Gene:EGFR, Gene Region:TSS1500, Relation to CpG Island:Island, Platform:HumanMethylation450, Value:beta_value'
+        # Example: 'Methylation | Build:hg19, Probe:cg07311521, Gene:EGFR, Gene Region:TSS1500, Relation to CpG Island:Island, Platform:HumanMethylation450, Value:beta_value'
         # If value is not present, display '-'
         if row['gene_name'] is '':
             row['gene_name'] = "-"
@@ -116,22 +134,31 @@ class METHSearcher(object):
         if row['relation_to_island'] is '':
             row['relation_to_island'] = "-"
 
-        label = "Methylation | Probe:" + row['probe_name'] + ", Gene:" + row['gene_name'] + \
-                ", Gene Region:" + row['relation_to_gene'] + ", CpG Island Region:" + row['relation_to_island'] + \
-                ", Platform:" + row['platform'] + ", Value:" + row['value_field']
+        label = "Methylation | Build:{build_id}, Probe:{probe_name}, Gene:{gene_label}" \
+                ", Gene Region:{relation_to_gene}, CpG Island Region:{relation_to_island}" \
+                ", Platform:{platform}, Value:{value_field}".format(
+                    build_id=row['genomic_build'],
+                    probe_name=row['probe_name'],
+                    gene_label=row['gene_name'],
+                    relation_to_gene=row['relation_to_gene'],
+                    relation_to_island=row['relation_to_island'],
+                    platform=row['platform'],
+                    value_field=row['value_field']
+                )
         return label
 
     def search(self, parameters):
         self.validate_feature_search_input(parameters)
 
         query = 'SELECT gene_name, probe_name, platform, relation_to_gene, relation_to_island, ' \
-                       'value_field, internal_feature_id ' \
+                       'value_field, genomic_build, internal_feature_id ' \
                 'FROM {table_name} ' \
                 'WHERE gene_name=%s ' \
                 'AND probe_name LIKE %s ' \
                 'AND platform LIKE %s ' \
                 'AND relation_to_gene LIKE %s ' \
                 'AND relation_to_island LIKE %s ' \
+                'AND genomic_build=%s' \
                 'LIMIT %s'.format(table_name=self.get_table_name()
         )
 
@@ -144,6 +171,7 @@ class METHSearcher(object):
                       '%' + input['platform'] + '%',
                       '%' + input['relation_to_gene'] + '%',
                       '%' + input['relation_to_island'] + '%',
+                      input['genomic_build'],
                       FOUND_FEATURE_LIMIT]
 
         try:
@@ -162,5 +190,6 @@ class METHSearcher(object):
 
             return items
 
-        except MySQLError:
+        except MySQLError as mse:
+            logger.exception(mse)
             raise BackendException('database error')

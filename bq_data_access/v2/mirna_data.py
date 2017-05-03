@@ -1,6 +1,6 @@
 """
 
-Copyright 2015, Institute for Systems Biology
+Copyright 2017, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,34 +21,10 @@ from re import compile as re_compile
 
 from bq_data_access.v2.errors import FeatureNotFoundException
 from bq_data_access.v2.feature_value_types import ValueType, DataTypes
-from bq_data_access.v2.feature_data_provider import FeatureDataProvider
 from bq_data_access.v2.utils import DurationLogged
+from bq_data_access.data_types.mirna import BIGQUERY_CONFIG
+from scripts.feature_def_gen.mirna_features import MIRNDataSourceConfig
 
-TABLES = [
-    {
-        'name': 'miRNA_BCGSC_GA_mirna',
-        'info': 'miRNA (GA, BCGSC RPM)',
-        'platform': 'IlluminaGA',
-        'feature_id': 'mirna_illumina_ga_rpm',
-        'value_field': 'reads_per_million_miRNA_mapped'
-    },
-    {
-        'name': 'miRNA_BCGSC_HiSeq_mirna',
-        'info': 'miRNA (HiSeq, BCGSC RPM)',
-        'platform': 'IlluminaHiSeq',
-        'feature_id': 'mirna_illumina_hiseq_rpm',
-        'value_field': 'reads_per_million_miRNA_mapped'
-    },
-    {
-        'name': 'miRNA_Expression',
-        'platform': 'both',
-        'info': 'miRNA',
-        'feature_id': 'expression',
-        'value_field': 'normalized_count'
-    }
-]
-
-TABLE_IDX_MIRNA_EXPRESSION = 2
 
 VALUE_READS_PER_MILLION = 'RPM'
 VALUE_NORMALIZED_COUNT = 'normalized_count'
@@ -62,45 +38,47 @@ def get_feature_type():
 
 
 def get_mirna_expression_table_info():
-    return TABLES[TABLE_IDX_MIRNA_EXPRESSION]
-
-
-def get_table_info(platform, value):
+    config_instance = MIRNDataSourceConfig.from_dict(BIGQUERY_CONFIG)
     table_info = None
-    if value == VALUE_NORMALIZED_COUNT:
-        table_info = get_mirna_expression_table_info()
-    else:
-        for table_entry in TABLES:
-            if platform == table_entry['platform']:
-                table_info = table_entry
+
+    for table_config in config_instance.data_table_list:
+        if table_config.expression_table:
+            table_info = table_config
+
+    return table_info
+
+
+def get_table_info(table_id):
+    config_instance = MIRNDataSourceConfig.from_dict(BIGQUERY_CONFIG)
+    table_info = None
+
+    for table_config in config_instance.data_table_list:
+        if table_config.internal_table_id == table_id:
+            table_info = table_config
+
     return table_info
 
 
 class MIRNFeatureDef(object):
     # Regular expression for parsing the feature definition.
     #
-    # Example ID: MIRN:hsa-mir-1244-1:mirna_illumina_ga_rpm
-    regex = re_compile("^MIRN:"
-                       # mirna name
+    # Example ID: v2:MIRN:hsa-mir-1244-1:hg19_mirna_rpm
+    config_instance = MIRNDataSourceConfig.from_dict(BIGQUERY_CONFIG)
+    regex = re_compile("^v2:MIRN:"
+                       # miRNA ID 
                        "([a-zA-Z0-9._\-]+):"
-                       # table
-                       "(" + "|".join([table['feature_id'] for table in TABLES]) +
+                       # table identifier
+                       "(" + "|".join([table.internal_table_id for table in config_instance.data_table_list]) +
                        ")$")
 
-    def __init__(self, mirna_name, platform, value_field, table_id):
+    def __init__(self, mirna_name, internal_table_id):
         self.mirna_name = mirna_name
-        self.platform = platform
-        self.value_field = value_field
-        self.table_id = table_id
+        self.internal_table_id = internal_table_id
 
-    @classmethod
-    def get_table_info(cls, table_id):
-        table_info = None
-        for table_entry in TABLES:
-            if table_id == table_entry['feature_id']:
-                table_info = table_entry
-
-        return table_info
+    def get_table_configuration(self):
+        for table_config in self.config_instance.data_table_list:
+            if table_config.internal_table_id == self.internal_table_id:
+                return table_config
 
     @classmethod
     def from_feature_id(cls, feature_id):
@@ -108,23 +86,15 @@ class MIRNFeatureDef(object):
         if len(feature_fields) == 0:
             raise FeatureNotFoundException(feature_id)
 
-        mirna_name, table_id = feature_fields[0]
-        table_info = cls.get_table_info(table_id)
-        platform = table_info['platform']
-        value_field = table_info['value_field']
+        mirna_id, internal_table_id = feature_fields[0]
 
-        return cls(mirna_name, platform, value_field, table_id)
+        return cls(mirna_id, internal_table_id)
 
 
-class MIRNFeatureProvider(FeatureDataProvider):
-    TABLES = TABLES
-
-    def __init__(self, feature_id, **kwargs):
+class MIRNDataQueryHandler(object):
+    def __init__(self, feature_id):
         self.feature_def = None
-        self.table_info = None
-        self.table_name = ''
         self.parse_internal_feature_id(feature_id)
-        super(MIRNFeatureProvider, self).__init__(**kwargs)
 
     def get_value_type(self):
         return ValueType.FLOAT
@@ -136,41 +106,39 @@ class MIRNFeatureProvider(FeatureDataProvider):
     def process_data_point(cls, data_point):
         return data_point['value']
 
-    def build_query(self, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array, project_id_array):
+    def build_query_for_program(self, feature_def, cohort_table, cohort_id_array, project_id_array):
         # Generate the 'IN' statement string: (%s, %s, ..., %s)
         cohort_id_stmt = ', '.join([str(cohort_id) for cohort_id in cohort_id_array])
         project_id_stmt = ''
         if project_id_array is not None:
             project_id_stmt = ', '.join([str(project_id) for project_id in project_id_array])
 
-        query_template = \
-            ("SELECT ParticipantBarcode, SampleBarcode, AliquotBarcode, {value_field} AS value, {mirna_name_field} "
-             "FROM [{project_name}:{dataset_name}.{table_name}] "
-             "WHERE {mirna_name_field}='{mirna_name}' ")
+        query_template = "SELECT case_barcode AS case_id, sample_barcode AS sample_id, aliquot_barcode AS aliquot_id, {value_field} AS value {brk}" \
+             "FROM [{table_id}] {brk}" \
+             "WHERE {mirna_id_field}='{mirna_id}' {brk}"
 
-        if table_name == get_mirna_expression_table_info()['name']:
-            mirna_name_field = 'mirna_id'
-            query_template += " AND Platform='{platform}' "
-        else:
-            mirna_name_field = 'miRNA_ID'
+        query_template += "AND sample_barcode IN ({brk} " \
+             "    SELECT sample_barcode {brk}" \
+             "    FROM [{cohort_dataset_and_table}] {brk}" \
+             "    WHERE cohort_id IN ({cohort_id_list}) {brk}" \
+             "         AND (project_id IS NULL {brk}"
 
-        query_template += \
-            ("AND SampleBarcode IN ( "
-             "    SELECT sample_barcode "
-             "    FROM [{project_name}:{cohort_dataset}.{cohort_table}] "
-             "    WHERE cohort_id IN ({cohort_id_list})"
-             "         AND (project_id IS NULL")
+        query_template += (" OR project_id IN ({project_id_list}))) {brk}" if project_id_array is not None else ")) {brk}")
 
-        query_template += (" OR project_id IN ({project_id_list})))" if project_id_array is not None else "))")
+        table_config = feature_def.get_table_configuration()
 
-        query = query_template.format(dataset_name=dataset_name, project_name=project_name, table_name=table_name,
-                                      mirna_name_field=mirna_name_field, mirna_name=feature_def.mirna_name,
-                                      platform=feature_def.platform,
-                                      value_field=feature_def.value_field,
-                                      cohort_dataset=cohort_dataset, cohort_table=cohort_table,
-                                      cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt)
+        query = query_template.format(table_id=table_config.table_id,
+                                      mirna_id_field=table_config.mirna_id_field, mirna_id=feature_def.mirna_name,
+                                      value_field=table_config.value_field,
+                                      cohort_dataset_and_table=cohort_table,
+                                      cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt,
+                                      brk='\n')
 
         logging.debug("BQ_QUERY_MIRN: " + query)
+        return query
+
+    def build_query(self, project_set, cohort_table, cohort_id_array, project_id_array):
+        query = self.build_query_for_program(self.feature_def, cohort_table, cohort_id_array, project_id_array)
         return query
 
     @DurationLogged('MIRN', 'UNPACK')
@@ -201,18 +169,8 @@ class MIRNFeatureProvider(FeatureDataProvider):
 
         return result
 
-    def get_table_info(self, table_id):
-        table_info = None
-        for table_entry in self.TABLES:
-            if table_id == table_entry['feature_id']:
-                table_info = table_entry
-
-        return table_info
-
     def parse_internal_feature_id(self, feature_id):
         self.feature_def = MIRNFeatureDef.from_feature_id(feature_id)
-        self.table_info = self.get_table_info(self.feature_def.table_id)
-        self.table_name = self.table_info['name']
 
     @classmethod
     def is_valid_feature_id(cls, feature_id):

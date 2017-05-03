@@ -21,8 +21,6 @@ import sys
 from uuid import uuid4
 from time import sleep
 
-from django.conf import settings
-from google_helpers.bigquery_service import get_bigquery_service
 from bq_data_access.v2.utils import DurationLogged
 
 
@@ -32,21 +30,20 @@ class FeatureDataProvider(object):
 
     TODO: Document interface
     """
-    def __init__(self, bigquery_service=None):
+    def __init__(self, feature_query_support, bigquery_service=None, project_id_number=None):
+        self.feature_query_support = feature_query_support
         self.job_reference = None
         self.bigquery_service = bigquery_service
+        self.project_id = project_id_number
 
     def get_bq_service(self):
-        if self.bigquery_service is None:
-            self.bigquery_service = get_bigquery_service()
-
         return self.bigquery_service
 
     @DurationLogged('FEATURE', 'BQ_SUBMIT')
-    def submit_bigquery_job(self, bigquery, project_id, query_body, batch=False):
+    def submit_bigquery_job(self, bigquery, query_body, batch=False):
         job_data = {
             'jobReference': {
-                'projectId': project_id,
+                'projectId': self.project_id,
                 'job_id': str(uuid4())
             },
             'configuration': {
@@ -58,7 +55,7 @@ class FeatureDataProvider(object):
         }
 
         return bigquery.jobs().insert(
-                projectId=project_id,
+                projectId=self.project_id,
                 body=job_data).execute(num_retries=5)
 
     @DurationLogged('FEATURE', 'BQ_POLL')
@@ -115,14 +112,15 @@ class FeatureDataProvider(object):
         bigquery_service = self.get_bq_service()
         query_result_array = self.download_query_result(bigquery_service, self.job_reference)
 
-        result = self.unpack_query_response(query_result_array)
+        result = self.feature_query_support.unpack_query_response(query_result_array)
         return result
 
-    def submit_query_and_get_job_ref(self, project_id, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array, project_id_array):
-        bigquery_service = self.get_bq_service()
+    def submit_query_and_get_job_ref(self, program_set, cohort_table, cohort_id_array, project_id_array):
+        bigquery_client = self.get_bq_service()
 
-        query_body = self.build_query(project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array, project_id_array)
-        query_job = self.submit_bigquery_job(bigquery_service, project_id, query_body)
+        query_body = self.feature_query_support.build_query(program_set, cohort_table, cohort_id_array, project_id_array)
+        logging.info(query_body)
+        query_job = self.submit_bigquery_job(bigquery_client, query_body)
 
         # Poll for completion of the query
         self.job_reference = query_job['jobReference']
@@ -131,13 +129,13 @@ class FeatureDataProvider(object):
 
         return self.job_reference
 
-    def get_data_job_reference(self, cohort_id_array, cohort_dataset, cohort_table, project_id_array):
-        project_id = settings.BQ_PROJECT_ID
-        project_name = settings.BIGQUERY_PROJECT_NAME
-        dataset_name = settings.BIGQUERY_DATASET
-
-        result = self.submit_query_and_get_job_ref(project_id, project_name, dataset_name, self.table_name,
-                                                   self.feature_def, cohort_dataset, cohort_table, cohort_id_array,
-                                                   project_id_array)
+    def get_data_job_reference(self, program_set, cohort_table, cohort_id_array, project_id_array):
+        result = self.submit_query_and_get_job_ref(program_set, cohort_table, cohort_id_array, project_id_array)
         return result
 
+    @classmethod
+    def build_from_django_settings(cls, **kwargs):
+        # TODO implement
+        from django.conf import settings as django_settings
+        project_id = django_settings.BQ_PROJECT_ID
+        return cls(project_id=project_id, **kwargs)

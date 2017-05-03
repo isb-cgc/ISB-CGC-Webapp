@@ -1,6 +1,6 @@
 """
 
-Copyright 2015, Institute for Systems Biology
+Copyright 2017, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -28,17 +28,27 @@ from cohorts.metadata_helpers import get_sql_connection
 
 
 class GNABSearcher(object):
-    feature_search_valid_fields = set(['gene_name', 'value_field'])
+    feature_search_valid_fields = set(['gene_name', 'value_field', 'genomic_build'])
     field_search_valid_fields = set(['gene_name'])
 
     searchable_fields = [
-        {'name': 'gene_name',
-         'label': 'Gene',
-         'static': False},
-        {'name': 'value_field',
-         'label': 'Value',
-         'static': True,
-         'values': ['variant_classification', 'variant_type', 'sequence_source', 'num_mutations']}
+        {
+            'name': 'gene_name',
+            'label': 'Gene',
+            'static': False
+        },
+        {
+            'name': 'value_field',
+            'label': 'Value',
+            'static': True,
+            'values': ['variant_classification', 'variant_type', 'num_mutations']
+        },
+        {
+            'name': 'genomic_build',
+            'label': 'Genomic Build',
+            'static': True,
+            'values': ['hg19']
+        }
     ]
 
     @classmethod
@@ -51,7 +61,7 @@ class GNABSearcher(object):
 
     @classmethod
     def get_table_name(cls):
-        return "feature_defs_gnab"
+        return "feature_defs_gnab_v2"
 
     def validate_field_search_input(self, keyword, field):
         if field not in self.field_search_valid_fields:
@@ -99,16 +109,17 @@ class GNABSearcher(object):
             raise EmptyQueryException(self.get_datatype_identifier())
 
     def build_feature_label(self, row):
-        # Example: 'Mutation | Gene:EGFR, Value:variant_classification'
-        label = "Mutation | Gene:" + row['gene_name'] + ", Value:" + row['value_field']
+        # Example: 'Mutation | Build:hg19, Gene:EGFR, Value:variant_classification'
+        label = "Mutation | Build:" + row['genomic_build'] + ", Gene:" + row['gene_name'] + ", Value:" + row['value_field']
         return label
 
     def search(self, parameters):
         self.validate_feature_search_input(parameters)
 
-        query = 'SELECT gene_name, value_field, internal_feature_id' \
+        query = 'SELECT gene_name, genomic_build, value_field, internal_feature_id' \
                 ' FROM {table_name}' \
-                ' WHERE gene_name=%s'\
+                ' WHERE gene_name=%s' \
+                ' AND genomic_build=%s' \
                 ' AND value_field LIKE %s' \
                 ' LIMIT %s'.format(table_name=self.get_table_name()
         )
@@ -119,6 +130,7 @@ class GNABSearcher(object):
         # Format the keyword for MySQL string matching
         # sql_keyword = '%' + keyword + '%'
         query_args = [input['gene_name'],
+                      input['genomic_build'],
                       '%' + input['value_field'] + '%',
                       FOUND_FEATURE_LIMIT]
 

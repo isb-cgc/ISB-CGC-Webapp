@@ -1,6 +1,6 @@
 """
 
-Copyright 2015, Institute for Systems Biology
+Copyright 2017, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,12 +19,12 @@ limitations under the License.
 import logging
 from re import compile as re_compile
 
-from django.conf import settings
-
 from bq_data_access.v2.errors import FeatureNotFoundException
 from bq_data_access.v2.feature_value_types import ValueType, DataTypes
-from bq_data_access.v2.feature_data_provider import FeatureDataProvider
 from bq_data_access.v2.utils import DurationLogged
+from bq_data_access.data_types.rppa import BIGQUERY_CONFIG
+from scripts.feature_def_gen.protein_features import RPPADataSourceConfig
+
 
 RPPA_FEATURE_TYPE = 'RPPA'
 
@@ -36,16 +36,25 @@ def get_feature_type():
 class RPPAFeatureDef(object):
     # Regular expression for parsing the feature definition.
     #
-    # Example ID: RPPA:GYG1:GYG-Glycogenin1
-    regex = re_compile("^RPPA:"
+    # Example ID: RPPA:GYG1:GYG-Glycogenin1:value_field
+    config_instance = RPPADataSourceConfig.from_dict(BIGQUERY_CONFIG)
+    regex = re_compile("^v2:RPPA:"
                        # gene
                        "([a-zA-Z0-9\-]+):"
                        # protein name
-                       "([a-zA-Z0-9._\-]+)$")
+                       "([a-zA-Z0-9._\-]+):"
+                       # table ID
+                       "(" + "|".join([table.internal_table_id for table in config_instance.data_table_list]) + ")")
 
-    def __init__(self, gene, protein_name):
+    def __init__(self, gene, protein_name, internal_table_id):
         self.gene = gene
         self.protein_name = protein_name
+        self.internal_table_id = internal_table_id
+
+    def get_table_configuration(self):
+        for table_config in self.config_instance.data_table_list:
+            if table_config.internal_table_id == self.internal_table_id:
+                return table_config
 
     @classmethod
     def from_feature_id(cls, feature_id):
@@ -53,25 +62,15 @@ class RPPAFeatureDef(object):
         if len(feature_fields) == 0:
             raise FeatureNotFoundException(feature_id)
 
-        gene_label, protein_name = feature_fields[0]
-        return cls(gene_label, protein_name)
+        gene_label, protein_name, internal_table_id = feature_fields[0]
+        return cls(gene_label, protein_name, internal_table_id)
 
 
-class RPPAFeatureProvider(FeatureDataProvider):
-    TABLES = [
-        {
-            'name': 'Protein_RPPA_data',
-            'info': 'Protein',
-            'id': 'protein'
-        }
-    ]
-
-    def __init__(self, feature_id, **kwargs):
+class RPPADataQueryHandler(object):
+    def __init__(self, feature_id):
         self.feature_def = None
-        self.table_info = None
-        self.table_name = ''
+        self.config_instance = RPPADataSourceConfig.from_dict(BIGQUERY_CONFIG)
         self.parse_internal_feature_id(feature_id)
-        super(RPPAFeatureProvider, self).__init__(**kwargs)
 
     def get_value_type(self):
         return ValueType.FLOAT
@@ -83,7 +82,7 @@ class RPPAFeatureProvider(FeatureDataProvider):
     def process_data_point(cls, data_point):
         return data_point['value']
 
-    def build_query(self, project_name, dataset_name, table_name, feature_def,  cohort_dataset, cohort_table, cohort_id_array, project_id_array):
+    def build_query_for_program(self, feature_def, cohort_table, cohort_id_array, project_id_array):
         # Generate the 'IN' statement string: (%s, %s, ..., %s)
         cohort_id_stmt = ', '.join([str(cohort_id) for cohort_id in cohort_id_array])
         project_id_stmt = ''
@@ -91,23 +90,32 @@ class RPPAFeatureProvider(FeatureDataProvider):
             project_id_stmt = ', '.join([str(project_id) for project_id in project_id_array])
 
         query_template = \
-            ("SELECT ParticipantBarcode, SampleBarcode, AliquotBarcode, protein_expression AS value "
-             "FROM [{project_name}:{dataset_name}.{table_name}] "
-             "WHERE ( gene_name='{gene}' AND protein_name='{protein}' ) "
-             "AND SampleBarcode IN ( "
-             "    SELECT sample_barcode "
-             "    FROM [{project_name}:{cohort_dataset}.{cohort_table}] "
-             "    WHERE cohort_id IN ({cohort_id_list})"
-             "         AND (project_id IS NULL")
+            ("SELECT case_barcode AS case_id, sample_barcode AS sample_id, aliquot_barcode AS aliquot_id, {value_field} AS value {brk}"
+             "FROM [{table_id}] {brk}"
+             "WHERE ({gene_label_field}='{gene}' AND protein_name='{protein}' ) {brk}"
+             "AND sample_barcode IN ( {brk}"
+             "    SELECT sample_barcode {brk}"
+             "    FROM [{cohort_dataset_and_table}] {brk}"
+             "    WHERE cohort_id IN ({cohort_id_list}) {brk}"
+             "         AND (project_id IS NULL {brk}")
 
-        query_template += (" OR project_id IN ({project_id_list})))" if project_id_array is not None else "))")
+        query_template += (" OR project_id IN ({project_id_list}))) {brk}" if project_id_array is not None else ")) {brk}")
 
-        query = query_template.format(dataset_name=dataset_name, project_name=project_name, table_name=table_name,
+        table_config = feature_def.get_table_configuration()
+
+        query = query_template.format(table_id=table_config.table_id,
+                                      value_field=table_config.value_field,
+                                      gene_label_field=table_config.gene_label_field,
                                       gene=feature_def.gene, protein=feature_def.protein_name,
-                                      cohort_dataset=cohort_dataset, cohort_table=cohort_table,
-                                      cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt)
+                                      cohort_dataset_and_table=cohort_table,
+                                      cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt,
+                                      brk='\n')
 
         logging.debug("BQ_QUERY_RPPA: " + query)
+        return query
+
+    def build_query(self, project_set, cohort_table, cohort_id_array, project_id_array):
+        query = self.build_query_for_program(self.feature_def, cohort_table, cohort_id_array, project_id_array)
         return query
 
     @DurationLogged('RPPA', 'UNPACK')
@@ -138,21 +146,8 @@ class RPPAFeatureProvider(FeatureDataProvider):
 
         return result
 
-    def get_data_from_bigquery(self, cohort_id_array, cohort_dataset, cohort_table):
-        project_id = settings.BQ_PROJECT_ID
-        project_name = settings.BIGQUERY_PROJECT_NAME
-        dataset_name = settings.BIGQUERY_DATASET
-        result = self.do_query(project_id, project_name, dataset_name, self.table_name, self.feature_def,
-                               cohort_dataset, cohort_table, cohort_id_array)
-        return result
-
-    def get_data(self, cohort_id_array, cohort_dataset, cohort_table):
-        result = self.get_data_from_bigquery(cohort_id_array, cohort_dataset, cohort_table)
-        return result
-
     def parse_internal_feature_id(self, feature_id):
         self.feature_def = RPPAFeatureDef.from_feature_id(feature_id)
-        self.table_name = self.TABLES[0]['name']
 
     @classmethod
     def is_valid_feature_id(cls, feature_id):

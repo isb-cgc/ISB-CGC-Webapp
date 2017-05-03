@@ -1,6 +1,6 @@
 """
 
-Copyright 2016, Institute for Systems Biology
+Copyright 2017, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,100 +18,54 @@ limitations under the License.
 
 import logging
 
-from feature_def_bq_provider import FeatureDefBigqueryProvider
-
-from scripts.feature_def_gen.feature_def_utils import DataSetConfig
+from bq_data_access.data_types.definitions import PlottableDataType
 
 logger = logging
 
+CNV_FEATURE_TYPE = PlottableDataType.CNVR
 
-class CNVFeatureDefConfig(object):
-    def __init__(self, project_id, genomic_reference, gencode_table, target_config, out_path):
-        self.project_id = project_id
-        self.genomic_reference_config = genomic_reference
-        self.gencode_table = gencode_table
-        self.target_config = target_config
-        self.output_csv_path = out_path
+
+class CNVRTableConfig(object):
+    """
+    Configuration class for a BigQuery table accessible through GNAB feature
+    definitions.
+    
+    Args:
+        table_id: Full BigQuery table identifier - project-name:dataset_name.table_name 
+    
+    """
+    def __init__(self, table_id, gencode_reference_table_id, genomic_build, gene_label_field, internal_table_id, program, value_field):
+        self.table_id = table_id
+        self.gencode_reference_table_id = gencode_reference_table_id
+        self.genomic_build = genomic_build
+        self.gene_label_field = gene_label_field
+        self.internal_table_id = internal_table_id
+        self.program = program
+        self.value_field = value_field
 
     @classmethod
     def from_dict(cls, param):
-        project_id = param['project_id']
-        genomic_reference_config = DataSetConfig.from_dict(param['genomic_reference_config'])
-        gencode_table = param['gencode_table']
-        target_config = DataSetConfig.from_dict(param['target_config'])
-        output_csv_path = param['output_csv_path']
+        table_id = param['table_id']
+        gencode_reference_table_id = param['gencode_reference_table_id']
+        genomic_build = param['genomic_build']
+        gene_label_field = param['gene_label_field']
+        internal_table_id = param['internal_table_id']
+        program = param['program']
+        value_field = param['value_field']
 
-        return cls(project_id, genomic_reference_config, gencode_table, target_config,  output_csv_path)
-
-
-# TODO remove duplicate code
-def get_feature_type():
-    return 'CNVR'
+        return cls(table_id, gencode_reference_table_id, genomic_build, gene_label_field, internal_table_id, program, value_field)
 
 
-class CNVFeatureDefProvider(FeatureDefBigqueryProvider):
-    BQ_JOB_POLL_SLEEP_TIME = 10
-    BQ_JOB_POLL_MAX_RETRIES = 20
+class CNVRDataSourceConfig(object):
+    """
+    Configuration class for GNAB feature definitions.
+    """
+    def __init__(self, tables_array):
+        self.data_table_list = tables_array
 
-    MYSQL_SCHEMA = [
-        {
-            'name': 'gene_name',
-            'type': 'string'
-        },
-        {
-            'name': 'value_field',
-            'type': 'string'
-        },
-        {
-            'name': 'internal_feature_id',
-            'type': 'string'
-        },
-    ]
+    @classmethod
+    def from_dict(cls, param):
+        data_table_list = [CNVRTableConfig.from_dict(item) for item in param['tables']]
 
-    def get_mysql_schema(self):
-        return self.MYSQL_SCHEMA
-
-    def build_query(self, config):
-        query_template = ("SELECT gene_name, seq_name, start, end \
-                           FROM [{genomic_reference_project_name}:{genomic_reference_dataset_name}.{gencode_table}] \
-                           WHERE feature=\'gene\'")
-
-        query_str = query_template.format(
-            genomic_reference_project_name=config.genomic_reference_config.project_name,
-            genomic_reference_dataset_name=config.genomic_reference_config.dataset_name,
-            gencode_table=config.gencode_table
-        )
-
-        return query_str
-
-    def build_internal_feature_id(self, feature_type, value_field, chromosome, start, end):
-        return '{feature_type}:{value}:{chr}:{start}:{end}'.format(
-            feature_type=feature_type,
-            value=value_field,
-            chr=chromosome,
-            start=start,
-            end=end
-        )
-
-    def unpack_query_response(self, row_item_array):
-        feature_type = get_feature_type()
-        VALUES = ['avg_segment_mean', 'std_dev_segment_mean', 'min_segment_mean', 'max_segment_mean', 'num_segments']
-
-        result = []
-        for row in row_item_array:
-            gene_name = row['f'][0]['v']
-            seqname = row['f'][1]['v']
-            # TODO validation
-            chromosome = seqname[3:]
-            start = row['f'][2]['v']
-            end = row['f'][3]['v']
-
-            for value_field in VALUES:
-                result.append({
-                    'gene_name': gene_name,
-                    'value_field': value_field,
-                    'internal_feature_id': self.build_internal_feature_id(feature_type, value_field, chromosome, start, end)
-                })
-
-        return result
+        return cls(data_table_list)
 
