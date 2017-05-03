@@ -93,7 +93,7 @@ def build_query(project_name, dataset_name, table_name, gene_symbol, value_field
         project_id_stmt = ', '.join([str(project_id) for project_id in project_id_array])
 
     query_template = \
-        ("SELECT ParticipantBarcode AS patient_id, SampleBarcode AS sample_id, AliquotBarcode AS aliquot_id, {value_field} AS value "
+        ("SELECT ParticipantBarcode AS case_id, SampleBarcode AS sample_id, AliquotBarcode AS aliquot_id, {value_field} AS value "
          "FROM [{project_name}:{dataset_name}.{table_name}] AS gexp "
          "WHERE original_gene_symbol='{gene_symbol}' "
          "AND SampleBarcode IN ( "
@@ -131,7 +131,7 @@ def do_query(project_id, project_name, dataset_name, table_name, gene_symbol, va
 
     for row in query_response['rows']:
         result.append({
-            'patient_id': row['f'][0]['v'],
+            'case_id': row['f'][0]['v'],
             'sample_id': row['f'][1]['v'],
             'aliquot_id': row['f'][2]['v'],
             'value': float(row['f'][3]['v'])
