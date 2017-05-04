@@ -96,7 +96,7 @@
                                             {% endif %}
                                         </select>
                                     {% empty %}
-                                        <select id="placeholder-{{ type.datatype }}" class="form-control field-options placeholder-options" data-field="placeholder" disabled style="display: none;">
+                                        <select id="x-placeholder-{{ type.datatype }}" class="form-control field-options placeholder-options" data-field="placeholder" disabled style="display: none;">
                                              <option value="placeholder" disabled selected type="label">placeholder</option>
                                         </select>
                                     {% endfor %}
@@ -159,6 +159,10 @@
                                                 {% endfor %}
                                             {% endif %}
                                         </select>
+                                    {% empty %}
+                                        <select id="y-placeholder-{{ type.datatype }}" class="form-control field-options placeholder-options" data-field="placeholder" disabled style="display: none;">
+                                            <option value="placeholder" disabled selected type="label">placeholder</option>
+                                        </select>
                                     {% endfor %}
                                 </div>
                                 <div class="search-term feature-search space-top-15">
@@ -166,10 +170,6 @@
                                     <select id="search-term-select-y" class="search-term-field search-term-select form-control"></select>
                                 </div>
                             </div>
-                        {% empty %}
-                            <select id="placeholder-{{ type.datatype }}" class="form-control field-options placeholder-options" data-field="placeholder" disabled style="display: none;">
-                                 <option value="placeholder" disabled selected type="label">placeholder</option>
-                            </select>
                         {% endfor %}
                         <label for="y-log-transform">
                             <input id="y-log-transform" type="checkbox" class="log-scale"> Plot as log<sub>10</sub>(n+1)

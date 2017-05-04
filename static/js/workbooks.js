@@ -421,7 +421,6 @@ require([
                 }
             }
             parent.find('.'+ data.specification).find('.search-term-select').val(data["selection"].selected);
-            console.debug(parent.find('.'+ data.specification).find('.search-term-select option'));
         }
     }
 
@@ -494,7 +493,8 @@ require([
             $('#x-log-transform').prop("disabled", true);
         } else {
             if(attr === 'GEXP' && !for_plot_load){
-                field_options_change($('div[data-field="GEXP"]>select'));
+                console.debug($(self).siblings('.'+attr).children('div[data-field="GEXP"]'));
+                field_options_change($(self).siblings('.'+attr).children('div[data-field="GEXP"]').find('select'));
             }
             if($('#x-log-transform').prop("disabled")) {
                 $('#x-log-transform').prop("disabled", false);
@@ -596,7 +596,7 @@ require([
             $('#y-log-transform').prop("disabled", true);
         } else {
             if(attr === 'GEXP' && !for_plot_load){
-                field_options_change($('div[data-field="GEXP"]>select'));
+                field_options_change($(self).siblings('.'+attr).children('div[data-field="GEXP"]').find('select'));
             }
             if($('#y-log-transform').prop("disabled")) {
                 $('#y-log-transform').prop("disabled", false);
