@@ -67,7 +67,7 @@ define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                     };
                 }
 
-                sampleSet[val].samples['{'+data[i]['sample_id']+'}{'+data[i]['case_id']+'}'] = {sample: data[i]['sample_id'], case: data[i]['case_id']};
+                sampleSet[val].samples['{'+data[i]['sample_id']+'}{'+data[i]['case_id']+'}'] = {sample: data[i]['sample_id'], case: data[i]['case_id'], project: data[i]['project']};
                 sampleSet[val].cases.add(data[i]['case_id']);
             }
 
