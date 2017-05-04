@@ -35,7 +35,7 @@ define([
 
 ], function($, jqueryui, bootstrap, session_security, d3, d3tip, d3textwrap, vizhelpers, scatter_plot, cubby_plot, violin_plot, histogram, bar_graph, seqpeek_view, mock_histogram_data ) {
 
-    var VERSION = $('#workbook-build :selected').data('plot-version');
+    var VERSION = $('#workbook-build :selected').data('plot-version') || $('.workbook-build-display').data('plot-version');
 
     var scatter_plot_obj = Object.create(scatter_plot, {});
     var cubby_plot_obj   = Object.create(cubby_plot, {});

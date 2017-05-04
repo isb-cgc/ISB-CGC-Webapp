@@ -29,6 +29,9 @@ if settings.DEBUG:
 
 WHITELIST_RE = settings.WHITELIST_RE
 
+# These fields are handled by the workbook/worksheet UI and do not need to be determined from the SearchHelper
+SKIPPED_FIELDS = ['mirna_name', 'gene_name', 'genomic_build']
+
 @login_required
 def workbook_list(request):
     template  = 'workbooks/workbook_list.html',
@@ -153,25 +156,34 @@ def workbook_create_with_analysis(request):
     return redirect(redirect_url)
 
 
-def get_gene_datatypes():
+def get_gene_datatypes(build=None):
+
+
     datatype_labels = {'GEXP' : 'Gene Expression',
-                       'METH' : 'Methylation',
+                       'METH' : 'DNA Methylation',
                        'CNVR' : 'Copy Number',
                        'RPPA' : 'Protein',
-                       'GNAB' : 'Mutation'}
+                       'GNAB' : 'Mutation',
+                       'MIRN' : 'miRNA Expression'}
 
-    datatype_list = SearchableFieldHelper.get_fields_for_all_datatypes()
+    datatype_list = SearchableFieldHelper.get_fields_for_all_datatypes() if build is None else SearchableFieldHelper_v2.get_fields_for_all_datatypes(build)
+
+    print >> sys.stdout, str(datatype_list)
 
     return_list = []
     for type in datatype_list:
-        if type['datatype'] != 'CLIN' and type['datatype'] != 'MIRN' :
+        if type['datatype'] != 'CLIN' and ((build is None and type['datatype'] != 'MIRN') or build is not None):
             type['label'] = datatype_labels[type['datatype']]
-            return_list.append(type)
 
-        #remove gene in fields as they are set with the variable selection
-        for index, field in enumerate(type['fields']):
-            if field['label'] == "Gene":
-                del type['fields'][index]
+            relevant_fields = []
+
+            for field in type['fields']:
+                if 'name' in field and field['name'] not in SKIPPED_FIELDS:
+                    relevant_fields.append(field)
+
+            type['fields'] = relevant_fields
+
+            return_list.append(type)
 
     return return_list
 
@@ -247,8 +259,10 @@ def workbook(request, workbook_id=0):
 
                 plot_types = Analysis.get_types()
 
+                print >> sys.stdout, "Workbook build is %s" % ('None' if workbook_model.build is None else str(workbook_model.build))
+
                 return render(request, template, {'workbook'    : workbook_model,
-                                                  'datatypes'   : get_gene_datatypes(),
+                                                  'datatypes'   : get_gene_datatypes(workbook_model.build),
                                                   'is_shareable': is_shareable,
                                                   'shared'      : shared,
                                                   'plot_types'  : plot_types})
@@ -286,7 +300,7 @@ def worksheet_display(request, workbook_id=0, worksheet_id=0):
     plot_types = Analysis.get_types()
     return render(request, template, {'workbook'            : workbook_model,
                                       'is_shareable'        : is_shareable,
-                                      'datatypes'           : get_gene_datatypes(),
+                                      'datatypes'           : get_gene_datatypes(workbook_model.build),
                                       'display_worksheet'   : display_worksheet,
                                       'plot_types'          : plot_types})
 

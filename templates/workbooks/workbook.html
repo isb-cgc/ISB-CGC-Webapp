@@ -18,7 +18,7 @@
         <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
     </ol>
     <h1 class="page-header">{{ workbook.name }}</h1>
-    <p class="workbook-build-display"><span>Build: </span> {% if not workbook.build %}Legacy{% else %}{{ workbook.build }}{% endif %}</p>
+    <p class="workbook-build-display" data-plot-version="{% if not workbook.build %}v1{% else %}v2{% endif %}"><span>Build: </span> {% if not workbook.build %}Legacy{% else %}{{ workbook.build }}{% endif %}</p>
     <p>{{ workbook.description }}</p>
     <ul class="page-action-group" role="menubar">
         {% if workbook.owner.id == request.user.id %}

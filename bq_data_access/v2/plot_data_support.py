@@ -131,13 +131,13 @@ def get_merged_feature_vectors(fvb, x_id, y_id, c_id, cohort_id_array, logTransf
     The merged result:
     [
         {
-            'patient_id': <patient ID #0>
+            'case_id': <patient ID #0>
             'x': <value for x for patient ID #0>
             'y': <value for y for patient ID #0>
             'c': <value for c for patient ID #0>
         },
         {
-            'patient_id': <patient ID #1>
+            'case_id': <patient ID #1>
             'x': <value for x for patient ID #1>
             'y': <value for y for patient ID #1>
             'c': <value for c for patient ID #1>
