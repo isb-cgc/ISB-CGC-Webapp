@@ -1,6 +1,6 @@
 """
 
-Copyright 2015, Institute for Systems Biology
+Copyright 2017, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,34 +16,48 @@ limitations under the License.
 
 """
 
-from bq_data_access.v2.feature_search.gexp_searcher import GEXPSearcher
-from bq_data_access.v2.feature_search.clinical_searcher import ClinicalSearcher
-from bq_data_access.v2.feature_search.methylation_searcher import METHSearcher
-from bq_data_access.v2.feature_search.copynumber_search import CNVRSearcher
-from bq_data_access.v2.feature_search.protein_searcher import RPPASearcher
-from bq_data_access.v2.feature_search.microrna_searcher import MIRNSearcher
-from bq_data_access.v2.feature_search.gnab_searcher import GNABSearcher
+from bq_data_access.data_types.definitions import FEATURE_ID_TO_TYPE_MAP
+from bq_data_access.v2.feature_id_utils import FeatureDataTypeHelper
+
 
 class SearchableFieldHelper(object):
-    datatype_handlers = [
-        GEXPSearcher,
-        ClinicalSearcher,
-        METHSearcher,
-        CNVRSearcher,
-        RPPASearcher,
-        MIRNSearcher,
-        GNABSearcher
-    ]
-
     @classmethod
-    def get_fields_for_all_datatypes(cls):
+    def get_fields_for_all_datatypes(cls, genomic_build):
+        """
+        Return searchable fields for all data types for which data is available
+        for the given genomic build.
+        
+        Since the genomic build is stored in lower case in the BigQuery table
+        configurations, the genomic_build parameter will be lowercased as well.
+    
+        Returns:
+            Array of objects, with 'datatype' field and 'fields' key that contains an
+            array of searchable_fields objects from the feature searcher classes.
+        """
+        genomic_build = genomic_build.lower()
+
         result = []
-        for searcher in cls.datatype_handlers:
-            datatype = searcher.get_datatype_identifier()
-            searchable_fields = searcher.get_searchable_fields()
+        for _, data_type in FEATURE_ID_TO_TYPE_MAP.iteritems():
+            config_class = FeatureDataTypeHelper.get_feature_def_config_from_data_type(data_type)
+            data_type_config_dict = FeatureDataTypeHelper.get_feature_def_default_config_dict_from_data_type(data_type)
+            config_instance = config_class.from_dict(data_type_config_dict)
+
+            # Check if any tables for the data type match the build
+            found = False
+            for table_config in config_instance.data_table_list:
+                if table_config.genomic_build == genomic_build:
+                    found = True
+                    break
+            if not found:
+                continue
+
+            searcher_class = FeatureDataTypeHelper.get_feature_searcher_class_from_data_type(data_type)
+            datatype_prefix = searcher_class.get_datatype_identifier()
+            searchable_fields = searcher_class.get_searchable_fields()
+
             result.append({
-                'datatype': datatype,
+                'datatype': datatype_prefix,
                 'fields': searchable_fields
-                })
+            })
 
         return result
