@@ -359,7 +359,7 @@ class UserFeatureProvider(FeatureDataProvider):
 
         for row in query_result_array:
             result.append({
-                'patient_id': None,
+                'case_id': None,
                 'sample_id': row['f'][1]['v'],
                 'aliquot_id': None,
                 'value': self.unpack_value_from_row_with_feature_def(row)

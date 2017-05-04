@@ -165,8 +165,10 @@ require([
         };
         if (input in dictionary) {
             return dictionary[input];
-        } else {
+        } else if(input !== null && input !== undefined) {
             return input.replace(/_/g, ' ');
+        } else {
+            return "N/A";
         }
 
     };
@@ -256,7 +258,7 @@ require([
                         '<tr>' +
                         '<td>' + files[i]['program'] + '</td>' +
                         '<td>' + files[i]['sample'] + '</td>' +
-                        '<td>' + files[i]['exp_strat'] + '</td>' +
+                        '<td>' + (files[i]['exp_strat'] || 'N/A') + '</td>' +
                         '<td>' + happy_name(files[i]['platform']) + '</td>' +
                         '<td>' + files[i]['datacat'] + '</td>' +
                         '<td>' + files[i]['datatype'] + '</td>' +

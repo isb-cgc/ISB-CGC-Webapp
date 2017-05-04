@@ -394,21 +394,23 @@ require([
             axis_select_change(variable_element);
             var parent = variable_element.parents(".variable-container");
             parent.find('.spec-select').val(data.specification);
-            axis_attribute_change(parent.find('.spec-select'));
+            axis_attribute_change(parent.find('.spec-select'), true);
             vizhelpers.get_datatype_search_interfaces(parent.find('.spec-select'), parent.find('.spec-select').val());
 
             var keys = Object.keys(data);
             parent.find('.'+ data.specification).find('.field-options').each(function(i, ele){
-                if($.inArray(ele.id, keys) != -1){
-                    if($(ele).hasClass('select2')){
-                        $(ele).parent().find('.select2-selection__rendered').empty();
-                        $(ele).parent().find('.select2-selection__rendered').append('<option value="' + data[ele.id].options[0].value + '"> '+ data[ele.id].options[0].text + '</option>');
-                    } else {
-                        $(ele).empty();
-                        for (var i in data[ele.id].options) {
-                            $(ele).append('<option value="' + data[ele.id].options[i].value + '"> '+ data[ele.id].options[i].text + '</option>');
+                if($(ele).find(':selected').val() !== 'placeholder') {
+                    if ($.inArray(ele.id, keys) != -1) {
+                        if ($(ele).hasClass('select2')) {
+                            $(ele).parent().find('.select2-selection__rendered').empty();
+                            $(ele).parent().find('.select2-selection__rendered').append('<option value="' + data[ele.id].options[0].value + '"> ' + data[ele.id].options[0].text + '</option>');
+                        } else {
+                            $(ele).empty();
+                            for (var i in data[ele.id].options) {
+                                $(ele).append('<option value="' + data[ele.id].options[i].value + '"> ' + data[ele.id].options[i].text + '</option>');
+                            }
+                            $(ele).val(data[ele.id].selected);
                         }
-                        $(ele).val(data[ele.id].selected);
                     }
                 }
             });
@@ -419,6 +421,7 @@ require([
                 }
             }
             parent.find('.'+ data.specification).find('.search-term-select').val(data["selection"].selected);
+            console.debug(parent.find('.'+ data.specification).find('.search-term-select option'));
         }
     }
 
@@ -435,11 +438,11 @@ require([
     /*
      * Event Handlers for X-Axis
      */
-    function axis_attribute_change(self){
+    function axis_attribute_change(self, for_plot_load){
         if($(self).hasClass('x-gene-attribute-select')){
-            x_attribute_change(self);
+            x_attribute_change(self, for_plot_load);
         } else if($(self).hasClass('y-gene-attribute-select')){
-            y_attribute_change(self);
+            y_attribute_change(self, for_plot_load);
         }
     }
     function axis_select_change(self){
@@ -452,26 +455,47 @@ require([
     function x_select_change(self){
         var type = $(self).find(":selected").attr('type');
         $(self).parent().find(".attr-options").fadeOut();
-        if(type == "gene"){
+
+        if(type == "gene") {
             $(self).parent().find('.x-gene-attribute-select option:contains("select a specification")').prop('selected', true);
+            $(self).parent().find('.x-gene-attribute-select option').each(function(){
+                if($(this).val() && $(this).val() === 'MIRN') {
+                    $(this).attr('disabled', true);
+                } else {
+                    $(this).removeAttr('disabled');
+                }
+            });
             $(self).parent().find(".x-gene-attribute-select").fadeIn();
-            var gene = $(self).find(":selected").val();
+        } else if(type == 'miRNA') {
+            $(self).parent().find('.x-gene-attribute-select option:contains("select a specification")').prop('selected', true);
+            $(self).parent().find('.x-gene-attribute-select option').each(function(){
+                if($(this).val() && $(this).val() !== 'MIRN') {
+                    $(this).attr('disabled',true);
+                } else {
+                    $(this).removeAttr('disabled');
+                }
+            });
+            $(self).parent().find(".x-gene-attribute-select").fadeIn();
         } else {
             $(self).parent().find('.x-gene-attribute-select option:contains("select a specification")').prop('selected', true);
             $(self).parent().find(".x-gene-attribute-select").fadeOut();
             $(self).parent().find("#x-axis-data-type-container").fadeOut();
         }
     }
+
     $('.x-axis-select').change(function(){
         x_select_change(this);
     });
-    function x_attribute_change(self){
+    function x_attribute_change(self, for_plot_load){
         $(self).parent().find(".attr-options").fadeOut();
         var attr = $(self).find(":selected").val();
         if(attr == "GNAB" && $('#value-GNAB :selected').val() !== "num_mutations") {
             $('#x-log-transform').prop("checked", false);
             $('#x-log-transform').prop("disabled", true);
         } else {
+            if(attr === 'GEXP' && !for_plot_load){
+                field_options_change($('div[data-field="GEXP"]>select'));
+            }
             if($('#x-log-transform').prop("disabled")) {
                 $('#x-log-transform').prop("disabled", false);
             }
@@ -536,8 +560,25 @@ require([
         var type = $(self).find(":selected").attr('type');
         if(type == "gene"){
             $(self).parent().find('.y-gene-attribute-select option:contains("select a specification")').prop('selected', true);
+            $(self).parent().find('.y-gene-attribute-select option').each(function(){
+                if($(this).val() && $(this).val() === 'MIRN') {
+                    $(this).attr('disabled',true);
+                } else {
+                    $(this).removeAttr('disabled');
+                }
+            });
             $(self).parent().find(".y-gene-attribute-select").fadeIn();
             var gene = $(self).find(":selected").val();
+        } else if(type == 'miRNA') {
+            $(self).parent().find('.y-gene-attribute-select option:contains("select a specification")').prop('selected', true);
+            $(self).parent().find('.y-gene-attribute-select option').each(function(){
+                if($(this).val() && $(this).val() !== 'MIRN') {
+                    $(this).attr('disabled',true);
+                } else {
+                    $(this).removeAttr('disabled');
+                }
+            });
+            $(self).parent().find(".x-gene-attribute-select").fadeIn();
         } else {
             $(self).parent().find('.y-gene-attribute-select option:contains("select a specification")').prop('selected', true);
             $(self).parent().find(".y-gene-attribute-select").fadeOut();
@@ -547,13 +588,16 @@ require([
     $('.y-axis-select').change(function(){
         y_select_change(this);
     });
-    function y_attribute_change(self){
+    function y_attribute_change(self, for_plot_load){
         $(self).parent().find(".attr-options").fadeOut();
         var attr = $(self).find(":selected").val();
         if(attr == "GNAB" && $('#value-GNAB :selected').val() !== "num_mutations") {
             $('#y-log-transform').prop("checked", false);
             $('#y-log-transform').prop("disabled", true);
         } else {
+            if(attr === 'GEXP' && !for_plot_load){
+                field_options_change($('div[data-field="GEXP"]>select'));
+            }
             if($('#y-log-transform').prop("disabled")) {
                 $('#y-log-transform').prop("disabled", false);
             }
@@ -576,15 +620,16 @@ require([
     $('.feature-search').on('change',    function() { vizhelpers.field_search_change_callback(this); });
     $('.select-field').on('click',       function() { vizhelpers.select_field_callback(this); });
     $('.close-field-search').on('click', function() { vizhelpers.close_field_search_callback(this); });
-    $('.field-options').on('change', function(event) {
-        var self            = $(this);
+
+    function field_options_change(self) {
+
         var parent          = self.parent();
         var datatype        = parent[0].getAttribute('data-field');
         var filterElements  = parent.find('select');
         var variable_name   = self.parents(".variable-container").attr('variable');
-        var gene_selection  = self.parents(".variable-container").find(":selected").val();
-        var filters         = [{ filter : 'gene_name',
-                                 value  : gene_selection}];
+        var gene_selector   = self.parents(".variable-container").find(":selected");
+        var filters         = [{ filter : gene_selector.attr('type').toLowerCase()+'_name',
+                                 value  : gene_selector.val()}];
 
         var axis_transform = (variable_name == "x-axis-select") ? "#x-log-transform" : "#y-log-transform";
 
@@ -597,7 +642,7 @@ require([
 
         $.each(filterElements, function(i, ele){
             var value = $(ele).find(":selected").text();
-            if(value !== "" && value !== "Please select an option" ){
+            if(value !== "" && value !== "Please select an option" && value !== 'placeholder'){
                 filters.push({'filter' : ele.getAttribute('data-field'), 'value' : value.trim()});
             }
         });
@@ -607,15 +652,17 @@ require([
             selectbox.empty();
 
             if(options.length>0) {
-                selectbox.append('<option value="" disabled selected>Please select an option</option>');
+                selectbox.append('<option value="" type="label" disabled selected>Please select an option</option>');
                 for (var i = 0; i < options.length; i++) {
                     selectbox.append('<option value="' + options[i]['internal_feature_id'] + '">' + options[i]['label'] + '</option>')
                 }
             } else {
-                selectbox.append('<option value="" disabled selected>No features available</option>');
+                selectbox.append('<option value="" type="label" disabled selected>No features available</option>');
             }
         });
-    });
+    };
+
+    $('.field-options').on('change', function() { field_options_change($(this));});
 
     // Hide/Show settings as appropriate for plot:
     var hide_show_widgets = function(plot_type, settings_flyout) {
@@ -727,7 +774,7 @@ require([
             };
             // All placeholders should be given a type of 'label', and they will never return a url_code
             if(plot_settings.find('.'+label+' :selected').attr("type") !== "label") {
-                if(plot_settings.find('.'+label+' :selected').attr("type") === "gene"){
+                if(plot_settings.find('.'+label+' :selected').attr("type") === "gene" || plot_settings.find('.'+label+' :selected').attr("type") === 'miRNA'){
                     result = {
                         url_code : plot_settings.find('[variable="'+ label + '"] .search-term-select:visible').find(":selected").val(),
                         type: "gene"
