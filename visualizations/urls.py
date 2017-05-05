@@ -20,6 +20,9 @@ from django.conf.urls import patterns, url
 
 import views, feature_access_views, feature_access_views_v2, data_access_views, data_access_views_v2
 
+import seqpeek_data_views_v1
+#import seqpeek_data_views_v2
+
 
 urlpatterns = [
     url(r'^saveviz$', views.save_viz, name='saveviz'),
@@ -45,4 +48,8 @@ urlpatterns = [
     # Feature data access views
     url(r'^feature_data_plot/v1', data_access_views.data_access_for_plot, name='feature_data_plot'),
     url(r'^feature_data_plot/v2', data_access_views_v2.data_access_for_plot, name='feature_data_plot_v2'),
+
+    # SeqPeek data access views
+    url(r'^seqpeek_data_plot/v1', seqpeek_data_views_v1.seqpeek_view_data, name='seqpeek_data_plot_v1'),
+    #url(r'^seqpeek_data_plot/v2', seqpeek_data_views_v2.seqpeek_view_data, name='seqpeek_data_plot_v2'),
 ]

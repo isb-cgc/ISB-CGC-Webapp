@@ -355,6 +355,49 @@ def get_feature_id_validity_for_array(feature_id_array):
 
     return result
 
+
+def get_confirmed_project_ids_for_cohorts(cohort_id_array):
+    """
+    Returns the project ID numbers that are referred to by the samples
+    in a list of cohorts.
+    
+    Returns:
+        List of project ID numbers.
+    """
+    cohort_vals = ()
+    cohort_params = ""
+    for cohort in cohort_id_array:
+        cohort_params += "%s,"
+        cohort_vals += (cohort,)
+    cohort_params = cohort_params[:-1]
+    db = get_sql_connection()
+    cursor = db.cursor()
+
+    tcga_studies = fetch_isbcgc_project_set()
+
+    cursor.execute("SELECT DISTINCT project_id FROM cohorts_samples WHERE cohort_id IN (" + cohort_params + ");",
+                   cohort_vals)
+
+    # Only samples whose source studies are TCGA studies, or extended from them, should be used
+    confirmed_study_ids = []
+    unconfirmed_study_ids = []
+
+    for row in cursor.fetchall():
+        if row[0] in tcga_studies:
+            if row[0] not in confirmed_study_ids:
+                confirmed_study_ids.append(row[0])
+        elif row[0] not in unconfirmed_study_ids:
+            unconfirmed_study_ids.append(row[0])
+
+    if len(unconfirmed_study_ids) > 0:
+        projects = Project.objects.filter(id__in=unconfirmed_study_ids)
+
+        for project in projects:
+            if project.get_my_root_and_depth()['root'] in tcga_studies:
+                confirmed_study_ids.append(project.id)
+    return confirmed_study_ids
+
+
 def data_access_for_plot(request):
     """ Used by the web application."""
     try:
@@ -382,39 +425,7 @@ def data_access_for_plot(request):
                 raise Exception('Feature Not Found')
 
         # Get the project IDs these cohorts' samples come from
-        cohort_vals = ()
-        cohort_params = ""
-
-        for cohort in cohort_id_array:
-            cohort_params += "%s,"
-            cohort_vals += (cohort,)
-
-        cohort_params = cohort_params[:-1]
-
-        db = get_sql_connection()
-        cursor = db.cursor()
-
-        tcga_studies = fetch_isbcgc_project_set()
-
-        cursor.execute("SELECT DISTINCT project_id FROM cohorts_samples WHERE cohort_id IN ("+cohort_params+");",cohort_vals)
-
-        # Only samples whose source studies are TCGA studies, or extended from them, should be used
-        confirmed_study_ids = []
-        unconfirmed_study_ids = []
-
-        for row in cursor.fetchall():
-            if row[0] in tcga_studies:
-                if row[0] not in confirmed_study_ids:
-                    confirmed_study_ids.append(row[0])
-            elif row[0] not in unconfirmed_study_ids:
-                unconfirmed_study_ids.append(row[0])
-
-        if len(unconfirmed_study_ids) > 0:
-            projects = Project.objects.filter(id__in=unconfirmed_study_ids)
-
-            for project in projects:
-                if project.get_my_root_and_depth()['root'] in tcga_studies:
-                    confirmed_study_ids.append(project.id)
+        confirmed_study_ids = get_confirmed_project_ids_for_cohorts(cohort_id_array)
 
         return JsonResponse(get_merged_feature_vectors(x_id, y_id, c_id, cohort_id_array, logTransform, confirmed_study_ids))
 
@@ -422,4 +433,6 @@ def data_access_for_plot(request):
         print >> sys.stdout, traceback.format_exc()
         logger.exception(e)
         return JsonResponse({'error': str(e)}, status=500)
+
+
 
