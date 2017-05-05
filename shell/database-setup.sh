@@ -30,12 +30,12 @@ mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME -e "INSERT INTO
 
 # Load your SQL table file
 # Looks for user_data_dump.sql; if that isn't available, looks for metadata_featdef_tables.sql
-# If metadata_featdef_tables.sql isn't found, it downloads a file from sql-table-dumps/ and saves it
+# If metadata_featdef_tables.sql isn't found, it downloads a file from GCS and saves it
 # as metadata_featdef_tables.sql for future use
 if [ ! -f ${HOMEROOT}/user_data_dump.sql ]; then
     if [ ! -f ${HOMEROOT}/scripts/metadata_featdef_tables.sql ]; then
         echo "Downloading SQL Table File..."
-        wget -q https://storage.googleapis.com/sql-table-dumps/dev_test_dump_08_17_2016.sql -O ${HOMEROOT}/scripts/metadata_featdef_tables.sql
+        wget -q https://storage.googleapis.com/isb-cgc-sqldumps/dev/dev_test_dump_08_17_2016.sql -O ${HOMEROOT}/scripts/metadata_featdef_tables.sql
     fi
     echo "Applying SQL Table File... (may take a while)"
     mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/metadata_featdef_tables.sql

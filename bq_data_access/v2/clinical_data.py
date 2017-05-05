@@ -146,7 +146,7 @@ class ClinicalFeatureProvider(FeatureDataProvider):
         """
         Unpacks values from a BigQuery response object into a flat array. The array will contain dicts with
         the following fields:
-        - 'patient_id': Patient barcode
+        - 'case_id': Patient barcode
         - 'sample_id': Sample barcode
         - 'aliquot_id': Always None
         - 'value': Value of the selected column from the clinical data table

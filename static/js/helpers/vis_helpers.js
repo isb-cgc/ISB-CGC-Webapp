@@ -162,7 +162,7 @@ define(['jquery'], function($) {
             if(typeof(callback) !== 'undefined'){
                 var base_feature_search_url = base_url + '/visualizations/feature_search/'+version+'?';
                 if(version == 'v2') {
-                    filters.push({filter: 'build', value: $('#workbook-build :selected').val()});
+                    filters.push({filter: 'genomic_build', value: $('#workbook-build :selected').val()});
                 }
                 var feature_search_url = base_feature_search_url + "datatype=" + datatype;
 
@@ -274,27 +274,6 @@ define(['jquery'], function($) {
                     templateSelection: helpers.select2_formatting,
                     width: '100%'
                 })
-            } else if (value == 'MIRN') {
-                // Initialize select box with new features from feature search url
-                var that = this;
-                $.ajax({
-                    type: 'GET',
-                    url: feature_search_url,
-                    success: function(data) {
-                        data = data['items'];
-                        var selectbox = $(that).parents('.search-field').find('.feature-search .search-term-field');
-                        selectbox.empty();
-                        selectbox.append('<option value="" disabled selected>Please select an option</option>');
-                        if (data) {
-                            for (var i = 0; i < data.length; i++) {
-                                selectbox.append('<option value="'+data[i]['internal_feature_id']+'">'+data[i]['label']+'</option>')
-                            }
-                        }
-                    },
-                    error: function(e) {
-                        console.error("[ERROR] " + e.status + ": "+ e.statusText);
-                    }
-                });
             }
         },
 
