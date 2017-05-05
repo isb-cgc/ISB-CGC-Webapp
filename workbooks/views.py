@@ -371,7 +371,7 @@ def worksheet_variables(request, workbook_id=0, worksheet_id=0, variable_id=0):
         else:
             variables = []
             #from Edit Page
-            if "variables" in request.body :
+            if "variables" in request.body:
                 json_response = True
                 name          = json.loads(request.body)['name']
                 variable_list = json.loads(request.body)['variables']

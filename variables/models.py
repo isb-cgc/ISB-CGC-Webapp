@@ -32,10 +32,8 @@ class VariableFavorite(models.Model):
 
         return last_view
 
-
     def get_readable_version(self):
         return 'Version '+str(self.version[1:])
-
 
     @classmethod
     def get_list(cls, user):

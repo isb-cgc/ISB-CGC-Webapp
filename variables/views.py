@@ -65,9 +65,9 @@ def variable_fav_list(request, workbook_id=0, worksheet_id=0, new_workbook=0):
             context['worksheet'] = worksheet_model
             context['base_url']  = settings.BASE_URL
 
-            if variable_list :
+            if variable_list:
                 template = 'variables/variables_select.html'
-            else :
+            else:
                 return initialize_variable_selection_page(request, workbook_id=workbook_id, worksheet_id=worksheet_id)
 
         except ObjectDoesNotExist:
@@ -77,7 +77,7 @@ def variable_fav_list(request, workbook_id=0, worksheet_id=0, new_workbook=0):
         context['new_workbook'] = True
         if variable_list :
             template = 'variables/variables_select.html'
-        else :
+        else:
             return initialize_variable_selection_page(request, new_workbook=True)
 
     return render(request, template, context)
@@ -95,7 +95,7 @@ def variable_fav_detail(request, variable_fav_id, workbook_id=0, worksheet_id=0,
     if new_workbook :
         context['new_workbook'] = True
 
-    if workbook_id :
+    if workbook_id:
         try:
             workbook_model       = Workbook.objects.get(id=workbook_id)
             context['workbook']  = workbook_model

@@ -47,12 +47,17 @@
                             {% if variables.version == 'v2' %}<a data-toggle="modal" data-target="#new-favorite-workbook-modal" class="btn btn-primary">Apply to New Workbook</a>
                             {% else %}<span class="btn btn-info" title="Version 1 Variable lists cannot be added to new Workbooks." disabled>Apply to New Workbook</span>{% endif %}
                         {% else %}
-                            <form action="{% url 'worksheet_variables_edit' workbook.id worksheet.id %}" method="POST">
-                                {% csrf_token %}
-                                <input type="hidden" name="variable_list_id" value="{{ variables.id }}">
-                                <button class="btn btn-primary" type="submit"><i class="fa fa-plus"></i>Apply to Worksheet</button>
+                            {% if workbook|workbook_matches_varfave:variables %}
+                                <form action="{% url 'worksheet_variables_edit' workbook.id worksheet.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="variable_list_id" value="{{ variables.id }}">
+                                    <button class="btn btn-primary" type="submit"><i class="fa fa-plus"></i>Apply to Worksheet</button>
+                                    <a class="btn btn-info"  href="{% url 'variable_select_for_existing_workbook' workbook.id worksheet.id %}">Back</a>
+                                </form>
+                            {% else %}
+                                <span class="btn btn-info" title="Variable lists can only be applied to Workbooks of the same plot version." disabled> Apply to Worksheet</span>
                                 <a class="btn btn-info"  href="{% url 'variable_select_for_existing_workbook' workbook.id worksheet.id %}">Back</a>
-                            </form>
+                            {% endif %}
                         {% endif %}
                     </li>
                 </ul>
