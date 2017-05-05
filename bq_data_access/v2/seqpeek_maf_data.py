@@ -32,7 +32,7 @@ class SeqPeekDataProvider(GNABDataQueryHandler):
     def process_data_point(cls, data_point):
         return str(data_point['value'])
 
-    def build_query(self, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array, project_id_array):
+    def build_query_for_program(self, feature_def, cohort_table, cohort_id_array, project_id_array):
         # Generate the 'IN' statement string: (%s, %s, ..., %s)
         cohort_id_stmt = ', '.join([str(cohort_id) for cohort_id in cohort_id_array])
         project_id_stmt = ''
@@ -40,27 +40,31 @@ class SeqPeekDataProvider(GNABDataQueryHandler):
             project_id_stmt = ', '.join([str(project_id) for project_id in project_id_array])
 
         query_template = \
-            ("SELECT ParticipantBarcode, Tumor_SampleBarcode, Tumor_AliquotBarcode, "
+            ("SELECT case_barcode, sample_barcode_tumor, aliquot_barcode_tumor, "
              "    Hugo_symbol, "
-             "    UniProt_AApos, "
-             "    variant_classification, "
+             "    Protein_position, "
+             "    Variant_Classification, "
              "    HGNC_UniProt_ID_Supplied_By_UniProt as uniprot_id "
              "FROM [{project_name}:{dataset_name}.{table_name}] "
              "WHERE Hugo_Symbol='{gene}' "
              "AND Tumor_SampleBarcode IN ( "
              "    SELECT sample_barcode "
-             "    FROM [{project_name}:{cohort_dataset}.{cohort_table}] "
+             "    FROM [{cohort_dataset_and_table}] "
              "    WHERE cohort_id IN ({cohort_id_list})"
              "         AND (project_id IS NULL")
 
         query_template += (" OR project_id IN ({project_id_list})))" if project_id_array is not None else "))")
 
-        query = query_template.format(dataset_name=dataset_name, project_name=project_name, table_name=table_name,
+        query = query_template.format(table_name=table_config.table_id,
                                       gene=feature_def.gene,
-                                      cohort_dataset=cohort_dataset, cohort_table=cohort_table,
+                                      cohort_dataset_and_table=cohort_table,
                                       cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt)
 
         logging.debug("BQ_QUERY_SEQPEEK: " + query)
+        return query
+
+    def build_query(self, project_set, cohort_table, cohort_id_array, project_id_array):
+        query = self.build_query_for_program(self.feature_def, cohort_table, cohort_id_array, project_id_array)
         return query
 
     @DurationLogged('SEQPEEK_GNAB', 'UNPACK')
