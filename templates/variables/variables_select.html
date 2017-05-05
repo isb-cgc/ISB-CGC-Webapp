@@ -44,6 +44,7 @@
                 <thead>
                     <tr>
                         <th></th>
+                        <th>Version</th>
                         <th>Name</th>
                         <th># of Variables</th>
                         <th>Last Updated</th>
@@ -51,8 +52,14 @@
                 </thead>
                 <tbody>
                     {% for variable_fav in variable_list %}
-                        <tr>
-                            <td class="checkbox-col"><input type="checkbox" name="id" value="{{ variable_fav.id }}" title="{{ variable_fav.name }} Checkbox" aria-label="gene-checkbox"/></td>
+                        <tr></tr>
+                            <td class="checkbox-col">
+                                {% if not workbook|workbook_matches_varfave:variable_fav %}
+                                    <span title="Workbook and Variable Favorite List version must match."><i class="fa fa-times"></i> </span>
+                                {% else %}
+                                    <input type="checkbox" name="id" value="{{ variable_fav.id }}" title="{{ variable_fav.name }} Checkbox" aria-label="gene-checkbox"/></td>
+                                {% endif %}
+                            <td>{{ variable_fav.get_readable_version }}</td>
                             {% if workbook %}
                                 <td class="name-col"><a href="{% url 'variable_detail_for_existing_workbook' variable_fav.id workbook.id worksheet.id %}">{{variable_fav.name}}</a></td>
                             {% else %}

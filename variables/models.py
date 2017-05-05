@@ -12,6 +12,7 @@ class VariableFavorite(models.Model):
     user = models.ForeignKey(User, null=False, blank=False)
     active = models.BooleanField(default=True)
     last_date_saved = models.DateTimeField(auto_now=True)
+    version = models.CharField(max_length=5, blank=False, null=True)
     objects = FavoriteManager()
 
     '''
@@ -30,6 +31,9 @@ class VariableFavorite(models.Model):
         last_view.save(False, True)
 
         return last_view
+
+    def get_readable_version(self):
+        return 'Version '+str(self.version[1:])
 
     @classmethod
     def get_list(cls, user):

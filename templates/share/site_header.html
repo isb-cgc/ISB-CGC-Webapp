@@ -256,26 +256,26 @@
                     <li class="menu-item">
                         <strong>Start New Workbook With ...</strong>
                         <ul class="item-list">
-                            {% for vflv in user.variablefavorite_set.all|active|dictsortreversed:'last_date_saved'|slice:':5' %}
-                            <li class="menu-item">
-                                <form action="{% url 'worksheet_create_with_variables' %}" method="POST">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="variable_list_id" value="{{ vflv.id }}">
-                                    <button type="submit" title="{{ vflv.name|wrap_text }}">{{ vflv.name }}</button>
-                                </form>
-                            </li>
+                            {% for vflv in user.variablefavorite_set.all|active_and_v2|dictsortreversed:'last_date_saved'|slice:':5' %}
+                                <li class="menu-item">
+                                    <form action="{% url 'worksheet_create_with_variables' %}" method="POST">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="variable_list_id" value="{{ vflv.id }}">
+                                        <button type="submit" title="{{ vflv.name|wrap_text }}">{{ vflv.name }}</button>
+                                    </form>
+                                </li>
                             {% endfor %}
-                            {% if user.variablefavorite_set.all|active|length > 5 %}
+                            {% if user.variablefavorite_set.all|active_and_v2|length > 5 %}
                             <li class="menu-item has-drop-down__more"> More
                                 <ul class="drop">
-                                    {% for vflv in user.variablefavorite_set.all|active|dictsortreversed:'last_date_saved'|slice:'5:' %}
-                                    <li class="menu-item">
-                                        <form action="{% url 'worksheet_create_with_variables' %}" method="POST">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="variable_list_id" value="{{ vflv.id }}">
-                                            <button type="submit" title="{{ vflv.name|wrap_text }}">{{ vflv.name }}</button>
-                                        </form>
-                                    </li>
+                                    {% for vflv in user.variablefavorite_set.all|active_and_v2|dictsortreversed:'last_date_saved'|slice:'5:' %}
+                                        <li class="menu-item">
+                                            <form action="{% url 'worksheet_create_with_variables' %}" method="POST">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="variable_list_id" value="{{ vflv.id }}">
+                                                <button type="submit" title="{{ vflv.name|wrap_text }}">{{ vflv.name }}</button>
+                                            </form>
+                                        </li>
                                     {% endfor %}
                                 </ul>
                             </li>
