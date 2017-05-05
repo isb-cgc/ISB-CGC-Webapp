@@ -27,6 +27,11 @@ class SearchableFieldHelper(object):
         Return searchable fields for all data types for which data is available
         for the given genomic build.
         
+        The data availability for given build for a data type is resolved by finding
+        tables with matching build in the table configuration of the data type in
+        the bq_data_access/data_types module. If no matching tables are found,
+        no entry is returned for the data type.
+        
         Since the genomic build is stored in lower case in the BigQuery table
         configurations, the genomic_build parameter will be lowercased as well.
     

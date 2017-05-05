@@ -75,8 +75,8 @@ def get_confirmed_project_ids_for_cohorts(cohort_id_array):
 
     tcga_studies = fetch_isbcgc_project_set()
 
-    cursor.execute("SELECT DISTINCT project_id FROM cohorts_samples WHERE cohort_id IN (" + cohort_params + ");",
-                   cohort_vals)
+    query_str = "SELECT DISTINCT project_id FROM cohorts_samples WHERE cohort_id IN (" + cohort_params + ");"
+    cursor.execute(query_str, cohort_vals)
 
     # Only samples whose source studies are TCGA studies, or extended from them, should be used
     confirmed_study_ids = []
