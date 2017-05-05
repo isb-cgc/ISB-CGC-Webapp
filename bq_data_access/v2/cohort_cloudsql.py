@@ -76,11 +76,11 @@ class CloudSQLCohortAccess(object):
             raise CohortException('bad cohort: ' + str(cohort_id_array))
 
     @classmethod
-    def get_cohorts_for_datapoints(cls, cohort_id_array):
+    def get_cohorts_and_projects_for_datapoints(cls, cohort_id_array):
         # Generate the 'IN' statement string: (%s, %s, ..., %s)
         cohort_id_stmt = ', '.join(['%s' for x in xrange(len(cohort_id_array))])
 
-        query = 'SELECT sample_barcode, cohort_id FROM {cohort_samples_table} WHERE cohort_id IN ({cohort_id_stmt})'.format(
+        query = 'SELECT sample_barcode, cohort_id, project_id FROM {cohort_samples_table} WHERE cohort_id IN ({cohort_id_stmt})'.format(
             cohort_samples_table=DJANGO_COHORT_SAMPLES_TABLE,
             cohort_id_stmt=cohort_id_stmt)
 
@@ -92,17 +92,21 @@ class CloudSQLCohortAccess(object):
 
             result = cursor.fetchall()
             cohort_per_samples = {}
+            project_per_samples = {}
 
             for row in result:
-                cohort_id, sample_barcode = row['cohort_id'], row['sample_barcode']
+                cohort_id, sample_barcode, project_id = row['cohort_id'], row['sample_barcode'], row['project_id']
                 if sample_barcode not in cohort_per_samples:
                     cohort_per_samples[sample_barcode] = []
                 cohort_per_samples[sample_barcode].append(cohort_id)
+                if sample_barcode not in project_per_samples:
+                    project_per_samples[sample_barcode] = []
+                    project_per_samples[sample_barcode].append(project_id)
 
             cursor.close()
             db.close()
 
-            return cohort_per_samples
+            return {'cohorts': cohort_per_samples, 'projects': project_per_samples}
 
         except Exception as e:
             logger.exception(e)
@@ -165,7 +169,10 @@ def add_cohort_info_to_merged_vectors(target, x_id, y_id, c_id, cohort_id_array)
         None
     """
     # Resolve which (requested) cohorts each datapoint belongs to.
-    cohort_set_dict = CloudSQLCohortAccess.get_cohorts_for_datapoints(cohort_id_array)
+    cohort_proj_dict_set = CloudSQLCohortAccess.get_cohorts_and_projects_for_datapoints(cohort_id_array)
+
+    cohort_set_dict = cohort_proj_dict_set['cohorts']
+    project_set_dict = cohort_proj_dict_set['projects']
 
     # Get the name and ID for every requested cohort.
     cohort_info_array = CloudSQLCohortAccess.get_cohort_info(cohort_id_array)
@@ -186,6 +193,9 @@ def add_cohort_info_to_merged_vectors(target, x_id, y_id, c_id, cohort_id_array)
 
         if len(cohort_set) >= DATAPOINT_COHORT_THRESHOLD:
             item['cohort'] = cohort_set
+
+        if sample_id in project_set_dict:
+            item['project'] = project_set_dict[sample_id]
 
         items.append(item)
 

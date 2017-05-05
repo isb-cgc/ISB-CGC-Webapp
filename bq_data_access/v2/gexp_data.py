@@ -18,6 +18,7 @@ limitations under the License.
 
 import logging
 from re import compile as re_compile
+import sys
 
 from bq_data_access.v2.errors import FeatureNotFoundException
 from bq_data_access.v2.feature_value_types import ValueType, DataTypes
@@ -144,7 +145,9 @@ class GEXPDataQueryHandler(object):
                          "{subqueries}" \
                          ") {brk}" \
                          ""
+
         query = query_template.format(brk='\n', subqueries=subquery_stmt)
+
         return query
 
     @DurationLogged('GEXP', 'UNPACK')

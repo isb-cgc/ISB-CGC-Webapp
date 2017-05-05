@@ -361,6 +361,23 @@ require([
                         option.attr('disabled','disabled');
                     }
 
+                    // Genes themselves may be valid but their sub-filters might not; check those too
+                    if(option.attr('var_type') == 'G') {
+                        option.parent().siblings('.spec-select.datatype-selector').find('option').each(function(i,opt){
+                            var data_type = $(opt).val();
+                            if(data_type !== "") {
+                                option.parent().siblings('.'+data_type).children('div[data-field="'+data_type+'"]').find('option').each(function(i,elem){
+                                    var field_opt = $(elem);
+                                    console.debug(field_opt.val() + ':' + field_opt.attr('var_type'));
+                                    if ((field_opt.attr('var_type') == 'C' && plot_settings.axis[axis_index].type == 'NUMERICAL') ||
+                                        (field_opt.attr('var_type') == 'N' && plot_settings.axis[axis_index].type == 'CATEGORICAL')) {
+                                        field_opt.attr('disabled','disabled');
+                                    }
+                                });
+                            }
+                        });
+                    }
+
                     // If the selected option is no longer valid - Select the default
                     if (option.prop('value') == parent.find(':selected').val() && option.prop('disabled') && option.attr('type') !== "label") {
                         // Find first sibling that not disabled
@@ -407,7 +424,8 @@ require([
                         } else {
                             $(ele).empty();
                             for (var i in data[ele.id].options) {
-                                $(ele).append('<option value="' + data[ele.id].options[i].value + '"> ' + data[ele.id].options[i].text + '</option>');
+                                var var_type = data[ele.id].options[i].value == 'variant_classification' ||  data[ele.id].options[i].value == 'variant_type' ? 'C' : 'N';
+                                $(ele).append('<option value="' + data[ele.id].options[i].value + '" var_type="'+var_type+'"> ' + data[ele.id].options[i].text + '</option>');
                             }
                             $(ele).val(data[ele.id].selected);
                         }
@@ -421,6 +439,7 @@ require([
                 }
             }
             parent.find('.'+ data.specification).find('.search-term-select').val(data["selection"].selected);
+            disable_invalid_variable_options($('.worksheet.active .main-settings'));
         }
     }
 

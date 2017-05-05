@@ -64,7 +64,7 @@
                             {% endif %}
                             {% for gene in genes %}
                                 {% if not plot or plot.x_axis.id != gene.id %}
-                                    <option type="{{ gene.type }}" value="{{ gene.gene }}" var_id="{{ gene.id }}">{{ gene.gene }}</option>
+                                    <option type="{{ gene.type }}" value="{{ gene.gene }}" var_id="{{ gene.id }}" var_type="G">{{ gene.gene }}</option>
                                 {% endif %}
                             {% endfor %}
                             {% for var in variables %}
@@ -91,7 +91,7 @@
                                             {% if field.static %}
                                                 <option value="" disabled selected type="label">Please select an option</option>
                                                 {% for value in field.values %}
-                                                    <option value="{{ value }}">{{ value }}</option>
+                                                    <option value="{{ value }}" var_type="{% if value == 'variant_classification' or value == 'variant_type' %}C{% else %}N{% endif %}">{{ value }}</option>
                                                 {% endfor %}
                                             {% endif %}
                                         </select>
@@ -128,7 +128,7 @@
                             {% endif %}
                             {% for gene in genes %}
                                 {% if not plot or plot.y_axis.id != gene.id %}
-                                    <option type="{{ gene.type }}" value="{{ gene.gene }}" var_id="{{ gene.id }}">{{ gene.gene }}</option>
+                                    <option type="{{ gene.type }}" value="{{ gene.gene }}" var_id="{{ gene.id }}" var_type="G">{{ gene.gene }}</option>
                                     {# TODO {% endif %}#}
                                 {% endif %}
                             {% endfor %}
@@ -155,7 +155,7 @@
                                             {% if field.static %}
                                                 <option value="" disabled selected type="label">Please select an option</option>
                                                 {% for value in field.values %}
-                                                    <option value="{{ value }}">{{ value }}</option>
+                                                    <option value="{{ value }}" var_type="{% if value == 'variant_classification' or value == 'variant_type' %}C{% else %}N{% endif %}">{{ value }}</option>
                                                 {% endfor %}
                                             {% endif %}
                                         </select>
