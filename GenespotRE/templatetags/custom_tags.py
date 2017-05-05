@@ -231,6 +231,13 @@ def active(list, key=None):
 
 
 @register.filter
+def active_and_v2(list, key=None):
+    if not key:
+        return list.filter(active=True, version='v2')
+    return list.filter(**{key + '__active':True, key+'__version':'v2'})
+
+
+@register.filter
 def is_public(list, key=None):
     if not key:
         return list.filter(is_public=True)

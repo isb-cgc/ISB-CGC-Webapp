@@ -53,11 +53,11 @@ def variable_fav_list(request, workbook_id=0, worksheet_id=0, new_workbook=0):
     context  = {}
 
     variable_list = VariableFavorite.get_list(request.user)
-    if len(variable_list) == 0 :
+    if len(variable_list) == 0:
         variable_list = None
     context['variable_list']=variable_list
 
-    if workbook_id != 0 :
+    if workbook_id != 0:
         try:
             workbook_model       = Workbook.objects.get(id=workbook_id)
             context['workbook']  = workbook_model
@@ -142,7 +142,7 @@ def initialize_variable_selection_page(request,
     worksheet_model = None
     existing_variable_list = None
 
-    if workbook_id != 0 :
+    if workbook_id != 0:
         try:
             workbook_model       = Workbook.objects.get(id=workbook_id)
             context['workbook']  = workbook_model
@@ -155,6 +155,9 @@ def initialize_variable_selection_page(request,
     if variable_list_id != 0:
         try:
             existing_variable_list = request.user.variablefavorite_set.get(id=variable_list_id)
+            if existing_variable_list != 'v2':
+                messages.warning(request, 'Version 1 Variable lists cannot be edited due to changes in available variables.')
+                return redirect('variables')
         except ObjectDoesNotExist:
             messages.error(request, 'The variable favorite you were looking for does not exist.')
             return redirect('variables')

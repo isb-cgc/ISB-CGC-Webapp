@@ -38,12 +38,14 @@
             <div>
                 <ul class="page-action-group" role="menubar">
                     {% if not workbook and not new_workbook %}
-                        <li><a class="btn btn-info" href="{% url 'variable_fav_edit' variables.id %}"><i class="fa fa-pencil"></i> Edit</a></li>
+                        <li>{% if variables.version == 'v2' %}<a class="btn btn-info" href="{% url 'variable_fav_edit' variables.id %}"><i class="fa fa-pencil"></i> Edit</a>
+                            {% else %}<span class="btn btn-info" title="Version 1 Variable lists cannot be edited due to changes in variable names." disabled> Edit</span>{% endif %}
                         <li><a data-toggle="modal" data-target="#delete-favorite-modal" class="btn btn-info">Delete</a></li>
                     {% endif %}
                     <li role="menuitem">
                         {% if not workbook %}
-                            <a data-toggle="modal" data-target="#new-favorite-workbook-modal" class="btn btn-primary">Apply to New Workbook</a>
+                            {% if variables.version == 'v2' %}<a data-toggle="modal" data-target="#new-favorite-workbook-modal" class="btn btn-primary">Apply to New Workbook</a>
+                            {% else %}<span class="btn btn-info" title="Version 1 Variable lists cannot be added to new Workbooks." disabled>Apply to New Workbook</span>{% endif %}
                         {% else %}
                             <form action="{% url 'worksheet_variables_edit' workbook.id worksheet.id %}" method="POST">
                                 {% csrf_token %}
