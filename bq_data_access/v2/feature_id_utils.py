@@ -91,11 +91,12 @@ class FeatureIdQueryDescription(object):
 
 
 class ProviderClassQueryDescription(object):
-    def __init__(self, feature_data_provider_class, feature_id, cohort_id_array, project_id_array):
+    def __init__(self, feature_data_provider_class, feature_id, cohort_id_array, project_id_array, program_set):
         self.feature_data_provider_class = feature_data_provider_class
         self.feature_id = feature_id
         self.cohort_id_array = cohort_id_array
         self.project_id_array = project_id_array
+        self.program_set = program_set
 
 
 class FeatureProviderFactory(object):
