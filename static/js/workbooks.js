@@ -363,13 +363,17 @@ require([
 
                     // Genes themselves may be valid but their sub-filters might not; check those too
                     if(option.attr('var_type') == 'G') {
-                        var data_type = option.parent().siblings('.spec-select.datatype-selector').val();
-                        option.parent().siblings('.'+data_type).children('div[data-field="'+data_type+'"]').find('option').each(function(i,elem){
-                            var field_opt = $(elem);
-                            console.debug(field_opt.val() + ':' + field_opt.attr('var_type'));
-                            if ((field_opt.attr('var_type') == 'C' && plot_settings.axis[axis_index].type == 'NUMERICAL') ||
-                                (field_opt.attr('var_type') == 'N' && plot_settings.axis[axis_index].type == 'CATEGORICAL')) {
-                                field_opt.attr('disabled','disabled');
+                        option.parent().siblings('.spec-select.datatype-selector').find('option').each(function(i,opt){
+                            var data_type = $(opt).val();
+                            if(data_type !== "") {
+                                option.parent().siblings('.'+data_type).children('div[data-field="'+data_type+'"]').find('option').each(function(i,elem){
+                                    var field_opt = $(elem);
+                                    console.debug(field_opt.val() + ':' + field_opt.attr('var_type'));
+                                    if ((field_opt.attr('var_type') == 'C' && plot_settings.axis[axis_index].type == 'NUMERICAL') ||
+                                        (field_opt.attr('var_type') == 'N' && plot_settings.axis[axis_index].type == 'CATEGORICAL')) {
+                                        field_opt.attr('disabled','disabled');
+                                    }
+                                });
                             }
                         });
                     }
