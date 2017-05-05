@@ -212,7 +212,8 @@
                         <div role="tabpanel" class="tab-pane filter-panel" id="favorites">
                             <ul class="list-group" id="favorites-accordion" role="tablist" aria-multiselectable="true">
                                 {% for fav in favorite_list %}
-                                    <li class="list-group-item">
+                                    {% if fav.version == 'v2' %}
+                                        <li class="list-group-item">
                                         <div id="heading-{{ fav.name }}" data-field="{{ fav.name }}" class="list-group-item__heading">
                                             <a role="button" data-toggle="collapse" data-parent="#clin-accordion" href="#collapse-{{ fav.id }}" aria-expanded="false" aria-controls="collapse-{{ fav.id }}">
                                                 <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ fav.name }}
@@ -234,10 +235,11 @@
                                             </ul>
                                         </div>
                                     </li>
+                                    {% endif %}
                                 {% endfor %}
                             </ul>
                             <div class="tab-content">
-                                <a href="{% url 'variables' %}">Manage Saved Favorites ({{ favorite_list | length }})</a>
+                                <a href="{% url 'variables' %}">Manage Saved Favorites ({{ full_favorite_list_count }})</a>
                             </div>
                         </div>
                         <div id="0-data" class="tab-pane filter-panel" role="tabpanel">
