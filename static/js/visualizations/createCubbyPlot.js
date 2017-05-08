@@ -76,7 +76,7 @@ function($, d3, d3tip, d3textwrap, _) {
 
                 results_dict[val]['total']++;
 
-                sampleSet[val].samples['{'+data[i]['sample_id']+'}{'+data[i]['case_id']+'}'] = {sample: data[i]['sample_id'], case: data[i]['case_id']};
+                sampleSet[val].samples['{'+data[i]['sample_id']+'}{'+data[i]['case_id']+'}'] = {sample: data[i]['sample_id'], case: data[i]['case_id'], project: data[i]['project']};
                 sampleSet[val].cases.add(data[i]['case_id']);
 
                 x_total[x_item] += 1;

@@ -215,10 +215,3 @@ class FeatureVectorBigQueryBuilder(object):
         cohort_settings = BigQueryCohortStorageSettings(cohort_table_id)
 
         return cls(project_id_number, cohort_settings, bqss)
-
-
-
-
-
-
-

@@ -307,7 +307,7 @@ define([
                 cohort_str += '&cohort_id=' + cohorts[i];
             }
         }
-        var api_url = base_api_url + '/_ah/api/seqpeek_data_api/v1/view_data?' + VERSION + '&' + cohort_str;
+        var api_url = base_url + '/seqpeek_data_plot/' + VERSION + '?&' + cohort_str;
         api_url += "&hugo_symbol=" + gene_label;
 
         return api_url;

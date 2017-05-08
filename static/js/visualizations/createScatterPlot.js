@@ -65,7 +65,7 @@ function($, d3, d3textwrap, vizhelpers, _) {
                 if(oneIsValid){
                     var id = Counter.getNextSet();
                     d['id'] = id;
-                    sampleSet[id] = {sample: d['sample_id'], case: d['case_id']};
+                    sampleSet[id] = {sample: d['sample_id'], case: d['case_id'], project: d['project']};
                 }
             });
 

@@ -158,7 +158,6 @@ def workbook_create_with_analysis(request):
 
 def get_gene_datatypes(build=None):
 
-
     datatype_labels = {'GEXP' : 'Gene Expression',
                        'METH' : 'DNA Methylation',
                        'CNVR' : 'Copy Number',
@@ -167,8 +166,6 @@ def get_gene_datatypes(build=None):
                        'MIRN' : 'miRNA Expression'}
 
     datatype_list = SearchableFieldHelper.get_fields_for_all_datatypes() if build is None else SearchableFieldHelper_v2.get_fields_for_all_datatypes(build)
-
-    print >> sys.stdout, str(datatype_list)
 
     return_list = []
     for type in datatype_list:
@@ -258,8 +255,6 @@ def workbook(request, workbook_id=0):
                     shared = request.user.shared_resource_set.get(workbook__id=workbook_id)
 
                 plot_types = Analysis.get_types()
-
-                print >> sys.stdout, "Workbook build is %s" % ('None' if workbook_model.build is None else str(workbook_model.build))
 
                 return render(request, template, {'workbook'    : workbook_model,
                                                   'datatypes'   : get_gene_datatypes(workbook_model.build),
@@ -376,7 +371,7 @@ def worksheet_variables(request, workbook_id=0, worksheet_id=0, variable_id=0):
         else:
             variables = []
             #from Edit Page
-            if "variables" in request.body :
+            if "variables" in request.body:
                 json_response = True
                 name          = json.loads(request.body)['name']
                 variable_list = json.loads(request.body)['variables']
