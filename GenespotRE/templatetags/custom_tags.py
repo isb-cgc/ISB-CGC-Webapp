@@ -111,9 +111,6 @@ def get_readable_name(csv_name, attr=None):
     if 'MUT:' in csv_name or (attr and 'MUT:' in attr):
         is_mutation = True
 
-    if 'has_' in csv_name or (attr and 'has_' in attr):
-        is_data_type = True
-
     if 'user_' in csv_name:
         is_user_data = True
 
