@@ -16,11 +16,15 @@ limitations under the License.
 
 """
 
-from bq_data_access.v2.schema.tcga_clinical import schema as clinical_schema
 from bq_data_access.v2.clinical_data import CLINICAL_FEATURE_TYPE
 from bq_data_access.v2.feature_search.common import InvalidFieldException, EmptyQueryException
+from bq_data_access.data_types.clinical import BIGQUERY_CONFIG
+from scripts.feature_def_gen.clinical_features import CLINDataSourceConfig
+from bq_data_access.v2.schema.program_schemas import TABLE_TO_SCHEMA_MAP
+
 
 class ClinicalSearcher(object):
+    config_instance = CLINDataSourceConfig.from_dict(BIGQUERY_CONFIG)
     feature_search_valid_fields = ['keyword']
 
     @classmethod
@@ -45,11 +49,15 @@ class ClinicalSearcher(object):
 
     def filter_by_name(self, keyword):
         result = []
+        found_columns = set()
+        for table_config in self.config_instance.data_table_list:
+            schema = TABLE_TO_SCHEMA_MAP[table_config.table_id]
 
-        for item in clinical_schema:
-            name = item['name']
-            if name.find(keyword.lower()) != -1:
-                result.append(item)
+            for field_item in schema:
+                name = field_item['name']
+                if (name not in found_columns) and (name.find(keyword.lower()) != -1):
+                    result.append(field_item)
+                    found_columns.update(name)
 
         return result
 
@@ -77,15 +85,17 @@ class ClinicalSearcher(object):
         for feature_item in search_result:
             column_name = feature_item['name']
             human_readable_name = self.build_feature_label(column_name)
-            internal_id = 'CLIN:' + column_name
-            type = "N"
+            internal_id = 'v2:CLIN:' + column_name
+            value_type = "N"
+
             if feature_item['type'] == "STRING" :
-                type = "C"
+                value_type = "C"
+
             found_features.append({
                 'feature_type': 'CLIN',
                 'internal_feature_id': internal_id,
                 'label': human_readable_name,
-                'type' : type
+                'type': value_type
             })
 
         return found_features
