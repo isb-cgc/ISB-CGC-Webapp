@@ -39,7 +39,8 @@ class SeqPeekMAFWithCohorts(object):
 class SeqPeekMAFDataFormatter(object):
     def annotate_vector_with_cohorts(self, cohort_id_array, result):
         # Resolve which (requested) cohorts each datapoint belongs to.
-        cohort_set_dict = CloudSQLCohortAccess.get_cohorts_for_datapoints(cohort_id_array)
+        cohorts_and_projects = CloudSQLCohortAccess.get_cohorts_and_projects_for_datapoints(cohort_id_array)
+        cohort_set_dict = cohorts_and_projects['cohorts']
 
         for row in result:
             sample_id = row['sample_id']
