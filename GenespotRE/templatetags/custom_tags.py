@@ -42,10 +42,13 @@ VALUE_SPECIFIC_ORDERS = {
     'bmi': ['underweight', 'normal weight', 'overweight', 'obese', 'None', ],
     'hpv_status': ['Positive', 'Negative', 'None', ],
     'age_at_initial_pathologic_diagnosis': ['10 to 39', '40 to 49', '50 to 59', '60 to 69', '70 to 79', 'Over 80', 'None', ],
+    'age_at_diagnosis': ['10 to 39', '40 to 49', '50 to 59', '60 to 69', '70 to 79', 'Over 80', 'None', ],
     'year_of_diagnosis': ['1976 to 1980', '1981 to 1985', '1986 to 1990', '1991 to 1995', '1996 to 2000', '2001 to 2005', '2006 to 2010', '2011 to 2015', 'None',],
     'overall_survival': simple_day_sort,
     'event_free_survival': simple_day_sort,
     'days_to_death': simple_day_sort,
+    'days_to_last_followp': simple_day_sort,
+    'days_to_last_known_alive': simple_day_sort,
     'pathologic_stage': ['Stage 0','Stage I','Stage IA','Stage IB','Stage II','Stage IIA','Stage IIB','Stage IIC',
                          'Stage III','Stage IIIA','Stage IIIB','Stage IIIC','Stage IS','Stage IV','Stage IVA',
                          'Stage IVB','Stage IVC','Stage X','I or II NOS','None',],
@@ -58,10 +61,19 @@ ATTR_SPECIFIC_ORDERS = [
     'user_program',
     'user_project',
     'disease_code',
-    'sample_type',
-    'tumor_type',
-    'tumor_tissue_site',
+    'vital_status',
     'gender',
+    'age_at_diagnosis',
+    'sample_type',
+    'tumor_tissue_site',
+    'histological_type',
+    'pathologic_stage',
+    'person_neoplasm_cancer_status',
+    'neoplasm_histologic_grade',
+    'bmi',
+    'hpv_status',
+    'residual_tumor',
+    'tobacco_smoking_history',
     'race',
     'ethnicity',
 ]
@@ -81,9 +93,8 @@ def get_item(dictionary, key):
 
 @register.filter
 def check_for_order(items, attr):
-    if attr in ALPHANUM_SORT:
-        return sorted(items, key=lambda k: k['value'])
-    elif attr in VALUE_SPECIFIC_ORDERS:
+    if attr in VALUE_SPECIFIC_ORDERS:
+        # If they have a specific order defined in the dict
         item_order = VALUE_SPECIFIC_ORDERS[attr]
         ordered_items = []
         for ordinal in item_order:
@@ -91,8 +102,12 @@ def check_for_order(items, attr):
                 if item['value'] == ordinal:
                     ordered_items.append(item)
         return ordered_items
+    elif attr in ALPHANUM_SORT:
+        # If they should be sorted alphanumerically based on the value
+        return sorted(items, key=lambda k: k['value'])
     else:
-        return items
+        # Otherwise, sort them by count, descending
+        return sorted(items, key=lambda k: k['count'], reverse=True)
 
 
 # A specific filter for producing readable token names in cohort filter displays
