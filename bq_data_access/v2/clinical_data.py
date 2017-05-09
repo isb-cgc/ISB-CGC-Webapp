@@ -1,6 +1,6 @@
 """
 
-Copyright 2015, Institute for Systems Biology
+Copyright 2017, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,20 +16,20 @@ limitations under the License.
 
 """
 
-import logging
-import sys
+import logging as logger
 from re import compile as re_compile
 
 from schema.tcga_clinical import schema as clinical_schema
 
-from bq_data_access.v2.feature_data_provider import FeatureDataProvider
 from bq_data_access.v2.errors import FeatureNotFoundException
 from bq_data_access.v2.feature_value_types import DataTypes, BigQuerySchemaToValueTypeConverter
 from bq_data_access.v2.utils import DurationLogged
+from bq_data_access.data_types.clinical import BIGQUERY_CONFIG
+from scripts.feature_def_gen.clinical_features import CLINDataSourceConfig
+from bq_data_access.v2.schema.program_schemas import TABLE_TO_SCHEMA_MAP
 
 CLINICAL_FEATURE_TYPE = 'CLIN'
 
-BSP_TABLE_NAME = 'Biospecimen_data'
 
 class InvalidClinicalFeatureIDException(Exception):
     def __init__(self, feature_id, reason):
@@ -43,16 +43,29 @@ class InvalidClinicalFeatureIDException(Exception):
         )
 
 
+class ClinicalTableFeatureDef(object):
+    def __init__(self, table_id, biospecimen_table_id, column_name):
+        self.table_id = table_id
+        self.biospecimen_table_id = biospecimen_table_id
+        self.column_name = column_name
+
+    @classmethod
+    def from_table_config(cls, table_config, column_name):
+        return cls(table_config.table_id, table_config.biospecimen_table_id, column_name)
+
+
 class ClinicalFeatureDef(object):
+    config_instance = CLINDataSourceConfig.from_dict(BIGQUERY_CONFIG)
+
     # Regular expression for parsing the feature definition.
     #
-    # Example ID: CLIN:vital_status
-    regex = re_compile("^CLIN:"
+    # Example ID: v2:CLIN:vital_status
+    regex = re_compile("^v2:CLIN:"
                        # column name
                        "([a-zA-Z0-9_\-]+)$")
 
-    def __init__(self, table_field, value_type):
-        self.table_field = table_field
+    def __init__(self, column_name, value_type):
+        self.column_name = column_name
         self.value_type = value_type
 
     @classmethod
@@ -62,7 +75,7 @@ class ClinicalFeatureDef(object):
         for clinical_field in clinical_schema:
             name, schema_field_type = clinical_field['name'], clinical_field['type']
             if name == column_id:
-                table_field= name
+                table_field = name
                 value_type = BigQuerySchemaToValueTypeConverter.get_value_type(schema_field_type)
 
         return table_field, value_type
@@ -74,27 +87,35 @@ class ClinicalFeatureDef(object):
             raise FeatureNotFoundException(feature_id)
         column_name = feature_fields[0]
 
-        table_field, value_type = cls.get_table_field_and_value_type(column_name)
-        if table_field is None:
-            raise FeatureNotFoundException(feature_id)
+        # Check if the column exists in any configured tables.
+        # If matching tables are found, then check that the value type
+        # of the column in the found tables is the same.
+        found_tables = []
+        for table_config in cls.config_instance.data_table_list:
+            schema = TABLE_TO_SCHEMA_MAP[table_config.table_id]
 
-        return cls(table_field, value_type)
+            for field_item in schema:
+                if field_item['name'] == column_name:
+                    # Capture the type of the field in this table
+                    found_tables.append((table_config, field_item['type']))
+
+        if len(found_tables) == 0:
+            raise InvalidClinicalFeatureIDException(feature_id, "No tables found for column name")
+
+        data_type_set = set([table[1] for table in found_tables])
+
+        if len(data_type_set) != 1:
+            raise InvalidClinicalFeatureIDException(feature_id, "Data types of found tables do not match")
+
+        value_type = BigQuerySchemaToValueTypeConverter.get_value_type(list(data_type_set)[0])
+
+        return cls(column_name, value_type)
 
 
-class ClinicalFeatureProvider(FeatureDataProvider):
-    TABLES = [
-        {
-            'name': 'Clinical_data',
-            'info': 'Clinical',
-            'id': 'tcga_clinical'
-        }
-    ]
-
-    def __init__(self, feature_id, **kwargs):
-        self.table_name = ''
+class ClinicalDataQueryHandler(object):
+    def __init__(self, feature_id):
         self.feature_def = None
         self.parse_internal_feature_id(feature_id)
-        super(ClinicalFeatureProvider, self).__init__(**kwargs)
 
     def get_value_type(self):
         return self.feature_def.value_type
@@ -106,7 +127,7 @@ class ClinicalFeatureProvider(FeatureDataProvider):
     def process_data_point(cls, data_point):
         return data_point['value']
 
-    def build_query(self, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array, project_id_array):
+    def build_query_for_program(self, feature_def, cohort_table, cohort_id_array, project_id_array):
         # Generate the 'IN' statement string: (%s, %s, ..., %s)
         cohort_id_stmt = ', '.join([str(cohort_id) for cohort_id in cohort_id_array])
         project_id_stmt = ''
@@ -114,31 +135,67 @@ class ClinicalFeatureProvider(FeatureDataProvider):
             project_id_stmt = ', '.join([str(project_id) for project_id in project_id_array])
 
         query_template = \
-            ("SELECT clin.ParticipantBarcode, biospec.sample_id, clin.{column_name} "
-             "FROM ( "
-             " SELECT ParticipantBarcode, {column_name} "
-             " FROM [{project_name}:{dataset_name}.{table_name}] "
-             " ) AS clin "
-             " JOIN ( "
-             " SELECT ParticipantBarcode, SampleBarcode as sample_id "
-             " FROM [{project_name}:{dataset_name}.{bsp_table_name}] "
-             " ) AS biospec "
-             " ON clin.ParticipantBarcode = biospec.ParticipantBarcode "
-             "WHERE biospec.sample_id IN ( "
-             "    SELECT sample_barcode "
-             "    FROM [{project_name}:{cohort_dataset}.{cohort_table}] "
-             "    WHERE cohort_id IN ({cohort_id_list})"
-             "          AND (project_id IS NULL")
+            ("SELECT clin.case_barcode, biospec.sample_barcode, clin.{column_name} AS value {brk}"
+             "FROM ( {brk}"
+             " SELECT case_barcode, {column_name} {brk}"
+             " FROM [{table_id}] {brk}"
+             " ) AS clin {brk}"
+             " JOIN ( {brk}"
+             " SELECT case_barcode, sample_barcode {brk}"
+             " FROM [{biospecimen_table_id}] {brk}"
+             " ) AS biospec {brk}"
+             " ON clin.case_barcode = biospec.case_barcode {brk}"
+             "WHERE biospec.sample_barcode IN ( {brk}"
+             "    SELECT sample_barcode {brk}"
+             "    FROM [{cohort_dataset_and_table}] {brk}"
+             "    WHERE cohort_id IN ({cohort_id_list}) {brk}"
+             "          AND (project_id IS NULL {brk}")
 
         query_template += (" OR project_id IN ({project_id_list})))" if project_id_array is not None else "))")
-        query_template += " GROUP BY clin.ParticipantBarcode, biospec.sample_id, clin.{column_name}"
+        query_template += " GROUP BY clin.case_barcode, biospec.sample_barcode, value"
 
-        query = query_template.format(dataset_name=dataset_name, project_name=project_name, table_name=table_name,
-                                      column_name=feature_def.table_field, bsp_table_name=BSP_TABLE_NAME,
-                                      cohort_dataset=cohort_dataset, cohort_table=cohort_table,
-                                      cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt)
+        query = query_template.format(table_id=feature_def.table_id,
+                                      biospecimen_table_id=feature_def.biospecimen_table_id,
+                                      column_name=feature_def.column_name,
+                                      bsp_table_id=feature_def.biospecimen_table_id,
+                                      cohort_dataset_and_table=cohort_table,
+                                      cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt,
+                                      brk='\n')
 
-        logging.debug("BQ_QUERY_CLIN: " + query)
+        return query
+
+    def build_query(self, project_set, cohort_table, cohort_id_array, project_id_array):
+        # Find matching tables
+        config_instance = CLINDataSourceConfig.from_dict(BIGQUERY_CONFIG)
+        found_tables = []
+
+        for table in config_instance.data_table_list:
+            if table.program in project_set:
+                logger.info("Found matching table: '{}'".format(table.table_id))
+                found_tables.append(table)
+
+        # Build a BigQuery statement for each found table configuration
+        subqueries = []
+        for table_config in found_tables:
+            # Build the project-specific feature def
+            sub_feature_def = ClinicalTableFeatureDef.from_table_config(table_config, self.feature_def.column_name)
+            subquery = self.build_query_for_program(sub_feature_def, cohort_table, cohort_id_array, project_id_array)
+            subqueries.append(subquery)
+
+        # Union of subqueries
+        subquery_stmt_template = ",".join(["({})" for x in xrange(len(subqueries))])
+        subquery_stmt = subquery_stmt_template.format(*subqueries)
+
+        query_template = "SELECT case_barcode, sample_barcode, value {brk}" \
+                         "FROM ( {brk}" \
+                         "{subqueries}" \
+                         ") {brk}" \
+                         ""
+
+        query = query_template.format(brk='\n', subqueries=subquery_stmt)
+
+        logger.debug("BQ_QUERY_CLIN: " + query)
+
         return query
 
     @DurationLogged('CLIN', 'UNPACK')
@@ -169,12 +226,8 @@ class ClinicalFeatureProvider(FeatureDataProvider):
 
         return result
 
-    def get_table_name(self):
-        return self.TABLES[0]['name']
-
     def parse_internal_feature_id(self, feature_id):
         self.feature_def = ClinicalFeatureDef.from_feature_id(feature_id)
-        self.table_name = self.get_table_name()
 
     @classmethod
     def is_valid_feature_id(cls, feature_id):
@@ -182,7 +235,7 @@ class ClinicalFeatureProvider(FeatureDataProvider):
         try:
             ClinicalFeatureDef.from_feature_id(feature_id)
             is_valid = True
-        except Exception:
+        except Exception as e:
             # ClinicalFeatureDef.from_feature_id raises Exception if the feature identifier
             # is not valid. Nothing needs to be done here, since is_valid is already False.
             pass
