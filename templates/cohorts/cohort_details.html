@@ -143,12 +143,12 @@
                     </div>
                     <div class="row col-md-12 space-bottom-10">
                         <span class="rev-history">Revision History:</span>
-                        <ul>
+                        <ul class="rev-history">
                             {% for item in cohort.get_revision_history %}
                                 {%  if 'type' in item and item.type == 'filter' %}
-                                    <div class="panel-body creation-filter-panel">
+                                    <div class="panel-body revision-filter-panel">
                                         {% for prog, filters in item.vals.items %}
-                                            <div class="col-sm-{{ item.vals.keys|get_prog_col_size }} creation-prog-filter-set">
+                                            <div class="col-sm-{{ item.vals.keys|get_prog_col_size }} revision-prog-filter-set">
                                             <h6>{{ prog }}</h6>
                                             {% for filter in filters %}
                                                 <span class="filter-label label label-default space-right-5">{{ filter.displ_name }}: {{ filter.displ_val }}</span>
