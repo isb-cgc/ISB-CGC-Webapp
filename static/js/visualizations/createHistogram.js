@@ -142,7 +142,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
 
                 for (var j = 0; j < hist_data[i].length; j++) {
                     var data = sorted[sample_index];
-                    sampleSet[val].samples['{'+data['sample_id']+'}{'+data['case_id']+'}'] = {sample: data['sample_id'], case: data['case_id'], project: data[i]['project']};
+                    sampleSet[val].samples['{'+data['sample_id']+'}{'+data['case_id']+'}'] = {sample: data['sample_id'], case: data['case_id'], project: data['project']};
                     sampleSet[val].cases.add(data['case_id']);
                     sample_index++;
                 }
