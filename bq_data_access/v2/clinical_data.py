@@ -98,6 +98,7 @@ class ClinicalFeatureDef(object):
                 if field_item['name'] == column_name:
                     # Capture the type of the field in this table
                     found_tables.append((table_config, field_item['type']))
+                    break
 
         if len(found_tables) == 0:
             raise InvalidClinicalFeatureIDException(feature_id, "No tables found for column name")
