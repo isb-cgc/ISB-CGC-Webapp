@@ -298,7 +298,7 @@ define([
     }
 
     // Generate url for gathering data for a SeqPeek plot
-    function get_seqpeek_data_url(base_api_url, cohorts, gene_label){
+    function get_seqpeek_data_url(base_url, cohorts, gene_label){
         var cohort_str = '';
         for (var i = 0; i < cohorts.length; i++) {
             if (i == 0) {
@@ -307,10 +307,10 @@ define([
                 cohort_str += '&cohort_id=' + cohorts[i];
             }
         }
-        var api_url = base_url + '/seqpeek_data_plot/' + VERSION + '?&' + cohort_str;
-        api_url += "&hugo_symbol=" + gene_label;
+        var seqpeek_url = base_url + '/visualizations/seqpeek_data_plot/' + VERSION + '?&' + cohort_str;
+        seqpeek_url += "&hugo_symbol=" + gene_label;
 
-        return api_url;
+        return seqpeek_url;
     }
 
     function configure_pairwise_display(element, data){
