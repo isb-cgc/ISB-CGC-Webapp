@@ -24,7 +24,7 @@ from bq_data_access.v2.seqpeek.seqpeek_interpro import InterProDataProvider
 SAMPLE_ID_FIELD_NAME = 'sample_id'
 TRACK_ID_FIELD = "tumor"
 COORDINATE_FIELD_NAME = 'uniprot_aapos'
-PROTEIN_ID_FIELD = 'uniprot_id'
+PROTEIN_ID_FIELD = 'ensg_id'
 
 PROTEIN_DOMAIN_DB = 'PFAM'
 
@@ -32,7 +32,7 @@ SEQPEEK_VIEW_DEBUG_MODE = False
 
 
 def build_gnab_feature_id(gene):
-    return "GNAB:{gene_label}:variant_classification".format(gene_label=gene)
+    return "v2:GNAB:{gene_label}:Variant_Classification".format(gene_label=gene)
 
 
 def get_number_of_unique_samples(track):

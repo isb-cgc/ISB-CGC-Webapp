@@ -21,6 +21,8 @@ from json import loads as json_loads
 
 from django.conf import settings
 from google_helpers.bigquery_service import get_bigquery_service
+from bq_data_access.v2.seqpeek_maf_data import SeqPeekDataSourceConfig
+from bq_data_access.data_types.seqpeek import BIGQUERY_CONFIG as SEQPEEK_BIGQUERY_CONFIG
 
 
 class SeqPeekMAFWithCohorts(object):
@@ -31,19 +33,22 @@ class SeqPeekMAFWithCohorts(object):
 
 class InterProDataProvider(object):
     def __init__(self):
-        logging.debug(__name__ + ".__init__")
+        self.data_source_config = SeqPeekDataSourceConfig.from_dict(SEQPEEK_BIGQUERY_CONFIG)
 
-    def build_query(self, project_name, uniprot_id):
-        query_template = "SELECT * FROM [{project_name}:test.interpro_filtered] WHERE uniprot_id=\'{uniprot_id}\'"
+    def build_query(self, ensg_id):
+        query_template = "SELECT jsonString FROM [{table_id}] WHERE Gene=\'{ensg_id}\'"
 
-        query = query_template.format(project_name=project_name, uniprot_id=uniprot_id)
+        query = query_template.format(
+            table_id=self.data_source_config.interpro_reference_table_id,
+            ensg_id=ensg_id
+        )
         logging.debug("INTERPRO SQL: " + query)
         return query
 
-    def do_query(self, project_id, project_name, uniprot_id):
+    def do_query(self, project_id, ensg_id):
         bigquery_service = get_bigquery_service()
 
-        query = self.build_query(project_name, uniprot_id)
+        query = self.build_query(ensg_id)
         query_body = {
             'query': query
         }
@@ -56,16 +61,15 @@ class InterProDataProvider(object):
             return None
 
         row = query_response['rows'][0]
-        interpro_literal = row['f'][1]['v']
+        interpro_literal = row['f'][0]['v']
         interpro_literal = interpro_literal.replace('\'', '"')
         interpro_literal = json_loads(interpro_literal)
 
         return interpro_literal
 
-    def get_data_from_bigquery(self, uniprot_id):
+    def get_data_from_bigquery(self, ensg_id):
         project_id = settings.BQ_PROJECT_ID
-        project_name = settings.BIGQUERY_PROJECT_NAME
-        result = self.do_query(project_id, project_name, uniprot_id)
+        result = self.do_query(project_id, ensg_id)
         return result
 
     def get_data(self, uniprot_id):

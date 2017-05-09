@@ -1,6 +1,6 @@
 """
 
-Copyright 2016, Institute for Systems Biology
+Copyright 2017, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,9 +24,23 @@ from bq_data_access.v2.utils import DurationLogged
 SEQPEEK_FEATURE_TYPE = 'SEQPEEK'
 
 
-class SeqPeekDataProvider(GNABDataQueryHandler):
+class SeqPeekDataSourceConfig(object):
+    """
+    Configuration class for SeqPeek data.
+    """
+    def __init__(self, interpro_reference_table_id):
+        self.interpro_reference_table_id = interpro_reference_table_id
+
+    @classmethod
+    def from_dict(cls, param):
+        interpro_reference_table_id = param['interpro_reference_table_id']
+
+        return cls(interpro_reference_table_id)
+
+
+class SeqPeekDataQueryHandler(GNABDataQueryHandler):
     def __init__(self, feature_id, **kwargs):
-        super(SeqPeekDataProvider, self).__init__(feature_id, **kwargs)
+        super(SeqPeekDataQueryHandler, self).__init__(feature_id, **kwargs)
 
     @classmethod
     def process_data_point(cls, data_point):
@@ -40,25 +54,28 @@ class SeqPeekDataProvider(GNABDataQueryHandler):
             project_id_stmt = ', '.join([str(project_id) for project_id in project_id_array])
 
         query_template = \
-            ("SELECT case_barcode, sample_barcode_tumor, aliquot_barcode_tumor, "
-             "    Hugo_symbol, "
-             "    Protein_position, "
-             "    Variant_Classification, "
-             "    HGNC_UniProt_ID_Supplied_By_UniProt as uniprot_id "
-             "FROM [{project_name}:{dataset_name}.{table_name}] "
-             "WHERE Hugo_Symbol='{gene}' "
-             "AND Tumor_SampleBarcode IN ( "
-             "    SELECT sample_barcode "
-             "    FROM [{cohort_dataset_and_table}] "
-             "    WHERE cohort_id IN ({cohort_id_list})"
-             "         AND (project_id IS NULL")
+            ("SELECT case_barcode, sample_barcode_tumor, aliquot_barcode_tumor, {brk}"
+             "    SYMBOL, {brk}"
+             "    Protein_position, {brk}"
+             "    Variant_Classification, {brk}"
+             "    Gene, {brk}"
+             "FROM [{table_id}] {brk}"
+             "WHERE SYMBOL='{gene}' {brk}"
+             "AND sample_barcode_tumor IN ( {brk}"
+             "    SELECT sample_barcode {brk}"
+             "    FROM [{cohort_dataset_and_table}] {brk}"
+             "    WHERE cohort_id IN ({cohort_id_list}) {brk}"
+             "         AND (project_id IS NULL {brk}")
 
         query_template += (" OR project_id IN ({project_id_list})))" if project_id_array is not None else "))")
 
-        query = query_template.format(table_name=table_config.table_id,
+        table_config = feature_def.get_table_configuration()
+
+        query = query_template.format(table_id=table_config.table_id,
                                       gene=feature_def.gene,
                                       cohort_dataset_and_table=cohort_table,
-                                      cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt)
+                                      cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt,
+                                      brk='\n')
 
         logging.debug("BQ_QUERY_SEQPEEK: " + query)
         return query
@@ -77,10 +94,10 @@ class SeqPeekDataProvider(GNABDataQueryHandler):
                 'case_id': row['f'][0]['v'],
                 'sample_id': row['f'][1]['v'],
                 'aliquot_id': row['f'][2]['v'],
-                'hugo_symbol': row['f'][3]['v'],
+                'gene_symbol': row['f'][3]['v'],
                 'uniprot_aapos': row['f'][4]['v'],
                 'variant_classification': row['f'][5]['v'],
-                'uniprot_id': row['f'][6]['v'],
+                'ensg_id': row['f'][6]['v'],
             })
 
         logging.debug("Query result is {qrows} rows, skipped {skipped} rows".format(qrows=len(query_result_array),
