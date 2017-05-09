@@ -108,7 +108,7 @@
                         <div class="col-sm-{{ cohort.get_current_filters.keys|get_prog_col_size }} prog-filter-set">
                         <h5>{{ prog }}</h5>
                         {% for filter in filters %}
-                            <span class="filter-label label label-default space-right-5">{{ filter.name|get_feat_displ_name }}: {{ filter.value|get_readable_name:filter.name }}</span>
+                            <span class="filter-label label label-default space-right-5">{{ filter.displ_name }}: {{ filter.displ_val }}</span>
                         {% endfor %}
                         </div>
                     {% empty %}
@@ -143,15 +143,19 @@
                     </div>
                     <div class="row col-md-12 space-bottom-10">
                         <span class="rev-history">Revision History:</span>
-                        <ul>
+                        <ul class="rev-history">
                             {% for item in cohort.get_revision_history %}
                                 {%  if 'type' in item and item.type == 'filter' %}
-                                     <li class="applied-filters">
-                                        Applied Filters:
-                                         {% for filter in item.vals %}
-                                            <span>{{ filter.name|get_feat_displ_name }}: {{ filter.value|get_readable_name:filter.name }}</span>
-                                         {% endfor %}
-                                    </li>
+                                    <div class="panel-body revision-filter-panel">
+                                        {% for prog, filters in item.vals.items %}
+                                            <div class="col-sm-{{ item.vals.keys|get_prog_col_size }} revision-prog-filter-set">
+                                            <h6>{{ prog }}</h6>
+                                            {% for filter in filters %}
+                                                <span class="filter-label label label-default space-right-5">{{ filter.displ_name }}: {{ filter.displ_val }}</span>
+                                            {% endfor %}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
                                 {%  else %}
                                     <li>{{ item }}</li>
                                 {%  endif %}
@@ -174,7 +178,7 @@
                                 <div class="col-sm-{{ cohort.get_creation_filters.keys|get_prog_col_size }} creation-prog-filter-set">
                                 <h6>{{ prog }}</h6>
                                 {% for filter in filters %}
-                                    <span class="filter-label label label-default space-right-5">{{ filter.name|get_feat_displ_name }}: {{ filter.value|get_readable_name:filter.name }}</span>
+                                    <span class="filter-label label label-default space-right-5">{{ filter.displ_name }}: {{ filter.displ_val }}</span>
                                 {% endfor %}
                                 </div>
                             {% empty %}

@@ -36,8 +36,8 @@ class VariableFavorite(models.Model):
         return 'Version '+str(self.version[1:])
 
     @classmethod
-    def get_list(cls, user):
-        list = cls.objects.filter(user=user, active=True).order_by('-last_date_saved')
+    def get_list(cls, user, version=None):
+        list = cls.objects.filter(user=user, active=True).order_by('-last_date_saved') if not version else cls.objects.filter(user=user, version=version, active=True).order_by('-last_date_saved')
 
         for fav in list:
             fav.variables = fav.get_variables()

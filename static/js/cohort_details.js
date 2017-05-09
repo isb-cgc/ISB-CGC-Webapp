@@ -808,7 +808,7 @@ require([
                 }
             });
             $('.details-panel').animate({
-                height: ($('.cohort-info').outerHeight() + max_height+15)+'px'
+                height: ($('.cohort-info').outerHeight() + max_height+$('ul.rev-history').outerHeight()+15)+'px'
             }, 800);
         });
         $('.less-details button').on('click', function() {
