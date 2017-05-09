@@ -52,7 +52,7 @@ class VariableFavorite(models.Model):
 
     @classmethod
     def create(cls, name, variables, user):
-        variable_favorite_model = cls.objects.create(name=name, user=user)
+        variable_favorite_model = cls.objects.create(name=name, user=user, version="v2")
         variable_favorite_model.save()
 
         for var in variables :
