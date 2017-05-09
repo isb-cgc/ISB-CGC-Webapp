@@ -307,7 +307,7 @@ define([
                 cohort_str += '&cohort_id=' + cohorts[i];
             }
         }
-        var seqpeek_url = base_url + '/visualizations/seqpeek_data_plot/' + VERSION + '?&' + cohort_str;
+        var seqpeek_url = base_url + '/visualizations/seqpeek_data_plot/' + VERSION + '?' + cohort_str;
         seqpeek_url += "&hugo_symbol=" + gene_label;
 
         return seqpeek_url;
