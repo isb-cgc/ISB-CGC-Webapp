@@ -203,9 +203,11 @@ def initialize_variable_selection_page(request,
     user_programs = programs.distinct()
 
     # User favorites
-    favorite_list = VariableFavorite.get_list(user=request.user)
+    favorite_list = VariableFavorite.get_list(user=request.user, version='v2')
     for fav in favorite_list:
         fav.variables = fav.get_variables()
+
+    full_fave_count =  len(VariableFavorite.get_list(user=request.user))
 
     program_attrs = {}
 
@@ -219,6 +221,7 @@ def initialize_variable_selection_page(request,
 
     context = {
         'favorite_list'         : favorite_list,
+        'full_favorite_list_count': full_fave_count,
         'datatype_list'         : datatype_list,
         'data_attr'             : data_attr,
         'public_programs'       : public_programs,

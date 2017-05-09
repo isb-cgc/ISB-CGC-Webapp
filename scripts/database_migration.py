@@ -398,7 +398,7 @@ def fix_cohort_projects(debug):
 # eg. Sample Type Code, Smoking History. The attribute is always required (to associate the correct display string for a value), but
 # if this is a display string for an attribute value_name can be null. Program ID is optional, to allow for different programs to have
 # different display values.
-def make_attr_display_table(debug):
+def update_attr_display_table(debug):
 
     cursor = None
     db = None
@@ -408,18 +408,7 @@ def make_attr_display_table(debug):
         db = get_mysql_connection()
         cursor = db.cursor()
 
-        table_create_statement = """
-            CREATE TABLE IF NOT EXISTS attr_value_display (
-              attr_name VARCHAR(100) NOT NULL, value_name VARCHAR(100), display_string VARCHAR(256) NOT NULL, preformatted TINYINT(1) DEFAULT 1 NOT NULL, program_id INT
-            );
-        """
-
-        cursor.execute(table_create_statement)
-
-        # some test values - will replace with actual LOAD INTO at a later time
-        insert_statement = """
-            INSERT INTO attr_value_display(attr_name,value_name,display_string,program_id) VALUES(%s,%s,%s,%s)
-        """
+        db.autocommit(True)
 
         # get the ISB superuser ID
         cursor.execute("""
@@ -434,94 +423,41 @@ def make_attr_display_table(debug):
 
         # get the public program IDs
         cursor.execute("""
-            SELECT id
+            SELECT name, id
             FROM projects_program
             WHERE owner_id = %s AND is_public = 1 AND active = 1
         """, (suid,))
 
-        for row in cursor.fetchall():
-            public_program_ids.append(row[0])
+        update_attr_tbl_stmt = """
+            UPDATE attr_value_display
+            SET program_id = %s
+            WHERE program_id = %s;
+        """
 
-        displs = {
-            'BMI': {
-                'underweight': 'Underweight: BMI less than 18.5',
-                'normal weight': 'Normal weight: BMI is 18.5 - 24.9',
-                'overweight': 'Overweight: BMI is 25 - 29.9',
-                'obese': 'Obese: BMI is 30 or more',
+        progs = {
+            'TCGA':{
+                'new_id': 0,
+                'old_id': 5
             },
-            'sample_type': {
-                '01': 'Primary Solid Tumor',
-                '02': 'Recurrent Solid Tumor',
-                '03': 'Primary Blood Derived Cancer - Peripheral Blood',
-                '04': 'Recurrent Blood Derived Cancer - Bone Marrow',
-                '05': 'Additional - New Primary',
-                '06': 'Metastatic',
-                '07': 'Additional Metastatic',
-                '08': 'Human Tumor Original Cells',
-                '09': 'Primary Blood Derived Cancer - Bone Marrow',
-                '10': 'Blood Derived Normal',
-                '11': 'Solid Tissue Normal',
-                '12': 'Buccal Cell Normal',
-                '13': 'EBV Immortalized Normal',
-                '14': 'Bone Marrow Normal',
-                '20': 'Control Analyte',
-                '40': 'Recurrent Blood Derived Cancer - Peripheral Blood',
-                '50': 'Cell Lines',
-                '60': 'Primary Xenograft Tissue',
-                '61': 'Cell Line Derived Xenograft Tissue',
-                'None': 'NA',
+            'CCLE':{
+                'new_id': 0,
+                'old_id': 6
             },
-            'tobacco_smoking_history': {
-                '1': 'Lifelong Non-smoker',
-                '2': 'Current Smoker',
-                '3': 'Current Reformed Smoker for > 15 years',
-                '4': 'Current Reformed Smoker for <= 15 years',
-                '5': 'Current Reformed Smoker, Duration Not Specified',
-                '6': 'Smoker at Diagnosis',
-                '7': 'Smoking History Not Documented',
-                'None': 'NA',
+            'TARGET':{
+                'new_id': 0,
+                'old_id': 48
             },
-            'somatic_mutation': {
-                'Missense_Mutation': 'Missense Mutation',
-                'Frame_Shift_Del': 'Frame Shift - Deletion',
-                'Frame_Shift_Ins': 'Frame Shift - Insertion',
-                'De_novo_Start_OutOfFrame': 'De novo Start Out of Frame',
-                'De_novo_Start_InFrame': 'De novo Start In Frame',
-                'In_Frame_Del': 'In Frame Deletion',
-                'In_Frame_Ins': 'In Frame Insertion',
-                'Nonsense_Mutation': 'Nonsense Mutation',
-                'Start_Codon_SNP': 'Start Codon - SNP',
-                'Start_Codon_Del': 'Start Codon - Deletion',
-                'Start_Codon_Ins': 'Start Codon - Insertion',
-                'Stop_Codon_Del': 'Stop Codon - Deletion',
-                'Stop_Codon_Ins': 'Stop Codon - Insertion',
-                'Nonstop_Mutation': 'Nonstop Mutation',
-                'Silent': 'Silent',
-                'RNA': 'RNA',
-                'Intron': 'Intron',
-                'lincRNA': 'lincRNA',
-                'Splice_Site': 'Splice Site',
-                "3'UTR": '3\' UTR',
-                "5'UTR": '5\' UTR',
-                'IGR': 'IGR',
-                "5'Flank": '5\' Flank',
-            }
         }
 
-        for pid in public_program_ids:
-            for attr in displs:
-                for val in displs[attr]:
-                    vals = (attr,val,displs[attr][val],pid,)
-                    cursor.execute(insert_statement,vals)
+        for row in cursor.fetchall():
+            progs[row[0]]['new_id'] = row[1]
 
-            vals = ('tobacco_smoking_history',None,'Tobacco Smoking History',pid,)
-            cursor.execute(insert_statement,vals)
-            vals = ('sample_type', None, 'Sample Type', pid,)
-            cursor.execute(insert_statement, vals)
-            vals = ('hpv_status', None, 'HPV Status', pid,)
-            cursor.execute(insert_statement, vals)
-
-        db.commit()
+        for prog in progs:
+            if debug:
+                print >> sys.stdout, "[STATUS] Excuting update query:" + update_attr_tbl_stmt
+                print >> sys.stdout, "With values "+str((progs[prog]['new_id'], progs[prog]['old_id'],))
+            else:
+                cursor.execute(update_attr_tbl_stmt, (progs[prog]['new_id'], progs[prog]['old_id'],))
 
     except Exception as e:
         print >> sys.stdout, "[ERROR] Exception when adding the attr_value_display table - it may not have been properly generated!"
@@ -860,7 +796,7 @@ def main():
                                  help="Don't execute statements, just print them with their paramter tuples.")
 
     cmd_line_parser.add_argument('-a', '--attr_displ_table', type=bool, default=False,
-                                 help="Add and bootstrap the metadata attribute display table.")
+                                 help="Change the program IDs in the metadata attribute display table to this database's programs.")
 
     cmd_line_parser.add_argument('-d', '--fix-case-id', type=bool, default=False,
                                  help="Add case barcodes to the cohorts_samples table for extent cohorts")
@@ -876,7 +812,7 @@ def main():
     try:
         args.create_prog_proj and create_programs_and_projects(args.debug_mode)
         args.fix_cohort_projects and fix_cohort_projects(args.debug_mode)
-        args.attr_displ_table and make_attr_display_table(args.debug_mode)
+        args.attr_displ_table and update_attr_display_table(args.debug_mode)
         args.fix_case_id and fix_case_barcodes_in_cohorts(args.debug_mode)
         args.fix_filters and fix_filters(args.debug_mode)
         args.fix_genes and fix_gene_symbols(args.debug_mode)
