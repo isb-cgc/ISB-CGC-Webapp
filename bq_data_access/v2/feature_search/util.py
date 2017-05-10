@@ -17,7 +17,7 @@ limitations under the License.
 """
 
 from bq_data_access.data_types.definitions import FEATURE_ID_TO_TYPE_MAP
-from bq_data_access.v2.feature_id_utils import FeatureDataTypeHelper
+from bq_data_access.v2.feature_id_utils import FeatureDataTypeHelper, PlottableDataType
 
 
 class SearchableFieldHelper(object):
@@ -31,6 +31,10 @@ class SearchableFieldHelper(object):
         tables with matching build in the table configuration of the data type in
         the bq_data_access/data_types module. If no matching tables are found,
         no entry is returned for the data type.
+        
+        An exception to the above is clinical data, for which the searchable fields will
+        always be returned. This is because the clinical data tables are not associated
+        to a genomic build.
         
         Since the genomic build is stored in lower case in the BigQuery table
         configurations, the genomic_build parameter will be lowercased as well.
@@ -47,14 +51,18 @@ class SearchableFieldHelper(object):
             data_type_config_dict = FeatureDataTypeHelper.get_feature_def_default_config_dict_from_data_type(data_type)
             config_instance = config_class.from_dict(data_type_config_dict)
 
-            # Check if any tables for the data type match the build
+            # Check if any tables for the data type match the build.
+            # Clinical data type will always be returned, as the clinical data tables are
+            # not tied to a genomic build.
             found = False
-            for table_config in config_instance.data_table_list:
-                if table_config.genomic_build == genomic_build:
-                    found = True
-                    break
-            if not found:
-                continue
+            if data_type != PlottableDataType.CLIN:
+                for table_config in config_instance.data_table_list:
+                    # This would fail for a CLINTableConfig object, as it has no "genomic_build" member.
+                    if table_config.genomic_build == genomic_build:
+                        found = True
+                        break
+                if not found:
+                    continue
 
             searcher_class = FeatureDataTypeHelper.get_feature_searcher_class_from_data_type(data_type)
             datatype_prefix = searcher_class.get_datatype_identifier()
