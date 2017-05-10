@@ -34,8 +34,12 @@ ALPHANUM_SORT = [
 
 ]
 
-simple_day_sort = ['1 to 500','501 to 1000','1001 to 1500','1501 to 2000','2001 to 2500','2501 to 3000',
-    '3001 to 3500','3501 to 4000','4001 to 4500','4501 to 5000','5001 to 5500','5501 to 6000', 'None',]
+simple_number_sort = [
+    '0 to 200', '201 to 400', '401 to 600', '601 to 800', '801 to 1000', '1001 to 1200', '1201 to 1400', '1400+', 
+    '1 to 500','501 to 1000','1001 to 1500','1501 to 2000','2001 to 2500','2501 to 3000', '3001 to 3500', 
+    '3501 to 4000', '4001 to 4500', '4501 to 5000', '5001 to 5500', '5501 to 6000', '0 to -5000', 
+    '-5001 to -10000', '-10001 to -15000', '-15001 to -20000', '-20001 to -25000', '-25001 to -30000', 
+    '-30001 to -35000', 'None', ]
 
 # If an attribute has a specific order, list it here; these should be the *values* not the display strings
 VALUE_SPECIFIC_ORDERS = {
@@ -44,11 +48,12 @@ VALUE_SPECIFIC_ORDERS = {
     'age_at_initial_pathologic_diagnosis': ['10 to 39', '40 to 49', '50 to 59', '60 to 69', '70 to 79', 'Over 80', 'None', ],
     'age_at_diagnosis': ['10 to 39', '40 to 49', '50 to 59', '60 to 69', '70 to 79', 'Over 80', 'None', ],
     'year_of_diagnosis': ['1976 to 1980', '1981 to 1985', '1986 to 1990', '1991 to 1995', '1996 to 2000', '2001 to 2005', '2006 to 2010', '2011 to 2015', 'None',],
-    'overall_survival': simple_day_sort,
-    'event_free_survival': simple_day_sort,
-    'days_to_death': simple_day_sort,
-    'days_to_last_followp': simple_day_sort,
-    'days_to_last_known_alive': simple_day_sort,
+    'overall_survival': simple_number_sort,
+    'event_free_survival': simple_number_sort,
+    'days_to_death': simple_number_sort,
+    'days_to_last_followp': simple_number_sort,
+    'days_to_last_known_alive': simple_number_sort,
+    'wbc_at_diagnosis': simple_number_sort,
     'pathologic_stage': ['Stage 0','Stage I','Stage IA','Stage IB','Stage II','Stage IIA','Stage IIB','Stage IIC',
                          'Stage III','Stage IIIA','Stage IIIB','Stage IIIC','Stage IS','Stage IV','Stage IVA',
                          'Stage IVB','Stage IVC','Stage X','I or II NOS','None',],
