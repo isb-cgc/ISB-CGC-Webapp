@@ -155,7 +155,7 @@ def initialize_variable_selection_page(request,
     if variable_list_id != 0:
         try:
             existing_variable_list = request.user.variablefavorite_set.get(id=variable_list_id)
-            if existing_variable_list != 'v2':
+            if existing_variable_list.version != 'v2':
                 messages.warning(request, 'Version 1 Variable lists cannot be edited due to changes in available variables.')
                 return redirect('variables')
         except ObjectDoesNotExist:

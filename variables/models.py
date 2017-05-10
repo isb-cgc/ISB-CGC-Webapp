@@ -55,7 +55,7 @@ class VariableFavorite(models.Model):
         variable_favorite_model = cls.objects.create(name=name, user=user, version="v2")
         variable_favorite_model.save()
 
-        for var in variables :
+        for var in variables:
             Variable.objects.create(name=var['name'], feature_id=var['feature_id'], type=var['type'], code=var['code'], variable_favorite=variable_favorite_model)
 
         return_obj = {
