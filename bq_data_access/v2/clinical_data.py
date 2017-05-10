@@ -19,8 +19,6 @@ limitations under the License.
 import logging as logger
 from re import compile as re_compile
 
-from schema.tcga_clinical import schema as clinical_schema
-
 from bq_data_access.v2.errors import FeatureNotFoundException
 from bq_data_access.v2.feature_value_types import DataTypes, BigQuerySchemaToValueTypeConverter
 from bq_data_access.v2.utils import DurationLogged
@@ -67,18 +65,6 @@ class ClinicalFeatureDef(object):
     def __init__(self, column_name, value_type):
         self.column_name = column_name
         self.value_type = value_type
-
-    @classmethod
-    def get_table_field_and_value_type(cls, column_id):
-        table_field = None
-        value_type = None
-        for clinical_field in clinical_schema:
-            name, schema_field_type = clinical_field['name'], clinical_field['type']
-            if name == column_id:
-                table_field = name
-                value_type = BigQuerySchemaToValueTypeConverter.get_value_type(schema_field_type)
-
-        return table_field, value_type
 
     @classmethod
     def from_feature_id(cls, feature_id):
