@@ -62,13 +62,21 @@ from bq_data_access.data_types.mirna import BIGQUERY_CONFIG as MIRN_BIGQUERY_CON
 from scripts.feature_def_gen.mirna_data.mirna_feature_def_builder import MIRNFeatureDefBuilder
 from scripts.feature_def_gen.mirna_features import MIRNDataSourceConfig
 
+# CLIN
+from bq_data_access.v2.clinical_data import ClinicalDataQueryHandler
+from bq_data_access.v2.feature_search.clinical_searcher import ClinicalSearcher
+from bq_data_access.data_types.clinical import BIGQUERY_CONFIG as CLIN_BIGQUERY_CONFIG
+from scripts.feature_def_gen.clinical_features import CLINDataSourceConfig
+
+
 FEATURE_TYPE_TO_PROVIDER_MAP = {
     PlottableDataType.GEXP: GEXPDataQueryHandler,
     PlottableDataType.GNAB: GNABDataQueryHandler,
     PlottableDataType.METH: METHDataQueryHandler,
     PlottableDataType.RPPA: RPPADataQueryHandler,
     PlottableDataType.CNVR: CNVRDataQueryHandler,
-    PlottableDataType.MIRN: MIRNDataQueryHandler
+    PlottableDataType.MIRN: MIRNDataQueryHandler,
+    PlottableDataType.CLIN: ClinicalDataQueryHandler
 }
 
 # noinspection PyPackageRequirements
@@ -78,7 +86,9 @@ FEATURE_TYPE_TO_FEATURE_DEF_PROVIDER_MAP = {
     PlottableDataType.METH: (METHDataSourceConfig, METHFeatureDefBuilder, METHDataQueryHandler, METH_BIGQUERY_CONFIG, METHSearcher),
     PlottableDataType.RPPA: (RPPADataSourceConfig, RPPAFeatureDefBuilder, RPPADataQueryHandler, RPPA_BIGQUERY_CONFIG, RPPASearcher),
     PlottableDataType.CNVR: (CNVRDataSourceConfig, CNVRFeatureDefBuilder, CNVRDataQueryHandler, CNVR_BIGQUERY_CONFIG, CNVRSearcher),
-    PlottableDataType.MIRN: (MIRNDataSourceConfig, MIRNFeatureDefBuilder, MIRNDataQueryHandler, MIRN_BIGQUERY_CONFIG, MIRNSearcher)
+    PlottableDataType.MIRN: (MIRNDataSourceConfig, MIRNFeatureDefBuilder, MIRNDataQueryHandler, MIRN_BIGQUERY_CONFIG, MIRNSearcher),
+    PlottableDataType.CLIN: (CLINDataSourceConfig, None, ClinicalDataQueryHandler, CLIN_BIGQUERY_CONFIG, ClinicalSearcher)
+
 }
 
 

@@ -17,27 +17,19 @@ limitations under the License.
 """
 
 
-# pip install enum34
-from enum import Enum
-
-
-class PlottableDataType(Enum):
-    GEXP = 1
-    GNAB = 2
-    METH = 3
-    RPPA = 4
-    CNVR = 5
-    MIRN = 6
-    CLIN = 7
-
-
-FEATURE_ID_TO_TYPE_MAP = {
-    'gexp': PlottableDataType.GEXP,
-    'gnab': PlottableDataType.GNAB,
-    'meth': PlottableDataType.METH,
-    'rppa': PlottableDataType.RPPA,
-    'cnvr': PlottableDataType.CNVR,
-    'mirn': PlottableDataType.MIRN,
-    'clin': PlottableDataType.CLIN
+BIGQUERY_CONFIG = {
+    "tables": [
+        {
+            "table_id": "isb-cgc:TARGET_bioclin_v0.Clinical",
+            "biospecimen_table_id": "isb-cgc:TARGET_bioclin_v0.Biospecimen",
+            "internal_table_id": "target_clinical",
+            "program": "target"
+        },
+        {
+            "table_id": "isb-cgc:TCGA_bioclin_v0.Clinical",
+            "biospecimen_table_id": "isb-cgc:TCGA_bioclin_v0.Biospecimen",
+            "internal_table_id": "tcga_clinical",
+            "program": "tcga"
+        }
+    ]
 }
-
