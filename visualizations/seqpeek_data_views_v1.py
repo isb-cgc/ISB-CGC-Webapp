@@ -23,8 +23,8 @@ import sys
 from django.http import JsonResponse
 
 from bq_data_access.v1.data_access import get_feature_vectors_tcga_only
-from bq_data_access.v2.seqpeek.seqpeek_view import SeqPeekViewDataBuilder
-from bq_data_access.v2.seqpeek.seqpeek_maf_formatter import SeqPeekMAFDataFormatter
+from bq_data_access.v1.seqpeek.seqpeek_view import SeqPeekViewDataBuilder
+from bq_data_access.v1.seqpeek.seqpeek_maf_formatter import SeqPeekMAFDataFormatter
 from bq_data_access.v1.seqpeek_maf_data import SeqPeekDataProvider
 from bq_data_access.v1.data_access import ProviderClassQueryDescription
 from visualizations.data_access_views import get_confirmed_project_ids_for_cohorts
