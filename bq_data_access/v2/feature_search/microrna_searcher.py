@@ -29,7 +29,7 @@ from cohorts.metadata_helpers import get_sql_connection
 
 
 class MIRNSearcher(object):
-    feature_search_valid_fields = set(['mirna_name', 'value_field', 'genomic_build'])
+    feature_search_valid_fields = set(['mirna_name', 'genomic_build'])
     field_search_valid_fields = set(['mirna_name'])
 
     searchable_fields = [
@@ -37,11 +37,6 @@ class MIRNSearcher(object):
             'name': 'mirna_name',
             'label': 'miRNA Name',
             'static': False
-        },
-        {
-            'name': 'value_field',
-            'label': 'Value',
-            'static': True, 'values': ['RPM', 'normalized_count']
         },
         {
             'name': 'genomic_build',
