@@ -18,6 +18,7 @@ limitations under the License.
 
 import logging
 import math
+import sys
 
 from bq_data_access.v2.feature_id_utils import FeatureIdQueryDescription
 from bq_data_access.v2.data_access import is_valid_feature_identifier
@@ -175,6 +176,7 @@ def get_merged_feature_vectors(fvb, x_id, y_id, c_id, cohort_id_array, logTransf
             log_transform_vector(y_vec, logTransform['yBase'])
 
     x_type, x_vec = async_result[x_id]['type'], async_result[x_id]['data']
+
     if logTransform and logTransform['x'] and is_log_transformable(x_type):
         log_transform_vector(x_vec, logTransform['xBase'])
 
