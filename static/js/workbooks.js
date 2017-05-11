@@ -457,12 +457,26 @@ require([
                 }
             });
             parent.find('.'+ data.specification).find('.search-term-select').empty();
+            var buildRe = /Build:(hg\d\d)/;
+            var checkBuild = null;
             for(var i in data["selection"].options) {
-                if (data["selection"].options[i].value == data["selection"].selected) {
-                    parent.find('.'+ data.specification).find('.search-term-select').append('<option value="' + data["selection"].options[i].value + '"> ' + data["selection"].options[i].text + '</option>');
+                checkBuild = buildRe.exec(data["selection"].options[i].text);
+                if(!checkBuild || checkBuild[1] === $('.workbook-build-display').data('build').toLowerCase()){
+                    if (data["selection"].options[i].value == data["selection"].selected) {
+                        parent.find('.'+ data.specification).find('.search-term-select').append(
+                            '<option value="' + data["selection"].options[i].value + '"> ' + data["selection"].options[i].text + '</option>'
+                        );
+                    }
+                } else {
+                    // This could indicate a buld-change - trigger the onChange for the parent to reload the options
+                    parent.find('.'+ data.specification).siblings('.spec-select.datatype-selector').triggerHandler('change');
                 }
             }
-            parent.find('.'+ data.specification).find('.search-term-select').val(data["selection"].selected);
+            checkBuild = buildRe.exec(data["selection"].selected);
+            if(parent.find('.'+ data.specification).find('.search-term-select').length > 0
+                && (!checkBuild || checkBuild[1] === $('.workbook-build-display').data('build').toLowerCase())) {
+                parent.find('.' + data.specification).find('.search-term-select').val(data["selection"].selected);
+            }
             disable_invalid_variable_options($('.worksheet.active .main-settings'));
         }
     }
@@ -834,7 +848,8 @@ require([
                 if(plot_settings.find('.'+label+' :selected').attr("type") === "gene" || plot_settings.find('.'+label+' :selected').attr("type") === 'miRNA'){
                     result = {
                         url_code : plot_settings.find('[variable="'+ label + '"] .search-term-select:visible').find(":selected").val(),
-                        type: "gene"
+                        type: "gene",
+                        selected: plot_settings.find('[variable="'+ label + '"] .search-term-select:visible').find(":selected").text()
                     };
                 } else {
                     result = {
@@ -985,31 +1000,6 @@ require([
             ($(active_sheet).find('.worksheet-content').height()-$(active_sheet).find('.worksheet-panel-body').outerHeight()) +'px');
     };
 
-    // Only init the active tab
-    var active_sheet = $(".worksheet.active")[0];
-    get_plot_info($(".worksheet.active .plot_selection"), function(success){
-        var plot_selex = $(active_sheet).find('.plot_selection')[0];
-        if(success) {
-            var flyout = $(plot_selex).parentsUntil(".worksheet-body").find('.settings-flyout');
-            var data = get_plot_info_on_page($('.worksheet.active .main-settings'));
-            disable_invalid_variable_options($('.worksheet.active .main-settings'));
-            hide_show_widgets(data.attrs.type, flyout);
-            if (valid_plot_settings($(plot_selex).parentsUntil(".worksheet-body").find('.update-plot').parent())) {
-                generate_plot({ worksheet_id : data.worksheet_id,
-                                type         : data.attrs.type,
-                                x            : data.attrs.x_axis.url_code,
-                                y            : data.attrs.y_axis.url_code,
-                                logTransform : data.logTransform,
-                                gene_label   : data.attrs.gene_label,
-                                color_by     : data.attrs.color_by.url_code,
-                                cohorts      : data.attrs.cohorts});
-            }
-            $(active_sheet).attr("is-loaded","true");
-        }
-        setPlotPanelHeight(active_sheet);
-    });
-
-
     // Prep all unloaded worksheets to load on selection
     $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
         var sheet_id = $(this).data('sheet-id');
@@ -1046,6 +1036,11 @@ require([
         var data = get_plot_info_on_page(plot_settings);
 
         if(data.attrs.cohorts.length == 0){
+            return false;
+        }
+
+        var buildResult = /Build:(hg\d\d)/.exec(data.attrs.x_axis.selected);
+        if(buildResult && buildResult[1] !== $('.workbook-build-display').data('build').toLowerCase()) {
             return false;
         }
 
@@ -1295,6 +1290,10 @@ require([
             e.preventDefault();
             return false;
         }
+        if($('#workbook-build').val() !== $('.workbook-build-display').data('build')) {
+            // Since specifications of gene/miRNA data are build dependent we have to reset them when the build changes
+            $('.spec-select.datatype-selector').val('');
+        }
     });
 
     // Saving a cohort from a plot selection
@@ -1379,6 +1378,30 @@ require([
     $('.save-comment-btn').prop('disabled', true);
     $('.comment-textarea').keyup(function() {
         $(this).siblings('.save-comment-btn').prop('disabled', this.value == '' ? true : false)
+    });
+
+    // Only init the active tab
+    var active_sheet = $(".worksheet.active")[0];
+    get_plot_info($(".worksheet.active .plot_selection"), function(success){
+        var plot_selex = $(active_sheet).find('.plot_selection')[0];
+        if(success) {
+            var flyout = $(plot_selex).parentsUntil(".worksheet-body").find('.settings-flyout');
+            var data = get_plot_info_on_page($('.worksheet.active .main-settings'));
+            disable_invalid_variable_options($('.worksheet.active .main-settings'));
+            hide_show_widgets(data.attrs.type, flyout);
+            if (valid_plot_settings($(plot_selex).parentsUntil(".worksheet-body").find('.update-plot').parent())) {
+                generate_plot({ worksheet_id : data.worksheet_id,
+                                type         : data.attrs.type,
+                                x            : data.attrs.x_axis.url_code,
+                                y            : data.attrs.y_axis.url_code,
+                                logTransform : data.logTransform,
+                                gene_label   : data.attrs.gene_label,
+                                color_by     : data.attrs.color_by.url_code,
+                                cohorts      : data.attrs.cohorts});
+            }
+            $(active_sheet).attr("is-loaded","true");
+        }
+        setPlotPanelHeight(active_sheet);
     });
 
     update_plot_elem_rdy();
