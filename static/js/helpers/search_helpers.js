@@ -317,16 +317,18 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                 });
             });
 
-            data_counts.map(function(obj){
-                counts_by_name[obj.name] = {
-                    values: {},
-                    total: obj.total
-                }
-                var values = counts_by_name[obj.name].values;
-                obj.values.map(function(val){
-                    values[val.value] = val.count;
+            if (data_counts) {
+                data_counts.map(function (obj) {
+                    counts_by_name[obj.name] = {
+                        values: {},
+                        total: obj.total
+                    }
+                    var values = counts_by_name[obj.name].values;
+                    obj.values.map(function (val) {
+                        values[val.value] = val.count;
+                    });
                 });
-            });
+            }
 
             $('#'+program_id+'-data-filter-panel li.list-group-item div.cohort-feature-select-block').each(function() {
                 var $this = $(this),
