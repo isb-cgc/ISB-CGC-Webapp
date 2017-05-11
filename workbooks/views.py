@@ -171,6 +171,7 @@ def get_gene_datatypes(build=None):
     for type in datatype_list:
         if type['datatype'] != 'CLIN' and ((build is None and type['datatype'] != 'MIRN') or build is not None):
             type['label'] = datatype_labels[type['datatype']]
+            type['var_type'] = 'N' if type['datatype'] != 'GNAB' else 'M'
 
             relevant_fields = []
 
@@ -181,6 +182,8 @@ def get_gene_datatypes(build=None):
             type['fields'] = relevant_fields
 
             return_list.append(type)
+
+    print >> sys.stdout, str(return_list)
 
     return return_list
 

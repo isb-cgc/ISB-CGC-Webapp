@@ -103,6 +103,7 @@ def data_access_for_plot(request):
     Used by the web application.
     """
     try:
+        logTransform = None
         ver = request.GET.get('ver', '1')
         x_id = request.GET.get('x_id', None)
         y_id = request.GET.get('y_id', None)
@@ -110,7 +111,8 @@ def data_access_for_plot(request):
         try:
             logTransform = json.loads(request.GET.get('log_transform', None))
         except Exception as e:
-            logger.info("No logTransform parameter supplied")
+            print >> sys.stdout, "[WARNING] Log transform parameter not supplied"
+            logger.warn("[WARNING] Log transform parameter not supplied")
             logTransform = None
 
         cohort_id_array = request.GET.getlist('cohort_id', None)

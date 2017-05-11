@@ -1,6 +1,6 @@
 """
 
-Copyright 2015, Institute for Systems Biology
+Copyright 2017, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@ limitations under the License.
 
 """
 
+import sys
+
+
 def enum(**enums):
     return type('Enum', (), enums)
 
@@ -29,7 +32,7 @@ class ValueType(object):
 
 
 def is_log_transformable(attr_type):
-    return isinstance(attr_type, ValueType) and (attr_type == ValueType.FLOAT or attr_type == ValueType.INTEGER)
+    return (isinstance(attr_type, ValueType) and (attr_type == ValueType.FLOAT or attr_type == ValueType.INTEGER)) or (type(attr_type) is int or type(attr_type is float))
 
 IdentifierTypes = enum(PATIENT=1, SAMPLE=2, ALIQUOT=3)
 DataTypes = enum(CLIN=1, GEXP=2, METH=3, CNVR=4, RPPA=5, MIRN=6, GNAB=7, USER=8)
