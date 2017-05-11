@@ -432,7 +432,7 @@ define([
         }
     };
 
-    function get_plot_settings(plot_type){
+    function get_plot_settings(plot_type, as_map){
         var settings = {
             axis : []
         };
@@ -462,6 +462,16 @@ define([
             default :
                 break;
         };
+
+        if(as_map) {
+            var map_settings = {};
+            settings.axis.map(function(axis){
+                map_settings[axis.name] = {
+                    type: axis.type
+                };
+            });
+            return map_settings;
+        }
 
         return settings;
     }

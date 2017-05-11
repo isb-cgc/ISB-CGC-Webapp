@@ -77,7 +77,7 @@
                         <select aria-label="Specification" class="x-gene-attribute-select form-control spec-select datatype-selector" style="display:none; margin-top:5px; width: 230px;">
                             <option value="" type="label" disabled selected>-- select a specification --</option>
                             {% for type in datatype_list %}
-                                <option value="{{ type.datatype }}">{{ type.label}}</option>
+                                <option value="{{ type.datatype }}" var_type="{{ type.var_type }}">{{ type.label}}</option>
                             {% endfor %}
                         </select>
 
@@ -142,7 +142,7 @@
                         <select aria-label="Specification" class="y-gene-attribute-select form-control spec-select datatype-selector" style="display:none; margin-top:5px; width: 230px;">
                             <option type="label" value="" disabled selected>-- select a specification --</option>
                             {% for type in datatype_list %}
-                                <option value="{{ type.datatype }}">{{ type.label}}</option>
+                                <option value="{{ type.datatype }}" var_type="{{ type.var_type }}">{{ type.label }}</option>
                             {% endfor %}
                         </select>
                         {# Selection of specific attributes of a gene if it is selected in the dropdown above #}
