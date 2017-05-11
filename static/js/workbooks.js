@@ -355,14 +355,16 @@ require([
                 options.each(function (i, element) {
                     var option = $(element);
                     var parent = option.parent();
-                    option.attr('type') !== "label" && option.removeAttr('disabled');
+                    option.attr('type') !== "label" && option.removeAttr('disabled') && option.removeAttr('title');
                     if ((option.attr('var_type') == 'C' && plot_settings.axis[axis_index].type == 'NUMERICAL') ||
                         (option.attr('var_type') == 'N' && plot_settings.axis[axis_index].type == 'CATEGORICAL')) {
                         option.attr('disabled','disabled');
+                        option.attr('title','This option is unavailable because it does not match the chart type.');
                     }
 
                     // Genes themselves may be valid but their sub-filters might not; check those too
                     if(option.attr('var_type') == 'G') {
+                        var selectedOpt = option.parent().find(':selected');
                         option.parent().siblings('.spec-select.datatype-selector').find('option').each(function(i,opt){
                             var data_type = $(opt).val();
                             if(data_type !== "") {
@@ -370,19 +372,24 @@ require([
                                 if($(opt).attr('var_type') == 'M') {
                                     option.parent().siblings('.' + data_type).children('div[data-field="' + data_type + '"]').find('option').each(function (i, elem) {
                                         var field_opt = $(elem);
-                                        field_opt.attr('type') !== 'label' && field_opt.removeAttr('disabled');
+                                        field_opt.attr('type') !== 'label' && field_opt.removeAttr('disabled') && field_opt.removeAttr('title');
                                         if ((field_opt.attr('var_type') == 'C' && plot_settings.axis[axis_index].type == 'NUMERICAL') ||
                                             (field_opt.attr('var_type') == 'N' && plot_settings.axis[axis_index].type == 'CATEGORICAL')) {
                                             field_opt.attr('disabled', 'disabled');
+                                            field_opt.attr('title','This option is disabled because it does not match the chart type.');
                                         }
                                     });
                                 } else {
-                                    $(opt).attr('type') !== 'label' && $(opt).removeAttr('disabled');
-                                    if (($(opt).attr('var_type') == 'C' && plot_settings.axis[axis_index].type == 'NUMERICAL') ||
-                                        ($(opt).attr('var_type') == 'N' && plot_settings.axis[axis_index].type == 'CATEGORICAL')) {
+                                    $(opt).attr('type') !== 'label' && $(opt).removeAttr('disabled') && $(opt).removeAttr('title');
+                                    if((selectedOpt.attr('type') === 'gene' && data_type === 'MIRN') || (selectedOpt.attr('type') === 'miRNA' && data_type !== 'MIRN')) {
                                         $(opt).attr('disabled', 'disabled');
+                                        $(opt).attr('title','This option is unavailable because it does not match the chosen gene/miRNA.');
+                                    } else if (($(opt).attr('var_type') == 'C' && plot_settings.axis[axis_index].type == 'NUMERICAL') ||
+                                            ($(opt).attr('var_type') == 'N' && plot_settings.axis[axis_index].type == 'CATEGORICAL')) {
+                                            $(opt).attr('disabled', 'disabled');
+                                            $(opt).attr('title','This option is unavailable because it does not match the chart type.');
+                                        }
                                     }
-                                }
                             }
                         });
                     }
@@ -444,7 +451,7 @@ require([
                     if ($.inArray(ele.id, keys) != -1) {
                         if ($(ele).hasClass('select2')) {
                             $(ele).parent().find('.select2-selection__rendered').empty();
-                            $(ele).parent().find('.select2-selection__rendered').append('<option var_type ="'+(data[ele.id].options[0].value === 'GNAB' ? 'M' : 'N')+'" value="' + data[ele.id].options[0].value + '"> ' + data[ele.id].options[0].text + '</option>');
+                            $(ele).parent().find('.select2-selection__rendered').append('<option value="' + data[ele.id].options[0].value + '"> ' + data[ele.id].options[0].text + '</option>');
                         } else {
                             $(ele).empty();
                             for (var i in data[ele.id].options) {
