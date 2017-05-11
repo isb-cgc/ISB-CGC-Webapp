@@ -20,6 +20,8 @@ import logging
 import sys
 import traceback
 
+from django.http import JsonResponse
+
 from bq_data_access.v2.clinical_data import CLINICAL_FEATURE_TYPE
 from bq_data_access.v2.copynumber_data import CNVR_FEATURE_TYPE
 from bq_data_access.v2.feature_search.clinical_searcher import ClinicalSearcher
@@ -35,7 +37,8 @@ from bq_data_access.v2.gnab_data import GNAB_FEATURE_TYPE
 from bq_data_access.v2.methylation_data import METH_FEATURE_TYPE
 from bq_data_access.v2.mirna_data import MIRN_FEATURE_TYPE
 from bq_data_access.v2.protein_data import RPPA_FEATURE_TYPE
-from django.http import JsonResponse
+
+from bq_data_access.v2.feature_search.clinical_schema_utils import ClinicalColumnFeatureSupport, ClinicalColumnNameMappingStatus
 
 
 class FeatureDefinitionSearcherFactory(object):
@@ -55,10 +58,8 @@ class FeatureDefinitionSearcherFactory(object):
             return MIRNSearcher()
         elif datatype == GNAB_FEATURE_TYPE:
             return GNABSearcher()
-        #TODO build a full search on all features
-        #elif datatype == ALL:
-        #    return FullSearcher()
         raise InvalidDataTypeException("Invalid datatype '{datatype}'".format(datatype=datatype))
+
 
 def feature_search(request):
     """ Used by the web application."""
@@ -104,6 +105,7 @@ def feature_search(request):
         logging.exception(e)
         return JsonResponse({'error': e}, status=500)
 
+
 def feature_field_search(request):
     """ Used by the web application."""
     try:
@@ -131,3 +133,25 @@ def feature_field_search(request):
         print >> sys.stdout, traceback.format_exc()
         logging.exception(e)
         raise JsonResponse({'error': e}, status=500)
+
+
+def clinical_feature_get(request):
+    try:
+        column_name_list = request.GET.getlist('column_name', None)
+        result = ClinicalColumnFeatureSupport.get_features_ids_for_column_names(column_name_list)
+
+        if result['status'] == ClinicalColumnNameMappingStatus.SUCCESS:
+            return JsonResponse({
+                'status': 'ok',
+                'clinical_feature_ids': result['clinical_feature_ids']
+            })
+        else:
+            return JsonResponse({
+                'status': 'error'
+            }, status=400)
+
+    except Exception as e:
+        print >> sys.stdout, traceback.format_exc()
+        logging.exception(e)
+        raise JsonResponse({'error': e}, status=500)
+
