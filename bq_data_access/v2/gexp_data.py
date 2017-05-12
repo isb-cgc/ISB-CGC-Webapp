@@ -119,6 +119,12 @@ class GEXPDataQueryHandler(object):
         return query
 
     def build_query(self, project_set, cohort_table, cohort_id_array, project_id_array):
+        """
+        Returns:
+            Tuple (query_body, run_query).
+            The "query_body" value is the BigQuery query string.
+            The "run_query" is always True.
+        """
         # Find matching tables
         config_instance = GEXPDataSourceConfig.from_dict(BIGQUERY_CONFIG)
         found_tables = []
@@ -148,7 +154,7 @@ class GEXPDataQueryHandler(object):
 
         query = query_template.format(brk='\n', subqueries=subquery_stmt)
 
-        return query
+        return query, True
 
     @DurationLogged('GEXP', 'UNPACK')
     def unpack_query_response(self, query_result_array):
