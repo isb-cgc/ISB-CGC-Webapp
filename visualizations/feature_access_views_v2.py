@@ -82,6 +82,7 @@ def feature_search(request):
                 obj = {key: row[key] for key in fields}
                 if obj['feature_type'] == 'CLIN':
                     obj['type'] = row['type']
+                    obj['column_name'] = row['column_name']
                 items.append(obj)
 
         return JsonResponse({'items': items}, status=200)

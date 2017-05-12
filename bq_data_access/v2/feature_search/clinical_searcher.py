@@ -93,6 +93,7 @@ class ClinicalSearcher(object):
 
             found_features.append({
                 'feature_type': 'CLIN',
+                'column_name': column_name,
                 'internal_feature_id': internal_id,
                 'label': human_readable_name,
                 'type': value_type
