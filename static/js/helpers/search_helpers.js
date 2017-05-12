@@ -41,23 +41,7 @@ var TRANSLATION_DICT = {
     'FEMALE':                   'Female',
     'MALE':                     'Male',
     '0':                        'Wild Type',
-    '1':                        'Mutant',
-    'Aligned_Reads:HG19': 'Aligned Reads, HG19',
-    'Copy_Number_Segment_Masked:HG19': 'Copy Number Segment Masked, HG19',
-    'DNA_Methylation_Beta:HG19': 'DNA Methylation Beta, HG19',
-    'miRNA_Gene_Quantification:HG19': 'miRNA Gene Quantification, HG19',
-    'miRNA_Isoform_Quantification:HG19': 'miRNA Isoform Quantification, HG19',
-    'mRNA_Gene_Quantification:HG19': 'mRNA Gene Quantification, HG19',
-    'mRNA_Isoform_Quantification:HG19': 'mRNA Isoform Quantification, HG19',
-    'Protein_Quantification:HG19': 'Protein Quantification, HG19',
-    'Aligned_Reads:HG38': 'Aligned Reads, HG38',
-    'Copy_Number_Segment_Masked:HG38': 'Copy Number Segment Masked, HG38',
-    'DNA_Methylation_Beta:HG38': 'DNA Methylation Beta, HG38',
-    'miRNA_Gene_Quantification:HG38': 'miRNA Gene Quantification, HG38',
-    'miRNA_Isoform_Quantification:HG38': 'miRNA Isoform Quantification, HG38',
-    'mRNA_Gene_Quantification:HG38': 'mRNA Gene Quantification, HG38',
-    'mRNA_Isoform_Quantification:HG38': 'mRNA Isoform Quantification, HG38',
-    'Protein_Quantification:HG38': 'Protein Quantification, HG38'
+    '1':                        'Mutant'
 };
 
 define(['jquery', 'tree_graph', 'stack_bar_chart', 'draw_parsets'],
@@ -407,7 +391,8 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                     return TRANSLATION_DICT[csv_name];
                 }
                 csv_name = csv_name.replace(/_/g, ' ');
-                return csv_name.replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
+                //return csv_name.replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
+                return csv_name;
             }
             return '';
         }
