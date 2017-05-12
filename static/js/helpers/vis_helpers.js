@@ -17,7 +17,8 @@
  */
 
 define(['jquery'], function($) {
-    var base_feature_search_url = base_url + '/visualizations/feature_search?';
+    var base_feature_search_url = base_url + '/visualizations/feature_search/';
+
     return {
         isValidNumber: function(val) {
             return (
@@ -189,10 +190,13 @@ define(['jquery'], function($) {
           * This performs a similar function to field_option_change_callback
           *
           */
-        get_datatype_search_interfaces : function(obj, datatype) {
+        get_datatype_search_interfaces : function(obj, datatype, version) {
+            if(!version) {
+                version = 'v2'
+            }
             var value   = datatype;
             var helpers = this;
-            var feature_search_url = base_feature_search_url + 'datatype=' + value;
+            var feature_search_url = base_feature_search_url + version + '?datatype=' + value;
 
             // Hide all field options
             $(obj).parents('.field-search').find('.search-field').each(function() {
