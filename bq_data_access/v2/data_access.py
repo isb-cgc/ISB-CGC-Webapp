@@ -94,21 +94,35 @@ def submit_tcga_job(param_obj, project_id_number, bigquery_client, cohort_settin
     project_id_array = param_obj.project_id_array
     program_set = param_obj.program_set
 
-    job_reference = bigquery_runner.get_data_job_reference(
+    job_description = bigquery_runner.get_data_job_reference(
         program_set, cohort_settings.table_id, cohort_id_array, project_id_array
     )
 
-    logging.info("Submitted TCGA {job_id}: {fid} - {cohorts}".format(
-        job_id=job_reference['jobId'], fid=feature_id, cohorts=str(cohort_id_array))
-    )
+    # Was a query job submitted at all?
+    run_query = job_description['run_query']
+    if run_query:
+        logging.info("Submitted TCGA {job_id}: {fid} - {cohorts}".format(
+            job_id=job_description['job_reference']['jobId'],
+            fid=feature_id, cohorts=str(cohort_id_array))
+        )
 
-    job_item = {
-        'feature_id': feature_id,
-        'provider': bigquery_runner,
-        'query_support': query_provider,
-        'ready': False,
-        'job_reference': job_reference
-    }
+        job_item = {
+            'run_query': run_query,
+            'feature_id': feature_id,
+            'provider': bigquery_runner,
+            'query_support': query_provider,
+            'ready': False,
+            'job_reference': job_description['job_reference']
+        }
+    else:
+        job_item = {
+            'run_query': run_query,
+            'feature_id': feature_id,
+            'provider': bigquery_runner,
+            'query_support': query_provider,
+            'ready': False,
+            'job_reference': job_description['job_reference']
+        }
 
     return job_item
 
@@ -125,12 +139,28 @@ def get_submitted_job_results(provider_array, project_id, poll_retry_limit, skip
         total_retries += 1
 
         for item in provider_array:
+            # Was a BigQuery job even started for this feature ID and cohort(s)?
+            run_query = item['run_query']
+
             provider = item['provider']
             query_support = item['query_support']
             feature_id = item['feature_id']
-            is_finished = provider.is_bigquery_job_finished(project_id)
-            logging.info("Status {job_id}: {status}".format(job_id=item['job_reference']['jobId'],
-                                                            status=str(is_finished)))
+
+            if not run_query:
+                is_finished = True
+                logging.info("Query not run for feature {feature_id}".format(
+                    feature_id=feature_id))
+                item['ready'] = True
+                value_type = query_support.get_value_type()
+                result[feature_id] = {
+                    'type': value_type,
+                    'data': []
+                }
+
+            if run_query:
+                is_finished = provider.is_bigquery_job_finished(project_id)
+                logging.info("Status {job_id}: {status}".format(job_id=item['job_reference']['jobId'],
+                                                                status=str(is_finished)))
 
             if item['ready'] is False and is_finished:
                 item['ready'] = True
