@@ -1,6 +1,6 @@
 """
 
-Copyright 2015, Institute for Systems Biology
+Copyright 2017, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -93,6 +93,7 @@ class ClinicalSearcher(object):
 
             found_features.append({
                 'feature_type': 'CLIN',
+                'column_name': column_name,
                 'internal_feature_id': internal_id,
                 'label': human_readable_name,
                 'type': value_type

@@ -45,6 +45,9 @@ urlpatterns = [
     url(r'^feature_search/v2', feature_access_views_v2.feature_search, name='feature_search'),
     url(r'^feature_field_search', feature_access_views_v2.feature_field_search, name='feature_field_search'),
 
+    # Clinical data column search
+    url(r'^clinical_feature_get/v2', feature_access_views_v2.clinical_feature_get, name='clinical_feature_get'),
+
     # Feature data access views
     url(r'^feature_data_plot/v1', data_access_views.data_access_for_plot, name='feature_data_plot'),
     url(r'^feature_data_plot/v2', data_access_views_v2.data_access_for_plot, name='feature_data_plot_v2'),
