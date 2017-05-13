@@ -1,19 +1,14 @@
-import operator
-
-from django.db import models
-from django.contrib.auth.models import User
-from django.contrib import admin
-from cohorts.models import Cohort
-from variables.models import Variable
-from genes.models import Gene
-from projects.models import Project, Study, User_Feature_Definitions
-from cohorts.models import Cohort, Cohort_Perms
-from sharing.models import Shared_Resource
-from django.utils import formats
-from django.core import serializers
-import sys
-import json
 import ast
+
+from cohorts.models import Cohort
+from django.contrib import admin
+from django.contrib.auth.models import User
+from django.db import models
+from django.utils import formats
+from projects.models import User_Feature_Definitions
+from sharing.models import Shared_Resource
+from genes.models import GeneSymbol
+
 
 # Create your models here.
 class WorkbookManager(models.Manager):
@@ -31,6 +26,7 @@ class Workbook(models.Model):
     active = models.BooleanField(default=True)
     shared = models.ManyToManyField(Shared_Resource)
     is_public = models.BooleanField(default=False)
+    build = models.CharField(max_length=10, null=True)
 
     @classmethod
     def deep_get(cls, id):
@@ -42,8 +38,8 @@ class Workbook(models.Model):
         return workbook_model
 
     @classmethod
-    def create(cls, name, description, user):
-        workbook_model = cls.objects.create(name=name, description=description, owner=user)
+    def create(cls, name, description, user, build='HG38'):
+        workbook_model = cls.objects.create(name=name, description=description, owner=user, build=build)
         workbook_model.save()
 
         return workbook_model
@@ -58,23 +54,28 @@ class Workbook(models.Model):
         return workbook_model
 
     @classmethod
-    def edit(cls, id, name, description):
+    def edit(cls, id, name, description, build=None):
         workbook_model = cls.objects.get(id=id)
         workbook_model.name = name
         workbook_model.description = description
+        # Workbook builds cannot be set to None - that would flag them as Legacy workbooks - and they cannot be
+        # changed from None to a non-Legacy build value
+        if build and workbook_model.build is not None:
+            workbook_model.build = build
+
         workbook_model.save()
         return workbook_model
 
     @classmethod
     def copy(cls, id, user):
         workbook_model = cls.objects.get(id=id)
-        workbook_copy  = cls.create(workbook_model.name + " copy", workbook_model.description, user)
+        workbook_copy  = cls.create(workbook_model.name + " copy", workbook_model.description, user, workbook_model.build)
 
         worksheets = workbook_model.get_worksheets()
         for worksheet in worksheets:
             copy = Worksheet.copy(id=worksheet.id)
-            copy.workbook = workbook_copy;
-            copy.save();
+            copy.workbook = workbook_copy
+            copy.save()
 
         return workbook_copy
 
@@ -139,10 +140,10 @@ class Workbook(models.Model):
                         is_shareable = False
                         break
 
-                # Check all variables are from projects owned by the user
+                # Check all variables are from programs owned by the user
                 for variable in worksheet.get_variables():
                     if variable.feature: #feature will be null if the variable is from TCGA
-                        if variable.feature.study.project.owner_id != request.user.id and not variable.feature.study.project.is_public:
+                        if variable.feature.study.program.owner_id != request.user.id and not variable.feature.study.program.is_public:
                             is_shareable = False
                             break
 
@@ -150,6 +151,10 @@ class Workbook(models.Model):
                     break
 
         return is_shareable
+
+
+    def get_builds(self):
+        return ["HG19", "HG38"]
 
 
 class Workbook_Last_View(models.Model):
@@ -380,12 +385,13 @@ class Worksheet_gene(models.Model):
     date_created    = models.DateTimeField(auto_now_add=True)
     modified_date   = models.DateTimeField(auto_now=True)
     gene            = models.CharField(max_length=2024, blank=False)
+    type            = models.CharField(max_length=16, blank=False, default='gene')
     objects         = Worksheet_Gene_Manager()
 
     @classmethod
     def edit_list(cls, workbook_id, worksheet_id, gene_list, user):
         workbook_owner = Workbook.objects.get(id=workbook_id).get_owner()
-        if workbook_owner.id == user.id :
+        if workbook_owner.id == user.id:
             worksheet_model = Worksheet.objects.get(id=worksheet_id)
 
             genes = Worksheet_gene.objects.filter(worksheet=worksheet_model)
@@ -393,26 +399,28 @@ class Worksheet_gene(models.Model):
                 gene.destroy();
 
             results = []
-            for gene in gene_list :
+            for gene in gene_list:
                 results.append(Worksheet_gene.create(worksheet_id=worksheet_model.id, gene=gene))
 
             return_obj = {
-                'variables' : results,
+                'variables': results,
             }
-        else :
+        else:
             return_obj = {
-                'error'     : "you do not have access to update this worksheet",
+                'error': "You do not have access to update this worksheet.",
             }
         return return_obj
 
     @classmethod
     def create(cls, worksheet_id, gene):
-        worksheet_gene_model = cls.objects.create(worksheet_id = worksheet_id, gene = gene)
+        gene_type = GeneSymbol.get_type(gene) or 'gene'
+        worksheet_gene_model = cls.objects.create(worksheet_id = worksheet_id, gene = gene, type=gene_type)
         worksheet_gene_model.save()
 
         return_obj = {
             'id'            : worksheet_gene_model.id,
             'gene'          : worksheet_gene_model.gene,
+            'type'          : worksheet_gene_model.type,
             'date_created'  : formats.date_format(worksheet_gene_model.date_created, 'DATETIME_FORMAT')
         }
         return return_obj

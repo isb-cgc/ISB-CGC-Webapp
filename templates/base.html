@@ -62,15 +62,7 @@
     {%  endif %}
     <script>
         var STATIC_FILES_URL = '{{ STATIC_FILES_URL }}';
-
-        var BASE_URL = '{{ BASE_URL }}' || "";
-        if(location.host.includes("-preview.com") && !BASE_URL.includes("-preview.com")) {
-            BASE_URL = BASE_URL.replace('appspot.com','appspot-preview.com');
-        }
-
-        var BASE_API_URL = '{{ BASE_API_URL }}' || "";
     </script>
-
 </head>
 <body id="body">
 <!--Include site main header-->
@@ -143,7 +135,7 @@
         var warnAfter = {{ request|warn_after|unlocalize }};
         var expireAfter = {{ request|expire_after|unlocalize }};
         var confirmFormDiscard = "{% trans 'You have unsaved changes in a form of this page.' %}";
-
+        var returnToUrl = '{% url 'landing_page' %}';
     </script>
     {% endlocalize %}
 {% endif %}

@@ -29,6 +29,7 @@
             <table id="workbook-table" class="table table-striped tablesorter">
                 <thead>
                     <th class=""></th>
+                    <th>Version and Build</th>
                     <th class="name-col">Name</th>
                     <th class="study-col">Worksheets</th>
                     <th>Ownership</th>
@@ -54,6 +55,7 @@
                                 </div>
 {#                                {% endif %}#}
                             </td>
+                            <td>{% if workbook.build and workbook.build != 'Legacy' %}Version 2, Build {{ workbook.build }}{% else %}Version 1, Legacy{% endif %}</td>
                             <td class="name-col"><a href="{% url 'workbook_detail' workbook.id %}" title="{{ workbook.name|title|wrap_text }}">{{ workbook.name }}</a></td>
                             <td> {{ workbook.worksheet_set.count }}</td>
                             <td>{% if workbook.owner.id == user.id %}

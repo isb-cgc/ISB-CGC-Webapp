@@ -30,6 +30,7 @@
                     <thead>
                         <tr>
                             <th></th>
+                            <th>Version</th>
                             <th>Name</th>
                             <th># of Variables</th>
                             <th>Last Updated</th>
@@ -42,12 +43,15 @@
                                     <div class="dropdown">
                                         <a data-target="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-caret-down"></i></a>
                                         <ul class="dropdown-menu">
-                                            <li><a href="{% url 'variable_fav_edit' favorite.id %}">Edit</a> </li>
+                                            <li>{% if favorite.version == 'v2' %}<a href="{% url 'variable_fav_edit' favorite.id %}">Edit</a>
+                                                {% else %}<span title="Version 1 Variable lists cannot be edited due to changes in variable names." class="disabled" disabled>Edit</span>{% endif %}</li>
                                             <li><a data-toggle="modal" role="button" data-target="#delete-favorite-modal-{{ favorite.id }}" >Delete</a></li>
-                                            <li><a data-toggle="modal" role="button" data-target="#new-favorite-workbook-modal-{{ favorite.id }}" >Start New Workbook</a></li>
+                                            <li>{% if favorite.version == 'v2' %}<a data-toggle="modal" role="button" data-target="#new-favorite-workbook-modal-{{ favorite.id }}" >Start New Workbook</a>
+                                            {% else %}<span title="Version 1 Variable lists cannot be used to start a new workbook." class="disabled">Start New Workbook</span>{% endif %}</li>
                                         </ul>
                                     </div>
                                 </td>
+                                <td class="ver-col">{{ favorite.get_readable_version }}</td>
                                 <td class="name-col"><a href="{% url 'variable_fav_detail' favorite.id %}" title="{{ favorite.name|wrap_text }}">{{ favorite.name }}</a></td>
                                 <td>{{ favorite.variables | length }}</td>
                                 <td>{{ favorite.last_date_saved|date:'M d, Y, g:i a'}}</td>

@@ -1,6 +1,6 @@
 """
 
-Copyright 2016, Institute for Systems Biology
+Copyright 2017, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,105 +18,52 @@ limitations under the License.
 
 import logging
 
-from feature_def_bq_provider import FeatureDefBigqueryProvider
-
-from scripts.feature_def_gen.feature_def_utils import DataSetConfig
 
 logger = logging
-VALUE_FIELD_NUM_MUTATIONS = 'num_mutations'
-VALUES = frozenset(['variant_classification', 'variant_type', 'sequence_source', VALUE_FIELD_NUM_MUTATIONS])
-FIELDNAMES = ['gene_name', 'protein_name', 'value_field', 'internal_feature_id']
 
 
-MYSQL_SCHEMA = [
-    {
-        'name': 'gene_name',
-        'type': 'string'
-    },
-    {
-        'name': 'protein_name',
-        'type': 'string'
-    },
-    {
-        'name': 'value_field',
-        'type': 'string'
-    },
-    {
-        'name': 'internal_feature_id',
-        'type': 'string'
-    },
-]
-
-
-class RPPAFeatureDefConfig(object):
-    def __init__(self, project_id, target_config, rppa_table_name, out_path):
-        self.project_id = project_id
-        self.target_config = target_config
-        self.rppa_table_name = rppa_table_name
-        self.output_csv_path = out_path
+class RPPATableConfig(object):
+    """
+    Configuration class for a BigQuery table accessible through RPPA feature
+    definitions.
+    """
+    def __init__(self, table_id, genomic_build, gene_label_field, value_field, internal_table_id, program):
+        """
+        Args:
+            table_id: Full BigQuery table identifier - project-name:dataset_name.table_name 
+        
+        """
+        self.table_id = table_id
+        self.genomic_build = genomic_build
+        self.gene_label_field = gene_label_field
+        self.value_field = value_field
+        self.internal_table_id = internal_table_id
+        self.program = program
 
     @classmethod
     def from_dict(cls, param):
-        project_id = param['project_id']
-        target_config = DataSetConfig.from_dict(param['target_config'])
-        table_name = param['rppa_table_name']
-        output_csv_path = param['output_csv_path']
+        table_id = param['table_id']
+        genomic_build = param['genomic_build']
+        gene_label_field = param['gene_label_field']
+        value_field = param['value_field']
+        internal_table_id = param['internal_table_id']
+        program = param['program']
 
-        return cls(project_id, target_config, table_name, output_csv_path)
-
-
-
-# TODO remove duplicate code
-def get_feature_type():
-    return 'RPPA'
+        return cls(table_id, genomic_build, gene_label_field, value_field, internal_table_id, program)
 
 
-def build_internal_feature_id(feature_type, gene, protein):
-    return '{feature_type}:{gene}:{protein}'.format(
-        feature_type=feature_type,
-        gene=gene,
-        protein=protein
-    )
+class RPPADataSourceConfig(object):
+    """
+    Configuration class for RPPA feature definitions.
+    """
+    def __init__(self, supported_genomic_builds, tables_array):
+        self.supported_genomic_builds = supported_genomic_builds
+        self.data_table_list = tables_array
 
+    @classmethod
+    def from_dict(cls, param):
+        supported_genomic_builds = param['supported_genomic_builds']
+        data_table_list = [RPPATableConfig.from_dict(item) for item in param['tables']]
 
-class RPPAFeatureDefProvider(FeatureDefBigqueryProvider):
-    def get_mysql_schema(self):
-        return MYSQL_SCHEMA
-
-
-    def build_query(self, config):
-        query_template = \
-            'SELECT gene_name, protein_name ' \
-            'FROM [{main_project_name}:{main_dataset_name}.{table_name}] ' \
-            'WHERE gene_name IS NOT NULL ' \
-            'GROUP BY gene_name, protein_name'
-
-        query_str = query_template.format(
-            main_project_name=config.target_config.project_name,
-            main_dataset_name=config.target_config.dataset_name,
-            table_name=config.rppa_table_name
-        )
-
-        feature_type = get_feature_type()
-        logger.debug(str(feature_type) + " SQL: " + query_str)
-
-        return query_str
-
-    def unpack_query_response(self, row_item_array):
-        feature_type = get_feature_type()
-        result = []
-        for row in row_item_array:
-            gene_name = row['f'][0]['v']
-            protein_name = row['f'][1]['v']
-
-            for value_field in VALUES:
-                result.append({
-                    'gene_name': gene_name,
-                    'protein_name': protein_name,
-                    'value_field': value_field,
-                    'internal_feature_id': build_internal_feature_id(feature_type, gene_name, protein_name)
-                })
-
-        return result
-
+        return cls(supported_genomic_builds, data_table_list)
 

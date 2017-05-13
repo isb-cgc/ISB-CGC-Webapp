@@ -1,37 +1,51 @@
+"""
+Copyright 2017, Institute for Systems Biology
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
+
 import json
 import logging
 import re
 import sys
+
 from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
-from bq_data_access.feature_search.util import SearchableFieldHelper
+from bq_data_access.v1.feature_search.util import SearchableFieldHelper
+from bq_data_access.v2.feature_search.util import SearchableFieldHelper as SearchableFieldHelper_v2
 from models import VariableFavorite
-from workbooks.models import Workbook, Worksheet, Worksheet_variable
-from projects.models import Project, Study
-from cohorts.views import count_metadata
+from workbooks.models import Workbook, Worksheet
+from projects.models import Program
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
 from django.conf import settings
-debug = settings.DEBUG
+from django.contrib.auth.models import User as Django_User
 from django.http import HttpResponse
-from django.db import connection
 
-from django.core import serializers
+from cohorts.metadata_helpers import fetch_program_attr
 
-BIG_QUERY_API_URL   = settings.BASE_API_URL + '/_ah/api/bq_api/v1'
-COHORT_API          = settings.BASE_API_URL + '/_ah/api/cohort_api/v1'
-META_DISCOVERY_URL  = settings.BASE_API_URL + '/_ah/api/discovery/v1/apis/meta_api/v1/rest'
-METADATA_API        = settings.BASE_API_URL + '/_ah/api/meta_api/v2'
+debug = settings.DEBUG
 
 WHITELIST_RE = settings.WHITELIST_RE
 
 logger = logging.getLogger(__name__)
 
+
 @login_required
 def variable_fav_list_for_new_workbook(request):
     return variable_fav_list(request=request, new_workbook=True)
+
 
 @login_required
 def variable_fav_list(request, workbook_id=0, worksheet_id=0, new_workbook=0):
@@ -39,11 +53,11 @@ def variable_fav_list(request, workbook_id=0, worksheet_id=0, new_workbook=0):
     context  = {}
 
     variable_list = VariableFavorite.get_list(request.user)
-    if len(variable_list) == 0 :
+    if len(variable_list) == 0:
         variable_list = None
     context['variable_list']=variable_list
 
-    if workbook_id != 0 :
+    if workbook_id != 0:
         try:
             workbook_model       = Workbook.objects.get(id=workbook_id)
             context['workbook']  = workbook_model
@@ -51,9 +65,9 @@ def variable_fav_list(request, workbook_id=0, worksheet_id=0, new_workbook=0):
             context['worksheet'] = worksheet_model
             context['base_url']  = settings.BASE_URL
 
-            if variable_list :
+            if variable_list:
                 template = 'variables/variables_select.html'
-            else :
+            else:
                 return initialize_variable_selection_page(request, workbook_id=workbook_id, worksheet_id=worksheet_id)
 
         except ObjectDoesNotExist:
@@ -63,80 +77,16 @@ def variable_fav_list(request, workbook_id=0, worksheet_id=0, new_workbook=0):
         context['new_workbook'] = True
         if variable_list :
             template = 'variables/variables_select.html'
-        else :
+        else:
             return initialize_variable_selection_page(request, new_workbook=True)
 
     return render(request, template, context)
 
 
-# tests whether parameter is a string, hash or iterable object
-# then returns base type data
-def convert(data):
-    #if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
-    if isinstance(data, basestring):
-        return str(data)
-    elif isinstance(data, collections.Mapping):
-        return dict(map(convert, data.iteritems()))
-    elif isinstance(data, collections.Iterable):
-        return type(data)(map(convert, data))
-    else:
-        return data
-
-# sorts on availability of a key in the feature def table?
-def data_availability_sort(key, value, data_attr, attr_details):
-    #if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
-
-    if key == 'has_Illumina_DNASeq':
-        attr_details['DNA_sequencing'] = sorted(value, key=lambda k: int(k['count']), reverse=True)
-    if key == 'has_SNP6':
-        attr_details['SNP_CN'] = sorted(value, key=lambda k: int(k['count']), reverse=True)
-    if key == 'has_RPPA':
-        attr_details['Protein'] = sorted(value, key=lambda k: int(k['count']), reverse=True)
-    if key == 'has_27k':
-        attr_details['DNA_methylation'].append({
-            'value': '27k',
-            'count': [v['count'] for v in value if v['value'] == 'True'][0]
-        })
-    if key == 'has_450k':
-        attr_details['DNA_methylation'].append({
-            'value': '450k',
-            'count': [v['count'] for v in value if v['value'] == 'True'][0]
-        })
-    if key == 'has_HiSeq_miRnaSeq':
-        attr_details['miRNA_sequencing'].append({
-            'value': 'Illumina HiSeq',
-            'count': [v['count'] for v in value if v['value'] == 'True'][0]
-        })
-    if key == 'has_GA_miRNASeq':
-        attr_details['miRNA_sequencing'].append({
-            'value': 'Illumina GA',
-            'count': [v['count'] for v in value if v['value'] == 'True'][0]
-        })
-    if key == 'has_UNC_HiSeq_RNASeq':
-        attr_details['RNA_sequencing'].append({
-            'value': 'UNC Illumina HiSeq',
-            'count': [v['count'] for v in value if v['value'] == 'True'][0]
-        })
-    if key == 'has_UNC_GA_RNASeq':
-        attr_details['RNA_sequencing'].append({
-            'value': 'UNC Illumina GA',
-            'count': [v['count'] for v in value if v['value'] == 'True'][0]
-        })
-    if key == 'has_BCGSC_HiSeq_RNASeq':
-        attr_details['RNA_sequencing'].append({
-            'value': 'BCGSC Illumina HiSeq',
-            'count': [v['count'] for v in value if v['value'] == 'True'][0]
-        })
-    if key == 'has_BCGSC_GA_RNASeq':
-        attr_details['RNA_sequencing'].append({
-            'value': 'BCGSC Illumina GA',
-            'count': [v['count'] for v in value if v['value'] == 'True'][0]
-        })
-
-
 @login_required
 def variable_fav_detail_for_new_workbook(request, variable_fav_id):
     return variable_fav_detail(request=request, variable_fav_id=variable_fav_id, new_workbook=True)
+
 
 @login_required
 def variable_fav_detail(request, variable_fav_id, workbook_id=0, worksheet_id=0, new_workbook=0):
@@ -145,7 +95,7 @@ def variable_fav_detail(request, variable_fav_id, workbook_id=0, worksheet_id=0,
     if new_workbook :
         context['new_workbook'] = True
 
-    if workbook_id :
+    if workbook_id:
         try:
             workbook_model       = Workbook.objects.get(id=workbook_id)
             context['workbook']  = workbook_model
@@ -164,17 +114,21 @@ def variable_fav_detail(request, variable_fav_id, workbook_id=0, worksheet_id=0,
 
     return render(request, template, context)
 
+
 @login_required
 def variable_fav_edit_for_new_workbook(request):
     return initialize_variable_selection_page(request, new_workbook=True)
+
 
 @login_required
 def variable_fav_edit_for_existing_workbook(request, workbook_id=0, worksheet_id=0, variable_fav_id=0):
     return initialize_variable_selection_page(request, workbook_id=workbook_id, worksheet_id=worksheet_id)
 
+
 @login_required
 def variable_fav_edit(request, variable_fav_id=0):
     return initialize_variable_selection_page(request, variable_list_id=variable_fav_id)
+
 
 @login_required
 def initialize_variable_selection_page(request,
@@ -188,7 +142,7 @@ def initialize_variable_selection_page(request,
     worksheet_model = None
     existing_variable_list = None
 
-    if workbook_id != 0 :
+    if workbook_id != 0:
         try:
             workbook_model       = Workbook.objects.get(id=workbook_id)
             context['workbook']  = workbook_model
@@ -201,6 +155,9 @@ def initialize_variable_selection_page(request,
     if variable_list_id != 0:
         try:
             existing_variable_list = request.user.variablefavorite_set.get(id=variable_list_id)
+            if existing_variable_list.version != 'v2':
+                messages.warning(request, 'Version 1 Variable lists cannot be edited due to changes in available variables.')
+                return redirect('variables')
         except ObjectDoesNotExist:
             messages.error(request, 'The variable favorite you were looking for does not exist.')
             return redirect('variables')
@@ -230,64 +187,57 @@ def initialize_variable_selection_page(request,
         type['label'] = datatype_labels[type['datatype']]
 
         #remove gene in fields
-        if debug: print >> sys.stdout, '[STATUS] attrs ' + json.dumps(type['fields'])
         for index, field in enumerate(type['fields']):
             if field['label'] == "Gene":
                 del type['fields'][index]
 
-    #get user projects and variables
-    ownedProjects = request.user.project_set.all().filter(active=True)
-    sharedProjects = Project.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
-    projects = ownedProjects | sharedProjects
-    projects = projects.distinct()
 
-    #get user favorites
-    favorite_list = VariableFavorite.get_list(user=request.user)
-    for fav in favorite_list :
+    # Public programs
+    isb_user = Django_User.objects.filter(username='isb').first()
+    public_programs = Program.objects.filter(active=True, is_public=True, owner=isb_user)
+
+    # User programs
+    ownedPrograms = request.user.program_set.all().filter(active=True)
+    sharedPrograms = Program.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
+    programs = ownedPrograms | sharedPrograms
+    user_programs = programs.distinct()
+
+    # User favorites
+    favorite_list = VariableFavorite.get_list(user=request.user, version='v2')
+    for fav in favorite_list:
         fav.variables = fav.get_variables()
 
-    #TODO common variables need to be refactored into an adaptive list based on common used
-    displayed_common_variables = [
-        {'name' : "vital_status",                          'code' : 'CLIN:vital_status',                                'type' : 'C'},
-        {'name' : "gender",                                'code' : 'CLIN:gender',                                      'type' : 'C'},
-        {'name' : "age_at_initial_pathologic_diagnosis",   'code' : 'CLIN:age_at_initial_pathologic_diagnosis',         'type' : 'N'},
-        {'name' : "tumor_tissue_site",                     'code' : 'CLIN:tumor_tissue_site',                           'type' : 'C'},
-        {'name' : "histological_type",                     'code' : 'CLIN:histological_type',                           'type' : 'C'},
-        {'name' : "other_diagnosis",                       'code' : 'CLIN:other_dx',                                    'type' : 'C'},
-        {'name' : "tumor_status",                          'code' : 'CLIN:person_neoplasm_cancer_status',               'type' : 'C'},
-        {'name' : "new_tumor_event_after_initial_treatment", 'code' : 'CLIN:new_tumor_event_after_initial_treatment',   'type' : 'C'},
-        {'name' : "histological_grade",                    'code' : 'CLIN:neoplasm_histologic_grade',                   'type' : 'C'},
-        {'name' : "residual_tumor",                        'code' : 'CLIN:residual_tumor',                              'type' : 'C'},
-        {'name' : "tobacco_smoking_history",               'code' : 'CLIN:tobacco_smoking_history',                     'type' : 'C'},
-        {'name' : "icd-10",                                'code' : 'CLIN:icd_10',                                      'type' : 'C'},
-        {'name' : "icd-o-3_site",                          'code' : 'CLIN:icd_o_3_site',                                'type' : 'C'},
-        {'name' : "icd-o-3_histology",                     'code' : 'CLIN:icd_o_3_histology',                           'type' : 'C'}
-    ]
-    common_variables = displayed_common_variables
-    TCGA_project    = {"id" : -1, "study" : {"id" :-1, "name" : ""}, "name" : "TCGA"}
-    common_project  = {"id" : -1, "study" : {"id" :-1, "name" : ""}, "name" : "Common", "variables" : common_variables}
+    full_fave_count =  len(VariableFavorite.get_list(user=request.user))
+
+    program_attrs = {}
+
+    for prog in public_programs:
+        program_attrs[prog.id] = fetch_program_attr(prog.id)
+
+    print >> sys.stdout, str(program_attrs)
 
     # users can select from their saved variable favorites
     variable_favorites = VariableFavorite.get_list(request.user)
 
     context = {
         'favorite_list'         : favorite_list,
+        'full_favorite_list_count': full_fave_count,
         'datatype_list'         : datatype_list,
-        'projects'              : projects,
         'data_attr'             : data_attr,
-
+        'public_programs'       : public_programs,
+        'user_programs'         : programs,
         'base_url'                  : settings.BASE_URL,
         'base_api_url'              : settings.BASE_API_URL,
-        'TCGA_project'              : TCGA_project,
-        'common_project'            : common_project,
         'variable_favorites'        : variable_favorites,
         'workbook'                  : workbook_model,
         'worksheet'                 : worksheet_model,
         'existing_variable_list'    : existing_variable_list,
-        'new_workbook'              : new_workbook
+        'new_workbook'              : new_workbook,
+        'program_attrs'         : program_attrs
     }
 
     return render(request, template, context)
+
 
 @login_required
 def variable_fav_delete(request, variable_fav_id):
@@ -306,6 +256,7 @@ def variable_fav_delete(request, variable_fav_id):
 
     return redirect(redirect_url)
 
+
 @login_required
 def variable_fav_copy(request, variable_fav_id):
     redirect_url = reverse('variables')
@@ -322,10 +273,10 @@ def variable_fav_copy(request, variable_fav_id):
 
     return redirect(redirect_url)
 
+
 @login_required
 def variable_fav_save(request, variable_fav_id=0):
     data   = json.loads(request.body)
-    print >> sys.stdout, 'vars as received: '+data['variables'].__str__()
     result = {}
 
     name = data['name']
@@ -352,7 +303,7 @@ def variable_fav_save(request, variable_fav_id=0):
         except ObjectDoesNotExist:
             messages.error(request, 'The gene list you want does not exist.')
             result['error'] = 'You do not have permission to update this gene favorite list'
-    else :
+    else:
         variable_model = VariableFavorite.create(name        = data['name'],
                                                  variables   = data['variables'],
                                                  user        = request.user)

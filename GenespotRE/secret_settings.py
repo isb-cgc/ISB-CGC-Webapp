@@ -16,7 +16,6 @@ SETTINGS = {
             'PASSWORD': os.environ.get('DATABASE_PASSWORD')
         }
     },
-
 }
 
 if os.environ.has_key('DB_SSL_CERT'):
