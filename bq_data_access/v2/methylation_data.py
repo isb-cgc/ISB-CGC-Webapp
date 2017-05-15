@@ -104,6 +104,12 @@ class METHDataQueryHandler(object):
         return data_point['beta_value']
 
     def build_query_for_program(self, feature_def, cohort_table, cohort_id_array, project_id_array):
+        """
+        Returns:
+            Tuple (query_body, run_query).
+            The "query_body" value is the BigQuery query string.
+            The "run_query" is always True.
+        """
         # Generate the 'IN' statement string: (%s, %s, ..., %s)
         cohort_id_stmt = ', '.join([str(cohort_id) for cohort_id in cohort_id_array])
         project_id_stmt = ''
@@ -132,7 +138,7 @@ class METHDataQueryHandler(object):
                                       brk='\n')
 
         logging.debug("BQ_QUERY_METH: " + query)
-        return query
+        return query, True
 
     def build_query(self, project_set, cohort_table, cohort_id_array, project_id_array):
         query = self.build_query_for_program(self.feature_def, cohort_table, cohort_id_array, project_id_array)

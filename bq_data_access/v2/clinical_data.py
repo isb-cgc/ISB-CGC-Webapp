@@ -152,14 +152,23 @@ class ClinicalDataQueryHandler(object):
         return query
 
     def build_query(self, project_set, cohort_table, cohort_id_array, project_id_array):
-        # Find matching tables
+        """
+        Returns:
+            Tuple (query_body, run_query).
+            The "query_body" value is the BigQuery query string.
+            The "run_query" is Boolean indicating whether or not the query should be run at all.
+        """
+        # Find matching tables. A table has to match the program and has to contain the column.
         config_instance = CLINDataSourceConfig.from_dict(BIGQUERY_CONFIG)
         found_tables = []
 
-        for table in config_instance.data_table_list:
-            if table.program in project_set:
-                logger.info("Found matching table: '{}'".format(table.table_id))
-                found_tables.append(table)
+        for table_config in config_instance.data_table_list:
+            schema = TABLE_TO_SCHEMA_MAP[table_config.table_id]
+            column_name_set = set([item['name'] for item in schema])
+
+            if (table_config.program in project_set) and (self.feature_def.column_name in column_name_set):
+                logger.info("Found matching table: '{}'".format(table_config.table_id))
+                found_tables.append(table_config)
 
         # Build a BigQuery statement for each found table configuration
         subqueries = []
@@ -169,21 +178,24 @@ class ClinicalDataQueryHandler(object):
             subquery = self.build_query_for_program(sub_feature_def, cohort_table, cohort_id_array, project_id_array)
             subqueries.append(subquery)
 
-        # Union of subqueries
-        subquery_stmt_template = ",".join(["({})" for x in xrange(len(subqueries))])
-        subquery_stmt = subquery_stmt_template.format(*subqueries)
+        if len(subqueries) == 0:
+            return "", False
+        else:
+            # Union of subqueries
+            subquery_stmt_template = ",".join(["({})" for x in xrange(len(subqueries))])
+            subquery_stmt = subquery_stmt_template.format(*subqueries)
 
-        query_template = "SELECT case_barcode, sample_barcode, value {brk}" \
-                         "FROM ( {brk}" \
-                         "{subqueries}" \
-                         ") {brk}" \
-                         ""
+            query_template = "SELECT case_barcode, sample_barcode, value {brk}" \
+                             "FROM ( {brk}" \
+                             "{subqueries} {brk}" \
+                             ") {brk}" \
+                             ""
 
-        query = query_template.format(brk='\n', subqueries=subquery_stmt)
+            query = query_template.format(brk='\n', subqueries=subquery_stmt)
 
-        logger.debug("BQ_QUERY_CLIN: " + query)
+            logger.debug("BQ_QUERY_CLIN: " + query)
 
-        return query
+            return query, True
 
     @DurationLogged('CLIN', 'UNPACK')
     def unpack_query_response(self, query_result_array):
