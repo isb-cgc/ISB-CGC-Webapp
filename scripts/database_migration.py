@@ -112,15 +112,7 @@ def create_programs_and_projects(debug):
         db = get_mysql_connection()
         cursor = db.cursor()
 
-        isb_userid = None
-
-        cursor.execute("SELECT id FROM auth_user WHERE username = %s AND is_active = 1 AND is_superuser = 1;", (SUPERUSER_NAME,))
-
-        for row in cursor.fetchall():
-            isb_userid = row[0]
-
-        if isb_userid is None:
-            raise Exception("Couldn't retrieve ID for isb user!")
+        isb_userid = User.objects.get(username='isb',is_staff=True,is_superuser=True,is_active=True).id
 
         for prog in programs_to_insert:
             cursor.execute('SELECT * FROM projects_program WHERE name=%s;', (prog,))
@@ -698,10 +690,10 @@ def fix_filters(debug):
             VALUES(%s,%s,%s,%s);
         """
 
-        isb_userid = User.objects.get(name='isb',is_staff=True,is_superuser=True,is_active=True).id
+        isb_userid = User.objects.get(username='isb',is_staff=True,is_superuser=True,is_active=True).id
 
-        tcga_program_id = Program.objects.get(name='TCGA',owner=isb_userid,is_public=True,active=True)
-        ccle_program_id = Program.objects.get(name='CCLE',owner=isb_userid,is_public=True,active=True)
+        tcga_program_id = Program.objects.get(name='TCGA',owner=isb_userid,is_public=True,active=True).id
+        ccle_program_id = Program.objects.get(name='CCLE',owner=isb_userid,is_public=True,active=True).id
 
         ccle_attr = fetch_metadata_value_set(ccle_program_id)
 
@@ -759,20 +751,21 @@ def main():
     # To disable any of these by default, change the default to False
     cmd_line_parser = ArgumentParser(description="Script to migrate the database to the new multi-program format.")
 
-    cmd_line_parser.add_argument('-p', '--create-prog-proj', type=bool, default=False,
-                                 help="Add the program and project entries to the Django tables.")
-
-    cmd_line_parser.add_argument('-c', '--fix-cohort-projects', type=bool, default=False,
-                                 help="Fix any cohort entries to contain the correct project ID")
 
     cmd_line_parser.add_argument('-b', '--debug-mode', type=bool, default=False,
                                  help="Don't execute statements, just print them with their paramter tuples.")
 
-    cmd_line_parser.add_argument('-a', '--attr_displ_table', type=bool, default=False,
-                                 help="Change the program IDs in the metadata attribute display table to this database's programs.")
+    cmd_line_parser.add_argument('-p', '--create-prog-proj', type=bool, default=False,
+                                 help="Add the program and project entries to the Django tables.")
 
     cmd_line_parser.add_argument('-d', '--fix-case-id', type=bool, default=False,
-                                 help="Add case barcodes to the cohorts_samples table for extent cohorts")
+                                 help="Add case barcodes to the cohorts_samples table for extent cohorts and fix CCLE barcodes (which have changed)")
+
+    cmd_line_parser.add_argument('-c', '--fix-cohort-projects', type=bool, default=False,
+                                 help="Fix any cohort entries to contain the correct project ID")
+
+    cmd_line_parser.add_argument('-a', '--attr_displ_table', type=bool, default=False,
+                                 help="Change the program IDs in the metadata attribute display table to this database's programs.")
 
     cmd_line_parser.add_argument('-f', '--fix_filters', type=bool, default=False,
                                  help="Fix the cohorts_filters table to reflext new, multiprogram cohorts")
