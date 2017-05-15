@@ -596,10 +596,10 @@ def fix_filters(debug):
             WHERE name='Project';
         """
 
-        # Study -> project_short_name
+        # Study -> disease_code
         fix_filters_project = """
             UPDATE cohorts_filters
-            SET name='project_short_name'
+            SET name='disease_code'
             WHERE name='Study';
         """
 
