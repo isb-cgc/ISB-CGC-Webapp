@@ -23,8 +23,10 @@ import time
 from MySQLdb import connect, cursors
 from GenespotRE import secret_settings, settings
 from argparse import ArgumentParser
-from cohorts.metadata_helpers import submit_bigquery_job, is_bigquery_job_finished, get_bq_job_results
+from cohorts.metadata_helpers import submit_bigquery_job, is_bigquery_job_finished, get_bq_job_results, fetch_metadata_value_set
+from projects.models import Program
 from google_helpers.bigquery_service import authorize_credentials_with_Google
+from django.contrib.auth.models import User
 from genes.models import GeneSymbol
 from cohorts.views import BQ_ATTEMPT_MAX
 
@@ -288,7 +290,7 @@ def create_programs_and_projects(debug):
         if db and db.open: db.close()
 
 
-# Add case barcodes to the cohorts_samples table (currently not present)
+# Add case barcodes to the cohorts_samples table (currently not present), and fix CCLE's sammple barcodes (which changed)
 def fix_case_barcodes_in_cohorts(debug):
 
     db = None
@@ -374,7 +376,7 @@ def fix_cohort_projects(debug):
                 JOIN {0}_metadata_samples ms
                 ON ms.sample_barcode = cs.sample_barcode
                 JOIN projects_project pp
-                ON ms.project_disease_type = pp.name
+                ON ms.disease_code = pp.name
                 SET cs.project_id = pp.id
                 WHERE pp.program_id = %s;
             """
@@ -591,6 +593,8 @@ def fix_filters(debug):
         db = get_mysql_connection()
         cursor = db.cursor()
 
+        db.autocommit(True)
+
         # Project -> Program
         fix_filters_program = """
             UPDATE cohorts_filters
@@ -644,10 +648,10 @@ def fix_filters(debug):
                     LEFT JOIN (
                         SELECT DISTINCT cs.cohort_id
                         FROM cohorts_samples cs
-                        WHERE cs.sample_barcode LIKE 'CCLE%'
+                        WHERE cs.sample_barcode LIKE 'CCLE%%'
                     ) ccle
                     ON tcga.cohort_id = ccle.cohort_id
-                    WHERE tcga.sample_barcode NOT LIKE 'CCLE%' AND ccle.cohort_id IS NULL
+                    WHERE tcga.sample_barcode NOT LIKE 'CCLE%%' AND ccle.cohort_id IS NULL
                 )
             ) tcga_cf
             ON tcga_cf.id = cf.id
@@ -666,10 +670,10 @@ def fix_filters(debug):
                     LEFT JOIN (
                         SELECT DISTINCT cs.cohort_id
                         FROM cohorts_samples cs
-                        WHERE cs.sample_barcode NOT LIKE 'CCLE%'
+                        WHERE cs.sample_barcode NOT LIKE 'CCLE%%'
                     ) tcga
                     ON tcga.cohort_id = ccle.cohort_id
-                    WHERE ccle.sample_barcode LIKE 'CCLE%' AND tcga.cohort_id IS NULL
+                    WHERE ccle.sample_barcode LIKE 'CCLE%%' AND tcga.cohort_id IS NULL
                 )
             ) ccle_cf
             ON ccle_cf.id = cf.id
@@ -693,44 +697,13 @@ def fix_filters(debug):
             INSERT INTO cohorts_filters(name,value,resulting_cohort_id,program_id)
             VALUES(%s,%s,%s,%s);
         """
-        cursor.execute("""
-            SELECT *
-            FROM CCLE_metadata_attrs;
-        """)
 
-        ccle_attr = []
+        isb_userid = User.objects.get(name='isb',is_staff=True,is_superuser=True,is_active=True).id
 
-        for row in cursor.fetchall():
-            ccle_attr.append(row[1])
+        tcga_program_id = Program.objects.get(name='TCGA',owner=isb_userid,is_public=True,active=True)
+        ccle_program_id = Program.objects.get(name='CCLE',owner=isb_userid,is_public=True,active=True)
 
-        isb_userid = None
-
-        cursor.execute("SELECT id FROM auth_user WHERE username = %s AND is_active = 1 AND is_superuser = 1;", (SUPERUSER_NAME,))
-
-        for row in cursor.fetchall():
-            isb_userid = row[0]
-
-        if isb_userid is None:
-            raise Exception("Couldn't retrieve ID for isb user!")
-
-        tcga_program_id = None
-        ccle_program_id = None
-
-        cursor.execute("SELECT id FROM projects_program WHERE active=1 AND is_public=1 AND name=%s AND owner_id=%s;", ("TCGA",isb_userid,))
-
-        for row in cursor.fetchall():
-            tcga_program_id = row[0]
-
-        if not tcga_program_id:
-            raise Exception("Could not retrieve TCGA program ID!")
-
-        cursor.execute("SELECT id FROM projects_program WHERE active=1 AND is_public=1 AND name=%s AND owner_id=%s;", ("CCLE", isb_userid,))
-
-        for row in cursor.fetchall():
-            ccle_program_id = row[0]
-
-        if not ccle_program_id:
-            raise Exception("Could not retrieve CCLE program ID!")
+        ccle_attr = fetch_metadata_value_set(ccle_program_id)
 
         # Fix CCLE-only cohort filters
         if debug:
@@ -766,8 +739,8 @@ def fix_filters(debug):
                     # First, apply TCGA as the program ID
                     cursor.execute(add_filter_program, (tcga_program_id, filter_row[0],))
 
-                    # Then, check to see if CCLE has this attr - if yes, duplicate the filter to CCLE
-                    if filter_row[1] in ccle_attr:
+                    # Then, check to see if CCLE has this attr and value - if yes, duplicate the filter to CCLE
+                    if filter_row[1] in ccle_attr and filter_row[2] in ccle_attr[filter_row[1]]['values']:
                         cursor.execute(insert_filter, (filter_row[1], filter_row[2], row[0], ccle_program_id,))
 
         db.commit()
