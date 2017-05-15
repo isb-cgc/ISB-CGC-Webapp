@@ -64,7 +64,7 @@ def create_programs_and_projects(debug):
     insert_programs = "INSERT INTO projects_program (name, active, last_date_saved, is_public, owner_id) " + \
                       "VALUES (%s,%s,%s,%s,%s);"
 
-    get_project_list = "SELECT project_short_name, name FROM {0} WHERE endpoint_type='current';"
+    get_project_list = "SELECT DISTINCT project_short_name, name FROM {0};"
 
     insert_projects = "INSERT INTO projects_project (name, description, active, last_date_saved, owner_id, program_id) " + \
                      "VALUES (%s,%s,%s,%s,%s,%s);"
@@ -112,6 +112,8 @@ def create_programs_and_projects(debug):
         db = get_mysql_connection()
         cursor = db.cursor()
 
+        db.autocommit(True)
+
         isb_userid = User.objects.get(username='isb',is_staff=True,is_superuser=True,is_active=True).id
 
         for prog in programs_to_insert:
@@ -128,9 +130,6 @@ def create_programs_and_projects(debug):
                     print >> sys.stdout, "with values: " + str(values)
                 else:
                     cursor.execute(insert_programs, values)
-
-        if not debug:
-            db.commit()
 
         for prog in program_tables_to_insert:
             prog_tables = program_tables_to_insert[prog]
@@ -240,8 +239,6 @@ def create_programs_and_projects(debug):
                 else:
                     cursor.execute(insert_metadata_tables.format(insert_metadata_tables_opt_fields,param_set), values)
 
-        if not debug: db.commit()
-
         for prog in projects_to_insert:
 
             prog_proj_table = prog+'_metadata_project'
@@ -265,6 +262,7 @@ def create_programs_and_projects(debug):
                 if len(check):
                     print >> sys.stdout, "Project "+row[0]+" is already in the projects_project table, skipping"
                 else:
+                    print >> sys.stdout, "Inserting project "+row[0]
                     insertTime = time.strftime('%Y-%m-%d %H:%M:%S')
                     values = (row[0][len(prog_leader):], row[1], True, insertTime, isb_userid, prog_id,)
                     if debug:
@@ -272,8 +270,6 @@ def create_programs_and_projects(debug):
                         print >> sys.stdout, "Values: " + str(values)
                     else:
                         cursor.execute(insert_projects, values)
-
-            if not debug: db.commit()
 
     except Exception as e:
         print >> sys.stdout, traceback.format_exc()
@@ -299,30 +295,35 @@ def fix_case_barcodes_in_cohorts(debug):
     fix_ccle_case_barcodes = """
         UPDATE cohorts_samples cs
         JOIN (
-            SELECT SampleBarcode AS sms, cms.sample_barcode, cms.case_barcode
+            SELECT SampleBarcode AS sms, cms.sample_barcode new_sample_barcode, cms.case_barcode new_case_barcode
             FROM metadata_samples ms
             JOIN CCLE_metadata_samples cms
             ON cms.case_barcode = ms.ParticipantBarcode
             WHERE SampleBarcode LIKE 'CCLE%'
         ) ms
         ON ms.sms = cs.sample_barcode
-        SET cs.sample_barcode = ms.sample_barcode, cs.case_barcode = ms.case_barcode
+        SET cs.sample_barcode = ms.new_sample_barcode, cs.case_barcode = ms.new_case_barcode
         WHERE cs.sample_barcode LIKE 'CCLE%';
     """
 
     try:
         db = get_mysql_connection()
         cursor = db.cursor()
+        db.autocommit(True)
 
         if debug:
             print >> sys.stdout, "Executing statement: "+fix_tcga_case_barcodes
         else:
+            print >> sys.stdout, "[STATUS] Fixing TCGA case barcodes..."
             cursor.execute(fix_tcga_case_barcodes)
+            print >> sys.stdout, "[STATUS] ...done."
 
         if debug:
             print >> sys.stdout, "Executing statement: " + fix_ccle_case_barcodes
         else:
+            print >> sys.stdout, "[STATUS] Fixing CCLE case barcodes..."
             cursor.execute(fix_ccle_case_barcodes)
+            print >> sys.stdout, "[STATUS] ...done."
 
     except Exception as e:
         print >> sys.stdout, traceback.format_exc()
@@ -341,6 +342,7 @@ def fix_cohort_projects(debug):
     try:
         db = get_mysql_connection()
         cursor = db.cursor()
+        db.autocommit(True)
 
         isb_userid = None
 
@@ -735,7 +737,6 @@ def fix_filters(debug):
                     if filter_row[1] in ccle_attr and filter_row[2] in ccle_attr[filter_row[1]]['values']:
                         cursor.execute(insert_filter, (filter_row[1], filter_row[2], row[0], ccle_program_id,))
 
-        db.commit()
 
     except Exception as e:
         print >> sys.stdout, traceback.format_exc()
@@ -768,7 +769,7 @@ def main():
                                  help="Change the program IDs in the metadata attribute display table to this database's programs.")
 
     cmd_line_parser.add_argument('-f', '--fix_filters', type=bool, default=False,
-                                 help="Fix the cohorts_filters table to reflext new, multiprogram cohorts")
+                                 help="Fix the cohorts_filters table to reflect new, multiprogram cohorts")
 
     cmd_line_parser.add_argument('-g', '--fix_genes', type=bool, default=False,
                                  help="Fix the genes_genesymbols table to include a type setting and add in miRNAs")
