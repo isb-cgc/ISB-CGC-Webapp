@@ -21,6 +21,7 @@ import traceback
 import sys
 
 from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
 
 from google_helpers.bigquery_service_v2 import BigQueryServiceSupport
 from bq_data_access.v2.data_access import FeatureVectorBigQueryBuilder
@@ -39,6 +40,7 @@ def get_program_set_for_seqpeek_plot(cohort_id_array):
     return {'tcga'}
 
 
+@login_required
 def seqpeek_view_data(request):
     try:
         hugo_symbol = request.GET.get('hugo_symbol', None)

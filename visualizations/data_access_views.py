@@ -23,6 +23,9 @@ import math
 import traceback
 import sys
 
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+
 from cohorts.metadata_helpers import get_sql_connection
 from bq_data_access.v1.pairwise import PairwiseInputVector, Pairwise
 from bq_data_access.v1.cohort_cloudsql import CloudSQLCohortAccess
@@ -32,7 +35,6 @@ from bq_data_access.v1.feature_value_types import ValueType, is_log_transformabl
 from bq_data_access.v1.utils import DurationLogged
 from bq_data_access.v1.utils import VectorMergeSupport
 from cohorts.metadata_helpers import fetch_isbcgc_project_set
-from django.http import JsonResponse
 from projects.models import Project
 
 logger = logging.getLogger(__name__)
@@ -398,6 +400,7 @@ def get_confirmed_project_ids_for_cohorts(cohort_id_array):
     return confirmed_study_ids
 
 
+@login_required
 def data_access_for_plot(request):
     """ Used by the web application."""
     try:

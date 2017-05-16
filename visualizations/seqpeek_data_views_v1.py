@@ -20,6 +20,7 @@ import logging as logger
 import traceback
 import sys
 
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 
 from bq_data_access.v1.data_access import get_feature_vectors_tcga_only
@@ -34,6 +35,7 @@ def build_gnab_feature_id(gene_label):
     return "GNAB:{gene_label}:variant_classification".format(gene_label=gene_label)
 
 
+@login_required
 def seqpeek_view_data(request):
     try:
         hugo_symbol = request.GET.get('hugo_symbol', None)
