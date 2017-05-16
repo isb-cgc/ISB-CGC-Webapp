@@ -24,7 +24,7 @@ from MySQLdb import connect, cursors
 from GenespotRE import secret_settings, settings
 from argparse import ArgumentParser
 from cohorts.metadata_helpers import submit_bigquery_job, is_bigquery_job_finished, get_bq_job_results, fetch_metadata_value_set
-from projects.models import Program
+from projects.models import Program, Public_Data_Tables, Public_Metadata_Tables, Public_Annotation_Tables
 from google_helpers.bigquery_service import authorize_credentials_with_Google
 from django.contrib.auth.models import User
 from genes.models import GeneSymbol
@@ -117,9 +117,7 @@ def create_programs_and_projects(debug):
         isb_userid = User.objects.get(username='isb',is_staff=True,is_superuser=True,is_active=True).id
 
         for prog in programs_to_insert:
-            cursor.execute('SELECT * FROM projects_program WHERE name=%s;', (prog,))
-            check = cursor.fetchall()
-            if len(check):
+            if len(Program.objects.filter(owner=isb_userid,is_public=True,active=True,name=prog)):
                 print >> sys.stdout, "Found program "+prog+", insert skipped."
             else:
                 insertTime = time.strftime('%Y-%m-%d %H:%M:%S')
@@ -134,20 +132,13 @@ def create_programs_and_projects(debug):
         for prog in program_tables_to_insert:
             prog_tables = program_tables_to_insert[prog]
 
-            prog_id = None
+            prog_obj = Program.objects.get(owner=isb_userid,is_public=True,active=True,name=prog)
+            prog_id = prog_obj.id
 
-            if not debug:
-                cursor.execute('SELECT id FROM projects_program WHERE name=%s AND active = 1 AND is_public = 1 AND owner_id = %s;', (prog, isb_userid,))
-                prog_id = cursor.fetchall()[0][0]
-
-            cursor.execute('SELECT id FROM projects_public_data_tables WHERE program_id = %s;', (prog_id,))
-
-            check = cursor.fetchall()
-
-            data_tables = None
+            check = Public_Data_Tables.objects.filter(program__name=prog)
 
             if len(check):
-                data_tables = check[0][0]
+                data_tables = check[0].id
             else:
                 for build in prog_tables['data']:
                     values = (prog+'_metadata_data_'+build,)
@@ -169,12 +160,10 @@ def create_programs_and_projects(debug):
 
             annot_tables = None
 
-            cursor.execute('SELECT id FROM projects_public_annotation_tables WHERE program_id = %s;', (prog_id,))
-
-            check = cursor.fetchall()
+            check = Public_Annotation_Tables.objects.filter(program__name=prog)
 
             if len(check):
-                annot_tables = check[0][0]
+                annot_tables = check[0].id
             else:
                 if 'annot' in prog_tables:
                     values = ()
@@ -208,8 +197,7 @@ def create_programs_and_projects(debug):
 
             insert_metadata_tables_opt_fields = ''
 
-            cursor.execute('SELECT * FROM projects_public_metadata_tables WHERE id=%s;', (prog_id,))
-            results = cursor.fetchall()
+            results = Public_Metadata_Tables.objects.filter(program__name=prog)
             is_update = len(results) > 0
 
             values = (prog + '_metadata_samples', prog + '_metadata_attrs',
@@ -255,7 +243,7 @@ def create_programs_and_projects(debug):
             prog_leader = prog+'-'
 
             for row in cursor.fetchall():
-                cursor.execute('SELECT * FROM projects_project WHERE program_id = %s AND name=%s;', (prog_id, row[0][len(prog_leader):],))
+                cursor.execute('SELECT * FROM projects_project WHERE program_id = %s AND active=1 AND name=%s;', (prog_id, row[0][len(prog_leader):],))
 
                 check = cursor.fetchall()
 
@@ -354,7 +342,7 @@ def fix_cohort_projects(debug):
         if isb_userid is None:
             raise Exception("Couldn't retrieve ID for isb user!")
 
-        program_cohorts_to_update = ['CCLE']
+        program_cohorts_to_update = ['CCLE','TCGA']
 
         for prog in program_cohorts_to_update:
             cursor.execute("SELECT id FROM projects_program WHERE name=%s and active = 1 and owner_id = %s;", (prog, isb_userid,))
@@ -372,7 +360,7 @@ def fix_cohort_projects(debug):
                 JOIN projects_project pp
                 ON ms.disease_code = pp.name
                 SET cs.project_id = pp.id
-                WHERE pp.program_id = %s;
+                WHERE pp.program_id = %s AND pp.active = 1;
             """
 
         values = (program_id, )
