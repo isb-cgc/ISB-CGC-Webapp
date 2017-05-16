@@ -16,7 +16,7 @@ limitations under the License.
 
 """
 
-import logging as logger
+import logging
 from re import compile as re_compile
 
 from bq_data_access.v2.errors import FeatureNotFoundException
@@ -27,6 +27,8 @@ from scripts.feature_def_gen.clinical_features import CLINDataSourceConfig
 from bq_data_access.v2.schema.program_schemas import TABLE_TO_SCHEMA_MAP
 
 CLINICAL_FEATURE_TYPE = 'CLIN'
+
+logger = logging.getLogger(__name__)
 
 
 class InvalidClinicalFeatureIDException(Exception):
@@ -186,10 +188,8 @@ class ClinicalDataQueryHandler(object):
             subquery_stmt = subquery_stmt_template.format(*subqueries)
 
             query_template = "SELECT case_barcode, sample_barcode, value {brk}" \
-                             "FROM ( {brk}" \
-                             "{subqueries} {brk}" \
-                             ") {brk}" \
-                             ""
+                             "FROM {brk}" \
+                             "{subqueries} {brk}"
 
             query = query_template.format(brk='\n', subqueries=subquery_stmt)
 
