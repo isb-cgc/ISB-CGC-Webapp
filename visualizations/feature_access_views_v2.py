@@ -20,6 +20,7 @@ import logging
 import sys
 import traceback
 
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 
 from bq_data_access.v2.clinical_data import CLINICAL_FEATURE_TYPE
@@ -61,6 +62,7 @@ class FeatureDefinitionSearcherFactory(object):
         raise InvalidDataTypeException("Invalid datatype '{datatype}'".format(datatype=datatype))
 
 
+@login_required
 def feature_search(request):
     """ Used by the web application."""
     try:
@@ -107,6 +109,7 @@ def feature_search(request):
         return JsonResponse({'error': e}, status=500)
 
 
+@login_required
 def feature_field_search(request):
     """ Used by the web application."""
     try:
@@ -136,6 +139,7 @@ def feature_field_search(request):
         raise JsonResponse({'error': e}, status=500)
 
 
+@login_required
 def clinical_feature_get(request):
     try:
         column_name_list = request.GET.getlist('column_name', None)

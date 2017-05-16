@@ -21,6 +21,7 @@ import logging
 import traceback
 import sys
 
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 
 from cohorts.metadata_helpers import get_sql_connection
@@ -111,6 +112,7 @@ def get_confirmed_project_ids_for_cohorts(cohort_id_array):
     return confirmed_study_ids
 
 
+@login_required
 def data_access_for_plot(request):
     """
     Used by the web application.
