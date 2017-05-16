@@ -24,7 +24,7 @@ from MySQLdb import connect, cursors
 from GenespotRE import secret_settings, settings
 from argparse import ArgumentParser
 from cohorts.metadata_helpers import submit_bigquery_job, is_bigquery_job_finished, get_bq_job_results, fetch_metadata_value_set
-from projects.models import Program
+from projects.models import Program, Public_Data_Tables, Public_Metadata_Tables, Public_Annotation_Tables
 from google_helpers.bigquery_service import authorize_credentials_with_Google
 from django.contrib.auth.models import User
 from genes.models import GeneSymbol
@@ -64,7 +64,7 @@ def create_programs_and_projects(debug):
     insert_programs = "INSERT INTO projects_program (name, active, last_date_saved, is_public, owner_id) " + \
                       "VALUES (%s,%s,%s,%s,%s);"
 
-    get_project_list = "SELECT project_short_name, name FROM {0} WHERE endpoint_type='current';"
+    get_project_list = "SELECT DISTINCT project_short_name, name FROM {0};"
 
     insert_projects = "INSERT INTO projects_project (name, description, active, last_date_saved, owner_id, program_id) " + \
                      "VALUES (%s,%s,%s,%s,%s,%s);"
@@ -112,20 +112,12 @@ def create_programs_and_projects(debug):
         db = get_mysql_connection()
         cursor = db.cursor()
 
-        isb_userid = None
+        db.autocommit(True)
 
-        cursor.execute("SELECT id FROM auth_user WHERE username = %s AND is_active = 1 AND is_superuser = 1;", (SUPERUSER_NAME,))
-
-        for row in cursor.fetchall():
-            isb_userid = row[0]
-
-        if isb_userid is None:
-            raise Exception("Couldn't retrieve ID for isb user!")
+        isb_userid = User.objects.get(username='isb',is_staff=True,is_superuser=True,is_active=True).id
 
         for prog in programs_to_insert:
-            cursor.execute('SELECT * FROM projects_program WHERE name=%s;', (prog,))
-            check = cursor.fetchall()
-            if len(check):
+            if len(Program.objects.filter(owner=isb_userid,is_public=True,active=True,name=prog)):
                 print >> sys.stdout, "Found program "+prog+", insert skipped."
             else:
                 insertTime = time.strftime('%Y-%m-%d %H:%M:%S')
@@ -137,26 +129,16 @@ def create_programs_and_projects(debug):
                 else:
                     cursor.execute(insert_programs, values)
 
-        if not debug:
-            db.commit()
-
         for prog in program_tables_to_insert:
             prog_tables = program_tables_to_insert[prog]
 
-            prog_id = None
+            prog_obj = Program.objects.get(owner=isb_userid,is_public=True,active=True,name=prog)
+            prog_id = prog_obj.id
 
-            if not debug:
-                cursor.execute('SELECT id FROM projects_program WHERE name=%s AND active = 1 AND is_public = 1 AND owner_id = %s;', (prog, isb_userid,))
-                prog_id = cursor.fetchall()[0][0]
-
-            cursor.execute('SELECT id FROM projects_public_data_tables WHERE program_id = %s;', (prog_id,))
-
-            check = cursor.fetchall()
-
-            data_tables = None
+            check = Public_Data_Tables.objects.filter(program__name=prog)
 
             if len(check):
-                data_tables = check[0][0]
+                data_tables = check[0].id
             else:
                 for build in prog_tables['data']:
                     values = (prog+'_metadata_data_'+build,)
@@ -178,12 +160,10 @@ def create_programs_and_projects(debug):
 
             annot_tables = None
 
-            cursor.execute('SELECT id FROM projects_public_annotation_tables WHERE program_id = %s;', (prog_id,))
-
-            check = cursor.fetchall()
+            check = Public_Annotation_Tables.objects.filter(program__name=prog)
 
             if len(check):
-                annot_tables = check[0][0]
+                annot_tables = check[0].id
             else:
                 if 'annot' in prog_tables:
                     values = ()
@@ -217,8 +197,7 @@ def create_programs_and_projects(debug):
 
             insert_metadata_tables_opt_fields = ''
 
-            cursor.execute('SELECT * FROM projects_public_metadata_tables WHERE id=%s;', (prog_id,))
-            results = cursor.fetchall()
+            results = Public_Metadata_Tables.objects.filter(program__name=prog)
             is_update = len(results) > 0
 
             values = (prog + '_metadata_samples', prog + '_metadata_attrs',
@@ -248,8 +227,6 @@ def create_programs_and_projects(debug):
                 else:
                     cursor.execute(insert_metadata_tables.format(insert_metadata_tables_opt_fields,param_set), values)
 
-        if not debug: db.commit()
-
         for prog in projects_to_insert:
 
             prog_proj_table = prog+'_metadata_project'
@@ -266,13 +243,14 @@ def create_programs_and_projects(debug):
             prog_leader = prog+'-'
 
             for row in cursor.fetchall():
-                cursor.execute('SELECT * FROM projects_project WHERE program_id = %s AND name=%s;', (prog_id, row[0][len(prog_leader):],))
+                cursor.execute('SELECT * FROM projects_project WHERE program_id = %s AND active=1 AND name=%s;', (prog_id, row[0][len(prog_leader):],))
 
                 check = cursor.fetchall()
 
                 if len(check):
                     print >> sys.stdout, "Project "+row[0]+" is already in the projects_project table, skipping"
                 else:
+                    print >> sys.stdout, "Inserting project "+row[0]
                     insertTime = time.strftime('%Y-%m-%d %H:%M:%S')
                     values = (row[0][len(prog_leader):], row[1], True, insertTime, isb_userid, prog_id,)
                     if debug:
@@ -280,8 +258,6 @@ def create_programs_and_projects(debug):
                         print >> sys.stdout, "Values: " + str(values)
                     else:
                         cursor.execute(insert_projects, values)
-
-            if not debug: db.commit()
 
     except Exception as e:
         print >> sys.stdout, traceback.format_exc()
@@ -307,30 +283,35 @@ def fix_case_barcodes_in_cohorts(debug):
     fix_ccle_case_barcodes = """
         UPDATE cohorts_samples cs
         JOIN (
-            SELECT SampleBarcode AS sms, cms.sample_barcode, cms.case_barcode
+            SELECT SampleBarcode AS sms, cms.sample_barcode new_sample_barcode, cms.case_barcode new_case_barcode
             FROM metadata_samples ms
             JOIN CCLE_metadata_samples cms
             ON cms.case_barcode = ms.ParticipantBarcode
             WHERE SampleBarcode LIKE 'CCLE%'
         ) ms
         ON ms.sms = cs.sample_barcode
-        SET cs.sample_barcode = ms.sample_barcode, cs.case_barcode = ms.case_barcode
+        SET cs.sample_barcode = ms.new_sample_barcode, cs.case_barcode = ms.new_case_barcode
         WHERE cs.sample_barcode LIKE 'CCLE%';
     """
 
     try:
         db = get_mysql_connection()
         cursor = db.cursor()
+        db.autocommit(True)
 
         if debug:
             print >> sys.stdout, "Executing statement: "+fix_tcga_case_barcodes
         else:
+            print >> sys.stdout, "[STATUS] Fixing TCGA case barcodes..."
             cursor.execute(fix_tcga_case_barcodes)
+            print >> sys.stdout, "[STATUS] ...done."
 
         if debug:
             print >> sys.stdout, "Executing statement: " + fix_ccle_case_barcodes
         else:
+            print >> sys.stdout, "[STATUS] Fixing CCLE case barcodes..."
             cursor.execute(fix_ccle_case_barcodes)
+            print >> sys.stdout, "[STATUS] ...done."
 
     except Exception as e:
         print >> sys.stdout, traceback.format_exc()
@@ -349,6 +330,7 @@ def fix_cohort_projects(debug):
     try:
         db = get_mysql_connection()
         cursor = db.cursor()
+        db.autocommit(True)
 
         isb_userid = None
 
@@ -360,7 +342,7 @@ def fix_cohort_projects(debug):
         if isb_userid is None:
             raise Exception("Couldn't retrieve ID for isb user!")
 
-        program_cohorts_to_update = ['CCLE']
+        program_cohorts_to_update = ['CCLE','TCGA']
 
         for prog in program_cohorts_to_update:
             cursor.execute("SELECT id FROM projects_program WHERE name=%s and active = 1 and owner_id = %s;", (prog, isb_userid,))
@@ -378,7 +360,7 @@ def fix_cohort_projects(debug):
                 JOIN projects_project pp
                 ON ms.disease_code = pp.name
                 SET cs.project_id = pp.id
-                WHERE pp.program_id = %s;
+                WHERE pp.program_id = %s AND pp.active = 1;
             """
 
         values = (program_id, )
@@ -602,10 +584,10 @@ def fix_filters(debug):
             WHERE name='Project';
         """
 
-        # Study -> project_short_name
+        # Study -> disease_code
         fix_filters_project = """
             UPDATE cohorts_filters
-            SET name='project_short_name'
+            SET name='disease_code'
             WHERE name='Study';
         """
 
@@ -698,10 +680,10 @@ def fix_filters(debug):
             VALUES(%s,%s,%s,%s);
         """
 
-        isb_userid = User.objects.get(name='isb',is_staff=True,is_superuser=True,is_active=True).id
+        isb_userid = User.objects.get(username='isb',is_staff=True,is_superuser=True,is_active=True).id
 
-        tcga_program_id = Program.objects.get(name='TCGA',owner=isb_userid,is_public=True,active=True)
-        ccle_program_id = Program.objects.get(name='CCLE',owner=isb_userid,is_public=True,active=True)
+        tcga_program_id = Program.objects.get(name='TCGA',owner=isb_userid,is_public=True,active=True).id
+        ccle_program_id = Program.objects.get(name='CCLE',owner=isb_userid,is_public=True,active=True).id
 
         ccle_attr = fetch_metadata_value_set(ccle_program_id)
 
@@ -743,7 +725,6 @@ def fix_filters(debug):
                     if filter_row[1] in ccle_attr and filter_row[2] in ccle_attr[filter_row[1]]['values']:
                         cursor.execute(insert_filter, (filter_row[1], filter_row[2], row[0], ccle_program_id,))
 
-        db.commit()
 
     except Exception as e:
         print >> sys.stdout, traceback.format_exc()
@@ -759,23 +740,24 @@ def main():
     # To disable any of these by default, change the default to False
     cmd_line_parser = ArgumentParser(description="Script to migrate the database to the new multi-program format.")
 
-    cmd_line_parser.add_argument('-p', '--create-prog-proj', type=bool, default=False,
-                                 help="Add the program and project entries to the Django tables.")
-
-    cmd_line_parser.add_argument('-c', '--fix-cohort-projects', type=bool, default=False,
-                                 help="Fix any cohort entries to contain the correct project ID")
 
     cmd_line_parser.add_argument('-b', '--debug-mode', type=bool, default=False,
                                  help="Don't execute statements, just print them with their paramter tuples.")
 
+    cmd_line_parser.add_argument('-p', '--create-prog-proj', type=bool, default=False,
+                                 help="Add the program and project entries to the Django tables.")
+
+    cmd_line_parser.add_argument('-d', '--fix-case-id', type=bool, default=False,
+                                 help="Add case barcodes to the cohorts_samples table for extent cohorts and fix CCLE barcodes (which have changed)")
+
+    cmd_line_parser.add_argument('-c', '--fix-cohort-projects', type=bool, default=False,
+                                 help="Fix any cohort entries to contain the correct project ID")
+
     cmd_line_parser.add_argument('-a', '--attr_displ_table', type=bool, default=False,
                                  help="Change the program IDs in the metadata attribute display table to this database's programs.")
 
-    cmd_line_parser.add_argument('-d', '--fix-case-id', type=bool, default=False,
-                                 help="Add case barcodes to the cohorts_samples table for extent cohorts")
-
     cmd_line_parser.add_argument('-f', '--fix_filters', type=bool, default=False,
-                                 help="Fix the cohorts_filters table to reflext new, multiprogram cohorts")
+                                 help="Fix the cohorts_filters table to reflect new, multiprogram cohorts")
 
     cmd_line_parser.add_argument('-g', '--fix_genes', type=bool, default=False,
                                  help="Fix the genes_genesymbols table to include a type setting and add in miRNAs")
