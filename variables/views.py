@@ -24,6 +24,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from bq_data_access.v1.feature_search.util import SearchableFieldHelper
 from bq_data_access.v2.feature_search.util import SearchableFieldHelper as SearchableFieldHelper_v2
+from bq_data_access.v2.feature_search.clinical_schema_utils import ClinicalColumnFeatureSupport
 from models import VariableFavorite
 from workbooks.models import Workbook, Worksheet
 from projects.models import Program
@@ -213,8 +214,15 @@ def initialize_variable_selection_page(request,
 
     for prog in public_programs:
         program_attrs[prog.id] = fetch_program_attr(prog.id)
-
-    print >> sys.stdout, str(program_attrs)
+        attr_codes = ClinicalColumnFeatureSupport.get_features_ids_for_column_names(program_attrs[prog.id].keys())
+        if 'not_found_columns' in attr_codes:
+            new_keys = [x for x in program_attrs[prog.id].keys() if x not in attr_codes['not_found_columns']]
+            attr_codes = ClinicalColumnFeatureSupport.get_features_ids_for_column_names(new_keys)
+        for attr in program_attrs[prog.id]:
+            if attr in attr_codes['clinical_feature_ids']:
+                program_attrs[prog.id][attr]['data_code'] = attr_codes['clinical_feature_ids'][attr]
+            else:
+                program_attrs[prog.id][attr]['data_code'] = 'v2:CLIN:'+attr
 
     # users can select from their saved variable favorites
     variable_favorites = VariableFavorite.get_list(request.user)

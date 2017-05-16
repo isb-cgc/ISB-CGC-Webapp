@@ -158,7 +158,7 @@ require([
     $('input[type="checkbox"]').on('change', function(event){
         var $this      = $(this),
             name       = $this.data('text-label'),
-            code       = $this.val(),
+            code       = $this.data('code'),
             feature_id = $this.data('feature-id'),
             var_type   = $this.attr('var_type');
 
