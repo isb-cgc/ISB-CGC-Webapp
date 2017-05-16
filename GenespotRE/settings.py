@@ -471,6 +471,10 @@ PUBSUB_TOPIC_ERA_LOGIN                   = os.environ.get('PUBSUB_TOPIC_ERA_LOGI
 # User project access key
 USER_GCP_ACCESS_CREDENTIALS              = os.environ.get('USER_GCP_ACCESS_CREDENTIALS')
 
+# Log name for ERA login views
+LOG_NAME_ERA_LOGIN_VIEW                  = os.environ.get('LOG_NAME_ERA_LOGIN_VIEW')
+
+
 ##############################
 #   Start django-finalware   #
 ##############################
