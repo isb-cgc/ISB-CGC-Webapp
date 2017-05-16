@@ -21,6 +21,9 @@ import logging
 import traceback
 import sys
 
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+
 from cohorts.metadata_helpers import get_sql_connection
 from bq_data_access.v2.plot_data_support import get_feature_id_validity_for_array
 from cohorts.metadata_helpers import fetch_isbcgc_project_set
@@ -31,25 +34,36 @@ from bq_data_access.v2.plot_data_support import get_merged_feature_vectors
 from bq_data_access.v2.cohort_cloudsql import add_cohort_info_to_merged_vectors
 
 from django.http import JsonResponse
-from cohorts.models import Cohort
+from django.conf import settings as django_settings
+from cohorts.models import Cohort, Program
 from projects.models import Project
 
 logger = logging.getLogger(__name__)
 
 
-def get_program_name_set_for_cohorts(cohort_id_array):
+def get_public_program_name_set_for_cohorts(cohort_id_array):
     """
-    Returns the set of names of programs that are referred to by the samples
-    in a list of cohorts.
+    Returns the set of names of superuser-owner public programs that
+    are referred to by the samples in a list of cohorts.
     
     Returns:
         Set of program names in lower case.
     """
+    superuser_username = django_settings.SITE_SUPERUSER_USERNAME
+    superuser = User.objects.get(username=superuser_username, is_staff=True, is_superuser=True)
     program_set = set()
     result = Cohort.objects.filter(id__in=cohort_id_array)
+
     for cohort in result:
         cohort_programs = cohort.get_programs()
-        program_set.update([p.name.lower() for p in cohort_programs])
+
+        # Filter down to public programs
+        public_progams_in_cohort = Program.objects.filter(
+            id__in=cohort_programs,
+            is_public=True,
+            owner=superuser)
+
+        program_set.update([p.name.lower() for p in public_progams_in_cohort])
 
     return program_set
 
@@ -98,6 +112,7 @@ def get_confirmed_project_ids_for_cohorts(cohort_id_array):
     return confirmed_study_ids
 
 
+@login_required
 def data_access_for_plot(request):
     """
     Used by the web application.
@@ -139,7 +154,7 @@ def data_access_for_plot(request):
         bqss = BigQueryServiceSupport.build_from_django_settings()
         fvb = FeatureVectorBigQueryBuilder.build_from_django_settings(bqss)
 
-        program_set = get_program_name_set_for_cohorts(cohort_id_array)
+        program_set = get_public_program_name_set_for_cohorts(cohort_id_array)
         data = get_merged_feature_vectors(fvb, x_id, y_id, None, cohort_id_array, logTransform, confirmed_study_ids, program_set=program_set)
 
         # Annotate each data point with cohort information

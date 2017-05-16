@@ -20,6 +20,9 @@ import logging
 import sys
 import traceback
 
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+
 from bq_data_access.v1.clinical_data import CLINICAL_FEATURE_TYPE
 from bq_data_access.v1.copynumber_data import CNVR_FEATURE_TYPE
 from bq_data_access.v1.feature_search.clinical_searcher import ClinicalSearcher
@@ -35,7 +38,6 @@ from bq_data_access.v1.gnab_data import GNAB_FEATURE_TYPE
 from bq_data_access.v1.methylation_data import METH_FEATURE_TYPE
 from bq_data_access.v1.mirna_data import MIRN_FEATURE_TYPE
 from bq_data_access.v1.protein_data import RPPA_FEATURE_TYPE
-from django.http import JsonResponse
 
 
 class FeatureDefinitionSearcherFactory(object):
@@ -60,6 +62,7 @@ class FeatureDefinitionSearcherFactory(object):
         #    return FullSearcher()
         raise InvalidDataTypeException("Invalid datatype '{datatype}'".format(datatype=datatype))
 
+@login_required
 def feature_search(request):
     """ Used by the web application."""
     try:
@@ -104,6 +107,8 @@ def feature_search(request):
         logging.exception(e)
         return JsonResponse({'error': e}, status=500)
 
+
+@login_required
 def feature_field_search(request):
     """ Used by the web application."""
     try:
