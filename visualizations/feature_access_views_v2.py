@@ -159,4 +159,3 @@ def clinical_feature_get(request):
         print >> sys.stdout, traceback.format_exc()
         logging.exception(e)
         raise JsonResponse({'error': e}, status=500)
-
