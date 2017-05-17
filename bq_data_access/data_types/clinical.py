@@ -26,9 +26,21 @@ BIGQUERY_CONFIG = {
             "program": "target"
         },
         {
+            "table_id": "isb-cgc:TARGET_bioclin_v0.Biospecimen",
+            "biospecimen_table_id": "isb-cgc:TARGET_bioclin_v0.Biospecimen",
+            "internal_table_id": "target_biospecimen",
+            "program": "target"
+        },
+        {
             "table_id": "isb-cgc:TCGA_bioclin_v0.Clinical",
             "biospecimen_table_id": "isb-cgc:TCGA_bioclin_v0.Biospecimen",
             "internal_table_id": "tcga_clinical",
+            "program": "tcga"
+        },
+        {
+            "table_id": "isb-cgc:TCGA_bioclin_v0.Biospecimen",
+            "biospecimen_table_id": "isb-cgc:TCGA_bioclin_v0.Biospecimen",
+            "internal_table_id": "tcga_biospecimen",
             "program": "tcga"
         }
     ]
