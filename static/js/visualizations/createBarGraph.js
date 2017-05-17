@@ -333,6 +333,7 @@ define (['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                         selected_sample_set.push(selectedSamples[sample]);
                     });
 
+                    console.debug("Plot element: "+$(svg[0]).parents('.plot'));
                     var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                     $('#save-cohort-' + plot_id + '-modal input[name="samples"]').attr('value', JSON.stringify(selected_sample_set));
                 }
