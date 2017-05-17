@@ -17,7 +17,7 @@
  */
 
 define(['jquery'], function($) {
-    var base_feature_search_url = base_url + '/visualizations/feature_search/';
+    var base_feature_search_url = BASE_URL + '/visualizations/feature_search/';
 
     return {
         isValidNumber: function(val) {
