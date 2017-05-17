@@ -143,7 +143,7 @@ class Workbook(models.Model):
                 # Check all variables are from programs owned by the user
                 for variable in worksheet.get_variables():
                     if variable.feature: #feature will be null if the variable is from TCGA
-                        if variable.feature.study.program.owner_id != request.user.id and not variable.feature.study.program.is_public:
+                        if variable.feature.project.program.owner_id != request.user.id and not variable.feature.project.program.is_public:
                             is_shareable = False
                             break
 

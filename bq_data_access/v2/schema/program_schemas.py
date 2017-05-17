@@ -2,16 +2,6 @@ TABLE_TO_SCHEMA_MAP = {
     "isb-cgc:TCGA_bioclin_v0.Clinical": [
         {
             "mode": "NULLABLE",
-            "name": "case_barcode",
-            "type": "STRING"
-        },
-        {
-            "mode": "NULLABLE",
-            "name": "case_gdc_id",
-            "type": "STRING"
-        },
-        {
-            "mode": "NULLABLE",
             "name": "program_name",
             "type": "STRING"
         },
@@ -367,16 +357,6 @@ TABLE_TO_SCHEMA_MAP = {
         }
     ],
     "isb-cgc:TARGET_bioclin_v0.Clinical": [
-        {
-            "mode": "NULLABLE",
-            "name": "case_barcode",
-            "type": "STRING"
-        },
-        {
-            "mode": "NULLABLE",
-            "name": "case_gdc_id",
-            "type": "STRING"
-        },
         {
             "mode": "NULLABLE",
             "name": "program_name",
@@ -1016,6 +996,195 @@ TABLE_TO_SCHEMA_MAP = {
             "mode": "NULLABLE",
             "name": "time_to_first_enrollment_on_relapse_protocol_in_days",
             "type": "INTEGER"
+        }
+    ],
+    "isb-cgc:TARGET_bioclin_v0.Biospecimen": [
+        {
+            "mode": "NULLABLE",
+            "name": "sample_type",
+            "type": "STRING"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "sample_type_name",
+            "type": "STRING"
+        },
+    ],
+    "isb-cgc:TCGA_bioclin_v0.Biospecimen": [
+        {
+            "mode": "NULLABLE",
+            "name": "sample_type",
+            "type": "STRING"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "sample_type_name",
+            "type": "STRING"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "program_name",
+            "type": "STRING"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "project_short_name",
+            "type": "STRING"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "batch_number",
+            "type": "INTEGER"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "bcr",
+            "type": "STRING"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "days_to_collection",
+            "type": "FLOAT"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "days_to_sample_procurement",
+            "type": "FLOAT"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "is_ffpe",
+            "type": "STRING"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "num_portions",
+            "type": "INTEGER"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "num_slides",
+            "type": "INTEGER"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "avg_percent_lymphocyte_infiltration",
+            "type": "FLOAT"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "avg_percent_monocyte_infiltration",
+            "type": "FLOAT"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "avg_percent_necrosis",
+            "type": "FLOAT"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "avg_percent_neutrophil_infiltration",
+            "type": "FLOAT"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "avg_percent_normal_cells",
+            "type": "FLOAT"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "avg_percent_stromal_cells",
+            "type": "FLOAT"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "avg_percent_tumor_cells",
+            "type": "FLOAT"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "avg_percent_tumor_nuclei",
+            "type": "FLOAT"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "max_percent_lymphocyte_infiltration",
+            "type": "FLOAT"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "max_percent_monocyte_infiltration",
+            "type": "FLOAT"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "max_percent_necrosis",
+            "type": "FLOAT"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "max_percent_neutrophil_infiltration",
+            "type": "FLOAT"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "max_percent_normal_cells",
+            "type": "FLOAT"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "max_percent_stromal_cells",
+            "type": "FLOAT"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "max_percent_tumor_cells",
+            "type": "FLOAT"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "max_percent_tumor_nuclei",
+            "type": "FLOAT"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "min_percent_lymphocyte_infiltration",
+            "type": "FLOAT"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "min_percent_monocyte_infiltration",
+            "type": "FLOAT"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "min_percent_necrosis",
+            "type": "FLOAT"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "min_percent_neutrophil_infiltration",
+            "type": "FLOAT"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "min_percent_normal_cells",
+            "type": "FLOAT"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "min_percent_stromal_cells",
+            "type": "FLOAT"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "min_percent_tumor_cells",
+            "type": "FLOAT"
+        },
+        {
+            "mode": "NULLABLE",
+            "name": "min_percent_tumor_nuclei",
+            "type": "FLOAT"
         }
     ]
 }

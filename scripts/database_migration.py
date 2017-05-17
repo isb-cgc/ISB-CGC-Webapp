@@ -566,6 +566,33 @@ def fix_gene_symbols(debug):
         if db and db.open: db.close()
 
 
+def fix_var_faves(debug):
+
+    db = None
+    cursor = None
+
+    try:
+        db = get_mysql_connection()
+        db.autocommit(True)
+        cursor = db.cursor()
+
+        update_vf_stmt = """
+            UPDATE variables_variablefavorite
+            SET version='v1'
+            WHERE version IS NULL;"""
+
+        if debug:
+            print >> sys.stdout, "[STATUS] Executing update statement: "+update_vf_stmt
+        else:
+            cursor.execute(update_vf_stmt)
+
+    except Exception as e:
+        print >> sys.stderr, "[ERROR] Exception while fixing variable favorites:"
+        print >> sys.stderr, traceback.format_exc()
+    finally:
+        if cursor: cursor.close()
+        if db and db.open: db.close()
+
 
 def fix_filters(debug):
     db = None
@@ -762,6 +789,9 @@ def main():
     cmd_line_parser.add_argument('-g', '--fix_genes', type=bool, default=False,
                                  help="Fix the genes_genesymbols table to include a type setting and add in miRNAs")
 
+    cmd_line_parser.add_argument('-v', '--fix_var_faves', type=bool, default=False,
+                                 help="Fix the old variable favorites by setting their version to v1")
+
     args = cmd_line_parser.parse_args()
 
     try:
@@ -771,6 +801,7 @@ def main():
         args.fix_case_id and fix_case_barcodes_in_cohorts(args.debug_mode)
         args.fix_filters and fix_filters(args.debug_mode)
         args.fix_genes and fix_gene_symbols(args.debug_mode)
+        args.fix_var_faves and fix_var_faves(args.debug_mode)
 
     except Exception as e:
         print >> sys.stdout, traceback.format_exc()

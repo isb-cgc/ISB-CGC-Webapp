@@ -18,7 +18,6 @@ limitations under the License.
 
 import logging
 from re import compile as re_compile
-import sys
 
 from bq_data_access.v2.errors import FeatureNotFoundException
 from bq_data_access.v2.feature_value_types import ValueType, DataTypes
@@ -28,7 +27,7 @@ from scripts.feature_def_gen.gexp_features import GEXPDataSourceConfig
 
 GEXP_FEATURE_TYPE = 'GEXP'
 
-logger = logging
+logger = logging.getLogger(__name__)
 
 
 def get_feature_type():
@@ -147,12 +146,12 @@ class GEXPDataQueryHandler(object):
         subquery_stmt = subquery_stmt_template.format(*subqueries)
 
         query_template = "SELECT case_id, sample_id, aliquot_id, value {brk}" \
-                         "FROM ( {brk}" \
-                         "{subqueries}" \
-                         ") {brk}" \
-                         ""
+                         "FROM {brk}" \
+                         "{subqueries}"
 
         query = query_template.format(brk='\n', subqueries=subquery_stmt)
+
+        logger.debug("BQ_QUERY_GEXP: " + query)
 
         return query, True
 
