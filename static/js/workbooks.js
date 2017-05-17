@@ -200,7 +200,7 @@ require([
         var form = this;
         var workbookId = $(form).find("#workbook_id_input").val();
         var worksheetId = $(form).find("#worksheet_id_input").val();
-        var url = base_url + '/workbooks/' + workbookId + '/worksheets/' + worksheetId + '/comments/create';
+        var url = BASE_URL + '/workbooks/' + workbookId + '/worksheets/' + worksheetId + '/comments/create';
 
         $.ajax({
             type: 'POST',
@@ -1160,7 +1160,7 @@ require([
         var csrftoken = $.getCookie('csrftoken');
         $.ajax({
             type        : 'GET',
-            url         : base_url + '/workbooks/' + workbook_id + '/worksheets/' + worksheet_id + "/plots/",
+            url         : BASE_URL + '/workbooks/' + workbook_id + '/worksheets/' + worksheet_id + "/plots/",
             data        : {type : type},
             dataType    :'json',
             beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
@@ -1183,7 +1183,7 @@ require([
         $.ajax({
             type        :'POST',
             dataType    :'json',
-            url         : base_url + '/workbooks/' + workbook_id + '/worksheets/' + worksheet_id + "/plots/" + plot_id + "/edit",
+            url         : BASE_URL + '/workbooks/' + workbook_id + '/worksheets/' + worksheet_id + "/plots/" + plot_id + "/edit",
             data        : JSON.stringify({attrs : attrs, settings : selections}),
             beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
             success : function (data) {
@@ -1322,7 +1322,7 @@ require([
         $(this).find('input[type="submit"]').attr('disabled', 'disabled');
         $.ajax({
             type: 'POST',
-            url: base_url + '/cohorts/save_cohort_from_plot/',
+            url: BASE_URL + '/cohorts/save_cohort_from_plot/',
             dataType  :'json',
             data: $(this).serialize(),
             success: function(data) {
@@ -1357,7 +1357,7 @@ require([
      */
     $('.remove-shared-user').on('click', function() {
         var shared_id = $(this).attr('data-shared-id');
-        var url = base_url + '/share/' + shared_id + '/remove';
+        var url = BASE_URL + '/share/' + shared_id + '/remove';
         var csrftoken = $.getCookie('csrftoken');
         var button = $(this);
         $.ajax({

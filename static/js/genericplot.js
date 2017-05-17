@@ -471,7 +471,7 @@ require([
     //                 var form = this;
     //                 $.ajax({
     //                     type: 'POST',
-    //                     url: base_url + '/cohorts/save_cohort_from_plot/',
+    //                     url: BASE_URL + '/cohorts/save_cohort_from_plot/',
     //                     data: $(this).serialize(),
     //                     success: function(data) {
     //                         $('.modal').modal('hide');
@@ -538,7 +538,7 @@ require([
     //     var form = this;
     //     $.ajax({
     //         type: 'POST',
-    //         url: base_url + '/cohorts/save_cohort_from_plot/',
+    //         url: BASE_URL + '/cohorts/save_cohort_from_plot/',
     //         data: $(this).serialize(),
     //         success: function(data) {
     //             $('.modal').modal('hide');
