@@ -18,6 +18,10 @@
         <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
     </ol>
     <h1 class="page-header">{{ workbook.name }}</h1>
+    <p class="workbook-ver-display"><span>Version: </span> {% if not workbook.build %}Version 1{% else %}Version 2{% endif %}</p>
+    <p class="workbook-build-display" data-plot-version="{% if not workbook.build %}v1{% else %}v2{% endif %}"
+       data-build="{% if not workbook.build %}None{% else %}{{ workbook.build }}{% endif %}">
+        <span>Build: </span> {% if not workbook.build %}Legacy{% else %}{{ workbook.build }}{% endif %}</p>
     <p>{{ workbook.description }}</p>
     <ul class="page-action-group" role="menubar">
         {% if workbook.owner.id == request.user.id %}
@@ -123,9 +127,9 @@
                                 <li class="list-item">
                                     <div class="list-item__heading">
                                         {% if workbook.owner.id == request.user.id %}
-                                        <a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Genes <i class="fa fa-plus pull-right"></i></a>
+                                        <a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Genes & miRNAs <i class="fa fa-plus pull-right"></i></a>
                                         {% else %}
-                                        <span>Genes </span>
+                                        <span>Genes & miRNAs </span>
                                         {% endif %}
                                     </div>
                                     {% if worksheet.worksheet_gene_set.count > 0 %}
@@ -140,7 +144,7 @@
                                                             <form action="{% url 'worksheet_gene_delete' workbook_id=workbook.id worksheet_id=worksheet.id gene_id=gene.id %}" method="POST">
                                                                 {% csrf_token %}
                                                                 {% if workbook.owner.id == user.id %}
-                                                                    <button type="submit" class="text-danger workbook-remove-item" aria-label="Remove Gene"><i class="fa fa-close"></i></button>
+                                                                    <button type="submit" class="text-danger workbook-remove-item" aria-label="Remove Gene or miRNA"><i class="fa fa-close"></i></button>
                                                                 {% endif %}
                                                                 {{ gene.gene }}
                                                             </form>

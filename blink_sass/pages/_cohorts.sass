@@ -1,5 +1,88 @@
 #cohort-details
 
+    #placeholder
+        .panel-body
+            height: 210px
+            position: relative
+            overflow: hidden
+        .spinner
+            position: absolute
+            width: 100%
+            height: 100%
+            top: 0px
+            left: 0px
+            background: rgba(0,0,0,.5)
+            z-index: 10
+            i
+                position: absolute
+                left: 45%
+                top: 40%
+                margin: auto
+                font-size: 100px
+
+    .cohort-selected-filters
+        overflow: hidden
+        .more-filters, .less-filters
+            width: 100%
+            height: 36px
+            position: relative
+            button
+                left: 50%
+                transform: translateX(-50%)
+                position: absolute
+                z-index: 20
+
+    .curr-filter-panel, .creation-filter-panel
+        overflow: hidden
+        height: 95px
+        .creation-prog-filter-set
+            height: 100%
+        .prog-filter-set
+            border-left: 2px solid $isb-primary
+            h5
+                margin-top: 0
+        :first-child
+            border-left: none
+        .label
+            margin: 0
+
+    .revision-filter-panel
+        overflow: hidden
+        padding: 0
+        .revision-prog-filter-set
+            height: 100%
+            padding: 0px 8px !important
+        .prog-filter-set
+            border-left: 2px solid $isb-primary
+            h5
+                margin-top: 0
+        :first-child
+            border-left: none
+        .label
+            margin: 0
+
+    .creation-filter-panel
+        height: 100%
+
+    .curr-filter-panel
+        padding: 0
+        margin-bottom: 15px
+
+    .details-panel
+        overflow: hidden
+        height: 110px
+
+    .cohort-info
+        .more-details, .less-details
+            width: 100%
+            height: 36px
+            position: relative
+            button
+                left: 50%
+                transform: translateX(-50%)
+                position: absolute
+                z-index: 20
+
     #one-cohort-type-per-create-warn
         margin: 0px 15px 15px 15px
 
@@ -23,8 +106,11 @@
             border: none
             background-color: #fff
             text-align: center
-            width: (100% / 3)
             font-size: 12.7px
+            &.program-tab
+                width: (100% / 4)
+            &.filter-tab
+                width: (100% / 3)
             &:first-child a
                 border-top-left-radius: 3px
             &:last-child a
@@ -35,9 +121,9 @@
                     margin: 0
         >li.active>a
             color: darken($isb-warning, 20%) !important
-        &-data, &-ud-filters
+        &-ud-filters
             li
-                width: (100% / 2)
+                width: 100%
     .filter-panel
         .heading-note
             font-style: italic
@@ -46,8 +132,6 @@
             float: right
             display: block
             width: 50%
-        #paste-in-genes-tokenfield
-            width: 100% !important
         .tabpanel
             border-top-left-radius: 3px
             border-top-right-radius: 3px
@@ -94,15 +178,20 @@
                     padding: 0px 15px 0px 15px
             .panel-collapse
                 max-height: 100px
-            #sel-gene
+            .sel-gene
                 max-height: 300px
-                .tokenfield.form-control
-                    max-height: 49px
+                .tokenfield
+                    &.form-control
+                        max-height: 49px
+                    span
+                        input
+                            width: 100% !important
                 >.tokenfield
                     display: none
+
             .alert
                 margin: 10px 0px 10px 0px
-        #molecular-accordion
+        .molecular-accordion
             .list-item__heading
                 padding: 10px 0px 10px 0px
             .list-item
@@ -197,6 +286,11 @@
     #create-cohort-form .form-control-static span
         display: inline-block
         max-width: 90%
+
+    #selected-filters
+        max-height: 300px
+        overflow-y: auto
+        overflow-x: hidden
 
     #multi-categorical
         overflow-x: auto
@@ -327,6 +421,9 @@
                 ul
                     list-style: none
                     padding-left: 10px
+        .platform-counts
+            input
+                margin-right: 5px
 
 
     .filelist-panel
@@ -335,8 +432,7 @@
 
         table
             table-layout: fixed
-            word-break: break-all
-            word-wrap: break-word
+            word-wrap: normal
             .col-barcode, .col-pipeline
                 width: 150px
             .col-datalevel

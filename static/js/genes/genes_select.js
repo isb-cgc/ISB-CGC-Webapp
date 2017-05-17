@@ -1,12 +1,12 @@
 require.config({
-    baseUrl: STATIC_FILES_URL,
+    baseUrl: STATIC_FILES_URL+'js/',
     paths: {
-        jquery: 'js/libs/jquery-1.11.1.min',
-        bootstrap: 'js/libs/bootstrap.min',
-        jqueryui: 'js/libs/jquery-ui.min',
-        session_security: 'js/session_security',
-        underscore: 'js/libs/underscore-min',
-        base: 'js/base'
+        jquery: 'libs/jquery-1.11.1.min',
+        bootstrap: 'libs/bootstrap.min',
+        jqueryui: 'libs/jquery-ui.min',
+        session_security: 'session_security',
+        underscore: 'libs/underscore-min',
+        base: 'base'
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -42,12 +42,12 @@ require([
             $.ajax({
                 type        : 'POST',
                 dataType    :'json',
-                url         : BASE_URL + '/workbooks/create_with_genes',
+                url         : base_url + '/workbooks/create_with_genes',
                 data        : JSON.stringify({gene_fav_list : gene_lists}),
                 beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                 success : function (data) {
                     if(!data.error) {
-                        window.location = BASE_URL + '/workbooks/' + data.workbook_id + '/worksheets/' + data.worksheet_id + '/';
+                        window.location = base_url + '/workbooks/' + data.workbook_id + '/worksheets/' + data.worksheet_id + '/';
                     } else {
                         console.log('Failed to add gene_lists to workbook');
                     }
@@ -76,12 +76,12 @@ require([
             $.ajax({
                 type        : 'POST',
                 dataType    :'json',
-                url         : BASE_URL + '/workbooks/' + workbook_id + '/worksheets/' + worksheet_id + "/genes/edit",
+                url         : base_url + '/workbooks/' + workbook_id + '/worksheets/' + worksheet_id + "/genes/edit",
                 data        : JSON.stringify({gene_fav_list : gene_lists}),
                 beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                 success : function (data) {
                     if(!data.error) {
-                        window.location = BASE_URL + '/workbooks/' + workbook_id + '/worksheets/' + worksheet_id + '/';
+                        window.location = base_url + '/workbooks/' + workbook_id + '/worksheets/' + worksheet_id + '/';
                     } else {
                         console.log('Failed to add gene_lists to workbook');
                     }

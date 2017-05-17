@@ -34,7 +34,7 @@
         <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
         <li><a href="{% url 'cohort_list' %}">Saved Cohorts</a></li>
     </ol>
-    <h1 class="page-header">{{ cohort.name }} </h1>
+    <h1 class="page-header">{{ cohort.name }}</h1>
     <label id="cohort-name-label" for="edit-cohort-name" class="hidden-label">Cohort Name:</label>
     <input id="edit-cohort-name" type="text" name="cohort-name" value="{{ cohort.name }}" class="form-control input-lg space-top-15" style="display: none" aria-labelledby="cohort-name-label"/>
     <div class="page-action-group">
@@ -53,7 +53,7 @@
             </li>
             <li class="separator"></li>
             {% if cohort.perm.perm == 'OWNER' %}
-                <li class="menu-item"><button class="btn btn-info" id="add-filter-btn">Edit</button> </li>
+                <li class="menu-item"><button class="btn btn-info" id="edit-cohort-btn">Edit</button> </li>
             {% endif %}
             <li class="menu-item"><button class="show-flyout btn btn-info" title="Show Comments">Comments</button></li>
             <li class="menu-item"><a href="{% url 'clone_cohort' cohort.id %}" class="btn btn-info clone-cohort-btn" title="Duplicate this cohort">Duplicate</a></li>
@@ -76,7 +76,7 @@
         <ul id="edit-cohort-menu" style="display: none">
             {% if cohort.perm.perm == 'OWNER' %}
                 <li class="menu-item"><button class="btn btn-primary" data-toggle="modal" data-target="#apply-edits-modal">Save Changes</button></li>
-                <li class="menu-item"><button class="btn btn-link" id="cancel-add-filter-btn">Cancel</button></li>
+                <li class="menu-item"><button class="btn btn-link" id="cancel-edit-cohort-btn">Cancel</button></li>
             {% endif %}
         </ul>
     </div>
@@ -97,11 +97,108 @@
     </div>
 
     <div class="row cgc-user-data-type-tabs">
-        <div class="col-lg-4">
+        {% if cohort.id %}
+        <div class="col-sm-12 col-md-12 col-lg-12">
+            <div class="cohort-selected-filters panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">Current Filters</h4>
+                </div>
+                <div class="panel-body curr-filter-panel">
+                    {% for prog, filters in cohort.get_current_filters.items %}
+                        <div class="col-sm-{{ cohort.get_current_filters.keys|get_prog_col_size }} prog-filter-set">
+                        <h5>{{ prog }}</h5>
+                        {% for filter in filters %}
+                            <span class="filter-label label label-default space-right-5">{{ filter.displ_name }}: {{ filter.displ_val }}</span>
+                        {% endfor %}
+                        </div>
+                    {% empty %}
+                        <div class="col-sm-12 prog-filter-set">
+                            <p>No filters have been applied to this cohort.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="more-filters"><button class="btn btn-link" role="button">Show More</button></div>
+                <div class="less-filters" style="display: none;"><button class="btn btn-link" role="button">Show Less</button></div>
+            </div>
+            <div class="cohort-info panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">Cohort Details</h4>
+                </div>
+                <div class="panel-body details-panel">
+                    <div class="row col-md-12 space-bottom-10">
+                        <span>Internal ISB-CGC Cohort ID: {{ cohort.id }}</span>
+                    </div>
+                    <div class="row col-md-12 space-bottom-10">
+                        <span class="detail-label">Total Number of Samples:</span>
+                        <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
+                        <span class="total-values" id="c-{{ cohort.id }}-data-total-samples">{{ total_samples }}</span>
+                    </div>
+                    <div class="row col-md-12 space-bottom-10">
+                        <span class="detail-label">Total Number of Cases:</span>
+                        <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
+                        <span class="total-values" id="c-{{ cohort.id }}-data-total-participants">{{ total_cases }}</span>
+                    </div>
+                    <div class="row col-md-12 space-bottom-10">
+                        <span>Your Permissions: {{ cohort.perm.perm }}</span>
+                    </div>
+                    <div class="row col-md-12 space-bottom-10">
+                        <span class="rev-history">Revision History:</span>
+                        <ul class="rev-history">
+                            {% for item in cohort.get_revision_history %}
+                                {%  if 'type' in item and item.type == 'filter' %}
+                                    <div class="panel-body revision-filter-panel">
+                                        {% for prog, filters in item.vals.items %}
+                                            <div class="col-sm-{{ item.vals.keys|get_prog_col_size }} revision-prog-filter-set">
+                                            <h6>{{ prog }}</h6>
+                                            {% for filter in filters %}
+                                                <span class="filter-label label label-default space-right-5">{{ filter.displ_name }}: {{ filter.displ_val }}</span>
+                                            {% endfor %}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {%  else %}
+                                    <li>{{ item }}</li>
+                                {%  endif %}
+                            {% endfor %}
+                        </ul>
+                        {% if shared_with_users and cohort.perm == 'OWNER'%}
+                            <br>
+                            <p><strong>Shared With Users:</strong></p>
+                            <ul>
+                            {% for user in shared_with_users %}
+                                <li>{{ user.first_name }} {{ user.last_name }} [{{ user.email }}]</li>
+                            {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    <div class="row col-md-12 space-bottom-10">
+                        <span>Creation Filters:</span>
+                        <div class="panel-body creation-filter-panel">
+                            {% for prog, filters in cohort.get_creation_filters.items %}
+                                <div class="col-sm-{{ cohort.get_creation_filters.keys|get_prog_col_size }} creation-prog-filter-set">
+                                <h6>{{ prog }}</h6>
+                                {% for filter in filters %}
+                                    <span class="filter-label label label-default space-right-5">{{ filter.displ_name }}: {{ filter.displ_val }}</span>
+                                {% endfor %}
+                                </div>
+                            {% empty %}
+                                <p>There were no filters used to create this cohort.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="more-details"><button class="btn btn-link" role="button">Show More</button></div>
+                <div class="less-details" style="display: none;"><button class="btn btn-link" role="button">Show Less</button></div>
+            </div>
+        </div>
+        {% endif %}
+        <div class="col-sm-12 col-md-12 col-lg-12">
             <div class="panel panel-default">
                 <ul class="nav nav-tabs nav-tabs-data" role="tablist">
-                    <li role="presentation" class="{% if user_data == None or metadata_counts.user_data_total == None or metadata_counts.user_data_total <= 0 %}active{% endif %}"><a href="#isb-cgc-data" role="tab" data-toggle="tab" title="Donor Filters">ISB-CGC Data</a></li>
-                    <li role="presentation" class="{% if user_data and metadata_counts.user_data_total > 0 %}active{% endif %}"><a href="#user-data" role="tab" data-toggle="tab" title="User Data">User Data</a></li>
+                    {% for program in programs %}
+                         <li role="presentation" class="program-tab {% if program|program_is_first_in_cohort:cohort.get_programs %}active{% endif %} {% if not program|program_is_in_cohort:cohort.get_programs %}disabled{% endif %}"><a href="#{{ program.id }}-data" role="tab" data-toggle="tab" title="ISB-CGC Data" data-program-id="{{ program.id }}">{{ program.name }} Data</a></li>
+                    {% endfor %}
+                    <li role="presentation" class="program-tab {% if cohort.get_programs|length <= 1 and cohort_programs|has_user_data %}active{% endif %} {% if not cohort_programs|has_user_data %}disabled{% endif %}"><a href="#0-data" role="tab" data-toggle="tab" title="User Data" data-program-id="0">User Data</a></li>
                 </ul>
             </div>
         </div>
@@ -109,8 +206,15 @@
 
     <div class="row">
         <div class="tab-content data-tab-content">
-            {% include "cohorts/isb-cgc-data.html" %}
-            {% include "cohorts/user-data.html" %}
+            <div id="placeholder" class="tab-pane active data-tab" role="tabpanel">
+                <div class="col-md-12 data-tab-content-panel spinner-panel">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="spinner"><i class="fa fa-spinner fa-spin"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -254,13 +358,10 @@
     </div>
 
     <script type="text/javascript">
-    var attr_list = {{ attr_list|tojson|safe }};
-    var attr_counts = {{ attr_list_count|tojson|safe }};
     var total_samples = {{ total_samples|safe }};
     var cohort_id = {{ cohort.id }};
     var user_data = {{ user_data|tojson|safe }};
-    var metadata_counts = {{ metadata_counts|tojson|safe }};
-    var metadata_filters = {{ metadata_filters|tojson|safe }};
+    var cohort_programs = {{ cohort_programs|tojson|safe }}
     </script>
 {% endblock %}
 

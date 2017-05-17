@@ -1,12 +1,12 @@
 if [ -n "$CI" ]; then
-export HOME=/home/ubuntu/${CIRCLE_PROJECT_REPONAME}
-export HOMEROOT=/home/ubuntu/${CIRCLE_PROJECT_REPONAME}
-export MYSQL_ROOT_USER=ubuntu
+    export HOME=/home/ubuntu/${CIRCLE_PROJECT_REPONAME}
+    export HOMEROOT=/home/ubuntu/${CIRCLE_PROJECT_REPONAME}
+    export MYSQL_ROOT_USER=ubuntu
 else
-export $(cat /home/vagrant/www/.env | grep -v ^# | xargs) 2> /dev/null
-export HOME=/home/vagrant
-export HOMEROOT=/home/vagrant/www
-export MYSQL_ROOT_USER=root
+    export $(cat /home/vagrant/www/.env | grep -v ^# | xargs) 2> /dev/null
+    export HOME=/home/vagrant
+    export HOMEROOT=/home/vagrant/www
+    export MYSQL_ROOT_USER=root
 fi
 
 export PYTHONPATH=${HOMEROOT}/lib/:${HOMEROOT}/:${HOME}/google_appengine/:${HOME}/google_appengine/lib/protorpc-1.0/
@@ -31,12 +31,12 @@ mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME -e "INSERT INTO
 
 # Load your SQL table file
 # Looks for user_data_dump.sql; if that isn't available, looks for metadata_featdef_tables.sql
-# If metadata_featdef_tables.sql isn't found, it downloads a file from sql-table-dumps/ and saves it
+# If metadata_featdef_tables.sql isn't found, it downloads a file from GCS and saves it
 # as metadata_featdef_tables.sql for future use
 if [ ! -f ${HOMEROOT}/user_data_dump.sql ]; then
     if [ ! -f ${HOMEROOT}/scripts/metadata_featdef_tables.sql ]; then
         echo "Downloading SQL Table File..."
-        wget -q https://storage.googleapis.com/isb-cgc-dev/sql-table-dumps/dev_test_dump_08_17_2016.sql -O ${HOMEROOT}/scripts/metadata_featdef_tables.sql
+        wget -q https://storage.googleapis.com/isb-cgc-sqldumps/dev/dev_test_dump_08_17_2016.sql -O ${HOMEROOT}/scripts/metadata_featdef_tables.sql
     fi
     echo "Applying SQL Table File... (may take a while)"
     mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/metadata_featdef_tables.sql
@@ -46,10 +46,7 @@ else
 fi
 
 echo "Adding Stored Procedures/Views and making table alterations.."
-python ${HOMEROOT}/scripts/database_catchup_scripts.py
-
-echo "Adding New Table Views..."
-python ${HOMEROOT}/scripts/userdata_bootstrap.py
+python ${HOMEROOT}/scripts/database_catchup_scripts.py -z True
 
 echo "Adding Cohort/Site Data..."
 python ${HOMEROOT}/scripts/add_site_ids.py
