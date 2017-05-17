@@ -57,7 +57,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             sample_type: 'Sample Type',
             tumor_tissue_site: 'Tumor Tissue Site',
             gender: 'Gender',
-            age_at_initial_pathologic_diagnosis: 'Age at Initial Pathologic Diagnosis'
+            age_at_diagnosis: 'Age at Diagnosis'
         },
         'CCLE':{
             disease_code: 'Disease Code',
