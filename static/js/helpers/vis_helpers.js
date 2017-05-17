@@ -161,7 +161,7 @@ define(['jquery'], function($) {
           */
         get_variable_field_options : function(datatype, filters, version, callback){
             if(typeof(callback) !== 'undefined'){
-                var base_feature_search_url = base_url + '/visualizations/feature_search/'+version+'?';
+                var base_feature_search_url = BASE_URL + '/visualizations/feature_search/'+version+'?';
                 if(version == 'v2') {
                     filters.push({filter: 'genomic_build', value: $('#workbook-build :selected').val()});
                 }
@@ -213,7 +213,7 @@ define(['jquery'], function($) {
                 if ($(this).hasClass('select2')) {
                     var datatype = value;
                     var field = $(this).attr('data-field');
-                    var feature_search_url = base_url + '/visualizations/feature_field_search?datatype=' + datatype + '&field=' + field;
+                    var feature_search_url = BASE_URL + '/visualizations/feature_field_search?datatype=' + datatype + '&field=' + field;
                     $(this).select2({
                         ajax: {
                             url: feature_search_url,

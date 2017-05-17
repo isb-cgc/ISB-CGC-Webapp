@@ -85,9 +85,9 @@ require([
     var gene_suggestions = new Bloodhound({
         datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
         queryTokenizer: Bloodhound.tokenizers.whitespace,
-        prefetch : base_url + '/genes/suggest/a.json',
+        prefetch : BASE_URL + '/genes/suggest/a.json',
         remote: {
-            url: base_url + '/genes/suggest/%QUERY.json',
+            url: BASE_URL + '/genes/suggest/%QUERY.json',
             wildcard: '%QUERY'
         }
     });
@@ -160,7 +160,7 @@ require([
             $.ajax({
                 type        : 'POST',
                 dataType    :'json',
-                url         : base_url + '/genes/is_valid/',
+                url         : BASE_URL + '/genes/is_valid/',
                 data        : JSON.stringify({'genes-list' : list}),
                 beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                 success : function (data) {
@@ -207,7 +207,7 @@ require([
         (update_displays_thread !== null) && clearTimeout(update_displays_thread);
 
         update_displays_thread = setTimeout(function(){
-            search_helper_obj.update_counts_parsets(base_url, 'metadata_counts_platform_list', cohort_id, 'v2', active_program_id, for_panel_load).then(
+            search_helper_obj.update_counts_parsets(BASE_URL, 'metadata_counts_platform_list', cohort_id, 'v2', active_program_id, for_panel_load).then(
                 function(){!withoutCheckChanges && check_for_changes();}
             );
         },SUBSEQUENT_DELAY);
@@ -632,7 +632,7 @@ require([
         var form = this;
         $.ajax({
             type: 'POST',
-            url: base_url + '/cohorts/save_cohort_comment/',
+            url: BASE_URL + '/cohorts/save_cohort_comment/',
             data: $(this).serialize(),
             success: function(data) {
                 data = JSON.parse(data);
@@ -680,7 +680,7 @@ require([
     // onClick: Remove shared user
     $('.remove-shared-user').on('click', function() {
         var user_id = $(this).attr('data-user-id');
-        var url = base_url + '/cohorts/unshare_cohort/' + cohort_id + '/';
+        var url = BASE_URL + '/cohorts/unshare_cohort/' + cohort_id + '/';
         var csrftoken = $.getCookie('csrftoken');
         var button = $(this);
         $.ajax({
@@ -856,7 +856,7 @@ require([
             $('#placeholder').addClass('active');
             $('#placeholder').show();
             var data_tab_content_div = $('div.data-tab-content');
-            var get_panel_url = base_url + '/cohorts/' + (cohort ? cohort+'/' : '') + 'filter_panel/' + active_program_id +'/';
+            var get_panel_url = BASE_URL + '/cohorts/' + (cohort ? cohort+'/' : '') + 'filter_panel/' + active_program_id +'/';
 
             $.ajax({
                 type        :'GET',
