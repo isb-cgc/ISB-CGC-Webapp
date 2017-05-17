@@ -353,7 +353,7 @@ require([
         var data = $(this).find('input[type="text"]').val();
         $.ajax({
             type: 'get',
-            url: base_url + '/search_cohorts_viz/?q=' + data,
+            url: BASE_URL + '/search_cohorts_viz/?q=' + data,
             success: function(data) {
                 data = JSON.parse(data);
 
