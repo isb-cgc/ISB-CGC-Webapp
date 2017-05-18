@@ -18,6 +18,7 @@ limitations under the License.
 
 from bq_data_access.data_types.definitions import FEATURE_ID_TO_TYPE_MAP
 from bq_data_access.v2.feature_id_utils import FeatureDataTypeHelper, PlottableDataType
+from bq_data_access.v2.feature_search.searcher_mapping import get_feature_searcher_class_from_data_type
 
 
 class SearchableFieldHelper(object):
@@ -64,7 +65,7 @@ class SearchableFieldHelper(object):
                 if not found:
                     continue
 
-            searcher_class = FeatureDataTypeHelper.get_feature_searcher_class_from_data_type(data_type)
+            searcher_class = get_feature_searcher_class_from_data_type(data_type)
             datatype_prefix = searcher_class.get_datatype_identifier()
             searchable_fields = searcher_class.get_searchable_fields()
 
