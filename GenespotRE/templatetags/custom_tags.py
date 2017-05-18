@@ -35,12 +35,12 @@ ALPHANUM_SORT = [
 ]
 
 simple_number_sort = [
-    '0 to 200', '201 to 400', '401 to 600', '601 to 800', '801 to 1000', '1001 to 1200', '1201 to 1400', '1400+',
+    '0 to 200', '200.01 to 400', '400.01 to 600', '600.01 to 800', '800.01 to 1000', '1000.01 to 1200', '1200.01 to 1400', '1400.01+',
     '0 to 4', '5 to 9', '10 to 14', '15 to 19', '20 to 24', '25 to 29', '30 to 34', '35 to 39', 'Over 40',
     '1 to 500','501 to 1000','1001 to 1500','1501 to 2000','2001 to 2500','2501 to 3000', '3001 to 3500', 
     '3501 to 4000', '4001 to 4500', '4501 to 5000', '5001 to 5500', '5501 to 6000', '0 to -5000', 
     '-5001 to -10000', '-10001 to -15000', '-15001 to -20000', '-20001 to -25000', '-25001 to -30000', 
-    '-30001 to -35000', 'None', ]
+    '-30001 to -35000', 'None', 'NA',]
 
 # If an attribute has a specific order, list it here; these should be the *values* not the display strings
 VALUE_SPECIFIC_ORDERS = {

@@ -62,11 +62,13 @@ class MIRNDataSourceConfig(object):
     """
     Configuration class for MIRN feature definitions.
     """
-    def __init__(self, tables_array):
+    def __init__(self, supported_genomic_builds, tables_array):
+        self.supported_genomic_builds = supported_genomic_builds
         self.data_table_list = tables_array
 
     @classmethod
     def from_dict(cls, param):
+        supported_genomic_builds = param['supported_genomic_builds']
         data_table_list = [MIRNTableConfig.from_dict(item) for item in param['tables']]
 
-        return cls(data_table_list)
+        return cls(supported_genomic_builds, data_table_list)
