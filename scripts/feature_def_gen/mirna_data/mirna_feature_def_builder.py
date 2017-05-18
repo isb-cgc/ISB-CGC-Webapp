@@ -34,15 +34,7 @@ class MIRNFeatureDefBuilder(FeatureDefBigqueryProvider):
             'type': 'string'
         },
         {
-            'name': 'value_field',
-            'type': 'string'
-        },
-        {
             'name': 'internal_feature_id',
-            'type': 'string'
-        },
-        {
-            'name': 'program_name',
             'type': 'string'
         },
         {
@@ -54,37 +46,56 @@ class MIRNFeatureDefBuilder(FeatureDefBigqueryProvider):
     def get_mysql_schema(self):
         return self.MYSQL_SCHEMA
 
-    def build_internal_feature_id(self, feature_type, mirna_name, internal_table_id):
-        return 'v2:{feature_type}:{mirna_name}:{internal_table_id}'.format(
+    def build_internal_feature_id(self, feature_type, mirna_name, genomic_build):
+        return 'v2:{feature_type}:{mirna_name}:{genomic_build}'.format(
             feature_type=feature_type,
             mirna_name=mirna_name,
-            internal_table_id=internal_table_id
+            genomic_build=genomic_build
         )
 
     def build_query(self, config):
         outer_template = \
-            'SELECT internal_table_id, mirna_id \n' \
+            'SELECT build_id, mirna_id \n' \
             'FROM \n' \
             '{subquery_stmt}'
 
-        table_queries = []
-        for table_config in config.data_table_list:
-            query_template = \
-            '(' \
-            'SELECT \'{table_id_field}\' AS internal_table_id, {mirna_id_field} AS mirna_id ' \
-            'FROM [{table_id}] ' \
-            'GROUP BY mirna_id' \
-            ')'
+        build_queries = []
+        for build in self.config.supported_genomic_builds:
+            build_template = \
+                '(' \
+                'SELECT \'{build_id}\' AS build_id, mirna_id \n' \
+                'FROM (' \
+                '   SELECT mirna_id \n' \
+                '   FROM \n' \
+                '   {build_tables_stmt} \n' \
+                '   GROUP BY mirna_id \n' \
+                '))'
 
-            query_str = query_template.format(
-                table_id_field=table_config.internal_table_id,
-                mirna_id_field=table_config.mirna_id_field,
-                table_id=table_config.table_id
-            )
+            # Find tables that match the platform
+            build_tables = [t for t in config.data_table_list if t.genomic_build == build]
 
-            table_queries.append(query_str)
+            table_queries = []
+            for table_config in build_tables:
+                table_query_template = \
+                    '(' \
+                    'SELECT {mirna_id_field} AS mirna_id ' \
+                    'FROM [{table_id}] ' \
+                    'WHERE {mirna_id_field} IS NOT NULL ' \
+                    ')'
 
-        sq_stmt = ',\n'.join(table_queries)
+                table_query_str = table_query_template.format(
+                    mirna_id_field=table_config.mirna_id_field,
+                    table_id=table_config.table_id
+                )
+
+                table_queries.append(table_query_str)
+
+            build_stmt = ',\n'.join(table_queries)
+            build_query = build_template.format(build_id=build,
+                                                build_tables_stmt=build_stmt)
+            build_queries.append(build_query)
+
+        sq_stmt = ',\n'.join(build_queries)
         sq_stmt += ';'
 
         outer_query = outer_template.format(subquery_stmt=sq_stmt)
@@ -102,16 +113,13 @@ class MIRNFeatureDefBuilder(FeatureDefBigqueryProvider):
         feature_type = get_feature_type()
         result = []
         for row in row_item_array:
-            internal_table_id = row['f'][0]['v']
+            genomic_build = row['f'][0]['v']
             mirna_name = row['f'][1]['v']
-            table_config = table_config_mapping[internal_table_id]
 
             result.append({
                 'mirna_name': mirna_name,
-                'value_field': table_config.value_label,
-                'genomic_build': table_config.genomic_build,
-                'program_name': table_config.program,
-                'internal_feature_id': self.build_internal_feature_id(feature_type, mirna_name, table_config.internal_table_id)
+                'genomic_build': genomic_build,
+                'internal_feature_id': self.build_internal_feature_id(feature_type, mirna_name, genomic_build)
             })
 
         return result

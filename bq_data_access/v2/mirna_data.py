@@ -32,6 +32,8 @@ VALUE_NORMALIZED_COUNT = 'normalized_count'
 MIRN_FEATURE_TYPE = 'MIRN'
 COHORT_FIELD_NAME = 'sample_id'
 
+logger = logging.getLogger(__name__)
+
 
 def get_feature_type():
     return MIRN_FEATURE_TYPE
@@ -59,21 +61,33 @@ def get_table_info(table_id):
     return table_info
 
 
+class MIRNTableFeatureDef(object):
+    def __init__(self, mirna_name, mirna_id_field, value_field, table_id):
+        self.mirna_name = mirna_name
+        self.mirna_id_field = mirna_id_field
+        self.value_field = value_field
+        self.table_id = table_id
+
+    @classmethod
+    def from_table_config(cls, mirna_name, table_config):
+        return cls(mirna_name, table_config.mirna_id_field, table_config.value_field, table_config.table_id)
+
+
 class MIRNFeatureDef(object):
     # Regular expression for parsing the feature definition.
     #
-    # Example ID: v2:MIRN:hsa-mir-1244-1:hg19_mirna_rpm
+    # Example ID: v2:MIRN:hsa-mir-1244-1:hg19
     config_instance = MIRNDataSourceConfig.from_dict(BIGQUERY_CONFIG)
     regex = re_compile("^v2:MIRN:"
                        # miRNA ID 
                        "([a-zA-Z0-9._\-]+):"
-                       # table identifier
-                       "(" + "|".join([table.internal_table_id for table in config_instance.data_table_list]) +
+                       # genomic_build 
+                       "(" + "|".join([build for build in config_instance.supported_genomic_builds]) +
                        ")$")
 
-    def __init__(self, mirna_name, internal_table_id):
+    def __init__(self, mirna_name, genomic_build):
         self.mirna_name = mirna_name
-        self.internal_table_id = internal_table_id
+        self.genomic_build = genomic_build
 
     def get_table_configuration(self):
         for table_config in self.config_instance.data_table_list:
@@ -86,9 +100,9 @@ class MIRNFeatureDef(object):
         if len(feature_fields) == 0:
             raise FeatureNotFoundException(feature_id)
 
-        mirna_id, internal_table_id = feature_fields[0]
+        mirna_id, genomic_build = feature_fields[0]
 
-        return cls(mirna_id, internal_table_id)
+        return cls(mirna_id, genomic_build)
 
 
 class MIRNDataQueryHandler(object):
@@ -121,9 +135,8 @@ class MIRNDataQueryHandler(object):
 
         query_template = "SELECT case_barcode AS case_id, sample_barcode AS sample_id, aliquot_barcode AS aliquot_id, {value_field} AS value {brk}" \
              "FROM [{table_id}] {brk}" \
-             "WHERE {mirna_id_field}='{mirna_id}' {brk}"
-
-        query_template += "AND sample_barcode IN ({brk} " \
+             "WHERE {mirna_id_field}='{mirna_id}' {brk}" \
+             "AND sample_barcode IN ({brk} " \
              "    SELECT sample_barcode {brk}" \
              "    FROM [{cohort_dataset_and_table}] {brk}" \
              "    WHERE cohort_id IN ({cohort_id_list}) {brk}" \
@@ -131,21 +144,51 @@ class MIRNDataQueryHandler(object):
 
         query_template += (" OR project_id IN ({project_id_list}))) {brk}" if project_id_array is not None else ")) {brk}")
 
-        table_config = feature_def.get_table_configuration()
-
-        query = query_template.format(table_id=table_config.table_id,
-                                      mirna_id_field=table_config.mirna_id_field, mirna_id=feature_def.mirna_name,
-                                      value_field=table_config.value_field,
+        query = query_template.format(table_id=feature_def.table_id,
+                                      mirna_id_field=feature_def.mirna_id_field, mirna_id=feature_def.mirna_name,
+                                      value_field=feature_def.value_field,
                                       cohort_dataset_and_table=cohort_table,
                                       cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt,
                                       brk='\n')
-
-        logging.debug("BQ_QUERY_MIRN: " + query)
-        return query, True
+        return query
 
     def build_query(self, project_set, cohort_table, cohort_id_array, project_id_array):
-        query = self.build_query_for_program(self.feature_def, cohort_table, cohort_id_array, project_id_array)
-        return query
+        """
+        Returns:
+            Tuple (query_body, run_query).
+            The "query_body" value is the BigQuery query string.
+            The "run_query" is always True.
+        """
+        # Find matching tables
+        config_instance = MIRNDataSourceConfig.from_dict(BIGQUERY_CONFIG)
+        found_tables = []
+
+        for table in config_instance.data_table_list:
+            if (table.program in project_set) and (table.genomic_build == self.feature_def.genomic_build):
+                logger.info("Found matching table: '{}'".format(table.table_id))
+                found_tables.append(table)
+
+        # Build a BigQuery statement for each found table configuration
+        subqueries = []
+        for table_config in found_tables:
+            # Build the project-specific feature def
+            sub_feature_def = MIRNTableFeatureDef.from_table_config(self.feature_def.mirna_name, table_config)
+            subquery = self.build_query_for_program(sub_feature_def, cohort_table, cohort_id_array, project_id_array)
+            subqueries.append(subquery)
+
+        # Union of subqueries
+        subquery_stmt_template = ",".join(["({})" for x in xrange(len(subqueries))])
+        subquery_stmt = subquery_stmt_template.format(*subqueries)
+
+        query_template = "SELECT case_id, sample_id, aliquot_id, value {brk}" \
+                         "FROM {brk}" \
+                         "{subqueries}"
+
+        query = query_template.format(brk='\n', subqueries=subquery_stmt)
+
+        logger.debug("BQ_QUERY_MIRN: " + query)
+
+        return query, True
 
     @DurationLogged('MIRN', 'UNPACK')
     def unpack_query_response(self, query_result_array):
