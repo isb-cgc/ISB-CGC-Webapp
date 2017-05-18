@@ -402,7 +402,7 @@ require([
     if ($('.selected-filters span').length > 0) {
         var variable_list = get_variable_list();
         for (var i = 0; i < variable_list.length; i++ ) {
-            $('input[type="checkbox"][value="'+variable_list[i]['code']+'"]').each(function() {
+            $('input[type="checkbox"][data-code="'+variable_list[i]['code']+'"]').each(function() {
                 $(this).prop('checked', true);
             })
         }
