@@ -26,45 +26,38 @@ from bq_data_access.v2.errors import FeatureNotFoundException
 from bq_data_access.data_types.definitions import PlottableDataType, FEATURE_ID_TO_TYPE_MAP
 # GEXP
 from bq_data_access.v2.gexp_data import GEXPDataQueryHandler
-from bq_data_access.v2.feature_search.gexp_searcher import GEXPSearcher
 from bq_data_access.data_types.gexp import BIGQUERY_CONFIG as GEXP_BIGQUERY_CONFIG
 from scripts.feature_def_gen.gexp_data.gexp_feature_def_builder import GEXPFeatureDefBuilder
 from scripts.feature_def_gen.gexp_features import GEXPDataSourceConfig
 # GNAB
 from bq_data_access.v2.gnab_data import GNABDataQueryHandler
-from bq_data_access.v2.feature_search.gnab_searcher import GNABSearcher
 from bq_data_access.data_types.gnab import BIGQUERY_CONFIG as GNAB_BIGQUERY_CONFIG
 from scripts.feature_def_gen.gnab_data.gnab_feature_def_builder import GNABFeatureDefBuilder
 from scripts.feature_def_gen.gnab_features import GNABDataSourceConfig
 # METH
 from bq_data_access.v2.methylation_data import METHDataQueryHandler
-from bq_data_access.v2.feature_search.methylation_searcher import METHSearcher
 from bq_data_access.data_types.methylation import BIGQUERY_CONFIG as METH_BIGQUERY_CONFIG
 from scripts.feature_def_gen.methylation_data.methylation_feature_def_builder import METHFeatureDefBuilder
 from scripts.feature_def_gen.methylation_features import METHDataSourceConfig
 # RPPA
 from bq_data_access.v2.protein_data import RPPADataQueryHandler
-from bq_data_access.v2.feature_search.protein_searcher import RPPASearcher
 from bq_data_access.data_types.rppa import BIGQUERY_CONFIG as RPPA_BIGQUERY_CONFIG
 from scripts.feature_def_gen.protein_data.protein_feature_def_builder import RPPAFeatureDefBuilder
 from scripts.feature_def_gen.protein_features import RPPADataSourceConfig
 # CNVR
 from bq_data_access.v2.copynumber_data import CNVRDataQueryHandler
-from bq_data_access.v2.feature_search.copynumber_search import CNVRSearcher
 from bq_data_access.data_types.cnvr import BIGQUERY_CONFIG as CNVR_BIGQUERY_CONFIG
 from scripts.feature_def_gen.copynumber_data.copynumber_feature_def_builder import CNVRFeatureDefBuilder
 from scripts.feature_def_gen.copynumber_features import CNVRDataSourceConfig
 
 # MIRN
 from bq_data_access.v2.mirna_data import MIRNDataQueryHandler
-from bq_data_access.v2.feature_search.microrna_searcher import MIRNSearcher
 from bq_data_access.data_types.mirna import BIGQUERY_CONFIG as MIRN_BIGQUERY_CONFIG
 from scripts.feature_def_gen.mirna_data.mirna_feature_def_builder import MIRNFeatureDefBuilder
 from scripts.feature_def_gen.mirna_features import MIRNDataSourceConfig
 
 # CLIN
 from bq_data_access.v2.clinical_data import ClinicalDataQueryHandler
-from bq_data_access.v2.feature_search.clinical_searcher import ClinicalSearcher
 from bq_data_access.data_types.clinical import BIGQUERY_CONFIG as CLIN_BIGQUERY_CONFIG
 from scripts.feature_def_gen.clinical_features import CLINDataSourceConfig
 
@@ -81,13 +74,13 @@ FEATURE_TYPE_TO_PROVIDER_MAP = {
 
 # noinspection PyPackageRequirements
 FEATURE_TYPE_TO_FEATURE_DEF_PROVIDER_MAP = {
-    PlottableDataType.GEXP: (GEXPDataSourceConfig, GEXPFeatureDefBuilder, GEXPDataQueryHandler, GEXP_BIGQUERY_CONFIG, GEXPSearcher),
-    PlottableDataType.GNAB: (GNABDataSourceConfig, GNABFeatureDefBuilder, GNABDataQueryHandler, GNAB_BIGQUERY_CONFIG, GNABSearcher),
-    PlottableDataType.METH: (METHDataSourceConfig, METHFeatureDefBuilder, METHDataQueryHandler, METH_BIGQUERY_CONFIG, METHSearcher),
-    PlottableDataType.RPPA: (RPPADataSourceConfig, RPPAFeatureDefBuilder, RPPADataQueryHandler, RPPA_BIGQUERY_CONFIG, RPPASearcher),
-    PlottableDataType.CNVR: (CNVRDataSourceConfig, CNVRFeatureDefBuilder, CNVRDataQueryHandler, CNVR_BIGQUERY_CONFIG, CNVRSearcher),
-    PlottableDataType.MIRN: (MIRNDataSourceConfig, MIRNFeatureDefBuilder, MIRNDataQueryHandler, MIRN_BIGQUERY_CONFIG, MIRNSearcher),
-    PlottableDataType.CLIN: (CLINDataSourceConfig, None, ClinicalDataQueryHandler, CLIN_BIGQUERY_CONFIG, ClinicalSearcher)
+    PlottableDataType.GEXP: (GEXPDataSourceConfig, GEXPFeatureDefBuilder, GEXPDataQueryHandler, GEXP_BIGQUERY_CONFIG),
+    PlottableDataType.GNAB: (GNABDataSourceConfig, GNABFeatureDefBuilder, GNABDataQueryHandler, GNAB_BIGQUERY_CONFIG),
+    PlottableDataType.METH: (METHDataSourceConfig, METHFeatureDefBuilder, METHDataQueryHandler, METH_BIGQUERY_CONFIG),
+    PlottableDataType.RPPA: (RPPADataSourceConfig, RPPAFeatureDefBuilder, RPPADataQueryHandler, RPPA_BIGQUERY_CONFIG),
+    PlottableDataType.CNVR: (CNVRDataSourceConfig, CNVRFeatureDefBuilder, CNVRDataQueryHandler, CNVR_BIGQUERY_CONFIG),
+    PlottableDataType.MIRN: (MIRNDataSourceConfig, MIRNFeatureDefBuilder, MIRNDataQueryHandler, MIRN_BIGQUERY_CONFIG),
+    PlottableDataType.CLIN: (CLINDataSourceConfig, None, ClinicalDataQueryHandler, CLIN_BIGQUERY_CONFIG)
 
 }
 
@@ -177,26 +170,22 @@ class FeatureDataTypeHelper(object):
 
     @classmethod
     def get_feature_def_config_from_data_type(cls, data_type):
-        config_class, _, _, _, _ = FEATURE_TYPE_TO_FEATURE_DEF_PROVIDER_MAP[data_type]
+        config_class, _, _, _ = FEATURE_TYPE_TO_FEATURE_DEF_PROVIDER_MAP[data_type]
         return config_class
 
     @classmethod
     def get_feature_def_provider_from_data_type(cls, data_type):
-        _, provider_class, _, _, _ = FEATURE_TYPE_TO_FEATURE_DEF_PROVIDER_MAP[data_type]
+        _, provider_class, _, _ = FEATURE_TYPE_TO_FEATURE_DEF_PROVIDER_MAP[data_type]
         return provider_class
 
     @classmethod
     def get_feature_def_default_config_dict_from_data_type(cls, data_type):
-        _, _, _, config_dict, _ = FEATURE_TYPE_TO_FEATURE_DEF_PROVIDER_MAP[data_type]
+        _, _, _, config_dict = FEATURE_TYPE_TO_FEATURE_DEF_PROVIDER_MAP[data_type]
         return config_dict
 
     @classmethod
     def get_feature_data_provider_from_data_type(cls, data_type):
-        _, _, data_provider_class, _, _ = FEATURE_TYPE_TO_FEATURE_DEF_PROVIDER_MAP[data_type]
+        _, _, data_provider_class, _ = FEATURE_TYPE_TO_FEATURE_DEF_PROVIDER_MAP[data_type]
         return data_provider_class
 
-    @classmethod
-    def get_feature_searcher_class_from_data_type(cls, data_type):
-        _, _, _, _, searcher_class = FEATURE_TYPE_TO_FEATURE_DEF_PROVIDER_MAP[data_type]
-        return searcher_class
 
