@@ -7,11 +7,6 @@ TABLE_TO_SCHEMA_MAP = {
         },
         {
             "mode": "NULLABLE",
-            "name": "program_dbgap_accession_number",
-            "type": "STRING"
-        },
-        {
-            "mode": "NULLABLE",
             "name": "project_short_name",
             "type": "STRING"
         },
@@ -47,7 +42,7 @@ TABLE_TO_SCHEMA_MAP = {
         },
         {
             "mode": "NULLABLE",
-            "name": "age_at_initial_pathologic_diagnosis",
+            "name": "age_at_diagnosis",
             "type": "INTEGER"
         },
         {
@@ -360,11 +355,6 @@ TABLE_TO_SCHEMA_MAP = {
         {
             "mode": "NULLABLE",
             "name": "program_name",
-            "type": "STRING"
-        },
-        {
-            "mode": "NULLABLE",
-            "name": "program_dbgap_accession_number",
             "type": "STRING"
         },
         {
