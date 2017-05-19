@@ -61,22 +61,13 @@ require([
         $('a.delete-x').off('click');
         $('a.delete-x').on('click', function() {
             var code = $(this).parent('span').data('code');
-            $('.variable-toggle-checkbox[value="' + code + '"]').prop('checked', false);
+            $('.variable-toggle-checkbox[data-code="' + code + '"]').prop('checked', false);
             $(this).parent('span').remove();
             $('#create-cohort-form .form-control-static').find('span[data-code="' + code + '"]').remove();
             return false;
         });
     }
     set_pill_deletes();
-
-    //removal of pills
-    $('a.delete-x').on('click', function() {
-        var search_id = $(this).parent('span').attr('value');
-        $('#' + search_id).prop('checked', false);
-        $(this).parent('span').remove();
-        $('#create-cohort-form .form-control-static').find('span[value="' + search_id + '"]').remove();
-        return false;
-    });
 
     vizhelpers.get_datatype_search_interfaces($(".clinical-accordion"), "CLIN");
 
@@ -135,7 +126,7 @@ require([
 
         set_pill_deletes();
 
-        $('input[type="checkbox"][value="'+code+'"]').each(function() {
+        $('input[type="checkbox"][data-code="'+code+'"]').each(function() {
             $(this).prop('checked', true);
         });
         return token;
@@ -147,9 +138,9 @@ require([
     function remove_variable_pill(code){
         $(".selected-variable[data-code='" + code + "']").remove();
         $('#create-cohort-form .form-control-static [data-code="' + code + '"]').remove();
-        $('input[type="checkbox"][value="'+code+'"]').each(function() {
+        $('input[type="checkbox"][data-code="'+code+'"]').each(function() {
             $(this).prop('checked', false);
-        })
+        });
     }
 
     /*
@@ -161,6 +152,10 @@ require([
             code       = $this.data('code'),
             feature_id = $this.data('feature-id'),
             var_type   = $this.attr('var_type');
+
+        $('input[type="checkbox"][data-code="'+code+'"]').each(function() {
+            $(this).prop('checked', $this.is(':checked'));
+        })
 
         if ($this.is(':checked') && $('.selected-filters span[data-code="' + code + '"]').length == 0) { // Checkbox checked and not already in list
             add_variable_pill(name, code, feature_id, var_type);
@@ -407,7 +402,7 @@ require([
     if ($('.selected-filters span').length > 0) {
         var variable_list = get_variable_list();
         for (var i = 0; i < variable_list.length; i++ ) {
-            $('input[type="checkbox"][value="'+variable_list[i]['code']+'"]').each(function() {
+            $('input[type="checkbox"][data-code="'+variable_list[i]['code']+'"]').each(function() {
                 $(this).prop('checked', true);
             })
         }
