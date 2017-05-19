@@ -202,7 +202,7 @@ function (
 
         render: function () {
             var seqpeek_data = [];
-            var protein_data = this.data_bundle['protein']['interpro_json'];
+            var protein_data = this.data_bundle['protein'];
             var region_data = this.data_bundle['regions'];
 
             _.each(this.data_bundle['tracks'], function (track) {
