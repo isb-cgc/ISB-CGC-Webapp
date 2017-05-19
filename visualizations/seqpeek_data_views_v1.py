@@ -83,11 +83,9 @@ def seqpeek_view_data(request):
         else:
             # No data found
             return JsonResponse({
-                'plot_data': {
-                    'tracks': [],
-                    'protein': None,
-                    'regions': []
-                },
+                # The SeqPeek client side view detects data availability by checking if
+                # the "plot_data" object has the "tracks" key present.
+                'plot_data': {},
                 'hugo_symbol': hugo_symbol,
                 'cohort_id_list': [str(i) for i in cohort_id_array],
                 'removed_row_statistics': []

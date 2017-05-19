@@ -124,6 +124,7 @@ BIGQUERY_DATASET_V1            = os.environ.get('BIGQUERY_DATASET_V1', '')
 
 PROJECT_NAME                = os.environ.get('GCLOUD_PROJECT_NAME')
 BIGQUERY_PROJECT_NAME       = os.environ.get('BIGQUERY_PROJECT_NAME', PROJECT_NAME)
+BIGQUERY_DATA_PROJECT_NAME  = os.environ.get('BIGQUERY_DATA_PROJECT_NAME', PROJECT_NAME)
 
 # Set cohort table here
 if BIGQUERY_COHORT_TABLE_ID is None:

@@ -70,6 +70,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             disease_code: 'Disease Code',
             vital_status: 'Vital Status',
             gender: 'Gender',
+            sample_type: 'Sample Type',
             age_at_diagnosis: 'Age at Diagnosis'
         }
     };
