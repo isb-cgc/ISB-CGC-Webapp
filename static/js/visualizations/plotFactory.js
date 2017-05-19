@@ -351,7 +351,7 @@ define([
         }
         // The response form the SeqPeek data endpoint has a different schema. This is case is handled in
         // another branch below.
-        if (data.hasOwnProperty('items') && data.hasOwnProperty('items').length > 0) {
+        if (data.hasOwnProperty('items') && data['items'].length > 0) {
 
             var cohort_set = data['cohort_set'];
 
