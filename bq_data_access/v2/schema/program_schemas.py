@@ -42,7 +42,7 @@ TABLE_TO_SCHEMA_MAP = {
         },
         {
             "mode": "NULLABLE",
-            "name": "age_at_initial_pathologic_diagnosis",
+            "name": "age_at_diagnosis",
             "type": "INTEGER"
         },
         {
