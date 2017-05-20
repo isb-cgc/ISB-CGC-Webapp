@@ -188,7 +188,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                     }
 
                     if(cohort_id) {
-                        parsets_obj.draw_parsets(metadata_counts, plot_features);
+                        parsets_obj.draw_parsets(metadata_counts, plot_features, program_id);
                     }
                 } else {
                     console.debug(metadata_counts);
@@ -265,7 +265,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                             }
 
                             if(cohort_id) {
-                                parsets_obj.draw_parsets(results, plot_features);
+                                parsets_obj.draw_parsets(results, plot_features, program_id);
                             }
                         } else {
                             console.debug(results);
