@@ -24,13 +24,13 @@ require.config({
         jqueryui: 'libs/jquery-ui.min',
         session_security: 'session_security',
         underscore: 'libs/underscore-min',
-        igvbeta: 'libs/igv'
+        igv_lib: 'libs/igv'
     },
     shim: {
         'session_security': ['jquery'],
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
-        'igvbeta': ['jquery', 'jqueryui']
+        'igv_lib': ['jquery', 'jqueryui']
     }
 });
 
@@ -40,10 +40,9 @@ require([
     'jqueryui',
     'session_security',
     'bootstrap',
-    'igvbeta'
+    'igv_lib'
 
-], function($, jqueryui, session_security, bs, igvbeta) {
-
+], function($, jqueryui, session_security, bs, igv_lib) {
     var browser;
     var tracks = [];
     var readgroupset_divs = $('.readgroupset-data');
