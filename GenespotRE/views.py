@@ -19,6 +19,7 @@ import sys
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import never_cache
 from django.contrib.auth.models import User
 from django.db.models import Count
 from django.http import HttpResponse
@@ -100,6 +101,7 @@ def _decode_dict(data):
 Handles login and user creation for new users.
 Returns user to landing page.
 '''
+@never_cache
 def landing_page(request):
     return render(request, 'GenespotRE/landing.html', {'request': request, })
 

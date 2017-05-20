@@ -140,8 +140,6 @@ var x_attr = '{% if viz|length %}{{ viz.plots.0.x_axis }}{% else %}country{% end
 var y_attr = '{% if viz|length %}{{ viz.plots.0.y_axis }}{% else %}{% endif %}';
 var color_by = '{% if viz|length and viz.plots.0.color_by != 'None' %}{{ viz.plots.0.color_by }}{% else %}disease_code{% endif %}';
 var cohort_list = {{ cohorts|safe }};
-var base_url = '{{ base_url }}';
-var base_api_url = '{{ base_api_url }}';
 </script>
 {% endblock %}
 

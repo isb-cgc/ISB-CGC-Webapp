@@ -52,7 +52,8 @@ require([
     'select2'
 ], function($, jqueryui, bootstrap, session_security, d3, d3tip, vizhelpers, base) {
 
-    // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
+    // Resets forms in modals on cancel so we don't get an onbeforeunload if we started filling one out and
+    // changed  our mind
     $('.modal').on('hide.bs.modal', function() {
         $(this).find('form')[0].reset();
     });
