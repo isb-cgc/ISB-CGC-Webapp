@@ -1251,13 +1251,14 @@ require([
 
     // Check Name and Desc for workbooks and worksheets
     var check_name_and_desc = function(type, mode) {
+        var active_sheet = $('.worksheet.active').attr('id');
         var name = null;
         var desc = null;
         var activeSheet = null;
         var thisModal = '';
 
-        $('#unallowed-chars-alert-sheet').hide();
-        $('#unallowed-chars-alert-book').hide();
+        $('.unallowed-chars-alert-sheet').hide();
+        $('.unallowed-chars-alert-book').hide();
 
         if(type == 'book') {
             name = $('.edit-workbook-name').val();
@@ -1328,13 +1329,14 @@ require([
 
         event.preventDefault();
 
-        var name = $('#'+($('.worksheet.active').attr('id'))+'-new-cohort-name').val();
+        var worksheet_id = $('.worksheet.active').attr('id');
+        var name = $('#'+worksheet_id+'-new-cohort-name').val();
 
         var unallowed = name.match(base.whitelist);
 
         if(unallowed) {
-            $('#unallowed-chars-cohort').text(unallowed.join(", "));
-            $('#unallowed-chars-alert-cohort').show();
+            $('#'+worksheet_id+'unallowed-chars-cohort').text(unallowed.join(", "));
+            $('#'+worksheet_id+'unallowed-chars-alert-cohort').show();
             return false;
         }
 
