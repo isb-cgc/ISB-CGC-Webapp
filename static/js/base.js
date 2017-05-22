@@ -133,7 +133,7 @@ require([
     $('#var-list-table').tablesorter({
         headers: {
             0: {sorter:false},
-            3: {sorter: 'fullDate'}
+            4: {sorter: 'fullDate'}
         },
         sortList: [[4,1]]
     });
