@@ -257,7 +257,7 @@
                             {% if workbook.owner.id == user.id %}
                                 <h5>Analysis Type</h5>
                                 <div class="form-group gray-area">
-                                    <select aria-label="Analysis Type" id="analysis-type" worksheet_id="{{ worksheet.id }}" class="form-control plot_selection">
+                                    <select aria-label="Analysis Type" id="{{ worksheet.id }}-analysis-type" worksheet_id="{{ worksheet.id }}" class="form-control plot_selection">
                                         {% if worksheet.active_plot %}
                                             <option value="{{ worksheet.active_plot.type }}" selected >{{ worksheet.active_plot.type }}</option>
                                         {% else %}

@@ -1,6 +1,5 @@
 {% comment %}
-
-   Copyright 2015, Institute for Systems Biology
+   Copyright 2017, Institute for Systems Biology
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -13,7 +12,6 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-
 {% endcomment %}
 
 <div class="plot panel" id="plot-{{ worksheet.id }}">
@@ -107,8 +105,8 @@
                                 </div>
                             </div>
                         {% endfor %}
-                        <label for="x-log-transform">
-                            <input id="x-log-transform" type="checkbox" class="log-scale"> Plot as log<sub>10</sub>(n+1)
+                        <label for="{{ worksheet.id }}-x-log-transform">
+                            <input id="{{ worksheet.id }}-x-log-transform" type="checkbox" class="log-scale"> Plot as log<sub>10</sub>(n+1)
                         </label>
                     </div>
 
@@ -171,8 +169,8 @@
                                 </div>
                             </div>
                         {% endfor %}
-                        <label for="y-log-transform">
-                            <input id="y-log-transform" type="checkbox" class="log-scale"> Plot as log<sub>10</sub>(n+1)
+                        <label for="{{ worksheet.id }}-y-log-transform">
+                            <input id="{{ worksheet.id }}-y-log-transform" type="checkbox" class="log-scale"> Plot as log<sub>10</sub>(n+1)
                         </label>
                     </div>
 
@@ -180,7 +178,7 @@
                     <div class="form-group color-by-group">
                         <label for="color-by">Color By Feature</label>
 {#                        <div class="color-selector filter-label label label-default" type="text" id="color-select" name="color-attr" value="{{ plot.color_by }}">{{ plot.color_by }}</div>#}
-                        <select id="color-by" class="color_by" {% if workbook.owner.id != user.id %} disabled {% endif %} class="form-control search-term-field" style="width: 230px;">
+                        <select id="{{ worksheet.id }}-color-by" class="color_by" {% if workbook.owner.id != user.id %} disabled {% endif %} class="form-control search-term-field" style="width: 230px;">
                             {% if plot.color_by %}
                                 <option value="{{ plot.color_by.url_code }}" var_id="{{ plot.color_by.id }}" selected >{{ plot.color_by.name }}</option>
                             {% else %}
@@ -191,8 +189,8 @@
 
                     <!-- Gene Label for SeqPeek -->
                     <div class="form-group seqpeek-genes">
-                        <label for="gene_label">Gene or miRNA</label>
-                        <select id="gene_label" {% if workbook.owner.id != user.id %} disabled {% endif %} class="form-control search-term-field" style="width: 230px;">
+                        <label for="{{ worksheet.id }}-gene_label">Gene or miRNA</label>
+                        <select id="{{ worksheet.id }}-gene_label" {% if workbook.owner.id != user.id %} disabled {% endif %} class="form-control search-term-field" style="width: 230px;">
                             {% if plot.gene_label %}
                                 <option value="{{ plot.gene_label }}" selected >{{ plot.gene_label }}</option>
                             {% else %}
@@ -200,9 +198,9 @@
                             {% endif %}
                             {% for gene_item in genes %}
                                 {% if not plot or plot.gene_label != gene_item.gene %}
-                                    {# TODO {% if gene_item.gene == plot.gene_label %}#}
-                                    <option value="{{ gene_item.gene }}">{{ gene_item.gene }}</option>
-                                    {# TODO {% endif %}#}
+                                    {% if gene_item.type == 'gene' %}
+                                        <option value="{{ gene_item.gene }}">{{ gene_item.gene }}</option>
+                                    {% endif %}
                                 {% endif %}
                             {% endfor %}
                         </select>
