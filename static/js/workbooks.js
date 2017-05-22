@@ -345,11 +345,23 @@ require([
         if(plot_settings) {
             for (var axis_index in plot_settings.axis) {
                 var name = plot_settings.axis[axis_index].name;
+                var axis_ltr = name.substring(0,1);
                 var options;
                 if (name == 'x_axis') {
                     options = $(element).find('.x-axis-select option');
                 } else if (name == 'y_axis') {
                     options = $(element).find('.y-axis-select option');
+                }
+
+                $('#'+plot_data.worksheet_id+'-'+axis_ltr+'-log-transform').prop('disabled',plot_settings.axis[axis_index].type === 'CATEGORICAL');
+
+                if(plot_settings.axis[axis_index].type == 'CATEGORICAL') {
+                    $('#'+plot_data.worksheet_id+'-'+axis_ltr+'-log-transform').prop('checked',false);
+                    $('#'+plot_data.worksheet_id+'-'+axis_ltr+'-log-transform').prop('title','Log transformation is not available with this axis for this plot type.');
+                    $('#'+plot_data.worksheet_id+'-'+axis_ltr+'-log-transform').parent().prop('title','Log transformation is not available with this axis for this plot type.');
+                } else {
+                    $('#'+plot_data.worksheet_id+'-'+axis_ltr+'-log-transform').parent().prop('title','');
+                    $('#'+plot_data.worksheet_id+'-'+axis_ltr+'-log-transform').prop('title','');
                 }
 
                 options.each(function (i, element) {
@@ -557,17 +569,18 @@ require([
         x_select_change(this);
     });
     function x_attribute_change(self, for_plot_load){
+        var active_worksheet = $('.worksheet.active').attr('id');
         $(self).parent().find(".attr-options").fadeOut();
         var attr = $(self).find(":selected").val();
         if(attr == "GNAB" && $('#value-GNAB :selected').val() !== "num_mutations") {
-            $('#x-log-transform').prop("checked", false);
-            $('#x-log-transform').prop("disabled", true);
+            $('#'+active_worksheet+'x-log-transform').prop("checked", false);
+            $('#'+active_worksheet+'x-log-transform').prop("disabled", true);
         } else {
             if((attr === 'GEXP' || attr === 'MIRN') && !for_plot_load){
                 field_options_change($(self).siblings('.'+attr).children('div[data-field="'+attr+'"]').find('select'));
             }
-            if($('#x-log-transform').prop("disabled")) {
-                $('#x-log-transform').prop("disabled", false);
+            if($('#'+active_worksheet+'x-log-transform').prop("disabled")) {
+                $('#'+active_worksheet+'x-log-transform').prop("disabled", false);
             }
         }
         var attr_type_div = $(self).parent().find("."+attr);
@@ -667,17 +680,18 @@ require([
         y_select_change(this);
     });
     function y_attribute_change(self, for_plot_load){
+        var active_worksheet = $('.worksheet.active').attr('id');
         $(self).parent().find(".attr-options").fadeOut();
         var attr = $(self).find(":selected").val();
         if(attr == "GNAB" && $('#value-GNAB :selected').val() !== "num_mutations") {
-            $('#y-log-transform').prop("checked", false);
-            $('#y-log-transform').prop("disabled", true);
+            $('#'+active_worksheet+'y-log-transform').prop("checked", false);
+            $('#'+active_worksheet+'y-log-transform').prop("disabled", true);
         } else {
             if((attr === 'GEXP' || attr === 'MIRN') && !for_plot_load){
                 field_options_change($(self).siblings('.'+attr).children('div[data-field="'+attr+'"]').find('select'));
             }
-            if($('#y-log-transform').prop("disabled")) {
-                $('#y-log-transform').prop("disabled", false);
+            if($('#'+active_worksheet+'y-log-transform').prop("disabled")) {
+                $('#'+active_worksheet+'y-log-transform').prop("disabled", false);
             }
         }
         var attr_type_div = $(self).parent().find("."+attr);
@@ -701,6 +715,8 @@ require([
 
     function field_options_change(self) {
 
+        var active_worksheet = $('.worksheet.active').attr('id');
+
         var parent          = self.parent();
         var datatype        = parent[0].getAttribute('data-field');
         var filterElements  = parent.find('select');
@@ -709,7 +725,7 @@ require([
         var filters         = [{ filter : gene_selector.attr('type').toLowerCase()+'_name',
                                  value  : gene_selector.val()}];
 
-        var axis_transform = (variable_name == "x-axis-select") ? "#x-log-transform" : "#y-log-transform";
+        var axis_transform = (variable_name == "x-axis-select") ? "#"+active_worksheet+"x-log-transform" : "#"+active_worksheet+"y-log-transform";
 
         if(datatype == "GNAB" && self.find(':selected').val() !== "num_mutations") {
             $(axis_transform).prop("disabled", true);
@@ -744,13 +760,14 @@ require([
 
     // Hide/Show settings as appropriate for plot:
     var hide_show_widgets = function(plot_type, settings_flyout) {
+        var active_worksheet = $('.worksheet.active').attr('id');
         var x_widgets = settings_flyout.find('div[variable="x-axis-select"]');
         var y_widgets = settings_flyout.find('div[variable="y-axis-select"]');
         var c_widgets = settings_flyout.find('div.form-group.color-by-group');
         var swap = settings_flyout.find('button.swap');
         var sp_genes = settings_flyout.find('.seqpeek-genes');
-        var xLogCheck = $('#x-log-transform').parent();
-        var yLogCheck = $('#y-log-transform').parent();
+        var xLogCheck = $('#'+active_worksheet+'x-log-transform').parent();
+        var yLogCheck = $('#'+active_worksheet+'y-log-transform').parent();
 
         // Clear selections for plots that are loaded
         if ($(settings_flyout).parents('.worksheet').attr('is-loaded') === 'true') {
@@ -869,16 +886,19 @@ require([
             return result;
         }
 
-        var xLog = $(plot_settings).find('#x-log-transform'), yLog = $(plot_settings).find('#y-log-transform');
+        var worksheet_id = $(plot_settings).find('.update-plot').attr("worksheet_id");
+
+        var xLog = $(plot_settings).find('#'+worksheet_id+'x-log-transform'), yLog = $(plot_settings).find('#'+worksheet_id+'y-log-transform');
 
         var result = {
-            worksheet_id : $(plot_settings).find('.update-plot').attr("worksheet_id"),
+            worksheet_id : worksheet_id,
+            plot_type    : $('#'+worksheet_id+'-analysis-type').val(),
             plot_id      : $(plot_settings).find('.update-plot').attr("plot_id"),
             selections   : {
                 x_axis   : get_values($(plot_settings).find('.x-axis-select').find(":selected")),
                 y_axis   : get_values($(plot_settings).find('.y-axis-select').find(":selected")),
                 color_by : get_simple_values(plot_settings.find('.color_by')),
-                gene_label: get_simple_values(plot_settings.find('#gene_label'))
+                gene_label: get_simple_values(plot_settings.find('#'+worksheet_id+'gene_label'))
             },
             attrs : {
                 type    : worksheet.find('.plot_selection :selected').val(),
@@ -888,7 +908,7 @@ require([
                 cohorts: plot_settings.find('[name="cohort-checkbox"]:checked').map(function () {
                     return {id: this.value, cohort_id: $(this).attr("cohort-id")};
                 }).get(),
-                gene_label: plot_settings.find('#gene_label :selected').val()
+                gene_label: plot_settings.find('#'+worksheet_id+'gene_label :selected').val()
             },
             logTransform: {
                 x: (xLog.css('display')!=="none") && xLog.is(':checked'),
@@ -1136,7 +1156,7 @@ require([
             apply_axis_values(plot_element.find('.color_by'), plot_data.color_by);
         }
         if(plot_data.gene_label) {
-            plot_element.find("#gene_label").val(plot_data.gene_label.variable);
+            plot_element.find("#"+worksheet_id+"gene_label").val(plot_data.gene_label.variable);
         }
 
         if(plot_data.cohort) {
@@ -1231,13 +1251,14 @@ require([
 
     // Check Name and Desc for workbooks and worksheets
     var check_name_and_desc = function(type, mode) {
+        var active_sheet = $('.worksheet.active').attr('id');
         var name = null;
         var desc = null;
         var activeSheet = null;
         var thisModal = '';
 
-        $('#unallowed-chars-alert-sheet').hide();
-        $('#unallowed-chars-alert-book').hide();
+        $('.unallowed-chars-alert-sheet').hide();
+        $('.unallowed-chars-alert-book').hide();
 
         if(type == 'book') {
             name = $('.edit-workbook-name').val();
@@ -1308,13 +1329,14 @@ require([
 
         event.preventDefault();
 
-        var name = $('#'+($('.worksheet.active').attr('id'))+'-new-cohort-name').val();
+        var worksheet_id = $('.worksheet.active').attr('id');
+        var name = $('#'+worksheet_id+'-new-cohort-name').val();
 
         var unallowed = name.match(base.whitelist);
 
         if(unallowed) {
-            $('#unallowed-chars-cohort').text(unallowed.join(", "));
-            $('#unallowed-chars-alert-cohort').show();
+            $('#'+worksheet_id+'unallowed-chars-cohort').text(unallowed.join(", "));
+            $('#'+worksheet_id+'unallowed-chars-alert-cohort').show();
             return false;
         }
 

@@ -41,6 +41,7 @@
 </div>
 
 <!-- Create Worksheet modal-->
+{% if workbook.build %}
 <div class="modal fade" id="create-worksheet-modal-{{ workbook.id }}" tabindex="-1" aria-labelledby="create-worksheet-header-{{ workbook.id }}" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -69,6 +70,7 @@
         </div>
     </div>
 </div>
+{% endif %}
 
 <!-- Delete Workbook Modal -->
 <div class="modal fade" id="delete-workbook-modal-{{ workbook.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-workbook-body" aria-hidden="true">
@@ -139,6 +141,7 @@
 {% endif %}
 
 <!-- Duplicate Workbook Modal -->
+{% if workbook.build %}
 <div class="modal fade" id="copy-workbook-modal-{{ workbook.id }}" tabindex="-1" role="dialog" aria-labelledby="copy-workbook-header" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -162,6 +165,7 @@
         </div>
     </div>
 </div>
+{% endif %}
 
 {% if is_shareable or shared %}
 <!-- Share Workbook Modal -->

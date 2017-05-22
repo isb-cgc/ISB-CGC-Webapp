@@ -55,7 +55,7 @@ class ClinicalSearcher(object):
 
             for field_item in schema:
                 name = field_item['name']
-                if (name not in found_columns) and (name.find(keyword.lower()) != -1):
+                if (name not in found_columns) and (name.find(keyword.replace(' ', '_').lower()) != -1):
                     found_columns.update([name])
                     result.append(field_item)
 

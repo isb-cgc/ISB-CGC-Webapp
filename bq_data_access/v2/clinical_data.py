@@ -17,6 +17,7 @@ limitations under the License.
 """
 
 import logging
+import sys
 from re import compile as re_compile
 
 from bq_data_access.v2.errors import FeatureNotFoundException
@@ -153,7 +154,7 @@ class ClinicalDataQueryHandler(object):
 
         return query
 
-    def build_query(self, project_set, cohort_table, cohort_id_array, project_id_array):
+    def build_query(self, program_set, cohort_table, cohort_id_array, project_id_array):
         """
         Returns:
             Tuple (query_body, run_query).
@@ -168,7 +169,7 @@ class ClinicalDataQueryHandler(object):
             schema = TABLE_TO_SCHEMA_MAP[table_config.table_id]
             column_name_set = set([item['name'] for item in schema])
 
-            if (table_config.program in project_set) and (self.feature_def.column_name in column_name_set):
+            if (table_config.program in program_set) and (self.feature_def.column_name in column_name_set):
                 logger.info("Found matching table: '{}'".format(table_config.table_id))
                 found_tables.append(table_config)
 
@@ -215,6 +216,8 @@ class ClinicalDataQueryHandler(object):
         """
         result = []
 
+        print >> sys.stdout, "Query result count: "+str(len(query_result_array))
+
         for row in query_result_array:
             result.append({
                 'case_id': row['f'][0]['v'],
@@ -222,6 +225,8 @@ class ClinicalDataQueryHandler(object):
                 'aliquot_id': None,
                 'value': row['f'][2]['v']
             })
+
+        print >> sys.stdout, "Result count: " + str(len(result))
 
         return result
 
