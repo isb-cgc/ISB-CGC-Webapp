@@ -214,8 +214,16 @@ require([
             success: function (data) {
                 total_files = data['total_file_count'];
                 var total_pages = Math.ceil(total_files / 20);
-                $('.filelist-panel .panel-body .file-count').html(total_pages);
-                $('.filelist-panel .panel-body .page-num').html(page);
+                if(total_pages <= 0) {
+                    $('.file-page-count').hide();
+                    $('.no-file-page-count').show();
+                } else {
+                    $('.file-page-count').show();
+                    $('.no-file-page-count').hide();
+                    $('.filelist-panel .panel-body .file-count').html(total_pages);
+                    $('.filelist-panel .panel-body .page-num').html(page);
+                }
+
                 var files = data['file_list'];
                 $('.filelist-panel table tbody').empty();
 
