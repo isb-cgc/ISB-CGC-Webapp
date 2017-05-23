@@ -155,7 +155,7 @@ def data_access_for_plot(request):
         fvb = FeatureVectorBigQueryBuilder.build_from_django_settings(bqss)
 
         program_set = get_public_program_name_set_for_cohorts(cohort_id_array)
-        data = get_merged_feature_vectors(fvb, x_id, y_id, None, cohort_id_array, logTransform, confirmed_study_ids, program_set=program_set)
+        data = get_merged_feature_vectors(fvb, x_id, y_id, c_id, cohort_id_array, logTransform, confirmed_study_ids, program_set=program_set)
 
         # Annotate each data point with cohort information
         add_cohort_info_to_merged_vectors(data, x_id, y_id, c_id, cohort_id_array)
