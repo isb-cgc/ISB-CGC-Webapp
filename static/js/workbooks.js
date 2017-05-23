@@ -598,7 +598,7 @@ require([
      * Color_by handler, update based on x and y selection
      */
     $(".search-term-field").change(function(){
-        if($(this).attr('id') != "color_by") {
+        if($(this).attr('id').indexOf("color-by")<0) {
             var parent = $(this).parents(".main-settings");
             var x = get_values(parent.find('.x-axis-select').find(":selected"));
             var y = get_values(parent.find('.y-axis-select').find(":selected"));
@@ -1115,25 +1115,28 @@ require([
 
         plot_loader.fadeIn();
         plot_element.find('.resubmit-button').hide();
-        plotFactory.generate_plot({ plot_selector    : plot_selector,
-                                    legend_selector  : legend_selector,
-                                    pairwise_element : pair_wise,
-                                    type             : args.type,
-                                    x                : args.x,
-                                    y                : args.y,
-                                    logTransform     : args.logTransform,
-                                    color_by         : args.color_by,
-                                    gene_label       : args.gene_label,
-                                    cohorts          : cohort_ids,
-                                    color_override   : color_override}, function(result){
-            if(result.error){
-                plot_element.find('.resubmit-button').show();
+        plotFactory.generate_plot({
+            plot_selector    : plot_selector,
+            legend_selector  : legend_selector,
+            pairwise_element : pair_wise,
+            type             : args.type,
+            x                : args.x,
+            y                : args.y,
+            logTransform     : args.logTransform,
+            color_by         : args.color_by,
+            gene_label       : args.gene_label,
+            cohorts          : cohort_ids,
+            color_override   : color_override
+         }, function(result){
+                if(result.error){
+                    plot_element.find('.resubmit-button').show();
+                }
+
+                update_plot_elem_rdy();
+
+                plot_loader.fadeOut();
             }
-
-            update_plot_elem_rdy();
-
-            plot_loader.fadeOut();
-        });
+        );
     }
 
     /*

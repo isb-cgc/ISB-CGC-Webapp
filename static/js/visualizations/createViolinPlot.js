@@ -245,7 +245,7 @@ function($, d3, d3textwrap, vizhelpers, _) {
                 var item = raw_Data[i];
                 var key = item[xAttr];
                 var tmp = {};
-                if (colorBy && tmp[colorBy]) {
+                if (colorBy && item[colorBy]) {
                     if (colorBy == 'cohort'){
                         tmp[colorBy] = item[colorBy][0];
                     } else {

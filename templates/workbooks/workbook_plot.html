@@ -176,7 +176,7 @@
 
                     <!-- Color By variable. only offer x and y selections-->
                     <div class="form-group color-by-group">
-                        <label for="color-by">Color By Feature</label>
+                        <label for="{{ worksheet.id }}-color-by">Color By Feature</label>
 {#                        <div class="color-selector filter-label label label-default" type="text" id="color-select" name="color-attr" value="{{ plot.color_by }}">{{ plot.color_by }}</div>#}
                         <select id="{{ worksheet.id }}-color-by" class="color_by" {% if workbook.owner.id != user.id %} disabled {% endif %} class="form-control search-term-field" style="width: 230px;">
                             {% if plot.color_by %}
