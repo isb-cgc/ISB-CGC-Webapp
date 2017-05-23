@@ -263,17 +263,17 @@ TABLE_TO_SCHEMA_MAP = {
         {
             "mode": "NULLABLE",
             "name": "age_began_smoking_in_years",
-            "type": "STRING"
+            "type": "INTEGER"
         },
         {
             "mode": "NULLABLE",
             "name": "year_of_tobacco_smoking_onset",
-            "type": "STRING"
+            "type": "INTEGER"
         },
         {
             "mode": "NULLABLE",
             "name": "stopped_smoking_year",
-            "type": "STRING"
+            "type": "INTEGER"
         },
         {
             "mode": "NULLABLE",
@@ -283,7 +283,7 @@ TABLE_TO_SCHEMA_MAP = {
         {
             "mode": "NULLABLE",
             "name": "number_pack_years_smoked",
-            "type": "STRING"
+            "type": "FLOAT"
         },
         {
             "mode": "NULLABLE",
@@ -333,12 +333,12 @@ TABLE_TO_SCHEMA_MAP = {
         {
             "mode": "NULLABLE",
             "name": "gleason_score_combined",
-            "type": "STRING"
+            "type": "INTEGER"
         },
         {
             "mode": "NULLABLE",
             "name": "psa_value",
-            "type": "STRING"
+            "type": "FLOAT"
         },
         {
             "mode": "NULLABLE",
