@@ -233,6 +233,8 @@ def index(request):
                                                                       defaults=updated_values)
                 logger.info("NIH_User.objects.update_or_create() returned nih_user: {} and created: {}".format(
                     str(nih_user.NIH_username), str(created)))
+                st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[STATUS] NIH_User.objects.update_or_create() returned nih_user: {} and created: {}".format(
+                    str(nih_user.NIH_username), str(created)))
 
                 # add or remove user from ACL_GOOGLE_GROUP if they are or are not dbGaP authorized
                 directory_client, http_auth = get_directory_resource()
@@ -261,6 +263,10 @@ def index(request):
                     directory_client.members().delete(groupKey=ACL_GOOGLE_GROUP,
                                                       memberKey=user_email).execute(http=http_auth)
                     logger.warn("User {} was deleted from group {} because they don't have dbGaP authorization.".format(user_email, ACL_GOOGLE_GROUP))
+                    st_logger.write_text_log_entry(
+                        LOG_NAME_ERA_LOGIN_VIEW,
+                        "[WARN] User {} was deleted from group {} because they don't have dbGaP authorization.".format(user_email, ACL_GOOGLE_GROUP)
+                    )
             # if the user_email doesn't exist in the google group an HttpError will be thrown...
             except HttpError:
                 # ...if the user is dbGaP authorized they should be added to the ACL_GOOGLE_GROUP
@@ -275,6 +281,7 @@ def index(request):
                     ).execute(http=http_auth)
                     logger.info(result)
                     logger.info("User {} added to {}.".format(user_email, ACL_GOOGLE_GROUP))
+                    st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[STATUS] User {} added to {}.".format(user_email, ACL_GOOGLE_GROUP))
 
             # Add task in queue to deactivate NIH_User entry after NIH_assertion_expiration has passed.
             try:
@@ -296,10 +303,12 @@ def index(request):
                     ]
                 }
                 client.projects().topics().publish(topic=full_topic_name, body=body).execute()
+                st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[STATUS] Notification sent to PubSub topic: {}".format(full_topic_name))
 
             except Exception as e:
                 logger.error("[ERROR] Failed to publish to PubSub topic")
                 logger.exception(e)
+                st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[ERROR] Failed to publish to PubSub topic: {}".format(str(e)))
 
             messages.info(request, warn_message)
             print >> sys.stdout, "[STATUS] http_host: "+req['http_host']
