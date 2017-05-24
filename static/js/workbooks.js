@@ -908,7 +908,7 @@ require([
                 cohorts: plot_settings.find('[name="cohort-checkbox"]:checked').map(function () {
                     return {id: this.value, cohort_id: $(this).attr("cohort-id")};
                 }).get(),
-                gene_label: plot_settings.find('#'+worksheet_id+'gene_label :selected').val()
+                gene_label: plot_settings.find('#'+worksheet_id+'-gene_label :selected').val()
             },
             logTransform: {
                 x: (xLog.css('display')!=="none") && xLog.is(':checked'),
