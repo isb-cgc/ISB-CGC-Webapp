@@ -24,7 +24,7 @@ from MySQLdb import connect, cursors
 from GenespotRE import secret_settings, settings
 from argparse import ArgumentParser
 from cohorts.metadata_helpers import submit_bigquery_job, is_bigquery_job_finished, get_bq_job_results, fetch_metadata_value_set
-from projects.models import Program, Public_Data_Tables, Public_Metadata_Tables, Public_Annotation_Tables
+from projects.models import Program, Public_Data_Tables, Public_Metadata_Tables, Public_Annotation_Tables, Project
 from google_helpers.bigquery_service import authorize_credentials_with_Google
 from django.contrib.auth.models import User
 from genes.models import GeneSymbol
@@ -114,7 +114,8 @@ def create_programs_and_projects(debug):
 
         db.autocommit(True)
 
-        isb_userid = User.objects.get(username='isb',is_staff=True,is_superuser=True,is_active=True).id
+        isb_user = User.objects.get(username='isb',is_staff=True,is_superuser=True,is_active=True)
+        isb_userid = isb_user.id
 
         for prog in programs_to_insert:
             if len(Program.objects.filter(owner=isb_userid,is_public=True,active=True,name=prog)):
@@ -258,6 +259,9 @@ def create_programs_and_projects(debug):
                         print >> sys.stdout, "Values: " + str(values)
                     else:
                         cursor.execute(insert_projects, values)
+
+        # Now de-activate the old CCLE project
+        Project.objects.get(name='CCLE', owner=isb_user, active=1).update(active=0)
 
     except Exception as e:
         print >> sys.stdout, traceback.format_exc()

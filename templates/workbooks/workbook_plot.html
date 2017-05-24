@@ -190,7 +190,7 @@
                     <!-- Gene Label for SeqPeek -->
                     <div class="form-group seqpeek-genes">
                         <label for="{{ worksheet.id }}-gene_label">Gene or miRNA</label>
-                        <select id="{{ worksheet.id }}-gene_label" {% if workbook.owner.id != user.id %} disabled {% endif %} class="form-control search-term-field" style="width: 230px;">
+                        <select id="{{ worksheet.id }}-gene_label" {% if workbook.owner.id != user.id %} disabled {% endif %} class="form-control search-term-field axis-select" style="width: 230px;">
                             {% if plot.gene_label %}
                                 <option value="{{ plot.gene_label }}" selected >{{ plot.gene_label }}</option>
                             {% else %}
@@ -241,7 +241,7 @@
                 </div>
             {% endif %}
         </div>
-        <div class="legend"></div>
+        <div class="legend" style="display: none;"></div>
         <button class="resubmit-button btn btn-primary">Submit Plot</button>
         <div class="pairwise-result"></div>
         <div class="save-cohort-card" style="display:none;">
