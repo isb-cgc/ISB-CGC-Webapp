@@ -10,4 +10,5 @@ def additional_context(request):
             'BASE_URL': settings.BASE_URL,
             'BASE_API_URL': settings.BASE_API_URL,
             'STATIC_FILES_URL': settings.STATIC_URL,
+            'GCP_REG_CLIENT_EMAIL': settings.GCP_REG_CLIENT_EMAIL,
     }
