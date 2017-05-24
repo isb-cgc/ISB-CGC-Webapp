@@ -907,7 +907,7 @@ require([
                 cohorts: plot_settings.find('[name="cohort-checkbox"]:checked').map(function () {
                     return {id: this.value, cohort_id: $(this).attr("cohort-id")};
                 }).get(),
-                gene_label: plot_settings.find('#'+worksheet_id+'gene_label :selected').val()
+                gene_label: plot_settings.find('#'+worksheet_id+'-gene_label :selected').val()
             },
             logTransform: {
                 x: (xLog.css('display')!=="none") && xLog.is(':checked'),
@@ -974,13 +974,23 @@ require([
 
     var axis_selex_update = function(e){
         var axisRdy = true;
-        $('.worksheet.active').find('.axis-select').each(function(){
-            if($(this).parent().css('display')!=='none'){
-                if(!$(this).find(':selected').val()) {
-                    axisRdy = false;
+
+        if(!$('.worksheet.active').find('.plot_selection :selected').val()) {
+            axisRdy = false;
+        } else if($('.worksheet.active').find('.plot_selection :selected').val() !== 'SeqPeek') {
+            $('.worksheet.active').find('.axis-select').each(function(){
+                if($(this).parent().css('display')!=='none'){
+                    if(!$(this).find(':selected').val()) {
+                        axisRdy = false;
+                    }
                 }
-            }
-        });
+            });
+        } else {
+             if(!$('#'+$('.worksheet.active').attr('id')+'-gene_label').find(':selected').val()) {
+                 axisRdy = false;
+             }
+        }
+
         plotReady.setReady($('.worksheet.active').attr('id'),'axis',axisRdy);
         $('#selGenVar-'+ $('.worksheet.active').attr('id')).prop('checked',axisRdy);
         check_for_plot_rdy();
@@ -1087,6 +1097,7 @@ require([
 
     // Generates the actual svg plots by accepting the plot settings configured in the settings area
     function generate_plot(args){
+        $('.legend').hide();
         var cohort_ids = [];
         //create list of actual cohort models
         for(var i in args.cohorts){
@@ -1132,6 +1143,8 @@ require([
                 }
 
                 update_plot_elem_rdy();
+
+                (args.color_by || args.type == 'SeqPeek') && $('.legend').show();
 
                 plot_loader.fadeOut();
             }

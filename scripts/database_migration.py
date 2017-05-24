@@ -24,7 +24,7 @@ from MySQLdb import connect, cursors
 from GenespotRE import secret_settings, settings
 from argparse import ArgumentParser
 from cohorts.metadata_helpers import submit_bigquery_job, is_bigquery_job_finished, get_bq_job_results, fetch_metadata_value_set
-from projects.models import Program, Public_Data_Tables, Public_Metadata_Tables, Public_Annotation_Tables
+from projects.models import Program, Public_Data_Tables, Public_Metadata_Tables, Public_Annotation_Tables, Project
 from google_helpers.bigquery_service import authorize_credentials_with_Google
 from django.contrib.auth.models import User
 from genes.models import GeneSymbol
@@ -114,7 +114,8 @@ def create_programs_and_projects(debug):
 
         db.autocommit(True)
 
-        isb_userid = User.objects.get(username='isb',is_staff=True,is_superuser=True,is_active=True).id
+        isb_user = User.objects.get(username='isb',is_staff=True,is_superuser=True,is_active=True)
+        isb_userid = isb_user.id
 
         for prog in programs_to_insert:
             if len(Program.objects.filter(owner=isb_userid,is_public=True,active=True,name=prog)):
@@ -258,6 +259,9 @@ def create_programs_and_projects(debug):
                         print >> sys.stdout, "Values: " + str(values)
                     else:
                         cursor.execute(insert_projects, values)
+
+        # Now de-activate the old CCLE project
+        Project.objects.get(name='CCLE', owner=isb_user, active=1).update(active=0)
 
     except Exception as e:
         print >> sys.stdout, traceback.format_exc()
@@ -566,6 +570,66 @@ def fix_gene_symbols(debug):
         if db and db.open: db.close()
 
 
+def fix_user_data_tables(debug,db_to_update = 'test'):
+
+    db = None
+    cursor = None
+
+    try:
+        db = get_mysql_connection()
+        db.autocommit(True)
+        cursor = db.cursor()
+
+        update_metadata_stmt = """
+            ALTER TABLE %s CHANGE study_id project_id INT(10);
+        """
+
+        update_case_samples_stmt = """
+            ALTER TABLE %s CHANGE %s case_barcode VARCHAR(200);
+        """
+
+        cursor.execute("""
+            SELECT TABLE_NAME
+            FROM INFORMATION_SCHEMA.COLUMNS
+            WHERE TABLE_SCHEMA = '%s' AND COLUMN_NAME LIKE 'study_id' AND TABLE_NAME NOT LIKE 'metadata%%'
+            GROUP BY TABLE_NAME;
+        """ % db_to_update)
+
+        for row in cursor.fetchall():
+            if debug:
+                print >> sys.stdout, "[STATUS] Execution statement: " +update_metadata_stmt % row[0]
+            else:
+                cursor.execute(update_metadata_stmt % row[0])
+
+        cursor.execute("""
+            SELECT TABLE_NAME, GROUP_CONCAT(COLUMN_NAME)
+            FROM INFORMATION_SCHEMA.COLUMNS
+            WHERE TABLE_SCHEMA = '%s' AND
+              (COLUMN_NAME LIKE 'participant_barcode' OR COLUMN_NAME LIKE 'ParticipantBarcode') AND
+              TABLE_NAME NOT LIKE 'metadata%%' AND TABLE_NAME NOT IN (
+                SELECT DISTINCT TABLE_NAME
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_SCHEMA = '%s' AND TABLE_NAME NOT LIKE 'metadata%%' AND
+                COLUMN_NAME LIKE 'case_barcode'
+              )
+            GROUP BY TABLE_NAME;
+        """ % (db_to_update, db_to_update,))
+
+        for row in cursor.fetchall():
+            cols = row[1].split(',')
+            if debug:
+                print >> sys.stdout, "[STATUS] Execution statement: "+update_case_samples_stmt % (row[0], cols[len(cols)-1],)
+            else:
+                cursor.execute(update_case_samples_stmt % (row[0], cols[len(cols)-1],))
+
+    except Exception as e:
+        print >> sys.stderr, "[ERROR] While fixing user data tables"
+        print >> sys.stderr, traceback.format_exc()
+    finally:
+        if cursor: cursor.close()
+        if db and db.open: db.close()
+
+
 def fix_var_faves(debug):
 
     db = None
@@ -792,6 +856,12 @@ def main():
     cmd_line_parser.add_argument('-v', '--fix_var_faves', type=bool, default=False,
                                  help="Fix the old variable favorites by setting their version to v1")
 
+    cmd_line_parser.add_argument('-u', '--fix_user_data', type=bool, default=False,
+                                 help="Fix previously uploaded user data tables to have the right column names")
+
+    cmd_line_parser.add_argument('-db', '--database', type=str, default='test',
+                                 help="Database to work on")
+
     args = cmd_line_parser.parse_args()
 
     try:
@@ -802,6 +872,7 @@ def main():
         args.fix_filters and fix_filters(args.debug_mode)
         args.fix_genes and fix_gene_symbols(args.debug_mode)
         args.fix_var_faves and fix_var_faves(args.debug_mode)
+        args.fix_user_data and fix_user_data_tables(args.debug_mode,args.database)
 
     except Exception as e:
         print >> sys.stdout, traceback.format_exc()

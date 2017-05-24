@@ -445,6 +445,7 @@ CLIENT_SECRETS                  = os.path.join(os.path.dirname(os.path.dirname(_
 WEB_CLIENT_ID                   = os.environ.get('WEB_CLIENT_ID', '') # Client ID from client_secrets.json
 IGV_WEB_CLIENT_ID               = os.environ.get('IGV_WEB_CLIENT_ID', WEB_CLIENT_ID)
 INSTALLED_APP_CLIENT_ID         = os.environ.get('INSTALLED_APP_CLIENT_ID', '') # Native Client ID
+GCP_REG_CLIENT_EMAIL            = os.environ.get('CLIENT_EMAIL','')
 
 #################################
 #   For NIH/eRA Commons login   #
