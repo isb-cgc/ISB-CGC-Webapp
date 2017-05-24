@@ -226,7 +226,7 @@
                                                     <li class="checkbox">
                                                         <div id="heading-{{ var.id }}">
                                                             <label>
-                                                                <input class="variable-toggle-checkbox" type="checkbox" value="{{ var.code }}" name="elements-selected" data-text-label="{{ var.name }}" {% if var.feature %}data-feature-id="{{ var.feature.id }}"{% endif %}>
+                                                                <input class="variable-toggle-checkbox" type="checkbox" value="{{ var.code }}" var_type="{{ var.type }}" data-code="{{ var.code }}" name="elements-selected" data-text-label="{{ var.name }}" {% if var.feature %}data-feature-id="{{ var.feature.id }}"{% endif %}>
                                                                 {{ var.name }}
                                                             </label>
                                                         </div>
