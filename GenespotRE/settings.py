@@ -451,7 +451,7 @@ GCP_REG_CLIENT_EMAIL            = os.environ.get('CLIENT_EMAIL','')
 #   For NIH/eRA Commons login   #
 #################################
 
-LOGIN_EXPIRATION_MINUTES                = os.environ.get('LOGIN_EXPIRATION_MINUTES', 24*60)
+LOGIN_EXPIRATION_MINUTES                = int(os.environ.get('LOGIN_EXPIRATION_MINUTES', 24*60))
 DBGAP_AUTHENTICATION_LIST_FILENAME      = os.environ.get('DBGAP_AUTHENTICATION_LIST_FILENAME', '')
 DBGAP_AUTHENTICATION_LIST_BUCKET        = os.environ.get('DBGAP_AUTHENTICATION_LIST_BUCKET', '')
 ACL_GOOGLE_GROUP                        = os.environ.get('ACL_GOOGLE_GROUP', '')
