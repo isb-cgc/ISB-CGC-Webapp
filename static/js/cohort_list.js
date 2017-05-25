@@ -44,7 +44,6 @@ require([
     'tablesorter',
     'base'
 ], function($) {
-
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function() {
         var form = $(this).find('form');
@@ -173,6 +172,7 @@ require([
             });
         }
     });
+
 
     $('#public-cohorts-list tr:not(:first) input[type="checkbox"]').on('change', function() {
         clear_objects();

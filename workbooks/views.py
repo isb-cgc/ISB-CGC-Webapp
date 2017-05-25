@@ -42,7 +42,7 @@ def workbook_list(request):
     workbooks = userWorkbooks | sharedWorkbooks
     workbooks = workbooks.distinct()
 
-    return render(request, template, {'workbooks' : workbooks})
+    return render(request, template, {'workbooks': workbooks})
 
 def workbook_samples(request):
     template = 'workbooks/workbook_samples.html'

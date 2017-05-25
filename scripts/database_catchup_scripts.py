@@ -76,9 +76,9 @@ def catchup_shortlist(cursor):
             """
             cursor.execute(set_metadata_shortlist_def)
     except Exception as e:
-        print >> sys.stdout, "[ERROR] Exception when setting the metadata shortlist in metadata_attr; it may not have been made."
-        print >> sys.stdout, e
-        print >> sys.stdout, traceback.format_exc()
+        print >> sys.stderr, "[ERROR] Exception when setting the metadata shortlist in metadata_attr; it may not have been made."
+        print >> sys.stderr, e
+        print >> sys.stderr, traceback.format_exc()
 
 # *** DEPRECATED ***
 # Create the view which lists all members of metadata_attributes with shortlist=1 (i.e. true).
@@ -92,10 +92,9 @@ def create_shortlist_view(cursor):
         """
         cursor.execute(metadata_shortlist_view_def)
     except Exception as e:
-        print >> sys.stdout, "[ERROR] Exception when creating the metadata shortlist view! It may not have been made."
-        print >> sys.stdout, e
-        print >> sys.stdout, traceback.format_exc()
-# *** DEPRECATED ***
+        print >> sys.stderr, "[ERROR] Exception when creating the metadata shortlist view! It may not have been made."
+        print >> sys.stderr, e
+        print >> sys.stderr, traceback.format_exc()
 
 # Create the get_metadata_values stored procedure, which retrieves all the possible values of the metadata shortlist
 # attributes found in metadata_samples.
@@ -124,7 +123,6 @@ def create_metadata_vals_sproc(cursor):
                     DEALLOCATE PREPARE stmt;
 
                     OPEN attr_cur;
-
                     shortlist_loop: LOOP
                         FETCH attr_cur INTO col;
                         IF done THEN
@@ -144,9 +142,9 @@ def create_metadata_vals_sproc(cursor):
         cursor.execute(metadata_vals_sproc_def)
 
     except Exception as e:
-        print >> sys.stdout, "[ERROR] Exception when making the metadata values sproc; it may not have been made!"
-        print >> sys.stdout, e
-        print >> sys.stdout, traceback.format_exc()
+        print >> sys.stderr, "[ERROR] Exception when making the metadata values sproc; it may not have been made"
+        print >> sys.stderr, e
+        print >> sys.stderr, traceback.format_exc()
 
 # Create the get_metadata_values stored procedure, which retrieves all the possible values of the attributes found in
 # metadata_samples for the indicated program.
@@ -350,10 +348,9 @@ def create_samples_shortlist_view(cursor):
 
         cursor.execute(metadata_samples_shortlist_view_def % view_cols)
     except Exception as e:
-        print >> sys.stdout, "[ERROR] Exception when creating the metadata_samples shortlist view; it may not have been made"
-        print >> sys.stdout, e
-        print >> sys.stdout, traceback.format_exc()
-# *** DEPRECATED ***
+        print >> sys.stderr, "[ERROR] Exception when creating the metadata_samples shortlist view; it may not have been made"
+        print >> sys.stderr, e
+        print >> sys.stderr, traceback.format_exc()
 
 
 # Cohorts made prior to the release of user data will have null values in their project IDs for each sample
@@ -417,6 +414,9 @@ def fix_cohort_projects(cursor):
         print >> sys.stdout, "[ERROR] Exception when fixing cohort project IDs; they may not have been fiixed"
         print >> sys.stdout, e
         print >> sys.stdout, traceback.format_exc()
+        print >> sys.stderr, "[ERROR] Exception when fixing cohort study IDs; they may not have been fiixed"
+        print >> sys.stderr, e
+        print >> sys.stderr, traceback.format_exc()
 
 
 # Add the stored procedure "get_isbcgc_project_set" which fetches the list of all program/project IDs which are owned by
@@ -437,9 +437,9 @@ def add_isb_cgc_project_sproc(cursor):
         cursor.execute("DROP PROCEDURE IF EXISTS `get_isbcgc_project_set`;")
         cursor.execute(sproc_def)
     except Exception as e:
-        print >> sys.stdout, "[ERROR] Exception when adding the get_isbcgc_project_set sproc set; it may not have been added"
-        print >> sys.stdout, e
-        print >> sys.stdout, traceback.format_exc()
+        print >> sys.stderr, "[ERROR] Exception when adding the get_isbcgc_study_set sproc set; it may not have been added"
+        print >> sys.stderr, e
+        print >> sys.stderr, traceback.format_exc()
 
 
 # Query to correct CCLE samples from fix_cohort_samples, because despite having specific 'Study' values all CCLE samples are
@@ -508,9 +508,9 @@ def fix_ccle(cursor):
             print >> sys.stdout, "[WARNING] Some CCLE samples still have the wrong project ID - double-check your database. (count: " + str(ccle_count) + ")"
 
     except Exception as e:
-        print >> sys.stdout, "[ERROR] Exception when fixing CCLE cohorts; they may not have been updated!"
-        print >> sys.stdout, e
-        print >> sys.stdout, traceback.format_exc()
+        print >> sys.stderr, "[ERROR] Exception when fixing CCLE cohorts; they may not have been updated!"
+        print >> sys.stderr, e
+        print >> sys.stderr, traceback.format_exc()
 
 
 def alter_metadata_tables(cursor):

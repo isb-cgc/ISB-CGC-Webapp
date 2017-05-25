@@ -76,7 +76,6 @@ require([
     'select2',
     'base'
 ], function ($, plot_factory, vizhelpers, _, base) {
-
     var savingComment = false;
 
     var plotReady = {

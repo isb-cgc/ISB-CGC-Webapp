@@ -177,6 +177,4 @@ define(['jquery',], function ($) {
         confirmFormDiscard: confirmFormDiscard,
         returnToUrl: BASE_URL
     });
-
-
 });
