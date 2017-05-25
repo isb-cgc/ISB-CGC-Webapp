@@ -34,7 +34,7 @@ from google_helpers.directory_service import get_directory_resource
 from googleapiclient.errors import HttpError
 from visualizations.models import SavedViz
 from cohorts.models import Cohort, Cohort_Perms
-from projects.models import Project
+from projects.models import Program
 from workbooks.models import Workbook
 from accounts.models import NIH_User, GoogleProject
 
@@ -44,10 +44,6 @@ from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 
 debug = settings.DEBUG
 logger = logging.getLogger(__name__)
-
-login_expiration_seconds = settings.LOGIN_EXPIRATION_HOURS * 60 * 60
-# schedule check_login tasks for 15 minutes after the user's login will expire
-COUNTDOWN_SECONDS = login_expiration_seconds + (60 * 15)
 
 USER_API_URL = settings.BASE_API_URL + '/_ah/api/user_api/v1'
 ACL_GOOGLE_GROUP = settings.ACL_GOOGLE_GROUP
@@ -103,8 +99,7 @@ Returns user to landing page.
 '''
 @never_cache
 def landing_page(request):
-    return render(request, 'GenespotRE/landing.html',
-                  {'request': request})
+    return render(request, 'GenespotRE/landing.html', {'request': request, })
 
 '''
 Returns css_test page used to test css for general ui elements
@@ -150,28 +145,21 @@ def user_detail(request, user_id):
                 logger.warn("Error when retrieving nih_user with user_id {}. {}".format(str(user_id), str(e)))
                 # todo: add code to unlink all accounts?
 
-        era_login_url = "{}?sso&redirect_url={}/accounts/nih_login".format(settings.ERA_LOGIN_URL,
-                                                                            settings.BASE_URL)
-
         return render(request, 'GenespotRE/user_detail.html',
                       {'request': request,
                        'user': user,
                        'user_details': user_details,
                        'NIH_AUTH_ON': settings.NIH_AUTH_ON,
-                       'ERA_LOGIN_URL': era_login_url
+                       'ERA_LOGIN_URL': settings.ERA_LOGIN_URL
                        })
     else:
         return render(request, '403.html')
 
 @login_required
-def nih_login(request):
-    logging.info('at nih_login')
-
-@login_required
 def bucket_object_list(request):
     if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
     credentials = GoogleCredentials.get_application_default()
-    service = discovery.build('storage', 'v1', credentials=credentials)
+    service = discovery.build('storage', 'v1', credentials=credentials, cache_discovery=False)
 
     req = service.objects().list(bucket='isb-cgc-dev')
     resp = req.execute()
@@ -215,7 +203,7 @@ def user_landing(request):
 
     users = User.objects.filter(is_superuser=0)
     cohort_perms = Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True)
-    cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved').annotate(num_patients=Count('samples'))
+    cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved').annotate(num_cases=Count('samples__case_barcode'))
 
     for item in cohorts:
         item.perm = item.get_perm(request).get_perm_display()
@@ -309,12 +297,12 @@ def igv(request, sample_barcode=None, readgroupset_id=None):
     context['readgroupset_list'] = readgroupset_list
     context['bam_list'] = bam_list
     context['base_url'] = settings.BASE_URL
-    context['service_account'] = settings.IGV_WEB_CLIENT_ID
+    context['service_account'] = settings.WEB_CLIENT_ID
 
     return render(request, 'GenespotRE/igv.html', context)
 
 def health_check(request):
-    print >> sys.stdout, "[STATUS] Health check is secure? "+str(request.is_secure())
+    print >> sys.stdout, "[STATUS] Health check is secure: "+str(request.is_secure())
     return HttpResponse('')
 
 def help_page(request):
@@ -332,11 +320,11 @@ def dashboard_page(request):
     cohort_perms = list(set(Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True).exclude(cohort__id__in=public_cohorts)))
     cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved')
 
-    # Project List
-    ownedProjects = request.user.project_set.all().filter(active=True)
-    sharedProjects = Project.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
-    projects = ownedProjects | sharedProjects
-    projects = projects.distinct().order_by('-last_date_saved')
+    # Program List
+    ownedPrograms = request.user.program_set.all().filter(active=True)
+    sharedPrograms = Program.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
+    programs = ownedPrograms | sharedPrograms
+    programs = programs.distinct().order_by('-last_date_saved')
 
     # Workbook List
     userWorkbooks = request.user.workbook_set.all().filter(active=True)
@@ -347,6 +335,6 @@ def dashboard_page(request):
     return render(request, 'GenespotRE/dashboard.html', {
         'request'  : request,
         'cohorts'  : cohorts,
-        'projects' : projects,
+        'programs' : programs,
         'workbooks': workbooks,
     })

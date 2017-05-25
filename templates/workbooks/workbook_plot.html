@@ -1,6 +1,5 @@
 {% comment %}
-
-   Copyright 2015, Institute for Systems Biology
+   Copyright 2017, Institute for Systems Biology
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -13,7 +12,6 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-
 {% endcomment %}
 
 <div class="plot panel" id="plot-{{ worksheet.id }}">
@@ -64,7 +62,7 @@
                             {% endif %}
                             {% for gene in genes %}
                                 {% if not plot or plot.x_axis.id != gene.id %}
-                                    <option type="gene" value="{{ gene.gene }}" var_id="{{ gene.id }}">{{ gene.gene }}</option>
+                                    <option type="{{ gene.type }}" value="{{ gene.gene }}" var_id="{{ gene.id }}" var_type="G">{{ gene.gene }}</option>
                                 {% endif %}
                             {% endfor %}
                             {% for var in variables %}
@@ -77,7 +75,7 @@
                         <select aria-label="Specification" class="x-gene-attribute-select form-control spec-select datatype-selector" style="display:none; margin-top:5px; width: 230px;">
                             <option value="" type="label" disabled selected>-- select a specification --</option>
                             {% for type in datatype_list %}
-                                <option value="{{ type.datatype }}">{{ type.label}}</option>
+                                <option value="{{ type.datatype }}" var_type="{{ type.var_type }}">{{ type.label}}</option>
                             {% endfor %}
                         </select>
 
@@ -91,20 +89,24 @@
                                             {% if field.static %}
                                                 <option value="" disabled selected type="label">Please select an option</option>
                                                 {% for value in field.values %}
-                                                    <option value="{{ value }}">{{ value }}</option>
+                                                    <option value="{{ value }}" var_type="{% if value == 'variant_classification' or value == 'variant_type' %}C{% else %}N{% endif %}">{{ value }}</option>
                                                 {% endfor %}
                                             {% endif %}
+                                        </select>
+                                    {% empty %}
+                                        <select id="x-placeholder-{{ type.datatype }}" class="form-control field-options placeholder-options" data-field="placeholder" disabled style="display: none;">
+                                             <option value="placeholder" disabled selected type="label">placeholder</option>
                                         </select>
                                     {% endfor %}
                                 </div>
                                 <div class="search-term feature-search space-top-15">
-                                    <label for="search-term-select-x-{{ type.datatype }}">Select Feature</label>
-                                    <select id="search-term-select-x-{{ type.datatype }}" project="{{ TCGA_project.id }}" project_name="{{ TCGA_project.name }}" study="{{ TCGA_project.study.id }}" study_name="{{ TCGA_project.study.name}}" class="search-term-field search-term-select form-control"></select>
+                                    <label for="search-term-select-x-{{ type.datatype }}" disabled selected>Select Feature</label>
+                                    <select id="search-term-select-x-{{ type.datatype }}" class="search-term-field search-term-select form-control"></select>
                                 </div>
                             </div>
                         {% endfor %}
-                        <label for="x-log-transform">
-                            <input id="x-log-transform" type="checkbox" class="log-scale"> Plot as log<sub>10</sub>(n+1)
+                        <label for="{{ worksheet.id }}-x-log-transform">
+                            <input id="{{ worksheet.id }}-x-log-transform" type="checkbox" class="log-scale"> Plot as log<sub>10</sub>(n+1)
                         </label>
                     </div>
 
@@ -124,7 +126,7 @@
                             {% endif %}
                             {% for gene in genes %}
                                 {% if not plot or plot.y_axis.id != gene.id %}
-                                    <option type="gene" value="{{ gene.gene }}" var_id="{{ gene.id }}">{{ gene.gene }}</option>
+                                    <option type="{{ gene.type }}" value="{{ gene.gene }}" var_id="{{ gene.id }}" var_type="G">{{ gene.gene }}</option>
                                     {# TODO {% endif %}#}
                                 {% endif %}
                             {% endfor %}
@@ -138,7 +140,7 @@
                         <select aria-label="Specification" class="y-gene-attribute-select form-control spec-select datatype-selector" style="display:none; margin-top:5px; width: 230px;">
                             <option type="label" value="" disabled selected>-- select a specification --</option>
                             {% for type in datatype_list %}
-                                <option value="{{ type.datatype }}">{{ type.label}}</option>
+                                <option value="{{ type.datatype }}" var_type="{{ type.var_type }}">{{ type.label }}</option>
                             {% endfor %}
                         </select>
                         {# Selection of specific attributes of a gene if it is selected in the dropdown above #}
@@ -151,28 +153,32 @@
                                             {% if field.static %}
                                                 <option value="" disabled selected type="label">Please select an option</option>
                                                 {% for value in field.values %}
-                                                    <option value="{{ value }}">{{ value }}</option>
+                                                    <option value="{{ value }}" var_type="{% if value == 'variant_classification' or value == 'variant_type' %}C{% else %}N{% endif %}">{{ value }}</option>
                                                 {% endfor %}
                                             {% endif %}
+                                        </select>
+                                    {% empty %}
+                                        <select id="y-placeholder-{{ type.datatype }}" class="form-control field-options placeholder-options" data-field="placeholder" disabled style="display: none;">
+                                            <option value="placeholder" disabled selected type="label">placeholder</option>
                                         </select>
                                     {% endfor %}
                                 </div>
                                 <div class="search-term feature-search space-top-15">
                                     <label for="search-term-select-y">Select Feature</label>
-                                    <select id="search-term-select-y" project="{{ TCGA_project.id }}" project_name="{{ TCGA_project.name }}" study="{{ TCGA_project.study.id }}" study_name="{{ TCGA_project.study.name}}" class="search-term-field search-term-select form-control"></select>
+                                    <select id="search-term-select-y" class="search-term-field search-term-select form-control"></select>
                                 </div>
                             </div>
                         {% endfor %}
-                        <label for="y-log-transform">
-                            <input id="y-log-transform" type="checkbox" class="log-scale"> Plot as log<sub>10</sub>(n+1)
+                        <label for="{{ worksheet.id }}-y-log-transform">
+                            <input id="{{ worksheet.id }}-y-log-transform" type="checkbox" class="log-scale"> Plot as log<sub>10</sub>(n+1)
                         </label>
                     </div>
 
                     <!-- Color By variable. only offer x and y selections-->
                     <div class="form-group color-by-group">
-                        <label for="color-by">Color By Feature</label>
+                        <label for="{{ worksheet.id }}-color-by">Color By Feature</label>
 {#                        <div class="color-selector filter-label label label-default" type="text" id="color-select" name="color-attr" value="{{ plot.color_by }}">{{ plot.color_by }}</div>#}
-                        <select id="color-by" class="color_by" {% if workbook.owner.id != user.id %} disabled {% endif %} class="form-control search-term-field" style="width: 230px;">
+                        <select id="{{ worksheet.id }}-color-by" class="color_by" {% if workbook.owner.id != user.id %} disabled {% endif %} class="form-control search-term-field" style="width: 230px;">
                             {% if plot.color_by %}
                                 <option value="{{ plot.color_by.url_code }}" var_id="{{ plot.color_by.id }}" selected >{{ plot.color_by.name }}</option>
                             {% else %}
@@ -183,8 +189,8 @@
 
                     <!-- Gene Label for SeqPeek -->
                     <div class="form-group seqpeek-genes">
-                        <label for="gene_label">Gene</label>
-                        <select id="gene_label" {% if workbook.owner.id != user.id %} disabled {% endif %} class="form-control search-term-field" style="width: 230px;">
+                        <label for="{{ worksheet.id }}-gene_label">Gene or miRNA</label>
+                        <select id="{{ worksheet.id }}-gene_label" {% if workbook.owner.id != user.id %} disabled {% endif %} class="form-control search-term-field axis-select" style="width: 230px;">
                             {% if plot.gene_label %}
                                 <option value="{{ plot.gene_label }}" selected >{{ plot.gene_label }}</option>
                             {% else %}
@@ -192,9 +198,9 @@
                             {% endif %}
                             {% for gene_item in genes %}
                                 {% if not plot or plot.gene_label != gene_item.gene %}
-                                    {# TODO {% if gene_item.gene == plot.gene_label %}#}
-                                    <option value="{{ gene_item.gene }}">{{ gene_item.gene }}</option>
-                                    {# TODO {% endif %}#}
+                                    {% if gene_item.type == 'gene' %}
+                                        <option value="{{ gene_item.gene }}">{{ gene_item.gene }}</option>
+                                    {% endif %}
                                 {% endif %}
                             {% endfor %}
                         </select>
@@ -229,18 +235,18 @@
                     <p><i class="fa fa-exclamation-circle"></i> To complete this analysis: </p>
                     <ul class="ul no-bullet">
                         <li><input class="plot-ready-check" type="checkbox" id="selAnType-{{ worksheet.id }}" readonly onclick="this.checked=!this.checked;"> Select an Analysis Type (above)</li>
-                        <li><input class="plot-ready-check" type="checkbox" id="selGenVar-{{ worksheet.id }}" readonly onclick="this.checked=!this.checked;"> Select <a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Genes</a> and/or <a href="{% url 'variable_select_for_existing_workbook' workbook.id worksheet.id %}">Variables</a></li>
+                        <li><input class="plot-ready-check" type="checkbox" id="selGenVar-{{ worksheet.id }}" readonly onclick="this.checked=!this.checked;"> Select <a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Genes & miRNAs</a> and/or <a href="{% url 'variable_select_for_existing_workbook' workbook.id worksheet.id %}">Variables</a></li>
                         <li><input class="plot-ready-check" type="checkbox" id="selCoh-{{ worksheet.id }}" readonly onclick="this.checked=!this.checked;"> Select a <a href="{% url 'cohort_select_for_existing_workbook' workbook.id worksheet.id %}%}">Cohort</a></li>
                     </ul>
                 </div>
             {% endif %}
         </div>
-        <div class="legend"></div>
+        <div class="legend" style="display: none;"></div>
         <button class="resubmit-button btn btn-primary">Submit Plot</button>
         <div class="pairwise-result"></div>
         <div class="save-cohort-card" style="display:none;">
             <p class="selected-samples-count">Number of Samples: 0</p>
-            <p class="selected-patients-count">Number of Participants: 0</p>
+            <p class="selected-patients-count">Number of Cases: 0</p>
             <button class="btn btn-primary" data-toggle="modal" data-target="#save-cohort-{{ worksheet.id }}-modal" title="Save Cohort">Save Cohort</button>
         </div>
         <input type="hidden" name="type" value="genericplot" />
@@ -256,9 +262,9 @@
                 </div>
                 <form id="save-cohort-{{ worksheet.id }}" class="save-cohort-form" method="POST" action="{% url 'save_cohort_from_plot' %}">
                     <div class="modal-body">
-                        <div id="unallowed-chars-alert-cohort" class="alert alert-warning alert-dismissable" style="display: none;">
+                        <div id="{{ worksheet.id }}-unallowed-chars-alert-cohort" class="alert alert-warning alert-dismissable" style="display: none;">
                             <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                            Your cohort's name contains invalid characters (<span id="unallowed-chars-cohort"></span>). Please choose another name.
+                            Your cohort's name contains invalid characters (<span id="{{ worksheet.id }}-unallowed-chars-cohort"></span>). Please choose another name.
                         </div>
                         <label class="form-inline" for="{{ worksheet.id }}-new-cohort-name">New Cohort Name</label>
                         <input type="text" class="form-control" name="cohort-name" id="{{ worksheet.id }}-new-cohort-name" placeholder="Enter a name for the new cohort.">

@@ -24,12 +24,12 @@ import dotenv
 dotenv.read_dotenv(join(dirname(__file__), '../.env'))
 
 APP_ENGINE_FLEX = 'aef-'
+APP_ENGINE = 'Google App Engine/'
 
 BASE_DIR                = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + os.sep
 
 SHARED_SOURCE_DIRECTORIES = [
     'ISB-CGC-Common',
-    'ISB-CGC-API',
 ]
 
 # Add the shared Django application subdirectory to the Python module search path
@@ -37,6 +37,7 @@ for directory_name in SHARED_SOURCE_DIRECTORIES:
     sys.path.append(os.path.join(BASE_DIR, directory_name))
 
 DEBUG                   = bool(os.environ.get('DEBUG', False))
+print >> sys.stdout, "[STATUS] DEBUG mode is "+str(DEBUG)
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOST', 'localhost').split(',')
 
@@ -73,18 +74,21 @@ BIGQUERY_COHORT_TABLE_ID    = os.environ.get('BIGQUERY_COHORT_TABLE_ID', 'develo
 NIH_AUTH_ON             = bool(os.environ.get('NIH_AUTH_ON', False))
 USER_DATA_ON            = bool(os.environ.get('USER_DATA_ON', False))
 
-DATABASES = {'default': {
-    'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.mysql'),
-    'HOST': os.environ.get('DATABASE_HOST', '127.0.0.1'),
-    'NAME': os.environ.get('DATABASE_NAME', ''),
-    'USER': os.environ.get('DATABASE_USER'),
-    'PASSWORD': os.environ.get('DATABASE_PASSWORD')
-}}
+DATABASES = {
+    'default': {
+        'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.mysql'),
+        'HOST': os.environ.get('DATABASE_HOST', '127.0.0.1'),
+        'NAME': os.environ.get('DATABASE_NAME', ''),
+        'USER': os.environ.get('DATABASE_USER'),
+        'PASSWORD': os.environ.get('DATABASE_PASSWORD')
+    }
+}
 
 DB_SOCKET = DATABASES['default']['HOST'] if 'cloudsql' in DATABASES['default']['HOST'] else None
 
 IS_DEV = bool(os.environ.get('IS_DEV', False))
 IS_APP_ENGINE_FLEX = os.getenv('GAE_INSTANCE', '').startswith(APP_ENGINE_FLEX)
+IS_APP_ENGINE = os.getenv('SERVER_SOFTWARE', '').startswith(APP_ENGINE)
 
 # If this is a GAE-Flex deployment, we don't need to specify SSL; the proxy will take
 # care of that for us
@@ -100,8 +104,7 @@ if os.environ.has_key('DB_SSL_CERT') and not IS_APP_ENGINE_FLEX:
 # Default to localhost for the site ID
 SITE_ID = 3
 
-# Swap to appspot.com site ID if we detect AEF
-if IS_APP_ENGINE_FLEX:
+if IS_APP_ENGINE_FLEX or IS_APP_ENGINE:
     print >> sys.stdout, "[STATUS] AppEngine Flex detected."
     SITE_ID = 4
 
@@ -116,18 +119,26 @@ def get_project_identifier():
     return BQ_PROJECT_ID
 
 BIGQUERY_DATASET            = os.environ.get('BIGQUERY_DATASET', '')
+BIGQUERY_DATASET_V1            = os.environ.get('BIGQUERY_DATASET_V1', '')
 
 PROJECT_NAME                = os.environ.get('GCLOUD_PROJECT_NAME')
 BIGQUERY_PROJECT_NAME       = os.environ.get('BIGQUERY_PROJECT_NAME', PROJECT_NAME)
+BIGQUERY_DATA_PROJECT_NAME  = os.environ.get('BIGQUERY_DATA_PROJECT_NAME', PROJECT_NAME)
 
 # Set cohort table here
 if BIGQUERY_COHORT_TABLE_ID is None:
     raise Exception("Developer-specific cohort table ID is not set.")
 
+
+# TODO Remove duplicate class.
+#
+# This class is retained here, as it is required by bq_data_access/v1.
+# bq_data_access/v2 uses the class from the bq_data_access/bigquery_cohorts module.
 class BigQueryCohortStorageSettings(object):
     def __init__(self, dataset_id, table_id):
         self.dataset_id = dataset_id
         self.table_id = table_id
+
 
 def GET_BQ_COHORT_SETTINGS():
     return BigQueryCohortStorageSettings(COHORT_DATASET_ID, BIGQUERY_COHORT_TABLE_ID)
@@ -152,8 +163,6 @@ SECURE_SSL_REDIRECT = bool(os.environ.get('SECURE_SSL_REDIRECT', False))
 SSLIFY_DISABLE = True if not SECURE_SSL_REDIRECT else False
 
 if SECURE_SSL_REDIRECT:
-    os.environ['HTTPS'] = "on"
-    os.environ['wsgi.url_scheme'] = 'https'
     # Exempt the health check so it can go through
     SECURE_REDIRECT_EXEMPT = [r'^_ah/health$', ]
     SSLIFY_DISABLE_FOR_REQUEST = [
@@ -312,12 +321,12 @@ LOGGING = {
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
         },
-        'console': {
+        'console_dev': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler'
         },
-        'console_all': {
-            'level': 'DEBUG',
+        'console_prod': {
+            'level': 'WARNING',
             'filters': ['require_debug_false'],
             'class': 'logging.StreamHandler'
         }
@@ -329,32 +338,32 @@ LOGGING = {
             'propagate': True,
         },
         'cohorts': {
-            'handlers': ['console_all'],
+            'handlers': ['console_dev','console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'allauth': {
-            'handlers': ['console_all'],
+            'handlers': ['console_dev','console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'demo': {
-            'handlers': ['console_all'],
+            'handlers': ['console_dev','console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'projects': {
-            'handlers': ['console_all'],
+            'handlers': ['console_dev','console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'workbooks': {
-            'handlers': ['console_all'],
+            'handlers': ['console_dev','console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'accounts': {
-            'handlers': ['console_all'],
+            'handlers': ['console_dev','console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
@@ -432,17 +441,16 @@ if IS_DEV:
 
 GOOGLE_APPLICATION_CREDENTIALS  = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')) if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS') else '' # Path to privatekey.json
 CLIENT_SECRETS                  = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('CLIENT_SECRETS')) if os.environ.get('CLIENT_SECRETS') else ''
-PEM_FILE                        = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('PEM_FILE')) if os.environ.get('PEM_FILE') else ''
-CLIENT_EMAIL                    = os.environ.get('CLIENT_EMAIL', '') # Client email from client_secrets.json
 WEB_CLIENT_ID                   = os.environ.get('WEB_CLIENT_ID', '') # Client ID from client_secrets.json
 IGV_WEB_CLIENT_ID               = os.environ.get('IGV_WEB_CLIENT_ID', WEB_CLIENT_ID)
 INSTALLED_APP_CLIENT_ID         = os.environ.get('INSTALLED_APP_CLIENT_ID', '') # Native Client ID
+GCP_REG_CLIENT_EMAIL            = os.environ.get('CLIENT_EMAIL','')
 
 #################################
 #   For NIH/eRA Commons login   #
 #################################
 
-LOGIN_EXPIRATION_HOURS = 24
+LOGIN_EXPIRATION_MINUTES                = int(os.environ.get('LOGIN_EXPIRATION_MINUTES', 24*60))
 DBGAP_AUTHENTICATION_LIST_FILENAME      = os.environ.get('DBGAP_AUTHENTICATION_LIST_FILENAME', '')
 DBGAP_AUTHENTICATION_LIST_BUCKET        = os.environ.get('DBGAP_AUTHENTICATION_LIST_BUCKET', '')
 ACL_GOOGLE_GROUP                        = os.environ.get('ACL_GOOGLE_GROUP', '')

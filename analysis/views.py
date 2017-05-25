@@ -1,6 +1,6 @@
 """
 
-Copyright 2015, Institute for Systems Biology
+Copyright 2017, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,11 +19,7 @@ limitations under the License.
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-
-debug = settings.DEBUG
 from models import Analysis
-
-debug = settings.DEBUG
 
 @login_required
 def sample_analyses(request):

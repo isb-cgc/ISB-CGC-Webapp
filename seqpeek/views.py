@@ -32,7 +32,7 @@ from visualizations.models import SavedViz, Plot, Plot_Cohorts, Viz_Perms
 
 SEQPEEK_VIEW_DEBUG_MODE = False
 
-SAMPLE_ID_FIELD_NAME = 'sample_id'
+SAMPLE_ID_FIELD_NAME = 'sample_barcode'
 TRACK_ID_FIELD = "tumor"
 COORDINATE_FIELD_NAME = 'uniprot_aapos'
 PROTEIN_ID_FIELD = 'uniprot_id'

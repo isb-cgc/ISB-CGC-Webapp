@@ -1,4 +1,5 @@
 import operator
+import sys
 
 from django.db import models
 from django.contrib.auth.models import User
@@ -38,7 +39,11 @@ class GeneFavorite(models.Model):
         gene_favorite_model = cls.objects.create(name=name, user=user)
         gene_favorite_model.save()
 
-        for gene_name in gene_list :
+        for gene_name in gene_list:
+            # Get the formal gene symbol name, if it exists
+            gene_symbol = GeneSymbol.objects.filter(symbol=gene_name)
+            if len(gene_symbol) > 0:
+                gene_name = gene_symbol[0].symbol
             gene_model = Gene(name=gene_name, gene_favorite=gene_favorite_model)
             gene_model.save()
 
@@ -113,6 +118,7 @@ class GeneSymbol_Manager(models.Manager):
 class GeneSymbol(models.Model):
     id     = models.AutoField(primary_key=True)
     symbol = models.CharField(max_length=255, null=False, blank=False, db_index=True)
+    type = models.CharField(max_length=16, null=True, blank=False)
     objects = GeneSymbol_Manager()
 
      #returns a boolean on whether the string is valid
@@ -123,6 +129,15 @@ class GeneSymbol(models.Model):
             return True
         else:
             return False
+
+    # returns the type-string if a matching symbol is found
+    @classmethod
+    def get_type(cls, symbol):
+        genesymbol = cls.objects.filter(symbol=symbol)
+
+        if len(genesymbol) > 0:
+            return genesymbol[0].type
+        return None
 
     #returns a list of gene symbol suggestions
     @classmethod

@@ -35,6 +35,8 @@ define([
 
 ], function($, jqueryui, bootstrap, session_security, d3, d3tip, d3textwrap, vizhelpers, scatter_plot, cubby_plot, violin_plot, histogram, bar_graph, seqpeek_view, mock_histogram_data ) {
 
+    var VERSION = $('#workbook-build :selected').data('plot-version') || $('.workbook-build-display').data('plot-version');
+
     var scatter_plot_obj = Object.create(scatter_plot, {});
     var cubby_plot_obj   = Object.create(cubby_plot, {});
     var violin_plot_obj  = Object.create(violin_plot, {});
@@ -118,7 +120,7 @@ define([
 
          var legend = d3.select(legend_selector)
              .append('svg')
-             .attr('width', width);
+             .attr('width', 850);
          var svg = d3.select(plot_selector)
              .append('svg')
              .attr('width', width + 10)
@@ -151,7 +153,7 @@ define([
         var max_n = tmp[1];
         var legend = d3.select(legend_selector)
             .append('svg')
-            .attr('width', width);
+            .attr('width', 850);
 
         var svg = d3.select(plot_selector)
             .append('svg')
@@ -186,7 +188,7 @@ define([
         var max_n = tmp[1];
         var legend = d3.select(legend_selector)
             .append('svg')
-            .attr('width', width);
+            .attr('width', 850);
 
         var svg = d3.select(plot_selector)
             .append('svg')
@@ -271,7 +273,7 @@ define([
     /*
         Generate url for gathering data
      */
-    function get_data_url(url, cohorts, x_attr, y_attr, color_by, logTransform){
+    function get_data_url(base_url, cohorts, x_attr, y_attr, color_by, logTransform){
         var cohort_str = '';
         for (var i = 0; i < cohorts.length; i++) {
             if (i == 0) {
@@ -280,7 +282,7 @@ define([
                 cohort_str += '&cohort_id=' + cohorts[i];
             }
         }
-        var api_url = url + '/_ah/api/feature_data_api/v1/feature_data_plot?' + cohort_str;
+        var api_url = base_url + '/visualizations/feature_data_plot/'+ VERSION + '?' + cohort_str;
 
         api_url += '&x_id=' + x_attr;
         if(color_by && color_by !== ''){
@@ -296,7 +298,7 @@ define([
     }
 
     // Generate url for gathering data for a SeqPeek plot
-    function get_seqpeek_data_url(url, cohorts, gene_label){
+    function get_seqpeek_data_url(base_url, cohorts, gene_label){
         var cohort_str = '';
         for (var i = 0; i < cohorts.length; i++) {
             if (i == 0) {
@@ -305,14 +307,14 @@ define([
                 cohort_str += '&cohort_id=' + cohorts[i];
             }
         }
-        var api_url = url + '/_ah/api/seqpeek_data_api/v1/view_data?' + cohort_str;
-        api_url += "&hugo_symbol=" + gene_label;
+        var seqpeek_url = base_url + '/visualizations/seqpeek_data_plot/' + VERSION + '?' + cohort_str;
+        seqpeek_url += "&hugo_symbol=" + gene_label;
 
-        return api_url;
+        return seqpeek_url;
     }
 
     function configure_pairwise_display(element, data){
-        if (data['pairwise_result'].hasOwnProperty('result_vectors')) {
+        if (data['pairwise_result'] && data['pairwise_result'].hasOwnProperty('result_vectors')) {
             var vectors = data['pairwise_result']['result_vectors'];
 
             var output = $('<table class="table"><thead><tr>' +
@@ -349,7 +351,7 @@ define([
         }
         // The response form the SeqPeek data endpoint has a different schema. This is case is handled in
         // another branch below.
-        if (data.hasOwnProperty('items')) {
+        if (data.hasOwnProperty('items') && data['items'].length > 0) {
 
             var cohort_set = data['cohort_set'];
 
@@ -414,9 +416,8 @@ define([
         }
         else if (args.type == "SeqPeek") {
             visualization = generate_seqpeek_plot(args.plot_selector, args.legend_selector, data);
-        }
-        else {
-            // No samples provided TODO abstract view information
+        } else {
+            // No data returned
             d3.select(args.plot_selector)
                 .append('svg')
                 .attr('width', width)
@@ -430,7 +431,7 @@ define([
         }
     };
 
-    function get_plot_settings(plot_type){
+    function get_plot_settings(plot_type, as_map){
         var settings = {
             axis : []
         };
@@ -461,16 +462,26 @@ define([
                 break;
         };
 
+        if(as_map) {
+            var map_settings = {};
+            settings.axis.map(function(axis){
+                map_settings[axis.name] = {
+                    type: axis.type
+                };
+            });
+            return map_settings;
+        }
+
         return settings;
     }
 
     function generate_plot(args, callback){ //plot_selector, legend_selector, pairwise_element, type, x_attr, y_attr, color_by, cohorts, cohort_override, callback) {
         var plot_data_url;
         if (args.type == "SeqPeek") {
-            plot_data_url = get_seqpeek_data_url(BASE_API_URL, args.cohorts, args.gene_label);
+            plot_data_url = get_seqpeek_data_url(BASE_URL, args.cohorts, args.gene_label, VERSION);
         }
         else {
-            plot_data_url = get_data_url(BASE_API_URL, args.cohorts, args.x, args.y, args.color_by, args.logTransform);
+            plot_data_url = get_data_url(BASE_URL, args.cohorts, args.x, args.y, args.color_by, args.logTransform, VERSION);
         }
 
         $.ajax({
