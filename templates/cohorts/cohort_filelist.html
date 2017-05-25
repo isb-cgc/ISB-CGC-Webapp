@@ -41,21 +41,31 @@
     <div class="row">
         <div id="filter-panel" class="col-lg-3">
             <div class="panel panel-default">
-                <div class="panel-heading" id="heading-platforms">Platforms</div>
                 <div class="panel-body">
-                    <ul class="search-checkbox-list" id="{{ attr }}">
+                    <label for="build">Build</label>
+                    <select aria-label="Build" id="build" class="form-control build">
+                        <option value="HG38" {% if build == 'HG38' %}selected{% endif %}>HG38</option>
+                        <option value="HG19" {% if build == 'HG19' %}selected{% endif %}>HG19</option>
+                    </select>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading" id="heading-platforms">Platforms</div>
+                <div class="panel-body" id="platforms-panel">
+                    <ul class="search-checkbox-list platform-counts" id="platform-{{ build }}">
                         {% for platform in platform_counts %}
                             <li>
                                 <input data-platform-count="{{ platform.count }}" type="checkbox" name="platform-selected" id="{{ platform.platform }}" >
                                 <label for="{{ platform.platform }}">{{ platform.platform|get_readable_name }}</label>
                                 <span class="count">({{ platform.count }})</span>
                             </li>
+                        {% empty %}
+                            <i>No platforms available to list.</i>
                         {% endfor %}
                     </ul>
                 </div>
             </div>
         </div>
-
 
         <div id="content-panel" class="col-md-9">
             <div class="panel">
@@ -89,7 +99,8 @@
                     <form id="view-igv" method="POST" action="{% url 'igv' %}">
                         <input type="text" class="hidden_form_value" id="checked_list_input" name="checked_list" data-type="checked_list">
                         {% csrf_token %}
-                        <p>Showing 20 files. Page: <span class="page-num">1</span> of <span class="file-count">unknown</span> pages.</p>
+                        <p class="file-page-count">Showing 20 files. Page: <span class="page-num">1</span> of <span class="file-count">unknown</span> pages.</p>
+                        <p class="no-file-page-count" style="display: none;">Showing 0 files.</p>
                         <div>
                             <a role="button" id="prev-page" class="btn btn-primary disabled">Previous Page</a>
                             <a role="button" id="next-page" class="btn btn-primary">Next Page</a>
@@ -99,10 +110,11 @@
                         <table class="table table-striped file-list-table" aria-label="File Listing Table">
                             <thead>
                             <tr>
+                                <th class="col-program">Program</th>
                                 <th class="col-barcode">Sample Barcode</th>
-                                <th class="col-pipeline">Pipeline</th>
+                                <th class="col-exp-strategy">Exp. Strategy</th>
                                 <th class="col-platform">Platform</th>
-                                <th class="col-datalevel">Data Level</th>
+                                <th class="col-datacat">Data Category</th>
                                 <th class="col-datatype">Data Type</th>
                                 <th class="col-igv">IGV</th>
                             </tr>
@@ -141,7 +153,7 @@
     <script type="text/javascript">
     var cohort_id = {{ cohort.id }};
     var page = 1;
-    var total_files = 0;
+    var total_files = {{ total_files }};
     var download_url = '{{ download_url }}';
     var ajax_update_url = '{% url 'cohort_filelist_ajax' cohort.id %}';
     var SEL_FILE_MAX = '{{  sel_file_max }}';

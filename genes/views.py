@@ -1,21 +1,17 @@
-from copy import deepcopy
 import json
-import re
 import logging
-import sys
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from django.utils.safestring import mark_safe
-from django.core import serializers
-from django.core.urlresolvers import reverse
-from django.core.exceptions import ObjectDoesNotExist
-from django.views.decorators.csrf import csrf_protect
+import re
+
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.urlresolvers import reverse
+from django.http import HttpResponse
+from django.shortcuts import render, redirect
+from django.utils.safestring import mark_safe
 from models import GeneFavorite, GeneSymbol
 from workbooks.models import Workbook, Worksheet
-from django.contrib.auth.models import User
-from django.conf import settings
 
 WHITELIST_RE = settings.WHITELIST_RE
 
@@ -175,7 +171,7 @@ def gene_fav_save(request, gene_fav_id=0):
     name = request.POST.get("genes-name")
     gene_list = request.POST.get("genes-list")
 
-    gene_list = [x.strip().upper() for x in gene_list.split(' ')]
+    gene_list = [x.strip() for x in gene_list.split(' ')]
     gene_list = list(set(gene_list))
 
     whitelist = re.compile(WHITELIST_RE, re.UNICODE)

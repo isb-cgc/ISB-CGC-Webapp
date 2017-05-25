@@ -164,7 +164,7 @@
         <div class="pairwise-result"></div>
         <div class="save-cohort-card" style="display:none;">
             <p class="selected-samples-count">Number of Samples: 0</p>
-            <p class="selected-patients-count">Number of Participants: 0</p>
+            <p class="selected-patients-count">Number of Cases: 0</p>
             <button class="btn btn-primary" data-toggle="modal" data-target="#save-cohort-{{ plot.id }}-modal" title="Save Cohort">Save Cohort</button>
         </div>
         <input type="hidden" name="type" value="genericplot" />
@@ -178,8 +178,12 @@
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <h4 class="modal-title" id="save-cohort-{{ plot.id }}-header">Save Cohort</h4>
                 </div>
-                <form id="save-cohort-{{ plot.id }}" method="POST" action="{% url 'save_cohort_from_plot' %}">
+                <form id="save-cohort-{{ plot.id }}" method="POST" class="save-cohort-form" action="{% url 'save_cohort_from_plot' %}">
                     <div class="modal-body">
+                        <div id="unallowed-chars-alert" class="alert alert-warning alert-dismissable" style="display: none;">
+                            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                            Your cohort's name contains invalid characters (<span class="unallowed-chars"></span>). Please choose another name.
+                        </div>
                         <label class="form-inline" for="{{ plot.id }}-new-cohort-name">New Cohort Name</label>
                         <input type="text" class="form-control" name="cohort-name" id="{{ plot.id }}-new-cohort-name" placeholder="Enter a name for the new cohort.">
                         <input type="hidden" name="plot_id" value="{{ plot.id }}" />

@@ -49,7 +49,7 @@ function (
         var AMINO_ACID_WILDTYPE_FIELD_NAME = "amino_acid_wildtype";
         var DNA_CHANGE_FIELD_NAME = "dna_change";
 
-        var SAMPLE_ID_FIELD_NAME = "sample_id";
+        var SAMPLE_ID_FIELD_NAME = "sample_barcode";
 
         var DNA_CHANGE_KEY_FN = function(data_point) {
             var id = data_point[DNA_CHANGE_FIELD_NAME];
@@ -202,7 +202,7 @@ function (
 
         render: function () {
             var seqpeek_data = [];
-            var protein_data = this.data_bundle['protein']['interpro_json'];
+            var protein_data = this.data_bundle['protein'];
             var region_data = this.data_bundle['regions'];
 
             _.each(this.data_bundle['tracks'], function (track) {
