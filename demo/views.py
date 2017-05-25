@@ -49,7 +49,7 @@ logger = logging.getLogger(__name__)
 DBGAP_AUTHENTICATION_LIST_BUCKET = settings.DBGAP_AUTHENTICATION_LIST_BUCKET
 DBGAP_AUTHENTICATION_LIST_FILENAME = settings.DBGAP_AUTHENTICATION_LIST_FILENAME
 ACL_GOOGLE_GROUP = settings.ACL_GOOGLE_GROUP
-login_expiration_seconds = settings.LOGIN_EXPIRATION_HOURS * 60 * 60
+login_expiration_seconds = settings.LOGIN_EXPIRATION_MINUTES * 60
 COUNTDOWN_SECONDS = login_expiration_seconds + (60 * 15)
 
 LOGOUT_WORKER_TASKQUEUE = settings.LOGOUT_WORKER_TASKQUEUE
@@ -217,7 +217,7 @@ def index(request):
 
                 saml_response = None if 'SAMLResponse' not in req['post_data'] else req['post_data']['SAMLResponse']
                 saml_response = saml_response.replace('\r\n', '')
-                NIH_assertion_expiration = datetime.datetime.now() + datetime.timedelta(days=1)
+                NIH_assertion_expiration = datetime.datetime.now() + datetime.timedelta(seconds=login_expiration_seconds)
 
                 updated_values = {
                     'NIH_assertion': saml_response,
