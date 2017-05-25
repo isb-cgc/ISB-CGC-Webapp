@@ -45,10 +45,6 @@ from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 debug = settings.DEBUG
 logger = logging.getLogger(__name__)
 
-login_expiration_seconds = settings.LOGIN_EXPIRATION_HOURS * 60 * 60
-# schedule check_login tasks for 15 minutes after the user's login will expire
-COUNTDOWN_SECONDS = login_expiration_seconds + (60 * 15)
-
 USER_API_URL = settings.BASE_API_URL + '/_ah/api/user_api/v1'
 ACL_GOOGLE_GROUP = settings.ACL_GOOGLE_GROUP
 DBGAP_AUTHENTICATION_LIST_BUCKET = settings.DBGAP_AUTHENTICATION_LIST_BUCKET
