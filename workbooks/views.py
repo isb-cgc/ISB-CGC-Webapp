@@ -1,6 +1,7 @@
 from copy import deepcopy
 import json
 import re
+import sys
 import logging
 from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
@@ -23,9 +24,6 @@ from django.core.exceptions import ObjectDoesNotExist
 logger = logging.getLogger(__name__)
 
 debug = settings.DEBUG
-
-if settings.DEBUG:
-    import sys
 
 WHITELIST_RE = settings.WHITELIST_RE
 
@@ -182,8 +180,6 @@ def get_gene_datatypes(build=None):
             type['fields'] = relevant_fields
 
             return_list.append(type)
-
-    print >> sys.stdout, str(return_list)
 
     return return_list
 
