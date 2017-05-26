@@ -131,9 +131,11 @@ def create_programs_and_projects(debug):
                     cursor.execute(insert_programs, values)
 
         for prog in program_tables_to_insert:
+            data_tables = None
+
             prog_tables = program_tables_to_insert[prog]
 
-            prog_obj = Program.objects.get(owner=isb_userid,is_public=True,active=True,name=prog)
+            prog_obj = Program.objects.get(owner_id=isb_userid,is_public=True,active=True,name=prog)
             prog_id = prog_obj.id
 
             check = Public_Data_Tables.objects.filter(program__name=prog)
@@ -154,6 +156,7 @@ def create_programs_and_projects(debug):
                     if debug:
                         print >> sys.stdout, "Executing statement: "+insert_data_tables.format(insert_data_tables_opt_fields, param_set)
                         print >> sys.stdout, "Values: "+str(values)
+                        data_tables = 'data_tables_id'
                     else:
                         cursor.execute(insert_data_tables.format(insert_data_tables_opt_fields, param_set), values)
                         cursor.execute('SELECT id FROM projects_public_data_tables WHERE program_id = %s AND build = %s;', (prog_id, build,))
@@ -261,7 +264,9 @@ def create_programs_and_projects(debug):
                         cursor.execute(insert_projects, values)
 
         # Now de-activate the old CCLE project
-        Project.objects.get(name='CCLE', owner=isb_user, active=1).update(active=0)
+        ccle_proj = Project.objects.get(name='CCLE', owner=isb_user, active=1)
+        ccle_proj.active=0
+        ccle_proj.save()
 
     except Exception as e:
         print >> sys.stdout, traceback.format_exc()
