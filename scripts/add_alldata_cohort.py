@@ -148,6 +148,7 @@ class BigQueryCohortSupport(object):
         response = self._streaming_insert(rows)
         return response
 
+
 def get_mysql_connection():
     env = os.getenv('SERVER_SOFTWARE')
     db_settings = secret_settings.get('DATABASE')['default']
@@ -191,19 +192,31 @@ def get_superuser_id(conn, superuser_name):
     else:
         return None
 
+
 def get_sample_barcodes(conn):
     logging.info("Getting list of sample barcodes from MySQL")
     cursor = conn.cursor(DictCursor)
-    select_samples_str = "SELECT distinct sample_barcode, case_barcode from TCGA_metadata_samples;"
+    select_samples_str = """
+      SELECT distinct ms.sample_barcode, ms.case_barcode, pp.id AS project_id
+      FROM TCGA_metadata_samples ms
+      JOIN projects_project pp
+      ON pp.name = SUBSTR(ms.project_short_name, LOCATE('-',ms.project_short_name)+1)
+      JOIN projects_program pr
+      ON pr.id = pp.program_id
+      WHERE pr.name = 'TCGA'
+    """
     cursor.execute(select_samples_str)
-    rows = cursor.fetchall()
+    barcodes = []
     cursor.close()
-    # TODO: Temporary shim until Project IDs are in metadata_samples
-    for row in rows:
-        row['project_id'] = None
-        row['sample_barcode'] = row['sample_barcode']
-        row['case_barcode'] = row['case_barcode']
-    return rows
+    for row in cursor.fetchall():
+        barcodes.append({
+            'project_id': row['project_id'],
+            'sample_barcode': row['sample_barcode'],
+            'case_barcode': row['case_barcode']
+        })
+
+    return barcodes
+
 
 def get_barcodes_from_file(filename):
     with open(filename) as tsv:
@@ -236,6 +249,7 @@ def get_barcodes_from_file(filename):
 
     pass
 
+
 def create_tcga_cohorts_from_files(directory):
     filelist = os.listdir(directory)
 
@@ -244,8 +258,9 @@ def create_tcga_cohorts_from_files(directory):
         file_barcodes = get_barcodes_from_file(filepath)
         print filepath, len(file_barcodes['sample_barcodes']), len(file_barcodes['case_barcodes'])
 
+
 def insert_barcodes_mysql(conn, superuser_id, cohort_name, sample_barcodes):
-    insert_samples_str = 'INSERT INTO cohorts_samples (sample_barcode, cohort_id, case_barcode) values (%s, %s, %s);'
+    insert_samples_str = 'INSERT INTO cohorts_samples (sample_barcode, cohort_id, case_barcode, project_id) values (%s, %s, %s, %s);'
 
     insert_cohort_str = 'insert into cohorts_cohort (name, active, last_date_saved) values (%s, %s, %s);'
     insert_cohort_tuple = (cohort_name, True, datetime.datetime.now())
@@ -270,7 +285,7 @@ def insert_barcodes_mysql(conn, superuser_id, cohort_name, sample_barcodes):
 
     sample_tuples = []
     for row in sample_barcodes:
-        sample_tuples.append((row['sample_barcode'], str(cohort_id), row['case_barcode'],))
+        sample_tuples.append((row['sample_barcode'], str(cohort_id), row['case_barcode'], row['project_id']))
     logging.info('Number of sample barcodes: {num_samples}'.format(num_samples=len(sample_tuples)))
 
     cursor.executemany(insert_samples_str, sample_tuples)
@@ -280,6 +295,7 @@ def insert_barcodes_mysql(conn, superuser_id, cohort_name, sample_barcodes):
 
     return cohort_id
 
+
 def authorize_and_get_bq_service():
     credentials = GoogleCredentials.get_application_default().create_scoped(['https://www.googleapis.com/auth/bigquery'])
     http = httplib2.Http()
@@ -288,78 +304,11 @@ def authorize_and_get_bq_service():
     bigquery_service = build('bigquery', 'v2', http=http)
     return bigquery_service
 
+
 def create_bq_cohort(project_id, dataset_id, table_id, cohort_id, sample_barcodes):
     service = authorize_and_get_bq_service()
     bqs = BigQueryCohortSupport(project_id, dataset_id, table_id)
     bqs.add_cohort_to_bq(cohort_id, sample_barcodes)
-
-
-# TODO: This is a hack until we get project_ids in metadata_samples.
-def fix_cohort_projects(conn):
-    try:
-        cursor = conn.cursor()
-        null_project_count = """
-            SELECT COUNT(*)
-            FROM cohorts_samples cs
-                    JOIN %s_metadata_samples ms ON ms.sample_barcode = cs.sample_barcode
-                    JOIN (
-                        SELECT p.id AS id,p.name AS name
-                        FROM projects_project p
-                          JOIN auth_user au ON au.id = p.owner_id
-                        WHERE au.username = 'isb' AND au.is_superuser = 1 AND au.is_active = 1 AND p.active = 1
-                    ) ps ON ps.name = ms.disease_code
-                    JOIN cohorts_cohort AS cc ON cc.id = cs.cohort_id
-            where cs.project_id IS NULL AND cc.active = 1;
-        """
-
-        cursor.execute(null_project_count % 'TCGA')
-        count_to_fix = cursor.fetchall()[0][0]
-        cursor.execute(null_project_count % 'CCLE')
-        count_to_fix += cursor.fetchall()[0][0]
-
-        if count_to_fix > 0:
-            fix_project_ids_str = """
-                UPDATE cohorts_samples AS cs
-                JOIN (
-                    SELECT ms.sample_barcode AS sample_barcode,ps.id AS project
-                        FROM %s_metadata_samples ms
-                        JOIN (
-                            SELECT p.id AS id,p.name AS name
-                            FROM projects_project p
-                                JOIN auth_user au ON au.id = p.owner_id
-                            WHERE au.username = 'isb' AND au.is_active = 1 AND p.active=1 AND au.is_superuser = 1
-                        ) ps ON ps.name = ms.disease_code
-                ) AS ss ON ss.sample_barcode = cs.sample_barcode
-                JOIN cohorts_cohort AS cc
-                ON cc.id = cs.cohort_id
-                SET cs.project_id = ss.project
-                WHERE cs.project_id IS NULL AND cc.active = 1;
-            """
-
-            print >> sys.stdout,"[STATUS] Number of cohort sample entries from ISB-CGC projects with null project IDs: "+str(count_to_fix)
-            print >> sys.stdout,"[STATUS] Correcting null project IDs for ISB-CGC cohorts - this could take a while!"
-
-            cursor.execute(fix_project_ids_str % 'TCGA')
-            cursor.execute(fix_project_ids_str % 'CCLE')
-            conn.commit()
-            print >> sys.stdout, "[STATUS] ...done. Checking for still-null project IDs..."
-
-            cursor.execute(null_project_count % 'TCGA')
-            not_fixed = cursor.fetchall()[0][0]
-            cursor.execute(null_project_count % 'CCLE')
-            not_fixed += cursor.fetchall()[0][0]
-
-            print >> sys.stdout, "[STATUS] Number of cohort sample entries from ISB-CGC projects with null project IDs after correction: " + str(not_fixed)
-            if not_fixed > 0:
-                print >> sys.stdout, "[WARNING] Some of the samples were not corrected! You should double-check them."
-
-
-        else:
-            print >> sys.stdout, "[STATUS] No cohort samples were found with missing project IDs."
-    except Exception as e:
-        print >> sys.stdout, "[ERROR] Exception when fixing cohort project IDs; they may not have been fixed."
-        print >> sys.stdout, e
-        print >> sys.stdout, traceback.format_exc()
 
 
 def main():
@@ -399,7 +348,7 @@ def main():
 
         logging.info("Superuser ID: {sid}".format(sid=superuser_id))
         cohort_id = insert_barcodes_mysql(conn, superuser_id, args.cohort_name, sample_barcodes)
-        fix_cohort_projects(conn)
+
     else:
         cohort_id = args.cohort_id
 
