@@ -16,8 +16,19 @@
  *
  */
 
-define (['jquery', 'd3', 'd3textwrap', 'vizhelpers'],
-function($, d3, d3textwrap, vizhelpers) {
+var Counter = {
+    lastSet: null,
+    firstSet: 'aaaaa',
+    getNextSet: function() {
+        this.lastSet = (this.lastSet ? ((parseInt(this.lastSet, 36)+1).toString(36).replace(/0/g,'a')) : this.firstSet);
+        return this.lastSet;
+    }
+};
+
+var RECALC_THROTTLE = 75;
+
+define (['jquery', 'd3', 'd3textwrap', 'vizhelpers', 'underscore'],
+function($, d3, d3textwrap, vizhelpers, _) {
 
     var helpers = Object.create(vizhelpers, {});
 
@@ -27,6 +38,13 @@ function($, d3, d3textwrap, vizhelpers) {
         scale: null
     };
 
+    // The samples in our data, keyed by their SVG element ID attributes
+    var sampleSet = {};
+
+    // The samples found in the selected ID set; this is used to produce the JSON which
+    // is submitted by the form
+    var selectedSamples = null;
+
     return {
         create_scatterplot: function(svg, data, domain, range, xLabel, yLabel, xParam, yParam, colorBy, legend, width, height, cohort_set) {
             var margin = {top: 10, bottom: 100, left: 120, right: 10};
@@ -35,11 +53,19 @@ function($, d3, d3textwrap, vizhelpers) {
             var checkYvalid = 0;
 
             data.map(function(d){
+                var oneIsValid = false;
                 if(helpers.isValidNumber(d[xParam])) {
+                    oneIsValid = true;
                     checkXvalid++;
                 }
                 if(helpers.isValidNumber(d[yParam])) {
                     checkYvalid++;
+                    oneIsValid = true;
+                }
+                if(oneIsValid){
+                    var id = Counter.getNextSet();
+                    d['id'] = id;
+                    sampleSet[id] = {sample: d['sample_id'], case: d['case_id'], project: d['project']};
                 }
             });
 
@@ -103,27 +129,48 @@ function($, d3, d3textwrap, vizhelpers) {
                 .attr('width', width)
                 .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-            // Highlight the selected circles.
-            var brushmove = function(p) {
-                var sample_list = [];
+            // Highlight circles which are selected
+            // This is throttles so recalculation of the selected set isn't done
+            // more than every RECALC_THROTTLE milliseconds
+            var brushmove = _.throttle(function(p) {
                 var e = brush.extent();
+                var oldSet = selectedSamples;
+                selectedSamples = {};
+                var reCalc = false;
 
-                var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                 svg.selectAll("circle").classed("selected", function(d) {
                     return e[0][0] <= d[xParam] && d[xParam] <= e[1][0]
                         && e[0][1] <= d[yParam] && d[yParam] <= e[1][1]
                         && !$(this).is('.hidden');
-                    });
-                var selected_samples = $('svg circle.selected');
-                selected_samples.each(function(){ sample_list.push(this.id); });
-                var patient_list = $.map(sample_list, function(d) { return d.substr(0, 12); })
-                    .filter(function(item, i, a) { return i == a.indexOf(item); });
+                });
 
-                sample_form_update(e, selected_samples.length, patient_list.length, sample_list);
-            };
+                var oldSetKeys = Object.keys(oldSet);
+
+                if(oldSetKeys.length !== $('svg circle.selected').length) {
+                    reCalc = true;
+                }
+
+                $('svg circle.selected').each(function(){
+                    if(!oldSet[this.id]) {
+                        reCalc = true;
+                    }
+                    selectedSamples[this.id] = 1;
+                });
+
+                for(var i=0;i<oldSetKeys.length;i++) {
+                    if(!selectedSamples[oldSetKeys[i]]) {
+                        reCalc = true;
+                    }
+                }
+
+                sample_form_update(e, reCalc);
+            },RECALC_THROTTLE);
+
+            var mouseDown = null;
 
             // If the brush is empty, select all circles.
             var brushend = function() {
+                mouseDown = null;
                 if (brush.empty()) {
                     svg.selectAll(".hidden").classed("hidden", false);
                     $(svg[0]).parents('.plot').find('.save-cohort-card').hide();
@@ -133,7 +180,22 @@ function($, d3, d3textwrap, vizhelpers) {
             var brush = d3.svg.brush()
                 .x(xScale)
                 .y(yScale)
-                .on('brush', brushmove)
+                .on('brushstart',function(e){
+                    selectedSamples = {};
+                    mouseDown = null;
+                })
+                .on('brush', function(p){
+                    mouseDown = mouseDown || brush.extent();
+                    // We call brushmove separately so the selection recalculation can be throttled...
+                    brushmove(p);
+                    // ...but we don't want to throttle visual updating of the selection card, because
+                    // that looks weird and isn't really necessary
+                    var e = brush.extent();
+                    var topVal = Math.min((yScale(e[1][1]) + $('.save-cohort-card').height()+20),(height-$('.save-cohort-card').height()));
+                    var leftVal = Math.min(((xScale(mouseDown[0][0]) > xScale(e[0][0]) ? xScale(e[0][0]) : xScale(e[1][0]))+ 30),(width-$('.save-cohort-card').width()));
+                    $('.save-cohort-card').show()
+                        .attr('style', 'position:absolute; top: '+ topVal +'px; left:' +leftVal+'px;');
+                })
                 .on('brushend', brushend);
 
             var transformer = function(d) {
@@ -162,7 +224,7 @@ function($, d3, d3textwrap, vizhelpers) {
                 .style('fill', function(d) { return color(colorVal(d)); })
                 .attr('transform', transformer)
                 .attr('r', 2)
-                .attr('id', function(d) { return d['sample_id']; });
+                .attr('id', function(d) { return d['id']; });
 
             // append axes
             svg.append('g')
@@ -276,10 +338,12 @@ function($, d3, d3textwrap, vizhelpers) {
                     var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                     // Clear selections
                     $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + 0);
-                    $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Participants: ' + 0);
-                    $('#save-cohort-'+plot_id+'-modal input[name="samples"]').attr('value', []);
+                    $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Cases: ' + 0);
+                    $('#save-cohort-'+plot_id+'-modal input[name="samples"]').attr('value', "");
                     svg.selectAll('.selected').classed('selected', false);
+                    selectedSamples = {};
                     $(svg[0]).parents('.plot').find('.save-cohort-card').hide();
+
                     // Get rid of the selection rectangle - comment out if we want to enable selection carry-over
                     brush.clear();
                     // Remove brush event listener plot area
@@ -287,21 +351,33 @@ function($, d3, d3textwrap, vizhelpers) {
                 }
             };
 
-            /*
-                Update the sample cohort bar update
-             */
-            function sample_form_update(extent, total_samples, total_patients, sample_list){
-                var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
-                $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + total_samples);
-                $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Participants: ' + total_patients);
-                $('#save-cohort-' + plot_id + '-modal input[name="samples"]').attr('value', sample_list);
-                var topVal = Math.min((yScale(extent[1][1]) + 180),(height-$('.save-cohort-card').height()));
-                var leftVal = Math.min((xScale(extent[1][0])+ 40),(width-$('.save-cohort-card').width()));
-                $('.save-cohort-card').show()
-                    .attr('style', 'position:absolute; top: '+ topVal +'px; left:' +leftVal+'px;');
+            // Recalculate the counts of selected samples if there was a change
+            function sample_form_update(extent, reCalc){
+                if(reCalc) {
+                    var case_set = {};
+                    _.each(Object.keys(selectedSamples),function(val) {
+                        case_set[sampleSet[val]['case']] = 1;
+                    });
 
-                $('.save-cohort-card').find('.btn').prop('disabled', (total_samples <= 0));
+                    $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + Object.keys(selectedSamples).length);
+                    $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Cases: ' + Object.keys(case_set).length);
+                    $('.save-cohort-card').find('.btn').prop('disabled', (Object.keys(selectedSamples).length <= 0));
+                }
             }
+
+            // If we are ready to save out this cohort, JSONify the selection set and set it to the form value
+            $('.save-cohort-card').find('.btn').on('click',function(e){
+                if(Object.keys(selectedSamples).length > 0){
+                    var selected_sample_set = [];
+                    _.each(Object.keys(selectedSamples),function(sample){
+                        selected_sample_set.push(sampleSet[sample]);
+                    });
+
+                    var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
+                    $('#save-cohort-' + plot_id + '-modal input[name="samples"]').attr('value', JSON.stringify(selected_sample_set));
+                }
+
+            });
 
             function resize() {
                 width = svg.node().parentNode.offsetWidth - 10;

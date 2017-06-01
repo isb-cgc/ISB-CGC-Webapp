@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% load custom_tags %}
-{% block title %}Saved Genes Favorites | ISB-CGC{% endblock %}}
+{% block title %}Saved Gene & miRNA Favorites | ISB-CGC{% endblock %}}
 {% block extra_css_libs %}{% endblock %}
 {% block header %}{% endblock %}
 
@@ -17,7 +17,7 @@
             <li><a href="{% url 'worksheet_display' workbook_id=workbook.id worksheet_id=worksheet.id %}">{{ workbook.name }}</a></li>
         {% endif %}
     </ol>
-    <h1 class="page-header pull-left">Data Source | Gene Favorites</h1>
+    <h1 class="page-header pull-left">Data Source | Gene & miRNA Favorites</h1>
 </div>
 {% endblock %}
 {% block content %}
@@ -35,9 +35,9 @@
                     </li>
                     <li role="menuitem">
                         {% if workbook %}
-                            <a class="btn btn-primary" href="{% url 'gene_create_for_existing_workbook' workbook.id worksheet.id %}"><i class="fa fa-plus"></i>Apply New Gene List</a>
+                            <a class="btn btn-primary" href="{% url 'gene_create_for_existing_workbook' workbook.id worksheet.id %}"><i class="fa fa-plus"></i>Apply New Gene & miRNA List</a>
                         {% else %}
-                            <a class="btn btn-primary" href="{% url 'gene_create_for_new_workbook' %}"><i class="fa fa-plus"></i>Apply New Gene List</a>
+                            <a class="btn btn-primary" href="{% url 'gene_create_for_new_workbook' %}"><i class="fa fa-plus"></i>Apply New Gene & miRNA List</a>
                         {% endif %}
                     </li>
                 </div>
@@ -48,7 +48,7 @@
                         <tr>
                             <th></th>
                             <th>Name</th>
-                            <th># of Genes</th>
+                            <th># of Genes & miRNAs</th>
                             <th>Last Updated</th>
                         </tr>
                     </thead>
@@ -71,11 +71,11 @@
                 </table>
             {% else %}
                 <br>
-                <p class="center">You don't have any gene favorites created yet. <br><br>
+                <p class="center">You don't have any gene & miRNA favorites created yet. <br><br>
                     {% if workbook %}
-                        <a class="btn btn-primary" href="{% url 'gene_create_for_existing_workbook' workbook.id worksheet.id %}"><i class="fa fa-plus"></i>Apply New Gene List</a>
+                        <a class="btn btn-primary" href="{% url 'gene_create_for_existing_workbook' workbook.id worksheet.id %}"><i class="fa fa-plus"></i>Apply New Gene & miRNA List</a>
                     {% else %}
-                        <a class="btn btn-primary" href="{% url 'gene_create_for_new_workbook' %}"><i class="fa fa-plus"></i>Apply New Gene List</a>
+                        <a class="btn btn-primary" href="{% url 'gene_create_for_new_workbook' %}"><i class="fa fa-plus"></i>Apply New Gene & miRNA List</a>
                     {% endif %}
                 </p>
                 <br>

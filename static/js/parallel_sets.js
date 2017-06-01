@@ -18,20 +18,22 @@
 
 define(['d3', 'd3parsets'], function(d3, d3parsets) {
     return {
-        draw_parsets: function(data, features) {
+        draw_parsets: function(data, features, program) {
             var startPlot = new Date().getTime();
             var chart = parsets()
                 .dimensions(features);
 
-            d3.select("#multi-categorical").html(""); // do checkbox transitions later
+            var selector = "#multi-categorical-"+program;
 
-            var vis = d3.select("#multi-categorical").append("svg")
+            d3.select(selector).html(""); // do checkbox transitions later
+
+            var vis = d3.select(selector).append("svg")
                 .attr("width", 740) //chart.width())
                 .attr("height", 600) //chart.height());
                 .attr("style", "display:block");
 
 
-            vis.datum(data['items']).call(chart);
+            vis.datum(data['data_avail']).call(chart);
 
             vis[0][0]['children'][0].setAttribute("transform", "translate(0,550)rotate(270)"); // ribbons
             vis[0][0]['children'][1].setAttribute("transform", "translate(0,550)rotate(270)"); // ??
@@ -39,7 +41,7 @@ define(['d3', 'd3parsets'], function(d3, d3parsets) {
             var stopPlot = new Date().getTime();
 
             // Auto-scroll over to center the graph on any redraw
-            $('#multi-categorical').prop('scrollLeft',150);
+            $(selector).prop('scrollLeft',150);
 
             console.debug("[BENCHMARKING] Time to build parallel coords plot: "+(stopPlot-startPlot)+ "ms");
 

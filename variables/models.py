@@ -1,11 +1,7 @@
-import operator
-import json
-import sys
-from django.db import models
 from django.contrib.auth.models import User
-from django.db.models import Q
-from projects.models import Project, Study, User_Feature_Definitions
-from django.conf import settings
+from django.db import models
+from projects.models import User_Feature_Definitions
+
 
 class FavoriteManager(models.Manager):
     content = "null"
@@ -16,6 +12,7 @@ class VariableFavorite(models.Model):
     user = models.ForeignKey(User, null=False, blank=False)
     active = models.BooleanField(default=True)
     last_date_saved = models.DateTimeField(auto_now=True)
+    version = models.CharField(max_length=5, blank=False, null=True)
     objects = FavoriteManager()
 
     '''
@@ -35,9 +32,12 @@ class VariableFavorite(models.Model):
 
         return last_view
 
+    def get_readable_version(self):
+        return 'Version '+str(self.version[1:])
+
     @classmethod
-    def get_list(cls, user):
-        list = cls.objects.filter(user=user, active=True).order_by('-last_date_saved')
+    def get_list(cls, user, version=None):
+        list = cls.objects.filter(user=user, active=True).order_by('-last_date_saved') if not version else cls.objects.filter(user=user, version=version, active=True).order_by('-last_date_saved')
 
         for fav in list:
             fav.variables = fav.get_variables()
@@ -52,10 +52,10 @@ class VariableFavorite(models.Model):
 
     @classmethod
     def create(cls, name, variables, user):
-        variable_favorite_model = cls.objects.create(name=name, user=user)
+        variable_favorite_model = cls.objects.create(name=name, user=user, version="v2")
         variable_favorite_model.save()
 
-        for var in variables :
+        for var in variables:
             Variable.objects.create(name=var['name'], feature_id=var['feature_id'], type=var['type'], code=var['code'], variable_favorite=variable_favorite_model)
 
         return_obj = {

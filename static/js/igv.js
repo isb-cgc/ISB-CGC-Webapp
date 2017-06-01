@@ -67,13 +67,17 @@ require([
         var row = $(bam_divs[i]);
         var bam_path = row.data('gcs');
         var sample_barcode = row.data('sample');
-        tracks.push({
+        var obj = {
             sourceType: 'gcs',
             type: 'bam',
-            url: bam_path, // gs:// url to .bam file. Location must also contain .bai file.
+            url: bam_path, // gs:// url to .bam file
             name: sample_barcode + ': GCS bam file',
             withCredentials: true
-        });
+        };
+        if(row['program'] === 'TCGA' && row['build'] === 'HG38'){
+            obj.indexURL = bam_path.replace(/\.bam/,'.bai');
+        }
+        tracks.push(obj);
     }
 
     tracks.push({
@@ -85,11 +89,12 @@ require([
 
     var options = {
         showNavigation: true,
-        genome: "hg19",
+        genome: genome_build.toLowerCase(),
         locus: "egfr",
         tracks: tracks,
         withCredentials: true
     };
+
     $('#igv-div').empty();
 
     // Invoking libs/igv creates a global igv var for us to use

@@ -2,7 +2,7 @@
 {% load staticfiles %}
 {% load custom_tags %}
 {% load cohort_filters %}
-{% load project_custom_tags %}
+{% load program_custom_tags %}
 {#{% load tz %}#}
 {% block header %}
 {% endblock %}
@@ -144,7 +144,7 @@
             <section class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">
-                        <a href="{% url 'genes' %}">Gene Favorites ({{ user.genefavorite_set.all|active|length }})</a></h3>
+                        <a href="{% url 'genes' %}">Gene & miRNA Favorites ({{ user.genefavorite_set.all|active|length }})</a></h3>
                 </div>
                 <div class="panel-body">
                     {% if user.genefavorite_set.all|active|length > 0 %}
@@ -166,9 +166,9 @@
                         <a href="{% url 'genes' %}" class="btn btn-link float-right">View All</a>
                         {% endif %}
                     {% else %}
-                    <p>You don't have any saved Gene Favorites.</p>
+                    <p>You don't have any saved Gene & miRNA Favorites.</p>
                     {% endif %}
-                    <a href="{% url 'gene_fav_create' %}" class="btn btn-link">Create Gene Favorites</a>
+                    <a href="{% url 'gene_fav_create' %}" class="nocap btn btn-link">Create Gene & miRNA Favorites</a>
                 </div>
             </section>
             <section class="panel panel-default">
@@ -212,39 +212,39 @@
             <section class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">
-                        <a href="{% url 'projects' %}">Saved Projects ({{ projects.count }})</a></h3>
+                        <a href="{% url 'programs' %}">Saved Programs ({{ programs.count }})</a></h3>
                 </div>
                 <div class="panel-body">
-                    <p>You can upload data from your own research projects.</p>
-                    {% if projects.count > 0 %}
+                    <p>You can upload data from your own research programs.</p>
+                    {% if programs.count > 0 %}
                     <ul class="table-list">
-                        {% for project in projects|slice:':6' %}
+                        {% for program in programs|slice:':6' %}
                            <li>
-                               <a href="{% url 'project_detail' project.id %}">
-                                   <p class="list-title">{{ project.name }}</p>
-                                   {% if project.description %}
-                                    <p>{{ project.description|slice:':65' }}{% if project.description|length > 65 %}&hellip;{% endif %}</p>
+                               <a href="{% url 'program_detail' program.id %}">
+                                   <p class="list-title">{{ program.name }}</p>
+                                   {% if program.description %}
+                                    <p>{{ program.description|slice:':65' }}{% if program.description|length > 65 %}&hellip;{% endif %}</p>
                                    {% endif %}
                                </a>
                            </li>
                         {% endfor %}
-                        {% if user.project_set.all|active|length > 6 %}
-                            <a class="btn btn-link" href="{% url 'projects' %}">View all</a>
+                        {% if user.program_set.all|active|length > 6 %}
+                            <a class="btn btn-link" href="{% url 'programs' %}">View all</a>
                         {% endif %}
                     </ul>
                     {% endif %}
                 </div>
                 <div class="panel-footer">
-                    <a href="{% url 'project_upload' %}" class="btn btn-link"><i class="fa fa-cloud-upload"></i>Upload Project Data</a>
+                    <a href="{% url 'program_upload' %}" class="btn btn-link"><i class="fa fa-cloud-upload"></i>Upload Program Data</a>
                 </div>
             </section>
         </div>
-{#      TODO: This div is hidden until we can figure out creating workbooks from projects/studies #}
+{#      TODO: This div is hidden until we can figure out creating workbooks from programs/studies #}
 {#        <div class="col-md-6">#}
 {#            <section class="panel panel-default">#}
 {#                <div class="panel-heading">#}
 {#                    <h3 class="panel-title">#}
-{#                        <a href="{% url 'public_projects' %}">Public Data ({% public_project_count %})</a></h3>#}
+{#                        <a href="{% url 'public_programs' %}">Public Data ({% public_program_count %})</a></h3>#}
 {#                </div>#}
 {#                <div class="panel-body">#}
 {#                    <p>Browse publicly-available studies and data</p>#}
