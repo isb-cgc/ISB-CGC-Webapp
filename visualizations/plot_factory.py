@@ -14,9 +14,8 @@ from django.core.urlresolvers import reverse
 from django.utils import formats
 
 from models import SavedViz, Plot, Plot_Cohorts, Viz_Perms, Plot_Comments
-from cohorts.models import Cohort, Cohort_Perms, Patients, Samples
+from cohorts.models import Cohort, Cohort_Perms, Samples
 from plot_enums import PlotEnums
-from bq_data_access.feature_search.util import SearchableFieldHelper
 
 # This factory generates the data objects needed for every visualization
 class PlotFactory(object):
@@ -60,10 +59,10 @@ class PlotFactory(object):
             return data
 
     @staticmethod
-    def union_cohort_samples_patients(cohort_ids):
-        cohort_patients = Patients.objects.filter(cohort_id__in=cohort_ids).distinct().values_list('patient_id', flat=True)
-        cohort_samples = Samples.objects.filter(cohort_id__in=cohort_ids).distinct().values_list('sample_id', flat=True)
-        return cohort_samples, cohort_patients
+    def union_cohort_samples_cases(cohort_ids):
+        cohort_cases = Samples.objects.filter(cohort_id__in=cohort_ids).distinct().values_list('case_barcode', flat=True)
+        cohort_samples = Samples.objects.filter(cohort_id__in=cohort_ids).distinct().values_list('sample_barcode', flat=True)
+        return cohort_samples, cohort_cases
 
     @classmethod
     def generate_generic_plot(cls, title, cohort):
@@ -93,8 +92,8 @@ class PlotFactory(object):
                         'name': cohort.name.encode('utf-8')
                     }],
                 'cohort_name': str(cohort.name),
-                'patient_length': len(cohort.patients_set.all()),
-                'sample_length': len(cohort.samples_set.all()),
+                'patient_length': len(cohort.case_size()),
+                'sample_length': len(cohort.samples_size()),
         }
 
         plots_data.append(item)

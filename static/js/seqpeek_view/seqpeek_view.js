@@ -71,23 +71,23 @@ define([
                 if (track['type'] == 'tumor') {
                     new_tr =
                         '<tr style="font-size: 8pt">' +
-                            '<td>Patients:</td><td>' + track['cohort_size'] + '</td>' +
+                            '<td>Patients:</td><td>' + track['statistics']['cohort_size'] + '</td>' +
                         '</tr>' +
                         '<tr style="font-size: 8pt">' +
-                            '<td>Mutants:</td><td>' + track['number_of_samples'] + '</td>' +
+                            '<td>Mutants:</td><td>' + track['statistics']['samples']['numberOf'] + '</td>' +
                         '</tr>' +
                         '<tr style="font-size: 8pt">' +
-                            '<td>Unique pos:</td><td>' + track['mutated_positions'] + '</td>' +
+                            '<td>Unique pos:</td><td>' + track['statistics']['samples']['mutated_positions'] + '</td>' +
                         '</tr>';
                 }
                 // "COMBINED" track
                 else {
                     new_tr =
                         '<tr style="font-size: 8pt">' +
-                            '<td>Mutants:</td><td>' + track['number_of_samples'] + '</td>' +
+                            '<td>Mutants:</td><td>' + track['statistics']['samples']['numberOf'] + '</td>' +
                         '</tr>' +
                         '<tr style="font-size: 8pt">' +
-                            '<td>Unique pos:</td><td>' + track['mutated_positions'] + '</td>' +
+                            '<td>Unique pos:</td><td>' + track['statistics']['samples']['mutated_positions'] + '</td>' +
                         '</tr>' +
                         '<tr><td></td><td></td></tr>';
                 }

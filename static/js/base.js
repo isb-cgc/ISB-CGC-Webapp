@@ -122,7 +122,7 @@ require([
         type: 'numeric'
     });
 
-    $('#gene-list-table, #var-list-table').tablesorter({
+    $('#gene-list-table').tablesorter({
         headers: {
             0: {sorter:false},
             3: {sorter: 'fullDate'}
@@ -130,12 +130,20 @@ require([
         sortList: [[3,1]]
     });
 
-    $('#workbook-table').tablesorter({
+    $('#var-list-table').tablesorter({
         headers: {
             0: {sorter:false},
             4: {sorter: 'fullDate'}
         },
         sortList: [[4,1]]
+    });
+
+    $('#workbook-table').tablesorter({
+        headers: {
+            0: {sorter:false},
+            5: {sorter: 'fullDate'}
+        },
+        sortList: [[5,1]]
     });
 });
 

@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2015, Institute for Systems Biology
+ * Copyright 2017, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ require([
         $('a.delete-x').off('click');
         $('a.delete-x').on('click', function() {
             var code = $(this).parent('span').data('code');
-            $('.variable-toggle-checkbox[value="' + code + '"]').prop('checked', false);
+            $('.variable-toggle-checkbox[data-code="' + code + '"]').prop('checked', false);
             $(this).parent('span').remove();
             $('#create-cohort-form .form-control-static').find('span[data-code="' + code + '"]').remove();
             return false;
@@ -70,24 +70,14 @@ require([
     }
     set_pill_deletes();
 
-    //removal of pills
-    $('a.delete-x').on('click', function() {
-        var search_id = $(this).parent('span').attr('value');
-        $('#' + search_id).prop('checked', false);
-        $(this).parent('span').remove();
-        $('#create-cohort-form .form-control-static').find('span[value="' + search_id + '"]').remove();
-        return false;
-    });
-
-    // set up the search bars for Clinical and MiRNA tabs
-    vizhelpers.get_datatype_search_interfaces($("#mirna-accordion"), "MIRN");
-    vizhelpers.get_datatype_search_interfaces($("#clinical-accordion"), "CLIN");
+    vizhelpers.get_datatype_search_interfaces($(".clinical-accordion"), "CLIN");
 
     // Field Editing
     $('.x-edit-field, .y-edit-field, .color-edit-field').on('click', function() { vizhelpers.show_field_search_panel(this); });
     $('.feature-search').on('change', function() { vizhelpers.field_search_change_callback(this); });
     $('.select-field').on('click', function() { vizhelpers.select_field_callback(this); });
     $('.close-field-search').on('click', function() { vizhelpers.close_field_search_callback(this); });
+
     $('.field-options').on('change', function(event) {
         var self            = $(this);
         var parent          = self.parent();
@@ -109,8 +99,6 @@ require([
             for (var i = 0; i < options.length; i++) {
                 if (options[i].hasOwnProperty('type')) {
                     selectbox.append('<option value="'+options[i]['internal_feature_id']+'" var_type="'+ options[i]['type'] + '">'+options[i]['label']+'</option>')
-                } else { // MIRNA
-                    selectbox.append('<option value="'+options[i]['internal_feature_id']+'" var_type="N">'+options[i]['label']+'</option>')
                 }
             }
         });
@@ -139,7 +127,7 @@ require([
 
         set_pill_deletes();
 
-        $('input[type="checkbox"][value="'+code+'"]').each(function() {
+        $('input[type="checkbox"][data-code="'+code+'"]').each(function() {
             $(this).prop('checked', true);
         });
         return token;
@@ -151,9 +139,9 @@ require([
     function remove_variable_pill(code){
         $(".selected-variable[data-code='" + code + "']").remove();
         $('#create-cohort-form .form-control-static [data-code="' + code + '"]').remove();
-        $('input[type="checkbox"][value="'+code+'"]').each(function() {
+        $('input[type="checkbox"][data-code="'+code+'"]').each(function() {
             $(this).prop('checked', false);
-        })
+        });
     }
 
     /*
@@ -162,9 +150,13 @@ require([
     $('input[type="checkbox"]').on('change', function(event){
         var $this      = $(this),
             name       = $this.data('text-label'),
-            code       = $this.val(),
+            code       = $this.data('code'),
             feature_id = $this.data('feature-id'),
             var_type   = $this.attr('var_type');
+
+        $('input[type="checkbox"][data-code="'+code+'"]').each(function() {
+            $(this).prop('checked', $this.is(':checked'));
+        })
 
         if ($this.is(':checked') && $('.selected-filters span[data-code="' + code + '"]').length == 0) { // Checkbox checked and not already in list
             add_variable_pill(name, code, feature_id, var_type);
@@ -173,16 +165,8 @@ require([
         }
     });
 
-    /*
-        Adds a variable pill when users select a variable from from dropdowns in the TCGA tab
-     */
     $('.search-term-field').on('change', function(event){
-        if ($(this).attr('id') == 'MIRN-search-term-select') {
-            selectedOption = $(this).find(':selected');
-        } else { // CLIN
-            //find the options specified to be created in the vis_helper.js line 265 select2_formatting function.
-            var selectedOption = $(this).parents('.form-group').find('.select2-selection__rendered').children().first();
-        }
+        var selectedOption = $(this).parents('.form-group').find('.select2-selection__rendered').children().first();
         var name       = selectedOption.text();
         var code       = selectedOption.val();
         var var_type   = selectedOption.attr('var_type');
@@ -419,7 +403,7 @@ require([
     if ($('.selected-filters span').length > 0) {
         var variable_list = get_variable_list();
         for (var i = 0; i < variable_list.length; i++ ) {
-            $('input[type="checkbox"][value="'+variable_list[i]['code']+'"]').each(function() {
+            $('input[type="checkbox"][data-code="'+variable_list[i]['code']+'"]').each(function() {
                 $(this).prop('checked', true);
             })
         }

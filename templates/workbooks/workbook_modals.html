@@ -16,7 +16,18 @@
                     </div>
                     <label for="edit-workbook-name">Name (required)</label>
                     <input class="edit-workbook-name form-control" type="text" name="name" value="{{ workbook.name }}" required/>
-                    <br>
+                    <br />
+                    <label for="workbook-build">Build</label>
+                    <select aria-label="Workbook Build" id="workbook-build" name="build" class="form-control workbook-build">
+                        <option value="{% if not workbook.build %}legacy{% else %}{{ workbook.build }}{% endif %}"
+                                data-plot-version="{% if not workbook.build %}v1{% else %}v2{% endif %}" selected >{% if not workbook.build %}Legacy{% else %}{{ workbook.build }}{% endif %}</option>
+                        {% for build in workbook.get_builds %}
+                            {% if build != workbook.build %}
+                                <option data-plot-version="v2" value="{{ build }}" {% if not workbook.build %}disabled title="Legacy workbooks cannot specify a build value."{% endif %}>{{ build }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    <br />
                     <label for="edit-workbook-desc">Description (optional, max length is 2000 characters)</label>
                     <textarea class="edit-workbook-desc form-control" name="description" maxlength="2000">{{workbook.description }}</textarea>
                 </div>
@@ -30,6 +41,7 @@
 </div>
 
 <!-- Create Worksheet modal-->
+{% if workbook.build %}
 <div class="modal fade" id="create-worksheet-modal-{{ workbook.id }}" tabindex="-1" aria-labelledby="create-worksheet-header-{{ workbook.id }}" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -58,6 +70,7 @@
         </div>
     </div>
 </div>
+{% endif %}
 
 <!-- Delete Workbook Modal -->
 <div class="modal fade" id="delete-workbook-modal-{{ workbook.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-workbook-body" aria-hidden="true">
@@ -128,6 +141,7 @@
 {% endif %}
 
 <!-- Duplicate Workbook Modal -->
+{% if workbook.build %}
 <div class="modal fade" id="copy-workbook-modal-{{ workbook.id }}" tabindex="-1" role="dialog" aria-labelledby="copy-workbook-header" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -151,6 +165,7 @@
         </div>
     </div>
 </div>
+{% endif %}
 
 {% if is_shareable or shared %}
 <!-- Share Workbook Modal -->

@@ -2,9 +2,8 @@ if [ -n "$CI" ]; then
     export HOME=/home/ubuntu/${CIRCLE_PROJECT_REPONAME}
     export HOMEROOT=/home/ubuntu/${CIRCLE_PROJECT_REPONAME}
 
-# Clone dependencies
-git clone -b isb-cgc-uat https://github.com/isb-cgc/ISB-CGC-Common.git
-git clone -b uat https://github.com/isb-cgc/ISB-CGC-API.git
+    # Clone dependencies
+    git clone -b isb-cgc-uat https://github.com/isb-cgc/ISB-CGC-Common.git
 
     # Remove .pyc files; these can sometimes stick around and if a
     # model has changed names it will cause various load failures

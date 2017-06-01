@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2016, Institute for Systems Biology
+ * Copyright 2017, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,9 +53,10 @@ require([
             var tokens = [];
             for(var i in this.gcs_bam) {
                 tokens.push({
-                    label: this.gcs_bam[i],
+                    label: this.gcs_bam[i]['label'],
                     value: i,
-                    dataType: "gcs_bam"
+                    dataType: "gcs_bam",
+                    program: this.gcs_bam[i]['program']
                 });
             }
             return tokens;
@@ -165,13 +166,16 @@ require([
         };
         if (input in dictionary) {
             return dictionary[input];
-        } else {
+        } else if(input !== null && input !== undefined) {
             return input.replace(/_/g, ' ');
+        } else {
+            return "N/A";
         }
 
     };
 
     var update_table = function () {
+        $('#igv-build').attr('value',$('#build :selected').val());
         var selector_list = [];
         $('#filter-panel input[type="checkbox"]:checked').each(function() {
             selector_list.push($(this).attr('id'));
@@ -192,15 +196,17 @@ require([
         
         
         if (selector_list.length) {
+            var param_list = '';
             for (var selector in selector_list) {
-                url += '&' + selector_list[selector] + '=True';
+                param_list += '&' + selector_list[selector] + '=True';
             }
-
-            $('#download-link').attr('href', download_url + '?params=' + selector_list.join(',') + '&total=' + file_list_total);
+            url += param_list;
+            $('#download-link').attr('href', download_url + '?' + param_list + '&total=' + file_list_total);
         } else {
             $('#download-link').attr('href', download_url + '?total=' + file_list_total)
         }
 
+        url += '&build='+$('#build :selected').val();
 
         $('#prev-page').addClass('disabled');
         $('#next-page').addClass('disabled');
@@ -208,13 +214,28 @@ require([
         $.ajax({
             url: url,
             success: function (data) {
-                data = JSON.parse(data);
-                var total_files = data['total_file_count'];
+                total_files = data['total_file_count'];
                 var total_pages = Math.ceil(total_files / 20);
-                $('.filelist-panel .panel-body .file-count').html(total_pages);
-                $('.filelist-panel .panel-body .page-num').html(page);
+                if(total_pages <= 0) {
+                    $('.file-page-count').hide();
+                    $('.no-file-page-count').show();
+                } else {
+                    $('.file-page-count').show();
+                    $('.no-file-page-count').hide();
+                    $('.filelist-panel .panel-body .file-count').html(total_pages);
+                    $('.filelist-panel .panel-body .page-num').html(page);
+                }
+
                 var files = data['file_list'];
                 $('.filelist-panel table tbody').empty();
+
+                if(files.length <= 0) {
+                    $('.filelist-panel table tbody').append(
+                        '<tr>' +
+                        '<td colspan="6"><i>No file listings found in this cohort for this build.</i></td><td></td>'
+                    );
+                }
+
                 for (var i = 0; i < files.length; i++) {
                     if (!('datatype' in files[i])) {
                         files[i]['datatype'] = '';
@@ -223,10 +244,10 @@ require([
                     var val = null;
                     var dataTypeName = '';
                     var label = '';
-                    var tokenLabel = files[i]['sample']+", "+files[i]['pipeline']+", "+happy_name(files[i]['platform'])+", "+files[i]['datatype'];
+                    var tokenLabel = files[i]['sample']+", "+files[i]['exp_strat']+", "+happy_name(files[i]['platform'])+", "+files[i]['datatype'];
                     var checkbox_inputs = '';
                     var disable = true;
-                    if (files[i]['access'] != 'dbGap controlled-access' || has_access == 'True') {
+                    if (files[i]['access'] != 'controlled' || has_access == 'True') {
                         disable = false;
                     }
 
@@ -234,7 +255,7 @@ require([
                         val = files[i]['cloudstorage_location'] + ',' + files[i]['sample'];
                         dataTypeName = "gcs_bam";
                         label = "Cloud Storage";
-                        checkbox_inputs += '<label><input type="checkbox" token-label="'+tokenLabel+'"name="'+dataTypeName+'" data-type="'+dataTypeName+'" value="'+val+'"';
+                        checkbox_inputs += '<label><input type="checkbox" token-label="'+tokenLabel+'" program="'+files[i]['program']+'" name="'+dataTypeName+'" data-type="'+dataTypeName+'" value="'+val+'"';
                         if (disable) {
                             checkbox_inputs += ' disabled="disabled"';
                         }
@@ -245,14 +266,15 @@ require([
 
                     $('.filelist-panel table tbody').append(
                         '<tr>' +
+                        '<td>' + files[i]['program'] + '</td>' +
                         '<td>' + files[i]['sample'] + '</td>' +
-                        '<td>' + files[i]['pipeline'] + '</td>' +
+                        '<td>' + (files[i]['exp_strat'] || 'N/A') + '</td>' +
                         '<td>' + happy_name(files[i]['platform']) + '</td>' +
-                        '<td>' + files[i]['datalevel'] + '</td>' +
+                        '<td>' + files[i]['datacat'] + '</td>' +
                         '<td>' + files[i]['datatype'] + '</td>' +
                         '<td>' + files[i]['igv_viewer'] + '</td>' +
                         '</tr>'
-                    )
+                    );
 
                     // Remember any previous checks
                     var thisCheck = $('.filelist-panel input[value="'+val+'"');
@@ -277,7 +299,10 @@ require([
                     var self=$(this);
 
                     if(self.is(':checked')) {
-                        selFiles[self.attr('data-type')][self.attr('value')] = self.attr('token-label');
+                        selFiles[self.attr('data-type')][self.attr('value')] = {
+                            'label': self.attr('token-label'),
+                            'program': self.attr('program')
+                        };
                         $('#selected-files-tokenfield').hide();
                     } else {
                         delete selFiles[self.attr('data-type')][self.attr('value')];
@@ -304,6 +329,33 @@ require([
                     $('#next-page').addClass('disabled');
                 }
                 $('#content-panel .spinner i').addClass('hidden');
+
+
+                var build = $('#build :selected').val();
+                // Update the platform build set
+                if($('#platform-'+build).length <= 0) {
+                    // We need to make this selection set
+                    $('#platforms-panel').append(
+                        '<ul class="search-checkbox-list platform-counts" id="platform-'+build+'"></ul>'
+                    );
+
+                    if(Object.keys(data.platform_count_list).length <= 0) {
+                        $('#platform-'+build).append(
+                            '<i>No platforms available to list.</i>'
+                        );
+                    }
+                    for(var i in data.platform_count_list) {
+                        if(data.platform_count_list.hasOwnProperty(i)) {
+                            var platform = data.platform_count_list[i];
+                            $('#platform-'+build).append(
+                                '<li><input data-platform-count="'+platform['count']+'" type="checkbox" name="platform-selected" '+
+                                    'id="'+platform['platform']+'"><label for="'+platform['platform']+'">'+platform['platform']+'</label><span class="count">('+platform['count']+')</span></li>'
+                            );
+                        }
+                    }
+                }
+                $('.platform-counts').hide();
+                $('#platform-'+build).show();
             },
             error: function(e) {
                 console.log(e);
@@ -321,6 +373,10 @@ require([
     // Previous page button click
     $('#prev-page').on('click', function () {
         page = page - 1;
+        update_table();
+    });
+
+    $('#build').on('change',function(){
         update_table();
     });
 
