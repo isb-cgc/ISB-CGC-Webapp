@@ -7,45 +7,41 @@ else
     export HOME=/home/vagrant
     export HOMEROOT=/home/vagrant/www
     export MYSQL_ROOT_USER=root
+    ${HOME}/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file ${HOMEROOT}/privatekey.json
+    ${HOME}/google-cloud-sdk/bin/gcloud config set project "${GCLOUD_PROJECT_NAME}"
 fi
 
 export PYTHONPATH=${HOMEROOT}/lib/:${HOMEROOT}/:${HOME}/google_appengine/:${HOME}/google_appengine/lib/protorpc-1.0/
 echo $PYTHONPATH
+
+echo "Creating django-user for web application..."
+mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON $DATABASE_NAME.* TO '${DATABASE_USER}'@'localhost' IDENTIFIED BY '${DATABASE_PASSWORD}';"
+
+echo "Creating the definer account for any routines in the table file..."
+mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON $DATABASE_NAME.* TO 'dev-user'@'%' IDENTIFIED BY '${DATABASE_PASSWORD}';"
+
 # If we have migrations for older, pre-migrations apps which haven't yet been added to the database dump, make them here eg.:
 # python manage.py makemigrations <appname>
-# >>> Once a new dump is available with these models in the database you can remove this <<<
-python ${HOMEROOT}/manage.py makemigrations adminrestrict
 # Now run migrations
 echo "Running Migrations..."
 python ${HOMEROOT}/manage.py migrate --noinput
 
-#echo "Creating django superuser"
-#echo "from django.contrib.auth.models import User; User.objects.create_superuser('isb', '', 'password')" | python ${HOMEROOT}/manage.py shell
-
-echo "Creating Django User for MySQL database..."
-mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -e "GRANT SELECT, INSERT, UPDATE, DELETE ON $DATABASE_NAME.* TO \"django\"@\"localhost\" IDENTIFIED BY \"PASSWORD\""
+# If the ISB superuser isn't present already, they need to be added.
+# echo "Creating isb superuser..."
+# echo "from django.contrib.auth.models import User; User.objects.create_superuser('${SUPERUSER_USERNAME}', '', '${SUPERUSER_PASSWORD}')" | python ${HOMEROOT}/manage.py shell
 
 echo "Adding in default Django admin IP allowances for local development"
 mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME -e "INSERT INTO adminrestrict_allowedip (ip_address) VALUES('127.0.0.1'),('10.0.*.*');"
 
 # Load your SQL table file
-# Looks for user_data_dump.sql; if that isn't available, looks for metadata_featdef_tables.sql
-# If metadata_featdef_tables.sql isn't found, it downloads a file from GCS and saves it
-# as metadata_featdef_tables.sql for future use
-if [ ! -f ${HOMEROOT}/user_data_dump.sql ]; then
-    if [ ! -f ${HOMEROOT}/scripts/metadata_featdef_tables.sql ]; then
+# Looks for metadata_featdef_tables.sql, if this isn't found, it downloads a file from GCS and saves it as
+# metadata_featdef_tables.sql for future use
+if [ ! -f ${HOMEROOT}/metadata_featdef_tables.sql ]; then
         echo "Downloading SQL Table File..."
-        wget -q https://storage.googleapis.com/isb-cgc-sqldumps/dev/dev_test_dump_08_17_2016.sql -O ${HOMEROOT}/scripts/metadata_featdef_tables.sql
-    fi
-    echo "Applying SQL Table File... (may take a while)"
-    mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/metadata_featdef_tables.sql
-else
-    echo "Applying User Data SQL Table File... (may take a while)"
-    mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/user_data_dump.sql
+        ${HOME}/google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_DEV_SQL}/dev_table_and_routines_file.sql" ${HOMEROOT}/scripts/metadata_featdef_tables.sql
 fi
-
-echo "Adding Stored Procedures/Views and making table alterations.."
-python ${HOMEROOT}/scripts/database_catchup_scripts.py -z True
+echo "Applying SQL Table File... (may take a while)"
+mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/metadata_featdef_tables.sql
 
 echo "Adding Cohort/Site Data..."
 python ${HOMEROOT}/scripts/add_site_ids.py
