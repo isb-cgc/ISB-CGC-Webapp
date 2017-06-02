@@ -1,10 +1,10 @@
 if [ -n "$CI" ]; then
-export HOME=/home/ubuntu
-export MYSQL_ROOT_USER=ubuntu
+    export HOME=/home/ubuntu
+    export MYSQL_ROOT_USER=ubuntu
 else
-export $(cat /home/vagrant/www/.env | grep -v ^# | xargs) 2> /dev/null
-export HOME=/home/vagrant
-export MYSQL_ROOT_USER=root
+    export $(cat /home/vagrant/www/.env | grep -v ^# | xargs) 2> /dev/null
+    export HOME=/home/vagrant
+    export MYSQL_ROOT_USER=root
 fi
 
 # MySQL Install
