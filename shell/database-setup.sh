@@ -41,6 +41,7 @@ mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME -e "INSERT INTO
 # Looks for metadata_featdef_tables.sql, if this isn't found, it downloads a file from GCS and saves it as
 # metadata_featdef_tables.sql for future use
 if [ ! -f ${HOMEROOT}/scripts/metadata_featdef_tables.sql ]; then
+        ${HOME}/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file ${HOMEROOT}/privatekey.json
         echo "Downloading SQL Table File..."
         ${HOME}/google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_DEV_SQL}/dev_table_and_routines_file.sql" ${HOMEROOT}/scripts/metadata_featdef_tables.sql
 fi
