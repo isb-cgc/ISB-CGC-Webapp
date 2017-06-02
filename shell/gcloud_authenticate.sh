@@ -8,7 +8,7 @@ echo "{\
   \"client_email\": \"$UAT_CLIENT_EMAIL\",\
   \"client_id\": \"$UAT_CLIENT_ID\",\
   \"type\": \"service_account\"\
-}" | tee deployment.key.json > /dev/null 2> /dev/null
+}" | tee dev_deployment.key.json > /dev/null 2> /dev/null
 
 echo "[STATUS] Generated JSON for $UAT_CLIENT_EMAIL, attempting to authenticate..."
 
