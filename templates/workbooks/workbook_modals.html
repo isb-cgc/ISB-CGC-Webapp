@@ -15,7 +15,7 @@
                         Your workbook's <span class="book-unallowed"></span> invalid characters (<span class="unallowed-chars-book"></span>). Please choose another <span class="book-fields"></span>.
                     </div>
                     <label for="edit-workbook-name">Name (required)</label>
-                    <input class="edit-workbook-name form-control" type="text" name="name" value="{{ workbook.name }}" required/>
+                    <input class="edit-workbook-name form-control" type="text" name="name" maxlength="2000" value="{{ workbook.name }}" required/>
                     <br />
                     <label for="workbook-build">Build</label>
                     <select aria-label="Workbook Build" id="workbook-build" name="build" class="form-control workbook-build">
