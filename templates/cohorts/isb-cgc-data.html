@@ -116,12 +116,37 @@
                         <li class="list-group-item">
                             <div class="list-group-item__heading" role="tab" id="p-{{ program.id }}-heading-gene-mutation-status">
                                 <a class="collapse-gene-mutation-status" role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#p-{{ program.id }}-collapse-gene-mutation-status" aria-expanded="false" aria-controls="collapse-gene-mutation-status">
-                                    <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> GENE MUTATION STATUS
+                                    <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> GENE MUTATION STATUS
                                 </a>
                             </div>
-                            <div id="p-{{ program.id }}-collapse-gene-mutation-status" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"
+                            <div id="p-{{ program.id }}-collapse-gene-mutation-status" class="list-group-item__body collapse cohort-feature-select-block gene-mutation-status" role="tabpanel"
                                  aria-labelledby="p-{{ program.id }}-heading-gene-mutation-status" data-feature-name="gene-mutation-status" data-feature-displ-name="Gene Mutation Status" data-feature-type="molecular">
                                 <ul class="list">
+                                    {% if molecular_attr_builds %}
+                                        <li class="list-item">
+                                            <!-- build selector -->
+                                            <div class="list-item__heading" role="tab" id="p-{{ program.id }}-heading-sel-build">
+                                                    Genomic Build
+                                            </div>
+                                            <div id="p-{{ program.id }}-sel-build" class="list-group-item__body sel-build" role="tabpanel" aria-labelledby="p-{{ program.id }}-heading-sel-build">
+                                                {% if molecular_attr_builds|length > 1 %}
+                                                    <select id="p-{{ program.id }}-mutation-build" class="form-control mutation-build" aria-labelledby="p-{{ program.id }}-heading-sel-build">
+                                                        {% for build in molecular_attr_builds %}
+                                                            <option value="{{ build.value }}" data-bq-table="{{ build.displ_text }}" title="BQ table: {{ build.displ_text }}" {% if build.value == 'HG19' %}selected{% endif %}>{{ build.value }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                    {% for build in molecular_attr_builds %}
+                                                        {% if build.value == 'HG19' %}
+                                                            <div class="bq-name"><span class="label bq-label">BQ Table:</span> <span class="bq-table-display" title="{{ build.displ_text }}" id="p-{{ program.id }}-bq-table">{{ build.displ_text }}</span></div>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                {% else %}
+                                                    <span>{{ molecular_attr_builds.0.value }}</span>
+                                                    <div class="bq-name"><span class="label bq-label">BQ Table:</span> <span class="bq-table-display" title="{{ molecular_attr_builds.0.displ_text }}" id="p-{{ program.id }}-bq-table">{{ molecular_attr_builds.0.displ_text }}</span></div>
+                                                {% endif %}
+                                            </div>
+                                        </li>
+                                    {% endif %}
                                     <li class="list-item">
                                         <!-- gene selector -->
                                         <div class="list-item__heading" role="tab" id="p-{{ program.id }}-heading-sel-gene">
@@ -144,7 +169,7 @@
                                         <div id="p-{{ program.id }}-sel-molecular-attr-cat" class="list-group-item__body cohort-feature-select-block" role="tabpanel"
                                              aria-labelledby="p-{{ program.id }}-heading-sel-molecular-attr-cat" data-feature-displ-name="Mutation Category" data-feature-id="category"
                                              data-feature-name="mutation-category" data-feature-type="molecular">
-                                            <select id="p-{{ program.id }}-mutation-category" class="mutation-category-selector form-control spec-select datatype-selector" aria-labelledby="p-{{ program.id }}-heading-sel-molecular-attr-cat">
+                                            <select id="p-{{ program.id }}-mutation-category" class="mutation-category-selector form-control" aria-labelledby="p-{{ program.id }}-heading-sel-molecular-attr-cat">
                                                 <option value="no-gene" selected disabled>-- Select a Gene to Enable --</option>
                                                 <option value="label" disabled>-- Select a Category --</option>
                                                 <option value="any" data-value-displ-name="Any" data-value-name="Any" data-value-id="any">Any</option>
