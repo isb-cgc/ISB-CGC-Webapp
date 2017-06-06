@@ -289,22 +289,22 @@ def igv(request, sample_barcode=None, readgroupset_id=None):
     bam_list = []
 
     checked_list = json.loads(request.POST.__getitem__('checked_list'))
-
-    # for item in checked_list['readgroupset_id']:
-    #    id_barcode = item.split(',')
-    #    readgroupset_list.append({'sample_barcode': id_barcode[1],
-    #                              'readgroupset_id': id_barcode[0]})
+    build = request.POST.__getitem__('build')
 
     for item in checked_list['gcs_bam']:
+        bam_item = checked_list['gcs_bam'][item]
         id_barcode = item.split(',')
-        bam_list.append({'sample_barcode': id_barcode[1],
-                         'gcs_path': id_barcode[0]})
+        bam_list.append({
+            'sample_barcode': id_barcode[1], 'gcs_path': id_barcode[0], 'build': build, 'program': bam_item['program']
+        })
 
-    context = {}
-    context['readgroupset_list'] = readgroupset_list
-    context['bam_list'] = bam_list
-    context['base_url'] = settings.BASE_URL
-    context['service_account'] = settings.WEB_CLIENT_ID
+    context = {
+        'readgroupset_list': readgroupset_list,
+        'bam_list': bam_list,
+        'base_url': settings.BASE_URL,
+        'service_account': settings.WEB_CLIENT_ID,
+        'build': build,
+    }
 
     return render(request, 'GenespotRE/igv.html', context)
 

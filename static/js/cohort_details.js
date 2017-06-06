@@ -73,6 +73,7 @@ require([
     'tree_graph',
     'stack_bar_chart'
 ], function ($, jqueryui, bootstrap, session_security, d3, d3tip, search_helpers, Bloodhound, _, base) {
+
     var savingComment = false;
     var savingChanges = false;
     var mode = (cohort_id ? 'VIEWING' : 'EDITING');
@@ -202,12 +203,12 @@ require([
 
     var search_helper_obj = Object.create(search_helpers, {});
 
-    var update_displays = function(withoutCheckChanges,for_panel_load) {
-        var active_program_id = $('ul.nav-tabs-data li.active a').data('program-id');
+    var update_displays = function(withoutCheckChanges,for_panel_load, alternate_prog_id) {
+        var prog_id = (alternate_prog_id === null || alternate_prog_id === undefined) ? $('ul.nav-tabs-data li.active a').data('program-id') : alternate_prog_id;
         (update_displays_thread !== null) && clearTimeout(update_displays_thread);
 
         update_displays_thread = setTimeout(function(){
-            search_helper_obj.update_counts_parsets(BASE_URL, 'metadata_counts_platform_list', cohort_id, 'v2', active_program_id, for_panel_load).then(
+            search_helper_obj.update_counts_parsets(BASE_URL, 'metadata_counts_platform_list', cohort_id, 'v2', prog_id, for_panel_load).then(
                 function(){!withoutCheckChanges && check_for_changes();}
             );
         },SUBSEQUENT_DELAY);
@@ -221,6 +222,16 @@ require([
 
         var $this = $(this);
 
+        // If this was actually a mutation-build change, use the mutation-category handler code
+        if($this.hasClass('mutation-build')) {
+            // Do nothing if a gene and/or category hasn't been selected
+            if($('#'+activeDataTab+' .paste-in-genes').tokenfield('getTokens').length <= 0 ||
+                $this.parents('.gene-mutation-status').find('select.mutation-category-selector :selected').val() == 'label') {
+                return;
+            }
+            $this = $this.parents('.gene-mutation-status').find('select.mutation-category-selector');
+        }
+
         var token = null;
 
         var feature = $this.closest('.cohort-feature-select-block'),
@@ -231,19 +242,20 @@ require([
             $('#create-cohort-form .form-control-static').append('<p id="'+activeDataTab+'-filters"></p>');
             createFormFilterSet = $('p#'+activeDataTab+'-filters')
             createFormFilterSet.append('<h5>'+(prog.data('prog-displ-name'))+'</h5>');
+        } else {
+            createFormFilterSet.show();
         }
 
         var tokenProgDisplName = prog.data('prog-displ-name'),
             tokenProgId = prog.data('prog-id');
 
-        // Mutation category dropdown
         if($this.prop('id').includes('mutation-category')) {
+            var build = $('#p-'+tokenProgId+'-mutation-build :selected').val();
+
             // Remove prior filters
             $('a.mol-cat-filter-x').trigger('click',{forNewVal: true});
             $('a.mol-spec-filter-x').trigger('click');
 
-            // Remove any previous iterations of this filter by triggering the
-            // 'Selected Filters' token 'X' button
             value = $this.find('option:selected');
 
             if(value.val() !== 'indv-selex') { // Categorized sets
@@ -260,20 +272,23 @@ require([
                 var tokenValDisplName = value.data('value-displ-name'),
                     tokenFeatDisplName = feature.data('feature-displ-name');
 
+                var feature_id = 'MUT:'+build+':'+gene.value + ':' + feature.data('feature-id');
+
                 var token = $('<span>').data({
-                    'feature-id': 'MUT:'+gene.value + ':' + feature.data('feature-id'),
+                    'feature-id': feature_id,
                     'feature-name': feature.data('feature-name'),
                     'prog-id': tokenProgId,
                     'prog-name': tokenProgDisplName,
+                    'build': build,
                     'value-id': value.data('value-id'),
                     'value-name': value.data('value-name')
-                });
+                }).attr('data-feature-id',feature_id).attr('data-value-id',value.data('value-id')).addClass(activeDataTab+'-token');
 
                 token.append(
                     $('<a>').addClass('delete-x filter-label label label-default mol-cat-filter-x')
-                        .text(gene.label + ' [' + tokenFeatDisplName + ': ' + tokenValDisplName + ']')
+                        .text(gene.label + ' [' + build+', '+ tokenFeatDisplName + ': ' + tokenValDisplName + ']')
                         .append('<i class="fa fa-times">')
-                        .attr("title",gene.label + ' [' + tokenFeatDisplName + ': ' + tokenValDisplName + ']')
+                        .attr("title",gene.label + ' [' + build + ', ' + tokenFeatDisplName + ': ' + tokenValDisplName + ']')
                 );
 
                 $this.data({
@@ -296,13 +311,29 @@ require([
                     (!data || !data.forNewVal) &&  mut_cat.val('label');
                     $(this).parent('span').remove();
 
-                    createFormFilterSet.find('span').each(function () {
-                        if ($(this).data('feature-id') == 'MUT:category') {
-                            $(this).remove();
+                    $(selFilterPanel+' .panel-body').find('span[data-feature-id="'+$(this).parent('span').data('feature-id')+'"]').remove();
+                    createFormFilterSet.find('span[data-feature-id="'+$(this).parent('span').data('feature-id')+'"]').remove();
+
+                    if(!cohort_id && $('.selected-filters .panel-body span').length <= 0) {
+                        $('#at-least-one-filter-alert-modal').show();
+                        $('#create-cohort-modal input[type="submit"]').attr('disabled','disabled');
+                    }
+
+                    // If this has emptied out a program's filter set, hide the modal's subsection for that program
+                    if(createFormFilterSet.find('span').length <= 0) {
+                        createFormFilterSet.hide();
+                    }
+
+                    // If we're down to 1 program in the filter set, the multiprogram warning is no longer needed
+                    var progCount = 0;
+                    $('.selected-filters .panel-body').each(function(){
+                        if($(this).find('span').length > 0) {
+                            progCount++;
                         }
                     });
+                    (progCount > 1) ? $('#multi-prog-cohort-create-warn').show() : $('#multi-prog-cohort-create-warn').hide();
 
-                    (!data || !data.without_update) && update_displays(true);
+                    (!data || !data.without_update) && update_displays(true,false,$(this).parent('span').data('prog-id'));
                     return false;
                 });
             } else {        // indv-selex
@@ -381,7 +412,8 @@ require([
 
                 } else { // Molecular feature
                     var gene = $('#'+activeDataTab+' .paste-in-genes').tokenfield('getTokens')[0];
-                    feature_id = 'MUT:'+gene.value + ':' + feature.data('feature-id');
+                    var build = $('#p-'+tokenProgId+'-mutation-build :selected').val();
+                    feature_id = 'MUT:'+build+':'+gene.value + ':' + feature.data('feature-id');
 
                     token = $('<span>').data({
                         'feature-id': feature_id,
@@ -390,11 +422,12 @@ require([
                         'value-id': value_id,
                         'value-name': value.data('value-name'),
                         'class': '',
+                        'build': build,
                         'prog-id': tokenProgId,
                         'prog-name': tokenProgDisplName
                     }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token');
 
-                    tokenFeatDisplName = gene.label + ' [' + feature.data('feature-displ-name');
+                    tokenFeatDisplName = gene.label + ' [' + build + ', '+ feature.data('feature-displ-name');
                     tokenValDisplName += ']'
                 }
 
@@ -425,7 +458,7 @@ require([
                             + '"] input[type="checkbox"][data-value-name="' + $(this).parent('span').data('value-name') + '"]');
 
                         if($(this).parent('span').data('feature-type') == 'molecular') {
-                            checked_box = $('div[data-feature-id="' + $(this).parent('span').data('feature-id').split(":")[2]
+                            checked_box = $('div[data-feature-id="' + $(this).parent('span').data('feature-id').split(":")[3]
                                 + '"] input[type="checkbox"][data-value-name="' + $(this).parent('span').data('value-name') + '"]');
                         }
                         checked_box.prop('checked', false);
@@ -435,7 +468,26 @@ require([
                         createFormFilterSet.find('span[data-feature-id="'+span_data['feature-id']+'"][data-value-id="'+span_data['value-id']+'"]').remove();
                         $(selFilterPanel+' .panel-body span[data-feature-id="'+span_data['feature-id']+'"][data-value-id="'+span_data['value-id']+'"]').remove();
 
-                        (!data || !data.without_update) && update_displays(true);
+                        if(!cohort_id && $('.selected-filters .panel-body span').length <= 0) {
+                            $('#at-least-one-filter-alert-modal').show();
+                            $('#create-cohort-modal input[type="submit"]').attr('disabled','disabled');
+                        }
+
+                        // If this has emptied out a program's filter set, hide the modal's subsection for that program
+                        if(createFormFilterSet.find('span').length <= 0) {
+                            createFormFilterSet.hide();
+                        }
+
+                        // If we're down to 1 program in the filter set, the multiprogram warning is no longer needed
+                        var progCount = 0;
+                        $('.selected-filters .panel-body').each(function(){
+                            if($(this).find('span').length > 0) {
+                                progCount++;
+                            }
+                        });
+                        (progCount > 1) ? $('#multi-prog-cohort-create-warn').show() : $('#multi-prog-cohort-create-warn').hide();
+
+                        (!data || !data.without_update) && update_displays(true,false,span_data['prog-id']);
                         return false;
                     });
                 }
@@ -455,6 +507,12 @@ require([
         }
         if(!data || !data.without_update) {
             update_displays();
+        }
+
+        if(!cohort_id && $('.selected-filters .panel-body span').length > 0) {
+            $('#at-least-one-filter-alert-modal').hide();
+            $('#at-least-one-filter-alert').hide();
+            $('#create-cohort-modal input[type="submit"]').removeAttr('disabled');
         }
     };
 
@@ -476,19 +534,23 @@ require([
     $('button[data-target="#apply-edits-modal"]').on('click',function(e){
         // Clear previous 'bad name' alerts
         $('#unallowed-chars-alert').hide();
-
     });
 
 
     $('button[data-target="#create-cohort-modal"]').on('click',function(e){
 
-        // Clear previous 'bad name' alerts
+        // Clear previous alerts
         $('#unallowed-chars-alert').hide();
+        $('#at-least-one-filter-alert').hide();
 
-        // A user can only make a user data cohort OR an ISB-CGC cohort; if they have
-        // chosen filters for both, the one which was active when they clicked 'save as new'
-        // is the one which is used.
-        // If we see filters for both, warn the user.
+        // There must be at least one filter for one program if this is a
+        // new cohort
+        if(!cohort_id && $('.selected-filters .panel-body span').length <= 0) {
+            $('#at-least-one-filter-alert').show();
+            e.preventDefault();
+            return false;
+        }
+
         var activeDataTab = $('.data-tab.active').attr('id');
         var progCount = 0;
         $('.selected-filters .panel-body').each(function(){
@@ -496,9 +558,7 @@ require([
                 progCount++;
             }
         });
-        if(progCount > 1) {
-            $('#multi-prog-cohort-create-warn').show();
-        }
+        (progCount > 1) ? $('#multi-prog-cohort-create-warn').show() : $('#multi-prog-cohort-create-warn').hide();
     });
 
     var set_mode = function(from_click) {
@@ -549,19 +609,6 @@ require([
         if(savingChanges) {
             e.preventDefault();
             return false;
-        }
-
-        if(!cohort_id || (original_title !== $('#edit-cohort-name').val())) {
-            var name = $('#create-cohort-name').val() || $('#edit-cohort-name').val();
-
-            var unallowed = name.match(base.whitelist);
-
-            if(unallowed) {
-                $('.unallowed-chars').text(unallowed.join(", "));
-                $('#unallowed-chars-alert').show();
-                e.preventDefault();
-                return false;
-            }
         }
 
         if(!cohort_id || (original_title !== $('#edit-cohort-name').val())) {
@@ -725,7 +772,6 @@ require([
     });
 
 
-
     var bind_widgets = function(program_data_selector,activeDataTab) {
 
         $(program_data_selector + ' .search-checkbox-list input[type="checkbox"]').on('change', filter_change_callback);
@@ -832,7 +878,7 @@ require([
                 height: '210px'
             }, 800);
         });
-
+        
         var firstSelect = true;
         $(program_data_selector + ' a.molecular-filters').on('click',function(e){
             firstSelect && $(program_data_selector + ' a.collapse-gene-mutation-status').trigger('click');
@@ -841,10 +887,16 @@ require([
             $(program_data_selector + ' .molecular-filter-alert').show();
             firstSelect = false;
         });
-
+    
         $(program_data_selector + ' .mutation-category-selector').on('change',filter_change_callback);
 
         createTokenizer($(program_data_selector+' .paste-in-genes'), [], program_data_selector, activeDataTab);
+
+        $('select.mutation-build').on('change', function(e){
+            $(this).siblings().find('.bq-table-display').text($(this).find(':selected').data('bq-table'));
+            $(this).siblings().find('.bq-table-display').attr('title',$(this).find(':selected').data('bq-table'));
+        });
+        $('select.mutation-build').on('change',filter_change_callback);
     };
 
     var filter_panel_load = function(cohort) {
@@ -904,7 +956,13 @@ require([
         filter_panel_load(cohort_id);
     });
 
-    filter_panel_load(cohort_id);
+    // Per https://stackoverflow.com/questions/13550477/twitter-bootstrap-alert-message-close-and-open-again
+    // Set up our own data-hide type to 'hide' our alerts instead of popping them off the DOM entirely
+    $("[data-hide]").on("click", function(){
+        $(this).closest("." + $(this).attr("data-hide")).hide();
+    });
 
+    filter_panel_load(cohort_id);
+    
 });
 
