@@ -222,6 +222,16 @@ require([
 
         var $this = $(this);
 
+        // If this was actually a mutation-build change, use the mutation-category handler code
+        if($this.hasClass('mutation-build')) {
+            // Do nothing if a gene and/or category hasn't been selected
+            if($('#'+activeDataTab+' .paste-in-genes').tokenfield('getTokens').length <= 0 ||
+                $this.parents('.gene-mutation-status').find('select.mutation-category-selector :selected').val() == 'label') {
+                return;
+            }
+            $this = $this.parents('.gene-mutation-status').find('select.mutation-category-selector');
+        }
+
         var token = null;
 
         var feature = $this.closest('.cohort-feature-select-block'),
@@ -237,14 +247,13 @@ require([
         var tokenProgDisplName = prog.data('prog-displ-name'),
             tokenProgId = prog.data('prog-id');
 
-        // Mutation category dropdown
         if($this.prop('id').includes('mutation-category')) {
+            var build = $('#p-'+tokenProgId+'-mutation-build :selected').val();
+
             // Remove prior filters
             $('a.mol-cat-filter-x').trigger('click',{forNewVal: true});
             $('a.mol-spec-filter-x').trigger('click');
 
-            // Remove any previous iterations of this filter by triggering the
-            // 'Selected Filters' token 'X' button
             value = $this.find('option:selected');
 
             if(value.val() !== 'indv-selex') { // Categorized sets
@@ -262,19 +271,20 @@ require([
                     tokenFeatDisplName = feature.data('feature-displ-name');
 
                 var token = $('<span>').data({
-                    'feature-id': 'MUT:'+gene.value + ':' + feature.data('feature-id'),
+                    'feature-id': 'MUT:'+build+':'+gene.value + ':' + feature.data('feature-id'),
                     'feature-name': feature.data('feature-name'),
                     'prog-id': tokenProgId,
                     'prog-name': tokenProgDisplName,
+                    'build': build,
                     'value-id': value.data('value-id'),
                     'value-name': value.data('value-name')
                 });
 
                 token.append(
                     $('<a>').addClass('delete-x filter-label label label-default mol-cat-filter-x')
-                        .text(gene.label + ' [' + tokenFeatDisplName + ': ' + tokenValDisplName + ']')
+                        .text(gene.label + ' [' + build+', '+ tokenFeatDisplName + ': ' + tokenValDisplName + ']')
                         .append('<i class="fa fa-times">')
-                        .attr("title",gene.label + ' [' + tokenFeatDisplName + ': ' + tokenValDisplName + ']')
+                        .attr("title",gene.label + ' [' + build + ', ' + tokenFeatDisplName + ': ' + tokenValDisplName + ']')
                 );
 
                 $this.data({
@@ -382,7 +392,8 @@ require([
 
                 } else { // Molecular feature
                     var gene = $('#'+activeDataTab+' .paste-in-genes').tokenfield('getTokens')[0];
-                    feature_id = 'MUT:'+gene.value + ':' + feature.data('feature-id');
+                    var build = $('#p-'+tokenProgId+'-mutation-build :selected').val();
+                    feature_id = 'MUT:'+build+':'+gene.value + ':' + feature.data('feature-id');
 
                     token = $('<span>').data({
                         'feature-id': feature_id,
@@ -391,11 +402,12 @@ require([
                         'value-id': value_id,
                         'value-name': value.data('value-name'),
                         'class': '',
+                        'build': build,
                         'prog-id': tokenProgId,
                         'prog-name': tokenProgDisplName
                     }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token');
 
-                    tokenFeatDisplName = gene.label + ' [' + feature.data('feature-displ-name');
+                    tokenFeatDisplName = gene.label + ' [' + build + ', '+ feature.data('feature-displ-name');
                     tokenValDisplName += ']'
                 }
 
@@ -477,12 +489,10 @@ require([
     $('button[data-target="#apply-edits-modal"]').on('click',function(e){
         // Clear previous 'bad name' alerts
         $('#unallowed-chars-alert').hide();
-
     });
 
 
     $('button[data-target="#create-cohort-modal"]').on('click',function(e){
-
 
         // Clear previous 'bad name' alerts
         $('#unallowed-chars-alert').hide();
@@ -727,7 +737,6 @@ require([
     });
 
 
-
     var bind_widgets = function(program_data_selector,activeDataTab) {
 
         $(program_data_selector + ' .search-checkbox-list input[type="checkbox"]').on('change', filter_change_callback);
@@ -847,6 +856,12 @@ require([
         $(program_data_selector + ' .mutation-category-selector').on('change',filter_change_callback);
 
         createTokenizer($(program_data_selector+' .paste-in-genes'), [], program_data_selector, activeDataTab);
+
+        $('select.mutation-build').on('change', function(e){
+            $(this).siblings().find('.bq-table-display').text($(this).find(':selected').data('bq-table'));
+            $(this).siblings().find('.bq-table-display').attr('title',$(this).find(':selected').data('bq-table'));
+        });
+        $('select.mutation-build').on('change',filter_change_callback);
     };
 
     var filter_panel_load = function(cohort) {
