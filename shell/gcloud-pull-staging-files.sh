@@ -3,6 +3,8 @@
 ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_TEST}/${TEST_JSON_FILE}" ./privatekey.json
 ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_TEST}/${TEST_USER_GCP_KEY}" ./
 
+./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_TEST}/${SERVICE_ACCOUNT_BLACKLIST_JSON_FILE}" ./
+
 if [ -n "${TEST_NIH_AUTH_ON}" ]; then
   ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_TEST}/saml/advanced_settings.json" ./saml/advanced_settings.json
   ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_TEST}/saml/settings.json" ./saml/settings.json

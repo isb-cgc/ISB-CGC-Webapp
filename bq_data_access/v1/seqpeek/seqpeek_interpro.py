@@ -64,7 +64,7 @@ class InterProDataProvider(object):
 
     def get_data_from_bigquery(self, uniprot_id):
         project_id = settings.BQ_PROJECT_ID
-        project_name = settings.BIGQUERY_PROJECT_NAME
+        project_name = settings.BIGQUERY_DATA_PROJECT_NAME
         result = self.do_query(project_id, project_name, uniprot_id)
         return result
 

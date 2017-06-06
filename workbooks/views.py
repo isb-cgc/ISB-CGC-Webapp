@@ -1,6 +1,7 @@
 from copy import deepcopy
 import json
 import re
+import sys
 import logging
 from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
@@ -23,9 +24,6 @@ from django.core.exceptions import ObjectDoesNotExist
 logger = logging.getLogger(__name__)
 
 debug = settings.DEBUG
-
-if settings.DEBUG:
-    import sys
 
 WHITELIST_RE = settings.WHITELIST_RE
 
@@ -183,8 +181,6 @@ def get_gene_datatypes(build=None):
 
             return_list.append(type)
 
-    print >> sys.stdout, str(return_list)
-
     return return_list
 
 
@@ -193,83 +189,96 @@ def workbook(request, workbook_id=0):
     template = 'workbooks/workbook.html'
     command = request.path.rsplit('/',1)[1]
 
-    if request.method == "POST":
-        if command == "create":
-            workbook_model = Workbook.createDefault(name="Untitled Workbook", description="", user=request.user)
-        elif command == "edit":
-            workbook_name = request.POST.get('name')
-            workbook_desc = request.POST.get('description')
-            workbook_build = request.POST.get('build')
+    try:
 
-            whitelist = re.compile(WHITELIST_RE, re.UNICODE)
-            match_name = whitelist.search(unicode(workbook_name))
-            match_desc = whitelist.search(unicode(workbook_desc))
+        if request.method == "POST":
+            if command == "create":
+                workbook_model = Workbook.createDefault(name="Untitled Workbook", description="", user=request.user)
+            elif command == "edit":
+                # Truncate incoming name and desc fields in case someone tried to send ones which were too long
+                workbook_name = request.POST.get('name')[0:2000]
+                workbook_desc = request.POST.get('description')[0:2000]
+                workbook_build = request.POST.get('build')
 
-            if match_name or match_desc:
-                # XSS risk, log and fail this cohort save
-                matches = ""
-                fields = ""
-                if match_name:
-                    match_name = whitelist.findall(unicode(workbook_name))
-                    logger.error('[ERROR] While saving a workbook, saw a malformed name: ' + workbook_name + ', characters: ' + match_name.__str__())
-                    matches = "name contains"
-                    fields = "name"
-                if match_desc:
-                    match_desc = whitelist.findall(unicode(workbook_desc))
-                    logger.error('[ERROR] While saving a workbook, saw a malformed description: ' + workbook_desc + ', characters: ' + match_desc.__str__())
-                    matches = "name and description contain" if match_name else "description contains"
-                    fields += (" and description" if match_name else "description")
+                whitelist = re.compile(WHITELIST_RE, re.UNICODE)
+                match_name = whitelist.search(unicode(workbook_name))
+                match_desc = whitelist.search(unicode(workbook_desc))
 
-                err_msg = "Your workbook's %s invalid characters; please choose another %s." % (matches, fields,)
-                messages.error(request, err_msg)
-                redirect_url = reverse('workbook_detail', kwargs={'workbook_id': workbook_id})
-                return redirect(redirect_url)
+                if match_name or match_desc:
+                    # XSS risk, log and fail this cohort save
+                    matches = ""
+                    fields = ""
+                    if match_name:
+                        match_name = whitelist.findall(unicode(workbook_name))
+                        logger.error('[ERROR] While saving a workbook, saw a malformed name: ' + workbook_name + ', characters: ' + match_name.__str__())
+                        matches = "name contains"
+                        fields = "name"
+                    if match_desc:
+                        match_desc = whitelist.findall(unicode(workbook_desc))
+                        logger.error('[ERROR] While saving a workbook, saw a malformed description: ' + workbook_desc + ', characters: ' + match_desc.__str__())
+                        matches = "name and description contain" if match_name else "description contains"
+                        fields += (" and description" if match_name else "description")
 
-            workbook_model = Workbook.edit(id=workbook_id, name=workbook_name, description=workbook_desc, build=workbook_build)
-        elif command == "copy":
-            workbook_model = Workbook.copy(id=workbook_id, user=request.user)
-        elif command == "delete":
-            Workbook.destroy(id=workbook_id)
+                    err_msg = "Your workbook's %s invalid characters; please choose another %s." % (matches, fields,)
+                    messages.error(request, err_msg)
+                    redirect_url = reverse('workbook_detail', kwargs={'workbook_id': workbook_id})
+                    return redirect(redirect_url)
 
-        if command == "delete":
-            redirect_url = reverse('workbooks')
-        else:
-            redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_model.id})
+                workbook_model = Workbook.edit(id=workbook_id, name=workbook_name, description=workbook_desc, build=workbook_build)
+            elif command == "copy":
+                workbook_model = Workbook.copy(id=workbook_id, user=request.user)
+            elif command == "delete":
+                Workbook.destroy(id=workbook_id)
 
-        return redirect(redirect_url)
+            if command == "delete":
+                redirect_url = reverse('workbooks')
+            else:
+                redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_model.id})
 
-    elif request.method == "GET" :
-        if workbook_id:
-            try :
-                ownedWorkbooks = request.user.workbook_set.all().filter(active=True)
-                sharedWorkbooks = Workbook.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
-                publicWorkbooks = Workbook.objects.all().filter(is_public=True,active=True)
+            return redirect(redirect_url)
 
-                workbooks = ownedWorkbooks | sharedWorkbooks | publicWorkbooks
-                workbooks = workbooks.distinct()
+        elif request.method == "GET" :
+            if workbook_id:
+                try :
+                    ownedWorkbooks = request.user.workbook_set.all().filter(active=True)
+                    sharedWorkbooks = Workbook.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
+                    publicWorkbooks = Workbook.objects.all().filter(is_public=True,active=True)
 
-                workbook_model = workbooks.get(id=workbook_id)
-                workbook_model.worksheets = workbook_model.get_deep_worksheets()
+                    workbooks = ownedWorkbooks | sharedWorkbooks | publicWorkbooks
+                    workbooks = workbooks.distinct()
 
-                is_shareable = workbook_model.is_shareable(request)
+                    workbook_model = workbooks.get(id=workbook_id)
+                    workbook_model.worksheets = workbook_model.get_deep_worksheets()
 
-                shared = None
-                if workbook_model.owner.id != request.user.id and not workbook_model.is_public:
-                    shared = request.user.shared_resource_set.get(workbook__id=workbook_id)
+                    is_shareable = workbook_model.is_shareable(request)
 
-                plot_types = Analysis.get_types()
+                    shared = None
+                    if workbook_model.owner.id != request.user.id and not workbook_model.is_public:
+                        shared = request.user.shared_resource_set.get(workbook__id=workbook_id)
 
-                return render(request, template, {'workbook'    : workbook_model,
-                                                  'datatypes'   : get_gene_datatypes(workbook_model.build),
-                                                  'is_shareable': is_shareable,
-                                                  'shared'      : shared,
-                                                  'plot_types'  : plot_types})
-            except ObjectDoesNotExist:
+                    plot_types = Analysis.get_types()
+
+                    return render(request, template, {'workbook'    : workbook_model,
+                                                      'datatypes'   : get_gene_datatypes(workbook_model.build),
+                                                      'is_shareable': is_shareable,
+                                                      'shared'      : shared,
+                                                      'plot_types'  : plot_types})
+                except ObjectDoesNotExist:
+                    redirect_url = reverse('workbooks')
+                    return redirect(redirect_url)
+            else:
                 redirect_url = reverse('workbooks')
                 return redirect(redirect_url)
-        else:
-            redirect_url = reverse('workbooks')
-            return redirect(redirect_url)
+
+    except Exception as e:
+        logger.error("[ERROR] Exception when viewing a workbook: ")
+        logger.exception(e)
+        messages.error(request, "An error was encountered while trying to view this workbook.")
+    finally:
+        redirect_url = reverse('workbooks')
+
+    return redirect(redirect_url)
+
 
 
 @login_required
