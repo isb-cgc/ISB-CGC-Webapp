@@ -195,8 +195,9 @@ def workbook(request, workbook_id=0):
             if command == "create":
                 workbook_model = Workbook.createDefault(name="Untitled Workbook", description="", user=request.user)
             elif command == "edit":
-                workbook_name = request.POST.get('name')
-                workbook_desc = request.POST.get('description')
+                # Truncate incoming name and desc fields in case someone tried to send ones which were too long
+                workbook_name = request.POST.get('name')[0:2000]
+                workbook_desc = request.POST.get('description')[0:2000]
                 workbook_build = request.POST.get('build')
 
                 whitelist = re.compile(WHITELIST_RE, re.UNICODE)
