@@ -1390,33 +1390,6 @@ require([
     });
 
     /*
-        Remove shared user
-     */
-    $('.remove-shared-user').on('click', function() {
-        var shared_id = $(this).attr('data-shared-id');
-        var url = BASE_URL + '/share/' + shared_id + '/remove';
-        var csrftoken = $.getCookie('csrftoken');
-        var button = $(this);
-        $.ajax({
-            type        :'POST',
-            url         : url,
-            dataType    :'json',
-            data        : {owner: true},
-            beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
-            success : function (data) {
-                button.parents('tr').remove();
-                var count = parseInt($($('.share-count')[0]).html());
-                $('.share-count').each(function() {
-                   $(this).html(count-1);
-                });
-            },
-            error: function () {
-                console.log('Failed to remove user');
-            }
-        })
-    });
-
-    /*
         Disable comment button if no content
      */
     $('.save-comment-btn').prop('disabled', true);
