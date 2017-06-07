@@ -74,6 +74,8 @@ require([
     'stack_bar_chart'
 ], function ($, jqueryui, bootstrap, session_security, d3, d3tip, search_helpers, Bloodhound, _, base) {
 
+    var UPDATE_PENDING = false;
+
     var savingComment = false;
     var savingChanges = false;
     var mode = (cohort_id ? 'VIEWING' : 'EDITING');
@@ -203,13 +205,42 @@ require([
 
     var search_helper_obj = Object.create(search_helpers, {});
 
+    var UPDATE_QUEUE = [];
+
+    function enqueueUpdate(withoutCheckChanges,for_panel_load, alternate_prog_id){
+        UPDATE_QUEUE.push(function(){
+            update_displays(withoutCheckChanges,for_panel_load, alternate_prog_id);
+        });
+    };
+
+    function dequeueUpdate(withoutCheckChanges,for_panel_load, alternate_prog_id){
+        if(UPDATE_QUEUE.length > 0) {
+            UPDATE_QUEUE.shift()();
+        }
+    };
+
     var update_displays = function(withoutCheckChanges,for_panel_load, alternate_prog_id) {
+        // If a user has clicked more filters while an update was going out, queue up a future update and return
+        if(UPDATE_PENDING) {
+            // Because our updates don't pull the filter set until they run, one will suffice for all changes made
+            // while the current update was running; don't queue more than that
+            if(UPDATE_QUEUE.length <= 0) {
+                enqueueUpdate(withoutCheckChanges, for_panel_load, alternate_prog_id);
+            }
+            return;
+        }
+
         var prog_id = (alternate_prog_id === null || alternate_prog_id === undefined) ? $('ul.nav-tabs-data li.active a').data('program-id') : alternate_prog_id;
         (update_displays_thread !== null) && clearTimeout(update_displays_thread);
 
         update_displays_thread = setTimeout(function(){
+            UPDATE_PENDING = true;
             search_helper_obj.update_counts_parsets(BASE_URL, 'metadata_counts_platform_list', cohort_id, 'v2', prog_id, for_panel_load).then(
-                function(){!withoutCheckChanges && check_for_changes();}
+                function(){
+                    !withoutCheckChanges && check_for_changes();
+                    UPDATE_PENDING = false;
+                    dequeueUpdate();
+                }
             );
         },SUBSEQUENT_DELAY);
     };

@@ -260,7 +260,7 @@ def create_programs_and_projects(debug):
                      "VALUES (%s,%s,%s,%s,%s,%s);"
 
     insert_metadata_tables = """
-      INSERT INTO projects_public_metadata_tables (samples_table, attr_table, sample_data_availability_table,
+      INSERT INTO projects_public_metadata_tables (samples_table, attr_table, projects_table, sample_data_availability_table,
         sample_data_type_availability_table, clin_table, biospec_table, data_tables_id, {0} program_id)
       VALUES({1});
     """
@@ -394,7 +394,7 @@ def create_programs_and_projects(debug):
             results = Public_Metadata_Tables.objects.filter(program__name=prog)
             is_update = len(results) > 0
 
-            values = (prog + '_metadata_samples', prog + '_metadata_attrs',
+            values = (prog + '_metadata_samples', prog + '_metadata_attrs', prog + '_metadata_project',
                 prog + '_metadata_sample_data_availability', prog + '_metadata_data_type_availability',
                 prog + '_metadata_clinical', prog + '_metadata_biospecimen', data_tables,)
 
