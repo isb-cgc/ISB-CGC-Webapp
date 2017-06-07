@@ -67,7 +67,7 @@
             <li class="separator"></li>
             <li class="menu-item"><a href="{% url 'cohort_filelist' cohort.id %}" class="btn btn-info view-files-btn" title="View this cohort's file list">View Files</a></li>
             <li class="menu-item"><a href="{%  url 'download_ids' cohort.id %}" class="btn btn-info download-ids-btn" title="Download this cohort's patient and sample IDs">Download IDs</a></li>
-            <li class="separator"></li>
+{#            <li class="separator"></li>#}
 {#            {% if cohort.perm.perm == 'OWNER' %}#}
 {#            <li class="menu-item"><button class="btn btn-info" data-toggle="modal" data-target="#share-cohort-modal">Share</button></li>#}
 {#            {% endif %}#}
