@@ -137,7 +137,7 @@ class ClinicalFeatureProvider(FeatureDataProvider):
 
         query = query_template.format(dataset_name=dataset_name, project_name=project_name, table_name=table_name,
                                       column_name=feature_def.table_field, bsp_table_name=BSP_TABLE_NAME,
-                                      cohort_dataset=cohort_dataset, cohort_table=cohort_table,
+                                      cohort_dataset=cohort_dataset, cohort_table=cohort_table, cohort_project_name=cohort_project_name,
                                       cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt)
 
         logging.debug("BQ_QUERY_CLIN: " + query)
