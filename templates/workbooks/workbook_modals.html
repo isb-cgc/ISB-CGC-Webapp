@@ -167,80 +167,80 @@
 </div>
 {% endif %}
 
-{% if is_shareable or shared %}
-<!-- Share Workbook Modal -->
-<div class="ajax-form-modal modal fade" id="share-workbook-modal-{{ workbook.id }}" tabindex="-1" role="dialog" aria-labelledby="share-workbook-header" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <!-- If we want to remove this header we must place this ID on another element with text which can describe the dialog to a screen reader -->
-                <h4 class="modal-title" id="share-workbook-header">Workbook Sharing</h4>
-                <ul class="nav nav-tabs" data-tabs="tablist">
-                    {% if workbook.owner == request.user %}
-                        <li class="active"><a href="#share-{{ workbook.id }}" data-toggle="tab">Share</a></li>
-                    {% endif %}
-                    <li ><a href="#shared-with-{{ workbook.id }}" data-toggle="tab">Shared With</a></li>
-                </ul>
-            </div>
-            <div class="tab-content">
-                {% if workbook.owner.id == request.user.id %}
-                <form class="tab-pane fade in active" id="share-{{ workbook.id }}" method="POST" action="{% url 'workbook_share' workbook.id %}">
-                    {% csrf_token %}
-                    <div class="modal-body">
-                        <p>
-                            This will share the web view of workbooks.
-                        </p>
-                        <label for="share-share_users">Enter email addresses separated by a comma</label>
-                        <textarea id="share-share_users" class="form-control" name="share_users"></textarea>
-                    </div>
-                    <div class="modal-footer">
-                        <input type="submit" value="Send" class="btn btn-primary" />
-                        <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
-                    </div>
-                </form>
-                {% endif %}
-                <div class="tab-pane fade {% if not workbook.owner == request.user %}active in{% endif %}" id="shared-with-{{ workbook.id }}">
-                    <div class="modal-body">
-                        {% if workbook.shared.count > 0 %}
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            {% for shared in workbook.shared.all|active %}
-                                <tr>
-                                    <td>
-                                        {% if shared.matched_user %}
-                                        {{shared.matched_user.first_name}} {{shared.matched_user.last_name}}
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {{shared.email}}
-                                    </td>
-                                    <td>
-                                        {% if workbook.owner.id == request.user.id %}
-                                        <a class="remove-shared-user" role="button" data-shared-id="{{ shared.id }}"><i class="fa fa-times"></i></a>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                        {% else %}
-                        <p class="center">This list is empty.</p>
-                        {% endif %}
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" data-dismiss="modal">Ok</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-{% endif %}
+{#{% if is_shareable or shared %}#}
+{#<!-- Share Workbook Modal -->#}
+{#<div class="ajax-form-modal modal fade" id="share-workbook-modal-{{ workbook.id }}" tabindex="-1" role="dialog" aria-labelledby="share-workbook-header" aria-hidden="true">#}
+{#    <div class="modal-dialog">#}
+{#        <div class="modal-content">#}
+{#            <div class="modal-header">#}
+{#                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>#}
+{#                <!-- If we want to remove this header we must place this ID on another element with text which can describe the dialog to a screen reader -->#}
+{#                <h4 class="modal-title" id="share-workbook-header">Workbook Sharing</h4>#}
+{#                <ul class="nav nav-tabs" data-tabs="tablist">#}
+{#                    {% if workbook.owner == request.user %}#}
+{#                        <li class="active"><a href="#share-{{ workbook.id }}" data-toggle="tab">Share</a></li>#}
+{#                    {% endif %}#}
+{#                    <li ><a href="#shared-with-{{ workbook.id }}" data-toggle="tab">Shared With</a></li>#}
+{#                </ul>#}
+{#            </div>#}
+{#            <div class="tab-content">#}
+{#                {% if workbook.owner.id == request.user.id %}#}
+{#                <form class="tab-pane fade in active" id="share-{{ workbook.id }}" method="POST" action="{% url 'workbook_share' workbook.id %}">#}
+{#                    {% csrf_token %}#}
+{#                    <div class="modal-body">#}
+{#                        <p>#}
+{#                            This will share the web view of workbooks.#}
+{#                        </p>#}
+{#                        <label for="share-share_users">Enter email addresses separated by a comma</label>#}
+{#                        <textarea id="share-share_users" class="form-control" name="share_users"></textarea>#}
+{#                    </div>#}
+{#                    <div class="modal-footer">#}
+{#                        <input type="submit" value="Send" class="btn btn-primary" />#}
+{#                        <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>#}
+{#                    </div>#}
+{#                </form>#}
+{#                {% endif %}#}
+{#                <div class="tab-pane fade {% if not workbook.owner == request.user %}active in{% endif %}" id="shared-with-{{ workbook.id }}">#}
+{#                    <div class="modal-body">#}
+{#                        {% if workbook.shared.count > 0 %}#}
+{#                        <table class="table table-striped">#}
+{#                            <thead>#}
+{#                                <tr>#}
+{#                                    <th>Name</th>#}
+{#                                    <th>Email</th>#}
+{#                                    <th></th>#}
+{#                                </tr>#}
+{#                            </thead>#}
+{#                            <tbody>#}
+{#                            {% for shared in workbook.shared.all|active %}#}
+{#                                <tr>#}
+{#                                    <td>#}
+{#                                        {% if shared.matched_user %}#}
+{#                                        {{shared.matched_user.first_name}} {{shared.matched_user.last_name}}#}
+{#                                        {% endif %}#}
+{#                                    </td>#}
+{#                                    <td>#}
+{#                                        {{shared.email}}#}
+{#                                    </td>#}
+{#                                    <td>#}
+{#                                        {% if workbook.owner.id == request.user.id %}#}
+{#                                        <a class="remove-shared-user" role="button" data-shared-id="{{ shared.id }}"><i class="fa fa-times"></i></a>#}
+{#                                        {% endif %}#}
+{#                                    </td>#}
+{#                                </tr>#}
+{#                            {% endfor %}#}
+{#                            </tbody>#}
+{#                        </table>#}
+{#                        {% else %}#}
+{#                        <p class="center">This list is empty.</p>#}
+{#                        {% endif %}#}
+{#                    </div>#}
+{#                    <div class="modal-footer">#}
+{#                        <button type="button" class="btn btn-primary" data-dismiss="modal">Ok</button>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
+{#</div>#}
+{#{% endif %}#}

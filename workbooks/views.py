@@ -283,12 +283,13 @@ def workbook(request, workbook_id=0):
 
 @login_required
 def workbook_share(request, workbook_id=0):
-    emails = re.split('\s*,\s*', request.POST['share_users'].strip())
-    workbook = request.user.workbook_set.get(id=workbook_id, active=True)
-    create_share(request, workbook, emails, 'Workbook')
+    # emails = re.split('\s*,\s*', request.POST['share_users'].strip())
+    # workbook = request.user.workbook_set.get(id=workbook_id, active=True)
+    # create_share(request, workbook, emails, 'Workbook')
 
     return JsonResponse({
-        'status': 'success'
+        # 'status': 'success'
+        'status': 'unauthorized'
     })
 
 
