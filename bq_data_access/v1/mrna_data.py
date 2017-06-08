@@ -17,12 +17,12 @@ limitations under the License.
 """
 
 from google_helpers.bigquery_service import get_bigquery_service
-from django.conf import settings
 
 import logging
 
 from bq_data_access.v1.errors import FeatureNotFoundException
 from bq_data_access.v1.feature_value_types import ValueType, DataTypes
+from django.conf import settings
 
 TABLES = [
     {
@@ -86,6 +86,7 @@ def get_table_info(table_id):
     return table_info
 
 def build_query(project_name, dataset_name, table_name, gene_symbol, value_field, cohort_dataset, cohort_table, cohort_id_array, project_id_array):
+    cohort_project_name = settings.PROJECT_NAME
     # Generate the 'IN' statement string: (%s, %s, ..., %s)
     cohort_id_stmt = ', '.join([str(cohort_id) for cohort_id in cohort_id_array])
     project_id_stmt = ''
@@ -98,14 +99,14 @@ def build_query(project_name, dataset_name, table_name, gene_symbol, value_field
          "WHERE original_gene_symbol='{gene_symbol}' "
          "AND SampleBarcode IN ( "
          "    SELECT sample_barcode "
-         "    FROM [{project_name}:{cohort_dataset}.{cohort_table}] "
+         "    FROM [{cohort_project_name}:{cohort_dataset}.{cohort_table}] "
          "    WHERE cohort_id IN ({cohort_id_list})"
          "         AND (project_id IS NULL")
 
     query_template += (" OR project_id IN ({project_id_list})))" if project_id_array is not None else "))")
 
     query = query_template.format(dataset_name=dataset_name, project_name=project_name, table_name=table_name,
-                                  gene_symbol=gene_symbol, value_field=value_field,
+                                  gene_symbol=gene_symbol, value_field=value_field, cohort_project_name=cohort_project_name,
                                   cohort_dataset=cohort_dataset, cohort_table=cohort_table,
                                   cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt)
 
