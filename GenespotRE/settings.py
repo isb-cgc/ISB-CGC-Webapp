@@ -345,27 +345,27 @@ LOGGING = {
             'propagate': True,
         },
         'cohorts': {
-            'handlers': ['console_dev','console_prod'],
+            'handlers': ['console_dev', 'console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'allauth': {
-            'handlers': ['console_dev','console_prod'],
+            'handlers': ['console_dev', 'console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'demo': {
-            'handlers': ['console_dev','console_prod'],
+            'handlers': ['console_dev', 'console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'projects': {
-            'handlers': ['console_dev','console_prod'],
+            'handlers': ['console_dev', 'console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'workbooks': {
-            'handlers': ['console_dev','console_prod'],
+            'handlers': ['console_dev', 'console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
