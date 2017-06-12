@@ -87,7 +87,7 @@ DATABASES = {
 
 DB_SOCKET = DATABASES['default']['HOST'] if 'cloudsql' in DATABASES['default']['HOST'] else None
 
-IS_DEV = bool(os.environ.get('IS_DEV', False))
+IS_DEV = (os.environ.get('IS_DEV', 'False') == 'True')
 IS_APP_ENGINE_FLEX = os.getenv('GAE_INSTANCE', '').startswith(APP_ENGINE_FLEX)
 IS_APP_ENGINE = os.getenv('SERVER_SOFTWARE', '').startswith(APP_ENGINE)
 
@@ -314,12 +314,10 @@ LOGGING = {
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
-        }
-    },
-    'filters': {
+        },
         'require_debug_true': {
             '()': 'django.utils.log.RequireDebugTrue'
-        }
+        },
     },
     'handlers': {
         'mail_admins': {
@@ -336,7 +334,7 @@ LOGGING = {
             'level': 'DEBUG',
             'filters': ['require_debug_false'],
             'class': 'logging.StreamHandler'
-        }
+        },
     },
     'loggers': {
         'django.request': {
@@ -374,7 +372,7 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
-    }
+    },
 }
 
 ##########################
