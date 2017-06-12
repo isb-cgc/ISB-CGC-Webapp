@@ -165,9 +165,9 @@ SSLIFY_DISABLE = True if not SECURE_SSL_REDIRECT else False
 
 if SECURE_SSL_REDIRECT:
     # Exempt the health check so it can go through
-    SECURE_REDIRECT_EXEMPT = [r'^_ah/health$', ]
+    SECURE_REDIRECT_EXEMPT = [r'^_ah/(vm_)?health$', ]
     SSLIFY_DISABLE_FOR_REQUEST = [
-        lambda request: request.get_full_path().startswith('/_ah/health')
+        lambda request: request.get_full_path().startswith('/_ah/health') or request.get_full_path().startswith('/_ah/vm_health')
     ]
 
 # Local time zone for this installation. Choices can be found here:
