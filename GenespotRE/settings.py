@@ -40,7 +40,7 @@ for directory_name in SHARED_SOURCE_DIRECTORIES:
 DEBUG                   = (os.environ.get('DEBUG', 'False') == 'True')
 print >> sys.stdout, "[STATUS] DEBUG mode is "+str(DEBUG)
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOST', 'localhost').split(',')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOST', 'localhost').split(',') + ['localhost', '127.0.0.1', '[::1]']
 
 SSL_DIR = os.path.abspath(os.path.dirname(__file__))+os.sep
 
@@ -316,6 +316,11 @@ LOGGING = {
             '()': 'django.utils.log.RequireDebugFalse'
         }
     },
+    'filters': {
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue'
+        }
+    },
     'handlers': {
         'mail_admins': {
             'level': 'ERROR',
@@ -324,10 +329,11 @@ LOGGING = {
         },
         'console_dev': {
             'level': 'DEBUG',
+            'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler'
         },
         'console_prod': {
-            'level': 'WARNING',
+            'level': 'DEBUG',
             'filters': ['require_debug_false'],
             'class': 'logging.StreamHandler'
         }
