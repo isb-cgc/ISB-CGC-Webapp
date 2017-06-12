@@ -40,7 +40,7 @@ for directory_name in SHARED_SOURCE_DIRECTORIES:
 DEBUG                   = (os.environ.get('DEBUG', 'False') == 'True')
 print >> sys.stdout, "[STATUS] DEBUG mode is "+str(DEBUG)
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOST', 'localhost').split(',')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOST', 'localhost').split(',') + ['localhost', '127.0.0.1', '[::1]']
 
 SSL_DIR = os.path.abspath(os.path.dirname(__file__))+os.sep
 
@@ -87,7 +87,7 @@ DATABASES = {
 
 DB_SOCKET = DATABASES['default']['HOST'] if 'cloudsql' in DATABASES['default']['HOST'] else None
 
-IS_DEV = bool(os.environ.get('IS_DEV', False))
+IS_DEV = (os.environ.get('IS_DEV', 'False') == 'True')
 IS_APP_ENGINE_FLEX = os.getenv('GAE_INSTANCE', '').startswith(APP_ENGINE_FLEX)
 IS_APP_ENGINE = os.getenv('SERVER_SOFTWARE', '').startswith(APP_ENGINE)
 
@@ -314,7 +314,10 @@ LOGGING = {
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
-        }
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue'
+        },
     },
     'handlers': {
         'mail_admins': {
@@ -324,13 +327,14 @@ LOGGING = {
         },
         'console_dev': {
             'level': 'DEBUG',
+            'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler'
         },
         'console_prod': {
-            'level': 'WARNING',
+            'level': 'DEBUG',
             'filters': ['require_debug_false'],
             'class': 'logging.StreamHandler'
-        }
+        },
     },
     'loggers': {
         'django.request': {
@@ -339,27 +343,27 @@ LOGGING = {
             'propagate': True,
         },
         'cohorts': {
-            'handlers': ['console_dev','console_prod'],
+            'handlers': ['console_dev', 'console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'allauth': {
-            'handlers': ['console_dev','console_prod'],
+            'handlers': ['console_dev', 'console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'demo': {
-            'handlers': ['console_dev','console_prod'],
+            'handlers': ['console_dev', 'console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'projects': {
-            'handlers': ['console_dev','console_prod'],
+            'handlers': ['console_dev', 'console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'workbooks': {
-            'handlers': ['console_dev','console_prod'],
+            'handlers': ['console_dev', 'console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
@@ -368,7 +372,7 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
-    }
+    },
 }
 
 ##########################
