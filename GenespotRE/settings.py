@@ -37,7 +37,7 @@ SHARED_SOURCE_DIRECTORIES = [
 for directory_name in SHARED_SOURCE_DIRECTORIES:
     sys.path.append(os.path.join(BASE_DIR, directory_name))
 
-DEBUG                   = bool(os.environ.get('DEBUG', False))
+DEBUG                   = (os.environ.get('DEBUG', 'False') == 'True')
 print >> sys.stdout, "[STATUS] DEBUG mode is "+str(DEBUG)
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOST', 'localhost').split(',')
