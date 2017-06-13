@@ -91,6 +91,7 @@ IS_DEV = (os.environ.get('IS_DEV', 'False') == 'True')
 IS_APP_ENGINE_FLEX = os.getenv('GAE_INSTANCE', '').startswith(APP_ENGINE_FLEX)
 IS_APP_ENGINE = os.getenv('SERVER_SOFTWARE', '').startswith(APP_ENGINE)
 
+print >> sys.stdout, "IS_DEV: "+("Yes" if IS_DEV else "No")
 print >> sys.stdout, "AppEngine Flex: "+("Yes" if IS_APP_ENGINE_FLEX else "No")
 print >> sys.stdout, "AppEngine Standard: "+("Yes" if IS_APP_ENGINE else "No")
 
