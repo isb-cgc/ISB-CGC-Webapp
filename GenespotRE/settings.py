@@ -105,6 +105,7 @@ if os.environ.has_key('DB_SSL_CERT') and not (IS_APP_ENGINE_FLEX or IS_APP_ENGIN
         }
     }
 
+    print >> sys.stdout, "DB_SSL_CERT: "+os.environ.has_key('DB_SSL_CERT')
     print >> sys.stdout, "DB_SSL_CERT found and AEF/AE not detected: ssl certs enabled"
 
 # Default to localhost for the site ID
