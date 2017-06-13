@@ -91,11 +91,6 @@ IS_DEV = (os.environ.get('IS_DEV', 'False') == 'True')
 IS_APP_ENGINE_FLEX = os.getenv('GAE_INSTANCE', '').startswith(APP_ENGINE_FLEX)
 IS_APP_ENGINE = os.getenv('SERVER_SOFTWARE', '').startswith(APP_ENGINE)
 
-print >> sys.stdout, "IS_DEV: "+("Yes" if IS_DEV else "No")
-print >> sys.stdout, "GAE S/F: "+os.getenv('SERVER_SOFTWARE', '')+':'+os.getenv('GAE_INSTANCE', '')
-print >> sys.stdout, "AppEngine Flex: "+("Yes" if IS_APP_ENGINE_FLEX else "No")
-print >> sys.stdout, "AppEngine Standard: "+("Yes" if IS_APP_ENGINE else "No")
-
 # If this is a GAE deployment, we don't need to specify SSL; the proxy will take
 # care of that for us
 if os.environ.has_key('DB_SSL_CERT') and not (IS_APP_ENGINE_FLEX or IS_APP_ENGINE):
@@ -107,14 +102,11 @@ if os.environ.has_key('DB_SSL_CERT') and not (IS_APP_ENGINE_FLEX or IS_APP_ENGIN
         }
     }
 
-    print >> sys.stdout, "DB_SSL_CERT: "+str(os.environ.has_key('DB_SSL_CERT'))
-    print >> sys.stdout, "DB_SSL_CERT found and AEF/AE not detected: ssl certs enabled"
-
 # Default to localhost for the site ID
 SITE_ID = 3
 
 if IS_APP_ENGINE_FLEX or IS_APP_ENGINE:
-    print >> sys.stdout, "[STATUS] AppEngine Flex detected."
+    print >> sys.stdout, "[STATUS] AppEngine detected."
     SITE_ID = 4
 
 # Default to no NIH Auth unless we are not on a local dev environment *and* are in AppEngine-Flex
