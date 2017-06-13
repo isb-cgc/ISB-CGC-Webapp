@@ -30,15 +30,15 @@
         <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#edit-program-details-modal">Edit Details</button></li>
         <li role="menuitem"><button class="btn btn-info program-delete" data-toggle="modal" data-target="#delete-program-modal">Delete</button></li>
         <li class="separator"></li>
-        <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#share-program-modal">Share</button></li>
+{#        <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#share-program-modal">Share</button></li>#}
         {% elif shared %}
         <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#remove-program-modal">Remove</button></li>
-        <li class="separator"></li>
         {% endif %}
         {% if program.is_public %}
+        <li class="separator"></li>
         <li><em>Public Program</em></li>
-        {% else %}
-        <li role="menuitem"><button class="btn btn-link" data-toggle="modal" data-target="#share-program-modal">Shared with (<span class="share-count">{{ program.shared.count }}</span>)</button></li>
+{#        {% else %}#}
+{#        <li role="menuitem"><button class="btn btn-link" data-toggle="modal" data-target="#share-program-modal">Shared with (<span class="share-count">{{ program.shared.count }}</span>)</button></li>#}
         {% endif %}
     </ul>
 </div>
@@ -67,14 +67,20 @@
                 <h4 class="panel-title pull-left">{{ project.name }}</h4>
             </div>
             <div class="panel-body">
-                {% if project.get_status == 'Processing' %}
+                {% if project.get_status_with_message.status == 'Processing' %}
                 <div class="message message-info alert alert-dismissible fade in">
                     <p>Project Data is currently being processed.</p>
                     <a class="close" data-dismiss="alert" aria-label="Close"><i class="fa fa-times" aria-hidden="true"></i></a>
                 </div>
-                {% elif project.get_status == 'Error' %}
+                {% elif project.get_status_with_message.status == 'Error' %}
                 <div class="message message-error alert alert-dismissible fade in">
-                    <p>Upload of project data has an error. Please delete the project and re-upload.</p>
+                    <p>Upload of project data had an error:
+                        {% if project.get_status_with_message.errmsg %}
+                            [{{ project.get_status_with_message.errmsg }}].
+                        {% else %}
+                            [No specific message provided].
+                        {% endif %}
+                        Please delete the project and re-upload.</p>
                     <a class="close" data-dismiss="alert" aria-label="Close"><i class="fa fa-times" aria-hidden="true"></i></a>
                 </div>
                 {% comment "Success message does not yet have technical implementation" %}

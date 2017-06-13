@@ -313,9 +313,4 @@ require([
         });
         return Object.keys(genes_count_object);
     }
-
-    $('.cancel-edit').on('click', function() {
-        window.onbeforeunload = null
-    })
-    
 });

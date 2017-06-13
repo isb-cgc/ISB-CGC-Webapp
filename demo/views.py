@@ -49,7 +49,7 @@ logger = logging.getLogger(__name__)
 DBGAP_AUTHENTICATION_LIST_BUCKET = settings.DBGAP_AUTHENTICATION_LIST_BUCKET
 DBGAP_AUTHENTICATION_LIST_FILENAME = settings.DBGAP_AUTHENTICATION_LIST_FILENAME
 ACL_GOOGLE_GROUP = settings.ACL_GOOGLE_GROUP
-login_expiration_seconds = settings.LOGIN_EXPIRATION_HOURS * 60 * 60
+login_expiration_seconds = settings.LOGIN_EXPIRATION_MINUTES * 60
 COUNTDOWN_SECONDS = login_expiration_seconds + (60 * 15)
 
 LOGOUT_WORKER_TASKQUEUE = settings.LOGOUT_WORKER_TASKQUEUE
@@ -217,7 +217,7 @@ def index(request):
 
                 saml_response = None if 'SAMLResponse' not in req['post_data'] else req['post_data']['SAMLResponse']
                 saml_response = saml_response.replace('\r\n', '')
-                NIH_assertion_expiration = datetime.datetime.now() + datetime.timedelta(days=1)
+                NIH_assertion_expiration = datetime.datetime.now() + datetime.timedelta(seconds=login_expiration_seconds)
 
                 updated_values = {
                     'NIH_assertion': saml_response,
@@ -232,6 +232,8 @@ def index(request):
                                                                       user_id=request.user.id,
                                                                       defaults=updated_values)
                 logger.info("NIH_User.objects.update_or_create() returned nih_user: {} and created: {}".format(
+                    str(nih_user.NIH_username), str(created)))
+                st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[STATUS] NIH_User.objects.update_or_create() returned nih_user: {} and created: {}".format(
                     str(nih_user.NIH_username), str(created)))
 
                 # add or remove user from ACL_GOOGLE_GROUP if they are or are not dbGaP authorized
@@ -261,6 +263,10 @@ def index(request):
                     directory_client.members().delete(groupKey=ACL_GOOGLE_GROUP,
                                                       memberKey=user_email).execute(http=http_auth)
                     logger.warn("User {} was deleted from group {} because they don't have dbGaP authorization.".format(user_email, ACL_GOOGLE_GROUP))
+                    st_logger.write_text_log_entry(
+                        LOG_NAME_ERA_LOGIN_VIEW,
+                        "[WARN] User {} was deleted from group {} because they don't have dbGaP authorization.".format(user_email, ACL_GOOGLE_GROUP)
+                    )
             # if the user_email doesn't exist in the google group an HttpError will be thrown...
             except HttpError:
                 # ...if the user is dbGaP authorized they should be added to the ACL_GOOGLE_GROUP
@@ -275,6 +281,7 @@ def index(request):
                     ).execute(http=http_auth)
                     logger.info(result)
                     logger.info("User {} added to {}.".format(user_email, ACL_GOOGLE_GROUP))
+                    st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[STATUS] User {} added to {}.".format(user_email, ACL_GOOGLE_GROUP))
 
             # Add task in queue to deactivate NIH_User entry after NIH_assertion_expiration has passed.
             try:
@@ -296,10 +303,12 @@ def index(request):
                     ]
                 }
                 client.projects().topics().publish(topic=full_topic_name, body=body).execute()
+                st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[STATUS] Notification sent to PubSub topic: {}".format(full_topic_name))
 
             except Exception as e:
                 logger.error("[ERROR] Failed to publish to PubSub topic")
                 logger.exception(e)
+                st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[ERROR] Failed to publish to PubSub topic: {}".format(str(e)))
 
             messages.info(request, warn_message)
             print >> sys.stdout, "[STATUS] http_host: "+req['http_host']

@@ -120,7 +120,7 @@ define([
 
          var legend = d3.select(legend_selector)
              .append('svg')
-             .attr('width', width);
+             .attr('width', 850);
          var svg = d3.select(plot_selector)
              .append('svg')
              .attr('width', width + 10)
@@ -153,7 +153,7 @@ define([
         var max_n = tmp[1];
         var legend = d3.select(legend_selector)
             .append('svg')
-            .attr('width', width);
+            .attr('width', 850);
 
         var svg = d3.select(plot_selector)
             .append('svg')
@@ -188,7 +188,7 @@ define([
         var max_n = tmp[1];
         var legend = d3.select(legend_selector)
             .append('svg')
-            .attr('width', width);
+            .attr('width', 850);
 
         var svg = d3.select(plot_selector)
             .append('svg')
@@ -351,7 +351,7 @@ define([
         }
         // The response form the SeqPeek data endpoint has a different schema. This is case is handled in
         // another branch below.
-        if (data.hasOwnProperty('items')) {
+        if (data.hasOwnProperty('items') && data['items'].length > 0) {
 
             var cohort_set = data['cohort_set'];
 
@@ -416,9 +416,8 @@ define([
         }
         else if (args.type == "SeqPeek") {
             visualization = generate_seqpeek_plot(args.plot_selector, args.legend_selector, data);
-        }
-        else {
-            // No samples provided TODO abstract view information
+        } else {
+            // No data returned
             d3.select(args.plot_selector)
                 .append('svg')
                 .attr('width', width)

@@ -94,7 +94,7 @@
                         <li role="menuitem">
                             <input type="submit" value="Save as Favorite" class="btn btn-primary"/>
                         </li>
-                        <li role="menuitem"><a class="cencel-edit" href="{% url 'genes' %}">Cancel</a></li>
+                        <li role="menuitem"><a class="cancel-edit" href="{% url 'genes' %}">Cancel</a></li>
                     {% endif %}
                     <menuitem class="btn nocap btn-link pull-right"><a href="http://www.genenames.org/" target="_blank">View Gene Identifiers</a></menuitem>
                     <menuitem class="btn nocap btn-link pull-right"><a href="http://www.mirbase.org/cgi-bin/mirna_summary.pl?org=hsa" target="_blank">View miRNA Identifiers</a></menuitem>
@@ -104,7 +104,7 @@
     </section>
 </div>
 <script type="text/javascript">
-    var base_url = '{{ base_url|safe }}';
+
     {% if gene_favorite %}
         var gene_fav = { genes : {{ genes }} };
     {% else %}

@@ -2,6 +2,8 @@
 ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_DEV}/${DEV_SECRETS_FILE}" ./client_secrets.json
 ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_DEV}/${DEV_JSON_FILE}" ./privatekey.json
 
+./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_DEV}/${SERVICE_ACCOUNT_BLACKLIST_JSON_FILE}" ./
+
 if [ -n "${DEV_NIH_AUTH_ON}" ]; then
   ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_DEV}/saml/advanced_settings.json" ./saml/advanced_settings.json
   ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_DEV}/saml/settings.json" ./saml/settings.json

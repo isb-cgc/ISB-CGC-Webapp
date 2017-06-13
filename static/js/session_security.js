@@ -174,7 +174,8 @@ define(['jquery',], function ($) {
         pingUrl: pingUrl,
         warnAfter: warnAfter,
         expireAfter: expireAfter,
-        confirmFormDiscard: confirmFormDiscard
+        confirmFormDiscard: confirmFormDiscard,
+        returnToUrl: BASE_URL
     });
 
 

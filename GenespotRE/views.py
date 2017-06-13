@@ -19,6 +19,7 @@ import sys
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import never_cache
 from django.contrib.auth.models import User
 from django.db.models import Count
 from django.http import HttpResponse
@@ -43,10 +44,6 @@ from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 
 debug = settings.DEBUG
 logger = logging.getLogger(__name__)
-
-login_expiration_seconds = settings.LOGIN_EXPIRATION_HOURS * 60 * 60
-# schedule check_login tasks for 15 minutes after the user's login will expire
-COUNTDOWN_SECONDS = login_expiration_seconds + (60 * 15)
 
 USER_API_URL = settings.BASE_API_URL + '/_ah/api/user_api/v1'
 ACL_GOOGLE_GROUP = settings.ACL_GOOGLE_GROUP
@@ -100,6 +97,7 @@ def _decode_dict(data):
 Handles login and user creation for new users.
 Returns user to landing page.
 '''
+@never_cache
 def landing_page(request):
     return render(request, 'GenespotRE/landing.html', {'request': request, })
 
@@ -284,22 +282,22 @@ def igv(request, sample_barcode=None, readgroupset_id=None):
     bam_list = []
 
     checked_list = json.loads(request.POST.__getitem__('checked_list'))
-
-    # for item in checked_list['readgroupset_id']:
-    #    id_barcode = item.split(',')
-    #    readgroupset_list.append({'sample_barcode': id_barcode[1],
-    #                              'readgroupset_id': id_barcode[0]})
+    build = request.POST.__getitem__('build')
 
     for item in checked_list['gcs_bam']:
+        bam_item = checked_list['gcs_bam'][item]
         id_barcode = item.split(',')
-        bam_list.append({'sample_barcode': id_barcode[1],
-                         'gcs_path': id_barcode[0]})
+        bam_list.append({
+            'sample_barcode': id_barcode[1], 'gcs_path': id_barcode[0], 'build': build, 'program': bam_item['program']
+        })
 
-    context = {}
-    context['readgroupset_list'] = readgroupset_list
-    context['bam_list'] = bam_list
-    context['base_url'] = settings.BASE_URL
-    context['service_account'] = settings.WEB_CLIENT_ID
+    context = {
+        'readgroupset_list': readgroupset_list,
+        'bam_list': bam_list,
+        'base_url': settings.BASE_URL,
+        'service_account': settings.WEB_CLIENT_ID,
+        'build': build,
+    }
 
     return render(request, 'GenespotRE/igv.html', context)
 

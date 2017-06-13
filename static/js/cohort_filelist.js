@@ -53,9 +53,10 @@ require([
             var tokens = [];
             for(var i in this.gcs_bam) {
                 tokens.push({
-                    label: this.gcs_bam[i],
+                    label: this.gcs_bam[i]['label'],
                     value: i,
-                    dataType: "gcs_bam"
+                    dataType: "gcs_bam",
+                    program: this.gcs_bam[i]['program']
                 });
             }
             return tokens;
@@ -174,6 +175,7 @@ require([
     };
 
     var update_table = function () {
+        $('#igv-build').attr('value',$('#build :selected').val());
         var selector_list = [];
         $('#filter-panel input[type="checkbox"]:checked').each(function() {
             selector_list.push($(this).attr('id'));
@@ -214,8 +216,16 @@ require([
             success: function (data) {
                 total_files = data['total_file_count'];
                 var total_pages = Math.ceil(total_files / 20);
-                $('.filelist-panel .panel-body .file-count').html(total_pages);
-                $('.filelist-panel .panel-body .page-num').html(page);
+                if(total_pages <= 0) {
+                    $('.file-page-count').hide();
+                    $('.no-file-page-count').show();
+                } else {
+                    $('.file-page-count').show();
+                    $('.no-file-page-count').hide();
+                    $('.filelist-panel .panel-body .file-count').html(total_pages);
+                    $('.filelist-panel .panel-body .page-num').html(page);
+                }
+
                 var files = data['file_list'];
                 $('.filelist-panel table tbody').empty();
 
@@ -245,7 +255,7 @@ require([
                         val = files[i]['cloudstorage_location'] + ',' + files[i]['sample'];
                         dataTypeName = "gcs_bam";
                         label = "Cloud Storage";
-                        checkbox_inputs += '<label><input type="checkbox" token-label="'+tokenLabel+'"name="'+dataTypeName+'" data-type="'+dataTypeName+'" value="'+val+'"';
+                        checkbox_inputs += '<label><input type="checkbox" token-label="'+tokenLabel+'" program="'+files[i]['program']+'" name="'+dataTypeName+'" data-type="'+dataTypeName+'" value="'+val+'"';
                         if (disable) {
                             checkbox_inputs += ' disabled="disabled"';
                         }
@@ -289,7 +299,10 @@ require([
                     var self=$(this);
 
                     if(self.is(':checked')) {
-                        selFiles[self.attr('data-type')][self.attr('value')] = self.attr('token-label');
+                        selFiles[self.attr('data-type')][self.attr('value')] = {
+                            'label': self.attr('token-label'),
+                            'program': self.attr('program')
+                        };
                         $('#selected-files-tokenfield').hide();
                     } else {
                         delete selFiles[self.attr('data-type')][self.attr('value')];
@@ -364,7 +377,7 @@ require([
     });
 
     $('#build').on('change',function(){
-       update_table();
+        update_table();
     });
 
     $('#filter-panel input[type="checkbox"]').on('change', function() {

@@ -18,8 +18,8 @@ limitations under the License.
 import os
 from os.path import join, dirname
 import sys
-
 import dotenv
+from socket import gethostname, gethostbyname
 
 dotenv.read_dotenv(join(dirname(__file__), '../.env'))
 
@@ -37,10 +37,11 @@ SHARED_SOURCE_DIRECTORIES = [
 for directory_name in SHARED_SOURCE_DIRECTORIES:
     sys.path.append(os.path.join(BASE_DIR, directory_name))
 
-DEBUG                   = bool(os.environ.get('DEBUG', False))
+DEBUG                   = (os.environ.get('DEBUG', 'False') == 'True')
 print >> sys.stdout, "[STATUS] DEBUG mode is "+str(DEBUG)
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOST', 'localhost').split(',')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOST', 'localhost').split(',') + ['localhost', '127.0.0.1', '[::1]', gethostname(), gethostbyname(gethostname()),]
+print >> sys.stdout, "[STATUS] Allowed hosts: "+str(ALLOWED_HOSTS)
 
 SSL_DIR = os.path.abspath(os.path.dirname(__file__))+os.sep
 
@@ -56,8 +57,8 @@ CRON_MODULE             = os.environ.get('CRON_MODULE')
 # Log Names
 SERVICE_ACCOUNT_LOG_NAME = os.environ.get('SERVICE_ACCOUNT_LOG_NAME', 'local_dev_logging')
 
-BASE_URL                = os.environ.get('BASE_URL', 'http://isb-cgc.appspot.com')
-BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://api-dot-isb-cgc.appspot.com')
+BASE_URL                = os.environ.get('BASE_URL', 'https://mvm-dot-isb-cgc.appspot.com')
+BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://mvm-api-dot-isb-cgc.appspot.com')
 
 # Compute services - Should not be necessary in webapp
 PAIRWISE_SERVICE_URL    = os.environ.get('PAIRWISE_SERVICE_URL', None)
@@ -87,7 +88,7 @@ DATABASES = {
 
 DB_SOCKET = DATABASES['default']['HOST'] if 'cloudsql' in DATABASES['default']['HOST'] else None
 
-IS_DEV = bool(os.environ.get('IS_DEV', False))
+IS_DEV = (os.environ.get('IS_DEV', 'False') == 'True')
 IS_APP_ENGINE_FLEX = os.getenv('GAE_INSTANCE', '').startswith(APP_ENGINE_FLEX)
 IS_APP_ENGINE = os.getenv('SERVER_SOFTWARE', '').startswith(APP_ENGINE)
 
@@ -124,6 +125,7 @@ BIGQUERY_DATASET_V1            = os.environ.get('BIGQUERY_DATASET_V1', '')
 
 PROJECT_NAME                = os.environ.get('GCLOUD_PROJECT_NAME')
 BIGQUERY_PROJECT_NAME       = os.environ.get('BIGQUERY_PROJECT_NAME', PROJECT_NAME)
+BIGQUERY_DATA_PROJECT_NAME  = os.environ.get('BIGQUERY_DATA_PROJECT_NAME', PROJECT_NAME)
 
 # Set cohort table here
 if BIGQUERY_COHORT_TABLE_ID is None:
@@ -164,9 +166,9 @@ SSLIFY_DISABLE = True if not SECURE_SSL_REDIRECT else False
 
 if SECURE_SSL_REDIRECT:
     # Exempt the health check so it can go through
-    SECURE_REDIRECT_EXEMPT = [r'^_ah/health$', ]
+    SECURE_REDIRECT_EXEMPT = [r'^_ah/(vm_)?health$', ]
     SSLIFY_DISABLE_FOR_REQUEST = [
-        lambda request: request.get_full_path().startswith('/_ah/health')
+        lambda request: request.get_full_path().startswith('/_ah/health') or request.get_full_path().startswith('/_ah/vm_health')
     ]
 
 # Local time zone for this installation. Choices can be found here:
@@ -313,7 +315,10 @@ LOGGING = {
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
-        }
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue'
+        },
     },
     'handlers': {
         'mail_admins': {
@@ -323,13 +328,14 @@ LOGGING = {
         },
         'console_dev': {
             'level': 'DEBUG',
+            'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler'
         },
         'console_prod': {
-            'level': 'WARNING',
+            'level': 'DEBUG',
             'filters': ['require_debug_false'],
             'class': 'logging.StreamHandler'
-        }
+        },
     },
     'loggers': {
         'django.request': {
@@ -338,27 +344,27 @@ LOGGING = {
             'propagate': True,
         },
         'cohorts': {
-            'handlers': ['console_dev','console_prod'],
+            'handlers': ['console_dev', 'console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'allauth': {
-            'handlers': ['console_dev','console_prod'],
+            'handlers': ['console_dev', 'console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'demo': {
-            'handlers': ['console_dev','console_prod'],
+            'handlers': ['console_dev', 'console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'projects': {
-            'handlers': ['console_dev','console_prod'],
+            'handlers': ['console_dev', 'console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'workbooks': {
-            'handlers': ['console_dev','console_prod'],
+            'handlers': ['console_dev', 'console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
@@ -367,7 +373,7 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
-    }
+    },
 }
 
 ##########################
@@ -442,13 +448,15 @@ if IS_DEV:
 GOOGLE_APPLICATION_CREDENTIALS  = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')) if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS') else '' # Path to privatekey.json
 CLIENT_SECRETS                  = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('CLIENT_SECRETS')) if os.environ.get('CLIENT_SECRETS') else ''
 WEB_CLIENT_ID                   = os.environ.get('WEB_CLIENT_ID', '') # Client ID from client_secrets.json
+IGV_WEB_CLIENT_ID               = os.environ.get('IGV_WEB_CLIENT_ID', WEB_CLIENT_ID)
 INSTALLED_APP_CLIENT_ID         = os.environ.get('INSTALLED_APP_CLIENT_ID', '') # Native Client ID
+GCP_REG_CLIENT_EMAIL            = os.environ.get('CLIENT_EMAIL','')
 
 #################################
 #   For NIH/eRA Commons login   #
 #################################
 
-LOGIN_EXPIRATION_HOURS = 24
+LOGIN_EXPIRATION_MINUTES                = int(os.environ.get('LOGIN_EXPIRATION_MINUTES', 24*60))
 DBGAP_AUTHENTICATION_LIST_FILENAME      = os.environ.get('DBGAP_AUTHENTICATION_LIST_FILENAME', '')
 DBGAP_AUTHENTICATION_LIST_BUCKET        = os.environ.get('DBGAP_AUTHENTICATION_LIST_BUCKET', '')
 ACL_GOOGLE_GROUP                        = os.environ.get('ACL_GOOGLE_GROUP', '')
@@ -474,6 +482,8 @@ USER_GCP_ACCESS_CREDENTIALS              = os.environ.get('USER_GCP_ACCESS_CREDE
 # Log name for ERA login views
 LOG_NAME_ERA_LOGIN_VIEW                  = os.environ.get('LOG_NAME_ERA_LOGIN_VIEW')
 
+# Service account blacklist file path
+SERVICE_ACCOUNT_BLACKLIST_PATH           = os.environ.get('SERVICE_ACCOUNT_BLACKLIST_PATH')
 
 ##############################
 #   Start django-finalware   #

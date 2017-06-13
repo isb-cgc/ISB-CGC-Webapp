@@ -108,11 +108,12 @@ def print_query(feature_id, cohort_id_array, program_array, project_id_array, co
 
     provider = FeatureProviderFactory.from_feature_id(feature_id)
 
-    query_string = provider.build_query(program_set,
-                                        cohort_table_id,
-                                        cohort_id_array,
-                                        project_id_array
-                                        )
+    query_string, _ = provider.build_query(
+        program_set,
+        cohort_table_id,
+        cohort_id_array,
+        project_id_array
+    )
 
     logger.info("QUERY:\n\n{}".format(query_string))
 

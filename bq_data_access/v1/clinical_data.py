@@ -19,6 +19,7 @@ limitations under the License.
 import logging
 import sys
 from re import compile as re_compile
+from django.conf import settings
 
 from schema.tcga_clinical import schema as clinical_schema
 
@@ -107,6 +108,7 @@ class ClinicalFeatureProvider(FeatureDataProvider):
         return data_point['value']
 
     def build_query(self, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array, project_id_array):
+        cohort_project_name=settings.PROJECT_NAME
         # Generate the 'IN' statement string: (%s, %s, ..., %s)
         cohort_id_stmt = ', '.join([str(cohort_id) for cohort_id in cohort_id_array])
         project_id_stmt = ''
@@ -126,7 +128,7 @@ class ClinicalFeatureProvider(FeatureDataProvider):
              " ON clin.ParticipantBarcode = biospec.ParticipantBarcode "
              "WHERE biospec.sample_id IN ( "
              "    SELECT sample_barcode "
-             "    FROM [{project_name}:{cohort_dataset}.{cohort_table}] "
+             "    FROM [{cohort_project_name}:{cohort_dataset}.{cohort_table}] "
              "    WHERE cohort_id IN ({cohort_id_list})"
              "          AND (project_id IS NULL")
 
@@ -135,7 +137,7 @@ class ClinicalFeatureProvider(FeatureDataProvider):
 
         query = query_template.format(dataset_name=dataset_name, project_name=project_name, table_name=table_name,
                                       column_name=feature_def.table_field, bsp_table_name=BSP_TABLE_NAME,
-                                      cohort_dataset=cohort_dataset, cohort_table=cohort_table,
+                                      cohort_dataset=cohort_dataset, cohort_table=cohort_table, cohort_project_name=cohort_project_name,
                                       cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt)
 
         logging.debug("BQ_QUERY_CLIN: " + query)

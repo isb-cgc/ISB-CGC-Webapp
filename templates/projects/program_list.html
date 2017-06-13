@@ -38,7 +38,7 @@
                         <th class="name-col">Name</th>
                         <th class="project-col">Projects</th>
                         <th>Ownership</th>
-                        <th>Shared with</th>
+{#                        <th>Shared with</th>#}
                         <th>Last Updated</th>
                     </thead>
                     <tbody>
@@ -71,7 +71,7 @@
                             {% else %}
                                 {{ program.owner.first_name }} {{ program.owner.last_name }}
                             {% endif %}</td>
-                            <td>({{ program.shared.count }})</td>
+{#                            <td>({{ program.shared.count }})</td>#}
                             <td>{{ program.last_date_saved|date:'M d, Y, g:i a' }}</td>
                         {% for project in program.project_set.all|active %}
                         </tr>

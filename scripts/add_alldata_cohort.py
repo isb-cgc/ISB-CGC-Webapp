@@ -23,18 +23,25 @@ import os
 import csv
 from argparse import ArgumentParser
 import sys
+import time
+from copy import deepcopy
 
-from apiclient.discovery import build
-
-import httplib2
-from GenespotRE import secret_settings
+from GenespotRE import secret_settings, settings
 from MySQLdb import connect
 from MySQLdb.cursors import DictCursor
-from oauth2client.client import GoogleCredentials
+from google_helpers.bigquery_service import authorize_credentials_with_Google
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "GenespotRE.settings")
+
+import django
+django.setup()
+
+from projects.models import Program, Public_Data_Tables, Public_Metadata_Tables, Public_Annotation_Tables, Project
+from django.contrib.auth.models import User
 
 ALLDATA_COHORT_NAME = 'All TCGA Data'
-BQ_DATASET = None
-DEFAULT_COHORT_TABLE = None
+BQ_DATASET = settings.COHORT_DATASET_ID
+DEFAULT_COHORT_TABLE = settings.BIGQUERY_COHORT_TABLE_ID
 SUPERUSER_NAME = 'isb'
 
 logging.basicConfig(level=logging.INFO)
@@ -65,10 +72,6 @@ class BigQueryCohortSupport(object):
         }
     ]
 
-    patient_type = 'patient'
-    sample_type = 'sample'
-    aliquot_type = 'aliquot'
-
     @classmethod
     def get_schema(cls):
         return deepcopy(cls.cohort_schema)
@@ -90,7 +93,7 @@ class BigQueryCohortSupport(object):
         }
 
     def _streaming_insert(self, rows):
-        bigquery_service = authorize_and_get_bq_service()
+        bigquery_service = authorize_credentials_with_Google()
         table_data = bigquery_service.tabledata()
 
         body = self._build_request_body_from_rows(rows)
@@ -148,25 +151,319 @@ class BigQueryCohortSupport(object):
         response = self._streaming_insert(rows)
         return response
 
+
 def get_mysql_connection():
-    env = os.getenv('SERVER_SOFTWARE')
-    db_settings = secret_settings.get('DATABASE')['default']
+    db_settings = secret_settings.get('DATABASE')['default'] if settings.IS_DEV else settings.DATABASES['default']
+
     db = None
     ssl = None
+
     if 'OPTIONS' in db_settings and 'ssl' in db_settings['OPTIONS']:
         ssl = db_settings['OPTIONS']['ssl']
 
-    if env and env.startswith('Google App Engine/'):  # or os.getenv('SETTINGS_MODE') == 'prod':
+    if settings.IS_APP_ENGINE_FLEX or settings.IS_APP_ENGINE:
         # Connecting from App Engine
         db = connect(
-            unix_socket='/cloudsql/<YOUR-APP-ID>:<CLOUDSQL-INSTANCE>',
-            db='',
-            user='',
+            host='localhost',
+            unix_socket=settings.DB_SOCKET,
+            db=db_settings['NAME'],
+            user=db_settings['USER'],
+            password=db_settings['PASSWORD']
         )
     else:
-        db = connect(host=db_settings['HOST'], port=db_settings['PORT'], db=db_settings['NAME'], user=db_settings['USER'], passwd=db_settings['PASSWORD'], ssl=ssl)
+        db = connect(host=db_settings['HOST'], port=db_settings['PORT'], db=db_settings['NAME'],
+                     user=db_settings['USER'], passwd=db_settings['PASSWORD'], ssl=ssl)
 
     return db
+
+
+# Update the attribute display table program IDs
+def update_attr_display_table(debug):
+
+    cursor = None
+    db = None
+
+    try:
+
+        db = get_mysql_connection()
+        cursor = db.cursor()
+
+        db.autocommit(True)
+
+        # get the ISB superuser ID
+        cursor.execute("""
+            SELECT id
+            FROM auth_user
+            WHERE username = 'isb' AND is_superuser = 1 AND is_active = 1
+        """)
+
+        suid = cursor.fetchall()[0][0]
+
+        # get the public program IDs
+        cursor.execute("""
+            SELECT name, id
+            FROM projects_program
+            WHERE owner_id = %s AND is_public = 1 AND active = 1
+        """, (suid,))
+
+        update_attr_tbl_stmt = """
+            UPDATE attr_value_display
+            SET program_id = %s
+            WHERE program_id = %s;
+        """
+
+        progs = {
+            'TCGA':{
+                'new_id': 0,
+                'old_id': 5
+            },
+            'CCLE':{
+                'new_id': 0,
+                'old_id': 6
+            },
+            'TARGET':{
+                'new_id': 0,
+                'old_id': 48
+            },
+        }
+
+        for row in cursor.fetchall():
+            progs[row[0]]['new_id'] = row[1]
+
+        for prog in progs:
+            if debug:
+                print >> sys.stdout, "[STATUS] Excuting update query:" + update_attr_tbl_stmt
+                print >> sys.stdout, "With values "+str((progs[prog]['new_id'], progs[prog]['old_id'],))
+            else:
+                cursor.execute(update_attr_tbl_stmt, (progs[prog]['new_id'], progs[prog]['old_id'],))
+
+    except Exception as e:
+        print >> sys.stdout, "[ERROR] Exception when adding the attr_value_display table - it may not have been properly generated!"
+        print >> sys.stdout, e
+        print >> sys.stdout, traceback.format_exc()
+    finally:
+        if cursor: cursor.close()
+        if db and db.open: db.close()
+
+
+# Insert any missing programs and projects into Django tables
+def create_programs_and_projects(debug):
+    db = None
+    cursor = None
+
+    insert_programs = "INSERT INTO projects_program (name, active, last_date_saved, is_public, owner_id) " + \
+                      "VALUES (%s,%s,%s,%s,%s);"
+
+    get_project_list = "SELECT DISTINCT project_short_name, name FROM {0};"
+
+    insert_projects = "INSERT INTO projects_project (name, description, active, last_date_saved, owner_id, program_id) " + \
+                     "VALUES (%s,%s,%s,%s,%s,%s);"
+
+    insert_metadata_tables = """
+      INSERT INTO projects_public_metadata_tables (samples_table, attr_table, projects_table, sample_data_availability_table,
+        sample_data_type_availability_table, clin_table, biospec_table, data_tables_id, {0} program_id)
+      VALUES({1});
+    """
+    update_metadata_tables = """
+      UPDATE projects_public_metadata_tables
+      SET samples_table = %s, attr_table = %s, sample_data_availability_table = %s,
+        sample_data_type_availability_table = %s, clin_table = %s, biospec_table = %s, {0} data_tables_id = %s
+      WHERE id = %s;
+    """
+
+    insert_data_tables = """
+      INSERT INTO projects_public_data_tables (data_table, {0} build, program_id)
+      VALUES({1});
+    """
+
+    insert_annot_tables = """
+      INSERT INTO projects_public_annotation_tables ({0} program_id)
+      VALUES({1});
+    """
+
+    programs_to_insert = ['TARGET', 'TCGA', 'CCLE']
+
+    projects_to_insert = ['CCLE', 'TCGA', 'TARGET']
+
+    program_tables_to_insert = {
+        'TCGA': {
+            'annot': ['annot', 'biospec', 'clin', 'sample'],
+            'data': {'HG19': 1, 'HG38': 1}
+        },
+        'CCLE': {
+            'data': {'HG19': 0}
+        },
+        'TARGET': {
+            'data': {'HG19': 0, 'HG38': 0}
+        }
+    }
+
+    try:
+        db = get_mysql_connection()
+        cursor = db.cursor()
+
+        db.autocommit(True)
+
+        isb_user = User.objects.get(username='isb',is_staff=True,is_superuser=True,is_active=True)
+        isb_userid = isb_user.id
+
+        for prog in programs_to_insert:
+            if len(Program.objects.filter(owner=isb_userid,is_public=True,active=True,name=prog)):
+                print >> sys.stdout, "Found program "+prog+", insert skipped."
+            else:
+                insertTime = time.strftime('%Y-%m-%d %H:%M:%S')
+                values = (prog, True, insertTime, True, isb_userid, )
+
+                if debug:
+                    print >> sys.stdout, "Executing statement: " + insert_programs
+                    print >> sys.stdout, "with values: " + str(values)
+                else:
+                    cursor.execute(insert_programs, values)
+
+        for prog in program_tables_to_insert:
+            data_tables = None
+
+            prog_tables = program_tables_to_insert[prog]
+
+            prog_obj = Program.objects.get(owner_id=isb_userid,is_public=True,active=True,name=prog)
+            prog_id = prog_obj.id
+
+            check = Public_Data_Tables.objects.filter(program__name=prog)
+
+            if len(check):
+                data_tables = check[0].id
+            else:
+                for build in prog_tables['data']:
+                    values = (prog+'_metadata_data_'+build,)
+                    insert_data_tables_opt_fields = ''
+                    if prog_tables['data'][build]:
+                        values += (prog+'_metadata_annotation2data_'+build,)
+                        insert_data_tables_opt_fields = 'annot2data_table,'
+                    values += (build, prog_id,)
+
+                    param_set = ("%s," * len(values))[:-1]
+
+                    if debug:
+                        print >> sys.stdout, "Executing statement: "+insert_data_tables.format(insert_data_tables_opt_fields, param_set)
+                        print >> sys.stdout, "Values: "+str(values)
+                        data_tables = 'data_tables_id'
+                    else:
+                        cursor.execute(insert_data_tables.format(insert_data_tables_opt_fields, param_set), values)
+                        cursor.execute('SELECT id FROM projects_public_data_tables WHERE program_id = %s AND build = %s;', (prog_id, build,))
+                        data_tables = cursor.fetchall()[0][0]
+
+            annot_tables = None
+
+            check = Public_Annotation_Tables.objects.filter(program__name=prog)
+
+            if len(check):
+                annot_tables = check[0].id
+            else:
+                if 'annot' in prog_tables:
+                    values = ()
+                    insert_annot_tables_fields = ''
+                    annot_table_set = prog_tables['annot']
+
+                    if 'annot' in annot_table_set:
+                        values += (prog+'_metadata_annotation',)
+                        insert_annot_tables_fields += 'annot_table,'
+                    if 'biospec' in annot_table_set:
+                        values += (prog+'_metadata_annotation2biospecimen',)
+                        insert_annot_tables_fields += 'annot2biospec_table,'
+                    if 'clin' in annot_table_set:
+                        values += (prog+'_metadata_annotation2clinical',)
+                        insert_annot_tables_fields += 'annot2clin_table,'
+                    if 'sample' in annot_table_set:
+                        values += (prog+'_metadata_annotation2samples',)
+                        insert_annot_tables_fields += 'annot2sample_table,'
+
+                    values += (prog_id,)
+
+                    param_set = ("%s," * len(values))[:-1]
+
+                    if debug:
+                        print >> sys.stdout, "Executing statment: "+ insert_annot_tables.format(insert_annot_tables_fields, param_set)
+                        print >> sys.stdout, "Values: "+str(values)
+                    else:
+                        cursor.execute(insert_annot_tables.format(insert_annot_tables_fields, param_set), values)
+                        cursor.execute('SELECT id FROM projects_public_annotation_tables WHERE program_id = %s;', (prog_id,))
+                        annot_tables = cursor.fetchall()[0][0]
+
+            insert_metadata_tables_opt_fields = ''
+
+            results = Public_Metadata_Tables.objects.filter(program__name=prog)
+            is_update = len(results) > 0
+
+            values = (prog + '_metadata_samples', prog + '_metadata_attrs', prog + '_metadata_project',
+                prog + '_metadata_sample_data_availability', prog + '_metadata_data_type_availability',
+                prog + '_metadata_clinical', prog + '_metadata_biospecimen', data_tables,)
+
+            if annot_tables:
+                values += (annot_tables,)
+                if is_update:
+                    insert_metadata_tables_opt_fields = 'annot_tables_id = %s,'
+                else:
+                    insert_metadata_tables_opt_fields = 'annot_tables_id,'
+
+            values += (prog_id,)
+
+            if is_update:
+                if debug:
+                    print >> sys.stdout, "Executing statement: "+update_metadata_tables.format(insert_metadata_tables_opt_fields)
+                    print >> sys.stdout, " with values "+ str(values)
+                else:
+                    cursor.execute(update_metadata_tables.format(insert_metadata_tables_opt_fields), values)
+            else:
+                param_set = ("%s," * len(values))[:-1]
+                if debug:
+                    print >> sys.stdout, "Exeucting statement: "+update_metadata_tables.format(insert_metadata_tables_opt_fields,param_set)
+                    print >> sys.stdout, " with values "+ str(values)
+                else:
+                    cursor.execute(insert_metadata_tables.format(insert_metadata_tables_opt_fields,param_set), values)
+
+        for prog in projects_to_insert:
+
+            prog_proj_table = prog+'_metadata_project'
+
+            prog_id = None
+
+            cursor.execute('SELECT id FROM projects_program WHERE name=%s and active=1;', (prog,))
+            results = cursor.fetchall()
+            if len(results):
+                prog_id = results[0][0]
+
+            cursor.execute(get_project_list.format(prog_proj_table))
+
+            prog_leader = prog+'-'
+
+            for row in cursor.fetchall():
+                cursor.execute('SELECT * FROM projects_project WHERE program_id = %s AND active=1 AND name=%s;', (prog_id, row[0][len(prog_leader):],))
+
+                check = cursor.fetchall()
+
+                if len(check):
+                    print >> sys.stdout, "Project "+row[0]+" is already in the projects_project table, skipping"
+                else:
+                    print >> sys.stdout, "Inserting project "+row[0]
+                    insertTime = time.strftime('%Y-%m-%d %H:%M:%S')
+                    values = (row[0][len(prog_leader):], row[1], True, insertTime, isb_userid, prog_id,)
+                    if debug:
+                        print >> sys.stdout, "Executing statement: "+insert_projects
+                        print >> sys.stdout, "Values: " + str(values)
+                    else:
+                        cursor.execute(insert_projects, values)
+
+        # Now de-activate the old CCLE project
+        ccle_proj = Project.objects.filter(name='CCLE', owner=isb_user, active=1)
+        if len(ccle_proj) > 0:
+            ccle_proj[0].active=0
+            ccle_proj[0].save()
+
+    except Exception as e:
+        print >> sys.stdout, traceback.format_exc()
+    finally:
+        if cursor: cursor.close()
+        if db and db.open: db.close()
 
 
 def get_existing_alldata_cohort_mysql(conn, cohort_name):
@@ -191,19 +488,33 @@ def get_superuser_id(conn, superuser_name):
     else:
         return None
 
+
 def get_sample_barcodes(conn):
     logging.info("Getting list of sample barcodes from MySQL")
     cursor = conn.cursor(DictCursor)
-    select_samples_str = "SELECT distinct sample_barcode, case_barcode from TCGA_metadata_samples;"
+    select_samples_str = """
+      SELECT distinct ms.sample_barcode, ms.case_barcode, pp.id AS project_id
+      FROM TCGA_metadata_samples ms
+      JOIN projects_project pp
+      ON pp.name = SUBSTR(ms.project_short_name, LOCATE('-',ms.project_short_name)+1)
+      JOIN projects_program pr
+      ON pr.id = pp.program_id
+      WHERE pr.name = 'TCGA';
+    """
     cursor.execute(select_samples_str)
-    rows = cursor.fetchall()
+    barcodes = []
+
+    for row in cursor.fetchall():
+        barcodes.append({
+            'project_id': row['project_id'],
+            'sample_barcode': row['sample_barcode'],
+            'case_barcode': row['case_barcode']
+        })
+
     cursor.close()
-    # TODO: Temporary shim until Project IDs are in metadata_samples
-    for row in rows:
-        row['project_id'] = None
-        row['sample_barcode'] = row['sample_barcode']
-        row['case_barcode'] = row['case_barcode']
-    return rows
+
+    return barcodes
+
 
 def get_barcodes_from_file(filename):
     with open(filename) as tsv:
@@ -236,6 +547,7 @@ def get_barcodes_from_file(filename):
 
     pass
 
+
 def create_tcga_cohorts_from_files(directory):
     filelist = os.listdir(directory)
 
@@ -244,8 +556,9 @@ def create_tcga_cohorts_from_files(directory):
         file_barcodes = get_barcodes_from_file(filepath)
         print filepath, len(file_barcodes['sample_barcodes']), len(file_barcodes['case_barcodes'])
 
+
 def insert_barcodes_mysql(conn, superuser_id, cohort_name, sample_barcodes):
-    insert_samples_str = 'INSERT INTO cohorts_samples (sample_barcode, cohort_id, case_barcode) values (%s, %s, %s);'
+    insert_samples_str = 'INSERT INTO cohorts_samples (sample_barcode, cohort_id, case_barcode, project_id) values (%s, %s, %s, %s);'
 
     insert_cohort_str = 'insert into cohorts_cohort (name, active, last_date_saved) values (%s, %s, %s);'
     insert_cohort_tuple = (cohort_name, True, datetime.datetime.now())
@@ -270,7 +583,7 @@ def insert_barcodes_mysql(conn, superuser_id, cohort_name, sample_barcodes):
 
     sample_tuples = []
     for row in sample_barcodes:
-        sample_tuples.append((row['sample_barcode'], str(cohort_id), row['case_barcode'],))
+        sample_tuples.append((row['sample_barcode'], str(cohort_id), row['case_barcode'], row['project_id']))
     logging.info('Number of sample barcodes: {num_samples}'.format(num_samples=len(sample_tuples)))
 
     cursor.executemany(insert_samples_str, sample_tuples)
@@ -280,86 +593,21 @@ def insert_barcodes_mysql(conn, superuser_id, cohort_name, sample_barcodes):
 
     return cohort_id
 
-def authorize_and_get_bq_service():
-    credentials = GoogleCredentials.get_application_default().create_scoped(['https://www.googleapis.com/auth/bigquery'])
-    http = httplib2.Http()
-    http = credentials.authorize(http)
-
-    bigquery_service = build('bigquery', 'v2', http=http)
-    return bigquery_service
 
 def create_bq_cohort(project_id, dataset_id, table_id, cohort_id, sample_barcodes):
-    service = authorize_and_get_bq_service()
+    service = authorize_credentials_with_Google()
     bqs = BigQueryCohortSupport(project_id, dataset_id, table_id)
-    bqs.add_cohort_to_bq(cohort_id, sample_barcodes)
+    bq_result = bqs.add_cohort_to_bq(cohort_id, sample_barcodes)
 
-
-# TODO: This is a hack until we get project_ids in metadata_samples.
-def fix_cohort_projects(conn):
-    try:
-        cursor = conn.cursor()
-        null_project_count = """
-            SELECT COUNT(*)
-            FROM cohorts_samples cs
-                    JOIN %s_metadata_samples ms ON ms.sample_barcode = cs.sample_barcode
-                    JOIN (
-                        SELECT p.id AS id,p.name AS name
-                        FROM projects_project p
-                          JOIN auth_user au ON au.id = p.owner_id
-                        WHERE au.username = 'isb' AND au.is_superuser = 1 AND au.is_active = 1 AND p.active = 1
-                    ) ps ON ps.name = ms.disease_code
-                    JOIN cohorts_cohort AS cc ON cc.id = cs.cohort_id
-            where cs.project_id IS NULL AND cc.active = 1;
-        """
-
-        cursor.execute(null_project_count % 'TCGA')
-        count_to_fix = cursor.fetchall()[0][0]
-        cursor.execute(null_project_count % 'CCLE')
-        count_to_fix += cursor.fetchall()[0][0]
-
-        if count_to_fix > 0:
-            fix_project_ids_str = """
-                UPDATE cohorts_samples AS cs
-                JOIN (
-                    SELECT ms.sample_barcode AS sample_barcode,ps.id AS project
-                        FROM %s_metadata_samples ms
-                        JOIN (
-                            SELECT p.id AS id,p.name AS name
-                            FROM projects_project p
-                                JOIN auth_user au ON au.id = p.owner_id
-                            WHERE au.username = 'isb' AND au.is_active = 1 AND p.active=1 AND au.is_superuser = 1
-                        ) ps ON ps.name = ms.disease_code
-                ) AS ss ON ss.sample_barcode = cs.sample_barcode
-                JOIN cohorts_cohort AS cc
-                ON cc.id = cs.cohort_id
-                SET cs.project_id = ss.project
-                WHERE cs.project_id IS NULL AND cc.active = 1;
-            """
-
-            print >> sys.stdout,"[STATUS] Number of cohort sample entries from ISB-CGC projects with null project IDs: "+str(count_to_fix)
-            print >> sys.stdout,"[STATUS] Correcting null project IDs for ISB-CGC cohorts - this could take a while!"
-
-            cursor.execute(fix_project_ids_str % 'TCGA')
-            cursor.execute(fix_project_ids_str % 'CCLE')
-            conn.commit()
-            print >> sys.stdout, "[STATUS] ...done. Checking for still-null project IDs..."
-
-            cursor.execute(null_project_count % 'TCGA')
-            not_fixed = cursor.fetchall()[0][0]
-            cursor.execute(null_project_count % 'CCLE')
-            not_fixed += cursor.fetchall()[0][0]
-
-            print >> sys.stdout, "[STATUS] Number of cohort sample entries from ISB-CGC projects with null project IDs after correction: " + str(not_fixed)
-            if not_fixed > 0:
-                print >> sys.stdout, "[WARNING] Some of the samples were not corrected! You should double-check them."
-
-
+    # If BQ insertion fails, we immediately de-activate the cohort and warn the user
+    if 'insertErrors' in bq_result:
+        err_msg = ''
+        if len(bq_result['insertErrors']) > 1:
+            err_msg = 'There were ' + str(len(bq_result['insertErrors'])) + ' insertion errors '
         else:
-            print >> sys.stdout, "[STATUS] No cohort samples were found with missing project IDs."
-    except Exception as e:
-        print >> sys.stdout, "[ERROR] Exception when fixing cohort project IDs; they may not have been fixed."
-        print >> sys.stdout, e
-        print >> sys.stdout, traceback.format_exc()
+            err_msg = 'There was an insertion error '
+
+        print >> sys.stderr, err_msg + ' when creating your cohort in BigQuery. Creation of the BQ cohort has failed.'
 
 
 def main():
@@ -369,10 +617,17 @@ def main():
     cmd_line_parser.add_argument('-d', '--dataset', type=str, default=BQ_DATASET, help="BigQuery dataset name")
     cmd_line_parser.add_argument('-t', '--table-name', type=str, default=DEFAULT_COHORT_TABLE, help="BigQuery table name")
     cmd_line_parser.add_argument('-i', '--cohort-id', type=int, help="Cohort ID override to be used for BigQuery")
+    cmd_line_parser.add_argument('-p', '--add-proj-prog', type=bool, help="Bootstrap Django project and program tables")
+    cmd_line_parser.add_argument('-a', '--attr-displ-table', type=bool, default=False,
+                                 help="Change the program IDs in the metadata attribute display table to this database's programs.")
     cmd_line_parser.add_argument('-o', '--operation', type=str, choices=['all', 'cloudsql', 'bq'], default='all',
                                  help="Operation")
 
     args = cmd_line_parser.parse_args()
+
+    args.add_proj_prog and create_programs_and_projects(False)
+
+    args.attr_displ_table and update_attr_display_table(False)
 
     project_id = args.PROJECT_ID
 
@@ -399,7 +654,7 @@ def main():
 
         logging.info("Superuser ID: {sid}".format(sid=superuser_id))
         cohort_id = insert_barcodes_mysql(conn, superuser_id, args.cohort_name, sample_barcodes)
-        fix_cohort_projects(conn)
+
     else:
         cohort_id = args.cohort_id
 
