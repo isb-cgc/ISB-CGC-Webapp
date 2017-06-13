@@ -18,8 +18,8 @@ limitations under the License.
 import os
 from os.path import join, dirname
 import sys
-
 import dotenv
+from socket import gethostname, gethostbyname
 
 dotenv.read_dotenv(join(dirname(__file__), '../.env'))
 
@@ -40,7 +40,7 @@ for directory_name in SHARED_SOURCE_DIRECTORIES:
 DEBUG                   = (os.environ.get('DEBUG', 'False') == 'True')
 print >> sys.stdout, "[STATUS] DEBUG mode is "+str(DEBUG)
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOST', 'localhost').split(',') + ['localhost', '127.0.0.1', '[::1]']
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOST', 'localhost').split(',') + ['localhost', '127.0.0.1', '[::1]', gethostname(), gethostbyname(gethostname()),]
 print >> sys.stdout, "[STATUS] Allowed hosts: "+str(ALLOWED_HOSTS)
 
 SSL_DIR = os.path.abspath(os.path.dirname(__file__))+os.sep
