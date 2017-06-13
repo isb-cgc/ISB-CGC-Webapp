@@ -91,9 +91,9 @@ IS_DEV = (os.environ.get('IS_DEV', 'False') == 'True')
 IS_APP_ENGINE_FLEX = os.getenv('GAE_INSTANCE', '').startswith(APP_ENGINE_FLEX)
 IS_APP_ENGINE = os.getenv('SERVER_SOFTWARE', '').startswith(APP_ENGINE)
 
-# If this is a GAE-Flex deployment, we don't need to specify SSL; the proxy will take
+# If this is a GAE deployment, we don't need to specify SSL; the proxy will take
 # care of that for us
-if os.environ.has_key('DB_SSL_CERT') and not IS_APP_ENGINE_FLEX:
+if os.environ.has_key('DB_SSL_CERT') and not (IS_APP_ENGINE_FLEX or IS_APP_ENGINE):
     DATABASES['default']['OPTIONS'] = {
         'ssl': {
             'ca': os.environ.get('DB_SSL_CA'),
@@ -106,7 +106,7 @@ if os.environ.has_key('DB_SSL_CERT') and not IS_APP_ENGINE_FLEX:
 SITE_ID = 3
 
 if IS_APP_ENGINE_FLEX or IS_APP_ENGINE:
-    print >> sys.stdout, "[STATUS] AppEngine Flex detected."
+    print >> sys.stdout, "[STATUS] AppEngine detected."
     SITE_ID = 4
 
 # Default to no NIH Auth unless we are not on a local dev environment *and* are in AppEngine-Flex
