@@ -94,9 +94,9 @@ IS_APP_ENGINE = os.getenv('SERVER_SOFTWARE', '').startswith(APP_ENGINE)
 print >> sys.stdout, "AppEngine Flex: "+("Yes" if IS_APP_ENGINE_FLEX else "No")
 print >> sys.stdout, "AppEngine Standard: "+("Yes" if IS_APP_ENGINE else "No")
 
-# If this is a GAE-Flex deployment, we don't need to specify SSL; the proxy will take
+# If this is a GAE deployment, we don't need to specify SSL; the proxy will take
 # care of that for us
-if os.environ.has_key('DB_SSL_CERT') and not IS_APP_ENGINE_FLEX:
+if os.environ.has_key('DB_SSL_CERT') and not (IS_APP_ENGINE_FLEX or IS_APP_ENGINE):
     DATABASES['default']['OPTIONS'] = {
         'ssl': {
             'ca': os.environ.get('DB_SSL_CA'),
