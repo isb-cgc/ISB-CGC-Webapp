@@ -39,7 +39,7 @@ class GNABFeatureDef(object):
 
     # Regular expression for parsing the feature definition.
     #
-    # Example ID: v2:GNAB:SMYD3:hg19_mc3:Variant_Classification
+    # Example ID: v2:GNAB:SMYD3:tcga_hg19_mc3:Variant_Classification
     regex = re_compile("^v2:GNAB:"
                        # gene
                        "([a-zA-Z0-9_.\-]+):"
