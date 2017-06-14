@@ -308,12 +308,19 @@ def igv(request, sample_barcode=None, readgroupset_id=None):
 
     return render(request, 'GenespotRE/igv.html', context)
 
-def health_check(request):
+
+# Because the match for vm_ is always done regardless of its presense in the URL
+# we must always provide an argument slot for it
+#
+def health_check(request, match):
+    print >> sys.stdout, "[DEBUG] Health check host: " + request.META['HTTP_HOST']
     print >> sys.stdout, "[STATUS] Health check is secure: "+str(request.is_secure())
     return HttpResponse('')
 
+
 def help_page(request):
     return render(request, 'GenespotRE/help.html')
+
 
 def about_page(request):
     return render(request, 'GenespotRE/about.html')
