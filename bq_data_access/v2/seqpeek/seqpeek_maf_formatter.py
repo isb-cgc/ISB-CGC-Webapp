@@ -26,8 +26,6 @@ from bq_data_access.v2.cohort_cloudsql import CloudSQLCohortAccess
 COORDINATE_FIELD_NAME = 'uniprot_aapos'
 TYPE_FIELD_NAME = 'variant_classification'
 
-DIGIT_FINDER_RE = re_compile('^\d+$')
-
 
 class SeqPeekMAFWithCohorts(object):
     def __init__(self, maf_vector, cohort_info, removed_row_stats):
@@ -37,6 +35,36 @@ class SeqPeekMAFWithCohorts(object):
 
 
 class SeqPeekMAFDataFormatter(object):
+    DIGIT_FINDER_RE = re_compile('^\d+$')
+
+    # '600/766' -> '600'
+    HG38_REGEX_1 = re_compile('^(\d+)/\d+$')
+    # '566-567/1158' -> '566'
+    HG38_REGEX_2 = re_compile('^(\d+)-\d+/\d+$')
+
+    def get_protein_position_for_hg19(self, protein_position):
+        if protein_position is None:
+            return None
+        if len(self.DIGIT_FINDER_RE.findall(protein_position)) == 1:
+            return int(protein_position)
+
+    def get_protein_position_for_hg38(self, protein_position):
+        regex_list = [
+            self.HG38_REGEX_1,
+            self.HG38_REGEX_2
+        ]
+
+        value = None
+        for regex in regex_list:
+            result = regex.findall(protein_position)
+            if len(result) > 0:
+                value = result[0]
+
+        if value is not None:
+            value = int(value)
+
+        return value
+
     def annotate_vector_with_cohorts(self, cohort_id_array, result):
         # Resolve which (requested) cohorts each datapoint belongs to.
         cohorts_and_projects = CloudSQLCohortAccess.get_cohorts_and_projects_for_datapoints(cohort_id_array)
@@ -53,17 +81,25 @@ class SeqPeekMAFDataFormatter(object):
                 cohort_set = cohort_set_dict[sample_id]
             row['cohort'] = cohort_set
 
-    def remove_rows_with_no_aa_position(self, data):
+    def remove_rows_with_no_aa_position(self, data, genomic_build):
         result = []
         removed_stats = defaultdict(int)
+
+        if genomic_build == "hg19":
+            protein_position_parse_fn = self.get_protein_position_for_hg19
+        else:
+            protein_position_parse_fn = self.get_protein_position_for_hg38
 
         count = 0
         for row in data:
             aapos = row[COORDINATE_FIELD_NAME]
-            if aapos is not None and len(DIGIT_FINDER_RE.findall(aapos)) == 1:
+
+            protein_position_value = protein_position_parse_fn(aapos)
+
+            if protein_position_value is not None:
                 count += 1
                 item = deepcopy(row)
-                item[COORDINATE_FIELD_NAME] = int(aapos)
+                item[COORDINATE_FIELD_NAME] = protein_position_value
                 result.append(item)
             # Include removed row in statistics
             else:
@@ -78,8 +114,8 @@ class SeqPeekMAFDataFormatter(object):
 
         return cohort_info_array
 
-    def format_maf_vector_for_view(self, maf_vector, cohort_id_array):
-        filtered_maf_vector, removed_stats = self.remove_rows_with_no_aa_position(maf_vector)
+    def format_maf_vector_for_view(self, maf_vector, cohort_id_array, genomic_build):
+        filtered_maf_vector, removed_stats = self.remove_rows_with_no_aa_position(maf_vector, genomic_build)
         self.annotate_vector_with_cohorts(cohort_id_array, filtered_maf_vector)
         cohort_info = self.get_cohort_information(cohort_id_array)
 

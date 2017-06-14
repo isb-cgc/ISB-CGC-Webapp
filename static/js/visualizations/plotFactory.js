@@ -310,7 +310,7 @@ define([
         var seqpeek_url = base_url + '/visualizations/seqpeek_data_plot/' + VERSION + '?' + cohort_str;
 
         seqpeek_url += "&hugo_symbol=" + gene_label
-            + (VERSION == 'v2' ? "&genomic_build=" + $('#workbook-build :selected').data('build') : '');
+            + (VERSION == 'v2' ? "&genomic_build=" + $('.workbook-build-display').data('build') : '');
 
 
         return seqpeek_url;
