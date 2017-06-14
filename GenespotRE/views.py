@@ -306,8 +306,6 @@ def igv(request, sample_barcode=None, readgroupset_id=None):
 # we must always provide an argument slot for it
 #
 def health_check(request, match):
-    print >> sys.stdout, "[DEBUG] Health check host: " + request.META['HTTP_HOST']
-    print >> sys.stdout, "[STATUS] Health check is secure: "+str(request.is_secure())
     return HttpResponse('')
 
 
