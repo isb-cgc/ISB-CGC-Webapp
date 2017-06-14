@@ -153,12 +153,12 @@ class BigQueryCohortSupport(object):
 
 
 def get_mysql_connection():
-    db_settings = secret_settings.get('DATABASE')['default'] if settings.IS_DEV else settings.DATABASES['default']
+    db_settings = secret_settings.get('DATABASE')['default'] if (settings.IS_DEV or not settings.DB_SOCKET) else settings.DATABASES['default']
 
     db = None
     ssl = None
 
-    if 'OPTIONS' in db_settings and 'ssl' in db_settings['OPTIONS']:
+    if 'OPTIONS' in db_settings and 'ssl' in db_settings['OPTIONS'] and not (settings.IS_APP_ENGINE_FLEX or settings.IS_APP_ENGINE):
         ssl = db_settings['OPTIONS']['ssl']
 
     if settings.IS_APP_ENGINE_FLEX or settings.IS_APP_ENGINE:
