@@ -32,18 +32,42 @@ from bq_data_access.v2.feature_id_utils import ProviderClassQueryDescription
 from visualizations.data_access_views_v2 import get_confirmed_project_ids_for_cohorts
 
 
-def build_gnab_feature_id(gene_label):
-    return "v2:GNAB:{gene_label}:hg19_mc3:Variant_Classification".format(gene_label=gene_label)
+def build_gnab_feature_id(gene_label, genomic_build):
+    """
+    Creates a GNAB v2 feature identifier that will be used to fetch data to be rendered in SeqPeek.
+
+    For more information on GNAB feature IDs, please see:
+    bq_data_access/data_types/gnab.py
+    bq_data_accvess/v2/gnab_data.py
+
+    Params:
+        gene_label: Gene label.
+        genomic_build: "hg19" or "hg38"
+
+    Returns: GNAB v2 feature identifier.
+    """
+    if genomic_build == "hg19":
+        return "v2:GNAB:{gene_label}:tcga_hg19_mc3:Variant_Classification".format(gene_label=gene_label)
+    elif genomic_build == "hg38":
+        return "v2:GNAB:{gene_label}:tcga_hg38:Variant_Classification".format(gene_label=gene_label)
 
 
 def get_program_set_for_seqpeek_plot(cohort_id_array):
     return {'tcga'}
 
 
+def is_valid_genomic_build(genomic_build_param):
+    """
+    Returns: True if given genomic build is valid, otherwise False.
+    """
+    return genomic_build_param == "hg19" or genomic_build_param == "hg38"
+
+
 @login_required
 def seqpeek_view_data(request):
     try:
         hugo_symbol = request.GET.get('hugo_symbol', None)
+        genomic_build = request.GET.get('genomic_build', None)
         cohort_id_param_array = request.GET.getlist('cohort_id', None)
         cohort_id_array = []
 
@@ -53,6 +77,9 @@ def seqpeek_view_data(request):
                 cohort_id_array.append(cohort_id)
             except Exception as e:
                 return JsonResponse({'error': 'Invalid cohort parameter'}, status=400)
+
+        if not is_valid_genomic_build(genomic_build):
+            return JsonResponse({'error': 'Invalid genomic build'}, status=400)
 
         if len(cohort_id_array) == 0:
             return JsonResponse({'error': 'No cohorts specified'}, status=400)
@@ -67,8 +94,13 @@ def seqpeek_view_data(request):
         fvb = FeatureVectorBigQueryBuilder.build_from_django_settings(bqss)
         program_set = get_program_set_for_seqpeek_plot(cohort_id_array)
 
+        extra_provider_params = {
+            "genomic_buid": genomic_build
+        }
+
         async_params = [
-            ProviderClassQueryDescription(SeqPeekDataQueryHandler, gnab_feature_id, cohort_id_array, confirmed_project_ids, program_set)]
+            ProviderClassQueryDescription(SeqPeekDataQueryHandler, gnab_feature_id, cohort_id_array,
+                                          confirmed_project_ids, program_set, extra_provider_params)]
         maf_data_result = fvb.get_feature_vectors_tcga_only(async_params, skip_formatting_for_plot=True)
 
         maf_data_vector = maf_data_result[gnab_feature_id]['data']
