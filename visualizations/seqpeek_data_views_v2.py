@@ -60,7 +60,7 @@ def is_valid_genomic_build(genomic_build_param):
     """
     Returns: True if given genomic build is valid, otherwise False.
     """
-    return genomic_build_param == "hg19" or genomic_build_param == "hg38"
+    return genomic_build_param == "HG19" or genomic_build_param == "HG38"
 
 
 @login_required
@@ -80,6 +80,8 @@ def seqpeek_view_data(request):
 
         if not is_valid_genomic_build(genomic_build):
             return JsonResponse({'error': 'Invalid genomic build'}, status=400)
+
+        genomic_build = genomic_build.lower()
 
         if len(cohort_id_array) == 0:
             return JsonResponse({'error': 'No cohorts specified'}, status=400)
