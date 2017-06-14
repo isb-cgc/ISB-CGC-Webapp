@@ -31,10 +31,6 @@ PROTEIN_DOMAIN_DB = 'PFAM'
 SEQPEEK_VIEW_DEBUG_MODE = False
 
 
-def build_gnab_feature_id(gene):
-    return "v2:GNAB:{gene_label}:Variant_Classification".format(gene_label=gene)
-
-
 def get_number_of_unique_samples(track):
     sample_ids = set()
     for mutation in track['mutations']:
