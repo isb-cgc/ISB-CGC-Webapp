@@ -84,7 +84,7 @@ def seqpeek_view_data(request):
         if len(cohort_id_array) == 0:
             return JsonResponse({'error': 'No cohorts specified'}, status=400)
 
-        gnab_feature_id = build_gnab_feature_id(hugo_symbol)
+        gnab_feature_id = build_gnab_feature_id(hugo_symbol, genomic_build)
         logger.debug("GNAB feature ID for SeqPeek: {0}".format(gnab_feature_id))
 
         # Get the project IDs these cohorts' samples come from
@@ -106,10 +106,11 @@ def seqpeek_view_data(request):
         maf_data_vector = maf_data_result[gnab_feature_id]['data']
 
         if len(maf_data_vector) > 0:
+            seqpeek_data = SeqPeekMAFDataFormatter().format_maf_vector_for_view(maf_data_vector, cohort_id_array,
+                                                                                genomic_build)
+        if len(seqpeek_data.maf_vector) > 0:
             # Since the gene (hugo_symbol) parameter is part of the GNAB feature ID,
             # it will be sanity-checked in the SeqPeekMAFDataAccess instance.
-            seqpeek_data = SeqPeekMAFDataFormatter().format_maf_vector_for_view(maf_data_vector, cohort_id_array)
-
             seqpeek_maf_vector = seqpeek_data.maf_vector
             seqpeek_cohort_info = seqpeek_data.cohort_info
             removed_row_statistics_dict = seqpeek_data.removed_row_statistics
@@ -134,4 +135,4 @@ def seqpeek_view_data(request):
     except Exception as e:
         print >> sys.stdout, traceback.format_exc()
         logger.exception(e)
-        return JsonResponse({'error': str(e)}, status=500)
+        return JsonResponse({'Error': str(e)}, status=500)
