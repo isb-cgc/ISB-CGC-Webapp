@@ -189,6 +189,12 @@ def has_user_data(programs):
 
 
 @register.filter
+def is_superuser(this_user):
+    isb_superuser = User.objects.get(username='isb')
+    return this_user.id == isb_superuser.id
+
+
+@register.filter
 def get_cohorts_this_user(this_user, is_active=True):
     isb_superuser = User.objects.get(username='isb')
     public_cohorts = Cohort_Perms.objects.filter(user=isb_superuser,perm=Cohort_Perms.OWNER).values_list('cohort', flat=True)
