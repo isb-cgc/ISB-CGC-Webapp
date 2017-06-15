@@ -63,6 +63,16 @@ def is_valid_genomic_build(genomic_build_param):
     return genomic_build_param == "HG19" or genomic_build_param == "HG38"
 
 
+def build_empty_data_response(hugo_symbol, cohort_id_array):
+    return {
+        # The SeqPeek client side view detects data availability by checking if
+        # the "plot_data" object has the "tracks" key present.
+        'plot_data': {},
+        'hugo_symbol': hugo_symbol,
+        'cohort_id_list': [str(i) for i in cohort_id_array],
+        'removed_row_statistics': []
+    }
+
 @login_required
 def seqpeek_view_data(request):
     try:
@@ -107,32 +117,28 @@ def seqpeek_view_data(request):
 
         maf_data_vector = maf_data_result[gnab_feature_id]['data']
 
-        if len(maf_data_vector) > 0:
-            seqpeek_data = SeqPeekMAFDataFormatter().format_maf_vector_for_view(maf_data_vector, cohort_id_array,
-                                                                                genomic_build)
-        if len(seqpeek_data.maf_vector) > 0:
-            # Since the gene (hugo_symbol) parameter is part of the GNAB feature ID,
-            # it will be sanity-checked in the SeqPeekMAFDataAccess instance.
-            seqpeek_maf_vector = seqpeek_data.maf_vector
-            seqpeek_cohort_info = seqpeek_data.cohort_info
-            removed_row_statistics_dict = seqpeek_data.removed_row_statistics
+        if len(maf_data_vector) == 0:
+            return JsonResponse(build_empty_data_response(hugo_symbol, cohort_id_array))
 
-            seqpeek_view_data = SeqPeekViewDataBuilder().build_view_data(hugo_symbol,
-                                                                         seqpeek_maf_vector,
-                                                                         seqpeek_cohort_info,
-                                                                         cohort_id_array,
-                                                                         removed_row_statistics_dict)
-            return JsonResponse(seqpeek_view_data)
-        else:
-            # No data found
-            return JsonResponse({
-                # The SeqPeek client side view detects data availability by checking if
-                # the "plot_data" object has the "tracks" key present.
-                'plot_data': {},
-                'hugo_symbol': hugo_symbol,
-                'cohort_id_list': [str(i) for i in cohort_id_array],
-                'removed_row_statistics': []
-            })
+        if len(maf_data_vector) > 0:
+           seqpeek_data = SeqPeekMAFDataFormatter().format_maf_vector_for_view(
+               maf_data_vector, cohort_id_array, genomic_build)
+
+        if len(seqpeek_data.maf_vector) == 0:
+            return JsonResponse(build_empty_data_response(hugo_symbol, cohort_id_array))
+
+        # Since the gene (hugo_symbol) parameter is part of the GNAB feature ID,
+        # it will be sanity-checked in the SeqPeekMAFDataAccess instance.
+        seqpeek_maf_vector = seqpeek_data.maf_vector
+        seqpeek_cohort_info = seqpeek_data.cohort_info
+        removed_row_statistics_dict = seqpeek_data.removed_row_statistics
+
+        seqpeek_view_data = SeqPeekViewDataBuilder().build_view_data(hugo_symbol,
+                                                                     seqpeek_maf_vector,
+                                                                     seqpeek_cohort_info,
+                                                                     cohort_id_array,
+                                                                     removed_row_statistics_dict)
+        return JsonResponse(seqpeek_view_data)
 
     except Exception as e:
         print >> sys.stdout, traceback.format_exc()
