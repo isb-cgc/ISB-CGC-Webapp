@@ -66,9 +66,9 @@ network:
   instance_tag: isb-cgc-webapp
 
 health_check:
-  enable_health_check: False
-#  check_interval_sec: 15
-#  restart_threshold: 15
+  enable_health_check: True
+  check_interval_sec: 15
+  restart_threshold: 15
 
 
 skip_files:
