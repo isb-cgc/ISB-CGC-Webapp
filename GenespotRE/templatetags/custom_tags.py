@@ -182,7 +182,6 @@ def get_data_attr_id(value, attr):
 @register.filter
 def has_user_data(programs):
     for prog in programs:
-        print >> sys.stdout, "program: "+str(prog)
         if prog['type'] == 'user-data':
             print >> sys.stdout, "is user data!"
             return True

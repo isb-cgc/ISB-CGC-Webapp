@@ -1,5 +1,5 @@
 <div id="0-data" class="tab-pane data-tab{% if cohort.id and user_data and metadata_counts.user_data_total > 0 %} active{% endif %}" role="tabpanel">
-    <div id="user-data-filter-panel" class="col-lg-3 filter-panel" role="tabpanel" {% if cohort.id %}style="display:none;"{% endif %} data-prog-id="0" data-prog-displ-name="User Data">
+    <div id="0-data-filter-panel" class="col-lg-3 filter-panel" role="tabpanel" {% if cohort.id %}style="display:none;"{% endif %} data-prog-id="0" data-prog-displ-name="User Data">
         <div class="tabpanel" role="tabpanel">
             <ul class="nav nav-tabs nav-tabs-ud-filters" role="tablist">
                 <li role="presentation" class="active"><a href="#ud-prog-project-filters" role="tab" data-toggle="tab" title="User Data Programs & Projects">Programs & Projects</a></li>
@@ -31,7 +31,7 @@
                                      aria-labelledby="heading-{{ attr.id }}" data-feature-name="{{ attr.name }}" data-feature-id="{{ attr.id }}"
                                      data-feature-displ-name="{% if attr.displ_name %}{{ attr.displ_name }}{% elif attr.name %}{{ attr.name }}{% else %}{{ attr.id }}{% endif %}"
                                      data-feature-type="user-data">
-                                    <ul class="search-checkbox-list" id="{{ attr.id }}">
+                                    <ul class="search-checkbox-list" id="0-{{ attr.id }}">
                                         {% for v in attr.values %}
                                             <li class="checkbox">
                                                 <label>
@@ -70,7 +70,7 @@
                                          aria-labelledby="heading-{{ attr.id }}" data-feature-name="{{ attr.name }}" data-feature-id="{{ attr.id }}"
                                          data-feature-displ-name="{% if attr.displ_name %}{{ attr.displ_name }}{% elif attr.name %}{{ attr.name }}{% else %}{{ attr.id }}{% endif %}"
                                          data-feature-type="user-data">
-                                        <ul class="search-checkbox-list" id="{{ attr.id }}">
+                                        <ul class="search-checkbox-list" id=0-"{{ attr.id }}">
                                             {% for v in attr.values %}
                                                 <li class="checkbox">
                                                     <label>

@@ -40,7 +40,7 @@ def workbook_list(request):
     workbooks = userWorkbooks | sharedWorkbooks
     workbooks = workbooks.distinct()
 
-    return render(request, template, {'workbooks': workbooks})
+    return render(request, template, {'workbooks' : workbooks})
 
 def workbook_samples(request):
     template = 'workbooks/workbook_samples.html'
@@ -195,8 +195,9 @@ def workbook(request, workbook_id=0):
             if command == "create":
                 workbook_model = Workbook.createDefault(name="Untitled Workbook", description="", user=request.user)
             elif command == "edit":
-                workbook_name = request.POST.get('name')
-                workbook_desc = request.POST.get('description')
+                # Truncate incoming name and desc fields in case someone tried to send ones which were too long
+                workbook_name = request.POST.get('name')[0:2000]
+                workbook_desc = request.POST.get('description')[0:2000]
                 workbook_build = request.POST.get('build')
 
                 whitelist = re.compile(WHITELIST_RE, re.UNICODE)
@@ -282,12 +283,13 @@ def workbook(request, workbook_id=0):
 
 @login_required
 def workbook_share(request, workbook_id=0):
-    emails = re.split('\s*,\s*', request.POST['share_users'].strip())
-    workbook = request.user.workbook_set.get(id=workbook_id, active=True)
-    create_share(request, workbook, emails, 'Workbook')
+    # emails = re.split('\s*,\s*', request.POST['share_users'].strip())
+    # workbook = request.user.workbook_set.get(id=workbook_id, active=True)
+    # create_share(request, workbook, emails, 'Workbook')
 
     return JsonResponse({
-        'status': 'success'
+        # 'status': 'success'
+        'status': 'unauthorized'
     })
 
 

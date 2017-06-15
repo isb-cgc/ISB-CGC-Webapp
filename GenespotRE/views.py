@@ -145,15 +145,22 @@ def user_detail(request, user_id):
                 logger.warn("Error when retrieving nih_user with user_id {}. {}".format(str(user_id), str(e)))
                 # todo: add code to unlink all accounts?
 
+        era_login_url = "{}?sso&redirect_url={}/accounts/nih_login".format(settings.ERA_LOGIN_URL,
+                                                                            settings.BASE_URL)
+
         return render(request, 'GenespotRE/user_detail.html',
                       {'request': request,
                        'user': user,
                        'user_details': user_details,
                        'NIH_AUTH_ON': settings.NIH_AUTH_ON,
-                       'ERA_LOGIN_URL': settings.ERA_LOGIN_URL
+                       'ERA_LOGIN_URL': era_login_url
                        })
     else:
         return render(request, '403.html')
+
+@login_required
+def nih_login(request):
+    logging.info('at nih_login')
 
 @login_required
 def bucket_object_list(request):
@@ -282,31 +289,36 @@ def igv(request, sample_barcode=None, readgroupset_id=None):
     bam_list = []
 
     checked_list = json.loads(request.POST.__getitem__('checked_list'))
-
-    # for item in checked_list['readgroupset_id']:
-    #    id_barcode = item.split(',')
-    #    readgroupset_list.append({'sample_barcode': id_barcode[1],
-    #                              'readgroupset_id': id_barcode[0]})
+    build = request.POST.__getitem__('build')
 
     for item in checked_list['gcs_bam']:
+        bam_item = checked_list['gcs_bam'][item]
         id_barcode = item.split(',')
-        bam_list.append({'sample_barcode': id_barcode[1],
-                         'gcs_path': id_barcode[0]})
+        bam_list.append({
+            'sample_barcode': id_barcode[1], 'gcs_path': id_barcode[0], 'build': build, 'program': bam_item['program']
+        })
 
-    context = {}
-    context['readgroupset_list'] = readgroupset_list
-    context['bam_list'] = bam_list
-    context['base_url'] = settings.BASE_URL
-    context['service_account'] = settings.WEB_CLIENT_ID
+    context = {
+        'readgroupset_list': readgroupset_list,
+        'bam_list': bam_list,
+        'base_url': settings.BASE_URL,
+        'service_account': settings.WEB_CLIENT_ID,
+        'build': build,
+    }
 
     return render(request, 'GenespotRE/igv.html', context)
 
-def health_check(request):
-    print >> sys.stdout, "[STATUS] Health check is secure: "+str(request.is_secure())
+
+# Because the match for vm_ is always done regardless of its presense in the URL
+# we must always provide an argument slot for it
+#
+def health_check(request, match):
     return HttpResponse('')
+
 
 def help_page(request):
     return render(request, 'GenespotRE/help.html')
+
 
 def about_page(request):
     return render(request, 'GenespotRE/about.html')

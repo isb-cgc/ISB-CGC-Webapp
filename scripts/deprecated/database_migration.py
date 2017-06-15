@@ -387,10 +387,7 @@ def fix_cohort_projects(debug):
         if db and db.open: db.close()
 
 
-# Create the display-string storage table for attributes and their values which are not displayed as they're stored in the database,
-# eg. Sample Type Code, Smoking History. The attribute is always required (to associate the correct display string for a value), but
-# if this is a display string for an attribute value_name can be null. Program ID is optional, to allow for different programs to have
-# different display values.
+# Update the attribute display table program IDs
 def update_attr_display_table(debug):
 
     cursor = None
@@ -411,8 +408,6 @@ def update_attr_display_table(debug):
         """)
 
         suid = cursor.fetchall()[0][0]
-
-        public_program_ids = []
 
         # get the public program IDs
         cursor.execute("""
@@ -849,7 +844,7 @@ def main():
     cmd_line_parser.add_argument('-c', '--fix-cohort-projects', type=bool, default=False,
                                  help="Fix any cohort entries to contain the correct project ID")
 
-    cmd_line_parser.add_argument('-a', '--attr_displ_table', type=bool, default=False,
+    cmd_line_parser.add_argument('-a', '--attr-displ-table', type=bool, default=False,
                                  help="Change the program IDs in the metadata attribute display table to this database's programs.")
 
     cmd_line_parser.add_argument('-f', '--fix_filters', type=bool, default=False,

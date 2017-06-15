@@ -55,13 +55,13 @@
         {% endfor %}
 
         {% for row in bam_list %}
-        <div class="bam-data" data-sample="{{ row.sample_barcode }}" data-gcs="{{ row.gcs_path }}"></div>
+        <div class="bam-data" data-sample="{{ row.sample_barcode }}" data-gcs="{{ row.gcs_path }}" data-build="{{ row.build }}" data-program="{{ row.program }}"></div>
         {% endfor %}
 
     </div>
     <script>
-
     var service_account = '{{ service_account }}';
+    var genome_build = '{{ build }}';
     </script>
 {% endblock %}
 
