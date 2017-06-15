@@ -67,14 +67,20 @@
                 <h4 class="panel-title pull-left">{{ project.name }}</h4>
             </div>
             <div class="panel-body">
-                {% if project.get_status == 'Processing' %}
+                {% if project.get_status_with_message.status == 'Processing' %}
                 <div class="message message-info alert alert-dismissible fade in">
                     <p>Project Data is currently being processed.</p>
                     <a class="close" data-dismiss="alert" aria-label="Close"><i class="fa fa-times" aria-hidden="true"></i></a>
                 </div>
-                {% elif project.get_status == 'Error' %}
+                {% elif project.get_status_with_message.status == 'Error' %}
                 <div class="message message-error alert alert-dismissible fade in">
-                    <p>Upload of project data has an error. Please delete the project and re-upload.</p>
+                    <p>Upload of project data had an error:
+                        {% if project.get_status_with_message.errmsg %}
+                            [{{ project.get_status_with_message.errmsg }}].
+                        {% else %}
+                            [No specific message provided].
+                        {% endif %}
+                        Please delete the project and re-upload.</p>
                     <a class="close" data-dismiss="alert" aria-label="Close"><i class="fa fa-times" aria-hidden="true"></i></a>
                 </div>
                 {% comment "Success message does not yet have technical implementation" %}

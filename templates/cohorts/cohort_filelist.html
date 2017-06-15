@@ -98,6 +98,7 @@
                 <div class="panel-body">
                     <form id="view-igv" method="POST" action="{% url 'igv' %}">
                         <input type="text" class="hidden_form_value" id="checked_list_input" name="checked_list" data-type="checked_list">
+                        <input type="text" class="hidden_form_value" id="igv-build" name="build">
                         {% csrf_token %}
                         <p class="file-page-count">Showing 20 files. Page: <span class="page-num">1</span> of <span class="file-count">unknown</span> pages.</p>
                         <p class="no-file-page-count" style="display: none;">Showing 0 files.</p>

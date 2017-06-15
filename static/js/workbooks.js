@@ -572,14 +572,14 @@ require([
         $(self).parent().find(".attr-options").fadeOut();
         var attr = $(self).find(":selected").val();
         if(attr == "GNAB" && $('#value-GNAB :selected').val() !== "num_mutations") {
-            $('#'+active_worksheet+'x-log-transform').prop("checked", false);
-            $('#'+active_worksheet+'x-log-transform').prop("disabled", true);
+            $('#'+active_worksheet+'-x-log-transform').prop("checked", false);
+            $('#'+active_worksheet+'-x-log-transform').prop("disabled", true);
         } else {
             if((attr === 'GEXP' || attr === 'MIRN') && !for_plot_load){
                 field_options_change($(self).siblings('.'+attr).children('div[data-field="'+attr+'"]').find('select'));
             }
-            if($('#'+active_worksheet+'x-log-transform').prop("disabled")) {
-                $('#'+active_worksheet+'x-log-transform').prop("disabled", false);
+            if($('#'+active_worksheet+'-x-log-transform').prop("disabled")) {
+                $('#'+active_worksheet+'-x-log-transform').prop("disabled", false);
             }
         }
         var attr_type_div = $(self).parent().find("."+attr);
@@ -683,14 +683,14 @@ require([
         $(self).parent().find(".attr-options").fadeOut();
         var attr = $(self).find(":selected").val();
         if(attr == "GNAB" && $('#value-GNAB :selected').val() !== "num_mutations") {
-            $('#'+active_worksheet+'y-log-transform').prop("checked", false);
-            $('#'+active_worksheet+'y-log-transform').prop("disabled", true);
+            $('#'+active_worksheet+'-y-log-transform').prop("checked", false);
+            $('#'+active_worksheet+'-y-log-transform').prop("disabled", true);
         } else {
             if((attr === 'GEXP' || attr === 'MIRN') && !for_plot_load){
                 field_options_change($(self).siblings('.'+attr).children('div[data-field="'+attr+'"]').find('select'));
             }
-            if($('#'+active_worksheet+'y-log-transform').prop("disabled")) {
-                $('#'+active_worksheet+'y-log-transform').prop("disabled", false);
+            if($('#'+active_worksheet+'-y-log-transform').prop("disabled")) {
+                $('#'+active_worksheet+'-y-log-transform').prop("disabled", false);
             }
         }
         var attr_type_div = $(self).parent().find("."+attr);
@@ -724,7 +724,7 @@ require([
         var filters         = [{ filter : gene_selector.attr('type').toLowerCase()+'_name',
                                  value  : gene_selector.val()}];
 
-        var axis_transform = (variable_name == "x-axis-select") ? "#"+active_worksheet+"x-log-transform" : "#"+active_worksheet+"y-log-transform";
+        var axis_transform = (variable_name == "x-axis-select") ? "#"+active_worksheet+"-x-log-transform" : "#"+active_worksheet+"-y-log-transform";
 
         if(datatype == "GNAB" && self.find(':selected').val() !== "num_mutations") {
             $(axis_transform).prop("disabled", true);
@@ -765,8 +765,8 @@ require([
         var c_widgets = settings_flyout.find('div.form-group.color-by-group');
         var swap = settings_flyout.find('button.swap');
         var sp_genes = settings_flyout.find('.seqpeek-genes');
-        var xLogCheck = $('#'+active_worksheet+'x-log-transform').parent();
-        var yLogCheck = $('#'+active_worksheet+'y-log-transform').parent();
+        var xLogCheck = $('#'+active_worksheet+'-x-log-transform').parent();
+        var yLogCheck = $('#'+active_worksheet+'-y-log-transform').parent();
 
         // Clear selections for plots that are loaded
         if ($(settings_flyout).parents('.worksheet').attr('is-loaded') === 'true') {
@@ -887,7 +887,7 @@ require([
 
         var worksheet_id = $(plot_settings).find('.update-plot').attr("worksheet_id");
 
-        var xLog = $(plot_settings).find('#'+worksheet_id+'x-log-transform'), yLog = $(plot_settings).find('#'+worksheet_id+'y-log-transform');
+        var xLog = $(plot_settings).find('#'+worksheet_id+'-x-log-transform'), yLog = $(plot_settings).find('#'+worksheet_id+'-y-log-transform');
 
         var result = {
             worksheet_id : worksheet_id,

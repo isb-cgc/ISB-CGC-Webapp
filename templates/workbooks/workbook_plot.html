@@ -94,7 +94,7 @@
                                             {% endif %}
                                         </select>
                                     {% empty %}
-                                        <select id="x-placeholder-{{ type.datatype }}" class="form-control field-options placeholder-options" data-field="placeholder" disabled style="display: none;">
+                                        <select id="x-placeholder-{{ type.datatype }}" class="form-control field-options placeholder-options" aria-label="x-placeholder-{{ type.datatype }}-{{ worksheet.id }}" aria-hidden="true" data-field="placeholder" disabled style="display: none;">
                                              <option value="placeholder" disabled selected type="label">placeholder</option>
                                         </select>
                                     {% endfor %}
@@ -158,7 +158,7 @@
                                             {% endif %}
                                         </select>
                                     {% empty %}
-                                        <select id="y-placeholder-{{ type.datatype }}" class="form-control field-options placeholder-options" data-field="placeholder" disabled style="display: none;">
+                                        <select id="y-placeholder-{{ type.datatype }}" class="form-control field-options placeholder-options" aria-label="y-placeholder-{{ type.datatype }}-{{ worksheet.id }}" aria-hidden="true" data-field="placeholder" disabled style="display: none;">
                                             <option value="placeholder" disabled selected type="label">placeholder</option>
                                         </select>
                                     {% endfor %}
@@ -234,9 +234,9 @@
                 <div class="worksheet-instruction">
                     <p><i class="fa fa-exclamation-circle"></i> To complete this analysis: </p>
                     <ul class="ul no-bullet">
-                        <li><input class="plot-ready-check" type="checkbox" id="selAnType-{{ worksheet.id }}" readonly onclick="this.checked=!this.checked;"> Select an Analysis Type (above)</li>
-                        <li><input class="plot-ready-check" type="checkbox" id="selGenVar-{{ worksheet.id }}" readonly onclick="this.checked=!this.checked;"> Select <a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Genes & miRNAs</a> and/or <a href="{% url 'variable_select_for_existing_workbook' workbook.id worksheet.id %}">Variables</a></li>
-                        <li><input class="plot-ready-check" type="checkbox" id="selCoh-{{ worksheet.id }}" readonly onclick="this.checked=!this.checked;"> Select a <a href="{% url 'cohort_select_for_existing_workbook' workbook.id worksheet.id %}%}">Cohort</a></li>
+                        <li class="checkbox"><label><input class="plot-ready-check" type="checkbox" id="selAnType-{{ worksheet.id }}" readonly onclick="this.checked=!this.checked;"> Select an Analysis Type (above)</label></li>
+                        <li class="checkbox"><label><input class="plot-ready-check" type="checkbox" id="selGenVar-{{ worksheet.id }}" readonly onclick="this.checked=!this.checked;"> Select <a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Genes & miRNAs</a> and/or <a href="{% url 'variable_select_for_existing_workbook' workbook.id worksheet.id %}">Variables</a></label></li>
+                        <li class="checkbox"><label><input class="plot-ready-check" type="checkbox" id="selCoh-{{ worksheet.id }}" readonly onclick="this.checked=!this.checked;"> Select a <a href="{% url 'cohort_select_for_existing_workbook' workbook.id worksheet.id %}">Cohort</a></label></li>
                     </ul>
                 </div>
             {% endif %}

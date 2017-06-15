@@ -28,8 +28,8 @@
             <form id="edit-workbook" method="POST" action="{% url 'worksheet_create_with_variables' %}">
                 {% csrf_token %}
                 <div class="modal-body">
-                    <label for="name">Name (required)</label>
-                    <input class="form-control" type="text" name="name" value="{{ favorite.name }} workbook"/>
+                    <label for="name-{{ favorite.id }}">Name (required)</label>
+                    <input id="name-{{ favorite.id }}" class="form-control" type="text" name="name" value="{{ favorite.name }} workbook"/>
                     <input type="hidden" name="variable_list_id" value="{{ favorite.id }}" />
                 </div>
                 <div class="modal-footer">

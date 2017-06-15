@@ -84,6 +84,7 @@ class RPPAFeatureProvider(FeatureDataProvider):
         return data_point['value']
 
     def build_query(self, project_name, dataset_name, table_name, feature_def,  cohort_dataset, cohort_table, cohort_id_array, project_id_array):
+        cohort_project_name = settings.PROJECT_NAME
         # Generate the 'IN' statement string: (%s, %s, ..., %s)
         cohort_id_stmt = ', '.join([str(cohort_id) for cohort_id in cohort_id_array])
         project_id_stmt = ''
@@ -96,14 +97,14 @@ class RPPAFeatureProvider(FeatureDataProvider):
              "WHERE ( gene_name='{gene}' AND protein_name='{protein}' ) "
              "AND SampleBarcode IN ( "
              "    SELECT sample_barcode "
-             "    FROM [{project_name}:{cohort_dataset}.{cohort_table}] "
+             "    FROM [{cohort_project_name}:{cohort_dataset}.{cohort_table}] "
              "    WHERE cohort_id IN ({cohort_id_list})"
              "         AND (project_id IS NULL")
 
         query_template += (" OR project_id IN ({project_id_list})))" if project_id_array is not None else "))")
 
         query = query_template.format(dataset_name=dataset_name, project_name=project_name, table_name=table_name,
-                                      gene=feature_def.gene, protein=feature_def.protein_name,
+                                      gene=feature_def.gene, protein=feature_def.protein_name, cohort_project_name=cohort_project_name,
                                       cohort_dataset=cohort_dataset, cohort_table=cohort_table,
                                       cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt)
 
@@ -140,7 +141,7 @@ class RPPAFeatureProvider(FeatureDataProvider):
 
     def get_data_from_bigquery(self, cohort_id_array, cohort_dataset, cohort_table):
         project_id = settings.BQ_PROJECT_ID
-        project_name = settings.BIGQUERY_PROJECT_NAME
+        project_name = settings.BIGQUERY_DATA_PROJECT_NAME
         dataset_name = settings.BIGQUERY_DATASET_V1
         result = self.do_query(project_id, project_name, dataset_name, self.table_name, self.feature_def,
                                cohort_dataset, cohort_table, cohort_id_array)

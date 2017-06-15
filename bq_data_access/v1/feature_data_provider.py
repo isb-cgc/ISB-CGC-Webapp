@@ -133,7 +133,7 @@ class FeatureDataProvider(object):
 
     def get_data_job_reference(self, cohort_id_array, cohort_dataset, cohort_table, project_id_array):
         project_id = settings.BQ_PROJECT_ID
-        project_name = settings.BIGQUERY_PROJECT_NAME
+        project_name = settings.BIGQUERY_DATA_PROJECT_NAME
         dataset_name = settings.BIGQUERY_DATASET_V1
 
         result = self.submit_query_and_get_job_ref(project_id, project_name, dataset_name, self.table_name,

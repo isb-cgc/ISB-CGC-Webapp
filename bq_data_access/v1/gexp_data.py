@@ -24,6 +24,8 @@ from bq_data_access.v1.errors import FeatureNotFoundException
 from bq_data_access.v1.feature_value_types import ValueType, DataTypes
 from bq_data_access.v1.utils import DurationLogged
 
+from django.conf import settings
+
 import sys
 
 TABLES = [
@@ -109,6 +111,7 @@ class GEXPFeatureProvider(FeatureDataProvider):
         return data_point['value']
 
     def build_query(self, project_name, dataset_name, table_name, feature_def, cohort_dataset, cohort_table, cohort_id_array, project_id_array):
+        cohort_project_name=settings.PROJECT_NAME
         # Generate the 'IN' statement string: (%s, %s, ..., %s)
         cohort_id_stmt = ', '.join([str(cohort_id) for cohort_id in cohort_id_array])
         project_id_stmt = ''
@@ -120,14 +123,14 @@ class GEXPFeatureProvider(FeatureDataProvider):
              "WHERE {gene_label_field}='{gene_symbol}' " \
              "AND SampleBarcode IN ( " \
              "     SELECT sample_barcode " \
-             "     FROM [{project_name}:{cohort_dataset}.{cohort_table}] " \
+             "     FROM [{cohort_project_name}:{cohort_dataset}.{cohort_table}] " \
              "     WHERE cohort_id IN ({cohort_id_list}) " \
              "          AND (project_id IS NULL"
 
         query_template += (" OR project_id IN ({project_id_list})))" if project_id_array is not None else "))")
 
         query = query_template.format(dataset_name=dataset_name, project_name=project_name, table_name=table_name,
-                                      gene_label_field=GENE_LABEL_FIELD,
+                                      gene_label_field=GENE_LABEL_FIELD, cohort_project_name=cohort_project_name,
                                       gene_symbol=feature_def.gene, value_field=feature_def.value_field,
                                       cohort_dataset=cohort_dataset, cohort_table=cohort_table,
                                       cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt)
