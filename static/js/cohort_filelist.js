@@ -301,7 +301,7 @@ require([
 
                     if(self.is(':checked')) {
                         selFiles[self.attr('data-type')][self.attr('value')] = {
-                            'label': self.attr('token-label'),
+                            'label': self.attr('token-label') + ' ['+$('#build :selected').val()+']',
                             'program': self.attr('program'),
                             'build': $('#build :selected').val()
                         };
