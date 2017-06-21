@@ -100,10 +100,12 @@ require([
     var options = {
         showNavigation: true,
         genome: genome_build.toLowerCase(),
-        locus: "EGFR",
+        locus: "TP53",
         tracks: tracks,
         withCredentials: true
     };
+
+    console.debug(JSON.stringify(tracks),JSON.stringify(options));
 
     $('#igv-div').empty();
     igv.browser = null;
