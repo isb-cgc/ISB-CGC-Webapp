@@ -80,12 +80,23 @@ require([
         tracks.push(obj);
     }
 
-    tracks.push({
-        name: "Genes",
-        url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
+    var genes_obj = {
+        name: "Genes: Gencode v18",
+        url: "https://s3.amazonaws.com/igv.broadinstitute.org/data/hg19/genes/gencode.v18.collapsed.bed",
+        indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/data/hg19/genes/gencode.v18.collapsed.bed.idx",
         order: Number.MAX_VALUE,
         displayMode: "EXPANDED"
-    });
+    };
+
+
+    if(row['build'] === 'HG38') {
+        genes_obj.url = 'https://s3.amazonaws.com/igv.broadinstitute.org/data/hg38/gencode.v24.annotation.sorted.gtf.gz';
+        genes_obj.indexURL = 'https://s3.amazonaws.com/igv.broadinstitute.org/data/hg38/gencode.v24.annotation.sorted.gtf.gz.tbi';
+        genes_obj.name = 'Genes: Gencode v24';
+        genes_obj.format = 'gtf';
+    }
+
+    tracks.push(genes_obj);
 
     var options = {
         showNavigation: true,
