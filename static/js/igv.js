@@ -74,7 +74,7 @@ require([
             name: sample_barcode + ': GCS bam file',
             withCredentials: true
         };
-        if(row['program'] === 'TCGA' && row['build'] === 'HG38'){
+        if(row['program'] === 'TCGA' && genome_build === 'HG38'){
             obj.indexURL = bam_path.replace(/\.bam/,'.bai');
         }
         tracks.push(obj);
@@ -88,8 +88,7 @@ require([
         displayMode: "EXPANDED"
     };
 
-
-    if(row['build'] === 'HG38') {
+    if(genome_build === 'HG38') {
         genes_obj.url = 'https://s3.amazonaws.com/igv.broadinstitute.org/data/hg38/gencode.v24.annotation.sorted.gtf.gz';
         genes_obj.indexURL = 'https://s3.amazonaws.com/igv.broadinstitute.org/data/hg38/gencode.v24.annotation.sorted.gtf.gz.tbi';
         genes_obj.name = 'Genes: Gencode v24';
