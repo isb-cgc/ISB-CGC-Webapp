@@ -100,7 +100,7 @@ require([
     var options = {
         showNavigation: true,
         genome: genome_build.toLowerCase(),
-        locus: "TP53",
+        locus: "EGFR",
         tracks: tracks,
         withCredentials: true
     };
