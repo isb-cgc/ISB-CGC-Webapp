@@ -351,7 +351,8 @@ require([
                     }
 
                     // If this has emptied out a program's filter set, hide the modal's subsection for that program
-                    if(createFormFilterSet.find('span').length <= 0) {
+                    // if a new value isn't replacing it
+                    if(createFormFilterSet.find('span').length <= 0 && (!data || !data.forNewVal)) {
                         createFormFilterSet.hide();
                     }
 
