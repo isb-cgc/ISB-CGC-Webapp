@@ -16930,7 +16930,7 @@ var oauth = (function (oauth) {
                     data: null,
                     success: function (resp) {
                         user = resp;
-                        console.log(user);
+                        //console.log(user);
                         //$('#uName').text('Welcome ' + user.name);
                         //$('#imgHolder').attr('src', user.picture);
                     },
@@ -16949,7 +16949,7 @@ var oauth = (function (oauth) {
                 else
                     return results[1];
             },
-			
+			// ISB-CGC 06/21/2017: use igv/google/oauth to log in
 			setRedirectUrl: function(url, clientId) {
                 REDIRECT = url;
                 if (url.substr(url.length-1) != '/') {
