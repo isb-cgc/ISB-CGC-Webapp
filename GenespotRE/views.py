@@ -45,9 +45,7 @@ from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 debug = settings.DEBUG
 logger = logging.getLogger(__name__)
 
-USER_API_URL = settings.BASE_API_URL + '/_ah/api/user_api/v1'
 ACL_GOOGLE_GROUP = settings.ACL_GOOGLE_GROUP
-DBGAP_AUTHENTICATION_LIST_BUCKET = settings.DBGAP_AUTHENTICATION_LIST_BUCKET
 ERA_LOGIN_URL = settings.ERA_LOGIN_URL
 OPEN_ACL_GOOGLE_GROUP = settings.OPEN_ACL_GOOGLE_GROUP
 
