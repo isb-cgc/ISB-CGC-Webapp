@@ -48,6 +48,8 @@ debug = settings.DEBUG
 logger = logging.getLogger(__name__)
 DBGAP_AUTHENTICATION_LIST_BUCKET = settings.DBGAP_AUTHENTICATION_LIST_BUCKET
 DBGAP_AUTHENTICATION_LIST_FILENAME = settings.DBGAP_AUTHENTICATION_LIST_FILENAME
+# TODO: @kleisb this is where you need to provide a method or class which would
+# indicate the ACLs a user can be in
 ACL_GOOGLE_GROUP = settings.ACL_GOOGLE_GROUP
 login_expiration_seconds = settings.LOGIN_EXPIRATION_MINUTES * 60
 COUNTDOWN_SECONDS = login_expiration_seconds + (60 * 15)
@@ -256,6 +258,7 @@ def index(request):
                 # if user is dbGaP authorized, warn message is different
                 warn_message = 'You are reminded that when accessing controlled access information you are bound by the dbGaP TCGA DATA USE CERTIFICATION AGREEMENT (DUCA).' + warn_message
             try:
+                # TODO: For ACL the user is in...
                 result = directory_client.members().get(groupKey=ACL_GOOGLE_GROUP,
                                                         memberKey=user_email).execute(http=http_auth)
                 # if the user is in the google group but isn't dbGaP authorized, delete member from group
@@ -275,6 +278,7 @@ def index(request):
                         "email": user_email,
                         "role": "MEMBER"
                     }
+                    # TODO: For ACL the user is in...
                     result = directory_client.members().insert(
                         groupKey=ACL_GOOGLE_GROUP,
                         body=body
