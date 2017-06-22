@@ -105,8 +105,6 @@ require([
         withCredentials: true
     };
 
-    console.debug(JSON.stringify(tracks),JSON.stringify(options));
-
     $('#igv-div').empty();
     igv.browser = null;
     igv.oauth.google.setRedirectUrl(BASE_URL, service_account);
