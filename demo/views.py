@@ -275,7 +275,7 @@ def index(request):
                             "email": user_email,
                             "role": "MEMBER"
                         }
-                        # TODO: For ACL the user is in...
+
                         result = directory_client.members().insert(
                             groupKey=dataset['acl_google_group'],
                             body=body
