@@ -36,7 +36,7 @@ from visualizations.models import SavedViz
 from cohorts.models import Cohort, Cohort_Perms
 from projects.models import Program
 from workbooks.models import Workbook
-from accounts.models import NIH_User, GoogleProject
+from accounts.models import NIH_User, GoogleProject, UserAuthorizedDatasets
 
 from allauth.socialaccount.models import SocialAccount
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
@@ -133,9 +133,10 @@ def user_detail(request, user_id):
 
         try:
             nih_user = NIH_User.objects.get(user_id=user_id, linked=True)
+            user_auth_datasets = UserAuthorizedDatasets.objects.filter(nih_user=nih_user)
             user_details['NIH_username'] = nih_user.NIH_username
             user_details['NIH_assertion_expiration'] = nih_user.NIH_assertion_expiration
-            user_details['dbGaP_authorized'] = nih_user.dbGaP_authorized and nih_user.active
+            user_details['dbGaP_authorized'] = (len(user_auth_datasets) > 0) and nih_user.active
             user_details['NIH_active'] = nih_user.active
         except (MultipleObjectsReturned, ObjectDoesNotExist), e:
             if type(e) is MultipleObjectsReturned:
