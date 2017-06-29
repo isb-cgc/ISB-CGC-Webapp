@@ -237,34 +237,36 @@ def index(request):
             if len(authorized_datasets) > 0:
                 # if user has access to one or more datasets, warn message is different
                 warn_message = 'You are reminded that when accessing controlled access information you are bound by the dbGaP DATA USE CERTIFICATION AGREEMENT (DUCA) for each dataset.' + warn_message
-            all_datasets = das.get_all_datasets_and_google_groups()
-            # TODO: Check all dataset Google Group ACLs, and if the user is in them but not authorized for them, remove them
-            for dataset in all_datasets:
-                try:
-                    ad = AuthorizedDataset.objects.filter(whitelist_id=dataset.dataset_id,
-                                                          acl_google_group=dataset.google_group_name)
 
+            all_datasets = das.get_all_datasets_and_google_groups()
+
+            for dataset in all_datasets:
+                ad = AuthorizedDataset.objects.filter(whitelist_id=dataset.dataset_id,
+                                                      acl_google_group=dataset.google_group_name)
+                uad = UserAuthorizedDatasets.objecrs.filter(nih_user=nih_user, dataset=ad)
+                dataset_in_auth_set = next((ds for ds in authorized_datasets if (ds.dataset_id == dataset.dataset_id and ds.google_group_name == dataset.google_group_name)), None)
+
+                try:
                     result = directory_client.members().get(groupKey=dataset.google_group_name,
                                                             memberKey=user_email).execute(http=http_auth)
-                    uad = UserAuthorizedDatasets.objecrs.filter(nih_user=nih_user, dataset=ad)
 
                     # If we found them in the ACL but they're not currently authorized for it, remove them from it and the table
-                    if len(result) and not next((ds for ds in authorized_datasets if (ds.dataset_id == dataset.dataset_id and ds.google_group_name == dataset.google_group_name)), None):
+                    if len(result) and not dataset_in_auth_set:
                         directory_client.members().delete(groupKey=dataset.google_group_name,
                                                           memberKey=user_email).execute(http=http_auth)
 
-                    if len(uad) and not next((ds for ds in authorized_datasets if (ds.dataset_id == dataset.dataset_id and ds.google_group_name == dataset.google_group_name)), None):
+                    if len(uad) and not dataset_in_auth_set:
                         uad.delete()
 
-                        logger.warn("User {} was deleted from group {} because they don't have dbGaP authorization.".format(user_email, dataset.google_group_name))
-                        st_logger.write_text_log_entry(
-                            LOG_NAME_ERA_LOGIN_VIEW,
-                            "[WARN] User {} was deleted from group {} because they don't have dbGaP authorization.".format(user_email, dataset.google_group_name)
-                        )
+                    logger.warn("User {} was deleted from group {} because they don't have dbGaP authorization.".format(user_email, dataset.google_group_name))
+                    st_logger.write_text_log_entry(
+                        LOG_NAME_ERA_LOGIN_VIEW,
+                        "[WARN] User {} was deleted from group {} because they don't have dbGaP authorization.".format(user_email, dataset.google_group_name)
+                    )
                 # if the user_email doesn't exist in the google group an HttpError will be thrown...
                 except HttpError:
                     # Check for their need to be in the ACL, and add them
-                    if next((ds for ds in authorized_datasets if (ds.dataset_id == dataset.dataset_id and ds.google_group_name == dataset.google_group_name)), None):
+                    if dataset_in_auth_set:
                         body = {
                             "email": user_email,
                             "role": "MEMBER"
@@ -274,11 +276,13 @@ def index(request):
                             groupKey=dataset.google_group_name,
                             body=body
                         ).execute(http=http_auth)
-                        logger.info(result)
-                        logger.info("User {} added to {}.".format(user_email, dataset.google_group_name))
+                        
                         # Then add then to the database as well
                         if not len(uad):
                             uad = UserAuthorizedDatasets.objects.update_or_create(nih_user=nih_user,dataset=ad)
+
+                        logger.info(result)
+                        logger.info("User {} added to {}.".format(user_email, dataset.google_group_name))
                         st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[STATUS] User {} added to {}.".format(user_email, dataset.google_group_name))
 
             # Add task in queue to deactivate NIH_User entry after NIH_assertion_expiration has passed.
