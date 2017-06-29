@@ -1,10 +1,10 @@
 <!-- Delete Favorite Modal -->
-<div class="modal fade" id="delete-favorite-modal-{{ favorite.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-workbook-header" aria-hidden="true">
+<div class="modal fade" id="delete-favorite-modal-{{ favorite.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-gene-fave-header" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Delete the gene & miRNA favorite "{{ favorite.name|title }}"?</h4>
+                <h4 id="delete-gene-fave-header" class="modal-title">Delete the gene & miRNA favorite "{{ favorite.name|title }}"?</h4>
             </div>
             <form id="delete-workbook" method="POST" action="{% url 'gene_fav_delete' favorite.id %}">
                 {% csrf_token %}
@@ -18,18 +18,18 @@
 </div>
 
 <!-- Create new workbook using favorite Modal -->
-<div class="modal fade" id="new-favorite-workbook-modal-{{ favorite.id }}" tabindex="-1" role="dialog" aria-labelledby="edit-workbook-header" aria-hidden="true">
+<div class="modal fade" id="new-favorite-workbook-modal-{{ favorite.id }}" tabindex="-1" role="dialog" aria-labelledby="edit-gene-fave-header" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Create a new workbook using the gene & miRNA favorite "{{ favorite.name|title }}"</h4>
+                <h4 id="edit-gene-fave-header" class="modal-title">Create a new workbook using the gene & miRNA favorite "{{ favorite.name|title }}"</h4>
             </div>
             <form id="edit-workbook" method="POST" action="{% url 'worksheet_create_with_genes' %}">
                 {% csrf_token %}
                 <div class="modal-body">
-                    <label for="name">Name (required)</label>
-                    <input class="form-control" type="text" name="name" value="{{ favorite.name }} workbook"/>
+                    <label for="list_name">Name (required)</label>
+                    <input id="list_name" class="form-control" type="text" name="name" value="{{ favorite.name }} workbook"/>
                     <input type="hidden" name="gene_list_id" value="{{ favorite.id }}" />
                 </div>
                 <div class="modal-footer">

@@ -148,8 +148,8 @@
                             <div style="display:none" class="{{ type.datatype }} attr-options form-group search-field">
                                 <div class="search-term" data-field="{{ type.datatype }}">
                                     {% for field in type.fields %}
-                                        <label for="{{ field.label }}" class="space-top-15">{{ field.label }} Filter</label>
-                                        <select id="{{ field.label }}" class="form-control field-options {{ field.name }}-options {% if not field.static %}select2{% endif %}" data-field="{{ field.name }}">
+                                        <label for="{{ field.label }}-{{ type.datatype }}" class="space-top-15">{{ field.label }} Filter</label>
+                                        <select id="{{ field.label }}-{{ type.datatype }}" class="form-control field-options {{ field.name }}-options {% if not field.static %}select2{% endif %}" data-field="{{ field.name }}">
                                             {% if field.static %}
                                                 <option value="" disabled selected type="label">Please select an option</option>
                                                 {% for value in field.values %}
