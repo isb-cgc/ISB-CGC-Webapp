@@ -248,7 +248,7 @@ require([
                     var tokenLabel = files[i]['sample']+", "+files[i]['exp_strat']+", "+happy_name(files[i]['platform'])+", "+files[i]['datatype'];
                     var checkbox_inputs = '';
                     var disable = true;
-                    if (files[i]['access'] != 'controlled' || has_access == 'True') {
+                    if (files[i]['access'] != 'controlled' || files[i]['user_access'] == 'True') {
                         disable = false;
                     }
 
