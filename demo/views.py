@@ -276,7 +276,7 @@ def index(request):
                             groupKey=dataset.google_group_name,
                             body=body
                         ).execute(http=http_auth)
-                        
+
                         # Then add then to the database as well
                         if not len(uad):
                             uad = UserAuthorizedDatasets.objects.update_or_create(nih_user=nih_user,dataset=ad)
