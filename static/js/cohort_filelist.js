@@ -56,6 +56,7 @@ require([
                     label: this.gcs_bam[i]['label'],
                     value: i,
                     dataType: "gcs_bam",
+                    'data-build': $('#igv-build :selected').val(),
                     program: this.gcs_bam[i]['program']
                 });
             }
@@ -247,7 +248,7 @@ require([
                     var tokenLabel = files[i]['sample']+", "+files[i]['exp_strat']+", "+happy_name(files[i]['platform'])+", "+files[i]['datatype'];
                     var checkbox_inputs = '';
                     var disable = true;
-                    if (files[i]['access'] != 'controlled' || has_access == 'True') {
+                    if (files[i]['access'] != 'controlled' || files[i]['user_access'] == 'True') {
                         disable = false;
                     }
 
@@ -300,8 +301,9 @@ require([
 
                     if(self.is(':checked')) {
                         selFiles[self.attr('data-type')][self.attr('value')] = {
-                            'label': self.attr('token-label'),
-                            'program': self.attr('program')
+                            'label': self.attr('token-label') + ' ['+$('#build :selected').val()+']',
+                            'program': self.attr('program'),
+                            'build': $('#build :selected').val()
                         };
                         $('#selected-files-tokenfield').hide();
                     } else {
@@ -420,4 +422,22 @@ require([
     $('input[type="submit"]').prop('disabled', true);
     $('input[type="submit"]').hide();
     update_table();
+
+    $('#build').on('change',function(){
+        // Remove any selected files not from this build
+        var new_build = $('#build :selected').val();
+        var selCount = Object.keys(selFiles.gcs_bam).length;
+        for(var i in selFiles.gcs_bam) {
+            if(selFiles.gcs_bam.hasOwnProperty(i)) {
+                if(selFiles.gcs_bam[i].build !== new_build){
+                    delete selFiles.gcs_bam[i];
+                    $('.filelist-panel input[value="'+i+'"').prop('checked',false);
+                }
+            }
+        }
+        if(Object.keys(selFiles.gcs_bam).length !== selCount) {
+            selFileField.tokenfield('setTokens',selFiles.toTokens());
+            update_on_selex_change();
+        }
+    });
 });
