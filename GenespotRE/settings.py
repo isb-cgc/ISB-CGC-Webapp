@@ -484,6 +484,9 @@ LOG_NAME_ERA_LOGIN_VIEW                  = os.environ.get('LOG_NAME_ERA_LOGIN_VI
 # Service account blacklist file path
 SERVICE_ACCOUNT_BLACKLIST_PATH           = os.environ.get('SERVICE_ACCOUNT_BLACKLIST_PATH')
 
+# Dataset configuration file path
+DATASET_CONFIGURATION_PATH               = os.environ.get('DATASET_CONFIGURATION_PATH')
+
 ##############################
 #   Start django-finalware   #
 ##############################
