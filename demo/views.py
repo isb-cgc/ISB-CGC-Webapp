@@ -21,7 +21,6 @@ from django.http import (HttpResponse, HttpResponseRedirect,
 from django.shortcuts import render_to_response, redirect
 from django.contrib import messages
 from django.template import RequestContext
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
@@ -30,15 +29,14 @@ from onelogin.saml2.utils import OneLogin_Saml2_Utils
 
 from googleapiclient.errors import HttpError
 
-from google_helpers.storage_service import get_storage_resource
 from google_helpers.directory_service import get_directory_resource
 from google_helpers.pubsub_service import get_pubsub_service, get_full_topic_name
 from google_helpers.stackdriver import StackDriverLogger
-from accounts.models import NIH_User
+from accounts.models import NIH_User, UserAuthorizedDatasets, AuthorizedDataset
+from dataset_utils.dataset_config import DatasetAccessSupport
 
 import base64
 import sys
-import csv_scanner
 from json import dumps as json_dumps
 import logging
 import datetime
@@ -46,9 +44,6 @@ import pytz
 
 debug = settings.DEBUG
 logger = logging.getLogger(__name__)
-# TODO: @kleisb this is where you need to provide a method or class which would
-# indicate the ACLs a user can be in
-ACL_GOOGLE_GROUP = settings.ACL_GOOGLE_GROUP
 login_expiration_seconds = settings.LOGIN_EXPIRATION_MINUTES * 60
 COUNTDOWN_SECONDS = login_expiration_seconds + (60 * 15)
 
@@ -79,12 +74,6 @@ def prepare_django_request(request):
 
     logger.info("[STATUS] prepared request: "+result.__str__())
     return result
-
-
-# TODO: @kleisb This should be replaced with a method or class which takes a name/id and
-# returns a set of datasets for that person
-def check_NIH_authorization_list(nameid=None):
-    return []
 
 
 @login_required
@@ -143,6 +132,7 @@ def index(request):
 
         if not errors:
             try:
+                das = DatasetAccessSupport.from_webapp_django_settings()
                 st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[STATUS] processing 'acs' response")
 
                 request.session['samlUserdata'] = auth.get_attributes()
@@ -206,9 +196,7 @@ def index(request):
             try:
                 st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[STATUS] Updating Django model")
 
-                storage_client = get_storage_resource()
-                # TODO: this should return a full list of datasets and ACLs the user can be on
-                authorized_datasets = check_NIH_authorization_list(NIH_username)
+                authorized_datasets = das.get_datasets_for_era_login(user_email)
 
                 saml_response = None if 'SAMLResponse' not in req['post_data'] else req['post_data']['SAMLResponse']
                 saml_response = saml_response.replace('\r\n', '')
@@ -249,40 +237,49 @@ def index(request):
             if len(authorized_datasets) > 0:
                 # if user has access to one or more datasets, warn message is different
                 warn_message = 'You are reminded that when accessing controlled access information you are bound by the dbGaP DATA USE CERTIFICATION AGREEMENT (DUCA) for each dataset.' + warn_message
-            all_datasets = check_NIH_authorization_list()
+            all_datasets = das.get_all_datasets_and_google_groups()
             # TODO: Check all dataset Google Group ACLs, and if the user is in them but not authorized for them, remove them
             for dataset in all_datasets:
                 try:
-                    result = directory_client.members().get(groupKey=dataset['acl_google_group'],
-                                                            memberKey=user_email).execute(http=http_auth)
+                    ad = AuthorizedDataset.objects.filter(whitelist_id=dataset.dataset_id,
+                                                          acl_google_group=dataset.google_group_name)
 
-                    # If we found them in the ACL but they're not currently authorized for it, remove them
-                    if len(result) and dataset not in authorized_datasets:
-                        directory_client.members().delete(groupKey=dataset['acl_google_group'],
+                    result = directory_client.members().get(groupKey=dataset.google_group_name,
+                                                            memberKey=user_email).execute(http=http_auth)
+                    uad = UserAuthorizedDatasets.objecrs.filter(nih_user=nih_user, dataset=ad)
+
+                    # If we found them in the ACL but they're not currently authorized for it, remove them from it and the table
+                    if len(result) and not next((ds for ds in authorized_datasets if (ds.dataset_id == dataset.dataset_id and ds.google_group_name == dataset.google_group_name)), None):
+                        directory_client.members().delete(groupKey=dataset.google_group_name,
                                                           memberKey=user_email).execute(http=http_auth)
 
+                    if len(uad) and not next((ds for ds in authorized_datasets if (ds.dataset_id == dataset.dataset_id and ds.google_group_name == dataset.google_group_name)), None):
+                        uad.delete()
 
-                        logger.warn("User {} was deleted from group {} because they don't have dbGaP authorization.".format(user_email, dataset['acl_google_group']))
+                        logger.warn("User {} was deleted from group {} because they don't have dbGaP authorization.".format(user_email, dataset.google_group_name))
                         st_logger.write_text_log_entry(
                             LOG_NAME_ERA_LOGIN_VIEW,
-                            "[WARN] User {} was deleted from group {} because they don't have dbGaP authorization.".format(user_email, dataset['acl_google_group'])
+                            "[WARN] User {} was deleted from group {} because they don't have dbGaP authorization.".format(user_email, dataset.google_group_name)
                         )
                 # if the user_email doesn't exist in the google group an HttpError will be thrown...
                 except HttpError:
                     # Check for their need to be in the ACL, and add them
-                    if dataset in authorized_datasets:
+                    if next((ds for ds in authorized_datasets if (ds.dataset_id == dataset.dataset_id and ds.google_group_name == dataset.google_group_name)), None):
                         body = {
                             "email": user_email,
                             "role": "MEMBER"
                         }
 
                         result = directory_client.members().insert(
-                            groupKey=dataset['acl_google_group'],
+                            groupKey=dataset.google_group_name,
                             body=body
                         ).execute(http=http_auth)
                         logger.info(result)
-                        logger.info("User {} added to {}.".format(user_email, dataset['acl_google_group']))
-                        st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[STATUS] User {} added to {}.".format(user_email, dataset['acl_google_group']))
+                        logger.info("User {} added to {}.".format(user_email, dataset.google_group_name))
+                        # Then add then to the database as well
+                        if not len(uad):
+                            uad = UserAuthorizedDatasets.objects.update_or_create(nih_user=nih_user,dataset=ad)
+                        st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[STATUS] User {} added to {}.".format(user_email, dataset.google_group_name))
 
             # Add task in queue to deactivate NIH_User entry after NIH_assertion_expiration has passed.
             try:
