@@ -30,6 +30,7 @@ BASE_DIR                = os.path.abspath(os.path.join(os.path.dirname(__file__)
 SHARED_SOURCE_DIRECTORIES = [
     'ISB-CGC-Common',
     'ISB-CGC-API',
+    'ISB-CGC-Cron',
 ]
 
 # Add the shared Django application subdirectory to the Python module search path
@@ -53,8 +54,8 @@ DATABASES = {'default': {
     'HOST': '127.0.0.1',
     'PORT': 3306,
     'NAME': os.environ.get('DATABASE_NAME', ''),
-    'USER': os.environ.get('DATABASE_USER'),
-    'PASSWORD': os.environ.get('DATABASE_PASSWORD')
+    'USER': os.environ.get('MYSQL_ROOT_USER'),
+    'PASSWORD': os.environ.get('MYSQL_ROOT_PASSWORD')
 }}
 
 USE_CLOUD_STORAGE           = os.environ.get('USE_CLOUD_STORAGE', 'False')
@@ -271,6 +272,12 @@ SOCIALACCOUNT_PROVIDERS = \
         }
     }
 
+
+# Service account blacklist file path
+SERVICE_ACCOUNT_BLACKLIST_PATH           = os.environ.get('SERVICE_ACCOUNT_BLACKLIST_PATH')
+
+# Dataset configuration file path
+DATASET_CONFIGURATION_PATH               = os.environ.get('DATASET_CONFIGURATION_PATH')
 
 ##########################
 #   End django-allauth   #
