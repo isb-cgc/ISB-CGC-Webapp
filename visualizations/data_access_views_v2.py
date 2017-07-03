@@ -124,6 +124,7 @@ def data_access_for_plot(request):
         y_id = request.GET.get('y_id', None)
         c_id = request.GET.get('c_id', None)
         try:
+            # TODO Use jsonschema to validate logTransform object
             logTransform = json.loads(request.GET.get('log_transform', None))
         except Exception as e:
             print >> sys.stdout, "[WARNING] Log transform parameter not supplied"
