@@ -16,7 +16,7 @@ limitations under the License.
 
 """
 
-import logging as logger
+import logging
 import traceback
 import sys
 
@@ -29,6 +29,9 @@ from bq_data_access.v1.seqpeek.seqpeek_maf_formatter import SeqPeekMAFDataFormat
 from bq_data_access.v1.seqpeek_maf_data import SeqPeekDataProvider
 from bq_data_access.v1.data_access import ProviderClassQueryDescription
 from visualizations.data_access_views import get_confirmed_project_ids_for_cohorts
+
+
+logger = logging.getLogger(__name__)
 
 
 def build_gnab_feature_id(gene_label):
