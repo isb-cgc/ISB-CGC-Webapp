@@ -40,7 +40,6 @@ for directory_name in SHARED_SOURCE_DIRECTORIES:
 DEBUG                   = (os.environ.get('DEBUG', 'False') == 'True')
 print >> sys.stdout, "[STATUS] DEBUG mode is "+str(DEBUG)
 
-# ALLOWED_HOSTS = list(set(os.environ.get('ALLOWED_HOST', 'localhost').split(',') + ['localhost', '127.0.0.1', '[::1]', gethostname(), gethostbyname(gethostname()),]))
 # Testing health checks problem
 ALLOWED_HOSTS = list(set(os.environ.get('ALLOWED_HOST', 'localhost').split(',') + ['localhost', '127.0.0.1', '[::1]', gethostname(), gethostbyname(gethostname()),]))
 #ALLOWED_HOSTS = ['*']
