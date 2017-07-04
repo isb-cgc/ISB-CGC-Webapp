@@ -56,11 +56,13 @@
                             </div>
                             <div id="datasets-select-div" style="display:none;">
                                 Which dataset(s) would you like to use?
-                                <ul class="form-control">
+                                <ul class="dataset-list">
                                     {% for dataset in authorized_datasets %}
-                                        <li><label>
-                                            <input type="checkbox" name="datasets" value="{{ dataset.id }}">{{ dataset.name }}
-                                        </label></li>
+                                        <li class="checkbox">
+                                            <label>
+                                                <input type="checkbox" name="datasets" value="{{ dataset.id }}">{{ dataset.name }}
+                                            </label>
+                                        </li>
                                     {% endfor %}
                                 </ul>
                             </div>

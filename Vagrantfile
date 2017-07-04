@@ -12,6 +12,9 @@ Vagrant.configure(2) do |config|
   # Map Common for the web application
   config.vm.synced_folder "../ISB-CGC-Common", "/home/vagrant/www/ISB-CGC-Common"
 
+  # Map Cron for the web application
+  config.vm.synced_folder "../ISB-CGC-Cron", "/home/vagrant/www/ISB-CGC-Cron"
+
   config.vm.provision "shell", path: 'shell/install-deps.sh'
   config.vm.provision "shell", path: 'shell/create-database.sh'
   config.vm.provision "shell", path: 'shell/database-setup.sh'

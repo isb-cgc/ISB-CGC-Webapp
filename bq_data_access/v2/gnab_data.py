@@ -25,6 +25,8 @@ from bq_data_access.v2.utils import DurationLogged
 from bq_data_access.data_types.gnab import BIGQUERY_CONFIG
 from scripts.feature_def_gen.gnab_features import GNABDataSourceConfig
 
+logger = logging.getLogger(__name__)
+
 GNAB_FEATURE_TYPE = 'GNAB'
 IDENTIFIER_COLUMN_NAME = 'sample_id'
 
@@ -129,7 +131,7 @@ class GNABDataQueryHandler(object):
                                       brk='\n')
 
 
-        logging.debug("BQ_QUERY_GNAB: " + query)
+        logger.debug("BQ_QUERY_GNAB: " + query)
         return query, True
 
     def build_query(self, project_set, cohort_table, cohort_id_array, project_id_array):

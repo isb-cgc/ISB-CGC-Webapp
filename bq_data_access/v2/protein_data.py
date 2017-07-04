@@ -25,6 +25,7 @@ from bq_data_access.v2.utils import DurationLogged
 from bq_data_access.data_types.rppa import BIGQUERY_CONFIG
 from scripts.feature_def_gen.protein_features import RPPADataSourceConfig
 
+logger = logging.getLogger(__name__)
 
 RPPA_FEATURE_TYPE = 'RPPA'
 
@@ -117,7 +118,7 @@ class RPPADataQueryHandler(object):
                                       cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt,
                                       brk='\n')
 
-        logging.debug("BQ_QUERY_RPPA: " + query)
+        logger.debug("BQ_QUERY_RPPA: " + query)
         return query, True
 
     def build_query(self, project_set, cohort_table, cohort_id_array, project_id_array):
