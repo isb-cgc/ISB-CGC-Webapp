@@ -25,6 +25,9 @@ from bq_data_access.v2.feature_id_utils import FeatureProviderFactory
 from bq_data_access.v2.errors import FeatureNotFoundException
 
 
+logger = logging.getLogger(__name__)
+
+
 def is_valid_feature_identifier(feature_id):
     """
     Answers if given internal feature identifier is valid.
@@ -46,7 +49,8 @@ def is_valid_feature_identifier(feature_id):
         # since is_valid is already False.
         pass
     except Exception as e:
-        print >> sys.stdout, traceback.format_exc()
+        logger.error("Unrecognized feature ID: '{}'".format(feature_id))
+        logger.exception(e)
     finally:
         return is_valid
 

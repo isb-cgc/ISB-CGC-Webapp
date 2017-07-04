@@ -64,6 +64,7 @@ class METHDataSourceConfig(object):
 
     def __init__(self, methylation_annotation_table_id, supported_genomic_builds, table_template):
         self.methylation_annotation_table_id = methylation_annotation_table_id
+        # TODO Remove "supported_genomic_builds" if not needed
         self.supported_genomic_builds = supported_genomic_builds
 
         self.data_table_list = []
