@@ -33,7 +33,7 @@ from google_helpers.directory_service import get_directory_resource
 from google_helpers.pubsub_service import get_pubsub_service, get_full_topic_name
 from google_helpers.stackdriver import StackDriverLogger
 from accounts.models import NIH_User, UserAuthorizedDatasets, AuthorizedDataset
-from dataset_utils.dataset_config import DatasetAccessSupport
+from dataset_utils.dataset_access_support_factory import DatasetAccessSupportFactory
 
 import base64
 import sys
@@ -132,7 +132,7 @@ def index(request):
 
         if not errors:
             try:
-                das = DatasetAccessSupport.from_webapp_django_settings()
+                das = DatasetAccessSupportFactory.from_webapp_django_settings()
                 st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[STATUS] processing 'acs' response")
 
                 request.session['samlUserdata'] = auth.get_attributes()
