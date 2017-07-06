@@ -134,6 +134,7 @@ def index(request):
 
             if not errors:
                 das = DatasetAccessSupportFactory.from_webapp_django_settings()
+                authorized_datasets = []
                 try:
                     st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[STATUS] processing 'acs' response")
 
