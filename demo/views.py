@@ -207,6 +207,7 @@ def index(request):
                     st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[STATUS] Updating Django model")
 
                     authorized_datasets = das.get_datasets_for_era_login(user_email)
+                    print >> sys.stdout, "[STATUS] Auth datasets: "+str(authorized_datasets)
 
                     saml_response = None if 'SAMLResponse' not in req['post_data'] else req['post_data']['SAMLResponse']
                     saml_response = saml_response.replace('\r\n', '')
@@ -245,6 +246,7 @@ def index(request):
                 except Exception as e:
                     st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW,
                                                    "[ERROR] Exception while finding user email: {}".format(str(e)))
+                    logger.error("[ERROR] Exception while finding user email: ")
                     logger.exception(e)
 
                 if len(authorized_datasets) > 0:
@@ -252,6 +254,8 @@ def index(request):
                     warn_message = 'You are reminded that when accessing controlled access information you are bound by the dbGaP DATA USE CERTIFICATION AGREEMENT (DUCA) for each dataset.' + warn_message
 
                 all_datasets = das.get_all_datasets_and_google_groups()
+
+                print >> sys.stdout, "[STATUS] All datasets: "+str(all_datasets)
 
                 for dataset in all_datasets:
                     ad = AuthorizedDataset.objects.filter(whitelist_id=dataset.dataset_id,
