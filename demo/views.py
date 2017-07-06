@@ -133,8 +133,8 @@ def index(request):
             st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[STATUS] no errors in 'auth' object")
 
             if not errors:
+                das = DatasetAccessSupportFactory.from_webapp_django_settings()
                 try:
-                    das = DatasetAccessSupportFactory.from_webapp_django_settings()
                     st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[STATUS] processing 'acs' response")
 
                     request.session['samlUserdata'] = auth.get_attributes()
@@ -260,7 +260,7 @@ def index(request):
                 for dataset in all_datasets:
                     ad = AuthorizedDataset.objects.filter(whitelist_id=dataset.dataset_id,
                                                           acl_google_group=dataset.google_group_name)
-                    uad = UserAuthorizedDatasets.objecrs.filter(nih_user=nih_user, dataset=ad)
+                    uad = UserAuthorizedDatasets.objects.filter(nih_user=nih_user, dataset=ad)
                     dataset_in_auth_set = next((ds for ds in authorized_datasets if (
                         ds.dataset_id == dataset.dataset_id and ds.google_group_name == dataset.google_group_name)), None)
 
