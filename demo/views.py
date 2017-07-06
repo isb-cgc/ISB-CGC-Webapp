@@ -133,8 +133,8 @@ def index(request):
             st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[STATUS] no errors in 'auth' object")
 
             if not errors:
+                das = DatasetAccessSupportFactory.from_webapp_django_settings()
                 try:
-                    das = DatasetAccessSupportFactory.from_webapp_django_settings()
                     st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[STATUS] processing 'acs' response")
 
                     request.session['samlUserdata'] = auth.get_attributes()
@@ -207,6 +207,7 @@ def index(request):
                     st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[STATUS] Updating Django model")
 
                     authorized_datasets = das.get_datasets_for_era_login(user_email)
+                    print >> sys.stdout, "[STATUS] Auth datasets: "+str(authorized_datasets)
 
                     saml_response = None if 'SAMLResponse' not in req['post_data'] else req['post_data']['SAMLResponse']
                     saml_response = saml_response.replace('\r\n', '')
@@ -245,6 +246,7 @@ def index(request):
                 except Exception as e:
                     st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW,
                                                    "[ERROR] Exception while finding user email: {}".format(str(e)))
+                    logger.error("[ERROR] Exception while finding user email: ")
                     logger.exception(e)
 
                 if len(authorized_datasets) > 0:
@@ -253,10 +255,12 @@ def index(request):
 
                 all_datasets = das.get_all_datasets_and_google_groups()
 
+                print >> sys.stdout, "[STATUS] All datasets: "+str(all_datasets)
+
                 for dataset in all_datasets:
                     ad = AuthorizedDataset.objects.filter(whitelist_id=dataset.dataset_id,
                                                           acl_google_group=dataset.google_group_name)
-                    uad = UserAuthorizedDatasets.objecrs.filter(nih_user=nih_user, dataset=ad)
+                    uad = UserAuthorizedDatasets.objects.filter(nih_user=nih_user, dataset=ad)
                     dataset_in_auth_set = next((ds for ds in authorized_datasets if (
                         ds.dataset_id == dataset.dataset_id and ds.google_group_name == dataset.google_group_name)), None)
 
