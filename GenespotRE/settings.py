@@ -374,6 +374,21 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
+        'dataset_utils': {
+            'handlers': ['console_dev', 'console_prod'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'google_helpers': {
+            'handlers': ['console_dev', 'console_prod'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'data_upload': {
+            'handlers': ['console_dev', 'console_prod'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
     },
 }
 
