@@ -260,6 +260,7 @@ def index(request):
                 print >> sys.stdout, "[STATUS] All datasets: "+str(all_datasets)
 
                 for dataset in all_datasets:
+                    ad = None
                     try:
                         ad = AuthorizedDataset.objects.get(whitelist_id=dataset.dataset_id,
                                                            acl_google_group=dataset.google_group_name)
@@ -270,8 +271,9 @@ def index(request):
                         )
                         continue
                     uad = UserAuthorizedDatasets.objects.filter(nih_user=nih_user, authorized_dataset=ad)
-                    dataset_in_auth_set = next((ds for ds in authorized_datasets if (
-                        ds.dataset_id == dataset.dataset_id and ds.google_group_name == dataset.google_group_name)), None)
+                    dataset_in_auth_set = next((ds for ds in authorized_datasets if (ds.dataset_id == dataset.dataset_id and ds.google_group_name == dataset.google_group_name)), None)
+
+                    logger.debug("In for datasets, %s was in auth set: %s" % (dataset.dataset_id, ('True' if dataset_in_auth_set else 'False')))
 
                     try:
                         result = directory_client.members().get(groupKey=dataset.google_group_name,
