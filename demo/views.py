@@ -260,6 +260,7 @@ def index(request):
                 print >> sys.stdout, "[STATUS] All datasets: "+str(all_datasets)
 
                 for dataset in all_datasets:
+                    ad = None
                     try:
                         ad = AuthorizedDataset.objects.get(whitelist_id=dataset.dataset_id,
                                                            acl_google_group=dataset.google_group_name)
@@ -269,9 +270,11 @@ def index(request):
                              "found for this ID and Google Group Name in the database: %s, %s") % (dataset.dataset_id, dataset.google_group_name)
                         )
                         continue
+
                     uad = UserAuthorizedDatasets.objects.filter(nih_user=nih_user, authorized_dataset=ad)
-                    dataset_in_auth_set = next((ds for ds in authorized_datasets if (
-                        ds.dataset_id == dataset.dataset_id and ds.google_group_name == dataset.google_group_name)), None)
+                    dataset_in_auth_set = next((ds for ds in authorized_datasets if (ds.dataset_id == dataset.dataset_id and ds.google_group_name == dataset.google_group_name)), None)
+
+                    logger.debug("In for datasets, %s was in auth set: %s" % (dataset.dataset_id, ('True' if dataset_in_auth_set else 'False')))
 
                     try:
                         result = directory_client.members().get(groupKey=dataset.google_group_name,
@@ -369,16 +372,12 @@ def index(request):
     except Exception as e:
         logger.error("[ERROR] While accessing views/index: ")
         logger.exception(e)
+        messages.error(request, "There was an error when attempting to log in/out - please contact an administrator.")
         st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW,
                                    "[ERROR] While accessing views/index: {}".format(str(e)))
 
-    return render_to_response('demo/index.html',
-                              {'errors': errors,
-                               'not_auth_warn': not_auth_warn,
-                               'success_slo': success_slo,
-                               'attributes': attributes,
-                               'paint_logout': paint_logout},
-                              context_instance=RequestContext(request))
+    # if we've made it here, it's likely an error state - go back to the user's detail page
+    return HttpResponseRedirect(reverse('user_detail', args=[request.user.id]))
 
 
 def attrs(request):
