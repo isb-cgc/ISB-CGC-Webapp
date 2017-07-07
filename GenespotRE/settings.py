@@ -321,6 +321,14 @@ LOGGING = {
             '()': 'django.utils.log.RequireDebugTrue'
         },
     },
+    'formatters': {
+        'verbose': {
+            'format': '[%(levelname)s] @%(asctime)s in %(module)s/%(process)d/%(thread)d - %(message)s'
+        },
+        'simple': {
+            'format': '[%(levelname)s] @%(asctime)s in %(module)s: %(message)s'
+        },
+    },
     'handlers': {
         'mail_admins': {
             'level': 'ERROR',
@@ -330,18 +338,25 @@ LOGGING = {
         'console_dev': {
             'level': 'DEBUG',
             'filters': ['require_debug_true'],
-            'class': 'logging.StreamHandler'
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
         },
         'console_prod': {
             'level': 'DEBUG',
             'filters': ['require_debug_false'],
-            'class': 'logging.StreamHandler'
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
         },
     },
     'loggers': {
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
+            'propagate': True,
+        },
+        'main_logger': {
+            'handlers': ['console_dev', 'console_prod'],
+            'level': 'DEBUG',
             'propagate': True,
         },
         'cohorts': {
