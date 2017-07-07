@@ -344,6 +344,11 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
+        'main_logger': {
+            'handlers': ['console_dev', 'console_prod'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
         'cohorts': {
             'handlers': ['console_dev', 'console_prod'],
             'level': 'DEBUG',
