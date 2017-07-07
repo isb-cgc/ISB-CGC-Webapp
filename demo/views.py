@@ -270,8 +270,11 @@ def index(request):
                              "found for this ID and Google Group Name in the database: %s, %s") % (dataset.dataset_id, dataset.google_group_name)
                         )
                         continue
+
                     uad = UserAuthorizedDatasets.objects.filter(nih_user=nih_user, authorized_dataset=ad)
                     dataset_in_auth_set = next((ds for ds in authorized_datasets if (ds.dataset_id == dataset.dataset_id and ds.google_group_name == dataset.google_group_name)), None)
+                    if dataset_in_auth_set:
+                        logger.debug("Dataset %s found in auth set."%dataset.dataset_id)
 
                     logger.debug("In for datasets, %s was in auth set: %s" % (dataset.dataset_id, ('True' if dataset_in_auth_set else 'False')))
 
