@@ -16,6 +16,7 @@ limitations under the License.
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.http import (HttpResponse, HttpResponseRedirect,
                          HttpResponseServerError)
 from django.shortcuts import render_to_response, redirect
@@ -43,7 +44,7 @@ import datetime
 import pytz
 
 debug = settings.DEBUG
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('main_logger')
 login_expiration_seconds = settings.LOGIN_EXPIRATION_MINUTES * 60
 COUNTDOWN_SECONDS = login_expiration_seconds + (60 * 15)
 
@@ -259,8 +260,15 @@ def index(request):
                 print >> sys.stdout, "[STATUS] All datasets: "+str(all_datasets)
 
                 for dataset in all_datasets:
-                    ad = AuthorizedDataset.objects.filter(whitelist_id=dataset.dataset_id,
-                                                          acl_google_group=dataset.google_group_name)
+                    try:
+                        ad = AuthorizedDataset.objects.get(whitelist_id=dataset.dataset_id,
+                                                           acl_google_group=dataset.google_group_name)
+                    except (ObjectDoesNotExist, MultipleObjectsReturned) as e:
+                        logger.error((
+                             "[ERROR] " + ("More than one dataset " if type(e) is MultipleObjectsReturned else "No dataset ") +
+                             "found for this ID and Google Group Name in the database: %s, %s") % (dataset.dataset_id, dataset.google_group_name)
+                        )
+                        continue
                     uad = UserAuthorizedDatasets.objects.filter(nih_user=nih_user, authorized_dataset=ad)
                     dataset_in_auth_set = next((ds for ds in authorized_datasets if (
                         ds.dataset_id == dataset.dataset_id and ds.google_group_name == dataset.google_group_name)), None)
@@ -277,12 +285,16 @@ def index(request):
                         if len(uad) and not dataset_in_auth_set:
                             uad.delete()
 
-                        logger.warn("User {} was deleted from group {} because they don't have dbGaP authorization.".format(
-                            user_email, dataset.google_group_name))
+                        logger.warn(
+                            "User {} was deleted from group {} because they don't have dbGaP authorization.".format(
+                                user_email, dataset.google_group_name
+                            )
+                        )
                         st_logger.write_text_log_entry(
                             LOG_NAME_ERA_LOGIN_VIEW,
                             "[WARN] User {} was deleted from group {} because they don't have dbGaP authorization.".format(
-                                user_email, dataset.google_group_name)
+                                user_email, dataset.google_group_name
+                            )
                         )
                     # if the user_email doesn't exist in the google group an HttpError will be thrown...
                     except HttpError:
@@ -304,9 +316,7 @@ def index(request):
 
                             logger.info(result)
                             logger.info("User {} added to {}.".format(user_email, dataset.google_group_name))
-                            st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW,
-                                                           "[STATUS] User {} added to {}.".format(user_email,
-                                                                                                  dataset.google_group_name))
+                            st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[STATUS] User {} added to {}.".format(user_email, dataset.google_group_name))
 
                 # Add task in queue to deactivate NIH_User entry after NIH_assertion_expiration has passed.
                 try:
