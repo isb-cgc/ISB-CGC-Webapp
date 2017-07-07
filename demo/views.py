@@ -369,16 +369,12 @@ def index(request):
     except Exception as e:
         logger.error("[ERROR] While accessing views/index: ")
         logger.exception(e)
+        messages.error(request, "There was an error when attempting to log in/out - please contact an administrator.")
         st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW,
                                    "[ERROR] While accessing views/index: {}".format(str(e)))
 
-    return render_to_response('demo/index.html',
-                              {'errors': errors,
-                               'not_auth_warn': not_auth_warn,
-                               'success_slo': success_slo,
-                               'attributes': attributes,
-                               'paint_logout': paint_logout},
-                              context_instance=RequestContext(request))
+    # if we've made it here, it's likely an error state - go back to the user's detail page
+    return HttpResponseRedirect(reverse('user_detail', args=[request.user.id]))
 
 
 def attrs(request):
