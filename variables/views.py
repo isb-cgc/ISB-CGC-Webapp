@@ -291,9 +291,9 @@ def variable_fav_delete(request, variable_fav_id):
             if variable_fav_model.user == request.user :
                 name = variable_fav_model.name
                 variable_fav_model.destroy()
-                messages.info(request, 'the variable favorite \"'+name+'\" has been deleted')
+                messages.info(request, 'The variable favorite \"'+name+'\" has been deleted.')
             else :
-                messages.error(request, 'You do not have permission to update this variable favorite list')
+                messages.error(request, 'You do not have permission to update this variable favorite list.')
         except ObjectDoesNotExist:
             messages.error(request, 'The variable list you want does not exist.')
 
@@ -303,14 +303,14 @@ def variable_fav_delete(request, variable_fav_id):
 @login_required
 def variable_fav_copy(request, variable_fav_id):
     redirect_url = reverse('variables')
-    if variable_fav_id :
+    if variable_fav_id:
         try:
             variable_fav_model = VariableFavorite.objects.get(id=variable_fav_id)
-            if variable_fav_model.user == request.user :
+            if variable_fav_model.user == request.user:
                 new_model = variable_fav_model.copy()
-                messages.info(request, 'the variable favorite \"'+new_model.name+'\" has been created')
-            else :
-                messages.error(request, 'You do not have permission to update this variable favorite list')
+                messages.info(request, 'The variable favorite \"'+new_model.name+'\" has been copies from \"'+variable_fav_model.name+'\".')
+            else:
+                messages.error(request, 'You do not have permission to copy this variable favorite list.')
         except ObjectDoesNotExist:
             messages.error(request, 'The variable list you want does not exist.')
 
