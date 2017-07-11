@@ -284,21 +284,26 @@ def index(request):
                         if len(result) and not dataset_in_auth_set:
                             directory_client.members().delete(groupKey=dataset.google_group_name,
                                                               memberKey=user_email).execute(http=http_auth)
+                            logger.warn(
+                                "User {} was deleted from group {} because they don't have dbGaP authorization.".format(
+                                    user_email, dataset.google_group_name
+                                )
+                            )
+                            st_logger.write_text_log_entry(
+                                LOG_NAME_ERA_LOGIN_VIEW,
+                                "[WARN] User {} was deleted from group {} because they don't have dbGaP authorization.".format(
+                                    user_email, dataset.google_group_name
+                                )
+                            )
 
                         if len(uad) and not dataset_in_auth_set:
                             uad.delete()
-
-                        logger.warn(
-                            "User {} was deleted from group {} because they don't have dbGaP authorization.".format(
-                                user_email, dataset.google_group_name
-                            )
-                        )
-                        st_logger.write_text_log_entry(
-                            LOG_NAME_ERA_LOGIN_VIEW,
-                            "[WARN] User {} was deleted from group {} because they don't have dbGaP authorization.".format(
-                                user_email, dataset.google_group_name
-                            )
-                        )
+                        # Sometimes an account is in the Google Group but not the database - add them if they should
+                        # have access
+                        elif not len(uad) and len(result) and dataset_in_auth_set:
+                            uad = UserAuthorizedDatasets.objects.update_or_create(nih_user=nih_user,
+                                                                                  authorized_dataset=ad)
+                                   
                     # if the user_email doesn't exist in the google group an HttpError will be thrown...
                     except HttpError:
                         # Check for their need to be in the ACL, and add them
