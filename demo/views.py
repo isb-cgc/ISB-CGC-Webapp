@@ -302,18 +302,22 @@ def index(request):
                         # have access
                         elif not len(uad) and len(result) and dataset_in_auth_set:
                             logger.info(
-                                "User {} was was found in group {} but not the ddatabase--adding them.".format(
+                                "User {} was was found in group {} but not the database--adding them.".format(
                                     user_email, dataset.google_group_name
                                 )
                             )
                             st_logger.write_text_log_entry(
                                 LOG_NAME_ERA_LOGIN_VIEW,
-                                "[WARN] User {} was was found in group {} but not the ddatabase--adding them.".format(
+                                "[WARN] User {} was was found in group {} but not the database--adding them.".format(
                                     user_email, dataset.google_group_name
                                 )
                             )
-                            uad = UserAuthorizedDatasets.objects.update_or_create(nih_user=nih_user,
+                            uad, created = UserAuthorizedDatasets.objects.update_or_create(nih_user=nih_user,
                                                                                   authorized_dataset=ad)
+                            if not created:
+                                logger.warn("[WARNING] Unable to create entry for user {} and dataset {}.".format(user_email,ad.whitelist_id))
+                            else:
+                                logger.info("[STATUS] Added user {} to dataset {}.".format(user_email, ad.whitelist_id))
 
                     # if the user_email doesn't exist in the google group an HttpError will be thrown...
                     except HttpError:
@@ -331,8 +335,11 @@ def index(request):
 
                             # Then add then to the database as well
                             if not len(uad):
-                                uad = UserAuthorizedDatasets.objects.update_or_create(nih_user=nih_user, authorized_dataset=ad)
-                                logger.info("[STATUS] Added user {} to dataset {}.".format(user_email,ad.whitelist_id))
+                                uad, created = UserAuthorizedDatasets.objects.update_or_create(nih_user=nih_user, authorized_dataset=ad)
+                                if not created:
+                                    logger.warn("[WARNING] Unable to create entry for user {} and dataset {}.".format(user_email,ad.whitelist_id))
+                                else:
+                                    logger.info("[STATUS] Added user {} to dataset {}.".format(user_email,ad.whitelist_id))
 
                             logger.info(result)
                             logger.info("User {} added to {}.".format(user_email, dataset.google_group_name))
