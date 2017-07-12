@@ -301,9 +301,20 @@ def index(request):
                         # Sometimes an account is in the Google Group but not the database - add them if they should
                         # have access
                         elif not len(uad) and len(result) and dataset_in_auth_set:
+                            logger.info(
+                                "User {} was was found in group {} but not the ddatabase--adding them.".format(
+                                    user_email, dataset.google_group_name
+                                )
+                            )
+                            st_logger.write_text_log_entry(
+                                LOG_NAME_ERA_LOGIN_VIEW,
+                                "[WARN] User {} was was found in group {} but not the ddatabase--adding them.".format(
+                                    user_email, dataset.google_group_name
+                                )
+                            )
                             uad = UserAuthorizedDatasets.objects.update_or_create(nih_user=nih_user,
                                                                                   authorized_dataset=ad)
-                                   
+
                     # if the user_email doesn't exist in the google group an HttpError will be thrown...
                     except HttpError:
                         # Check for their need to be in the ACL, and add them
@@ -321,6 +332,7 @@ def index(request):
                             # Then add then to the database as well
                             if not len(uad):
                                 uad = UserAuthorizedDatasets.objects.update_or_create(nih_user=nih_user, authorized_dataset=ad)
+                                logger.info("[STATUS] Added user {} to dataset {}.".format(user_email,ad.whitelist_id))
 
                             logger.info(result)
                             logger.info("User {} added to {}.".format(user_email, dataset.google_group_name))
@@ -356,7 +368,7 @@ def index(request):
                                                    "[ERROR] Failed to publish to PubSub topic: {}".format(str(e)))
 
                 messages.info(request, warn_message)
-                print >> sys.stdout, "[STATUS] http_host: " + req['http_host']
+                logger.info("[STATUS] http_host: " + req['http_host'])
                 return HttpResponseRedirect(auth.redirect_to('https://{}'.format(req['http_host'])))
 
         elif 'sls' in req['get_data']:
