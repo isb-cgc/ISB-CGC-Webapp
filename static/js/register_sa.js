@@ -116,6 +116,8 @@ require([
                                 td.append('<span title="User '+member['email']+' does not have access to this dataset."><i class="fa fa-times"></i> '+dataset['name']+'</span><br />');
                             }
                         }
+                        tr.append(td);
+                        
                         tbody.append(tr);
                     }
                 }
