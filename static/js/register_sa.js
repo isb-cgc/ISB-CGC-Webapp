@@ -106,10 +106,15 @@ require([
                         } else {
                             tr.append('<td><i class="fa fa-times"></i></td>');
                         }
-                        if (memberlist[i]['datasets_valid']) {
-                            tr.append('<td><i class="fa fa-check"></i></td>');
-                        } else {
-                            tr.append('<td><i class="fa fa-times"></i> ' + memberlist[i]['datasets'] + '</td>');
+                        for(var j=0;j<memberlist[i]['datasets'].length;j++){
+                            var td = $('<td></td>');
+                            var dataset = memberlist[i]['datasets'][j];
+                            if (dataset['valid']) {
+                                td.append('<i class="fa fa-check"></i> ');
+                            } else {
+                                td.append('<i class="fa fa-times"></i> ');
+                            }
+                            td.append(dataset['name']+'<br />')
                         }
                         tbody.append(tr);
                     }
