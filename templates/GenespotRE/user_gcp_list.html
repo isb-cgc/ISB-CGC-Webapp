@@ -99,7 +99,7 @@
                                                     {% for service_account in project.serviceaccount_set.all %}
                                                     <tr>
                                                         <td>{{ service_account.service_account }}</td>
-                                                        <td>{{ service_account.serviceaccountauthorizeddataset_set.all|get_values_list:"name"|joinwith:", " }}</td>
+                                                        <td>{{ service_account.get_auth_datasets|get_values_list:"name"|joinwith:", " }}</td>
                                                         <td>{{ service_account.authorized_date|date:'M d, Y, g:i a' }}</td>
                                                         <td>{% if service_account.active %}<i class="fa fa-check"></i>{% endif %}</td>
                                                         <td>
