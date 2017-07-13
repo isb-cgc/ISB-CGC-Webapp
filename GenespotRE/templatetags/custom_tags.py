@@ -223,6 +223,13 @@ def get_barcodes_length(barcodes):
 
 
 @register.filter
+def joinwith(a_list,delimiter):
+    if type(a_list) is not list:
+        return ""
+    return delimiter.join(a_list)
+
+
+@register.filter
 def wrap_text(text, length=60):
 
     if len(text) <= length:
@@ -305,6 +312,11 @@ def get_prog_attr(prog, prog_attr):
     if prog in prog_attr:
         return [prog_attr[prog][x] for x in prog_attr[prog]]
     return None
+
+
+@register.filter
+def get_values_list(object_list, value):
+    return object_list.values_list(value, flat=True)
 
 
 @register.filter

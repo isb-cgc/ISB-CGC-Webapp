@@ -4,7 +4,7 @@
 {% load tz %}
 {% comment %}
 
-   Copyright 2016, Institute for Systems Biology
+   Copyright 2017, Institute for Systems Biology
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -89,7 +89,7 @@
                                                     <thead>
                                                     <tr>
                                                         <th>Service Account</th>
-                                                        <th>Authorized Dataset</th>
+                                                        <th>Authorized Datasets</th>
                                                         <th>Date Activated</th>
                                                         <th>Active</th>
                                                         <th></th>
@@ -99,7 +99,7 @@
                                                     {% for service_account in project.serviceaccount_set.all %}
                                                     <tr>
                                                         <td>{{ service_account.service_account }}</td>
-                                                        <td>{{ service_account.authorized_dataset.name }}</td>
+                                                        <td>{{ service_account.serviceaccountauthorizeddataset_set.all|get_values_list:"name"|joinwith:", " }}</td>
                                                         <td>{{ service_account.authorized_date|date:'M d, Y, g:i a' }}</td>
                                                         <td>{% if service_account.active %}<i class="fa fa-check"></i>{% endif %}</td>
                                                         <td>
