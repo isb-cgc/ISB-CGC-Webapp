@@ -224,7 +224,7 @@ def get_barcodes_length(barcodes):
 
 @register.filter
 def joinwith(a_list,delimiter):
-    if type(a_list) is not list:
+    if type(a_list) is not list or len(a_list) <= 0:
         return ""
     return delimiter.join(a_list)
 
