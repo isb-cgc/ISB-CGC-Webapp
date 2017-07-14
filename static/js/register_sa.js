@@ -94,23 +94,30 @@ require([
                 for (var role in roles) {
                     var memberlist = roles[role];
                     for (var i in memberlist) {
+                        var member = memberlist[i];
                         var tr = $('<tr></tr>');
-                        tr.append('<td>' + memberlist[i]['email'] + '</td>');
-                        if (memberlist[i]['registered_user']) {
+                        tr.append('<td>' + member['email'] + '</td>');
+                        if (member['registered_user']) {
                             tr.append('<td><i class="fa fa-check"></i></td>');
                         } else {
                             tr.append('<td><i class="fa fa-times"></i></td>');
                         }
-                        if (memberlist[i]['nih_registered']) {
+                        if (member['nih_registered']) {
                             tr.append('<td><i class="fa fa-check"></i></td>');
                         } else {
                             tr.append('<td><i class="fa fa-times"></i></td>');
                         }
-                        if (memberlist[i]['datasets_valid']) {
-                            tr.append('<td><i class="fa fa-check"></i></td>');
-                        } else {
-                            tr.append('<td><i class="fa fa-times"></i> ' + memberlist[i]['datasets'] + '</td>');
+                        for(var j=0;j<member['datasets'].length;j++){
+                            var td = $('<td></td>');
+                            var dataset = member['datasets'][j];
+                            if (dataset['valid']) {
+                                td.append('<span><i class="fa fa-check"></i> '+dataset['name']+'</span><br />');
+                            } else {
+                                td.append('<span title="User '+member['email']+' does not have access to this dataset."><i class="fa fa-times"></i> '+dataset['name']+'</span><br />');
+                            }
                         }
+                        tr.append(td);
+                        
                         tbody.append(tr);
                     }
                 }
