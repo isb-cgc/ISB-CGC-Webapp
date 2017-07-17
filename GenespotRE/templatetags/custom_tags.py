@@ -29,6 +29,7 @@ from projects.models import Program
 from workbooks.models import Workbook
 
 
+
 # If an attribute's values should be alphanumerically sorted, list them here
 ALPHANUM_SORT = [
 
@@ -316,6 +317,8 @@ def get_prog_attr(prog, prog_attr):
 
 @register.filter
 def get_values_list(object_list, value):
+    if not object_list:
+        return []
     return object_list.values_list(value, flat=True)
 
 
