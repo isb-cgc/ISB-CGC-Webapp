@@ -97,16 +97,18 @@
                                                     </thead>
                                                     <tbody>
                                                     {% for service_account in project.serviceaccount_set.all %}
-                                                    <tr>
-                                                        <td>{{ service_account.service_account }}</td>
-                                                        <td>{{ service_account.get_auth_datasets|get_values_list:"name"|joinwith:", " }}</td>
-                                                        <td>{{ service_account.authorized_date|date:'M d, Y, g:i a' }}</td>
-                                                        <td>{% if service_account.active %}<i class="fa fa-check"></i>{% endif %}</td>
-                                                        <td>
-                                                            <a data-toggle="modal" role="button" data-target="#refresh-sa-modal-{{ service_account.id }}" class="space-right-5"><i class="fa fa-refresh"></i></a>
-                                                            <a data-toggle="modal" role="button" data-target="#delete-sa-modal-{{ service_account.id }}"><i class="fa fa-trash"></i></a>
-                                                        </td>
-                                                    </tr>
+                                                        {% with auth_datasets=service_account.get_auth_datasets %}
+                                                            <tr>
+                                                                <td>{{ service_account.service_account }}</td>
+                                                                <td>{% if auth_datasets|length == 0 %}None{% else %}{{ auth_datasets|get_values_list:"name"|joinwith:", " }}{% endif %}</td>
+                                                                <td>{{ service_account.authorized_date|date:'M d, Y, g:i a' }}</td>
+                                                                <td>{% if service_account.active %}<i class="fa fa-check"></i>{% endif %}</td>
+                                                                <td>
+                                                                    <a data-toggle="modal" role="button" data-target="#refresh-sa-modal-{{ service_account.id }}" class="space-right-5"><i class="fa fa-refresh"></i></a>
+                                                                    <a data-toggle="modal" role="button" data-target="#delete-sa-modal-{{ service_account.id }}"><i class="fa fa-trash"></i></a>
+                                                                </td>
+                                                            </tr>
+                                                        {% endwith %}
                                                     {% endfor %}
                                                     </tbody>
                                                 </table>
