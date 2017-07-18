@@ -107,8 +107,9 @@ require([
                         } else {
                             tr.append('<td><i class="fa fa-times"></i></td>');
                         }
+                        var td = $('<td></td>');
+                        td.append('<span><i class="fa fa-check"></i>All Open Datasets</span><br />');
                         for(var j=0;j<member['datasets'].length;j++){
-                            var td = $('<td></td>');
                             var dataset = member['datasets'][j];
                             if (dataset['valid']) {
                                 td.append('<span><i class="fa fa-check"></i> '+dataset['name']+'</span><br />');
@@ -128,11 +129,10 @@ require([
                 $('.register-sa-div').hide();
                 $('.cannot-register').hide();
 
-                if (data['user_dataset_verified']) {
-                    $('.register-sa-div').show();
-                } else {
-                    $('.cannot-register').show();
-                }
+                // If no datasets were requested, or, they were and verification came out clean, allow registration
+                console.debug("data['datasets']: "+data['datasets']);
+                (data['datasets'].length <= 0 || data['all_user_datasets_verified']) ? $('.register-sa-div').show() : $('.cannot-register').show();
+
             },
             error: function(xhr, ajaxOptions, thrownError) {
                 var response = $.parseJSON(xhr.responseText);
