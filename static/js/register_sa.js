@@ -128,11 +128,8 @@ require([
                 $('.register-sa-div').hide();
                 $('.cannot-register').hide();
 
-                if (data['user_dataset_verified']) {
-                    $('.register-sa-div').show();
-                } else {
-                    $('.cannot-register').show();
-                }
+                data['all_user_datasets_verified'] ? $('.register-sa-div').show() : $('.cannot-register').show();
+
             },
             error: function(xhr, ajaxOptions, thrownError) {
                 var response = $.parseJSON(xhr.responseText);
