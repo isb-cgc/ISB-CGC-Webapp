@@ -107,8 +107,9 @@ require([
                         } else {
                             tr.append('<td><i class="fa fa-times"></i></td>');
                         }
+                        var td = $('<td></td>');
+                        td.append('<span><i class="fa fa-check"></i>All Open Datasets</span><br />');
                         for(var j=0;j<member['datasets'].length;j++){
-                            var td = $('<td></td>');
                             var dataset = member['datasets'][j];
                             if (dataset['valid']) {
                                 td.append('<span><i class="fa fa-check"></i> '+dataset['name']+'</span><br />');
