@@ -128,7 +128,9 @@ require([
                 $('.register-sa-div').hide();
                 $('.cannot-register').hide();
 
-                data['all_user_datasets_verified'] ? $('.register-sa-div').show() : $('.cannot-register').show();
+                // If no datasets were requested, or, they were and verification came out clean, allow registration
+                console.debug("data['datasets']: "+data['datasets']);
+                (data['datasets'].length <= 0 || data['all_user_datasets_verified']) ? $('.register-sa-div').show() : $('.cannot-register').show();
 
             },
             error: function(xhr, ajaxOptions, thrownError) {
