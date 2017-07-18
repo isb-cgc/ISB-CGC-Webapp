@@ -138,6 +138,7 @@ def user_detail(request, user_id):
             user_details['NIH_assertion_expiration'] = nih_user.NIH_assertion_expiration
             user_details['dbGaP_authorized'] = (len(user_auth_datasets) > 0) and nih_user.active
             user_details['NIH_active'] = nih_user.active
+            user_details['auth_datasets'] = [] if len(user_auth_datasets) <= 0 else user_auth_datasets
         except (MultipleObjectsReturned, ObjectDoesNotExist), e:
             if type(e) is MultipleObjectsReturned:
                 # in this case there is more than one nih_username linked to the same google identity
