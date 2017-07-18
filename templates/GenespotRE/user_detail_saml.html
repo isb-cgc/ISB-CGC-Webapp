@@ -29,7 +29,7 @@
         <p><i class="fa fa-check-circle"></i> dbGaP Access Authorized</p>
         <hr>
         <p>
-            Congratulations, {{ user_details.NIH_username }}! You now have access to ISB-CGC controlled access TCGA data until
+            Congratulations, {{ user_details.NIH_username }}! You now have access to ISB-CGC controlled access data ({{ user_details.auth_datasets|joinwith:', ' }}) until
             <p id="NIH_expiration">{{ user_details.NIH_assertion_expiration|safe }} GMT</p>
             <a href="{% url 'demo:saml_index' %}?sso">Extend controlled access period to 24 hours from now.</a>
         </p>
