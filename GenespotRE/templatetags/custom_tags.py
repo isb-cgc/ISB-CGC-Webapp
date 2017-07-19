@@ -322,6 +322,7 @@ def get_values_list(object_list, value):
     if not object_list:
         logger.warn('[WARNING] get_values_list called with a None list object.')
         return []
+    logger.info('[STATUS] Values list: {}'.format(str(object_list.values_list(value, flat=True))))
     return object_list.values_list(value, flat=True)
 
 
