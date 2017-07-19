@@ -228,6 +228,7 @@ def get_barcodes_length(barcodes):
 @register.filter
 def joinwith(a_list, delimiter):
     if type(a_list) is not list or len(a_list) <= 0:
+        logger.info("Type of a_list is {}".format(str(type(a_list))))
         return ""
     logger.info("[STATUS] In joinwith, {}+{}={}".format(delimiter, str(a_list),delimiter.join(a_list)))
     return delimiter.join(a_list)
