@@ -27,7 +27,9 @@ from cohorts.models import Cohort, Cohort_Perms
 from django.contrib.auth.models import User
 from projects.models import Program
 from workbooks.models import Workbook
+import logging
 
+logger = logging.getLogger('main_logger')
 
 
 # If an attribute's values should be alphanumerically sorted, list them here
@@ -318,6 +320,7 @@ def get_prog_attr(prog, prog_attr):
 @register.filter
 def get_values_list(object_list, value):
     if not object_list:
+        logger.warn('[WARNING] get_values_list called with a None list object.')
         return []
     return object_list.values_list(value, flat=True)
 
