@@ -230,7 +230,6 @@ def joinwith(a_list, delimiter):
     if a_list is None:
         logger.warn("[WARNING] In custom_tags: attempted to join with a None list object.")
         return ""
-    logger.info("[STATUS] In joinwith, {}+{}={}".format(delimiter, str(a_list),delimiter.join(a_list)))
     return delimiter.join(a_list)
 
 
