@@ -80,6 +80,10 @@ class UserFeatureDef(object):
 
     @classmethod
     def from_user_feature_id(cls, feature_id):
+        """
+           This returns a *LIST* of one UserFeatureDef, unless it maps to a standard project ID. Then
+           the list may have multiple entries.
+         """
         logging.debug("UserFeatureDef.from_user_feature_id {0}".format(str([feature_id])))
         # ID breakdown: project ID:Feature ID
         # Example ID: USER:1:6
@@ -141,8 +145,14 @@ class UserFeatureDef(object):
 
         return [cls(bq_table, column_name, project_id, is_numeric, filters)]
 
+
     @classmethod
     def from_feature_id(cls, feature_id, project_id=None):
+        """
+           This is the method used when the user feature maps to feature in an existing project (i.e. there is a
+           shared_id in the projects_user_feature_definitions entry.
+           It returns a *LIST* of UserFeatureDefs
+         """
         logging.debug("UserFeatureDef.from_feature_id: {0}".format(str([feature_id, project_id])))
         if feature_id is None:
             raise FeatureNotFoundException(feature_id)
@@ -221,15 +231,14 @@ class UserFeatureDef(object):
         return query
 
 
-class UserFeatureProvider(FeatureDataProvider):
+class UserDataQueryHandler(object):
     """
     Feature data provider for user data.
     """
-    def __init__(self, feature_id, user_feature_id=None, **kwargs):
+    def __init__(self, feature_id, user_feature_id=None):
         self.feature_defs = None
         self.parse_internal_feature_id(feature_id, user_feature_id=user_feature_id)
         self._project_ids = None
-        super(UserFeatureProvider, self).__init__(**kwargs)
 
     def get_feature_type(self):
         return DataTypes.USER
@@ -259,8 +268,7 @@ class UserFeatureProvider(FeatureDataProvider):
             if cursor: cursor.close()
             raise e
 
-    @classmethod
-    def process_data_point(cls, data_point):
+    def process_data_point(self, data_point):
         return data_point['value']
 
     def get_value_type(self):
@@ -367,6 +375,8 @@ class UserFeatureProvider(FeatureDataProvider):
 
         return result
 
+    # THIS ROUGHLY CORRESPONDS TO user_feature_handler() in user_data_plot_support.py. Though that method
+    # had concept of tcga project versus user studies. Port that???
     def get_project_ids(self, cohort_id_array):
         """
         Returns: The user project identifiers associated with the samples in all given cohorts.
@@ -389,6 +399,8 @@ class UserFeatureProvider(FeatureDataProvider):
                 if db: db.close()
                 if cursor: cursor.close()
                 raise e
+
+        #  user_data_plot_support.py then tries to convert it with a shared ID to a TCGA queryable id. Do here as well??
 
         self._project_ids = project_ids
         return self._project_ids
