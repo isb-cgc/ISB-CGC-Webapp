@@ -25,6 +25,8 @@ from bq_data_access.v2.utils import DurationLogged
 from bq_data_access.data_types.methylation import BIGQUERY_CONFIG
 from scripts.feature_def_gen.methylation_features import METHDataSourceConfig
 
+logger = logging.getLogger(__name__)
+
 METH_FEATURE_TYPE = 'METH'
 IDENTIFIER_COLUMN_NAME = 'sample_id'
 
@@ -137,7 +139,7 @@ class METHDataQueryHandler(object):
                                       cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt,
                                       brk='\n')
 
-        logging.debug("BQ_QUERY_METH: " + query)
+        logger.debug("BQ_QUERY_METH: " + query)
         return query, True
 
     def build_query(self, project_set, cohort_table, cohort_id_array, project_id_array):

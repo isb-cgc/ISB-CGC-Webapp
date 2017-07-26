@@ -74,23 +74,33 @@ require([
             name: sample_barcode + ': GCS bam file',
             withCredentials: true
         };
-        if(row['program'] === 'TCGA' && row['build'] === 'HG38'){
+        if(row.data('program') === 'TCGA' && genome_build === 'HG38'){
             obj.indexURL = bam_path.replace(/\.bam/,'.bai');
         }
         tracks.push(obj);
     }
 
-    tracks.push({
-        name: "Genes",
-        url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
+    var genes_obj = {
+        name: "Genes: Gencode v18",
+        url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
+        indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.idx",
         order: Number.MAX_VALUE,
         displayMode: "EXPANDED"
-    });
+    };
+
+    if(genome_build === 'HG38') {
+        genes_obj.url = 'https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg38/genes/gencode.v24.annotation.sorted.gtf.gz';
+        genes_obj.indexURL = 'https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg38/genes/gencode.v24.annotation.sorted.gtf.gz.tbi';
+        genes_obj.name = 'Genes: Gencode v24';
+        genes_obj.format = 'gtf';
+    }
+
+    tracks.push(genes_obj);
 
     var options = {
         showNavigation: true,
         genome: genome_build.toLowerCase(),
-        locus: "egfr",
+        locus: "EGFR",
         tracks: tracks,
         withCredentials: true
     };

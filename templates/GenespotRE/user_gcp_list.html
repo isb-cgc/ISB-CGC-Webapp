@@ -4,7 +4,7 @@
 {% load tz %}
 {% comment %}
 
-   Copyright 2016, Institute for Systems Biology
+   Copyright 2017, Institute for Systems Biology
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -89,7 +89,7 @@
                                                     <thead>
                                                     <tr>
                                                         <th>Service Account</th>
-                                                        <th>Authorized Dataset</th>
+                                                        <th>Authorized Datasets</th>
                                                         <th>Date Activated</th>
                                                         <th>Active</th>
                                                         <th></th>
@@ -97,16 +97,18 @@
                                                     </thead>
                                                     <tbody>
                                                     {% for service_account in project.serviceaccount_set.all %}
-                                                    <tr>
-                                                        <td>{{ service_account.service_account }}</td>
-                                                        <td>{{ service_account.authorized_dataset.name }}</td>
-                                                        <td>{{ service_account.authorized_date|date:'M d, Y, g:i a' }}</td>
-                                                        <td>{% if service_account.active %}<i class="fa fa-check"></i>{% endif %}</td>
-                                                        <td>
-                                                            <a data-toggle="modal" role="button" data-target="#refresh-sa-modal-{{ service_account.id }}" class="space-right-5"><i class="fa fa-refresh"></i></a>
-                                                            <a data-toggle="modal" role="button" data-target="#delete-sa-modal-{{ service_account.id }}"><i class="fa fa-trash"></i></a>
-                                                        </td>
-                                                    </tr>
+                                                        {% with auth_datasets=service_account.get_auth_datasets %}
+                                                            <tr>
+                                                                <td>{{ service_account.service_account }}</td>
+                                                                <td>{% if auth_datasets|length == 0 %}None{% else %}{{ auth_datasets|get_values_list:"name"|joinwith:", " }}{% endif %}</td>
+                                                                <td>{{ service_account.authorized_date|date:'M d, Y, g:i a' }}</td>
+                                                                <td>{% if service_account.active %}<i class="fa fa-check"></i>{% endif %}</td>
+                                                                <td>
+                                                                    <a data-toggle="modal" role="button" data-target="#refresh-sa-modal-{{ service_account.id }}" class="space-right-5"><i class="fa fa-refresh"></i></a>
+                                                                    <a data-toggle="modal" role="button" data-target="#delete-sa-modal-{{ service_account.id }}"><i class="fa fa-trash"></i></a>
+                                                                </td>
+                                                            </tr>
+                                                        {% endwith %}
                                                     {% endfor %}
                                                     </tbody>
                                                 </table>

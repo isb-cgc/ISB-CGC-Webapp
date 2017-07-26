@@ -5,7 +5,6 @@ dotenv.read_dotenv(join(dirname(__file__), '../.env'))
 
 
 SETTINGS = {
-
     'DATABASE': {
         'default': {
             'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.mysql'),

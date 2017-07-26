@@ -21,6 +21,8 @@ import logging
 from bq_data_access.v2.gnab_data import GNABDataQueryHandler
 from bq_data_access.v2.utils import DurationLogged
 
+logger = logging.getLogger(__name__)
+
 SEQPEEK_FEATURE_TYPE = 'SEQPEEK'
 
 
@@ -83,7 +85,7 @@ class SeqPeekDataQueryHandler(GNABDataQueryHandler):
                                       cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt,
                                       brk='\n')
 
-        logging.debug("BQ_QUERY_SEQPEEK: " + query)
+        logger.debug("BQ_QUERY_SEQPEEK: " + query)
         return query, True
 
     def build_query(self, project_set, cohort_table, cohort_id_array, project_id_array):
