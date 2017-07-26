@@ -18,8 +18,8 @@ limitations under the License.
 import os
 from os.path import join, dirname
 import sys
-
 import dotenv
+from socket import gethostname, gethostbyname
 
 dotenv.read_dotenv(join(dirname(__file__), '../.env'))
 
@@ -37,10 +37,12 @@ SHARED_SOURCE_DIRECTORIES = [
 for directory_name in SHARED_SOURCE_DIRECTORIES:
     sys.path.append(os.path.join(BASE_DIR, directory_name))
 
-DEBUG                   = bool(os.environ.get('DEBUG', False))
+DEBUG                   = (os.environ.get('DEBUG', 'False') == 'True')
 print >> sys.stdout, "[STATUS] DEBUG mode is "+str(DEBUG)
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOST', 'localhost').split(',')
+# Theoretically Nginx allows us to use '*' for ALLOWED_HOSTS but...
+ALLOWED_HOSTS = list(set(os.environ.get('ALLOWED_HOST', 'localhost').split(',') + ['localhost', '127.0.0.1', '[::1]', gethostname(), gethostbyname(gethostname()),]))
+#ALLOWED_HOSTS = ['*']
 
 SSL_DIR = os.path.abspath(os.path.dirname(__file__))+os.sep
 
@@ -87,7 +89,7 @@ DATABASES = {
 
 DB_SOCKET = DATABASES['default']['HOST'] if 'cloudsql' in DATABASES['default']['HOST'] else None
 
-IS_DEV = bool(os.environ.get('IS_DEV', False))
+IS_DEV = (os.environ.get('IS_DEV', 'False') == 'True')
 IS_APP_ENGINE_FLEX = os.getenv('GAE_INSTANCE', '').startswith(APP_ENGINE_FLEX)
 IS_APP_ENGINE = os.getenv('SERVER_SOFTWARE', '').startswith(APP_ENGINE)
 
@@ -165,9 +167,9 @@ SSLIFY_DISABLE = True if not SECURE_SSL_REDIRECT else False
 
 if SECURE_SSL_REDIRECT:
     # Exempt the health check so it can go through
-    SECURE_REDIRECT_EXEMPT = [r'^_ah/health$', ]
+    SECURE_REDIRECT_EXEMPT = [r'^_ah/(vm_)?health$', ]
     SSLIFY_DISABLE_FOR_REQUEST = [
-        lambda request: request.get_full_path().startswith('/_ah/health')
+        lambda request: request.get_full_path().startswith('/_ah/health') or request.get_full_path().startswith('/_ah/vm_health')
     ]
 
 # Local time zone for this installation. Choices can be found here:
@@ -314,7 +316,18 @@ LOGGING = {
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
-        }
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue'
+        },
+    },
+    'formatters': {
+        'verbose': {
+            'format': '[%(levelname)s] @%(asctime)s in %(module)s/%(process)d/%(thread)d - %(message)s'
+        },
+        'simple': {
+            'format': '[%(levelname)s] @%(asctime)s in %(module)s: %(message)s'
+        },
     },
     'handlers': {
         'mail_admins': {
@@ -324,13 +337,16 @@ LOGGING = {
         },
         'console_dev': {
             'level': 'DEBUG',
-            'class': 'logging.StreamHandler'
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
         },
         'console_prod': {
-            'level': 'WARNING',
+            'level': 'DEBUG',
             'filters': ['require_debug_false'],
-            'class': 'logging.StreamHandler'
-        }
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
     },
     'loggers': {
         'django.request': {
@@ -338,28 +354,33 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
+        'main_logger': {
+            'handlers': ['console_dev', 'console_prod'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
         'cohorts': {
-            'handlers': ['console_dev','console_prod'],
+            'handlers': ['console_dev', 'console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'allauth': {
-            'handlers': ['console_dev','console_prod'],
+            'handlers': ['console_dev', 'console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'demo': {
-            'handlers': ['console_dev','console_prod'],
+            'handlers': ['console_dev', 'console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'projects': {
-            'handlers': ['console_dev','console_prod'],
+            'handlers': ['console_dev', 'console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'workbooks': {
-            'handlers': ['console_dev','console_prod'],
+            'handlers': ['console_dev', 'console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
@@ -368,7 +389,22 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
-    }
+        'dataset_utils': {
+            'handlers': ['console_dev', 'console_prod'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'google_helpers': {
+            'handlers': ['console_dev', 'console_prod'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'data_upload': {
+            'handlers': ['console_dev', 'console_prod'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
 }
 
 ##########################
@@ -452,33 +488,34 @@ GCP_REG_CLIENT_EMAIL            = os.environ.get('CLIENT_EMAIL','')
 #################################
 
 LOGIN_EXPIRATION_MINUTES                = int(os.environ.get('LOGIN_EXPIRATION_MINUTES', 24*60))
-DBGAP_AUTHENTICATION_LIST_FILENAME      = os.environ.get('DBGAP_AUTHENTICATION_LIST_FILENAME', '')
-DBGAP_AUTHENTICATION_LIST_BUCKET        = os.environ.get('DBGAP_AUTHENTICATION_LIST_BUCKET', '')
 ACL_GOOGLE_GROUP                        = os.environ.get('ACL_GOOGLE_GROUP', '')
 OPEN_ACL_GOOGLE_GROUP                   = os.environ.get('OPEN_ACL_GOOGLE_GROUP', '')
 GOOGLE_GROUP_ADMIN                      = os.environ.get('GOOGLE_GROUP_ADMIN', '')
 SUPERADMIN_FOR_REPORTS                  = os.environ.get('SUPERADMIN_FOR_REPORTS', '')
 ERA_LOGIN_URL                           = os.environ.get('ERA_LOGIN_URL', '')
-SAML_FOLDER                             = os.environ.get('SAML_FOLDER')
+SAML_FOLDER                             = os.environ.get('SAML_FOLDER', '')
 
 # TaskQueue used when users go through the ERA flow
-LOGOUT_WORKER_TASKQUEUE                  = os.environ.get('LOGOUT_WORKER_TASKQUEUE')
-CHECK_NIH_USER_LOGIN_TASK_URI            = os.environ.get('CHECK_NIH_USER_LOGIN_TASK_URI')
+LOGOUT_WORKER_TASKQUEUE                  = os.environ.get('LOGOUT_WORKER_TASKQUEUE', '')
+CHECK_NIH_USER_LOGIN_TASK_URI            = os.environ.get('CHECK_NIH_USER_LOGIN_TASK_URI', '')
 
 # TaskQueue used by the sweep_nih_user_logins task
-LOGOUT_SWEEPER_FALLBACK_TASKQUEUE        = os.environ.get('LOGOUT_SWEEPER_FALLBACK_TASKQUEUE')
+LOGOUT_SWEEPER_FALLBACK_TASKQUEUE        = os.environ.get('LOGOUT_SWEEPER_FALLBACK_TASKQUEUE', '')
 
 # PubSub topic for ERA login notifications
-PUBSUB_TOPIC_ERA_LOGIN                   = os.environ.get('PUBSUB_TOPIC_ERA_LOGIN')
+PUBSUB_TOPIC_ERA_LOGIN                   = os.environ.get('PUBSUB_TOPIC_ERA_LOGIN', '')
 
 # User project access key
-USER_GCP_ACCESS_CREDENTIALS              = os.environ.get('USER_GCP_ACCESS_CREDENTIALS')
+USER_GCP_ACCESS_CREDENTIALS              = os.environ.get('USER_GCP_ACCESS_CREDENTIALS', '')
 
 # Log name for ERA login views
-LOG_NAME_ERA_LOGIN_VIEW                  = os.environ.get('LOG_NAME_ERA_LOGIN_VIEW')
+LOG_NAME_ERA_LOGIN_VIEW                  = os.environ.get('LOG_NAME_ERA_LOGIN_VIEW', '')
 
 # Service account blacklist file path
-SERVICE_ACCOUNT_BLACKLIST_PATH           = os.environ.get('SERVICE_ACCOUNT_BLACKLIST_PATH')
+SERVICE_ACCOUNT_BLACKLIST_PATH           = os.environ.get('SERVICE_ACCOUNT_BLACKLIST_PATH', '')
+
+# Dataset configuration file path
+DATASET_CONFIGURATION_PATH               = os.environ.get('DATASET_CONFIGURATION_PATH', '')
 
 ##############################
 #   Start django-finalware   #

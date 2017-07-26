@@ -351,7 +351,8 @@ require([
                     }
 
                     // If this has emptied out a program's filter set, hide the modal's subsection for that program
-                    if(createFormFilterSet.find('span').length <= 0) {
+                    // if a new value isn't replacing it
+                    if(createFormFilterSet.find('span').length <= 0 && (!data || !data.forNewVal)) {
                         createFormFilterSet.hide();
                     }
 
@@ -744,40 +745,9 @@ require([
         }
     };
 
-    // onClick: Shared With button 
-    $('#shared-with-btn').on('click', function(e){
-        var target = $(this).data('target');
-        $(target + ' a[data-target="#shared-pane"]').tab('show');
-    });
-
     $('#create-cohort-modal form').on('submit', function() {
         save_changes_btn.prop('disabled', 'disabled');
         save_changes_btn_modal.prop('disabled', 'disabled');
-    });
-
-    // onClick: Remove shared user
-    $('.remove-shared-user').on('click', function() {
-        var user_id = $(this).attr('data-user-id');
-        var url = BASE_URL + '/cohorts/unshare_cohort/' + cohort_id + '/';
-        var csrftoken = $.getCookie('csrftoken');
-        var button = $(this);
-        $.ajax({
-            type        :'POST',
-            url         : url,
-            dataType    :'json',
-            data        : {user_id: user_id},
-            beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
-            success : function (data) {
-                button.parents('tr').remove();
-                var count = parseInt($($('.share-count')[0]).html());
-                $('.share-count').each(function() {
-                   $(this).html(count-1);
-                });
-            },
-            error: function () {
-                console.log('Failed to remove user');
-            }
-        })
     });
 
     // Disable the comment button if there's no content in the comment

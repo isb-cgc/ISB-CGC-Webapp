@@ -44,6 +44,8 @@ BQ_DATASET = settings.COHORT_DATASET_ID
 DEFAULT_COHORT_TABLE = settings.BIGQUERY_COHORT_TABLE_ID
 SUPERUSER_NAME = 'isb'
 
+MAX_INSERT = 15000
+
 logging.basicConfig(level=logging.INFO)
 
 # TODO Use bq_data_access.BigQueryCohortSupport
@@ -96,14 +98,25 @@ class BigQueryCohortSupport(object):
         bigquery_service = authorize_credentials_with_Google()
         table_data = bigquery_service.tabledata()
 
-        body = self._build_request_body_from_rows(rows)
+        print >> sys.stdout, self.project_id + ":" + self.dataset_id + ":" + self.table_id
 
-        print >> sys.stdout, self.project_id+":"+self.dataset_id+":"+self.table_id
+        index = 0
+        next = 0
 
-        response = table_data.insertAll(projectId=self.project_id,
-                                        datasetId=self.dataset_id,
-                                        tableId=self.table_id,
-                                        body=body).execute()
+        while index < len(rows) and next is not None:
+            next = MAX_INSERT+index
+            body = None
+            if next > len(rows):
+                next = None
+                body = self._build_request_body_from_rows(rows[index:])
+            else:
+                body = self._build_request_body_from_rows(rows[index:next])
+
+            response = table_data.insertAll(projectId=self.project_id,
+                                            datasetId=self.dataset_id,
+                                            tableId=self.table_id,
+                                            body=body).execute()
+            index = next
 
         return response
 
@@ -153,12 +166,12 @@ class BigQueryCohortSupport(object):
 
 
 def get_mysql_connection():
-    db_settings = secret_settings.get('DATABASE')['default'] if settings.IS_DEV else settings.DATABASES['default']
+    db_settings = secret_settings.get('DATABASE')['default'] if (settings.IS_DEV or not settings.DB_SOCKET) else settings.DATABASES['default']
 
     db = None
     ssl = None
 
-    if 'OPTIONS' in db_settings and 'ssl' in db_settings['OPTIONS']:
+    if 'OPTIONS' in db_settings and 'ssl' in db_settings['OPTIONS'] and not (settings.IS_APP_ENGINE_FLEX or settings.IS_APP_ENGINE):
         ssl = db_settings['OPTIONS']['ssl']
 
     if settings.IS_APP_ENGINE_FLEX or settings.IS_APP_ENGINE:

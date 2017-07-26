@@ -20,6 +20,8 @@ import logging
 
 from bq_data_access.data_types.definitions import PlottableDataType
 
+from jsonschema import validate as schema_validate, ValidationError
+
 logger = logging
 
 
@@ -62,18 +64,48 @@ class GNABDataSourceConfig(object):
     """
     Configuration class for GNAB feature definitions.
     """
+
+    SCHEMA = {
+        "type": "object",
+        "properties": {
+            "tables": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "program": {"enum": ["tcga", "target"]},
+                        "table_id": {
+                            "type": "string"
+                        },
+                        "internal_table_id": {
+                            "type": "string"
+                        },
+                        "genomic_build": {"enum": ["hg19", "hg38"]},
+                        "gene_label_field": {
+                            "type": "string"
+                        }
+                    },
+                    "required": ["program", "table_id", "internal_table_id", "gene_label_field", "genomic_build"]
+                }
+            }
+        }
+    }
+
     def __init__(self, supported_genomic_builds, tables_array):
         self.supported_genomic_builds = supported_genomic_builds
         self.data_table_list = tables_array
 
     @classmethod
     def from_dict(cls, param):
+        """
+        Throws:
+            ValidationError if the data object does not match the required schema.
+        """
+        schema_validate(param, cls.SCHEMA)
+
         supported_genomic_builds = param['supported_genomic_builds']
         data_table_list = [GNABTableConfig.from_dict(item) for item in param['tables']]
 
         return cls(supported_genomic_builds, data_table_list)
-
-
-
 
 

@@ -39,6 +39,8 @@ from bq_data_access.v1.methylation_data import METH_FEATURE_TYPE
 from bq_data_access.v1.mirna_data import MIRN_FEATURE_TYPE
 from bq_data_access.v1.protein_data import RPPA_FEATURE_TYPE
 
+logger = logging.getLogger(__name__)
+
 
 class FeatureDefinitionSearcherFactory(object):
     @classmethod
@@ -90,21 +92,21 @@ def feature_search(request):
 
     # TODO: This should be integrated into the code
     # except InvalidDataTypeException as e:
-    #     logging.error(str(e))
+    #     logger.error(str(e))
     #     return JsonResponse({'error': str(e)})
     # except EmptyQueryException as e:
-    #     logging.error("Empty query: %s", str(e))
+    #     logger.error("Empty query: %s", str(e))
     #     raise BadRequestException()
     # except InvalidFieldException as e:
-    #     logging.error("Invalid field: %s", str(e))
+    #     logger.error("Invalid field: %s", str(e))
     #     raise BadRequestException(str(e))
     # except BackendException:
-    #     logging.exception("feature_search BackendException")
+    #     logger.exception("feature_search BackendException")
     #     raise InternalServerErrorException()
 
     except Exception as e:
         print >> sys.stdout, traceback.format_exc()
-        logging.exception(e)
+        logger.exception(e)
         return JsonResponse({'error': e}, status=500)
 
 
@@ -123,16 +125,16 @@ def feature_field_search(request):
 
     # TODO: Integrate into view
     # except InvalidDataTypeException as e:
-    #     logging.error(str(e))
+    #     logger.error(str(e))
     #     raise BadRequestException()
     # except InvalidFieldException as e:
-    #     logging.error(str(e))
+    #     logger.error(str(e))
     #     raise BadRequestException()
     # except BackendException:
-    #     logging.exception("feature_field_search BackendException")
+    #     logger.exception("feature_field_search BackendException")
     #     raise InternalServerErrorException()
 
     except Exception as e:
         print >> sys.stdout, traceback.format_exc()
-        logging.exception(e)
+        logger.exception(e)
         raise JsonResponse({'error': e}, status=500)

@@ -36,7 +36,7 @@ from visualizations.models import SavedViz
 from cohorts.models import Cohort, Cohort_Perms
 from projects.models import Program
 from workbooks.models import Workbook
-from accounts.models import NIH_User, GoogleProject
+from accounts.models import NIH_User, GoogleProject, UserAuthorizedDatasets, AuthorizedDataset
 
 from allauth.socialaccount.models import SocialAccount
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
@@ -45,9 +45,7 @@ from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 debug = settings.DEBUG
 logger = logging.getLogger(__name__)
 
-USER_API_URL = settings.BASE_API_URL + '/_ah/api/user_api/v1'
 ACL_GOOGLE_GROUP = settings.ACL_GOOGLE_GROUP
-DBGAP_AUTHENTICATION_LIST_BUCKET = settings.DBGAP_AUTHENTICATION_LIST_BUCKET
 ERA_LOGIN_URL = settings.ERA_LOGIN_URL
 OPEN_ACL_GOOGLE_GROUP = settings.OPEN_ACL_GOOGLE_GROUP
 
@@ -135,10 +133,12 @@ def user_detail(request, user_id):
 
         try:
             nih_user = NIH_User.objects.get(user_id=user_id, linked=True)
+            user_auth_datasets = UserAuthorizedDatasets.objects.filter(nih_user=nih_user)
             user_details['NIH_username'] = nih_user.NIH_username
             user_details['NIH_assertion_expiration'] = nih_user.NIH_assertion_expiration
-            user_details['dbGaP_authorized'] = nih_user.dbGaP_authorized and nih_user.active
+            user_details['dbGaP_authorized'] = (len(user_auth_datasets) > 0) and nih_user.active
             user_details['NIH_active'] = nih_user.active
+            user_details['auth_datasets'] = [] if len(user_auth_datasets) <= 0 else AuthorizedDataset.objects.filter(id__in=user_auth_datasets.values_list('authorized_dataset',flat=True)).values_list('name',flat=True)
         except (MultipleObjectsReturned, ObjectDoesNotExist), e:
             if type(e) is MultipleObjectsReturned:
                 # in this case there is more than one nih_username linked to the same google identity
@@ -301,12 +301,17 @@ def igv(request, sample_barcode=None, readgroupset_id=None):
 
     return render(request, 'GenespotRE/igv.html', context)
 
-def health_check(request):
-    print >> sys.stdout, "[STATUS] Health check is secure: "+str(request.is_secure())
+
+# Because the match for vm_ is always done regardless of its presense in the URL
+# we must always provide an argument slot for it
+#
+def health_check(request, match):
     return HttpResponse('')
+
 
 def help_page(request):
     return render(request, 'GenespotRE/help.html')
+
 
 def about_page(request):
     return render(request, 'GenespotRE/about.html')
