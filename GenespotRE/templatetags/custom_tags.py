@@ -333,6 +333,13 @@ def get_values_list(object_list, value):
 
 
 @register.filter
+def get_id_string(object_list, seperator):
+    if len(object_list):
+        return seperator.join([str(x) for x in get_values_list(object_list, "id")])
+    return ""
+
+
+@register.filter
 def list_contains_name(list, value):
     for item in list:
         if item['name'] == value:

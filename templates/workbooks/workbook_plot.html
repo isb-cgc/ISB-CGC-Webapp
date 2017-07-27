@@ -198,9 +198,7 @@
                             {% endif %}
                             {% for gene_item in genes %}
                                 {% if not plot or plot.gene_label != gene_item.gene %}
-                                    {% if gene_item.type == 'gene' %}
-                                        <option value="{{ gene_item.gene }}">{{ gene_item.gene }}</option>
-                                    {% endif %}
+                                    <option value="{{ gene_item.gene }}">{{ gene_item.gene }}</option>
                                 {% endif %}
                             {% endfor %}
                         </select>
