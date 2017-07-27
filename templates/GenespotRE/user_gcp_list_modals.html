@@ -68,7 +68,7 @@
                     </p>
                     <input type="hidden" name="gcp_id" value="{{ project.project_id }}" />
                     <input type="hidden" name="user_sa" value="{{ service_account.service_account }}" />
-                    <input type="hidden" name="datasets" value="{{ service_account.get_auth_datasets|get_values_list:'id' }}" />
+                    <input type="hidden" name="datasets" value="{{ service_account.get_auth_datasets|get_id_string:"," }}" />
                 </div>
                 <div class="modal-footer">
                     <input type="submit" value="Refresh" class="btn btn-primary" />
