@@ -127,7 +127,6 @@ def data_access_for_plot(request):
             # TODO Use jsonschema to validate logTransform object
             logTransform = json.loads(request.GET.get('log_transform', None))
         except Exception as e:
-            print >> sys.stdout, "[WARNING] Log transform parameter not supplied"
             logger.warn("[WARNING] Log transform parameter not supplied")
             logTransform = None
 
@@ -164,7 +163,7 @@ def data_access_for_plot(request):
         return JsonResponse(data)
 
     except Exception as e:
-        print >> sys.stdout, traceback.format_exc()
+        logger.error("[ERROR] In data access for plot: ")
         logger.exception(e)
         return JsonResponse({'error': str(e)}, status=500)
 

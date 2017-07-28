@@ -144,6 +144,6 @@ def seqpeek_view_data(request):
         return JsonResponse(seqpeek_view_data)
 
     except Exception as e:
-        print >> sys.stdout, traceback.format_exc()
+        logger.error("[ERROR] In seqpeek_view_data: ")
         logger.exception(e)
         return JsonResponse({'Error': str(e)}, status=500)

@@ -113,9 +113,6 @@ def index(request):
             return HttpResponseRedirect(auth.logout(name_id=name_id, session_index=session_index))
         elif 'acs' in req['get_data']:
             st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[STATUS] received ?acs")
-            print >> sys.stdout, "[STATUS] recevied ?acs:"
-            print >> sys.stdout, req.__str__()
-            print >> sys.stdout, req['get_data'].__str__()
             auth.process_response()
             errors = auth.get_errors()
             if errors:
@@ -209,7 +206,6 @@ def index(request):
                     st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[STATUS] Updating Django model")
 
                     authorized_datasets = das.get_datasets_for_era_login(user_email)
-                    print >> sys.stdout, ("[STATUS] Auth datasets for user email %s: " % user_email) +str(authorized_datasets)
 
                     saml_response = None if 'SAMLResponse' not in req['post_data'] else req['post_data']['SAMLResponse']
                     saml_response = saml_response.replace('\r\n', '')
@@ -256,8 +252,6 @@ def index(request):
                     warn_message = 'You are reminded that when accessing controlled access information you are bound by the dbGaP DATA USE CERTIFICATION AGREEMENT (DUCA) for each dataset.' + warn_message
 
                 all_datasets = das.get_all_datasets_and_google_groups()
-
-                print >> sys.stdout, "[STATUS] All datasets: "+str(all_datasets)
 
                 for dataset in all_datasets:
                     ad = None

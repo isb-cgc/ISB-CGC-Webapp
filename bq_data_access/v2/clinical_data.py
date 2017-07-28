@@ -216,8 +216,6 @@ class ClinicalDataQueryHandler(object):
         """
         result = []
 
-        print >> sys.stdout, "Query result count: "+str(len(query_result_array))
-
         for row in query_result_array:
             result.append({
                 'case_id': row['f'][0]['v'],
@@ -225,8 +223,6 @@ class ClinicalDataQueryHandler(object):
                 'aliquot_id': None,
                 'value': row['f'][2]['v']
             })
-
-        print >> sys.stdout, "Result count: " + str(len(result))
 
         return result
 

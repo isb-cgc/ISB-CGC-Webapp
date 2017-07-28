@@ -106,7 +106,7 @@ def feature_search(request):
     #     raise InternalServerErrorException()
 
     except Exception as e:
-        print >> sys.stdout, traceback.format_exc()
+        logger.error("[ERROR] In feature search: ")
         logger.exception(e)
         return JsonResponse({'error': e}, status=500)
 
@@ -136,7 +136,7 @@ def feature_field_search(request):
     #     raise InternalServerErrorException()
 
     except Exception as e:
-        print >> sys.stdout, traceback.format_exc()
+        logger.error("[ERROR] In feature field search: ")
         logger.exception(e)
         raise JsonResponse({'error': e}, status=500)
 
@@ -158,6 +158,6 @@ def clinical_feature_get(request):
             }, status=400)
 
     except Exception as e:
-        print >> sys.stdout, traceback.format_exc()
+        logger.error("[ERROR] In clinical feature get: ")
         logger.exception(e)
         raise JsonResponse({'error': e}, status=500)

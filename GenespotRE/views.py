@@ -112,7 +112,7 @@ Returns page that has user details
 '''
 @login_required
 def user_detail(request, user_id):
-    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+    if debug: logger.debug('Called '+sys._getframe().f_code.co_name)
 
     if int(request.user.id) == int(user_id):
 
@@ -157,7 +157,7 @@ def user_detail(request, user_id):
 
 @login_required
 def bucket_object_list(request):
-    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+    if debug: logger.debug('Called '+sys._getframe().f_code.co_name)
     credentials = GoogleCredentials.get_application_default()
     service = discovery.build('storage', 'v1', credentials=credentials, cache_discovery=False)
 
@@ -191,7 +191,7 @@ def user_landing(request):
     except HttpError, e:
         logger.info(e)
 
-    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+    if debug: logger.debug('Called '+sys._getframe().f_code.co_name)
     # check to see if user has read access to 'All TCGA Data' cohort
     isb_superuser = User.objects.get(username='isb')
     superuser_perm = Cohort_Perms.objects.get(user=isb_superuser)
@@ -244,7 +244,7 @@ DEPRECATED - Returns Results from text search
 '''
 @login_required
 def search_cohorts_viz(request):
-    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+    if debug: logger.debug('Called '+sys._getframe().f_code.co_name)
     q = request.GET.get('q', None)
     result_obj = {
         'q': q
@@ -276,7 +276,7 @@ def search_cohorts_viz(request):
 
 @login_required
 def igv(request, sample_barcode=None, readgroupset_id=None):
-    if debug: print >> sys.stderr, 'Called '+sys._getframe().f_code.co_name
+    if debug: logger.debug('Called '+sys._getframe().f_code.co_name)
 
     readgroupset_list = []
     bam_list = []

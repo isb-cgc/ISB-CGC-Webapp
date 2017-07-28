@@ -112,8 +112,6 @@ class BigQueryCohortSupport(object):
 
         response = self._streaming_insert(rows)
 
-        print >> sys.stdout, response.__str__()
-
         return response
 
     # Create a cohort based only on sample and optionally project IDs (patient/participant/case ID is NOT added)

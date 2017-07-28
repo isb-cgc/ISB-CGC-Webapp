@@ -150,9 +150,8 @@ class CloudSQLCohortAccess(object):
             return result
 
         except Exception as e:
-            print >> sys.stdout, "[ERROR] In get_cohort_info: "
-            print >> sys.stdout, e
-            print >> sys.stdout, traceback.format_exc()
+            logger.error("[ERROR] In get_cohort_info: ")
+            logger.exception(e)
             raise CohortException('get_cohort_info CloudSQL error, cohort IDs {cohort_ids}: {message}'.format(
                 cohort_ids=cohort_id_array,
                 message=str(e.message)))
