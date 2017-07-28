@@ -19,6 +19,9 @@ limitations under the License.
 import logging
 import sys
 import traceback
+import logging
+
+logger = logging.getLogger('main_logger')
 
 from MySQLdb.cursors import DictCursor
 from cohorts.metadata_helpers import get_sql_connection
@@ -26,8 +29,6 @@ from cohorts.metadata_helpers import get_sql_connection
 DJANGO_COHORT_TABLE = 'cohorts_samples'
 DJANGO_COHORT_INFO_TABLE = 'cohorts_cohort'
 DJANGO_COHORT_SAMPLES_TABLE = 'cohorts_samples'
-
-logger = logging
 
 
 class CohortException(Exception):

@@ -18,8 +18,11 @@ limitations under the License.
 
 from copy import deepcopy
 import sys
+import logging
 
 from google_helpers.bigquery_service import get_bigquery_service
+
+logger = logging.getLogger('main_logger')
 
 COHORT_DATASETS = {
     'prod': 'cloud_deployment_cohorts',

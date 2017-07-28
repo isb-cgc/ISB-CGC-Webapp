@@ -27,7 +27,7 @@ DJANGO_COHORT_TABLE = 'cohorts_samples'
 DJANGO_COHORT_INFO_TABLE = 'cohorts_cohort'
 DJANGO_COHORT_SAMPLES_TABLE = 'cohorts_samples'
 
-logger = logging
+logger = logging.getLogger('main_logger')
 
 DATAPOINT_COHORT_THRESHOLD = 1
 

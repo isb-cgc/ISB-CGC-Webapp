@@ -18,6 +18,9 @@ limitations under the License.
 
 from copy import deepcopy
 import sys
+import logging
+
+logger = logging.getLogger('main_logger')
 
 from google_helpers.bigquery_service import get_bigquery_service
 
