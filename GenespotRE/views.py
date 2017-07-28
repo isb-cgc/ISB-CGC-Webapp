@@ -43,7 +43,7 @@ from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 
 
 debug = settings.DEBUG
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('main_logger')
 
 ACL_GOOGLE_GROUP = settings.ACL_GOOGLE_GROUP
 ERA_LOGIN_URL = settings.ERA_LOGIN_URL

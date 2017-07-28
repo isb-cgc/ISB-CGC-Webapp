@@ -41,7 +41,7 @@ from bq_data_access.v2.protein_data import RPPA_FEATURE_TYPE
 
 from bq_data_access.v2.feature_search.clinical_schema_utils import ClinicalColumnFeatureSupport, ClinicalColumnNameMappingStatus
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('main_logger')
 
 
 class FeatureDefinitionSearcherFactory(object):

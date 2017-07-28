@@ -32,7 +32,7 @@ from bq_data_access.v2.feature_id_utils import ProviderClassQueryDescription
 from visualizations.data_access_views_v2 import get_confirmed_project_ids_for_cohorts
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('main_logger')
 
 
 def build_gnab_feature_id(gene_label, genomic_build):

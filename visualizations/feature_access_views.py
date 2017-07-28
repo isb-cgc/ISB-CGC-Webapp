@@ -39,7 +39,7 @@ from bq_data_access.v1.methylation_data import METH_FEATURE_TYPE
 from bq_data_access.v1.mirna_data import MIRN_FEATURE_TYPE
 from bq_data_access.v1.protein_data import RPPA_FEATURE_TYPE
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('main_logger')
 
 
 class FeatureDefinitionSearcherFactory(object):

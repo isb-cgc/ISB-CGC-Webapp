@@ -29,7 +29,7 @@ from bq_data_access.v2.schema.program_schemas import TABLE_TO_SCHEMA_MAP
 
 CLINICAL_FEATURE_TYPE = 'CLIN'
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('main_logger')
 
 
 class InvalidClinicalFeatureIDException(Exception):

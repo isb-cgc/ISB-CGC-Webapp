@@ -37,7 +37,7 @@ from bq_data_access.v1.utils import VectorMergeSupport
 from cohorts.metadata_helpers import fetch_isbcgc_project_set
 from projects.models import Project
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('main_logger')
 
 VIZ_UNIT_DATADICTIONARY = {
     'BMI': 'kg/m^2',
