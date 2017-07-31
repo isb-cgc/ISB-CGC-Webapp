@@ -23,6 +23,8 @@ from time import sleep
 
 from bq_data_access.v2.utils import DurationLogged
 
+logger = logging.getLogger(__name__)
+
 
 class FeatureDataProvider(object):
     """
@@ -120,19 +122,19 @@ class FeatureDataProvider(object):
 
         query_body, run_query = self.feature_query_support.build_query(program_set, cohort_table, cohort_id_array, project_id_array)
         if not run_query:
-            logging.info("Not submitting BigQuery job - returning empty result.")
+            logger.info("Not submitting BigQuery job - returning empty result.")
             return {
                 "job_reference": None,
                 "run_query": False
             }
 
-        logging.info(query_body)
+        logger.info(query_body)
         query_job = self.submit_bigquery_job(bigquery_client, query_body)
 
         # Poll for completion of the query
         self.job_reference = query_job['jobReference']
         job_id = query_job['jobReference']['jobId']
-        logging.debug("JOBID {id}".format(id=job_id))
+        logger.debug("JOBID {id}".format(id=job_id))
 
         return {
             "job_reference": self.job_reference,
