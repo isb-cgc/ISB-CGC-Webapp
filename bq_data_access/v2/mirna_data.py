@@ -32,7 +32,7 @@ VALUE_NORMALIZED_COUNT = 'normalized_count'
 MIRN_FEATURE_TYPE = 'MIRN'
 COHORT_FIELD_NAME = 'sample_id'
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('main_logger')
 
 
 def get_feature_type():

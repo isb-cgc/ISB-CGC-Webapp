@@ -31,7 +31,7 @@ from bq_data_access.v1.data_access import ProviderClassQueryDescription
 from visualizations.data_access_views import get_confirmed_project_ids_for_cohorts
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('main_logger')
 
 
 def build_gnab_feature_id(gene_label):
@@ -95,6 +95,6 @@ def seqpeek_view_data(request):
             })
 
     except Exception as e:
-        print >> sys.stdout, traceback.format_exc()
+        logger.error("[ERROR] In seqpeek_view_data: ")
         logger.exception(e)
         return JsonResponse({'error': str(e)}, status=500)

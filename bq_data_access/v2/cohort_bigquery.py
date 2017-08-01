@@ -18,8 +18,11 @@ limitations under the License.
 
 from copy import deepcopy
 import sys
+import logging
 
 from google_helpers.bigquery_service import get_bigquery_service
+
+logger = logging.getLogger('main_logger')
 
 COHORT_DATASETS = {
     'prod': 'cloud_deployment_cohorts',
@@ -111,8 +114,6 @@ class BigQueryCohortSupport(object):
             rows.append(self._build_cohort_row(cohort_id, case_barcode=sample['case_barcode'], sample_barcode=sample['sample_barcode'], project_id=sample['project_id']))
 
         response = self._streaming_insert(rows)
-
-        print >> sys.stdout, response.__str__()
 
         return response
 

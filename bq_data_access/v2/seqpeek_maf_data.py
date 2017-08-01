@@ -21,7 +21,7 @@ import logging
 from bq_data_access.v2.gnab_data import GNABDataQueryHandler
 from bq_data_access.v2.utils import DurationLogged
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('main_logger')
 
 SEQPEEK_FEATURE_TYPE = 'SEQPEEK'
 

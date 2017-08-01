@@ -43,7 +43,7 @@ from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 
 
 debug = settings.DEBUG
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('main_logger')
 
 ACL_GOOGLE_GROUP = settings.ACL_GOOGLE_GROUP
 ERA_LOGIN_URL = settings.ERA_LOGIN_URL
@@ -112,7 +112,7 @@ Returns page that has user details
 '''
 @login_required
 def user_detail(request, user_id):
-    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+    if debug: logger.debug('Called '+sys._getframe().f_code.co_name)
 
     if int(request.user.id) == int(user_id):
 
@@ -137,6 +137,7 @@ def user_detail(request, user_id):
             user_details['NIH_username'] = nih_user.NIH_username
             user_details['NIH_assertion_expiration'] = nih_user.NIH_assertion_expiration
             user_details['dbGaP_authorized'] = (len(user_auth_datasets) > 0) and nih_user.active
+            logger.debug("[DEBUG] User {} has access to {} dataset(s) and is {}".format(nih_user.NIH_username, str(len(user_auth_datasets)), ('not active' if not nih_user.active else 'active')))
             user_details['NIH_active'] = nih_user.active
             user_details['auth_datasets'] = [] if len(user_auth_datasets) <= 0 else AuthorizedDataset.objects.filter(id__in=user_auth_datasets.values_list('authorized_dataset',flat=True)).values_list('name',flat=True)
         except (MultipleObjectsReturned, ObjectDoesNotExist), e:
@@ -157,7 +158,7 @@ def user_detail(request, user_id):
 
 @login_required
 def bucket_object_list(request):
-    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+    if debug: logger.debug('Called '+sys._getframe().f_code.co_name)
     credentials = GoogleCredentials.get_application_default()
     service = discovery.build('storage', 'v1', credentials=credentials, cache_discovery=False)
 
@@ -191,7 +192,7 @@ def user_landing(request):
     except HttpError, e:
         logger.info(e)
 
-    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+    if debug: logger.debug('Called '+sys._getframe().f_code.co_name)
     # check to see if user has read access to 'All TCGA Data' cohort
     isb_superuser = User.objects.get(username='isb')
     superuser_perm = Cohort_Perms.objects.get(user=isb_superuser)
@@ -244,7 +245,7 @@ DEPRECATED - Returns Results from text search
 '''
 @login_required
 def search_cohorts_viz(request):
-    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+    if debug: logger.debug('Called '+sys._getframe().f_code.co_name)
     q = request.GET.get('q', None)
     result_obj = {
         'q': q
@@ -276,7 +277,7 @@ def search_cohorts_viz(request):
 
 @login_required
 def igv(request, sample_barcode=None, readgroupset_id=None):
-    if debug: print >> sys.stderr, 'Called '+sys._getframe().f_code.co_name
+    if debug: logger.debug('Called '+sys._getframe().f_code.co_name)
 
     readgroupset_list = []
     bam_list = []
