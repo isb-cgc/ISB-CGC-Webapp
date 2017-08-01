@@ -23,7 +23,7 @@ from time import sleep
 
 from bq_data_access.v2.utils import DurationLogged
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('main_logger')
 
 
 class FeatureDataProvider(object):

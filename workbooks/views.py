@@ -21,7 +21,7 @@ from sharing.service import create_share
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('main_logger')
 
 debug = settings.DEBUG
 
