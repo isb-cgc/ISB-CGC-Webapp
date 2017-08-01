@@ -37,7 +37,7 @@ from bq_data_access.v1.utils import VectorMergeSupport
 from cohorts.metadata_helpers import fetch_isbcgc_project_set
 from projects.models import Project
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('main_logger')
 
 VIZ_UNIT_DATADICTIONARY = {
     'BMI': 'kg/m^2',
@@ -152,8 +152,8 @@ def get_pairwise_result(feature_array):
     except Exception as e:
         outputs = None
         results = None
-        print >> sys.stdout, traceback.format_exc()
-        logger.error(traceback.format_exc())
+        logger.error("[ERROR] While getting pairwise result: ")
+        logger.exception(e)
 
     return results
 
@@ -433,7 +433,7 @@ def data_access_for_plot(request):
         return JsonResponse(get_merged_feature_vectors(x_id, y_id, c_id, cohort_id_array, logTransform, confirmed_study_ids))
 
     except Exception as e:
-        print >> sys.stdout, traceback.format_exc()
+        logger.error("[ERROR] While accessing data for plot: ")
         logger.exception(e)
         return JsonResponse({'error': str(e)}, status=500)
 

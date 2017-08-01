@@ -357,7 +357,5 @@ def variable_fav_save(request, variable_fav_id=0):
     except Exception as e:
         logger.error('[ERROR] Exception while saving variable favorite:')
         logger.exception(e)
-        print >> sys.stderr, "[ERROR] Exception while saving variable favorite:"
-        print >> sys.stderr, traceback.format_exc()
         result['error'] = "There was an error saving your variable favorite; it may not have been saved correctly."
         return HttpResponse(json.dumps(result), status=500)
