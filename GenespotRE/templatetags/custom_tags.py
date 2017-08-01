@@ -186,15 +186,8 @@ def get_data_attr_id(value, attr):
 def has_user_data(programs):
     for prog in programs:
         if prog['type'] == 'user-data':
-            print >> sys.stdout, "is user data!"
             return True
     return False
-
-
-@register.filter
-def is_superuser(this_user):
-    isb_superuser = User.objects.get(username='isb')
-    return this_user.id == isb_superuser.id
 
 
 @register.filter

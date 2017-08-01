@@ -25,7 +25,7 @@ from sys import stdout
 
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('main_logger')
 logger.setLevel(logging.DEBUG)
 _ch = logging.StreamHandler(stream=stdout)
 logger.addHandler(_ch)
