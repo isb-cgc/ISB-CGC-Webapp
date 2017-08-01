@@ -306,7 +306,16 @@ require([
             return {variable: "", type: "label"};
         }
         if(selection.attr("type") == "common"){
-            result = {variable : selection.val(), text : selection.text(), type : "common"};
+            result = {
+                variable : selection.val(),
+                text : selection.text(),
+                type : "common"
+            };
+
+            if(selection.attr('var_type')=='N' && !selection.parents('.variable-container').find('.log-scale').is(':disabled') &&
+                selection.parents('.variable-container').find('.log-scale').is(':checked')) {
+                result['logTransform'] = true;
+            }
         } else {
             result = {variable : selection.val(), type : "gene"};
             var parent = selection.parents(".variable-container");
@@ -334,6 +343,11 @@ require([
             options.find('.search-term-select').find("option").each(function(i, ele){
                 result['selection'].options.push({value : $(ele).val(), text : $(ele).text()});
             });
+            if(parent.find('.spec-select').find(':selected').attr('var_type')=='N' &&
+                !parent.find('.log-scale').is(':disabled') &&
+                parent.find('.log-scale').is(':checked')) {
+                result.selection['logTransform'] = true;
+            }
         }
         return result;
     }
@@ -445,6 +459,7 @@ require([
             }
 
             disable_invalid_variable_options($('.worksheet.active .main-settings'));
+            variable_element.parent('.variable-container').find('.log-scale').prop('checked',data.logTransform || false);
             variable_element.val(data.variable);
             axis_select_change(variable_element);
         } else if(data.type == "gene") {
@@ -496,6 +511,7 @@ require([
                 parent.find('.' + data.specification).find('.search-term-select').val(data["selection"].selected);
             }
             disable_invalid_variable_options($('.worksheet.active .main-settings'));
+            variable_element.parent('.variable-container').find('.log-scale').prop('checked',data.selection.logTransform || false);
         }
     }
 
