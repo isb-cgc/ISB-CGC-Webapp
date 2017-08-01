@@ -205,7 +205,7 @@ def index(request):
                 try:
                     st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[STATUS] Updating Django model")
 
-                    authorized_datasets = das.get_datasets_for_era_login(user_email)
+                    authorized_datasets = das.get_datasets_for_era_login(NIH_username)
 
                     saml_response = None if 'SAMLResponse' not in req['post_data'] else req['post_data']['SAMLResponse']
                     saml_response = saml_response.replace('\r\n', '')
