@@ -27,7 +27,7 @@ DJANGO_COHORT_TABLE = 'cohorts_samples'
 DJANGO_COHORT_INFO_TABLE = 'cohorts_cohort'
 DJANGO_COHORT_SAMPLES_TABLE = 'cohorts_samples'
 
-logger = logging
+logger = logging.getLogger('main_logger')
 
 DATAPOINT_COHORT_THRESHOLD = 1
 
@@ -150,9 +150,8 @@ class CloudSQLCohortAccess(object):
             return result
 
         except Exception as e:
-            print >> sys.stdout, "[ERROR] In get_cohort_info: "
-            print >> sys.stdout, e
-            print >> sys.stdout, traceback.format_exc()
+            logger.error("[ERROR] In get_cohort_info: ")
+            logger.exception(e)
             raise CohortException('get_cohort_info CloudSQL error, cohort IDs {cohort_ids}: {message}'.format(
                 cohort_ids=cohort_id_array,
                 message=str(e.message)))

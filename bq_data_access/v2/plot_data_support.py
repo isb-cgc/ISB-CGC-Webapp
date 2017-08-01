@@ -26,7 +26,7 @@ from bq_data_access.v2.feature_value_types import ValueType, is_log_transformabl
 from bq_data_access.v2.utils import DurationLogged
 from bq_data_access.v2.utils import VectorMergeSupport
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('main_logger')
 
 VIZ_UNIT_DATADICTIONARY = {
     'BMI': 'kg/m^2',

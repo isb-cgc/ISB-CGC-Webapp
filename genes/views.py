@@ -15,7 +15,7 @@ from workbooks.models import Workbook, Worksheet
 
 WHITELIST_RE = settings.WHITELIST_RE
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('main_logger')
 
 # validates whether each gene is a list of gene symbols are known gene symbols
 # returns a json object keyed on each gene symbol with values of whether or not they are valid
