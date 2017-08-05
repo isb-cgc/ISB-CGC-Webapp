@@ -1251,6 +1251,11 @@ require([
      * Ajax submitting forms
      */
     $('.ajax-form-modal').find('form').on('submit', function (e) {
+
+        if($(this).hasClass('share-workbook-form')) {
+            return false;
+        }
+
         e.preventDefault();
         e.stopPropagation();
 
@@ -1404,6 +1409,109 @@ require([
             }
         });
         return false;
+    });
+
+
+    // Share with user click
+    $('.share-workbook-form').on('submit', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+
+        var invalid_emails = [];
+
+        var $this=$(this);
+
+        var emails = $('#share-share_users').val().split(",");
+        for(var i=0; i < emails.length; i++) {
+            if(!emails[i].match(base.email)) {
+                invalid_emails.push(emails[i]);
+            }
+        }
+
+        if(invalid_emails.length > 0) {
+            $('#share-modal-js-messages').empty();
+            $('#share-modal-js-messages').append(
+                $('<p>')
+                    .addClass('alert alert-danger alert-dismissible')
+                    .text("The following email addresses appear to be invalid: "+invalid_emails.join("; ")));
+
+            return false;
+        }
+
+        var workbook_id = $(this).data('workbook-id');
+
+        var url = base_url + '/workbooks/' + workbook_id + '/share';
+
+        $(this).find('.btn-primary').addClass('btn-disabled').attr('disabled', true);
+
+        var csrftoken = $.getCookie('csrftoken');
+        $.ajax({
+            type        :'POST',
+            url         : url,
+            dataType    :'json',
+            data        : $(this).serialize(),
+            beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+            success : function (data) {
+                if(data.status && data.status == 'error') {
+                    if(data.result && data.result.msg) {
+                        $('#share-modal-js-messages').empty();
+                        $('#share-modal-js-messages').append(
+                            $('<p>')
+                                .addClass('alert alert-danger alert-dismissible')
+                                .text(data.result.msg));
+                    }
+                } else if(data.status && data.status == 'success') {
+                    $this.closest('.modal').modal('hide');
+                    if($this.data('redirect')) {
+                        window.location = $this.data('redirect');
+                    } else {
+                        window.location.reload();
+                    }
+                }
+            },
+            error: function (err) {
+                $this.closest('.modal').modal('hide');
+                $('#js-messages').append(
+                    $('<p>')
+                        .addClass('alert alert-danger alert-dismissible')
+                        .text(err));
+            },
+        }).always(function () {
+            $this.find('.btn-primary').removeClass('btn-disabled').attr('disabled', false);
+        });
+        // We don't want this form submission to trigger a reload
+        return false;
+    });
+
+    $('.share-workbook-modal button.btn-cancel,.share-workbook-modal button.close').on('click',function(){
+        $('#share-modal-js-messages').empty();
+        $(this).parents('.share-workbook-modal').find('.btn-primary').removeClass('btn-disabled').attr('disabled', false);
+    });
+
+
+    // Remove shared user cliclk
+    $('.remove-shared-user').on('click', function() {
+        var shared_id = $(this).attr('data-shared-id');
+        var url = base_url + '/share/' + shared_id + '/remove';
+        var csrftoken = $.getCookie('csrftoken');
+        var button = $(this);
+        $.ajax({
+            type        :'POST',
+            url         : url,
+            dataType    :'json',
+            data        : {owner: true},
+            beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+            success : function (data) {
+                button.parents('tr').remove();
+                var count = parseInt($($('.share-count')[0]).html());
+                $('.share-count').each(function() {
+                   $(this).html(count-1);
+                });
+            },
+            error: function () {
+                console.log('Failed to remove user');
+            }
+        });
     });
 
     /*
