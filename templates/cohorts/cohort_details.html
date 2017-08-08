@@ -41,7 +41,7 @@
 
         <ul id="default-cohort-menu">
             {% if cohort.perm.perm != 'OWNER' %}
-                <li class="menu-item"><h4>Owner: {{ cohort.owner.first_name|title}} {{ cohort.owner.last_name|title }}</h4></li>
+                <li class="menu-item"><h4>Owner: {% if cohort.is_public %}ISB-CGC{% else %}{{ cohort.owner.first_name|title}} {{ cohort.owner.last_name|title }}{% endif %}</h4></li>
                 <li class="separator"></li>
             {% endif %}
             <li class="menu-item">
@@ -67,11 +67,14 @@
             <li class="separator"></li>
             <li class="menu-item"><a href="{% url 'cohort_filelist' cohort.id %}" class="btn btn-info view-files-btn" title="View this cohort's file list">View Files</a></li>
             <li class="menu-item"><a href="{%  url 'download_ids' cohort.id %}" class="btn btn-info download-ids-btn" title="Download this cohort's patient and sample IDs">Download IDs</a></li>
-            <li class="separator"></li>
             {% if cohort.perm.perm == 'OWNER' %}
+            <li class="separator"></li>
             <li class="menu-item"><button class="btn btn-info" data-toggle="modal" data-target="#share-cohort-modal">Share</button></li>
             {% endif %}
+            {% if not cohort.is_public %}
+            <li class="separator"></li>
             <li class="menu-item"><a data-target="#share-cohort-modal" data-toggle="modal" class="btn btn-link" id="shared-with-btn">Shared with (<span class="share-count">{{ shared_with_users|length}}</span>)</a></li>
+            {% endif %}
         </ul>
         <ul id="edit-cohort-menu" style="display: none">
             {% if cohort.perm.perm == 'OWNER' %}
@@ -92,6 +95,7 @@
                     <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                     You have selected too many filters. The current counts shown will not be accurate until one or more filter options are removed.
                 </div>
+                <div id="js-messages"></div>
             </div>
         </div>
     </div>
@@ -248,6 +252,8 @@
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <h4 class="modal-title">Cohort Sharing</h4>
+                    <div class="modal-js-messages" id="share-cohort-js-messages">
+                    </div>
                     <ul class="nav nav-tabs" role="tablist">
                         {% if cohort.perm.perm == 'OWNER' %}
                             <li role="presentation" class="active"><a data-target="#share-cohort-pane" data-toggle="tab" aria-controls="home" role="tab" id="shareCohortModal">Share Cohort</a></li>
@@ -259,14 +265,14 @@
                 <div class="tab-content">
                     {% if cohort.perm.perm == 'OWNER' %}
                     <div role="tabpanel" class="tab-pane active" id="share-cohort-pane">
-                        <form id="share-cohort-form" method="POST" action="{% url 'share_cohort' cohort.id %}">
+                        <form id="share-cohort-form" data-cohort-id="{{ cohort.id }}" method="" action="">
                             <div class="modal-body">
                                 <label for="share-share_users">Enter email addresses separated by a comma</label>
                                 <textarea id="share-share_users" class="form-control" name="share_users"></textarea>
                             </div>
                             <div class="modal-footer">
                                 {% csrf_token %}
-                                <input type="submit" value="Send" class="btn btn-primary" />
+                                <input type="submit" class="btn btn-primary" />
                             </div>
                         </form>
                     </div>

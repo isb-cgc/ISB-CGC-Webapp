@@ -358,15 +358,15 @@ def worksheet_display(request, workbook_id=0, worksheet_id=0):
 
 @login_required
 def worksheet(request, workbook_id=0, worksheet_id=0):
-    command  = request.path.rsplit('/',1)[1]
+    command = request.path.rsplit('/',1)[1]
 
-    if request.method == "POST" :
+    if request.method == "POST":
         this_workbook = Workbook.objects.get(id=workbook_id)
         this_workbook.save()
-        if command == "create" :
+        if command == "create":
             this_worksheet = Worksheet.create(workbook_id=workbook_id, name=request.POST.get('name'), description=request.POST.get('description'))
             redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': this_worksheet.id})
-        elif command == "edit" :
+        elif command == "edit":
             worksheet_name = request.POST.get('name')
             worksheet_desc = request.POST.get('description')
             whitelist = re.compile(WHITELIST_RE, re.UNICODE)

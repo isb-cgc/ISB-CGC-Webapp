@@ -186,7 +186,7 @@ require([
         hide_plot_settings();
     });
 
-    ////Model communications
+    // Model communications
     $('.add_worksheet_comment_form').on('submit', function (event) {
 
         if(savingComment) {
@@ -286,9 +286,7 @@ require([
         }
     }
 
-    /*
-     * gather the options and selections on a variable, used for gathering the color_by variable
-     */
+    // gather the options and selections on a variable, used for gathering the color_by variable
     function get_simple_values(selection) {
         var result;
         result = {variable: selection.find(":selected").val(), type : "common", options: []};
@@ -296,11 +294,9 @@ require([
            result.options.push({value : $(ele).val(), text : $(ele).text()});
         });
         return result;
-    }
+    };
 
-    /*
-     * gather the options and selections on a variable in the plot settings
-     */
+    // gather the options and selections on a variable in the plot settings
     function get_values(selection){
         var result;
         if(selection.attr('type') == "label") {
@@ -445,10 +441,8 @@ require([
         }
     }
 
-    /*
-     * add data values to the variable_element representing a plot axis,
-     * This is called on loading plot data from model and swapping axis
-     */
+    // Add data values to the variable_element representing a plot axis,
+    // This is called on loading plot data from model and swapping axis
     function apply_axis_values(variable_element, data, axis_settings){
         if(data.type == "common"){
             if(data.options){
@@ -514,11 +508,9 @@ require([
             disable_invalid_variable_options($('.worksheet.active .main-settings'));
             variable_element.parent('.variable-container').find('.log-scale').prop('checked',data.selection.logTransform || false);
         }
-    }
+    };
 
-    /*
-     * Event handler for the Swap button
-     */
+    // Event handler for the Swap button
     $('.swap').click(function(){
         var x = get_values($(this).parent().find('.x-axis-select').find(":selected"));
         var y = get_values($(this).parent().find('.y-axis-select').find(":selected"));
@@ -526,9 +518,7 @@ require([
         apply_axis_values($(this).parent().find('.x-axis-select'), y);
     });
 
-    /*
-     * Event Handlers for X-Axis
-     */
+    // Event Handlers for X-Axis
     function axis_attribute_change(self, for_plot_load){
         if($(self).hasClass('x-gene-attribute-select')){
             x_attribute_change(self, for_plot_load);
@@ -610,9 +600,7 @@ require([
         x_attribute_change(this);
     });
 
-    /*
-     * Color_by handler, update based on x and y selection
-     */
+    // Color_by handler, update based on x and y selection
     $(".search-term-field").change(function(){
         if($(this).attr('id').indexOf("color-by")<0) {
             var parent = $(this).parents(".main-settings");
@@ -651,9 +639,7 @@ require([
         }
     });
 
-    /*
-     * Event Handlers for Y-Axis
-     */
+    // Event Handlers for Y-Axis
     function y_select_change(self) {
         $(self).parent().find(".attr-options").fadeOut();
         var type = $(self).find(":selected").attr('type');
@@ -721,9 +707,7 @@ require([
         y_attribute_change(this);
     });
 
-    /*
-     * Gene attribute selection
-     */
+    // Gene attribute selection
     $('.datatype-selector').on('change', function() { vizhelpers.get_datatype_search_interfaces(this, this.value)});
     $('.feature-search').on('change',    function() { vizhelpers.field_search_change_callback(this); });
     $('.select-field').on('click',       function() { vizhelpers.select_field_callback(this); });
@@ -844,9 +828,7 @@ require([
         }
     };
 
-    /*
-     * generate plot upon user click
-     */
+    // generate plot upon user click
     $('.update-plot').on('click', function(event){
         if($('.toggle-selection').hasClass('active')) {
             $('.toggle-selection').click();
@@ -871,9 +853,7 @@ require([
         $(this).parentsUntil(".worksheet-body").find('.update-plot').click();
     });
 
-    /*
-     * Gather plot information on the page
-     */
+    // Gather plot information on the page
     function get_plot_info_on_page(plot_settings){
         
         var worksheet = plot_settings.parents('.worksheet-body');
@@ -958,9 +938,7 @@ require([
         }
     }
 
-    /*
-     * Get plot model when plot selection changes
-     */
+    // Get plot model when plot selection changes
     $(".plot_selection").on("change", function(event){
         var self = this;
         $(this).find(":disabled :selected").remove();
@@ -1082,9 +1060,7 @@ require([
         }
     });
 
-    /*
-     * validate the plot settings before initiating the plot
-     */
+    // validate the plot settings before initiating the plot
     function valid_plot_settings(plot_settings){
         var data = get_plot_info_on_page(plot_settings);
 
@@ -1168,9 +1144,7 @@ require([
         );
     }
 
-    /*
-     * loads the plot data into the ui inputs for adjustment
-     */
+    // Loads the plot data into the ui inputs for adjustment
     function load_plot(worksheet_id, plot_data, plot_settings, callback){
         var plot_element = $("[worksheet_id='"+worksheet_id+"']").parent().parent().find(".plot");
 
@@ -1247,9 +1221,7 @@ require([
         });
     }
 
-    /*
-     * Ajax submitting forms
-     */
+    // Generic form submission used by default
     $('.ajax-form-modal').find('form').on('submit', function (e) {
 
         if($(this).hasClass('share-workbook-form')) {
@@ -1479,15 +1451,15 @@ require([
         }).always(function () {
             $this.find('.btn-primary').removeClass('btn-disabled').attr('disabled', false);
         });
-        // We don't want this form submission to trigger a reload
+        // We don't want this form submission to automatically trigger a reload
         return false;
     });
 
+    // Any time the share workbook modal is closed, clear out the messages and re-enable the buttons
     $('.share-workbook-modal button.btn-cancel,.share-workbook-modal button.close').on('click',function(){
         $('#share-modal-js-messages').empty();
         $(this).parents('.share-workbook-modal').find('.btn-primary').removeClass('btn-disabled').attr('disabled', false);
     });
-
 
     // Remove shared user cliclk
     $('.remove-shared-user').on('click', function() {
@@ -1514,9 +1486,7 @@ require([
         });
     });
 
-    /*
-        Disable comment button if no content
-     */
+    //Disable comment button if no content
     $('.save-comment-btn').prop('disabled', true);
     $('.comment-textarea').keyup(function() {
         $(this).siblings('.save-comment-btn').prop('disabled', this.value == '' ? true : false)
