@@ -20,6 +20,7 @@ from projects.models import Program
 from sharing.service import create_share
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils.html import escape
 
 logger = logging.getLogger('main_logger')
 
@@ -590,63 +591,71 @@ def worksheet_plots(request, workbook_id=0, worksheet_id=0, plot_id=0):
     json_response = False
     default_name  = "Untitled Workbook"
     result        = {}
+    try:
+        workbook_model = Workbook.objects.get(id=workbook_id) if workbook_id != 0 else None
 
-    if request.method == "POST" :
-        workbook = Workbook.objects.get(id=workbook_id)
-        workbook.save()
-        if command == "delete" :
-            var = Worksheet_plot.objects.get(id=plot_id).delete()
-            result['message'] = "the plot has been deleted from workbook"
+        if request.method == "POST":
+            workbook_model.save()
+            if command == "delete":
+                var = Worksheet_plot.objects.get(id=plot_id).delete()
+                result['message'] = "This plot has been deleted from workbook."
+            else:
+                if "attrs" in request.body:
+                    json_response = True
+                    attrs    = json.loads(request.body)['attrs']
+                    settings = json.loads(request.body)['settings']
+                    if plot_id :
+                        plot_model = Worksheet_plot.objects.get(id=plot_id)
+                        plot_model.settings_json = settings
+                        if attrs['cohorts']:
+                            try :
+                                Worksheet_plot_cohort.objects.filter(plot=plot_model).delete()
+                                for obj in attrs['cohorts'] :
+                                    wpc = Worksheet_plot_cohort(plot=plot_model, cohort_id=obj['id'])
+                                    wpc.save()
+                            except ObjectDoesNotExist:
+                                None
+
+                        plot_model.save()
+                        result['updated'] = "success"
+
+        elif request.method == "GET":
+            json_response = True
+            plot_type = escape(request.GET.get('type', 'default'))
+
+            if plot_type not in Analysis.get_types_list():
+                raise Exception("Plot type {} was not found in the allowed list of plot types!".format(plot_type))
+
+            worksheet_model = Worksheet.objects.get(id=worksheet_id)
+            plots = worksheet_model.worksheet_plot_set.all()
+            for p in plots :
+                p.active = False
+                p.save()
+
+            plots = worksheet_model.worksheet_plot_set.filter(type=plot_type)
+            if len(plots) == 0:
+                model = Worksheet_plot(type=plot_type, worksheet=worksheet_model)
+                model.save()
+            else:
+                model = plots[0]
+                model.active = True
+                model.save()
+
+            result['data'] = model.toJSON()
         else:
-            #update
-            if "attrs" in request.body :
-                json_response = True
-                attrs    = json.loads(request.body)['attrs']
-                settings = json.loads(request.body)['settings']
-                if plot_id :
-                    plot_model = Worksheet_plot.objects.get(id=plot_id)
-                    plot_model.settings_json = settings
-                    if attrs['cohorts'] :
-                        try :
-                            Worksheet_plot_cohort.objects.filter(plot=plot_model).delete()
-                            for obj in attrs['cohorts'] :
-                                wpc = Worksheet_plot_cohort(plot=plot_model, cohort_id=obj['id'])
-                                wpc.save()
-                        except ObjectDoesNotExist:
-                            None
+            result['error'] = "method not correct"
 
-
-                    plot_model.save()
-                    result['updated'] = "success"
-
-    elif request.method == "GET":
-        json_response = True
-        plot_type = request.GET.get('type', 'default')
-
-        worksheet_model = Worksheet.objects.get(id=worksheet_id)
-        plots = worksheet_model.worksheet_plot_set.all()
-        for p in plots :
-            p.active = False
-            p.save()
-
-        plots = worksheet_model.worksheet_plot_set.filter(type=plot_type)
-        if len(plots) == 0:
-            model = Worksheet_plot(type=plot_type, worksheet=worksheet_model)
-            model.save()
+        if json_response:
+            return HttpResponse(json.dumps(result), status=200)
         else:
-            model = plots[0]
-            model.active = True
-            model.save()
+            redirect_url = reverse('worksheet_display', kwargs={'workbook_id': workbook_model.id, 'worksheet_id': worksheet_model.id})
+            return redirect(redirect_url)
 
-        result['data'] = model.toJSON()
-    else:
-        result['error'] = "method not correct"
-
-    if json_response:
-        return HttpResponse(json.dumps(result), status=200)
-    else:
-        redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_model.id, 'worksheet_id': worksheet_model.id})
-        return redirect(redirect_url)
+    except Exception as e:
+        logger.error("[ERROR] While accessing workbooks/worksheets:")
+        logger.exception(e)
+        messages.error(request, "An error occurred while trying to process this workbook request.")
+        return redirect('workbooks')
 
 
 @login_required
