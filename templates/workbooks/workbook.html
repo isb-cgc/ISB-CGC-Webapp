@@ -28,11 +28,11 @@
         <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target=".edit-workbook-details-modal">Edit Details</button></li>
         <li role="menuitem"><button class="btn btn-info {% if not workbook.build %}disabled{% endif %}" data-toggle="modal" data-target="{% if workbook.build %}#copy-workbook-modal-{{ workbook.id }}{% endif %}">Duplicate</button></li>
         <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#delete-workbook-modal-{{ workbook.id }}">Delete</button></li>
-{#        {% if is_shareable %}#}
-{#        <li class="separator"></li>#}
-{#        <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#share-workbook-modal-{{ workbook.id }}">Share</button></li>#}
-{#        <li role="menuitem"><button class="btn btn-link" data-toggle="modal" data-target="#share-workbook-modal-{{ workbook.id }}">Shared with (<span class="share-count">{{ workbook.shared.all|shared_active_count }}</span>)</button></li>#}
-{#        {% endif %}#}
+        {% if is_shareable %}
+        <li class="separator"></li>
+        <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#share-workbook-modal-{{ workbook.id }}">Share</button></li>
+        <li role="menuitem"><button class="btn btn-link" data-toggle="modal" data-target="#share-workbook-modal-{{ workbook.id }}">Shared with (<span class="share-count">{{ workbook.shared.all|shared_active_count }}</span>)</button></li>
+        {% endif %}
         {% elif workbook.is_public %}
         {# Is a public workbook #}
         <li><em>Public Workbook</em></li>
@@ -42,7 +42,7 @@
         {# Is a shared workbook #}
         <li role="menuitem"><button class="btn btn-info {% if not workbook.build %}disabled{% endif %}" data-toggle="modal" data-target="{% if workbook.build %}#copy-workbook-modal-{{ workbook.id }}{% endif %}">Duplicate</button></li>
         <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#remove-workbook-modal-{{ workbook.id }}">Remove</button></li>
-{#        <li role="menuitem"><button class="btn btn-link" data-toggle="modal" data-target="#share-workbook-modal-{{ workbook.id }}">Shared with (<span class="share-count">{{ workbook.shared.all|shared_active_count }}</span>)</button></li>#}
+        <li role="menuitem"><button class="btn btn-link" data-toggle="modal" data-target="#share-workbook-modal-{{ workbook.id }}">Shared with (<span class="share-count">{{ workbook.shared.all|shared_active_count }}</span>)</button></li>
         {% endif %}
 
     </ul>
