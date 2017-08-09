@@ -592,7 +592,7 @@ def worksheet_plots(request, workbook_id=0, worksheet_id=0, plot_id=0):
     default_name  = "Untitled Workbook"
     result        = {}
     try:
-        workbook_model = Workbook.objects.get(id=workbook_id) if workbook_id != 0 else None
+        workbook_model = Workbook.objects.get(id=workbook_id) if workbook_id else None
 
         if request.method == "POST":
             workbook_model.save()
