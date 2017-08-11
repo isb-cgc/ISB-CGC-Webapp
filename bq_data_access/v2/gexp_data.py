@@ -124,7 +124,6 @@ class GEXPDataQueryHandler(object):
                                       brk='\n')
 
         logging.debug("BQ_QUERY_GEXP: " + query)
-        print "Q ", query
         return query
 
     def build_query(self, project_set, cohort_table, cohort_id_array, project_id_array):
@@ -141,7 +140,6 @@ class GEXPDataQueryHandler(object):
         for table in config_instance.data_table_list:
             if (table.program in project_set) and (table.genomic_build == self.feature_def.genomic_build):
                 logger.info("Found matching table: '{}'".format(table.table_id))
-                print "table prog in ", table.program, " ", project_set
                 found_tables.append(table)
 
         # Build a BigQuery statement for each found table configuration
