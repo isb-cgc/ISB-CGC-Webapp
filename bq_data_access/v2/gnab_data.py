@@ -25,7 +25,7 @@ from bq_data_access.v2.utils import DurationLogged
 from bq_data_access.data_types.gnab import BIGQUERY_CONFIG
 from scripts.feature_def_gen.gnab_features import GNABDataSourceConfig
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('main_logger')
 
 GNAB_FEATURE_TYPE = 'GNAB'
 IDENTIFIER_COLUMN_NAME = 'sample_id'

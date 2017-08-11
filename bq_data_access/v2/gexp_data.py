@@ -27,7 +27,7 @@ from scripts.feature_def_gen.gexp_features import GEXPDataSourceConfig
 
 GEXP_FEATURE_TYPE = 'GEXP'
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('main_logger')
 
 
 def get_feature_type():

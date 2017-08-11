@@ -21,7 +21,7 @@ from sharing.service import create_share
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('main_logger')
 
 debug = settings.DEBUG
 
@@ -188,6 +188,7 @@ def get_gene_datatypes(build=None):
 def workbook(request, workbook_id=0):
     template = 'workbooks/workbook.html'
     command = request.path.rsplit('/',1)[1]
+    workbook_model = None
 
     try:
 
@@ -233,7 +234,7 @@ def workbook(request, workbook_id=0):
             if command == "delete":
                 redirect_url = reverse('workbooks')
             else:
-                redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_model.id})
+                redirect_url = reverse('workbook_detail', kwargs={'workbook_id': workbook_model.id})
 
             return redirect(redirect_url)
 
@@ -280,16 +281,58 @@ def workbook(request, workbook_id=0):
     return redirect(redirect_url)
 
 
-
 @login_required
 def workbook_share(request, workbook_id=0):
-    # emails = re.split('\s*,\s*', request.POST['share_users'].strip())
-    # workbook = request.user.workbook_set.get(id=workbook_id, active=True)
-    # create_share(request, workbook, emails, 'Workbook')
+    status = None
+    result = None
+
+    try:
+        emails = re.split('\s*,\s*', request.POST['share_users'].strip())
+        users_not_found = []
+        req_user = None
+
+        try:
+            req_user = User.objects.get(id=request.user.id)
+        except ObjectDoesNotExist as e:
+            raise Exception("{} is not a user ID in this database!".format(str(request.user.id)))
+
+        workbook_to_share = request.user.workbook_set.get(id=workbook_id, active=True)
+
+        if workbook_to_share.owner.id != req_user.id:
+            raise Exception(" {} is not the owner of this workbook!".format(req_user.email))
+
+        for email in emails:
+            try:
+                User.objects.get(email=email)
+            except ObjectDoesNotExist as e:
+                users_not_found.append(email)
+
+        if len(users_not_found) > 0:
+            status = 'error'
+            result = {
+                'msg': 'The following user emails could not be found; please ask them to log into the site first: '+", ".join(users_not_found)
+            }
+        else:
+            create_share(request, workbook_to_share, emails, 'Workbook')
+            status = 'success'
+
+    except Exception as e:
+        logger.error("[ERROR] While trying to share a workbook:")
+        logger.exception(e)
+        status = 'error'
+        result = {
+            'msg': 'There was an error while attempting to share this workbook.'
+        }
+    finally:
+        if not status:
+            status = 'error'
+            result = {
+                'msg': 'An unknown error has occurred while sharing this workbook.'
+            }
 
     return JsonResponse({
-        # 'status': 'success'
-        'status': 'unauthorized'
+        'status': status,
+        'result': result
     })
 
 
@@ -315,15 +358,15 @@ def worksheet_display(request, workbook_id=0, worksheet_id=0):
 
 @login_required
 def worksheet(request, workbook_id=0, worksheet_id=0):
-    command  = request.path.rsplit('/',1)[1]
+    command = request.path.rsplit('/',1)[1]
 
-    if request.method == "POST" :
+    if request.method == "POST":
         this_workbook = Workbook.objects.get(id=workbook_id)
         this_workbook.save()
-        if command == "create" :
+        if command == "create":
             this_worksheet = Worksheet.create(workbook_id=workbook_id, name=request.POST.get('name'), description=request.POST.get('description'))
             redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': this_worksheet.id})
-        elif command == "edit" :
+        elif command == "edit":
             worksheet_name = request.POST.get('name')
             worksheet_desc = request.POST.get('description')
             whitelist = re.compile(WHITELIST_RE, re.UNICODE)

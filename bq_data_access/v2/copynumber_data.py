@@ -26,7 +26,7 @@ from bq_data_access.data_types.cnvr import BIGQUERY_CONFIG
 from scripts.feature_def_gen.copynumber_features import CNVRDataSourceConfig
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('main_logger')
 
 CNVR_FEATURE_TYPE = 'CNVR'
 IDENTIFIER_COLUMN_NAME = 'sample_id'

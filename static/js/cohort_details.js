@@ -750,6 +750,112 @@ require([
         save_changes_btn_modal.prop('disabled', 'disabled');
     });
 
+
+    // Share with user click
+    $('#share-cohort-form').on('submit', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+
+        var invalid_emails = [];
+
+        var $this=$(this);
+
+        var emails = $('#share-share_users').val().split(",");
+        for(var i=0; i < emails.length; i++) {
+            if(!emails[i].match(base.email)) {
+                invalid_emails.push(emails[i]);
+            }
+        }
+
+        if(invalid_emails.length > 0) {
+            $('#share-cohort-js-messages').empty();
+            $('#share-cohort-js-messages').append(
+                $('<p>')
+                    .addClass('alert alert-danger alert-dismissible')
+                    .text("The following email addresses appear to be invalid: "+invalid_emails.join("; ")));
+
+            return false;
+        }
+
+        var cohort_id = $(this).data('cohort-id');
+
+        var url = base_url + '/cohorts/share_cohort/' + cohort_id + "/";
+
+        $(this).find('.btn-primary').addClass('btn-disabled').attr('disabled', true);
+
+        var csrftoken = $.getCookie('csrftoken');
+        $.ajax({
+            type        :'POST',
+            url         : url,
+            dataType    :'json',
+            data        : $(this).serialize(),
+            beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+            success : function (data) {
+                if(data.status && data.status == 'error') {
+                    if(data.result && data.result.msg) {
+                        $('#share-cohort-js-messages').empty();
+                        $('#share-cohort-js-messages').append(
+                            $('<p>')
+                                .addClass('alert alert-danger alert-dismissible')
+                                .text(data.result.msg));
+                    }
+                } else if(data.status && data.status == 'success') {
+                    $this.closest('.modal').modal('hide');
+                    if($this.data('redirect')) {
+                        window.location = $this.data('redirect');
+                    } else {
+                        window.location.reload();
+                    }
+                }
+            },
+            error: function (err) {
+                $this.closest('.modal').modal('hide');
+                $('#js-messages').empty();
+                $('#js-messages').append(
+                    $('<p>')
+                        .addClass('alert alert-danger alert-dismissible')
+                        .text(err));
+            },
+        }).always(function () {
+            $this.find('.btn-primary').removeClass('btn-disabled').attr('disabled', false);
+        });
+        // We don't want this form submission to automatically trigger a reload
+        return false;
+    });
+
+    // Any time the share workbook modal is closed, clear out the messages and re-enable the buttons
+    $('#share-cohort-modal button.btn-cancel,#share-cohort-modal button.close').on('click',function(){
+        $('#share-cohort-js-messages').empty();
+        $(this).parents('#share-cohort-modal').find('.btn-primary').removeClass('btn-disabled').attr('disabled', false);
+    });
+
+
+
+    // Remove shared user
+    $('.remove-shared-user').on('click', function() {
+        var user_id = $(this).attr('data-user-id');
+        var url = base_url + '/cohorts/unshare_cohort/' + cohort_id + '/';
+        var csrftoken = $.getCookie('csrftoken');
+        var button = $(this);
+        $.ajax({
+            type        :'POST',
+            url         : url,
+            dataType    :'json',
+            data        : {user_id: user_id},
+            beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+            success : function (data) {
+                button.parents('tr').remove();
+                var count = parseInt($($('.share-count')[0]).html());
+                $('.share-count').each(function() {
+                   $(this).html(count-1);
+                });
+            },
+            error: function () {
+                console.log('Failed to remove user');
+            }
+        })
+    });
+
     // Disable the comment button if there's no content in the comment
     $('.save-comment-btn').prop('disabled', true);
     $('#comment-content').keyup(function() {

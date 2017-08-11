@@ -186,9 +186,14 @@ def get_data_attr_id(value, attr):
 def has_user_data(programs):
     for prog in programs:
         if prog['type'] == 'user-data':
-            print >> sys.stdout, "is user data!"
             return True
     return False
+
+
+@register.filter
+def is_superuser(this_user):
+    isb_superuser = User.objects.get(username='isb')
+    return this_user.id == isb_superuser.id
 
 
 @register.filter
@@ -324,6 +329,13 @@ def get_values_list(object_list, value):
         logger.warn('[WARNING] get_values_list called with a None list object.')
         return []
     return object_list.values_list(value, flat=True)
+
+
+@register.filter
+def get_id_string(object_list, seperator):
+    if len(object_list):
+        return seperator.join([str(x) for x in get_values_list(object_list, "id")])
+    return ""
 
 
 @register.filter

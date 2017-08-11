@@ -25,7 +25,7 @@ from bq_data_access.v2.utils import DurationLogged
 from bq_data_access.data_types.rppa import BIGQUERY_CONFIG
 from scripts.feature_def_gen.protein_features import RPPADataSourceConfig
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('main_logger')
 
 RPPA_FEATURE_TYPE = 'RPPA'
 
