@@ -29,7 +29,6 @@ from bq_data_access.v2.feature_value_types import ValueType
 
 from bq_data_access.v2.errors import FeatureNotFoundException
 from bq_data_access.v2.feature_value_types import DataTypes
-from bq_data_access.v2.feature_data_provider import FeatureDataProvider
 from bq_data_access.v2.utils import DurationLogged
 
 USER_FEATURE_TYPE = 'USER'
@@ -87,7 +86,8 @@ class UserFeatureDef(object):
         logging.debug("UserFeatureDef.from_user_feature_id {0}".format(str([feature_id])))
         # ID breakdown: project ID:Feature ID
         # Example ID: USER:1:6
-        regex = re_compile("^USER:"
+        regex = re_compile(
+                           "(?:^v2:)?USER:"
                            # project ID
                            "([0-9]+):"
                            # Feature ID
@@ -124,6 +124,8 @@ class UserFeatureDef(object):
             if cursor: cursor.close()
             raise e
 
+        # The feature we want is "shared", i.e. defined in a project we are extended from. So we delegate the
+        # task to the from_feature_id() function:
         if shared_id is not None:
             return cls.from_feature_id(bq_id, project_id)
 
@@ -150,7 +152,7 @@ class UserFeatureDef(object):
     def from_feature_id(cls, feature_id, project_id=None):
         """
            This is the method used when the user feature maps to feature in an existing project (i.e. there is a
-           shared_id in the projects_user_feature_definitions entry.
+           shared_id in the projects_user_feature_definitions entry).
            It returns a *LIST* of UserFeatureDefs
          """
         logging.debug("UserFeatureDef.from_feature_id: {0}".format(str([feature_id, project_id])))
@@ -158,7 +160,8 @@ class UserFeatureDef(object):
             raise FeatureNotFoundException(feature_id)
         # ID breakdown: project ID:Feature ID
         # Example ID: USER:1:6
-        regex = re_compile("^USER:"
+        regex = re_compile(
+                          "(?:^v2:)?USER:"
                            # project ID
                            "([0-9]+):"
                            # Feature ID
@@ -210,18 +213,28 @@ class UserFeatureDef(object):
         if project_id_array is not None and len(project_id_array):
             project_id_stmt = ', '.join([str(project_id) for project_id in project_id_array])
 
-        query_template =  "SELECT {fdef_id} AS fdef_id, t.sample_barcode, t.{column_name} FROM [{table_name}] AS t " \
-                          "JOIN [{cohort_table}] AS c ON c.sample_barcode = t.sample_barcode " \
+        query_template =  "SELECT {fdef_id} AS fdef_id, t.sample_barcode, t.{column_name} {brk}" \
+                          "FROM [{table_name}] AS t {brk}" \
+                          "JOIN [{cohort_table}] AS c ON c.sample_barcode = t.sample_barcode {brk}" \
                           "WHERE c.cohort_id IN ({cohort_list}) AND (c.project_id IS NULL"
-
-
-        query_template += (" OR c.project_id IN ({project_id_list}))" if project_id_array is not None and len(project_id_array) else ")")
+        #
+        # Previous code (below) allowed the cohort project ID to match a list of projects. With user data that is not
+        # extended (i.e. using IDs from a public project), sample IDs could be identical in different projects but
+        # refer to different samples. With user data, the table is project-specific. So we cannot allow a sampleID from another
+        # project to cause a match with the same sampleID in this project. Thus, we limit to cohort rows that actually match the
+        # project of the table. Note that since we are dealing with just one table, we do not have to loop over all projects and
+        # union the results.
+        # Old code line:
+        # query_template += (" OR c.project_id IN ({project_id_list}))" if project_id_array is not None and len(project_id_array) else ")")
+        #
+        query_template += (" OR c.project_id = {project_id})" if project_id_array is not None and len(project_id_array) else ")")
         query = query_template.format(fdef_id=self.bq_row_id,
                               column_name=self.column_name,
                               table_name=self.bq_table,
                               cohort_table=cohort_table,
                               cohort_list=cohort_str,
-                              project_id_list=project_id_stmt)
+                              project_id=self.project_id,
+                              brk='\n')
 
         if self.filters is not None:
             for key, val in self.filters.items():
@@ -233,18 +246,27 @@ class UserFeatureDef(object):
 
 class UserDataQueryHandler(object):
     """
-    Feature data provider for user data.
+    Feature data provider for user data. Note in the V2 framework this gets called in FeatureProviderFactory.from_feature_id
+    in this fashion:
+        provider_class = cls.get_provider_class_from_feature_id(feature_id)
+        return provider_class(feature_id, **kwargs)
+    Which means that the user_feature_id is always None in v2 cases.
     """
     def __init__(self, feature_id, user_feature_id=None):
         self.feature_defs = None
         self.parse_internal_feature_id(feature_id, user_feature_id=user_feature_id)
         self._project_ids = None
 
-    def get_feature_type(self):
+    @classmethod
+    def get_feature_type(cls):
         return DataTypes.USER
 
     @classmethod
-    def convert_user_feature_id(cls, feature_id):
+    def can_convert_feature_id(cls):
+        return True
+
+    @classmethod
+    def convert_feature_id(cls, feature_id):
         bq_id = None
         try:
             db = get_sql_connection()
@@ -260,7 +282,7 @@ class UserDataQueryHandler(object):
             cursor.close()
             db.close()
 
-            logging.debug("UserFeatureProvider.convert_user_feature_id {0} -> {1}".format(feature_id, bq_id))
+            logging.debug("UserFeatureDef.convert_user_feature_id {0} -> {1}".format(feature_id, bq_id))
             return bq_id
 
         except Exception as e:
@@ -274,7 +296,7 @@ class UserDataQueryHandler(object):
     def get_value_type(self):
         return self.feature_defs[0].get_value_type()
 
-    def build_query(self, project_ids, cohort_id_array, cohort_dataset, cohort_table, project_id_array):
+    def build_query(self, program_ids, cohort_table, cohort_id_array, project_id_array):
         """
         Builds the BigQuery query string for USER data. The query string is constructed from one or more data sources
         (queries), such that each associated UserFeatureDef instance constructs one data source. Each data source
@@ -311,13 +333,16 @@ class UserDataQueryHandler(object):
 
         """
         queries = []
-        cohort_table_full = settings.BIGQUERY_PROJECT_NAME + ':' + cohort_dataset + '.' + cohort_table
-        # TODO: this is a hack to append project_ids to the tcga project id list. project_id_array is actually empty.
-        project_id_array += project_ids
+
+        # TODO: this is a hack to append program_ids to the tcga project id list. project_id_array is actually empty.
+        # 7/24/17: NO! program_ids is a list of public programs (e.g. tcga). project_id_array is a bunch of
+        # project DBIDs.
+        # project_id_array += program_ids
+
         for feature_def in self.feature_defs:
-            if int(feature_def.project_id) in project_ids:
+            if int(feature_def.project_id) in project_id_array:
                 # Build our query
-                queries.append(feature_def.build_query(cohort_table_full, cohort_id_array, project_id_array))
+                queries.append(feature_def.build_query(cohort_table, cohort_id_array, project_id_array))
 
         # Create a combination query using the UNION ALL operator. Each data source defined above (query1, query2, ...)
         # will be combined as follows:
@@ -332,7 +357,7 @@ class UserDataQueryHandler(object):
         #
         query = ' , '.join(['(' + query + ')' for query in queries])
         logging.info("BQ_QUERY_USER: " + query)
-        return query
+        return query, True
 
     def unpack_value_from_row_with_feature_def(self, row):
         """
@@ -406,11 +431,17 @@ class UserDataQueryHandler(object):
         return self._project_ids
 
     def parse_internal_feature_id(self, feature_id, user_feature_id=None):
+        #
+        # In V2 usages, this is ALWAYS called with user_feature_id = None! Thus, the first case
+        # is not used. Note that from_user_feature_id() subsequently calls from_feature_id() if
+        # it detects that the User feature ID extends a public project feature ID!
+        #
         if user_feature_id is None or user_feature_id is '':
-            logging.debug("UserFeatureProvider.parse_internal_feature_id -      feature_id: {0}".format(feature_id))
+            logging.debug("UserFeatureDef.parse_internal_feature_id -      feature_id: {0}".format(feature_id))
             self.feature_defs = UserFeatureDef.from_feature_id(feature_id)
         else:
-            logging.debug("UserFeatureProvider.parse_internal_feature_id - user_feature_id: {0}".format(user_feature_id))
+            # This actually calls from_feature_id() if we find a variable extends a project.
+            logging.debug("UserFeatureDef.parse_internal_feature_id - user_feature_id: {0}".format(user_feature_id))
             self.feature_defs = UserFeatureDef.from_user_feature_id(user_feature_id)
 
         # Assign a unique identifier to all feature defs.

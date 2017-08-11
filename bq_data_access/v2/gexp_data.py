@@ -83,8 +83,17 @@ class GEXPDataQueryHandler(object):
     def get_value_type(self):
         return ValueType.FLOAT
 
-    def get_feature_type(self):
+    @classmethod
+    def get_feature_type(cls):
         return DataTypes.GEXP
+
+    @classmethod
+    def can_convert_feature_id(cls):
+        return False
+
+    @classmethod
+    def convert_feature_id(cls, feature_id):
+        return None
 
     def process_data_point(self, data_point):
         return data_point['value']
@@ -115,6 +124,7 @@ class GEXPDataQueryHandler(object):
                                       brk='\n')
 
         logging.debug("BQ_QUERY_GEXP: " + query)
+        print "Q ", query
         return query
 
     def build_query(self, project_set, cohort_table, cohort_id_array, project_id_array):
@@ -131,6 +141,7 @@ class GEXPDataQueryHandler(object):
         for table in config_instance.data_table_list:
             if (table.program in project_set) and (table.genomic_build == self.feature_def.genomic_build):
                 logger.info("Found matching table: '{}'".format(table.table_id))
+                print "table prog in ", table.program, " ", project_set
                 found_tables.append(table)
 
         # Build a BigQuery statement for each found table configuration

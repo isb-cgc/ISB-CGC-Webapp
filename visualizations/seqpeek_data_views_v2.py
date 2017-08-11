@@ -103,7 +103,7 @@ def seqpeek_view_data(request):
         logger.debug("GNAB feature ID for SeqPeek: {0}".format(gnab_feature_id))
 
         # Get the project IDs these cohorts' samples come from
-        confirmed_project_ids = get_confirmed_project_ids_for_cohorts(cohort_id_array)
+        confirmed_project_ids, user_only_study_ids = get_confirmed_project_ids_for_cohorts(cohort_id_array)
 
         bqss = BigQueryServiceSupport.build_from_django_settings()
         fvb = FeatureVectorBigQueryBuilder.build_from_django_settings(bqss)
