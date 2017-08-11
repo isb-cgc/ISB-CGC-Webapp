@@ -83,10 +83,20 @@ class GEXPDataQueryHandler(object):
     def get_value_type(self):
         return ValueType.FLOAT
 
-    def get_feature_type(self):
+    @classmethod
+    def get_feature_type(cls):
         return DataTypes.GEXP
 
-    def process_data_point(self, data_point):
+    @classmethod
+    def can_convert_feature_id(cls):
+        return False
+
+    @classmethod
+    def convert_feature_id(cls, feature_id):
+        return None
+
+    @classmethod
+    def process_data_point(cls, data_point):
         return data_point['value']
 
     def build_query_for_program(self, feature_def, cohort_table, cohort_id_array, project_id_array):
