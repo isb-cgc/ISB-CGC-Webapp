@@ -113,8 +113,17 @@ class MIRNDataQueryHandler(object):
     def get_value_type(self):
         return ValueType.FLOAT
 
-    def get_feature_type(self):
+    @classmethod
+    def get_feature_type(cls):
         return DataTypes.MIRN
+
+    @classmethod
+    def can_convert_feature_id(cls):
+        return False
+
+    @classmethod
+    def convert_feature_id(cls, feature_id):
+        return None
 
     @classmethod
     def process_data_point(cls, data_point):
