@@ -57,7 +57,7 @@
             {% endif %}
             <li class="menu-item"><button class="show-flyout btn btn-info" title="Show Comments">Comments</button></li>
             <li class="menu-item"><a href="{% url 'clone_cohort' cohort.id %}" class="btn btn-info clone-cohort-btn" title="Duplicate this cohort">Duplicate</a></li>
-            <li class="menu-item"><button class="btn btn-info" data-toggle="modal" data-target="#delete-cohort-modal">
+            <li class="menu-item"><button class="btn btn-info" data-toggle="modal" data-target="{% if cohort.perm.perm == 'OWNER' %}#delete-cohort-modal{% else %}#remove-cohort-modal{% endif %}">
                 {% if cohort.perm.perm == 'OWNER' %}
                     Delete
                 {% else %}
@@ -71,9 +71,9 @@
             <li class="separator"></li>
             <li class="menu-item"><button class="btn btn-info" data-toggle="modal" data-target="#share-cohort-modal">Share</button></li>
             {% endif %}
-            {% if not cohort.is_public %}
+            {% if not cohort.is_public and cohort.perm.perm == 'OWNER' %}
             <li class="separator"></li>
-            <li class="menu-item"><a data-target="#share-cohort-modal" data-toggle="modal" class="btn btn-link" id="shared-with-btn">Shared with (<span class="share-count">{{ shared_with_users|length}}</span>)</a></li>
+            <li class="menu-item"><a data-target="#share-cohort-modal" data-toggle="modal" class="btn btn-link">Shared with (<span class="share-count">{{ shared_with_users|length}}</span>)</a></li>
             {% endif %}
         </ul>
         <ul id="edit-cohort-menu" style="display: none">
@@ -165,15 +165,6 @@
                                 {%  endif %}
                             {% endfor %}
                         </ul>
-                        {% if shared_with_users and cohort.perm == 'OWNER'%}
-                            <br>
-                            <p><strong>Shared With Users:</strong></p>
-                            <ul>
-                            {% for user in shared_with_users %}
-                                <li>{{ user.first_name }} {{ user.last_name }} [{{ user.email }}]</li>
-                            {% endfor %}
-                            </ul>
-                        {% endif %}
                     </div>
                     <div class="row col-md-12 space-bottom-10">
                         <span>Creation Filters:</span>
@@ -246,6 +237,7 @@
     </div>
 
     <!-- Share Cohort Modal -->
+    {% if cohort.perm.perm == 'OWNER' %}
     <div class="modal fade" id="share-cohort-modal" tabindex="-1" role="dialog" aria-labelledby="shareCohortModal" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -255,15 +247,12 @@
                     <div class="modal-js-messages" id="share-cohort-js-messages">
                     </div>
                     <ul class="nav nav-tabs" role="tablist">
-                        {% if cohort.perm.perm == 'OWNER' %}
-                            <li role="presentation" class="active"><a data-target="#share-cohort-pane" data-toggle="tab" aria-controls="home" role="tab" id="shareCohortModal">Share Cohort</a></li>
-                        {% endif %}
-                        <li role="presentation"><a data-target="#shared-pane" data-toggle="tab" aria-controls="home" role="tab">Shared With (<span class="share-count">{{shared_with_users|length}}</span>)</a></li>
+                        <li role="presentation" class="share-cohort active"><a data-target="#share-cohort-pane" data-toggle="tab" aria-controls="home" role="tab" id="shareCohortModal">Share Cohort</a></li>
+                        <li role="presentation" class="shared"><a data-target="#shared-pane" data-toggle="tab" aria-controls="home" role="tab">Shared With (<span class="share-count">{{shared_with_users|length}}</span>)</a></li>
                     </ul>
                 </div>
 
                 <div class="tab-content">
-                    {% if cohort.perm.perm == 'OWNER' %}
                     <div role="tabpanel" class="tab-pane active" id="share-cohort-pane">
                         <form id="share-cohort-form" data-cohort-id="{{ cohort.id }}" method="" action="">
                             <div class="modal-body">
@@ -276,7 +265,6 @@
                             </div>
                         </form>
                     </div>
-                    {% endif %}
                     <div role="tabpanel" class="tab-pane" id="shared-pane">
                         <div class="modal-body">
                             {% if shared_with_users|length > 0 %}
@@ -299,7 +287,7 @@
                                 </tbody>
                             </table>
                             {% else %}
-                            <p class="center">This list is empty.</p>
+                            <p class="center">This cohort is not currently shared with any users.</p>
                             {% endif %}
                         </div>
                     </div>
@@ -307,6 +295,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
 
     <!-- Apply Edits Modal -->
     <div class="modal fade" id="apply-edits-modal" tabindex="-1" role="dialog" aria-labelledby="applyFiltersModal" aria-hidden="true">
@@ -358,12 +347,31 @@
         </div>
     </div>
 
+    <!-- Remove Cohort Modal -->
+    <div class="ajax-form-modal modal fade" id="remove-cohort-modal" tabindex="-1" role="dialog" aria-labelledby="remove-cohort-header" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="remove-cohort-header">Remove Yourself from this Cohort?</h4>
+                </div>
+                <form id="remove-cohort" method="POST" action="{% url 'unshare_cohort' cohort.id %}">
+                    {% csrf_token %}
+                    <div class="modal-footer">
+                        <input type="submit" value="Remove" class="btn btn-primary" />
+                        <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script type="text/javascript">
     var total_samples = {{ total_samples|safe }};
     var base_url = '{{ base_url|safe }}';
     var cohort_id = {{ cohort.id }};
     var user_data = {{ user_data|tojson|safe }};
-    var cohort_programs = {{ cohort_programs|tojson|safe }}
+    var cohort_programs = {{ cohort_programs|tojson|safe }};
     </script>
 {% endblock %}
 
