@@ -35,6 +35,8 @@
 {% endblock %}
 {% block content %}
 <div class="container">
+    <div id="js-messages">
+    </div>
     <div class="panel panel-default">
         <ul class="nav nav-tabs" role="tablist">
             <li role="presentation" {% if not is_public %} class="active" {% endif %} >
@@ -64,12 +66,12 @@
                                 Set Operations
                                 </button>
                             </li>
-{#                            <li role="menuitem">#}
-{#                                <button class="btn btn-info" id="share-cohorts-btn" type="button" data-toggle="modal" data-target="#share-cohorts-modal" aria-label="share-cohorts" role="button" aria-expanded="true">#}
-{#                                    <i class="fa fa-share-alt"></i>#}
-{#                                    Share#}
-{#                                </button>#}
-{#                            </li>#}
+                            <li role="menuitem">
+                                <button class="btn btn-info" id="share-cohorts-btn" type="button" data-toggle="modal" data-target="#share-cohorts-modal" aria-label="share-cohorts" role="button" aria-expanded="true">
+                                    <i class="fa fa-share-alt"></i>
+                                    Share
+                                </button>
+                            </li>
                         </div>
                     {% endif %}
 
@@ -80,7 +82,7 @@
                             <th class="sample-col"># Samples</th>
                             <th># Cases</th>
                             <th class="owner-col">Ownership</th>
-{#                            <th>Shared With</th>#}
+                            <th>Shared With</th>
                             <th>Cohort ID</th>
                             <th class="date-col">Last Modified</th>
                         </tr></thead>
@@ -101,13 +103,13 @@
                                         {{cohort.owner.first_name}} {{cohort.owner.last_name}}
                                     {% endif %}
                                 </td>
-{#                                <td class="share-col">#}
-{#                                    {% if cohort.shared_with_users|length %}#}
-{#                                        ( <a data-toggle="modal" data-target="#share-cohorts-modal" data-cohort-id="{{ cohort.id }}" class="shared">{{cohort.shared_with_users|length}}</a> )#}
-{#                                    {% else %}#}
-{#                                        ( 0 )#}
-{#                                    {% endif %}#}
-{#                                </td>#}
+                                <td class="share-col">
+                                    {% if cohort.shared_with_users|length %}
+                                        ( <a data-toggle="modal" data-target="#share-cohorts-modal" data-cohort-id="{{ cohort.id }}" class="shared">{{cohort.shared_with_users|length}}</a> )
+                                    {% else %}
+                                        ( 0 )
+                                    {% endif %}
+                                </td>
                                 <td>
                                     {{ cohort.id }}
                                 </td>
@@ -256,50 +258,47 @@
         </div>
     </div>
 
-{#    <!-- Share Cohort Modal -->#}
-{#    <div class="modal fade" id="share-cohorts-modal" tabindex="-1" role="dialog" aria-labelledby="share-cohort-header" aria-hidden="true">#}
-{#        <div class="modal-dialog">#}
-{#            <div class="modal-content">#}
-{#                <div class="modal-header">#}
-{#                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>#}
-{#                    <ul class="nav nav-tabs">#}
-{#                        <li role="presentation" class="active"><a data-target="#share-pane" data-toggle="tab" id="share-cohort-header">Share Cohort</a></li>#}
-{#                        <li role="presentation"><a data-target="#shared-with-pane" data-toggle="tab">Shared With</a></li>#}
-{#                    </ul>#}
-{##}
-{#                </div>#}
-{#                <div class="tab-content">#}
-{#                    <div class="tab-pane active" id="share-pane">#}
-{#                        <form id="share-cohort-form" method="POST" action="{% url 'share_cohorts' %}">#}
-{#                            <div class="modal-body">#}
-{#                                <label>Selected Cohorts</label>#}
-{#                                <p class="form-control-static selected-cohorts"></p>#}
-{#                                <label for="share-cohort-users">Please select the users you would like to share these cohorts with:</label>#}
-{#                                <select id="share-cohort-users" name="users" multiple="multiple" class="form-control" required>#}
-{#                                    {% for user in user_list %}#}
-{#                                    <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }} ({{ user.email }})</option>#}
-{#                                    {% endfor %}#}
-{#                                </select>#}
-{#                            </div>#}
-{#                            <div class="modal-footer">#}
-{#                                {% csrf_token %}#}
-{#                                <input type="submit" value="Share Cohort" class="btn btn-primary" />#}
-{#                            </div>#}
-{#                        </form>#}
-{#                    </div>#}
-{#                    <div class="tab-pane" id="shared-with-pane">#}
-{#                        <div class="modal-body">#}
-{#                            <table class="table table-striped"></table>#}
-{#                        </div>#}
-{#                    </div>#}
-{#                </div>#}
-{#            </div>#}
-{#        </div>#}
-{#    </div>#}
+    <!-- Share Cohort Modal -->
+    <div class="modal fade" id="share-cohorts-modal" tabindex="-1" role="dialog" aria-labelledby="share-cohort-header" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Cohort Sharing</h4>
+                    <div class="modal-js-messages" id="share-cohort-js-messages"></div>
+                    <ul class="nav nav-tabs">
+                        <li role="presentation" class="active"><a data-target="#share-pane" data-toggle="tab" id="share-cohort-header">Share Cohort</a></li>
+                        <li role="presentation"><a data-target="#shared-with-pane" data-toggle="tab">Shared With</a></li>
+                    </ul>
+                </div>
+                <div class="tab-content">
+                    <div class="tab-pane active" id="share-pane">
+                        <form id="share-cohort-form">
+                            <div class="modal-body">
+                                <label>Selected Cohorts</label>
+                                <p class="form-control-static selected-cohorts"></p>
+                                <label for="share-share_users">Enter email addresses separated by a comma</label>
+                                <textarea id="share-share_users" class="form-control" name="share_users"></textarea>
+                            </div>
+                            <div class="modal-footer">
+                                {% csrf_token %}
+                                <input type="submit" value="Share Cohort" class="btn btn-primary" />
+                            </div>
+                        </form>
+                    </div>
+                    <div class="tab-pane" id="shared-with-pane">
+                        <div class="modal-body">
+                            <table class="table table-striped"></table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script type="text/javascript">
     var cohort_list = {{ cohorts_listing|safe }};
-{#    var shared_users = {{ shared_users|safe }};#}
+    var shared_users = {{ shared_users|safe }};
     var from_workbook = {{ from_workbook|lower }};
     </script>
 {% endblock %}
