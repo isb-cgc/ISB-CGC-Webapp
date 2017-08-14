@@ -207,6 +207,7 @@ require([
             $('#download-link').attr('href', download_url + '?total=' + file_list_total)
         }
 
+        $('#download-link').attr('href',$('#download-link').attr('href')+'&build='+$('#build :selected').val());
         url += '&build='+$('#build :selected').val();
 
         $('#prev-page').addClass('disabled');
