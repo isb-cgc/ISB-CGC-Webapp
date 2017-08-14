@@ -68,7 +68,6 @@ require([
     'vizhelpers',
     'underscore',
     'base',
-    'session_security',
     'jqueryui',
     'bootstrap',
     'd3',

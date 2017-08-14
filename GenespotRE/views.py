@@ -139,7 +139,7 @@ def user_detail(request, user_id):
             user_details['dbGaP_authorized'] = (len(user_auth_datasets) > 0) and nih_user.active
             logger.debug("[DEBUG] User {} has access to {} dataset(s) and is {}".format(nih_user.NIH_username, str(len(user_auth_datasets)), ('not active' if not nih_user.active else 'active')))
             user_details['NIH_active'] = nih_user.active
-            user_details['auth_datasets'] = [] if len(user_auth_datasets) <= 0 else AuthorizedDataset.objects.filter(id__in=user_auth_datasets.values_list('authorized_dataset',flat=True)).values_list('name',flat=True)
+            user_details['auth_datasets'] = [] if len(user_auth_datasets) <= 0 else AuthorizedDataset.objects.filter(id__in=user_auth_datasets.values_list('authorized_dataset',flat=True))
         except (MultipleObjectsReturned, ObjectDoesNotExist), e:
             if type(e) is MultipleObjectsReturned:
                 # in this case there is more than one nih_username linked to the same google identity
