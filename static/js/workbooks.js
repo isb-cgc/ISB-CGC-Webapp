@@ -73,8 +73,7 @@ require([
     'bootstrap',
     'd3',
     'd3tip',
-    'select2',
-    'base'
+    'select2'
 ], function ($, plot_factory, vizhelpers, _, base) {
 
     var savingComment = false;
