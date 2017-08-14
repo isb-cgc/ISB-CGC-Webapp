@@ -65,22 +65,39 @@ require([
   //      });
  //   });
 
+    $('.modal').on('hide.bs.modal', function() {
+        var forms = $(this).find('form');
+        if (forms.length) {
+            _.each(forms, function (form) {
+                form.reset();
+            });
+        }
+      })
 
-    // Share with user click
-    $('#edit-program').on('submit', function(e){
+
+    var do_submission = function(e) {
         e.preventDefault();
         e.stopPropagation();
+        console.debug($.getCookie)
+        var name = $('#edit-program-name-field').val();
+        var desc = $('#edit-program-desc-field').val();
 
-        var name = $('#WJRL-program').val();
+        var unallowed_name = name.match(base.whitelist);
+        var unallowed_desc = desc.match(base.whitelist);
 
-        console.debug("NAMEDANGER " + name)
-        var unallowed = name.match(base.whitelist);
-         console.debug("NAMEUNA " + unallowed)
-
-        if(unallowed) {
-            console.debug("DANGER" + unallowed.join(", "))
+        if (unallowed_name || unallowed_desc) {
+            var unallowed_all = ""
+            if (unallowed_name) {
+                unallowed_all += unallowed_name.join(", ");
+            }
+            if (unallowed_name && unallowed_desc) {
+                unallowed_all += ", "
+            }
+            if (unallowed_desc) {
+                unallowed_all += unallowed_desc.join(", ");
+            }
             base.showJsMessage('danger',
-                "These characters are invalid: "+unallowed.join(", "), true,'#edit-program-js-messages');
+                "These characters are invalid: " + unallowed_all, true,'#edit-program-js-messages');
             return false;
         } else {
             $('#edit-program-js-messages').empty();
@@ -89,6 +106,7 @@ require([
         $(this).find('.btn-primary').addClass('btn-disabled').attr('disabled', true);
         var $this = $(this);
 
+         console.debug("off to ajax")
         var csrftoken = $.getCookie('csrftoken');
         $.ajax({
             type        :'POST',
@@ -97,21 +115,20 @@ require([
             data        : $(this).serialize(),
             beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
             success : function (data) {
+                console.debug("back from ajax 1")
                 if(data.status && data.status == 'error') {
                     if(data.result && data.result.msg) {
                         base.showJsMessage('error',data.result.msg,true,'#edit-program-js-messages');
                     }
                 } else if(data.status && data.status == 'success') {
-                    console.debug("NODANGER" + data.status)
                     if(data.result && data.result.msg) {
                         base.setReloadMsg('info',data.result.msg);
                     }
+                    console.debug("back from ajax")
                     $this.closest('.modal').modal('hide');
                     if($this.data('redirect')) {
-                         console.debug("NODANGER" + "RED")
                         window.location = $this.data('redirect');
                     } else {
-                         console.debug("NODANGER" + "REL")
                         window.location.reload();
                     }
                 }
@@ -125,6 +142,11 @@ require([
         });
         // We don't want this form submission to automatically trigger a reload
         return false;
-    });
+    }
+
+    // Share with user click
+    $('#edit-program').on('submit', function(e) {
+         return (do_submission(e));
+      })
 
 });
