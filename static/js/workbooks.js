@@ -1032,7 +1032,7 @@ require([
     };
 
     // Prep all unloaded worksheets to load on selection
-    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+    $('a[data-toggle-type="worksheet"]').on('shown.bs.tab', function (e) {
         var sheet_id = $(this).data('sheet-id');
         if($('#'+sheet_id).attr("is-loaded") !== "true") {
             var self = $(".worksheet.active .plot_selection")[0];
@@ -1475,6 +1475,11 @@ require([
             beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
             success : function (data) {
                 button.parents('tr').remove();
+                // If that was the last user this woekbook was shared with, update the table's display
+                if(button.parents('tbody').length <= 0) {
+                    button.parents('.modal-body table').empty();
+                    button.parents('.modal-body table').append('<p class="center">This workbook is not currently shared with any users.</p>')
+                }
                 var count = parseInt($($('.share-count')[0]).html());
                 $('.share-count').each(function() {
                    $(this).html(count-1);
@@ -1490,6 +1495,14 @@ require([
     $('.save-comment-btn').prop('disabled', true);
     $('.comment-textarea').keyup(function() {
         $(this).siblings('.save-comment-btn').prop('disabled', this.value == '' ? true : false)
+    });
+
+    $('button.shared-with').on('click',function(){
+        $('a.shared-with').click();
+    });
+
+    $('button.share-modal').on('click',function(){
+        $('a.share-workbook').click();
     });
 
     // Only init the active tab
