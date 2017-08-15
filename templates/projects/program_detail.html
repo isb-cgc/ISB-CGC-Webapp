@@ -1,6 +1,25 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% load custom_tags %}
+
+{% comment %}
+
+   Copyright 2017, Institute for Systems Biology
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+{% endcomment %}
+
 {% block title %}Program | ISB-CGC{% endblock %}}
 {% block extra_css_libs %}{% endblock %}
 {% block header %}{% endblock %}
@@ -59,8 +78,9 @@
                             <li role="menuitem"><a data-toggle="modal" data-target="#delete-project-modal-{{ project.id }}" class="project-delete">Delete</a></li>
                             <li role="menuitem"><a data-toggle="modal" data-target="#edit-project-details-modal-{{ project.id }}">Edit Details</a></li>
                         {% endif %}
+                    {#   This modal does not appear to exist at the moment: #}
                         {% if shared %}
-                            <li role="menuitem"><a data-toggle="modal" data-target="#remove-project-modal-{{ project.id }}">Delete</a></li>
+                     {#       <li role="menuitem"><a data-toggle="modal" data-target="#remove-project-modal-{{ project.id }}">Delete</a></li> #}
                         {% endif %}
                     </ul>
                 </div>

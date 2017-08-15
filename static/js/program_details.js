@@ -1,3 +1,21 @@
+/**
+ *
+ * Copyright 2017, Institute for Systems Biology
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
 require.config({
     baseUrl: STATIC_FILES_URL+'js/',
     paths: {
@@ -27,44 +45,6 @@ require([
 ], function($, jqueryui, bootstrap, session_security, _, base) {
     'use strict';
 
-    // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
- //   $('.modal').on('hide.bs.modal', function() {
-  //      var forms = $(this).find('form');
- //       if(forms.length)
- //           _.each(forms, function (form) {
- //               form.reset();
- //           });
- //   }).find('form').on('submit', function (e) {
- //       e.preventDefault();
-//        e.stopPropagation();
-
- //       var $this = $(this),
- //           fields = $this.serialize();
-
- //       $this.find('.btn').addClass('btn-disabled').attr('disabled', true);
- //       $.ajax({
- //           url: $this.attr('action'),
- //           data: fields,
-  //          method: 'POST'
- //       }).then(function () {
- //           $this.closest('.modal').modal('hide');
- //           if($this.data('redirect')) {
- //               window.location = $this.data('redirect');
- //           } else {
- //               window.location.reload();
- //           }
- //       }, function () {
- //           $this.find('.error-messages').append(
- //               $('<p>')
- //                   .addClass('alert alert-danger')
- //                   .text('There was an error deleting that project. Please reload and try again, or try again later.')
- //           );
- //       })
- //       .always(function () {
-  //          $this.find('.btn').removeClass('btn-disabled').attr('disabled', false);
-  //      });
- //   });
-
     //
     // We always want to reset forms when we hide modals, since otherwise even on a successful AJAX
     // submission and reload Chrome asks us if we want to do the reload!
@@ -84,16 +64,16 @@ require([
     // unallowed characters. Also used in the project editor dialog.
     //
 
-    var do_submission = function(self, e, name_field, desc_field, msg_target) {
+    var do_submission = function(self, e, name_class, desc_class, msg_class) {
         e.preventDefault();
         e.stopPropagation();
         var $self = $(self);
-        console.debug("rpcess " + self);
 
-        var name = $(name_field).val();
-        var desc = $(desc_field).val();
-        console.debug("rpcessA " + name);
-        console.debug("rpcessB " + desc);
+        // showJsMessage wants either the ID or DOM element. This gives the DOM element:
+        var msg_target = $self.siblings(msg_class)[0];
+
+        var name = $self.find(name_class).val();
+        var desc = $self.find(desc_class).val();
 
         var unallowed_name = name.match(base.whitelist);
         var unallowed_desc = desc.match(base.whitelist);
@@ -118,7 +98,6 @@ require([
 
         $self.find('.btn-primary').addClass('btn-disabled').attr('disabled', true);
 
-        console.debug("off to ajax")
         var csrftoken = $.getCookie('csrftoken');
         $.ajax({
             type        :'POST',
@@ -156,12 +135,12 @@ require([
 
     // Handles program edits checking and submission
     $('#edit-program').on('submit', function(e) {
-         return (do_submission(this, e, '#edit-program-name-field', '#edit-program-desc-field', '#edit-program-js-messages'));
+         return (do_submission(this, e, '.edit-name-field', '.edit-desc-field', '.modal-js-messages'));
       })
 
     // Handles project edits checking and submission
     $('.project-edit-form').on('submit', function(e) {
-         return (do_submission(this, e, '#edit-project-name-field', '#edit-project-desc-field', '#edit-project-js-messages'));
+         return (do_submission(this, e, '.edit-name-field', '.edit-desc-field', '.modal-js-messages'));
       })
 
 });
