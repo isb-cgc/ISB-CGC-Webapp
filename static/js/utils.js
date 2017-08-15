@@ -45,6 +45,12 @@ require.config({
 define(['jquery'], function($) {
 
     return {
+        // Simple method for displaying an alert-<type> message at a given selector or DOM element location.
+        //
+        // type: One of the accepted alert types (danger, error, info, warning)
+        // text: Content of the alert, added via jQuery.text() (and so escaped)
+        // withEmpty: Truthy boolean for indicating if the element represented by rootSelector should first be emptied
+        // rootSelector: text selector or DOM element which will be the parent of the alert
         showJsMessage: function(type,text,withEmpty,rootSelector) {
             rootSelector = rootSelector || '#js-messages';
             withEmpty && $(rootSelector).empty();
