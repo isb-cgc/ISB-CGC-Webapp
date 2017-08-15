@@ -50,7 +50,8 @@ define(['jquery'], function($) {
         // type: One of the accepted alert types (danger, error, info, warning)
         // text: Content of the alert, added via jQuery.text() (and so escaped)
         // withEmpty: Truthy boolean for indicating if the element represented by rootSelector should first be emptied
-        // rootSelector: text selector or DOM element which will be the parent of the alert
+        // rootSelector: text selector or DOM element which will be the parent of the alert; defaults to #js-messages
+        //  (the DIV present on all pages which shows document-level JS messages)
         showJsMessage: function(type,text,withEmpty,rootSelector) {
             rootSelector = rootSelector || '#js-messages';
             withEmpty && $(rootSelector).empty();
