@@ -27,16 +27,19 @@
 
         <p><i class="fa fa-check-circle"></i> dbGaP Access Authorized</p>
         <hr>
+        {% with user_datasets_count=user_details.auth_datasets|length user_auth_datasets=user_details.auth_datasets %}
         <p>
-            Congratulations, {{ user_details.NIH_username }}! You now have access to ISB-CGC controlled access data (
-            {% with user_datasets_count=user_details.auth_datasets|length user_auth_datasets=user_details.auth_datasets %}
-            {% for dataset in user_auth_datasets %}
-                <a href="https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id={{ dataset.whitelist_id }}" target="_BLANK">dataset.name</a>{% if not forloop.counter == user_datasets_count %}, {% endif %}{% endfor %}
-            {% endwith %}
-            until
+            Congratulations, {{ user_details.NIH_username }}! You now have access to the following ISB-CGC controlled access dataset{% if user_datasets_count > 1 %}s{% endif %}:
+            <ul>
+                {% for dataset in user_auth_datasets %}
+                    <li><a href="https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id={{ dataset.whitelist_id }}" target="_BLANK">{{ dataset.name }}</a></li>
+                {% endfor %}
+            </ul>
+            Your access is valid until:
             <p id="NIH_expiration">{{ user_details.NIH_assertion_expiration|safe }} GMT</p>
             <a href="{% url 'demo:saml_index' %}?sso">Extend controlled access period to 24 hours from now.</a>
         </p>
+        {% endwith %}
 
         <a href="https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?view_pdf&stacc=phs000178.v8.p7" target="_blank">Data Use Certification Agreement</a>
 
