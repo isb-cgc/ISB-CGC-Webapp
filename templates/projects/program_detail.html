@@ -56,11 +56,11 @@
                     <ul class="dropdown-menu">
 {#                        <li role="menuitem"><a href="">New Workbook</a></li>#}
                         {% if program.owner.id == user.id %}
-                        <li role="menuitem"><a data-toggle="modal" data-target="#delete-project-modal-{{ project.id }}" class="project-delete">Delete</a></li>
+                            <li role="menuitem"><a data-toggle="modal" data-target="#delete-project-modal-{{ project.id }}" class="project-delete">Delete</a></li>
+                            <li role="menuitem"><a data-toggle="modal" data-target="#edit-project-details-modal-{{ project.id }}">Edit Details</a></li>
                         {% endif %}
                         {% if shared %}
-                        <li role="menuitem"><a data-toggle="modal" data-target="#edit-project-details-modal-{{ project.id }}">Edit Details</a></li>
-{#                        <li role="menuitem"><a data-toggle="modal" data-target="#delete-project-modal-{{ project.id }}" class="project-delete">Delete</a></li>#}
+                            <li role="menuitem"><a data-toggle="modal" data-target="#remove-project-modal-{{ project.id }}">Delete</a></li>
                         {% endif %}
                     </ul>
                 </div>

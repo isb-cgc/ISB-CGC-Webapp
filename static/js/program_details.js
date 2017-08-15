@@ -65,6 +65,11 @@ require([
   //      });
  //   });
 
+    //
+    // We always want to reset forms when we hide modals, since otherwise even on a successful AJAX
+    // submission and reload Chrome asks us if we want to do the reload!
+    //
+
     $('.modal').on('hide.bs.modal', function() {
         var forms = $(this).find('form');
         if (forms.length) {
@@ -74,79 +79,89 @@ require([
         }
       })
 
+    //
+    // This handles issue #2006. When user edits name or description, we check that there are no
+    // unallowed characters. Also used in the project editor dialog.
+    //
 
-    var do_submission = function(e) {
+    var do_submission = function(self, e, name_field, desc_field, msg_target) {
         e.preventDefault();
         e.stopPropagation();
-        console.debug($.getCookie)
-        var name = $('#edit-program-name-field').val();
-        var desc = $('#edit-program-desc-field').val();
+        var $self = $(self);
+        console.debug("rpcess " + self);
+
+        var name = $(name_field).val();
+        var desc = $(desc_field).val();
+        console.debug("rpcessA " + name);
+        console.debug("rpcessB " + desc);
 
         var unallowed_name = name.match(base.whitelist);
         var unallowed_desc = desc.match(base.whitelist);
 
         if (unallowed_name || unallowed_desc) {
-            var unallowed_all = ""
+            var unallowed_all = "";
             if (unallowed_name) {
                 unallowed_all += unallowed_name.join(", ");
             }
             if (unallowed_name && unallowed_desc) {
-                unallowed_all += ", "
+                unallowed_all += ", ";
             }
             if (unallowed_desc) {
                 unallowed_all += unallowed_desc.join(", ");
             }
             base.showJsMessage('danger',
-                "These characters are invalid: " + unallowed_all, true,'#edit-program-js-messages');
+                "These characters are invalid: " + unallowed_all, true, msg_target);
             return false;
         } else {
-            $('#edit-program-js-messages').empty();
+            $(msg_target).empty();
         }
 
-        $(this).find('.btn-primary').addClass('btn-disabled').attr('disabled', true);
-        var $this = $(this);
+        $self.find('.btn-primary').addClass('btn-disabled').attr('disabled', true);
 
-         console.debug("off to ajax")
+        console.debug("off to ajax")
         var csrftoken = $.getCookie('csrftoken');
         $.ajax({
             type        :'POST',
-            url         : $(this).attr('action'),
+            url         : $self.attr('action'),
             dataType    :'json',
-            data        : $(this).serialize(),
+            data        : $self.serialize(),
             beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
             success : function (data) {
-                console.debug("back from ajax 1")
                 if(data.status && data.status == 'error') {
                     if(data.result && data.result.msg) {
-                        base.showJsMessage('error',data.result.msg,true,'#edit-program-js-messages');
+                        base.showJsMessage('error', data.result.msg, true, msg_target);
                     }
                 } else if(data.status && data.status == 'success') {
                     if(data.result && data.result.msg) {
                         base.setReloadMsg('info',data.result.msg);
                     }
-                    console.debug("back from ajax")
-                    $this.closest('.modal').modal('hide');
-                    if($this.data('redirect')) {
-                        window.location = $this.data('redirect');
+                    $self.closest('.modal').modal('hide');
+                    if($self.data('redirect')) {
+                        window.location = $self.data('redirect');
                     } else {
                         window.location.reload();
                     }
                 }
             },
             error: function (err) {
-                $this.closest('.modal').modal('hide');
+                $self.closest('.modal').modal('hide');
                 base.showJsMessage('error',err,true);
             },
         }).always(function () {
-            $this.find('.btn-primary').removeClass('btn-disabled').attr('disabled', false);
+            $self.find('.btn-primary').removeClass('btn-disabled').attr('disabled', false);
         });
         // We don't want this form submission to automatically trigger a reload
         return false;
     }
 
-    // Share with user click
+    // Handles program edits checking and submission
     $('#edit-program').on('submit', function(e) {
-         return (do_submission(e));
+         return (do_submission(this, e, '#edit-program-name-field', '#edit-program-desc-field', '#edit-program-js-messages'));
+      })
+
+    // Handles project edits checking and submission
+    $('.project-edit-form').on('submit', function(e) {
+         return (do_submission(this, e, '#edit-project-name-field', '#edit-project-desc-field', '#edit-project-js-messages'));
       })
 
 });
