@@ -30,8 +30,8 @@
         <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#delete-workbook-modal-{{ workbook.id }}">Delete</button></li>
         {% if is_shareable %}
         <li class="separator"></li>
-        <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#share-workbook-modal-{{ workbook.id }}">Share</button></li>
-        <li role="menuitem"><button class="btn btn-link" data-toggle="modal" data-target="#share-workbook-modal-{{ workbook.id }}">Shared with (<span class="share-count">{{ workbook.shared.all|shared_active_count }}</span>)</button></li>
+        <li role="menuitem"><button class="btn btn-info share-modal" data-toggle="modal" data-target="#share-workbook-modal-{{ workbook.id }}">Share</button></li>
+        <li role="menuitem"><button class="btn btn-link shared-with" data-toggle="modal" data-target="#share-workbook-modal-{{ workbook.id }}">Shared with (<span class="share-count">{{ workbook.shared.all|shared_active_count }}</span>)</button></li>
         {% endif %}
         {% elif workbook.is_public %}
         {# Is a public workbook #}
@@ -51,8 +51,6 @@
 {% block content %}
 
 <div class="container">
-    <div id="js-messages">
-    </div>
     <div class="panel-invisible" id="worksheets">
          <!-- tabs of worksheets -->
         <ul class="nav nav-tabs_excel" id="worksheets-tabs">
@@ -60,7 +58,7 @@
             {% for worksheet in workbook.worksheets %}
                 {% if forloop.counter < 4 %}
                     <li class="{% if display_worksheet and display_worksheet.id == worksheet.id %} active {% elif not display_worksheet and forloop.counter == 1 %} active {% endif %}">
-                         <a href="#{{ worksheet.id }}" data-toggle="tab" data-sheet-id="{{ worksheet.id }}" is-loaded="false" title="{{ worksheet.name|wrap_text }}">{{ worksheet.name }}</a>
+                         <a href="#{{ worksheet.id }}" data-toggle="tab" data-toggle-type="worksheet" data-sheet-id="{{ worksheet.id }}" is-loaded="false" title="{{ worksheet.name|wrap_text }}">{{ worksheet.name }}</a>
                          {% if workbook.owner.id == request.user.id %}
                          <div class="dropdown">
                              <a class="dropdown-toggle worksheet-drop" role="button" data-toggle="dropdown"><i class="fa fa-caret-down" ></i></a>
