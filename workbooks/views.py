@@ -525,7 +525,7 @@ def worksheet_genes(request, workbook_id=0, worksheet_id=0, genes_id=0):
                 GeneFave = GeneFavorite.create(name=name, gene_list=gene_list, user=request.user)
                 messages.info(request, 'The gene favorite list \"' + name + '\" was created and added to your worksheet')
                 # Refetch the created gene list, because it will have the names correctly formatted
-                for g in GeneFavorite.objects.get(id=GeneFave.id).get_list(user=request.user):
+                for g in GeneFavorite.objects.get(id=GeneFave['id']).get_genes_list():
                     genes.append(g)
 
             #from Gene Details Page

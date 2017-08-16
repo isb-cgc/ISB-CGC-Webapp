@@ -20,22 +20,14 @@ class GeneFavorite(models.Model):
     last_date_saved = models.DateTimeField(auto_now=True)
     objects = GeneFavoriteManager()
 
-    '''
-    Sets the last viewed time for a cohort
-    '''
-    def mark_viewed(self, request, user=None):
-        if user is None:
-            user = request.user
+    @classmethod
+    def get_list(cls, user):
+        list = cls.objects.filter(user=user, active=True).order_by('-last_date_saved')
 
-        last_view = self.genefavorite_last_view_set.filter(user=user)
-        if last_view is None or len(last_view) is 0:
-            last_view = self.genefavorite_last_view_set.create(user=user)
-        else:
-            last_view = last_view[0]
+        for fav in list:
+            fav.genes = fav.get_genes()
 
-        last_view.save(False, True)
-
-        return last_view
+        return list
 
     @classmethod
     def create(cls, name, gene_list, user):
@@ -56,14 +48,25 @@ class GeneFavorite(models.Model):
         }
         return return_obj
 
-    @classmethod
-    def get_list(cls, user):
-        list = cls.objects.filter(user=user, active=True).order_by('-last_date_saved')
+    '''
+    Sets the last viewed time for a cohort
+    '''
+    def mark_viewed(self, request, user=None):
+        if user is None:
+            user = request.user
 
-        for fav in list:
-            fav.genes = fav.get_genes()
+        last_view = self.genefavorite_last_view_set.filter(user=user)
+        if last_view is None or len(last_view) is 0:
+            last_view = self.genefavorite_last_view_set.create(user=user)
+        else:
+            last_view = last_view[0]
 
-        return list
+        last_view.save(False, True)
+
+        return last_view
+
+    def get_genes_list(self):
+        return self.gene_set.all().values_list('name', flat=True)
 
     def edit_list(self, gene_list, user):
         if self.user == user :
