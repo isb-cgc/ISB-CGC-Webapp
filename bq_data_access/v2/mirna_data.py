@@ -197,7 +197,7 @@ class MIRNDataQueryHandler(object):
 
         logger.debug("BQ_QUERY_MIRN: " + query)
 
-        return query, True
+        return query, subquery_stmt  # Second arg resolves to True if a query got built. Will be empty if above loop appends nothing!
 
     @DurationLogged('MIRN', 'UNPACK')
     def unpack_query_response(self, query_result_array):
