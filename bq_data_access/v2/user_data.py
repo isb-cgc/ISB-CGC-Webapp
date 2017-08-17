@@ -357,7 +357,7 @@ class UserDataQueryHandler(object):
         #
         query = ' , '.join(['(' + query + ')' for query in queries])
         logging.info("BQ_QUERY_USER: " + query)
-        return query, True
+        return query, query  # Second arg resolves to True if a query got built. Will be empty if above loop appends nothing!
 
     def unpack_value_from_row_with_feature_def(self, row):
         """
