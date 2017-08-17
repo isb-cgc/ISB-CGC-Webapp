@@ -81,7 +81,7 @@
                 <!--<h4 class="modal-title">Delete Workbook</h4>-->
             </div>
             <div class="modal-body" id="delete-workbook-body">Delete this Workbook?</div>
-            <form id="delete-workbook-{{ workbook.id }}" method="POST" action="{% url 'workbook_delete' workbook.id %}">
+            <form class="delete-workbook" id="delete-workbook-{{ workbook.id }}" method="POST" action="{% url 'workbook_delete' workbook.id %}">
                 {% csrf_token %}
                 <div class="modal-footer">
                     <input type="submit" value="Delete" class="btn btn-primary" />

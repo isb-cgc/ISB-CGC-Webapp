@@ -126,7 +126,7 @@ require([
         $(e.target).siblings('a').find('i.fa-caret-down').hide()
     });
 
-    $('#copy-workbook, #delete-workbook, form[id^=worksheet_create_form]').on('submit', function() {
+    $('form:not(.worksheet_create_form)').on('submit', function() {
         $(this).find('input[type="submit"]').attr('disabled', 'disabled');
     });
 
