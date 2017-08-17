@@ -68,13 +68,11 @@ require([
     'vizhelpers',
     'underscore',
     'base',
-    'session_security',
     'jqueryui',
     'bootstrap',
     'd3',
     'd3tip',
-    'select2',
-    'base'
+    'select2'
 ], function ($, plot_factory, vizhelpers, _, base) {
 
     var savingComment = false;
@@ -274,7 +272,7 @@ require([
         lastTab.removeClass('active');
         dropdown.prepend(lastTab);
         tabsList = $('#worksheets-tabs a[data-toggle="tab"]');
-    }
+    };
 
     // Activate the recent added tab
     if (display_worksheet_id) {
@@ -518,21 +516,6 @@ require([
         apply_axis_values($(this).parent().find('.x-axis-select'), y);
     });
 
-    // Event Handlers for X-Axis
-    function axis_attribute_change(self, for_plot_load){
-        if($(self).hasClass('x-gene-attribute-select')){
-            x_attribute_change(self, for_plot_load);
-        } else if($(self).hasClass('y-gene-attribute-select')){
-            y_attribute_change(self, for_plot_load);
-        }
-    }
-    function axis_select_change(self){
-        if($(self).hasClass('x-axis-select')){
-            x_select_change(self);
-        } else if($(self).hasClass('y-axis-select')){
-            y_select_change(self);
-        }
-    }
     function x_select_change(self){
         var type = $(self).find(":selected").attr('type');
         $(self).parent().find(".attr-options").fadeOut();
@@ -570,10 +553,6 @@ require([
             $(self).parent().find("#x-axis-data-type-container").fadeOut();
         }
     }
-
-    $('.x-axis-select').change(function(){
-        x_select_change(this);
-    });
     function x_attribute_change(self, for_plot_load){
         var active_worksheet = $('.worksheet.active').attr('id');
         $(self).parent().find(".attr-options").fadeOut();
@@ -596,9 +575,6 @@ require([
         attr_type_div.find('.feature-search select option:gt(0)').remove();
         attr_type_div.fadeIn();
     }
-    $(".x-gene-attribute-select").change(function(){
-        x_attribute_change(this);
-    });
 
     // Color_by handler, update based on x and y selection
     $(".search-term-field").change(function(){
@@ -678,9 +654,6 @@ require([
             $(self).parent().find("#y-data-type-container").fadeOut();
         }
     }
-    $('.y-axis-select').change(function(){
-        y_select_change(this);
-    });
     function y_attribute_change(self, for_plot_load){
         var active_worksheet = $('.worksheet.active').attr('id');
         $(self).parent().find(".attr-options").fadeOut();
@@ -703,9 +676,36 @@ require([
         attr_type_div.find('.feature-search select option:gt(0)').remove();
         attr_type_div.fadeIn();
     }
+
+    $(".x-gene-attribute-select").change(function(){
+        x_attribute_change(this);
+    });
+    $('.x-axis-select').change(function(){
+        axis_select_change(this);
+    });
+    $('.y-axis-select').change(function(){
+        axis_select_change(this);
+    });
     $(".y-gene-attribute-select").change(function(){
         y_attribute_change(this);
     });
+
+    // Event Handlers for X-Axis
+    function axis_attribute_change(self, for_plot_load){
+        if($(self).hasClass('x-gene-attribute-select')){
+            x_attribute_change(self, for_plot_load);
+        } else if($(self).hasClass('y-gene-attribute-select')){
+            y_attribute_change(self, for_plot_load);
+        }
+    }
+    function axis_select_change(self){
+        $(self).attr("title",$(self).find('option[value="'+$(self).val()+'"]').text());
+        if($(self).hasClass('x-axis-select')){
+            x_select_change(self);
+        } else if($(self).hasClass('y-axis-select')){
+            y_select_change(self);
+        }
+    }
 
     // Gene attribute selection
     $('.datatype-selector').on('change', function() { vizhelpers.get_datatype_search_interfaces(this, this.value)});
@@ -1032,7 +1032,7 @@ require([
     };
 
     // Prep all unloaded worksheets to load on selection
-    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+    $('a[data-toggle-type="worksheet"]').on('shown.bs.tab', function (e) {
         var sheet_id = $(this).data('sheet-id');
         if($('#'+sheet_id).attr("is-loaded") !== "true") {
             var self = $(".worksheet.active .plot_selection")[0];
@@ -1475,6 +1475,11 @@ require([
             beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
             success : function (data) {
                 button.parents('tr').remove();
+                // If that was the last user this woekbook was shared with, update the table's display
+                if(button.parents('tbody').length <= 0) {
+                    button.parents('.modal-body table').empty();
+                    button.parents('.modal-body table').append('<p class="center">This workbook is not currently shared with any users.</p>')
+                }
                 var count = parseInt($($('.share-count')[0]).html());
                 $('.share-count').each(function() {
                    $(this).html(count-1);
@@ -1490,6 +1495,14 @@ require([
     $('.save-comment-btn').prop('disabled', true);
     $('.comment-textarea').keyup(function() {
         $(this).siblings('.save-comment-btn').prop('disabled', this.value == '' ? true : false)
+    });
+
+    $('button.shared-with').on('click',function(){
+        $('a.shared-with').click();
+    });
+
+    $('button.share-modal').on('click',function(){
+        $('a.share-workbook').click();
     });
 
     // Only init the active tab
