@@ -165,6 +165,22 @@ require([
         sortList: [[5,1]]
     });
 
+    $('#cohort-table').tablesorter({
+        headers: {
+            0: {sorter:false},
+            7: {sorter: 'fullDate'}
+        },
+        sortList: [[7,1]]
+    });
+
+    $('#public-cohort-table').tablesorter({
+        headers: {
+            0: {sorter:false},
+            4: {sorter: 'fullDate'}
+        },
+        sortList: [[4,1]]
+    });
+
     $(document).ready(function(){
         if(sessionStorage.getItem("reloadMsg")) {
             var msg = JSON.parse(sessionStorage.getItem("reloadMsg"));
