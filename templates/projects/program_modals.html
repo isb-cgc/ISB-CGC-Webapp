@@ -59,7 +59,7 @@
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title">Remove Yourself from this Program?</h4>
             </div>
-            <form id="remove-program" method="POST" action="{% url 'sharing_remove' shared.id %}" data-redirect="{% url 'programs' %}">
+            <form id="remove-program" method="POST" action="{% url 'program_unshare' program.id %}" data-redirect="{% url 'programs' %}">
                 {% csrf_token %}
                 <div class="modal-footer">
                     <input type="submit" value="Remove" class="btn btn-primary" />
@@ -73,18 +73,16 @@
 
 {% if program.owner == request.user %}
 <!-- Share Program Modal -->
-<div class="modal fade" id="share-program-modal" tabindex="-1" role="dialog" aria-labelledby="delete-program-header" aria-hidden="true">
+<div class="modal fade" id="share-program-modal" tabindex="-1" role="dialog" aria-labelledby="share-program-header" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Program Sharing</h4>
-                <div id="share-modal-js-messages"></div>
+                <h4 class="modal-title" id="share-program-header">Program Sharing</h4>
+                <div id="share-program-js-messages"></div>
                 <ul class="nav nav-tabs" data-tabs="tablist">
-                    {% if program.owner == request.user %}
-                        <li class="active"><a href="#share" data-toggle="tab">Share</a></li>
-                    {% endif %}
-                    <li class="{% if not program.owner == request.user %}active{% endif %}"><a href="#shared-with" data-toggle="tab">Shared With</a></li>
+                    <li class="active"><a class="share" href="#share" data-toggle="tab">Share</a></li>
+                    <li><a class="shared-with" href="#shared-with" data-toggle="tab">Shared With</a></li>
                 </ul>
             </div>
             <div class="tab-content">
@@ -96,7 +94,7 @@
                             and big query data needed if you wish to access this program outside of the website.
                         </p>
                         <label for="share-users">Enter email addresses separated by a comma</label>
-                        <textarea class="form-control" name="share_users"></textarea>
+                        <textarea class="form-control" id="share_users" name="share_users"></textarea>
                     </div>
                     <div class="modal-footer">
                         <input type="submit" value="Send" class="btn btn-primary" />
@@ -126,7 +124,7 @@
                                     </td>
                                     <td>
                                         {% if program.owner == request.user %}
-                                        <a class="remove-shared-user" role="button" data-shared-id="{{ shared.id }}"><i class="fa fa-times"></i></a>
+                                        <a class="remove-shared-user" role="button" data-user-id="{{ shared.matched_user.id }}"><i class="fa fa-times"></i></a>
                                         {% endif %}
                                     </td>
                                 </tr>
@@ -134,7 +132,7 @@
                             </tbody>
                         </table>
                         {% else %}
-                        <p class="center">This list is empty.</p>
+                        <p class="center">This program is not currently shared with any users.</p>
                         {% endif %}
                     </div>
                     <div class="modal-footer">

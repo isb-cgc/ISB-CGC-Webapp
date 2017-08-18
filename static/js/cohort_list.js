@@ -227,7 +227,7 @@ require([
     // Remove shared user
     var remove_shared_user = function() {
         var user_id = $(this).attr('data-user-id');
-        var cohort_ids = $(this).attr('data-cohort-ids').split(",");
+        var cohort_ids = $(this).attr('data-cohort-ids').split(/\s*,\s*/);
         var url = BASE_URL + '/cohorts/unshare_cohort/';
         var csrftoken = $.getCookie('csrftoken');
         $.ajax({
@@ -296,7 +296,7 @@ require([
 
         var $this=$(this);
 
-        var emails = $('#share-share_users').val().split(",");
+        var emails = $('#share-share_users').val().split(/\s*,\s*/);
         for(var i=0; i < emails.length; i++) {
             if(!emails[i].match(base.email)) {
                 invalid_emails.push(emails[i]);

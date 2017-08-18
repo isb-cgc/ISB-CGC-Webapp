@@ -71,7 +71,7 @@
                             {% else %}
                                 {{ program.owner.first_name }} {{ program.owner.last_name }}
                             {% endif %}</td>
-                            <td>( {% if program.owner.id == user.id %}{{ program.shared.count }}{% else %}You{% endif %} )</td>
+                            <td>{% if program.owner.id == user.id %}( {{ program.shared.count }} ){% else %}You{% endif %}</td>
                             <td>{{ program.last_date_saved|date:'M d, Y, g:i a' }}</td>
                         {% for project in program.project_set.all|active %}
                         </tr>

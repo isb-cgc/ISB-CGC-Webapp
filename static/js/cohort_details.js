@@ -772,7 +772,7 @@ require([
 
         var $this=$(this);
 
-        var emails = $('#share-share_users').val().split(",");
+        var emails = $('#share-share_users').val().split(/\s*,\s*/);
         for(var i=0; i < emails.length; i++) {
             if(!emails[i].match(base.email)) {
                 invalid_emails.push(emails[i]);
@@ -850,7 +850,7 @@ require([
             success : function (data) {
                 button.parents('tr').remove();
                 // If that was the last user this cohort was shared with, update the table's display
-                if(button.parents('tbody').length <= 0) {
+                if(button.parents('tbody tr').length <= 0) {
                     $('#shared-pane .modal-body table').empty();
                     $('#shared-pane .modal-body table').append('<p class="center">This cohort is not currently shared with any users.</p>')
                 }
