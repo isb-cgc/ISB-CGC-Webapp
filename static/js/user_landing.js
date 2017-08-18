@@ -336,9 +336,9 @@ require([
     $('#cohort-table, #viz-table, #seqpeek-table').tablesorter({
         headers: {
             0: {sorter:false},
-            6: {sorter:'customDate'}
+            7: {sorter:'customDate'}
         },
-        sortList: [[6,1]]
+        sortList: [[7,1]]
     });
     $('#public-cohort-table').tablesorter({
         headers: {
