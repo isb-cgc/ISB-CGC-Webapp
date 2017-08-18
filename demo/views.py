@@ -228,6 +228,9 @@ def index(request):
                     st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW,
                                                    "[STATUS] NIH_User.objects.update_or_create() returned nih_user: {} and created: {}".format(
                                                        str(nih_user.NIH_username), str(created)))
+                    st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW,
+                                                   "[STATUS] NIH_User {} associated with email {} and logged in with assertion: {}".format(
+                                                       str(nih_user.NIH_username), str(user_email), str(saml_response)))
 
                     # add or remove user from ACL_GOOGLE_GROUP if they are or are not dbGaP authorized
                     directory_client, http_auth = get_directory_resource()

@@ -31,7 +31,7 @@
             <div class="modal-body" id="delete-worksheet-body">
                 Delete this Worksheet "{{ worksheet.name }}"?
             </div>
-            <form id="delete-workbook" method="POST" action="{% url 'worksheet_delete' workbook.id worksheet.id %}">
+            <form class="delete-worksheet" id="delete-worksheet" method="POST" action="{% url 'worksheet_delete' workbook.id worksheet.id %}">
                 {% csrf_token %}
                 <div class="modal-footer">
                     <input type="submit" value="Delete" class="btn btn-primary" />

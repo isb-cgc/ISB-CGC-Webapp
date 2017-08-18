@@ -38,12 +38,13 @@ require.config({
 
 require([
     'jquery',
+    'base',
     'jqueryui',
     'bootstrap',
     'session_security',
-    'tablesorter',
-    'base'
-], function($) {
+    'tablesorter'
+], function($,base) {
+
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function() {
         var form = $(this).find('form');
@@ -173,7 +174,6 @@ require([
         }
     });
 
-
     $('#public-cohorts-list tr:not(:first) input[type="checkbox"]').on('change', function() {
         clear_objects();
         var tablename = '#' + $(this).closest('table')[0].id;
@@ -214,6 +214,145 @@ require([
         }
     });
 
+    $('#cohorts-list .shared').on('click', function (e) {
+        var modalName = $(this).data('target');
+        var item = $(this).closest('tr').find('input[type="checkbox"]');
+
+        $(this).closest('table').find('input[type="checkbox"]').attr('checked', false);
+        item.click();
+
+        $(modalName + ' a[data-target="#shared-with-pane"]').tab('show');
+    });
+
+    // Remove shared user
+    var remove_shared_user = function() {
+        var user_id = $(this).attr('data-user-id');
+        var cohort_ids = $(this).attr('data-cohort-ids').split(/\s*,\s*/);
+        var url = BASE_URL + '/cohorts/unshare_cohort/';
+        var csrftoken = $.getCookie('csrftoken');
+        $.ajax({
+            type: 'POST',
+            url: url,
+            dataType: 'json',
+            data: {user_id: user_id, cohorts: JSON.stringify(cohort_ids)},
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            },
+            success: function (data) {
+                if(data.result && data.result.msg) {
+                    base.setReloadMsg('info',data.result.msg);
+                }
+                window.location.reload(true);
+            },
+            error: function (e) {
+                console.error('Failed to remove user: ' + JSON.parse(e.responseText).msg);
+            }
+        })
+    };
+
+    $('#share-cohorts-modal').on('show.bs.modal', function () {
+        var users = [];
+        var user_map = {};
+        var that = this;
+        $('#cohorts-list tr:not(:first) input:checked').each(function(){
+            var cohort = $(this).val();
+            var tempt = shared_users[$(this).val()];
+            if(tempt){
+                JSON.parse(tempt).forEach(function(user){
+                    if(!user_map[user.pk]){
+                        user_map[user.pk] = user.fields;
+                        user.fields.shared_cohorts = [cohort];
+                        user.fields.id = user.pk;
+                        users.push(user.fields);
+                    } else {
+                        user_map[user.pk].shared_cohorts.push(cohort);
+                    }
+                })
+            }
+        });
+        var table = $(that).find('table');
+        if(users.length){
+            table.append('<thead><th>Name</th><th>Email</th><th></th></thead>')
+            users.forEach(function(user){
+                $(that).find('table').append(
+                    '<tr><td>'+ user.first_name + ' ' + user.last_name + '</td>'
+                    +'<td>'+ user.email +'</td>'
+                    +'<td><a title="Remove '+user.first_name+' '+user.last_name+' from all shared Cohorts?" class="remove-shared-user" role="button" data-user-id="'+user.id+'" data-cohort-ids="'+user.shared_cohorts.join(",")+'"><i class="fa fa-times"></i></a></td></tr>')
+            });
+            $('.remove-shared-user').on('click', remove_shared_user);
+        }else{
+            table.append('<p class="center">Not currently shared with any users.</p>')
+        }
+    }).on('hidden.bs.modal', function(){
+        $(this).find('table').html('');
+    });
+
+    // Share with user click
+    $('#share-cohort-form').on('submit', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+
+        var invalid_emails = [];
+
+        var $this=$(this);
+
+        var emails = $('#share-share_users').val().split(/\s*,\s*/);
+        for(var i=0; i < emails.length; i++) {
+            if(!emails[i].match(base.email)) {
+                invalid_emails.push(emails[i]);
+            }
+        }
+
+        if(invalid_emails.length > 0) {
+            base.showJsMessage('danger',
+                "The following email addresses appear to be invalid: "+invalid_emails.join("; "),
+                true,'#share-cohort-js-messages');
+            return false;
+        }
+
+        $(this).find('.selected-cohorts span').each(function() {
+            $this.append('<input type="hidden" name="cohort-ids" value="'+$(this).attr('value')+'" />')
+        });
+
+        var url = BASE_URL + '/cohorts/share_cohort/';
+
+        $(this).find('.btn-primary').addClass('btn-disabled').attr('disabled', true);
+
+        var csrftoken = $.getCookie('csrftoken');
+        $.ajax({
+            type        :'POST',
+            url         : url,
+            dataType    :'json',
+            data        : $(this).serialize(),
+            beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+            success : function (data) {
+                if(data.status && data.status == 'error') {
+                    if(data.result && data.result.msg) {
+                        base.showJsMessage('danger',data.result.msg,true,'#share-cohort-js-messages');
+                    }
+                } else if(data.status && data.status == 'success') {
+                    $this.closest('.modal').modal('hide');
+                    if(data.result && data.result.msg) {
+                        base.setReloadMsg('info',data.result.msg);
+                    }
+                    if($this.data('redirect')) {
+                        window.location = $this.data('redirect');
+                    } else {
+                        window.location.reload();
+                    }
+                }
+            },
+            error: function (err) {
+                $this.closest('.modal').modal('hide');
+                base.showJsMessage('error',err,true);
+            },
+        }).always(function () {
+            $this.find('.btn-primary').removeClass('btn-disabled').attr('disabled', false);
+        });
+        // We don't want this form submission to automatically trigger a reload
+        return false;
+    });
+
     $('#set-op-cohort').on('submit', function() {
         var form = $(this);
         $('#selected-ids').children().each(function() {
@@ -225,6 +364,13 @@ require([
         $('#subtract-ids').children().each(function() {
             form.append('<input type="hidden" name="subtract-ids" value="'+$(this).attr('value')+'" />')
         });
+    });
+
+    $('#share-cohort-form').on('submit', function() {
+        var form = $(this);
+        $(this).find('.selected-cohorts span').each(function() {
+            form.append('<input type="hidden" name="cohort-ids" value="'+$(this).attr('value')+'" />')
+        })
     });
 
     $('#delete-cohort-form').on('submit', function() {

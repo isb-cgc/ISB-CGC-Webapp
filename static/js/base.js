@@ -1,3 +1,21 @@
+/**
+ *
+ * Copyright 2017, Institute for Systems Biology
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
 require.config({
     baseUrl: STATIC_FILES_URL+'js/',
     paths: {
@@ -28,10 +46,11 @@ require([
     'bootstrap',
     'session_security',
     'underscore',
+    'utils',
     'assetscore',
     'assetsresponsive',
     'tablesorter'
-], function($, jqueryui, bootstrap, session_security, _) {
+], function($, jqueryui, bootstrap, session_security, _, utils) {
     'use strict';
 
     A11y.Core();
@@ -145,14 +164,28 @@ require([
         },
         sortList: [[5,1]]
     });
+
+    $(document).ready(function(){
+        if(sessionStorage.getItem("reloadMsg")) {
+            var msg = JSON.parse(sessionStorage.getItem("reloadMsg"));
+            utils.showJsMessage(msg.type,msg.text,true);
+        }
+        sessionStorage.removeItem("reloadMsg");
+    });
 });
 
 // Return an object for consts/methods used by most views
-define([], function() {
+define(['jquery', 'utils'], function($, utils) {
 
     return {
         whitelist: /[^\\\_\|\"\+~@:#\$%\^&\*=\-\.,\(\)0-9a-zA-Z\sÇüéâäàåçêëèïîíìÄÅÉæÆôöòûùÖÜáóúñÑÀÁÂÃÈÊËÌÍÎÏÐÒÓÔÕØÙÚÛÝßãðõøýþÿ]/g,
         // From http://www.regular-expressions.info/email.html
-        email: /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/
+        email: /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/,
+        showJsMessage: utils.showJsMessage,
+        // Simple method for standardizing storage of a message into sessionStorage so it can be retrieved and reloaded
+        // at document load time
+        setReloadMsg: function(type,text) {
+            sessionStorage.setItem("reloadMsg",JSON.stringify({type: type, text: text}));
+        }
     };
 });

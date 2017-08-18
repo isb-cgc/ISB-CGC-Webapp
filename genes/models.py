@@ -4,6 +4,9 @@ import sys
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Q
+import logging
+
+logger = logging.getLogger('main_logger')
 
 
 class GeneFavoriteManager(models.Manager):
@@ -17,22 +20,14 @@ class GeneFavorite(models.Model):
     last_date_saved = models.DateTimeField(auto_now=True)
     objects = GeneFavoriteManager()
 
-    '''
-    Sets the last viewed time for a cohort
-    '''
-    def mark_viewed (self, request, user=None):
-        if user is None:
-            user = request.user
+    @classmethod
+    def get_list(cls, user):
+        list = cls.objects.filter(user=user, active=True).order_by('-last_date_saved')
 
-        last_view = self.genefavorite_last_view_set.filter(user=user)
-        if last_view is None or len(last_view) is 0:
-            last_view = self.genefavorite_last_view_set.create(user=user)
-        else:
-            last_view = last_view[0]
+        for fav in list:
+            fav.genes = fav.get_genes()
 
-        last_view.save(False, True)
-
-        return last_view
+        return list
 
     @classmethod
     def create(cls, name, gene_list, user):
@@ -53,14 +48,25 @@ class GeneFavorite(models.Model):
         }
         return return_obj
 
-    @classmethod
-    def get_list(cls, user):
-        list = cls.objects.filter(user=user, active=True).order_by('-last_date_saved')
+    '''
+    Sets the last viewed time for a cohort
+    '''
+    def mark_viewed(self, request, user=None):
+        if user is None:
+            user = request.user
 
-        for fav in list:
-            fav.genes = fav.get_genes()
+        last_view = self.genefavorite_last_view_set.filter(user=user)
+        if last_view is None or len(last_view) is 0:
+            last_view = self.genefavorite_last_view_set.create(user=user)
+        else:
+            last_view = last_view[0]
 
-        return list
+        last_view.save(False, True)
+
+        return last_view
+
+    def get_genes_list(self):
+        return self.gene_set.all().values_list('name', flat=True)
 
     def edit_list(self, gene_list, user):
         if self.user == user :
@@ -69,12 +75,12 @@ class GeneFavorite(models.Model):
             for g in genes :
                 g.delete()
 
-            for gene_name in gene_list :
+            for gene_name in gene_list:
                 gene_model = Gene(name=gene_name, gene_favorite=self)
                 gene_model.save()
 
             return_obj = {
-                'genes' : gene_list,
+                'genes': gene_list,
             }
         else :
             return_obj = {
@@ -96,27 +102,31 @@ class GeneFavorite(models.Model):
     def destroy(self):
         self.active = False
         genes = Gene.objects.filter(gene_favorite=self)
-        for g in genes :
+        for g in genes:
             g.delete()
         self.save()
-        return {'message' : "gene favorite has been deleted"}
+        return {'message': "gene favorite has been deleted"}
+
 
 class GeneFavorite_Last_View(models.Model):
     genefavorite = models.ForeignKey(GeneFavorite, blank=False)
     user = models.ForeignKey(User, null=False, blank=False)
     last_view = models.DateTimeField(auto_now=True)
 
+
 class Gene(models.Model):
     id            = models.AutoField(primary_key=True)
     name          = models.TextField(null=False, blank=False)
     gene_favorite = models.ForeignKey(GeneFavorite, null=False, blank=False)
 
+
 class GeneSymbol_Manager(models.Manager):
     content = None
 
+
 #used solely for list of gene symbols
 class GeneSymbol(models.Model):
-    id     = models.AutoField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     symbol = models.CharField(max_length=255, null=False, blank=False, db_index=True)
     type = models.CharField(max_length=16, null=True, blank=False)
     objects = GeneSymbol_Manager()

@@ -38,7 +38,57 @@ from django.conf import settings as django_settings
 from cohorts.models import Cohort, Program
 from projects.models import Project
 
+from bq_data_access.v2.feature_id_utils import FeatureProviderFactory
+
 logger = logging.getLogger('main_logger')
+
+
+def get_extended_public_program_name_set_for_user_extended_projects(user_extended_projects):
+    """
+    When working with user data where the user program is an extension of a public project,
+    we need to follow the extension chain back up to the public project. This allows us to plot
+    data contained in the public project against user data. Since public projects are identified
+    by unique *names*, we resolve to the *names* of these projects
+
+    Returns:
+        Set of program names in lower case.
+    """
+    program_set = set()
+    projects = Project.objects.filter(id__in=user_extended_projects)
+
+    root_projects = [];
+    tcga_projects = fetch_isbcgc_project_set()
+
+    for project in projects:
+        rad = project.get_my_root_and_depth()['root']
+        if rad in tcga_projects:
+            root_projects.append(rad)
+
+    extended_projects = Project.objects.filter(id__in=root_projects)
+
+    for ext_proj in extended_projects:
+        pub_program = ext_proj.program
+        p = Program.objects.get(id = pub_program.id)
+        program_set.update([p.name.lower()])
+
+    return program_set
+
+
+def get_user_program_id_set_for_user_only_projects(user_only_project_ids):
+    """
+    Get User Programs for projects.
+
+    Returns:
+        user program ids
+    """
+    program_set = set()
+    projects = Project.objects.filter(id__in=user_only_project_ids)
+
+    for user_proj in projects:
+        p = Program.objects.get(id = user_proj.program_id)
+        program_set.update([p.id])
+
+    return program_set
 
 
 def get_public_program_name_set_for_cohorts(cohort_id_array):
@@ -95,6 +145,7 @@ def get_confirmed_project_ids_for_cohorts(cohort_id_array):
     # Only samples whose source studies are TCGA studies, or extended from them, should be used
     confirmed_study_ids = []
     unconfirmed_study_ids = []
+    user_only_study_ids = []
 
     for row in cursor.fetchall():
         if row[0] in tcga_studies:
@@ -109,7 +160,27 @@ def get_confirmed_project_ids_for_cohorts(cohort_id_array):
         for project in projects:
             if project.get_my_root_and_depth()['root'] in tcga_studies:
                 confirmed_study_ids.append(project.id)
-    return confirmed_study_ids
+            else:
+                user_only_study_ids.append(project.id)
+    return confirmed_study_ids, user_only_study_ids
+
+
+def _feature_converter(feature_id):
+    """
+    User data feature requests can be mapped onto parent program feature IDs (this is the purpose of
+    the shared_map_id column in the projects_user_feature_definitions table). Currently only used for
+    case_barcodes, (which cannot be plotted?) but this capability was in the V1 code. Thus, we port it over.
+    """
+    if feature_id is None:
+        return None
+    provider_class = FeatureProviderFactory.get_provider_class_from_feature_id(feature_id)
+    if provider_class.can_convert_feature_id():
+        converted_user_feature = provider_class.convert_feature_id(feature_id)
+        if converted_user_feature:
+            if feature_id.startswith('v2') and not converted_user_feature.startswith('v2'):
+                converted_user_feature = 'v2:{0}'.format(converted_user_feature)
+            return converted_user_feature
+    return feature_id
 
 
 @login_required
@@ -148,13 +219,37 @@ def data_access_for_plot(request):
                 logging.error("Invalid internal feature ID '{}'".format(feature_id))
                 raise Exception('Feature Not Found')
 
+
+        # Gives the user data handler a chance to map e.g. "v2:USER:343:58901" to "v2:CLIN:case_barcode"
+
+        x_id = _feature_converter(x_id)
+        y_id = _feature_converter(y_id)
+        c_id = _feature_converter(c_id)
+
         # Get the project IDs these cohorts' samples come from
-        confirmed_study_ids = get_confirmed_project_ids_for_cohorts(cohort_id_array)
+        confirmed_study_ids, user_only_study_ids = get_confirmed_project_ids_for_cohorts(cohort_id_array)
 
         bqss = BigQueryServiceSupport.build_from_django_settings()
         fvb = FeatureVectorBigQueryBuilder.build_from_django_settings(bqss)
 
+        # By extracting info from the cohort, we get the NAMES of the public projects
+        # we need to access (public projects have unique name tags, e.g. tcga).
         program_set = get_public_program_name_set_for_cohorts(cohort_id_array)
+
+        # We need to do this for cohorts that contain samples found in user data projects,
+        # where those projects are extension of public data. This is because the cohorts
+        # only reference the user project, but if we are plotting against pubic data, we
+        # have to know which public programs we need to look at.
+
+        prog_set_extended = get_extended_public_program_name_set_for_user_extended_projects(confirmed_study_ids)
+        program_set.update(prog_set_extended)
+
+        user_programs = get_user_program_id_set_for_user_only_projects(user_only_study_ids)
+
+        if len(user_programs):
+            program_set.update(user_programs)
+            confirmed_study_ids = user_only_study_ids
+
         data = get_merged_feature_vectors(fvb, x_id, y_id, c_id, cohort_id_array, logTransform, confirmed_study_ids, program_set=program_set)
 
         # Annotate each data point with cohort information
