@@ -745,11 +745,23 @@ require([
         }
     };
 
+    // Generic form submission used by default
+    $('.ajax-form-modal').find('form').on('submit', function (e) {
+        $this.find('.btn').addClass('btn-disabled').attr('disabled', true);
+    });
+
     $('#create-cohort-modal form').on('submit', function() {
         save_changes_btn.prop('disabled', 'disabled');
         save_changes_btn_modal.prop('disabled', 'disabled');
     });
 
+    $('a[data-target="#share-cohort-modal"]').on('click',function(){
+        $('#share-cohort-modal a[data-target="#shared-pane"]').tab('show');
+    });
+
+    $('button[data-target="#share-cohort-modal"]').on('click',function(){
+        $('#share-cohort-modal a[data-target="#share-cohort-pane"]').tab('show');
+    });
 
     // Share with user click
     $('#share-cohort-form').on('submit', function(e){
@@ -760,7 +772,7 @@ require([
 
         var $this=$(this);
 
-        var emails = $('#share-share_users').val().split(",");
+        var emails = $('#share-share_users').val().split(/\s*,\s*/);
         for(var i=0; i < emails.length; i++) {
             if(!emails[i].match(base.email)) {
                 invalid_emails.push(emails[i]);
@@ -768,13 +780,12 @@ require([
         }
 
         if(invalid_emails.length > 0) {
-            $('#share-cohort-js-messages').empty();
-            $('#share-cohort-js-messages').append(
-                $('<p>')
-                    .addClass('alert alert-danger alert-dismissible')
-                    .text("The following email addresses appear to be invalid: "+invalid_emails.join("; ")));
-
+            base.showJsMessage('danger',
+                "The following email addresses appear to be invalid: "+invalid_emails.join("; "),
+                true,'#share-cohort-js-messages');
             return false;
+        } else {
+            $('#share-cohort-js-messages').empty();
         }
 
         var cohort_id = $(this).data('cohort-id');
@@ -793,13 +804,12 @@ require([
             success : function (data) {
                 if(data.status && data.status == 'error') {
                     if(data.result && data.result.msg) {
-                        $('#share-cohort-js-messages').empty();
-                        $('#share-cohort-js-messages').append(
-                            $('<p>')
-                                .addClass('alert alert-danger alert-dismissible')
-                                .text(data.result.msg));
+                        base.showJsMessage('error',data.result.msg,true,'#share-cohort-js-messages');
                     }
                 } else if(data.status && data.status == 'success') {
+                    if(data.result && data.result.msg) {
+                        base.setReloadMsg('info',data.result.msg);
+                    }
                     $this.closest('.modal').modal('hide');
                     if($this.data('redirect')) {
                         window.location = $this.data('redirect');
@@ -810,11 +820,7 @@ require([
             },
             error: function (err) {
                 $this.closest('.modal').modal('hide');
-                $('#js-messages').empty();
-                $('#js-messages').append(
-                    $('<p>')
-                        .addClass('alert alert-danger alert-dismissible')
-                        .text(err));
+                base.showJsMessage('error',err,true);
             },
         }).always(function () {
             $this.find('.btn-primary').removeClass('btn-disabled').attr('disabled', false);
@@ -828,8 +834,6 @@ require([
         $('#share-cohort-js-messages').empty();
         $(this).parents('#share-cohort-modal').find('.btn-primary').removeClass('btn-disabled').attr('disabled', false);
     });
-
-
 
     // Remove shared user
     $('.remove-shared-user').on('click', function() {
@@ -845,13 +849,18 @@ require([
             beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
             success : function (data) {
                 button.parents('tr').remove();
+                // If that was the last user this cohort was shared with, update the table's display
+                if(button.parents('tbody tr').length <= 0) {
+                    $('#shared-pane .modal-body table').empty();
+                    $('#shared-pane .modal-body table').append('<p class="center">This cohort is not currently shared with any users.</p>')
+                }
                 var count = parseInt($($('.share-count')[0]).html());
                 $('.share-count').each(function() {
                    $(this).html(count-1);
                 });
             },
-            error: function () {
-                console.log('Failed to remove user');
+            error: function (err) {
+                base.showJsMessage('error',err,true);
             }
         })
     });

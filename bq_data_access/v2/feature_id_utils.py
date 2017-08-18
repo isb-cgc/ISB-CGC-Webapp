@@ -61,6 +61,9 @@ from bq_data_access.v2.clinical_data import ClinicalDataQueryHandler
 from bq_data_access.data_types.clinical import BIGQUERY_CONFIG as CLIN_BIGQUERY_CONFIG
 from scripts.feature_def_gen.clinical_features import CLINDataSourceConfig
 
+# USER
+from bq_data_access.v2.user_data import UserDataQueryHandler
+
 
 FEATURE_TYPE_TO_PROVIDER_MAP = {
     PlottableDataType.GEXP: GEXPDataQueryHandler,
@@ -69,7 +72,9 @@ FEATURE_TYPE_TO_PROVIDER_MAP = {
     PlottableDataType.RPPA: RPPADataQueryHandler,
     PlottableDataType.CNVR: CNVRDataQueryHandler,
     PlottableDataType.MIRN: MIRNDataQueryHandler,
-    PlottableDataType.CLIN: ClinicalDataQueryHandler
+    PlottableDataType.CLIN: ClinicalDataQueryHandler,
+    PlottableDataType.USER: UserDataQueryHandler
+
 }
 
 # noinspection PyPackageRequirements
@@ -80,7 +85,8 @@ FEATURE_TYPE_TO_FEATURE_DEF_PROVIDER_MAP = {
     PlottableDataType.RPPA: (RPPADataSourceConfig, RPPAFeatureDefBuilder, RPPADataQueryHandler, RPPA_BIGQUERY_CONFIG),
     PlottableDataType.CNVR: (CNVRDataSourceConfig, CNVRFeatureDefBuilder, CNVRDataQueryHandler, CNVR_BIGQUERY_CONFIG),
     PlottableDataType.MIRN: (MIRNDataSourceConfig, MIRNFeatureDefBuilder, MIRNDataQueryHandler, MIRN_BIGQUERY_CONFIG),
-    PlottableDataType.CLIN: (CLINDataSourceConfig, None, ClinicalDataQueryHandler, CLIN_BIGQUERY_CONFIG)
+    PlottableDataType.CLIN: (CLINDataSourceConfig, None, ClinicalDataQueryHandler, CLIN_BIGQUERY_CONFIG),
+    PlottableDataType.USER: (None, None, UserDataQueryHandler, None)
 
 }
 

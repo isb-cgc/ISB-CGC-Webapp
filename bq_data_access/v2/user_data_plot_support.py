@@ -19,10 +19,10 @@ limitations under the License.
 import logging
 
 from django.conf import settings
-from MySQLDb.cursor import DictCursor
+from MySQLdb.cursors import DictCursor
 
 from bq_data_access.v2.feature_id_utils import FeatureProviderFactory
-from bq_data_access.v2.user_data import UserFeatureProvider
+from bq_data_access.v2.user_data import UserDataQueryHandler
 from bq_data_access.v2.data_access import submit_tcga_job, get_submitted_job_results
 
 from cohorts.metadata_helpers import get_sql_connection
@@ -35,7 +35,7 @@ def user_feature_handler(feature_id, cohort_id_array):
     for cohort_id in cohort_id_array:
         try:
             db = get_sql_connection()
-            cursor = db.cursor(MySQLdb.cursors.DictCursor)
+            cursor = db.cursor(DictCursor)
 
             cursor.execute("SELECT project_id FROM cohorts_samples WHERE cohort_id = %s GROUP BY project_id", (cohort_id,))
             for row in cursor.fetchall():
@@ -53,7 +53,7 @@ def user_feature_handler(feature_id, cohort_id_array):
     if feature_id.startswith('USER:'):
         # Try and convert it with a shared ID to a TCGA queryable id
         user_feature_id = feature_id
-        feature_id = UserFeatureProvider.convert_user_feature_id(feature_id)
+        feature_id = UserDataQueryHandler.convert_feature_id(feature_id)
         if feature_id is None:
             # Querying user specific data, don't include TCGA
             include_tcga = False
@@ -87,9 +87,9 @@ def submit_jobs_with_user_data(params_array):
             converted_feature_id = user_data['converted_feature_id']
             user_feature_id = user_data['user_feature_id']
             logging.debug("user_feature_id: {0}".format(user_feature_id))
-            provider = UserFeatureProvider(converted_feature_id, user_feature_id=user_feature_id)
+            provider = UserDataQueryHandler(converted_feature_id, user_feature_id=user_feature_id)
 
-            # The UserFeatureProvider instance might not generate a BigQuery query and job at all given the combination
+            # The UserDataQueryHandler instance might not generate a BigQuery query and job at all given the combination
             # of cohort(s) and feature identifiers. The provider is not added to the array, and therefore to the
             # polling loop below, if it would not submit a BigQuery job.
             if provider.is_queryable(cohort_id_array):
@@ -108,6 +108,9 @@ def submit_jobs_with_user_data(params_array):
 
     return provider_array
 
+
+# This code was part of the V1 data_access code, pulled out of V2 data_access.py, and only used in
+# the V1 Pairwise analysis.
 
 def get_feature_vector(feature_id, cohort_id_array):
     include_tcga = False
@@ -134,7 +137,7 @@ def get_feature_vector(feature_id, cohort_id_array):
     if feature_id.startswith('USER:'):
         # Try and convert it with a shared ID to a TCGA queryable id
         user_feature_id = feature_id
-        feature_id = UserFeatureProvider.convert_user_feature_id(feature_id)
+        feature_id = UserDataQueryHandler.convert_user_feature_id(feature_id)
         if feature_id is None:
             # Querying user specific data, don't include TCGA
             include_tcga = False
@@ -162,7 +165,7 @@ def get_feature_vector(feature_id, cohort_id_array):
 
     if len(user_studies) > 0:
         # Query User Data
-        user_provider = UserFeatureProvider(feature_id, user_feature_id=user_feature_id)
+        user_provider = UserDataQueryHandler(feature_id, user_feature_id=user_feature_id)
         user_result = user_provider.get_data(cohort_id_array, cohort_settings.dataset_id, cohort_settings.table_id)
         result.extend(user_result)
 
