@@ -234,7 +234,7 @@ require([
     $('.project-edit-form').on('submit', function(e) {
          return (do_submission(this, e, '.edit-name-field', '.edit-desc-field', '.modal-js-messages'));
     });
-    
+
     $('button.shared-with').on('click',function(){
         $('a.shared-with').click();
     });
