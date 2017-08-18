@@ -126,7 +126,7 @@ require([
         $(e.target).siblings('a').find('i.fa-caret-down').hide()
     });
 
-    $('#copy-workbook, #delete-workbook, form[id^=worksheet_create_form]').on('submit', function() {
+    $('form:not(.worksheet_create_form)').on('submit', function() {
         $(this).find('input[type="submit"]').attr('disabled', 'disabled');
     });
 
@@ -1393,7 +1393,7 @@ require([
 
         var $this=$(this);
 
-        var emails = $('#share-share_users').val().split(",");
+        var emails = $('#share-share_users').val().split(/\s*,\s*/);
         for(var i=0; i < emails.length; i++) {
             if(!emails[i].match(base.email)) {
                 invalid_emails.push(emails[i]);
@@ -1476,7 +1476,7 @@ require([
             success : function (data) {
                 button.parents('tr').remove();
                 // If that was the last user this woekbook was shared with, update the table's display
-                if(button.parents('tbody').length <= 0) {
+                if(button.parents('tbody tr').length <= 0) {
                     button.parents('.modal-body table').empty();
                     button.parents('.modal-body table').append('<p class="center">This workbook is not currently shared with any users.</p>')
                 }

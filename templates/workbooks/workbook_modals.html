@@ -81,7 +81,7 @@
                 <!--<h4 class="modal-title">Delete Workbook</h4>-->
             </div>
             <div class="modal-body" id="delete-workbook-body">Delete this Workbook?</div>
-            <form id="delete-workbook-{{ workbook.id }}" method="POST" action="{% url 'workbook_delete' workbook.id %}">
+            <form class="delete-workbook" id="delete-workbook-{{ workbook.id }}" method="POST" action="{% url 'workbook_delete' workbook.id %}">
                 {% csrf_token %}
                 <div class="modal-footer">
                     <input type="submit" value="Delete" class="btn btn-primary" />
@@ -169,7 +169,7 @@
 
 <!-- Only workbook owners have access to the sharing modal -->
 {% if workbook.owner.id == request.user.id %}
-    {% if is_shareable or shared %}
+    {% if is_shareable %}
     <!-- Share Workbook Modal -->
     <div class="ajax-form-modal share-workbook-modal modal fade" id="share-workbook-modal-{{ workbook.id }}" tabindex="-1" role="dialog" aria-labelledby="share-workbook-header" aria-hidden="true">
         <div class="modal-dialog">

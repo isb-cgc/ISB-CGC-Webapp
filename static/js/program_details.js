@@ -131,16 +131,116 @@ require([
         });
         // We don't want this form submission to automatically trigger a reload
         return false;
-    }
+    };
+
+    // Share program
+    $('#share').on('submit',function(e){
+        e.preventDefault();
+        e.stopPropagation();
+
+        var $self = $(this);
+
+        var invalid_emails = [];
+
+        var emails = $('#share_users').val().split(/\s*,\s*/);
+        for(var i=0; i < emails.length; i++) {
+            if(!emails[i].match(base.email)) {
+                invalid_emails.push(emails[i]);
+            }
+        }
+
+        if(invalid_emails.length > 0) {
+            base.showJsMessage('danger',
+                "The following email addresses appear to be invalid: "+invalid_emails.join("; "),
+                true,'#share-program-js-messages');
+            return false;
+        } else {
+            $('#share-program-js-messages').empty();
+        }
+
+        $self.find('.btn-primary').addClass('btn-disabled').attr('disabled', true);
+
+        var csrftoken = $.getCookie('csrftoken');
+        $.ajax({
+            type        :'POST',
+            url         : $self.attr('action'),
+            dataType    :'json',
+            data        : $self.serialize(),
+            beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+            success : function (data) {
+                if(data.status && data.status == 'error') {
+                    if(data.result && data.result.msg) {
+                        base.showJsMessage('error', data.result.msg, true, '#share-program-js-messages');
+                    }
+                } else if(data.status && data.status == 'success') {
+                    if(data.result && data.result.msg) {
+                        base.setReloadMsg('info',data.result.msg);
+                    }
+                    $self.closest('.modal').modal('hide');
+                    if($self.data('redirect')) {
+                        window.location = $self.data('redirect');
+                    } else {
+                        window.location.reload();
+                    }
+                }
+            },
+            error: function (err) {
+                $self.closest('.modal').modal('hide');
+                base.showJsMessage('error',err,true);
+            },
+        }).always(function () {
+            $self.find('.btn-primary').removeClass('btn-disabled').attr('disabled', false);
+        });
+        // We don't want this form submission to automatically trigger a reload
+        return false;
+    });
+
+        // Remove shared user
+    $('.remove-shared-user').on('click', function() {
+        var user_id = $(this).attr('data-user-id');
+        var url = BASE_URL + '/programs/' + program_id + '/unshare/';
+        var csrftoken = $.getCookie('csrftoken');
+        var button = $(this);
+        $.ajax({
+            type        :'POST',
+            url         : url,
+            dataType    :'json',
+            data        : {user_id: user_id},
+            beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+            success : function (data) {
+                button.parents('tr').remove();
+                // If that was the last user this cohort was shared with, update the table's display
+                if(button.parents('tbody tr').length <= 0) {
+                    $('#shared-with .modal-body table').empty();
+                    $('#shared-with .modal-body table').append('<p class="center">This program is not currently shared with any users.</p>')
+                }
+                var count = parseInt($($('.share-count')[0]).html());
+                $('.share-count').each(function() {
+                   $(this).html(count-1);
+                });
+            },
+            error: function (err) {
+                base.showJsMessage('error',err,true);
+            }
+        })
+    });
 
     // Handles program edits checking and submission
     $('#edit-program').on('submit', function(e) {
          return (do_submission(this, e, '.edit-name-field', '.edit-desc-field', '.modal-js-messages'));
-      })
+    });
 
     // Handles project edits checking and submission
     $('.project-edit-form').on('submit', function(e) {
          return (do_submission(this, e, '.edit-name-field', '.edit-desc-field', '.modal-js-messages'));
-      })
+    });
+
+    $('button.shared-with').on('click',function(){
+        $('a.shared-with').click();
+    });
+
+    $('button.share').on('click',function(){
+        $('a.share').click();
+    });
 
 });

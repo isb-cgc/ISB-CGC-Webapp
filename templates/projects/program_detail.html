@@ -44,27 +44,29 @@
 {#            </form>#}
 {#        </li>#}
 {#        <li class="separator"></li>#}
+        {% if program.owner.id != request.user.id %}
+            {% if program.is_public %}
+            <li><h4>Public Program</h4></li>
+            {% else %}
+            <li><h4>Owner: {{ program.owner.first_name|title }} {{ program.owner.last_name|title }}</h4></li>
+            {% endif %}
+            <li class="separator"></li>
+        {% endif %}
         {% if program.owner.id == user.id %}
         <li role="menuitem"><a href="{% url 'program_upload_existing' %}?program_id={{ program.id }}" class="btn btn-info"><i class="fa fa-cloud-upload"></i>Upload Data</a></li>
         <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#edit-program-details-modal">Edit Details</button></li>
         <li role="menuitem"><button class="btn btn-info program-delete" data-toggle="modal" data-target="#delete-program-modal">Delete</button></li>
         <li class="separator"></li>
-{#        <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#share-program-modal">Share</button></li>#}
+        <li role="menuitem"><button class="btn btn-info share" data-toggle="modal" data-target="#share-program-modal">Share</button></li>
+        <li role="menuitem"><button class="btn btn-link shared-with" data-toggle="modal" data-target="#share-program-modal">Shared with (<span class="share-count">{{ program.shared.count }}</span>)</button></li>
         {% elif shared %}
         <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#remove-program-modal">Remove</button></li>
-        {% endif %}
-        {% if program.is_public %}
-        <li class="separator"></li>
-        <li><em>Public Program</em></li>
-{#        {% else %}#}
-{#        <li role="menuitem"><button class="btn btn-link" data-toggle="modal" data-target="#share-program-modal">Shared with (<span class="share-count">{{ program.shared.count }}</span>)</button></li>#}
         {% endif %}
     </ul>
 </div>
 {% endblock %}
 {% block content %}
     <div class="container">
-        <div class="error-messages"></div>
         {% for project in projects %}
         <section class="program-project panel panel-primary" data-project-id="{{ project.id }}">
             <div class="panel-heading clearfix">
@@ -78,9 +80,8 @@
                             <li role="menuitem"><a data-toggle="modal" data-target="#delete-project-modal-{{ project.id }}" class="project-delete">Delete</a></li>
                             <li role="menuitem"><a data-toggle="modal" data-target="#edit-project-details-modal-{{ project.id }}">Edit Details</a></li>
                         {% endif %}
-                    {#   This modal does not appear to exist at the moment: #}
                         {% if shared %}
-                     {#       <li role="menuitem"><a data-toggle="modal" data-target="#remove-project-modal-{{ project.id }}">Delete</a></li> #}
+                            <li role="menuitem"><a data-toggle="modal" data-target="#remove-project-modal-{{ project.id }}">Remove</a></li>
                         {% endif %}
                     </ul>
                 </div>
@@ -137,6 +138,7 @@
     <script type="text/javascript">
 {#    var base_api_url            = '{{ BASE_API_URL|safe }}';#}
     var base_url                = '{{ BASE_URL|safe }}';
+    var program_id              = {{ program.id }};
 {#    var display_worksheet_id    = '{{ display_worksheet.id|safe }}';#}
 {#    var workbook_id             = '{{ workbook.id }}';#}
 </script>

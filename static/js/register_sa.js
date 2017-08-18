@@ -71,7 +71,6 @@ require([
             data: fields,
             method: 'POST',
             success: function(data) {
-                console.log(data);
                 var tbody = user_ver_div.find('tbody');
                 tbody.empty();
                 spinner.hide();

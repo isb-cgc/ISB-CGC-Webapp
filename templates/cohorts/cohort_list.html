@@ -102,10 +102,10 @@
                                     {% endif %}
                                 </td>
                                 <td class="share-col">
-                                    {% if cohort.shared_with_users|length %}
-                                        ( <a data-toggle="modal" data-target="#share-cohorts-modal" data-cohort-id="{{ cohort.id }}" class="shared">{{cohort.shared_with_users|length}}</a> )
+                                    {% if request.user.id == cohort.owner.id %}
+                                        ( {% if cohort.shared_with_users|length %}<a data-toggle="modal" data-target="#share-cohorts-modal" data-cohort-id="{{ cohort.id }}" class="shared">{{cohort.shared_with_users|length}}</a>{% else %}0{% endif %} )
                                     {% else %}
-                                        ( 0 )
+                                        You
                                     {% endif %}
                                 </td>
                                 <td>

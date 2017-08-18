@@ -69,14 +69,14 @@
                             </tr>
 
                             <!-- Refresh Service Account Modal -->
-                            <div class="modal fade" id="refresh-sa-modal-{{ service_account.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-project-header" aria-hidden="true">
+                            <div class="modal fade" id="refresh-sa-modal-{{ service_account.id }}" tabindex="-1" role="dialog" aria-labelledby="refresh-sa-header" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
                                         <div class="modal-header">
                                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                                             <h4 class="modal-title">Refresh this Service Account?</h4>
                                         </div>
-                                        <form id="delete-project" method="POST" action="{% url 'register_sa' user.id %}">
+                                        <form id="refresh-sa" method="POST" action="{% url 'register_sa' user.id %}">
                                             <div class="modal-body">
                                                 {% csrf_token %}
                                                 <p>
@@ -116,14 +116,14 @@
                             <li>{{ bucket.bucket_name }}<span class="remove"><a data-toggle="modal" role="button" data-target="#remove-bucket-modal-{{ bucket.id }}"><i class="fa fa-times"></i></a></span></li>
 
                             <!-- Remove Bucket Modal -->
-                            <div class="modal fade" id="remove-bucket-modal-{{ bucket.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-bucket-header" aria-hidden="true">
+                            <div class="modal fade" id="remove-bucket-modal-{{ bucket.id }}" tabindex="-1" role="dialog" aria-labelledby="remove-bucket-header" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
                                         <div class="modal-header">
                                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                            <h4 class="modal-title">Unregister Bucket</h4>
+                                            <h4 id="remove-bucket-header" class="modal-title">Unregister Bucket</h4>
                                         </div>
-                                        <form id="delete-project" method="POST" action="{% url 'delete_bucket' user.id bucket.id %}">
+                                        <form id="remove-bucket" method="POST" action="{% url 'delete_bucket' user.id bucket.id %}">
                                             <div class="modal-body">
                                                 {% csrf_token %}
                                                 <p>
@@ -167,9 +167,9 @@
                                     <div class="modal-content">
                                         <div class="modal-header">
                                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                            <h4 class="modal-title">Unregister BigQuery Dataset</h4>
+                                            <h4 id="delete-bqdataset-header" class="modal-title">Unregister BigQuery Dataset</h4>
                                         </div>
-                                        <form id="delete-project" method="POST" action="{% url 'delete_bqdataset' user.id dataset.id %}">
+                                        <form id="delete-bqdataset" method="POST" action="{% url 'delete_bqdataset' user.id dataset.id %}">
                                             <div class="modal-body">
                                                 {% csrf_token %}
                                                 <p>
@@ -199,12 +199,12 @@
     </div>
 
     <!-- Register Bucket Modal -->
-    <div class="modal fade" id="register-bucket-modal" tabindex="-1" role="dialog" aria-labelledby="delete-project-header" aria-hidden="true">
+    <div class="modal fade" id="register-bucket-modal" tabindex="-1" role="dialog" aria-labelledby="register-bucket-header" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Register Bucket</h4>
+                    <h4 id="register-bucket" class="modal-title">Register Bucket</h4>
                 </div>
                 <form id="register-bucket" method="POST" action="{% url 'register_bucket' user.id gcp.id %}">
                     <div class="modal-body">
@@ -229,12 +229,12 @@
     </div>
 
     <!-- Register BQ Dataset Modal -->
-    <div class="modal fade" id="register-bqdataset-modal" tabindex="-1" role="dialog" aria-labelledby="delete-project-header" aria-hidden="true">
+    <div class="modal fade" id="register-bqdataset-modal" tabindex="-1" role="dialog" aria-labelledby="register-bqdataset-header" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Register BigQuery Dataset</h4>
+                    <h4 id="register-bqdataset-header" class="modal-title">Register BigQuery Dataset</h4>
                 </div>
                 <form id="register-bqdataset" method="POST" action="{% url 'register_bqdataset' user.id gcp.id %}">
                     <div class="modal-body">
