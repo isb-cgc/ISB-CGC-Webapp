@@ -224,6 +224,11 @@ def get_workbooks_this_user(this_user, is_active=True):
 
 
 @register.filter
+def get_cohort_perm(cohort, request):
+    return cohort.get_perm(request)
+
+
+@register.filter
 def get_barcodes_length(barcodes):
     codes = barcodes.replace('[','').replace(']','').split(',')
     codes = filter(None, codes)
