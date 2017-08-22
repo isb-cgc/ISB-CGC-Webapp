@@ -214,25 +214,27 @@
                                                 {% with wsch.cohort as cohort %}
                                                 {% if forlook.counter0 < 6 %}
                                                     <li class="sublist-item">
-                                                        {% if shared %}
-                                                            {{ cohort.name }}
-                                                        {% else %}
+                                                        {% if workbook.owner.id == user.id %}
                                                             <form action="{% url 'remove_cohort_from_worksheet' workbook_id=workbook.id worksheet_id=worksheet.id cohort_id=cohort.id %}" method="POST">
                                                                 {% csrf_token %}
-                                                                {% if workbook.owner.id == user.id %}
-                                                                    <button type="submit" class="text-danger workbook-remove-item" aria-label="Remove Cohort"><i class="fa fa-close"></i></button>
-                                                                {% endif %}
-                                                                <a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a>
+                                                                <button type="submit" class="text-danger workbook-remove-item" aria-label="Remove Cohort"><i class="fa fa-close"></i></button>
+                                                        {% endif %}
+                                                        {% if cohort|get_cohort_perm:request %}
+                                                            <a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a>
+                                                        {% else %}
+                                                            <span title="You do not have permission to view this cohort.">{{ cohort.name }}</span>
+                                                        {% endif %}
+                                                        {% if workbook.owner.id == user.id %}
                                                             </form>
                                                         {% endif %}
                                                     </li>
                                                 {% elif forloop.counter0 == 6 and num_more > 0 %}
                                                     <a class="show-more">{{num_more}} more</a>
                                                     <li class="extra-values sublist-item">
-                                                        {% if shared %}
-                                                            {{ cohort.name }}
-                                                        {% else %}
+                                                        {% if cohort|get_cohort_perm:request %}
                                                             <a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a>
+                                                        {% else %}
+                                                            <span title="You do not have permission to view this cohort.">{{ cohort.name }}</span>
                                                         {% endif %}
                                                     </li>
                                                 {% endif %}
