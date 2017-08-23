@@ -49,6 +49,8 @@ class SearchableFieldHelper(object):
         result = []
         for _, data_type in FEATURE_ID_TO_TYPE_MAP.iteritems():
             config_class = FeatureDataTypeHelper.get_feature_def_config_from_data_type(data_type)
+            if not config_class: # User data has no config class
+                continue
             data_type_config_dict = FeatureDataTypeHelper.get_feature_def_default_config_dict_from_data_type(data_type)
             config_instance = config_class.from_dict(data_type_config_dict)
 

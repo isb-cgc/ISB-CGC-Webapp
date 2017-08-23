@@ -745,9 +745,124 @@ require([
         }
     };
 
+    // Generic form submission used by default
+    $('.ajax-form-modal').find('form').on('submit', function (e) {
+        $this.find('.btn').addClass('btn-disabled').attr('disabled', true);
+    });
+
     $('#create-cohort-modal form').on('submit', function() {
         save_changes_btn.prop('disabled', 'disabled');
         save_changes_btn_modal.prop('disabled', 'disabled');
+    });
+
+    $('a[data-target="#share-cohort-modal"]').on('click',function(){
+        $('#share-cohort-modal a[data-target="#shared-pane"]').tab('show');
+    });
+
+    $('button[data-target="#share-cohort-modal"]').on('click',function(){
+        $('#share-cohort-modal a[data-target="#share-cohort-pane"]').tab('show');
+    });
+
+    // Share with user click
+    $('#share-cohort-form').on('submit', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+
+        var invalid_emails = [];
+
+        var $this=$(this);
+
+        var emails = $('#share-share_users').val().split(/\s*,\s*/);
+        for(var i=0; i < emails.length; i++) {
+            if(!emails[i].match(base.email)) {
+                invalid_emails.push(emails[i]);
+            }
+        }
+
+        if(invalid_emails.length > 0) {
+            base.showJsMessage('danger',
+                "The following email addresses appear to be invalid: "+invalid_emails.join("; "),
+                true,'#share-cohort-js-messages');
+            return false;
+        } else {
+            $('#share-cohort-js-messages').empty();
+        }
+
+        var cohort_id = $(this).data('cohort-id');
+
+        var url = base_url + '/cohorts/share_cohort/' + cohort_id + "/";
+
+        $(this).find('.btn-primary').addClass('btn-disabled').attr('disabled', true);
+
+        var csrftoken = $.getCookie('csrftoken');
+        $.ajax({
+            type        :'POST',
+            url         : url,
+            dataType    :'json',
+            data        : $(this).serialize(),
+            beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+            success : function (data) {
+                if(data.status && data.status == 'error') {
+                    if(data.result && data.result.msg) {
+                        base.showJsMessage('error',data.result.msg,true,'#share-cohort-js-messages');
+                    }
+                } else if(data.status && data.status == 'success') {
+                    if(data.result && data.result.msg) {
+                        base.setReloadMsg('info',data.result.msg);
+                    }
+                    $this.closest('.modal').modal('hide');
+                    if($this.data('redirect')) {
+                        window.location = $this.data('redirect');
+                    } else {
+                        window.location.reload();
+                    }
+                }
+            },
+            error: function (err) {
+                $this.closest('.modal').modal('hide');
+                base.showJsMessage('error',err,true);
+            },
+        }).always(function () {
+            $this.find('.btn-primary').removeClass('btn-disabled').attr('disabled', false);
+        });
+        // We don't want this form submission to automatically trigger a reload
+        return false;
+    });
+
+    // Any time the share workbook modal is closed, clear out the messages and re-enable the buttons
+    $('#share-cohort-modal button.btn-cancel,#share-cohort-modal button.close').on('click',function(){
+        $('#share-cohort-js-messages').empty();
+        $(this).parents('#share-cohort-modal').find('.btn-primary').removeClass('btn-disabled').attr('disabled', false);
+    });
+
+    // Remove shared user
+    $('.remove-shared-user').on('click', function() {
+        var user_id = $(this).attr('data-user-id');
+        var url = base_url + '/cohorts/unshare_cohort/' + cohort_id + '/';
+        var csrftoken = $.getCookie('csrftoken');
+        var button = $(this);
+        $.ajax({
+            type        :'POST',
+            url         : url,
+            dataType    :'json',
+            data        : {user_id: user_id},
+            beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+            success : function (data) {
+                button.parents('tr').remove();
+                // If that was the last user this cohort was shared with, update the table's display
+                if(button.parents('tbody tr').length <= 0) {
+                    $('#shared-pane .modal-body table').empty();
+                    $('#shared-pane .modal-body table').append('<p class="center">This cohort is not currently shared with any users.</p>')
+                }
+                var count = parseInt($($('.share-count')[0]).html());
+                $('.share-count').each(function() {
+                   $(this).html(count-1);
+                });
+            },
+            error: function (err) {
+                base.showJsMessage('error',err,true);
+            }
+        })
     });
 
     // Disable the comment button if there's no content in the comment

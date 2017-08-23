@@ -32,3 +32,7 @@ class Analysis(models.Model):
                   'image': 'img/seqpeak.png'}]
 
         return types
+
+    @classmethod
+    def get_types_list(self):
+        return [x['name'] for x in self.get_types()]
