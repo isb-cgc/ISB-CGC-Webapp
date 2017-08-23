@@ -110,8 +110,17 @@ class ClinicalDataQueryHandler(object):
     def get_value_type(self):
         return self.feature_def.value_type
 
-    def get_feature_type(self):
+    @classmethod
+    def get_feature_type(cls):
         return DataTypes.CLIN
+
+    @classmethod
+    def can_convert_feature_id(cls):
+        return False
+
+    @classmethod
+    def convert_feature_id(cls, feature_id):
+        return None
 
     @classmethod
     def process_data_point(cls, data_point):
@@ -196,7 +205,7 @@ class ClinicalDataQueryHandler(object):
 
             logger.debug("BQ_QUERY_CLIN: " + query)
 
-            return query, True
+            return query, subquery_stmt  # Second arg resolves to True if a query got built. Will be empty if above loop appends nothing!
 
     @DurationLogged('CLIN', 'UNPACK')
     def unpack_query_response(self, query_result_array):

@@ -1,6 +1,6 @@
 """
 
-Copyright 2016, Institute for Systems Biology
+Copyright 2017, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,10 +19,12 @@ limitations under the License.
 from copy import deepcopy
 import sys
 import logging
-
+from django.conf import settings
 from google_helpers.bigquery_service import get_bigquery_service
 
 logger = logging.getLogger('main_logger')
+
+MAX_INSERT = settings.MAX_BQ_INSERT
 
 COHORT_DATASETS = {
     'prod': 'cloud_deployment_cohorts',
@@ -88,12 +90,23 @@ class BigQueryCohortSupport(object):
         bigquery_service = get_bigquery_service()
         table_data = bigquery_service.tabledata()
 
-        body = self._build_request_body_from_rows(rows)
+        index = 0
+        next = 0
 
-        response = table_data.insertAll(projectId=self.project_id,
-                                        datasetId=self.dataset_id,
-                                        tableId=self.table_id,
-                                        body=body).execute()
+        while index < len(rows) and next is not None:
+            next = MAX_INSERT+index
+            body = None
+            if next > len(rows):
+                next = None
+                body = self._build_request_body_from_rows(rows[index:])
+            else:
+                body = self._build_request_body_from_rows(rows[index:next])
+
+            response = table_data.insertAll(projectId=self.project_id,
+                                            datasetId=self.dataset_id,
+                                            tableId=self.table_id,
+                                            body=body).execute()
+            index = next
 
         return response
 

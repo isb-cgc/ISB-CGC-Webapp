@@ -47,7 +47,7 @@ class GNABFeatureDef(object):
                        "([a-zA-Z0-9_.\-]+):"
                        "(" + "|".join([table.internal_table_id for table in config_instance.data_table_list]) + "):"
                        # value field
-                       "(Variant_Classification|Variant_Type|{})$".format(VALUE_FIELD_NUM_MUTATIONS))
+                       "([vV]ariant_[cC]lassification|[vV]ariant_[tT]ype|{})$".format(VALUE_FIELD_NUM_MUTATIONS))
 
     def __init__(self, gene, internal_table_id, value_field):
         self.gene = gene
@@ -82,8 +82,17 @@ class GNABDataQueryHandler(object):
         else:
             return ValueType.STRING
 
-    def get_feature_type(self):
+    @classmethod
+    def get_feature_type(cls):
         return DataTypes.GNAB
+
+    @classmethod
+    def can_convert_feature_id(cls):
+        return False
+
+    @classmethod
+    def convert_feature_id(cls, feature_id):
+        return None
 
     @classmethod
     def process_data_point(cls, data_point):

@@ -24,7 +24,7 @@ require([
     'session_security',
     'underscore',
     'base',
-], function($, jqueryui, bootstrap, session_security, _) {
+], function($, jqueryui, bootstrap, session_security, _, base) {
     'use strict';
 
     $('.project').css('display', 'none').removeClass('hidden');
@@ -65,11 +65,7 @@ require([
                 window.location.reload();
             }
         }, function () {
-            $this.find('.error-messages').append(
-                $('<p>')
-                    .addClass('alert alert-danger')
-                    .text('There was an error deleting that project. Please reload and try again, or try again later.')
-            );
+            base.showJsMessage('danger','There was an error deleting that project. Please reload and try again, or try again later.',true);
         })
         .always(function () {
             $this.find('.btn').removeClass('btn-disabled').attr('disabled', false);

@@ -78,20 +78,21 @@
         {% block page_header %}{% endblock %}
     </div>
     <div class="container">
-        {% if messages %}
-            {% autoescape off %}
-            <div class="row">
-                <div class="col-lg-12">
-                    {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }} alert-dismissible">
-                            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                </div>
+        <div class="row">
+            <div class="col-lg-12">
+                {% if messages %}
+                    {% autoescape off %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible">
+                                <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endautoescape %}
+                {% endif %}
+                <div id="js-messages"></div>
             </div>
-            {% endautoescape %}
-        {% endif %}
+        </div>
         <div class="row">{% block content %}{% endblock %}</div>
     </div>
 
