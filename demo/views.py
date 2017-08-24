@@ -113,9 +113,6 @@ def index(request):
             return HttpResponseRedirect(auth.logout(name_id=name_id, session_index=session_index))
         elif 'acs' in req['get_data']:
             st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW, "[STATUS] received ?acs")
-            print >> sys.stdout, "[STATUS] recevied ?acs:"
-            print >> sys.stdout, req.__str__()
-            print >> sys.stdout, req['get_data'].__str__()
             auth.process_response()
             errors = auth.get_errors()
             if errors:
@@ -231,6 +228,9 @@ def index(request):
                     st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW,
                                                    "[STATUS] NIH_User.objects.update_or_create() returned nih_user: {} and created: {}".format(
                                                        str(nih_user.NIH_username), str(created)))
+                    st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW,
+                                                   "[STATUS] NIH_User {} associated with email {} and logged in with assertion: {}".format(
+                                                       str(nih_user.NIH_username), str(user_email), str(saml_response)))
 
                     # add or remove user from ACL_GOOGLE_GROUP if they are or are not dbGaP authorized
                     directory_client, http_auth = get_directory_resource()
@@ -255,8 +255,6 @@ def index(request):
                     warn_message = 'You are reminded that when accessing controlled access information you are bound by the dbGaP DATA USE CERTIFICATION AGREEMENT (DUCA) for each dataset.' + warn_message
 
                 all_datasets = das.get_all_datasets_and_google_groups()
-
-                print >> sys.stdout, "[STATUS] All datasets: "+str(all_datasets)
 
                 for dataset in all_datasets:
                     ad = None

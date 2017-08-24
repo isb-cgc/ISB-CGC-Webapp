@@ -26,7 +26,7 @@ from bq_data_access.data_types.cnvr import BIGQUERY_CONFIG
 from scripts.feature_def_gen.copynumber_features import CNVRDataSourceConfig
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('main_logger')
 
 CNVR_FEATURE_TYPE = 'CNVR'
 IDENTIFIER_COLUMN_NAME = 'sample_id'
@@ -86,8 +86,17 @@ class CNVRDataQueryHandler(object):
     def get_value_type(self):
         return ValueType.FLOAT
 
-    def get_feature_type(self):
+    @classmethod
+    def get_feature_type(cls):
         return DataTypes.CNVR
+
+    @classmethod
+    def can_convert_feature_id(cls):
+        return False
+
+    @classmethod
+    def convert_feature_id(cls, feature_id):
+        return None
 
     @classmethod
     def process_data_point(cls, data_point):

@@ -18,8 +18,13 @@ limitations under the License.
 
 from copy import deepcopy
 import sys
-
+import logging
+from django.conf import settings
 from google_helpers.bigquery_service import get_bigquery_service
+
+MAX_INSERT = settings.MAX_BQ_INSERT
+
+logger = logging.getLogger('main_logger')
 
 COHORT_DATASETS = {
     'prod': 'cloud_deployment_cohorts',
@@ -85,14 +90,23 @@ class BigQueryCohortSupport(object):
         bigquery_service = get_bigquery_service()
         table_data = bigquery_service.tabledata()
 
-        body = self._build_request_body_from_rows(rows)
+        index = 0
+        next = 0
 
-        print >> sys.stdout, self.project_id+":"+self.dataset_id+":"+self.table_id
+        while index < len(rows) and next is not None:
+            next = MAX_INSERT+index
+            body = None
+            if next > len(rows):
+                next = None
+                body = self._build_request_body_from_rows(rows[index:])
+            else:
+                body = self._build_request_body_from_rows(rows[index:next])
 
-        response = table_data.insertAll(projectId=self.project_id,
-                                        datasetId=self.dataset_id,
-                                        tableId=self.table_id,
-                                        body=body).execute()
+            response = table_data.insertAll(projectId=self.project_id,
+                                            datasetId=self.dataset_id,
+                                            tableId=self.table_id,
+                                            body=body).execute()
+            index = next
 
         return response
 
@@ -113,8 +127,6 @@ class BigQueryCohortSupport(object):
             rows.append(self._build_cohort_row(cohort_id, case_barcode=sample['case_barcode'], sample_barcode=sample['sample_barcode'], project_id=sample['project_id']))
 
         response = self._streaming_insert(rows)
-
-        print >> sys.stdout, response.__str__()
 
         return response
 

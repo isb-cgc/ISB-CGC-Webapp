@@ -25,7 +25,7 @@ from bq_data_access.v2.utils import DurationLogged
 from bq_data_access.data_types.methylation import BIGQUERY_CONFIG
 from scripts.feature_def_gen.methylation_features import METHDataSourceConfig
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('main_logger')
 
 METH_FEATURE_TYPE = 'METH'
 IDENTIFIER_COLUMN_NAME = 'sample_id'
@@ -98,8 +98,17 @@ class METHDataQueryHandler(object):
     def get_value_type(self):
         return ValueType.FLOAT
 
-    def get_feature_type(self):
+    @classmethod
+    def get_feature_type(cls):
         return DataTypes.METH
+
+    @classmethod
+    def can_convert_feature_id(cls):
+        return False
+
+    @classmethod
+    def convert_feature_id(cls, feature_id):
+        return None
 
     @classmethod
     def process_data_point(cls, data_point):

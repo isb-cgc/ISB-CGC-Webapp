@@ -19,6 +19,9 @@ limitations under the License.
 import logging
 import sys
 import traceback
+import logging
+
+logger = logging.getLogger('main_logger')
 
 from MySQLdb.cursors import DictCursor
 from cohorts.metadata_helpers import get_sql_connection
@@ -26,8 +29,6 @@ from cohorts.metadata_helpers import get_sql_connection
 DJANGO_COHORT_TABLE = 'cohorts_samples'
 DJANGO_COHORT_INFO_TABLE = 'cohorts_cohort'
 DJANGO_COHORT_SAMPLES_TABLE = 'cohorts_samples'
-
-logger = logging
 
 
 class CohortException(Exception):
@@ -143,9 +144,8 @@ class CloudSQLCohortAccess(object):
             return result
 
         except Exception as e:
-            print >> sys.stdout, "[ERROR] In get_cohort_info: "
-            print >> sys.stdout, e
-            print >> sys.stdout, traceback.format_exc()
+            logger.error("[ERROR] In get_cohort_info: ")
+            logger.exception(e)
             raise CohortException('get_cohort_info CloudSQL error, cohort IDs {cohort_ids}: {message}'.format(
                 cohort_ids=cohort_id_array,
                 message=str(e.message)))
