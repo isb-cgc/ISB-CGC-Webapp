@@ -27,7 +27,7 @@ from scripts.feature_def_gen.gexp_features import GEXPDataSourceConfig
 
 GEXP_FEATURE_TYPE = 'GEXP'
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('main_logger')
 
 
 def get_feature_type():
@@ -83,10 +83,20 @@ class GEXPDataQueryHandler(object):
     def get_value_type(self):
         return ValueType.FLOAT
 
-    def get_feature_type(self):
+    @classmethod
+    def get_feature_type(cls):
         return DataTypes.GEXP
 
-    def process_data_point(self, data_point):
+    @classmethod
+    def can_convert_feature_id(cls):
+        return False
+
+    @classmethod
+    def convert_feature_id(cls, feature_id):
+        return None
+
+    @classmethod
+    def process_data_point(cls, data_point):
         return data_point['value']
 
     def build_query_for_program(self, feature_def, cohort_table, cohort_id_array, project_id_array):
@@ -153,7 +163,7 @@ class GEXPDataQueryHandler(object):
 
         logger.debug("BQ_QUERY_GEXP: " + query)
 
-        return query, True
+        return query, subquery_stmt  # Second arg resolves to True if a query got built. Will be empty if above loop appends nothing!
 
     @DurationLogged('GEXP', 'UNPACK')
     def unpack_query_response(self, query_result_array):

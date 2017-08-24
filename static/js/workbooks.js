@@ -68,13 +68,11 @@ require([
     'vizhelpers',
     'underscore',
     'base',
-    'session_security',
     'jqueryui',
     'bootstrap',
     'd3',
     'd3tip',
-    'select2',
-    'base'
+    'select2'
 ], function ($, plot_factory, vizhelpers, _, base) {
     var savingComment = false;
 
@@ -127,7 +125,7 @@ require([
         $(e.target).siblings('a').find('i.fa-caret-down').hide()
     });
 
-    $('#copy-workbook, #delete-workbook, form[id^=worksheet_create_form]').on('submit', function() {
+    $('form:not(.worksheet_create_form)').on('submit', function() {
         $(this).find('input[type="submit"]').attr('disabled', 'disabled');
     });
 
@@ -185,7 +183,7 @@ require([
         hide_plot_settings();
     });
 
-    ////Model communications
+    // Model communications
     $('.add_worksheet_comment_form').on('submit', function (event) {
 
         if(savingComment) {
@@ -273,7 +271,7 @@ require([
         lastTab.removeClass('active');
         dropdown.prepend(lastTab);
         tabsList = $('#worksheets-tabs a[data-toggle="tab"]');
-    }
+    };
 
     // Activate the recent added tab
     if (display_worksheet_id) {
@@ -285,9 +283,7 @@ require([
         }
     }
 
-    /*
-     * gather the options and selections on a variable, used for gathering the color_by variable
-     */
+    // gather the options and selections on a variable, used for gathering the color_by variable
     function get_simple_values(selection) {
         var result;
         result = {variable: selection.find(":selected").val(), type : "common", options: []};
@@ -295,11 +291,9 @@ require([
            result.options.push({value : $(ele).val(), text : $(ele).text()});
         });
         return result;
-    }
+    };
 
-    /*
-     * gather the options and selections on a variable in the plot settings
-     */
+    // gather the options and selections on a variable in the plot settings
     function get_values(selection){
         var result;
         if(selection.attr('type') == "label") {
@@ -444,10 +438,8 @@ require([
         }
     }
 
-    /*
-     * add data values to the variable_element representing a plot axis,
-     * This is called on loading plot data from model and swapping axis
-     */
+    // Add data values to the variable_element representing a plot axis,
+    // This is called on loading plot data from model and swapping axis
     function apply_axis_values(variable_element, data, axis_settings){
         if(data.type == "common"){
             if(data.options){
@@ -513,11 +505,9 @@ require([
             disable_invalid_variable_options($('.worksheet.active .main-settings'));
             variable_element.parent('.variable-container').find('.log-scale').prop('checked',data.selection.logTransform || false);
         }
-    }
+    };
 
-    /*
-     * Event handler for the Swap button
-     */
+    // Event handler for the Swap button
     $('.swap').click(function(){
         var x = get_values($(this).parent().find('.x-axis-select').find(":selected"));
         var y = get_values($(this).parent().find('.y-axis-select').find(":selected"));
@@ -525,23 +515,6 @@ require([
         apply_axis_values($(this).parent().find('.x-axis-select'), y);
     });
 
-    /*
-     * Event Handlers for X-Axis
-     */
-    function axis_attribute_change(self, for_plot_load){
-        if($(self).hasClass('x-gene-attribute-select')){
-            x_attribute_change(self, for_plot_load);
-        } else if($(self).hasClass('y-gene-attribute-select')){
-            y_attribute_change(self, for_plot_load);
-        }
-    }
-    function axis_select_change(self){
-        if($(self).hasClass('x-axis-select')){
-            x_select_change(self);
-        } else if($(self).hasClass('y-axis-select')){
-            y_select_change(self);
-        }
-    }
     function x_select_change(self){
         var type = $(self).find(":selected").attr('type');
         $(self).parent().find(".attr-options").fadeOut();
@@ -579,10 +552,6 @@ require([
             $(self).parent().find("#x-axis-data-type-container").fadeOut();
         }
     }
-
-    $('.x-axis-select').change(function(){
-        x_select_change(this);
-    });
     function x_attribute_change(self, for_plot_load){
         var active_worksheet = $('.worksheet.active').attr('id');
         $(self).parent().find(".attr-options").fadeOut();
@@ -605,13 +574,8 @@ require([
         attr_type_div.find('.feature-search select option:gt(0)').remove();
         attr_type_div.fadeIn();
     }
-    $(".x-gene-attribute-select").change(function(){
-        x_attribute_change(this);
-    });
 
-    /*
-     * Color_by handler, update based on x and y selection
-     */
+    // Color_by handler, update based on x and y selection
     $(".search-term-field").change(function(){
         if($(this).attr('id').indexOf("color-by")<0) {
             var parent = $(this).parents(".main-settings");
@@ -650,9 +614,7 @@ require([
         }
     });
 
-    /*
-     * Event Handlers for Y-Axis
-     */
+    // Event Handlers for Y-Axis
     function y_select_change(self) {
         $(self).parent().find(".attr-options").fadeOut();
         var type = $(self).find(":selected").attr('type');
@@ -691,9 +653,6 @@ require([
             $(self).parent().find("#y-data-type-container").fadeOut();
         }
     }
-    $('.y-axis-select').change(function(){
-        y_select_change(this);
-    });
     function y_attribute_change(self, for_plot_load){
         var active_worksheet = $('.worksheet.active').attr('id');
         $(self).parent().find(".attr-options").fadeOut();
@@ -716,13 +675,38 @@ require([
         attr_type_div.find('.feature-search select option:gt(0)').remove();
         attr_type_div.fadeIn();
     }
+
+    $(".x-gene-attribute-select").change(function(){
+        x_attribute_change(this);
+    });
+    $('.x-axis-select').change(function(){
+        axis_select_change(this);
+    });
+    $('.y-axis-select').change(function(){
+        axis_select_change(this);
+    });
     $(".y-gene-attribute-select").change(function(){
         y_attribute_change(this);
     });
 
-    /*
-     * Gene attribute selection
-     */
+    // Event Handlers for X-Axis
+    function axis_attribute_change(self, for_plot_load){
+        if($(self).hasClass('x-gene-attribute-select')){
+            x_attribute_change(self, for_plot_load);
+        } else if($(self).hasClass('y-gene-attribute-select')){
+            y_attribute_change(self, for_plot_load);
+        }
+    }
+    function axis_select_change(self){
+        $(self).attr("title",$(self).find('option[value="'+$(self).val()+'"]').text());
+        if($(self).hasClass('x-axis-select')){
+            x_select_change(self);
+        } else if($(self).hasClass('y-axis-select')){
+            y_select_change(self);
+        }
+    }
+
+    // Gene attribute selection
     $('.datatype-selector').on('change', function() { vizhelpers.get_datatype_search_interfaces(this, this.value)});
     $('.feature-search').on('change',    function() { vizhelpers.field_search_change_callback(this); });
     $('.select-field').on('click',       function() { vizhelpers.select_field_callback(this); });
@@ -843,9 +827,7 @@ require([
         }
     };
 
-    /*
-     * generate plot upon user click
-     */
+    // generate plot upon user click
     $('.update-plot').on('click', function(event){
         if($('.toggle-selection').hasClass('active')) {
             $('.toggle-selection').click();
@@ -870,9 +852,7 @@ require([
         $(this).parentsUntil(".worksheet-body").find('.update-plot').click();
     });
 
-    /*
-     * Gather plot information on the page
-     */
+    // Gather plot information on the page
     function get_plot_info_on_page(plot_settings){
         
         var worksheet = plot_settings.parents('.worksheet-body');
@@ -957,9 +937,7 @@ require([
         }
     }
 
-    /*
-     * Get plot model when plot selection changes
-     */
+    // Get plot model when plot selection changes
     $(".plot_selection").on("change", function(event){
         var self = this;
         $(this).find(":disabled :selected").remove();
@@ -1053,7 +1031,7 @@ require([
     };
 
     // Prep all unloaded worksheets to load on selection
-    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+    $('a[data-toggle-type="worksheet"]').on('shown.bs.tab', function (e) {
         var sheet_id = $(this).data('sheet-id');
         if($('#'+sheet_id).attr("is-loaded") !== "true") {
             var self = $(".worksheet.active .plot_selection")[0];
@@ -1081,9 +1059,7 @@ require([
         }
     });
 
-    /*
-     * validate the plot settings before initiating the plot
-     */
+    // validate the plot settings before initiating the plot
     function valid_plot_settings(plot_settings){
         var data = get_plot_info_on_page(plot_settings);
 
@@ -1167,9 +1143,7 @@ require([
         );
     }
 
-    /*
-     * loads the plot data into the ui inputs for adjustment
-     */
+    // Loads the plot data into the ui inputs for adjustment
     function load_plot(worksheet_id, plot_data, plot_settings, callback){
         var plot_element = $("[worksheet_id='"+worksheet_id+"']").parent().parent().find(".plot");
 
@@ -1246,10 +1220,13 @@ require([
         });
     }
 
-    /*
-     * Ajax submitting forms
-     */
+    // Generic form submission used by default
     $('.ajax-form-modal').find('form').on('submit', function (e) {
+
+        if($(this).hasClass('share-workbook-form')) {
+            return false;
+        }
+
         e.preventDefault();
         e.stopPropagation();
 
@@ -1405,12 +1382,126 @@ require([
         return false;
     });
 
-    /*
-        Disable comment button if no content
-     */
+
+    // Share with user click
+    $('.share-workbook-form').on('submit', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+
+        var invalid_emails = [];
+
+        var $this=$(this);
+
+        var emails = $('#share-share_users').val().split(/\s*,\s*/);
+        for(var i=0; i < emails.length; i++) {
+            if(!emails[i].match(base.email)) {
+                invalid_emails.push(emails[i]);
+            }
+        }
+
+        if(invalid_emails.length > 0) {
+            $('#share-modal-js-messages').empty();
+            $('#share-modal-js-messages').append(
+                $('<p>')
+                    .addClass('alert alert-danger alert-dismissible')
+                    .text("The following email addresses appear to be invalid: "+invalid_emails.join("; ")));
+
+            return false;
+        }
+
+        var workbook_id = $(this).data('workbook-id');
+
+        var url = base_url + '/workbooks/' + workbook_id + '/share';
+
+        $(this).find('.btn-primary').addClass('btn-disabled').attr('disabled', true);
+
+        var csrftoken = $.getCookie('csrftoken');
+        $.ajax({
+            type        :'POST',
+            url         : url,
+            dataType    :'json',
+            data        : $(this).serialize(),
+            beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+            success : function (data) {
+                if(data.status && data.status == 'error') {
+                    if(data.result && data.result.msg) {
+                        $('#share-modal-js-messages').empty();
+                        $('#share-modal-js-messages').append(
+                            $('<p>')
+                                .addClass('alert alert-danger alert-dismissible')
+                                .text(data.result.msg));
+                    }
+                } else if(data.status && data.status == 'success') {
+                    $this.closest('.modal').modal('hide');
+                    if($this.data('redirect')) {
+                        window.location = $this.data('redirect');
+                    } else {
+                        window.location.reload();
+                    }
+                }
+            },
+            error: function (err) {
+                $this.closest('.modal').modal('hide');
+                $('#js-messages').append(
+                    $('<p>')
+                        .addClass('alert alert-danger alert-dismissible')
+                        .text(err));
+            },
+        }).always(function () {
+            $this.find('.btn-primary').removeClass('btn-disabled').attr('disabled', false);
+        });
+        // We don't want this form submission to automatically trigger a reload
+        return false;
+    });
+
+    // Any time the share workbook modal is closed, clear out the messages and re-enable the buttons
+    $('.share-workbook-modal button.btn-cancel,.share-workbook-modal button.close').on('click',function(){
+        $('#share-modal-js-messages').empty();
+        $(this).parents('.share-workbook-modal').find('.btn-primary').removeClass('btn-disabled').attr('disabled', false);
+    });
+
+    // Remove shared user cliclk
+    $('.remove-shared-user').on('click', function() {
+        var shared_id = $(this).attr('data-shared-id');
+        var url = base_url + '/share/' + shared_id + '/remove';
+        var csrftoken = $.getCookie('csrftoken');
+        var button = $(this);
+        $.ajax({
+            type        :'POST',
+            url         : url,
+            dataType    :'json',
+            data        : {owner: true},
+            beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+            success : function (data) {
+                button.parents('tr').remove();
+                // If that was the last user this woekbook was shared with, update the table's display
+                if(button.parents('tbody tr').length <= 0) {
+                    button.parents('.modal-body table').empty();
+                    button.parents('.modal-body table').append('<p class="center">This workbook is not currently shared with any users.</p>')
+                }
+                var count = parseInt($($('.share-count')[0]).html());
+                $('.share-count').each(function() {
+                   $(this).html(count-1);
+                });
+            },
+            error: function () {
+                console.log('Failed to remove user');
+            }
+        });
+    });
+
+    //Disable comment button if no content
     $('.save-comment-btn').prop('disabled', true);
     $('.comment-textarea').keyup(function() {
         $(this).siblings('.save-comment-btn').prop('disabled', this.value == '' ? true : false)
+    });
+
+    $('button.shared-with').on('click',function(){
+        $('a.shared-with').click();
+    });
+
+    $('button.share-modal').on('click',function(){
+        $('a.share-workbook').click();
     });
 
     // Only init the active tab

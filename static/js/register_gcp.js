@@ -80,6 +80,13 @@ require([
                 submit_button.prop('disabled', false);
             },
             error: function(xhr, ajaxOptions, thrownError) {
+                if(xhr.responseJSON.message) {
+                    $('#verify-error-text').text(xhr.responseJSON.message);
+                    $('#verify-error-base').hide();
+                } else {
+                    $('#verify-error-text').hide();
+                    $('#verify-error-base').show();
+                }
                 $('.verify-error').show();
                 $("html, body").animate({ scrollTop: 0 }, "slow");
                 submit_button.prop('disabled', false);

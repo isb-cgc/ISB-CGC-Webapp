@@ -25,7 +25,7 @@ from bq_data_access.v2.feature_id_utils import FeatureProviderFactory
 from bq_data_access.v2.errors import FeatureNotFoundException
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('main_logger')
 
 
 def is_valid_feature_identifier(feature_id):

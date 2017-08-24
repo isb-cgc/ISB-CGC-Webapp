@@ -29,7 +29,7 @@ from bq_data_access.v1.data_access import get_feature_vector
 from bq_data_access.v1.feature_value_types import ValueType
 from bq_data_access.v1.utils import VectorMergeSupport
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('main_logger')
 
 class PairwiseInputVector(object):
     def __init__(self, feature_id, value_type, data):

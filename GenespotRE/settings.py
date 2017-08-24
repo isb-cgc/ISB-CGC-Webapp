@@ -72,6 +72,7 @@ GCLOUD_BUCKET           = os.environ.get('GOOGLE_STORAGE_BUCKET')
 # BigQuery cohort storage settings
 COHORT_DATASET_ID           = os.environ.get('COHORT_DATASET_ID', 'cohort_dataset')
 BIGQUERY_COHORT_TABLE_ID    = os.environ.get('BIGQUERY_COHORT_TABLE_ID', 'developer_cohorts')
+MAX_BQ_INSERT               = int(os.environ.get('MAX_BQ_INSERT', '500'))
 
 NIH_AUTH_ON             = bool(os.environ.get('NIH_AUTH_ON', False))
 USER_DATA_ON            = bool(os.environ.get('USER_DATA_ON', False))
@@ -487,7 +488,6 @@ GCP_REG_CLIENT_EMAIL            = os.environ.get('CLIENT_EMAIL','')
 #################################
 
 LOGIN_EXPIRATION_MINUTES                = int(os.environ.get('LOGIN_EXPIRATION_MINUTES', 24*60))
-ACL_GOOGLE_GROUP                        = os.environ.get('ACL_GOOGLE_GROUP', '')
 OPEN_ACL_GOOGLE_GROUP                   = os.environ.get('OPEN_ACL_GOOGLE_GROUP', '')
 GOOGLE_GROUP_ADMIN                      = os.environ.get('GOOGLE_GROUP_ADMIN', '')
 SUPERADMIN_FOR_REPORTS                  = os.environ.get('SUPERADMIN_FOR_REPORTS', '')

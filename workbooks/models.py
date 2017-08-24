@@ -1,3 +1,19 @@
+"""
+Copyright 2017, Institute for Systems Biology
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
+
 import ast
 
 from cohorts.models import Cohort
@@ -9,6 +25,9 @@ from projects.models import User_Feature_Definitions
 from sharing.models import Shared_Resource
 from genes.models import GeneSymbol
 
+import logging
+
+logger = logging.getLogger('main_logger')
 
 # Create your models here.
 class WorkbookManager(models.Manager):
@@ -132,11 +151,14 @@ class Workbook(models.Model):
     def is_shareable(self, request):
         is_shareable = (self.owner.id == request.user.id)
 
+        logger.debug("Shareable: {}".format(str(is_shareable)))
+
         if is_shareable:
             for worksheet in self.get_deep_worksheets():
                 # Check all cohorts are owned by the user
                 for cohort in worksheet.cohorts:
                     if cohort.cohort.get_owner().id != request.user.id and not cohort.cohort.is_public():
+                        logger.debug("Not shareable due to cohort")
                         is_shareable = False
                         break
 
@@ -144,11 +166,14 @@ class Workbook(models.Model):
                 for variable in worksheet.get_variables():
                     if variable.feature: #feature will be null if the variable is from TCGA
                         if variable.feature.project.program.owner_id != request.user.id and not variable.feature.project.program.is_public:
+                            logger.debug("Not shareable due to variable features")
                             is_shareable = False
                             break
 
                 if not is_shareable:
                     break
+
+        logger.debug("Shareable: {}".format(str(is_shareable)))
 
         return is_shareable
 

@@ -39,7 +39,7 @@ from bq_data_access.v1.methylation_data import METH_FEATURE_TYPE
 from bq_data_access.v1.mirna_data import MIRN_FEATURE_TYPE
 from bq_data_access.v1.protein_data import RPPA_FEATURE_TYPE
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('main_logger')
 
 
 class FeatureDefinitionSearcherFactory(object):
@@ -105,7 +105,7 @@ def feature_search(request):
     #     raise InternalServerErrorException()
 
     except Exception as e:
-        print >> sys.stdout, traceback.format_exc()
+        logger.error("[ERROR] In feature search: ")
         logger.exception(e)
         return JsonResponse({'error': e}, status=500)
 
@@ -135,6 +135,6 @@ def feature_field_search(request):
     #     raise InternalServerErrorException()
 
     except Exception as e:
-        print >> sys.stdout, traceback.format_exc()
+        logger.error("[ERROR] In feature field search: ")
         logger.exception(e)
         raise JsonResponse({'error': e}, status=500)

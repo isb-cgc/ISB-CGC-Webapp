@@ -1,3 +1,20 @@
+"""
+Copyright 2017, Institute for Systems Biology
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
+
+
 from copy import deepcopy
 import json
 import re
@@ -20,8 +37,9 @@ from projects.models import Program
 from sharing.service import create_share
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils.html import escape
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('main_logger')
 
 debug = settings.DEBUG
 
@@ -188,6 +206,7 @@ def get_gene_datatypes(build=None):
 def workbook(request, workbook_id=0):
     template = 'workbooks/workbook.html'
     command = request.path.rsplit('/',1)[1]
+    workbook_model = None
 
     try:
 
@@ -233,11 +252,11 @@ def workbook(request, workbook_id=0):
             if command == "delete":
                 redirect_url = reverse('workbooks')
             else:
-                redirect_url = reverse('workbook_detail', kwargs={'workbook_id':workbook_model.id})
+                redirect_url = reverse('workbook_detail', kwargs={'workbook_id': workbook_model.id})
 
             return redirect(redirect_url)
 
-        elif request.method == "GET" :
+        elif request.method == "GET":
             if workbook_id:
                 try :
                     ownedWorkbooks = request.user.workbook_set.all().filter(active=True)
@@ -280,16 +299,58 @@ def workbook(request, workbook_id=0):
     return redirect(redirect_url)
 
 
-
 @login_required
 def workbook_share(request, workbook_id=0):
-    # emails = re.split('\s*,\s*', request.POST['share_users'].strip())
-    # workbook = request.user.workbook_set.get(id=workbook_id, active=True)
-    # create_share(request, workbook, emails, 'Workbook')
+    status = None
+    result = None
+
+    try:
+        emails = re.split('\s*,\s*', request.POST['share_users'].strip())
+        users_not_found = []
+        req_user = None
+
+        try:
+            req_user = User.objects.get(id=request.user.id)
+        except ObjectDoesNotExist as e:
+            raise Exception("{} is not a user ID in this database!".format(str(request.user.id)))
+
+        workbook_to_share = request.user.workbook_set.get(id=workbook_id, active=True)
+
+        if workbook_to_share.owner.id != req_user.id:
+            raise Exception(" {} is not the owner of this workbook!".format(req_user.email))
+
+        for email in emails:
+            try:
+                User.objects.get(email=email)
+            except ObjectDoesNotExist as e:
+                users_not_found.append(email)
+
+        if len(users_not_found) > 0:
+            status = 'error'
+            result = {
+                'msg': 'The following user emails could not be found; please ask them to log into the site first: '+", ".join(users_not_found)
+            }
+        else:
+            create_share(request, workbook_to_share, emails, 'Workbook')
+            status = 'success'
+
+    except Exception as e:
+        logger.error("[ERROR] While trying to share a workbook:")
+        logger.exception(e)
+        status = 'error'
+        result = {
+            'msg': 'There was an error while attempting to share this workbook.'
+        }
+    finally:
+        if not status:
+            status = 'error'
+            result = {
+                'msg': 'An unknown error has occurred while sharing this workbook.'
+            }
 
     return JsonResponse({
-        # 'status': 'success'
-        'status': 'unauthorized'
+        'status': status,
+        'result': result
     })
 
 
@@ -315,15 +376,15 @@ def worksheet_display(request, workbook_id=0, worksheet_id=0):
 
 @login_required
 def worksheet(request, workbook_id=0, worksheet_id=0):
-    command  = request.path.rsplit('/',1)[1]
+    command = request.path.rsplit('/',1)[1]
 
-    if request.method == "POST" :
+    if request.method == "POST":
         this_workbook = Workbook.objects.get(id=workbook_id)
         this_workbook.save()
-        if command == "create" :
+        if command == "create":
             this_worksheet = Worksheet.create(workbook_id=workbook_id, name=request.POST.get('name'), description=request.POST.get('description'))
             redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': this_worksheet.id})
-        elif command == "edit" :
+        elif command == "edit":
             worksheet_name = request.POST.get('name')
             worksheet_desc = request.POST.get('description')
             whitelist = re.compile(WHITELIST_RE, re.UNICODE)
@@ -478,9 +539,10 @@ def worksheet_genes(request, workbook_id=0, worksheet_id=0, genes_id=0):
                 gene_list = request.POST.get("genes-list")
                 gene_list = [x.strip() for x in gene_list.split(' ')]
                 gene_list = list(set(gene_list))
-                GeneFavorite.create(name=name, gene_list=gene_list, user=request.user)
+                GeneFave = GeneFavorite.create(name=name, gene_list=gene_list, user=request.user)
                 messages.info(request, 'The gene favorite list \"' + name + '\" was created and added to your worksheet')
-                for g in gene_list:
+                # Refetch the created gene list, because it will have the names correctly formatted
+                for g in GeneFavorite.objects.get(id=GeneFave['id']).get_genes_list():
                     genes.append(g)
 
             #from Gene Details Page
@@ -547,63 +609,71 @@ def worksheet_plots(request, workbook_id=0, worksheet_id=0, plot_id=0):
     json_response = False
     default_name  = "Untitled Workbook"
     result        = {}
+    try:
+        workbook_model = Workbook.objects.get(id=workbook_id) if workbook_id else None
 
-    if request.method == "POST" :
-        workbook = Workbook.objects.get(id=workbook_id)
-        workbook.save()
-        if command == "delete" :
-            var = Worksheet_plot.objects.get(id=plot_id).delete()
-            result['message'] = "the plot has been deleted from workbook"
+        if request.method == "POST":
+            workbook_model.save()
+            if command == "delete":
+                var = Worksheet_plot.objects.get(id=plot_id).delete()
+                result['message'] = "This plot has been deleted from workbook."
+            else:
+                if "attrs" in request.body:
+                    json_response = True
+                    attrs    = json.loads(request.body)['attrs']
+                    settings = json.loads(request.body)['settings']
+                    if plot_id :
+                        plot_model = Worksheet_plot.objects.get(id=plot_id)
+                        plot_model.settings_json = settings
+                        if attrs['cohorts']:
+                            try :
+                                Worksheet_plot_cohort.objects.filter(plot=plot_model).delete()
+                                for obj in attrs['cohorts'] :
+                                    wpc = Worksheet_plot_cohort(plot=plot_model, cohort_id=obj['id'])
+                                    wpc.save()
+                            except ObjectDoesNotExist:
+                                None
+
+                        plot_model.save()
+                        result['updated'] = "success"
+
+        elif request.method == "GET":
+            json_response = True
+            plot_type = escape(request.GET.get('type', 'default'))
+
+            if plot_type not in Analysis.get_types_list():
+                raise Exception("Plot type {} was not found in the allowed list of plot types!".format(plot_type))
+
+            worksheet_model = Worksheet.objects.get(id=worksheet_id)
+            plots = worksheet_model.worksheet_plot_set.all()
+            for p in plots :
+                p.active = False
+                p.save()
+
+            plots = worksheet_model.worksheet_plot_set.filter(type=plot_type)
+            if len(plots) == 0:
+                model = Worksheet_plot(type=plot_type, worksheet=worksheet_model)
+                model.save()
+            else:
+                model = plots[0]
+                model.active = True
+                model.save()
+
+            result['data'] = model.toJSON()
         else:
-            #update
-            if "attrs" in request.body :
-                json_response = True
-                attrs    = json.loads(request.body)['attrs']
-                settings = json.loads(request.body)['settings']
-                if plot_id :
-                    plot_model = Worksheet_plot.objects.get(id=plot_id)
-                    plot_model.settings_json = settings
-                    if attrs['cohorts'] :
-                        try :
-                            Worksheet_plot_cohort.objects.filter(plot=plot_model).delete()
-                            for obj in attrs['cohorts'] :
-                                wpc = Worksheet_plot_cohort(plot=plot_model, cohort_id=obj['id'])
-                                wpc.save()
-                        except ObjectDoesNotExist:
-                            None
+            result['error'] = "method not correct"
 
-
-                    plot_model.save()
-                    result['updated'] = "success"
-
-    elif request.method == "GET":
-        json_response = True
-        plot_type = request.GET.get('type', 'default')
-
-        worksheet_model = Worksheet.objects.get(id=worksheet_id)
-        plots = worksheet_model.worksheet_plot_set.all()
-        for p in plots :
-            p.active = False
-            p.save()
-
-        plots = worksheet_model.worksheet_plot_set.filter(type=plot_type)
-        if len(plots) == 0:
-            model = Worksheet_plot(type=plot_type, worksheet=worksheet_model)
-            model.save()
+        if json_response:
+            return HttpResponse(json.dumps(result), status=200)
         else:
-            model = plots[0]
-            model.active = True
-            model.save()
+            redirect_url = reverse('worksheet_display', kwargs={'workbook_id': workbook_model.id, 'worksheet_id': worksheet_model.id})
+            return redirect(redirect_url)
 
-        result['data'] = model.toJSON()
-    else:
-        result['error'] = "method not correct"
-
-    if json_response:
-        return HttpResponse(json.dumps(result), status=200)
-    else:
-        redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_model.id, 'worksheet_id': worksheet_model.id})
-        return redirect(redirect_url)
+    except Exception as e:
+        logger.error("[ERROR] While accessing workbooks/worksheets:")
+        logger.exception(e)
+        messages.error(request, "An error occurred while trying to process this workbook request.")
+        return redirect('workbooks')
 
 
 @login_required

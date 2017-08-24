@@ -186,7 +186,6 @@ def get_data_attr_id(value, attr):
 def has_user_data(programs):
     for prog in programs:
         if prog['type'] == 'user-data':
-            print >> sys.stdout, "is user data!"
             return True
     return False
 
@@ -222,6 +221,11 @@ def get_workbooks_this_user(this_user, is_active=True):
     workbooks = userWorkbooks | sharedWorkbooks
     workbooks = workbooks.distinct().order_by('-last_date_saved')
     return workbooks
+
+
+@register.filter
+def get_cohort_perm(cohort, request):
+    return cohort.get_perm(request)
 
 
 @register.filter

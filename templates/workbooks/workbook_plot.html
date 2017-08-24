@@ -22,7 +22,7 @@
             <br />
             <a role="button" class="show-settings-flyout" data-target=".setting-flyout" aria-label="Show Plot Settings"><i class="fa fa-bar-chart"></i> Edit Analysis Settings</a>
             {% else %}
-            <a role="button" class="show-settings-flyout" data-target=".setting-flyout" aria-label="Show Plot Settings"><i class="fa fa-tasks"></i></a>
+            <a role="button" class="show-settings-flyout" data-target=".setting-flyout" aria-label="Show Plot Settings"><i class="fa fa-tasks"></i> View Plot Settings</a>
             {% endif %}
         </div>
         <div id="missing-plot-reqs-alert" class="alert alert-warning alert-dismissable" style="display: none;">
@@ -54,7 +54,7 @@
                     <!-- X Axis selection -->
                     <div class="form-group variable-container" variable="x-axis-select">
                         <label for="{{ worksheet.id }}-x-select">X Axis Variable <a role="button" class="x-edit-field" data-attribute="x-selector" aria-label="X Field Editor"></a></label>
-                        <select id="{{ worksheet.id }}-x-select" {% if workbook.owner.id != user.id %} disabled {% endif %} plot="{{ worksheet.id }}" class="axis-select x-axis-select form-control search-term-field" style="width: 230px;">
+                        <select id="{{ worksheet.id }}-x-select" {% if workbook.owner.id != user.id %} disabled {% endif %} plot="{{ worksheet.id }}" class="axis-select x-axis-select form-control search-term-field" style="width: 230px;" title="{% if plot.x_axis %}{{ plot.x_axis.name }}{% endif %}">
                             {% if plot.x_axis %}
                                 <option value="{{ plot.x_axis.url_code }}" var_id="{{ plot.x_axis.id }}" selected >{{ plot.x_axis.name }}</option>
                             {% else %}
@@ -118,7 +118,7 @@
                     <!-- Y Axis selection -->
                     <div class="form-group variable-container" variable="y-axis-select">
                         <label for="{{ worksheet.id }}-y-select">Y Axis Variable <a role="button" class="y-edit-field" data-attribute="y-selector" aria-label="Y Field Editor"></a></label>
-                        <select id="{{ worksheet.id }}-y-select" {% if workbook.owner.id != user.id %} disabled {% endif %} plot="{{ worksheet.id }}" class="axis-select y-axis-select form-control search-term-field" style="width: 230px;">
+                        <select id="{{ worksheet.id }}-y-select" {% if workbook.owner.id != user.id %} disabled {% endif %} plot="{{ worksheet.id }}" class="axis-select y-axis-select form-control search-term-field" style="width: 230px;" title="{% if plot.y_axis %}{{ plot.y_axis.name }}{% endif %}">
                             {% if plot.y_axis %}
                                 <option value="{{ plot.y_axis.url_code }}" var_id="{{ plot.y_axis.id }}" selected >{{ plot.y_axis.name }}</option>
                             {% else %}
@@ -127,7 +127,6 @@
                             {% for gene in genes %}
                                 {% if not plot or plot.y_axis.id != gene.id %}
                                     <option type="{{ gene.type }}" value="{{ gene.gene }}" var_id="{{ gene.id }}" var_type="G">{{ gene.gene }}</option>
-                                    {# TODO {% endif %}#}
                                 {% endif %}
                             {% endfor %}
                             {% for var in variables %}
