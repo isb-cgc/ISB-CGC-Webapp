@@ -223,7 +223,7 @@ def index(request):
                     nih_user, created = NIH_User.objects.update_or_create(NIH_username=NIH_username,
                                                                           user_id=request.user.id,
                                                                           defaults=updated_values)
-                    logger.info("NIH_User.objects.update_or_create() returned nih_user: {} and created: {}".format(
+                    logger.info("[STATUS] NIH_User.objects.update_or_create() returned nih_user: {} and created: {}".format(
                         str(nih_user.NIH_username), str(created)))
                     st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW,
                                                    "[STATUS] NIH_User.objects.update_or_create() returned nih_user: {} and created: {}".format(
@@ -271,7 +271,7 @@ def index(request):
                     uad = UserAuthorizedDatasets.objects.filter(nih_user=nih_user, authorized_dataset=ad)
                     dataset_in_auth_set = next((ds for ds in authorized_datasets if (ds.dataset_id == dataset.dataset_id and ds.google_group_name == dataset.google_group_name)), None)
 
-                    logger.debug("In for datasets, %s was in auth set: %s" % (dataset.dataset_id, ('True' if dataset_in_auth_set else 'False')))
+                    logger.debug("[STATUS] UserAuthorizedDatasets for {}: {}".format(nih_user.NIH_username,str(uad)))
 
                     try:
                         result = directory_client.members().get(groupKey=dataset.google_group_name,
