@@ -11,7 +11,7 @@
         {% else %}
             <p><a href="{% url 'demo:saml_index' %}?sso">Log in with your NIH identity: {{ user_details.NIH_username }}</a></p>
             <hr>
-            <p><a href="{% url 'unlink_accounts' %}">Unlink {{ user_details.email }} from the NIH identity: {{ user_details.NIH_username }}</a></p>
+            <p><a data-toggle="modal" data-target="#unlink-nih-account-modal">Unlink {{ user_details.email }} from the NIH identity: {{ user_details.NIH_username }}</a></p>
         {% endif %}
         <p><a href="https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login" target="_blank">Learn More</a></p>
 
