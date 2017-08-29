@@ -193,8 +193,7 @@ def index(request):
                                                            prelinked_user_emails + '.'
                                                        ))
 
-                        messages.warning(request,
-                                         "You tried to log into an NIH account that is linked to another google email address.")
+                        messages.warning(request,"You tried to link your email address to NIH account {}, but it is already linked to {}.".format(NIH_username, prelinked_user_emails))
                         return redirect('/users/' + str(request.user.id))
 
                 except Exception as e:
