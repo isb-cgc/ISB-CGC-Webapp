@@ -441,7 +441,7 @@ require([
 
     // Add data values to the variable_element representing a plot axis,
     // This is called on loading plot data from model and swapping axis
-    function apply_axis_values(variable_element, data, axis_settings){
+    function apply_axis_values(variable_element, data, logTransform){
         if(data.type == "common"){
             if(data.options){
                 for(var i in data.options){
@@ -505,6 +505,9 @@ require([
             }
             disable_invalid_variable_options($('.worksheet.active .main-settings'));
             variable_element.parent('.variable-container').find('.log-scale').prop('checked',data.selection.logTransform || false);
+        }
+        if(logTransform) {
+            variable_element.find('.log-scale').prop('checked',true);
         }
     };
 
@@ -835,7 +838,7 @@ require([
         }
         if(valid_plot_settings($(this).parent())) {
             var data = get_plot_info_on_page($(this).parent());
-            update_plot_model(workbook_id, data.worksheet_id, data.plot_id, data.attrs, data.selections, function(result){
+            update_plot_model(workbook_id, data.worksheet_id, data.plot_id, data.attrs, data.selections, data.logTransform, function(result){
                 generate_plot({ worksheet_id : data.worksheet_id,
                                 type         : data.attrs.type,
                                 x            : data.attrs.x_axis.url_code,
@@ -1153,10 +1156,10 @@ require([
 
         //apply values
         if(plot_data.x_axis) {
-            apply_axis_values(plot_element.find('.x-axis-select'), plot_data.x_axis);
+            apply_axis_values(plot_element.find('.x-axis-select'), plot_data.x_axis, (plot_data.logTransform ? plot_data.logTransform.x : null));
         }
         if(plot_data.y_axis) {
-            apply_axis_values(plot_element.find('.y-axis-select'), plot_data.y_axis);
+            apply_axis_values(plot_element.find('.y-axis-select'), plot_data.y_axis, (plot_data.logTransform ? plot_data.logTransform.y : null));
         }
         if(plot_data.color_by) {
             apply_axis_values(plot_element.find('.color_by'), plot_data.color_by);
@@ -1204,13 +1207,15 @@ require([
         });
     }
 
-    function update_plot_model(workbook_id, worksheet_id, plot_id, attrs, selections, callback){
+    function update_plot_model(workbook_id, worksheet_id, plot_id, attrs, selections, log, callback){
+        var settings = JSON.parse(JSON.stringify(selections));
+        settings['logTransform'] = log;
         var csrftoken = $.getCookie('csrftoken');
         $.ajax({
             type        :'POST',
             dataType    :'json',
             url         : BASE_URL + '/workbooks/' + workbook_id + '/worksheets/' + worksheet_id + "/plots/" + plot_id + "/edit",
-            data        : JSON.stringify({attrs : attrs, settings : selections}),
+            data        : JSON.stringify({attrs : attrs, settings : settings}),
             beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
             success : function (data) {
                 callback(data);
