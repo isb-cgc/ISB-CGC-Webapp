@@ -39,7 +39,9 @@
                     Deleting this project will not delete underlying Google BigQuery tables or files in Google Cloud Storage. Those must be removed manually.
                 </div>
             </div>
-            <form id="delete-project-{{ project.id }}" method="POST" action="{% url 'project_delete' program.id project.id %}">
+            <div class="modal-js-messages" id="delete-project-js-messages-{{ project.id }}">
+            </div>
+            <form id="delete-project-{{ project.id }}" method="POST" class="project-delete-form" action="{% url 'project_delete' program.id project.id %}">
                 {% csrf_token %}
                 <div class="modal-footer">
                     <input type="submit" value="Delete" class="btn btn-primary" />
