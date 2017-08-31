@@ -108,7 +108,7 @@ def variable_fav_detail(request, variable_fav_id, workbook_id=0, worksheet_id=0,
             messages.error(request, 'The workbook you were referencing does not exist.')
             return redirect('variables')
     try:
-        variable_fav = VariableFavorite.get_deep(variable_fav_id, request.user)
+        variable_fav = VariableFavorite.get_deep(id=variable_fav_id, user=request.user)
         context['variables'] = variable_fav
         variable_fav.mark_viewed(request)
     except ObjectDoesNotExist:
