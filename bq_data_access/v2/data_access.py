@@ -43,7 +43,7 @@ def is_valid_feature_identifier(feature_id):
         provider_class = FeatureProviderFactory.get_provider_class_from_feature_id(feature_id)
         is_valid = provider_class.is_valid_feature_id(feature_id)
     except FeatureNotFoundException as e:
-        logging.exception(e)
+        logger.exception(e)
         # FeatureProviderFactory.get_provider_class_from_feature_id raises FeatureNotFoundException
         # if the feature identifier does not look valid. Nothing needs to be done here,
         # since is_valid is already False.
@@ -105,7 +105,7 @@ def submit_tcga_job(param_obj, project_id_number, bigquery_client, cohort_settin
     # Was a query job submitted at all?
     run_query = job_description['run_query']
     if run_query:
-        logging.info("Submitted TCGA {job_id}: {fid} - {cohorts}".format(
+        logger.info("Submitted TCGA {job_id}: {fid} - {cohorts}".format(
             job_id=job_description['job_reference']['jobId'],
             fid=feature_id, cohorts=str(cohort_id_array))
         )
@@ -116,7 +116,8 @@ def submit_tcga_job(param_obj, project_id_number, bigquery_client, cohort_settin
             'provider': bigquery_runner,
             'query_support': query_provider,
             'ready': False,
-            'job_reference': job_description['job_reference']
+            'job_reference': job_description['job_reference'],
+            'tables_used': job_description['tables_used']
         }
     else:
         job_item = {
@@ -132,7 +133,9 @@ def submit_tcga_job(param_obj, project_id_number, bigquery_client, cohort_settin
 
 
 def get_submitted_job_results(provider_array, project_id, poll_retry_limit, skip_formatting_for_plot):
-    result = {}
+    result = {
+        'tables_queried': [],
+    }
     all_done = False
     total_retries = 0
     poll_count = 0
@@ -145,14 +148,14 @@ def get_submitted_job_results(provider_array, project_id, poll_retry_limit, skip
         for item in provider_array:
             # Was a BigQuery job even started for this feature ID and cohort(s)?
             run_query = item['run_query']
-
+            result['tables_queried'].extend(item['tables_used'])
             provider = item['provider']
             query_support = item['query_support']
             feature_id = item['feature_id']
 
             if not run_query:
                 is_finished = True
-                logging.info("Query not run for feature {feature_id}".format(
+                logger.info("Query not run for feature {feature_id}".format(
                     feature_id=feature_id))
                 item['ready'] = True
                 value_type = query_support.get_value_type()
@@ -163,7 +166,7 @@ def get_submitted_job_results(provider_array, project_id, poll_retry_limit, skip
 
             if run_query:
                 is_finished = provider.is_bigquery_job_finished(project_id)
-                logging.info("Status {job_id}: {status}".format(job_id=item['job_reference']['jobId'],
+                logger.info("Status {job_id}: {status}".format(job_id=item['job_reference']['jobId'],
                                                                 status=str(is_finished)))
 
             if item['ready'] is False and is_finished:
@@ -193,8 +196,9 @@ def get_submitted_job_results(provider_array, project_id, poll_retry_limit, skip
             sleep(1)
 
         all_done = all([j['ready'] for j in provider_array])
-        logging.debug("Done: {done}    retry: {retry}".format(done=str(all_done), retry=total_retries))
+        logger.debug("Done: {done}    retry: {retry}".format(done=str(all_done), retry=total_retries))
 
+        logger.debug(str(result))
     return result
 
 

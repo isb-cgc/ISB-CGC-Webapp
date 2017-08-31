@@ -149,11 +149,11 @@ class METHDataQueryHandler(object):
                                       brk='\n')
 
         logger.debug("BQ_QUERY_METH: " + query)
-        return query, True
+        return query, [table_config.table_id], True
 
     def build_query(self, project_set, cohort_table, cohort_id_array, project_id_array):
-        query = self.build_query_for_program(self.feature_def, cohort_table, cohort_id_array, project_id_array)
-        return query
+        query, tables_used = self.build_query_for_program(self.feature_def, cohort_table, cohort_id_array, project_id_array)
+        return query, tables_used
 
     @DurationLogged('METH', 'UNPACK')
     def unpack_query_response(self, query_result_array):

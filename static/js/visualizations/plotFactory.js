@@ -501,7 +501,7 @@ define([
                              color_by         : args.cohorts,
                              cohort_override  : args.color_override,
                              data             : data});
-                callback({});
+                callback({bq_tables: data.bq_tables});
 
             },
             error: function(xhr, status, error) {
