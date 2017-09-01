@@ -1153,8 +1153,6 @@ require([
 
                 update_plot_elem_rdy();
 
-                (args.color_by || args.type == 'SeqPeek') && $('.legend').show();
-
                 plot_loader.fadeOut();
             }
         );

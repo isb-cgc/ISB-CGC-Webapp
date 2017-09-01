@@ -126,7 +126,7 @@ class FeatureDataProvider(object):
             return {
                 "job_reference": None,
                 "run_query": False,
-                "tables_used": None
+                "tables_used": []
             }
 
         logger.info(query_body)

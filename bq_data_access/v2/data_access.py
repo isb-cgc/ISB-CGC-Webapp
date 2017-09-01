@@ -126,7 +126,8 @@ def submit_tcga_job(param_obj, project_id_number, bigquery_client, cohort_settin
             'provider': bigquery_runner,
             'query_support': query_provider,
             'ready': False,
-            'job_reference': job_description['job_reference']
+            'job_reference': job_description['job_reference'],
+            'tables_used': job_description['tables_used']
         }
 
     return job_item
@@ -196,9 +197,7 @@ def get_submitted_job_results(provider_array, project_id, poll_retry_limit, skip
             sleep(1)
 
         all_done = all([j['ready'] for j in provider_array])
-        logger.debug("Done: {done}    retry: {retry}".format(done=str(all_done), retry=total_retries))
 
-        logger.debug(str(result))
     return result
 
 

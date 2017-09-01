@@ -200,7 +200,7 @@ def format_removed_row_statistics_to_list(stats_dict):
 
 
 class SeqPeekViewDataBuilder(object):
-    def build_view_data(self, hugo_symbol, filtered_maf_vector, seqpeek_cohort_info, cohort_id_list, removed_row_statistics):
+    def build_view_data(self, hugo_symbol, filtered_maf_vector, seqpeek_cohort_info, cohort_id_list, removed_row_statistics, tables_used):
         context = get_genes_tumors_lists()
 
         cohort_info_map = {str(item['id']): item for item in seqpeek_cohort_info}
@@ -257,7 +257,8 @@ class SeqPeekViewDataBuilder(object):
             'hugo_symbol': hugo_symbol,
             'tumor_list': tumor_list,
             'cohort_id_list': track_id_list,
-            'removed_row_statistics': format_removed_row_statistics_to_list(removed_row_statistics)
+            'removed_row_statistics': format_removed_row_statistics_to_list(removed_row_statistics),
+            'bq_tables': tables_used
         })
 
         return context
