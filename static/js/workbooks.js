@@ -1144,7 +1144,7 @@ require([
                 if(result.bq_tables) {
                     plot_element.find('.bq-table-display').empty();
                     for(var i=0; i < result.bq_tables.length; i++) {
-                        plot_element.find('.bq-table-display').append($('<li>').text(result.bq_tables[i]));
+                        plot_element.find('.bq-table-display').append($('<li>').text(result.bq_tables[i]).prop('title',result.bq_tables[i]));
                     }
                     plot_element.find('.bq-tables').show();
                 } else {
