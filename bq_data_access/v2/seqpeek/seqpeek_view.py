@@ -258,7 +258,7 @@ class SeqPeekViewDataBuilder(object):
             'tumor_list': tumor_list,
             'cohort_id_list': track_id_list,
             'removed_row_statistics': format_removed_row_statistics_to_list(removed_row_statistics),
-            'bq_tables': tables_used
+            'bq_tables': list(set(tables_used))
         })
 
         return context

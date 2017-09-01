@@ -140,7 +140,7 @@ class FeatureDataProvider(object):
         return {
             "job_reference": self.job_reference,
             "run_query": True,
-            "tables_used": tables_used
+            "tables_used": list(set(tables_used))
         }
 
     def get_data_job_reference(self, program_set, cohort_table, cohort_id_array, project_id_array):
