@@ -42,7 +42,9 @@ function($, d3, d3tip, vis_helpers) {
         get_treemap_ready: function(data, attribute) {
             var children = [];
             for (var i in data) {
-                children.push({name:(data[i]['displ_name'] || data[i]['value'].toString().replace(/_/g, ' ')), count: data[i]['count']});
+                // For Issue 2018 we build a standardized tag that identifies check boxes:
+                var click_targ = (attribute + "-" + data[i]['value']).replace(/\s+/g, '_').toUpperCase();
+                children.push({name:(data[i]['displ_name'] || data[i]['value'].toString().replace(/_/g, ' ')), count: data[i]['count'], click_targ: click_targ});
             }
             return {children: children, name: attribute};
         },
@@ -94,8 +96,11 @@ function($, d3, d3tip, vis_helpers) {
                 .text(function(d) { return d.name; })
                 .on('mouseover.tip', tip.show)
                 .on('mouseout.tip', tip.hide)
-                .on('click', function() {
-                    var item = $('#' + $(this).attr('data-attr') + '-' + $(this).html().replace(/\s+/g, ''));
+                .on('click', function(d) {
+                    // This function predated the Issue 2018 fix, but the target element was being missed because no id
+                    // was provided, and the tag generation here was faulty. Use a prebuilt click targ here that matches the
+                    // pattern established in Common/cohorts/metadata_counting.py:
+                    var item = $('#' + d.click_targ);
                     if (item.length > 0) {
                         item[0].checked = 'checked';
                         $(item[0]).trigger('change');
