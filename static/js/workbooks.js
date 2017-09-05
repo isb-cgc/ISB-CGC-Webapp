@@ -1106,9 +1106,12 @@ require([
         var plot_area    = plot_element.find('.plot-div');
         var plot_legend  = plot_element.find('.legend');
         var pair_wise    = plot_element.find('.pairwise-result');
+        var bq_tables    = plot_element.find('.bq-tables');
         pair_wise.empty();
         plot_area.empty();
         plot_legend.empty();
+        bq_tables.hide();
+
         var plot_selector   = '#' + plot_element.prop('id') + ' .plot-div';
         var legend_selector = '#' + plot_element.prop('id') + ' .legend';
 
@@ -1138,9 +1141,17 @@ require([
                     plot_element.find('.resubmit-button').show();
                 }
 
-                update_plot_elem_rdy();
+                if(result.bq_tables) {
+                    plot_element.find('.bq-table-display').empty();
+                    for(var i=0; i < result.bq_tables.length; i++) {
+                        plot_element.find('.bq-table-display').append($('<li>').text(result.bq_tables[i]).prop('title',result.bq_tables[i]));
+                    }
+                    plot_element.find('.bq-tables').show();
+                } else {
+                    plot_element.find('.bq-tables').hide();
+                }
 
-                (args.color_by || args.type == 'SeqPeek') && $('.legend').show();
+                update_plot_elem_rdy();
 
                 plot_loader.fadeOut();
             }
