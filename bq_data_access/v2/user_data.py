@@ -241,7 +241,7 @@ class UserFeatureDef(object):
                 query += ' AND t.{filter_key} = "{value}" '.format(filter_key=key, value=val)
 
                 query += " GROUP BY t.sample_barcode, t.{column_name} ".format(column_name=self.column_name) # To prevent duplicates from multiple cohorts
-        return query
+        return query, [self.bq_table]
 
 
 class UserDataQueryHandler(object):
@@ -333,6 +333,7 @@ class UserDataQueryHandler(object):
 
         """
         queries = []
+        tables_queried = []
 
         # TODO: this is a hack to append program_ids to the tcga project id list. project_id_array is actually empty.
         # 7/24/17: NO! program_ids is a list of public programs (e.g. tcga). project_id_array is a bunch of
@@ -341,8 +342,10 @@ class UserDataQueryHandler(object):
 
         for feature_def in self.feature_defs:
             if int(feature_def.project_id) in project_id_array:
-                # Build our query
-                queries.append(feature_def.build_query(cohort_table, cohort_id_array, project_id_array))
+                # Build our query and record the tables
+                built_query, tables = feature_def.build_query(cohort_table, cohort_id_array, project_id_array)
+                queries.append(built_query)
+                tables_queried.extend(tables)
 
         # Create a combination query using the UNION ALL operator. Each data source defined above (query1, query2, ...)
         # will be combined as follows:
@@ -357,7 +360,7 @@ class UserDataQueryHandler(object):
         #
         query = ' , '.join(['(' + query + ')' for query in queries])
         logging.info("BQ_QUERY_USER: " + query)
-        return query, query  # Second arg resolves to True if a query got built. Will be empty if above loop appends nothing!
+        return query, tables_queried, query  # Third arg resolves to True if a query got built. Will be empty if above loop appends nothing!
 
     def unpack_value_from_row_with_feature_def(self, row):
         """
@@ -454,12 +457,15 @@ class UserDataQueryHandler(object):
 
         bigquery_service = self.get_bq_service()
 
-        query_body = self.build_query(project_ids, cohort_id_array, cohort_dataset, cohort_table, project_id_array)
+        query_body, tables_queried = self.build_query(project_ids, cohort_id_array, cohort_dataset, cohort_table, project_id_array)
         query_job = self.submit_bigquery_job(bigquery_service, project_id, query_body)
 
         self.job_reference = query_job['jobReference']
 
-        return self.job_reference
+        return {
+            'job_reference': self.job_reference,
+            'tables_used': tables_queried
+        }
 
     def is_queryable(self, cohort_id_array):
         """

@@ -101,7 +101,8 @@ def submit_jobs_with_user_data(params_array):
                     'feature_id': feature_id,
                     'provider': provider,
                     'ready': False,
-                    'job_reference': job_reference
+                    'job_reference': job_reference['job_reference'],
+                    'tables_used': job_reference['tables_queried']
                 })
             else:
                 logging.debug("No UserFeatureDefs for '{0}'".format(converted_feature_id))
