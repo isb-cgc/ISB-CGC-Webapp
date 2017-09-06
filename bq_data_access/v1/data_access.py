@@ -175,15 +175,16 @@ def submit_tcga_job(param_obj, bigquery_service, cohort_settings):
     feature_id = param_obj.feature_id
     cohort_id_array = param_obj.cohort_id_array
     project_id_array = param_obj.project_id_array
-    job_reference = provider.get_data_job_reference(cohort_id_array, cohort_settings.dataset_id, cohort_settings.table_id, project_id_array)
+    job_description = provider.get_data_job_reference(cohort_id_array, cohort_settings.dataset_id, cohort_settings.table_id, project_id_array)
 
-    logging.info("Submitted TCGA {job_id}: {fid} - {cohorts}".format(job_id=job_reference['jobId'], fid=feature_id,
+    logging.info("Submitted TCGA {job_id}: {fid} - {cohorts}".format(job_id=job_description['job_reference']['jobId'], fid=feature_id,
                                                                              cohorts=str(cohort_id_array)))
     job_item = {
         'feature_id': feature_id,
         'provider': provider,
         'ready': False,
-        'job_reference': job_reference
+        'job_reference': job_description['job_reference'],
+        'tables_used': job_description['tables_used']
     }
 
     return job_item
@@ -233,7 +234,9 @@ def submit_jobs_with_user_data(params_array):
 
 
 def get_submitted_job_results(provider_array, project_id, poll_retry_limit, skip_formatting_for_plot):
-    result = {}
+    result = {
+        'tables_queried': [],
+    }
     all_done = False
     total_retries = 0
     poll_count = 0
@@ -244,6 +247,7 @@ def get_submitted_job_results(provider_array, project_id, poll_retry_limit, skip
         total_retries += 1
 
         for item in provider_array:
+            result['tables_queried'].extend(item['tables_used'])
             provider = item['provider']
             feature_id = item['feature_id']
             is_finished = provider.is_bigquery_job_finished(project_id)
