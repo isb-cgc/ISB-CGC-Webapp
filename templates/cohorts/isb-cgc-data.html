@@ -30,6 +30,7 @@
                                                         <li class="checkbox">
                                                             <label title="{% if v.tooltip %}{{ v.tooltip }}{% else %} {% endif %}">
                                                                 <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}"
+                                                                       id="{% if v.full_id %}{{ program.id }}-{{ v.full_id }}{% endif %}"
                                                                        data-value-displ-name="{% if v.displ_name %}{{ v.displ_name }}{% endif %}"
                                                                        data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">
                                                                 {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name|get_readable_name:attr.name }}{% else %}{{ v.value|get_readable_name:attr.name }}{% endif %}
@@ -41,6 +42,7 @@
                                                         <li class="extra-values checkbox" style="display:none;">
                                                             <label title="{% if v.tooltip %}{{ v.tooltip }}{% else %} {% endif %}">
                                                                 <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}"
+                                                                       id="{% if v.full_id %}{{ program.id }}-{{ v.full_id }}{% endif %}"
                                                                        data-value-displ-name="{% if v.displ_name %}{{ v.displ_name }}{% endif %}"
                                                                        data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">
                                                                 {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name|get_readable_name:attr.name }}{% else %}{{ v.value|get_readable_name:attr.name }}{% endif %}
@@ -51,6 +53,7 @@
                                                         <li class="extra-values checkbox" style="display:none;">
                                                             <label title="{% if v.tooltip %}{{ v.tooltip }}{% else %} {% endif %}">
                                                                 <input type="checkbox" name="elements-selected" data-value-name="{{ v.value }}"
+                                                                       id="{% if v.full_id %}{{ program.id }}-{{ v.full_id }}{% endif %}"
                                                                        data-value-displ-name="{% if v.displ_name %}{{ v.displ_name }}{% endif %}"
                                                                        data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}">
                                                                 {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name|get_readable_name:attr.name }}{% else %}{{ v.value|get_readable_name:attr.name }}{% endif %}

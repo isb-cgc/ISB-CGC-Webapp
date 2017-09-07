@@ -395,7 +395,7 @@ class UserFeatureProvider(FeatureDataProvider):
 
     def parse_internal_feature_id(self, feature_id, user_feature_id=None):
         if user_feature_id is None or user_feature_id is '':
-            logging.debug("UserFeatureProvider.parse_internal_feature_id -      feature_id: {0}".format(feature_id))
+            logging.debug("UserFeatureProvider.parse_internal_feature_id - feature_id: {0}".format(feature_id))
             self.feature_defs = UserFeatureDef.from_feature_id(feature_id)
         else:
             logging.debug("UserFeatureProvider.parse_internal_feature_id - user_feature_id: {0}".format(user_feature_id))
