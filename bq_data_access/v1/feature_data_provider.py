@@ -126,10 +126,13 @@ class FeatureDataProvider(object):
 
         # Poll for completion of the query
         self.job_reference = query_job['jobReference']
-        job_id = query_job['jobReference']['jobId']
-        logging.debug("JOBID {id}".format(id=job_id))
+        job_description = {
+            'job_reference': self.job_reference,
+            "tables_used": [table_name]
+        }
+        logging.debug("JOBID {id}".format(id=query_job['jobReference']['jobId']))
 
-        return self.job_reference
+        return job_description
 
     def get_data_job_reference(self, cohort_id_array, cohort_dataset, cohort_table, project_id_array):
         project_id = settings.BQ_PROJECT_ID

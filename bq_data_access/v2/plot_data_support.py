@@ -197,7 +197,9 @@ def get_merged_feature_vectors(fvb, x_id, y_id, c_id, cohort_id_array, logTransf
                'items':            items,
                'counts':           count_message,
                'xUnits':           units['x'],
-               'yUnits':           units['y']}
+               'yUnits':           units['y'],
+               'bq_tables':        list(set(async_result['tables_queried']))
+   }
 
     return results
 
