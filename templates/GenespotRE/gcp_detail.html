@@ -49,7 +49,7 @@
                             <thead>
                             <tr>
                                 <th>Service Account</th>
-                                <th>Authorized Dataset</th>
+                                <th>Authorized Datasets</th>
                                 <th>Date Activated</th>
                                 <th>Active</th>
                                 <th></th>
@@ -57,17 +57,18 @@
                             </thead>
                             <tbody>
                             {% for service_account in gcp.serviceaccount_set.all %}
-                            <tr>
-                                <td>{{ service_account.service_account }}</td>
-                                <td>{{ service_account.authorized_dataset.name }}</td>
-                                <td>{{ service_account.authorized_date|date:'M d, Y, g:i a' }}</td>
-                                <td>{% if service_account.active %}<i class="fa fa-check"></i>{% endif %}</td>
-                                <td>
-                                    <a data-toggle="modal" role="button" data-target="#refresh-sa-modal-{{ service_account.id }}" class="space-right-5"><i class="fa fa-refresh"></i></a>
-                                    <a data-toggle="modal" role="button" data-target="#delete-sa-modal-{{ service_account.id }}"><i class="fa fa-trash"></i></a>
-                                </td>
-                            </tr>
-
+                                {% with auth_datasets=service_account.get_auth_datasets %}
+                                    <tr>
+                                        <td>{{ service_account.service_account }}</td>
+                                        <td>{% if auth_datasets|length == 0 %}None{% else %}{{ auth_datasets|get_values_list:"name"|joinwith:", " }}{% endif %}</td>
+                                        <td>{{ service_account.authorized_date|date:'M d, Y, g:i a' }}</td>
+                                        <td>{% if service_account.active %}<i class="fa fa-check"></i>{% endif %}</td>
+                                        <td>
+                                            <a data-toggle="modal" role="button" data-target="#refresh-sa-modal-{{ service_account.id }}" class="space-right-5"><i class="fa fa-refresh"></i></a>
+                                            <a data-toggle="modal" role="button" data-target="#delete-sa-modal-{{ service_account.id }}"><i class="fa fa-trash"></i></a>
+                                        </td>
+                                    </tr>
+                                {% endwith %}
                             <!-- Refresh Service Account Modal -->
                             <div class="modal fade" id="refresh-sa-modal-{{ service_account.id }}" tabindex="-1" role="dialog" aria-labelledby="refresh-sa-header" aria-hidden="true">
                                 <div class="modal-dialog">
@@ -84,7 +85,7 @@
                                                 </p>
                                                 <input type="hidden" name="gcp_id" value="{{ gcp.project_id }}" />
                                                 <input type="hidden" name="user_sa" value="{{ service_account.service_account }}" />
-                                                <input type="hidden" name="datasets" value="{{ service_account.authorized_dataset_id }}" />
+                                                <input type="hidden" name="datasets" value="{{ service_account.get_auth_datasets|get_id_string:"," }}" />
                                             </div>
                                             <div class="modal-footer">
                                                 <input type="submit" value="Refresh" class="btn btn-primary" />
