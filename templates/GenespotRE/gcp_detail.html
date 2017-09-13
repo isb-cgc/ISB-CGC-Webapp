@@ -70,6 +70,7 @@
                                     </tr>
                                 {% endwith %}
                             <!-- Refresh Service Account Modal -->
+                            <!-- TODO: this should be using the user_gcp_list_modals template instead -->
                             <div class="modal fade" id="refresh-sa-modal-{{ service_account.id }}" tabindex="-1" role="dialog" aria-labelledby="refresh-sa-header" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
@@ -89,6 +90,29 @@
                                             </div>
                                             <div class="modal-footer">
                                                 <input type="submit" value="Refresh" class="btn btn-primary" />
+                                                <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Delete Service Account Modal -->
+                            <div class="modal fade" id="delete-sa-modal-{{ service_account.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-sa-header" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                            <h4 id="delete-sa-header" class="modal-title">Unregister this Service Account?</h4>
+                                        </div>
+                                        <form id="delete-sa" method="POST" action="{% url 'delete_sa' user.id service_account.id %}">
+                                            <div class="modal-body">
+                                                {% csrf_token %}
+                                                <p>
+                                                    <em>Note</em>: By unregistering this Service Account, you are only revoking its access to controlled access datasets.
+                                                </p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <input type="submit" value="Unregister" class="btn btn-primary" />
                                                 <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
                                             </div>
                                         </form>
