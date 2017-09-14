@@ -76,6 +76,8 @@ class Plot(models.Model):
     y_axis = models.TextField()
     color_by = models.TextField(null=True)
     plot_type = models.TextField()
+    log_transf_x = models.BooleanField(default=False)
+    log_transf_y = models.BooleanField(default=False)
     # notes = models.CharField(max_length=1024, null=True)
 
 class Plot_Cohorts(models.Model):
