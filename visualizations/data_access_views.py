@@ -322,9 +322,9 @@ def get_merged_feature_vectors(x_id, y_id, c_id, cohort_id_array, logTransform, 
                 'items':            items,
                 'cohort_set':       cohort_info_obj_array,
                 'counts':           count_message,
-
                 'xUnits':           units['x'],
-                'yUnits':           units['y']}
+                'yUnits':           units['y'],
+               'bq_tables':        list(set(async_result['tables_queried']))}
 
     pairwise_result = None
 

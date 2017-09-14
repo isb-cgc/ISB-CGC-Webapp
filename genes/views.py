@@ -104,7 +104,7 @@ def gene_fav_detail(request, gene_fav_id, workbook_id=0, worksheet_id=0, new_wor
             messages.error(request, 'The workbook you were referencing does not exist.')
             return redirect('genes')
     try:
-        gene_favorite_model = GeneFavorite.objects.get(id=gene_fav_id)
+        gene_favorite_model = GeneFavorite.objects.get(id=gene_fav_id, user=request.user)
         gene_favorite_model.genes = gene_favorite_model.get_genes()
         context['gene_favorite'] = gene_favorite_model
         gene_favorite_model.mark_viewed(request)

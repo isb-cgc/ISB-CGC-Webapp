@@ -11,7 +11,7 @@
         {% else %}
             <p><a href="{% url 'demo:saml_index' %}?sso">Log in with your NIH identity: {{ user_details.NIH_username }}</a></p>
             <hr>
-            <p><a href="{% url 'unlink_accounts' %}">Unlink {{ user_details.email }} from the NIH identity: {{ user_details.NIH_username }}</a></p>
+            <p><a data-toggle="modal" data-target="#unlink-nih-account-modal">Unlink {{ user_details.email }} from the NIH identity: {{ user_details.NIH_username }}</a></p>
         {% endif %}
         <p><a href="https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login" target="_blank">Learn More</a></p>
 
@@ -30,7 +30,7 @@
                 <p>Congratulations, {{ user_details.NIH_username }}! You now have access to the following ISB-CGC controlled access dataset{% if user_datasets_count > 1 %}s{% endif %}:</p>
                 <ul>
                     {% for dataset in user_auth_datasets %}
-                        <li><a href="https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id={{ dataset.whitelist_id }}" target="_BLANK">{{ dataset.name }}</a>{% if dataset.duca_id %} - <a href="https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?view_pdf&stacc={{ dataset.duca_id }}" target="_BLANK">Data Use Certification Agreement</a>{% endif %}</li>
+                        <li><a href="https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id={{ dataset.whitelist_id }}" target="_BLANK">{{ dataset.name }}</a>{% if dataset.duca_id %} - <a href="https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?view_pdf&stacc={{ dataset.duca_id }}" target="_BLANK">DUCA</a>{% endif %}</li>
                     {% endfor %}
                 </ul>
                 <p>Your access is valid until:</p>
@@ -53,6 +53,35 @@
         </p>
 
     {% endif %}
+
+    {# If we're associated with an NIH account but not active, include the unlinking dialog #}
+    {% if user_details.NIH_username and not user_details.NIH_active %}
+    <div class="modal fade" id="unlink-nih-account-modal" tabindex="-1" role="dialog" aria-labelledby="unlink-nih-account-header" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="unlink-nih-account-header">Unlink {{ user_details.email }} from the NIH identity '{{ user_details.NIH_username }}'?</h4>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        This will remove your access to any controlled access datasets. In addition, service accounts from Google Cloud Projects you are associated with
+                        which were accessing controlled access data will also lose their access to controlled access datasets.
+                    </p>
+                </div>
+                <form id="unlink-nih-account" method="GET" action="{% url 'unlink_accounts' %}">
+                    {% csrf_token %}
+                    <div class="modal-footer">
+                        <input type="submit" value="Unlink" class="btn btn-primary" />
+                        <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% endif %}
+
     <script type="text/javascript"> 
             var NIH_assertion_expiration_client_time = new Date("{{ user_details.NIH_assertion_expiration|safe }}".replace(" ","T"));
             document.getElementById('NIH_expiration').innerHTML = NIH_assertion_expiration_client_time; 

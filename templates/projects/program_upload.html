@@ -87,7 +87,7 @@
 {#                                    <option>All TCGA Data</option>#}
                                     {% for program in programs %}
                                     <optgroup label="{{ program.name }}">
-                                    {% for project in program.project_set.all %}
+                                    {% for project in program.project_set.all|dictsort:"name" %}
                                         {% if project.active %}
                                         <option value="{{ project.id }}">{{ project.name }}</option>
                                         {% endif %}
