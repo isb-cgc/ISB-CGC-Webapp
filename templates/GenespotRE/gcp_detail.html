@@ -87,6 +87,7 @@
                                                 <input type="hidden" name="gcp_id" value="{{ gcp.project_id }}" />
                                                 <input type="hidden" name="user_sa" value="{{ service_account.service_account }}" />
                                                 <input type="hidden" name="datasets" value="{{ service_account.get_auth_datasets|get_id_string:"," }}" />
+                                                <input type="hidden" name="is_refresh" value="true" />
                                             </div>
                                             <div class="modal-footer">
                                                 <input type="submit" value="Refresh" class="btn btn-primary" />
