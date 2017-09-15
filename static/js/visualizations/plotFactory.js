@@ -421,7 +421,7 @@ define([
 
             //establish resize call to data
             d3.select(window).on('resize', visualization.plot.resize);
-            args.color_by && $(args.legend_selector).show();
+            args.color_by_sel && $(args.legend_selector).show();
 
         } else if (args.type == "SeqPeek") {
             visualization = generate_seqpeek_plot(args.plot_selector, args.legend_selector, data);
@@ -509,6 +509,7 @@ define([
                              logTransform     : args.logTransform,
                              color_by         : args.cohorts,
                              cohort_override  : args.color_override,
+                             color_by_sel     : args.color_by_sel,
                              data             : data});
                 callback({bq_tables: data.bq_tables});
 

@@ -844,6 +844,7 @@ require([
                                 x            : data.attrs.x_axis.url_code,
                                 y            : data.attrs.y_axis.url_code,
                                 color_by     : data.attrs.color_by.url_code,
+                                color_by_sel : data.color_by_sel,
                                 logTransform : data.logTransform,
                                 gene_label   : data.attrs.gene_label,
                                 cohorts      : data.attrs.cohorts});
@@ -916,7 +917,8 @@ require([
                 y: (yLog.css('display')!=="none") && yLog.is(':checked'),
                 yBase: 10,
                 yFormula: "n+1"
-            }
+            },
+            color_by_sel: plot_settings.find('.color_by :selected').val() !== null && plot_settings.find('.color_by :selected').val() !== ""
         }
 
         return result;
@@ -1054,7 +1056,8 @@ require([
                                         logTransform : data.logTransform,
                                         gene_label   : data.attrs.gene_label,
                                         color_by     : data.attrs.color_by.url_code,
-                                        cohorts      : data.attrs.cohorts});
+                                        cohorts      : data.attrs.cohorts,
+                                        color_by_sel : data.color_by_sel});
                         $('#'+sheet_id).attr("is-loaded","true");
                     }
                 }
@@ -1133,6 +1136,7 @@ require([
             y                : args.y,
             logTransform     : args.logTransform,
             color_by         : args.color_by,
+            color_by_sel     : args.color_by_sel,
             gene_label       : args.gene_label,
             cohorts          : cohort_ids,
             color_override   : color_override
@@ -1538,7 +1542,8 @@ require([
                                 logTransform : data.logTransform,
                                 gene_label   : data.attrs.gene_label,
                                 color_by     : data.attrs.color_by.url_code,
-                                cohorts      : data.attrs.cohorts});
+                                cohorts      : data.attrs.cohorts,
+                                color_by_sel : data.color_by_sel});
             }
             $(active_sheet).attr("is-loaded","true");
         }
