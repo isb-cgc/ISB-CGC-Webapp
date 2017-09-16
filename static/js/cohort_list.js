@@ -55,7 +55,9 @@ require([
 
     var delete_x_callback = function () {
         var parent_form = $(this).parents('form');
-        $('input[type="checkbox"][value="' + $(this).parent().attr('value') + '"]').prop('checked', false);
+        if($('input[type="checkbox"][value="' + $(this).parent().attr('value') + '"] :checked')) {
+            $('input[type="checkbox"][value="' + $(this).parent().attr('value') + '"]').trigger('click');
+        }
         $(this).parent('.cohort-label').remove();
         if (parent_form && !parent_form.find('.label').length) {
             parent_form.find('[type="submit"]').prop('disabled', 'disabled')
@@ -118,7 +120,8 @@ require([
                 $('.selected-cohorts').each(function() {
                     $(this).append(token.clone());
                 });
-
+                $('.delete-x').off();
+                $('.delete-x').on('click', delete_x_callback);
                 // Add all values to the form
                 formApply.append($('<input>', {type: 'hidden', name: 'cohorts', value: $(this).val()}));
             });
@@ -141,6 +144,7 @@ require([
         if ($('#saved-cohorts-list tr:not(:first) input[type="checkbox"]:checked').length == 0) {
             $('#saved-cohorts-list .select-all').prop('checked', false);
             repopulate_cohort_selects();
+            disable_buttons(tablename);
 
         } else {
             enable_buttons(tablename);
@@ -160,6 +164,7 @@ require([
                     $('.selected-cohorts').each(function() {
                         $(this).append(cohort_token.clone());
                     });
+                    $('.delete-x').off();
                     $('.delete-x').on('click', delete_x_callback);
                     $('.viz-cohort-select').each(function() {
                         if ($(this).parent().find('.viz-cohort-select:first')[0] != this
@@ -181,7 +186,7 @@ require([
         if ($('#public-cohorts-list tr:not(:first) input[type="checkbox"]:checked').length == 0) {
             $('#public-cohorts-list .select-all').prop('checked', false);
             repopulate_cohort_selects();
-
+            disable_buttons(tablename);
         } else {
             enable_buttons(tablename);
             var formApply = $('#cohort-apply-to-workbook');
@@ -200,6 +205,7 @@ require([
                     $('.selected-cohorts').each(function() {
                         $(this).append(cohort_token.clone());
                     });
+                    $('.delete-x').off();
                     $('.delete-x').on('click', delete_x_callback);
                     $('.viz-cohort-select').each(function() {
                         if ($(this).parent().find('.viz-cohort-select:first')[0] != this
@@ -405,6 +411,7 @@ require([
                         + '</span>';
             var cohort_token = $(token_str);
             $(event.target).parents('.form-group').find('.form-control-static').append(cohort_token);
+            $('.delete-x').off();
             $('.delete-x').on('click', delete_x_callback);
             $(this).val('');
             $(this).hide();
