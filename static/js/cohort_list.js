@@ -56,6 +56,7 @@ require([
     var delete_x_callback = function () {
         var parent_form = $(this).parents('form');
         $('input[type="checkbox"][value="' + $(this).parent().attr('value') + '"]').prop('checked', false);
+        // TODO: need to de-select the members WITHOUT clearing all the others
         $(this).parent('.cohort-label').remove();
         if (parent_form && !parent_form.find('.label').length) {
             parent_form.find('[type="submit"]').prop('disabled', 'disabled')
@@ -160,7 +161,6 @@ require([
                     $('.selected-cohorts').each(function() {
                         $(this).append(cohort_token.clone());
                     });
-                    $('.delete-x').on('click', delete_x_callback);
                     $('.viz-cohort-select').each(function() {
                         if ($(this).parent().find('.viz-cohort-select:first')[0] != this
                             && $(this).has('.none-value').length == 0) {
@@ -200,7 +200,6 @@ require([
                     $('.selected-cohorts').each(function() {
                         $(this).append(cohort_token.clone());
                     });
-                    $('.delete-x').on('click', delete_x_callback);
                     $('.viz-cohort-select').each(function() {
                         if ($(this).parent().find('.viz-cohort-select:first')[0] != this
                             && $(this).has('.none-value').length == 0) {
@@ -405,8 +404,6 @@ require([
                         + '</span>';
             var cohort_token = $(token_str);
             $(event.target).parents('.form-group').find('.form-control-static').append(cohort_token);
-            $('.delete-x').off();
-            $('.delete-x').on('click', delete_x_callback);
             $(this).val('');
             $(this).hide();
             return false;
@@ -446,5 +443,7 @@ require([
             });
         }
     });
+
+    $('.selected-cohorts, #selected-ids').on('click', '.delete-x', delete_x_callback);
 
 });
