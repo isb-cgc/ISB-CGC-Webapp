@@ -55,9 +55,7 @@ require([
 
     var delete_x_callback = function () {
         var parent_form = $(this).parents('form');
-        if($('input[type="checkbox"][value="' + $(this).parent().attr('value') + '"] :checked')) {
-            $('input[type="checkbox"][value="' + $(this).parent().attr('value') + '"]').trigger('click');
-        }
+        $('input[type="checkbox"][value="' + $(this).parent().attr('value') + '"]').prop('checked', false);
         $(this).parent('.cohort-label').remove();
         if (parent_form && !parent_form.find('.label').length) {
             parent_form.find('[type="submit"]').prop('disabled', 'disabled')
@@ -120,8 +118,7 @@ require([
                 $('.selected-cohorts').each(function() {
                     $(this).append(token.clone());
                 });
-                $('.delete-x').off();
-                $('.delete-x').on('click', delete_x_callback);
+
                 // Add all values to the form
                 formApply.append($('<input>', {type: 'hidden', name: 'cohorts', value: $(this).val()}));
             });
@@ -145,7 +142,6 @@ require([
             $('#saved-cohorts-list .select-all').prop('checked', false);
             repopulate_cohort_selects();
             disable_buttons(tablename);
-
         } else {
             enable_buttons(tablename);
             var formApply = $('#cohort-apply-to-workbook');
@@ -164,7 +160,6 @@ require([
                     $('.selected-cohorts').each(function() {
                         $(this).append(cohort_token.clone());
                     });
-                    $('.delete-x').off();
                     $('.delete-x').on('click', delete_x_callback);
                     $('.viz-cohort-select').each(function() {
                         if ($(this).parent().find('.viz-cohort-select:first')[0] != this
@@ -205,7 +200,6 @@ require([
                     $('.selected-cohorts').each(function() {
                         $(this).append(cohort_token.clone());
                     });
-                    $('.delete-x').off();
                     $('.delete-x').on('click', delete_x_callback);
                     $('.viz-cohort-select').each(function() {
                         if ($(this).parent().find('.viz-cohort-select:first')[0] != this
