@@ -54,7 +54,7 @@
                             </li>
                             <li class="separator"></li>
                             <li role="menuitem">
-                                <button id='delete-cohorts' type="button" class="btn btn-info" data-toggle="modal" data-target="#delete-cohorts-modal" aria-label="delete-cohorts" role="button" aria-expanded="true">
+                                <button id="delete-cohorts" type="button" class="btn btn-info owner-only" data-toggle="modal" data-target="#delete-cohorts-modal" aria-label="delete-cohorts" role="button" aria-expanded="true">
                                     <i class="fa fa-trash"></i>
                                     Delete
                                 </button>
@@ -65,7 +65,7 @@
                                 </button>
                             </li>
                             <li role="menuitem">
-                                <button class="btn btn-info" id="share-cohorts-btn" type="button" data-toggle="modal" data-target="#share-cohorts-modal" aria-label="share-cohorts" role="button" aria-expanded="true">
+                                <button class="btn btn-info owner-only" id="share-cohorts-btn" type="button" data-toggle="modal" data-target="#share-cohorts-modal" aria-label="share-cohorts" role="button" aria-expanded="true">
                                     <i class="fa fa-share-alt"></i>
                                     Share
                                 </button>
@@ -73,7 +73,7 @@
                         </div>
                     {% endif %}
 
-                    <table id="cohort-table" class="table table-striped tablesorter">
+                    <table id="cohort-table" class="table table-striped tablesorter cohort-table">
                         <thead><tr>
                             <th class="checkbox-col"><input type="checkbox" class="select-all" title="select-all"/></th>
                             <th class="name-col">Cohort Name</th>
@@ -134,7 +134,7 @@
                 </div>
                 {% endif %}
                 {% if cohorts %}
-                    <table id="public-cohort-table" class="table table-striped tablesorter">
+                    <table id="public-cohort-table" class="table table-striped tablesorter cohort-table">
                         <thead><tr>
                             <th class="checkbox-col"><input type="checkbox" class="select-all" title="select-all"/></th>
                             <th class="name-col">Cohort Name</th>
@@ -248,7 +248,7 @@
                     </div>
                     <div class="modal-footer">
                         {% csrf_token %}
-                        <input type="submit" value="Delete" class="btn btn-primary" />
+                        <input type="submit" value="Delete" class="btn btn-primary owner-only" />
                         <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
                     </div>
                 </form>
@@ -280,7 +280,7 @@
                             </div>
                             <div class="modal-footer">
                                 {% csrf_token %}
-                                <input type="submit" value="Share Cohort" class="btn btn-primary" />
+                                <input type="submit" value="Share Cohort" class="btn btn-primary owner-only" />
                             </div>
                         </form>
                     </div>
