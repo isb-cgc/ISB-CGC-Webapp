@@ -335,8 +335,6 @@ require([
                 $(selFilterPanel+' .panel-body').append($this.data('select-filters-item'));
                 createFormFilterSet.append($this.data('create-cohort-form-item'));
 
-                // Remove previous binding to prevent duplication
-                $('a.mol-cat-filter-x').off();
                 $('a.mol-cat-filter-x').on('click', function (e,data) {
                     // When the 'Selected Filters' token is removed, remove this filter from other
                     // locations in which it's stored
@@ -487,8 +485,6 @@ require([
                     $(selFilterPanel+' .panel-body').append($this.data('select-filters-item'));
                     createFormFilterSet.append($this.data('create-cohort-form-item'));
 
-                    // Remove prior binds, or we're just duplicating
-                    $('a.delete-x').off();
                     $('a.delete-x').on('click', function(e,data) {
                         var checked_box = $('div[data-feature-id="' + $(this).parent('span').data('feature-id')
                             + '"] input[type="checkbox"][data-value-name="' + $(this).parent('span').data('value-name') + '"]');
