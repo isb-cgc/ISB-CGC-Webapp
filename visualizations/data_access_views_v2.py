@@ -37,6 +37,7 @@ from django.http import JsonResponse
 from django.conf import settings as django_settings
 from cohorts.models import Cohort, Program
 from projects.models import Project
+from cohorts.metadata_helpers import fetch_metadata_value_set
 
 from bq_data_access.v2.feature_id_utils import FeatureProviderFactory
 
@@ -254,6 +255,30 @@ def data_access_for_plot(request):
 
         # Annotate each data point with cohort information
         add_cohort_info_to_merged_vectors(data, x_id, y_id, c_id, cohort_id_array)
+
+        # convert to display strings where needed (eg. categoricals stored as indicies rather than strings)
+        programs_by_project = {}
+        preformatted_vals = {}
+        for item in data['items']:
+            programs = []
+            for project in item['project']:
+                # Fetch the program if we don't know it already
+                if project not in programs_by_project:
+                    programs_by_project[project] = Project.objects.get(id=project).program.id
+                programs.append(programs_by_project[project])
+
+            for program in programs:
+                if program not in preformatted_vals:
+                    preformatted_vals[program] = fetch_metadata_value_set(program)
+                if x_id is not None and x_id.split(':')[-1] in preformatted_vals[program] and item['x'] in \
+                        preformatted_vals[program][x_id.split(':')[-1]]['values']:
+                    item['x'] = preformatted_vals[program][x_id.split(':')[-1]]['values'][item['x']]['displ_value']
+                if y_id is not None and y_id.split(':')[-1] in preformatted_vals[program] and item['y'] in \
+                        preformatted_vals[program][y_id.split(':')[-1]]['values']:
+                    item['y'] = preformatted_vals[program][y_id.split(':')[-1]]['values'][item['y']]['displ_value']
+                if c_id is not None and c_id.split(':')[-1] in preformatted_vals[program] and item['c'] in \
+                        preformatted_vals[program][c_id.split(':')[-1]]['values']:
+                    item['c'] = preformatted_vals[program][c_id.split(':')[-1]]['values'][item['c']]['displ_value']
 
         return JsonResponse(data)
 

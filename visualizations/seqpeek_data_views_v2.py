@@ -66,14 +66,15 @@ def is_valid_genomic_build(genomic_build_param):
     return genomic_build_param == "HG19" or genomic_build_param == "HG38"
 
 
-def build_empty_data_response(hugo_symbol, cohort_id_array):
+def build_empty_data_response(hugo_symbol, cohort_id_array, tables_used):
     return {
         # The SeqPeek client side view detects data availability by checking if
         # the "plot_data" object has the "tracks" key present.
         'plot_data': {},
         'hugo_symbol': hugo_symbol,
         'cohort_id_list': [str(i) for i in cohort_id_array],
-        'removed_row_statistics': []
+        'removed_row_statistics': [],
+        'bq_tables': tables_used
     }
 
 @login_required
@@ -121,14 +122,14 @@ def seqpeek_view_data(request):
         maf_data_vector = maf_data_result[gnab_feature_id]['data']
 
         if len(maf_data_vector) == 0:
-            return JsonResponse(build_empty_data_response(hugo_symbol, cohort_id_array))
+            return JsonResponse(build_empty_data_response(hugo_symbol, cohort_id_array, maf_data_result['tables_queried']))
 
         if len(maf_data_vector) > 0:
            seqpeek_data = SeqPeekMAFDataFormatter().format_maf_vector_for_view(
                maf_data_vector, cohort_id_array, genomic_build)
 
         if len(seqpeek_data.maf_vector) == 0:
-            return JsonResponse(build_empty_data_response(hugo_symbol, cohort_id_array))
+            return JsonResponse(build_empty_data_response(hugo_symbol, cohort_id_array, maf_data_result['tables_queried']))
 
         # Since the gene (hugo_symbol) parameter is part of the GNAB feature ID,
         # it will be sanity-checked in the SeqPeekMAFDataAccess instance.
@@ -140,7 +141,8 @@ def seqpeek_view_data(request):
                                                                      seqpeek_maf_vector,
                                                                      seqpeek_cohort_info,
                                                                      cohort_id_array,
-                                                                     removed_row_statistics_dict)
+                                                                     removed_row_statistics_dict,
+                                                                     maf_data_result['tables_queried'])
         return JsonResponse(seqpeek_view_data)
 
     except Exception as e:

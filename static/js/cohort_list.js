@@ -55,7 +55,7 @@ require([
 
     var delete_x_callback = function () {
         var parent_form = $(this).parents('form');
-        $('input[type="checkbox"][value="' + $(this).parent().attr('value') + '"]').prop('checked', false);
+        $('input[type="checkbox"][value="' + $(this).parent().attr('value') + '"]').trigger('click');
         $(this).parent('.cohort-label').remove();
         if (parent_form && !parent_form.find('.label').length) {
             parent_form.find('[type="submit"]').prop('disabled', 'disabled')
@@ -63,44 +63,27 @@ require([
         return false;
     };
 
-    var clear_objects = function() {
-        $('#selected-ids').empty();
-        $('#list-cohorts').empty();
-        $('.selected-cohorts').empty();
+    var toggle_buttons = function() {
+        $('.cohort-table').each(function () {
+            if ($(this).find('tr:not(:first) input[type="checkbox"]:checked').length == 0) {
+                $(this).parent().find('.page-action-group .btn').prop('disabled', 'disabled');
+            } else {
+                $(this).parent().find('.page-action-group .btn:not(.owner-only)').removeAttr('disabled');
 
-        $('.viz-cohort-select').each(function() { $(this).empty(); });
-        $('#cohort-apply-to-workbook input[name=cohorts]').remove();
-    };
-
-    var disable_buttons = function(tablename){
-        $(tablename).parent().find('.page-action-group .btn').prop('disabled', 'disabled');
-        $('#cohort-apply-to-workbook .btn').prop('disabled', 'disabled');
-    };
-    var enable_buttons = function(tablename){
-        $(tablename).parent().find('.page-action-group .btn').removeAttr('disabled');
-        $('#cohort-apply-to-workbook .btn').removeAttr('disabled');
-        $('#delete-cohort-form input[type="submit"]').removeAttr('disabled')
-    };
-    var repopulate_cohort_selects = function() {
-        $('#saved-cohorts-list tr:not(:first)').each(function() {
-            var id = $(this).find('input').val();
-            var name = $(this).find('.name-col a').html();
-            var option = $('<option value="' + id + '">' + name + '</option>');
-            $('.viz-cohort-select').each(function () {
-                if ($(this).parent().find('.viz-cohort-select:first')[0] != this
-                    && $(this).has('.none-value').length == 0) {
-                    $(this).append($('<option class="none-value" value="">None</option>'));
-                }
-                option = option.clone();
-                $(this).append(option);
-            });
+                var canDelOrShare = true;
+                $(this).find('tr:not(:first) input[type="checkbox"]:checked').each(function () {
+                    if ($.trim($(this).parents('td').siblings('td.owner-col').text()) !== 'You') {
+                        canDelOrShare = false;
+                    }
+                });
+                canDelOrShare && $('.owner-only').removeAttr('disabled');
+                !canDelOrShare && $('.owner-only').prop('disabled', 'disabled');
+            }
         });
-    };
 
-    // Initiate buttons states on load
-    disable_buttons('#cohort-table');
-    disable_buttons('#public-cohort-table');
-    $('.complement-control').hide();
+        $('.cohort-table tr:not(:first) input[type="checkbox"]:checked').length == 0 && $('#cohort-apply-to-workbook .btn').prop('disabled', 'disabled');
+        $('.cohort-table tr:not(:first) input[type="checkbox"]:checked').length > 0 && $('#cohort-apply-to-workbook .btn').removeAttr('disabled');
+    }
 
     $('.select-all').on('change', function() {
         var checked = $(this).is(':checked');
@@ -134,85 +117,36 @@ require([
         });
     });
 
-    $('#saved-cohorts-list tr:not(:first) input[type="checkbox"]').on('change', function() {
-        clear_objects();
+    var checkbox_change_callback = function() {
         var tablename = '#' + $(this).closest('table')[0].id;
         // If no checkboxes are selected
-        if ($('#saved-cohorts-list tr:not(:first) input[type="checkbox"]:checked').length == 0) {
-            $('#saved-cohorts-list .select-all').prop('checked', false);
-            repopulate_cohort_selects();
-
-        } else {
-            enable_buttons(tablename);
-            var formApply = $('#cohort-apply-to-workbook');
-            $('#saved-cohorts-list input[type="checkbox"], #public-cohorts-list input[type="checkbox"]').each(function() {
-                if ($(this).is(':checked') && $(this).val() !== 'on') {
-
-                    formApply.append($('<input>', {type: 'hidden', name: 'cohorts', value: $(this).val()}));
-                    var option = $('<option value="' + $(this).val() + '">' + $(this).parents('tr').find('.name-col a').html() + '</option>');
-                    var token_str = '<span class="cohort-label label label-default space-right-5" value="'
-                        + $(this).val() + '" name="selected-ids">'
-                        + $(this).parents('tr').find('.name-col a').html()
-                        + ' <a href="" class="delete-x"><i class="fa fa-times"></a>'
-                        + '</span>';
-                    var cohort_token = $(token_str);
-                    $('#selected-ids').append(cohort_token.clone());
-                    $('.selected-cohorts').each(function() {
-                        $(this).append(cohort_token.clone());
-                    });
-                    $('.delete-x').on('click', delete_x_callback);
-                    $('.viz-cohort-select').each(function() {
-                        if ($(this).parent().find('.viz-cohort-select:first')[0] != this
-                            && $(this).has('.none-value').length == 0) {
-                            $(this).append($('<option class="none-value" value="">None</option>'));
-                        }
-                        option = option.clone();
-                        $(this).append(option);
-                    });
-                }
-            });
+        if ($(tablename+' tr:not(:first) input[type="checkbox"]:checked').length == 0) {
+            $(tablename+' .select-all').prop('checked', false);
         }
-    });
 
-    $('#public-cohorts-list tr:not(:first) input[type="checkbox"]').on('change', function() {
-        clear_objects();
-        var tablename = '#' + $(this).closest('table')[0].id;
-        // If no checkboxes are selected
-        if ($('#public-cohorts-list tr:not(:first) input[type="checkbox"]:checked').length == 0) {
-            $('#public-cohorts-list .select-all').prop('checked', false);
-            repopulate_cohort_selects();
+        toggle_buttons();
 
+        // Box was checked - add token and hidden input
+        if ($(this).is(':checked') && $(this).val() !== 'on') {
+            $('#cohort-apply-to-workbook').append($('<input>', {type: 'hidden', name: 'cohorts', value: $(this).val()}));
+            var cohort_token = $('<span class="cohort-label label label-default space-right-5" value="'
+                + $(this).val() + '" name="selected-ids">'
+                + $(this).parents('tr').find('.name-col a').html()
+                + ' <a href="" class="delete-x"><i class="fa fa-times"></a>'
+                + '</span>');
+            $('#selected-ids').append(cohort_token.clone());
+            if(!tablename.match(/public/)) {
+                $('.selected-cohorts').each(function() {
+                    $(this).append(cohort_token.clone());
+                });
+            }
+        // Box was unchecked - remove token
         } else {
-            enable_buttons(tablename);
-            var formApply = $('#cohort-apply-to-workbook');
-            $('#saved-cohorts-list input[type="checkbox"], #public-cohorts-list input[type="checkbox"]').each(function() {
-                if ($(this).is(':checked') && $(this).val() !== 'on') {
-
-                    formApply.append($('<input>', {type: 'hidden', name: 'cohorts', value: $(this).val()}));
-                    var option = $('<option value="' + $(this).val() + '">' + $(this).parents('tr').find('.name-col a').html() + '</option>');
-                    var token_str = '<span class="cohort-label label label-default space-right-5" value="'
-                        + $(this).val() + '" name="selected-ids">'
-                        + $(this).parents('tr').find('.name-col a').html()
-                        + ' <a href="" class="delete-x"><i class="fa fa-times"></a>'
-                        + '</span>';
-                    var cohort_token = $(token_str);
-                    $('#selected-ids').append(cohort_token.clone());
-                    $('.selected-cohorts').each(function() {
-                        $(this).append(cohort_token.clone());
-                    });
-                    $('.delete-x').on('click', delete_x_callback);
-                    $('.viz-cohort-select').each(function() {
-                        if ($(this).parent().find('.viz-cohort-select:first')[0] != this
-                            && $(this).has('.none-value').length == 0) {
-                            $(this).append($('<option class="none-value" value="">None</option>'));
-                        }
-                        option = option.clone();
-                        $(this).append(option);
-                    });
-                }
-            });
+            $('#cohort-apply-to-workbook input[value="'+$(this).val()+'"], #selected-ids span[value="'+$(this).val()+'"], .selected-cohorts span[value="'+$(this).val()+'"]').remove();
         }
-    });
+    };
+
+    $('#saved-cohorts-list tr:not(:first) input[type="checkbox"], #public-cohorts-list tr:not(:first) input[type="checkbox"]').on('change', checkbox_change_callback);
 
     $('#cohorts-list .shared').on('click', function (e) {
         var modalName = $(this).data('target');
@@ -405,7 +339,6 @@ require([
                         + '</span>';
             var cohort_token = $(token_str);
             $(event.target).parents('.form-group').find('.form-control-static').append(cohort_token);
-            $('.delete-x').on('click', delete_x_callback);
             $(this).val('');
             $(this).hide();
             return false;
@@ -446,4 +379,10 @@ require([
         }
     });
 
+    $('.selected-cohorts, #selected-ids').on('click', '.delete-x', delete_x_callback);
+
+    // Initiate buttons states on load
+    toggle_buttons();
+
+    $('.complement-control').hide();
 });

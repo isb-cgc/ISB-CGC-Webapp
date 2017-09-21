@@ -39,7 +39,9 @@
                     Deleting this program will not delete underlying Google BigQuery tables or files in Google Cloud Storage. Those must be removed manually.
                 </div>
             </div>
-            <form id="delete-program" method="POST" action="{% url 'program_delete' program.id %}" data-redirect="{% url 'programs' %}">
+            <div class="modal-js-messages" id="delete-program-js-messages-{{ program.id }}">
+            </div>
+            <form id="delete-program" method="POST" class="program-delete-form" action="{% url 'program_delete' program.id %}" data-redirect="{% url 'programs' %}">
                 {% csrf_token %}
                 <div class="modal-footer">
                     <input type="submit" value="Delete" class="btn btn-primary" />

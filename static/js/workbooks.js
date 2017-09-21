@@ -440,7 +440,7 @@ require([
 
     // Add data values to the variable_element representing a plot axis,
     // This is called on loading plot data from model and swapping axis
-    function apply_axis_values(variable_element, data, axis_settings){
+    function apply_axis_values(variable_element, data, logTransform){
         if(data.type == "common"){
             if(data.options){
                 for(var i in data.options){
@@ -504,6 +504,9 @@ require([
             }
             disable_invalid_variable_options($('.worksheet.active .main-settings'));
             variable_element.parent('.variable-container').find('.log-scale').prop('checked',data.selection.logTransform || false);
+        }
+        if(logTransform) {
+            variable_element.find('.log-scale').prop('checked',true);
         }
     };
 
@@ -834,12 +837,13 @@ require([
         }
         if(valid_plot_settings($(this).parent())) {
             var data = get_plot_info_on_page($(this).parent());
-            update_plot_model(workbook_id, data.worksheet_id, data.plot_id, data.attrs, data.selections, function(result){
+            update_plot_model(workbook_id, data.worksheet_id, data.plot_id, data.attrs, data.selections, data.logTransform, function(result){
                 generate_plot({ worksheet_id : data.worksheet_id,
                                 type         : data.attrs.type,
                                 x            : data.attrs.x_axis.url_code,
                                 y            : data.attrs.y_axis.url_code,
                                 color_by     : data.attrs.color_by.url_code,
+                                color_by_sel : data.color_by_sel,
                                 logTransform : data.logTransform,
                                 gene_label   : data.attrs.gene_label,
                                 cohorts      : data.attrs.cohorts});
@@ -912,7 +916,8 @@ require([
                 y: (yLog.css('display')!=="none") && yLog.is(':checked'),
                 yBase: 10,
                 yFormula: "n+1"
-            }
+            },
+            color_by_sel: plot_settings.find('.color_by :selected').val() !== null && plot_settings.find('.color_by :selected').val() !== ""
         }
 
         return result;
@@ -1050,7 +1055,8 @@ require([
                                         logTransform : data.logTransform,
                                         gene_label   : data.attrs.gene_label,
                                         color_by     : data.attrs.color_by.url_code,
-                                        cohorts      : data.attrs.cohorts});
+                                        cohorts      : data.attrs.cohorts,
+                                        color_by_sel : data.color_by_sel});
                         $('#'+sheet_id).attr("is-loaded","true");
                     }
                 }
@@ -1102,9 +1108,12 @@ require([
         var plot_area    = plot_element.find('.plot-div');
         var plot_legend  = plot_element.find('.legend');
         var pair_wise    = plot_element.find('.pairwise-result');
+        var bq_tables    = plot_element.find('.bq-tables');
         pair_wise.empty();
         plot_area.empty();
         plot_legend.empty();
+        bq_tables.hide();
+
         var plot_selector   = '#' + plot_element.prop('id') + ' .plot-div';
         var legend_selector = '#' + plot_element.prop('id') + ' .legend';
 
@@ -1126,6 +1135,7 @@ require([
             y                : args.y,
             logTransform     : args.logTransform,
             color_by         : args.color_by,
+            color_by_sel     : args.color_by_sel,
             gene_label       : args.gene_label,
             cohorts          : cohort_ids,
             color_override   : color_override
@@ -1134,9 +1144,17 @@ require([
                     plot_element.find('.resubmit-button').show();
                 }
 
-                update_plot_elem_rdy();
+                if(result.bq_tables) {
+                    plot_element.find('.bq-table-display').empty();
+                    for(var i=0; i < result.bq_tables.length; i++) {
+                        plot_element.find('.bq-table-display').append($('<li>').text(result.bq_tables[i]).prop('title',result.bq_tables[i]));
+                    }
+                    plot_element.find('.bq-tables').show();
+                } else {
+                    plot_element.find('.bq-tables').hide();
+                }
 
-                (args.color_by || args.type == 'SeqPeek') && $('.legend').show();
+                update_plot_elem_rdy();
 
                 plot_loader.fadeOut();
             }
@@ -1152,10 +1170,10 @@ require([
 
         //apply values
         if(plot_data.x_axis) {
-            apply_axis_values(plot_element.find('.x-axis-select'), plot_data.x_axis);
+            apply_axis_values(plot_element.find('.x-axis-select'), plot_data.x_axis, (plot_data.logTransform ? plot_data.logTransform.x : null));
         }
         if(plot_data.y_axis) {
-            apply_axis_values(plot_element.find('.y-axis-select'), plot_data.y_axis);
+            apply_axis_values(plot_element.find('.y-axis-select'), plot_data.y_axis, (plot_data.logTransform ? plot_data.logTransform.y : null));
         }
         if(plot_data.color_by) {
             apply_axis_values(plot_element.find('.color_by'), plot_data.color_by);
@@ -1203,13 +1221,15 @@ require([
         });
     }
 
-    function update_plot_model(workbook_id, worksheet_id, plot_id, attrs, selections, callback){
+    function update_plot_model(workbook_id, worksheet_id, plot_id, attrs, selections, log, callback){
+        var settings = JSON.parse(JSON.stringify(selections));
+        settings['logTransform'] = log;
         var csrftoken = $.getCookie('csrftoken');
         $.ajax({
             type        :'POST',
             dataType    :'json',
             url         : BASE_URL + '/workbooks/' + workbook_id + '/worksheets/' + worksheet_id + "/plots/" + plot_id + "/edit",
-            data        : JSON.stringify({attrs : attrs, settings : selections}),
+            data        : JSON.stringify({attrs : attrs, settings : settings}),
             beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
             success : function (data) {
                 callback(data);
@@ -1521,7 +1541,8 @@ require([
                                 logTransform : data.logTransform,
                                 gene_label   : data.attrs.gene_label,
                                 color_by     : data.attrs.color_by.url_code,
-                                cohorts      : data.attrs.cohorts});
+                                cohorts      : data.attrs.cohorts,
+                                color_by_sel : data.color_by_sel});
             }
             $(active_sheet).attr("is-loaded","true");
         }
