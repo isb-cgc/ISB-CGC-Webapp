@@ -74,7 +74,7 @@ require([
             name: sample_barcode + ': GCS bam file',
             withCredentials: true
         };
-        if(row.data('program') === 'TCGA' && genome_build === 'HG38'){
+        if(row.data('program') === 'TARGET' || (row.data('program') === 'TCGA' && genome_build === 'HG38')){
             obj.indexURL = bam_path.replace(/\.bam/,'.bai');
         }
         tracks.push(obj);

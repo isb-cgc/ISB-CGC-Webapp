@@ -51,8 +51,9 @@ class SeqPeekDataQueryHandler(GNABDataQueryHandler):
     def build_query_for_program(self, feature_def, cohort_table, cohort_id_array, project_id_array):
         """
         Returns:
-            Tuple (query_body, run_query).
+            Tuple (query_body, tables used, run_query).
             The "query_body" value is the BigQuery query string.
+            The "tables used" are the tables queried for data.
             The "run_query" is always True.
         """
         # Generate the 'IN' statement string: (%s, %s, ..., %s)
@@ -86,11 +87,11 @@ class SeqPeekDataQueryHandler(GNABDataQueryHandler):
                                       brk='\n')
 
         logger.debug("BQ_QUERY_SEQPEEK: " + query)
-        return query, True
+        return query, [table_config.table_id.split(":")[-1]], True
 
     def build_query(self, project_set, cohort_table, cohort_id_array, project_id_array):
-        query = self.build_query_for_program(self.feature_def, cohort_table, cohort_id_array, project_id_array)
-        return query
+        query, tables_used, run_query = self.build_query_for_program(self.feature_def, cohort_table, cohort_id_array, project_id_array)
+        return query, tables_used, run_query
 
     @DurationLogged('SEQPEEK_GNAB', 'UNPACK')
     def unpack_query_response(self, query_result_array):

@@ -1015,11 +1015,21 @@ require([
         $('select.mutation-build').on('change',filter_change_callback);
     };
 
-    var filter_panel_load = function(cohort) {
+    //
+    // Fix for Issue #1950. While user is waiting for cohort data request, we prevent them from clicking on
+    // another tab and starting another request.
+    //
 
+    var reject_load = false;
+
+    var filter_panel_load = function(cohort) {
+        if (reject_load) {
+            return;
+        }
         var active_program_id = $('ul.nav-tabs-data li.active a').data('program-id');
         var program_data_selector ='#'+active_program_id+'-data';
         if ($(program_data_selector).length == 0) {
+            reject_load = true;
             $('.tab-pane.data-tab').each(function() { $(this).removeClass('active'); });
             $('#placeholder').addClass('active');
             $('#placeholder').show();
@@ -1043,6 +1053,9 @@ require([
                 },
                 error: function () {
                     console.log('Failed to load program panel');
+                },
+                complete: function(xhr, status) {
+                   reject_load = false;
                 }
             })
         }
@@ -1067,9 +1080,22 @@ require([
         $('.more-filters').hide();
     }
 
-    // Detect tab change
+    // Detect tab change. This fires when the tab is shown. But
+    // we need to stop the tab from responding to clicks for Issue
+    // #1950 fix, so we introduce the next function...
+
     $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
         filter_panel_load(cohort_id);
+    });
+
+    // Clicking on the tab will have no effect if another tab
+    // is loading....
+
+    $('a[data-toggle="tab"]').on('click', function (e) {
+        if (reject_load) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
     });
 
     // Per https://stackoverflow.com/questions/13550477/twitter-bootstrap-alert-message-close-and-open-again
