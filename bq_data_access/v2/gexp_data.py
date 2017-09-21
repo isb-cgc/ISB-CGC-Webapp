@@ -163,7 +163,7 @@ class GEXPDataQueryHandler(object):
 
         logger.debug("BQ_QUERY_GEXP: " + query)
 
-        return query, [x.table_id.split(':')[1] for x in found_tables], subquery_stmt  # Third arg resolves to True if a query got built. Will be empty if above loop appends nothing!
+        return query, [x.table_id.split(':')[-1] for x in found_tables], subquery_stmt  # Third arg resolves to True if a query got built. Will be empty if above loop appends nothing!
 
     @DurationLogged('GEXP', 'UNPACK')
     def unpack_query_response(self, query_result_array):
