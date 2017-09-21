@@ -45,8 +45,11 @@ class VariableFavorite(models.Model):
         return list
 
     @classmethod
-    def get_deep(cls, id):
-        variable_favorite_list = cls.objects.get(id=id)
+    def get_deep(cls, id, user=None):
+        # Fix for 2036. If being called by e.g. the variable favorite detail page, you MUST provide a user id
+        # to insure rando users cannot sniff variable favorites that do not belong to them. For other internal
+        # uses, you can skip the argument to eliminate that check:
+        variable_favorite_list = cls.objects.get(id=id, user=user) if user else cls.objects.get(id=id)
         variable_favorite_list.list = variable_favorite_list.get_variables()
         return variable_favorite_list
 

@@ -120,12 +120,13 @@ class FeatureDataProvider(object):
     def submit_query_and_get_job_ref(self, program_set, cohort_table, cohort_id_array, project_id_array):
         bigquery_client = self.get_bq_service()
 
-        query_body, run_query = self.feature_query_support.build_query(program_set, cohort_table, cohort_id_array, project_id_array)
+        query_body, tables_used, run_query = self.feature_query_support.build_query(program_set, cohort_table, cohort_id_array, project_id_array)
         if not run_query:
             logger.info("Not submitting BigQuery job - returning empty result.")
             return {
                 "job_reference": None,
-                "run_query": False
+                "run_query": False,
+                "tables_used": []
             }
 
         logger.info(query_body)
@@ -138,7 +139,8 @@ class FeatureDataProvider(object):
 
         return {
             "job_reference": self.job_reference,
-            "run_query": True
+            "run_query": True,
+            "tables_used": list(set(tables_used))
         }
 
     def get_data_job_reference(self, program_set, cohort_table, cohort_id_array, project_id_array):
