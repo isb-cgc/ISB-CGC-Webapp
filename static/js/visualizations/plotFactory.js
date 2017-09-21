@@ -263,10 +263,12 @@ define([
             var gene_element = seqpeek_el.gene_element;
 
             seqpeek_view.render_seqpeek(table_selector, gene_element, view_data);
+            $(legend_selector).show();
         }
         else {
             // No data was found for the gene and cohorts
             seqpeek_view.render_no_data_message(plot_selector, hugo_symbol);
+            $(legend_selector).hide();
         }
     }
 
@@ -395,13 +397,17 @@ define([
                     break;
             }
 
-            if(!visualization.plot) {
             // Data was not valid
+            if(!visualization.plot) {
+
                 $(args.plot_selector).empty().prepend('<div id="log-scale-alert" class="alert alert-warning alert-dismissable">'
                     + '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>'
                     + 'No valid data was returned for this plot. Double-check your plot type, '
                     + 'axis variables, and cohorts to make sure they can return valid data. Please note, some data types '
                     + 'cannot be log transformed due to negative values.</div>');
+
+                // Hide the legend
+                $(args.legend_selector).hide();
                 return;
             }
 
@@ -415,9 +421,9 @@ define([
 
             //establish resize call to data
             d3.select(window).on('resize', visualization.plot.resize);
+            args.color_by_sel && $(args.legend_selector).show();
 
-        }
-        else if (args.type == "SeqPeek") {
+        } else if (args.type == "SeqPeek") {
             visualization = generate_seqpeek_plot(args.plot_selector, args.legend_selector, data);
         } else {
             // No data returned
@@ -431,6 +437,9 @@ define([
                 .attr('text-anchor', 'middle')
                 .attr('transform', 'translate(' + (width/2) + ',' + (height/2) + ')')
                 .text('No samples were found for this combination of plot type, cohort, and axis variables.');
+
+            // Hide the legend
+            $(args.legend_selector).hide();
         }
     };
 
@@ -500,8 +509,9 @@ define([
                              logTransform     : args.logTransform,
                              color_by         : args.cohorts,
                              cohort_override  : args.color_override,
+                             color_by_sel     : args.color_by_sel,
                              data             : data});
-                callback({});
+                callback({bq_tables: data.bq_tables});
 
             },
             error: function(xhr, status, error) {

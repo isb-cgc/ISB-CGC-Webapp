@@ -225,6 +225,56 @@ require([
         })
     });
 
+    var do_deletion = function(self, e, msg_class) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $self = $(self);
+
+        var csrftoken = $.getCookie('csrftoken');
+        // showJsMessage wants either the ID or DOM element. This gives the DOM element:
+        var msg_target = $self.siblings('.modal-js-messages')[0];
+        $.ajax({
+            type        :'POST',
+            url         : $self.attr('action'),
+            beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+            success : function (data) {
+                if(data.status && data.status == 'error') {
+                    if(data.result && data.result.msg) {
+                        base.showJsMessage('error', data.result.msg, true, msg_target);
+                    }
+                } else if(data.status && data.status == 'success') {
+                    if(data.result && data.result.msg) {
+                        base.setReloadMsg('info',data.result.msg);
+                    }
+                    $self.closest('.modal').modal('hide');
+                    if($self.data('redirect')) {
+                        window.location = $self.data('redirect');
+                    } else {
+                        window.location.reload();
+                    }
+                }
+            },
+            error: function (err) {
+                $self.closest('.modal').modal('hide');
+                base.showJsMessage('error',err,true);
+            },
+        }).always(function () {
+            $self.find('.btn-primary').removeClass('btn-disabled').attr('disabled', false);
+        });
+        // We don't want this form submission to automatically trigger a reload
+        return false;
+    }
+
+    // Delete project
+    $('.project-delete-form').on('submit', function(e) {
+         return (do_deletion(this, e, '.modal-js-messages'));
+    });
+
+    // Delete program
+    $('.program-delete-form').on('submit', function(e) {
+        return (do_deletion(this, e, '.modal-js-messages'));
+    });
+
     // Handles program edits checking and submission
     $('#edit-program').on('submit', function(e) {
          return (do_submission(this, e, '.edit-name-field', '.edit-desc-field', '.modal-js-messages'));

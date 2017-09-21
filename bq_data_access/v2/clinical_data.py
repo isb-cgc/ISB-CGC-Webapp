@@ -179,7 +179,6 @@ class ClinicalDataQueryHandler(object):
             column_name_set = set([item['name'] for item in schema])
 
             if (table_config.program in program_set) and (self.feature_def.column_name in column_name_set):
-                logger.info("Found matching table: '{}'".format(table_config.table_id))
                 found_tables.append(table_config)
 
         # Build a BigQuery statement for each found table configuration
@@ -191,7 +190,7 @@ class ClinicalDataQueryHandler(object):
             subqueries.append(subquery)
 
         if len(subqueries) == 0:
-            return "", False
+            return "", None, False
         else:
             # Union of subqueries
             subquery_stmt_template = ",".join(["({})" for x in xrange(len(subqueries))])
@@ -205,7 +204,7 @@ class ClinicalDataQueryHandler(object):
 
             logger.debug("BQ_QUERY_CLIN: " + query)
 
-            return query, subquery_stmt  # Second arg resolves to True if a query got built. Will be empty if above loop appends nothing!
+            return query, [x.table_id.split(':')[-1] for x in found_tables], subquery_stmt  # Third arg resolves to True if a query got built. Will be empty if above loop appends nothing!
 
     @DurationLogged('CLIN', 'UNPACK')
     def unpack_query_response(self, query_result_array):
