@@ -431,7 +431,7 @@ function($, d3, d3tip, d3textwrap, _) {
                     svg.on('.zoom',null);
                     zoom_status.translation = zoom.translate();
                     $('.save-cohort-card').attr('style','position: absolute; top: '+($('.worksheet-content').outerHeight()-$('.plot-container').outerHeight())
-                        +'px; left: '+($('.worksheet-content').width()-$('.save-cohort-card').outerWidth())+'px;');
+                        +'px; left: 275px;');
                     $('.save-cohort-card').show();
                 } else {
                     // Resume zooming, restoring the zoom's last state

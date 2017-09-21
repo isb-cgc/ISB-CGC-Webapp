@@ -204,7 +204,7 @@ class ClinicalDataQueryHandler(object):
 
             logger.debug("BQ_QUERY_CLIN: " + query)
 
-            return query, [x.table_id.split(':')[1] for x in found_tables], subquery_stmt  # Third arg resolves to True if a query got built. Will be empty if above loop appends nothing!
+            return query, [x.table_id.split(':')[-1] for x in found_tables], subquery_stmt  # Third arg resolves to True if a query got built. Will be empty if above loop appends nothing!
 
     @DurationLogged('CLIN', 'UNPACK')
     def unpack_query_response(self, query_result_array):

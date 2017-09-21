@@ -149,7 +149,7 @@ class METHDataQueryHandler(object):
                                       brk='\n')
 
         logger.debug("BQ_QUERY_METH: " + query)
-        return query, [table_config.table_id], True
+        return query, [table_config.table_id.split(":")[-1]], True
 
     def build_query(self, project_set, cohort_table, cohort_id_array, project_id_array):
         query, tables_used = self.build_query_for_program(self.feature_def, cohort_table, cohort_id_array, project_id_array)

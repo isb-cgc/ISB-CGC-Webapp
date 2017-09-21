@@ -241,7 +241,7 @@ class UserFeatureDef(object):
                 query += ' AND t.{filter_key} = "{value}" '.format(filter_key=key, value=val)
 
                 query += " GROUP BY t.sample_barcode, t.{column_name} ".format(column_name=self.column_name) # To prevent duplicates from multiple cohorts
-        return query, [self.bq_table]
+        return query, [self.bq_table.split(":")[-1]]
 
 
 class UserDataQueryHandler(object):
