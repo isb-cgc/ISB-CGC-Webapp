@@ -47,15 +47,15 @@ require([
     });
 
     $('input[name="select-datasets"]:radio').change(function() {
-        if ($('input[name="select-datasets"]:checked').val() === 'yes') {
+        if ($('input[name="select-datasets"]:checked').val() === 'yes' || $('input[name="select-datasets"]:checked').val() === 'alter') {
             $('#datasets-select-div').show();
         } else {
             $('#datasets-select-div').hide();
-            $('#datasets-select-div select option:selected').removeAttr('selected');
         }
     });
 
     $('#verify-sa').on('submit', function(e) {
+        $('#invalid-sa-error button.close').click();
         e.preventDefault();
         e.stopPropagation();
 
