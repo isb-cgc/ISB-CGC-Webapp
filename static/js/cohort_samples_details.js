@@ -43,57 +43,75 @@ require([
     'base'
 ], function ($, jqueryui, bootstrap, session_security, _, base) {
 
+    // Used for getting the CORS token for submitting data
+    function get_cookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
     var validateEntries = function(barcodes) {
         var result = {
             valid_entries: null,
             invalid_entries: null
         };
 
-        barcodes.map(function(barcode){
+        barcodes.filter(function(barcode){ return barcode !== ""; }).map(function(barcode) {
             var entry_split = barcode.split(/["']*\s*,\s*["']*/);
-            if(entry_split.length !== 3) {
-                if(!result.invalid_entries) {
+            if (entry_split.length !== 3) {
+                if (!result.invalid_entries) {
                     result.invalid_entries = [];
                 }
                 result.invalid_entries.push(barcode);
             } else {
-                if(!result.valid_entries) {
+                if (!result.valid_entries) {
                     result.valid_entries = [];
                 }
                 result.valid_entries.push(entry_split[0] + ":" + entry_split[1] + ":" + entry_split[2]);
             }
-
-            // Any entries which were valid on the split must now be checked against the database
-
-            if(result.valid_entries) {
-                var deferred = $.Deferred();
-                $.ajax({
-                    type        : 'POST',
-                    dataType    :'json',
-                    url         : BASE_URL + '/cohorts/validate_barcodes/',
-                    data        : JSON.stringify({'barcodes' : result.valid_entries}),
-                    beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
-                    success : function (data) {
-                        result.valid_entries = data.valid_entries ? data.valid_entries : null;
-                        if(data.invalid_entries) {
-                            if (!result.invalid_entries) {
-                                result.invalid_entries = data.invalid_entries;
-                            } else {
-                                result.invalid_entries.concat(data.invalid_entries);
-                            }
-                        }
-                        result.invalid_entries && deferred.reject(result);
-                        !result.invalid_entries && deferred.resolve(result);
-                    },
-                    error: function () {
-                        alert("There was an error while parsing your barcode set.")
-                    }
-                });
-                return deferred;
-            } else {
-                return $.Deferred().reject(result);
-            }
         });
+
+        // Any entries which were valid on the split must now be checked against the database
+
+        if(result.valid_entries) {
+            var deferred = $.Deferred();
+            var csrftoken = get_cookie('csrftoken');
+            $.ajax({
+                type        : 'POST',
+                dataType    :'json',
+                url         : BASE_URL + '/cohorts/validate_barcodes/',
+                data        : JSON.stringify({'barcodes' : result.valid_entries}),
+                beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
+                success : function (data) {
+                    result.valid_entries = data.valid_entries ? data.valid_entries : null;
+                    if(data.invalid_entries) {
+                        if (!result.invalid_entries) {
+                            result.invalid_entries = data.invalid_entries;
+                        } else {
+                            result.invalid_entries.concat(data.invalid_entries);
+                        }
+                    }
+                    result.invalid_entries && deferred.reject(result);
+                    !result.invalid_entries && deferred.resolve(result);
+                },
+                error: function () {
+                    alert("There was an error while parsing your barcode set.")
+                }
+            });
+            return deferred;
+        } else {
+            return $.Deferred().reject(result);
+        }
     };
 
 
@@ -144,14 +162,16 @@ require([
 
                     var entries = fr.result.split('\n');
 
-                    console.debug(entries);
-
                     // Validate the entries
                     validateEntries(entries).then(
-                        function(){
+                        function(result){
 
-                        },function(invalid_entries){
+                            $('.btn.save').removeAttr('disabled');
+                        },function(result){
 
+                            // show error
+
+                            $('.btn.save').attr('disabled','disabled');
                         }
                     );
                     $('#uploading').removeClass('in');
