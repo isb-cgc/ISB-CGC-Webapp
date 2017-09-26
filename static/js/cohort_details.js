@@ -600,7 +600,7 @@ require([
                 $('.data-tab-content-panel:not(.spinner-panel)').removeClass('col-md-12').addClass('col-md-9');
                 $('.filter-panel').show();
                 $('.selected-filters').show();
-                $('.page-header').hide();
+                cohort_id && $('.page-header').hide();
                 $('input[name="cohort-name"]').show();
                 $('#default-cohort-menu').hide();
                 $('#edit-cohort-menu').show();
