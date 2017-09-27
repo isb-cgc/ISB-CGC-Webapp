@@ -83,7 +83,7 @@
                 <div class="col-md-12 data-tab-content-panel spinner-panel">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <h4>Upload a file of sample or case barcodes</h4>
+                            <h4>Upload a file of case and/or sample barcodes</h4>
                         </div>
                         <div class="panel-body">
                             <div id="uploadField" class="center" style="display : inline-block;">
@@ -97,23 +97,25 @@
                             </div>
                             <button class="btn btn-primary instructions" title="Show/Hide the upload instructions">Instructions</button>
                             <div class="instructions" style="display: none;">
-                                <p>All files must be in tab- or comma-delimited format (TSV or CSV), and should not include any headers. Quotes around values are optional. Format your entries as follows:</p>
-                                <ul><pre>Sample Barcode (optional), Case Barcode (required), Program Short Name (required)</pre></ul>
-                                <p><b>Note:</b> If a sample barcode is omitted, all samples associate with a provided case barcode will be included.</p>
-                                <p>Example Entries:</p>
-                                <ul>
-                                    <pre>,TCGA-N9-A4Q4,TCGA
-TCGA-N7-A4Y8-01A,TCGA-N7-A4Y8,TCGA
-'CCLE-Saos-2','Saos-2', 'CCLE'
-'','Hs 863.T','CCLE'
-"TARGET-51-PAJLIV-10A", "TARGET-51-PAJLIV", "TARGET"
-"", "TARGET-51-PAJMFS", "TARGET"</pre>
-                                </ul>
+                                <p>All entries must contain a valid <span class="code">case barcode</span> and <span class="code">program short name</span>, and may optionally include a <span class="code">sample barcode</span>.
                                 <p>Valid program short names:</p>
                                 <ul>
                                     <li>TCGA</li>
                                     <li>CCLE</li>
                                     <li>TARGET</li>
+                                </ul>
+                                <p>When a sample barcode is omitted, all samples from the specified case will be included in the cohort. Make a separate entry per sample/case barcode pair if only specific samples from a case should be added to the cohort. </p>
+                                <p>Files must be in tab- or comma-delimited format (TSV or CSV), and should not include any headers. Values may be placed in single or double quotes. Format your entries as follows:</p>
+                                <ul><pre>Case Barcode,Sample Barcode,Program Short Name</pre></ul>
+                                <p>When omitting sample barcodes, please be sure to still include the empty column's delimiter. (See examples below.) You may also include an empty quoted value ("" or ''), but this is optional.</p>
+                                <h5>Example Entries</h5>
+                                <ul>
+                                    <pre>TCGA-N9-A4Q4,,TCGA
+TCGA-N7-A4Y8,TCGA-N7-A4Y8-01A,TCGA
+'Saos-2','CCLE-Saos-2', 'CCLE'
+'Hs 863.T', '','CCLE'
+"TARGET-51-PAJLIV",, "TARGET"
+TARGET-51-PAJMFS,"", "TARGET"</pre>
                                 </ul>
                                 <p>After selecting the file and uploading it, the entries will be verified. Any entries which are found to be invalid will be listed, and you can choose to omit them or select a new file for verificaiton and upload.</p>
                             </div>
@@ -125,10 +127,10 @@ TCGA-N7-A4Y8-01A,TCGA-N7-A4Y8,TCGA
                 <div class="col-md-12 data-tab-content-panel spinner-panel">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <h4>Paste a set of sample or case barcodes</h4>
+                            <h4>Paste a set of case and/or sample barcodes</h4>
                         </div>
                         <div class="panel-body">
-                            <h5>Sample/Case Barcode Entries</h5>
+                            <h5>Barcode Entries</h5>
                             <textarea></textarea>
                             <p>
                                 <button class="btn btn-primary verify" title="Verify the barcode set">Verify</button>
@@ -136,23 +138,25 @@ TCGA-N7-A4Y8-01A,TCGA-N7-A4Y8,TCGA
                             </p>
                             <button class="btn btn-primary instructions" title="Show/Hide the upload instructions">Instructions</button>
                             <div class="instructions" style="display: none;">
-                                <p>All entries must be in tab- or comma-separated format, and should not include any headers. Quotes around values are optional. Format your entries as follows:</p>
-                                <ul><pre>Sample Barcode (optional), Case Barcode (required), Program Short Name (required)</pre></ul>
-                                <p><b>Note:</b> If a sample barcode is omitted, all samples associate with a provided case barcode will be included.</p>
-                                <p>Example Entries:</p>
-                                <ul>
-                                    <pre>,TCGA-N9-A4Q4,TCGA
-TCGA-N7-A4Y8-01A,TCGA-N7-A4Y8,TCGA
-'CCLE-Saos-2','Saos-2', 'CCLE'
-'','Hs 863.T','CCLE'
-"TARGET-51-PAJLIV-10A", "TARGET-51-PAJLIV", "TARGET"
-"", "TARGET-51-PAJMFS", "TARGET"</pre>
-                                </ul>
+                                <p>All entries must contain a valid <span class="code">case barcode</span> and <span class="code">program short name</span>, and may optionally include a <span class="code">sample barcode</span>.</p>
                                 <p>Valid program short names:</p>
                                 <ul>
                                     <li>TCGA</li>
                                     <li>CCLE</li>
                                     <li>TARGET</li>
+                                </ul>
+                                <p>When a sample barcode is omitted, all samples from the specified case will be included in the cohort. Make a separate entry per sample/case barcode pair if only specific samples from a case should be added to the cohort. </p>
+                                <p>All entries must be in tab- or comma-separated format, and there should be no headers. Values may be placed in single or double quotes. Order your entries as follows:</p>
+                                <ul><pre>Case Barcode,Sample Barcode,Program Short Name</pre></ul>
+                                <p>When omitting sample barcodes, please be sure to still include the empty column's delimiter. (See examples below.) You may place an empty quoted value ("" or ''), but this is optional.</p>
+                                <h5>Example Entries</h5>
+                                <ul>
+                                    <pre>TCGA-N9-A4Q4,,TCGA
+TCGA-N7-A4Y8,TCGA-N7-A4Y8-01A,TCGA
+'Saos-2','CCLE-Saos-2', 'CCLE'
+'Hs 863.T', '','CCLE'
+"TARGET-51-PAJLIV",, "TARGET"
+TARGET-51-PAJMFS,"", "TARGET"</pre>
                                 </ul>
                                 <p>Click the 'Verify' button to check your entries. Any entries which are found to be invalid will be listed, and you can choose to omit them or re-enter the set.</p>
                             </div>
