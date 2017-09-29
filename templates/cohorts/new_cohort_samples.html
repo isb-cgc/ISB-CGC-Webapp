@@ -95,6 +95,36 @@
                                     <i class="fa fa-circle-o-notch fa-spin"></i>  <span id="selected-file-name"></span>
                                 </div>
                             </div>
+                            <div class="barcode-status" style="display: none;">
+                                <hr>
+                                <div class="valid-entries">
+                                    <h5>Valid Entries</h5>
+                                    <ul><pre></pre></ul>
+                                </div>
+                                <div class="cohort-counts">
+                                    <h5>Resulting Cohort Counts</h5>
+                                    <table class="table table-striped">
+                                        <thead><tr>
+                                                <th>Program</th>
+                                                <th>Samples</th>
+                                                <th>Cases</th>
+                                        </tr></thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                                <p class="invalid-not-saved">Note: Invalid entries <b>will not</b> be included if you choose to create this cohort.</p>
+                                <button class="btn btn-primary save-cohort" title="Save this Cohort" style="display: none;">Save Cohort</button>
+                                <div class="invalid-entries">
+                                    <h5>Invalid Entries</h5>
+                                    <ul><pre></pre></ul>
+                                    <div class="validation-messages">
+                                        <p><b>Information regarding the invalid entries</b></p>
+                                        <ul>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
                             <button class="btn btn-primary instructions" title="Show/Hide the instructions">Instructions</button>
                             <div class="instructions" style="display: none;">
                                 <p>All entries must contain a valid <span class="code">case barcode</span> and <span class="code">program short name</span>, and may optionally include a <span class="code">sample barcode</span>.
@@ -134,8 +164,37 @@ TARGET-51-PAJMFS,"", "TARGET"</pre>
                             <textarea></textarea>
                             <p>
                                 <button class="btn btn-primary verify" title="Verify the barcode set">Verify</button>
-                                <button class="btn btn-primary save" title="Create the cohort" disabled>Save Cohort</button>
                             </p>
+                            <div class="barcode-status" style="display: none;">
+                                <hr>
+                                <div class="valid-entries">
+                                    <h5>Valid Entries</h5>
+                                    <ul><pre></pre></ul>
+                                </div>
+                                <div class="cohort-counts">
+                                    <h5>Resulting Cohort Counts</h5>
+                                    <table class="table table-striped">
+                                        <thead><tr>
+                                                <th>Program</th>
+                                                <th>Samples</th>
+                                                <th>Cases</th>
+                                        </tr></thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                                <p class="invalid-not-saved">Note: Invalid entries <b>will not</b> be saved if you choose to create this cohort.</p>
+                                <button class="btn btn-primary save-cohort" title="Save this Cohort" style="display: none;">Save Cohort</button>
+                                <div class="invalid-entries">
+                                    <h5>Invalid Entries</h5>
+                                    <ul><pre></pre></ul>
+                                    <div class="validation-messages">
+                                        <p><b>Information regarding the invalid entries</b></p>
+                                        <ul>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
                             <button class="btn btn-primary instructions" title="Show/Hide the instructions">Instructions</button>
                             <div class="instructions" style="display: none;">
                                 <p>All entries must contain a valid <span class="code">case barcode</span> and <span class="code">program short name</span>, and may optionally include a <span class="code">sample barcode</span>.</p>

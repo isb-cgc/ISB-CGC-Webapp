@@ -102,12 +102,17 @@ require([
                         } else {
                             result.invalid_entries.concat(data.invalid_entries);
                         }
+                        if(data.messages) {
+                            result.messages = data.messages;
+                        }
                     }
+                    result.counts = data.counts;
                     result.valid_entries && deferred.resolve(result);
                     !result.valid_entries && deferred.reject(result);
                 },
-                error: function () {
-                    alert("There was an error while parsing your barcode set.")
+                error: function (data) {
+                    // If no valid barcodes were found we wind up here
+                    deferred.reject(data);
                 }
             });
             return deferred;
@@ -115,6 +120,46 @@ require([
             return $.Deferred().reject(result);
         }
     }
+
+
+    function checkContentValidity(contents) {
+        // Do a rough file content validation
+        var tsvMatch = contents.match(/\t/g);
+        var csvMatch = contents.match(/,/g);
+        var whitelistMatch = contents.match(base.barcode_file_whitelist);
+
+        return !((tsvMatch && csvMatch) || (!tsvMatch && !csvMatch) || (csvMatch && csvMatch.length % 2 != 0) || (tsvMatch && tsvMatch.length % 2 != 0) || whitelistMatch);
+    }
+
+    // Text-area paste
+    $('#enter-barcodes button.verify').on('click',function(){
+        var content = $('#enter-barcodes textarea').val();
+
+        if(!checkContentValidity(content)) {
+            base.showJsMessage("error","The entered set of barcodes is not properly formatted. Please double-check that they are in tab- or comma-delimited format.",true);
+            return false;
+        } else {
+            $('.alert-dismissible button.close').trigger('click');
+        }
+
+        var entries = content.split('\n');
+
+        // Validate the entries
+        validateEntries(entries).then(
+            function(result){
+                showEntries(result, $('#enter-barcodes'));
+                $('#enter-barcodes .btn.save-cohort').removeAttr('disabled');
+                $('#enter-barcodes .btn.save-cohort').show();
+            },function(result){
+                // We only reach this point if no entries are valid, so show an error message as well.
+                base.showJsMessage("error","None of the supplied barcode entries were valid. Please double-check the format of your entries.",true);
+                showEntries(result.responseJSON,$('#enter-barcodes'));
+                fileUploadField.val("");
+                $('#enter-barcodes .btn.save').attr('disabled','disabled');
+                $('#enter-barcodes .btn.save-cohort').hide();
+            }
+        );
+    });
 
 
     // File Upload
@@ -131,6 +176,9 @@ require([
         $('#file-upload-btn').click(function(event){
             event.preventDefault()
             fileUploadField.click();
+            $('.alert-dismissible button.close').trigger('click');
+            $('.barcode-status').hide();
+            $('#upload .save-cohort').attr('disabled','disabled');
         });
 
         fileUploadField.on('change', function(event){
@@ -153,12 +201,7 @@ require([
                 var fr = new FileReader();
                 fr.onload = function(event){
 
-                    // Do a rough file content validation
-                    var tsvMatch = fr.result.match(/\t/g);
-                    var csvMatch = fr.result.match(/,/g);
-                    var whitelistMatch = fr.result.match(base.barcode_file_whitelist);
-
-                    if((tsvMatch && csvMatch) || (!tsvMatch && !csvMatch) || (csvMatch && csvMatch.length % 2 != 0) || (tsvMatch && tsvMatch.length % 2 != 0) || whitelistMatch) {
+                    if(!checkContentValidity(fr.result)) {
                         base.showJsMessage("error","This file is not in a valid format. Please supply a comma- or tab-delimited file, in .tsv, .csv, or .txt format.",true);
                         $('#uploading').removeClass('in');
                         $('#file-upload-btn').show();
@@ -171,14 +214,16 @@ require([
                     // Validate the entries
                     validateEntries(entries).then(
                         function(result){
-                            showEntries(result);
-                            $('.btn.save').removeAttr('disabled');
+                            showEntries(result, $('#upload-file'));
+                            $('#upload-file .btn.save-cohort').removeAttr('disabled');
+                            $('#upload-file .btn.save-cohort').show();
                         },function(result){
                             // We only reach this point if no entries are valid, so show an error message as well.
                             base.showJsMessage("error","None of the supplied barcode entries were valid. Please double-check the format of your entries.",true);
-                            showEntries(result.invalid_entries);
+                            showEntries(result.responseJSON,$('#upload-file'));
                             fileUploadField.val("");
-                            $('.btn.save').attr('disabled','disabled');
+                            $('#upload-file .btn.save').attr('disabled','disabled');
+                            $('#upload-file .btn.save-cohort').hide();
                         }
                     );
                     $('#uploading').removeClass('in');
@@ -191,39 +236,51 @@ require([
         })
     }
 
-    function showEntries(result) {
-        if(result.invalid_entries) {
+    function showEntries(result, tab) {
+        if(result.invalid_entries && result.invalid_entries.length > 0) {
+            tab.find('.validation-messages ul').empty();
             var entry_set = "";
             for(var i=0; i < result.invalid_entries.length; i++) {
-                entry_set += result.invalid_entries[i]+'\n';
+                var entry = result.invalid_entries[i];
+                entry_set += entry['case']+", "+entry['sample']+", "+entry['program']+'\n';
             }
-            $('.invalid-entries').html(entry_set);
-            $('.invalid-entries').show();
-            $('#invalid-not-saved').show();
+            tab.find('.invalid-entries pre').html(entry_set);
+            if(result.messages) {
+                var msg_set = "";
+                for(var i=0; i < result.messages.length; i++) {
+                    tab.find('.validation-messages ul').append('<li>'+result.messages[i]+'</li>')
+                }
+                tab.find('.validation-messages').show();
+            } else {
+                tab.find('.validation-messages').hide();
+            }
+            tab.find('.invalid-entries').show();
         } else {
-            $('.invalid-entries').hide();
-            $('#invalid-not-saved').hide();
+            tab.find('.invalid-entries').hide();
+            tab.find('.invalid-not-saved').hide();
         }
 
-        if(result.valid_entries) {
+        if(result.valid_entries && result.valid_entries.length > 0) {
             var entry_set = "";
             for(var i=0; i < result.valid_entries.length; i++) {
-                entry_set += result.valid_entries[i]+'\n';
+                var entry = result.valid_entries[i];
+                entry_set += entry['case']+", "+entry['sample']+", "+entry['program']+'\n';
             }
-            $('.valid-entries').html(entry_set);
-            $('.valid-entries').show();
-            $('.cohort-counts').empty();
-            for(program in result.counts) {
-                if(result.counts.hasOwnProperty(program)) {
-                    var prod_deets = result.counts[program];
-                    $('.cohort-counts').append('<tr><td>'+program+'</td><td>'+prod_deets['samples']+'</td><td>'+prod_deets['cases']+'</td>');
-                }
+            tab.find('.valid-entries pre').html(entry_set);
+            tab.find('.valid-entries').show();
+            tab.find('.cohort-counts tbody').empty();
+            for(var i = 0; i < result.counts.length; i++) {
+                var prog_deets = result.counts[i];
+                tab.find('.cohort-counts tbody').append('<tr><td>'+prog_deets['program']+'</td><td>'+prog_deets['samples']+'</td><td>'+prog_deets['cases']+'</td>');
             }
-            $('.cohort-counts').show();
+            tab.find('.cohort-counts').show();
+            result.invalid_entries && result.invalid_entries.length > 0 && tab.find('.invalid-not-saved').show();
         } else {
-            $('.valid-entries').hide();
-            $('.cohort-counts').hide();
+            tab.find('.valid-entries').hide();
+            tab.find('.cohort-counts').hide();
+            tab.find('.invalid-not-saved').hide();
         }
+        tab.find('.barcode-status').show();
     }
 
 
