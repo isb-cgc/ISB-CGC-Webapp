@@ -121,7 +121,7 @@ require([
         }
     }
 
-
+    // Basic filtering for tsv or csv format, correct number of columns (including empties), and allowed characters
     function checkContentValidity(contents) {
         // Do a rough file content validation
         var tsvMatch = contents.match(/\t/g);

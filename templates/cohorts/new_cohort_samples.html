@@ -127,21 +127,21 @@
                             <hr>
                             <button class="btn btn-primary instructions" title="Show/Hide the instructions">Instructions</button>
                             <div class="instructions" style="display: none;">
-                                <p>All entries must contain a valid <span class="code">case barcode</span> and <span class="code">program short name</span>, and may optionally include a <span class="code">sample barcode</span>.
+                                <p>All entries must contain a valid <span class="code">case barcode</span> <b><i>or</i></b> <span class="code">sample barcode</span>, and a valid <span class="code">program short name</span>.</p>
                                 <p>Valid program short names:</p>
                                 <ul>
                                     <li>TCGA</li>
                                     <li>CCLE</li>
                                     <li>TARGET</li>
                                 </ul>
-                                <p>When a sample barcode is omitted, all samples from the specified case will be included in the cohort. Make a separate entry per sample/case barcode pair if only specific samples from a case should be added to the cohort. </p>
+                                <p>When only a case barcode is provided, all samples from that case will be included in the cohort. Make a separate entry per sample if only specific samples from a case should be added to the cohort. </p>
                                 <p>Files must be in tab- or comma-delimited format (TSV or CSV) and have an extension of <span class="code">.txt</span>, <span class="code">.csv</span>, or <span class="code">.tsv</span>. Please do not include any column headers. Values may be placed in single or double quotes. Format your entries as follows:</p>
                                 <ul><pre>Case Barcode,Sample Barcode,Program Short Name</pre></ul>
-                                <p>When omitting sample barcodes, please be sure to still include the empty column's delimiter. (See examples below.) You may also include an empty quoted value ("" or ''), but this is optional.</p>
+                                <p>When omitting either barcode type, please be sure to still include the empty column's delimiter. (See examples below.) You may place an empty quoted value ("" or ''), but this is optional.</p>
                                 <h5>Example Barcode Set</h5>
                                 <ul>
                                     <pre>TCGA-N9-A4Q4,,TCGA
-TCGA-N7-A4Y8,TCGA-N7-A4Y8-01A,TCGA
+,TCGA-N7-A4Y8-01A,TCGA
 'Saos-2','CCLE-Saos-2', 'CCLE'
 'Hs 863.T', '','CCLE'
 "TARGET-51-PAJLIV",, "TARGET"
@@ -197,21 +197,21 @@ TARGET-51-PAJMFS,"", "TARGET"</pre>
                             <hr>
                             <button class="btn btn-primary instructions" title="Show/Hide the instructions">Instructions</button>
                             <div class="instructions" style="display: none;">
-                                <p>All entries must contain a valid <span class="code">case barcode</span> and <span class="code">program short name</span>, and may optionally include a <span class="code">sample barcode</span>.</p>
+                                <p>All entries must contain a valid <span class="code">case barcode</span> <b><i>or</i></b> <span class="code">sample barcode</span>, and a valid <span class="code">program short name</span>.</p>
                                 <p>Valid program short names:</p>
                                 <ul>
                                     <li>TCGA</li>
                                     <li>CCLE</li>
                                     <li>TARGET</li>
                                 </ul>
-                                <p>When a sample barcode is omitted, all samples from the specified case will be included in the cohort. Make a separate entry per sample/case barcode pair if only specific samples from a case should be added to the cohort. </p>
+                                <p>When only a case barcode is provided, all samples from that case will be included in the cohort. Make a separate entry per sample if only specific samples from a case should be added to the cohort. </p>
                                 <p>All entries must be in tab- or comma-separated format, and there should be no headers. Values may be placed in single or double quotes. Order your entries as follows:</p>
                                 <ul><pre>Case Barcode,Sample Barcode,Program Short Name</pre></ul>
-                                <p>When omitting sample barcodes, please be sure to still include the empty column's delimiter. (See examples below.) You may place an empty quoted value ("" or ''), but this is optional.</p>
+                                <p>When omitting either barcode type, please be sure to still include the empty column's delimiter. (See examples below.) You may place an empty quoted value ("" or ''), but this is optional.</p>
                                 <h5>Example Barcode Set</h5>
                                 <ul>
                                     <pre>TCGA-N9-A4Q4,,TCGA
-TCGA-N7-A4Y8,TCGA-N7-A4Y8-01A,TCGA
+,TCGA-N7-A4Y8-01A,TCGA
 'Saos-2','CCLE-Saos-2', 'CCLE'
 'Hs 863.T', '','CCLE'
 "TARGET-51-PAJLIV",, "TARGET"
