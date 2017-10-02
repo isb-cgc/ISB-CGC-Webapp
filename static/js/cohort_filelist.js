@@ -254,7 +254,7 @@ require([
                     }
 
                     if (files[i]['cloudstorage_location'] && files[i]['cloudstorage_location'].split('.').pop() == 'bam') {
-                        val = files[i]['cloudstorage_location'] + ',' + files[i]['sample'];
+                        val = files[i]['cloudstorage_location'] + ';' + files[i]['cloudstorage_location'].substring(0,files[i]['cloudstorage_location'].lastIndexOf("/")+1)+files[i]['index_name']+',' + files[i]['sample'];
                         dataTypeName = "gcs_bam";
                         label = "Cloud Storage";
                         checkbox_inputs += '<label><input type="checkbox" token-label="'+tokenLabel+'" program="'+files[i]['program']+'" name="'+dataTypeName+'" data-type="'+dataTypeName+'" value="'+val+'"';
