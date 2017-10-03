@@ -50,6 +50,8 @@ require([
         var form = $(this).find('form');
         if(form.length){
             form[0].reset();
+            $('#base-id').empty();
+            $('#subtract-ids').empty();
         }
     });
 
@@ -59,6 +61,7 @@ require([
         $(this).parents('.complement-control').length <= 0 && $('input[type="checkbox"][value="' + $(this).parent().attr('value') + '"]').trigger('click');
         $(this).parents('.complement-control').length <= 0 && $('#base-ids').empty() && $('#subtract-ids').empty();
         $(this).parent('.cohort-label').remove();
+        console.debug(parent_form.find('.label').length);
         if (parent_form && parent_form.find('.label').length <= 1) {
             parent_form.find('[type="submit"]').prop('disabled', 'disabled')
         }
@@ -99,10 +102,8 @@ require([
 
     $('.select-all').on('change', function() {
         var checked = $(this).is(':checked');
-        var tablename = '#' + $(this).closest('table')[0].id;
         var formApply = $('#cohort-apply-to-workbook');
         if (checked) {
-            enable_buttons(tablename);
             // Create tokens for Set Ops modal
             $(this).parents('table').find('tr:not(:first) input[type="checkbox"]').each(function() {
                 var token = $('<span class="cohort-label label label-default space-right-5" value="'
@@ -113,20 +114,23 @@ require([
                 $('.selected-cohorts').each(function() {
                     $(this).append(token.clone());
                 });
+                $('#selected-ids').append(token.clone());
 
                 // Add all values to the form
                 formApply.append($('<input>', {type: 'hidden', name: 'cohorts', value: $(this).val()}));
             });
         } else {
-            disable_buttons(tablename);
-            clear_objects();
-            repopulate_cohort_selects();
+            formApply.empty();
+            $('.selected-cohorts').empty();
+            $('#selected-ids').empty();
         }
 
         // Sets all checkboxes to the state of the select-all
         $(this).parents('table').find('input[type=checkbox]').each(function() {
             $(this).prop('checked', checked);
         });
+
+        toggle_buttons();
     });
 
     var checkbox_change_callback = function() {
@@ -336,16 +340,16 @@ require([
                 var cohort = {
                     'value': $(this).parent('td').siblings('.id-col').text().trim(),
                     'label': $(this).parent('td').siblings('.name-col').text().trim(),
-                    'size': $(this).parent('td').siblings('.sample-col').text().trim()
+                    'size': parseInt($(this).parent('td').siblings('.sample-col').text().trim())
                 };
                 if(!largest) {
                     largest = cohort;
-                } else if(smaller.length <= 0) {
-                    smaller.push(cohort);
                 } else {
                     if(cohort['size'] > largest['size']) {
                         smaller.push(largest);
                         largest = cohort;
+                    } else {
+                        smaller.push(cohort);
                     }
                 }
             });
@@ -380,6 +384,7 @@ require([
 
     $('#set-ops-modal').on('show.bs.modal', function(){
         $('#operation').trigger('change');
+        $(this).find('button[type="submit"]').removeAttr('disabled');
 
         $('.cohort-search-div').hide();
 
