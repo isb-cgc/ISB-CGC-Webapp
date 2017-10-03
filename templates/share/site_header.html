@@ -17,6 +17,11 @@
                             <a href="{% url 'landing_page' %}" title="Home Page" >
                         {%  endif %}
                         <img class="navbar-brand" src="{% static 'img/isblogo.png' %}" alt="ISB Logo"/><span class="navbar-item">ISB-CGC</span></a></li>
+                     {% if request.path != '/' %}
+                       <li class="navbar-link navbar-item">
+                            <a href="{% url 'landing_page' %}">Home Page</a>
+                        </li>
+                     {% endif %}
                      <li class="navbar-link navbar-item">
                          <a href="http://isb-cancer-genomics-cloud.readthedocs.org/en/latest/" target="_blank">Documentation</a>
                      </li>
