@@ -43,6 +43,9 @@ require([
     'base'
 ], function ($, jqueryui, bootstrap, session_security, _, base) {
 
+    var savingChanges = false;
+    var validated_barcodes = null;
+
     // Used for getting the CORS token for submitting data
     function get_cookie(name) {
         var cookieValue = null;
@@ -148,15 +151,15 @@ require([
         validateEntries(entries).then(
             function(result){
                 showEntries(result, $('#enter-barcodes'));
-                $('#enter-barcodes .btn.save-cohort').removeAttr('disabled');
-                $('#enter-barcodes .btn.save-cohort').show();
+                $('#enter-barcodes .save-cohort button').removeAttr('disabled');
+                $('#enter-barcodes .save-cohort').show();
             },function(result){
                 // We only reach this point if no entries are valid, so show an error message as well.
                 base.showJsMessage("error","None of the supplied barcode entries were valid. Please double-check the format of your entries.",true);
                 showEntries(result.responseJSON,$('#enter-barcodes'));
                 fileUploadField.val("");
-                $('#enter-barcodes .btn.save').attr('disabled','disabled');
-                $('#enter-barcodes .btn.save-cohort').hide();
+                $('#enter-barcodes .save-cohort button').attr('disabled','disabled');
+                $('#enter-barcodes .save-cohort').hide();
             }
         );
     });
@@ -262,11 +265,14 @@ require([
 
         if(result.valid_entries && result.valid_entries.length > 0) {
             var entry_set = "";
+            validated_barcodes = [];
             for(var i=0; i < result.valid_entries.length; i++) {
                 var entry = result.valid_entries[i];
                 entry_set += entry['case']+", "+entry['sample']+", "+entry['program']+'\n';
+                validated_barcodes.push({'sample_barcode': entry['sample'], 'case_barcode': entry['case'], 'program': entry['program_id'], 'project': entry['project']});
             }
             tab.find('.valid-entries pre').html(entry_set);
+            tab.find('.valid-entries input').remove();
             tab.find('.valid-entries').show();
             tab.find('.cohort-counts tbody').empty();
             for(var i = 0; i < result.counts.length; i++) {
@@ -290,6 +296,41 @@ require([
         $(this).siblings('div.instructions').is(':visible') ? $(this).siblings('div.instructions').hide() : $(this).siblings('div.instructions').show();
     });
 
+    $('button[data-target="#create-cohort-modal"]').on('click',function(e){
+        // Clear previous alerts
+        $('#unallowed-chars-alert').hide();
 
+        $('#cohort-counts-modal tbody').empty();
+        $('.tab-pane.data-tab.active .cohort-counts tbody tr').each(function(){
+            $('#cohort-counts-modal tbody').append($(this).clone());
+        });
+
+    });
+
+    $('#create-cohort-form').on('submit', function(e) {
+
+        $('#unallowed-chars-alert').hide();
+
+        if(savingChanges) {
+            e.preventDefault();
+            return false;
+        }
+
+        var unallowed = $('#create-cohort-name').val().match(base.whitelist);
+        if(unallowed) {
+            $('.unallowed-chars').text(unallowed.join(", "));
+            $('#unallowed-chars-alert').show();
+            e.preventDefault();
+            return false;
+        }
+
+        var form = $(this);
+
+        savingChanges = true;
+
+        form.append('<input type="hidden" name="apply-name" value="true" />');
+        form.append('<input type="hidden" name="apply-barcodes" value="true" />');
+        form.append($('<input>').attr({type: "hidden", name: "barcodes", value: JSON.stringify(validated_barcodes)}));
+    });
 });
 
