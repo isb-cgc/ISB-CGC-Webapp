@@ -42,13 +42,6 @@
         </ol>
     {% endif %}
     <h1 class="page-header pull-left">Create Cohort - Barcodes</h1>
-    {% if workbook %}
-        <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal">Apply to Worksheet</button>
-    {% elif create_workbook %}
-        <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal">Apply to new Worksheet</button>
-    {% else %}
-        <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal">Save As New Cohort</button>
-    {% endif %}
 </div>
 
 {% endblock %}
@@ -113,7 +106,15 @@
                                     </table>
                                 </div>
                                 <p class="invalid-not-saved">Note: Invalid entries <b>will not</b> be included if you choose to create this cohort.</p>
-                                <button class="btn btn-primary save-cohort" title="Save this Cohort" style="display: none;">Save Cohort</button>
+                                <div class="save-cohort" style="display: none;">
+                                    {% if workbook %}
+                                        <button class="btn btn-primary" data-toggle="modal" data-target="#create-cohort-modal">Apply to Worksheet</button>
+                                    {% elif create_workbook %}
+                                        <button class="btn btn-primary" data-toggle="modal" data-target="#create-cohort-modal">Apply to new Worksheet</button>
+                                    {% else %}
+                                        <button class="btn btn-primary" data-toggle="modal" data-target="#create-cohort-modal">Save As New Cohort</button>
+                                    {% endif %}
+                                </div>
                                 <div class="invalid-entries">
                                     <h5>Invalid Entries</h5>
                                     <ul><pre></pre></ul>
@@ -183,7 +184,15 @@ TARGET-51-PAJMFS,"", "TARGET"</pre>
                                     </table>
                                 </div>
                                 <p class="invalid-not-saved">Note: Invalid entries <b>will not</b> be saved if you choose to create this cohort.</p>
-                                <button class="btn btn-primary save-cohort" title="Save this Cohort" style="display: none;">Save Cohort</button>
+                                <div class="save-cohort" style="display: none;">
+                                    {% if workbook %}
+                                        <button class="btn btn-primary" data-toggle="modal" data-target="#create-cohort-modal">Apply to Worksheet</button>
+                                    {% elif create_workbook %}
+                                        <button class="btn btn-primary" data-toggle="modal" data-target="#create-cohort-modal">Apply to new Worksheet</button>
+                                    {% else %}
+                                        <button class="btn btn-primary" data-toggle="modal" data-target="#create-cohort-modal">Save Cohort</button>
+                                    {% endif %}
+                                </div>
                                 <div class="invalid-entries">
                                     <h5>Invalid Entries</h5>
                                     <ul><pre></pre></ul>
@@ -244,26 +253,24 @@ TARGET-51-PAJMFS,"", "TARGET"</pre>
                     <form id="create-cohort-form" method="POST" action="{% url 'save_cohort' %}">
                 {% endif %}
                     <div class="modal-body">
-                        <div id="multi-prog-cohort-create-warn" class="alert alert-warning alert-dismissable" style="display: none;">
-                            <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                            Your cohort contains samples from multiple programs. Please note that filters will only apply to samples from the program indicated
-                            by the tab they were chosen on - they will not apply to samples from other programs in this cohort.
-                        </div>
                         <div id="unallowed-chars-alert" class="alert alert-warning alert-dismissable" style="display: none;">
                             <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                             Your cohort's name contains invalid characters (<span class="unallowed-chars"></span>). Please choose another name.
-                        </div>
-                        <div id="at-least-one-filter-alert-modal" class="alert alert-warning alert-dismissable" style="display: none;">
-                            <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                            You must choose at least one filter to include samples in your cohort.
                         </div>
                         <div class="form-group">
                             <label for="cohort-name">Name:</label>
                             <input class="form-control" type="text" id="create-cohort-name" name="name" required />
                         </div>
                         <div class="form-group">
-                            <h5>Selected Filters:</h5>
-                            <p id="selected-filters" class="form-control-static"></p>
+                            <h5>Barcode Counts:</h5>
+                            <table id="cohort-counts-modal" class="table table-striped">
+                                <thead><tr>
+                                        <th>Program</th>
+                                        <th>Samples</th>
+                                        <th>Cases</th>
+                                </tr></thead>
+                                <tbody></tbody>
+                            </table>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -280,4 +287,4 @@ TARGET-51-PAJMFS,"", "TARGET"</pre>
     </script>
 {% endblock %}
 
-{% block js_file %}{% static 'js/cohort_samples_details.js' %}{% endblock %}
+{% block js_file %}{% static 'js/cohort_barcodes_details.js' %}{% endblock %}

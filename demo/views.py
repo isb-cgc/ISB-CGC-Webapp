@@ -251,7 +251,7 @@ def index(request):
 
                 if len(authorized_datasets) > 0:
                     # if user has access to one or more datasets, warn message is different
-                    warn_message = 'You are reminded that when accessing controlled access information you are bound by the dbGaP DATA USE CERTIFICATION AGREEMENT (DUCA) for each dataset.' + warn_message
+                    warn_message = 'You are reminded that when accessing controlled information you are bound by the dbGaP DATA USE CERTIFICATION AGREEMENT (DUCA) for each dataset.' + warn_message
 
                 all_datasets = das.get_all_datasets_and_google_groups()
 

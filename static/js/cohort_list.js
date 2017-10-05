@@ -333,7 +333,8 @@ require([
     $('#operation').on('change', function() {
         if ($(this).val() == 'complement') {
             $('.set-control').hide();
-            $('.complement-control').show();
+            $('#base-id').find('span').remove();
+            $('#subtract-ids').find('span').remove();
             var largest = null;
             var smaller = [];
             $('tr:not(:first) input[type="checkbox"]:checked').each(function(){
@@ -376,6 +377,8 @@ require([
                     }
                 }
             }
+            $('.cohort-search-div').hide();
+            $('.complement-control').show();
         } else {
             $('.set-control').show();
             $('.complement-control').hide();
