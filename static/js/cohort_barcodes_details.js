@@ -218,15 +218,15 @@ require([
                     validateEntries(entries).then(
                         function(result){
                             showEntries(result, $('#upload-file'));
-                            $('#upload-file .btn.save-cohort').removeAttr('disabled');
-                            $('#upload-file .btn.save-cohort').show();
+                            $('#upload-file .save-cohort button').removeAttr('disabled');
+                            $('#upload-file .save-cohort').show();
                         },function(result){
                             // We only reach this point if no entries are valid, so show an error message as well.
                             base.showJsMessage("error","None of the supplied barcode entries were valid. Please double-check the format of your entries.",true);
                             showEntries(result.responseJSON,$('#upload-file'));
                             fileUploadField.val("");
-                            $('#upload-file .btn.save').attr('disabled','disabled');
-                            $('#upload-file .btn.save-cohort').hide();
+                            $('#upload-file .save-cohort button').attr('disabled','disabled');
+                            $('#upload-file .save-cohort').hide();
                         }
                     );
                     $('#uploading').removeClass('in');
