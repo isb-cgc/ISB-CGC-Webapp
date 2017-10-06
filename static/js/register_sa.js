@@ -147,7 +147,7 @@ require([
     });
 
     $('#register-sa').on('submit', function(e) {
-        !($('input[name="is_adjust"]').length) && $('#verify-sa')[0].reset();
+        $('#verify-sa')[0].reset();
     });
 
     $('.retry-btn').on('click', function(e) {
