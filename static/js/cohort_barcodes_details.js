@@ -70,10 +70,10 @@ require([
         };
 
         barcodes.filter(function(barcode){ return barcode !== ""; }).map(function(barcode) {
-            // Trim leading and trailing quotes
-            barcode = barcode.replace(/(^\s*['"])|(['"]\s*$)/g,"").trim();
             // Split the entry into its values
-            var entry_split = barcode.split(/["']*\s*,\s*["']*/);
+            barcode = barcode.trim();
+            // Per https://stackoverflow.com/a/1757107 regex to manage commas inside quotes in a CSV, adjusted to work for tabs and single quotes
+            var entry_split = barcode.split(/\s*[,\t](?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)\s*/);
             if (entry_split.length !== 3) {
                 if (!result.invalid_entries) {
                     result.invalid_entries = [];
@@ -83,7 +83,7 @@ require([
                 if (!result.valid_entries) {
                     result.valid_entries = [];
                 }
-                result.valid_entries.push(entry_split[0] + ":" + entry_split[1] + ":" + entry_split[2]);
+                result.valid_entries.push(entry_split[0].replace(/["']/g,"") + "{}" + entry_split[1].replace(/["']/g,"") + "{}" + entry_split[2].replace(/["']/g,""));
             }
         });
 
@@ -98,8 +98,8 @@ require([
                 data        : JSON.stringify({'barcodes' : result.valid_entries}),
                 beforeSend  : function(xhr){xhr.setRequestHeader("X-CSRFToken", csrftoken);},
                 success : function (data) {
-                    result.valid_entries = data.valid_entries ? data.valid_entries : null;
-                    if(data.invalid_entries) {
+                    result.valid_entries = data.valid_entries && data.valid_entries.length > 0 ? data.valid_entries : null;
+                    if(data.invalid_entries && data.invalid_entries.length > 0) {
                         if (!result.invalid_entries) {
                             result.invalid_entries = data.invalid_entries;
                         } else {
@@ -129,9 +129,19 @@ require([
         // Do a rough file content validation
         var tsvMatch = contents.match(/\t/g);
         var csvMatch = contents.match(/,/g);
+        var dQuoteMatch = contents.match(/"/g);
+        var sQuoteMatch = contents.match(/'/g);
         var whitelistMatch = contents.match(base.barcode_file_whitelist);
 
-        return !((tsvMatch && csvMatch) || (!tsvMatch && !csvMatch) || (csvMatch && csvMatch.length % 2 != 0) || (tsvMatch && tsvMatch.length % 2 != 0) || whitelistMatch);
+        // Content rules:
+        // - A file cannot have both tabs and commas, or, if it does, there must be an even number of double or single quotes (to surround the tab or comma in the value)
+        // - A file must have an even number or tabs or commas
+        // - A file must have an even number of single and/or double quotes
+        // - A file must only have character present on the whitelist
+
+        return !(
+            (tsvMatch && csvMatch && ((sQuoteMatch &&sQuoteMatch.length <= 0 && dQuoteMatch && dQuoteMatch.length <= 0) || (dQuoteMatch && dQuoteMatch.length % 2 != 0 && sQuoteMatch && sQuoteMatch.length % 2 != 0)))
+            || (!tsvMatch && !csvMatch) || (csvMatch && csvMatch.length % 2 != 0) || (tsvMatch && tsvMatch.length % 2 != 0) || whitelistMatch);
     }
 
     // Text-area paste
@@ -247,12 +257,19 @@ require([
     }
 
     function showEntries(result, tab) {
+        tab.find('.invalid-entries pre').empty();
+        tab.find('.valid-entries pre').empty();
         if(result.invalid_entries && result.invalid_entries.length > 0) {
             tab.find('.validation-messages ul').empty();
             var entry_set = "";
             for(var i=0; i < result.invalid_entries.length; i++) {
                 var entry = result.invalid_entries[i];
-                entry_set += entry['case']+", "+entry['sample']+", "+entry['program']+'\n';
+                entry_set += (
+                    (entry['case'].indexOf(",") < 0 ? entry['case'] : '"' + entry['case'] + '"')
+                    +", "
+                    +(entry['sample'].indexOf(",") < 0 ? entry['sample'] : '"' + entry['sample'] + '"')
+                    +", "+entry['program']+'\n'
+                );
             }
             tab.find('.invalid-entries pre').html(entry_set);
             if(result.messages) {
@@ -275,7 +292,12 @@ require([
             validated_barcodes = [];
             for(var i=0; i < result.valid_entries.length; i++) {
                 var entry = result.valid_entries[i];
-                entry_set += entry['case']+", "+entry['sample']+", "+entry['program']+'\n';
+                entry_set += (
+                    (entry['case'].indexOf(",") < 0 ? entry['case'] : '"' + entry['case'] + '"')
+                    +", "
+                    +(entry['sample'].indexOf(",") < 0 ? entry['sample'] : '"' + entry['sample'] + '"')
+                    +", "+entry['program']+'\n'
+                );
                 validated_barcodes.push({'sample_barcode': entry['sample'], 'case_barcode': entry['case'], 'program': entry['program_id'], 'project': entry['project']});
             }
             tab.find('.valid-entries pre').html(entry_set);
