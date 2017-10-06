@@ -161,8 +161,8 @@ TARGET-51-PAJMFS,"", "TARGET"</pre>
                             <h4>Paste a set of barcodes and programs</h4>
                         </div>
                         <div class="panel-body">
-                            <h5>Barcode Entries</h5>
-                            <textarea></textarea>
+                            <h5>Barcode Entries</h5> <i>(Maximum length: 10000 characters)</i>
+                            <textarea id="pasted-barcodes" maxlength="10000"></textarea>
                             <p>
                                 <button class="btn btn-primary verify" title="Verify the barcode set">Verify</button>
                             </p>
@@ -206,6 +206,7 @@ TARGET-51-PAJMFS,"", "TARGET"</pre>
                             <hr>
                             <button class="btn btn-primary instructions" title="Show/Hide the instructions">Instructions</button>
                             <div class="instructions" style="display: none;">
+                                <p>There is a maximum length of 10000 character for the text box. Please use the file upload option if you need to upload more barcodes than will fit in that space.</p>
                                 <p>All entries must contain a valid <span class="code">case barcode</span> <b><i>or</i></b> <span class="code">sample barcode</span>, and a valid <span class="code">program short name</span>.</p>
                                 <p>Valid program short names:</p>
                                 <ul>

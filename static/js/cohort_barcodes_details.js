@@ -332,5 +332,13 @@ require([
         form.append('<input type="hidden" name="apply-barcodes" value="true" />');
         form.append($('<input>').attr({type: "hidden", name: "barcodes", value: JSON.stringify(validated_barcodes)}));
     });
-});
 
+    $("#pasted-barcodes").keypress(function (e) {
+        var str = $(this).val();
+        if (str.length >= parseInt($("#pasted-barcodes").attr('maxlength'))) {
+            e.preventDefault();
+            base.showJsMessage("warning", "You have reached the maximum size of the text box.",true);
+            return false;
+        }
+    });
+});
