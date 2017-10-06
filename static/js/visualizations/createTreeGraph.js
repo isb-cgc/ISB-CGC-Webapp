@@ -39,22 +39,22 @@ function($, d3, d3tip, vis_helpers) {
         });
 
     return {
-        get_treemap_ready: function(data, attribute, prog_id) {
+        get_treemap_ready: function(data, clin_attr_key, attribute, prog_id) {
             var children = [];
             for (var i in data) {
                 // For Issue 2018 we build a standardized tag that identifies check boxes:
-                var click_targ = (prog_id + "-" + attribute + "-" + data[i]['value']).replace(/\s+/g, '_').toUpperCase();
+                var click_targ = (prog_id + "-" + clin_attr_key + "-" + data[i]['value']).replace(/\s+/g, '_').toUpperCase();
                 children.push({name:(data[i]['displ_name'] || data[i]['value'].toString().replace(/_/g, ' ')), count: data[i]['count'], click_targ: click_targ});
             }
             return {children: children, name: attribute};
         },
-        draw_tree: function(data, svg, prog_id, attribute, w, h, showtext, tip, pcount) {
+        draw_tree: function(data, svg, prog_id, clin_attr_key, attribute, w, h, showtext, tip, pcount) {
 
             pcount = pcount || 0;
 
             tip = treeTip || tip;
 
-            var node = this.get_treemap_ready(data, attribute, prog_id);
+            var node = this.get_treemap_ready(data, clin_attr_key, attribute, prog_id);
             var treemap = d3.layout.treemap()
                 .round(false)
                 .size([w, h])
@@ -147,7 +147,7 @@ function($, d3, d3tip, vis_helpers) {
                     .style("height", h + "px")
                     .append("svg:g")
                     .attr("transform", "translate(.5,.5)");
-                this.draw_tree(tree_data[clin_attr_keys[i]], graph_svg, prog_id, clin_attr[clin_attr_keys[i]], w, h, false, treeTip, pcount);
+                this.draw_tree(tree_data[clin_attr_keys[i]], graph_svg, prog_id, clin_attr_keys[i], clin_attr[clin_attr_keys[i]], w, h, false, treeTip, pcount);
             }
 
             var stopPlot = new Date().getTime();
