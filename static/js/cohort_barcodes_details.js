@@ -214,12 +214,17 @@ require([
 
                     var entries = fr.result.split('\n');
 
+                    $('#file-upload-btn').attr('disabled','disabled');
+                    $('#verify-pending').show();
+
                     // Validate the entries
                     validateEntries(entries).then(
                         function(result){
                             showEntries(result, $('#upload-file'));
                             $('#upload-file .save-cohort button').removeAttr('disabled');
                             $('#upload-file .save-cohort').show();
+                            $('#verify-pending').hide();
+                            $('#file-upload-btn').removeAttr('disabled');
                         },function(result){
                             // We only reach this point if no entries are valid, so show an error message as well.
                             base.showJsMessage("error","None of the supplied barcode entries were valid. Please double-check the format of your entries.",true);
@@ -227,6 +232,8 @@ require([
                             fileUploadField.val("");
                             $('#upload-file .save-cohort button').attr('disabled','disabled');
                             $('#upload-file .save-cohort').hide();
+                            $('#verify-pending').hide();
+                            $('#file-upload-btn').removeAttr('disabled');
                         }
                     );
                     $('#uploading').removeClass('in');
