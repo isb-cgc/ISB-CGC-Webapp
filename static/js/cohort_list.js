@@ -189,8 +189,15 @@ require([
                 xhr.setRequestHeader("X-CSRFToken", csrftoken);
             },
             success: function (data) {
-                if(data.result && data.result.msg) {
-                    base.setReloadMsg('info',data.result.msg);
+                if(data.result) {
+                    var msgs = [];
+                    if(data.result.msg) {
+                        msgs.push(data.result.msg);
+                    }
+                    if(data.result.note) {
+                        msgs.push(data.result.note)
+                    }
+                    base.setReloadMsg('info',msgs);
                 }
                 window.location.reload(true);
             },
@@ -282,8 +289,15 @@ require([
                     }
                 } else if(data.status && data.status == 'success') {
                     $this.closest('.modal').modal('hide');
-                    if(data.result && data.result.msg) {
-                        base.setReloadMsg('info',data.result.msg);
+                    if(data.result) {
+                        var msgs = [];
+                        if(data.result.msg) {
+                            msgs.push(data.result.msg);
+                        }
+                        if(data.result.note) {
+                            msgs.push(data.result.note)
+                        }
+                        base.setReloadMsg('info',msgs);
                     }
                     if($this.data('redirect')) {
                         window.location = $this.data('redirect');

@@ -55,10 +55,18 @@ define(['jquery'], function($) {
         showJsMessage: function(type,text,withEmpty,rootSelector) {
             rootSelector = rootSelector || '#js-messages';
             withEmpty && $(rootSelector).empty();
+            var msg = "";
+            if(text instanceof Array){
+                for(var i=0; i<text.length; i++) {
+                    msg += text[i] + '<br />';
+                }
+            } else {
+                msg = text;
+            }
             $(rootSelector).append(
                 $('<div>')
                     .addClass('alert alert-'+type +' alert-dismissible')
-                    .text(text)
+                    .html(msg)
                     .prepend(
                         '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">'
                         +'&times;</span><span class="sr-only">Close</span></button>'
