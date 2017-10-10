@@ -69,32 +69,31 @@ require([
     };
 
     var toggle_buttons = function() {
-        $('.cohort-table').each(function () {
-            if ($(this).find('tr:not(:first) input[type="checkbox"]:checked').length == 0) {
-                $(this).parent().find('.page-action-group .btn').prop('disabled', 'disabled');
-                $(this).parent().find('.page-action-group .btn').attr('title', 'Select one or more cohorts.');
-                $(this).parent().find('.page-action-group .btn.set-ops').attr('title', 'Select two or more cohorts.');
+        if ($('tr:not(:first) input[type="checkbox"]:checked').length == 0) {
+           $('.page-action-group .btn').prop('disabled', 'disabled');
+           $('.page-action-group .btn').attr('title', 'Select one or more cohorts.');
+           $('.page-action-group .btn.set-ops').attr('title', 'Select two or more cohorts.');
+        } else {
+            if($('tr:not(:first) input[type="checkbox"]:checked').length >= 2) {
+               $('.page-action-group .btn').removeAttr('title');
+               $('.page-action-group .btn:not(.owner-only)').removeAttr('disabled');
             } else {
-                if($(this).find('tr:not(:first) input[type="checkbox"]:checked').length >= 2) {
-                    $(this).parent().find('.page-action-group .btn').removeAttr('title');
-                    $(this).parent().find('.page-action-group .btn:not(.owner-only)').removeAttr('disabled');
-                } else {
-                    $(this).parent().find('.page-action-group .btn:not(.set-ops)').removeAttr('title');
-                    $(this).parent().find('.page-action-group .btn:not(.owner-only,.set-ops)').removeAttr('disabled');
-                    $(this).parent().find('.page-action-group .btn.set-ops').prop('disabled', 'disabled');
-                    $(this).parent().find('.page-action-group .btn.set-ops').attr('title', 'Select two or more cohorts.');
-                }
-
-                var canDelOrShare = true;
-                $(this).find('tr:not(:first) input[type="checkbox"]:checked').each(function () {
-                    if ($.trim($(this).parents('td').siblings('td.owner-col').text()) !== 'You') {
-                        canDelOrShare = false;
-                    }
-                });
-                canDelOrShare && $('.owner-only').removeAttr('disabled') && $(this).parent().find('.page-action-group .btn:not(.set-ops)').removeAttr('title');
-                !canDelOrShare && $('.owner-only').prop('disabled', 'disabled') && $(this).parent().find('.page-action-group .btn.owner-only').attr('title', "You don't have permission to share or delete some of the selected cohorts.");
+               $('.page-action-group .btn:not(.set-ops)').removeAttr('title');
+               $('.page-action-group .btn:not(.owner-only,.set-ops)').removeAttr('disabled');
+               $('.page-action-group .btn.set-ops').prop('disabled', 'disabled');
+               $('.page-action-group .btn.set-ops').attr('title', 'Select two or more cohorts.');
             }
-        });
+
+            var canDelOrShare = true;
+            $('tr:not(:first) input[type="checkbox"]:checked').each(function () {
+                if ($.trim($(this).parents('td').siblings('td.owner-col').text()) !== 'You') {
+                    canDelOrShare = false;
+                }
+            });
+            canDelOrShare && $('.owner-only').removeAttr('disabled') &&$('.page-action-group .btn:not(.set-ops)').removeAttr('title');
+            !canDelOrShare && $('.owner-only').prop('disabled', 'disabled') && $('.page-action-group .btn.owner-only').attr('title', "You don't have permission to share or delete some of the selected cohorts.");
+        }
+
 
         $('.cohort-table tr:not(:first) input[type="checkbox"]:checked').length == 0 && $('#cohort-apply-to-workbook .btn').prop('disabled', 'disabled');
         $('.cohort-table tr:not(:first) input[type="checkbox"]:checked').length > 0 && $('#cohort-apply-to-workbook .btn').removeAttr('disabled');
