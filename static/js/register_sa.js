@@ -123,6 +123,10 @@ require([
                     }
                 }
 
+                if($('input[value="remove"]:checked').length > 0) {
+                    register_form.append($('input[value="remove"]').clone()[0]);
+                }
+
                 user_ver_div.show();
                 $this.find('input[type="submit"]').prop('disabled', '');
 
