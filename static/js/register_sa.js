@@ -35,8 +35,9 @@ require([
     'jquery',
     'jqueryui',
     'bootstrap',
-    'session_security'
-], function($, jqueryui, bootstrap, session_security) {
+    'session_security',
+    'base'
+], function($, jqueryui, bootstrap, session_security, base) {
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function() {
@@ -122,6 +123,10 @@ require([
                     }
                 }
 
+                if($('input[value="remove"]:checked').length > 0) {
+                    register_form.append($('input[value="remove"]').clone()[0]);
+                }
+
                 user_ver_div.show();
                 $this.find('input[type="submit"]').prop('disabled', '');
 
@@ -129,7 +134,6 @@ require([
                 $('.cannot-register').hide();
 
                 // If no datasets were requested, or, they were and verification came out clean, allow registration
-                console.debug("data['datasets']: "+data['datasets']);
                 (data['datasets'].length <= 0 || data['all_user_datasets_verified']) ? $('.register-sa-div').show() : $('.cannot-register').show();
 
             },
@@ -137,10 +141,7 @@ require([
                 var response = $.parseJSON(xhr.responseText);
                 spinner.hide();
                 $('.verify-sa-btn').prop('disabled', '');
-                $('#invalid-sa-error').append('<div class="alert alert-error alert-dismissible">' +
-                    '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>'
-                        + response['message'] + '</div>'
-                );
+                base.showJsMessage(response['level'] || "error",response['message'],true);
             }
         });
         return false;
