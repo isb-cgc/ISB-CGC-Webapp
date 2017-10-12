@@ -124,7 +124,9 @@ require([
                 }
 
                 if($('input[value="remove"]:checked').length > 0) {
-                    register_form.append($('input[value="remove"]').clone()[0]);
+                    var remove_all = $('input[value="remove"]').clone();
+                    remove_all.attr("type","hidden");
+                    register_form.append(remove_all[0]);
                 }
 
                 user_ver_div.show();
