@@ -600,7 +600,7 @@ require([
                 $('.data-tab-content-panel:not(.spinner-panel)').removeClass('col-md-12').addClass('col-md-9');
                 $('.filter-panel').show();
                 $('.selected-filters').show();
-                $('.page-header').hide();
+                cohort_id && $('.page-header').hide();
                 $('input[name="cohort-name"]').show();
                 $('#default-cohort-menu').hide();
                 $('#edit-cohort-menu').show();
@@ -807,8 +807,15 @@ require([
                         base.showJsMessage('error',data.result.msg,true,'#share-cohort-js-messages');
                     }
                 } else if(data.status && data.status == 'success') {
-                    if(data.result && data.result.msg) {
-                        base.setReloadMsg('info',data.result.msg);
+                    if(data.result) {
+                        var msgs = [];
+                        if(data.result.msg) {
+                            msgs.push(data.result.msg);
+                        }
+                        if(data.result.note) {
+                            msgs.push(data.result.note)
+                        }
+                        base.setReloadMsg('info',msgs);
                     }
                     $this.closest('.modal').modal('hide');
                     if($this.data('redirect')) {

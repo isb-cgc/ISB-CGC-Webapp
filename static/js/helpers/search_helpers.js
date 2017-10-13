@@ -64,7 +64,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             gender: 'Gender',
             site_primary: 'Site Primary',
             histology: 'Histology',
-            hist_subtype: 'Histoligcal Subtype'
+            hist_subtype: 'Histological Subtype'
         },
         'TARGET':{
             disease_code: 'Disease Code',

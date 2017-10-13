@@ -65,18 +65,17 @@ require([
 
     for (var i = 0; i < bam_divs.length; i++) {
         var row = $(bam_divs[i]);
-        var bam_path = row.data('gcs');
+        var bam_path = row.data('gcs').split(';')[0];
+        var bai_path = row.data('gcs').split(';')[1];
         var sample_barcode = row.data('sample');
         var obj = {
             sourceType: 'gcs',
             type: 'bam',
             url: bam_path, // gs:// url to .bam file
             name: sample_barcode + ': GCS bam file',
-            withCredentials: true
+            withCredentials: true,
+            indexURL: bai_path
         };
-        if(row.data('program') === 'TARGET' || (row.data('program') === 'TCGA' && genome_build === 'HG38')){
-            obj.indexURL = bam_path.replace(/\.bam/,'.bai');
-        }
         tracks.push(obj);
     }
 
