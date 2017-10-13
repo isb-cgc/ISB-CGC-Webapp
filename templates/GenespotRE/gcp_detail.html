@@ -64,8 +64,9 @@
                                         <td>{{ service_account.authorized_date|date:'M d, Y, g:i a' }}</td>
                                         <td>{% if service_account.active %}<i class="fa fa-check"></i>{% endif %}</td>
                                         <td>
-                                            <a data-toggle="modal" role="button" data-target="#refresh-sa-modal-{{ service_account.id }}" class="space-right-5"><i class="fa fa-refresh"></i></a>
-                                            <a data-toggle="modal" role="button" data-target="#delete-sa-modal-{{ service_account.id }}"><i class="fa fa-trash"></i></a>
+                                            <a title="Refresh this Service Account" data-toggle="modal" role="button" data-target="#refresh-sa-modal-{{ service_account.id }}" class="space-right-5"><i class="fa fa-refresh"></i></a>
+                                            <a title="Delete this Service Account" data-toggle="modal" role="button" data-target="#delete-sa-modal-{{ service_account.id }}"><i class="fa fa-trash"></i></a>
+                                            <a title="Adjust Datasets for this Service Account" data-toggle="modal" role="button" href="{% url 'adjust_sa' user.id %}?sa_id={{ service_account.id }}"><i class="fa fa-plus-square"></i></a>
                                         </td>
                                     </tr>
                                 {% endwith %}
@@ -109,7 +110,7 @@
                                             <div class="modal-body">
                                                 {% csrf_token %}
                                                 <p>
-                                                    <em>Note</em>: By unregistering this Service Account, you are only revoking its access to controlled access datasets.
+                                                    <em>Note</em>: By unregistering this Service Account, you are only revoking its access to controlled datasets.
                                                 </p>
                                             </div>
                                             <div class="modal-footer">
