@@ -225,7 +225,7 @@ require([
                     var entries = fr.result.split('\n');
 
                     $('#file-upload-btn').attr('disabled','disabled');
-                    $('#verify-pending').show();
+                    $('#verify-pending').css('display','inline-block');
 
                     // Validate the entries
                     validateEntries(entries).then(
@@ -360,6 +360,8 @@ require([
         form.append('<input type="hidden" name="apply-name" value="true" />');
         form.append('<input type="hidden" name="apply-barcodes" value="true" />');
         form.append($('<input>').attr({type: "hidden", name: "barcodes", value: JSON.stringify(validated_barcodes)}));
+
+        $('#saving-cohort').css('display','inline-block');
     });
 
     $("#pasted-barcodes").keypress(function (e) {

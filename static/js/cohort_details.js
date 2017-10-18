@@ -686,6 +686,8 @@ require([
             $('#apply-edit-cohort-name').prop('value', $('#edit-cohort-name').val());
             form.append('<input type="hidden" name="source" value="' + cohort_id + '" />');
         }
+
+        $('#saving-cohort').css('display','inline-block');
     });
 
     $('.show-flyout').on('click', function() {
