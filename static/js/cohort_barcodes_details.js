@@ -146,6 +146,7 @@ require([
 
     // Text-area paste
     $('#enter-barcodes button.verify').on('click',function(){
+        $('.verify-pending').css('display','inline-block');
         var content = $('#enter-barcodes textarea').val();
 
         if(!checkContentValidity(content)) {
@@ -160,10 +161,12 @@ require([
         // Validate the entries
         validateEntries(entries).then(
             function(result){
+                $('.verify-pending').hide();
                 showEntries(result, $('#enter-barcodes'));
                 $('#enter-barcodes .save-cohort button').removeAttr('disabled');
                 $('#enter-barcodes .save-cohort').show();
             },function(result){
+                $('.verify-pending').hide();
                 // We only reach this point if no entries are valid, so show an error message as well.
                 base.showJsMessage("error","None of the supplied barcode entries were valid. Please double-check the format of your entries.",true);
                 showEntries(result.responseJSON,$('#enter-barcodes'));
@@ -225,7 +228,7 @@ require([
                     var entries = fr.result.split('\n');
 
                     $('#file-upload-btn').attr('disabled','disabled');
-                    $('#verify-pending').css('display','inline-block');
+                    $('.verify-pending').css('display','inline-block');
 
                     // Validate the entries
                     validateEntries(entries).then(
@@ -233,7 +236,7 @@ require([
                             showEntries(result, $('#upload-file'));
                             $('#upload-file .save-cohort button').removeAttr('disabled');
                             $('#upload-file .save-cohort').show();
-                            $('#verify-pending').hide();
+                            $('.verify-pending').hide();
                             $('#file-upload-btn').removeAttr('disabled');
                         },function(result){
                             // We only reach this point if no entries are valid, so show an error message as well.
@@ -242,7 +245,7 @@ require([
                             fileUploadField.val("");
                             $('#upload-file .save-cohort button').attr('disabled','disabled');
                             $('#upload-file .save-cohort').hide();
-                            $('#verify-pending').hide();
+                            $('.verify-pending').hide();
                             $('#file-upload-btn').removeAttr('disabled');
                         }
                     );
