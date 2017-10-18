@@ -310,7 +310,7 @@ require([
                 base.showJsMessage('error',err,true);
             },
         }).always(function () {
-            $this.find('.btn-primary').removeClass('btn-disabled').attr('disabled', false);
+            $this.find('.btn-primary').removeClass('btn-disabled').removeAttr('disabled');
         });
         // We don't want this form submission to automatically trigger a reload
         return false;
@@ -460,12 +460,14 @@ require([
                     if(!data.error) {
                         window.location = BASE_URL + '/workbooks/' + data.workbook_id + '/worksheets/' + data.worksheet_id + '/';
                     } else {
-                        console.log('Failed to create workbook with cohorts.');
+                        base.setReloadMsg('error','Failed to create a workbook with cohort(s): '+ cohorts.join(", "));
                     }
                 },
                 error: function () {
-                    console.log('Failed to create workbook with cohorts.');
+                    base.setReloadMsg('error','Failed to create a workbook with cohort(s): '+ cohorts.join(", "));
                 }
+            }).always(function () {
+                $this.find('button[type="submit"]').removeClass('btn-disabled').removeAttr('disabled');
             });
         }
     });
