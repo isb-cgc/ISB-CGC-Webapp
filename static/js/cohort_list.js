@@ -476,4 +476,9 @@ require([
     toggle_buttons();
 
     $('.complement-control').hide();
+
+    // Prevent multiple submissions of any form
+    $('form').on('submit',function(){
+        $(this).find('button[type="submit"]').attr('disabled','disabled');
+    });
 });
