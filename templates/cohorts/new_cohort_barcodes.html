@@ -63,7 +63,7 @@
         <div class="col-sm-12 col-md-12 col-lg-12">
             <div class="panel panel-default">
                 <ul class="nav nav-tabs nav-tabs-data" role="tablist">
-                    <li role="presentation" class="active"><a href="#upload-file" role="tab" data-toggle="tab" title="Upload a list of barcodes">Upload</a></li>
+                    <li role="presentation" class="active"><a href="#upload-file" role="tab" data-toggle="tab" title="Upload a JSON or TSV/CSV file">Upload</a></li>
                     <li role="presentation"><a href="#enter-barcodes" role="tab" data-toggle="tab" title="Enter a list of barcodes">Enter</a></li>
                 </ul>
             </div>
@@ -76,12 +76,14 @@
                 <div class="col-md-12 data-tab-content-panel spinner-panel">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <h4>Upload a file of barcodes and programs</h4>
+                            <h4>Upload a GDC Case Manifest or a CSV/TSV file of barcodes and programs</h4>
                         </div>
                         <div class="panel-body">
                             <button class="btn btn-primary instructions" title="Show/Hide the instructions">Instructions</button>
                             <div class="instructions" style="display: none;">
-                                <p>All entries must contain a valid <span class="code">case barcode</span> <b><i>or</i></b> <span class="code">sample barcode</span>, and a valid <span class="code">program short name</span>.</p>
+                                <p>Files must be in <a href="https://docs.gdc.cancer.gov/Data_Portal/Users_Guide/Exploration/#cases" target="_BLANK">GDC JSON or TSV case manifest format</a>, or in comma- or tab-delimited case/sample/program format. After selecting the file and uploading it, the entries will be validated. Any entries which are found to be invalid will be listed, and you can choose to omit them and continue with cohort creation, or select a new file for verification and upload.</p>
+                                <h5>CSV/TSV Barcode Files</h5>
+                                <p>All entries in comma- or tab-delimited case/sample/program files must contain a valid <span class="code">case barcode</span> <b><i>or</i></b> <span class="code">sample barcode</span>, and a valid <span class="code">program short name</span>.</p>
                                 <p>Valid program short names:</p>
                                 <ul>
                                     <li>TCGA</li>
@@ -89,10 +91,10 @@
                                     <li>TARGET</li>
                                 </ul>
                                 <p>When only a case barcode is provided, all samples from that case will be included in the cohort. Make a separate entry per sample if only specific samples from a case should be added to the cohort. </p>
-                                <p>Files must be in tab- or comma-delimited format (TSV or CSV) and have an extension of <span class="code">.txt</span>, <span class="code">.csv</span>, or <span class="code">.tsv</span>. Please do not include any column headers. Values may be placed in single or double quotes. Format your entries as follows:</p>
+                                <p>Tab- or comma-delimited files must have an extension of <span class="code">.txt</span>, <span class="code">.csv</span>, or <span class="code">.tsv</span>. Please do not include any column headers. Values may be placed in single or double quotes. Format your entries as follows:</p>
                                 <ul><pre>Case Barcode,Sample Barcode,Program Short Name</pre></ul>
                                 <p>When omitting either barcode type, please be sure to still include the empty column's delimiter. (See examples below.) You may place an empty quoted value ("" or ''), but this is optional.</p>
-                                <h5>Example Barcode Set</h5>
+                                <h6>Example CSV/TSV Barcode Set</h6>
                                 <ul>
                                     <pre>TCGA-N9-A4Q4,,TCGA
 ,TCGA-N7-A4Y8-01A,TCGA
@@ -101,7 +103,11 @@
 "TARGET-51-PAJLIV",, "TARGET"
 TARGET-51-PAJMFS,"", "TARGET"</pre>
                                 </ul>
-                                <p>After selecting the file and uploading it, the entries will be validated. Any entries which are found to be invalid will be listed, and you can choose to omit them and continue with cohort creation, or select a new file for verification and upload.</p>
+                                <h5>GDC Case Manifest Files</h5>
+                                <p>GDC case manifests can be obtained on the <a target="_BLANK" href="https://portal.gdc.cancer.gov/exploration">'Cases' tab of the Exploration section of the data portal.</a></p>
+                                <p>All JSON case manifests must have a .json extension, and will be validated against the GDC's JSON manifest schema. The minimum required properties for each entry in the JSON file are the <span class="code">project_id</span> and <span class="code">submitter_id</span>. All other information will be ignored.</p>
+                                <p>The TSV case manifests must have a .tsv extension, and must contain the first 3 columns of the GDC TSV case manifest in the following order: Case UUID, Case ID, Project. Any other columns will be ignored. <b><i>Do not remove the header row of the TSV case manifest.</i></b></p>
+                                <p>Because the GDC case manifest entries are cases, all samples from a case will be included in the cohort.</p>
                             </div>
                             <hr>
                             <div id="uploadField" class="center" style="display : inline-block;">
