@@ -81,8 +81,8 @@
                         <div class="panel-body">
                             <button class="btn btn-primary instructions" title="Show/Hide the instructions">Instructions</button>
                             <div class="instructions" style="display: none;">
-                                <p>Files must be in <a href="https://docs.gdc.cancer.gov/Data_Portal/Users_Guide/Exploration/#cases" target="_BLANK">GDC JSON or TSV case manifest format</a>, or in comma- or tab-delimited case/sample/program format. After selecting the file and uploading it, the entries will be validated. Any entries which are found to be invalid will be listed, and you can choose to omit them and continue with cohort creation, or select a new file for verification and upload.</p>
-                                <h5>CSV/TSV Barcode Files</h5>
+                                <p>Files must be in <a href="#gdc-manifest">GDC case manifest format</a>, or in <a href="#tcsv-format">comma/tab-delimited case/sample/program format</a>. After selecting the file and uploading it, the entries will be validated. Any entries which are found to be invalid will be listed, and you can choose to omit them and continue with cohort creation, or select a new file for verification and upload.</p>
+                                <a name="tcsv-format"></a><h5>CSV/TSV Barcode Files</h5>
                                 <p>All entries in comma- or tab-delimited case/sample/program files must contain a valid <span class="code">case barcode</span> <b><i>or</i></b> <span class="code">sample barcode</span>, and a valid <span class="code">program short name</span>.</p>
                                 <p>Valid program short names:</p>
                                 <ul>
@@ -103,10 +103,10 @@
 "TARGET-51-PAJLIV",, "TARGET"
 TARGET-51-PAJMFS,"", "TARGET"</pre>
                                 </ul>
-                                <h5>GDC Case Manifest Files</h5>
+                                <a name="gdc-manifest"></a><h5>GDC Case Manifest Files</h5>
                                 <p>GDC case manifests can be obtained on the <a target="_BLANK" href="https://portal.gdc.cancer.gov/exploration">'Cases' tab of the Exploration section of the data portal.</a></p>
-                                <p>All JSON case manifests must have a .json extension, and will be validated against the GDC's JSON manifest schema. The minimum required properties for each entry in the JSON file are the <span class="code">project_id</span> and <span class="code">submitter_id</span>. All other information will be ignored.</p>
-                                <p>The TSV case manifests must have a .tsv extension, and must contain the first 3 columns of the GDC TSV case manifest in the following order: Case UUID, Case ID, Project. Any other columns will be ignored. <b><i>Do not remove the header row of the TSV case manifest.</i></b></p>
+                                <p>JSON case manifests must have a .json extension, and will be validated against the GDC's JSON schema. The minimum required properties for each entry in the JSON file are the <span class="code">project</span> object and the <span class="code">submitter_id</span> field. The <span class="code">project</span> object must include the <span class="code">project_id</span> property. All other properties will be ignored.</p>
+                                <p>TSV case manifests must have a .tsv extension, and must contain the first 3 columns of the GDC TSV case manifest in the following order: Case UUID, Case ID, Project. Any other columns will be ignored. <b><i>Do not remove the header row of the TSV case manifest.</i></b></p>
                                 <p>Because the GDC case manifest entries are cases, all samples from a case will be included in the cohort.</p>
                             </div>
                             <hr>
