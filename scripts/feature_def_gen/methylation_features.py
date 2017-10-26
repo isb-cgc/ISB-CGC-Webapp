@@ -43,6 +43,14 @@ class METHTableConfig(object):
         self.internal_table_id = internal_table_id
         self.program = program
 
+    def __str__(self):
+        return "METHTableConfig(table_id: {}, chr: {}, build: {}, value_field: {}, internal_table_id: {}, program: {})".format(
+            str(self.table_id),str(self.chromosome),str(self.genomic_build),str(self.value_field),str(self.internal_table_id),str(self.program)
+        )
+
+    def __repr__(self):
+        return self.__str__()
+
     @classmethod
     def from_dict(cls, param):
         table_id = param['table_id']
@@ -62,7 +70,7 @@ class METHDataSourceConfig(object):
     CHROMOSOMES = [str(c) for c in range(1, 23)]
     CHROMOSOMES.extend(['X', 'Y'])
 
-    def __init__(self, methylation_annotation_table_id, supported_genomic_builds, table_template):
+    def __init__(self, methylation_annotation_table_id, supported_genomic_builds, table_templates):
         self.methylation_annotation_table_id = methylation_annotation_table_id
         # TODO Remove "supported_genomic_builds" if not needed
         self.supported_genomic_builds = supported_genomic_builds
@@ -70,12 +78,13 @@ class METHDataSourceConfig(object):
         self.data_table_list = []
 
         for c in self.CHROMOSOMES:
-            table_config = {key: table_template[key] for key in ['genomic_build', 'value_field', 'program']}
-            table_config.update({
-                "table_id": table_template['table_id_prefix'] + c,
-                "chromosome": c,
-                "internal_table_id": table_template['genomic_build'] + '_chr' + c.lower()
-            })
+            for table_template in table_templates:
+                table_config = {key: table_template[key] for key in ['genomic_build', 'value_field', 'program']}
+                table_config.update({
+                    "table_id": table_template['table_id_prefix'] + c,
+                    "chromosome": c,
+                    "internal_table_id": table_template['genomic_build'] + '_chr' + c.lower()
+                })
 
             self.data_table_list.append(METHTableConfig.from_dict(table_config))
 

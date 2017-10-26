@@ -20,6 +20,9 @@ from bq_data_access.data_types.definitions import FEATURE_ID_TO_TYPE_MAP
 from bq_data_access.v2.feature_id_utils import FeatureDataTypeHelper, PlottableDataType
 from bq_data_access.v2.feature_search.searcher_mapping import get_feature_searcher_class_from_data_type
 
+import logging
+
+logger = logging.getLogger('main_logger')
 
 class SearchableFieldHelper(object):
     @classmethod
