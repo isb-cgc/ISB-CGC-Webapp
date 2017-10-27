@@ -19,6 +19,7 @@ limitations under the License.
 from copy import deepcopy
 import sys
 import logging
+import datetime
 from django.conf import settings
 from google_helpers.bigquery_service import get_bigquery_service
 
@@ -151,3 +152,119 @@ class BigQueryCohortSupport(object):
 
         response = self._streaming_insert(rows)
         return response
+
+    # Get all the tables for this BigQueryCohortSupport object's project ID
+    def get_tables(self):
+        bq_tables = []
+        bigquery_service = get_bigquery_service()
+        datasets = bigquery_service.datasets().list(projectId=self.project_id).execute()
+
+        for dataset in datasets['datasets']:
+            tables = bigquery_service.tables().list(projectId=self.project_id,datasetId=dataset['datasetReference']['datasetId']).execute()
+            if 'tables' not in tables:
+                continue
+            for table in tables['tables']:
+                bq_tables.append({'dataset': dataset['datasetReference']['datasetId'], 'table_id':  table['tableReference']['tableId']})
+
+        return bq_tables
+
+    # Check if the dataset referenced by dataset_id exists in the project referenced by project_id
+    def _dataset_exists(self):
+        bigquery_service = get_bigquery_service()
+        datasets = bigquery_service.datasets().list(projectId=self.project_id).execute()
+        dataset_found = False
+
+        for dataset in datasets['datasets']:
+            if self.dataset_id == dataset['datasetReference']['datasetId']:
+                return True
+
+        return dataset_found
+
+    def _insert_dataset(self):
+        response = {}
+
+        return response
+
+    # Check if the table referened by table_id exists in the dataset referenced by dataset_id and the project referenced by project_id
+    def _table_exists(self):
+        bigquery_service = get_bigquery_service()
+        tables = bigquery_service.tables().list(projectId=self.project_id,datasetId=self.dataset_id).execute()
+        table_found = False
+
+        for table in tables['tables']:
+            if self.table_id == table['tableReference']['tableId']:
+                return True
+
+        return table_found
+
+    # Insert a cohort-export table, optionally providing a list of cohort IDs to include in the description
+    def _insert_table(self,cohorts):
+        bigquery_service = get_bigquery_service()
+        tables = bigquery_service.tables()
+
+        desc = "BQ Export table from ISB-CGC"
+        if len(cohorts):
+            desc += ", cohort ID{} ".format(("s" if len(cohorts) > 1 else ""), ", ".join(cohorts))
+
+        response = tables.insert(projectId=self.project_id, datasetId=self.dataset_id, body={
+            'friendlyName': self.table_id,
+            'description': desc,
+            'kind': 'bigquery#table',
+            'schema': {
+                'fields': [
+                    {
+                        'name': 'cohort_id',
+                        'type': 'INTEGER'
+                    },{
+                        "name": "case_barcode",
+                        "type": "STRING"
+                    },{
+                        "name": "sample_barcode",
+                        "type": "STRING"
+                    },{
+                        "name": "project_short_name",
+                        "type": "STRING"
+                    },{
+                        "name": "date_added",
+                        "type": "TIMESTAMP"
+                    }
+                ]
+            },
+            'tableReference': {
+                'datasetId': self.dataset_id,
+                'projectId': self.project_id,
+                'tableId': self.table_id
+            }
+        }).execute()
+
+        return response
+
+    # Export a cohort or cohorts as represented by a set of samples into the BQ table referenced by project_id:dataset_id:table_id
+    def export_cohort_to_bq(self, samples):
+
+        # Get the dataset (make if not exists)
+        if not self._dataset_exists():
+            self._insert_dataset()
+
+        # Get the table (make if not exists)
+        if not self._table_exists():
+            self._insert_table(samples.values_list('cohort_id',flat=True).distinct())
+
+        rows = []
+        date_added = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        for sample in samples:
+            rows.append({
+                'cohort_id': sample.cohort.id,
+                'sample_barcode': sample.sample_barcode,
+                'case_barcode': sample.case_barcode,
+                'project_short_name': sample.project.program.name + '-' + sample.project.name,
+                'date_added': date_added
+            })
+
+        logger.debug("Exporting rows: {}".format(str(rows)))
+
+        response = {}
+        # response = self._streaming_insert(rows)
+
+        return response
+
