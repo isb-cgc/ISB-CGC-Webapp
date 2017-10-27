@@ -70,6 +70,7 @@
             {% if cohort.perm.perm == 'OWNER' %}
             <li class="separator"></li>
             <li class="menu-item"><button class="btn btn-info" data-toggle="modal" data-target="#share-cohort-modal">Share</button></li>
+            <li class="menu-item"><button class="btn btn-info" data-toggle="modal" data-target="#export-cohort-modal" title="Export this cohort to a BigQuery table">Export to BQ</button></li>
             {% endif %}
             {% if not cohort.is_public and cohort.perm.perm == 'OWNER' %}
             <li class="separator"></li>
@@ -235,8 +236,54 @@
         </div>
     </div>
 
-    <!-- Share Cohort Modal -->
     {% if cohort.perm.perm == 'OWNER' %}
+    <!-- Export Cohort Modal -->
+    <div class="modal fade" id="export-cohort-modal" tabindex="-1" role="dialog" aria-labelledby="export-cohort-header" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 id="export-cohort-header" class="modal-title">Cohort Export</h4>
+                    <div class="modal-js-messages" id="export-cohort-js-messages">
+                    </div>
+                </div>
+                <form id="export-cohort-form" method="POST" action="{% url 'export_cohort_to_bq' cohort.id %}">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="export-cohort-project-dataset">Choose a Project and Dataset:</label>
+                            <select id="export-cohort-project-dataset" class="form-control">
+                                <option value="" disabled selected type="label">Please select a project and dataset</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <ul class="table-type">
+                                <div class="radio">
+                                    <label><input type="radio" name="table-type" value="new" checked> Make a new table</label>
+                                </div>
+                                <div class="radio">
+                                    <label><input type="radio" name="table-type" value="append"> Append to an existing table</label>
+                                </div>
+                            </ul>
+                        </div>
+                        <div class="form-group table-name" style="display: none;">
+                            <label for="table-name">Name:</label>
+                            <input class="form-control" type="text" id="table-name" name="name" />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        {% csrf_token %}
+                        <input type="submit" value="Exprt Cohort" class="btn btn-primary" />
+                        <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                        <div id="exporting-cohort" class="collapse" style="display: none;">
+                            <i class="fa fa-circle-o-notch fa-spin"></i>  Exporting Cohort...
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Cohort Modal -->
     <div class="modal fade" id="share-cohort-modal" tabindex="-1" role="dialog" aria-labelledby="shareCohortModal" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -250,7 +297,6 @@
                         <li role="presentation" class="shared"><a data-target="#shared-pane" data-toggle="tab" aria-controls="home" role="tab">Shared With (<span class="share-count">{{shared_with_users|length}}</span>)</a></li>
                     </ul>
                 </div>
-
                 <div class="tab-content">
                     <div role="tabpanel" class="tab-pane active" id="share-cohort-pane">
                         <form id="share-cohort-form" data-cohort-id="{{ cohort.id }}" method="" action="">
