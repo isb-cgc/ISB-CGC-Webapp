@@ -1107,6 +1107,73 @@ require([
         }
     });
 
+    $('.table-type').on('change',function(){
+        $('#export-cohort-table').val('');
+        if($(this).find(':checked').val()=='append') {
+            $('#export-cohort-table').empty();
+            var tables = $('#export-cohort-project-dataset :selected').data('tables');
+            for(var i=0;i<tables.length;i++) {
+                $('#export-cohort-table').append('<option value="'+tables[i]+'">'+tables[i]+'</option>')
+            }
+            $('.table-list').show();
+        } else {
+            $('.table-list').hide();
+        }
+    });
+
+    $('#export-cohort-project-dataset').on('change',function(){
+        $('.table-type').removeAttr('disabled');
+        $('.table-type').parents('label').removeAttr('title');
+        $('#export-cohort-table').empty();
+        var tables = $('#export-cohort-project-dataset :selected').data('tables');
+        if(tables.length > 0) {
+            for (var i = 0; i < tables.length; i++) {
+                $('#export-cohort-table').append('<option value="' + tables[i] + '">' + tables[i] + '</option>')
+            }
+        } else {
+            $('#export-cohort-table').append('<option value="">No tables in this dataset</option>')
+        }
+    });
+
+    $('#export-cohort-modal input[type="submit"]').on('click',function(){
+        $('#exporting-cohort').css('display','inline-block');
+    });
+
+    $('button[data-target="#export-cohort-modal"]').on('click',function(e){
+        $.ajax({
+            type: 'GET',
+            url: BASE_URL + '/cohorts/export_cohort/',
+            success: function (data) {
+                if(data['status']==='success') {
+                    if(Object.keys(data['data']['projects']).length > 0) {
+                        var projects = data['data']['projects'];
+                        for(var i=0;i<projects.length;i++) {
+                            if($('optgroup.'+projects[i]['name']).length <= 0) {
+                                $('#export-cohort-project-dataset').append('<optgroup class="'+projects[i]['name']+'" label="'+projects[i]['name']+'"></optgroup>');
+                            }
+                            var datasets = projects[i]['datasets'];
+                            for(var j in datasets) {
+                                if(datasets.hasOwnProperty(j)) {
+                                    $('optgroup.'+projects[i]['name']).append(
+                                        '<option class="dataset" value="'+projects[i]['name']+':'+j+'">'+j+'</option>'
+                                    );
+                                    $('option[value="'+projects[i]['name']+':'+j+'"]').data({'tables': datasets[j]});
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+
+
+    $('#export-cohort-form').on('submit',function(){
+        if($('.table-type :checked').val() == 'new') {
+            $('#export-cohort-table').val('');
+        }
+    });
+
     // Per https://stackoverflow.com/questions/13550477/twitter-bootstrap-alert-message-close-and-open-again
     // Set up our own data-hide type to 'hide' our alerts instead of popping them off the DOM entirely
     $("[data-hide]").on("click", function(){
