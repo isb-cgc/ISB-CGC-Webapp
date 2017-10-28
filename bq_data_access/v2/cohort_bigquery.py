@@ -63,6 +63,27 @@ class BigQueryCohortSupport(object):
         }
     ]
 
+    cohort_export_schema = {
+        'fields': [
+            {
+                'name': 'cohort_id',
+                'type': 'INTEGER'
+            },{
+                "name": "case_barcode",
+                "type": "STRING"
+            },{
+                "name": "sample_barcode",
+                "type": "STRING"
+            },{
+                "name": "project_short_name",
+                "type": "STRING"
+            },{
+                "name": "date_added",
+                "type": "TIMESTAMP"
+            }
+        ]
+    }
+
     patient_type = 'patient'
     sample_type = 'sample'
     aliquot_type = 'aliquot'
@@ -185,6 +206,29 @@ class BigQueryCohortSupport(object):
 
         return response
 
+    # Compare the schema of the table referenced in table_id with the cohort-export table schema
+    # Note this only confirms that fields required by cohort_export_schema are found in the proposed table
+    # with the appropriate type, and that no 'required' fields in the proposed table are absent from cohort_export_schema
+    def _confirm_table_schema(self):
+        bigquery_service = get_bigquery_service()
+        table = bigquery_service.tables().get(projectId=self.project_id, datasetId=self.dataset_id,tableId=self.table_id).execute()
+        table_fields = table['schema']['fields']
+
+        proposed_schema = {x['name']: x['type'] for x in table_fields}
+        expected_schema = {x['name']: x['type'] for x in self.cohort_export_schema['fields']}
+
+        # Check for expected fields
+        for field in self.cohort_export_schema['fields']:
+            if field['name'] not in proposed_schema or proposed_schema[field['name']] != field['type']:
+                return False
+
+        # Check for unexpected, required fields
+        for field in table_fields:
+            if 'mode' in field and field['mode'] == 'REQUIRED' and field['name'] not in expected_schema:
+                return False
+
+        return True
+
     # Check if the table referened by table_id exists in the dataset referenced by dataset_id and the project referenced by project_id
     def _table_exists(self):
         bigquery_service = get_bigquery_service()
@@ -204,32 +248,13 @@ class BigQueryCohortSupport(object):
 
         desc = "BQ Export table from ISB-CGC"
         if len(cohorts):
-            desc += ", cohort ID{} ".format(("s" if len(cohorts) > 1 else ""), ", ".join(cohorts))
+            desc += ", cohort ID{} {}".format(("s" if len(cohorts) > 1 else ""), ", ".join([str(x) for x in cohorts]))
 
         response = tables.insert(projectId=self.project_id, datasetId=self.dataset_id, body={
             'friendlyName': self.table_id,
             'description': desc,
             'kind': 'bigquery#table',
-            'schema': {
-                'fields': [
-                    {
-                        'name': 'cohort_id',
-                        'type': 'INTEGER'
-                    },{
-                        "name": "case_barcode",
-                        "type": "STRING"
-                    },{
-                        "name": "sample_barcode",
-                        "type": "STRING"
-                    },{
-                        "name": "project_short_name",
-                        "type": "STRING"
-                    },{
-                        "name": "date_added",
-                        "type": "TIMESTAMP"
-                    }
-                ]
-            },
+            'schema': self.cohort_export_schema,
             'tableReference': {
                 'datasetId': self.dataset_id,
                 'projectId': self.project_id,
@@ -248,7 +273,16 @@ class BigQueryCohortSupport(object):
 
         # Get the table (make if not exists)
         if not self._table_exists():
-            self._insert_table(samples.values_list('cohort_id',flat=True).distinct())
+            table_result = self._insert_table(samples.values_list('cohort_id',flat=True).distinct())
+            if 'tableReference' not in table_result:
+                return {
+                    'tableErrors': "Unable to create table {} in project {} and dataset {} - please double-check your project's permissions for the ISB-CGC service account.".format(
+                        self.table_id,self.project_id,self.dataset_id)
+                }
+        elif not self._confirm_table_schema():
+            return {
+                'tableErrors': "The table schema of {} does not match the required schema for cohort export. Please make a new table, or adjust this table's schema.".format(self.table_id)
+            }
 
         rows = []
         date_added = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -261,10 +295,7 @@ class BigQueryCohortSupport(object):
                 'date_added': date_added
             })
 
-        logger.debug("Exporting rows: {}".format(str(rows)))
-
-        response = {}
-        # response = self._streaming_insert(rows)
+        response = self._streaming_insert(rows)
 
         return response
 
