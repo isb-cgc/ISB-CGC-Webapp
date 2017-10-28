@@ -1135,7 +1135,11 @@ require([
         }
     });
 
-    $('#export-cohort-modal').on('show.bs.modal',function(e){
+    $('#export-cohort-modal input[type="submit"]').on('click',function(){
+        $('#exporting-cohort').css('display','inline-block');
+    });
+
+    $('button[data-target="#export-cohort-modal"]').on('click',function(e){
         $.ajax({
             type: 'GET',
             url: BASE_URL + '/cohorts/export_cohort/',
