@@ -1172,7 +1172,6 @@ require([
         if($('.table-type :checked').val() == 'new') {
             $('#export-cohort-table').val('');
         }
-        console.debug($(this).serialize());
     });
 
     // Per https://stackoverflow.com/questions/13550477/twitter-bootstrap-alert-message-close-and-open-again
