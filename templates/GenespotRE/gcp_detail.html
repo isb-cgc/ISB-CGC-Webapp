@@ -30,6 +30,9 @@
 {% block page_header %}
     <div class="container">
         <h1 class="page-header pull-left"><a href="{% url 'user_gcp_list' user.id %}" role="link"><i class="fa fa-chevron-left"></i></a> {{ gcp.project_name }}</h1>
+        <div class="pull-right refresh-project">
+            <a class="refresh-project btn btn-primary" data-toggle="modal" role="button" data-user-id="{{ request.user.id }}" data-project-id="{{ gcp.id }}" data-project-name="{{ gcp.project_name }}" data-target="#refresh-project-modal" >Refresh Project</a></li>
+        </div>
     </div>
 {% endblock %}
 
@@ -225,6 +228,32 @@
         </div>
     </div>
 
+    <!-- Refresh Google Cloud Project Modal -->
+    <div class="modal fade" id="refresh-project-modal" tabindex="-1" role="dialog" aria-labelledby="refresh-project-header" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 id="refresh-project-header" class="modal-title">Refresh the Google Cloud Project "{{ gcp.project_name }}"?</h4>
+                </div>
+                <form id="refresh-project" method="POST" action="{% url 'register_gcp' user.id %}">
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        <p>
+                            Refreshing this project will update the Web Application users associated with it.
+                        </p>
+                        <input type="hidden" name="is_refresh" value="true" />
+                        <input type="hidden" name="gcp_id" value="{{ gcp.project_id }}" />
+                    </div>
+                    <div class="modal-footer">
+                        <input type="submit" value="Refresh" class="btn btn-primary" />
+                        <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Register Bucket Modal -->
     <div class="modal fade" id="register-bucket-modal" tabindex="-1" role="dialog" aria-labelledby="register-bucket-header" aria-hidden="true">
         <div class="modal-dialog">
@@ -244,7 +273,7 @@
 
                         <label for="bucket_name_input">Bucket Name:</label>
                         <input type="text" name="bucket_name" id="bucket_name_input" class="form-control" required/>
-                        <input type="hidden" name="gcp_id" value="{{ project.project_id }}" />
+                        <input type="hidden" name="gcp_id" value="{{ gcp.project_id }}" />
                     </div>
                     <div class="modal-footer">
                         <input type="submit" value="Register" class="btn btn-primary" />
@@ -274,7 +303,7 @@
 
                         <label for="bqdataset_name_input">Dataset Name:</label>
                         <input type="text" name="bqdataset_name" id="bqdataset_name_input" class="form-control" required />
-                        <input type="hidden" name="gcp_id" value="{{ project.project_id }}" />
+                        <input type="hidden" name="gcp_id" value="{{ gcp.project_id }}" />
                     </div>
                     <div class="modal-footer">
                         <input type="submit" value="Register" class="btn btn-primary" />

@@ -59,6 +59,7 @@
                                         <ul class="dropdown-menu">
                                             <li><a href="{% url 'register_sa' user.id %}?gcp_id={{ project.project_id }}">Register Service Account</a> </li>
                                             <li><a data-toggle="modal" role="button" data-target="#delete-project-modal-{{ project.id }}" >Unregister Project</a></li>
+                                            <li><a class="refresh-project" data-toggle="modal" role="button" data-user-id="{{ request.user.id }}" data-project-id="{{ project.id }}" data-project-name="{{ project.project_name }}" data-target="#refresh-project-modal-{{ project.id }}" >Refresh Project</a></li>
 {#                                            <li><a data-toggle="modal" role="button" data-target="#new-favorite-workbook-modal-{{ favorite.id }}" >Start New Workbook</a></li>#}
                                         </ul>
                                         </div>
