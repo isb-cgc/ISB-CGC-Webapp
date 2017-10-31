@@ -1167,11 +1167,14 @@ require([
 
         var tables = $('#export-cohort-project-dataset :selected').data('tables');
         if(tables.length > 0) {
+            $('input.table-type[value="append"]').removeAttr('disabled');
+            $('input.table-type[value="append"]').parents('label').removeAttr('title');
             for (var i = 0; i < tables.length; i++) {
                 $('#export-cohort-table').append('<option value="' + tables[i] + '">' + tables[i] + '</option>')
             }
         } else {
-            $('#export-cohort-table').append('<option value="">No tables in this dataset</option>')
+            $('input.table-type[value="append"]').attr('disabled','disabled');
+            $('input.table-type[value="append"]').parents('label').attr('title',"There are no tables in this dataset.");
         }
     });
 
@@ -1220,6 +1223,23 @@ require([
                         }
                     }
                 }
+            },
+            error: function (data) {
+                var link_to_bqr = data.responseJSON.msg.match(/register at least one dataset/);
+                var link_to_gcpr = data.responseJSON.msg.match(/register at least one project/);
+                if(link_to_bqr) {
+                    data.responseJSON.msg = data.responseJSON.msg.replace(
+                        "register at least one dataset",
+                        '<a href="http://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/webapp/program_data_upload.html#registering-cloud-storage-buckets-and-bigquery-datasets-a-pre-requisite-for-using-your-own-data-in-isb-cgc" target="_BLANK">register at least one dataset</a>'
+                    );
+                }
+                if(link_to_gcpr) {
+                    data.responseJSON.msg = data.responseJSON.msg.replace(
+                        "register at least one project",
+                        '<a href="http://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/webapp/Gaining-Access-To-Contolled-Access-Data.html?#registering-your-google-cloud-project-service-account" target="_BLANK">register at least one project</a>'
+                    );
+                }
+                base.showJsMessage('error',data.responseJSON.msg,true,"#export-cohort-js-messages");
             },
             complete: function() {
                 $('#export-cohort-modal').modal('show');
