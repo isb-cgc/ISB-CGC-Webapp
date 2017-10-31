@@ -1116,14 +1116,36 @@ require([
                 $('#export-cohort-table').append('<option value="'+tables[i]+'">'+tables[i]+'</option>')
             }
             $('.table-list').show();
+            $('.new-table-name').hide();
         } else {
             $('.table-list').hide();
+            $('.new-table-name').show();
         }
     });
 
+    $('#new-table-name').on('keypress keyup paste',function (e) {
+        var self = $(this);
+        setTimeout(function() {
+            $('.message-container').empty();
+            var str = self.val();
+
+            if(str.match(/[^A-Za-z0-9_]/)) {
+                e.preventDefault();
+                base.showJsMessage("error", "BigQuery table names are restricted to numbers, letters, and underscores.",false, $('.message-container'));
+                return false;
+            }
+
+            if (str.length >= parseInt($('#new-table-name').attr('maxlength'))) {
+                e.preventDefault();
+                base.showJsMessage("warning", "You have reached the maximum size of the table name.",false, $('.message-container'));
+                return false;
+            }
+        },70);
+    });
+
     $('#export-cohort-project-dataset').on('change',function(){
-        $('.table-type').removeAttr('disabled');
-        $('.table-type').parents('label').removeAttr('title');
+        $('.table-type, .new-table-name').removeAttr('disabled');
+        $('.table-type, .new-table-name').removeAttr('title');
         $('#export-cohort-table').empty();
         var tables = $('#export-cohort-project-dataset :selected').data('tables');
         if(tables.length > 0) {
@@ -1137,6 +1159,10 @@ require([
 
     $('#export-cohort-modal input[type="submit"]').on('click',function(){
         $('#exporting-cohort').css('display','inline-block');
+    });
+
+    $('#export-cohort-modal').on('bs.modal.hide',function(){
+        $('.message-container').empty();
     });
 
     $('button[data-target="#export-cohort-modal"]').on('click',function(e){
