@@ -1110,7 +1110,7 @@ require([
     $('.table-type').on('change',function(){
         $('#export-cohort-table').val('');
         if($(this).find(':checked').val()=='append') {
-            $('#export-cohort-table').empty();
+            $('#export-cohort-table option:not([type="label"])').remove();
             var tables = $('#export-cohort-project-dataset :selected').data('tables');
             for(var i=0;i<tables.length;i++) {
                 $('#export-cohort-table').append('<option value="'+tables[i]+'">'+tables[i]+'</option>')
@@ -1146,7 +1146,7 @@ require([
     $('#export-cohort-project-dataset').on('change',function(){
         $('.table-type, .new-table-name').removeAttr('disabled');
         $('.table-type, .new-table-name').removeAttr('title');
-        $('#export-cohort-table').empty();
+        $('#export-cohort-table option:not([type="label"])').remove();
         var tables = $('#export-cohort-project-dataset :selected').data('tables');
         if(tables.length > 0) {
             for (var i = 0; i < tables.length; i++) {
@@ -1161,11 +1161,22 @@ require([
         $('#exporting-cohort').css('display','inline-block');
     });
 
-    $('#export-cohort-modal').on('bs.modal.hide',function(){
+    $('#export-cohort-modal').on('hide.bs.modal',function(){
+        $('#export-cohort-project-dataset optgroup').remove();
+        $('.table-type, .new-table-name').attr('disabled','disabled');
+        $('.table-type, .new-table-name').attr('title','Select a project and dataset to enable this option');
+        $('.new-table-name').show();
+        $('.table-list').hide();
         $('.message-container').empty();
+        $('#export-cohort-table option:not([type="label"])').remove();
     });
 
     $('button[data-target="#export-cohort-modal"]').on('click',function(e){
+        if($('#export-cohort-modal').data('opening')) {
+            e.preventDefault();
+            return false;
+        }
+        $('#export-cohort-modal').data('opening',true);
         $.ajax({
             type: 'GET',
             url: BASE_URL + '/cohorts/export_cohort/',
@@ -1189,8 +1200,15 @@ require([
                         }
                     }
                 }
+            },
+            complete: function() {
+                $('#export-cohort-modal').modal('show');
+                $('#export-cohort-modal').data('opening',false);
             }
         });
+        // Don't let the modal open automatically; we're controlling that.
+        e.preventDefault();
+        return false;
     });
 
 
