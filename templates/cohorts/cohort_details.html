@@ -250,6 +250,7 @@
                 <form id="export-cohort-form" method="POST" action="{% url 'export_cohort_to_bq' cohort.id %}">
                     {% csrf_token %}
                     <div class="modal-body">
+                        <div class="message-container"></div>
                         <div class="form-group">
                             <label for="export-cohort-project-dataset">Choose a Project and Dataset:</label>
                             <select id="export-cohort-project-dataset" name="project-dataset" class="form-control">
@@ -257,12 +258,12 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <ul class="table-type">
-                                <div class="radio">
-                                    <label><input class="table-type" type="radio" name="table-type" value="new" checked> Make a new table</label>
+                            <ul class="table-type" disabled>
+                                <div class="radio table-type">
+                                    <label class="table-type" title="Select a project and dataset to enable this option."><input class="table-type" type="radio" name="table-type" value="new" disabled checked> Make a new table</label>
                                 </div>
-                                <div class="radio">
-                                    <label title="Select a project and dataset to enable this option." disabled><input class="table-type" type="radio" name="table-type" value="append" disabled> Append to an existing table</label>
+                                <div class="radio table-type">
+                                    <label class="table-type" title="Select a project and dataset to enable this option."><input class="table-type" type="radio" name="table-type" value="append" disabled> Append to an existing table</label>
                                 </div>
                             </ul>
                         </div>
@@ -272,9 +273,9 @@
                                 <option value="" disabled selected type="label">Please select a table</option>
                             </select>
                         </div>
-                        <div class="form-group new-table-name" style="display: none;">
+                        <div class="form-group new-table-name">
                             <label for="new-table-name">Name:</label>
-                            <input class="form-control" type="text" id="table-name" name="new-table-name" />
+                            <input title="Select a project and dataset to enable this option." disabled class="form-control new-table-name" type="text" maxlength="1024" placeholder="If left blank, a table name will be provided." id="new-table-name" name="new-table-name" />
                         </div>
                     </div>
                     <div class="modal-footer">

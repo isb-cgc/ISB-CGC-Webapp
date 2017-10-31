@@ -1110,21 +1110,61 @@ require([
     $('.table-type').on('change',function(){
         $('#export-cohort-table').val('');
         if($(this).find(':checked').val()=='append') {
-            $('#export-cohort-table').empty();
+            $('#export-cohort-form input[type="submit"]').attr('disabled','disabled');
+            $('#export-cohort-table option:not([type="label"])').remove();
             var tables = $('#export-cohort-project-dataset :selected').data('tables');
             for(var i=0;i<tables.length;i++) {
                 $('#export-cohort-table').append('<option value="'+tables[i]+'">'+tables[i]+'</option>')
             }
             $('.table-list').show();
+            $('.new-table-name').hide();
         } else {
+            $('#export-cohort-form input[type="submit"]').removeAttr('disabled');
             $('.table-list').hide();
+            $('.new-table-name').show();
+        }
+    });
+
+    $('#new-table-name').on('keypress keyup paste',function (e) {
+        var self = $(this);
+        setTimeout(function() {
+            $('.message-container').empty();
+            var str = self.val();
+
+            if(str.match(/[^A-Za-z0-9_]/)) {
+                e.preventDefault();
+                base.showJsMessage("error", "BigQuery table names are restricted to numbers, letters, and underscores.",false, $('.message-container'));
+                return false;
+            }
+
+            if (str.length >= parseInt($('#new-table-name').attr('maxlength'))) {
+                e.preventDefault();
+                base.showJsMessage("warning", "You have reached the maximum size of the table name.",false, $('.message-container'));
+                return false;
+            }
+        },70);
+    });
+
+    $('#export-cohort-table').on('change',function(){
+        if($(this).find(':selected').attr('type') !== "label") {
+            $('#export-cohort-form input[type="submit"]').removeAttr('disabled');
         }
     });
 
     $('#export-cohort-project-dataset').on('change',function(){
-        $('.table-type').removeAttr('disabled');
-        $('.table-type').parents('label').removeAttr('title');
-        $('#export-cohort-table').empty();
+        $('.table-type, .new-table-name').removeAttr('disabled');
+        $('.table-type, .new-table-name').removeAttr('title');
+        $('#export-cohort-table option:not([type="label"])').remove();
+        if($('.table-type').find(':checked').val() == 'append') {
+            if($('#export-cohort-table :selected').attr('type') !== "label") {
+                $('#export-cohort-form input[type="submit"]').removeAttr('disabled');
+            } else {
+                $('#export-cohort-form input[type="submit"]').attr('disabled','disabled');
+            }
+        } else {
+            $('#export-cohort-form input[type="submit"]').removeAttr('disabled');
+        }
+
         var tables = $('#export-cohort-project-dataset :selected').data('tables');
         if(tables.length > 0) {
             for (var i = 0; i < tables.length; i++) {
@@ -1139,7 +1179,24 @@ require([
         $('#exporting-cohort').css('display','inline-block');
     });
 
+    $('#export-cohort-modal').on('hide.bs.modal',function(){
+        $('#export-cohort-project-dataset optgroup').remove();
+        $('.table-type, .new-table-name').attr('disabled','disabled');
+        $('.table-type, .new-table-name').attr('title','Select a project and dataset to enable this option');
+        $('.new-table-name').show();
+        $('.table-list').hide();
+        $('.message-container').empty();
+        $('#export-cohort-table option:not([type="label"])').remove();
+        $('#export-cohort-form input[type="submit"]').attr('disabled','disabled');
+    });
+
     $('button[data-target="#export-cohort-modal"]').on('click',function(e){
+        if($('#export-cohort-modal').data('opening')) {
+            e.preventDefault();
+            return false;
+        }
+        $('#export-cohort-modal').data('opening',true);
+        $('#export-cohort-form input[type="submit"]').attr('disabled','disabled');
         $.ajax({
             type: 'GET',
             url: BASE_URL + '/cohorts/export_cohort/',
@@ -1163,8 +1220,15 @@ require([
                         }
                     }
                 }
+            },
+            complete: function() {
+                $('#export-cohort-modal').modal('show');
+                $('#export-cohort-modal').data('opening',false);
             }
         });
+        // Don't let the modal open automatically; we're controlling that.
+        e.preventDefault();
+        return false;
     });
 
 
