@@ -286,7 +286,8 @@ def get_image_data_args(request):
     elif request.POST:
         slide_barcode = request.POST.get('slide_barcode',None)
 
-    slide_barcode = (None if re.compile(ur'[^A-Za-z0-9\-]').search(slide_barcode) else slide_barcode)
+    if slide_barcode:
+        slide_barcode = (None if re.compile(ur'[^A-Za-z0-9\-]').search(slide_barcode) else slide_barcode)
 
     return get_image_data(request, slide_barcode)
 
