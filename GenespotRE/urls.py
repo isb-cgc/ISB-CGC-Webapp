@@ -33,6 +33,9 @@ urlpatterns = [
     url(r'^bucket_object_list/$', views.bucket_object_list, name='bucket_object_list'),
     url(r'^igv/$', views.igv, name='igv'),
 
+    url(r'^images/(?P<slide_barcode>[A-Za-z0-9\-]+)/$', views.get_image_data, name='image_data'),
+    url(r'^images/', views.get_image_data_args, name='image_data_args'),
+
     url(r'^analysis/', include('analysis.urls')),
     url(r'^workbooks/', include('workbooks.urls')),
     url(r'^cohorts/', include('cohorts.urls')),
