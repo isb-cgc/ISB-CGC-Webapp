@@ -137,20 +137,14 @@
                                                             {% if type.datatype == 'CLIN' %}
                                                                 <div class="form-group search-field {{ type.datatype }}-options ">
                                                                     <div class="search-term feature-search">
-                                                                        <label for="{{ type.datatype }}-search-term-select">Feature Search</label>
-                                                                        <select id="{{ type.datatype }}-search-term-select" class="form-control search-term-field"></select>
+                                                                        <label for="{{ type.datatype }}-search-term-select-{{ program.id }}">Feature Search</label>
+                                                                        <select id="{{ type.datatype }}-search-term-select-{{ program.id }}" class="form-control search-term-field"></select>
                                                                     </div>
                                                                 </div>
                                                             {% endif %}
                                                         {% endfor %}
                                                     </li>
                                                 </ul>
-                                            </div>
-                                            <div role="tabpanel" class="tab-pane" id="search">
-                                                <br>
-                                                <div class="form-group">
-                                                    <input type="text" class="form-control" placeholder="Search">
-                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -201,7 +195,7 @@
                                                     <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ per_proj.progName }} | {{ per_proj.projName }}
                                                 </a>
                                             </div>
-                                            <div id="collapse-{{ per_proj.progID }}-{{ per_proj.projID }}" class="list-group-item__body collapse" role="tabpanel" aria-labelledby="heading-{{ per_proj.progID }}-{{ per_proj.projID }}">
+                                            <div id="collapse-{{ per_proj.progID }}-{{ per_proj.projID }}" class="list-group-item__body collapse" role="tabpanel" aria-labelledby="heading-{{ data_type_name }}">
                                                 <ul class="search-checkbox-list" id="{{ data_type_name }}">
                                                     {% with per_proj.vars|how_many_more:6 as num_more %}
                                                         {% for per_proj_var in per_proj.vars %} {#|get_item:attr %}#}
