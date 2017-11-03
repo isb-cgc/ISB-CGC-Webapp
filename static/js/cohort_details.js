@@ -270,7 +270,7 @@ require([
             value = $this;
 
         if(createFormFilterSet.length <= 0) {
-            $('#create-cohort-form .form-control-static').append('<p id="'+activeDataTab+'-filters"></p>');
+            $('#selected-filters').append('<p id="'+activeDataTab+'-filters"></p>');
             createFormFilterSet = $('p#'+activeDataTab+'-filters')
             createFormFilterSet.append('<h5>'+(prog.data('prog-displ-name'))+'</h5>');
         } else {
@@ -950,89 +950,89 @@ require([
             $(this).siblings().find('.bq-table-display').attr('title',$(this).find(':selected').data('bq-table'));
         });
         $('select.mutation-build').on('change',filter_change_callback);
-
-       // Event handlers for the 'x' of the case and data type filter tokens
-        $('.selected-filters, #selected-filters').on('click', 'a.mol-cat-filter-x', function (e,data) {
-            var activeDataTab = $(this).parents('.data-tab').attr('id');
-            var selFilterPanel = '.'+activeDataTab+ '-selected-filters';
-            var createFormFilterSet = $('p#'+activeDataTab+'-filters');
-
-            // When the 'Selected Filters' token is removed, remove this filter from other
-            // locations in which it's stored
-            var mut_cat = $('#'+activeDataTab+' .mutation-category-selector');
-            (!data || !data.forNewVal) &&  mut_cat.val('label');
-            $(this).parent('span').remove();
-
-            $(selFilterPanel+' .panel-body').find('span[data-feature-id="'+$(this).parent('span').data('feature-id')+'"]').remove();
-            createFormFilterSet.find('span[data-feature-id="'+$(this).parent('span').data('feature-id')+'"]').remove();
-
-            if(!cohort_id && $('.selected-filters .panel-body span').length <= 0) {
-                $('#at-least-one-filter-alert-modal').show();
-                $('#create-cohort-modal input[type="submit"]').attr('disabled','disabled');
-            }
-
-            // If this has emptied out a program's filter set, hide the modal's subsection for that program
-            // if a new value isn't replacing it
-            if(createFormFilterSet.find('span').length <= 0 && (!data || !data.forNewVal)) {
-                createFormFilterSet.hide();
-            }
-
-            // If we're down to 1 program in the filter set, the multiprogram warning is no longer needed
-            var progCount = 0;
-            $('.selected-filters .panel-body').each(function(){
-                if($(this).find('span').length > 0) {
-                    progCount++;
-                }
-            });
-            (progCount > 1) ? $('#multi-prog-cohort-create-warn').show() : $('#multi-prog-cohort-create-warn').hide();
-
-            (!data || !data.without_update) && update_displays(true,false,$(this).parent('span').data('prog-id'));
-            return false;
-        });
-
-        // Handler for the 'x' of the mutation filter tokens
-        $('.selected-filters, #selected-filters').on('click', 'a.delete-x', function(e,data) {
-            var activeDataTab = $(this).parents('.data-tab').attr('id');
-            var selFilterPanel = '.'+activeDataTab+ '-selected-filters';
-            var createFormFilterSet = $('p#'+activeDataTab+'-filters');
-
-            var checked_box = $('div[data-feature-id="' + $(this).parent('span').data('feature-id')
-                + '"] input[type="checkbox"][data-value-name="' + $(this).parent('span').data('value-name') + '"]');
-
-            if($(this).parent('span').data('feature-type') == 'molecular') {
-                checked_box = $('div[data-feature-id="' + $(this).parent('span').data('feature-id').split(":")[3]
-                    + '"] input[type="checkbox"][data-value-name="' + $(this).parent('span').data('value-name') + '"]');
-            }
-            checked_box.prop('checked', false);
-            var span_data = $(this).parent('span').data();
-
-            // Remove the filter tokens from their respective containers
-            createFormFilterSet.find('span[data-feature-id="'+span_data['feature-id']+'"][data-value-id="'+span_data['value-id']+'"]').remove();
-            $(selFilterPanel+' .panel-body span[data-feature-id="'+span_data['feature-id']+'"][data-value-id="'+span_data['value-id']+'"]').remove();
-
-            if(!cohort_id && $('.selected-filters .panel-body span').length <= 0) {
-                $('#at-least-one-filter-alert-modal').show();
-                $('#create-cohort-modal input[type="submit"]').attr('disabled','disabled');
-            }
-
-            // If this has emptied out a program's filter set, hide the modal's subsection for that program
-            if(createFormFilterSet.find('span').length <= 0) {
-                createFormFilterSet.hide();
-            }
-
-            // If we're down to 1 program in the filter set, the multiprogram warning is no longer needed
-            var progCount = 0;
-            $('.selected-filters .panel-body').each(function(){
-                if($(this).find('span').length > 0) {
-                    progCount++;
-                }
-            });
-            (progCount > 1) ? $('#multi-prog-cohort-create-warn').show() : $('#multi-prog-cohort-create-warn').hide();
-
-            (!data || !data.without_update) && update_displays(true,false,span_data['prog-id']);
-            return false;
-        });
     };
+
+    // Event handlers for the 'x' of the case and data type filter tokens
+    $('.tab-content, #selected-filters').on('click', 'a.mol-cat-filter-x', function (e,data) {
+        var activeDataTab = $(this).parents('.data-tab').attr('id');
+        var selFilterPanel = '.'+activeDataTab+ '-selected-filters';
+        var createFormFilterSet = $('p#'+activeDataTab+'-filters');
+
+        // When the 'Selected Filters' token is removed, remove this filter from other
+        // locations in which it's stored
+        var mut_cat = $('#'+activeDataTab+' .mutation-category-selector');
+        (!data || !data.forNewVal) &&  mut_cat.val('label');
+        $(this).parent('span').remove();
+
+        $(selFilterPanel+' .panel-body').find('span[data-feature-id="'+$(this).parent('span').data('feature-id')+'"]').remove();
+        createFormFilterSet.find('span[data-feature-id="'+$(this).parent('span').data('feature-id')+'"]').remove();
+
+        if(!cohort_id && $('.selected-filters .panel-body span').length <= 0) {
+            $('#at-least-one-filter-alert-modal').show();
+            $('#create-cohort-modal input[type="submit"]').attr('disabled','disabled');
+        }
+
+        // If this has emptied out a program's filter set, hide the modal's subsection for that program
+        // if a new value isn't replacing it
+        if(createFormFilterSet.find('span').length <= 0 && (!data || !data.forNewVal)) {
+            createFormFilterSet.hide();
+        }
+
+        // If we're down to 1 program in the filter set, the multiprogram warning is no longer needed
+        var progCount = 0;
+        $('.selected-filters .panel-body').each(function(){
+            if($(this).find('span').length > 0) {
+                progCount++;
+            }
+        });
+        (progCount > 1) ? $('#multi-prog-cohort-create-warn').show() : $('#multi-prog-cohort-create-warn').hide();
+
+        (!data || !data.without_update) && update_displays(true,false,$(this).parent('span').data('prog-id'));
+        return false;
+    });
+
+    // Handler for the 'x' of the mutation filter tokens
+    $('.tab-content, #selected-filters').on('click', 'a.delete-x', function(e,data) {
+        var activeDataTab = $(this).parents('.data-tab').attr('id');
+        var selFilterPanel = '.'+activeDataTab+ '-selected-filters';
+        var createFormFilterSet = $('p#'+activeDataTab+'-filters');
+
+        var checked_box = $('div[data-feature-id="' + $(this).parent('span').data('feature-id')
+            + '"] input[type="checkbox"][data-value-name="' + $(this).parent('span').data('value-name') + '"]');
+
+        if($(this).parent('span').data('feature-type') == 'molecular') {
+            checked_box = $('div[data-feature-id="' + $(this).parent('span').data('feature-id').split(":")[3]
+                + '"] input[type="checkbox"][data-value-name="' + $(this).parent('span').data('value-name') + '"]');
+        }
+        checked_box.prop('checked', false);
+        var span_data = $(this).parent('span').data();
+
+        // Remove the filter tokens from their respective containers
+        createFormFilterSet.find('span[data-feature-id="'+span_data['feature-id']+'"][data-value-id="'+span_data['value-id']+'"]').remove();
+        $(selFilterPanel+' .panel-body span[data-feature-id="'+span_data['feature-id']+'"][data-value-id="'+span_data['value-id']+'"]').remove();
+
+        if(!cohort_id && $('.selected-filters .panel-body span').length <= 0) {
+            $('#at-least-one-filter-alert-modal').show();
+            $('#create-cohort-modal input[type="submit"]').attr('disabled','disabled');
+        }
+
+        // If this has emptied out a program's filter set, hide the modal's subsection for that program
+        if(createFormFilterSet.find('span').length <= 0) {
+            createFormFilterSet.hide();
+        }
+
+        // If we're down to 1 program in the filter set, the multiprogram warning is no longer needed
+        var progCount = 0;
+        $('.selected-filters .panel-body').each(function(){
+            if($(this).find('span').length > 0) {
+                progCount++;
+            }
+        });
+        (progCount > 1) ? $('#multi-prog-cohort-create-warn').show() : $('#multi-prog-cohort-create-warn').hide();
+
+        (!data || !data.without_update) && update_displays(true,false,span_data['prog-id']);
+        return false;
+    });
 
     //
     // Fix for Issue #1950. While user is waiting for cohort data request, we prevent them from clicking on
