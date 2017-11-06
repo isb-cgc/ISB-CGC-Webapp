@@ -27,7 +27,7 @@
         <hr>
         {% with user_datasets_count=user_details.auth_datasets|length user_auth_datasets=user_details.auth_datasets %}
             {% if user_datasets_count > 0 %}
-                <p>Congratulations, {{ user_details.NIH_username }}! You now have access to the following ISB-CGC controlled access dataset{% if user_datasets_count > 1 %}s{% endif %}:</p>
+                <p>Congratulations, {{ user_details.NIH_username }}! You now have access to the following ISB-CGC controlled dataset{% if user_datasets_count > 1 %}s{% endif %}:</p>
                 <ul>
                     {% for dataset in user_auth_datasets %}
                         <li><a href="https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id={{ dataset.whitelist_id }}" target="_BLANK">{{ dataset.name }}</a>{% if dataset.duca_id %} - <a href="https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?view_pdf&stacc={{ dataset.duca_id }}" target="_BLANK">DUCA</a>{% endif %}</li>
@@ -65,8 +65,8 @@
                 </div>
                 <div class="modal-body">
                     <p>
-                        This will remove your access to any controlled access datasets. In addition, service accounts from Google Cloud Projects you are associated with
-                        which were accessing controlled access data will also lose their access to controlled access datasets.
+                        This will remove your access to any controlled datasets. In addition, service accounts from Google Cloud Projects you are associated with
+                        which were accessing controlled data will also lose their access.
                     </p>
                 </div>
                 <form id="unlink-nih-account" method="GET" action="{% url 'unlink_accounts' %}">
