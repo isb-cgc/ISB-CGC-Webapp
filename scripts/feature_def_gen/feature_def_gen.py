@@ -21,6 +21,12 @@ from json import load as load_json
 import logging
 from StringIO import StringIO
 from time import sleep
+import os
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "GenespotRE.settings")
+
+import django
+django.setup()
 
 import click
 
@@ -80,6 +86,7 @@ def save_csv(data_rows, schema, csv_path, include_header=False):
 @click.option('--config_json', type=str)
 @click.option('-chr', "chromosome_array", type=str, multiple=True, help="Chromosome (required for methylation)")
 def print_query(data_type, config_json, chromosome_array):
+
     feature_type = FeatureDataTypeHelper.get_type(data_type)
     logging.info("Feature type: {}".format(str(feature_type)))
     config_class = FeatureDataTypeHelper.get_feature_def_config_from_data_type(feature_type)
@@ -90,6 +97,10 @@ def print_query(data_type, config_json, chromosome_array):
     else:
         config_dict = FeatureDataTypeHelper.get_feature_def_default_config_dict_from_data_type(feature_type)
         config_instance = config_class.from_dict(config_dict)
+
+    if not chromosome_array:
+        chromosome_array = [str(c) for c in range(1, 23)]
+        chromosome_array.extend(['X', 'Y'])
 
     provider = provider_class(config_instance, chromosome_array=chromosome_array)
     query = provider.build_query(config_instance)
@@ -113,6 +124,11 @@ def run(project_id, data_type, csv_path, config_json, chromosome_array):
     else:
         config_dict = FeatureDataTypeHelper.get_feature_def_default_config_dict_from_data_type(feature_type)
         config_instance = config_class.from_dict(config_dict)
+
+
+    if not chromosome_array:
+        chromosome_array = [str(c) for c in range(1, 23)]
+        chromosome_array.extend(['X', 'Y'])
 
     provider = provider_class(config_instance, chromosome_array=chromosome_array)
 

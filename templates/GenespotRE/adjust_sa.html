@@ -24,12 +24,12 @@
 
 {% endblock %}
 
-{% block link_page_name %}user-register-sa{% endblock %}
-{% block page_name %}user-register-sa{% endblock %}
+{% block link_page_name %}user-adjust-sa{% endblock %}
+{% block page_name %}user-adjust-sa{% endblock %}
 
 {% block page_header %}
     <div class="container">
-        <h1 class="page-header pull-left"><a href="{% url 'user_gcp_list' user.id %}" aria-label="Back to Project Listing"><i class="fa fa-chevron-left"></i></a> Register a Service Account</h1>
+        <h1 class="page-header pull-left"><a href="{% url 'user_gcp_list' user.id %}" aria-label="Back to Project Listing"><i class="fa fa-chevron-left"></i></a> Adjust Service Account Datasets</h1>
     </div>
 {% endblock %}
 
@@ -38,21 +38,18 @@
         <div class="row">
             <div class="col-sm-12 col-md-12 col-lg-12">
                 <div id="invalid-sa-error"></div>
-                <h4>To register service account for {{ gcp_id }}, please follow these instructions:</h4>
+                <h4>Adjust available datasets for Service Account {{ sa_id }}</h4>
                 <ul>
-                    <li>
+                    <li class="upper">
                         <form id="verify-sa" method="POST" action="{% url 'verify_sa' user.id %}">
                             {% csrf_token %}
-                            <label for="user_sa">Please enter the Service Account ID you'd like to register to this Google Cloud Project. Service Accounts may be found in your Google Cloud Platform console under IAM & Admin.</label>
-
-                            <input id="user_sa" type="text" name="user_sa" placeholder="ex. 000000000000-alphanumericstringofcharacters@developer.gserviceaccount.com" class="form-control" required/>
-                            <br>
-                            Are you going to use this service account to work with controlled-access data?
+                            What adjustments do you need to make?
+                            <br />
                             <div class="radio">
-                                <label><input type="radio" name="select-datasets" value="no" checked> No</label>
+                                <label><input type="radio" name="select-datasets" value="remove" checked> Remove all controlled-access datasets</label>
                             </div>
                             <div class="radio">
-                                <label><input type="radio" name="select-datasets" value="yes"> Yes</label>
+                                <label><input type="radio" name="select-datasets" value="alter"> Add/Remove specific datasets</label>
                             </div>
                             <div id="datasets-select-div" style="display:none;">
                                 Which dataset(s) would you like to use?
@@ -60,13 +57,15 @@
                                     {% for dataset in authorized_datasets %}
                                         <li class="checkbox">
                                             <label>
-                                                <input type="checkbox" name="datasets" value="{{ dataset.id }}">{{ dataset.name }}
+                                                <input type="checkbox" name="datasets" value="{{ dataset.id }}"{% if dataset in sa_datasets %}checked="checked"{% endif %}>{{ dataset.name }}
                                             </label>
                                         </li>
                                     {% endfor %}
                                 </ul>
                             </div>
                             <input type="hidden" name="gcp_id" value="{{ gcp_id }}"/>
+                            <input type="hidden" name="user_sa" value="{{ sa_id }}"/>
+                            <input type="hidden" name="is_adjust" value="true" />
                             <br>
                             Click this <input type="submit" class="verify-sa-btn btn btn-default" value="button"/> to allow us to verify who is allowed to use this service account.
                         </form>
@@ -97,52 +96,15 @@
                             {% csrf_token %}
                             <p>We have verified that all of the users in your Google Cloud Project have permission to access the proposed datasets.</p>
                             <input type="hidden" name="gcp_id" value="{{ gcp_id }}"/>
-                            <input type="submit" class="register-sa-btn btn btn-default" value="Register" />
+                            <input type="hidden" name="user_sa" value="{{ sa_id }}"/>
+                            <input type="submit" class="register-sa-btn btn btn-default" value="Adjust" />
+                            <input type="hidden" name="is_adjust" value="true" />
                         </form>
                     </div>
                 </ul>
             </div>
         </div>
     </div>
-
-    <!-- Modals -->
-{##}
-{#    <div class="modal fade" id="add-cloud-project" tabindex="-1" role="dialog" aria-labelledby="AddCloudProject" aria-hidden="true">#}
-{#        <div class="modal-dialog">#}
-{#            <div class="modal-content">#}
-{#                <div class="modal-header">#}
-{#                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>#}
-{#                    <h4 class="modal-title" id="add-gcp-header">Link Google Cloud Project</h4>#}
-{#                </div>#}
-{#                <form id="add-gcp" method="POST" action="{% url 'register_gcp' user.id %}" class="form-horizontal">#}
-{#                    <div class="modal-body">#}
-{#                        <div class="form-group">#}
-{#                            <label for="name" class="control-label col-sm-3">Name (Required)</label>#}
-{#                            <div class="col-sm-9">#}
-{#                                <input type="text" class="form-control" name="project_name" id="name" placeholder="Project Name" required />#}
-{#                            </div>#}
-{#                        </div>#}
-{#                        <div class="form-group">#}
-{#                            <label for="project-id" class="control-label col-sm-3">Project ID (Required)</label>#}
-{#                            <div class="col-sm-9">#}
-{#                                <input type="text" class="form-control" name="project_id" id="project-id" placeholder="Project Id" required />#}
-{#                            </div>#}
-{#                        </div>#}
-{#                        <div class="form-group">#}
-{#                            <label for="project-dataset" class="control-label col-sm-3">Big Query Dataset (Optional)</label>#}
-{#                            <div class="col-sm-9">#}
-{#                                <input type="text" class="form-control" name="bq_dataset" id="project-dataset" placeholder="Project Name" />#}
-{#                            </div>#}
-{#                        </div>#}
-{#                    </div>#}
-{#                    <div class="modal-footer">#}
-{#                        {% csrf_token %}#}
-{#                        <input type="submit" value="Register" class="btn btn-primary" />#}
-{#                    </div>#}
-{#                </form>#}
-{#            </div>#}
-{#        </div>#}
-{#    </div>#}
 {% endblock %}
 
 {% block js_file %}{% static 'js/register_sa.js' %}{% endblock %}

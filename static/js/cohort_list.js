@@ -50,36 +50,50 @@ require([
         var form = $(this).find('form');
         if(form.length){
             form[0].reset();
+            $('#base-id').empty();
+            $('#subtract-ids').empty();
         }
     });
 
     var delete_x_callback = function () {
         var parent_form = $(this).parents('form');
-        $('input[type="checkbox"][value="' + $(this).parent().attr('value') + '"]').trigger('click');
+        $(this).parents('.form-control-static').siblings('.cohort-search-div').show();
+        $(this).parents('.complement-control').length <= 0 && $('input[type="checkbox"][value="' + $(this).parent().attr('value') + '"]').trigger('click');
+        $(this).parents('.complement-control').length <= 0 && $('#base-ids').empty() && $('#subtract-ids').empty();
         $(this).parent('.cohort-label').remove();
-        if (parent_form && !parent_form.find('.label').length) {
+        console.debug(parent_form.find('.label').length);
+        if (parent_form && parent_form.find('.label').length <= 1) {
             parent_form.find('[type="submit"]').prop('disabled', 'disabled')
         }
         return false;
     };
 
     var toggle_buttons = function() {
-        $('.cohort-table').each(function () {
-            if ($(this).find('tr:not(:first) input[type="checkbox"]:checked').length == 0) {
-                $(this).parent().find('.page-action-group .btn').prop('disabled', 'disabled');
+        if ($('tr:not(:first) input[type="checkbox"]:checked').length == 0) {
+           $('.page-action-group .btn').prop('disabled', 'disabled');
+           $('.page-action-group .btn').attr('title', 'Select one or more cohorts.');
+           $('.page-action-group .btn.set-ops').attr('title', 'Select two or more cohorts.');
+        } else {
+            if($('tr:not(:first) input[type="checkbox"]:checked').length >= 2) {
+               $('.page-action-group .btn').removeAttr('title');
+               $('.page-action-group .btn:not(.owner-only)').removeAttr('disabled');
             } else {
-                $(this).parent().find('.page-action-group .btn:not(.owner-only)').removeAttr('disabled');
-
-                var canDelOrShare = true;
-                $(this).find('tr:not(:first) input[type="checkbox"]:checked').each(function () {
-                    if ($.trim($(this).parents('td').siblings('td.owner-col').text()) !== 'You') {
-                        canDelOrShare = false;
-                    }
-                });
-                canDelOrShare && $('.owner-only').removeAttr('disabled');
-                !canDelOrShare && $('.owner-only').prop('disabled', 'disabled');
+               $('.page-action-group .btn:not(.set-ops)').removeAttr('title');
+               $('.page-action-group .btn:not(.owner-only,.set-ops)').removeAttr('disabled');
+               $('.page-action-group .btn.set-ops').prop('disabled', 'disabled');
+               $('.page-action-group .btn.set-ops').attr('title', 'Select two or more cohorts.');
             }
-        });
+
+            var canDelOrShare = true;
+            $('tr:not(:first) input[type="checkbox"]:checked').each(function () {
+                if ($.trim($(this).parents('td').siblings('td.owner-col').text()) !== 'You') {
+                    canDelOrShare = false;
+                }
+            });
+            canDelOrShare && $('.owner-only').removeAttr('disabled') &&$('.page-action-group .btn:not(.set-ops)').removeAttr('title');
+            !canDelOrShare && $('.owner-only').prop('disabled', 'disabled') && $('.page-action-group .btn.owner-only').attr('title', "You don't have permission to share or delete some of the selected cohorts.");
+        }
+
 
         $('.cohort-table tr:not(:first) input[type="checkbox"]:checked').length == 0 && $('#cohort-apply-to-workbook .btn').prop('disabled', 'disabled');
         $('.cohort-table tr:not(:first) input[type="checkbox"]:checked').length > 0 && $('#cohort-apply-to-workbook .btn').removeAttr('disabled');
@@ -87,10 +101,8 @@ require([
 
     $('.select-all').on('change', function() {
         var checked = $(this).is(':checked');
-        var tablename = '#' + $(this).closest('table')[0].id;
         var formApply = $('#cohort-apply-to-workbook');
         if (checked) {
-            enable_buttons(tablename);
             // Create tokens for Set Ops modal
             $(this).parents('table').find('tr:not(:first) input[type="checkbox"]').each(function() {
                 var token = $('<span class="cohort-label label label-default space-right-5" value="'
@@ -101,20 +113,23 @@ require([
                 $('.selected-cohorts').each(function() {
                     $(this).append(token.clone());
                 });
+                $('#selected-ids').append(token.clone());
 
                 // Add all values to the form
                 formApply.append($('<input>', {type: 'hidden', name: 'cohorts', value: $(this).val()}));
             });
         } else {
-            disable_buttons(tablename);
-            clear_objects();
-            repopulate_cohort_selects();
+            formApply.empty();
+            $('.selected-cohorts').empty();
+            $('#selected-ids').empty();
         }
 
         // Sets all checkboxes to the state of the select-all
         $(this).parents('table').find('input[type=checkbox]').each(function() {
             $(this).prop('checked', checked);
         });
+
+        toggle_buttons();
     });
 
     var checkbox_change_callback = function() {
@@ -173,8 +188,15 @@ require([
                 xhr.setRequestHeader("X-CSRFToken", csrftoken);
             },
             success: function (data) {
-                if(data.result && data.result.msg) {
-                    base.setReloadMsg('info',data.result.msg);
+                if(data.result) {
+                    var msgs = [];
+                    if(data.result.msg) {
+                        msgs.push(data.result.msg);
+                    }
+                    if(data.result.note) {
+                        msgs.push(data.result.note)
+                    }
+                    base.setReloadMsg('info',msgs);
                 }
                 window.location.reload(true);
             },
@@ -266,8 +288,15 @@ require([
                     }
                 } else if(data.status && data.status == 'success') {
                     $this.closest('.modal').modal('hide');
-                    if(data.result && data.result.msg) {
-                        base.setReloadMsg('info',data.result.msg);
+                    if(data.result) {
+                        var msgs = [];
+                        if(data.result.msg) {
+                            msgs.push(data.result.msg);
+                        }
+                        if(data.result.note) {
+                            msgs.push(data.result.note)
+                        }
+                        base.setReloadMsg('info',msgs);
                     }
                     if($this.data('redirect')) {
                         window.location = $this.data('redirect');
@@ -281,7 +310,7 @@ require([
                 base.showJsMessage('error',err,true);
             },
         }).always(function () {
-            $this.find('.btn-primary').removeClass('btn-disabled').attr('disabled', false);
+            $this.find('.btn-primary').removeClass('btn-disabled').removeAttr('disabled');
         });
         // We don't want this form submission to automatically trigger a reload
         return false;
@@ -317,6 +346,51 @@ require([
     $('#operation').on('change', function() {
         if ($(this).val() == 'complement') {
             $('.set-control').hide();
+            $('#base-id').find('span').remove();
+            $('#subtract-ids').find('span').remove();
+            var largest = null;
+            var smaller = [];
+            $('tr:not(:first) input[type="checkbox"]:checked').each(function(){
+                var cohort = {
+                    'value': $(this).parent('td').siblings('.id-col').text().trim(),
+                    'label': $(this).parent('td').siblings('.name-col').text().trim(),
+                    'size': parseInt($(this).parent('td').siblings('.sample-col').text().trim())
+                };
+                if(!largest) {
+                    largest = cohort;
+                } else {
+                    if(cohort['size'] > largest['size']) {
+                        smaller.push(largest);
+                        largest = cohort;
+                    } else {
+                        smaller.push(cohort);
+                    }
+                }
+            });
+            if($('#base-id').find('span').length <= 0) {
+                var token_str = '<span class="cohort-label label label-default space-right-5" value="'
+                    + largest.value + '" name="selected-ids">'
+                    + largest.label
+                    + ' <a href="" class="delete-x"><i class="fa fa-times"></a>'
+                    + '</span>';
+                var cohort_token = $(token_str);
+                $('#base-id').append(cohort_token);
+            }
+            if($('#subtract-ids').find('span').length <= 0) {
+                for (var i = 0; i < smaller.length; i++) {
+                    if ($('#subtract-ids').find('span[value="' + smaller[i].value + '"]').length <= 0) {
+                        var cohort = smaller[i];
+                        var token_str = '<span class="cohort-label label label-default space-right-5" value="'
+                            + cohort.value + '" name="selected-ids">'
+                            + cohort.label
+                            + ' <a href="" class="delete-x"><i class="fa fa-times"></a>'
+                            + '</span>';
+                        var cohort_token = $(token_str);
+                        $('#subtract-ids').append(cohort_token);
+                    }
+                }
+            }
+            $('.cohort-search-div').hide();
             $('.complement-control').show();
         } else {
             $('.set-control').show();
@@ -324,29 +398,46 @@ require([
         }
     });
 
+    $('#set-ops-modal').on('show.bs.modal', function(){
+        $('#operation').trigger('change');
+        $(this).find('button[type="submit"]').removeAttr('disabled');
+
+        $('.cohort-search-div').hide();
+
+        var sel_cohorts = [];
+        $('tr:not(:first) input[type="checkbox"]:checked').each(function(){
+            sel_cohorts.push({'value': $(this).parent('td').siblings('.id-col').text().trim(), 'label': $(this).parent('td').siblings('.name-col').text().trim()});
+        });
+        $('.search-cohorts').autocomplete({
+            source: sel_cohorts,
+            select: function(event, ui) {
+                // Don't allow cohort tokens to be added multiple times
+                if($('.complement-control .form-control-static span[value="'+ui.item.value+'"]').length <= 0
+                    && ($(event.target).parents('.cohort-search-div').siblings('#base-id').length <= 0 || $('#base-id').find('span').length <= 0)) {
+                    var token_str = '<span class="cohort-label label label-default space-right-5" value="'
+                                + ui.item.value + '" name="selected-ids">'
+                                + ui.item.label
+                                + ' <a href="" class="delete-x"><i class="fa fa-times"></a>'
+                                + '</span>';
+                    var cohort_token = $(token_str);
+                    $(event.target).parents('.form-group').find('.form-control-static').append(cohort_token);
+                    $(this).val('');
+                    $(this).hide();
+                }
+                $(this).parents('.cohort-search-div').siblings('#base-id').length > 0 && $('#base-id').find('span').length > 0 && $('#base-id').siblings('.cohort-search-div').hide();
+                $(this).parents('.cohort-search-div').siblings('#subtract-ids').length > 0 && $('#subtract-ids').find('span').length >= (sel_cohorts.length-1) && $('#subtract-ids').siblings('.cohort-search-div').hide();
+                return false;
+            },
+            open: function(event, ui) {
+                $('.ui-autocomplete').css('width', $(this).parents('.form-group').width() + 'px')
+            }
+        }).hide();
+    });
+
     $('.add-cohort').on('click', function() {
         $(this).siblings('.search-cohorts').show();
         return false;
     });
-
-    $('.search-cohorts').autocomplete({
-        source: cohort_list,
-        select: function(event, ui) {
-            var token_str = '<span class="cohort-label label label-default space-right-5" value="'
-                        + ui.item.value + '" name="selected-ids">'
-                        + ui.item.label
-                        + ' <a href="" class="delete-x"><i class="fa fa-times"></a>'
-                        + '</span>';
-            var cohort_token = $(token_str);
-            $(event.target).parents('.form-group').find('.form-control-static').append(cohort_token);
-            $(this).val('');
-            $(this).hide();
-            return false;
-        },
-        open: function(event, ui) {
-            $('.ui-autocomplete').css('width', $(this).parents('.form-group').width() + 'px')
-        }
-    }).hide();
 
     $(".createWorkbookWithCohort").on("click", function(){
         //get the selected cohort
@@ -369,20 +460,27 @@ require([
                     if(!data.error) {
                         window.location = BASE_URL + '/workbooks/' + data.workbook_id + '/worksheets/' + data.worksheet_id + '/';
                     } else {
-                        console.log('Failed to create workbook with cohorts.');
+                        base.setReloadMsg('error','Failed to create a workbook with cohort(s): '+ cohorts.join(", "));
                     }
                 },
                 error: function () {
-                    console.log('Failed to create workbook with cohorts.');
+                    base.setReloadMsg('error','Failed to create a workbook with cohort(s): '+ cohorts.join(", "));
                 }
+            }).always(function () {
+                $this.find('button[type="submit"]').removeClass('btn-disabled').removeAttr('disabled');
             });
         }
     });
 
-    $('.selected-cohorts, #selected-ids').on('click', '.delete-x', delete_x_callback);
+    $('.selected-cohorts, #selected-ids, #base-id, #subtract-ids').on('click', '.delete-x', delete_x_callback);
 
     // Initiate buttons states on load
     toggle_buttons();
 
     $('.complement-control').hide();
+
+    // Prevent multiple submissions of any form
+    $('form').on('submit',function(){
+        $(this).find('button[type="submit"]').attr('disabled','disabled');
+    });
 });

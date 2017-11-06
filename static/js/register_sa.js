@@ -35,8 +35,9 @@ require([
     'jquery',
     'jqueryui',
     'bootstrap',
-    'session_security'
-], function($, jqueryui, bootstrap, session_security) {
+    'session_security',
+    'base'
+], function($, jqueryui, bootstrap, session_security, base) {
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function() {
@@ -47,15 +48,16 @@ require([
     });
 
     $('input[name="select-datasets"]:radio').change(function() {
-        if ($('input[name="select-datasets"]:checked').val() === 'yes') {
+        if ($('input[name="select-datasets"]:checked').val() === 'yes' || $('input[name="select-datasets"]:checked').val() === 'alter') {
             $('#datasets-select-div').show();
+            $('#register-sa input[name="select-datasets"][value="remove"]').remove();
         } else {
             $('#datasets-select-div').hide();
-            $('#datasets-select-div select option:selected').removeAttr('selected');
         }
     });
 
     $('#verify-sa').on('submit', function(e) {
+        $('#invalid-sa-error button.close').click();
         e.preventDefault();
         e.stopPropagation();
 
@@ -122,6 +124,12 @@ require([
                     }
                 }
 
+                if($('input[name="select-datasets"][value="remove"]:checked').length > 0) {
+                    var remove_all = $('input[value="remove"]').clone();
+                    remove_all.attr("type","hidden");
+                    register_form.append(remove_all[0]);
+                }
+
                 user_ver_div.show();
                 $this.find('input[type="submit"]').prop('disabled', '');
 
@@ -129,7 +137,6 @@ require([
                 $('.cannot-register').hide();
 
                 // If no datasets were requested, or, they were and verification came out clean, allow registration
-                console.debug("data['datasets']: "+data['datasets']);
                 (data['datasets'].length <= 0 || data['all_user_datasets_verified']) ? $('.register-sa-div').show() : $('.cannot-register').show();
 
             },
@@ -137,10 +144,7 @@ require([
                 var response = $.parseJSON(xhr.responseText);
                 spinner.hide();
                 $('.verify-sa-btn').prop('disabled', '');
-                $('#invalid-sa-error').append('<div class="alert alert-error alert-dismissible">' +
-                    '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>'
-                        + response['message'] + '</div>'
-                );
+                base.showJsMessage(response['level'] || "error",response['message'],true);
             }
         });
         return false;

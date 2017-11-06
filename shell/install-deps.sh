@@ -41,6 +41,10 @@ if [ -z "$CI" ]; then
     rm -rf "${HOMEROOT}/lib/*"
 fi
 pip install -q -r ${HOMEROOT}/requirements.txt -t ${HOMEROOT}/lib --upgrade --only-binary all
+if [ "$DEBUG" = "True"] && [ "$DEBUG_TOOLBAR" = "True"]; then
+    pip install -q django-debug-toolbar -t ${HOMEROOT}/lib --only-binary all
+fi
+
 echo "Libraries Installed"
 
 # Install SASS

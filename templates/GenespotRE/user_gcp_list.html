@@ -59,11 +59,12 @@
                                         <ul class="dropdown-menu">
                                             <li><a href="{% url 'register_sa' user.id %}?gcp_id={{ project.project_id }}">Register Service Account</a> </li>
                                             <li><a data-toggle="modal" role="button" data-target="#delete-project-modal-{{ project.id }}" >Unregister Project</a></li>
+                                            <li><a class="refresh-project" data-toggle="modal" role="button" data-user-id="{{ request.user.id }}" data-project-id="{{ project.id }}" data-project-name="{{ project.project_name }}" data-target="#refresh-project-modal-{{ project.id }}" >Refresh Project</a></li>
 {#                                            <li><a data-toggle="modal" role="button" data-target="#new-favorite-workbook-modal-{{ favorite.id }}" >Start New Workbook</a></li>#}
                                         </ul>
                                         </div>
                                     </td>
-                                    <td><a href="{% url 'gcp_detail' user.id project.id %}">{{ project.project_name }}</a> <a href="https://console.cloud.google.com/home/dashboard?project={{ project.project_name }}"><i class="fa fa-external-link"></i></a></td>
+                                    <td><a href="{% url 'gcp_detail' user.id project.id %}">{{ project.project_name }}</a> <a target="_BLANK" href="https://console.cloud.google.com/home/dashboard?project={{ project.project_name }}"><i class="fa fa-external-link"></i></a></td>
                                     <td>{{ project.project_id }}</td>
 {#                                    <td>{% if project.big_query_dataset %}{{ project.big_query_dataset }}{% else %}N/A{% endif %}</td>#}
 
@@ -104,8 +105,9 @@
                                                                 <td>{{ service_account.authorized_date|date:'M d, Y, g:i a' }}</td>
                                                                 <td>{% if service_account.active %}<i class="fa fa-check"></i>{% endif %}</td>
                                                                 <td>
-                                                                    <a data-toggle="modal" role="button" data-target="#refresh-sa-modal-{{ service_account.id }}" class="space-right-5"><i class="fa fa-refresh"></i></a>
-                                                                    <a data-toggle="modal" role="button" data-target="#delete-sa-modal-{{ service_account.id }}"><i class="fa fa-trash"></i></a>
+                                                                    <a title="Refresh Service Account" data-toggle="modal" role="button" data-target="#refresh-sa-modal-{{ service_account.id }}" class="space-right-5"><i class="fa fa-refresh"></i></a>
+                                                                    <a title="Delete Service Account" data-toggle="modal" role="button" data-target="#delete-sa-modal-{{ service_account.id }}"><i class="fa fa-trash"></i></a>
+                                                                    <a title="Adjust Datasets for this Service Account" data-toggle="modal" role="button" href="{% url 'adjust_sa' user.id %}?sa_id={{ service_account.id }}"><i class="fa fa-plus-square"></i></a>
                                                                 </td>
                                                             </tr>
                                                         {% endwith %}

@@ -270,7 +270,7 @@ require([
             value = $this;
 
         if(createFormFilterSet.length <= 0) {
-            $('#create-cohort-form .form-control-static').append('<p id="'+activeDataTab+'-filters"></p>');
+            $('#selected-filters').append('<p id="'+activeDataTab+'-filters"></p>');
             createFormFilterSet = $('p#'+activeDataTab+'-filters')
             createFormFilterSet.append('<h5>'+(prog.data('prog-displ-name'))+'</h5>');
         } else {
@@ -334,40 +334,6 @@ require([
 
                 $(selFilterPanel+' .panel-body').append($this.data('select-filters-item'));
                 createFormFilterSet.append($this.data('create-cohort-form-item'));
-
-                $('a.mol-cat-filter-x').on('click', function (e,data) {
-                    // When the 'Selected Filters' token is removed, remove this filter from other
-                    // locations in which it's stored
-                    var mut_cat = $('#'+activeDataTab+' .mutation-category-selector');
-                    (!data || !data.forNewVal) &&  mut_cat.val('label');
-                    $(this).parent('span').remove();
-
-                    $(selFilterPanel+' .panel-body').find('span[data-feature-id="'+$(this).parent('span').data('feature-id')+'"]').remove();
-                    createFormFilterSet.find('span[data-feature-id="'+$(this).parent('span').data('feature-id')+'"]').remove();
-
-                    if(!cohort_id && $('.selected-filters .panel-body span').length <= 0) {
-                        $('#at-least-one-filter-alert-modal').show();
-                        $('#create-cohort-modal input[type="submit"]').attr('disabled','disabled');
-                    }
-
-                    // If this has emptied out a program's filter set, hide the modal's subsection for that program
-                    // if a new value isn't replacing it
-                    if(createFormFilterSet.find('span').length <= 0 && (!data || !data.forNewVal)) {
-                        createFormFilterSet.hide();
-                    }
-
-                    // If we're down to 1 program in the filter set, the multiprogram warning is no longer needed
-                    var progCount = 0;
-                    $('.selected-filters .panel-body').each(function(){
-                        if($(this).find('span').length > 0) {
-                            progCount++;
-                        }
-                    });
-                    (progCount > 1) ? $('#multi-prog-cohort-create-warn').show() : $('#multi-prog-cohort-create-warn').hide();
-
-                    (!data || !data.without_update) && update_displays(true,false,$(this).parent('span').data('prog-id'));
-                    return false;
-                });
             } else {        // indv-selex
                 // Enable the checkbox set
                 $('#'+activeDataTab+' .spec-molecular-attrs .search-checkbox-list').removeClass('disabled');
@@ -484,44 +450,6 @@ require([
 
                     $(selFilterPanel+' .panel-body').append($this.data('select-filters-item'));
                     createFormFilterSet.append($this.data('create-cohort-form-item'));
-
-                    $('a.delete-x').on('click', function(e,data) {
-                        var checked_box = $('div[data-feature-id="' + $(this).parent('span').data('feature-id')
-                            + '"] input[type="checkbox"][data-value-name="' + $(this).parent('span').data('value-name') + '"]');
-
-                        if($(this).parent('span').data('feature-type') == 'molecular') {
-                            checked_box = $('div[data-feature-id="' + $(this).parent('span').data('feature-id').split(":")[3]
-                                + '"] input[type="checkbox"][data-value-name="' + $(this).parent('span').data('value-name') + '"]');
-                        }
-                        checked_box.prop('checked', false);
-                        var span_data = $(this).parent('span').data();
-
-                        // Remove the filter tokens from their respective containers
-                        createFormFilterSet.find('span[data-feature-id="'+span_data['feature-id']+'"][data-value-id="'+span_data['value-id']+'"]').remove();
-                        $(selFilterPanel+' .panel-body span[data-feature-id="'+span_data['feature-id']+'"][data-value-id="'+span_data['value-id']+'"]').remove();
-
-                        if(!cohort_id && $('.selected-filters .panel-body span').length <= 0) {
-                            $('#at-least-one-filter-alert-modal').show();
-                            $('#create-cohort-modal input[type="submit"]').attr('disabled','disabled');
-                        }
-
-                        // If this has emptied out a program's filter set, hide the modal's subsection for that program
-                        if(createFormFilterSet.find('span').length <= 0) {
-                            createFormFilterSet.hide();
-                        }
-
-                        // If we're down to 1 program in the filter set, the multiprogram warning is no longer needed
-                        var progCount = 0;
-                        $('.selected-filters .panel-body').each(function(){
-                            if($(this).find('span').length > 0) {
-                                progCount++;
-                            }
-                        });
-                        (progCount > 1) ? $('#multi-prog-cohort-create-warn').show() : $('#multi-prog-cohort-create-warn').hide();
-
-                        (!data || !data.without_update) && update_displays(true,false,span_data['prog-id']);
-                        return false;
-                    });
                 }
             } else { // Checkbox unchecked
                 // Remove create cohort form pill if it exists
@@ -600,7 +528,7 @@ require([
                 $('.data-tab-content-panel:not(.spinner-panel)').removeClass('col-md-12').addClass('col-md-9');
                 $('.filter-panel').show();
                 $('.selected-filters').show();
-                $('.page-header').hide();
+                cohort_id && $('.page-header').hide();
                 $('input[name="cohort-name"]').show();
                 $('#default-cohort-menu').hide();
                 $('#edit-cohort-menu').show();
@@ -686,6 +614,8 @@ require([
             $('#apply-edit-cohort-name').prop('value', $('#edit-cohort-name').val());
             form.append('<input type="hidden" name="source" value="' + cohort_id + '" />');
         }
+
+        $('#saving-cohort').css('display','inline-block');
     });
 
     $('.show-flyout').on('click', function() {
@@ -807,8 +737,15 @@ require([
                         base.showJsMessage('error',data.result.msg,true,'#share-cohort-js-messages');
                     }
                 } else if(data.status && data.status == 'success') {
-                    if(data.result && data.result.msg) {
-                        base.setReloadMsg('info',data.result.msg);
+                    if(data.result) {
+                        var msgs = [];
+                        if(data.result.msg) {
+                            msgs.push(data.result.msg);
+                        }
+                        if(data.result.note) {
+                            msgs.push(data.result.note)
+                        }
+                        base.setReloadMsg('info',msgs);
                     }
                     $this.closest('.modal').modal('hide');
                     if($this.data('redirect')) {
@@ -1015,6 +952,88 @@ require([
         $('select.mutation-build').on('change',filter_change_callback);
     };
 
+    // Event handlers for the 'x' of the case and data type filter tokens
+    $('.tab-content, #selected-filters').on('click', 'a.mol-cat-filter-x', function (e,data) {
+        var activeDataTab = $(this).parents('span').data('prog-id')+'-data';
+        var selFilterPanel = '.'+activeDataTab+ '-selected-filters';
+        var createFormFilterSet = $('p#'+activeDataTab+'-filters');
+
+        // When the 'Selected Filters' token is removed, remove this filter from other
+        // locations in which it's stored
+        var mut_cat = $('#'+activeDataTab+' .mutation-category-selector');
+        (!data || !data.forNewVal) &&  mut_cat.val('label');
+        $(this).parent('span').remove();
+
+        $(selFilterPanel+' .panel-body').find('span[data-feature-id="'+$(this).parent('span').data('feature-id')+'"]').remove();
+        createFormFilterSet.find('span[data-feature-id="'+$(this).parent('span').data('feature-id')+'"]').remove();
+
+        if(!cohort_id && $('.selected-filters .panel-body span').length <= 0) {
+            $('#at-least-one-filter-alert-modal').show();
+            $('#create-cohort-modal input[type="submit"]').attr('disabled','disabled');
+        }
+
+        // If this has emptied out a program's filter set, hide the modal's subsection for that program
+        // if a new value isn't replacing it
+        if(createFormFilterSet.find('span').length <= 0 && (!data || !data.forNewVal)) {
+            createFormFilterSet.hide();
+        }
+
+        // If we're down to 1 program in the filter set, the multiprogram warning is no longer needed
+        var progCount = 0;
+        $('.selected-filters .panel-body').each(function(){
+            if($(this).find('span').length > 0) {
+                progCount++;
+            }
+        });
+        (progCount > 1) ? $('#multi-prog-cohort-create-warn').show() : $('#multi-prog-cohort-create-warn').hide();
+
+        (!data || !data.without_update) && update_displays(true,false,$(this).parent('span').data('prog-id'));
+        return false;
+    });
+
+    // Handler for the 'x' of the mutation filter tokens
+    $('.tab-content, #selected-filters').on('click', 'a.delete-x', function(e,data) {
+        var activeDataTab = $(this).parents('span').data('prog-id')+'-data';
+        var selFilterPanel = '.'+activeDataTab+ '-selected-filters';
+        var createFormFilterSet = $('p#'+activeDataTab+'-filters');
+
+        var checked_box = $('div[data-feature-id="' + $(this).parent('span').data('feature-id')
+            + '"] input[type="checkbox"][data-value-name="' + $(this).parent('span').data('value-name') + '"]');
+
+        if($(this).parent('span').data('feature-type') == 'molecular') {
+            checked_box = $('div[data-feature-id="' + $(this).parent('span').data('feature-id').split(":")[3]
+                + '"] input[type="checkbox"][data-value-name="' + $(this).parent('span').data('value-name') + '"]');
+        }
+        checked_box.prop('checked', false);
+        var span_data = $(this).parent('span').data();
+
+        // Remove the filter tokens from their respective containers
+        createFormFilterSet.find('span[data-feature-id="'+span_data['feature-id']+'"][data-value-id="'+span_data['value-id']+'"]').remove();
+        $(selFilterPanel+' .panel-body span[data-feature-id="'+span_data['feature-id']+'"][data-value-id="'+span_data['value-id']+'"]').remove();
+
+        if(!cohort_id && $('.selected-filters .panel-body span').length <= 0) {
+            $('#at-least-one-filter-alert-modal').show();
+            $('#create-cohort-modal input[type="submit"]').attr('disabled','disabled');
+        }
+
+        // If this has emptied out a program's filter set, hide the modal's subsection for that program
+        if(createFormFilterSet.find('span').length <= 0) {
+            createFormFilterSet.hide();
+        }
+
+        // If we're down to 1 program in the filter set, the multiprogram warning is no longer needed
+        var progCount = 0;
+        $('.selected-filters .panel-body').each(function(){
+            if($(this).find('span').length > 0) {
+                progCount++;
+            }
+        });
+        (progCount > 1) ? $('#multi-prog-cohort-create-warn').show() : $('#multi-prog-cohort-create-warn').hide();
+
+        (!data || !data.without_update) && update_displays(true,false,span_data['prog-id']);
+        return false;
+    });
+
     //
     // Fix for Issue #1950. While user is waiting for cohort data request, we prevent them from clicking on
     // another tab and starting another request.
@@ -1095,6 +1114,157 @@ require([
         if (reject_load) {
             e.preventDefault();
             e.stopPropagation();
+        }
+    });
+
+    $('.table-type').on('change',function(){
+        $('#export-cohort-table').val('');
+        if($(this).find(':checked').val()=='append') {
+            $('#export-cohort-form input[type="submit"]').attr('disabled','disabled');
+            $('#export-cohort-table option:not([type="label"])').remove();
+            var tables = $('#export-cohort-project-dataset :selected').data('tables');
+            for(var i=0;i<tables.length;i++) {
+                $('#export-cohort-table').append('<option value="'+tables[i]+'">'+tables[i]+'</option>')
+            }
+            $('.table-list').show();
+            $('.new-table-name').hide();
+        } else {
+            $('#export-cohort-form input[type="submit"]').removeAttr('disabled');
+            $('.table-list').hide();
+            $('.new-table-name').show();
+        }
+    });
+
+    $('#new-table-name').on('keypress keyup paste',function (e) {
+        var self = $(this);
+        setTimeout(function() {
+            $('.message-container').empty();
+            var str = self.val();
+
+            if(str.match(/[^A-Za-z0-9_]/)) {
+                e.preventDefault();
+                base.showJsMessage("error", "BigQuery table names are restricted to numbers, letters, and underscores.",false, $('.message-container'));
+                return false;
+            }
+
+            if (str.length >= parseInt($('#new-table-name').attr('maxlength'))) {
+                e.preventDefault();
+                base.showJsMessage("warning", "You have reached the maximum size of the table name.",false, $('.message-container'));
+                return false;
+            }
+        },70);
+    });
+
+    $('#export-cohort-table').on('change',function(){
+        if($(this).find(':selected').attr('type') !== "label") {
+            $('#export-cohort-form input[type="submit"]').removeAttr('disabled');
+        }
+    });
+
+    $('#export-cohort-project-dataset').on('change',function(){
+        $('.table-type, .new-table-name').removeAttr('disabled');
+        $('.table-type, .new-table-name').removeAttr('title');
+        $('#export-cohort-table option:not([type="label"])').remove();
+        if($('.table-type').find(':checked').val() == 'append') {
+            if($('#export-cohort-table :selected').attr('type') !== "label") {
+                $('#export-cohort-form input[type="submit"]').removeAttr('disabled');
+            } else {
+                $('#export-cohort-form input[type="submit"]').attr('disabled','disabled');
+            }
+        } else {
+            $('#export-cohort-form input[type="submit"]').removeAttr('disabled');
+        }
+
+        var tables = $('#export-cohort-project-dataset :selected').data('tables');
+        if(tables.length > 0) {
+            $('input.table-type[value="append"]').removeAttr('disabled');
+            $('input.table-type[value="append"]').parents('label').removeAttr('title');
+            for (var i = 0; i < tables.length; i++) {
+                $('#export-cohort-table').append('<option value="' + tables[i] + '">' + tables[i] + '</option>')
+            }
+        } else {
+            $('input.table-type[value="append"]').attr('disabled','disabled');
+            $('input.table-type[value="append"]').parents('label').attr('title',"There are no tables in this dataset.");
+        }
+    });
+
+    $('#export-cohort-modal input[type="submit"]').on('click',function(){
+        $('#exporting-cohort').css('display','inline-block');
+    });
+
+    $('#export-cohort-modal').on('hide.bs.modal',function(){
+        $('#export-cohort-project-dataset optgroup').remove();
+        $('.table-type, .new-table-name').attr('disabled','disabled');
+        $('.table-type, .new-table-name').attr('title','Select a project and dataset to enable this option');
+        $('.new-table-name').show();
+        $('.table-list').hide();
+        $('.message-container').empty();
+        $('#export-cohort-table option:not([type="label"])').remove();
+        $('#export-cohort-form input[type="submit"]').attr('disabled','disabled');
+    });
+
+    $('button[data-target="#export-cohort-modal"]').on('click',function(e){
+        if($('#export-cohort-modal').data('opening')) {
+            e.preventDefault();
+            return false;
+        }
+        $('#export-cohort-modal').data('opening',true);
+        $('#export-cohort-form input[type="submit"]').attr('disabled','disabled');
+        $.ajax({
+            type: 'GET',
+            url: BASE_URL + '/cohorts/export_cohort/',
+            success: function (data) {
+                if(data['status']==='success') {
+                    if(Object.keys(data['data']['projects']).length > 0) {
+                        var projects = data['data']['projects'];
+                        for(var i=0;i<projects.length;i++) {
+                            if($('optgroup.'+projects[i]['name']).length <= 0) {
+                                $('#export-cohort-project-dataset').append('<optgroup class="'+projects[i]['name']+'" label="'+projects[i]['name']+'"></optgroup>');
+                            }
+                            var datasets = projects[i]['datasets'];
+                            for(var j in datasets) {
+                                if(datasets.hasOwnProperty(j)) {
+                                    $('optgroup.'+projects[i]['name']).append(
+                                        '<option class="dataset" value="'+projects[i]['name']+':'+j+'">'+j+'</option>'
+                                    );
+                                    $('option[value="'+projects[i]['name']+':'+j+'"]').data({'tables': datasets[j]});
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            error: function (data) {
+                var link_to_bqr = data.responseJSON.msg.match(/register at least one dataset/);
+                var link_to_gcpr = data.responseJSON.msg.match(/register at least one project/);
+                if(link_to_bqr) {
+                    data.responseJSON.msg = data.responseJSON.msg.replace(
+                        "register at least one dataset",
+                        '<a href="http://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/webapp/program_data_upload.html#registering-cloud-storage-buckets-and-bigquery-datasets-a-pre-requisite-for-using-your-own-data-in-isb-cgc" target="_BLANK">register at least one dataset</a>'
+                    );
+                }
+                if(link_to_gcpr) {
+                    data.responseJSON.msg = data.responseJSON.msg.replace(
+                        "register at least one project",
+                        '<a href="http://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/webapp/Gaining-Access-To-Contolled-Access-Data.html?#registering-your-google-cloud-project-service-account" target="_BLANK">register at least one project</a>'
+                    );
+                }
+                base.showJsMessage('error',data.responseJSON.msg,true,"#export-cohort-js-messages");
+            },
+            complete: function() {
+                $('#export-cohort-modal').modal('show');
+                $('#export-cohort-modal').data('opening',false);
+            }
+        });
+        // Don't let the modal open automatically; we're controlling that.
+        e.preventDefault();
+        return false;
+    });
+
+
+    $('#export-cohort-form').on('submit',function(){
+        if($('.table-type :checked').val() == 'new') {
+            $('#export-cohort-table').val('');
         }
     });
 
