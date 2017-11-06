@@ -1266,6 +1266,7 @@ require([
         if($('.table-type :checked').val() == 'new') {
             $('#export-cohort-table').val('');
         }
+        $('#export-cohort-form input[type="submit"]').attr('disabled','disabled');
     });
 
     // Per https://stackoverflow.com/questions/13550477/twitter-bootstrap-alert-message-close-and-open-again

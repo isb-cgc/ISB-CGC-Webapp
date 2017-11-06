@@ -38,6 +38,8 @@ for directory_name in SHARED_SOURCE_DIRECTORIES:
     sys.path.append(os.path.join(BASE_DIR, directory_name))
 
 DEBUG                   = (os.environ.get('DEBUG', 'False') == 'True')
+DEBUG_TOOLBAR           = (os.environ.get('DEBUG_TOOLBAR', 'False') == 'True')
+
 print >> sys.stdout, "[STATUS] DEBUG mode is "+str(DEBUG)
 
 # Theoretically Nginx allows us to use '*' for ALLOWED_HOSTS but...
@@ -533,7 +535,7 @@ NOTIFICATION_EMAIL_FROM_ADDRESS = os.environ.get('NOTIFICATOON_EMAIL_FROM_ADDRES
 
 WHITELIST_RE = ur'([^\\\_\|\"\+~@:#\$%\^&\*=\-\.,\(\)0-9a-zA-Z\s\xc7\xfc\xe9\xe2\xe4\xe0\xe5\xe7\xea\xeb\xe8\xef\xee\xed\xec\xc4\xc5\xc9\xe6\xc6\xf4\xf6\xf2\xfb\xf9\xd6\xdc\xe1\xf3\xfa\xf1\xd1\xc0\xc1\xc2\xc3\xc8\xca\xcb\xcc\xcd\xce\xcf\xd0\xd2\xd3\xd4\xd5\xd8\xd9\xda\xdb\xdd\xdf\xe3\xf0\xf5\xf8\xfd\xfe\xff])'
 
-if DEBUG and bool(os.environ.get('DEBUG_TOOLBAR', '') == 'True'):
+if DEBUG and DEBUG_TOOLBAR:
     INSTALLED_APPS += ('debug_toolbar',)
     MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
     DEBUG_TOOLBAR_PANELS = [

@@ -68,7 +68,7 @@ if settings.IS_DEV:
 if settings.NIH_AUTH_ON:
     urlpatterns.append(url(r'^demo/', include('demo.urls', namespace='demo')))
 
-if settings.DEBUG:
+if settings.DEBUG and settings.DEBUG_TOOLBAR:
     import debug_toolbar
     urlpatterns = [
         url(r'^__debug__/', include(debug_toolbar.urls)),
