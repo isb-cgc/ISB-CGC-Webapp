@@ -954,7 +954,7 @@ require([
 
     // Event handlers for the 'x' of the case and data type filter tokens
     $('.tab-content, #selected-filters').on('click', 'a.mol-cat-filter-x', function (e,data) {
-        var activeDataTab = $(this).parents('.data-tab').attr('id');
+        var activeDataTab = $(this).parents('span').data('prog-id')+'-data';
         var selFilterPanel = '.'+activeDataTab+ '-selected-filters';
         var createFormFilterSet = $('p#'+activeDataTab+'-filters');
 
@@ -993,7 +993,7 @@ require([
 
     // Handler for the 'x' of the mutation filter tokens
     $('.tab-content, #selected-filters').on('click', 'a.delete-x', function(e,data) {
-        var activeDataTab = $(this).parents('.data-tab').attr('id');
+        var activeDataTab = $(this).parents('span').data('prog-id')+'-data';
         var selFilterPanel = '.'+activeDataTab+ '-selected-filters';
         var createFormFilterSet = $('p#'+activeDataTab+'-filters');
 
