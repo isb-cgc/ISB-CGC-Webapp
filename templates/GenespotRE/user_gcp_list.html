@@ -91,8 +91,7 @@
                                                     <tr>
                                                         <th>Service Account</th>
                                                         <th>Authorized Datasets</th>
-                                                        <th>Date Activated</th>
-                                                        <th>Active</th>
+                                                        <th>Date Last Activated</th>
                                                         <th></th>
                                                     </tr>
                                                     </thead>
@@ -102,8 +101,7 @@
                                                             <tr>
                                                                 <td>{{ service_account.service_account }}</td>
                                                                 <td>{% if auth_datasets|length == 0 %}None{% else %}{{ auth_datasets|get_values_list:"name"|joinwith:", " }}{% endif %}</td>
-                                                                <td>{{ service_account.authorized_date|date:'M d, Y, g:i a' }}</td>
-                                                                <td>{% if service_account.active %}<i class="fa fa-check"></i>{% endif %}</td>
+                                                                <td{% if service_account.is_expired and auth_datasets|length > 0 %} class="red" title="Service Account's authorization date has expired; refresh to extend access."{% endif %}>{{ service_account.authorized_date|date:'M d, Y, g:i a' }}</td>
                                                                 <td>
                                                                     <a title="Refresh Service Account" data-toggle="modal" role="button" data-target="#refresh-sa-modal-{{ service_account.id }}" class="space-right-5"><i class="fa fa-refresh"></i></a>
                                                                     <a title="Delete Service Account" data-toggle="modal" role="button" data-target="#delete-sa-modal-{{ service_account.id }}"><i class="fa fa-trash"></i></a>
