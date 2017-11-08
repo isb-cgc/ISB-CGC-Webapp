@@ -16,6 +16,8 @@ import json
 import logging
 import os
 import sys
+import re
+from time import sleep
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -28,9 +30,9 @@ from django.utils import formats
 from googleapiclient import discovery
 from oauth2client.client import GoogleCredentials
 
-debug = settings.DEBUG
-
 from google_helpers.directory_service import get_directory_resource
+from google_helpers.bigquery_service_v2 import BigQueryServiceSupport
+from cohorts.metadata_helpers import submit_bigquery_job, is_bigquery_job_finished, get_bq_job_results
 from googleapiclient.errors import HttpError
 from visualizations.models import SavedViz
 from cohorts.models import Cohort, Cohort_Perms
@@ -41,12 +43,14 @@ from accounts.models import NIH_User, GoogleProject, UserAuthorizedDatasets, Aut
 from allauth.socialaccount.models import SocialAccount
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 
+from django.http import HttpResponse, JsonResponse
 
 debug = settings.DEBUG
 logger = logging.getLogger('main_logger')
 
 ERA_LOGIN_URL = settings.ERA_LOGIN_URL
 OPEN_ACL_GOOGLE_GROUP = settings.OPEN_ACL_GOOGLE_GROUP
+BQ_ATTEMPT_MAX = 10
 
 
 def convert(data):
@@ -280,6 +284,72 @@ def search_cohorts_viz(request):
             })
         result_obj['visualizations'] = list
     return HttpResponse(json.dumps(result_obj), status=200)
+
+# get_image_data which allows for URI arguments, falls through to get_image_data(request, slide_barcode)
+def get_image_data_args(request):
+    slide_barcode = None
+    if request.GET:
+        slide_barcode = request.GET.get('slide_barcode',None)
+    elif request.POST:
+        slide_barcode = request.POST.get('slide_barcode',None)
+
+    if slide_barcode:
+        slide_barcode = (None if re.compile(ur'[^A-Za-z0-9\-]').search(slide_barcode) else slide_barcode)
+
+    return get_image_data(request, slide_barcode)
+
+# Given a slide_barcode, returns image metadata in JSON format
+def get_image_data(request, slide_barcode):
+    status=200
+    result = {}
+
+    if not slide_barcode:
+        status=503
+        result = {
+            'message': "There was an error while processing this request: a valid slide_barcode was not supplied."
+        }
+    else:
+        try:
+            img_data_query = """
+                SELECT slide_barcode, OriginalWidth AS width, OriginalHeight AS height, mpp_x, mpp_y, GCSurl
+                FROM [isb-cgc:metadata.TCGA_slide_images]
+                WHERE slide_barcode = '{}';
+            """
+
+            bqs = BigQueryServiceSupport.build_from_application_default().get_client()
+            query_job = submit_bigquery_job(bqs, settings.BQ_PROJECT_ID, img_data_query.format(slide_barcode))
+            job_is_done = is_bigquery_job_finished(bqs, settings.BQ_PROJECT_ID,
+                                                   query_job['jobReference']['jobId'])
+
+            retries = 0
+
+            while not job_is_done and retries < BQ_ATTEMPT_MAX:
+                retries += 1
+                sleep(1)
+                job_is_done = is_bigquery_job_finished(bqs, settings.BQ_PROJECT_ID,
+                                                       query_job['jobReference']['jobId'])
+
+            query_results = get_bq_job_results(bqs, query_job['jobReference'])
+
+            if len(query_results) > 0:
+                result = {
+                    'Width': query_results[0]['f'][1]['v'],
+                    'Height': query_results[0]['f'][2]['v'],
+                    'MPP-X': query_results[0]['f'][3]['v'],
+                    'MPP-Y': query_results[0]['f'][4]['v'],
+                    'FileLocation': query_results[0]['f'][5]['v'],
+                    'TissueID': query_results[0]['f'][0]['v']
+                }
+
+        except Exception as e:
+            logger.error("[ERROR] While attempting to retrieve image data:")
+            logger.exception(e)
+            status=503
+            result = {
+                'message': "There was an error while processing this request."
+            }
+
+    return JsonResponse(result, status=status)
 
 @login_required
 def igv(request, sample_barcode=None, readgroupset_id=None):
