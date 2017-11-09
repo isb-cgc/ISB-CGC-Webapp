@@ -54,6 +54,7 @@
             <li class="separator"></li>
             {% if cohort.perm.perm == 'OWNER' %}
                 <li class="menu-item"><button class="btn btn-info" id="edit-cohort-btn">Edit</button> </li>
+                <input id="cohort-mode" type="hidden" value="VIEW">
             {% endif %}
             <li class="menu-item"><button class="show-flyout btn btn-info" title="Show Comments">Comments</button></li>
             <li class="menu-item"><a href="{% url 'clone_cohort' cohort.id %}" class="btn btn-info clone-cohort-btn" title="Duplicate this cohort">Duplicate</a></li>
