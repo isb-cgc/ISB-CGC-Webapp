@@ -101,7 +101,8 @@ function($, d3, d3tip, vis_helpers) {
                     // was provided, and the tag generation here was faulty. Use a prebuilt click targ here that matches the
                     // pattern established in Common/cohorts/metadata_counting.py:
                     var item = $('#' + d.click_targ);
-                    if (item.length > 0) {
+                    var viewOnly = ($('#cohort-mode').length) && ($('#cohort-mode').val() == 'VIEW');
+                    if ((item.length > 0) && !viewOnly) {
                         item[0].checked = 'checked';
                         $(item[0]).trigger('change');
                     }
