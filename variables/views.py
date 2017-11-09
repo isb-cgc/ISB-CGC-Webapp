@@ -56,7 +56,7 @@ def variable_fav_list(request, workbook_id=0, worksheet_id=0, new_workbook=0):
     context  = {}
 
     variable_list = VariableFavorite.get_list(request.user)
-    if len(variable_list) == 0:
+    if not variable_list.count():
         variable_list = None
     context['variable_list']=variable_list
 
@@ -76,9 +76,9 @@ def variable_fav_list(request, workbook_id=0, worksheet_id=0, new_workbook=0):
         except ObjectDoesNotExist:
             messages.error(request, 'The workbook and worksheet you were referencing does not exist.')
             return redirect('variables')
-    elif new_workbook :
+    elif new_workbook:
         context['new_workbook'] = True
-        if variable_list :
+        if variable_list:
             template = 'variables/variables_select.html'
         else:
             return initialize_variable_selection_page(request, new_workbook=True)
@@ -95,7 +95,7 @@ def variable_fav_detail_for_new_workbook(request, variable_fav_id):
 def variable_fav_detail(request, variable_fav_id, workbook_id=0, worksheet_id=0, new_workbook=0):
     template = 'variables/variable_detail.html'
     context  = {}
-    if new_workbook :
+    if new_workbook:
         context['new_workbook'] = True
 
     if workbook_id:
@@ -213,7 +213,7 @@ def initialize_variable_selection_page(request,
         for fav in favorite_list:
             fav.variables = fav.get_variables()
 
-        full_fave_count =  len(VariableFavorite.get_list(user=request.user))
+        full_fave_count =  VariableFavorite.get_list(user=request.user).count()
 
         program_attrs = {}
 
@@ -292,14 +292,14 @@ def initialize_variable_selection_page(request,
 @login_required
 def variable_fav_delete(request, variable_fav_id):
     redirect_url = reverse('variables')
-    if variable_fav_id :
+    if variable_fav_id:
         try:
             variable_fav_model = VariableFavorite.objects.get(id=variable_fav_id)
-            if variable_fav_model.user == request.user :
+            if variable_fav_model.user == request.user:
                 name = variable_fav_model.name
                 variable_fav_model.destroy()
                 messages.info(request, 'The variable favorite \"'+name+'\" has been deleted.')
-            else :
+            else:
                 messages.error(request, 'You do not have permission to update this variable favorite list.')
         except ObjectDoesNotExist:
             messages.error(request, 'The variable list you want does not exist.')
@@ -315,11 +315,11 @@ def variable_fav_copy(request, variable_fav_id):
             variable_fav_model = VariableFavorite.objects.get(id=variable_fav_id)
             if variable_fav_model.user == request.user:
                 new_model = variable_fav_model.copy()
-                messages.info(request, 'The variable favorite \"'+new_model.name+'\" has been copies from \"'+variable_fav_model.name+'\".')
+                messages.info(request, 'The variable favorite \"'+new_model.name+'\" has been copied from \"'+variable_fav_model.name+'\".')
             else:
                 messages.error(request, 'You do not have permission to copy this variable favorite list.')
         except ObjectDoesNotExist:
-            messages.error(request, 'The variable list you want does not exist.')
+            messages.error(request, 'The variable list you requested does not exist.')
 
     return redirect(redirect_url)
 
@@ -345,10 +345,10 @@ def variable_fav_save(request, variable_fav_id=0):
         if variable_fav_id:
             try:
                 variable_model = VariableFavorite.objects.get(id=variable_fav_id)
-                if variable_model.user == request.user :
+                if variable_model.user == request.user:
                     variable_model.update(name = data['name'], variables = data['variables'])
                     result['model'] = { 'id' : variable_model.id, 'name' : variable_model.name }
-                else :
+                else:
                     result['error'] = 'You do not have permission to update this variable favorite list'
                     messages.error(request, 'You do not have permission to update this variable favorite list')
             except ObjectDoesNotExist:
