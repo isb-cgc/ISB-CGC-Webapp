@@ -84,25 +84,27 @@
             <li class="menu-item has-drop-down">
                 <a>WORKBOOKS <i class="fa fa-caret-down"></i></a>
                 <ul class="sub-menu drop">
-                    {% if user|get_workbooks_this_user|length > 0 %}
-                    <li class="menu-item">
-                        <strong>Recent</strong>
-                        <ul class="item-list">
-                            {% for wlv in user|get_workbooks_this_user|slice:':5' %}
-                            <li class="menu-item" title="{{ wlv.name|wrap_text }}"><a class="inline-block" href="{% url 'workbook_detail' wlv.id %}">{{ wlv.name }}</a></li>
-                            {% endfor %}
-                            {% if user|get_workbooks_this_user|length > 5 %}
-                            <li class="menu-item has-drop-down__more"> More
-                                <ul class="drop">
-                                    {% for wlv in user|get_workbooks_this_user|slice:'5:' %}
-                                    <li class="menu-item" title="{{ wlv.name|wrap_text }}"><a class="inline-block" href="{% url 'workbook_detail' wlv.id %}">{{ wlv.name }}</a></li>
-                                    {% endfor %}
-                                </ul>
-                            </li>
-                            {% endif %}
-                        </ul>
-                    </li>
-                    {% endif %}
+                    {% with user|get_workbooks_this_user as workbooks_this_user %}
+                        {% if workbooks_this_user|length > 0 %}
+                        <li class="menu-item">
+                            <strong>Recent</strong>
+                            <ul class="item-list">
+                                {% for wlv in workbooks_this_user|slice:':5' %}
+                                <li class="menu-item" title="{{ wlv.name|wrap_text }}"><a class="inline-block" href="{% url 'workbook_detail' wlv.id %}">{{ wlv.name }}</a></li>
+                                {% endfor %}
+                                {% if workbooks_this_user|length > 5 %}
+                                <li class="menu-item has-drop-down__more"> More
+                                    <ul class="drop">
+                                        {% for wlv in workbooks_this_user|slice:'5:' %}
+                                        <li class="menu-item" title="{{ wlv.name|wrap_text }}"><a class="inline-block" href="{% url 'workbook_detail' wlv.id %}">{{ wlv.name }}</a></li>
+                                        {% endfor %}
+                                    </ul>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </li>
+                        {% endif %}
+                    {% endwith %}
                     <li class="menu-item"><a href="{% url 'workbooks' %}">Saved Workbooks ( {% user_workbook_count %} )</a></li>
                     <li class="menu-item">
                         <form action="{% url 'workbook_create' %}" method="POST">
@@ -256,37 +258,39 @@
                 <a>VARIABLES <i class="fa fa-caret-down"></i></a>
                 <ul class="sub-menu drop">
                     <!--Temporary code to showcase recent variables items-->
-                    {% if user.variablefavorite_set.all|active|length > 0 %}
-                    <li class="menu-item">
-                        <strong>Start New Workbook With ...</strong>
-                        <ul class="item-list">
-                            {% for vflv in user.variablefavorite_set.all|active_and_v2|dictsortreversed:'last_date_saved'|slice:':5' %}
-                                <li class="menu-item">
-                                    <form action="{% url 'worksheet_create_with_variables' %}" method="POST">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="variable_list_id" value="{{ vflv.id }}">
-                                        <button type="submit" title="{{ vflv.name|wrap_text }}">{{ vflv.name }}</button>
-                                    </form>
+                    {% with user.variablefavorite_set.all as user_var_faves %}
+                        {% if user_var_faves|active|length > 0 %}
+                        <li class="menu-item">
+                            <strong>Start New Workbook With ...</strong>
+                            <ul class="item-list">
+                                {% for vflv in user_var_faves|active_and_v2|dictsortreversed:'last_date_saved'|slice:':5' %}
+                                    <li class="menu-item">
+                                        <form action="{% url 'worksheet_create_with_variables' %}" method="POST">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="variable_list_id" value="{{ vflv.id }}">
+                                            <button type="submit" title="{{ vflv.name|wrap_text }}">{{ vflv.name }}</button>
+                                        </form>
+                                    </li>
+                                {% endfor %}
+                                {% if user_var_faves|active_and_v2|length > 5 %}
+                                <li class="menu-item has-drop-down__more"> More
+                                    <ul class="drop">
+                                        {% for vflv in user_var_faves|active_and_v2|dictsortreversed:'last_date_saved'|slice:'5:' %}
+                                            <li class="menu-item">
+                                                <form action="{% url 'worksheet_create_with_variables' %}" method="POST">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="variable_list_id" value="{{ vflv.id }}">
+                                                    <button type="submit" title="{{ vflv.name|wrap_text }}">{{ vflv.name }}</button>
+                                                </form>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
                                 </li>
-                            {% endfor %}
-                            {% if user.variablefavorite_set.all|active_and_v2|length > 5 %}
-                            <li class="menu-item has-drop-down__more"> More
-                                <ul class="drop">
-                                    {% for vflv in user.variablefavorite_set.all|active_and_v2|dictsortreversed:'last_date_saved'|slice:'5:' %}
-                                        <li class="menu-item">
-                                            <form action="{% url 'worksheet_create_with_variables' %}" method="POST">
-                                                {% csrf_token %}
-                                                <input type="hidden" name="variable_list_id" value="{{ vflv.id }}">
-                                                <button type="submit" title="{{ vflv.name|wrap_text }}">{{ vflv.name }}</button>
-                                            </form>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            </li>
-                            {% endif %}
-                        </ul>
-                    </li>
-                    {% endif %}
+                                {% endif %}
+                            </ul>
+                        </li>
+                        {% endif %}
+                    {% endwith %}
                     <li class="menu-item"><a href="{% url 'variables' %}">Manage Favorite Variable(s) Lists ( {{ user.variablefavorite_set.all|active|length }} )</a></li>
                     <li class="menu-item"><a href="{% url 'variable_fav_create' %}">Create Favorite Variable(s) List</a></li>
                     <li class="menu-item"><a href="{% url 'variable_select_for_new_workbook' %}">Select Variables for a New Workbook</a></li>
@@ -299,30 +303,32 @@
                     <li class="menu-item">
                         <strong>Start New Workbook With ...</strong>
                         <ul class="item-list">
-                            {% for clv in user|get_cohorts_this_user|slice:':5' %}
-                            <li class="menu-item">
-                                <form action="{% url 'worksheet_create_with_cohort' %}" method="POST">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="cohort_id" value="{{ clv.id}}">
-                                    <button type="submit" title="{{ clv.name|wrap_text }}">{{ clv.name }}</button>
-                                </form>
-                            </li>
-                            {% endfor %}
-                            {% if user|get_cohorts_this_user|length > 5 %}
-                            <li class="menu-item has-drop-down__more"> More
-                                <ul class="drop">
-                                    {% for clv in user|get_cohorts_this_user|slice:'5:' %}
-                                    <li class="menu-item">
-                                        <form action="{% url 'worksheet_create_with_cohort' %}" method="POST">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="cohort_id" value="{{ clv.id}}">
-                                            <button type="submit" title="{{ clv.name|wrap_text }}">{{ clv.name }}</button>
-                                        </form>
-                                    </li>
-                                    {% endfor %}
-                                </ul>
-                            </li>
-                            {% endif %}
+                            {% with user|get_cohorts_this_user as cohorts_this_user %}
+                                {% for clv in cohorts_this_user|slice:':5' %}
+                                <li class="menu-item">
+                                    <form action="{% url 'worksheet_create_with_cohort' %}" method="POST">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="cohort_id" value="{{ clv.id}}">
+                                        <button type="submit" title="{{ clv.name|wrap_text }}">{{ clv.name }}</button>
+                                    </form>
+                                </li>
+                                {% endfor %}
+                                {% if cohorts_this_user|length > 5 %}
+                                <li class="menu-item has-drop-down__more"> More
+                                    <ul class="drop">
+                                        {% for clv in cohorts_this_user|slice:'5:' %}
+                                        <li class="menu-item">
+                                            <form action="{% url 'worksheet_create_with_cohort' %}" method="POST">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="cohort_id" value="{{ clv.id}}">
+                                                <button type="submit" title="{{ clv.name|wrap_text }}">{{ clv.name }}</button>
+                                            </form>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </li>
+                                {% endif %}
+                            {% endwith %}
                         </ul>
                     </li>
                     {% endif %}
