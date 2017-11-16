@@ -61,4 +61,28 @@ require([
 
     });
 
+    $('a.refresh-project').on('click',function(e){
+        var user_id = $(this).data('user-id');
+        var project_name = $(this).data('project-name');
+        var project_id = $(this).data('project-id');
+
+        $.ajax({
+            url: BASE_URL + '/accounts/users/'+user_id+'/verify_gcp/',
+            data: "gcp-id="+project_name + "&is_refresh=true",
+            method: 'GET',
+            success: function(data) {
+                console.debug(data);
+                var roles = data['roles']
+                for (var key in roles) {
+                    var list = roles[key];
+                    for (var item in list) {
+                        if (list[item]['registered_user']) {
+                            $('#refresh-project-'+project_id).append('<input type="hidden" name="register_users" value="' + list[item]['email'] + '"/>');
+                        }
+                    }
+                }
+            }
+        });
+    });
+
 });

@@ -50,6 +50,7 @@ require([
     $('input[name="select-datasets"]:radio').change(function() {
         if ($('input[name="select-datasets"]:checked').val() === 'yes' || $('input[name="select-datasets"]:checked').val() === 'alter') {
             $('#datasets-select-div').show();
+            $('#register-sa input[name="select-datasets"][value="remove"]').remove();
         } else {
             $('#datasets-select-div').hide();
         }
@@ -123,7 +124,7 @@ require([
                     }
                 }
 
-                if($('input[value="remove"]:checked').length > 0) {
+                if($('input[name="select-datasets"][value="remove"]:checked').length > 0) {
                     var remove_all = $('input[value="remove"]').clone();
                     remove_all.attr("type","hidden");
                     register_form.append(remove_all[0]);
