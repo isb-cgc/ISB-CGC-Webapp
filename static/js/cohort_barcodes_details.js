@@ -85,9 +85,20 @@ require([
         };
 
         if(!preFormatted) {
+            var case_id_col = 0;
+            var proj_col = 0;
             var isGdcTsv = false;
-            if(barcodes[0].match(/Case UUID\tCase ID\tProject/)) {
+            if(barcodes[0].match(/Project/) && barcodes[0].match(/Case ID/) && barcodes[0].match(/\t/)) {
                 isGdcTsv = true;
+                var header_cols = barcodes[0].split(/\s*\t\s*/);
+                for(var i=0; i<header_cols.length; i++) {
+                    if(header_cols[i] == 'Case ID') {
+                        case_id_col = i;
+                    }
+                    if(header_cols[i] == 'Project') {
+                        proj_col = i;
+                    }
+                }
                 barcodes.shift();
             }
             barcodes.filter(function(barcode){ return barcode !== ""; }).map(function(barcode) {
@@ -100,7 +111,7 @@ require([
                     // Per https://stackoverflow.com/a/1757107 regex to manage commas inside quotes in a CSV, adjusted to work for tabs and single quotes
                     entry_split = barcode.split(/\s*[,\t](?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)\s*/);
                 }
-                if ((isGdcTsv && entry_split.length < 3) || (!isGdcTsv && entry_split.length !== 3)) {
+                if ((isGdcTsv && entry_split.length < 2) || (!isGdcTsv && entry_split.length !== 3)) {
                     if (!result.invalid_entries) {
                         result.invalid_entries = [];
                     }
@@ -110,7 +121,7 @@ require([
                         result.valid_entries = [];
                     }
                     if(isGdcTsv) {
-                        result.valid_entries.push(entry_split[1] + "{}{}" + entry_split[2].split(/^([^-]+)-.+/)[1]);
+                        result.valid_entries.push(entry_split[case_id_col] + "{}{}" + entry_split[proj_col].split(/^([^-]+)-.+/)[1]);
                     } else {
                         result.valid_entries.push(entry_split[0].replace(/["']/g,"") + "{}" + entry_split[1].replace(/["']/g,"") + "{}" + entry_split[2].replace(/["']/g,""));
                     }
@@ -251,7 +262,7 @@ require([
                 var fr = new FileReader();
                 fr.onload = function(event){
                     var isGdcJson = fr.result.match(/submitter_id/);
-                    var isGdcTsv = fr.result.match(/Case UUID\tCase ID\tProject/);
+                    var isGdcTsv = fr.result.match(/Case ID/) && fr.result.match(/Project/) && fr.result.match(/\t/);
                     var entries = null;
                     var isPreFormatted = false;
                     var msg = null;
@@ -275,8 +286,8 @@ require([
                         }
                     // GDC TSV case manifest
                     } else if(isGdcTsv) {
-                        if(!fr.result.match(/\t/g).length > 3) {
-                            msg = "This file is not in a valid GDC TSV case manifest format. Please double-check the file, and be sure the header row was included."
+                        if(!fr.result.match(/\t/g).length > 2) {
+                            msg = "This file is not in a valid GDC TSV case manifest format. Please double-check the file, and be sure the header row, Project column, and Case ID column were included."
                         }
                     // tab/comma delimited barcode list
                     } else if(!checkContentValidity(fr.result)) {
