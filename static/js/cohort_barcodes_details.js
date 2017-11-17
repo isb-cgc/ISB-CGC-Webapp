@@ -286,7 +286,7 @@ require([
                         }
                     // GDC TSV case manifest
                     } else if(isGdcTsv) {
-                        if(!(fr.result.match(/\t/g).length > 2)) {
+                        if(!(fr.result.match(/\t/g).length >= 2)) {
                             msg = "This file is not in a valid GDC TSV case manifest format. Please double-check the file, and be sure the header row, Project column, and Case ID column were included."
                         }
                     // tab/comma delimited barcode list
