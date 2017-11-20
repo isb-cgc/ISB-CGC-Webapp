@@ -744,7 +744,7 @@ require([
             }
         });
 
-        vizhelpers.get_variable_field_options(datatype, filters, $('#workbook-build :selected').data('plot-version'), function(options){
+        vizhelpers.get_variable_field_options(datatype, filters, $('#workbook-build-'+workbook_id+' :selected').data('plot-version'), function(options){
             var selectbox = parent.parent('.search-field').find('.feature-search .search-term-field');
             selectbox.empty();
 
