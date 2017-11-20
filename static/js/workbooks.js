@@ -1347,7 +1347,7 @@ require([
             e.preventDefault();
             return false;
         }
-        if($('#workbook-build').val() !== $('.workbook-build-display').data('build')) {
+        if($('#workbook-build-'+workbook_id).val() !== $('.workbook-build-display').data('build')) {
             // Since specifications of gene/miRNA data are build dependent we have to reset them when the build changes
             $('.spec-select.datatype-selector').val('');
         }
