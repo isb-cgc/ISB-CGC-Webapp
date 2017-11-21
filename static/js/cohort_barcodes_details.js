@@ -24,6 +24,7 @@ require.config({
         jqueryui: 'libs/jquery-ui.min',
         session_security: 'session_security',
         underscore: 'libs/underscore-min',
+        ajv: 'libs/ajv.bundle',
         base: 'base'
     },
     shim: {
@@ -40,8 +41,9 @@ require([
     'bootstrap',
     'session_security',
     'underscore',
-    'base'
-], function ($, jqueryui, bootstrap, session_security, _, base) {
+    'base',
+    'ajv'
+], function ($, jqueryui, bootstrap, session_security, _, base, ajv) {
 
     var savingChanges = false;
     var validated_barcodes = null;
@@ -63,29 +65,71 @@ require([
         return cookieValue;
     }
 
-    function validateEntries(barcodes) {
+    function validateJson(json) {
+        var jv = new ajv();
+        var validator = jv.compile(base.gdcSchema);
+
+        var validate = validator(json);
+
+        if(!validate) {
+            return validator.errors;
+        }
+        return null;
+    };
+
+    function validateEntries(barcodes,preFormatted) {
+
         var result = {
             valid_entries: null,
             invalid_entries: null
         };
 
-        barcodes.filter(function(barcode){ return barcode !== ""; }).map(function(barcode) {
-            // Split the entry into its values
-            barcode = barcode.trim();
-            // Per https://stackoverflow.com/a/1757107 regex to manage commas inside quotes in a CSV, adjusted to work for tabs and single quotes
-            var entry_split = barcode.split(/\s*[,\t](?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)\s*/);
-            if (entry_split.length !== 3) {
-                if (!result.invalid_entries) {
-                    result.invalid_entries = [];
+        if(!preFormatted) {
+            var case_id_col = 0;
+            var proj_col = 0;
+            var isGdcTsv = false;
+            if(barcodes[0].match(/Project/) && barcodes[0].match(/Case ID/) && barcodes[0].match(/\t/)) {
+                isGdcTsv = true;
+                var header_cols = barcodes[0].split(/\s*\t\s*/);
+                for(var i=0; i<header_cols.length; i++) {
+                    if(header_cols[i] == 'Case ID') {
+                        case_id_col = i;
+                    }
+                    if(header_cols[i] == 'Project') {
+                        proj_col = i;
+                    }
                 }
-                result.invalid_entries.push(barcode);
-            } else {
-                if (!result.valid_entries) {
-                    result.valid_entries = [];
-                }
-                result.valid_entries.push(entry_split[0].replace(/["']/g,"") + "{}" + entry_split[1].replace(/["']/g,"") + "{}" + entry_split[2].replace(/["']/g,""));
+                barcodes.shift();
             }
-        });
+            barcodes.filter(function(barcode){ return barcode !== ""; }).map(function(barcode) {
+                // Split the entry into its values
+                barcode = barcode.trim();
+                var entry_split = null;
+                if(isGdcTsv) {
+                    entry_split = barcode.split(/\s*\t\s*/);
+                } else {
+                    // Per https://stackoverflow.com/a/1757107 regex to manage commas inside quotes in a CSV, adjusted to work for tabs and single quotes
+                    entry_split = barcode.split(/\s*[,\t](?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)\s*/);
+                }
+                if ((isGdcTsv && entry_split.length < 2) || (!isGdcTsv && entry_split.length !== 3)) {
+                    if (!result.invalid_entries) {
+                        result.invalid_entries = [];
+                    }
+                    result.invalid_entries.push(barcode);
+                } else {
+                    if (!result.valid_entries) {
+                        result.valid_entries = [];
+                    }
+                    if(isGdcTsv) {
+                        result.valid_entries.push(entry_split[case_id_col] + "{}{}" + entry_split[proj_col].split(/^([^-]+)-.+/)[1]);
+                    } else {
+                        result.valid_entries.push(entry_split[0].replace(/["']/g,"") + "{}" + entry_split[1].replace(/["']/g,"") + "{}" + entry_split[2].replace(/["']/g,""));
+                    }
+                }
+            });
+        } else {
+            result.valid_entries = barcodes;
+        }
 
         // Any entries which were valid during the initial parse must now be checked against the database
         if(result.valid_entries) {
@@ -140,17 +184,19 @@ require([
         // - A file must only have character present on the whitelist
 
         return !(
-            (tsvMatch && csvMatch && ((sQuoteMatch &&sQuoteMatch.length <= 0 && dQuoteMatch && dQuoteMatch.length <= 0) || (dQuoteMatch && dQuoteMatch.length % 2 != 0 && sQuoteMatch && sQuoteMatch.length % 2 != 0)))
+            (tsvMatch && csvMatch && ((sQuoteMatch && sQuoteMatch.length <= 0 && dQuoteMatch && dQuoteMatch.length <= 0) || (dQuoteMatch && dQuoteMatch.length % 2 != 0 && sQuoteMatch && sQuoteMatch.length % 2 != 0)))
             || (!tsvMatch && !csvMatch) || (csvMatch && csvMatch.length % 2 != 0) || (tsvMatch && tsvMatch.length % 2 != 0) || whitelistMatch);
     }
 
     // Text-area paste
     $('#enter-barcodes button.verify').on('click',function(){
+        $('.verify-pending').css('display','inline-block');
         var content = $('#enter-barcodes textarea').val();
 
         if(!checkContentValidity(content)) {
             base.showJsMessage("error","The entered set of barcodes is not properly formatted. Please double-check that they are in tab- or comma-delimited format.",true);
             return false;
+            $('.verify-pending').hide();
         } else {
             $('.alert-dismissible button.close').trigger('click');
         }
@@ -160,10 +206,12 @@ require([
         // Validate the entries
         validateEntries(entries).then(
             function(result){
+                $('.verify-pending').hide();
                 showEntries(result, $('#enter-barcodes'));
                 $('#enter-barcodes .save-cohort button').removeAttr('disabled');
                 $('#enter-barcodes .save-cohort').show();
             },function(result){
+                $('.verify-pending').hide();
                 // We only reach this point if no entries are valid, so show an error message as well.
                 base.showJsMessage("error","None of the supplied barcode entries were valid. Please double-check the format of your entries.",true);
                 showEntries(result.responseJSON,$('#enter-barcodes'));
@@ -184,7 +232,7 @@ require([
     } else {
         // If file upload is supported
         var fileUploadField = $('#file-upload-field');
-        var validFileTypes = ['txt', 'csv', 'tsv'];
+        var validFileTypes = ['txt', 'csv', 'tsv', 'json'];
 
         $('#file-upload-btn').click(function(event){
             event.preventDefault()
@@ -201,7 +249,7 @@ require([
             // check file format against valid file types
             if(validFileTypes.indexOf(ext) < 0){
                 // If file type is not correct
-                base.showJsMessage("error","Please choose a .txt, .tsv, or .csv file.",true);
+                base.showJsMessage("error","Please choose a .txt, .tsv, .csv, or .json file.",true);
                 fileUploadField.val("");
                 return false;
             } else{
@@ -213,27 +261,68 @@ require([
             if(event.target.files != undefined){
                 var fr = new FileReader();
                 fr.onload = function(event){
+                    var isGdcJson = fr.result.match(/submitter_id/);
+                    var isGdcTsv = fr.result.match(/Case ID/) && fr.result.match(/Project/) && fr.result.match(/\t/);
+                    var entries = null;
+                    var isPreFormatted = false;
+                    var msg = null;
+                    // GDC JSON file
+                    if(isGdcJson) {
+                        var parsedJson = null;
+                        try {
+                            parsedJson = JSON.parse(fr.result);
+                        } catch (e) {
+                            parsedJson = null;
+                        }
 
-                    if(!checkContentValidity(fr.result)) {
-                        base.showJsMessage("error","This file is not in a valid format. Please supply a comma- or tab-delimited file, in .tsv, .csv, or .txt format.",true);
+                        if(!parsedJson) {
+                            msg = "This file does not contain valid JSON. Please double-check its format.";
+                        } else {
+                            var checkJson = validateJson(parsedJson);
+                            if (checkJson) {
+                                msg = "This file is not in a valid GDC JSON case manifest format. Please double-check your file. The following errors were found: ";
+                                msg += checkJson[0].message.replace("should have", "missing");
+                            }
+                        }
+                    // GDC TSV case manifest
+                    } else if(isGdcTsv) {
+                        if(!(fr.result.match(/\t/g).length >= 2)) {
+                            msg = "This file is not in a valid GDC TSV case manifest format. Please double-check the file, and be sure the header row, Project column, and Case ID column were included."
+                        }
+                    // tab/comma delimited barcode list
+                    } else if(!checkContentValidity(fr.result)) {
+                        msg = "This file is not in a valid format. Please supply a comma- or tab-delimited file, in .tsv, .csv, or .txt format.";
+                    }
+
+                    if(msg) {
+                        base.showJsMessage("error",msg,true);
                         $('#uploading').removeClass('in');
                         $('#file-upload-btn').show();
                         fileUploadField.val("");
                         return false;
                     }
 
-                    var entries = fr.result.split('\n');
+                    if(isGdcJson) {
+                        var gdcSet = JSON.parse(fr.result);
+                        var entries = [];
+                        for(var i=0; i < gdcSet.length; i++) {
+                            entries.push(gdcSet[i]['submitter_id']+"{}{}"+gdcSet[i]['project']['project_id'].split(/^([^-]+)-.+/)[1])
+                        }
+                        isPreFormatted = true;
+                    } else {
+                        entries = fr.result.split('\n');
+                    }
 
                     $('#file-upload-btn').attr('disabled','disabled');
-                    $('#verify-pending').show();
+                    $('.verify-pending').css('display','inline-block');
 
                     // Validate the entries
-                    validateEntries(entries).then(
+                    validateEntries(entries,isPreFormatted).then(
                         function(result){
                             showEntries(result, $('#upload-file'));
                             $('#upload-file .save-cohort button').removeAttr('disabled');
                             $('#upload-file .save-cohort').show();
-                            $('#verify-pending').hide();
+                            $('.verify-pending').hide();
                             $('#file-upload-btn').removeAttr('disabled');
                         },function(result){
                             // We only reach this point if no entries are valid, so show an error message as well.
@@ -242,7 +331,7 @@ require([
                             fileUploadField.val("");
                             $('#upload-file .save-cohort button').attr('disabled','disabled');
                             $('#upload-file .save-cohort').hide();
-                            $('#verify-pending').hide();
+                            $('.verify-pending').hide();
                             $('#file-upload-btn').removeAttr('disabled');
                         }
                     );
@@ -250,6 +339,7 @@ require([
                     $('#file-upload-btn').show();
                     fileUploadField.val("");
                 }
+
                 fr.readAsText(event.target.files.item(0));
                 fileUploadField.val("");
             }
@@ -360,6 +450,8 @@ require([
         form.append('<input type="hidden" name="apply-name" value="true" />');
         form.append('<input type="hidden" name="apply-barcodes" value="true" />');
         form.append($('<input>').attr({type: "hidden", name: "barcodes", value: JSON.stringify(validated_barcodes)}));
+
+        $('#saving-cohort').css('display','inline-block');
     });
 
     $("#pasted-barcodes").keypress(function (e) {

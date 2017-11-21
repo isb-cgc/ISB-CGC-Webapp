@@ -5,6 +5,7 @@
 
 ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET}/${PROD_DATASET_JSON_FILE}" ./
 ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET}/${SERVICE_ACCOUNT_BLACKLIST_JSON_FILE}" ./
+./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET}/${GOOGLE_ORG_WHITELIST_JSON_FILE}" ./
 
 if [ -n "${PROD_NIH_AUTH_ON}" ]; then
   ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET}/saml/advanced_settings.json" ./saml/advanced_settings.json

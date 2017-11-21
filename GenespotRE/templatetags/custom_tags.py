@@ -318,7 +318,7 @@ def program_is_in_cohort(prog, cohort_progs):
 
 @register.filter
 def program_is_first_in_cohort(prog, cohort_progs):
-    if len(cohort_progs):
+    if cohort_progs.count():
         return (prog.id == cohort_progs[0].id)
     logger.error("[ERROR] This cohort doesn't appear to have any programs associated with it--this means the samples may not have project IDs!")
     return False
