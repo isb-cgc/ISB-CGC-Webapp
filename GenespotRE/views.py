@@ -396,13 +396,13 @@ def dashboard_page(request):
     cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved')
 
     # Program List
-    ownedPrograms = request.user.program_set.all().filter(active=True)
+    ownedPrograms = request.user.program_set.filter(active=True)
     sharedPrograms = Program.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
     programs = ownedPrograms | sharedPrograms
     programs = programs.distinct().order_by('-last_date_saved')
 
     # Workbook List
-    userWorkbooks = request.user.workbook_set.all().filter(active=True)
+    userWorkbooks = request.user.workbook_set.filter(active=True)
     sharedWorkbooks = Workbook.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
     workbooks = userWorkbooks | sharedWorkbooks
     workbooks = workbooks.distinct().order_by('-last_date_saved')

@@ -48,6 +48,8 @@ require([
     });
 
     $('#verify-gcp').on('submit', function(e) {
+        $('#verify-gcp-id').val($('#verify-gcp-id').val().trim());
+
         e.preventDefault();
         e.stopPropagation();
 

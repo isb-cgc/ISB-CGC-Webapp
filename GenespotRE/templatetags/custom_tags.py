@@ -207,7 +207,7 @@ def get_cohorts_this_user(this_user, is_active=True):
 
 @register.filter
 def get_programs_this_user(this_user, is_active=True):
-    ownedPrograms = this_user.program_set.all().filter(active=True)
+    ownedPrograms = this_user.program_set.filter(active=True)
     sharedPrograms = Program.objects.filter(shared__matched_user=this_user, shared__active=True, active=is_active)
     programs = ownedPrograms | sharedPrograms
     programs = programs.distinct().order_by('-last_date_saved')
@@ -216,7 +216,7 @@ def get_programs_this_user(this_user, is_active=True):
 
 @register.filter
 def get_workbooks_this_user(this_user, is_active=True):
-    userWorkbooks = this_user.workbook_set.all().filter(active=is_active)
+    userWorkbooks = this_user.workbook_set.filter(active=is_active)
     sharedWorkbooks = Workbook.objects.filter(shared__matched_user=this_user, shared__active=True, active=is_active)
     workbooks = userWorkbooks | sharedWorkbooks
     workbooks = workbooks.distinct().order_by('-last_date_saved')
