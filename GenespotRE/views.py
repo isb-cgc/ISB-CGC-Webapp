@@ -407,9 +407,17 @@ def dashboard_page(request):
     workbooks = userWorkbooks | sharedWorkbooks
     workbooks = workbooks.distinct().order_by('-last_date_saved')
 
+    # Gene & miRNA Favorites
+    genefaves = request.user.genefavorite_set.filter(active=True)
+
+    # Variable Favorites
+    varfaves = request.user.variablefavorite_set.filter(active=True)
+
     return render(request, 'GenespotRE/dashboard.html', {
         'request'  : request,
         'cohorts'  : cohorts,
         'programs' : programs,
         'workbooks': workbooks,
+        'genefaves': genefaves,
+        'varfaves' : varfaves
     })
