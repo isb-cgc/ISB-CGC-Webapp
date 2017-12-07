@@ -32,6 +32,8 @@ urlpatterns = [
 
     url(r'^bucket_object_list/$', views.bucket_object_list, name='bucket_object_list'),
     url(r'^igv/$', views.igv, name='igv'),
+    url(r'^camic/$', views.camic, name='camic'),
+    url(r'^camic/(?P<slide_barcode>[A-Za-z0-9\-]+)/$', views.camic, name='camic_barcode'),
 
     url(r'^images/(?P<slide_barcode>[A-Za-z0-9\-]+)/$', views.get_image_data, name='image_data'),
     url(r'^images/', views.get_image_data_args, name='image_data_args'),

@@ -330,7 +330,7 @@ def get_image_data(request, slide_barcode):
                     'Height': query_results[0]['f'][2]['v'],
                     'MPP-X': query_results[0]['f'][3]['v'],
                     'MPP-Y': query_results[0]['f'][4]['v'],
-                    'FileLocation': query_results[0]['f'][5]['v'],
+                    'FileLocation': query_results[0]['f'][5]['v'].replace('isb-cgc-open/NCI-GDC/legacy/TCGA/TCGA-HNSC/Other/Tissue_slide_image','images-west'),
                     'TissueID': query_results[0]['f'][0]['v']
                 }
 
@@ -343,6 +343,30 @@ def get_image_data(request, slide_barcode):
             }
 
     return JsonResponse(result, status=status)
+
+
+@login_required
+def camic(request,sample_barcode=None):
+    if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
+    images = []
+
+    if sample_barcode:
+        images = [sample_barcode]
+
+    images_obj = json.loads(request.POST.get('checked_list'))
+
+    images.extend(images_obj['tissue_slide_image'].keys())
+
+    context = {
+        'barcodes': images,
+        'camic_ip': settings.CAMIC_VIEWER_IP,
+        'camic_port': settings.CAMIC_VIEWER_PORT
+    }
+
+    logger.info(str(context))
+
+    return render(request, 'GenespotRE/camic.html', context)
+
 
 @login_required
 def igv(request, sample_barcode=None, readgroupset_id=None):
