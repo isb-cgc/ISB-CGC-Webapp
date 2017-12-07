@@ -25,6 +25,7 @@ import textwrap
 from django.template.defaulttags import register
 from cohorts.models import Cohort, Cohort_Perms
 from django.contrib.auth.models import User
+from django.db.models.query import QuerySet
 from projects.models import Program
 from workbooks.models import Workbook
 import logging
@@ -266,6 +267,15 @@ def active(list, key=None):
     if not key:
         return list.filter(active=True)
     return list.filter(**{key + '__active':True})
+
+
+@register.filter
+def count(querySet):
+    if not querySet:
+        return 0
+    if isinstance(querySet, QuerySet):
+        return querySet.count()
+    return None
 
 
 @register.filter

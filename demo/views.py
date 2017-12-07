@@ -371,8 +371,7 @@ def index(request):
                                                    "[ERROR] Failed to publish to PubSub topic: {}".format(str(e)))
 
                 messages.info(request, warn_message)
-                logger.info("[STATUS] http_host: " + req['http_host'])
-                return HttpResponseRedirect(auth.redirect_to('https://{}'.format(req['http_host'])))
+                return redirect('/users/' + str(request.user.id))
 
         elif 'sls' in req['get_data']:
             dscb = lambda: request.session.flush()
