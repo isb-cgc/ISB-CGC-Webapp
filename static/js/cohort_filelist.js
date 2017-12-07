@@ -315,7 +315,7 @@ require([
                             label = "IGV";
                             checkbox_inputs += '<label><input type="checkbox" token-label="' + tokenLabel + '" program="' + files[i]['program'] + '" name="' + dataTypeName + '" data-type="' + dataTypeName + '" value="' + val + '"';
                         } else {
-                            val = files[i]['sample'];
+                            val = files[i]['cloudstorage_location'].split('/').pop().split(/\./).shift();
                             dataTypeName = "tissue_slide_image";
                             label = "caMicro";
                             checkbox_inputs += '<label><input class="cam" type="checkbox" name="' + dataTypeName + '" data-type="' + dataTypeName + '" value="' + val + '"';
