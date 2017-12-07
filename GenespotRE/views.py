@@ -330,8 +330,12 @@ def get_image_data(request, slide_barcode):
                     'Height': query_results[0]['f'][2]['v'],
                     'MPP-X': query_results[0]['f'][3]['v'],
                     'MPP-Y': query_results[0]['f'][4]['v'],
-                    'FileLocation': query_results[0]['f'][5]['v'].replace('isb-cgc-open/NCI-GDC/legacy/TCGA/TCGA-HNSC/Other/Tissue_slide_image','images-west'),
+                    'FileLocation': re.sub(r'isb-cgc-open/[A-Za-z/-]*_image', 'images-west', query_results[0]['f'][5]['v']),
                     'TissueID': query_results[0]['f'][0]['v']
+                }
+            else:
+                result = {
+                    'msg': 'Slide barcode {} was not found.'.format(slide_barcode)
                 }
 
         except Exception as e:
