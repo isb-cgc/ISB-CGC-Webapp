@@ -308,7 +308,7 @@ require([
                         disable = false;
                     }
 
-                    if (files[i]['cloudstorage_location'] && ((files[i]['cloudstorage_location'].split('.').pop() == 'bam') || (files[i]['datatype'] == 'Tissue slide image'))) {
+                    if (files[i]['cloudstorage_location'] && ((files[i]['cloudstorage_location'].split('.').pop() == 'bam') || (files[i]['datatype'] == 'Tissue slide image') || (files[i]['datatype'] == 'Diagnostic image'))) {
                         if(files[i]['cloudstorage_location'].split('.').pop() == 'bam') {
                             val = files[i]['cloudstorage_location'] + ';' + files[i]['cloudstorage_location'].substring(0, files[i]['cloudstorage_location'].lastIndexOf("/") + 1) + files[i]['index_name'] + ',' + files[i]['sample'];
                             dataTypeName = "gcs_bam";

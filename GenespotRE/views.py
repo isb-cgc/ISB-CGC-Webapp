@@ -330,7 +330,7 @@ def get_image_data(request, slide_barcode):
                     'Height': query_results[0]['f'][2]['v'],
                     'MPP-X': query_results[0]['f'][3]['v'],
                     'MPP-Y': query_results[0]['f'][4]['v'],
-                    'FileLocation': re.sub(r'isb-cgc-open/[A-Za-z/-]*_image', 'images-west', query_results[0]['f'][5]['v']),
+                    'FileLocation': re.sub(r'isb-cgc-open/.*_image', 'images-west', query_results[0]['f'][5]['v']),
                     'TissueID': query_results[0]['f'][0]['v']
                 }
             else:
@@ -350,16 +350,19 @@ def get_image_data(request, slide_barcode):
 
 
 @login_required
-def camic(request,sample_barcode=None):
+def camic(request, slide_barcode=None):
     if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
     images = []
+    images_obj = None
 
-    if sample_barcode:
-        images = [sample_barcode]
+    if slide_barcode:
+        images = [slide_barcode]
 
-    images_obj = json.loads(request.POST.get('checked_list'))
+    if request.POST.get('checked_list', None):
+        images_obj = json.loads(request.POST.get('checked_list'))
 
-    images.extend(images_obj['tissue_slide_image'].keys())
+    if images_obj and 'tissue_slide_image' in images_obj:
+        images.extend(images_obj['tissue_slide_image'].keys())
 
     context = {
         'barcodes': images,

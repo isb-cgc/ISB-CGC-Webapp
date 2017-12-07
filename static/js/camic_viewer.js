@@ -42,5 +42,16 @@ require([
     'tokenfield'
 ], function ($) {
 
+    $('.barcode-link').on('click',function(){
+        var barcode = $(this).data('value');
+        $('#view-camic').attr('action',$('#view-camic').attr('action').replace(/images\/.*/,'images/'+barcode));
+        console.debug($('#view-camic').attr('action'));
+
+        console.debug($('#camic-iframe').attr('src'));
+
+        $('#camic-iframe').attr('src',$('#camic-iframe').attr('src').replace(/=.*/,'='+barcode));
+
+        console.debug($('#camic-iframe').attr('src'));
+    });
 
 });
