@@ -69,10 +69,10 @@
 {#                                    <td>{% if project.big_query_dataset %}{{ project.big_query_dataset }}{% else %}N/A{% endif %}</td>#}
 
                                     <td>
-                                        {% if project.serviceaccount_set.all|length > 0 %}
-                                        <a role="button" class="show-service-accounts" data-target="{{ project.id }}-expander"><i class="fa fa-caret-right"></i> {{ project.serviceaccount_set.all|length }}</a>
+                                        {% if project.active_service_accounts|length > 0 %}
+                                        <a role="button" class="show-service-accounts" data-target="{{ project.id }}-expander"><i class="fa fa-caret-right"></i> {{ project.active_service_accounts|length }}</a>
                                         {% else %}
-                                        {{ project.serviceaccount_set.all|length }}
+                                        {{ project.active_service_accounts|length }}
                                         {% endif %}
                                     </td>
 
@@ -96,7 +96,7 @@
                                                     </tr>
                                                     </thead>
                                                     <tbody>
-                                                    {% for service_account in project.serviceaccount_set.all %}
+                                                    {% for service_account in project.active_service_accounts %}
                                                         {% with auth_datasets=service_account.get_auth_datasets %}
                                                             <tr>
                                                                 <td>{{ service_account.service_account }}</td>

@@ -5,6 +5,7 @@
 
 ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_TEST}/${SERVICE_ACCOUNT_BLACKLIST_JSON_FILE}" ./
 ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_TEST}/${GOOGLE_ORG_WHITELIST_JSON_FILE}" ./
+./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_TEST}/${MANAGED_SERVICE_ACCOUNTS_JSON_FILE}" ./
 ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_TEST}/${TEST_DATASET_JSON_FILE}" ./
 
 if [ -n "${TEST_NIH_AUTH_ON}" ]; then

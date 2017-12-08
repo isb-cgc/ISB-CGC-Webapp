@@ -147,7 +147,7 @@ require([
     /*
         Adds or removes a variable pill when users click on a checkbox representing a variable
      */
-    $('input[type="checkbox"]').on('change', function(event){
+    $('.data-tab-content').on('change', 'input[type="checkbox"]', function(event){
         var $this      = $(this),
             name       = $this.data('text-label'),
             code       = $this.data('code'),
@@ -378,9 +378,8 @@ require([
         $(this).hide();
     });
 
-    /*
-        Used for getting the CORS token for submitting data
-     */
+
+    // Used for getting the CORS token for submitting data
     function get_cookie(name) {
         var cookieValue = null;
         if (document.cookie && document.cookie != '') {
@@ -397,16 +396,35 @@ require([
         return cookieValue;
     }
 
-    /*
-        If there are variables on load, check off the boxes that are already selected
-     */
-    if ($('.selected-filters span').length > 0) {
-        var variable_list = get_variable_list();
-        for (var i = 0; i < variable_list.length; i++ ) {
-            $('input[type="checkbox"][data-code="'+variable_list[i]['code']+'"]').each(function() {
-                $(this).prop('checked', true);
-            })
+    // Checks for previously-selected variables (i.e. editing an extent list) and checks them off
+    function check_for_selections() {
+        if ($('.selected-filters span').length > 0) {
+            var variable_list = get_variable_list();
+            for (var i = 0; i < variable_list.length; i++ ) {
+                $('input[type="checkbox"][data-code="'+variable_list[i]['code']+'"]').each(function() {
+                    $(this).prop('checked', true);
+                })
+            }
         }
     }
+
+    $('.user-vars-tab').on('click',function(){
+        $.ajax({
+            type: 'GET',
+            url: BASE_URL + '/variables/user_vars/',
+            success: function(user_vars) {
+                $('#0-data').empty();
+                $('#0-data').append(user_vars);
+                // Re-run the checkbox settings to account for user vars now
+                check_for_selections();
+            },
+            error: function() {
+                base.showJsMessage("error","There was an error while retrieving your user variables - please contact the administrator.",true);
+                $('.spinner').hide();
+            }
+        });
+    });
+
+    check_for_selections();
 
 });

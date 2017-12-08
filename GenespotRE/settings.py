@@ -489,6 +489,9 @@ SERVICE_ACCOUNT_BLACKLIST_PATH           = os.environ.get('SERVICE_ACCOUNT_BLACK
 # Google Org whitelist file path
 GOOGLE_ORG_WHITELIST_PATH                = os.environ.get('GOOGLE_ORG_WHITELIST_PATH', '')
 
+# Managed Service Account file path
+MANAGED_SERVICE_ACCOUNTS_PATH            = os.environ.get('MANAGED_SERVICE_ACCOUNTS_PATH', '')
+
 # Dataset configuration file path
 DATASET_CONFIGURATION_PATH               = os.environ.get('DATASET_CONFIGURATION_PATH', '')
 
@@ -527,6 +530,12 @@ MAX_FILE_LIST_REQUEST = 65000
 
 # IGV limit to prevent users from trying ot open dozens of files
 MAX_FILES_IGV = 5
+
+#################################
+# caMicroscope Viewer settings
+#################################
+CAMIC_VIEWER_IP = os.environ.get('CAMIC_VIEWER_IP', None)
+CAMIC_VIEWER_PORT = int(os.environ.get('CAMIC_VIEWER_PORT', '0'))
 
 ##############################################################
 #   MailGun Email Settings
