@@ -42,39 +42,36 @@
 {% endblock %}
 
 {% block content %}
-    <div class="col-lg-12">
-
-        <div id="camic-div" class="row">
-            <div class="row cgc-user-data-type-tabs">
-                <div class="panel panel-default">
-                    <ul class="nav nav-tabs nav-tabs-data" role="tablist">
-                        {% for barcode in barcodes %}
-                        <li role="presentation" class="{% if forloop.first %}active{% endif %}"><a href="#{{ barcode }}-viewer" role="tab" data-toggle="tab" title="{{ barcode }} Tissue Slide Image">{{ barcode }}</a></li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
-            <div class="row">
-                <div class="tab-content data-tab-content">
+    <div class="col-lg-3">
+        <div class="row cgc-user-data-type-tabs">
+            <div class="panel panel-default">
+                <ul class="nav nav-tabs nav-tabs-data camic-tabs" role="tablist">
                     {% for barcode in barcodes %}
-                    <div id="{{ barcode }}-viewer" class="tab-pane{% if forloop.first %} active{% else %} inactive{% endif %} data-tab" role="tabpanel">
-                        <div class="data-tab-content-panel">
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    <input type="submit" form ="view-camic-{{ barcode }}" value="Open in new tab" class="btn btn-primary pull-right nocap" />
-                                    <form id="view-camic-{{ barcode }}" method="POST" action="{% url 'camic_barcode' barcode %}" target="_blank">
-                                        {% csrf_token %}
-                                    </form>
-                                </div>
-                                <div class="panel-body">
-                                    <div class="iframe-container">
-                                        <iframe width="100%" src="http://{{ camic_ip }}:{{ camic_port }}/camicroscope/osdCamicroscope.php?slideBarcode={{ barcode }}"></iframe>
-                                    </div>
+                    <li role="presentation" class="{% if forloop.first %}active{% endif %}"><a class="barcode-link" role="tab" data-toggle="tab" data-value="{{ barcode }}" title="{{ barcode }} Tissue Slide Image">{{ barcode }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-9">
+        <div id="camic-div" class="row">
+            <div class="row">
+                <div id="camic-viewer">
+                    <div class="data-tab-content-panel">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <input type="submit" form ="view-camic" value="Open in new tab" class="btn btn-primary pull-right nocap" />
+                                <form id="view-camic" method="POST" action="{% url 'camic_barcode' barcodes.0 %}" target="_blank">
+                                    {% csrf_token %}
+                                </form>
+                            </div>
+                            <div class="panel-body">
+                                <div class="iframe-container">
+                                    <iframe id="camic-iframe" width="100%" src="http://{{ camic_ip }}:{{ camic_port }}/camicroscope/osdCamicroscope.php?slideBarcode={{ barcode.0 }}"></iframe>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    {% endfor %}
                 </div>
             </div>
         </div>

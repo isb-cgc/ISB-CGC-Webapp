@@ -442,6 +442,14 @@
     input
         margin-left: 5px
 
+    .nav-tabs
+      li,li.active
+        a
+          text-transform: none
+
+    .token-label
+      max-width: none !important
+
 .parsets-tooltip
     background-color: rgba($tooltip-color, 0.8)
     border-radius: 3px
@@ -514,7 +522,10 @@ span.code
     font-family: monospace
     font-weight: 600
 
-#camic-div
+#camic
+    .camic-tabs
+        li:not(:last-child)
+            margin-bottom: 10px
     iframe
         min-height: 900px
         margin-top: 10px

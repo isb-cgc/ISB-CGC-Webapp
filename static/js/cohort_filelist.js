@@ -105,13 +105,21 @@ require([
 
         // If we've cleared out our tokenfield, re-display the placeholder
         selIgvFiles.count() <= 0 && $('#selected-files-igv-tokenfield').show();
+        selCamFiles.count() <= 0 && $('#selected-files-camic-tokenfield').show();
 
         if(selIgvFiles.count() >= SEL_IGV_FILE_MAX) {
-            $('#file-max-alert').show();
+            $('#file-max-alert-igv').show();
             $('.filelist-panel input.igv[type="checkbox"]:not(:checked)').attr('disabled',true);
         } else {
-            $('#file-max-alert').hide();
+            $('#file-max-alert-igv').hide();
             $('.filelist-panel input.igv[type="checkbox"]').attr('disabled',false);
+        }
+        if(selCamFiles.count() >= SEL_IGV_FILE_MAX) {
+            $('#file-max-alert-cam').show();
+            $('.filelist-panel input.cam[type="checkbox"]:not(:checked)').attr('disabled',true);
+        } else {
+            $('#file-max-alert-cam').hide();
+            $('.filelist-panel input.cam[type="checkbox"]').attr('disabled',false);
         }
     };
 
@@ -308,7 +316,7 @@ require([
                         disable = false;
                     }
 
-                    if (files[i]['cloudstorage_location'] && ((files[i]['cloudstorage_location'].split('.').pop() == 'bam') || (files[i]['datatype'] == 'Tissue slide image'))) {
+                    if (files[i]['cloudstorage_location'] && ((files[i]['cloudstorage_location'].split('.').pop() == 'bam') || (files[i]['datatype'] == 'Tissue slide image') || (files[i]['datatype'] == 'Diagnostic image'))) {
                         if(files[i]['cloudstorage_location'].split('.').pop() == 'bam') {
                             val = files[i]['cloudstorage_location'] + ';' + files[i]['cloudstorage_location'].substring(0, files[i]['cloudstorage_location'].lastIndexOf("/") + 1) + files[i]['index_name'] + ',' + files[i]['sample'];
                             dataTypeName = "gcs_bam";
