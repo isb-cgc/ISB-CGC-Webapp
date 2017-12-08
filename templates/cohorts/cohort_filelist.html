@@ -88,6 +88,10 @@
                                     <h4>Selected Image Files</h4>
                                 </div>
                                 <div class="panel-body file-list">
+                                    <div id="file-max-alert-cam" class="alert alert-warning alert-dismissable">
+                                        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                        The maximum number of images which can be queued for caMicroscope simultaneously is <span class="file-limit-camic">#</span>.
+                                    </div>
                                     <p><span id="selected-count-camic">0</span> file(s) selected (<span id="selected-file-limit-camic">limit <span class="file-limit-camic file-limit">#</span></span>)</p>
                                     <div id="tokenfield-holder-cam">
                                         <!-- "caM selected file tokenizer" -->
@@ -110,9 +114,9 @@
                                     <p><i>Note: Files viewed in IGV must all be for the same build.</i></p>
                                 </div>
                                 <div class="panel-body file-list">
-                                    <div id="file-max-alert" class="alert alert-warning alert-dismissable">
+                                    <div id="file-max-alert-igv" class="alert alert-warning alert-dismissable">
                                         <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                        The maximum number of files which can be viewed in IGV simultaneously is <span class="file-limit">#</span>.
+                                        The maximum number of files which can be viewed in IGV simultaneously is <span class="file-limit-igv">#</span>.
                                     </div>
                                     <p><span id="selected-count-igv">0</span> file(s) selected (<span id="selected-file-limit-igv">limit <span class="file-limit-igv file-limit">#</span></span>)</p>
                                     <div id="tokenfield-holder-igv">
