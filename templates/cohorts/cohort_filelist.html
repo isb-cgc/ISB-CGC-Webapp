@@ -39,7 +39,8 @@
 
 {% block content %}
     <div class="row">
-        <div id="filter-panel" class="col-lg-3">
+
+        <div id="filter-panel" class="col-lg-3 col-md-3 col-sm-3">
             <div class="panel panel-default">
                 <div class="panel-body">
                     <label for="build">Build</label>
@@ -67,26 +68,75 @@
             </div>
         </div>
 
-        <div id="content-panel" class="col-md-9">
-            <div class="panel">
-                <div class="panel-heading">
-                    <input type="submit" form ="view-igv" value="Launch IGV" class="btn btn-primary pull-right" style="display: none;"/>
-                    <h4>Selected Files</h4>
-                    <p><i>Note: Files viewed in IGV must all be for the same build.</i></p>
+        <div class="col-sm-9 col-md-9 col-lg-9">
+            <div class="row cgc-user-data-type-tabs">
+                <div class="panel panel-default">
+                    <ul class="nav nav-tabs nav-tabs-data" role="tablist">
+                        <li role="presentation" class="active"><a href="#igv-viewer" role="tab" data-toggle="tab" title="View Selected Files in IGV">IGV</a></li>
+                        <li role="presentation"><a href="#camic-viewer" role="tab" data-toggle="tab" title="View Selected Files in caMicroscope">caMicroscope</a></li>
+                    </ul>
                 </div>
-                <div class="panel-body file-list">
-                    <div id="file-max-alert" class="alert alert-warning alert-dismissable">
-                        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                        The maximum number of files which can be viewed in IGV simultaneously is <span class="file-limit">#</span>.
+            </div>
+
+            <div class="row">
+                <div class="tab-content data-tab-content">
+                    <div id="camic-viewer" class="tab-pane inactive data-tab" role="tabpanel">
+                        <div class="data-tab-content-panel">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <input type="submit" form ="view-camic" value="Launch caMicroscope" class="btn btn-primary pull-right nocap" style="display: none;"/>
+                                    <h4>Selected Image Files</h4>
+                                </div>
+                                <div class="panel-body file-list">
+                                    <div id="file-max-alert-cam" class="alert alert-warning alert-dismissable">
+                                        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                        The maximum number of images which can be queued for caMicroscope simultaneously is <span class="file-limit-camic">#</span>.
+                                    </div>
+                                    <p><span id="selected-count-camic">0</span> file(s) selected (<span id="selected-file-limit-camic">limit <span class="file-limit-camic file-limit">#</span></span>)</p>
+                                    <div id="tokenfield-holder-cam">
+                                        <!-- "caM selected file tokenizer" -->
+                                        <textarea name="selected-files-cam" class="form-control tokenfield" id="selected-files-cam" placeholder="Select files"></textarea>
+                                    </div>
+                                    <form id="view-camic" method="POST" action="{% url 'camic' %}" target="_blank">
+                                        <input type="text" class="hidden_form_value" id="checked_list_input_camic" name="checked_list" data-type="checked_list">
+                                        {% csrf_token %}
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <p><span id="selected-count">0</span> file(s) selected (<span id="selected-file-limit">limit <span class="file-limit">#</span></span>)</p>
-                    <div id="tokenfield-holder">
-                        <!-- "selected files tokenizer" -->
-                        <textarea name="selected-files" class="form-control tokenfield" id="selected-files" placeholder="Select files"></textarea>
+                    <div id="igv-viewer" class="tab-pane active data-tab" role="tabpanel">
+                        <div class="data-tab-content-panel">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <input type="submit" form ="view-igv" value="Launch IGV" class="btn btn-primary pull-right" style="display: none;"/>
+                                    <h4>Selected BAM Files</h4>
+                                    <p><i>Note: Files viewed in IGV must all be for the same build.</i></p>
+                                </div>
+                                <div class="panel-body file-list">
+                                    <div id="file-max-alert-igv" class="alert alert-warning alert-dismissable">
+                                        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                        The maximum number of files which can be viewed in IGV simultaneously is <span class="file-limit-igv">#</span>.
+                                    </div>
+                                    <p><span id="selected-count-igv">0</span> file(s) selected (<span id="selected-file-limit-igv">limit <span class="file-limit-igv file-limit">#</span></span>)</p>
+                                    <div id="tokenfield-holder-igv">
+                                        <!-- "IGV selected files tokenizer" -->
+                                        <textarea name="selected-files-igv" class="form-control tokenfield" id="selected-files-igv" placeholder="Select files"></textarea>
+                                        <form id="view-igv" method="POST" action="{% url 'igv' %}" target="_blank">
+                                            <input type="text" class="hidden_form_value" id="checked_list_input" name="checked_list" data-type="checked_list">
+                                            <input type="text" class="hidden_form_value" id="igv-build" name="build">
+                                            {% csrf_token %}
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="filelist-panel panel">
+
+            <div class="row">
+                <div class="filelist-panel panel">
                 <div id="file-list-warning" class="alert alert-warning alert-dismissable" style="display: none;">
                     <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                     The maximum number of files which can be downloaded in a list is <span class="file-list-limit">#</span>. Your selections currently total
@@ -97,36 +147,31 @@
                     <h4>File Listing</h4>
                 </div>
                 <div class="panel-body">
-                    <form id="view-igv" method="POST" action="{% url 'igv' %}">
-                        <input type="text" class="hidden_form_value" id="checked_list_input" name="checked_list" data-type="checked_list">
-                        <input type="text" class="hidden_form_value" id="igv-build" name="build">
-                        {% csrf_token %}
-                        <p class="file-page-count">Showing 20 files. Page: <span class="page-num">1</span> of <span class="file-count">unknown</span> pages.</p>
-                        <p class="no-file-page-count" style="display: none;">Showing 0 files.</p>
-                        <div>
-                            <a role="button" id="prev-page" class="btn btn-primary disabled">Previous Page</a>
-                            <a role="button" id="next-page" class="btn btn-primary">Next Page</a>
-                            <span class="spinner"><i class="fa fa-spin fa-spinner hidden"></i></span>
-                        </div>
+                    <p class="file-page-count">Showing 20 files. Page: <span class="page-num">1</span> of <span class="file-count">unknown</span> pages.</p>
+                    <p class="no-file-page-count" style="display: none;">Showing 0 files.</p>
+                    <div>
+                        <a role="button" id="prev-page" class="btn btn-primary disabled">Previous Page</a>
+                        <a role="button" id="next-page" class="btn btn-primary">Next Page</a>
+                        <span class="spinner"><i class="fa fa-spin fa-spinner hidden"></i></span>
+                    </div>
 
-                        <table class="table table-striped file-list-table" aria-label="File Listing Table">
-                            <thead>
-                            <tr>
-                                <th class="col-program">Program</th>
-                                <th class="col-barcode">Sample Barcode</th>
-                                <th class="col-exp-strategy">Exp. Strategy</th>
-                                <th class="col-platform">Platform</th>
-                                <th class="col-datacat">Data Category</th>
-                                <th class="col-datatype">Data Type</th>
-                                <th class="col-igv">IGV</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            </tbody>
-                        </table>
-
-                    </form>
+                    <table class="table table-striped file-list-table" aria-label="File Listing Table">
+                        <thead>
+                        <tr>
+                            <th class="col-program">Program</th>
+                            <th class="col-barcode">Sample Barcode</th>
+                            <th class="col-exp-strategy">Exp. Strategy</th>
+                            <th class="col-platform">Platform</th>
+                            <th class="col-datacat">Data Category</th>
+                            <th class="col-datatype">Data Type</th>
+                            <th class="col-viewer">Viewer</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
                 </div>
+            </div>
             </div>
         </div>
     </div>
@@ -158,7 +203,7 @@
     var total_files = {{ total_files }};
     var download_url = '{{ download_url }}';
     var ajax_update_url = '{% url 'cohort_filelist_ajax' cohort.id %}';
-    var SEL_FILE_MAX = '{{  sel_file_max }}';
+    var SEL_IGV_FILE_MAX = '{{  sel_file_max }}';
     var FILE_LIST_MAX = '{{  file_list_max }}';
     </script>
 {% endblock %}

@@ -57,6 +57,7 @@ require([
     });
 
     $('#verify-sa').on('submit', function(e) {
+        $('#user_sa').val($('#user_sa').val().trim());
         $('#invalid-sa-error button.close').click();
         e.preventDefault();
         e.stopPropagation();

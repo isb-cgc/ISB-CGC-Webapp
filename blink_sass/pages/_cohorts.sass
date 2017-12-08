@@ -439,6 +439,16 @@
                 width: 90px
             td:last-child i
                 color: $isb-success
+    input
+        margin-left: 5px
+
+    .nav-tabs
+      li,li.active
+        a
+          text-transform: none
+
+    .token-label
+      max-width: none !important
 
 .parsets-tooltip
     background-color: rgba($tooltip-color, 0.8)
@@ -511,3 +521,11 @@
 span.code
     font-family: monospace
     font-weight: 600
+
+#camic
+    .camic-tabs
+        li:not(:last-child)
+            margin-bottom: 10px
+    iframe
+        min-height: 900px
+        margin-top: 10px

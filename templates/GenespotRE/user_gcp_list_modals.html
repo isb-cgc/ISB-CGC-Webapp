@@ -53,7 +53,7 @@
     </div>
 </div>
 
-{% for service_account in project.serviceaccount_set.all %}
+{% for service_account in project.active_service_accounts %}
 <!-- Delete Service Account Modal -->
 <div class="modal fade" id="delete-sa-modal-{{ service_account.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-sa-header" aria-hidden="true">
     <div class="modal-dialog">
