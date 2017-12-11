@@ -96,8 +96,8 @@ require([
         $('#camic-viewer input[type="submit"]').prop('disabled', (selCamFiles.count() <= 0));
 
         // Update the display counter
-        $('#selected-count-igv').text(selIgvFiles.count());
-        $('#selected-count-camic').text(selCamFiles.count());
+        $('.selected-count-igv').text(selIgvFiles.count());
+        $('.selected-count-camic').text(selCamFiles.count());
 
         // Update the limit display
         $('#selected-file-limit-igv').css('color', (selIgvFiles.count() < SEL_IGV_FILE_MAX ? "#000000" : "#BD12CC"));
