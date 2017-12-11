@@ -31,13 +31,13 @@
 {% block page_name %}camic{% endblock %}
 
 {% block page_header %}
-    <div class="container">
-        <h1 class="page-header pull-left"><a href="" target="_blank">caMicroscope</a></h1>
-        <div class="pull-right">
-            <a href="" target="_blank">
+    <div class="container camic-header-container">
+        <div class="pull-left logo">
+            <a href="http://imaging.cci.emory.edu/wiki/display/CAMIC/Home" target="_blank">
                 <img class="header-camic-logo" alt="caMicroscope Logo" src="{% static 'img/camic_logo.png' %}" />
             </a>
         </div>
+        <h1 class="page-header pull-left"><a href="http://imaging.cci.emory.edu/wiki/display/CAMIC/Home" target="_blank">caMicroscope</a></h1>
     </div>
 {% endblock %}
 
@@ -67,7 +67,7 @@
                             </div>
                             <div class="panel-body">
                                 <div class="iframe-container">
-                                    <iframe id="camic-iframe" width="100%" src="http://{{ camic_ip }}:{{ camic_port }}/camicroscope/osdCamicroscope.php?slideBarcode={{ barcode.0 }}"></iframe>
+                                    <iframe id="camic-iframe" width="100%" src="https://{{ camic_viewer }}/camicroscope/osdCamicroscope.php?slideBarcode={{ barcodes.0 }}"></iframe>
                                 </div>
                             </div>
                         </div>

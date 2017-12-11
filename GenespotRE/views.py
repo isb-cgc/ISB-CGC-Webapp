@@ -337,7 +337,7 @@ def get_image_data(request, slide_barcode):
                     'Height': query_results[0]['f'][2]['v'],
                     'MPP-X': query_results[0]['f'][3]['v'],
                     'MPP-Y': query_results[0]['f'][4]['v'],
-                    'FileLocation': re.sub(r'isb-cgc-open/.*_image', 'images-west', query_results[0]['f'][5]['v']),
+                    'FileLocation': re.sub(r'isb-cgc-open/.*_image', 'imaging-west', query_results[0]['f'][5]['v']),
                     'TissueID': query_results[0]['f'][0]['v']
                 }
             else:
@@ -373,11 +373,8 @@ def camic(request, slide_barcode=None):
 
     context = {
         'barcodes': images,
-        'camic_ip': settings.CAMIC_VIEWER_IP,
-        'camic_port': settings.CAMIC_VIEWER_PORT
+        'camic_viewer': settings.CAMIC_VIEWER
     }
-
-    logger.info(str(context))
 
     return render(request, 'GenespotRE/camic.html', context)
 
