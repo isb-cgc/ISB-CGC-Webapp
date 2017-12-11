@@ -62,7 +62,7 @@
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h4 id="delete-sa-header" class="modal-title">Unregister this Service Account?</h4>
             </div>
-            <form id="delete-sa" method="POST" action="{% url 'delete_sa' user.id service_account.id %}">
+            <form id="delete-sa" method="POST" action="{% url 'delete_sa' user.id service_account.service_account %}">
                 <div class="modal-body">
                     {% csrf_token %}
                     <p>
