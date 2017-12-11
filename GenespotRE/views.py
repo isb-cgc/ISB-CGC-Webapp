@@ -366,8 +366,7 @@ def camic(request, slide_barcode=None):
 
     context = {
         'barcodes': images,
-        'camic_ip': settings.CAMIC_VIEWER_IP,
-        'camic_port': settings.CAMIC_VIEWER_PORT
+        'camic_viewer': settings.CAMIC_VIEWER
     }
 
     return render(request, 'GenespotRE/camic.html', context)
