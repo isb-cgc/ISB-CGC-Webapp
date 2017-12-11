@@ -48,4 +48,13 @@ require([
         $('#camic-iframe').attr('src',$('#camic-iframe').attr('src').replace(/=.*/,'='+barcode));
     });
 
+    $('.barcode-link').on('click',function(){
+        $('.load-spinner').show();
+    });
+
+    $('#camic-iframe').on('load',function(){
+        $('.load-spinner').hide();
+    });
+
+    $('.load-spinner').show();
 });
