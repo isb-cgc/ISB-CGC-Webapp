@@ -52,6 +52,7 @@ require([
             $('#datasets-select-div').show();
             $('#register-sa input[name="select-datasets"][value="remove"]').remove();
         } else {
+            $('input[name="datasets"]').attr('checked',false);
             $('#datasets-select-div').hide();
         }
     });
