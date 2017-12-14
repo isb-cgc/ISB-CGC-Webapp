@@ -72,8 +72,8 @@
             <div class="row cgc-user-data-type-tabs">
                 <div class="panel panel-default">
                     <ul class="nav nav-tabs nav-tabs-data" role="tablist">
-                        <li role="presentation" class="active"><a href="#igv-viewer" role="tab" data-toggle="tab" title="View Selected Files in IGV">IGV</a></li>
-                        <li role="presentation"><a href="#camic-viewer" role="tab" data-toggle="tab" title="View Selected Files in caMicroscope">caMicroscope</a></li>
+                        <li role="presentation" class="active"><a href="#igv-viewer" role="tab" data-toggle="tab" title="View Selected Files in IGV">IGV (<span class="selected-count-igv">0</span>)</a></li>
+                        <li role="presentation"><a href="#camic-viewer" role="tab" data-toggle="tab" title="View Selected Files in caMicroscope">caMicroscope (<span class="selected-count-camic">0</span>)</a></li>
                     </ul>
                 </div>
             </div>
@@ -92,7 +92,7 @@
                                         <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                                         The maximum number of images which can be queued for caMicroscope simultaneously is <span class="file-limit-camic">#</span>.
                                     </div>
-                                    <p><span id="selected-count-camic">0</span> file(s) selected (<span id="selected-file-limit-camic">limit <span class="file-limit-camic file-limit">#</span></span>)</p>
+                                    <p><span class="selected-count-camic">0</span> file(s) selected (<span id="selected-file-limit-camic">limit <span class="file-limit-camic file-limit">#</span></span>)</p>
                                     <div id="tokenfield-holder-cam">
                                         <!-- "caM selected file tokenizer" -->
                                         <textarea name="selected-files-cam" class="form-control tokenfield" id="selected-files-cam" placeholder="Select files"></textarea>
@@ -118,7 +118,7 @@
                                         <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                                         The maximum number of files which can be viewed in IGV simultaneously is <span class="file-limit-igv">#</span>.
                                     </div>
-                                    <p><span id="selected-count-igv">0</span> file(s) selected (<span id="selected-file-limit-igv">limit <span class="file-limit-igv file-limit">#</span></span>)</p>
+                                    <p><span class="selected-count-igv">0</span> file(s) selected (<span id="selected-file-limit-igv">limit <span class="file-limit-igv file-limit">#</span></span>)</p>
                                     <div id="tokenfield-holder-igv">
                                         <!-- "IGV selected files tokenizer" -->
                                         <textarea name="selected-files-igv" class="form-control tokenfield" id="selected-files-igv" placeholder="Select files"></textarea>

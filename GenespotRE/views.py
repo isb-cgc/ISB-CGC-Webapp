@@ -337,7 +337,7 @@ def get_image_data(request, slide_barcode):
                     'Height': query_results[0]['f'][2]['v'],
                     'MPP-X': query_results[0]['f'][3]['v'],
                     'MPP-Y': query_results[0]['f'][4]['v'],
-                    'FileLocation': re.sub(r'isb-cgc-open/.*_image', 'images-west', query_results[0]['f'][5]['v']),
+                    'FileLocation': re.sub(r'isb-cgc-open/.*_image', 'imaging-west', query_results[0]['f'][5]['v']),
                     'TissueID': query_results[0]['f'][0]['v']
                 }
             else:
@@ -360,10 +360,13 @@ def get_image_data(request, slide_barcode):
 def camic(request, slide_barcode=None):
     if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
     images = []
+    context = {}
     images_obj = None
+    template = 'GenespotRE/camic.html'
 
     if slide_barcode:
         images = [slide_barcode]
+        template = 'GenespotRE/camic_single.html'
 
     if request.POST.get('checked_list', None):
         images_obj = json.loads(request.POST.get('checked_list'))
@@ -371,15 +374,10 @@ def camic(request, slide_barcode=None):
     if images_obj and 'tissue_slide_image' in images_obj:
         images.extend(images_obj['tissue_slide_image'].keys())
 
-    context = {
-        'barcodes': images,
-        'camic_ip': settings.CAMIC_VIEWER_IP,
-        'camic_port': settings.CAMIC_VIEWER_PORT
-    }
+    context['barcodes'] = images
+    context['camic_viewer'] = settings.CAMIC_VIEWER
 
-    logger.info(str(context))
-
-    return render(request, 'GenespotRE/camic.html', context)
+    return render(request, template, context)
 
 
 @login_required

@@ -534,8 +534,7 @@ MAX_FILES_IGV = 5
 #################################
 # caMicroscope Viewer settings
 #################################
-CAMIC_VIEWER_IP = os.environ.get('CAMIC_VIEWER_IP', None)
-CAMIC_VIEWER_PORT = int(os.environ.get('CAMIC_VIEWER_PORT', '0'))
+CAMIC_VIEWER = os.environ.get('CAMIC_VIEWER', None)
 
 ##############################################################
 #   MailGun Email Settings
