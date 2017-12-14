@@ -353,6 +353,7 @@ def get_image_data(request, slide_barcode):
 def camic(request, slide_barcode=None):
     if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
     images = []
+    context = {}
     images_obj = None
     template = 'GenespotRE/camic.html'
 
@@ -366,10 +367,8 @@ def camic(request, slide_barcode=None):
     if images_obj and 'tissue_slide_image' in images_obj:
         images.extend(images_obj['tissue_slide_image'].keys())
 
-    context = {
-        'barcodes': images,
-        'camic_viewer': settings.CAMIC_VIEWER
-    }
+    context['barcodes'] = images
+    context['camic_viewer'] = settings.CAMIC_VIEWER
 
     return render(request, template, context)
 
