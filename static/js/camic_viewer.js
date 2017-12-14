@@ -56,5 +56,11 @@ require([
         $('.load-spinner').hide();
     });
 
+    // Because we're operating a bit outside the Bootstrap framework on the camic-single template,
+    // we need to force the loading spinner to size properly
+    if($('#camic-single').length > 0) {
+        $('.load-spinner').width($('#camic-iframe').css('width'));
+    }
+
     $('.load-spinner').show();
 });
