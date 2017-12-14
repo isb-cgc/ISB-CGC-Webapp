@@ -354,9 +354,11 @@ def camic(request, slide_barcode=None):
     if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
     images = []
     images_obj = None
+    template = 'GenespotRE/camic.html'
 
     if slide_barcode:
         images = [slide_barcode]
+        template = 'GenespotRE/camic_single.html'
 
     if request.POST.get('checked_list', None):
         images_obj = json.loads(request.POST.get('checked_list'))
@@ -369,7 +371,7 @@ def camic(request, slide_barcode=None):
         'camic_viewer': settings.CAMIC_VIEWER
     }
 
-    return render(request, 'GenespotRE/camic.html', context)
+    return render(request, template, context)
 
 
 @login_required
