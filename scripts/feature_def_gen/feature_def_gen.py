@@ -107,6 +107,9 @@ def print_query(data_type, config_json, chromosome_array):
     print(query)
 
 
+# project_id: project number of the BQ data project (typically isb-cgc's project number)
+# data_type: 4-letter data type code, eg. GNAB
+
 @click.command()
 @click.argument('project_id', type=click.INT)
 @click.argument('data_type', type=str)
