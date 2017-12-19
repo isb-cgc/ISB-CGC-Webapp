@@ -21,7 +21,7 @@ import logging
 from bq_data_access.data_types.definitions import PlottableDataType
 from scripts.feature_def_gen.feature_def_utils import DataSetConfig
 
-logger = logging
+logger = logging.getLogger('main_logger')
 
 GEXP_FEATURE_TYPE = PlottableDataType.GEXP
 
