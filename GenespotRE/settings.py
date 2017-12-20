@@ -42,7 +42,7 @@ DEBUG_TOOLBAR           = (os.environ.get('DEBUG_TOOLBAR', 'False') == 'True')
 
 print >> sys.stdout, "[STATUS] DEBUG mode is "+str(DEBUG)
 
-# Theoretically Nginx allows us to use '*' for ALLOWED_HOSTS but...
+# Testing health checks problem
 ALLOWED_HOSTS = list(set(os.environ.get('ALLOWED_HOST', 'localhost').split(',') + ['localhost', '127.0.0.1', '[::1]', gethostname(), gethostbyname(gethostname()),]))
 #ALLOWED_HOSTS = ['*']
 
@@ -60,8 +60,8 @@ CRON_MODULE             = os.environ.get('CRON_MODULE')
 # Log Names
 SERVICE_ACCOUNT_LOG_NAME = os.environ.get('SERVICE_ACCOUNT_LOG_NAME', 'local_dev_logging')
 
-BASE_URL                = os.environ.get('BASE_URL', 'https://mvm-dot-isb-cgc.appspot.com')
-BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://mvm-api-dot-isb-cgc.appspot.com')
+BASE_URL                = os.environ.get('BASE_URL', 'https://isb-cgc-test.appspot.com')
+BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://api-dot-isb-cgc-test.appspot.com')
 
 # Compute services - Should not be necessary in webapp
 PAIRWISE_SERVICE_URL    = os.environ.get('PAIRWISE_SERVICE_URL', None)
@@ -96,9 +96,9 @@ IS_DEV = (os.environ.get('IS_DEV', 'False') == 'True')
 IS_APP_ENGINE_FLEX = os.getenv('GAE_INSTANCE', '').startswith(APP_ENGINE_FLEX)
 IS_APP_ENGINE = os.getenv('SERVER_SOFTWARE', '').startswith(APP_ENGINE)
 
-# If this is a GAE-Flex deployment, we don't need to specify SSL; the proxy will take
+# If this is a GAE deployment, we don't need to specify SSL; the proxy will take
 # care of that for us
-if os.environ.has_key('DB_SSL_CERT') and not IS_APP_ENGINE_FLEX:
+if os.environ.has_key('DB_SSL_CERT') and not (IS_APP_ENGINE_FLEX or IS_APP_ENGINE):
     DATABASES['default']['OPTIONS'] = {
         'ssl': {
             'ca': os.environ.get('DB_SSL_CA'),
@@ -111,7 +111,7 @@ if os.environ.has_key('DB_SSL_CERT') and not IS_APP_ENGINE_FLEX:
 SITE_ID = 3
 
 if IS_APP_ENGINE_FLEX or IS_APP_ENGINE:
-    print >> sys.stdout, "[STATUS] AppEngine Flex detected."
+    print >> sys.stdout, "[STATUS] AppEngine detected."
     SITE_ID = 4
 
 # Default to no NIH Auth unless we are not on a local dev environment *and* are in AppEngine-Flex
