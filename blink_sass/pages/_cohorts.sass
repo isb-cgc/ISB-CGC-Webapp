@@ -439,6 +439,16 @@
                 width: 90px
             td:last-child i
                 color: $isb-success
+    input
+        margin-left: 5px
+
+    .nav-tabs
+        li,li.active
+            a
+                text-transform: none
+
+    .token-label
+        max-width: none !important
 
 .parsets-tooltip
     background-color: rgba($tooltip-color, 0.8)
@@ -511,3 +521,41 @@
 span.code
     font-family: monospace
     font-weight: 600
+
+#camic, #camic-single
+    .camic-tabs
+        li:not(:last-child)
+            margin-bottom: 10px
+    iframe
+        min-height: 900px
+        margin-top: 10px
+
+    .logo
+        margin-right: 10px
+
+    .camic-header-container
+        background-color: #2e66bc
+        a
+            color: white
+
+    .load-spinner
+        position: absolute
+        width: 100%
+        height: 900px
+        margin-top: 25px
+        background: rgb(130, 158, 188)
+        z-index: 10
+        i
+            position: absolute
+            left: 45%
+            top: 40%
+            margin: auto
+            font-size: 100px
+
+#camic-single
+    .container
+        width: 90%
+    >.container
+        padding: 0px
+    >.container>.row
+        margin: 0px 15px 0px 15px

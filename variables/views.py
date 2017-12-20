@@ -33,7 +33,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
 from django.conf import settings
 from django.contrib.auth.models import User as Django_User
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 
 from cohorts.metadata_helpers import fetch_program_attr
 from GenespotRE.templatetags.custom_tags import get_readable_name
@@ -134,6 +134,58 @@ def variable_fav_edit(request, variable_fav_id=0):
 
 
 @login_required
+def get_user_vars(request):
+
+    try:
+        # User programs
+        ownedPrograms = request.user.program_set.filter(active=True)
+        sharedPrograms = Program.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
+        programs = ownedPrograms | sharedPrograms
+        # user_programs is not being used. Can a shared program actually show up twice?
+        #user_programs = programs.distinct()
+
+
+        # This detailed construction of user data variables WAS happening in the template. Now it is here:
+
+        user_vars = {}
+        if programs:
+            for program in programs:
+                for project in program.project_set.all():
+                    if project.active:
+                        per_proj = {
+                            'progName' : program.name,
+                            'projName' : project.name,
+                            'progID' : program.id,
+                            'projID' : project.id
+                        }
+                        user_vars[project.id] = per_proj
+                        per_proj_vars = []
+                        per_proj['vars'] = per_proj_vars
+
+                        for variable in project.user_feature_definitions_set.all():
+                            if variable.shared_map_id:
+                                value = variable.shared_map_id
+                            else:
+                                value = 'v2:USER:{0}:{1}'.format(str(project.id), str(variable.id))
+                            per_proj_var = {
+                                'var_type' : 'N' if variable.is_numeric else 'C',
+                                'value' : value,
+                                'data_code' : value,
+                                'data_text_label' : '{0}: {1}'.format(project.name, get_readable_name(variable.feature_name)),
+                                'data_feature_id' : variable.id,
+                                'data_feature_name' : get_readable_name(variable.feature_name)
+                            }
+                            per_proj_vars.append(per_proj_var)
+    except Exception as e:
+        logger.error("[ERROR] While trying to load user variables for variable selection page:")
+        logger.exception(e)
+        messages(request,"There was an error while trying to load your user variables - please contact the administrator.")
+        return redirect(reverse('variables'))
+
+    return render(request, 'variables/variable_edit_user_data.html', {'user_vars': user_vars})
+
+
+@login_required
 def initialize_variable_selection_page(request,
                                        variable_list_id=0,
                                        workbook_id=0,
@@ -155,17 +207,17 @@ def initialize_variable_selection_page(request,
                 context['worksheet'] = worksheet_model
             except ObjectDoesNotExist:
                 messages.error(request, 'The workbook you were referencing does not exist.')
-                return redirect('variables')
+                return redirect(reverse('variables'))
 
         if variable_list_id != 0:
             try:
                 existing_variable_list = request.user.variablefavorite_set.get(id=variable_list_id)
                 if existing_variable_list.version != 'v2':
                     messages.warning(request, 'Version 1 Variable lists cannot be edited due to changes in available variables.')
-                    return redirect('variables')
+                    return redirect(reverse('variables'))
             except ObjectDoesNotExist:
                 messages.error(request, 'The variable favorite you were looking for does not exist.')
-                return redirect('variables')
+                return redirect(reverse('variables'))
 
         data_attr = [
             'DNA_sequencing',
@@ -201,13 +253,6 @@ def initialize_variable_selection_page(request,
         isb_user = Django_User.objects.filter(username='isb').first()
         public_programs = Program.objects.filter(active=True, is_public=True, owner=isb_user)
 
-        # User programs
-        ownedPrograms = request.user.program_set.all().filter(active=True)
-        sharedPrograms = Program.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
-        programs = ownedPrograms | sharedPrograms
-        # user_programs is not being used. Can a shared program actually show up twice?
-        #user_programs = programs.distinct()
-
         # User favorites
         favorite_list = VariableFavorite.get_list(user=request.user, version='v2')
         for fav in favorite_list:
@@ -232,37 +277,7 @@ def initialize_variable_selection_page(request,
         # users can select from their saved variable favorites
         variable_favorites = VariableFavorite.get_list(request.user)
 
-        # This detailed construction of user data variables WAS happening in the template. Now it is here:
-
-        user_vars = {}
-        if programs:
-            for program in programs:
-                for project in program.project_set.all():
-                    if project.active:
-                        per_proj = {
-                            'progName' : program.name,
-                            'projName' : project.name,
-                            'progID' : program.id,
-                            'projID' : project.id
-                        }
-                        user_vars[project.id] = per_proj
-                        per_proj_vars = []
-                        per_proj['vars'] = per_proj_vars
-
-                        for variable in project.user_feature_definitions_set.all():
-                            if variable.shared_map_id:
-                                value = variable.shared_map_id
-                            else:
-                                value = 'v2:USER:{0}:{1}'.format(str(project.id), str(variable.id))
-                            per_proj_var = {
-                                'var_type' : 'N' if variable.is_numeric else 'C',
-                                'value' : value,
-                                'data_code' : value,
-                                'data_text_label' : '{0}: {1}'.format(project.name, get_readable_name(variable.feature_name)),
-                                'data_feature_id' : variable.id,
-                                'data_feature_name' : get_readable_name(variable.feature_name)
-                            }
-                            per_proj_vars.append(per_proj_var)
+        has_user_data = (request.user.program_set.filter(active=True).count() > 0)
 
         context = {
             'favorite_list'         : favorite_list,
@@ -278,13 +293,12 @@ def initialize_variable_selection_page(request,
             'existing_variable_list'    : existing_variable_list,
             'new_workbook'              : new_workbook,
             'program_attrs'         : program_attrs,
-            'user_vars'             : user_vars
+            'has_user_data'         : has_user_data
         }
     except Exception as e:
         logger.error("[ERROR] While attempting to initialize variable selection:")
         logger.exception(e)
-        messages.error(request,"There was an error while attempting to load the variable selection page - please contact the administrator.")
-        return redirect(reverse('variables'))
+        return JsonResponse({'msg': "There was an error while attempting to load the variable selection page - please contact the administrator."}, status=500)
 
     return render(request, template, context)
 

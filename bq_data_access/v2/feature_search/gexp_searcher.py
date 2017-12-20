@@ -22,7 +22,7 @@ from _mysql_exceptions import MySQLError
 from copy import deepcopy
 from collections import defaultdict
 
-import logging as logger
+import logging
 
 from cohorts.metadata_helpers import get_sql_connection
 from bq_data_access.v2.feature_search.common import FOUND_FEATURE_LIMIT
@@ -30,6 +30,7 @@ from bq_data_access.v2.feature_search.common import BackendException, InvalidFie
 
 from bq_data_access.v2.gexp_data import GEXP_FEATURE_TYPE
 
+logger = logging.getLogger('main_logger')
 
 class GEXPSearcher(object):
     feature_search_valid_fields = set(['gene_name', 'genomic_build'])

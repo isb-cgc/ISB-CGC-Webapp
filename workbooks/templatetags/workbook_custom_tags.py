@@ -11,7 +11,7 @@ def public_workbook_count():
 def user_workbook_count(context):
     user = context['user']
 
-    userWorkbooks = user.workbook_set.all().filter(active=True)
+    userWorkbooks = user.workbook_set.filter(active=True)
     sharedWorkbooks = Workbook.objects.filter(shared__matched_user=user, shared__active=True, active=True)
     workbooks = userWorkbooks | sharedWorkbooks
 

@@ -58,7 +58,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                            {% for service_account in gcp.serviceaccount_set.all %}
+                            {% for service_account in gcp.active_service_accounts %}
                                 {% with auth_datasets=service_account.get_auth_datasets %}
                                     <tr>
                                         <td>{{ service_account.service_account }}</td>

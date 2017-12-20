@@ -63,7 +63,7 @@ def workbook_list(request):
 def workbook_samples(request):
     template = 'workbooks/workbook_samples.html'
     return render(request, template, {
-        'workbooks': Workbook.objects.all().filter(is_public=True, active=True)
+        'workbooks': Workbook.objects.filter(is_public=True, active=True)
     })
 
 
@@ -108,7 +108,7 @@ def workbook_create_with_program(request):
     worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
 
     #add every variable within the model
-    for study in program_model.study_set.all().filter(active=True) :
+    for study in program_model.study_set.filter(active=True) :
         for var in study.user_feature_definitions_set.all():
             work_var = Worksheet_variable.objects.create(worksheet_id = worksheet_model.id,
                                               name         = var.feature_name,
@@ -259,9 +259,9 @@ def workbook(request, workbook_id=0):
         elif request.method == "GET":
             if workbook_id:
                 try :
-                    ownedWorkbooks = request.user.workbook_set.all().filter(active=True)
+                    ownedWorkbooks = request.user.workbook_set.filter(active=True)
                     sharedWorkbooks = Workbook.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
-                    publicWorkbooks = Workbook.objects.all().filter(is_public=True,active=True)
+                    publicWorkbooks = Workbook.objects.filter(is_public=True,active=True)
 
                     workbooks = ownedWorkbooks | sharedWorkbooks | publicWorkbooks
                     workbooks = workbooks.distinct()

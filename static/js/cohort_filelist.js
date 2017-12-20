@@ -47,7 +47,7 @@ require([
     // File selection storage object
     // The data-type/name input checkbox attritbutes in the form below must be reflected here in this map
     // to properly convey the checked list to IGV
-    var selFiles = {
+    var selIgvFiles = {
         gcs_bam: {},
         toTokens: function() {
             var tokens = [];
@@ -67,24 +67,60 @@ require([
         }
     };
 
+    var selCamFiles = {
+        tissue_slide_image: {},
+        toTokens: function() {
+            var tokens = [];
+            for(var i in this.tissue_slide_image) {
+                tokens.push({
+                    label: this.tissue_slide_image[i]['label'],
+                    value: i,
+                    dataType: "tissue_slide_image"
+                });
+            }
+            return tokens;
+        },
+        count: function() {
+            return (Object.keys(this.tissue_slide_image).length);
+        }
+    };
+
     // Set of display controls to update when we check or uncheck
     var update_on_selex_change = function() {
         // Update the hidden form control
-        $('#checked_list_input').attr('value',JSON.stringify(selFiles));
+        $('#checked_list_input').attr('value',JSON.stringify(selIgvFiles));
+        $('#checked_list_input_camic').attr('value',JSON.stringify(selCamFiles));
 
-        // Update the submit button
-        $('input[type="submit"]').prop('disabled', (selFiles.count() <= 0));
+        // Update the submit buttons
+        $('#igv-viewer input[type="submit"]').prop('disabled', (selIgvFiles.count() <= 0));
+        $('#camic-viewer input[type="submit"]').prop('disabled', (selCamFiles.count() <= 0));
 
         // Update the display counter
-        $('#selected-count').text(selFiles.count());
+        $('.selected-count-igv').text(selIgvFiles.count());
+        $('.selected-count-camic').text(selCamFiles.count());
 
         // Update the limit display
-        $('#selected-file-limit').css('color', (selFiles.count() < SEL_FILE_MAX ? "#000000" : "#BD12CC"));
+        $('#selected-file-limit-igv').css('color', (selIgvFiles.count() < SEL_IGV_FILE_MAX ? "#000000" : "#BD12CC"));
+        $('#selected-file-limit-camic').css('color', (selCamFiles.count() < SEL_IGV_FILE_MAX ? "#000000" : "#BD12CC"));
 
         // If we've cleared out our tokenfield, re-display the placeholder
-        selFiles.count() <= 0 && $('#selected-files-tokenfield').show();
+        selIgvFiles.count() <= 0 && $('#selected-files-igv-tokenfield').show();
+        selCamFiles.count() <= 0 && $('#selected-files-camic-tokenfield').show();
 
-        selFiles.count() >= 5 ? $('#file-max-alert').show() : $('#file-max-alert').hide();
+        if(selIgvFiles.count() >= SEL_IGV_FILE_MAX) {
+            $('#file-max-alert-igv').show();
+            $('.filelist-panel input.igv[type="checkbox"]:not(:checked)').attr('disabled',true);
+        } else {
+            $('#file-max-alert-igv').hide();
+            $('.filelist-panel input.igv[type="checkbox"]').attr('disabled',false);
+        }
+        if(selCamFiles.count() >= SEL_IGV_FILE_MAX) {
+            $('#file-max-alert-cam').show();
+            $('.filelist-panel input.cam[type="checkbox"]:not(:checked)').attr('disabled',true);
+        } else {
+            $('#file-max-alert-cam').hide();
+            $('.filelist-panel input.cam[type="checkbox"]').attr('disabled',false);
+        }
     };
 
     var update_on_platform_filter_change = function(e) {
@@ -108,18 +144,20 @@ require([
         }
     };
 
-    $('.file-limit').text(SEL_FILE_MAX);
+    $('.file-limit-igv').text(SEL_IGV_FILE_MAX);
+    $('.file-limit-camic').text(SEL_IGV_FILE_MAX);
 
     // Our file list tokenizer
-    var selFileField = $('#selected-files');
+    var selIgvFileField = $('#selected-files-igv');
+    var selCamFilesField = $('#selected-files-cam');
 
-    // Build the file tokenizer
+    // Build the file tokenizer for IGV
     // Bootstrap tokenfield requires 'value' as the datem attribute field
-    selFileField.tokenfield({
+    selIgvFileField.tokenfield({
         delimiter : " ",
         minLength: 2,
-        limit: SEL_FILE_MAX,
-        tokens: selFiles.toTokens()
+        limit: SEL_IGV_FILE_MAX,
+        tokens: selIgvFiles.toTokens()
     // No creating
     }).on('tokenfield:edittoken',function(e){
         e.preventDefault();
@@ -131,13 +169,38 @@ require([
         var thisCheck = $('.filelist-panel input[value="'+e.attrs.value+'"');
         thisCheck.prop('checked',false);
 
-        delete selFiles[e.attrs.dataType][e.attrs.value];
+        delete selIgvFiles[e.attrs.dataType][e.attrs.value];
 
         update_on_selex_change();
 
-        if(selFiles.count() <= SEL_FILE_MAX) {
+        if(selIgvFiles.count() <= SEL_IGV_FILE_MAX) {
             $('.filelist-panel input[type="checkbox"]').attr('disabled',false);
         }
+    });
+
+    // Build the file tokenizer for caMic
+    // Bootstrap tokenfield requires 'value' as the datem attribute field
+    selCamFilesField.tokenfield({
+        delimiter : " ",
+        minLength: 2,
+        limit: SEL_IGV_FILE_MAX,
+        tokens: selCamFiles.toTokens()
+    // No creating
+    }).on('tokenfield:edittoken',function(e){
+        e.preventDefault();
+        return false;
+    }).on('tokenfield:removedtoken',function(e){
+
+        // Uncheck the input checkbox - note this will not fire the event, which
+        // is bound to form click
+        var thisCheck = $('.filelist-panel input[value="'+e.attrs.value+'"');
+        thisCheck.prop('checked',false);
+
+        delete selCamFiles[e.attrs.dataType][e.attrs.value];
+
+        update_on_selex_change();
+
+        $('.filelist-panel input.cam[type="checkbox"]').attr('disabled',false);
     });
 
     // Prevent direct user input on the tokenfield
@@ -253,18 +316,25 @@ require([
                         disable = false;
                     }
 
-                    if (files[i]['cloudstorage_location'] && files[i]['cloudstorage_location'].split('.').pop() == 'bam') {
-                        val = files[i]['cloudstorage_location'] + ';' + files[i]['cloudstorage_location'].substring(0,files[i]['cloudstorage_location'].lastIndexOf("/")+1)+files[i]['index_name']+',' + files[i]['sample'];
-                        dataTypeName = "gcs_bam";
-                        label = "Cloud Storage";
-                        checkbox_inputs += '<label><input type="checkbox" token-label="'+tokenLabel+'" program="'+files[i]['program']+'" name="'+dataTypeName+'" data-type="'+dataTypeName+'" value="'+val+'"';
+                    if (files[i]['cloudstorage_location'] && ((files[i]['cloudstorage_location'].split('.').pop() == 'bam') || (files[i]['datatype'] == 'Tissue slide image') || (files[i]['datatype'] == 'Diagnostic image'))) {
+                        if(files[i]['cloudstorage_location'].split('.').pop() == 'bam') {
+                            val = files[i]['cloudstorage_location'] + ';' + files[i]['cloudstorage_location'].substring(0, files[i]['cloudstorage_location'].lastIndexOf("/") + 1) + files[i]['index_name'] + ',' + files[i]['sample'];
+                            dataTypeName = "gcs_bam";
+                            label = "IGV";
+                            checkbox_inputs += '<label><input type="checkbox" token-label="' + tokenLabel + '" program="' + files[i]['program'] + '" name="' + dataTypeName + '" data-type="' + dataTypeName + '" value="' + val + '"';
+                        } else {
+                            val = files[i]['cloudstorage_location'].split('/').pop().split(/\./).shift();
+                            dataTypeName = "tissue_slide_image";
+                            label = "caMicro";
+                            checkbox_inputs += '<label><input class="cam" type="checkbox" name="' + dataTypeName + '" data-type="' + dataTypeName + '" value="' + val + '"';
+                        }
                         if (disable) {
                             checkbox_inputs += ' disabled="disabled"';
                         }
                         checkbox_inputs += '> '+label+'</label>';
                     }
 
-                    files[i]['igv_viewer'] = checkbox_inputs;
+                    files[i]['file_viewer'] = checkbox_inputs;
 
                     $('.filelist-panel table tbody').append(
                         '<tr>' +
@@ -274,22 +344,22 @@ require([
                         '<td>' + happy_name(files[i]['platform']) + '</td>' +
                         '<td>' + files[i]['datacat'] + '</td>' +
                         '<td>' + files[i]['datatype'] + '</td>' +
-                        '<td>' + files[i]['igv_viewer'] + '</td>' +
+                        '<td>' + files[i]['file_viewer'] + '</td>' +
                         '</tr>'
                     );
 
                     // Remember any previous checks
                     var thisCheck = $('.filelist-panel input[value="'+val+'"');
-                    selFiles[thisCheck.attr('data-type')] && selFiles[thisCheck.attr('data-type')][thisCheck.attr('value')] && thisCheck.attr('checked', true);
+                    selIgvFiles[thisCheck.attr('data-type')] && selIgvFiles[thisCheck.attr('data-type')][thisCheck.attr('value')] && thisCheck.attr('checked', true);
                 }
 
                 // If we're at the max, disable all checkboxes which are not currently checked
-                selFiles.count() >= SEL_FILE_MAX && $('.filelist-panel input[type="checkbox"]:not(:checked)').attr('disabled',true);
+                selIgvFiles.count() >= SEL_IGV_FILE_MAX && $('.filelist-panel input[type="checkbox"]:not(:checked)').attr('disabled',true);
 
-                selFileField.tokenfield('setTokens',selFiles.toTokens());
+                selIgvFileField.tokenfield('setTokens',selIgvFiles.toTokens());
 
                 // If there are checkboxes for igv, show the "Launch IGV" button
-                if (selFiles.count() > 0 || $('.filelist-panel input[type="checkbox"]').length > 0) {
+                if (selIgvFiles.count() > 0 || $('.filelist-panel input[type="checkbox"]').length > 0) {
                     $('input[type="submit"]').show();
                 } else {
                     $('input[type="submit"]').hide();
@@ -300,27 +370,33 @@ require([
 
                     var self=$(this);
 
-                    if(self.is(':checked')) {
-                        selFiles[self.attr('data-type')][self.attr('value')] = {
-                            'label': self.attr('token-label') + ' ['+$('#build :selected').val()+']',
-                            'program': self.attr('program'),
-                            'build': $('#build :selected').val()
-                        };
-                        $('#selected-files-tokenfield').hide();
-                    } else {
-                        delete selFiles[self.attr('data-type')][self.attr('value')];
-                    }
+                    if(self.data('type') == 'tissue_slide_image') {
+                        if(self.is(':checked')) {
+                            selCamFiles[self.attr('data-type')][self.attr('value')] = {
+                                'label': self.attr('value')
+                            };
+                            $('#selected-files-cam-tokenfield').hide();
+                        } else {
+                            delete selCamFiles[self.attr('data-type')][self.attr('value')];
+                        }
 
-                    selFileField.tokenfield('setTokens',selFiles.toTokens());
+                        selCamFilesField.tokenfield('setTokens',selCamFiles.toTokens());
+                    } else {
+                        if(self.is(':checked')) {
+                            selIgvFiles[self.attr('data-type')][self.attr('value')] = {
+                                'label': self.attr('token-label') + ' ['+$('#build :selected').val()+']',
+                                'program': self.attr('program'),
+                                'build': $('#build :selected').val()
+                            };
+                            $('#selected-files-igv-tokenfield').hide();
+                        } else {
+                            delete selIgvFiles[self.attr('data-type')][self.attr('value')];
+                        }
+
+                        selIgvFileField.tokenfield('setTokens',selIgvFiles.toTokens());
+                    }
 
                     update_on_selex_change();
-
-                    if (self.is(':checked') && selFiles.count() >= SEL_FILE_MAX) {
-                        $('.filelist-panel input[type="checkbox"]:not(:checked)').attr('disabled',true);
-                    } else {
-                        $('.filelist-panel input[type="checkbox"]').attr('disabled',false);
-                    }
-
                 });
 
                 $('#prev-page').removeClass('disabled');
@@ -427,17 +503,17 @@ require([
     $('#build').on('change',function(){
         // Remove any selected files not from this build
         var new_build = $('#build :selected').val();
-        var selCount = Object.keys(selFiles.gcs_bam).length;
-        for(var i in selFiles.gcs_bam) {
-            if(selFiles.gcs_bam.hasOwnProperty(i)) {
-                if(selFiles.gcs_bam[i].build !== new_build){
-                    delete selFiles.gcs_bam[i];
+        var selCount = Object.keys(selIgvFiles.gcs_bam).length;
+        for(var i in selIgvFiles.gcs_bam) {
+            if(selIgvFiles.gcs_bam.hasOwnProperty(i)) {
+                if(selIgvFiles.gcs_bam[i].build !== new_build){
+                    delete selIgvFiles.gcs_bam[i];
                     $('.filelist-panel input[value="'+i+'"').prop('checked',false);
                 }
             }
         }
-        if(Object.keys(selFiles.gcs_bam).length !== selCount) {
-            selFileField.tokenfield('setTokens',selFiles.toTokens());
+        if(Object.keys(selIgvFiles.gcs_bam).length !== selCount) {
+            selIgvFileField.tokenfield('setTokens',selIgvFiles.toTokens());
             update_on_selex_change();
         }
     });
