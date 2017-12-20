@@ -357,6 +357,7 @@ require([
                 selIgvFiles.count() >= SEL_IGV_FILE_MAX && $('.filelist-panel input[type="checkbox"]:not(:checked)').attr('disabled',true);
 
                 selIgvFileField.tokenfield('setTokens',selIgvFiles.toTokens());
+                selCamFilesField.tokenfield('setTokens',selCamFiles.toTokens());
 
                 // If there are checkboxes for igv, show the "Launch IGV" button
                 if (selIgvFiles.count() > 0 || $('.filelist-panel input[type="checkbox"]').length > 0) {
