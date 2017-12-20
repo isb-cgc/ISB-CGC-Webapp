@@ -350,6 +350,7 @@ require([
                     // Remember any previous checks
                     var thisCheck = $('.filelist-panel input[value="'+val+'"');
                     selIgvFiles[thisCheck.attr('data-type')] && selIgvFiles[thisCheck.attr('data-type')][thisCheck.attr('value')] && thisCheck.attr('checked', true);
+                    selCamFiles[thisCheck.attr('data-type')] && selCamFiles[thisCheck.attr('data-type')][thisCheck.attr('value')] && thisCheck.attr('checked', true);
                 }
 
                 // If we're at the max, disable all checkboxes which are not currently checked
