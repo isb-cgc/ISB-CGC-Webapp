@@ -354,7 +354,8 @@ require([
                 }
 
                 // If we're at the max, disable all checkboxes which are not currently checked
-                selIgvFiles.count() >= SEL_IGV_FILE_MAX && $('.filelist-panel input[type="checkbox"]:not(:checked)').attr('disabled',true);
+                selIgvFiles.count() >= SEL_IGV_FILE_MAX && $('.filelist-panel input.igv[type="checkbox"]:not(:checked)').attr('disabled',true);
+                selCamFiles.count() >= SEL_IGV_FILE_MAX && $('.filelist-panel input.cam[type="checkbox"]:not(:checked)').attr('disabled',true);
 
                 selIgvFileField.tokenfield('setTokens',selIgvFiles.toTokens());
 
