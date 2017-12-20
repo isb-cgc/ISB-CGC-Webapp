@@ -350,7 +350,6 @@ require([
                     // Remember any previous checks
                     var thisCheck = $('.filelist-panel input[value="'+val+'"');
                     selIgvFiles[thisCheck.attr('data-type')] && selIgvFiles[thisCheck.attr('data-type')][thisCheck.attr('value')] && thisCheck.attr('checked', true);
-                    selCamFiles[thisCheck.attr('data-type')] && selCamFiles[thisCheck.attr('data-type')][thisCheck.attr('value')] && thisCheck.attr('checked', true);
                 }
 
                 // If we're at the max, disable all checkboxes which are not currently checked
@@ -362,6 +361,14 @@ require([
                 $('#camic-viewer input[type="submit"]').prop('disabled', (selCamFiles.count() <= 0));
 
                 selIgvFileField.tokenfield('setTokens',selIgvFiles.toTokens());
+                selCamFilesField.tokenfield('setTokens',selCamFiles.toTokens());
+
+                // If there are checkboxes for igv, show the "Launch IGV" button
+                if (selIgvFiles.count() > 0 || $('.filelist-panel input[type="checkbox"]').length > 0) {
+                    $('input[type="submit"]').show();
+                } else {
+                    $('input[type="submit"]').hide();
+                }
 
                 // Bind event handler to checkboxes
                 $('.filelist-panel input[type="checkbox"]').on('click', function() {
