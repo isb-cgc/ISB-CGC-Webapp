@@ -54,6 +54,7 @@
             <li class="separator"></li>
             {% if cohort.perm.perm == 'OWNER' %}
                 <li class="menu-item"><button class="btn btn-info" id="edit-cohort-btn">Edit</button> </li>
+                <input id="cohort-mode" type="hidden" value="VIEW">
             {% endif %}
             <li class="menu-item"><button class="show-flyout btn btn-info" title="Show Comments">Comments</button></li>
             <li class="menu-item"><a href="{% url 'clone_cohort' cohort.id %}" class="btn btn-info clone-cohort-btn" title="Duplicate this cohort">Duplicate</a></li>
@@ -191,7 +192,7 @@
             <div class="panel panel-default">
                 <ul class="nav nav-tabs nav-tabs-data" role="tablist">
                     {% for program in programs %}
-                         <li role="presentation" class="program-tab {% if program|program_is_first_in_cohort:cohort.get_programs %}active{% endif %} {% if not program|program_is_in_cohort:cohort.get_programs %}disabled{% endif %}"><a href="#{{ program.id }}-data" role="tab" data-toggle="tab" title="ISB-CGC Data" data-program-id="{{ program.id }}">{{ program.name }} Data</a></li>
+                         <li role="presentation" class="program-tab{% if not program|program_is_in_cohort:cohort.get_programs %} disabled{% elif program|program_is_first_in_cohort:cohort.get_programs %} active{% endif %}"><a href="#{{ program.id }}-data" role="tab" data-toggle="tab" title="ISB-CGC Data" data-program-id="{{ program.id }}">{{ program.name }} Data</a></li>
                     {% endfor %}
                     <li role="presentation" class="program-tab {% if cohort.get_programs|length <= 1 and cohort_programs|has_user_data %}active{% endif %} {% if not cohort_programs|has_user_data %}disabled{% endif %}"><a href="#0-data" role="tab" data-toggle="tab" title="User Data" data-program-id="0">User Data</a></li>
                 </ul>
@@ -280,7 +281,7 @@
                     </div>
                     <div class="modal-footer">
                         {% csrf_token %}
-                        <input type="submit" value="Exprt Cohort" class="btn btn-primary" />
+                        <input type="submit" value="Export Cohort" class="btn btn-primary" />
                         <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
                         <div id="exporting-cohort" class="collapse" style="display: none;">
                             <i class="fa fa-circle-o-notch fa-spin"></i>  Exporting Cohort...

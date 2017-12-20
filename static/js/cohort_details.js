@@ -553,11 +553,13 @@ require([
     // cohort_details: show and hide the filter panel for editing an extant cohort
     $('#edit-cohort-btn').on('click', function() {
         mode = "EDITING";
+        $('#cohort-mode').val('EDIT');
         set_mode(true);
     });
 
     $('#cancel-edit-cohort-btn').on('click', function() {
         mode = "VIEWING";
+        $('#cohort-mode').val('VIEW');
         $('.selected-filters .delete-x').trigger('click');
         set_mode(true);
     });
@@ -1266,6 +1268,7 @@ require([
         if($('.table-type :checked').val() == 'new') {
             $('#export-cohort-table').val('');
         }
+        $('#export-cohort-form input[type="submit"]').attr('disabled','disabled');
     });
 
     // Per https://stackoverflow.com/questions/13550477/twitter-bootstrap-alert-message-close-and-open-again

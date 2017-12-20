@@ -330,8 +330,12 @@ def get_image_data(request, slide_barcode):
                     'Height': query_results[0]['f'][2]['v'],
                     'MPP-X': query_results[0]['f'][3]['v'],
                     'MPP-Y': query_results[0]['f'][4]['v'],
-                    'FileLocation': query_results[0]['f'][5]['v'],
+                    'FileLocation': re.sub(r'isb-cgc-open/.*_image', 'imaging-west', query_results[0]['f'][5]['v']),
                     'TissueID': query_results[0]['f'][0]['v']
+                }
+            else:
+                result = {
+                    'msg': 'Slide barcode {} was not found.'.format(slide_barcode)
                 }
 
         except Exception as e:
@@ -343,6 +347,31 @@ def get_image_data(request, slide_barcode):
             }
 
     return JsonResponse(result, status=status)
+
+
+@login_required
+def camic(request, slide_barcode=None):
+    if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
+    images = []
+    context = {}
+    images_obj = None
+    template = 'GenespotRE/camic.html'
+
+    if slide_barcode:
+        images = [slide_barcode]
+        template = 'GenespotRE/camic_single.html'
+
+    if request.POST.get('checked_list', None):
+        images_obj = json.loads(request.POST.get('checked_list'))
+
+    if images_obj and 'tissue_slide_image' in images_obj:
+        images.extend(images_obj['tissue_slide_image'].keys())
+
+    context['barcodes'] = images
+    context['camic_viewer'] = settings.CAMIC_VIEWER
+
+    return render(request, template, context)
+
 
 @login_required
 def igv(request, sample_barcode=None, readgroupset_id=None):
@@ -396,20 +425,28 @@ def dashboard_page(request):
     cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved')
 
     # Program List
-    ownedPrograms = request.user.program_set.all().filter(active=True)
+    ownedPrograms = request.user.program_set.filter(active=True)
     sharedPrograms = Program.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
     programs = ownedPrograms | sharedPrograms
     programs = programs.distinct().order_by('-last_date_saved')
 
     # Workbook List
-    userWorkbooks = request.user.workbook_set.all().filter(active=True)
+    userWorkbooks = request.user.workbook_set.filter(active=True)
     sharedWorkbooks = Workbook.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
     workbooks = userWorkbooks | sharedWorkbooks
     workbooks = workbooks.distinct().order_by('-last_date_saved')
+
+    # Gene & miRNA Favorites
+    genefaves = request.user.genefavorite_set.filter(active=True)
+
+    # Variable Favorites
+    varfaves = request.user.variablefavorite_set.filter(active=True)
 
     return render(request, 'GenespotRE/dashboard.html', {
         'request'  : request,
         'cohorts'  : cohorts,
         'programs' : programs,
         'workbooks': workbooks,
+        'genefaves': genefaves,
+        'varfaves' : varfaves
     })
