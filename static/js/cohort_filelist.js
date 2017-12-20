@@ -257,8 +257,7 @@ require([
                file_list_total += parseInt($(this).attr('data-platform-count'));
             });
         }        
-        
-        
+
         if (selector_list.length) {
             var param_list = '';
             for (var selector in selector_list) {
@@ -351,20 +350,18 @@ require([
                     // Remember any previous checks
                     var thisCheck = $('.filelist-panel input[value="'+val+'"');
                     selIgvFiles[thisCheck.attr('data-type')] && selIgvFiles[thisCheck.attr('data-type')][thisCheck.attr('value')] && thisCheck.attr('checked', true);
+                    selCamFiles[thisCheck.attr('data-type')] && selCamFiles[thisCheck.attr('data-type')][thisCheck.attr('value')] && thisCheck.attr('checked', true);
                 }
 
                 // If we're at the max, disable all checkboxes which are not currently checked
                 selIgvFiles.count() >= SEL_IGV_FILE_MAX && $('.filelist-panel input.igv[type="checkbox"]:not(:checked)').attr('disabled',true);
                 selCamFiles.count() >= SEL_IGV_FILE_MAX && $('.filelist-panel input.cam[type="checkbox"]:not(:checked)').attr('disabled',true);
 
-                selIgvFileField.tokenfield('setTokens',selIgvFiles.toTokens());
+                // Update the Launch buttons
+                $('#igv-viewer input[type="submit"]').prop('disabled', (selIgvFiles.count() <= 0));
+                $('#camic-viewer input[type="submit"]').prop('disabled', (selCamFiles.count() <= 0));
 
-                // If there are checkboxes for igv, show the "Launch IGV" button
-                if (selIgvFiles.count() > 0 || $('.filelist-panel input[type="checkbox"]').length > 0) {
-                    $('input[type="submit"]').show();
-                } else {
-                    $('input[type="submit"]').hide();
-                }
+                selIgvFileField.tokenfield('setTokens',selIgvFiles.toTokens());
 
                 // Bind event handler to checkboxes
                 $('.filelist-panel input[type="checkbox"]').on('click', function() {
@@ -498,7 +495,7 @@ require([
     });
 
     $('input[type="submit"]').prop('disabled', true);
-    $('input[type="submit"]').hide();
+
     update_table();
 
     $('#build').on('change',function(){
