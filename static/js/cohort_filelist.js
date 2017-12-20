@@ -257,8 +257,7 @@ require([
                file_list_total += parseInt($(this).attr('data-platform-count'));
             });
         }        
-        
-        
+
         if (selector_list.length) {
             var param_list = '';
             for (var selector in selector_list) {
@@ -321,7 +320,7 @@ require([
                             val = files[i]['cloudstorage_location'] + ';' + files[i]['cloudstorage_location'].substring(0, files[i]['cloudstorage_location'].lastIndexOf("/") + 1) + files[i]['index_name'] + ',' + files[i]['sample'];
                             dataTypeName = "gcs_bam";
                             label = "IGV";
-                            checkbox_inputs += '<label><input type="checkbox" token-label="' + tokenLabel + '" program="' + files[i]['program'] + '" name="' + dataTypeName + '" data-type="' + dataTypeName + '" value="' + val + '"';
+                            checkbox_inputs += '<label><input class="igv" type="checkbox" token-label="' + tokenLabel + '" program="' + files[i]['program'] + '" name="' + dataTypeName + '" data-type="' + dataTypeName + '" value="' + val + '"';
                         } else {
                             val = files[i]['cloudstorage_location'].split('/').pop().split(/\./).shift();
                             dataTypeName = "tissue_slide_image";
@@ -351,12 +350,19 @@ require([
                     // Remember any previous checks
                     var thisCheck = $('.filelist-panel input[value="'+val+'"');
                     selIgvFiles[thisCheck.attr('data-type')] && selIgvFiles[thisCheck.attr('data-type')][thisCheck.attr('value')] && thisCheck.attr('checked', true);
+                    selCamFiles[thisCheck.attr('data-type')] && selCamFiles[thisCheck.attr('data-type')][thisCheck.attr('value')] && thisCheck.attr('checked', true);
                 }
 
                 // If we're at the max, disable all checkboxes which are not currently checked
-                selIgvFiles.count() >= SEL_IGV_FILE_MAX && $('.filelist-panel input[type="checkbox"]:not(:checked)').attr('disabled',true);
+                selIgvFiles.count() >= SEL_IGV_FILE_MAX && $('.filelist-panel input.igv[type="checkbox"]:not(:checked)').attr('disabled',true);
+                selCamFiles.count() >= SEL_IGV_FILE_MAX && $('.filelist-panel input.cam[type="checkbox"]:not(:checked)').attr('disabled',true);
+
+                // Update the Launch buttons
+                $('#igv-viewer input[type="submit"]').prop('disabled', (selIgvFiles.count() <= 0));
+                $('#camic-viewer input[type="submit"]').prop('disabled', (selCamFiles.count() <= 0));
 
                 selIgvFileField.tokenfield('setTokens',selIgvFiles.toTokens());
+                selCamFilesField.tokenfield('setTokens',selCamFiles.toTokens());
 
                 // If there are checkboxes for igv, show the "Launch IGV" button
                 if (selIgvFiles.count() > 0 || $('.filelist-panel input[type="checkbox"]').length > 0) {
@@ -497,7 +503,7 @@ require([
     });
 
     $('input[type="submit"]').prop('disabled', true);
-    $('input[type="submit"]').hide();
+
     update_table();
 
     $('#build').on('change',function(){
