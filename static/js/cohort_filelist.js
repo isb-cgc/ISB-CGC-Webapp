@@ -238,16 +238,70 @@ require([
 
     };
 
-    var update_table = function () {
-        $('#igv-build').attr('value',$('#build :selected').val());
-        var selector_list = [];
-        $('#filter-panel input[type="checkbox"]:checked').each(function() {
-            selector_list.push($(this).attr('id'));
-        });
-        var url = ajax_update_url + '?page=' + page;
+    var reject_load = false;
+
+    var browser_tab_load = function(cohort) {
+        if (reject_load) {
+            return;
+        }
+        var active_tab = $('ul.nav-tabs-files li.active a').data('file-type');
+        var tab_selector ='#'+active_tab+'-files';
+        if ($(tab_selector).length == 0) {
+            reject_load = true;
+            $('.tab-pane.data-tab').each(function() { $(this).removeClass('active'); });
+            $('#placeholder').addClass('active');
+            $('#placeholder').show();
+            var data_tab_content_div = $('div.data-tab-content');
+            var get_panel_url = BASE_URL + '/cohorts/filelist/'+cohort+'/panel/' + active_tab +'/';
+
+            $.ajax({
+                type        :'GET',
+                url         : get_panel_url,
+                success : function (data) {
+                    data_tab_content_div.append(data);
+
+                    update_table(active_tab);
+
+                    $('.tab-pane.data-tab').each(function() { $(this).removeClass('active'); });
+                    $(tab_selector).addClass('active');
+                    $('#placeholder').hide();
+                },
+                error: function () {
+                    base.showJsMessage("error","Failed to load file browser panel.",true);
+                    $('#placeholder').hide();
+                },
+                complete: function(xhr, status) {
+                   reject_load = false;
+                }
+            })
+        }
+    };
+
+    // Detect tab change and load the panel
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        browser_tab_load(cohort_id);
+    });
+    $('a[data-toggle="tab"]').on('click', function (e) {
+        if (reject_load) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    });
+
+    var update_table = function (active_tab) {
+        var tab_selector = '#'+active_tab+'-files'
+        if(active_tab == 'igv'){
+            $('#igv-build').attr('value',$(tab_selector).find('.build :selected').val());
+        }
+
+        // Gather filters here
+        var filters = {};
+
+        var url = ajax_update_url[active_tab] + '?page=' + page;
         
         file_list_total = 0;
-        
+
+        // Calculate the file total based on the reported counts for any given filter (platforms used here)
         if($('input[name="platform-selected"]:checked').length <= 0) {
              $('input[name="platform-selected"]').each(function(i) {
                file_list_total += parseInt($(this).attr('data-platform-count'));
@@ -258,43 +312,46 @@ require([
             });
         }        
 
-        if (selector_list.length) {
+        var filter_keys = Object.keys(filters);
+        if (filter_keys.length) {
             var param_list = '';
-            for (var selector in selector_list) {
-                param_list += '&' + selector_list[selector] + '=True';
+            for (var filter in filter_keys) {
+                // Do this like for cohorts
             }
             url += param_list;
-            $('#download-link').attr('href', download_url + '?' + param_list + '&total=' + file_list_total);
+            $(tab_selector).find('.download-link').attr('href', download_url + '?' + param_list + '&total=' + file_list_total);
         } else {
-            $('#download-link').attr('href', download_url + '?total=' + file_list_total)
+            $(tab_selector).find('.download-link').attr('href', download_url + '?total=' + file_list_total)
         }
 
-        $('#download-link').attr('href',$('#download-link').attr('href')+'&build='+$('#build :selected').val());
-        url += '&build='+$('#build :selected').val();
+        if(active_tab !== 'camic') {
+            $(tab_selector).find('.download-link').attr('href',$(tab_selector).find('.download-link').attr('href')+'&build='+$(tab_selector).find('.build :selected').val());
+            url += '&build='+$(tab_selector).find('.build :selected').val();
+        }
 
-        $('#prev-page').addClass('disabled');
-        $('#next-page').addClass('disabled');
-        $('#content-panel .spinner i').removeClass('hidden');
+        $(tab_selector).find('.prev-page').addClass('disabled');
+        $(tab_selector).find('.next-page').addClass('disabled');
+        $(tab_selector).find('.content-panel .spinner i').removeClass('hidden');
         $.ajax({
             url: url,
             success: function (data) {
                 total_files = data['total_file_count'];
                 var total_pages = Math.ceil(total_files / 20);
                 if(total_pages <= 0) {
-                    $('.file-page-count').hide();
-                    $('.no-file-page-count').show();
+                    $(tab_selector).find('.file-page-count').hide();
+                    $(tab_selector).find('.no-file-page-count').show();
                 } else {
-                    $('.file-page-count').show();
-                    $('.no-file-page-count').hide();
-                    $('.filelist-panel .panel-body .file-count').html(total_pages);
-                    $('.filelist-panel .panel-body .page-num').html(page);
+                    $(tab_selector).find('.file-page-count').show();
+                    $(tab_selector).find('.no-file-page-count').hide();
+                    $(tab_selector).find('.filelist-panel .panel-body .file-count').html(total_pages);
+                    $(tab_selector).find('.filelist-panel .panel-body .page-num').html(page);
                 }
 
                 var files = data['file_list'];
-                $('.filelist-panel table tbody').empty();
+                $(tab_selector).find('.filelist-panel table tbody').empty();
 
                 if(files.length <= 0) {
-                    $('.filelist-panel table tbody').append(
+                    $(tab_selector).find('.filelist-panel table tbody').append(
                         '<tr>' +
                         '<td colspan="6"><i>No file listings found in this cohort for this build.</i></td><td></td>'
                     );
@@ -305,7 +362,7 @@ require([
                         files[i]['datatype'] = '';
                     }
 
-                    var val = null;
+                    var val = "";
                     var dataTypeName = '';
                     var label = '';
                     var tokenLabel = files[i]['sample']+", "+files[i]['exp_strat']+", "+happy_name(files[i]['platform'])+", "+files[i]['datatype'];
@@ -315,47 +372,54 @@ require([
                         disable = false;
                     }
 
-                    if (files[i]['cloudstorage_location'] && ((files[i]['cloudstorage_location'].split('.').pop() == 'bam') || (files[i]['datatype'] == 'Tissue slide image') || (files[i]['datatype'] == 'Diagnostic image'))) {
-                        if(files[i]['cloudstorage_location'].split('.').pop() == 'bam') {
-                            val = files[i]['cloudstorage_location'] + ';' + files[i]['cloudstorage_location'].substring(0, files[i]['cloudstorage_location'].lastIndexOf("/") + 1) + files[i]['index_name'] + ',' + files[i]['sample'];
-                            dataTypeName = "gcs_bam";
-                            label = "IGV";
-                            checkbox_inputs += '<label><input class="igv" type="checkbox" token-label="' + tokenLabel + '" program="' + files[i]['program'] + '" name="' + dataTypeName + '" data-type="' + dataTypeName + '" value="' + val + '"';
-                        } else {
-                            val = files[i]['cloudstorage_location'].split('/').pop().split(/\./).shift();
-                            dataTypeName = "tissue_slide_image";
-                            label = "caMicro";
-                            checkbox_inputs += '<label><input class="cam" type="checkbox" name="' + dataTypeName + '" data-type="' + dataTypeName + '" value="' + val + '"';
+                    if(active_tab !== 'all') {
+                        if (files[i]['cloudstorage_location'] && ((files[i]['dataformat'] == 'BAM') || (files[i]['datatype'] == 'Tissue slide image') || (files[i]['datatype'] == 'Diagnostic image'))) {
+                            if(active_tab === 'igv' && files[i]['dataformat'] == 'BAM') {
+                                val = files[i]['cloudstorage_location'] + ';' + files[i]['cloudstorage_location'].substring(0, files[i]['cloudstorage_location'].lastIndexOf("/") + 1) + files[i]['index_name'] + ',' + files[i]['sample'];
+                                dataTypeName = "gcs_bam";
+                                label = "IGV";
+                                checkbox_inputs += '<label><input class="igv" type="checkbox" token-label="' + tokenLabel + '" program="' + files[i]['program'] + '" name="' + dataTypeName + '" data-type="' + dataTypeName + '" value="' + val + '"';
+                                if (disable) {
+                                    checkbox_inputs += ' disabled="disabled"';
+                                }
+                                checkbox_inputs += '> '+label+'</label>';
+                            } else if(active_tab === 'camic' && (files[i]['datatype'] == 'Tissue slide image' || files[i]['datatype'] == 'Diagnostic image')) {
+                                val = files[i]['cloudstorage_location'].split('/').pop().split(/\./).shift();
+                                dataTypeName = "tissue_slide_image";
+                                label = "caMicro";
+                                checkbox_inputs += '<label><input class="cam" type="checkbox" name="' + dataTypeName + '" data-type="' + dataTypeName + '" value="' + val + '"';
+                                if (disable) {
+                                    checkbox_inputs += ' disabled="disabled"';
+                                }
+                                checkbox_inputs += '> '+label+'</label>';
+                            }
                         }
-                        if (disable) {
-                            checkbox_inputs += ' disabled="disabled"';
-                        }
-                        checkbox_inputs += '> '+label+'</label>';
+                        files[i]['file_viewer'] = checkbox_inputs;
                     }
 
-                    files[i]['file_viewer'] = checkbox_inputs;
-
-                    $('.filelist-panel table tbody').append(
-                        '<tr>' +
+                    var row = '<tr>' +
                         '<td>' + files[i]['program'] + '</td>' +
                         '<td>' + files[i]['sample'] + '</td>' +
-                        '<td>' + (files[i]['exp_strat'] || 'N/A') + '</td>' +
-                        '<td>' + happy_name(files[i]['platform']) + '</td>' +
-                        '<td>' + files[i]['datacat'] + '</td>' +
+                        (active_tab === 'camic' ? (files[i]['thumbnail'] ? '<td><img src="'+files[i]['thumbnail']+'"></td>' : '<td></td>') : '') +
+                        (active_tab !== 'camic' ? '<td>' + (files[i]['exp_strat'] || 'N/A') + '</td>' : '')+
+                        (active_tab !== 'camic' ? '<td>' + happy_name(files[i]['platform']) + '</td>' : '')+
+                        (active_tab !== 'camic' ? '<td>' + files[i]['datacat'] + '</td>' : '') +
                         '<td>' + files[i]['datatype'] + '</td>' +
-                        '<td>' + files[i]['file_viewer'] + '</td>' +
-                        '</tr>'
-                    );
+                        '<td>' + files[i]['dataformat'] + '</td>' +
+                        (active_tab !== 'all' ? (files[i]['file_viewer'] ? '<td>' + files[i]['file_viewer'] + '</td>' : '<td></td>') : '') +
+                    '</tr>';
+
+                    $(tab_selector).find('.filelist-panel table tbody').append(row);
 
                     // Remember any previous checks
-                    var thisCheck = $('.filelist-panel input[value="'+val+'"');
+                    var thisCheck = $(tab_selector).find('.filelist-panel input[value="'+val+'"]');
                     selIgvFiles[thisCheck.attr('data-type')] && selIgvFiles[thisCheck.attr('data-type')][thisCheck.attr('value')] && thisCheck.attr('checked', true);
                     selCamFiles[thisCheck.attr('data-type')] && selCamFiles[thisCheck.attr('data-type')][thisCheck.attr('value')] && thisCheck.attr('checked', true);
                 }
 
                 // If we're at the max, disable all checkboxes which are not currently checked
-                selIgvFiles.count() >= SEL_IGV_FILE_MAX && $('.filelist-panel input.igv[type="checkbox"]:not(:checked)').attr('disabled',true);
-                selCamFiles.count() >= SEL_IGV_FILE_MAX && $('.filelist-panel input.cam[type="checkbox"]:not(:checked)').attr('disabled',true);
+                selIgvFiles.count() >= SEL_IGV_FILE_MAX && $(tab_selector).find('.filelist-panel input.igv[type="checkbox"]:not(:checked)').attr('disabled',true);
+                selCamFiles.count() >= SEL_IGV_FILE_MAX && $(tab_selector).find('.filelist-panel input.cam[type="checkbox"]:not(:checked)').attr('disabled',true);
 
                 // Update the Launch buttons
                 $('#igv-viewer input[type="submit"]').prop('disabled', (selIgvFiles.count() <= 0));
@@ -364,15 +428,8 @@ require([
                 selIgvFileField.tokenfield('setTokens',selIgvFiles.toTokens());
                 selCamFilesField.tokenfield('setTokens',selCamFiles.toTokens());
 
-                // If there are checkboxes for igv, show the "Launch IGV" button
-                if (selIgvFiles.count() > 0 || $('.filelist-panel input[type="checkbox"]').length > 0) {
-                    $('input[type="submit"]').show();
-                } else {
-                    $('input[type="submit"]').hide();
-                }
-
                 // Bind event handler to checkboxes
-                $('.filelist-panel input[type="checkbox"]').on('click', function() {
+                $(tab_selector).find('.filelist-panel input[type="checkbox"]').on('click', function() {
 
                     var self=$(this);
 
@@ -405,18 +462,18 @@ require([
                     update_on_selex_change();
                 });
 
-                $('#prev-page').removeClass('disabled');
-                $('#next-page').removeClass('disabled');
+                $(tab_selector).find('.prev-page').removeClass('disabled');
+                $(tab_selector).find('.next-page').removeClass('disabled');
                 if (parseInt(page) == 1) {
-                    $('#prev-page').addClass('disabled');
+                    $(tab_selector).find('.prev-page').addClass('disabled');
                 }
                 if (parseInt(page) * 20 > total_files) {
-                    $('#next-page').addClass('disabled');
+                    $(tab_selector).find('.next-page').addClass('disabled');
                 }
-                $('#content-panel .spinner i').addClass('hidden');
+                $(tab_selector).find('.content-panel .spinner i').addClass('hidden');
 
 
-                var build = $('#build :selected').val();
+                var build = $(tab_selector).find('.build :selected').val();
                 // Update the platform build set
                 if($('#platform-'+build).length <= 0) {
                     // We need to make this selection set
@@ -444,21 +501,23 @@ require([
             },
             error: function(e) {
                 console.log(e);
-                $('#content-panel .spinner i').addClass('hidden');
+                $(tab_selector).find('.content-panel .spinner i').addClass('hidden');
             }
         })
     };
 
     // Next page button click
-    $('#next-page').on('click', function () {
+    $('.data-tab-content').on('click', '.next-page', function () {
+        var this_tab = $(this).parents('.data-tab').data('file-type');
         page = page + 1;
-        update_table();
+        update_table(this_tab);
     });
 
     // Previous page button click
-    $('#prev-page').on('click', function () {
+    $('.data-tab-content').on('click', '.prev-page', function () {
+        var this_tab = $(this).parents('.data-tab').data('file-type');
         page = page - 1;
-        update_table();
+        update_table(this_tab);
     });
 
     $('#build').on('change',function(){
@@ -504,8 +563,6 @@ require([
 
     $('input[type="submit"]').prop('disabled', true);
 
-    update_table();
-
     $('#build').on('change',function(){
         // Remove any selected files not from this build
         var new_build = $('#build :selected').val();
@@ -523,4 +580,7 @@ require([
             update_on_selex_change();
         }
     });
+
+    browser_tab_load(cohort_id);
+
 });

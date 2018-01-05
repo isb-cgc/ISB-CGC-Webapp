@@ -1,9 +1,9 @@
-<div id="igv-files" class="tab-pane data-tab" data-file-type="igv" role="tabpanel">
-    <div id="igv-filter-panel" class="col-lg-3 col-md-3 col-sm-3">
+<div id="all-files" class="tab-pane data-tab" data-file-type="all" role="tabpanel">
+    <div id="all-filter-panel" class="col-lg-3 col-md-3 col-sm-3">
         <div class="panel panel-default">
             <div class="panel-body">
                 <label for="build">Build</label>
-                <select aria-label="Build" id="build" class="form-control build">
+                <select aria-label="Build" class="form-control build">
                     <option value="HG38" {% if build == 'HG38' %}selected{% endif %}>HG38</option>
                     <option value="HG19" {% if build == 'HG19' %}selected{% endif %}>HG19</option>
                 </select>
@@ -26,26 +26,7 @@
             </div>
         </div>
     </div>
-    <div id="igv-file-panel" class="col-lg-9 col-md-9 col-sm-9" role="tabpanel">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <input type="submit" form ="view-igv" value="Launch IGV" class="btn btn-primary pull-right" style="display: none;"/>
-                <h4>Selected BAM Files</h4>
-                <p><i>Note: Files viewed in IGV must all be for the same build.</i></p>
-            </div>
-            <div class="panel-body file-list">
-                <p><span class="selected-count-igv">0</span> file(s) selected (<span id="selected-file-limit-igv">limit <span class="file-limit-igv file-limit">#</span></span>)</p>
-                <div id="tokenfield-holder-igv">
-                    <!-- "IGV selected files tokenizer" -->
-                    <textarea name="selected-files-igv" class="form-control tokenfield" id="selected-files-igv" placeholder="Select files"></textarea>
-                    <form id="view-igv" method="POST" action="{% url 'igv' %}" target="_blank">
-                        <input type="text" class="hidden_form_value" id="checked_list_input" name="checked_list" data-type="checked_list">
-                        <input type="text" class="hidden_form_value" id="igv-build" name="build">
-                        {% csrf_token %}
-                    </form>
-                </div>
-            </div>
-        </div>
+    <div id="all-file-panel" class="col-lg-9 col-md-9 col-sm-9">
         <div class="filelist-panel panel">
             <div id="file-list-warning" class="alert alert-warning alert-dismissable" style="display: none;">
                 <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
@@ -54,6 +35,20 @@
             </div>
             <div class="panel-heading">
                 <h4>File Listing</h4>
+                <div class="page-action-group pull-right">
+                    <ul>
+                        <li class="menu-item">
+                            <div class="filelist-obtain">
+                                <a id="download-link" href="{{ download_url }}" title="Download file manifest as CSV"><button class="btn btn-info">CSV</button></a> <a id="download-link" href="{{ download_url }}" title="Download file manifest as JSON"><button class="btn btn-info">JSON</button></a>
+                            </div>
+                        </li>
+                        <li class="menu-item">
+                            <div class="filelist-obtain">
+                                <a id="download-link" href="" title="Export file manifest to BQ"><button class="btn btn-info">BQ</button></a> <a id="download-link" href="" title="Export file manifest to GCS"><button class="btn btn-info">GCS</button></a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
             </div>
             <div class="panel-body">
                 <p class="file-page-count">Showing 20 files. Page: <span class="page-num">1</span> of <span class="file-count">unknown</span> pages.</p>
@@ -73,7 +68,6 @@
                             <th class="col-datacat">Data Category</th>
                             <th class="col-datatype">Data Type</th>
                             <th class="col-dataformat">Data Format</th>
-                            <th class="col-viewer">View</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -83,3 +77,4 @@
         </div>
     </div>
 </div>
+
