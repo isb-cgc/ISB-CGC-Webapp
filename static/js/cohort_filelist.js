@@ -385,6 +385,7 @@ require([
                                 checkbox_inputs += '> '+label+'</label>';
                             } else if(active_tab === 'camic' && (files[i]['datatype'] == 'Tissue slide image' || files[i]['datatype'] == 'Diagnostic image')) {
                                 val = files[i]['cloudstorage_location'].split('/').pop().split(/\./).shift();
+                                files[i]['thumbnail'] = files[i]['cloudstorage_location'].split('/').slice(-2)[0];
                                 dataTypeName = "tissue_slide_image";
                                 label = "caMicro";
                                 checkbox_inputs += '<label><input class="cam" type="checkbox" name="' + dataTypeName + '" data-type="' + dataTypeName + '" value="' + val + '"';
@@ -400,7 +401,7 @@ require([
                     var row = '<tr>' +
                         '<td>' + files[i]['program'] + '</td>' +
                         '<td>' + files[i]['sample'] + '</td>' +
-                        (active_tab === 'camic' ? (files[i]['thumbnail'] ? '<td><img src="'+files[i]['thumbnail']+'"></td>' : '<td></td>') : '') +
+                        (active_tab === 'camic' ? (files[i]['thumbnail'] ? '<td><img src="'+IMG_THUMBS_URL+files[i]['thumbnail']+'/thmb_128x64.jpeg"></td>' : '<td></td>') : '') +
                         (active_tab !== 'camic' ? '<td>' + (files[i]['exp_strat'] || 'N/A') + '</td>' : '')+
                         (active_tab !== 'camic' ? '<td>' + happy_name(files[i]['platform']) + '</td>' : '')+
                         (active_tab !== 'camic' ? '<td>' + files[i]['datacat'] + '</td>' : '') +
