@@ -42,6 +42,8 @@ htmlcov/
 nosetests.xml
 coverage.xml
 
+testbed.py
+
 # Translations
 *.mo
 *.pot
