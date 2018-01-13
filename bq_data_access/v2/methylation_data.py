@@ -62,8 +62,6 @@ class METHFeatureDef(object):
     def from_feature_id(cls, feature_id):
         config_instance = METHDataSourceConfig.from_dict(BIGQUERY_CONFIG)
 
-        logger.debug("In from_feature_id: {}".format(str(config_instance.data_table_list)))
-
         # Example ID: METH:cg08246323:HumanMethylation450:hg19_chr16
         regex = re_compile("^v2:METH:"
                            # TODO better validation for probe name

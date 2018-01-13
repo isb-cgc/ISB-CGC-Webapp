@@ -29,7 +29,7 @@ def get_feature_type():
 
 
 def build_internal_feature_id(feature_type, probe, platform, chromosome, table_config):
-    # Example ID: v2METH:cg08246323:HumanMethylation450:hg19_chr16
+    # Example ID: v2:METH:cg08246323:HumanMethylation450:hg19_chr16
     return 'v2:{feature_type}:{probe}:{platform}:{table_id}'.format(
         feature_type=feature_type,
         genomic_build=table_config.genomic_build,
