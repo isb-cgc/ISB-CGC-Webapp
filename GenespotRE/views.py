@@ -304,7 +304,7 @@ def get_image_data(request, slide_barcode):
     else:
         try:
             img_data_query = """
-                SELECT slide_barcode, OriginalWidth AS width, OriginalHeight AS height, mpp_x, mpp_y, GCSurl
+                SELECT slide_barcode, level_0__width AS width, level_0__height AS height, mpp_x, mpp_y, GCSurl
                 FROM [isb-cgc:metadata.TCGA_slide_images]
                 WHERE slide_barcode = '{}';
             """

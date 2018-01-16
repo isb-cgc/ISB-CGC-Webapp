@@ -128,17 +128,17 @@ def run(project_id, data_type, csv_path, config_json, chromosome_array):
         config_dict = FeatureDataTypeHelper.get_feature_def_default_config_dict_from_data_type(feature_type)
         config_instance = config_class.from_dict(config_dict)
 
-
     if not chromosome_array:
         chromosome_array = [str(c) for c in range(1, 23)]
         chromosome_array.extend(['X', 'Y'])
+    else:
+        chromosome_array = chromosome_array[0].split(",")
 
     provider = provider_class(config_instance, chromosome_array=chromosome_array)
 
     logging.info("Output CSV: {}".format(csv_path))
     result = run_query(project_id, provider, config_instance)
     save_csv(result, provider.get_mysql_schema(), csv_path, include_header=True)
-
 
 @click.group()
 def main():
