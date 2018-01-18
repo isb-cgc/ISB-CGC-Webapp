@@ -41,6 +41,14 @@ require([
     'session_security',
     'tokenfield'
 ], function ($) {
+
+    // For manaaging filter changes
+    var UPDATE_PENDING = false;
+    var SUBSEQUENT_DELAY = 600;
+    var update_displays_thread = null;
+    var UPDATE_QUEUE = [];
+
+    var SELECTED_FILTERS = {};
         
     var file_list_total = 0;
 
@@ -320,24 +328,20 @@ require([
         file_list_total = 0;
 
         // Calculate the file total based on the reported counts for any given filter (platforms used here)
-        if($('input[name="platform-selected"]:checked').length <= 0) {
-             $('input[name="platform-selected"]').each(function(i) {
-               file_list_total += parseInt($(this).attr('data-platform-count'));
+        if($('input[data-feature-name="all-data_format"]:checked').length <= 0) {
+             $('input[data-feature-name="all-data_format"]').each(function(i) {
+               file_list_total += parseInt($(this).data('count'));
             });
         } else {
-            $('input[name="platform-selected"]:checked').each(function(i) {
-               file_list_total += parseInt($(this).attr('data-platform-count'));
+            $('input[data-feature-name="all-data_format"]:checked').each(function(i) {
+               file_list_total += parseInt($(this).data('count'));
             });
         }        
 
-        var filter_keys = Object.keys(filters);
-        if (filter_keys.length) {
-            var param_list = '';
-            for (var filter in filter_keys) {
-                // Do this like for cohorts
-            }
-            url += param_list;
-            $(tab_selector).find('.download-link').attr('href', download_url + '?' + param_list + '&total=' + file_list_total);
+        if (Object.keys(SELECTED_FILTERS).length >0) {
+            var filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS));
+            url += '&'+filter_args;
+            $(tab_selector).find('.download-link').attr('href', download_url + '?' + filter_args + '&total=' + file_list_total);
         } else {
             $(tab_selector).find('.download-link').attr('href', download_url + '?total=' + file_list_total)
         }
@@ -502,23 +506,8 @@ require([
                     $('#platforms-panel').append(
                         '<ul class="search-checkbox-list platform-counts" id="platform-'+build+'"></ul>'
                     );
-
-                    if(Object.keys(data.platform_count_list).length <= 0) {
-                        $('#platform-'+build).append(
-                            '<i>No platforms available to list.</i>'
-                        );
-                    }
-                    for(var i in data.platform_count_list) {
-                        if(data.platform_count_list.hasOwnProperty(i)) {
-                            var platform = data.platform_count_list[i];
-                            $('#platform-'+build).append(
-                                '<li><input data-platform-count="'+platform['count']+'" type="checkbox" name="platform-selected" '+
-                                    'id="'+platform['platform']+'"><label for="'+platform['platform']+'">'+platform['platform']+'</label><span class="count">('+platform['count']+')</span></li>'
-                            );
-                        }
-                    }
                 }
-                $('.platform-counts').hide();
+
                 $('#platform-'+build).show();
             },
             error: function(e) {
@@ -540,6 +529,18 @@ require([
         var this_tab = $(this).parents('.data-tab').data('file-type');
         page = page - 1;
         update_table(this_tab);
+    });
+
+    // Show more/less links on categories with >6 fiilters
+    $('.data-tab-content').on('click', '.show-more', function() {
+        $(this).parent().siblings('li.extra-values').show();
+        $(this).parent().siblings('.less-checks').show();
+        $(this).parent().hide();
+    });
+    $('.data-tab-content').on('click', '.show-less', function() {
+        $(this).parent().siblings('li.extra-values').hide();
+        $(this).parent().siblings('.more-checks').show();
+        $(this).parent().hide();
     });
 
     $('#build').on('change',function(){
@@ -599,6 +600,77 @@ require([
             $('#selected-files-igv').tokenfield('setTokens',selIgvFiles.toTokens());
             update_on_selex_change();
         }
+    });
+
+    function update_filters(checked) {
+        SELECTED_FILTERS = {};
+        var type_tab = checked.parents('.data-tab.active')[0];
+
+        $(type_tab).find('input[type="checkbox"]:checked').each(function(){
+            if(!SELECTED_FILTERS[$(this).data('feature-name')]) {
+                SELECTED_FILTERS[$(this).data('feature-name')] = [];
+            }
+            SELECTED_FILTERS[$(this).data('feature-name')].push($(this).data('value-name'));
+        });
+    };
+
+    function enqueueUpdate(){
+        UPDATE_QUEUE.push(function(){
+            update_displays();
+        });
+    };
+
+    function dequeueUpdate(){
+        if(UPDATE_QUEUE.length > 0) {
+            UPDATE_QUEUE.shift()();
+        }
+    };
+
+    var update_displays = function(active_tab) {
+        // If a user has clicked more filters while an update was going out, queue up a future update and return
+        if(UPDATE_PENDING) {
+            // We only need to queue one update because our updates don't pull the filter set until they run
+            if(UPDATE_QUEUE.length <= 0) {
+                enqueueUpdate();
+            }
+            return;
+        }
+
+        // If there's an update ready to fire and waiting for additional input, clear it...
+        (update_displays_thread !== null) && clearTimeout(update_displays_thread);
+
+        // ...and replace it with a new one
+        update_displays_thread = setTimeout(function(){
+            var url = ajax_update_url[active_tab] + '?build=' + $('#'+active_tab+'-files').find('.build :selected').val() + '&filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS));
+            UPDATE_PENDING = true;
+            $.ajax({
+                type: 'GET',
+                url: url,
+                success: function(data) {
+                    for(var i=0; i <  data.metadata_data_attr.length; i++){
+                        var this_attr = data.metadata_data_attr[i];
+                        for(var j=0; j < this_attr.values.length; j++) {
+                            var this_val = this_attr.values[j];
+                            console.debug($('#'+active_tab+'-'+this_attr.name+'-'+this_val.name).siblings('span.count'));
+                            $('#'+active_tab+'-'+this_attr.name+'-'+this_val.value).siblings('span.count').html('('+this_val.count+')');
+                        }
+                    }
+                },
+                error: function() {
+
+                }
+            }).then(
+                    function(){
+                        UPDATE_PENDING = false;
+                        dequeueUpdate();
+                    }
+                );
+            },SUBSEQUENT_DELAY);
+    };
+
+    $('.data-tab-content').on('click','.filter-panel input[type="checkbox"]',function(){
+        update_filters($(this));
+        update_displays($('ul.nav-tabs-files li.active a').data('file-type'));
     });
 
     browser_tab_load(cohort_id);
