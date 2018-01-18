@@ -48,7 +48,10 @@ require([
     var update_displays_thread = null;
     var UPDATE_QUEUE = [];
 
-    var SELECTED_FILTERS = {};
+    var SELECTED_FILTERS = {
+        'all': {},
+        'igv': {}
+    };
         
     var file_list_total = 0;
 
@@ -338,8 +341,8 @@ require([
             });
         }        
 
-        if (Object.keys(SELECTED_FILTERS).length >0) {
-            var filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS));
+        if (Object.keys(SELECTED_FILTERS[active_tab]).length >0) {
+            var filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab]));
             url += '&'+filter_args;
             $(tab_selector).find('.download-link').attr('href', download_url + '?' + filter_args + '&total=' + file_list_total);
         } else {
@@ -603,14 +606,15 @@ require([
     });
 
     function update_filters(checked) {
-        SELECTED_FILTERS = {};
         var type_tab = checked.parents('.data-tab.active')[0];
+        var active_tab = $(type_tab).data('file-type');
+        SELECTED_FILTERS[active_tab] = {};
 
         $(type_tab).find('input[type="checkbox"]:checked').each(function(){
-            if(!SELECTED_FILTERS[$(this).data('feature-name')]) {
-                SELECTED_FILTERS[$(this).data('feature-name')] = [];
+            if(!SELECTED_FILTERS[active_tab][$(this).data('feature-name')]) {
+                SELECTED_FILTERS[active_tab][$(this).data('feature-name')] = [];
             }
-            SELECTED_FILTERS[$(this).data('feature-name')].push($(this).data('value-name'));
+            SELECTED_FILTERS[active_tab][$(this).data('feature-name')].push($(this).data('value-name'));
         });
     };
 
@@ -641,7 +645,10 @@ require([
 
         // ...and replace it with a new one
         update_displays_thread = setTimeout(function(){
-            var url = ajax_update_url[active_tab] + '?build=' + $('#'+active_tab+'-files').find('.build :selected').val() + '&filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS));
+            var url = ajax_update_url[active_tab] + '?build=' + $('#'+active_tab+'-files').find('.build :selected').val();
+            if(Object.keys(SELECTED_FILTERS[active_tab]).length > 0) {
+                url += '&filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab]));
+            }
             UPDATE_PENDING = true;
             $.ajax({
                 type: 'GET',
