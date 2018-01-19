@@ -1,0 +1,188 @@
+<div id="all-files" class="tab-pane data-tab" data-file-type="all" role="tabpanel">
+    <div id="all-filter-panel" class="col-lg-3 col-md-3 col-sm-3">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <label for="build">Build</label>
+                <select aria-label="Build" id="all-build" class="form-control build">
+                    <option value="HG38" {% if build == 'HG38' %}selected{% endif %}>HG38</option>
+                    <option value="HG19" {% if build == 'HG19' %}selected{% endif %}>HG19</option>
+                </select>
+            </div>
+        </div>
+        <div class="panel filter-panel panel-default">
+            <div class="panel-body tab-content filter-build-panel" data-filter-build="HG19" id="all-filter-panel-HG19">
+                <ul class="list-group" id="metadata-data-accordian-all" role="tablist" aria-multiselectable="true">
+                    {% for attr in metadata_data_attr.HG19 %}
+                        <li class="list-group-item">
+                            <div id="heading-all-hg19-{{attr.name}}" class="list-group-item__heading">
+                                <a role="button" data-toggle="collapse" data-parent="#metadata-data-accordian-all" href="#collapse-all-hg19-{{ attr.name }}" aria-expanded="false" aria-controls="collapse-all-hg19-{{ attr.name }}">
+                                    <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr.displ_name }}
+                                </a>
+                            </div>
+                            <div id="collapse-all-hg19-{{ attr.name }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" data-feature-type="donor"
+                                 aria-labelledby="heading-all-hg19-{{ attr.name }}" data-feature-name="{{ attr.name }}" data-feature-displ-name="{{ attr.displ_name }}">
+                                <ul class="search-checkbox-list" id="all-{{ attr.name }}">
+                                    {% with attr.values|how_many_more:6 as num_more %}
+                                        {% for v in attr.values|check_for_order:attr.name %}
+                                            {% if forloop.counter0 < 6 %}
+                                                <li class="checkbox">
+                                                    <label title="{% if v.tooltip %}{{ v.tooltip }}{% else %} {% endif %}">
+                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="all-HG19-{{ attr.name }}-{{ v.value }}"
+                                                               data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
+                                                        {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}
+                                                         <span class="count">({{ v.count }})</span>
+                                                    </label>
+                                                </li>
+                                            {% elif forloop.counter0 == 6 and num_more > 0 %}
+                                                <p class="more-checks"><a class="show-more">{{ num_more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                <li class="extra-values checkbox" style="display:none;">
+                                                    <label title="{% if v.tooltip %}{{ v.tooltip }}{% else %} {% endif %}">
+                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="all-HG19-{{ attr.name}}-{{ v.value }}"
+                                                               data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
+                                                        {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.name }}{% endif %}
+                                                         <span class="count">({{ v.count }})</span>
+                                                    </label>
+                                                </li>
+                                            {% else %}
+                                                <li class="extra-values checkbox" style="display:none;">
+                                                    <label title="{% if v.tooltip %}{{ v.tooltip }}{% else %} {% endif %}">
+                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="all-HG19-{{ attr.name }}-{{ v.value }}"
+                                                               data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
+                                                        {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.name }}{% endif %}
+                                                         <span class="count">({{ v.count }})</span>
+                                                    </label>
+                                                </li>
+                                            {% endif %}
+                                        {% endfor %}
+                                        {% if num_more > 0 %}
+                                            <p class="less-checks" style="display: none;"><a class="show-less">less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                        {% endif %}
+                                    {% endwith %}
+                                </ul>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="panel-body tab-content filter-build-panel" data-filter-build="HG38" id="all-filter-panel-HG38" style="display: none;">
+                <ul class="list-group" id="metadata-data-accordian-all" role="tablist" aria-multiselectable="true">
+                    {% for attr in metadata_data_attr.HG38 %}
+                        <li class="list-group-item">
+                            <div id="heading-all-hg38-{{attr.name}}" class="list-group-item__heading">
+                                <a role="button" data-toggle="collapse" data-parent="#metadata-data-accordian-all" href="#collapse-all-hg38-{{ attr.name }}" aria-expanded="false" aria-controls="collapse-all-hg38-{{ attr.name }}">
+                                    <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr.displ_name }}
+                                </a>
+                            </div>
+                            <div id="collapse-all-hg38-{{ attr.name }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" data-feature-type="donor"
+                                 aria-labelledby="heading-all-hg38-{{ attr.name }}" data-feature-name="{{ attr.name }}" data-feature-displ-name="{{ attr.displ_name }}">
+                                <ul class="search-checkbox-list" id="all-{{ attr.name }}">
+                                    {% with attr.values|how_many_more:6 as num_more %}
+                                        {% for v in attr.values|check_for_order:attr.name %}
+                                            {% if forloop.counter0 < 6 %}
+                                                <li class="checkbox">
+                                                    <label title="{% if v.tooltip %}{{ v.tooltip }}{% else %} {% endif %}">
+                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="all-HG38-{{ attr.name }}-{{ v.value }}"
+                                                               data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
+                                                        {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}
+                                                         <span class="count">({{ v.count }})</span>
+                                                    </label>
+                                                </li>
+                                            {% elif forloop.counter0 == 6 and num_more > 0 %}
+                                                <p class="more-checks"><a class="show-more">{{ num_more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                <li class="extra-values checkbox" style="display:none;">
+                                                    <label title="{% if v.tooltip %}{{ v.tooltip }}{% else %} {% endif %}">
+                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="all-HG38-{{ attr.name}}-{{ v.value }}"
+                                                               data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
+                                                        {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.name }}{% endif %}
+                                                         <span class="count">({{ v.count }})</span>
+                                                    </label>
+                                                </li>
+                                            {% else %}
+                                                <li class="extra-values checkbox" style="display:none;">
+                                                    <label title="{% if v.tooltip %}{{ v.tooltip }}{% else %} {% endif %}">
+                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="all-HG38-{{ attr.name }}-{{ v.value }}"
+                                                               data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
+                                                        {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.name }}{% endif %}
+                                                         <span class="count">({{ v.count }})</span>
+                                                    </label>
+                                                </li>
+                                            {% endif %}
+                                        {% endfor %}
+                                        {% if num_more > 0 %}
+                                            <p class="less-checks" style="display: none;"><a class="show-less">less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                        {% endif %}
+                                    {% endwith %}
+                                </ul>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div id="all-file-panel" class="col-lg-9 col-md-9 col-sm-9">
+        <div class="filelist-panel panel">
+            <div id="" class="alert alert-warning alert-dismissable file-list-warning" style="display: none;">
+                <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                The maximum number of files which can be downloaded in a list is <span class="file-list-limit">{{ sel_file_max }}</span>. Your selections currently total
+                <span class="file-list-total">#</span>. Please filter your list using the platform panel at the left (or make a smaller cohort) to limit the size of your file download list.
+            </div>
+            <div class="panel-heading">
+                <h4>File Listing</h4>
+                <div class="page-action-group pull-right">
+                    <ul>
+                        <li class="menu-item">
+                            <div class="filelist-obtain">
+                                <a class="download-link" href="{{ download_url }}" title="Download file manifest as CSV"><button class="btn btn-info">CSV</button></a>{# <a id="download-link" href="{{ download_url }}" title="Download file manifest as JSON"><button class="btn btn-info">JSON</button></a>#}
+                            </div>
+                        </li>
+{#                        <li class="menu-item">#}
+{#                            <div class="filelist-obtain">#}
+{#                                <a id="download-link" href="" title="Export file manifest to BQ"><button class="btn btn-info">BQ</button></a> <a id="download-link" href="" title="Export file manifest to GCS"><button class="btn btn-info">GCS</button></a>#}
+{#                            </div>#}
+{#                        </li>#}
+                    </ul>
+                </div>
+            </div>
+            <div class="panel-body">
+                <p class="file-page-count">Showing 20 files. Page: <span class="page-num">1</span> of <span class="file-count">unknown</span> pages.</p>
+                <p class="no-file-page-count" style="display: none;">Showing 0 files.</p>
+                <div>
+                    <a role="button" class="btn btn-primary prev-page disabled">Previous Page</a>
+                    <a role="button" class="btn btn-primary next-page">Next Page</a>
+                    <span class="spinner"><i class="fa fa-spin fa-spinner hidden"></i></span>
+                </div>
+                <table class="table table-striped file-list-table" aria-label="File Listing Table">
+                    <thead>
+                        <tr>
+                            <th class="col-program">Program</th>
+                            <th class="col-barcode">Sample Barcode</th>
+                            <th class="col-diseasecode">Disease Code</th>
+                            <th class="col-exp-strategy">Exp. Strategy</th>
+                            <th class="col-platform">Platform</th>
+                            <th class="col-datacat">Data Category</th>
+                            <th class="col-datatype">Data Type</th>
+                            <th class="col-dataformat">Data Format</th>
+                        </tr>
+                    </thead>
+                    <colgroup>
+                        <col style="width: 8%">
+                        <col style="width: 17%">
+                        <col style="width: 8%">
+                        <col style="width: 14%">
+                        <col style="width: 12%">
+                        <col style="width: 16%">
+                        <col style="width: 17%">
+                        <col style="width: 8%">
+                    </colgroup>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var total_files = {{ total_file_count|safe }};
+    var file_listing = {{ file_list|tojson|safe }};
+</script>

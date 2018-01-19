@@ -46,7 +46,7 @@
     <div class="row">
         <div class="panel panel-default">
             <div class="panel-body">
-                {{ barcodes.0 }}
+                {{ barcodes.0.barcode }}
             </div>
         </div>
     </div>
@@ -56,14 +56,14 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <input type="submit" form ="view-camic" value="Open in new tab" class="btn btn-primary pull-right nocap" />
-                        <form id="view-camic" method="POST" action="{% url 'camic_barcode' barcodes.0 %}" target="_blank">
+                        <form id="view-camic" method="POST" action="{% url 'camic_barcode' barcodes.0.barcode %}" target="_blank">
                             {% csrf_token %}
                         </form>
                     </div>
                     <div class="panel-body">
                         <div class="iframe-container">
                             <div class="load-spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                            <iframe id="camic-iframe" width="100%" src="https://{{ camic_viewer }}/camicroscope/osdCamicroscope.php?slideBarcode={{ barcodes.0 }}"></iframe>
+                            <iframe id="camic-iframe" width="100%" src="https://{{ camic_viewer }}/camicroscope/osdCamicroscope.php?slideBarcode={{ barcodes.0.barcode }}"></iframe>
                         </div>
                     </div>
                 </div>

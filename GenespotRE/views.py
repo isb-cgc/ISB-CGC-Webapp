@@ -358,17 +358,20 @@ def camic(request, slide_barcode=None):
     template = 'GenespotRE/camic.html'
 
     if slide_barcode:
-        images = [slide_barcode]
+        images = [{'barcode': slide_barcode, 'thumb': '', 'type': ''}]
         template = 'GenespotRE/camic_single.html'
 
     if request.POST.get('checked_list', None):
         images_obj = json.loads(request.POST.get('checked_list'))
 
-    if images_obj and 'tissue_slide_image' in images_obj:
-        images.extend(images_obj['tissue_slide_image'].keys())
+    if images_obj and 'slide_image' in images_obj:
+        for img_barcode in images_obj['slide_image'].keys():
+            slide_img = images_obj['slide_image'][img_barcode]
+            images.append({'barcode': img_barcode, 'thumb': slide_img['thumb'], 'type': slide_img['type']})
 
     context['barcodes'] = images
     context['camic_viewer'] = settings.CAMIC_VIEWER
+    context['img_thumb_url'] = settings.IMG_THUMBS_URL
 
     return render(request, template, context)
 
