@@ -291,7 +291,7 @@ require([
                         }
                     // tab/comma delimited barcode list
                     } else if(!checkContentValidity(fr.result)) {
-                        msg = "This file is not in a valid format. Please supply a JSON, comma-delimited, or tab-delimited file as specified in the Instructions.";
+                        msg = "This file is not in a valid format. Please supply a JSON, comma-delimited, or tab-delimited file in an appropriate format as specified in the Instructions.";
                     }
 
                     if(msg) {
