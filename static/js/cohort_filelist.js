@@ -672,8 +672,20 @@ require([
             },SUBSEQUENT_DELAY);
     };
 
-    $('.data-tab-content').on('click','.filter-panel input[type="checkbox"]',function(){
+    $('.data-tab-content').on('change','.filter-panel input[type="checkbox"]',function(){
         update_filters($(this));
+        update_displays($('ul.nav-tabs-files li.active a').data('file-type'));
+    });
+
+    // Click events for 'Check All/Uncheck All' in filter categories
+    $('.data-tab-content').on('click', '.check-all', function(){
+        $(this).parent().parent().siblings('.checkbox').find('input').prop('checked',true);
+        update_filters($($(this).parent().parent().siblings('.checkbox').find('input')[0]));
+        update_displays($('ul.nav-tabs-files li.active a').data('file-type'));
+    });
+    $('.data-tab-content').on('click', '.uncheck-all', function(){
+        $(this).parent().parent().siblings('.checkbox').find('input').prop('checked',false);
+        update_filters($($(this).parent().parent().siblings('.checkbox').find('input')[0]));
         update_displays($('ul.nav-tabs-files li.active a').data('file-type'));
     });
 
