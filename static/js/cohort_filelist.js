@@ -313,11 +313,11 @@ require([
         // Calculate the file total based on the reported counts for any given filter (data_format used here)
         if($(tab_selector).find('div[data-filter-build="'+build+'"] input[data-feature-name="data_format"]:checked').length <= 0) {
              $(tab_selector).find('div[data-filter-build="'+build+'"] input[data-feature-name="data_format"]').each(function(i) {
-               file_list_total += parseInt($(this).data('count'));
+               file_list_total += parseInt($(this).attr('data-count'));
             });
         } else {
             $(tab_selector).find('div[data-filter-build="'+build+'"] input[data-feature-name="data_format"]:checked').each(function(i) {
-               file_list_total += parseInt($(this).data('count'));
+               file_list_total += parseInt($(this).attr('data-count'));
             });
         }
 
@@ -654,6 +654,7 @@ require([
                         for(var j=0; j < this_attr.values.length; j++) {
                             var this_val = this_attr.values[j];
                             $('#'+active_tab+'-'+data.build+'-'+this_attr.name+'-'+this_val.value).siblings('span.count').html('('+this_val.count+')');
+                            $('#'+active_tab+'-'+data.build+'-'+this_attr.name+'-'+this_val.value).attr('data-count',this_val.count);
                         }
                     }
                     update_download_link(active_tab);
