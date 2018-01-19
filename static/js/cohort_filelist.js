@@ -311,14 +311,21 @@ require([
         file_list_total = 0;
 
         // Calculate the file total based on the reported counts for any given filter (data_format used here)
-        if($('input[data-feature-name="all-data_format"]:checked').length <= 0) {
-             $('input[data-feature-name="all-data_format"]').each(function(i) {
-               file_list_total += parseInt($(this).data('count'));
+        if($(tab_selector).find('div[data-filter-build="'+build+'"] input[data-feature-name="data_format"]:checked').length <= 0) {
+             $(tab_selector).find('div[data-filter-build="'+build+'"] input[data-feature-name="data_format"]').each(function(i) {
+               file_list_total += parseInt($(this).attr('data-count'));
             });
         } else {
-            $('input[data-feature-name="all-data_format"]:checked').each(function(i) {
-               file_list_total += parseInt($(this).data('count'));
+            $(tab_selector).find('div[data-filter-build="'+build+'"] input[data-feature-name="data_format"]:checked').each(function(i) {
+               file_list_total += parseInt($(this).attr('data-count'));
             });
+        }
+
+        if(file_list_total <= 0) {
+            // Can't download something that isn't there
+            $(tab_selector).find('.download-link .btn').attr('disabled','disabled');
+        } else {
+            $(tab_selector).find('.download-link .btn').removeAttr('disabled');
         }
 
         $(tab_selector).find('.file-list-total').text(file_list_total);
@@ -400,7 +407,7 @@ require([
         if(files.length <= 0) {
             $(tab_selector).find('.filelist-panel table tbody').append(
                 '<tr>' +
-                '<td colspan="6"><i>No file listings found in this cohort for this build.</i></td><td></td>'
+                '<td colspan="7"><i>No file listings found in this cohort for this build.</i></td><td></td>'
             );
         }
 
@@ -647,6 +654,7 @@ require([
                         for(var j=0; j < this_attr.values.length; j++) {
                             var this_val = this_attr.values[j];
                             $('#'+active_tab+'-'+data.build+'-'+this_attr.name+'-'+this_val.value).siblings('span.count').html('('+this_val.count+')');
+                            $('#'+active_tab+'-'+data.build+'-'+this_attr.name+'-'+this_val.value).attr('data-count',this_val.count);
                         }
                     }
                     update_download_link(active_tab);
