@@ -49,8 +49,14 @@ require([
     var UPDATE_QUEUE = [];
 
     var SELECTED_FILTERS = {
-        'all': {},
-        'igv': {}
+        'all': {
+            'HG19': {},
+            'HG38': {}
+        },
+        'igv': {
+            'HG19': {},
+            'HG38': {}
+        }
     };
         
     var file_list_total = 0;
@@ -134,26 +140,6 @@ require([
         }
     };
 
-    var update_on_platform_filter_change = function(e) {
-
-        var totalSel = 0;
-
-        if($('input[name="platform-selected"]:checked').length <= 0) {
-            $('input[name="platform-selected"]').each(function(i) {
-               totalSel += parseInt($(this).attr('data-platform-count'));
-            });
-        } else {
-            $('input[name="platform-selected"]:checked').each(function(i) {
-               totalSel += parseInt($(this).attr('data-platform-count'));
-            });
-        }
-        $('.file-list-limit').text(FILE_LIST_MAX);
-        $('.file-list-total').text(totalSel);
-
-        if(totalSel < FILE_LIST_MAX) {
-            $('#file-list-warning').hide();
-        }
-    };
 
     function build_igv_widgets() {
         // Build the file tokenizer for IGV
@@ -278,6 +264,7 @@ require([
                 success : function (data) {
                     data_tab_content_div.append(data);
 
+                    update_download_link(active_tab);
                     update_table_display(active_tab, {'total_file_count': total_files, 'file_list': file_listing});
 
                     $('.tab-pane.data-tab').each(function() { $(this).removeClass('active'); });
@@ -317,17 +304,10 @@ require([
         }
     });
 
-    var update_table = function (active_tab) {
+    function update_download_link(active_tab) {
         var tab_selector = '#'+active_tab+'-files';
-        if(active_tab == 'igv'){
-            $('#igv-build').attr('value',$(tab_selector).find('.build :selected').val());
-        }
+        var build = $(tab_selector).find('.build :selected').val();
 
-        // Gather filters here
-        var filters = {};
-
-        var url = ajax_update_url[active_tab] + '?page=' + page;
-        
         file_list_total = 0;
 
         // Calculate the file total based on the reported counts for any given filter (data_format used here)
@@ -339,33 +319,62 @@ require([
             $('input[data-feature-name="all-data_format"]:checked').each(function(i) {
                file_list_total += parseInt($(this).data('count'));
             });
-        }        
+        }
 
-        if (Object.keys(SELECTED_FILTERS[active_tab]).length >0) {
-            var filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab]));
-            url += '&'+filter_args;
+        $(tab_selector).find('.file-list-total').text(file_list_total);
+
+        if(file_list_total < FILE_LIST_MAX) {
+            $(tab_selector).find('.file-list-warning').hide();
+        } else {
+            $(tab_selector).find('.file-list-warning').show();
+        }
+
+        if (SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab][build]).length >0) {
+            var filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab][build]));
             $(tab_selector).find('.download-link').attr('href', download_url + '?' + filter_args + '&total=' + file_list_total);
         } else {
             $(tab_selector).find('.download-link').attr('href', download_url + '?total=' + file_list_total)
         }
 
         if(active_tab !== 'camic') {
-            $(tab_selector).find('.download-link').attr('href',$(tab_selector).find('.download-link').attr('href')+'&build='+$(tab_selector).find('.build :selected').val());
+            $(tab_selector).find('.download-link').attr('href',$(tab_selector).find('.download-link').attr('href')+'&build='+build);
+        }
+    };
+
+    var update_table = function (active_tab) {
+        var tab_selector = '#'+active_tab+'-files';
+        var build = $(tab_selector).find('.build :selected').val();
+        if(active_tab == 'igv'){
+            $('#igv-build').attr('value',build);
+        }
+
+        // Gather filters here
+        var filters = {};
+
+        var url = ajax_update_url[active_tab] + '?page=' + page;
+
+        if (SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab][build]).length >0) {
+            var filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab][build]));
+            url += '&'+filter_args;
+        }
+
+        if(active_tab !== 'camic') {
             url += '&build='+$(tab_selector).find('.build :selected').val();
         }
 
         $(tab_selector).find('.prev-page').addClass('disabled');
         $(tab_selector).find('.next-page').addClass('disabled');
-        $(tab_selector).find('.content-panel .spinner i').removeClass('hidden');
+        $(tab_selector).find('.filelist-panel .spinner i').removeClass('hidden');
 
         $.ajax({
             url: url,
             success: function (data) {
+                update_download_link(active_tab);
                 update_table_display(active_tab,data);
             },
             error: function(e) {
                 console.log(e);
-                $(tab_selector).find('.content-panel .spinner i').addClass('hidden');
+                $(tab_selector).find('.filelist-panel .spinner i').addClass('hidden');
             }
         });
 
@@ -416,21 +425,21 @@ require([
                         val = files[i]['cloudstorage_location'] + ';' + files[i]['cloudstorage_location'].substring(0, files[i]['cloudstorage_location'].lastIndexOf("/") + 1) + files[i]['index_name'] + ',' + files[i]['sample'];
                         dataTypeName = "gcs_bam";
                         label = "IGV";
-                        checkbox_inputs += '<label><input class="igv" type="checkbox" token-label="' + tokenLabel + '" program="' + files[i]['program'] + '" name="' + dataTypeName + '" data-type="' + dataTypeName + '" value="' + val + '"';
+                        checkbox_inputs += '<input class="igv" type="checkbox" token-label="' + tokenLabel + '" program="' + files[i]['program'] + '" name="' + dataTypeName + '" data-type="' + dataTypeName + '" value="' + val + '"';
                         if (disable) {
                             checkbox_inputs += ' disabled="disabled"';
                         }
-                        checkbox_inputs += '> '+label+'</label>';
+                        checkbox_inputs += '>';
                     } else if(active_tab === 'camic' && (files[i]['datatype'] == 'Tissue slide image' || files[i]['datatype'] == 'Diagnostic image')) {
                         val = files[i]['cloudstorage_location'].split('/').pop().split(/\./).shift();
                         files[i]['thumbnail'] = files[i]['cloudstorage_location'].split('/').slice(-2)[0];
                         dataTypeName = "slide_image";
                         label = "caMicro";
-                        checkbox_inputs += '<label><input class="cam" type="checkbox" name="' + dataTypeName + '" data-thumb="'+files[i]['thumbnail']+'" data-sub-type="'+files[i]['datatype']+'" data-type="' + dataTypeName + '" value="' + val + '"';
+                        checkbox_inputs += '<input class="cam" type="checkbox" name="' + dataTypeName + '" data-thumb="'+files[i]['thumbnail']+'" data-sub-type="'+files[i]['datatype']+'" data-type="' + dataTypeName + '" value="' + val + '"';
                         if (disable) {
                             checkbox_inputs += ' disabled="disabled"';
                         }
-                        checkbox_inputs += '> '+label+'</label>';
+                        checkbox_inputs += '>';
                     }
                 }
                 files[i]['file_viewer'] = checkbox_inputs;
@@ -488,10 +497,11 @@ require([
                 $('#selected-files-cam').tokenfield('setTokens',selCamFiles.toTokens());
             } else {
                 if(self.is(':checked')) {
+                    var build = $(tab_selector).find('.build :selected').val();
                     selIgvFiles[self.attr('data-type')][self.attr('value')] = {
-                        'label': self.attr('token-label') + ' ['+$('#build :selected').val()+']',
+                        'label': self.attr('token-label') + ' ['+build+']',
                         'program': self.attr('program'),
-                        'build': $('#build :selected').val()
+                        'build': build
                     };
                     $('#selected-files-igv-tokenfield').hide();
                 } else {
@@ -512,19 +522,8 @@ require([
         if (parseInt(page) * 20 > total_files) {
             $(tab_selector).find('.next-page').addClass('disabled');
         }
-        $(tab_selector).find('.content-panel .spinner i').addClass('hidden');
+        $(tab_selector).find('.filelist-panel .spinner i').addClass('hidden');
 
-
-        var build = $(tab_selector).find('.build :selected').val();
-        // Update the platform build set
-        if($('#platform-'+build).length <= 0) {
-            // We need to make this selection set
-            $('#platforms-panel').append(
-                '<ul class="search-checkbox-list platform-counts" id="platform-'+build+'"></ul>'
-            );
-        }
-
-        $('#platform-'+build).show();
     };
 
     // Next page button click
@@ -553,81 +552,61 @@ require([
         $(this).parent().hide();
     });
 
-    $('#build').on('change',function(){
-        update_table();
+    $('.data-tab-content').on('change','.build', function(){
+        var this_tab = $(this).parents('.data-tab').data('file-type');
+        $('#'+this_tab+'-files').find('.filter-build-panel').hide();
+        update_displays(this_tab);
+        $('#'+this_tab+'-filter-panel-'+$(this).find(':selected').val()).show();
+
+        if(this_tab == 'igv') {
+            // Remove any selected files not from this build
+            var new_build = $('#'+this_tab+'-files').find('.build :selected').val();
+            var selCount = Object.keys(selIgvFiles.gcs_bam).length;
+            for (var i in selIgvFiles.gcs_bam) {
+                if (selIgvFiles.gcs_bam.hasOwnProperty(i)) {
+                    if (selIgvFiles.gcs_bam[i].build !== new_build) {
+                        delete selIgvFiles.gcs_bam[i];
+                        $('.filelist-panel input[value="' + i + '"').prop('checked', false);
+                    }
+                }
+            }
+            if (Object.keys(selIgvFiles.gcs_bam).length !== selCount) {
+                $('#selected-files-igv').tokenfield('setTokens', selIgvFiles.toTokens());
+                update_on_selex_change();
+            }
+        }
     });
 
-    $('#filter-panel input[type="checkbox"]').on('change', function() {
-        page = 1;
-
-        var totalSel = 0;
-
-        if($('input[name="platform-selected"]:checked').length <= 0) {
-            $('input[name="platform-selected"]').each(function(i) {
-               totalSel += parseInt($(this).attr('data-platform-count'));
-            });
-        } else {
-            $('input[name="platform-selected"]:checked').each(function(i) {
-               totalSel += parseInt($(this).attr('data-platform-count'));
-            });
-        }
-
-        $('.file-list-total').text(totalSel);
-
-        if(totalSel < FILE_LIST_MAX) {
-            $('#file-list-warning').hide();
-        }
-
-        update_table();
-    });
-
-    $('#download-link').on('click',function(e) {
-
-        update_on_platform_filter_change();
+    $('.data-tab-content').on('click','.download-link',function(e) {
+        var type_tab = $(this).parents('.data-tab.active')[0];
+        var active_tab = $(type_tab).data('file-type');
 
         if(parseInt($('.file-list-total').text()) > FILE_LIST_MAX) {
-            $('#file-list-warning').show();
+            $('#'+active_tab+'-files').find('.file-list-warning').show();
             e.preventDefault();
             return false;
         } else {
-            $('#file-list-warning').hide();
-        }
-    });
-
-    $('#build').on('change',function(){
-        // Remove any selected files not from this build
-        var new_build = $('#build :selected').val();
-        var selCount = Object.keys(selIgvFiles.gcs_bam).length;
-        for(var i in selIgvFiles.gcs_bam) {
-            if(selIgvFiles.gcs_bam.hasOwnProperty(i)) {
-                if(selIgvFiles.gcs_bam[i].build !== new_build){
-                    delete selIgvFiles.gcs_bam[i];
-                    $('.filelist-panel input[value="'+i+'"').prop('checked',false);
-                }
-            }
-        }
-        if(Object.keys(selIgvFiles.gcs_bam).length !== selCount) {
-            $('#selected-files-igv').tokenfield('setTokens',selIgvFiles.toTokens());
-            update_on_selex_change();
+            $('#'+active_tab+'-files').find('.file-list-warning').hide();
         }
     });
 
     function update_filters(checked) {
         var type_tab = checked.parents('.data-tab.active')[0];
         var active_tab = $(type_tab).data('file-type');
-        SELECTED_FILTERS[active_tab] = {};
+        var build = $('#'+active_tab+'-files').find('.build :selected').val();
+        SELECTED_FILTERS[active_tab][build] = {};
 
-        $(type_tab).find('input[type="checkbox"]:checked').each(function(){
-            if(!SELECTED_FILTERS[active_tab][$(this).data('feature-name')]) {
-                SELECTED_FILTERS[active_tab][$(this).data('feature-name')] = [];
+        $(type_tab).find('div[data-filter-build="'+build+'"] input[type="checkbox"]:checked').each(function(){
+            if(!SELECTED_FILTERS[active_tab][build][$(this).data('feature-name')]) {
+                SELECTED_FILTERS[active_tab][build][$(this).data('feature-name')] = [];
             }
-            SELECTED_FILTERS[active_tab][$(this).data('feature-name')].push($(this).data('value-name'));
+            SELECTED_FILTERS[active_tab][build][$(this).data('feature-name')].push($(this).data('value-name'));
         });
     };
 
-    function enqueueUpdate(){
+    function enqueueUpdate(active_tab){
         UPDATE_QUEUE.push(function(){
-            update_displays();
+            update_displays(active_tab);
         });
     };
 
@@ -642,7 +621,7 @@ require([
         if(UPDATE_PENDING) {
             // We only need to queue one update because our updates don't pull the filter set until they run
             if(UPDATE_QUEUE.length <= 0) {
-                enqueueUpdate();
+                enqueueUpdate(active_tab);
             }
             return;
         }
@@ -652,11 +631,13 @@ require([
 
         // ...and replace it with a new one
         update_displays_thread = setTimeout(function(){
-            var url = ajax_update_url[active_tab] + '?build=' + $('#'+active_tab+'-files').find('.build :selected').val();
-            if(Object.keys(SELECTED_FILTERS[active_tab]).length > 0) {
-                url += '&filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab]));
+            var build = $('#'+active_tab+'-files').find('.build :selected').val();
+            var url = ajax_update_url[active_tab] + '?build=' + build;
+            if(SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab][build]).length > 0) {
+                url += '&filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab][build]));
             }
             UPDATE_PENDING = true;
+            $('#'+active_tab+'-files').find('.filelist-panel .spinner i').removeClass('hidden');
             $.ajax({
                 type: 'GET',
                 url: url,
@@ -665,9 +646,10 @@ require([
                         var this_attr = data.metadata_data_attr[i];
                         for(var j=0; j < this_attr.values.length; j++) {
                             var this_val = this_attr.values[j];
-                            $('#'+active_tab+'-'+this_attr.name+'-'+this_val.value).siblings('span.count').html('('+this_val.count+')');
+                            $('#'+active_tab+'-'+data.build+'-'+this_attr.name+'-'+this_val.value).siblings('span.count').html('('+this_val.count+')');
                         }
                     }
+                    update_download_link(active_tab);
                     update_table_display(active_tab, data);
                 },
                 error: function() {
