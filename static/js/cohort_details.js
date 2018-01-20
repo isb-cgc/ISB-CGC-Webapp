@@ -1080,7 +1080,6 @@ require([
                 }
             })
         }
-
     };
 
     // Check to see if we need 'Show More' buttons for details and filter panels (we may not)

@@ -63,7 +63,7 @@ class METHSearcher(object):
             'name': 'genomic_build',
             'label': 'Genomic Build',
             'static': True,
-            'values': ['hg19']
+            'values': ['hg19', 'hg38']
         }
     ]
 

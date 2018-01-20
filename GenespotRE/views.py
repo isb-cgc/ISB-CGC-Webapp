@@ -311,7 +311,7 @@ def get_image_data(request, slide_barcode):
     else:
         try:
             img_data_query = """
-                SELECT slide_barcode, OriginalWidth AS width, OriginalHeight AS height, mpp_x, mpp_y, GCSurl
+                SELECT slide_barcode, level_0__width AS width, level_0__height AS height, mpp_x, mpp_y, GCSurl
                 FROM [isb-cgc:metadata.TCGA_slide_images]
                 WHERE slide_barcode = '{}';
             """
@@ -365,17 +365,20 @@ def camic(request, slide_barcode=None):
     template = 'GenespotRE/camic.html'
 
     if slide_barcode:
-        images = [slide_barcode]
+        images = [{'barcode': slide_barcode, 'thumb': '', 'type': ''}]
         template = 'GenespotRE/camic_single.html'
 
     if request.POST.get('checked_list', None):
         images_obj = json.loads(request.POST.get('checked_list'))
 
-    if images_obj and 'tissue_slide_image' in images_obj:
-        images.extend(images_obj['tissue_slide_image'].keys())
+    if images_obj and 'slide_image' in images_obj:
+        for img_barcode in images_obj['slide_image'].keys():
+            slide_img = images_obj['slide_image'][img_barcode]
+            images.append({'barcode': img_barcode, 'thumb': slide_img['thumb'], 'type': slide_img['type']})
 
     context['barcodes'] = images
     context['camic_viewer'] = settings.CAMIC_VIEWER
+    context['img_thumb_url'] = settings.IMG_THUMBS_URL
 
     return render(request, template, context)
 

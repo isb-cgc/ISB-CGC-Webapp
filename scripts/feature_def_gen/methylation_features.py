@@ -85,8 +85,7 @@ class METHDataSourceConfig(object):
                     "chromosome": c,
                     "internal_table_id": table_template['genomic_build'] + '_chr' + c.lower()
                 })
-
-            self.data_table_list.append(METHTableConfig.from_dict(table_config))
+                self.data_table_list.append(METHTableConfig.from_dict(table_config))
 
     @classmethod
     def from_dict(cls, param):
