@@ -112,7 +112,7 @@ class METHDataQueryHandler(object):
 
     @classmethod
     def process_data_point(cls, data_point):
-        return data_point['beta_value']
+        return data_point['value']
 
     def build_query_for_program(self, feature_def, cohort_table, cohort_id_array, project_id_array):
         """

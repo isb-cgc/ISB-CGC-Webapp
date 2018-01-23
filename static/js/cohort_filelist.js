@@ -390,6 +390,7 @@ require([
     function update_table_display(active_tab, data) {
         var tab_selector = '#'+active_tab+'-files';
         var total_files = data['total_file_count'];
+        $(tab_selector).find('.showing').text((total_files < 20 ? total_files : "20"));
         var total_pages = Math.ceil(total_files / 20);
         if(total_pages <= 0) {
             $(tab_selector).find('.file-page-count').hide();
