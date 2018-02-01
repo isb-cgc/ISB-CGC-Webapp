@@ -1,4 +1,4 @@
-#cohort-details
+#cohort-details, #cohort-filelist
 
     #placeholder
         .panel-body
@@ -109,7 +109,7 @@
             font-size: 12.7px
             &.program-tab
                 width: (100% / 4)
-            &.filter-tab
+            &.filter-tab, &.file-browser-tab
                 width: (100% / 3)
             &:first-child a
                 border-top-left-radius: 3px
@@ -131,7 +131,7 @@
         .checks
             float: right
             display: block
-            width: 50%
+            width: 55%
         .tabpanel
             border-top-left-radius: 3px
             border-top-right-radius: 3px
@@ -381,9 +381,13 @@
 
 
 #cohort-filelist
-    padding-top: 15px
-    margin-top: 115px
-
+    #placeholder
+        .panel-body
+            height: 500px
+            position: relative
+            overflow: hidden
+    .page-action-group
+        margin-top: 0px
     .menu-bar h3
         margin-top: 0px
 
@@ -392,6 +396,10 @@
 
     .hidden_form_value
         display: none
+
+    .filelist-panel
+        h4
+            display: inline
 
     .file-list
         .alert-dismissable
@@ -439,8 +447,8 @@
                 width: 90px
             td:last-child i
                 color: $isb-success
-    input
-        margin-left: 5px
+        input
+            margin-left: 5px
 
     .nav-tabs
         li,li.active
@@ -524,8 +532,13 @@ span.code
 
 #camic, #camic-single
     .camic-tabs
+        li a
+            font-size: 13px
+            font-weight: 700
         li:not(:last-child)
             margin-bottom: 10px
+        img
+            margin-top: 5px
     iframe
         min-height: 900px
         margin-top: 10px

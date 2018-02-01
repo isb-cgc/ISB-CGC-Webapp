@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2015, Institute for Systems Biology
+ * Copyright 2018, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -482,5 +482,11 @@ require([
     // Prevent multiple submissions of any form
     $('form').on('submit',function(){
         $(this).find('button[type="submit"]').attr('disabled','disabled');
+    });
+
+    // If this is a Data Source/Cohorts load for a worksheet, we need to add the pre-checked cohorts,
+    // if any, to the various form entities
+    $('input.cohort:checked').each(function(){
+        $('#cohort-apply-to-workbook').append($('<input>', {type: 'hidden', name: 'cohorts', value: $(this).val()}));
     });
 });

@@ -27,69 +27,69 @@
 {% block page_name %}cohort-details{% endblock %}
 
 {% block page_header %}
-<link type="text/css" rel="stylesheet" href="{% static 'css/token-typeahead.css' %}" />
+    <link type="text/css" rel="stylesheet" href="{% static 'css/token-typeahead.css' %}" />
 
-<div class="container">
-    <ol class="breadcrumb">
-        <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
-        <li><a href="{% url 'cohort_list' %}">Saved Cohorts</a></li>
-    </ol>
-    <h1 class="page-header">{{ cohort.name }}</h1>
-    <label id="cohort-name-label" for="edit-cohort-name" class="hidden-label">Cohort Name:</label>
-    <input id="edit-cohort-name" type="text" name="cohort-name" value="{{ cohort.name }}" class="form-control input-lg space-top-15" style="display: none" aria-labelledby="cohort-name-label"/>
-    <div class="page-action-group">
+    <div class="container">
+        <ol class="breadcrumb">
+            <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+            <li><a href="{% url 'cohort_list' %}">Saved Cohorts</a></li>
+        </ol>
+        <h1 class="page-header">{{ cohort.name }}</h1>
 
-        <ul id="default-cohort-menu">
-            {% if cohort.perm.perm != 'OWNER' %}
-                <li class="menu-item"><h4>Owner: {% if cohort.is_public %}ISB-CGC{% else %}{{ cohort.owner.first_name|title}} {{ cohort.owner.last_name|title }}{% endif %}</h4></li>
-                <li class="separator"></li>
-            {% endif %}
-            <li class="menu-item">
-                <form action="{% url 'worksheet_create_with_cohort' %}" method="POST">
-                    {% csrf_token %}
-                    <input type="hidden" name="cohort_id" value="{{ cohort.id}}">
-                    <button class="btn btn-primary" type="submit">New Workbook</button>
-                </form>
-            </li>
-            <li class="separator"></li>
-            {% if cohort.perm.perm == 'OWNER' %}
-                <li class="menu-item"><button class="btn btn-info" id="edit-cohort-btn">Edit</button> </li>
-                <input id="cohort-mode" type="hidden" value="VIEW">
-            {% endif %}
-            <li class="menu-item"><button class="show-flyout btn btn-info" title="Show Comments">Comments</button></li>
-            <li class="menu-item"><a href="{% url 'clone_cohort' cohort.id %}" class="btn btn-info clone-cohort-btn" title="Duplicate this cohort">Duplicate</a></li>
-            <li class="menu-item"><button class="btn btn-info" data-toggle="modal" data-target="{% if cohort.perm.perm == 'OWNER' %}#delete-cohort-modal{% else %}#remove-cohort-modal{% endif %}">
-                {% if cohort.perm.perm == 'OWNER' %}
-                    Delete
-                {% else %}
-                    Remove
+        <label id="cohort-name-label" for="edit-cohort-name" class="hidden-label">Cohort Name:</label>
+        <input id="edit-cohort-name" type="text" name="cohort-name" value="{{ cohort.name }}" class="form-control input-lg space-top-15" style="display: none" aria-labelledby="cohort-name-label"/>
+
+        <div class="page-action-group">
+            <ul id="default-cohort-menu">
+                {% if cohort.perm.perm != 'OWNER' %}
+                    <li class="menu-item"><h4>Owner: {% if cohort.is_public %}ISB-CGC{% else %}{{ cohort.owner.first_name|title}} {{ cohort.owner.last_name|title }}{% endif %}</h4></li>
+                    <li class="separator"></li>
                 {% endif %}
-            </button></li>
-            <li class="separator"></li>
-            <li class="menu-item"><a href="{% url 'cohort_filelist' cohort.id %}" class="btn btn-info view-files-btn" title="View this cohort's file list">View Files</a></li>
-            <li class="menu-item"><a href="{%  url 'download_ids' cohort.id %}" class="btn btn-info download-ids-btn" title="Download this cohort's patient and sample IDs">Download IDs</a></li>
-            {% if cohort.perm.perm == 'OWNER' %}
-            <li class="separator"></li>
-            <li class="menu-item"><button class="btn btn-info" data-toggle="modal" data-target="#share-cohort-modal">Share</button></li>
-            <li class="menu-item"><button class="btn btn-info" data-toggle="modal" data-target="#export-cohort-modal" title="Export this cohort to a BigQuery table">Export to BQ</button></li>
-            {% endif %}
-            {% if not cohort.is_public and cohort.perm.perm == 'OWNER' %}
-            <li class="separator"></li>
-            <li class="menu-item"><a data-target="#share-cohort-modal" data-toggle="modal" class="btn btn-link">Shared with (<span class="share-count">{{ shared_with_users|length}}</span>)</a></li>
-            {% endif %}
-        </ul>
-        <ul id="edit-cohort-menu" style="display: none">
-            {% if cohort.perm.perm == 'OWNER' %}
-                <li class="menu-item"><button class="btn btn-primary" data-toggle="modal" data-target="#apply-edits-modal">Save Changes</button></li>
-                <li class="menu-item"><button class="btn btn-link" id="cancel-edit-cohort-btn">Cancel</button></li>
-            {% endif %}
-        </ul>
+                <li class="menu-item">
+                    <form action="{% url 'worksheet_create_with_cohort' %}" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="cohort_id" value="{{ cohort.id}}">
+                        <button class="btn btn-primary" type="submit">New Workbook</button>
+                    </form>
+                </li>
+                <li class="separator"></li>
+                {% if cohort.perm.perm == 'OWNER' %}
+                    <li class="menu-item"><button class="btn btn-info" id="edit-cohort-btn">Edit</button> </li>
+                    <input id="cohort-mode" type="hidden" value="VIEW">
+                {% endif %}
+                <li class="menu-item"><button class="show-flyout btn btn-info" title="Show Comments">Comments</button></li>
+                <li class="menu-item"><a href="{% url 'clone_cohort' cohort.id %}" class="btn btn-info clone-cohort-btn" title="Duplicate this cohort">Duplicate</a></li>
+                <li class="menu-item"><button class="btn btn-info" data-toggle="modal" data-target="{% if cohort.perm.perm == 'OWNER' %}#delete-cohort-modal{% else %}#remove-cohort-modal{% endif %}">
+                    {% if cohort.perm.perm == 'OWNER' %}
+                        Delete
+                    {% else %}
+                        Remove
+                    {% endif %}
+                </button></li>
+                <li class="separator"></li>
+                <li class="menu-item"><a href="{% url 'cohort_filelist' cohort.id %}" class="btn btn-info view-files-btn" title="View this cohort's file list">File Browser</a></li>
+                <li class="menu-item"><a href="{%  url 'download_ids' cohort.id %}" class="btn btn-info download-ids-btn" title="Download this cohort's patient and sample IDs">Download IDs</a></li>
+                {% if cohort.perm.perm == 'OWNER' %}
+                <li class="separator"></li>
+                <li class="menu-item"><button class="btn btn-info" data-toggle="modal" data-target="#share-cohort-modal">Share</button></li>
+                <li class="menu-item"><button class="btn btn-info" data-toggle="modal" data-target="#export-cohort-modal" title="Export this cohort to a BigQuery table">Export to BQ</button></li>
+                {% endif %}
+                {% if not cohort.is_public and cohort.perm.perm == 'OWNER' %}
+                <li class="separator"></li>
+                <li class="menu-item"><a data-target="#share-cohort-modal" data-toggle="modal" class="btn btn-link">Shared with (<span class="share-count">{{ shared_with_users|length}}</span>)</a></li>
+                {% endif %}
+            </ul>
+            <ul id="edit-cohort-menu" style="display: none">
+                {% if cohort.perm.perm == 'OWNER' %}
+                    <li class="menu-item"><button class="btn btn-primary" data-toggle="modal" data-target="#apply-edits-modal">Save Changes</button></li>
+                    <li class="menu-item"><button class="btn btn-link" id="cancel-edit-cohort-btn">Cancel</button></li>
+                {% endif %}
+            </ul>
+        </div>
     </div>
-</div>
 {% endblock %}
 
 {% block content %}
-
     <div class="row">
         <div class="col-lg-12">
             <div class="panel panel-default">
