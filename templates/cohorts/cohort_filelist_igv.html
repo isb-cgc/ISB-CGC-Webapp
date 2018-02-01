@@ -1,0 +1,143 @@
+<div id="igv-files" class="tab-pane data-tab" data-file-type="igv" role="tabpanel">
+    <div id="igv-filter-panel" class="col-lg-3 col-md-3 col-sm-3">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <label for="build">Build</label>
+                <select aria-label="Build" id="igv-build" class="form-control build">
+                    <option value="HG38" {% if build == 'HG38' %}selected{% endif %}>HG38</option>
+                    <option value="HG19" {% if build == 'HG19' %}selected{% endif %}>HG19</option>
+                </select>
+            </div>
+        </div>
+        <div class="panel panel-default filter-panel">
+            {% for attr_build, vals in metadata_data_attr.items %}
+            <div class="panel-body tab-content filter-build-panel" data-filter-build="{{ attr_build }}" id="igv-filter-panel-{{ attr_build }}" {% if build != attr_build %}style="display: none;"{% endif %}>
+                <ul class="list-group" id="metadata-data-accordian-igv" role="tablist" aria-multiselectable="true">
+                    {% for attr in vals %}
+                        <li class="list-group-item">
+                            <div id="heading-igv-{{ attr_build }}-{{attr.name}}" class="list-group-item__heading">
+                                <a role="button" data-toggle="collapse" data-parent="#metadata-data-accordian-igv" href="#collapse-igv-{{ attr_build }}-{{ attr.name }}" aria-expanded="false" aria-controls="collapse-igv-{{ attr_build }}-{{ attr.name }}">
+                                    <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr.displ_name }}
+                                </a>
+                            </div>
+                            <div id="collapse-igv-{{ attr_build }}-{{ attr.name }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" data-feature-type="donor"
+                                 aria-labelledby="heading-igv-{{ attr_build }}-{{ attr.name }}" data-feature-name="{{ attr.name }}" data-feature-displ-name="{{ attr.displ_name }}">
+                                <ul class="search-checkbox-list" id="igv-{{ attr.name }}">
+                                    {% with attr.values|how_many_more:6 as num_more %}
+                                        {% for v in attr.values|check_for_order:attr.name %}
+                                            {% if forloop.counter0 < 6 %}
+                                                <li class="checkbox">
+                                                    <label title="{% if v.tooltip %}{{ v.tooltip }}{% else %} {% endif %}">
+                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="igv-{{ attr_build }}-{{ attr.name }}-{{ v.value }}"
+                                                               data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
+                                                        {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}
+                                                         <span class="count">({{ v.count }})</span>
+                                                    </label>
+                                                </li>
+                                            {% elif forloop.counter0 == 6 and num_more > 0 %}
+                                                <p class="more-checks"><a class="show-more">{{ num_more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                <li class="extra-values checkbox" style="display:none;">
+                                                    <label title="{% if v.tooltip %}{{ v.tooltip }}{% else %} {% endif %}">
+                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="igv-{{ attr_build }}-{{ attr.name}}-{{ v.value }}"
+                                                               data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
+                                                        {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.name }}{% endif %}
+                                                         <span class="count">({{ v.count }})</span>
+                                                    </label>
+                                                </li>
+                                            {% else %}
+                                                <li class="extra-values checkbox" style="display:none;">
+                                                    <label title="{% if v.tooltip %}{{ v.tooltip }}{% else %} {% endif %}">
+                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="igv-{{ attr_build }}-{{ attr.name }}-{{ v.value }}"
+                                                               data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
+                                                        {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.name }}{% endif %}
+                                                         <span class="count">({{ v.count }})</span>
+                                                    </label>
+                                                </li>
+                                            {% endif %}
+                                        {% endfor %}
+                                        {% if num_more > 0 %}
+                                            <p class="less-checks" style="display: none;"><a class="show-less">less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                        {% endif %}
+                                    {% endwith %}
+                                </ul>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div id="igv-file-panel" class="col-lg-9 col-md-9 col-sm-9" role="tabpanel">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <input type="submit" form ="view-igv" value="Launch IGV" class="btn btn-primary pull-right igv" />
+                <h4>Selected BAM Files</h4>
+                <p><i>Note: Files viewed in IGV must all be for the same build.</i></p>
+            </div>
+            <div class="panel-body file-list">
+                <p><span class="selected-count-igv">0</span> file(s) selected (<span id="selected-file-limit-igv">limit <span class="file-limit-igv file-limit">#</span></span>)</p>
+                <div id="tokenfield-holder-igv">
+                    <!-- "IGV selected files tokenizer" -->
+                    <textarea name="selected-files-igv" class="form-control tokenfield" id="selected-files-igv" placeholder="Select files"></textarea>
+                    <form id="view-igv" method="POST" action="{% url 'igv' %}" target="_blank">
+                        <input type="text" class="hidden_form_value" id="checked_list_input" name="checked_list" data-type="checked_list">
+                        <input type="text" class="hidden_form_value" id="igv-build" name="build">
+                        {% csrf_token %}
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="filelist-panel panel">
+            <div class="alert alert-warning alert-dismissable file-list-warning" style="display: none;">
+                <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                The maximum number of files which can be downloaded in a list is <span class="file-list-limit">{{ sel_file_max }}</span>. Your selections currently total
+                <span class="file-list-total">#</span>. Please filter your list using the platform panel at the left (or make a smaller cohort) to limit the size of your file download list.
+            </div>
+            <div class="panel-heading">
+                <h4>File Listing</h4>
+            </div>
+            <div class="panel-body">
+                <p class="file-page-count">Showing <span class="showing">20</span> files. Page: <span class="page-num">1</span> of <span class="file-count">unknown</span> pages.</p>
+                <p class="no-file-page-count" style="display: none;">Showing 0 files.</p>
+                <div>
+                    <a role="button" class="btn btn-primary prev-page disabled">Previous Page</a>
+                    <a role="button" class="btn btn-primary next-page">Next Page</a>
+                    <span class="spinner"><i class="fa fa-spin fa-spinner hidden"></i></span>
+                </div>
+                <table class="table table-striped file-list-table" aria-label="File Listing Table">
+                    <thead>
+                        <tr>
+                            <th class="col-program">Program</th>
+                            <th class="col-barcode">Sample Barcode</th>
+                            <th class="col-diseasecode">Disease Code</th>
+                            <th class="col-exp-strategy">Exp. Strategy</th>
+                            <th class="col-platform">Platform</th>
+                            <th class="col-datacat">Data Category</th>
+                            <th class="col-datatype">Data Type</th>
+                            <th class="col-dataformat">Data Format</th>
+                            <th class="col-viewer">View</th>
+                        </tr>
+                    </thead>
+                    <colgroup>
+                        <col style="width: 8%">
+                        <col style="width: 17%">
+                        <col style="width: 8%">
+                        <col style="width: 10%">
+                        <col style="width: 12%">
+                        <col style="width: 16%">
+                        <col style="width: 8%">
+                        <col style="width: 8%">
+                        <col style="width: 8%">
+                    </colgroup>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var total_files = {{ total_file_count|safe }};
+    var file_listing = {{ file_list|tojson|safe }};
+</script>
