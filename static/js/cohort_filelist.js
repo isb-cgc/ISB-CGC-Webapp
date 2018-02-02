@@ -582,7 +582,7 @@ require([
                 $('#selected-files-igv').tokenfield('setTokens', selIgvFiles.toTokens());
                 update_on_selex_change();
             }
-            $('#igv-form-build').val(new_build);
+            $('#igv-form-build').attr("value",new_build);
         }
     });
 
