@@ -144,9 +144,9 @@ def create_metadata_vals_sproc(cursor):
         cursor.execute(metadata_vals_sproc_def)
 
     except Exception as e:
-        print >> sys.stdout, "[ERROR] Exception when making the metadata values sproc; it may not have been made!"
-        print >> sys.stdout, e
-        print >> sys.stdout, traceback.format_exc()
+        print >> sys.stderr, "[ERROR] Exception when making the metadata values sproc; it may not have been made"
+        print >> sys.stderr, e
+        print >> sys.stderr, traceback.format_exc()
 
 # Create the get_metadata_values stored procedure, which retrieves all the possible values of the attributes found in
 # metadata_samples for the indicated program.
@@ -354,6 +354,9 @@ def create_samples_shortlist_view(cursor):
         print >> sys.stdout, e
         print >> sys.stdout, traceback.format_exc()
 # *** DEPRECATED ***
+        print >> sys.stderr, "[ERROR] Exception when creating the metadata_samples shortlist view; it may not have been made"
+        print >> sys.stderr, e
+        print >> sys.stderr, traceback.format_exc()
 
 
 # Cohorts made prior to the release of user data will have null values in their project IDs for each sample
@@ -508,9 +511,9 @@ def fix_ccle(cursor):
             print >> sys.stdout, "[WARNING] Some CCLE samples still have the wrong project ID - double-check your database. (count: " + str(ccle_count) + ")"
 
     except Exception as e:
-        print >> sys.stdout, "[ERROR] Exception when fixing CCLE cohorts; they may not have been updated!"
-        print >> sys.stdout, e
-        print >> sys.stdout, traceback.format_exc()
+        print >> sys.stderr, "[ERROR] Exception when fixing CCLE cohorts; they may not have been updated!"
+        print >> sys.stderr, e
+        print >> sys.stderr, traceback.format_exc()
 
 
 def alter_metadata_tables(cursor):

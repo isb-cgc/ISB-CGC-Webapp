@@ -74,7 +74,6 @@ require([
     'd3tip',
     'select2'
 ], function ($, plot_factory, vizhelpers, _, base) {
-
     var savingComment = false;
 
     var plotReady = {
