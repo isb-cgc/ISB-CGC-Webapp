@@ -34,11 +34,11 @@
                     {% endfor %}
                 </ul>
                 <p>Your access is valid until:</p>
-                <p id="NIH_expiration">{% localtime off %}{{ user_details.NIH_assertion_expiration|date:'M d, Y, g:i a e' }}{% endlocaltime %} GMT</p>
+                <p id="NIH_expiration">{% localtime off %}{{ user_details.NIH_assertion_expiration|date:'M d, Y, g:i a e' }}{% endlocaltime %}</p>
                 <p><a href="{% url 'demo:saml_index' %}?sso">Extend controlled access period to 24 hours from now.</a></p>
             {% else %}
                 <p>Congratulations, {{ user_details.NIH_username }}! You are successfully authorized with dbGaP. Your access is valid until:</p>
-                <p id="NIH_expiration">{% localtime off %}{{ user_details.NIH_assertion_expiration|date:'M d, Y, g:i a e' }}{% endlocaltime %} GMT</p>
+                <p id="NIH_expiration">{% localtime off %}{{ user_details.NIH_assertion_expiration|date:'M d, Y, g:i a e' }}{% endlocaltime %}</p>
                 <p><a href="{% url 'demo:saml_index' %}?sso">Extend controlled access period to 24 hours from now.</a></p>
                 <p>We do not currently have any authorized datasets on record for this NIH username. If you believe this is in error, please contact dbGaP and inquire as to your status on the dataset whitelists.</p>
             {% endif %}
