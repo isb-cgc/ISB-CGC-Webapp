@@ -211,6 +211,7 @@ def index(request):
                     NIH_assertion_expiration = datetime.datetime.now() + datetime.timedelta(
                         seconds=login_expiration_seconds)
 
+                    logger.info("[STATUS] datetime.now: {}".format(str(datetime.datetime.now())))
                     logger.info("[STATUS] {} login set to expire on {}".format(NIH_username,str(NIH_assertion_expiration),))
 
                     updated_values = {
