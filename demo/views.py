@@ -208,10 +208,10 @@ def index(request):
 
                     saml_response = None if 'SAMLResponse' not in req['post_data'] else req['post_data']['SAMLResponse']
                     saml_response = saml_response.replace('\r\n', '')
-                    NIH_assertion_expiration = datetime.datetime.now() + datetime.timedelta(
+                    NIH_assertion_expiration = datetime.datetime.utcnow() + datetime.timedelta(
                         seconds=login_expiration_seconds)
 
-                    logger.info("[STATUS] datetime.now: {}".format(str(datetime.datetime.now())))
+                    logger.info("[STATUS] datetime.now: {}".format(str(datetime.datetime.utcnow())))
                     logger.info("[STATUS] {} login set to expire on {}".format(NIH_username,str(NIH_assertion_expiration),))
 
                     updated_values = {
