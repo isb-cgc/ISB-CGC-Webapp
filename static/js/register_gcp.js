@@ -48,10 +48,20 @@ require([
     });
 
     $('#verify-gcp').on('submit', function(e) {
-        $('#verify-gcp-id').val($('#verify-gcp-id').val().trim());
 
         e.preventDefault();
         e.stopPropagation();
+
+        $('#verify-gcp-id').val($('#verify-gcp-id').val().trim());
+
+        if(!($('#verify-gcp-id').val().match(/^[A-Za-z][A-Za-z0-9]*$|^[A-Za-z]([A-Za-z0-9]*\-?(?=[A-Za-z0-9]))*?[A-Za-z0-9]+$/))) {
+            $('#provided-gcp-id').text($('#verify-gcp-id').val());
+            $('#invalid-gcp-id').show();
+            return false;
+        } else {
+            $('#provided-gcp-id').val('');
+            $('#invalid-gcp-id').hide();
+        }
 
         var $this = $(this);
         var fields = $this.serialize();
@@ -127,6 +137,10 @@ require([
                 }
             }
         });
+    });
+
+    $('button.instructions').on('click',function(){
+        $(this).siblings('div.instructions').is(':visible') ? $(this).siblings('div.instructions').hide() : $(this).siblings('div.instructions').show();
     });
 
 });

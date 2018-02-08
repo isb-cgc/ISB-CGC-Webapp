@@ -211,6 +211,9 @@ def index(request):
                     NIH_assertion_expiration = datetime.datetime.now() + datetime.timedelta(
                         seconds=login_expiration_seconds)
 
+                    logger.info("[STATUS] datetime.now: {}".format(str(datetime.datetime.now())))
+                    logger.info("[STATUS] {} login set to expire on {}".format(NIH_username,str(NIH_assertion_expiration),))
+
                     updated_values = {
                         'NIH_assertion': saml_response,
                         'NIH_assertion_expiration': pytz.utc.localize(NIH_assertion_expiration),
@@ -222,6 +225,10 @@ def index(request):
                     nih_user, created = NIH_User.objects.update_or_create(NIH_username=NIH_username,
                                                                           user_id=request.user.id,
                                                                           defaults=updated_values)
+
+                    logger.info(
+                        "[STATUS] {} has stored expiration time of {}".format(
+                            str(nih_user.NIH_username), str(nih_user.NIH_assertion_expiration)))
                     logger.info("[STATUS] NIH_User.objects.update_or_create() returned nih_user: {} and created: {}".format(
                         str(nih_user.NIH_username), str(created)))
                     st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW,
