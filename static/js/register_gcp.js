@@ -125,7 +125,6 @@ require([
             data: "gcp-id="+project_name + "&is_refresh=true",
             method: 'GET',
             success: function(data) {
-                console.debug(data);
                 var roles = data['roles']
                 for (var key in roles) {
                     var list = roles[key];
@@ -137,6 +136,10 @@ require([
                 }
             }
         });
+    });
+
+    $('#refresh-project-modal').on('hide.bs.modal',function(){
+        $('#refresh-project input[name="register_users"]').remove();
     });
 
     $('button.instructions').on('click',function(){

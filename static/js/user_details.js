@@ -61,6 +61,10 @@ require([
 
     });
 
+    $('[id^="refresh-project-modal-"]').on('hide.bs.modal',function(){
+        $('form[id^="refresh-project-"] input[name="register_users"]').remove();
+    });
+
     $('a.refresh-project').on('click',function(e){
         var user_id = $(this).data('user-id');
         var project_name = $(this).data('project-name');
@@ -71,7 +75,6 @@ require([
             data: "gcp-id="+project_name + "&is_refresh=true",
             method: 'GET',
             success: function(data) {
-                console.debug(data);
                 var roles = data['roles']
                 for (var key in roles) {
                     var list = roles[key];
