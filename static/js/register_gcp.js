@@ -131,7 +131,7 @@ require([
                     var list = roles[key];
                     for (var item in list) {
                         if (list[item]['registered_user']) {
-                            $('#refresh-project-'+project_id).append('<input type="hidden" name="register_users" value="' + list[item]['email'] + '"/>');
+                            $('#refresh-project').append('<input type="hidden" name="register_users" value="' + list[item]['email'] + '"/>');
                         }
                     }
                 }
