@@ -1274,11 +1274,11 @@ a.text-success:focus {
   color: #2b542c; }
 
 .text-info {
-  color: #31708f; }
+  color: #2575b6; }
 
 a.text-info:hover,
 a.text-info:focus {
-  color: #245269; }
+  color: #1c5a8c; }
 
 .text-warning {
   color: #8a6d3b; }
@@ -4391,11 +4391,11 @@ a.thumbnail.active {
 .alert-info {
   background-color: #d9edf7;
   border-color: #bce8f1;
-  color: #31708f; }
+  color: #2575b6; }
   .alert-info hr {
     border-top-color: #a6e1ec; }
   .alert-info .alert-link {
-    color: #245269; }
+    color: #1c5a8c; }
 
 .alert-warning {
   background-color: #fcf8e3;
@@ -4623,27 +4623,27 @@ button.list-group-item-success {
     border-color: #3c763d; }
 
 .list-group-item-info {
-  color: #31708f;
+  color: #2575b6;
   background-color: #d9edf7; }
 
 a.list-group-item-info,
 button.list-group-item-info {
-  color: #31708f; }
+  color: #2575b6; }
   a.list-group-item-info .list-group-item-heading,
   button.list-group-item-info .list-group-item-heading {
     color: inherit; }
   a.list-group-item-info:hover, a.list-group-item-info:focus,
   button.list-group-item-info:hover,
   button.list-group-item-info:focus {
-    color: #31708f;
+    color: #2575b6;
     background-color: #c4e3f3; }
   a.list-group-item-info.active, a.list-group-item-info.active:hover, a.list-group-item-info.active:focus,
   button.list-group-item-info.active,
   button.list-group-item-info.active:hover,
   button.list-group-item-info.active:focus {
     color: #fff;
-    background-color: #31708f;
-    border-color: #31708f; }
+    background-color: #2575b6;
+    border-color: #2575b6; }
 
 .list-group-item-warning {
   color: #8a6d3b;
@@ -4962,14 +4962,14 @@ button.list-group-item-danger {
 .panel-info {
   border-color: #bce8f1; }
   .panel-info > .panel-heading {
-    color: #31708f;
+    color: #2575b6;
     background-color: #d9edf7;
     border-color: #bce8f1; }
     .panel-info > .panel-heading + .panel-collapse > .panel-body {
       border-top-color: #bce8f1; }
     .panel-info > .panel-heading .badge {
       color: #d9edf7;
-      background-color: #31708f; }
+      background-color: #2575b6; }
   .panel-info > .panel-footer + .panel-collapse > .panel-body {
     border-bottom-color: #bce8f1; }
 

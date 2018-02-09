@@ -208,7 +208,7 @@ def index(request):
 
                     saml_response = None if 'SAMLResponse' not in req['post_data'] else req['post_data']['SAMLResponse']
                     saml_response = saml_response.replace('\r\n', '')
-                    
+
                     # AppEngine Flex appears to return a datetime.datetime.now() of the server's local timezone, and not
                     # UTC as on AppEngine Standard; use utcnow() to ensure UTC.
                     NIH_assertion_expiration = datetime.datetime.utcnow() + datetime.timedelta(
@@ -372,7 +372,7 @@ def index(request):
                     st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW,
                                                    "[ERROR] Failed to publish to PubSub topic: {}".format(str(e)))
 
-                messages.info(request, warn_message)
+                messages.warn(request, warn_message)
                 return redirect('/users/' + str(request.user.id))
 
         elif 'sls' in req['get_data']:
