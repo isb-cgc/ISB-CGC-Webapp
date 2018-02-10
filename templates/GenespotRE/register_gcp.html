@@ -100,6 +100,7 @@
                         <form id="verify-gcp" method="GET" action="{% url 'verify_gcp' user.id %}">
                             <label for="verify-gcp-id">Please enter your Google Cloud Project ID: </label>
                             <input id="verify-gcp-id" name="gcp-id" type="text" class="form-control" placeholder="Google Cloud Project ID" required="required"/>
+                            <input class="btn btn-primary" type="submit" value="Verify"/> your Google Cloud Project
                         </form>
                     </li>
                 </ul>
@@ -112,15 +113,12 @@
                     <p>
                         The following people are identified as members of your Google Cloud Project:
 
-                        <ul class="user-list">
-
-                        </ul>
-                        <br>
-                        Users listed with a <i class="fa fa-check"></i> will have this Google Cloud Project registered under
-                        their account as well, if not already done. Users without a <i class="fa fa-check"></i> will have to
-                        register this project themselves.
-
+                        <ul class="user-list"></ul>
                     </p>
+                    <p>Users listed with a <i class="fa fa-check"></i> were found in our system and will have this Google Cloud Project registered under
+                        their account as well.</p>
+                    <p>Users without a <i class="fa fa-check"></i> will have to register with ISB-CGC and then register this project for themselves
+                        or request another user perform a project refresh (accessible from the GCP Project list and details pages).</p>
                     <input class="btn btn-primary" type="submit" value="Register"/>
                     {% csrf_token %}
                 </form>
