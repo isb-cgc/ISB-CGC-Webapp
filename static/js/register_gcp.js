@@ -23,7 +23,8 @@ require.config({
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
         session_security: 'session_security',
-        underscore: 'libs/underscore-min'
+        underscore: 'libs/underscore-min',
+        base: 'base'
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -34,10 +35,11 @@ require.config({
 
 require([
     'jquery',
+    'base',
     'jqueryui',
     'bootstrap',
     'session_security'
-], function($) {
+], function($,base) {
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function() {
@@ -116,6 +118,7 @@ require([
     });
 
     $('a.refresh-project').on('click',function(e){
+        var $self = $(this);
         var user_id = $(this).data('user-id');
         var project_name = $(this).data('project-name');
         var project_id = $(this).data('project-id');
@@ -134,6 +137,10 @@ require([
                         }
                     }
                 }
+            },
+            error: function(err) {
+                $($self.data('target')).modal('hide');
+                base.showJsMessage('error',err.message,true);
             }
         });
     });
