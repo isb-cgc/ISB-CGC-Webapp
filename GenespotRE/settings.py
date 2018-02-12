@@ -163,20 +163,11 @@ CSRF_COOKIE_SECURE = bool(os.environ.get('CSRF_COOKIE_SECURE', False))
 SESSION_COOKIE_SECURE = bool(os.environ.get('SESSION_COOKIE_SECURE', False))
 SECURE_SSL_REDIRECT = bool(os.environ.get('SECURE_SSL_REDIRECT', False))
 
-# Due to the behavior of AppEngine Flex and the load balancer, we have to explicitly
-# use SSLify to enforce redirect of http to https even though we're on Django 1.8+
-# --> DO NOT REMOVE THIS <--
-SSLIFY_DISABLE = True if not SECURE_SSL_REDIRECT else False
-
 SECURE_REDIRECT_EXEMPT = []
-SSLIFY_DISABLE_FOR_REQUEST = []
 
 if SECURE_SSL_REDIRECT:
     # Exempt the health check so it can go through
     SECURE_REDIRECT_EXEMPT = [r'^_ah/(vm_)?health$', ]
-    SSLIFY_DISABLE_FOR_REQUEST = [
-        lambda request: request.get_full_path().startswith('/_ah/health') or request.get_full_path().startswith('/_ah/vm_health')
-    ]
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -243,10 +234,6 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '')
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    # Due to the behavior of AppEngine Flex and the load balancer, we have to explicitly
-    # use SSLify to enforce redirect of http to https even though we're on Django 1.8+
-    # --> DO NOT REMOVE THIS <--
-    # 'sslify.middleware.SSLifyMiddleware',
     # For using NDB with Django
     # documentation: https://cloud.google.com/appengine/docs/python/ndb/#integration
     # WE DON'T SEEM TO BE USING NDB SO I'M COMMENTING THIS OUT - PL
