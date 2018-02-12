@@ -23,6 +23,8 @@ from re import compile as re_compile
 
 from bq_data_access.v2.cohort_cloudsql import CloudSQLCohortAccess
 
+logger = logging.getLogger('main_logger')
+
 COORDINATE_FIELD_NAME = 'uniprot_aapos'
 TYPE_FIELD_NAME = 'variant_classification'
 
@@ -49,6 +51,8 @@ class SeqPeekMAFDataFormatter(object):
             return int(protein_position)
 
     def get_protein_position_for_hg38(self, protein_position):
+        if protein_position is None:
+            return None
         regex_list = [
             self.HG38_REGEX_1,
             self.HG38_REGEX_2
