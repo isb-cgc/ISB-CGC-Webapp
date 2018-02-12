@@ -372,7 +372,7 @@ def index(request):
                     st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW,
                                                    "[ERROR] Failed to publish to PubSub topic: {}".format(str(e)))
 
-                messages.warn(request, warn_message)
+                messages.warning(request, warn_message)
                 return redirect('/users/' + str(request.user.id))
 
         elif 'sls' in req['get_data']:
