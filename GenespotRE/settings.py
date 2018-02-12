@@ -165,8 +165,11 @@ SECURE_SSL_REDIRECT = bool(os.environ.get('SECURE_SSL_REDIRECT', False))
 
 # Due to the behavior of AppEngine Flex and the load balancer, we have to explicitly
 # use SSLify to enforce redirect of http to https even though we're on Django 1.8+
-# --> DO NOT REMOVE THIS OR ITS REQUIREMENTS ENTRY <--
+# --> DO NOT REMOVE THIS <--
 SSLIFY_DISABLE = True if not SECURE_SSL_REDIRECT else False
+
+SECURE_REDIRECT_EXEMPT = []
+SSLIFY_DISABLE_FOR_REQUEST = []
 
 if SECURE_SSL_REDIRECT:
     # Exempt the health check so it can go through
@@ -238,11 +241,12 @@ STATICFILES_FINDERS = (
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '')
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
     # Due to the behavior of AppEngine Flex and the load balancer, we have to explicitly
     # use SSLify to enforce redirect of http to https even though we're on Django 1.8+
-    # --> DO NOT REMOVE THIS OR ITS REQUIREMENTS ENTRY <--
-    'sslify.middleware.SSLifyMiddleware',
+    # --> DO NOT REMOVE THIS <--
+    # 'sslify.middleware.SSLifyMiddleware',
     # For using NDB with Django
     # documentation: https://cloud.google.com/appengine/docs/python/ndb/#integration
     # WE DON'T SEEM TO BE USING NDB SO I'M COMMENTING THIS OUT - PL
@@ -257,7 +261,7 @@ MIDDLEWARE_CLASSES = (
     # Uncomment the next line for simple clickjacking protection:
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'offline.middleware.OfflineMiddleware',
-)
+]
 
 ROOT_URLCONF = 'GenespotRE.urls'
 
