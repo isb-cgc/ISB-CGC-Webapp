@@ -391,7 +391,7 @@ def index(request):
                 attributes = request.session['samlUserdata'].items()
 
     except Exception as e:
-        logger.error("[ERROR] While accessing views/index: ")
+        logger.error("[ERROR] In demo/views.index: ")
         logger.exception(e)
         messages.error(request, "There was an error when attempting to log in/out - please contact an administrator.")
         st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW,
