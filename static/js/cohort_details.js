@@ -280,7 +280,7 @@ require([
         var tokenProgDisplName = prog.data('prog-displ-name'),
             tokenProgId = prog.data('prog-id');
 
-        if($this.prop('id').includes('mutation-category')) {
+        if($this.prop('id').indexOf('mutation-category') > 0) {
             var build = $('#p-'+tokenProgId+'-mutation-build :selected').val();
 
             // Remove prior filters

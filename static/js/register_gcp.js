@@ -23,7 +23,8 @@ require.config({
         bootstrap: 'libs/bootstrap.min',
         jqueryui: 'libs/jquery-ui.min',
         session_security: 'session_security',
-        underscore: 'libs/underscore-min'
+        underscore: 'libs/underscore-min',
+        base: 'base'
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -34,10 +35,11 @@ require.config({
 
 require([
     'jquery',
+    'base',
     'jqueryui',
     'bootstrap',
     'session_security'
-], function($) {
+], function($,base) {
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function() {
@@ -116,6 +118,7 @@ require([
     });
 
     $('a.refresh-project').on('click',function(e){
+        var $self = $(this);
         var user_id = $(this).data('user-id');
         var project_name = $(this).data('project-name');
         var project_id = $(this).data('project-id');
@@ -125,18 +128,25 @@ require([
             data: "gcp-id="+project_name + "&is_refresh=true",
             method: 'GET',
             success: function(data) {
-                console.debug(data);
                 var roles = data['roles']
                 for (var key in roles) {
                     var list = roles[key];
                     for (var item in list) {
                         if (list[item]['registered_user']) {
-                            $('#refresh-project-'+project_id).append('<input type="hidden" name="register_users" value="' + list[item]['email'] + '"/>');
+                            $('#refresh-project').append('<input type="hidden" name="register_users" value="' + list[item]['email'] + '"/>');
                         }
                     }
                 }
+            },
+            error: function(err) {
+                $($self.data('target')).modal('hide');
+                base.showJsMessage('error',err.message,true);
             }
         });
+    });
+
+    $('#refresh-project-modal').on('hide.bs.modal',function(){
+        $('#refresh-project input[name="register_users"]').remove();
     });
 
     $('button.instructions').on('click',function(){

@@ -1,0 +1,1 @@
+NOTE: This is a copy of django-sslify/master, which is known to fail to build for Django 2.0/Py3.X.
