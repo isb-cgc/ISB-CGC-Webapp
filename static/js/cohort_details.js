@@ -559,6 +559,7 @@ require([
 
     $('#cancel-edit-cohort-btn').on('click', function() {
         mode = "VIEWING";
+        $('#edit-cohort-name').val() !== original_title && $('#edit-cohort-name').val(original_title);
         $('#cohort-mode').val('VIEW');
         $('.selected-filters .delete-x').trigger('click');
         set_mode(true);
