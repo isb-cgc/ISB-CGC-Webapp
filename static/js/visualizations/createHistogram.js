@@ -83,7 +83,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
             // var kde = science.stats.kde().sample(values_only);
             var tmp = helpers.get_min_max(raw_Data, x_attr);
             min_n = tmp[0];
-            max_n = tmp[1];
+            max_n = tmp[1] !== tmp[0] ? tmp[1] : tmp[0]+1;
 
             x = d3.scale.linear()
                 .range([margin.left, width - margin.right])
