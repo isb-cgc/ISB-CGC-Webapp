@@ -164,7 +164,7 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                 .enter().append("rect")
                 .attr("class", "plot-bar")
                 .attr("x", function (d) {
-                    return x(d.x) + 1;
+                    return x(d.x) + 2;
                 })
                 .attr("y", function (d) {
                     return y(d.y);
@@ -172,7 +172,12 @@ define(['jquery', 'd3', 'd3tip', 'd3textwrap', 'vizhelpers', 'underscore'],
                 .attr("value", function(d) {
                     return d.x;
                 })
-                .attr("width", x(hist_data[0].dx + hist_data[0].x) - x(hist_data[0].x) - 1)
+                .attr("width", function(d) {
+                    var w = (x(hist_data[0].dx + hist_data[0].x) - x(hist_data[0].x) - 1);
+                    // If all values are in one bin and that bin is zero, we won't get a width value
+                    // Just use a fixed width in this case.
+                    return (w > 0) ? w : 50;
+                })
                 .attr("height", function (d) {
                     return height - margin.top - margin.bottom - y(d.y);
                 })
