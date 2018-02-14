@@ -1271,12 +1271,6 @@ require([
         $('#export-cohort-form input[type="submit"]').attr('disabled','disabled');
     });
 
-    // Per https://stackoverflow.com/questions/13550477/twitter-bootstrap-alert-message-close-and-open-again
-    // Set up our own data-hide type to 'hide' our alerts instead of popping them off the DOM entirely
-    $("[data-hide]").on("click", function(){
-        $(this).closest("." + $(this).attr("data-hide")).hide();
-    });
-
     filter_panel_load(cohort_id);
     
 });
