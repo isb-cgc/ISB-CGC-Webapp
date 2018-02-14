@@ -77,6 +77,45 @@ require([
         return null;
     };
 
+    // Given a block of barcodes in non-GDC format, determine how to divide them into individual entries
+    function parseBarcodeEntries(content) {
+        var entries = [];
+
+        var tsvMatch = content.match(/\t/g);
+        var csvMatch = content.match(/,/g);
+        var nsvMatch = content.match(/\n/g);
+        var nl_split_entries = content.split('\n');
+
+        if(tsvMatch && csvMatch) {
+            if(nsvMatch) {
+                for(var i=0; i<nl_split_entries.length; i++) {
+                    entries = entries.concat(nl_split_entries[i].split(/\s*[,\t](?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)\s*/));
+                }
+            } else {
+                entries = content.split(/\s*[,\t](?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)\s*/);
+            }
+        } else if(tsvMatch) {
+            if(nsvMatch) {
+                for(var i=0; i<nl_split_entries.length; i++) {
+                    entries = entries.concat(nl_split_entries[i].split(/\s*\t(?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)\s*/));
+                }
+            } else {
+                entries = content.split(/\s*\t(?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)\s*/);
+            }
+        } else if(csvMatch) {
+            if(nsvMatch) {
+                for(var i=0; i<nl_split_entries.length; i++) {
+                    entries = entries.concat(nl_split_entries[i].split(/\s*,(?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)\s*/));
+                }
+            } else {
+                entries = content.split(/\s*,(?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)\s*/);
+            }
+        } else if(nsvMatch) {
+            entries = nl_split_entries;
+        }
+        return entries;
+    };
+
     function validateEntries(barcodes,preFormatted) {
 
         var result = {
@@ -192,7 +231,7 @@ require([
         }
     }
 
-    // Basic filtering for tsv or csv format, correct number of columns (including empties), and allowed characters
+    // Basic filtering for file/paste contents
     function checkContentValidity(contents) {
         // Do a rough file content validation
         var tsvMatch = contents.match(/\t/g);
@@ -202,14 +241,12 @@ require([
         var whitelistMatch = contents.match(base.barcode_file_whitelist);
 
         // Content rules:
-        // - A file cannot have both tabs and commas, or, if it does, there must be an even number of double or single quotes (to surround the tab or comma in the value)
-        // - A file must have an even number of single and/or double quotes
-        // - A file must only have characters present on the whitelist
+        // - Content cannot have both tabs and commas, or, if it does, there must be an even number of double or single quotes (to surround the tab or comma in the value)
+        // - Content must have an even number of single and/or double quotes
+        // - Content must only have characters present on the whitelist
 
-        return !(
-            (tsvMatch && csvMatch && ((sQuoteMatch && sQuoteMatch.length <= 0 && dQuoteMatch && dQuoteMatch.length <= 0)
-                || (dQuoteMatch && dQuoteMatch.length % 2 != 0 && sQuoteMatch && sQuoteMatch.length % 2 != 0)))
-            || whitelistMatch);
+        return !(whitelistMatch) && !(tsvMatch && csvMatch && ((dQuoteMatch && dQuoteMatch.length % 2 != 0) || (sQuoteMatch && sQuoteMatch.length % 2 != 0)))
+            && !(dQuoteMatch && dQuoteMatch.length % 2 != 0) && !(sQuoteMatch && sQuoteMatch.length % 2 != 0);
     }
 
     // Text-area paste
@@ -225,32 +262,7 @@ require([
             $('.alert-dismissible button.close').trigger('click');
         }
 
-        var entries = [];
-        var tsvMatch = content.match(/\t/g);
-        var csvMatch = content.match(/,/g);
-        var nsvMatch = content.match(/\n/g);
-
-        var nl_split_entries = content.split('\n');
-
-        if(tsvMatch) {
-            if(nsvMatch) {
-                for(var i=0; i<nl_split_entries.length; i++) {
-                    entries = entries.concat(nl_split_entries[i].split(/\s*\t(?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)\s*/));
-                }
-            } else {
-                entries = content.split(/\s*\t(?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)\s*/);
-            }
-        } else if(csvMatch) {
-            if(nsvMatch) {
-                for(var i=0; i<nl_split_entries.length; i++) {
-                    entries = entries.concat(nl_split_entries[i].split(/\s*,(?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)\s*/));
-                }
-            } else {
-                entries = content.split(/\s*,(?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)\s*/);
-            }
-        } else if(nsvMatch) {
-            entries = nl_split_entries;
-        }
+        var entries = parseBarcodeEntries(content);
 
         // Validate the entries
         validateEntries(entries).then(
@@ -361,33 +373,7 @@ require([
                     } else if(isGdcTsv) {
                         entries = fr.result.split('\n');
                     } else {
-                        var tsvMatch = fr.result.match(/\t/g);
-                        var csvMatch = fr.result.match(/,/g);
-                        var nsvMatch = fr.result.match(/\n/g);
-
-                        var nl_split_entries = fr.result.split('\n');
-
-                        if(tsvMatch) {
-                            if(nsvMatch) {
-                                entries = [];
-                                for(var i=0; i<nl_split_entries.length; i++) {
-                                    entries = entries.concat(nl_split_entries[i].split(/\s*\t(?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)\s*/));
-                                }
-                            } else {
-                                entries = fr.result.split(/\s*\t(?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)\s*/);
-                            }
-                        } else if(csvMatch) {
-                            if(nsvMatch) {
-                                entries = [];
-                                for(var i=0; i<nl_split_entries.length; i++) {
-                                    entries = entries.concat(nl_split_entries[i].split(/\s*,(?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)\s*/));
-                                }
-                            } else {
-                                entries = fr.result.split(/\s*,(?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)\s*/);
-                            }
-                        } else if(nsvMatch) {
-                            entries = nl_split_entries;
-                        }
+                        entries = parseBarcodeEntries(fr.result);
                     }
 
                     $('#file-upload-btn').attr('disabled','disabled');
