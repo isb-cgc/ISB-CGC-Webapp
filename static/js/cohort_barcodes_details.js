@@ -182,7 +182,9 @@ require([
                             if(barcode_split.length == 3) {
                                 case_barcode = barcode;
                             }
-                            if(barcode_split.length == 4) {
+                            if(barcode_split.length < 3 || barcode_split.length >= 4) {
+                                // Assume any 4-length barcode OR unfamiliar barcode format to be a sample barcode;
+                                // worst case scenario it simply won't be found.
                                 sample_barcode = barcode;
                             }
                         }
