@@ -29,7 +29,7 @@
 
 {% block page_header %}
     <div class="container">
-        <h1 class="page-header pull-left"><a href="{% url 'user_gcp_list' user.id %}" role="link"><i class="fa fa-chevron-left"></i></a> {{ gcp.project_name }}</h1>
+        <h1 class="page-header pull-left"><a href="{% url 'user_gcp_list' user.id %}" role="link"><i class="fa fa-chevron-left"></i></a> {{ gcp.project_name }} ({{ gcp.project_id }})</h1>
         <div class="pull-right refresh-project">
             <a class="refresh-project btn btn-primary" data-toggle="modal" role="button" data-user-id="{{ request.user.id }}" data-project-id="{{ gcp.id }}" data-project-name="{{ gcp.project_name }}" data-target="#refresh-project-modal" >Refresh Project</a></li>
         </div>

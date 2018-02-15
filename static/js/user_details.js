@@ -24,6 +24,7 @@ require.config({
         jqueryui: 'libs/jquery-ui.min',
         session_security: 'session_security',
         underscore: 'libs/underscore-min',
+        base: 'base'
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -35,8 +36,9 @@ require([
     'jquery',
     'jqueryui',
     'bootstrap',
-    'session_security'
-], function($, jqueryui, bootstrap, session_security) {
+    'session_security',
+    'base'
+], function($, jqueryui, bootstrap, session_security, base) {
 
     $('.show-service-accounts').on('click', function () {
         var $this = $(this);
@@ -61,7 +63,12 @@ require([
 
     });
 
+    $('[id^="refresh-project-modal-"]').on('hide.bs.modal',function(){
+        $('form[id^="refresh-project-"] input[name="register_users"]').remove();
+    });
+
     $('a.refresh-project').on('click',function(e){
+        var $self = $(this);
         var user_id = $(this).data('user-id');
         var project_name = $(this).data('project-name');
         var project_id = $(this).data('project-id');
@@ -71,7 +78,6 @@ require([
             data: "gcp-id="+project_name + "&is_refresh=true",
             method: 'GET',
             success: function(data) {
-                console.debug(data);
                 var roles = data['roles']
                 for (var key in roles) {
                     var list = roles[key];
@@ -81,6 +87,10 @@ require([
                         }
                     }
                 }
+            },
+            error: function(err) {
+                $($self.data('target')).modal('hide');
+                base.showJsMessage('error',err.message,true);
             }
         });
     });

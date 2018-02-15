@@ -74,7 +74,7 @@ def build_empty_data_response(hugo_symbol, cohort_id_array, tables_used):
         'hugo_symbol': hugo_symbol,
         'cohort_id_list': [str(i) for i in cohort_id_array],
         'removed_row_statistics': [],
-        'bq_tables': tables_used
+        'bq_tables': list(set(tables_used))
     }
 
 @login_required
