@@ -208,7 +208,10 @@ def index(request):
 
                     saml_response = None if 'SAMLResponse' not in req['post_data'] else req['post_data']['SAMLResponse']
                     saml_response = saml_response.replace('\r\n', '')
-                    NIH_assertion_expiration = datetime.datetime.now() + datetime.timedelta(
+
+                    # AppEngine Flex appears to return a datetime.datetime.now() of the server's local timezone, and not
+                    # UTC as on AppEngine Standard; use utcnow() to ensure UTC.
+                    NIH_assertion_expiration = datetime.datetime.utcnow() + datetime.timedelta(
                         seconds=login_expiration_seconds)
 
                     updated_values = {
@@ -222,6 +225,7 @@ def index(request):
                     nih_user, created = NIH_User.objects.update_or_create(NIH_username=NIH_username,
                                                                           user_id=request.user.id,
                                                                           defaults=updated_values)
+
                     logger.info("[STATUS] NIH_User.objects.update_or_create() returned nih_user: {} and created: {}".format(
                         str(nih_user.NIH_username), str(created)))
                     st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW,
@@ -368,7 +372,7 @@ def index(request):
                     st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW,
                                                    "[ERROR] Failed to publish to PubSub topic: {}".format(str(e)))
 
-                messages.info(request, warn_message)
+                messages.warning(request, warn_message)
                 return redirect('/users/' + str(request.user.id))
 
         elif 'sls' in req['get_data']:
@@ -387,7 +391,7 @@ def index(request):
                 attributes = request.session['samlUserdata'].items()
 
     except Exception as e:
-        logger.error("[ERROR] While accessing views/index: ")
+        logger.error("[ERROR] In demo/views.index: ")
         logger.exception(e)
         messages.error(request, "There was an error when attempting to log in/out - please contact an administrator.")
         st_logger.write_text_log_entry(LOG_NAME_ERA_LOGIN_VIEW,

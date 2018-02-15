@@ -77,6 +77,45 @@ require([
         return null;
     };
 
+    // Given a block of barcodes in non-GDC format, determine how to divide them into individual entries
+    function parseBarcodeEntries(content) {
+        var entries = [];
+
+        var tsvMatch = content.match(/\t/g);
+        var csvMatch = content.match(/,/g);
+        var nsvMatch = content.match(/\n/g);
+        var nl_split_entries = content.split('\n');
+
+        if(tsvMatch && csvMatch) {
+            if(nsvMatch) {
+                for(var i=0; i<nl_split_entries.length; i++) {
+                    entries = entries.concat(nl_split_entries[i].split(/\s*[,\t](?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)\s*/));
+                }
+            } else {
+                entries = content.split(/\s*[,\t](?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)\s*/);
+            }
+        } else if(tsvMatch) {
+            if(nsvMatch) {
+                for(var i=0; i<nl_split_entries.length; i++) {
+                    entries = entries.concat(nl_split_entries[i].split(/\s*\t(?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)\s*/));
+                }
+            } else {
+                entries = content.split(/\s*\t(?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)\s*/);
+            }
+        } else if(csvMatch) {
+            if(nsvMatch) {
+                for(var i=0; i<nl_split_entries.length; i++) {
+                    entries = entries.concat(nl_split_entries[i].split(/\s*,(?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)\s*/));
+                }
+            } else {
+                entries = content.split(/\s*,(?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)\s*/);
+            }
+        } else if(nsvMatch) {
+            entries = nl_split_entries;
+        }
+        return entries;
+    };
+
     function validateEntries(barcodes,preFormatted) {
 
         var result = {
@@ -107,11 +146,8 @@ require([
                 var entry_split = null;
                 if(isGdcTsv) {
                     entry_split = barcode.split(/\s*\t\s*/);
-                } else {
-                    // Per https://stackoverflow.com/a/1757107 regex to manage commas inside quotes in a CSV, adjusted to work for tabs and single quotes
-                    entry_split = barcode.split(/\s*[,\t](?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)\s*/);
                 }
-                if ((isGdcTsv && entry_split.length < 2) || (!isGdcTsv && entry_split.length !== 3)) {
+                if ((isGdcTsv && entry_split.length < 2) || barcode.length <= 0) {
                     if (!result.invalid_entries) {
                         result.invalid_entries = [];
                     }
@@ -123,7 +159,36 @@ require([
                     if(isGdcTsv) {
                         result.valid_entries.push(entry_split[case_id_col] + "{}{}" + entry_split[proj_col].split(/^([^-]+)-.+/)[1]);
                     } else {
-                        result.valid_entries.push(entry_split[0].replace(/["']/g,"") + "{}" + entry_split[1].replace(/["']/g,"") + "{}" + entry_split[2].replace(/["']/g,""));
+                        // Strip any surrounding double or single quotes
+                        barcode = barcode.replace(/["']/g,"");
+                        // Determine the barcode type (case or sample) and program
+                        var barcode_split = barcode.split("-");
+                        // If the program segment of the barcode is ambiguous,
+                        // this is probably a CCLE case barcode, otherwise
+                        // we can easily identify it. Default to CCLE in such
+                        // cases.
+                        var program = "CCLE";
+                        var case_barcode="",sample_barcode="";
+                        if(PROGRAM_PREFIXES[barcode_split[0]]) {
+                            program = barcode_split[0];
+                        }
+                        if(program == 'CCLE') {
+                            if(barcode.startsWith("CCLE-")) {
+                                sample_barcode = barcode;
+                            } else {
+                                case_barcode = barcode;
+                            }
+                        } else {
+                            if(barcode_split.length == 3) {
+                                case_barcode = barcode;
+                            }
+                            if(barcode_split.length < 3 || barcode_split.length >= 4) {
+                                // Assume any 4-length barcode OR unfamiliar barcode format to be a sample barcode;
+                                // worst case scenario it simply won't be found.
+                                sample_barcode = barcode;
+                            }
+                        }
+                        result.valid_entries.push(case_barcode + "{}" + sample_barcode + "{}" + program);
                     }
                 }
             });
@@ -168,7 +233,7 @@ require([
         }
     }
 
-    // Basic filtering for tsv or csv format, correct number of columns (including empties), and allowed characters
+    // Basic filtering for file/paste contents
     function checkContentValidity(contents) {
         // Do a rough file content validation
         var tsvMatch = contents.match(/\t/g);
@@ -178,14 +243,12 @@ require([
         var whitelistMatch = contents.match(base.barcode_file_whitelist);
 
         // Content rules:
-        // - A file cannot have both tabs and commas, or, if it does, there must be an even number of double or single quotes (to surround the tab or comma in the value)
-        // - A file must have an even number or tabs or commas
-        // - A file must have an even number of single and/or double quotes
-        // - A file must only have character present on the whitelist
+        // - Content cannot have both tabs and commas, or, if it does, there must be an even number of double or single quotes (to surround the tab or comma in the value)
+        // - Content must have an even number of single and/or double quotes
+        // - Content must only have characters present on the whitelist
 
-        return !(
-            (tsvMatch && csvMatch && ((sQuoteMatch && sQuoteMatch.length <= 0 && dQuoteMatch && dQuoteMatch.length <= 0) || (dQuoteMatch && dQuoteMatch.length % 2 != 0 && sQuoteMatch && sQuoteMatch.length % 2 != 0)))
-            || (!tsvMatch && !csvMatch) || (csvMatch && csvMatch.length % 2 != 0) || (tsvMatch && tsvMatch.length % 2 != 0) || whitelistMatch);
+        return !(whitelistMatch) && !(tsvMatch && csvMatch && ((dQuoteMatch && dQuoteMatch.length % 2 != 0) || (sQuoteMatch && sQuoteMatch.length % 2 != 0)))
+            && !(dQuoteMatch && dQuoteMatch.length % 2 != 0) && !(sQuoteMatch && sQuoteMatch.length % 2 != 0);
     }
 
     // Text-area paste
@@ -201,7 +264,7 @@ require([
             $('.alert-dismissible button.close').trigger('click');
         }
 
-        var entries = content.split('\n');
+        var entries = parseBarcodeEntries(content);
 
         // Validate the entries
         validateEntries(entries).then(
@@ -309,8 +372,10 @@ require([
                             entries.push(gdcSet[i]['submitter_id']+"{}{}"+gdcSet[i]['project']['project_id'].split(/^([^-]+)-.+/)[1])
                         }
                         isPreFormatted = true;
-                    } else {
+                    } else if(isGdcTsv) {
                         entries = fr.result.split('\n');
+                    } else {
+                        entries = parseBarcodeEntries(fr.result);
                     }
 
                     $('#file-upload-btn').attr('disabled','disabled');

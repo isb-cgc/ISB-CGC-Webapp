@@ -280,7 +280,7 @@ require([
         var tokenProgDisplName = prog.data('prog-displ-name'),
             tokenProgId = prog.data('prog-id');
 
-        if($this.prop('id').includes('mutation-category')) {
+        if($this.prop('id').indexOf('mutation-category') > 0) {
             var build = $('#p-'+tokenProgId+'-mutation-build :selected').val();
 
             // Remove prior filters
@@ -559,6 +559,7 @@ require([
 
     $('#cancel-edit-cohort-btn').on('click', function() {
         mode = "VIEWING";
+        $('#edit-cohort-name').val() !== original_title && $('#edit-cohort-name').val(original_title);
         $('#cohort-mode').val('VIEW');
         $('.selected-filters .delete-x').trigger('click');
         set_mode(true);
@@ -1268,12 +1269,6 @@ require([
             $('#export-cohort-table').val('');
         }
         $('#export-cohort-form input[type="submit"]').attr('disabled','disabled');
-    });
-
-    // Per https://stackoverflow.com/questions/13550477/twitter-bootstrap-alert-message-close-and-open-again
-    // Set up our own data-hide type to 'hide' our alerts instead of popping them off the DOM entirely
-    $("[data-hide]").on("click", function(){
-        $(this).closest("." + $(this).attr("data-hide")).hide();
     });
 
     filter_panel_load(cohort_id);
