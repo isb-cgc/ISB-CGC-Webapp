@@ -121,12 +121,11 @@ require([
     $('a.refresh-project').on('click',function(e){
         var $self = $(this);
         var user_id = $(this).data('user-id');
-        var project_name = $(this).data('project-name');
         var project_id = $(this).data('project-id');
 
         $.ajax({
             url: BASE_URL + '/accounts/users/'+user_id+'/verify_gcp/',
-            data: "gcp-id="+project_name + "&is_refresh=true",
+            data: "gcp-id="+project_id + "&is_refresh=true",
             method: 'GET',
             success: function(data) {
                 var roles = data['roles']
