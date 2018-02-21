@@ -68,13 +68,20 @@ require([
     });
 
     $('a.refresh-project').on('click',function(e){
-        var $self = $(this);
-        var user_id = $(this).data('user-id');
+        var this_modal = $($(this).data('target'));
+        if(this_modal.data('opening')) {
+            e.preventDefault();
+            return false;
+        }
+        this_modal.data('opening',true);
+
         var project_id = $(this).data('project-id');
+        var user_id = $(this).data('user-id');
+        var project_gcp_id = $(this).data('project-gcp-id');
 
         $.ajax({
             url: BASE_URL + '/accounts/users/'+user_id+'/verify_gcp/',
-            data: "gcp-id="+project_id + "&is_refresh=true",
+            data: "gcp-id="+project_gcp_id + "&is_refresh=true",
             method: 'GET',
             success: function(data) {
                 var roles = data['roles']
@@ -87,9 +94,14 @@ require([
                     }
                 }
             },
-            error: function(err) {
-                $($self.data('target')).modal('hide');
-                base.showJsMessage('error',err.message,true);
+            error: function(xhr) {
+                var response = $.parseJSON(xhr.responseText);
+                this_modal.modal('hide');
+                base.showJsMessage('error',response['message'],true);
+            },
+            complete: function() {
+                this_modal.modal('show');
+                this_modal.data('opening',false);
             }
         });
     });
