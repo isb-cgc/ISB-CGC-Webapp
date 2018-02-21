@@ -104,6 +104,9 @@ require([
                 this_modal.data('opening',false);
             }
         });
+        // Don't let the modal open automatically; we're controlling that.
+        e.preventDefault();
+        return false;
     });
 
 });
