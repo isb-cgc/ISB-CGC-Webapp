@@ -1145,7 +1145,7 @@ require([
                     plot_element.find('.resubmit-button').show();
                 }
 
-                if(result.bq_tables) {
+                if(result.bq_tables && result.bq_tables.length > 0) {
                     plot_element.find('.bq-table-display').empty();
                     for(var i=0; i < result.bq_tables.length; i++) {
                         plot_element.find('.bq-table-display').append($('<li>').text(result.bq_tables[i]).prop('title',result.bq_tables[i]));
