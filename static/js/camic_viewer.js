@@ -54,12 +54,20 @@ require([
 
     $('#camic-iframe').on('load',function(){
         $('.load-spinner').hide();
+        // Resize the iFrame's height to center the view vertically
+        if($('#camic-single').length > 0) {
+            $('#camic-iframe').height(($(window).height() - $('.navbar').height() - ($('#camic-viewer').height() - $('#camic-iframe').height())));
+            $('#camic-div')[0].scrollIntoView();
+            $(window).scrollTop($('#camic-div').scrollTop()+$('.navbar').height());
+
+        }
     });
 
     // Because we're operating a bit outside the Bootstrap framework on the camic-single template,
     // we need to force the loading spinner to size properly
     if($('#camic-single').length > 0) {
         $('.load-spinner').width($('#camic-iframe').css('width'));
+        $('.load-spinner').height($('#camic-iframe').css('height'));
     }
 
     $('.load-spinner').show();
