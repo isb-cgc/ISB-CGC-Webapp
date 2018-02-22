@@ -89,10 +89,15 @@ require([
         toTokens: function() {
             var tokens = [];
             for(var i in this.slide_image) {
+                var img = this.slide_image[i];
                 tokens.push({
-                    label: this.slide_image[i]['label'],
+                    label: img['label'],
                     value: i,
-                    dataType: "slide_image"
+                    dataType: "slide_image",
+                    sample: img['sample'],
+                    case: img['case'],
+                    project: img['project'],
+                    disease_code: img['disease_code']
                 });
             }
             return tokens;
@@ -443,7 +448,11 @@ require([
                         files[i]['thumbnail'] = files[i]['cloudstorage_location'].split('/').slice(-2)[0];
                         dataTypeName = "slide_image";
                         label = "caMicro";
-                        checkbox_inputs += '<input class="cam" type="checkbox" name="' + dataTypeName + '" data-thumb="'+files[i]['thumbnail']+'" data-sub-type="'+files[i]['datatype']+'" data-type="' + dataTypeName + '" value="' + val + '"';
+                        checkbox_inputs += '<input class="cam" type="checkbox" name="' + dataTypeName
+                            + '" data-thumb="'+files[i]['thumbnail']+'" data-sub-type="'+files[i]['datatype']
+                            + '" data-sample="' + files[i]['sample'] + '" data-case="' + files[i]['case']
+                            + '" data-disease-code="' + files[i]['disease_code'] + '" data-project="' + files[i]['project']
+                            + '" data-type="' + dataTypeName + '" value="' + val + '"';
                         if (disable) {
                             checkbox_inputs += ' disabled="disabled"';
                         }
@@ -495,7 +504,12 @@ require([
                     selCamFiles[self.data('type')][self.attr('value')] = {
                         'label': self.attr('value'),
                         'type': self.data('sub-type'),
-                        'thumb': self.data('thumb')
+                        'thumb': self.data('thumb'),
+                        'sample': self.data('sample'),
+                        'case': self.data('case'),
+                        'disease_code': self.data('disease-code'),
+                        'project': self.data('project'),
+
                     };
                     $('#selected-files-cam-tokenfield').hide();
                 } else {
