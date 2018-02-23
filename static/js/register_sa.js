@@ -147,10 +147,9 @@ require([
                 }
             },
             error: function(xhr, ajaxOptions, thrownError) {
-                var response = $.parseJSON(xhr.responseText);
                 spinner.hide();
                 $('.verify-sa-btn').prop('disabled', '');
-                base.showJsMessage(response['level'] || "error",response['message'],true);
+                base.showJsMessage(xhr.responseJSON.level || "error",xhr.responseJSON.message,true);
             }
         });
         return false;
