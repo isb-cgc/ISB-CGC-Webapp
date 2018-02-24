@@ -161,34 +161,37 @@ require([
                     } else {
                         // Strip any surrounding double or single quotes
                         barcode = barcode.replace(/["']/g,"");
-                        // Determine the barcode type (case or sample) and program
-                        var barcode_split = barcode.split("-");
-                        // If the program segment of the barcode is ambiguous,
-                        // this is probably a CCLE case barcode, otherwise
-                        // we can easily identify it. Default to CCLE in such
-                        // cases.
-                        var program = "CCLE";
-                        var case_barcode="",sample_barcode="";
-                        if(PROGRAM_PREFIXES[barcode_split[0]]) {
-                            program = barcode_split[0];
-                        }
-                        if(program == 'CCLE') {
-                            if(barcode.startsWith("CCLE-")) {
-                                sample_barcode = barcode;
+                        // Check if this might be a stand-alone program entry from an old file-format; if so, ignore it.
+                        if(!PROGRAM_PREFIXES[barcode]) {
+                            // Determine the barcode type (case or sample) and program
+                            var barcode_split = barcode.split("-");
+                            // If the program segment of the barcode is ambiguous,
+                            // this is probably a CCLE case barcode, otherwise
+                            // we can easily identify it. Default to CCLE in such
+                            // cases.
+                            var program = "CCLE";
+                            var case_barcode="",sample_barcode="";
+                            if(PROGRAM_PREFIXES[barcode_split[0]]) {
+                                program = barcode_split[0];
+                            }
+                            if(program == 'CCLE') {
+                                if(barcode.startsWith("CCLE-")) {
+                                    sample_barcode = barcode;
+                                } else {
+                                    case_barcode = barcode;
+                                }
                             } else {
-                                case_barcode = barcode;
+                                if(barcode_split.length == 3) {
+                                    case_barcode = barcode;
+                                }
+                                if(barcode_split.length < 3 || barcode_split.length >= 4) {
+                                    // Assume any 4-length barcode OR unfamiliar barcode format to be a sample barcode;
+                                    // worst case scenario it simply won't be found.
+                                    sample_barcode = barcode;
+                                }
                             }
-                        } else {
-                            if(barcode_split.length == 3) {
-                                case_barcode = barcode;
-                            }
-                            if(barcode_split.length < 3 || barcode_split.length >= 4) {
-                                // Assume any 4-length barcode OR unfamiliar barcode format to be a sample barcode;
-                                // worst case scenario it simply won't be found.
-                                sample_barcode = barcode;
-                            }
+                            result.valid_entries.push(case_barcode + "{}" + sample_barcode + "{}" + program);
                         }
-                        result.valid_entries.push(case_barcode + "{}" + sample_barcode + "{}" + program);
                     }
                 }
             });
@@ -444,7 +447,7 @@ require([
 
         if(result.valid_entries && result.valid_entries.length > 0) {
             var entry_set = "";
-            validated_barcodes = [];
+            validated_barcodes = {};
             for(var i=0; i < result.valid_entries.length; i++) {
                 var entry = result.valid_entries[i];
                 entry_set += (
@@ -453,7 +456,10 @@ require([
                     +(entry['sample'].indexOf(",") < 0 ? entry['sample'] : '"' + entry['sample'] + '"')
                     +", "+entry['program']+'\n'
                 );
-                validated_barcodes.push({'sample_barcode': entry['sample'], 'case_barcode': entry['case'], 'program': entry['program_id'], 'project': entry['project']});
+                if(!validated_barcodes[entry['program_id']]){
+                    validated_barcodes[entry['program_id']] = []
+                }
+                validated_barcodes[entry['program_id']].push([entry['sample'], entry['case'], entry['project']]);
             }
             tab.find('.valid-entries pre').html(entry_set);
             tab.find('.valid-entries input').remove();
