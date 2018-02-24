@@ -145,9 +145,8 @@ require([
                 }
             },
             error: function(xhr) {
-                var response = $.parseJSON(xhr.responseText);
                 this_modal.modal('hide');
-                base.showJsMessage('error',response['message'],true);
+                base.showJsMessage('error',xhr.responseJSON.message,true);
             },
             complete: function() {
                 this_modal.modal('show');
