@@ -358,8 +358,7 @@ def camic(request, slide_barcode=None):
     template = 'GenespotRE/camic.html'
 
     if slide_barcode:
-        case_info = json.loads(request.GET.get('case-info', '{}'))
-        images = [{'barcode': slide_barcode, 'thumb': '', 'type': case_info[''], 'project': case_info[''], 'disease_code': case_info['']}]
+        images = [{'barcode': slide_barcode, 'thumb': '', 'type': ''}]
         template = 'GenespotRE/camic_single.html'
 
     if request.POST.get('checked_list', None):
