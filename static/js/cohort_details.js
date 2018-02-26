@@ -758,9 +758,9 @@ require([
                     }
                 }
             },
-            error: function (err) {
+            error: function (xhr) {
                 $this.closest('.modal').modal('hide');
-                base.showJsMessage('error',err,true);
+                base.showJsMessage('error',xhr.responseJSON.message,true);
             },
         }).always(function () {
             $this.find('.btn-primary').removeClass('btn-disabled').attr('disabled', false);
