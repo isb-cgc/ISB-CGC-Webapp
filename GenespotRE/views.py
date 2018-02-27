@@ -341,10 +341,10 @@ def get_image_data(request, slide_barcode):
                     'TissueID': query_results[0]['f'][0]['v'],
                     'sample-barcode': query_results[0]['f'][6]['v'],
                     'case-barcode': query_results[0]['f'][7]['v'],
-                    'img-type': ('Diagnostic Image' if 'DX1' in slide_barcode else 'Tissue Slide Image' if 'TS1' in slide_barcode else "N/A")
+                    'img-type': ('Diagnostic Image' if slide_barcode.split("-")[-1].startswith("DX") else 'Tissue Slide Image' if slide_barcode.split("-")[-1].startswith("TS") else "N/A")
                 }
 
-                sample_metadata = get_sample_metadata(result['sample_barcode'])
+                sample_metadata = get_sample_metadata(result['sample-barcode'])
                 result['disease-code'] = sample_metadata['disease_code']
                 result['project'] = sample_metadata['project']
 
