@@ -110,7 +110,7 @@ require([
             } else {
                 entries = content.split(/\s*,(?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)\s*/);
             }
-        } else if(nsvMatch) {
+        } else {
             entries = nl_split_entries;
         }
         return entries;
@@ -123,80 +123,84 @@ require([
             invalid_entries: null
         };
 
-        if(!preFormatted) {
-            var case_id_col = 0;
-            var proj_col = 0;
-            var isGdcTsv = false;
-            if(barcodes[0].match(/Project/) && barcodes[0].match(/Case ID/) && barcodes[0].match(/\t/)) {
-                isGdcTsv = true;
-                var header_cols = barcodes[0].split(/\s*\t\s*/);
-                for(var i=0; i<header_cols.length; i++) {
-                    if(header_cols[i] == 'Case ID') {
-                        case_id_col = i;
-                    }
-                    if(header_cols[i] == 'Project') {
-                        proj_col = i;
-                    }
-                }
-                barcodes.shift();
-            }
-            barcodes.filter(function(barcode){ return barcode !== ""; }).map(function(barcode) {
-                // Split the entry into its values
-                barcode = barcode.trim();
-                var entry_split = null;
-                if(isGdcTsv) {
-                    entry_split = barcode.split(/\s*\t\s*/);
-                }
-                if ((isGdcTsv && entry_split.length < 2) || barcode.length <= 0) {
-                    if (!result.invalid_entries) {
-                        result.invalid_entries = [];
-                    }
-                    result.invalid_entries.push(barcode);
-                } else {
-                    if (!result.valid_entries) {
-                        result.valid_entries = [];
-                    }
-                    if(isGdcTsv) {
-                        result.valid_entries.push(entry_split[case_id_col] + "{}{}" + entry_split[proj_col].split(/^([^-]+)-.+/)[1]);
-                    } else {
-                        // Strip any surrounding double or single quotes
-                        barcode = barcode.replace(/["']/g,"");
-                        // Check if this might be a stand-alone program entry from an old file-format; if so, ignore it.
-                        if(!PROGRAM_PREFIXES[barcode]) {
-                            // Determine the barcode type (case or sample) and program
-                            var barcode_split = barcode.split("-");
-                            // If the program segment of the barcode is ambiguous,
-                            // this is probably a CCLE case barcode, otherwise
-                            // we can easily identify it. Default to CCLE in such
-                            // cases.
-                            var program = "CCLE";
-                            var case_barcode="",sample_barcode="";
-                            if(PROGRAM_PREFIXES[barcode_split[0]]) {
-                                program = barcode_split[0];
-                            }
-                            if(program == 'CCLE') {
-                                if(barcode.startsWith("CCLE-")) {
-                                    sample_barcode = barcode;
-                                } else {
-                                    case_barcode = barcode;
-                                }
-                            } else {
-                                if(barcode_split.length == 3) {
-                                    case_barcode = barcode;
-                                }
-                                if(barcode_split.length < 3 || barcode_split.length >= 4) {
-                                    // Assume any 4-length barcode OR unfamiliar barcode format to be a sample barcode;
-                                    // worst case scenario it simply won't be found.
-                                    sample_barcode = barcode;
-                                }
-                            }
-                            result.valid_entries.push(case_barcode + "{}" + sample_barcode + "{}" + program);
+        if(barcodes.length > 0) {
+            if (!preFormatted) {
+                var case_id_col = 0;
+                var proj_col = 0;
+                var isGdcTsv = false;
+                if (barcodes[0].match(/Project/) && barcodes[0].match(/Case ID/) && barcodes[0].match(/\t/)) {
+                    isGdcTsv = true;
+                    var header_cols = barcodes[0].split(/\s*\t\s*/);
+                    for (var i = 0; i < header_cols.length; i++) {
+                        if (header_cols[i] == 'Case ID') {
+                            case_id_col = i;
+                        }
+                        if (header_cols[i] == 'Project') {
+                            proj_col = i;
                         }
                     }
+                    barcodes.shift();
                 }
-            });
-        } else {
-            result.valid_entries = barcodes;
+                barcodes.filter(function (barcode) {
+                    return barcode !== "";
+                }).map(function (barcode) {
+                    // Split the entry into its values
+                    barcode = barcode.trim();
+                    var entry_split = null;
+                    if (isGdcTsv) {
+                        entry_split = barcode.split(/\s*\t\s*/);
+                    }
+                    if ((isGdcTsv && entry_split.length < 2) || barcode.length <= 0) {
+                        if (!result.invalid_entries) {
+                            result.invalid_entries = [];
+                        }
+                        result.invalid_entries.push(barcode);
+                    } else {
+                        if (!result.valid_entries) {
+                            result.valid_entries = [];
+                        }
+                        if (isGdcTsv) {
+                            result.valid_entries.push(entry_split[case_id_col] + "{}{}" + entry_split[proj_col].split(/^([^-]+)-.+/)[1]);
+                        } else {
+                            // Strip any surrounding double or single quotes
+                            barcode = barcode.replace(/["']/g, "");
+                            // Check if this might be a stand-alone program entry from an old file-format; if so, ignore it.
+                            if (!PROGRAM_PREFIXES[barcode]) {
+                                // Determine the barcode type (case or sample) and program
+                                var barcode_split = barcode.split("-");
+                                // If the program segment of the barcode is ambiguous,
+                                // this is probably a CCLE case barcode, otherwise
+                                // we can easily identify it. Default to CCLE in such
+                                // cases.
+                                var program = "CCLE";
+                                var case_barcode = "", sample_barcode = "";
+                                if (PROGRAM_PREFIXES[barcode_split[0]]) {
+                                    program = barcode_split[0];
+                                }
+                                if (program == 'CCLE') {
+                                    if (barcode.startsWith("CCLE-")) {
+                                        sample_barcode = barcode;
+                                    } else {
+                                        case_barcode = barcode;
+                                    }
+                                } else {
+                                    if (barcode_split.length == 3) {
+                                        case_barcode = barcode;
+                                    }
+                                    if (barcode_split.length < 3 || barcode_split.length >= 4) {
+                                        // Assume any 4-length barcode OR unfamiliar barcode format to be a sample barcode;
+                                        // worst case scenario it simply won't be found.
+                                        sample_barcode = barcode;
+                                    }
+                                }
+                                result.valid_entries.push(case_barcode + "{}" + sample_barcode + "{}" + program);
+                            }
+                        }
+                    }
+                });
+            } else {
+                result.valid_entries = barcodes;
+            }
         }
 
         // Any entries which were valid during the initial parse must now be checked against the database
@@ -419,14 +423,14 @@ require([
         tab.find('.valid-entries pre').empty();
         if(result.invalid_entries && result.invalid_entries.length > 0) {
             tab.find('.validation-messages ul').empty();
-            var entry_set = "";
+            var entry_set = "Case Barcode, Sample Barcode, Program\n";
             for(var i=0; i < result.invalid_entries.length; i++) {
                 var entry = result.invalid_entries[i];
                 entry_set += (
                     (entry['case'].indexOf(",") < 0 ? entry['case'] : '"' + entry['case'] + '"')
                     +", "
-                    +(entry['sample'].indexOf(",") < 0 ? entry['sample'] : '"' + entry['sample'] + '"')
-                    +", "+entry['program']+'\n'
+                    +(entry['sample'].length <= 0 ? "NOT FOUND" : (entry['sample'].indexOf(",") < 0 ? entry['sample'] : '"' + entry['sample'] + '"'))
+                    +", "+(entry['program'] == 'CCLE' && entry['sample'].indexOf('CCLE') < 0 ? 'UNKNOWN' : entry['program']) +'\n'
                 );
             }
             tab.find('.invalid-entries pre').html(entry_set);
@@ -446,7 +450,7 @@ require([
         }
 
         if(result.valid_entries && result.valid_entries.length > 0) {
-            var entry_set = "";
+            var entry_set = "Case Barcode, Sample Barcode, Program\n";
             validated_barcodes = {};
             for(var i=0; i < result.valid_entries.length; i++) {
                 var entry = result.valid_entries[i];
