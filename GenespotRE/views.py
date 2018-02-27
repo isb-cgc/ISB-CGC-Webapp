@@ -32,7 +32,7 @@ from oauth2client.client import GoogleCredentials
 
 from google_helpers.directory_service import get_directory_resource
 from google_helpers.bigquery_service_v2 import BigQueryServiceSupport
-from cohorts.metadata_helpers import submit_bigquery_job, is_bigquery_job_finished, get_bq_job_results
+from cohorts.metadata_helpers import submit_bigquery_job, is_bigquery_job_finished, get_bq_job_results, get_sample_metadata
 from googleapiclient.errors import HttpError
 from visualizations.models import SavedViz
 from cohorts.models import Cohort, Cohort_Perms
@@ -311,7 +311,7 @@ def get_image_data(request, slide_barcode):
     else:
         try:
             img_data_query = """
-                SELECT slide_barcode, level_0__width AS width, level_0__height AS height, mpp_x, mpp_y, GCSurl
+                SELECT slide_barcode, level_0__width AS width, level_0__height AS height, mpp_x, mpp_y, GCSurl, sample_barcode, case_barcode
                 FROM [isb-cgc:metadata.TCGA_slide_images]
                 WHERE slide_barcode = '{}';
             """
@@ -338,15 +338,23 @@ def get_image_data(request, slide_barcode):
                     'MPP-X': query_results[0]['f'][3]['v'],
                     'MPP-Y': query_results[0]['f'][4]['v'],
                     'FileLocation': re.sub(r'isb-cgc-open/.*_image', 'imaging-west', query_results[0]['f'][5]['v']),
-                    'TissueID': query_results[0]['f'][0]['v']
+                    'TissueID': query_results[0]['f'][0]['v'],
+                    'sample-barcode': query_results[0]['f'][6]['v'],
+                    'case-barcode': query_results[0]['f'][7]['v'],
+                    'img-type': ('Diagnostic Image' if 'DX1' in slide_barcode else 'Tissue Slide Image' if 'TS1' in slide_barcode else "N/A")
                 }
+
+                sample_metadata = get_sample_metadata(result['sample_barcode'])
+                result['disease-code'] = sample_metadata['disease_code']
+                result['project'] = sample_metadata['project']
+
             else:
                 result = {
                     'msg': 'Slide barcode {} was not found.'.format(slide_barcode)
                 }
 
         except Exception as e:
-            logger.error("[ERROR] While attempting to retrieve image data:")
+            logger.error("[ERROR] While attempting to retrieve image data for {}:".format(slide_barcode))
             logger.exception(e)
             status=503
             result = {
