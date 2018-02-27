@@ -97,7 +97,10 @@ require([
         } else if(tsvMatch) {
             if(nsvMatch) {
                 for(var i=0; i<nl_split_entries.length; i++) {
-                    entries = entries.concat(nl_split_entries[i].split(/\s*\t(?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)\s*/));
+                    var entry = nl_split_entries[i].trim();
+                    if(entry.length > 0) {
+                        entries = entries.concat(entry.split(/\s*\t(?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)\s*/));
+                    }
                 }
             } else {
                 entries = content.split(/\s*\t(?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)\s*/);
@@ -105,7 +108,10 @@ require([
         } else if(csvMatch) {
             if(nsvMatch) {
                 for(var i=0; i<nl_split_entries.length; i++) {
-                    entries = entries.concat(nl_split_entries[i].split(/\s*,(?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)\s*/));
+                    var entry = nl_split_entries[i].trim();
+                    if(entry.length > 0) {
+                        entries = entries.concat(entry.split(/\s*,(?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)\s*/));
+                    }
                 }
             } else {
                 entries = content.split(/\s*,(?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)\s*/);

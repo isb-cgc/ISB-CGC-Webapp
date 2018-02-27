@@ -56,7 +56,7 @@ require([
 
         $('#verify-gcp-id').val($('#verify-gcp-id').val().trim());
 
-        if(!($('#verify-gcp-id').val().match(/^[A-Za-z][A-Za-z0-9]*$|^[A-Za-z]([A-Za-z0-9]*\-?(?=[A-Za-z0-9]))*?[A-Za-z0-9]+$/))) {
+        if(!($('#verify-gcp-id').val().match(/^[a-z][a-z0-9]*$|^[a-z]([a-z0-9]*\-?(?=[a-z0-9]))*?[a-z0-9]+$/))) {
             $('#provided-gcp-id').text($('#verify-gcp-id').val());
             $('#invalid-gcp-id').show();
             return false;
