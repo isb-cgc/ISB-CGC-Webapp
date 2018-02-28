@@ -162,17 +162,11 @@ CSRF_COOKIE_SECURE = bool(os.environ.get('CSRF_COOKIE_SECURE', False))
 SESSION_COOKIE_SECURE = bool(os.environ.get('SESSION_COOKIE_SECURE', False))
 SECURE_SSL_REDIRECT = bool(os.environ.get('SECURE_SSL_REDIRECT', False))
 
-# Due to the behavior of AppEngine Flex and the load balancer, we have to explicitly
-# use SSLify to enforce redirect of http to https even though we're on Django 1.8+
-# --> DO NOT REMOVE THIS OR ITS REQUIREMENTS ENTRY <--
-SSLIFY_DISABLE = True if not SECURE_SSL_REDIRECT else False
+SECURE_REDIRECT_EXEMPT = []
 
 if SECURE_SSL_REDIRECT:
     # Exempt the health check so it can go through
     SECURE_REDIRECT_EXEMPT = [r'^_ah/(vm_)?health$', ]
-    SSLIFY_DISABLE_FOR_REQUEST = [
-        lambda request: request.get_full_path().startswith('/_ah/health') or request.get_full_path().startswith('/_ah/vm_health')
-    ]
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -237,11 +231,8 @@ STATICFILES_FINDERS = (
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '')
 
-MIDDLEWARE_CLASSES = (
-    # Due to the behavior of AppEngine Flex and the load balancer, we have to explicitly
-    # use SSLify to enforce redirect of http to https even though we're on Django 1.8+
-    # --> DO NOT REMOVE THIS OR ITS REQUIREMENTS ENTRY <--
-    'sslify.middleware.SSLifyMiddleware',
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
     # For using NDB with Django
     # documentation: https://cloud.google.com/appengine/docs/python/ndb/#integration
     # WE DON'T SEEM TO BE USING NDB SO I'M COMMENTING THIS OUT - PL
@@ -256,7 +247,7 @@ MIDDLEWARE_CLASSES = (
     # Uncomment the next line for simple clickjacking protection:
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'offline.middleware.OfflineMiddleware',
-)
+]
 
 ROOT_URLCONF = 'GenespotRE.urls'
 
@@ -296,7 +287,7 @@ INSTALLED_APPS += ('session_security',)
 SESSION_SECURITY_WARN_AFTER = 540
 SESSION_SECURITY_EXPIRE_AFTER = 600
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-MIDDLEWARE_CLASSES += (
+MIDDLEWARE.append(
     # for django-session-security -- must go *after* AuthenticationMiddleware
     'session_security.middleware.SessionSecurityMiddleware',
 )
@@ -548,7 +539,7 @@ WHITELIST_RE = ur'([^\\\_\|\"\+~@:#\$%\^&\*=\-\.,\(\)0-9a-zA-Z\s\xc7\xfc\xe9\xe2
 
 if DEBUG and DEBUG_TOOLBAR:
     INSTALLED_APPS += ('debug_toolbar',)
-    MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
+    MIDDLEWARE.append('debug_toolbar.middleware.DebugToolbarMiddleware',)
     DEBUG_TOOLBAR_PANELS = [
         'debug_toolbar.panels.versions.VersionsPanel',
         'debug_toolbar.panels.timer.TimerPanel',
