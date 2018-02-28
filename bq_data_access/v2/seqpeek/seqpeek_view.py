@@ -21,6 +21,8 @@ import logging
 
 from bq_data_access.v2.seqpeek.seqpeek_interpro import InterProDataProvider
 
+logger = logging.getLogger('main_logger')
+
 SAMPLE_ID_FIELD_NAME = 'sample_id'
 TRACK_ID_FIELD = "tumor"
 COORDINATE_FIELD_NAME = 'uniprot_aapos'

@@ -188,6 +188,13 @@ require([
         }
         sessionStorage.removeItem("reloadMsg");
     });
+
+    // Per https://stackoverflow.com/questions/13550477/twitter-bootstrap-alert-message-close-and-open-again
+    // Set up our own data-hide type to 'hide' our alerts instead of popping them off the DOM entirely
+    $("[data-hide]").on("click", function(){
+        $(this).closest("." + $(this).attr("data-hide")).hide();
+    });
+
 });
 
 // Return an object for consts/methods used by most views
