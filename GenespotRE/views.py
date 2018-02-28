@@ -356,7 +356,7 @@ def get_image_data(request, slide_barcode):
         except Exception as e:
             logger.error("[ERROR] While attempting to retrieve image data for {}:".format(slide_barcode))
             logger.exception(e)
-            status=503
+            status = '503'
             result = {
                 'message': "There was an error while processing this request."
             }

@@ -112,7 +112,7 @@
                 <div id="invalid-gcp-id" class="alert alert-warning alert-dismissible" style="display: none;">
                     <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                     <span id="verify-error-text"></span>
-                    <span id="verify-error-base">The Google Cloud Project ID provided (<span id="provided-gcp-id"></span>) does not appear to be a valid GCP ID. Please double-check and ensure you are not providing the GCP Name or Number. Only the GCP ID can be registered.</span>
+                    <span id="verify-error-base">The Google Cloud Project ID provided (<span id="provided-gcp-id"></span>) does not appear to be a valid GCP ID. Please double-check and ensure you are not providing the GCP Name or Number. Only the GCP ID can be registered. Note that per Google's requirements, Google Cloud Project IDs can only contain lowercase letters, numbers, and dashes, and must start with a letter.</span>
                 </div>
                 <form id="register-gcp-form" method="POST" action="{% url 'register_gcp' user.id %}" style="display:none;">
                     <p>
