@@ -589,7 +589,7 @@ require([
 
         var form = $(this);
 
-        $('#apply-edits-form input[type="submit"]').prop('disabled',true);
+        $(this).find('input[type="submit"]').attr("disabled","disabled");
         savingChanges = true;
 
         if($('.selected-filters .panel-body span').length > 0) {
