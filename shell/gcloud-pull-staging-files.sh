@@ -7,9 +7,6 @@
 ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_DEV}/${GOOGLE_ORG_WHITELIST_JSON_FILE}" ./
 ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_DEV}/${MANAGED_SERVICE_ACCOUNTS_JSON_FILE}" ./
 ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_DEV}/${DEV_DATASET_JSON_FILE}" ./
-echo ${GCLOUD_BUCKET_DEV}
-echo ${DEV_DATASET_JSON_FILE}
-cat ./${DEV_DATASET_JSON_FILE}
 
 if [ -n "${DEV_NIH_AUTH_ON}" ]; then
   ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_DEV}/saml/advanced_settings.json" ./saml/advanced_settings.json
