@@ -26,7 +26,7 @@ from bq_data_access.v2.user_data import UserDataQueryHandler
 from bq_data_access.v2.data_access import submit_tcga_job, get_submitted_job_results
 
 from cohorts.metadata_helpers import get_sql_connection
-from google_helpers.bigquery_service import get_bigquery_service
+from google_helpers.bigquery.service import get_bigquery_service
 
 
 def user_feature_handler(feature_id, cohort_id_array):

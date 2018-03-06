@@ -31,7 +31,7 @@ from googleapiclient import discovery
 from oauth2client.client import GoogleCredentials
 
 from google_helpers.directory_service import get_directory_resource
-from google_helpers.bigquery_service_v2 import BigQueryServiceSupport
+from google_helpers.bigquery.service_v2 import BigQueryServiceSupport
 from cohorts.metadata_helpers import submit_bigquery_job, is_bigquery_job_finished, get_bq_job_results, get_sample_metadata
 from googleapiclient.errors import HttpError
 from visualizations.models import SavedViz

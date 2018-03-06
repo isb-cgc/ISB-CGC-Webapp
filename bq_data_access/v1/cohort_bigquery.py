@@ -20,7 +20,7 @@ from copy import deepcopy
 import sys
 import logging
 from django.conf import settings
-from google_helpers.bigquery_service import get_bigquery_service
+from google_helpers.bigquery.service import get_bigquery_service
 
 MAX_INSERT = settings.MAX_BQ_INSERT
 
