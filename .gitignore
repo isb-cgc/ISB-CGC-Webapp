@@ -94,6 +94,7 @@ saml/*
 *.crt
 *.pem
 tmp*
+*.b64
 
 # Emacs
 \#*\#

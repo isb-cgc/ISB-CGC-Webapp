@@ -28,7 +28,7 @@ from cohorts.metadata_helpers import get_sql_connection
 from bq_data_access.v2.plot_data_support import get_feature_id_validity_for_array
 from cohorts.metadata_helpers import fetch_isbcgc_project_set
 
-from google_helpers.bigquery_service_v2 import BigQueryServiceSupport
+from google_helpers.bigquery.service_v2 import BigQueryServiceSupport
 from bq_data_access.v2.data_access import FeatureVectorBigQueryBuilder
 from bq_data_access.v2.plot_data_support import get_merged_feature_vectors
 from bq_data_access.v2.cohort_cloudsql import add_cohort_info_to_merged_vectors

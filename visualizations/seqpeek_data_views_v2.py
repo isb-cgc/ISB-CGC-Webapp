@@ -23,7 +23,7 @@ import sys
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 
-from google_helpers.bigquery_service_v2 import BigQueryServiceSupport
+from google_helpers.bigquery.service_v2 import BigQueryServiceSupport
 from bq_data_access.v2.data_access import FeatureVectorBigQueryBuilder
 from bq_data_access.v2.seqpeek.seqpeek_view import SeqPeekViewDataBuilder
 from bq_data_access.v2.seqpeek.seqpeek_maf_formatter import SeqPeekMAFDataFormatter
@@ -31,9 +31,7 @@ from bq_data_access.v2.seqpeek_maf_data import SeqPeekDataQueryHandler
 from bq_data_access.v2.feature_id_utils import ProviderClassQueryDescription
 from visualizations.data_access_views_v2 import get_confirmed_project_ids_for_cohorts
 
-
 logger = logging.getLogger('main_logger')
-
 
 def build_gnab_feature_id(gene_label, genomic_build):
     """
