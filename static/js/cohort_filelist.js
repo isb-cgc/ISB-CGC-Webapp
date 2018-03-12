@@ -370,7 +370,7 @@ require([
             url += '&'+filter_args;
         }
 
-        if(active_tab !== 'camic') {
+        if(active_tab !== 'camic' && active_tab !== 'dicom') {
             url += '&build='+$(tab_selector).find('.build :selected').val();
         }
 
@@ -464,15 +464,17 @@ require([
 
             var row = '<tr>' +
                 '<td>' + files[i]['program'] + '</td>' +
-                '<td>' + files[i]['sample'] + '</td>' +
+                '<td>' + files[i][(active_tab == 'dicom' ? 'case' : 'sample')] + '</td>' +
                 '<td>' + files[i]['disease_code'] + '</td>' +
+                (active_tab === 'dicom' ? '<td>'+files[i]['project_short_name']+'</td>' : '') +
+                (active_tab === 'dicom' ? '<td>'+files[i]['study_desc']+'</td>' : '') +
+                (active_tab === 'dicom' ? '<td><a href="'+DICOM_URL+files[i]['study_uid']+'/" target="_blank">'+files[i]['study_uid']+'</td>' : '') +
                 (active_tab === 'camic' ? (files[i]['thumbnail'] ? '<td><img src="'+IMG_THUMBS_URL+files[i]['thumbnail']+'/thmb_128x64.jpeg"></td>' : '<td></td>') : '') +
-                (active_tab !== 'camic' ? '<td>' + (files[i]['exp_strat'] || 'N/A') + '</td>' : '')+
-                (active_tab !== 'camic' ? '<td>' + happy_name(files[i]['platform']) + '</td>' : '')+
-                (active_tab !== 'camic' ? '<td>' + files[i]['datacat'] + '</td>' : '') +
-                '<td>' + files[i]['datatype'] + '</td>' +
-                '<td>' + files[i]['dataformat'] + '</td>' +
-                (active_tab !== 'all' ? (files[i]['file_viewer'] ? '<td>' + files[i]['file_viewer'] + '</td>' : '<td></td>') : '') +
+                (active_tab !== 'camic' && active_tab !== 'dicom' ? '<td>' + (files[i]['exp_strat'] || 'N/A') + '</td>' : '')+
+                (active_tab !== 'camic' && active_tab !== 'dicom' ? '<td>' + happy_name(files[i]['platform']) + '</td>' : '')+
+                (active_tab !== 'camic' && active_tab !== 'dicom' ? '<td>' + files[i]['datacat'] + '</td>' : '') +
+                (active_tab !== 'dicom' ? '<td>' + files[i]['datatype'] + '</td><td>' + files[i]['dataformat'] + '</td>' : '') +
+                (active_tab !== 'all' && active_tab !== 'dicom' ? (files[i]['file_viewer'] ? '<td>' + files[i]['file_viewer'] + '</td>' : '<td></td>') : '') +
             '</tr>';
 
             $(tab_selector).find('.filelist-panel table tbody').append(row);
