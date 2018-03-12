@@ -358,6 +358,13 @@ def get_image_data(request, slide_barcode):
 
 
 @login_required
+def dicom(request, study_uid=None):
+    template = 'GenespotRE/dicom.html'
+    context = {}
+    return render(request, template, context)
+
+
+@login_required
 def camic(request, slide_barcode=None):
     if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
     images = []
