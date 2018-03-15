@@ -436,7 +436,7 @@ define([
                 .style('font-size', 20)
                 .attr('text-anchor', 'middle')
                 .attr('transform', 'translate(' + (width/2) + ',' + (height/2) + ')')
-                .text('No samples were found for this combination of plot type, cohort, and axis variables.');
+                .text((data.message ? data.message : 'No samples were found for this combination of plot type, cohort, and axis variables.'));
 
             // Hide the legend
             $(args.legend_selector).hide();
