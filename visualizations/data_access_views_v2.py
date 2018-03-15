@@ -236,6 +236,14 @@ def data_access_for_plot(request):
         # we need to access (public projects have unique name tags, e.g. tcga).
         program_set = get_public_program_name_set_for_cohorts(cohort_id_array)
 
+        # We need to do this for cohorts that contain samples found in user data projects,
+        # where those projects are extension of public data. This is because the cohorts
+        # only reference the user project, but if we are plotting against pubic data, we
+        # have to know which public programs we need to look at.
+
+        prog_set_extended = get_extended_public_program_name_set_for_user_extended_projects(confirmed_study_ids)
+        program_set.update(prog_set_extended)
+
         # Check to see if these programs have data for the requested vectors; if not, there's no reason to plot
         features_without_program_data = []
         for id in [x_id, y_id, c_id]:
@@ -251,14 +259,6 @@ def data_access_for_plot(request):
 
         if len(features_without_program_data):
             return JsonResponse({'message': "The chosen cohorts do not contain programs with data for these features: {}.".format(", ".join(features_without_program_data))})
-
-        # We need to do this for cohorts that contain samples found in user data projects,
-        # where those projects are extension of public data. This is because the cohorts
-        # only reference the user project, but if we are plotting against pubic data, we
-        # have to know which public programs we need to look at.
-
-        prog_set_extended = get_extended_public_program_name_set_for_user_extended_projects(confirmed_study_ids)
-        program_set.update(prog_set_extended)
 
         user_programs = get_user_program_id_set_for_user_only_projects(user_only_study_ids)
 

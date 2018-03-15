@@ -423,7 +423,7 @@ define([
             d3.select(window).on('resize', visualization.plot.resize);
             args.color_by_sel && $(args.legend_selector).show();
 
-        } else if (args.type == "SeqPeek") {
+        } else if (args.type == "SeqPeek" && !data.message) {
             visualization = generate_seqpeek_plot(args.plot_selector, args.legend_selector, data);
         } else {
             // No data returned

@@ -112,4 +112,3 @@ class SeqPeekDataQueryHandler(GNABDataQueryHandler):
         logging.debug("Query result is {qrows} rows, skipped {skipped} rows".format(qrows=len(query_result_array),
                                                                                     skipped=skip_count))
         return result
-
