@@ -84,11 +84,12 @@
                                 <a class="download-link" href="{{ download_url }}" title="Download file manifest as CSV"><button class="btn btn-info">CSV</button></a>{# <a id="download-link" href="{{ download_url }}" title="Download file manifest as JSON"><button class="btn btn-info">JSON</button></a>#}
                             </div>
                         </li>
-{#                        <li class="menu-item">#}
-{#                            <div class="filelist-obtain">#}
-{#                                <a id="download-link" href="" title="Export file manifest to BQ"><button class="btn btn-info">BQ</button></a> <a id="download-link" href="" title="Export file manifest to GCS"><button class="btn btn-info">GCS</button></a>#}
-{#                            </div>#}
-{#                        </li>#}
+                        <li class="menu-item">
+                            <div class="filelist-obtain">
+                                <button class="btn btn-info export-btn" data-toggle="modal" data-target="#export-manifest-modal" title="Export this file manifest to a BigQuery table">Export to BQ</button>
+{#                                <a id="download-link" href="{{ export_url }}" title="Export file manifest to BQ"><button class="btn btn-info">BQ</button></a> <a id="download-link" href="" title="Export file manifest to GCS"><button class="btn btn-info">GCS</button></a>#}
+                            </div>
+                        </li>
                     </ul>
                 </div>
             </div>
