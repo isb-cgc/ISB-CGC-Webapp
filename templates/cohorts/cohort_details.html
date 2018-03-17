@@ -429,6 +429,7 @@
     var cohort_id = {{ cohort.id }};
     var user_data = {{ user_data|tojson|safe }};
     var cohort_programs = {{ cohort_programs|tojson|safe }};
+    var request_user_id = {{ user.id }};
     </script>
 {% endblock %}
 
