@@ -116,20 +116,25 @@ nav
  *******************************************/
 
 .tablesorter
-    th
+    thead tr th
         cursor: pointer
+        vertical-align: top
         &:first-child
             cursor: auto
-    .headerSortUp:after
-        content: "\f077"
-        float: right
-        font-family: FontAwesome
-        margin-left: -20px
-    .headerSortDown:after
-        content: "\f078"
-        float: right
-        font-family: FontAwesome
-        margin-left: -20px
+        &.header:after
+            content: ""
+            float: right
+            width: 20px
+            height: 20px
+        &.headerSortUp:after
+            content: "\f077"
+            float: right
+            font-family: FontAwesome
+        &.headerSortDown:after
+            content: "\f078"
+            float: right
+            font-family: FontAwesome
+
 
 /********************************************
  * Handy Classes
