@@ -24,23 +24,28 @@ require.config({
         jqueryui: 'libs/jquery-ui.min',
         session_security: 'session_security',
         underscore: 'libs/underscore-min',
-        tokenfield: 'libs/bootstrap-tokenfield.min'
+        tokenfield: 'libs/bootstrap-tokenfield.min',
+        base: 'base',
+        bq_export: 'export_to_bq'
     },
     shim: {
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
         'session_security': ['jquery'],
-        'tokenfield': ['jquery', 'jqueryui']
+        'tokenfield': ['jquery', 'jqueryui'],
+        'base': ['jquery', 'jqueryui', 'session_security', 'bootstrap', 'underscore']
     }
 });
 
 require([
     'jquery',
+    'base',
     'jqueryui',
     'bootstrap',
     'session_security',
-    'tokenfield'
-], function ($) {
+    'tokenfield',
+    'bq_export'
+], function ($, base) {
 
     // For manaaging filter changes
     var UPDATE_PENDING = false;
@@ -327,10 +332,10 @@ require([
         }
 
         if(file_list_total <= 0) {
-            // Can't download something that isn't there
-            $(tab_selector).find('.download-link .btn').attr('disabled','disabled');
+            // Can't download/export something that isn't there
+            $(tab_selector).find('.download-link .btn, .export-btn').attr('disabled','disabled');
         } else {
-            $(tab_selector).find('.download-link .btn').removeAttr('disabled');
+            $(tab_selector).find('.download-link .btn, .export-btn').removeAttr('disabled');
         }
 
         $(tab_selector).find('.file-list-total').text(file_list_total);
@@ -341,9 +346,15 @@ require([
             $(tab_selector).find('.file-list-warning').show();
         }
 
+        // Clear the previous parameter settings from the export form, and re-add the build
+        $('#export-manifest-form input.param').remove();
+        $('#export-manifest-form').append('<input class="param" type="hidden" name="build" value="'+build+'" />');
+
         if (SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab][build]).length >0) {
             var filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab][build]));
             $(tab_selector).find('.download-link').attr('href', download_url + '?' + filter_args + '&total=' + file_list_total);
+            $('#export-manifest-form').append('<input class="param" type="hidden" name="filters" value="" />');
+            $('#export-manifest-form input[name="filters"]').attr('value',JSON.stringify(SELECTED_FILTERS[active_tab][build]));
         } else {
             $(tab_selector).find('.download-link').attr('href', download_url + '?total=' + file_list_total)
         }

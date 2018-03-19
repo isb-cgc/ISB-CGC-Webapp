@@ -11,6 +11,9 @@ fi
 echo "Installing MySQL..."
 sudo debconf-set-selections <<< "mysql-server-5.6 mysql-server/root_password password $MYSQL_ROOT_PASSWORD"
 sudo debconf-set-selections <<< "mysql-server-5.6 mysql-server/root_password_again password $MYSQL_ROOT_PASSWORD"
+sudo apt-get -qq -y --force-yes install mysql-server-5.6
+sudo debconf-set-selections <<< "mysql-server-5.6 mysql-server/root_password password $MYSQL_ROOT_PASSWORD"
+sudo debconf-set-selections <<< "mysql-server-5.6 mysql-server/root_password_again password $MYSQL_ROOT_PASSWORD"
 sudo DEBIAN_FRONTEND=noninteractive apt-get -qq -y install mysql-server-5.6
 
 echo "Creating Databases..."

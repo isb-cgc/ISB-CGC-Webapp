@@ -15,13 +15,13 @@ export PYTHONPATH=${HOMEROOT}/lib/:${HOMEROOT}/:${HOME}/google_appengine/:${HOME
 echo $PYTHONPATH
 
 echo "Increase group_concat max, for longer data type names"
-mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -e "SET GLOBAL group_concat_max_len=150000;"
+mysql -u $MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -e "SET GLOBAL group_concat_max_len=150000;"
 
 echo "Creating django-user for web application..."
-mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON $DATABASE_NAME.* TO '${DATABASE_USER}'@'localhost' IDENTIFIED BY '${DATABASE_PASSWORD}';"
+mysql -u $MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON $DATABASE_NAME.* TO '${DATABASE_USER}'@'localhost' IDENTIFIED BY '${DATABASE_PASSWORD}';"
 
 echo "Creating the definer account for any routines in the table file..."
-mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON $DATABASE_NAME.* TO 'dev-user'@'%' IDENTIFIED BY '${DATABASE_PASSWORD}';"
+mysql -u $MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON $DATABASE_NAME.* TO 'dev-user'@'%' IDENTIFIED BY '${DATABASE_PASSWORD}';"
 
 # If we have migrations for older, pre-migrations apps which haven't yet been or will never be added to the database dump, make them here eg.:
 # python ${HOMEROOT}/manage.py makemigrations <appname>

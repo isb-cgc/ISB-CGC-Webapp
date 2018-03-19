@@ -69,6 +69,10 @@
         </div>
     </div>
 
+    {% if cohort.perm.perm == 'OWNER' %}
+        <!-- Export File Manifest Modal -->
+        {% include "cohorts/bq_export_modal.html" with export_type="File Manifest" export_url=export_url %}
+    {% endif %}
 
     <script type="text/javascript">
     var cohort_id = {{ cohort.id }};
@@ -83,7 +87,8 @@
     var DICOM_URL = {% url 'dicom' %};
     var SEL_IGV_FILE_MAX = '{{  sel_file_max }}';
     var FILE_LIST_MAX = '{{  file_list_max }}';
-    var IMG_THUMBS_URL = '{{ img_thumbs_url }}'
+    var IMG_THUMBS_URL = '{{ img_thumbs_url }}';
+    var request_user_id = {{ user.id }};
     </script>
 {% endblock %}
 
