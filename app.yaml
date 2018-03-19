@@ -14,7 +14,7 @@
 # limitations under the License.
 ###
 
-runtime: python27
+runtime: custom
 env: flex
 service: mvm
 api_version: 1
