@@ -75,6 +75,13 @@ require([
             data: fields,
             method: 'POST',
             success: function(data) {
+                // If we received a redirect, honor that
+                if(data('redirect')) {
+                    window.location = $this.data('redirect');
+                } else {
+                    window.location.reload();
+                }
+
                 var tbody = user_ver_div.find('tbody');
                 tbody.empty();
                 spinner.hide();

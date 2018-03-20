@@ -71,6 +71,7 @@ target/
 *.patch
 .env
 *.env
+!sample.env
 scripts/metadata_featdef_tables.sql
 
 # dummy datasets
