@@ -75,13 +75,6 @@ require([
             data: fields,
             method: 'POST',
             success: function(data) {
-                // If we received a redirect, honor that
-                if(data('redirect')) {
-                    window.location = $this.data('redirect');
-                } else {
-                    window.location.reload();
-                }
-
                 var tbody = user_ver_div.find('tbody');
                 tbody.empty();
                 spinner.hide();
@@ -156,7 +149,13 @@ require([
             error: function(xhr, ajaxOptions, thrownError) {
                 spinner.hide();
                 $('.verify-sa-btn').prop('disabled', '');
-                base.showJsMessage(xhr.responseJSON.level || "error",xhr.responseJSON.message,true);
+                // If we received a redirect, honor that
+                if(xhr.responseJSON.redirect) {
+                    base.setReloadMsg(xhr.responseJSON.level || "error",xhr.responseJSON.message);
+                    window.location = xhr.responseJSON.redirect;
+                } else {
+                    base.showJsMessage(xhr.responseJSON.level || "error",xhr.responseJSON.message,true);
+                }
             }
         });
         return false;
