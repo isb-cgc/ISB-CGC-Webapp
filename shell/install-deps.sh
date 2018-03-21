@@ -2,7 +2,7 @@ if [ -n "$CI" ]; then
     export HOME=/home/ubuntu/${CIRCLE_PROJECT_REPONAME}
     export HOMEROOT=/home/ubuntu/${CIRCLE_PROJECT_REPONAME}
 
-# Clone dependencies
+    # Clone dependencies
     git clone -b master https://github.com/isb-cgc/ISB-CGC-Common.git
 
     # Remove .pyc files; these can sometimes stick around and if a
