@@ -93,13 +93,18 @@ require([
                         }
                     }
                 }
+                this_modal.modal('show');
             },
             error: function(xhr) {
-                this_modal.modal('hide');
-                base.showJsMessage('error',xhr.responseJSON.message,true);
+                if(xhr.responseJSON.redirect) {
+                    base.setReloadMsg(xhr.responseJSON.level || "error",xhr.responseJSON.message);
+                    window.location = xhr.responseJSON.redirect;
+                } else {
+                    this_modal.modal('hide');
+                    base.showJsMessage('error', xhr.responseJSON.message, true);
+                }
             },
             complete: function() {
-                this_modal.modal('show');
                 this_modal.data('opening',false);
             }
         });
