@@ -136,7 +136,7 @@ require([
 
         $.ajax({
             url: BASE_URL + '/accounts/users/'+user_id+'/verify_gcp/',
-            data: "gcp-id="+project_gcp_id + "&is_refresh=true",
+            data: "gcp-id="+project_gcp_id + "&is_refresh=true&detail=true",
             method: 'GET',
             success: function(data) {
                 var roles = data['roles']
