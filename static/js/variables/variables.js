@@ -226,7 +226,7 @@ require([
     $("#create_favorite_list").on('click', function(event){
         var name = $.trim($("#variable_list_name_input").val());
 
-        var unallowed = name.match(base.whitelist);
+        var unallowed = name.match(base.blacklist);
 
         if(unallowed) {
             $('.unallowed-chars').text(unallowed.join(", "));
@@ -265,7 +265,7 @@ require([
     $("#edit_favorite_list").on('click', function(event){
         var name = $.trim($("#variable_list_name_input").val());
 
-        var unallowed = name.match(base.whitelist);
+        var unallowed = name.match(base.blacklist);
 
         if(unallowed) {
             $('.unallowed-chars').text(unallowed.join(", "));
@@ -304,7 +304,7 @@ require([
     $("#apply_to_worksheet").on('click', function(event){
         var name = $.trim($("#variable_list_name_input").val());
 
-        var unallowed = name.match(base.whitelist);
+        var unallowed = name.match(base.blacklist);
 
         if(unallowed) {
             $('.unallowed-chars').text(unallowed.join(", "));
