@@ -275,6 +275,7 @@ require([
         if(!checkContentValidity(content)) {
             base.showJsMessage("error","The entered set of barcodes is not properly formatted. Please double-check that they are in tab- or comma-delimited format.",true);
             return false;
+            $('.verify-pending').hide();
         } else {
             $('.alert-dismissible button.close').trigger('click');
         }
