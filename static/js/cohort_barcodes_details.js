@@ -538,7 +538,7 @@ require([
             return false;
         }
 
-        var unallowed = $('#create-cohort-name').val().match(base.whitelist);
+        var unallowed = $('#create-cohort-name').val().match(base.blacklist);
         if(unallowed) {
             $('.unallowed-chars').text(unallowed.join(", "));
             $('#unallowed-chars-alert').show();

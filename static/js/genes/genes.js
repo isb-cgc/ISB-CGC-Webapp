@@ -218,7 +218,7 @@ require([
             return false;
         }
 
-        var unallowed = name.match(base.whitelist);
+        var unallowed = name.match(base.blacklist);
 
         if(unallowed) {
             $('.unallowed-chars').text(unallowed.join(", "));
