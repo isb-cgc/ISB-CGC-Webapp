@@ -576,18 +576,18 @@ require([
             return false;
         }
 
-        // if(!cohort_id || (original_title !== $('#edit-cohort-name').val())) {
-        //     var name = $('#create-cohort-name').val() || $('#edit-cohort-name').val();
-        //
-        //     var unallowed = name.match(base.whitelist);
-        //
-        //     if(unallowed) {
-        //         $('.unallowed-chars').text(unallowed.join(", "));
-        //         $('#unallowed-chars-alert').show();
-        //         e.preventDefault();
-        //         return false;
-        //     }
-        // }
+        if(!cohort_id || (original_title !== $('#edit-cohort-name').val())) {
+            var name = $('#create-cohort-name').val() || $('#edit-cohort-name').val();
+
+            var unallowed = name.match(base.blacklist);
+
+            if(unallowed) {
+                $('.unallowed-chars').text(unallowed.join(", "));
+                $('#unallowed-chars-alert').show();
+                e.preventDefault();
+                return false;
+            }
+        }
 
         var form = $(this);
 
