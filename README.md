@@ -1,5 +1,5 @@
 # UI-prototyping
-ISB-CGC UI prototyping
+ ISB-CGC UI prototyping
 
 This project uses Google App Engine, Python 2.7, Django 1.7.1, and MySQL 5.6
 
