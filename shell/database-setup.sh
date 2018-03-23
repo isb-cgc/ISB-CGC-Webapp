@@ -1,3 +1,5 @@
+
+
 if [ -n "$CI" ]; then
     export HOME=/home/ubuntu/${CIRCLE_PROJECT_REPONAME}
     export HOMEROOT=/home/ubuntu/${CIRCLE_PROJECT_REPONAME}
@@ -13,13 +15,13 @@ export PYTHONPATH=${HOMEROOT}/lib/:${HOMEROOT}/:${HOME}/google_appengine/:${HOME
 echo $PYTHONPATH
 
 echo "Increase group_concat max, for longer data type names"
-mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -e "SET GLOBAL group_concat_max_len=150000;"
+mysql -u $MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -e "SET GLOBAL group_concat_max_len=150000;"
 
 echo "Creating django-user for web application..."
-mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON $DATABASE_NAME.* TO '${DATABASE_USER}'@'localhost' IDENTIFIED BY '${DATABASE_PASSWORD}';"
+mysql -u $MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON $DATABASE_NAME.* TO '${DATABASE_USER}'@'localhost' IDENTIFIED BY '${DATABASE_PASSWORD}';"
 
 echo "Creating the definer account for any routines in the table file..."
-mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON $DATABASE_NAME.* TO 'dev-user'@'%' IDENTIFIED BY '${DATABASE_PASSWORD}';"
+mysql -u $MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON $DATABASE_NAME.* TO 'dev-user'@'%' IDENTIFIED BY '${DATABASE_PASSWORD}';"
 
 # If we have migrations for older, pre-migrations apps which haven't yet been or will never be added to the database dump, make them here eg.:
 # python ${HOMEROOT}/manage.py makemigrations <appname>
@@ -44,11 +46,11 @@ if [ ! -f ${HOMEROOT}/scripts/metadata_featdef_tables.sql ]; then
         ${HOME}/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file ${HOMEROOT}/deployment.key.json
     # otherwise just use privatekey.json
     else
-        ${HOME}/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file ${HOMEROOT}/privatekey.json
-        ${HOME}/google-cloud-sdk/bin/gcloud config set project "${GCLOUD_PROJECT_NAME}"
+        sudo ${HOME}/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file ${HOMEROOT}/privatekey.json
+        sudo ${HOME}/google-cloud-sdk/bin/gcloud config set project "${GCLOUD_PROJECT_NAME}"
     fi
     echo "Downloading SQL Table File..."
-    ${HOME}/google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_DEV_SQL}/dev_table_and_routines_file.sql" ${HOMEROOT}/scripts/metadata_featdef_tables.sql
+    sudo ${HOME}/google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_DEV_SQL}/dev_table_and_routines_file.sql" ${HOMEROOT}/scripts/metadata_featdef_tables.sql
 fi
 echo "Applying SQL Table File... (may take a while)"
 mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/metadata_featdef_tables.sql

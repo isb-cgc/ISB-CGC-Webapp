@@ -21,7 +21,7 @@ import logging
 from bq_data_access.v1.errors import FeatureNotFoundException
 from bq_data_access.v1.feature_value_types import ValueType, DataTypes
 from django.conf import settings
-from google_helpers.bigquery_service import get_bigquery_service
+from google_helpers.bigquery.service import get_bigquery_service
 
 GNAB_FEATURE_TYPE = 'GNAB'
 IDENTIFIER_COLUMN_NAME = 'sample_id'
