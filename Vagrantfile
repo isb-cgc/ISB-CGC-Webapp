@@ -7,7 +7,7 @@ Vagrant.configure(2) do |config|
   config.vm.network "forwarded_port", guest: 8080, host: 8080
   config.vm.network "forwarded_port", guest: 8000, host: 8000
   # API ports
-  config.vm.network "forwarded_port", guest: 8080, host: 8090
+  config.vm.network "forwarded_port", guest: 8090, host: 8090
   config.vm.network "forwarded_port", guest: 9000, host: 9000
 
   config.vm.synced_folder ".", "/home/vagrant/www"
@@ -16,8 +16,9 @@ Vagrant.configure(2) do |config|
   # Map Common for the WebApp
   config.vm.synced_folder "../ISB-CGC-Common", "/home/vagrant/www/ISB-CGC-Common"
 
-  # Map Common for API
+  # Map Common and lib for API
   config.vm.synced_folder "../ISB-CGC-Common", "/home/vagrant/parentDir/ISB-CGC-API/ISB-CGC-Common"
+  config.vm.synced_folder "../ISB-CGC-WebApp/lib", "/home/vagrant/parentDir/ISB-CGC-API/lib"
 
   # Map Common for Cron
   config.vm.synced_folder "../ISB-CGC-Common", "/home/vagrant/parentDir/ISB-CGC-Cron/ISB-CGC-Common"
