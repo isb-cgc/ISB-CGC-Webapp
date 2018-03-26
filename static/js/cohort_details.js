@@ -636,10 +636,21 @@ require([
 
     // onSubmit: Add Comment
     $('.add-comment').on('submit', function(event) {
+        event.preventDefault();
+        $('#unallowed-chars-alert-comment').hide();
+
         if(savingComment) {
-            event.preventDefault();
             return false;
         }
+
+        var unallowed_chars = $('#comment-content').val().match(base.blacklist);
+
+        if(unallowed_chars) {
+            $('#unallowed-chars-comment').text(unallowed_chars.join(", "));
+            $('#unallowed-chars-alert-comment').show();
+            return false;
+        }
+
         $('.save-comment-btn').prop('disabled', true);
         savingComment = true;
         event.preventDefault();
