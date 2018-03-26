@@ -75,8 +75,8 @@ require([
         var name = $self.find(name_class).val();
         var desc = $self.find(desc_class).val();
 
-        var unallowed_name = name.match(base.whitelist);
-        var unallowed_desc = desc.match(base.whitelist);
+        var unallowed_name = name.match(base.blacklist);
+        var unallowed_desc = desc.match(base.blacklist);
 
         if (unallowed_name || unallowed_desc) {
             var unallowed_all = "";

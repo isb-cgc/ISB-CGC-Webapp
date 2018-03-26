@@ -576,18 +576,18 @@ require([
             return false;
         }
 
-        // if(!cohort_id || (original_title !== $('#edit-cohort-name').val())) {
-        //     var name = $('#create-cohort-name').val() || $('#edit-cohort-name').val();
-        //
-        //     var unallowed = name.match(base.whitelist);
-        //
-        //     if(unallowed) {
-        //         $('.unallowed-chars').text(unallowed.join(", "));
-        //         $('#unallowed-chars-alert').show();
-        //         e.preventDefault();
-        //         return false;
-        //     }
-        // }
+        if(!cohort_id || (original_title !== $('#edit-cohort-name').val())) {
+            var name = $('#create-cohort-name').val() || $('#edit-cohort-name').val();
+
+            var unallowed = name.match(base.blacklist);
+
+            if(unallowed) {
+                $('.unallowed-chars').text(unallowed.join(", "));
+                $('#unallowed-chars-alert').show();
+                e.preventDefault();
+                return false;
+            }
+        }
 
         var form = $(this);
 
@@ -636,10 +636,21 @@ require([
 
     // onSubmit: Add Comment
     $('.add-comment').on('submit', function(event) {
+        event.preventDefault();
+        $('#unallowed-chars-alert-comment').hide();
+
         if(savingComment) {
-            event.preventDefault();
             return false;
         }
+
+        var unallowed_chars = $('#comment-content').val().match(base.blacklist);
+
+        if(unallowed_chars) {
+            $('#unallowed-chars-comment').text(unallowed_chars.join(", "));
+            $('#unallowed-chars-alert-comment').show();
+            return false;
+        }
+
         $('.save-comment-btn').prop('disabled', true);
         savingComment = true;
         event.preventDefault();
