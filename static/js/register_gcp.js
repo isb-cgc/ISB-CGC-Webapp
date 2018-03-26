@@ -78,16 +78,14 @@ require([
                 $('.user-list').empty();
                 var gcp_id = data['gcp_id'];
                 var roles = data['roles']
-                for (var key in roles) {
-                    var list = roles[key];
-                    for (var item in list) {
-                        var user_item = $('<li>' + list[item]['email'] + '</li>');
-                        if (list[item]['registered_user']) {
-                            user_item.append('<i class="fa fa-check"></i>')
-                            $('#register-gcp-form').append('<input type="hidden" name="register_users" value="' + list[item]['email'] + '"/>');
-                        }
-                        $('.user-list').append(user_item);
+                for (var email in roles) {
+                    var member = roles[email];
+                    var user_item = $('<li>' + email + '</li>');
+                    if (member['registered_user']) {
+                        user_item.append('<i class="fa fa-check"></i>')
+                        $('#register-gcp-form').append('<input type="hidden" name="register_users" value="' + email + '"/>');
                     }
+                    $('.user-list').append(user_item);
                 }
                 $('#register-gcp-form').append('<input type="hidden" name="gcp_id" value="' + gcp_id + '"/>');
                 $('#register-gcp-form').show();
@@ -140,12 +138,10 @@ require([
             method: 'GET',
             success: function(data) {
                 var roles = data['roles']
-                for (var key in roles) {
-                    var list = roles[key];
-                    for (var item in list) {
-                        if (list[item]['registered_user']) {
-                            $('#refresh-project').append('<input type="hidden" name="register_users" value="' + list[item]['email'] + '"/>');
-                        }
+                for (var email in roles) {
+                    var member = roles[email];
+                    if (member['registered_user']) {
+                        $('#refresh-project').append('<input type="hidden" name="register_users" value="' + email + '"/>');
                     }
                 }
                 this_modal.modal('show');
