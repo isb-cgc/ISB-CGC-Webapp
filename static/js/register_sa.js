@@ -97,7 +97,7 @@ require([
                 for (var email in roles) {
                     var member = roles[email];
                     var tr = $('<tr></tr>');
-                    tr.append('<td>' + member['email'] + '</td>');
+                    tr.append('<td>' + email + '</td>');
                     if (member['registered_user']) {
                         tr.append('<td><i class="fa fa-check"></i></td>');
                     } else {
@@ -115,7 +115,7 @@ require([
                         if (dataset['valid']) {
                             td.append('<span><i class="fa fa-check"></i> '+dataset['name']+'</span><br />');
                         } else {
-                            td.append('<span title="User '+member['email']+' does not have access to this dataset."><i class="fa fa-times"></i> '+dataset['name']+'</span><br />');
+                            td.append('<span title="User '+email+' does not have access to this dataset."><i class="fa fa-times"></i> '+dataset['name']+'</span><br />');
                         }
                     }
                     tr.append(td);
