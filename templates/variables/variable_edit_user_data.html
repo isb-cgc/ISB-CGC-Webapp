@@ -1,0 +1,46 @@
+                            <ul class="list-group" id="project-accordion" role="tablist" aria-multiselectable="true">
+                                {% if user_vars %}
+                                     {% for key, per_proj in user_vars.items %}
+                                        <li class="list-group-item">
+                                            <div id="heading-{{ per_proj.progID }}-{{ per_proj.projID }}" class="list-group-item__heading">
+                                                <a role="button"  data-toggle="collapse" data-parent="#program-accordion" href="#collapse-{{ per_proj.progID }}-{{ per_proj.projID }}" aria-expanded="false" aria-controls="collapse-{{ attr }}">
+                                                    <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ per_proj.progName }} | {{ per_proj.projName }}
+                                                </a>
+                                            </div>
+                                            <div id="collapse-{{ per_proj.progID }}-{{ per_proj.projID }}" class="list-group-item__body collapse" role="tabpanel" aria-labelledby="heading-{{ per_proj.progID }}-{{ per_proj.projID }}">
+                                                <ul class="search-checkbox-list" id="{{ per_proj.progID }}-{{ per_proj.projID }}">
+                                                    {% with per_proj.vars|how_many_more:6 as num_more %}
+                                                        {% for per_proj_var in per_proj.vars %} {#|get_item:attr %}#}
+                                                            {% if forloop.counter0 < 6 %}
+                                                                <li class="checkbox">
+                                                                    <label>
+                                                                        <input class="variable-toggle-checkbox" type="checkbox" name="elements-selected" var_type="{{ per_proj_var.var_type }}" value="{{ per_proj_var.value }}" data-code="{{ per_proj_var.data_code }}" data-text-label="{{ per_proj_var.data_text_label }}" data-feature-id="{{ per_proj_var.data_feature_id }}" > {{ per_proj_var.data_feature_name }}
+                                                                    </label>
+                                                                </li>
+                                                            {% elif forloop.counter0 == 6 and num_more > 0 %}
+                                                                <a class="show-more">{{ num_more }} more</a>
+                                                                <li class="extra-values checkbox" style="display:none;">
+                                                                    <label>
+                                                                        <input class="variable-toggle-checkbox" type="checkbox" name="elements-selected" var_type="{{ per_proj_var.var_type }}" value="{{ per_proj_var.value }}" data-code="{{ per_proj_var.data_code }}" data-text-label="{{ per_proj_var.data_text_label }}" data-feature-id="{{ per_proj_var.data_feature_id }}" > {{ per_proj_var.data_feature_name }}
+                                                                    </label>
+                                                                </li>
+                                                            {% else %}
+                                                                <li class="extra-values checkbox" style="display:none;">
+                                                                    <label>
+                                                                        <input class="variable-toggle-checkbox" type="checkbox" name="elements-selected" var_type="{{ per_proj_var.var_type }}" value="{{ per_proj_var.value }}" data-code="{{ per_proj_var.data_code }}" data-text-label="{{ per_proj_var.data_text_label }}" data-feature-id="{{ per_proj_var.data_feature_id }}" > {{ per_proj_var.data_feature_name }}
+                                                                    </label>
+                                                                </li>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                        {% if num_more > 0 %}
+                                                            <a class="show-less" style="display:none;">less</a>
+                                                        {% endif %}
+                                                    {% endwith %}
+                                                </ul>
+                                            </div>
+                                        </li>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="space-top-15"><center>No projects available</center></div>
+                                {% endif %}
+                            </ul>

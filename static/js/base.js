@@ -188,13 +188,20 @@ require([
         }
         sessionStorage.removeItem("reloadMsg");
     });
+
+    // Per https://stackoverflow.com/questions/13550477/twitter-bootstrap-alert-message-close-and-open-again
+    // Set up our own data-hide type to 'hide' our alerts instead of popping them off the DOM entirely
+    $("[data-hide]").on("click", function(){
+        $(this).closest("." + $(this).attr("data-hide")).hide();
+    });
+
 });
 
 // Return an object for consts/methods used by most views
 define(['jquery', 'utils'], function($, utils) {
 
     return {
-        whitelist: /[^\\\_\|\"\+~@:#\$%\^&\*=\-\.,\(\)0-9a-zA-Z\sÇüéâäàåçêëèïîíìÄÅÉæÆôöòûùÖÜáóúñÑÀÁÂÃÈÊËÌÍÎÏÐÒÓÔÕØÙÚÛÝßãðõøýþÿ]/g,
+        blacklist: /<script>|<\/script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|<iframe>|<\/iframe>/ig,
         barcode_file_whitelist: /[^A-Za-z0-9\-,\t_\."'\s\(\)\/;:]/g,
         // From http://www.regular-expressions.info/email.html
         email: /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/,

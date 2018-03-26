@@ -16,6 +16,8 @@ import json
 import logging
 import os
 import sys
+import re
+from time import sleep
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -28,9 +30,9 @@ from django.utils import formats
 from googleapiclient import discovery
 from oauth2client.client import GoogleCredentials
 
-debug = settings.DEBUG
-
 from google_helpers.directory_service import get_directory_resource
+from google_helpers.bigquery.service_v2 import BigQueryServiceSupport
+from cohorts.metadata_helpers import submit_bigquery_job, is_bigquery_job_finished, get_bq_job_results, get_sample_metadata
 from googleapiclient.errors import HttpError
 from visualizations.models import SavedViz
 from cohorts.models import Cohort, Cohort_Perms
@@ -41,12 +43,14 @@ from accounts.models import NIH_User, GoogleProject, UserAuthorizedDatasets, Aut
 from allauth.socialaccount.models import SocialAccount
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 
+from django.http import HttpResponse, JsonResponse
 
 debug = settings.DEBUG
 logger = logging.getLogger('main_logger')
 
 ERA_LOGIN_URL = settings.ERA_LOGIN_URL
 OPEN_ACL_GOOGLE_GROUP = settings.OPEN_ACL_GOOGLE_GROUP
+BQ_ATTEMPT_MAX = 10
 
 
 def convert(data):
@@ -274,6 +278,119 @@ def search_cohorts_viz(request):
         result_obj['visualizations'] = list
     return HttpResponse(json.dumps(result_obj), status=200)
 
+# get_image_data which allows for URI arguments, falls through to get_image_data(request, slide_barcode)
+def get_image_data_args(request):
+    slide_barcode = None
+    if request.GET:
+        slide_barcode = request.GET.get('slide_barcode',None)
+    elif request.POST:
+        slide_barcode = request.POST.get('slide_barcode',None)
+
+    if slide_barcode:
+        slide_barcode = (None if re.compile(ur'[^A-Za-z0-9\-]').search(slide_barcode) else slide_barcode)
+
+    return get_image_data(request, slide_barcode)
+
+# Given a slide_barcode, returns image metadata in JSON format
+def get_image_data(request, slide_barcode):
+    status=200
+    result = {}
+
+    if not slide_barcode:
+        status=503
+        result = {
+            'message': "There was an error while processing this request: a valid slide_barcode was not supplied."
+        }
+    else:
+        try:
+            img_data_query = """
+                SELECT slide_barcode, level_0__width AS width, level_0__height AS height, mpp_x, mpp_y, GCSurl, sample_barcode, case_barcode
+                FROM [isb-cgc:metadata.TCGA_slide_images]
+                WHERE slide_barcode = '{}';
+            """
+
+            bqs = BigQueryServiceSupport.build_from_application_default().get_client()
+            query_job = submit_bigquery_job(bqs, settings.BQ_PROJECT_ID, img_data_query.format(slide_barcode))
+            job_is_done = is_bigquery_job_finished(bqs, settings.BQ_PROJECT_ID,
+                                                   query_job['jobReference']['jobId'])
+
+            retries = 0
+
+            while not job_is_done and retries < BQ_ATTEMPT_MAX:
+                retries += 1
+                sleep(1)
+                job_is_done = is_bigquery_job_finished(bqs, settings.BQ_PROJECT_ID,
+                                                       query_job['jobReference']['jobId'])
+
+            query_results = get_bq_job_results(bqs, query_job['jobReference'])
+
+            if len(query_results) > 0:
+                result = {
+                    'Width': query_results[0]['f'][1]['v'],
+                    'Height': query_results[0]['f'][2]['v'],
+                    'MPP-X': query_results[0]['f'][3]['v'],
+                    'MPP-Y': query_results[0]['f'][4]['v'],
+                    'FileLocation': re.sub(r'isb-cgc-open/.*_image', 'imaging-west', query_results[0]['f'][5]['v']),
+                    'TissueID': query_results[0]['f'][0]['v'],
+                    'sample-barcode': query_results[0]['f'][6]['v'],
+                    'case-barcode': query_results[0]['f'][7]['v'],
+                    'img-type': ('Diagnostic Image' if slide_barcode.split("-")[-1].startswith("DX") else 'Tissue Slide Image' if slide_barcode.split("-")[-1].startswith("TS") else "N/A")
+                }
+
+                sample_metadata = get_sample_metadata(result['sample-barcode'])
+                result['disease-code'] = sample_metadata['disease_code']
+                result['project'] = sample_metadata['project']
+
+            else:
+                result = {
+                    'msg': 'Slide barcode {} was not found.'.format(slide_barcode)
+                }
+
+        except Exception as e:
+            logger.error("[ERROR] While attempting to retrieve image data for {}:".format(slide_barcode))
+            logger.exception(e)
+            status = '503'
+            result = {
+                'message': "There was an error while processing this request."
+            }
+
+    return JsonResponse(result, status=status)
+
+
+@login_required
+def dicom(request, study_uid=None):
+    template = 'GenespotRE/dicom.html'
+    context = {}
+    return render(request, template, context)
+
+
+@login_required
+def camic(request, slide_barcode=None):
+    if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
+    images = []
+    context = {}
+    images_obj = None
+    template = 'GenespotRE/camic.html'
+
+    if slide_barcode:
+        images = [{'barcode': slide_barcode, 'thumb': '', 'type': ''}]
+        template = 'GenespotRE/camic_single.html'
+
+    if request.POST.get('checked_list', None):
+        images_obj = json.loads(request.POST.get('checked_list'))
+
+    if images_obj and 'slide_image' in images_obj:
+        for img_barcode in images_obj['slide_image'].keys():
+            slide_img = images_obj['slide_image'][img_barcode]
+            images.append({'barcode': img_barcode, 'thumb': slide_img['thumb'], 'type': slide_img['type']})
+
+    context['barcodes'] = images
+    context['camic_viewer'] = settings.CAMIC_VIEWER
+    context['img_thumb_url'] = settings.IMG_THUMBS_URL
+
+    return render(request, template, context)
+
+
 @login_required
 def igv(request, sample_barcode=None, readgroupset_id=None):
     if debug: logger.debug('Called '+sys._getframe().f_code.co_name)
@@ -326,20 +443,28 @@ def dashboard_page(request):
     cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved')
 
     # Program List
-    ownedPrograms = request.user.program_set.all().filter(active=True)
+    ownedPrograms = request.user.program_set.filter(active=True)
     sharedPrograms = Program.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
     programs = ownedPrograms | sharedPrograms
     programs = programs.distinct().order_by('-last_date_saved')
 
     # Workbook List
-    userWorkbooks = request.user.workbook_set.all().filter(active=True)
+    userWorkbooks = request.user.workbook_set.filter(active=True)
     sharedWorkbooks = Workbook.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
     workbooks = userWorkbooks | sharedWorkbooks
     workbooks = workbooks.distinct().order_by('-last_date_saved')
+
+    # Gene & miRNA Favorites
+    genefaves = request.user.genefavorite_set.filter(active=True)
+
+    # Variable Favorites
+    varfaves = request.user.variablefavorite_set.filter(active=True)
 
     return render(request, 'GenespotRE/dashboard.html', {
         'request'  : request,
         'cohorts'  : cohorts,
         'programs' : programs,
         'workbooks': workbooks,
+        'genefaves': genefaves,
+        'varfaves' : varfaves
     })

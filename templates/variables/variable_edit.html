@@ -92,7 +92,7 @@
                              <li role="presentation" class="program-tab{% if program.id == first_prog.id %} active{% endif %}"><a href="#{{ program.id }}-data" role="tab" data-toggle="tab" title="ISB-CGC Data" data-program-id="{{ program.id }}">{{ program.name }}</a></li>
                         {% endfor %}
                         <li role="presentation" class="program-tab {% if favorite_list|length <= 0 %}disabled{% endif %}"><a href="#favorites" aria-controls="favorites" role="tab" data-toggle="tab" titles="Favorites">Favorites ({{ favorite_list | length }})</a></li>
-                        <li role="presentation" class="program-tab {% if not user_vars %}disabled{% endif %}"><a href="#0-data" role="tab" data-toggle="tab" title="User Data" data-program-id="0">User Data</a></li>
+                        <li role="presentation" class="program-tab {% if not has_user_data %}disabled{% endif %}"><a href="#0-data" role="tab" class="user-vars-tab" data-toggle="tab" title="User Data" data-program-id="0">User Data</a></li>
                     {% endwith %}
                 </ul>
             </div>
@@ -137,20 +137,14 @@
                                                             {% if type.datatype == 'CLIN' %}
                                                                 <div class="form-group search-field {{ type.datatype }}-options ">
                                                                     <div class="search-term feature-search">
-                                                                        <label for="{{ type.datatype }}-search-term-select">Feature Search</label>
-                                                                        <select id="{{ type.datatype }}-search-term-select" class="form-control search-term-field"></select>
+                                                                        <label for="{{ type.datatype }}-search-term-select-{{ program.id }}">Feature Search</label>
+                                                                        <select id="{{ type.datatype }}-search-term-select-{{ program.id }}" class="form-control search-term-field"></select>
                                                                     </div>
                                                                 </div>
                                                             {% endif %}
                                                         {% endfor %}
                                                     </li>
                                                 </ul>
-                                            </div>
-                                            <div role="tabpanel" class="tab-pane" id="search">
-                                                <br>
-                                                <div class="form-group">
-                                                    <input type="text" class="form-control" placeholder="Search">
-                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -163,7 +157,7 @@
                                 {% for fav in favorite_list %}
                                     {% if fav.version == 'v2' %}
                                         <li class="list-group-item">
-                                        <div id="heading-{{ fav.name }}" data-field="{{ fav.name }}" class="list-group-item__heading">
+                                        <div id="heading-{{ fav.id }}" data-field="{{ fav.name }}" class="list-group-item__heading">
                                             <a role="button" data-toggle="collapse" data-parent="#clin-accordion" href="#collapse-{{ fav.id }}" aria-expanded="false" aria-controls="collapse-{{ fav.id }}">
                                                 <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ fav.name }}
                                             </a>
@@ -191,53 +185,10 @@
                                 <a href="{% url 'variables' %}">Manage Saved Favorites ({{ full_favorite_list_count }})</a>
                             </div>
                         </div>
-                        <div id="0-data" class="tab-pane filter-panel" role="tabpanel">
-                            <ul class="list-group" id="project-accordion" role="tablist" aria-multiselectable="true">
-                                {% if user_vars %}
-                                     {% for key, per_proj in user_vars.items %}
-                                        <li class="list-group-item">
-                                            <div id="heading-{{ data_type_name }}" class="list-group-item__heading">
-                                                <a role="button"  data-toggle="collapse" data-parent="#program-accordion" href="#collapse-{{ per_proj.progID }}-{{ per_proj.projID }}" aria-expanded="false" aria-controls="collapse-{{ attr }}">
-                                                    <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {{ per_proj.progName }} | {{ per_proj.projName }}
-                                                </a>
-                                            </div>
-                                            <div id="collapse-{{ per_proj.progID }}-{{ per_proj.projID }}" class="list-group-item__body collapse" role="tabpanel" aria-labelledby="heading-{{ per_proj.progID }}-{{ per_proj.projID }}">
-                                                <ul class="search-checkbox-list" id="{{ data_type_name }}">
-                                                    {% with per_proj.vars|how_many_more:6 as num_more %}
-                                                        {% for per_proj_var in per_proj.vars %} {#|get_item:attr %}#}
-                                                            {% if forloop.counter0 < 6 %}
-                                                                <li class="checkbox">
-                                                                    <label>
-                                                                        <input class="variable-toggle-checkbox" type="checkbox" name="elements-selected" var_type="{{ per_proj_var.var_type }}" value="{{ per_proj_var.value }}" data-code="{{ per_proj_var.data_code }}" data-text-label="{{ per_proj_var.data_text_label }}" data-feature-id="{{ per_proj_var.data_feature_id }}" > {{ per_proj_var.data_feature_name }}
-                                                                    </label>
-                                                                </li>
-                                                            {% elif forloop.counter0 == 6 and num_more > 0 %}
-                                                                <a class="show-more">{{ num_more }} more</a>
-                                                                <li class="extra-values checkbox" style="display:none;">
-                                                                    <label>
-                                                                        <input class="variable-toggle-checkbox" type="checkbox" name="elements-selected" var_type="{{ per_proj_var.var_type }}" value="{{ per_proj_var.value }}" data-code="{{ per_proj_var.data_code }}" data-text-label="{{ per_proj_var.data_text_label }}" data-feature-id="{{ per_proj_var.data_feature_id }}" > {{ per_proj_var.data_feature_name }}
-                                                                    </label>
-                                                                </li>
-                                                            {% else %}
-                                                                <li class="extra-values checkbox" style="display:none;">
-                                                                    <label>
-                                                                        <input class="variable-toggle-checkbox" type="checkbox" name="elements-selected" var_type="{{ per_proj_var.var_type }}" value="{{ per_proj_var.value }}" data-code="{{ per_proj_var.data_code }}" data-text-label="{{ per_proj_var.data_text_label }}" data-feature-id="{{ per_proj_var.data_feature_id }}" > {{ per_proj_var.data_feature_name }}
-                                                                    </label>
-                                                                </li>
-                                                            {% endif %}
-                                                        {% endfor %}
-                                                        {% if num_more > 0 %}
-                                                            <a class="show-less" style="display:none;">less</a>
-                                                        {% endif %}
-                                                    {% endwith %}
-                                                </ul>
-                                            </div>
-                                        </li>
-                                    {% endfor %}
-                                {% else %}
-                                    <div class="space-top-15"><center>No projects available</center></div>
-                                {% endif %}
-                            </ul>
+                        <div id="0-data" class="tab-pane filter-panel user-data-panel" role="tabpanel">
+                            <div class="panel-body">
+                                <div class="spinner"><i class="fa fa-spinner fa-spin"></i></div>
+                            </div>
                         </div>
                     </div>
                 </div>

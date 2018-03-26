@@ -16,7 +16,7 @@ limitations under the License.
 
 """
 
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 
 import views, feature_access_views, feature_access_views_v2, data_access_views, data_access_views_v2
 

@@ -21,6 +21,7 @@ from django.contrib import admin
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import formats
+from django.utils.html import escape
 from projects.models import User_Feature_Definitions
 from sharing.models import Shared_Resource
 from genes.models import GeneSymbol
@@ -582,7 +583,7 @@ class Worksheet_comment(models.Model):
             'first_name'    : user.first_name,
             'last_name'     : user.last_name,
             'date_created'  : formats.date_format(comment_model.date_created, 'DATETIME_FORMAT'),
-            'content'       : comment_model.content
+            'content'       : escape(comment_model.content)
         }
         return return_obj
 

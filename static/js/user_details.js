@@ -24,6 +24,7 @@ require.config({
         jqueryui: 'libs/jquery-ui.min',
         session_security: 'session_security',
         underscore: 'libs/underscore-min',
+        base: 'base'
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -35,8 +36,9 @@ require([
     'jquery',
     'jqueryui',
     'bootstrap',
-    'session_security'
-], function($, jqueryui, bootstrap, session_security) {
+    'session_security',
+    'base'
+], function($, jqueryui, bootstrap, session_security, base) {
 
     $('.show-service-accounts').on('click', function () {
         var $this = $(this);
@@ -61,17 +63,27 @@ require([
 
     });
 
+    $('[id^="refresh-project-modal-"]').on('hide.bs.modal',function(){
+        $('form[id^="refresh-project-"] input[name="register_users"]').remove();
+    });
+
     $('a.refresh-project').on('click',function(e){
-        var user_id = $(this).data('user-id');
-        var project_name = $(this).data('project-name');
+        var this_modal = $($(this).data('target'));
+        if(this_modal.data('opening')) {
+            e.preventDefault();
+            return false;
+        }
+        this_modal.data('opening',true);
+
         var project_id = $(this).data('project-id');
+        var user_id = $(this).data('user-id');
+        var project_gcp_id = $(this).data('project-gcp-id');
 
         $.ajax({
             url: BASE_URL + '/accounts/users/'+user_id+'/verify_gcp/',
-            data: "gcp-id="+project_name + "&is_refresh=true",
+            data: "gcp-id="+project_gcp_id + "&is_refresh=true",
             method: 'GET',
             success: function(data) {
-                console.debug(data);
                 var roles = data['roles']
                 for (var key in roles) {
                     var list = roles[key];
@@ -81,8 +93,24 @@ require([
                         }
                     }
                 }
+                this_modal.modal('show');
+            },
+            error: function(xhr) {
+                if(xhr.responseJSON.redirect) {
+                    base.setReloadMsg(xhr.responseJSON.level || "error",xhr.responseJSON.message);
+                    window.location = xhr.responseJSON.redirect;
+                } else {
+                    this_modal.modal('hide');
+                    base.showJsMessage('error', xhr.responseJSON.message, true);
+                }
+            },
+            complete: function() {
+                this_modal.data('opening',false);
             }
         });
+        // Don't let the modal open automatically; we're controlling that.
+        e.preventDefault();
+        return false;
     });
 
 });

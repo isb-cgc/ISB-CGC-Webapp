@@ -29,9 +29,9 @@
 
 {% block page_header %}
     <div class="container">
-        <h1 class="page-header pull-left"><a href="{% url 'user_gcp_list' user.id %}" role="link"><i class="fa fa-chevron-left"></i></a> {{ gcp.project_name }}</h1>
+        <h1 class="page-header pull-left"><a href="{% url 'user_gcp_list' user.id %}" role="link"><i class="fa fa-chevron-left"></i></a> {{ gcp.project_name }} ({{ gcp.project_id }})</h1>
         <div class="pull-right refresh-project">
-            <a class="refresh-project btn btn-primary" data-toggle="modal" role="button" data-user-id="{{ request.user.id }}" data-project-id="{{ gcp.id }}" data-project-name="{{ gcp.project_name }}" data-target="#refresh-project-modal" >Refresh Project</a></li>
+            <a class="refresh-project btn btn-primary" data-toggle="modal" role="button" data-user-id="{{ request.user.id }}" data-project-gcp-id="{{ gcp.project_id }}" data-project-name="{{ gcp.project_name }}" data-target="#refresh-project-modal" >Refresh Project</a></li>
         </div>
     </div>
 {% endblock %}
@@ -53,19 +53,17 @@
                             <tr>
                                 <th>Service Account</th>
                                 <th>Authorized Datasets</th>
-                                <th>Date Activated</th>
-                                <th>Active</th>
+                                <th>Date Last Activated</th>
                                 <th></th>
                             </tr>
                             </thead>
                             <tbody>
-                            {% for service_account in gcp.serviceaccount_set.all %}
+                            {% for service_account in gcp.active_service_accounts %}
                                 {% with auth_datasets=service_account.get_auth_datasets %}
                                     <tr>
                                         <td>{{ service_account.service_account }}</td>
                                         <td>{% if auth_datasets|length == 0 %}None{% else %}{{ auth_datasets|get_values_list:"name"|joinwith:", " }}{% endif %}</td>
-                                        <td>{{ service_account.authorized_date|date:'M d, Y, g:i a' }}</td>
-                                        <td>{% if service_account.active %}<i class="fa fa-check"></i>{% endif %}</td>
+                                        <td{% if service_account.is_expired and auth_datasets|length > 0 %} class="red" title="Service Account's authorization date has expired; refresh to extend access."{% endif %}>{{ service_account.authorized_date|date:'M d, Y, g:i a' }}</td>
                                         <td>
                                             <a title="Refresh this Service Account" data-toggle="modal" role="button" data-target="#refresh-sa-modal-{{ service_account.id }}" class="space-right-5"><i class="fa fa-refresh"></i></a>
                                             <a title="Delete this Service Account" data-toggle="modal" role="button" data-target="#delete-sa-modal-{{ service_account.id }}"><i class="fa fa-trash"></i></a>
@@ -244,6 +242,7 @@
                         </p>
                         <input type="hidden" name="is_refresh" value="true" />
                         <input type="hidden" name="gcp_id" value="{{ gcp.project_id }}" />
+                        <input type="hidden" name="detail" value="true" />
                     </div>
                     <div class="modal-footer">
                         <input type="submit" value="Refresh" class="btn btn-primary" />

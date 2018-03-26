@@ -163,7 +163,7 @@ define(['jquery'], function($) {
             if(typeof(callback) !== 'undefined'){
                 var base_feature_search_url = BASE_URL + '/visualizations/feature_search/'+version+'?';
                 if(version == 'v2') {
-                    filters.push({filter: 'genomic_build', value: $('#workbook-build :selected').val()});
+                    filters.push({filter: 'genomic_build', value: $('#workbook-build-'+workbook_id+' :selected').val()});
                 }
                 var feature_search_url = base_feature_search_url + "datatype=" + datatype;
 

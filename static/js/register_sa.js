@@ -52,11 +52,13 @@ require([
             $('#datasets-select-div').show();
             $('#register-sa input[name="select-datasets"][value="remove"]').remove();
         } else {
+            $('input[name="datasets"]').attr('checked',false);
             $('#datasets-select-div').hide();
         }
     });
 
     $('#verify-sa').on('submit', function(e) {
+        $('#user_sa').length > 0 && $('#user_sa').val($('#user_sa').val().trim());
         $('#invalid-sa-error button.close').click();
         e.preventDefault();
         e.stopPropagation();
@@ -137,24 +139,35 @@ require([
                 $('.cannot-register').hide();
 
                 // If no datasets were requested, or, they were and verification came out clean, allow registration
-                (data['datasets'].length <= 0 || data['all_user_datasets_verified']) ? $('.register-sa-div').show() : $('.cannot-register').show();
-
+                if(data['datasets'].length <= 0 || data['all_user_datasets_verified']) {
+                    $('.register-sa-div').show();
+                } else {
+                    $('.cannot-register').show();
+                    $('.retry-btn').removeAttr("disabled");
+                }
             },
             error: function(xhr, ajaxOptions, thrownError) {
-                var response = $.parseJSON(xhr.responseText);
                 spinner.hide();
                 $('.verify-sa-btn').prop('disabled', '');
-                base.showJsMessage(response['level'] || "error",response['message'],true);
+                // If we received a redirect, honor that
+                if(xhr.responseJSON.redirect) {
+                    base.setReloadMsg(xhr.responseJSON.level || "error",xhr.responseJSON.message);
+                    window.location = xhr.responseJSON.redirect;
+                } else {
+                    base.showJsMessage(xhr.responseJSON.level || "error",xhr.responseJSON.message,true);
+                }
             }
         });
         return false;
     });
 
     $('#register-sa').on('submit', function(e) {
+        $('.register-sa-btn').attr("disabled","disabled");
         $('#verify-sa')[0].reset();
     });
 
     $('.retry-btn').on('click', function(e) {
+        $('.retry-btn').attr("disabled","disabled");
         var user_ver_div = $('.user-verification');
         var table_body = user_ver_div.find('tbody');
 

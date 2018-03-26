@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 
 import views
 
@@ -10,6 +10,7 @@ urlpatterns = [
     url(r'^(?P<variable_fav_id>\d+)/delete$',   views.variable_fav_delete,  name='variable_fav_delete'),
     url(r'^(?P<variable_fav_id>\d+)/copy$',     views.variable_fav_copy,    name='variable_fav_copy'),
     url(r'^(?P<variable_fav_id>\d+)/update',    views.variable_fav_save,    name='variable_fav_update'),
+    url(r'^user_vars/$',                        views.get_user_vars,        name="user_vars"),
     url(r'^save$',                              views.variable_fav_save,    name="variable_fav_save"),
 
     url(r'^workbook/new/$',                                                      views.variable_fav_list_for_new_workbook,   name="variable_select_for_new_workbook"), #was select_and_create_workbook, variable_select_for_new_workbook

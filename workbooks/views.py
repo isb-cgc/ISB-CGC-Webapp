@@ -43,7 +43,7 @@ logger = logging.getLogger('main_logger')
 
 debug = settings.DEBUG
 
-WHITELIST_RE = settings.WHITELIST_RE
+BLACKLIST_RE = settings.BLACKLIST_RE
 
 # These fields are handled by the workbook/worksheet UI and do not need to be determined from the SearchHelper
 SKIPPED_FIELDS = ['mirna_name', 'gene_name', 'genomic_build']
@@ -63,7 +63,7 @@ def workbook_list(request):
 def workbook_samples(request):
     template = 'workbooks/workbook_samples.html'
     return render(request, template, {
-        'workbooks': Workbook.objects.all().filter(is_public=True, active=True)
+        'workbooks': Workbook.objects.filter(is_public=True, active=True)
     })
 
 
@@ -108,7 +108,7 @@ def workbook_create_with_program(request):
     worksheet_model = Worksheet.objects.create(name="worksheet 1", description="", workbook=workbook_model)
 
     #add every variable within the model
-    for study in program_model.study_set.all().filter(active=True) :
+    for study in program_model.study_set.filter(active=True) :
         for var in study.user_feature_definitions_set.all():
             work_var = Worksheet_variable.objects.create(worksheet_id = worksheet_model.id,
                                               name         = var.feature_name,
@@ -219,22 +219,22 @@ def workbook(request, workbook_id=0):
                 workbook_desc = request.POST.get('description')[0:2000]
                 workbook_build = request.POST.get('build')
 
-                whitelist = re.compile(WHITELIST_RE, re.UNICODE)
-                match_name = whitelist.search(unicode(workbook_name))
-                match_desc = whitelist.search(unicode(workbook_desc))
+                blacklist = re.compile(BLACKLIST_RE, re.UNICODE)
+                match_name = blacklist.search(unicode(workbook_name))
+                match_desc = blacklist.search(unicode(workbook_desc))
 
                 if match_name or match_desc:
                     # XSS risk, log and fail this cohort save
                     matches = ""
                     fields = ""
                     if match_name:
-                        match_name = whitelist.findall(unicode(workbook_name))
-                        logger.error('[ERROR] While saving a workbook, saw a malformed name: ' + workbook_name + ', characters: ' + match_name.__str__())
+                        match_name = blacklist.findall(unicode(workbook_name))
+                        logger.error('[ERROR] While saving a workbook, saw a malformed name: ' + workbook_name + ', characters: ' + str(match_name))
                         matches = "name contains"
                         fields = "name"
                     if match_desc:
-                        match_desc = whitelist.findall(unicode(workbook_desc))
-                        logger.error('[ERROR] While saving a workbook, saw a malformed description: ' + workbook_desc + ', characters: ' + match_desc.__str__())
+                        match_desc = blacklist.findall(unicode(workbook_desc))
+                        logger.error('[ERROR] While saving a workbook, saw a malformed description: ' + workbook_desc + ', characters: ' + str(match_desc))
                         matches = "name and description contain" if match_name else "description contains"
                         fields += (" and description" if match_name else "description")
 
@@ -259,9 +259,9 @@ def workbook(request, workbook_id=0):
         elif request.method == "GET":
             if workbook_id:
                 try :
-                    ownedWorkbooks = request.user.workbook_set.all().filter(active=True)
+                    ownedWorkbooks = request.user.workbook_set.filter(active=True)
                     sharedWorkbooks = Workbook.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
-                    publicWorkbooks = Workbook.objects.all().filter(is_public=True,active=True)
+                    publicWorkbooks = Workbook.objects.filter(is_public=True,active=True)
 
                     workbooks = ownedWorkbooks | sharedWorkbooks | publicWorkbooks
                     workbooks = workbooks.distinct()
@@ -387,22 +387,22 @@ def worksheet(request, workbook_id=0, worksheet_id=0):
         elif command == "edit":
             worksheet_name = request.POST.get('name')
             worksheet_desc = request.POST.get('description')
-            whitelist = re.compile(WHITELIST_RE, re.UNICODE)
-            match_name = whitelist.search(unicode(worksheet_name))
-            match_desc = whitelist.search(unicode(worksheet_desc))
+            blacklist = re.compile(BLACKLIST_RE, re.UNICODE)
+            match_name = blacklist.search(unicode(worksheet_name))
+            match_desc = blacklist.search(unicode(worksheet_desc))
 
             if match_name or match_desc:
                 # XSS risk, log and fail this cohort save
                 matches = ""
                 fields = ""
                 if match_name:
-                    match_name = whitelist.findall(unicode(worksheet_name))
-                    logger.error('[ERROR] While saving a worksheet, saw a malformed name: ' + worksheet_name + ', characters: ' + match_name.__str__())
+                    match_name = blacklist.findall(unicode(worksheet_name))
+                    logger.error('[ERROR] While saving a worksheet, saw a malformed name: ' + worksheet_name + ', characters: ' + str(match_name))
                     matches = "name contains"
                     fields = "name"
                 if match_desc:
-                    match_desc = whitelist.findall(unicode(worksheet_desc))
-                    logger.error('[ERROR] While saving a worksheet, saw a malformed description: ' + worksheet_desc + ', characters: ' + match_desc.__str__())
+                    match_desc = blacklist.findall(unicode(worksheet_desc))
+                    logger.error('[ERROR] While saving a worksheet, saw a malformed description: ' + worksheet_desc + ', characters: ' + str(match_desc))
                     matches = "name and description contain" if match_name else "description contains"
                     fields += (" and description" if match_name else "description")
 
@@ -454,7 +454,7 @@ def worksheet_variables(request, workbook_id=0, worksheet_id=0, variable_id=0):
                                                                    user       = request.user)
 
                 model = VariableFavorite.objects.get(id=variable_favorite_result['id'])
-                messages.info(request, 'The variable favorite list \"' + model.name + '\" was created and added to your worksheet')
+                messages.info(request, 'The variable favorite list \"' + escape(model.name) + '\" was created and added to your worksheet')
                 variables = model.get_variables()
 
             #from Details Page or list page
@@ -678,34 +678,36 @@ def worksheet_plots(request, workbook_id=0, worksheet_id=0, plot_id=0):
 
 @login_required
 def worksheet_cohorts(request, workbook_id=0, worksheet_id=0, cohort_id=0):
-    command = request.path.rsplit('/',1)[1];
+    command = request.path.rsplit('/', 1)[1]
 
     cohorts = json.loads(request.body)['cohorts']
-    if request.method == "POST" :
-        workbook = Workbook.objects.get(id=workbook_id)
-        workbook.save()
-        if command == "edit" :
+    if request.method == "POST":
+        wrkbk = Workbook.objects.get(id=workbook_id)
+        wrkbk.save()
+        if command == "edit":
             Worksheet_cohort.edit_list(worksheet_id=worksheet_id, id=cohort_id, cohort_ids=cohorts, user=request.user)
-        elif command == "delete" :
+        elif command == "delete":
             Worksheet_cohort.destroy(worksheet_id=worksheet_id, id=cohort_id, user=request.user)
 
-    redirect_url = reverse('worksheet_display', kwargs={'workbook_id':workbook_id, 'worksheet_id': worksheet_id})
+    redirect_url = reverse('worksheet_display', kwargs={'workbook_id': workbook_id, 'worksheet_id': worksheet_id})
     return redirect(redirect_url)
+
 
 @login_required
 def worksheet_comment(request, workbook_id=0, worksheet_id=0, comment_id=0):
-    command  = request.path.rsplit('/',1)[1];
+    command = request.path.rsplit('/', 1)[1]
 
-    if request.method == "POST" :
-        workbook = Workbook.objects.get(id=workbook_id)
-        workbook.save()
-        if command == "create" :
-            result = Worksheet_comment.create(worksheet_id = worksheet_id,
-                                              content = request.POST.get('content'),
-                                              user = request.user)
+    if request.method == "POST":
+        wrkbk = Workbook.objects.get(id=workbook_id)
+        wrkbk.save()
+        content = request.POST.get('content', '').encode('utf-8')
+        if command == "create":
+            return_obj = Worksheet_comment.create(worksheet_id=worksheet_id,
+                                              content=content,
+                                              user=request.user)
+
+            return_obj['content'] = escape(return_obj['content'])
+            return HttpResponse(json.dumps(return_obj), status=200)
+        elif command == "delete":
+            result = Worksheet_comment.destroy(comment_id=comment_id)
             return HttpResponse(json.dumps(result), status=200)
-        elif command == "delete" :
-            result = Worksheet_comment.destroy(comment_id = comment_id)
-            return HttpResponse(json.dumps(result), status=200)
-
-

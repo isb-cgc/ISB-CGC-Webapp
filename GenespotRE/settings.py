@@ -38,6 +38,8 @@ for directory_name in SHARED_SOURCE_DIRECTORIES:
     sys.path.append(os.path.join(BASE_DIR, directory_name))
 
 DEBUG                   = (os.environ.get('DEBUG', 'False') == 'True')
+DEBUG_TOOLBAR           = (os.environ.get('DEBUG_TOOLBAR', 'False') == 'True')
+
 print >> sys.stdout, "[STATUS] DEBUG mode is "+str(DEBUG)
 
 # Theoretically Nginx allows us to use '*' for ALLOWED_HOSTS but...
@@ -161,17 +163,11 @@ CSRF_COOKIE_SECURE = bool(os.environ.get('CSRF_COOKIE_SECURE', False))
 SESSION_COOKIE_SECURE = bool(os.environ.get('SESSION_COOKIE_SECURE', False))
 SECURE_SSL_REDIRECT = bool(os.environ.get('SECURE_SSL_REDIRECT', False))
 
-# Due to the behavior of AppEngine Flex and the load balancer, we have to explicitly
-# use SSLify to enforce redirect of http to https even though we're on Django 1.8+
-# --> DO NOT REMOVE THIS OR ITS REQUIREMENTS ENTRY <--
-SSLIFY_DISABLE = True if not SECURE_SSL_REDIRECT else False
+SECURE_REDIRECT_EXEMPT = []
 
 if SECURE_SSL_REDIRECT:
     # Exempt the health check so it can go through
     SECURE_REDIRECT_EXEMPT = [r'^_ah/(vm_)?health$', ]
-    SSLIFY_DISABLE_FOR_REQUEST = [
-        lambda request: request.get_full_path().startswith('/_ah/health') or request.get_full_path().startswith('/_ah/vm_health')
-    ]
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -236,11 +232,8 @@ STATICFILES_FINDERS = (
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '')
 
-MIDDLEWARE_CLASSES = (
-    # Due to the behavior of AppEngine Flex and the load balancer, we have to explicitly
-    # use SSLify to enforce redirect of http to https even though we're on Django 1.8+
-    # --> DO NOT REMOVE THIS OR ITS REQUIREMENTS ENTRY <--
-    'sslify.middleware.SSLifyMiddleware',
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
     # For using NDB with Django
     # documentation: https://cloud.google.com/appengine/docs/python/ndb/#integration
     # WE DON'T SEEM TO BE USING NDB SO I'M COMMENTING THIS OUT - PL
@@ -255,7 +248,7 @@ MIDDLEWARE_CLASSES = (
     # Uncomment the next line for simple clickjacking protection:
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'offline.middleware.OfflineMiddleware',
-)
+]
 
 ROOT_URLCONF = 'GenespotRE.urls'
 
@@ -295,7 +288,7 @@ INSTALLED_APPS += ('session_security',)
 SESSION_SECURITY_WARN_AFTER = 540
 SESSION_SECURITY_EXPIRE_AFTER = 600
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-MIDDLEWARE_CLASSES += (
+MIDDLEWARE.append(
     # for django-session-security -- must go *after* AuthenticationMiddleware
     'session_security.middleware.SessionSecurityMiddleware',
 )
@@ -484,6 +477,12 @@ LOG_NAME_ERA_LOGIN_VIEW                  = os.environ.get('LOG_NAME_ERA_LOGIN_VI
 # Service account blacklist file path
 SERVICE_ACCOUNT_BLACKLIST_PATH           = os.environ.get('SERVICE_ACCOUNT_BLACKLIST_PATH', '')
 
+# Google Org whitelist file path
+GOOGLE_ORG_WHITELIST_PATH                = os.environ.get('GOOGLE_ORG_WHITELIST_PATH', '')
+
+# Managed Service Account file path
+MANAGED_SERVICE_ACCOUNTS_PATH            = os.environ.get('MANAGED_SERVICE_ACCOUNTS_PATH', '')
+
 # Dataset configuration file path
 DATASET_CONFIGURATION_PATH               = os.environ.get('DATASET_CONFIGURATION_PATH', '')
 
@@ -523,6 +522,12 @@ MAX_FILE_LIST_REQUEST = 65000
 # IGV limit to prevent users from trying ot open dozens of files
 MAX_FILES_IGV = 5
 
+#################################
+# caMicroscope Viewer settings
+#################################
+CAMIC_VIEWER = os.environ.get('CAMIC_VIEWER', None)
+IMG_THUMBS_URL = os.environ.get('IMG_THUMBS_URL', None)
+
 ##############################################################
 #   MailGun Email Settings
 ##############################################################
@@ -531,4 +536,25 @@ EMAIL_SERVICE_API_URL = os.environ.get('EMAIL_SERVICE_API_URL', '')
 EMAIL_SERVICE_API_KEY = os.environ.get('EMAIL_SERVICE_API_KEY', '')
 NOTIFICATION_EMAIL_FROM_ADDRESS = os.environ.get('NOTIFICATOON_EMAIL_FROM_ADDRESS', '')
 
-WHITELIST_RE = ur'([^\\\_\|\"\+~@:#\$%\^&\*=\-\.,\(\)0-9a-zA-Z\s\xc7\xfc\xe9\xe2\xe4\xe0\xe5\xe7\xea\xeb\xe8\xef\xee\xed\xec\xc4\xc5\xc9\xe6\xc6\xf4\xf6\xf2\xfb\xf9\xd6\xdc\xe1\xf3\xfa\xf1\xd1\xc0\xc1\xc2\xc3\xc8\xca\xcb\xcc\xcd\xce\xcf\xd0\xd2\xd3\xd4\xd5\xd8\xd9\xda\xdb\xdd\xdf\xe3\xf0\xf5\xf8\xfd\xfe\xff])'
+# Explicitly check for known items
+BLACKLIST_RE = ur'((?i)<script>|(?i)</script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|(?i)<iframe>|(?i)</iframe>)'
+
+if DEBUG and DEBUG_TOOLBAR:
+    INSTALLED_APPS += ('debug_toolbar',)
+    MIDDLEWARE.append('debug_toolbar.middleware.DebugToolbarMiddleware',)
+    DEBUG_TOOLBAR_PANELS = [
+        'debug_toolbar.panels.versions.VersionsPanel',
+        'debug_toolbar.panels.timer.TimerPanel',
+        'debug_toolbar.panels.settings.SettingsPanel',
+        'debug_toolbar.panels.headers.HeadersPanel',
+        'debug_toolbar.panels.request.RequestPanel',
+        'debug_toolbar.panels.sql.SQLPanel',
+        'debug_toolbar.panels.staticfiles.StaticFilesPanel',
+        'debug_toolbar.panels.templates.TemplatesPanel',
+        'debug_toolbar.panels.cache.CachePanel',
+        'debug_toolbar.panels.signals.SignalsPanel',
+        'debug_toolbar.panels.logging.LoggingPanel',
+        'debug_toolbar.panels.redirects.RedirectsPanel',
+    ]
+    SHOW_TOOLBAR_CALLBACK = True
+    INTERNAL_IPS = (os.environ.get('INTERNAL_IP', ''),)

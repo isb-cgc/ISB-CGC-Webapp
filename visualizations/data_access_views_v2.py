@@ -28,10 +28,12 @@ from cohorts.metadata_helpers import get_sql_connection
 from bq_data_access.v2.plot_data_support import get_feature_id_validity_for_array
 from cohorts.metadata_helpers import fetch_isbcgc_project_set
 
-from google_helpers.bigquery_service_v2 import BigQueryServiceSupport
+from google_helpers.bigquery.service_v2 import BigQueryServiceSupport
 from bq_data_access.v2.data_access import FeatureVectorBigQueryBuilder
 from bq_data_access.v2.plot_data_support import get_merged_feature_vectors
 from bq_data_access.v2.cohort_cloudsql import add_cohort_info_to_merged_vectors
+from bq_data_access.v2.feature_id_utils import FeatureDataTypeHelper
+from bq_data_access.data_types.definitions import FEATURE_ID_TO_TYPE_MAP
 
 from django.http import JsonResponse
 from django.conf import settings as django_settings
@@ -215,14 +217,11 @@ def data_access_for_plot(request):
         valid_features = get_feature_id_validity_for_array(feature_ids_to_check)
 
         for feature_id, is_valid in valid_features:
-            logging.info((feature_id, is_valid))
             if not is_valid:
                 logging.error("Invalid internal feature ID '{}'".format(feature_id))
                 raise Exception('Feature Not Found')
 
-
         # Gives the user data handler a chance to map e.g. "v2:USER:343:58901" to "v2:CLIN:case_barcode"
-
         x_id = _feature_converter(x_id)
         y_id = _feature_converter(y_id)
         c_id = _feature_converter(c_id)
@@ -244,6 +243,22 @@ def data_access_for_plot(request):
 
         prog_set_extended = get_extended_public_program_name_set_for_user_extended_projects(confirmed_study_ids)
         program_set.update(prog_set_extended)
+
+        # Check to see if these programs have data for the requested vectors; if not, there's no reason to plot
+        features_without_program_data = []
+        for id in [x_id, y_id, c_id]:
+            if id:
+                type = id.split(':')[1].lower()
+                plot_type = FEATURE_ID_TO_TYPE_MAP[type] if type in FEATURE_ID_TO_TYPE_MAP else None
+                if plot_type:
+                    programs = FeatureDataTypeHelper.get_supported_programs_from_data_type(plot_type)
+                    valid_programs = set(programs).intersection(program_set)
+
+                    if not len(valid_programs):
+                        features_without_program_data.append(FeatureDataTypeHelper.get_proper_feature_type_name(plot_type))
+
+        if len(features_without_program_data):
+            return JsonResponse({'message': "The chosen cohorts do not contain programs with data for these features: {}.".format(", ".join(features_without_program_data))})
 
         user_programs = get_user_program_id_set_for_user_only_projects(user_only_study_ids)
 

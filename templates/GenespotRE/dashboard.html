@@ -3,7 +3,7 @@
 {% load custom_tags %}
 {% load cohort_filters %}
 {% load program_custom_tags %}
-{#{% load tz %}#}
+{% load tz %}
 {% block header %}
 {% endblock %}
 
@@ -90,7 +90,7 @@
                         </a>
                     </li>
                 {% endfor %}
-                {% if user.workbook_set.all|active|length > 6 %}
+                {% if workbooks.count > 6 %}
                 <a class="btn btn-link" href="{% url 'workbooks' %}">View All</a>
                 {% endif %}
             {% endif %}
@@ -141,15 +141,16 @@
             </section>
         </div>
         <div class="col-md-6">
+            {% with gene_fave_count=genefaves.count genefaves_sorted=genefaves|sort_last_save %}
             <section class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">
-                        <a href="{% url 'genes' %}">Gene & miRNA Favorites ({{ user.genefavorite_set.all|active|length }})</a></h3>
+                        <a href="{% url 'genes' %}">Gene & miRNA Favorites ({{ gene_fave_count }})</a></h3>
                 </div>
                 <div class="panel-body">
-                    {% if user.genefavorite_set.all|active|length > 0 %}
+                    {% if gene_fave_count > 0 %}
                     <ul class="table-list">
-                        {% for genefavorite in user.genefavorite_set.all|active|sort_last_save|slice:':6' %}
+                        {% for genefavorite in genefaves_sorted|slice:':6' %}
                         <li>
                             <a href="{% url 'gene_fav_detail' genefavorite.id %}">
                                 <div class="list-main">
@@ -162,7 +163,7 @@
                         </li>
                         {% endfor %}
                     </ul>
-                        {% if user.genefavorite_set.all|active|length > 6 %}
+                        {% if gene_fave_count > 6 %}
                         <a href="{% url 'genes' %}" class="btn btn-link float-right">View All</a>
                         {% endif %}
                     {% else %}
@@ -171,15 +172,17 @@
                     <a href="{% url 'gene_fav_create' %}" class="nocap btn btn-link">Create Gene & miRNA Favorites</a>
                 </div>
             </section>
+            {% endwith %}
+            {% with varfave_count=varfaves.count %}
             <section class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">
-                        <a href="{% url 'variables' %}">Variable Favorites ({{ user.variablefavorite_set.all|active|length }})</a></h3>
+                        <a href="{% url 'variables' %}">Variable Favorites ({{ varfave_count }})</a></h3>
                 </div>
                 <div class="panel-body">
-                    {% if user.variablefavorite_set.all|active|length > 0 %}
+                    {% if varfave_count > 0 %}
                     <ul class="table-list">
-                        {% for variablefavorite in user.variablefavorite_set.all|active|sort_last_save|slice:':6' %}
+                        {% for variablefavorite in varfaves|sort_last_save|slice:':6' %}
                            <li>
                                <a href="{% url 'variable_fav_detail' variablefavorite.id %}">
                                    <div class="list-main">
@@ -191,7 +194,7 @@
                                </a>
                            </li>
                         {% endfor %}
-                        {% if user.variablefavorite_set.all|active|length > 6 %}
+                        {% if varfave_count > 6 %}
                         <a href="{% url 'variables' %}" class="btn btn-link float-right">View All</a>
                         {% endif %}
                     </ul>
@@ -201,22 +204,23 @@
                     <a href="{% url 'variable_fav_create' %}" class="btn btn-link">Create Variable Favorites</a>
                 </div>
             </section>
-
+            {% endwith %}
         </div>
     </div>
 
     {% if USER_DATA_ON %}
-        <hr>
+    <hr>
     <div class="row">
         <div class="col-md-12">
+            {% with program_count=programs.count %}
             <section class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">
-                        <a href="{% url 'programs' %}">Saved Programs ({{ programs.count }})</a></h3>
+                        <a href="{% url 'programs' %}">Saved Programs ({{ program_count }})</a></h3>
                 </div>
                 <div class="panel-body">
                     <p>You can upload data from your own research programs.</p>
-                    {% if programs.count > 0 %}
+                    {% if program_count > 0 %}
                     <ul class="table-list">
                         {% for program in programs|slice:':6' %}
                            <li>
@@ -228,8 +232,8 @@
                                </a>
                            </li>
                         {% endfor %}
-                        {% if user.program_set.all|active|length > 6 %}
-                            <a class="btn btn-link" href="{% url 'programs' %}">View all</a>
+                        {% if program_count > 6 %}
+                            <a class="btn btn-link" href="{% url 'programs' %}">View All</a>
                         {% endif %}
                     </ul>
                     {% endif %}
@@ -238,6 +242,7 @@
                     <a href="{% url 'program_upload' %}" class="btn btn-link"><i class="fa fa-cloud-upload"></i>Upload Program Data</a>
                 </div>
             </section>
+            {% endwith %}
         </div>
 {#      TODO: This div is hidden until we can figure out creating workbooks from programs/studies #}
 {#        <div class="col-md-6">#}

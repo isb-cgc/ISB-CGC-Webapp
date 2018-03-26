@@ -744,7 +744,7 @@ require([
             }
         });
 
-        vizhelpers.get_variable_field_options(datatype, filters, $('#workbook-build :selected').data('plot-version'), function(options){
+        vizhelpers.get_variable_field_options(datatype, filters, $('#workbook-build-'+workbook_id+' :selected').data('plot-version'), function(options){
             var selectbox = parent.parent('.search-field').find('.feature-search .search-term-field');
             selectbox.empty();
 
@@ -1145,7 +1145,7 @@ require([
                     plot_element.find('.resubmit-button').show();
                 }
 
-                if(result.bq_tables) {
+                if(result.bq_tables && result.bq_tables.length > 0) {
                     plot_element.find('.bq-table-display').empty();
                     for(var i=0; i < result.bq_tables.length; i++) {
                         plot_element.find('.bq-table-display').append($('<li>').text(result.bq_tables[i]).prop('title',result.bq_tables[i]));
@@ -1303,8 +1303,8 @@ require([
             desc = $(thisModal+'.' + mode + '-sheet-desc').val();
         }
 
-        var unallowed_name = name.match(base.whitelist);
-        var unallowed_desc = desc.match(base.whitelist);
+        var unallowed_name = name.match(base.blacklist);
+        var unallowed_desc = desc.match(base.blacklist);
 
         if(unallowed_name || unallowed_desc) {
             var unalloweds = unallowed_name || [];
@@ -1347,7 +1347,7 @@ require([
             e.preventDefault();
             return false;
         }
-        if($('#workbook-build').val() !== $('.workbook-build-display').data('build')) {
+        if($('#workbook-build-'+workbook_id).val() !== $('.workbook-build-display').data('build')) {
             // Since specifications of gene/miRNA data are build dependent we have to reset them when the build changes
             $('.spec-select.datatype-selector').val('');
         }
@@ -1361,7 +1361,7 @@ require([
         var worksheet_id = $('.worksheet.active').attr('id');
         var name = $('#'+worksheet_id+'-new-cohort-name').val();
 
-        var unallowed = name.match(base.whitelist);
+        var unallowed = name.match(base.blacklist);
 
         if(unallowed) {
             $('#'+worksheet_id+'unallowed-chars-cohort').text(unallowed.join(", "));
