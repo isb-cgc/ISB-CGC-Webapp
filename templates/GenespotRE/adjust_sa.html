@@ -67,9 +67,9 @@
                             <input type="hidden" name="user_sa" value="{{ sa_id }}"/>
                             <input type="hidden" name="is_adjust" value="true" />
                             <br>
-                            Click this <input type="submit" class="verify-sa-btn btn btn-default" value="button"/> to allow us to verify who is allowed to use this service account.
+                            Click this <input type="submit" class="verify-sa-btn btn btn-primary" value="button"/> to allow us to verify who is allowed to use this service account.
                         </form>
-                        <i class="fa fa-spinner fa-spin hidden load-spinner"></i>
+                        <div id="sa-spinner" class="fa fa-spinner fa-spin hidden load-spinner"></div>
                     </li>
                     <div class="user-verification" style="display:none;">
                         <table class="table">
@@ -88,7 +88,7 @@
                     </div>
                     <div class="cannot-register" style="display: none;">
                         <p>Some of your users do not have access to the datasets you would like to use. Please try again when they have the proper permissions.</p>
-                        <button class="retry-btn btn btn-primary">Retry</button>
+                        <input type="button" class="retry-btn btn btn-primary" value="Retry"/>
                         <a href="{% url 'user_gcp_list' user.id %}" class="back-btn btn btn-primary" role="button">Go Back</a>
                     </div>
                     <div class="register-sa-div" style="display: none;">
@@ -97,7 +97,7 @@
                             <p>We have verified that all of the users in your Google Cloud Project have permission to access the proposed datasets.</p>
                             <input type="hidden" name="gcp_id" value="{{ gcp_id }}"/>
                             <input type="hidden" name="user_sa" value="{{ sa_id }}"/>
-                            <input type="submit" class="register-sa-btn btn btn-default" value="Adjust" />
+                            <input type="submit" class="register-sa-btn btn btn-primary" value="Adjust" />
                             <input type="hidden" name="is_adjust" value="true" />
                         </form>
                     </div>

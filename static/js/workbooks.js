@@ -185,9 +185,18 @@ require([
 
     // Model communications
     $('.add_worksheet_comment_form').on('submit', function (event) {
+        event.preventDefault();
+        $('#unallowed-chars-alert-comment').hide();
 
         if(savingComment) {
-            event.preventDefault();
+            return false;
+        }
+
+        var unallowed_content = $('#comment-content').val().match(base.blacklist);
+
+        if(unallowed_content) {
+            $('#unallowed-chars-comment').text(unallowed_content.join(", "));
+            $('#unallowed-chars-alert-comment').show();
             return false;
         }
 

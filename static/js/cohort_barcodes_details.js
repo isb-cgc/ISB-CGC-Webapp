@@ -437,11 +437,11 @@ require([
                 var entry = result.invalid_entries[i];
                 entry_set += (
                     "<tr><td>"
+                    +(entry['program'] == 'CCLE' && entry['sample'].indexOf('CCLE') < 0 ? 'UNKNOWN' : entry['program'])
+                    +"</td><td>"
                     +(entry['case'].indexOf(",") < 0 ? entry['case'] : '"' + entry['case'] + '"')
                     +"</td><td>"
-                    +(entry['sample'].length <= 0 ? "NOT FOUND" : (entry['sample'].indexOf(",") < 0 ? entry['sample'] : '"' + entry['sample'] + '"'))
-                    +"</td><td>"
-                    +(entry['program'] == 'CCLE' && entry['sample'].indexOf('CCLE') < 0 ? 'UNKNOWN' : entry['program']) +"</td></tr>"
+                    +(entry['sample'].length <= 0 ? "NOT FOUND" : (entry['sample'].indexOf(",") < 0 ? entry['sample'] : '"' + entry['sample'] + '"')) +"</td></tr>"
                 );
             }
             tab.find('.invalid-entries tbody').html(entry_set);
@@ -468,10 +468,12 @@ require([
                 var entry = result.valid_entries[i];
                 entry_set += (
                     "<tr><td>"
-                    +(entry['case'].indexOf(",") < 0 ? entry['case'] : '"' + entry['case'] + '"')
+                    +entry['program']
                     +"</td><td>"
+                    +(entry['case'].indexOf(",") < 0 ? entry['case'] : '"' + entry['case'] + '"')
+                    +"</td><td> "
                     +(entry['sample'].indexOf(",") < 0 ? entry['sample'] : '"' + entry['sample'] + '"')
-                    +"</td><td> "+entry['program']+"</td></tr>"
+                    +"</td></tr>"
                 );
                 if(!validated_barcodes[entry['program_id']]){
                     validated_barcodes[entry['program_id']] = []
