@@ -1,2 +1,2 @@
-echo 'export PYTHONPATH=/home/vagrant/www:/home/vagrant/google_appengine:/home/vagrant/google_appengine/lib/protorpc-1.0:/home/vagrant/www/lib' | tee -a /home/vagrant/.bash_profile
+echo 'export PYTHONPATH=/home/vagrant/www:/home/vagrant/google_appengine:/home/vagrant/google_appengine/lib/protorpc-1.0:/home/vagrant/www/lib:/home/vagrant/parentDir/ISB-CGC-API/lib' | tee -a /home/vagrant/.bash_profile
 chmod +x /home/vagrant/www/shell/python-su.sh
