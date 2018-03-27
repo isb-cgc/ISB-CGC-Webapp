@@ -68,9 +68,9 @@
                             </div>
                             <input type="hidden" name="gcp_id" value="{{ gcp_id }}"/>
                             <br>
-                            Click this <input type="submit" class="verify-sa-btn btn btn-default" value="button"/> to allow us to verify who is allowed to use this service account.
+                            Click this <input type="submit" class="verify-sa-btn btn btn-primary" value="button"/> to allow us to verify who is allowed to use this service account.
                         </form>
-                        <i class="fa fa-spinner fa-spin hidden load-spinner"></i>
+                        <div id="sa-spinner" class="fa fa-spinner fa-spin hidden load-spinner"></div>
                     </li>
                     <div class="user-verification" style="display:none;">
                         <table class="table">
@@ -97,7 +97,7 @@
                             {% csrf_token %}
                             <p>We have verified that all of the users in your Google Cloud Project have permission to access the proposed datasets.</p>
                             <input type="hidden" name="gcp_id" value="{{ gcp_id }}"/>
-                            <input type="submit" class="register-sa-btn btn btn-default" value="Register" />
+                            <input type="submit" class="register-sa-btn btn btn-primary" value="Register" />
                         </form>
                     </div>
                 </ul>
