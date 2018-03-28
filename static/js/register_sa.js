@@ -64,16 +64,15 @@ require([
     $('#verify-sa').on('submit', function(e) {
         $('#user_sa').length > 0 && $('#user_sa').val($('#user_sa').val().trim());
         $('#js-messages button.close').click();
-        $('#register-sa-div').hide();
         e.preventDefault();
         e.stopPropagation();
-
         var $this = $(this);
         var fields = $this.serialize();
         var user_ver_div = $('.user-verification');
-        var spinner = $('#sa-spinner');
-        spinner.removeClass('hidden');
         user_ver_div.hide();
+        $('.cannot-register').hide();
+        $('.register-sa-div').hide();
+        $('.verify-pending').show();
 
         $this.find('input[type="submit"]').prop('disabled', 'disabled');
         $.ajax({
@@ -83,8 +82,7 @@ require([
             success: function(data) {
                 var tbody = user_ver_div.find('tbody');
                 tbody.empty();
-                spinner.addClass('hidden');
-
+                $('.verify-pending').hide();
                 var register_form = $('form#register-sa');
                 var user_input = register_form.find('input[name="user_sa"]');
                 var dataset_input = register_form.find('input[name="datasets"]');
@@ -150,7 +148,7 @@ require([
                 }
             },
             error: function(xhr, ajaxOptions, thrownError) {
-                spinner.addClass('hidden');
+                $('.verify-pending').hide();
                 $('.verify-sa-btn').prop('disabled', '');
                 // If we received a redirect, honor that
                 if(xhr.responseJSON.redirect) {
@@ -168,7 +166,7 @@ require([
         $('.register-sa-btn').attr("disabled","disabled");
         $('#verify-sa').hide();
         $('#verify-sa')[0].reset();
-        $('#sa-spinner').removeClass('hidden');
+        $('.register-pending').show();
     });
 
     $('.retry-btn').on('click', function(e) {
