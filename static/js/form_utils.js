@@ -24,7 +24,7 @@ require([
     'underscore',
     'base'
 ], function($, jqueryui, bootstrap, session_security, _, base) {
-    console.debug($('form.new-workbook'));
+
     $('form.new-workbook input[type="submit"]').on('click',function(e){
         var form = $(this).parents('.new-workbook');
         var name = form.find('.new-workbook-name').val();
