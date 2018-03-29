@@ -231,6 +231,15 @@ require([
         }
     });
 
+    // Resets forms on cancel. Suppressed warning when leaving page with dirty forms
+    $('.cancel-edit').on('click', function() {
+        $('#unallowed-chars-alert').hide();
+        var form = $('.create-gene-list')[0];
+        if(form){
+            form.reset();
+        }
+    });
+
     $('form.create-gene-list').on('submit', function(e) {
         var name = $('#genes-list-name').prop('value');
         $('#unallowed-chars-alert').hide();

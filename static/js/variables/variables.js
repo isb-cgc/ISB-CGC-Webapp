@@ -282,9 +282,16 @@ require([
         }
     });
 
-    /*
-        Edits an existing favorite_list then redirects to the favorite list, or other place
-     */
+    // Resets forms on cancel. Suppressed warning when leaving page with dirty forms
+    $('.cancel-edit').on('click', function() {
+        $('#unallowed-chars-alert').hide();
+        var form = $('.create-gene-list')[0];
+        if(form){
+            form.reset();
+        }
+    });
+
+    // Edits an existing favorite_list then redirects to the favorite list, or other place
     $("#edit_favorite_list").on('click', function(event){
         var name = $.trim($("#variable_list_name_input").val());
 
