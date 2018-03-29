@@ -93,7 +93,7 @@
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h4 id="edit-workbook-header" class="modal-title">Create a new workbook using the variable favorite "{{ variables.name|title }}"</h4>
             </div>
-            <form id="edit-workbook" method="POST" action="{% url 'worksheet_create_with_variables' %}">
+            <form id="edit-workbook" class="new-workbook" method="POST" action="{% url 'worksheet_create_with_variables' %}">
                 {% csrf_token %}
                 <div class="modal-body">
                     <div id="unallowed-chars-alert" class="alert alert-warning alert-dismissable unallowed-chars-alert-wb" style="display: none;">
