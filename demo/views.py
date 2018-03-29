@@ -35,14 +35,6 @@ import logging
 
 debug = settings.DEBUG
 logger = logging.getLogger('main_logger')
-# login_expiration_seconds = settings.LOGIN_EXPIRATION_MINUTES * 60
-# COUNTDOWN_SECONDS = login_expiration_seconds + (60 * 15)
-#
-# LOGOUT_WORKER_TASKQUEUE = settings.LOGOUT_WORKER_TASKQUEUE
-# CHECK_NIH_USER_LOGIN_TASK_URI = settings.CHECK_NIH_USER_LOGIN_TASK_URI
-# CRON_MODULE = settings.CRON_MODULE
-#
-# PUBSUB_TOPIC_ERA_LOGIN = settings.PUBSUB_TOPIC_ERA_LOGIN
 LOG_NAME_ERA_LOGIN_VIEW = settings.LOG_NAME_ERA_LOGIN_VIEW
 
 
