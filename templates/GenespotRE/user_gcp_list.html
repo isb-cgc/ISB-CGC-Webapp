@@ -78,7 +78,6 @@
 
                                     <td>{{ project.bucket_set.all|length }}</td>
                                     <td>{{ project.bqdataset_set.all|length }}</td>
-                                {% include "GenespotRE/user_gcp_list_modals.html" with project=project %}
                                 </tr>
 
                                     <tr class="{{ project.id }}-expander" style="display:none;">
@@ -117,10 +116,12 @@
 
                                         </td>
                                     </tr>
-
                             {% endfor %}
                         </tbody>
                     </table>
+                    {% for project in gcp_list %}
+                        {% include "GenespotRE/user_gcp_list_modals.html" with project=project %}
+                    {% endfor %}
                 </div>
             </div>
         </div>
