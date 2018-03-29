@@ -273,9 +273,9 @@ require([
         var content = $('#enter-barcodes textarea').val();
 
         if(!checkContentValidity(content)) {
+            $('.verify-pending').hide();
             base.showJsMessage("error","The entered set of barcodes is not properly formatted. Please double-check that they are in tab- or comma-delimited format.",true);
             return false;
-            $('.verify-pending').hide();
         } else {
             $('.alert-dismissible button.close').trigger('click');
         }
