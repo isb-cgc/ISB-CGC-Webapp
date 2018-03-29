@@ -99,7 +99,7 @@ def index(request):
 
             for key in login_result.session_dict.keys():
                 request.session[key] = login_result.session_dict[key]
-            for warn in login_result:
+            for warn in login_result.messages:
                 messages.warning(request, warn)
             return redirect('/users/' + str(request.user.id))
 
