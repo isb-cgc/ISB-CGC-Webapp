@@ -58,7 +58,7 @@ require([
     });
 
     $('#verify-sa div input').change(function() {
-        $('.register-sa-btn, .retry-btn').attr("disabled","disabled");
+        $('.register-sa-btn').attr("disabled","disabled");
     });
 
     $('#verify-sa').on('submit', function(e) {
