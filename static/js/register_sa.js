@@ -153,6 +153,9 @@ require([
                 // If we received a redirect, honor that
                 if(xhr.responseJSON.redirect) {
                     base.setReloadMsg(xhr.responseJSON.level || "error",xhr.responseJSON.message);
+                    // hide and reset the form
+                    $('#verify-sa').hide();
+                    $('#verify-sa')[0].reset();
                     window.location = xhr.responseJSON.redirect;
                 } else {
                     base.showJsMessage(xhr.responseJSON.level || "error",xhr.responseJSON.message,true);
