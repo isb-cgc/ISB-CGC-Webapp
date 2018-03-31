@@ -85,12 +85,9 @@ require([
             method: 'GET',
             success: function(data) {
                 var roles = data['roles']
-                for (var key in roles) {
-                    var list = roles[key];
-                    for (var item in list) {
-                        if (list[item]['registered_user']) {
-                            $('#refresh-project-'+project_id).append('<input type="hidden" name="register_users" value="' + list[item]['email'] + '"/>');
-                        }
+                for (var email in roles) {
+                    if (roles[email]['registered_user']) {
+                        $('#refresh-project-'+project_id).append('<input type="hidden" name="register_users" value="' + email + '"/>');
                     }
                 }
                 this_modal.modal('show');
