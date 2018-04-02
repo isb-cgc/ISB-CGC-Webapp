@@ -25,13 +25,15 @@ require.config({
         session_security: 'session_security',
         underscore: 'libs/underscore-min',
         ajv: 'libs/ajv.bundle',
-        base: 'base'
+        base: 'base',
+        tablesorter:'libs/jquery.tablesorter.min'
     },
     shim: {
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
         'session_security': ['jquery'],
-        'base': ['jquery', 'jqueryui', 'session_security', 'bootstrap', 'underscore']
+        'base': ['jquery', 'jqueryui', 'session_security', 'bootstrap', 'underscore'],
+        'tablesorter': ['jquery']
     }
 });
 
@@ -42,7 +44,8 @@ require([
     'session_security',
     'underscore',
     'base',
-    'ajv'
+    'ajv',
+    'tablesorter'
 ], function ($, jqueryui, bootstrap, session_security, _, base, ajv) {
 
     var savingChanges = false;
@@ -270,9 +273,9 @@ require([
         var content = $('#enter-barcodes textarea').val();
 
         if(!checkContentValidity(content)) {
+            $('.verify-pending').hide();
             base.showJsMessage("error","The entered set of barcodes is not properly formatted. Please double-check that they are in tab- or comma-delimited format.",true);
             return false;
-            $('.verify-pending').hide();
         } else {
             $('.alert-dismissible button.close').trigger('click');
         }
@@ -425,21 +428,24 @@ require([
     }
 
     function showEntries(result, tab) {
-        tab.find('.invalid-entries pre').empty();
-        tab.find('.valid-entries pre').empty();
+        tab.find('.invalid-entries tbody').empty();
+        tab.find('.valid-entries tbody').empty();
         if(result.invalid_entries && result.invalid_entries.length > 0) {
             tab.find('.validation-messages ul').empty();
-            var entry_set = "Case Barcode, Sample Barcode, Program\n";
+            var entry_set = "";
             for(var i=0; i < result.invalid_entries.length; i++) {
                 var entry = result.invalid_entries[i];
                 entry_set += (
-                    (entry['case'].indexOf(",") < 0 ? entry['case'] : '"' + entry['case'] + '"')
-                    +", "
-                    +(entry['sample'].length <= 0 ? "NOT FOUND" : (entry['sample'].indexOf(",") < 0 ? entry['sample'] : '"' + entry['sample'] + '"'))
-                    +", "+(entry['program'] == 'CCLE' && entry['sample'].indexOf('CCLE') < 0 ? 'UNKNOWN' : entry['program']) +'\n'
+                    "<tr><td>"
+                    +(entry['program'] == 'CCLE' && entry['sample'].indexOf('CCLE') < 0 ? 'UNKNOWN' : entry['program'])
+                    +"</td><td>"
+                    +(entry['case'].indexOf(",") < 0 ? entry['case'] : '"' + entry['case'] + '"')
+                    +"</td><td>"
+                    +(entry['sample'].length <= 0 ? "NOT FOUND" : (entry['sample'].indexOf(",") < 0 ? entry['sample'] : '"' + entry['sample'] + '"')) +"</td></tr>"
                 );
             }
-            tab.find('.invalid-entries pre').html(entry_set);
+            tab.find('.invalid-entries tbody').html(entry_set);
+            tab.find('.invalid-entries table').trigger('update');
             if(result.messages) {
                 var msg_set = "";
                 for(var i=0; i < result.messages.length; i++) {
@@ -456,22 +462,26 @@ require([
         }
 
         if(result.valid_entries && result.valid_entries.length > 0) {
-            var entry_set = "Case Barcode, Sample Barcode, Program\n";
+            var entry_set = "";
             validated_barcodes = {};
             for(var i=0; i < result.valid_entries.length; i++) {
                 var entry = result.valid_entries[i];
                 entry_set += (
-                    (entry['case'].indexOf(",") < 0 ? entry['case'] : '"' + entry['case'] + '"')
-                    +", "
+                    "<tr><td>"
+                    +entry['program']
+                    +"</td><td>"
+                    +(entry['case'].indexOf(",") < 0 ? entry['case'] : '"' + entry['case'] + '"')
+                    +"</td><td> "
                     +(entry['sample'].indexOf(",") < 0 ? entry['sample'] : '"' + entry['sample'] + '"')
-                    +", "+entry['program']+'\n'
+                    +"</td></tr>"
                 );
                 if(!validated_barcodes[entry['program_id']]){
                     validated_barcodes[entry['program_id']] = []
                 }
                 validated_barcodes[entry['program_id']].push([entry['sample'], entry['case'], entry['project']]);
             }
-            tab.find('.valid-entries pre').html(entry_set);
+            tab.find('.valid-entries tbody').html(entry_set);
+            tab.find('.valid-entries table').trigger('update');
             tab.find('.valid-entries input').remove();
             tab.find('.valid-entries').show();
             tab.find('.cohort-counts tbody').empty();
@@ -489,7 +499,22 @@ require([
         tab.find('.barcode-status').show();
     }
 
+    //make in/valid-entries-tables sortable
 
+    $('.tablesorter th').css('cursor','pointer');
+
+    $('#valid-entries-table').tablesorter(
+        {sortList: [[0,0]]}
+    );
+    $('#invalid-entries-table').tablesorter(
+        {sortList: [[0,0]]}
+    );
+    $('#valid-entries-table2').tablesorter(
+        {sortList: [[0,0]]}
+    );
+    $('#invalid-entries-table2').tablesorter(
+        {sortList: [[0,0]]}
+    );
     // Event bindings
 
     $('button.instructions').on('click',function(){
@@ -516,7 +541,7 @@ require([
             return false;
         }
 
-        var unallowed = $('#create-cohort-name').val().match(base.whitelist);
+        var unallowed = $('#create-cohort-name').val().match(base.blacklist);
         if(unallowed) {
             $('.unallowed-chars').text(unallowed.join(", "));
             $('#unallowed-chars-alert').show();
@@ -543,4 +568,6 @@ require([
             return false;
         }
     });
+
+
 });

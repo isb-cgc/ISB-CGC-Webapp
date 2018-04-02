@@ -185,9 +185,18 @@ require([
 
     // Model communications
     $('.add_worksheet_comment_form').on('submit', function (event) {
+        event.preventDefault();
+        $('#unallowed-chars-alert-comment').hide();
 
         if(savingComment) {
-            event.preventDefault();
+            return false;
+        }
+
+        var unallowed_content = $('#comment-content').val().match(base.blacklist);
+
+        if(unallowed_content) {
+            $('#unallowed-chars-comment').text(unallowed_content.join(", "));
+            $('#unallowed-chars-alert-comment').show();
             return false;
         }
 
@@ -1302,8 +1311,8 @@ require([
             desc = $(thisModal+'.' + mode + '-sheet-desc').val();
         }
 
-        var unallowed_name = name.match(base.whitelist);
-        var unallowed_desc = desc.match(base.whitelist);
+        var unallowed_name = name.match(base.blacklist);
+        var unallowed_desc = desc.match(base.blacklist);
 
         if(unallowed_name || unallowed_desc) {
             var unalloweds = unallowed_name || [];
@@ -1360,7 +1369,7 @@ require([
         var worksheet_id = $('.worksheet.active').attr('id');
         var name = $('#'+worksheet_id+'-new-cohort-name').val();
 
-        var unallowed = name.match(base.whitelist);
+        var unallowed = name.match(base.blacklist);
 
         if(unallowed) {
             $('#'+worksheet_id+'unallowed-chars-cohort').text(unallowed.join(", "));

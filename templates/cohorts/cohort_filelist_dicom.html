@@ -1,0 +1,45 @@
+<div id="dicom-files" class="tab-pane data-tab" data-file-type="dicom" role="tabpanel">
+    <div id="dicom-file-panel" class="col-sm-12 col-md-12 col-lg-12">
+        <div class="filelist-panel panel">
+            <div class="panel-heading">
+                <h4>File Listing</h4>
+            </div>
+            <div class="panel-body">
+                <p class="file-page-count">Showing <span class="showing">20</span> files. Page: <span class="page-num">1</span> of <span class="file-count">unknown</span> pages.</p>
+                <p class="no-file-page-count" style="display: none;">Showing 0 files.</p>
+                <div>
+                    <a role="button" class="btn btn-primary prev-page disabled">Previous Page</a>
+                    <a role="button" class="btn btn-primary next-page">Next Page</a>
+                    <span class="spinner"><i class="fa fa-spin fa-spinner hidden"></i></span>
+                </div>
+
+                <table class="table table-striped file-list-table" aria-label="File Listing Table">
+                    <thead>
+                        <tr>
+                            <th class="col-program">Program</th>
+                            <th class="col-case">Case Barcode</th>
+                            <th class="col-diseasecode">Disease Code</th>
+                            <th class="col-projectname">Project Short Name</th>
+                            <th class="col-studydesc">Study Description</th>
+                            <th class="col-studyuid">Study Instance UID</th>
+                        </tr>
+                    </thead>
+                    <colgroup>
+                        <col style="width: 8%">
+                        <col style="width: 12%">
+                        <col style="width: 6%">
+                        <col style="width: 8%">
+                        <col style="width: 25%">
+                        <col style="width: 41%">
+                    </colgroup>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var total_files = {{ total_file_count|safe }};
+    var file_listing = {{ file_list|tojson|safe }};
+</script>

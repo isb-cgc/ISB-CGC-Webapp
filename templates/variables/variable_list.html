@@ -56,10 +56,12 @@
                                 <td>{{ favorite.variables | length }}</td>
                                 <td>{{ favorite.last_date_saved|date:'M d, Y, g:i a'}}</td>
                             </tr>
-                            {% include "variables/variable_list_modals.html" with favorite=favorite %}
                         {% endfor %}
                     </tbody>
                 </table>
+                {% for favorite in variable_list %}
+                    {% include "variables/variable_list_modals.html" with favorite=favorite %}
+                {% endfor %}
             {% else %}
                 <br>
                 <p class="center">You don't have any variable favorites created yet. <br><a href="{% url 'variable_fav_create' %}" class="btn btn-link">Create A Variable Favorite</a></p>
@@ -70,4 +72,4 @@
 </div>
 {% endblock %}
 
-{% block js_file %}{% static 'js/base.js' %}{% endblock %}
+{% block js_file %}{% static 'js/form_utils.js' %}{% endblock %}

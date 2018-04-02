@@ -16,7 +16,7 @@ limitations under the License.
 
 """
 
-from google_helpers.bigquery_service import get_bigquery_service
+from google_helpers.bigquery.service import get_bigquery_service
 
 import logging
 

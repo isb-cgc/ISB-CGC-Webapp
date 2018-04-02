@@ -1,5 +1,5 @@
 # UI-prototyping
-ISB-CGC UI prototyping
+ ISB-CGC UI prototyping
 
 This project uses Google App Engine, Python 2.7, Django 1.7.1, and MySQL 5.6
 
@@ -38,14 +38,11 @@ PyCharm Pro can be used to run your server through Vagrant and the Google App En
  8. Change the SDK directory to `/home/vagrant/google_appengine/`
  9. Click Ok to save
  10. Go to **Run > Edit Configurations**
- 11. If there is not an App Engine server Configuration, add one
+ 11. If there is not a Django Configuration, add one
  12. Set the host to `0.0.0.0`
- 13. Set Additional Options to `--skip_sdk_update_check --use_mtime_file_watcher=True --admin_host 0.0.0.0 /home/vagrant/www`
-   * Optionally set PyCharm to run a browser at url `http://127.0.0.1:8080/`
- 14. Set the Python Interpreter to the Vagrant Machine (if it is not set to that already)
- 15. Set the working directory to `\home\vagrant\www`
- 16. Click ok to save
- 17. Update app.yaml at root from "runtime:custom" to 'runtime: python27' this is due to a google bug identified by CGC
+ 13. Set the Python Interpreter to the Vagrant Machine (if it is not set to that already)
+ 14. Set the working directory to `/home/vagrant/www`
+ 15. Click ok to save
 
 You will also need to set the *shell/python-su.sh* file to be executable. You can do this in the vagrant machines command line with the command `chmod +x /home/vagrant/www/shell/python-su.sh`
 

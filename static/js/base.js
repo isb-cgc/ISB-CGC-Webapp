@@ -201,7 +201,7 @@ require([
 define(['jquery', 'utils'], function($, utils) {
 
     return {
-        whitelist: /[^\\\_\|\"\+~@:#\$%\^&\*=\-\.,\(\)0-9a-zA-Z\sÇüéâäàåçêëèïîíìÄÅÉæÆôöòûùÖÜáóúñÑÀÁÂÃÈÊËÌÍÎÏÐÒÓÔÕØÙÚÛÝßãðõøýþÿ]/g,
+        blacklist: /<script>|<\/script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|<iframe>|<\/iframe>/ig,
         barcode_file_whitelist: /[^A-Za-z0-9\-,\t_\."'\s\(\)\/;:]/g,
         // From http://www.regular-expressions.info/email.html
         email: /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/,

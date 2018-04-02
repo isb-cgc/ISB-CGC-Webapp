@@ -40,7 +40,7 @@ from GenespotRE.templatetags.custom_tags import get_readable_name
 
 debug = settings.DEBUG
 
-WHITELIST_RE = settings.WHITELIST_RE
+BLACKLIST_RE = settings.BLACKLIST_RE
 
 logger = logging.getLogger('main_logger')
 
@@ -345,11 +345,11 @@ def variable_fav_save(request, variable_fav_id=0):
         result = {}
 
         name = data['name']
-        whitelist = re.compile(WHITELIST_RE, re.UNICODE)
-        match = whitelist.search(unicode(name))
+        blacklist = re.compile(BLACKLIST_RE, re.UNICODE)
+        match = blacklist.search(unicode(name))
         if match:
             # XSS risk, log and fail this cohort save
-            match = whitelist.findall(unicode(name))
+            match = blacklist.findall(unicode(name))
             logger.error(
                 '[ERROR] While saving a variable list, saw a malformed name: ' + name + ', characters: ' + match.__str__())
             messages.error(request, "Your variable list's name contains invalid characters; please choose another name.")
