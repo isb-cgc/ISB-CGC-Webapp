@@ -84,6 +84,7 @@
 
     <script type="text/javascript"> 
         var expiry_time = new Date("{{ user_details.NIH_assertion_expiration|safe }}".replace(" ","T"));
-        document.getElementById('NIH_expiration').innerHTML = expiry_time; 
+        if(document.getElementById('NIH_expiration') != null)
+            document.getElementById('NIH_expiration').innerHTML = expiry_time; 
     </script>
 {%  endblock %}

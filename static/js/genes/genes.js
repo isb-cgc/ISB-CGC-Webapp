@@ -213,8 +213,41 @@ require([
         })
     }
 
+    $('form.new-workbook input[type="submit"]').on('click',function(e){
+        var form = $(this).parents('.new-workbook');
+        var name = form.find('.new-workbook-name').val();
+        var unallowed_chars_alert = $(this).parents('.new-workbook-modal').find('.unallowed-chars-wb-alert');
+        unallowed_chars_alert.hide();
+
+        // Do not allow white-space only names
+        if(name.match(/^\s*$/)) {
+            form.find('.new-workbook-name').prop('value','');
+            e.preventDefault();
+            return false;
+        }
+
+        var unallowed = name.match(base.blacklist);
+
+        if(unallowed) {
+            unallowed_chars_alert.find('.unallowed-chars-wb').text(unallowed.join(", "));
+            unallowed_chars_alert.show();
+            event.preventDefault();
+            return false;
+        }
+    });
+
+    // Resets forms on cancel. Suppressed warning when leaving page with dirty forms
+    $('.cancel-edit').on('click', function() {
+        $('#unallowed-chars-alert').hide();
+        var form = $('.create-gene-list')[0];
+        if(form){
+            form.reset();
+        }
+    });
+
     $('form.create-gene-list').on('submit', function(e) {
         var name = $('#genes-list-name').prop('value');
+        $('#unallowed-chars-alert').hide();
 
         // Do not allow white-space only names
         if(name.match(/^\s*$/)) {
@@ -223,15 +256,13 @@ require([
             return false;
         }
 
-        var unallowed = name.match(base.whitelist);
+        var unallowed = name.match(base.blacklist);
 
         if(unallowed) {
             $('.unallowed-chars').text(unallowed.join(", "));
             $('#unallowed-chars-alert').show();
             event.preventDefault();
             return false;
-        } else {
-            $('#unallowed-chars-alert').hide();
         }
 
         // Do not allow submission of empty gene lists
