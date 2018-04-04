@@ -81,12 +81,14 @@
                     <ul>
                         <li class="menu-item">
                             <div class="filelist-obtain">
+                                <span class="pending-left" id="download-in-prog" style="display: none;"><i class="fa fa-circle-o-notch fa-spin"></i>Downloading...</span>
                                 <a class="download-link" href="{{ download_url }}" title="Download file manifest as CSV"><button class="btn btn-info download-btn">CSV</button></a>{# <a id="download-link" href="{{ download_url }}" title="Download file manifest as JSON"><button class="btn btn-info">JSON</button></a>#}
                                 <input type="hidden" class="download-token" value="" />
                             </div>
                         </li>
                         <li class="menu-item">
                             <div class="filelist-obtain">
+
                                 <button class="btn btn-info export-btn" data-toggle="modal" data-target="#export-to-bq-modal" title="Export this file manifest to a BigQuery table">Export to BQ</button>
 {#                                <a id="download-link" href="{{ export_url }}" title="Export file manifest to BQ"><button class="btn btn-info">BQ</button></a> <a id="download-link" href="" title="Export file manifest to GCS"><button class="btn btn-info">GCS</button></a>#}
                             </div>

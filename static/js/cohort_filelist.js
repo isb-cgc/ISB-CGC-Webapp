@@ -733,6 +733,6 @@ require([
         base.blockResubmit(function() {
             self.removeAttr('disabled');
             msg.hide();
-        },$('.filelist-obtain .download-token').val());
+        },$('.filelist-obtain .download-token').val(),"downloadToken");
     });
 });
