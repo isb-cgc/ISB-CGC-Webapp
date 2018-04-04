@@ -44,6 +44,26 @@ require.config({
 // Return an object for consts/methods used by most views
 define(['jquery'], function($) {
 
+    var downloadTimer;
+    var attempts = 30;
+
+    function getCookie( name ) {
+        var parts = document.cookie.split(name + "=");
+        if (parts.length == 2) {
+            return parts.pop().split(";").shift();
+        }
+    };
+    function expireCookie( cName ) {
+        document.cookie =
+            encodeURIComponent(cName) + "=deleted; expires=" + new Date( 0 ).toUTCString();
+    };
+    function unblockSubmit(callback) {
+        window.clearInterval( downloadTimer );
+        expireCookie( "downloadToken" );
+        attempts = 30;
+        callback();
+    };
+
     return {
         // Simple method for displaying an alert-<type> message at a given selector or DOM element location.
         //
@@ -72,6 +92,17 @@ define(['jquery'], function($) {
                         +'&times;</span><span class="sr-only">Close</span></button>'
                     )
             );
+        },
+        blockResubmit: function(callback,downloadToken) {
+            downloadTimer = window.setInterval( function() {
+                var token = getCookie( "downloadToken" );
+
+                if( (token == downloadToken) || (attempts == 0) ) {
+                    unblockSubmit(callback);
+                }
+
+                attempts--;
+            }, 1000 );
         }
     };
 });
