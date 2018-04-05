@@ -397,9 +397,6 @@
     .hidden_form_value
         display: none
 
-    .filelist-panel
-        h4
-            display: inline
 
     .file-list
         .alert-dismissable
@@ -433,20 +430,41 @@
             input
                 margin-right: 5px
 
-
     .filelist-panel
+        h4
+            display: inline
         .page-num, .file-count
             display: inline-block
-
         table
             table-layout: fixed
             word-wrap: normal
+            font-size: 11px
             .col-barcode, .col-pipeline
                 width: 150px
             .col-datalevel
                 width: 90px
-            td:last-child i
-                color: $isb-success
+            td
+                .col-filename
+                    div
+                        display: block
+                        white-space: nowrap
+                        overflow: hidden
+                        text-overflow: ellipsis
+                div
+                    &.col-filename
+                        &:hover
+                            display: inline-block
+                            position: relative
+                            z-index: 99
+                            color: #FFF
+                            background-color: #2a537a
+                            border-color: #2a537a
+                            padding: 5px
+                            border-radius: 3px
+                            overflow: visible
+                &:last-child
+                    i
+                        color: $isb-success
         input
             margin-left: 5px
 
