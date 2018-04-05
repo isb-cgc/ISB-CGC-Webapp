@@ -46,7 +46,13 @@
                             <p>Your project's default Compute Engine Service Account ID is entered automtically; if you wish to register a different service account, delete the default ID and enter the other service account ID. Service Account IDs are located in your Google Cloud Platform console under IAM & Admin.</p>
                             <label for="user_sa">Service Account ID</label>
                             <input id="user_sa" type="text" name="user_sa" placeholder="ex. 000000000000-alphanumericstringofcharacters@developer.gserviceaccount.com" value={{ default_sa_id }} class="form-control" required/>
-                            <br>
+                            <br />
+                            <div id="invalid-sa-id" class="alert alert-warning alert-dismissible" style="display: none;">
+                                <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                <span id="verify-error-text"></span>
+                                <span id="verify-error-base">The Service Account ID provided (<span id="provided-sa-id"></span>) does not appear to be a valid GCP Service Account ID. Note that per Google's requirements, Google Cloud Platform Service Account IDs can only contain letters, numbers, dashes, periods, and the @ symbol.</span>
+                                <br />
+                            </div>
                             Are you going to use this service account to work with controlled-access data?
                             <div class="radio">
                                 <label><input type="radio" name="select-datasets" value="no" checked> No</label>

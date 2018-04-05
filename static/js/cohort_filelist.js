@@ -349,14 +349,18 @@ require([
         // Clear the previous parameter settings from the export form, and re-add the build
         $('#export-to-bq-form input.param').remove();
         $('#export-to-bq-form').append('<input class="param" type="hidden" name="build" value="'+build+'" />');
+        $('#export-to-bq-form').append('<input class="param" type="hidden" name="total_expected" value="'+file_list_total+'" />');
+
+        var downloadToken = new Date().getTime();
+        $('.filelist-obtain .download-token').val(downloadToken);
 
         if (SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab][build]).length >0) {
             var filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab][build]));
-            $(tab_selector).find('.download-link').attr('href', download_url + '?' + filter_args + '&total=' + file_list_total);
+            $(tab_selector).find('.download-link').attr('href', download_url + '?' + filter_args + '&downloadToken='+downloadToken+'&total=' + file_list_total);
             $('#export-to-bq-form').append('<input class="param" type="hidden" name="filters" value="" />');
             $('#export-to-bq-form input[name="filters"]').attr('value',JSON.stringify(SELECTED_FILTERS[active_tab][build]));
         } else {
-            $(tab_selector).find('.download-link').attr('href', download_url + '?total=' + file_list_total)
+            $(tab_selector).find('.download-link').attr('href', download_url + '?downloadToken='+downloadToken+'&total=' + file_list_total)
         }
 
         if(active_tab !== 'camic') {
@@ -720,4 +724,16 @@ require([
 
     browser_tab_load(cohort_id);
 
+    $('.data-tab-content').on('click', '.download-btn', function() {
+        var self=$(this);
+        var msg = $('#download-in-prog');
+
+        self.attr('disabled','disabled');
+        msg.show();
+
+        base.blockResubmit(function() {
+            self.removeAttr('disabled');
+            msg.hide();
+        },$('.filelist-obtain .download-token').val(),"downloadToken");
+    });
 });
