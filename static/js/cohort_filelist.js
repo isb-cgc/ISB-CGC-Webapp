@@ -352,11 +352,11 @@ require([
 
         if (SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab][build]).length >0) {
             var filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab][build]));
-            $(tab_selector).find('.download-link').attr('href', download_url + '?' + filter_args + '&total=' + file_list_total);
+            $(tab_selector).find('.download-link').attr('href', download_url + '?' + filter_args + '&total=' + Math.min(FILE_LIST_MAX,file_list_total));
             $('#export-to-bq-form').append('<input class="param" type="hidden" name="filters" value="" />');
             $('#export-to-bq-form input[name="filters"]').attr('value',JSON.stringify(SELECTED_FILTERS[active_tab][build]));
         } else {
-            $(tab_selector).find('.download-link').attr('href', download_url + '?total=' + file_list_total)
+            $(tab_selector).find('.download-link').attr('href', download_url +'&total=' + Math.min(FILE_LIST_MAX,file_list_total))
         }
 
         if(active_tab !== 'camic') {
