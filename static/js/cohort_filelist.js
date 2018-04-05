@@ -349,6 +349,7 @@ require([
         // Clear the previous parameter settings from the export form, and re-add the build
         $('#export-to-bq-form input.param').remove();
         $('#export-to-bq-form').append('<input class="param" type="hidden" name="build" value="'+build+'" />');
+        $('#export-to-bq-form').append('<input class="param" type="hidden" name="total_expected" value="'+file_list_total+'" />');
 
         if (SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab][build]).length >0) {
             var filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab][build]));
