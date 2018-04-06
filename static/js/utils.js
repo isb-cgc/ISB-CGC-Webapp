@@ -44,6 +44,34 @@ require.config({
 // Return an object for consts/methods used by most views
 define(['jquery'], function($) {
 
+    // Download block poll with cookie via StackOverflow:
+    // https://stackoverflow.com/questions/1106377/detect-when-browser-receives-file-download
+    var downloadTimer;
+    var attempts = 30;
+
+    function getCookie(name) {
+        var parts = document.cookie.split(name + "=");
+        if (parts.length == 2) {
+            return parts.pop().split(";").shift();
+        }
+    };
+
+    // Set the cookie to expire Forever Ago so it dies immediately
+    // Optional path parameter for path-specific cookies
+    function expireCookie(name,path) {
+        path = path || "/";
+        document.cookie = encodeURIComponent(name) + "=deleted; Path="+path+"; expires=" + new Date(0).toUTCString();
+    };
+
+    // Clear and reset the cookie-poll and fire the provided callback
+    // Callback can be used on a given page to unblock any DOM-based impediments
+    function unblockSubmit(callback,cookieName) {
+        window.clearInterval(downloadTimer);
+        expireCookie(cookieName);
+        attempts = 30;
+        callback();
+    };
+
     return {
         // Simple method for displaying an alert-<type> message at a given selector or DOM element location.
         //
@@ -72,6 +100,20 @@ define(['jquery'], function($) {
                         +'&times;</span><span class="sr-only">Close</span></button>'
                     )
             );
+        },
+        // Block re-requests of requests which can't be handled via AJAX (eg. file downloads)
+        // Uses cookie polling
+        // Request provides a parameter with a key of expectedCookie and a value of downloadToken
+        // Handling view on server side must set a cookie of key expectedCookie to the downloadToken value
+        // in its response
+        blockResubmit: function(callback,downloadToken,expectedCookie) {
+            downloadTimer = window.setInterval( function() {
+                var token = getCookie(expectedCookie);
+                if((token == downloadToken) || (attempts == 0)) {
+                    unblockSubmit(callback,expectedCookie);
+                }
+                attempts--;
+            }, 1000 );
         }
     };
 });
