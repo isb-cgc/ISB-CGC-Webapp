@@ -209,7 +209,8 @@ class FeatureDataTypeHelper(object):
     def get_supported_programs_from_data_type(cls, data_type):
         _, _, _, config_dict = FEATURE_TYPE_TO_FEATURE_DEF_PROVIDER_MAP[data_type]
         programs = []
-        for table in config_dict['tables']:
+        layout_type = 'tables' if 'tables' in config_dict else 'table_structure'
+        for table in config_dict[layout_type]:
             if table['program'] not in programs:
                 programs.append(table['program'])
 
