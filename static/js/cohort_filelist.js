@@ -377,7 +377,7 @@ require([
 
         // Gather filters here
         var filters = {};
-
+        var page = tab_page[active_tab];
         var url = ajax_update_url[active_tab] + '?page=' + page;
 
         if (SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab][build]).length >0) {
@@ -408,6 +408,7 @@ require([
     };
 
     function update_table_display(active_tab, data) {
+        var page = tab_page[active_tab];
         var tab_selector = '#'+active_tab+'-files';
         var total_files = data['total_file_count'];
         $(tab_selector).find('.showing').text((total_files < 20 ? total_files : "20"));
@@ -479,7 +480,12 @@ require([
 
             var row = '<tr>' +
                 '<td>' + files[i]['program'] + '</td>' +
-                '<td>' + files[i][(active_tab == 'dicom' ? 'case' : 'sample')] + '</td>' +
+                '<td>' + files[i]['case'] + '</td>' +
+                (active_tab !== 'dicom' ? '<td>'+files[i]['sample']+'</td>' : '') +
+                '<td><div class="col-filename">'
+                    +'<div>' + files[i]['filename'] + '</div>'
+                    +'<div>[GCD ID: ' + files[i]['file_gdc_id'] + ']</div>'
+                + '</div></td>' +
                 '<td>' + files[i]['disease_code'] + '</td>' +
                 (active_tab === 'dicom' ? '<td>'+files[i]['project_short_name']+'</td>' : '') +
                 (active_tab === 'dicom' ? '<td>'+files[i]['study_desc']+'</td>' : '') +
@@ -558,7 +564,7 @@ require([
         if (parseInt(page) == 1) {
             $(tab_selector).find('.prev-page').addClass('disabled');
         }
-        if (parseInt(page) * 20 > total_files) {
+        if (parseInt(page) * 20 >= total_files) {
             $(tab_selector).find('.next-page').addClass('disabled');
         }
         $(tab_selector).find('.filelist-panel .spinner i').addClass('hidden');
@@ -568,14 +574,14 @@ require([
     // Next page button click
     $('.data-tab-content').on('click', '.next-page', function () {
         var this_tab = $(this).parents('.data-tab').data('file-type');
-        page = page + 1;
+        tab_page[this_tab]++;
         update_table(this_tab);
     });
 
     // Previous page button click
     $('.data-tab-content').on('click', '.prev-page', function () {
         var this_tab = $(this).parents('.data-tab').data('file-type');
-        page = page - 1;
+        tab_page[this_tab]--;
         update_table(this_tab);
     });
 
@@ -642,6 +648,7 @@ require([
             }
             SELECTED_FILTERS[active_tab][build][$(this).data('feature-name')].push($(this).data('value-name'));
         });
+        tab_page[active_tab] = 1;
     };
 
     function enqueueUpdate(active_tab){

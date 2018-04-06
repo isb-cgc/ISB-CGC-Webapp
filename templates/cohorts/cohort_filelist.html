@@ -76,7 +76,12 @@
 
     <script type="text/javascript">
     var cohort_id = {{ cohort.id }};
-    var page = 1;
+    var tab_page ={
+        'all': 1,
+        'igv': 1,
+        'camic': 1,
+        'dicom': 1
+    };
     var download_url = '{{ download_url }}';
     var ajax_update_url = {
         'all': '{% url 'cohort_filelist_ajax_panel' cohort.id 'all' %}'
