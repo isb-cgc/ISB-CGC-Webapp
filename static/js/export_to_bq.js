@@ -110,28 +110,26 @@ require([
         }
     });
 
-    $('.container').on('click', '#export-to-bq-modal input[type="submit"]', function () {
-        $('#export-underway').css('display', 'inline-block');
-    });
-
     $('.container').on('hide.bs.modal', '#export-to-bq-modal', function () {
-        $('#export-to-bq-project-dataset optgroup').remove();
         $('.table-type, .new-table-name').attr('disabled', 'disabled');
         $('.table-type, .new-table-name').attr('title', 'Select a project and dataset to enable this option');
         $('.new-table-name').show();
         $('.table-list').hide();
         $('.message-container').empty();
-        $('#export-to-bq-table option:not([type="label"])').remove();
         $('#export-to-bq-form input[type="submit"]').attr('disabled', 'disabled');
+        $('#export-to-bq-form')[0].reset();
     });
 
     $('.container').on('click', 'button[data-target="#export-to-bq-modal"]', function (e) {
-        if ($('#export-to-bq-modal').data('opening')) {
-            e.preventDefault();
-            return false;
+        // Don't reload the data if we have it already
+        if($('select optgroup').length > 0) {
+            $('#export-to-bq-modal .loading-overlay').hide();
+            return true;
         }
-        $('#export-to-bq-modal').data('opening', true);
+
         $('#export-to-bq-form input[type="submit"]').attr('disabled', 'disabled');
+        $('#export-to-bq-modal .loading-overlay').show();
+
         $.ajax({
             type: 'GET',
             url: BASE_URL + '/accounts/users/'+request_user_id+'/datasets/',
@@ -155,6 +153,7 @@ require([
                         }
                     }
                 }
+                $('#export-to-bq-modal .loading-overlay').hide();
             },
             error: function (data) {
                 var link_to_bqr = data.responseJSON.msg.match(/register at least one dataset/);
@@ -172,23 +171,54 @@ require([
                     );
                 }
                 base.showJsMessage('error', data.responseJSON.msg, true, "#export-to-bq-js-messages");
+                $('#export-to-bq-modal .loading-overlay').hide();
             },
             complete: function () {
-                $('#export-to-bq-modal').modal('show');
-                $('#export-to-bq-modal').data('opening', false);
             }
         });
-        // Don't let the modal open automatically; we're controlling that.
-        e.preventDefault();
-        return false;
     });
 
 
-    $('#export-to-bq-form').on('submit', function () {
-        if ($('.table-type :checked').val() == 'new') {
+    $('.container').on('submit', '#export-to-bq-form', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var $this = $(this);
+
+        if ($this.find('.table-type :checked').val() == 'new') {
             $('#export-to-bq-table').val('');
         }
+        var fields = $this.serialize();
+
         $('#export-to-bq-form input[type="submit"]').attr('disabled', 'disabled');
+        $('#export-underway').css('display', 'inline-block');
+
+        $.ajax({
+            url: $this.attr('action'),
+            data: fields,
+            method: 'POST',
+            success: function (data) {
+                if(data.message) {
+                    base.showJsMessage("info",data.message,true);
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                // If we received a redirect, honor that
+                if(xhr.responseJSON.redirect) {
+                    base.setReloadMsg(xhr.responseJSON.level || "error",xhr.responseJSON.message);
+                    window.location = xhr.responseJSON.redirect;
+                } else {
+                    base.showJsMessage(xhr.responseJSON.level || "error",xhr.responseJSON.message,true);
+                }
+            },
+            complete: function(xhr, status) {
+                $('#export-to-bq-form input[type="submit"]').removeAttr('disabled');
+                $('#export-to-bq-modal').modal('hide');
+                $('#export-underway').hide();
+                $this[0].reset();
+            }
+        });
+        return false;
     });
 
 });
