@@ -118,6 +118,7 @@ require([
         $('.message-container').empty();
         $('#export-to-bq-form input[type="submit"]').attr('disabled', 'disabled');
         $('#export-to-bq-form')[0].reset();
+        $('#export-underway').hide();
     });
 
     $('.container').on('click', 'button[data-target="#export-to-bq-modal"]', function (e) {
@@ -202,13 +203,14 @@ require([
                     base.showJsMessage("info",data.message,true);
                 }
             },
-            error: function (xhr, ajaxOptions, thrownError) {
+            error: function (xhr) {
+                var responseJSON = $.parseJSON(xhr.responseText);
                 // If we received a redirect, honor that
-                if(xhr.responseJSON.redirect) {
-                    base.setReloadMsg(xhr.responseJSON.level || "error",xhr.responseJSON.message);
-                    window.location = xhr.responseJSON.redirect;
+                if(responseJSON.redirect) {
+                    base.setReloadMsg(responseJSON.level || "error",responseJSON.message);
+                    window.location = responseJSON.redirect;
                 } else {
-                    base.showJsMessage(xhr.responseJSON.level || "error",xhr.responseJSON.message,true);
+                    base.showJsMessage(responseJSON.level || "error",responseJSON.message,true);
                 }
             },
             complete: function(xhr, status) {

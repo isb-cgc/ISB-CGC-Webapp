@@ -158,18 +158,19 @@ require([
                     $('.retry-btn').removeAttr("disabled");
                 }
             },
-            error: function(xhr, ajaxOptions, thrownError) {
+            error: function (xhr) {
+                var responseJSON = $.parseJSON(xhr.responseText);
                 $('.verify-pending').hide();
                 $('.verify-sa-btn').prop('disabled', '');
                 // If we received a redirect, honor that
-                if(xhr.responseJSON.redirect) {
-                    base.setReloadMsg(xhr.responseJSON.level || "error",xhr.responseJSON.message);
+                if(responseJSON.redirect) {
+                    base.setReloadMsg(responseJSON.level || "error",responseJSON.message);
                     // hide and reset the form
                     $('#verify-sa').hide();
                     $('#verify-sa')[0].reset();
-                    window.location = xhr.responseJSON.redirect;
+                    window.location = responseJSON.redirect;
                 } else {
-                    base.showJsMessage(xhr.responseJSON.level || "error",xhr.responseJSON.message,true);
+                    base.showJsMessage(responseJSON.level || "error",responseJSON.message,true);
                 }
             }
         });

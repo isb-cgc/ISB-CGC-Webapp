@@ -91,13 +91,14 @@ require([
                 $('#register-gcp-form').show();
                 submit_button.prop('disabled', false);
             },
-            error: function(xhr, ajaxOptions, thrownError) {
-                if(xhr.responseJSON.redirect) {
-                    base.setReloadMsg(xhr.responseJSON.level || "error",xhr.responseJSON.message);
-                    window.location = xhr.responseJSON.redirect;
+            error: function (xhr) {
+                var responseJSON = $.parseJSON(xhr.responseText);
+                if(responseJSON.redirect) {
+                    base.setReloadMsg(responseJSON.level || "error",responseJSON.message);
+                    window.location = responseJSON.redirect;
                 } else {
-                    if(xhr.responseJSON.message) {
-                        $('#verify-error-text').text(xhr.responseJSON.message);
+                    if(responseJSON.message) {
+                        $('#verify-error-text').text(responseJSON.message);
                         $('#verify-error-base').hide();
                     } else {
                         $('#verify-error-text').hide();
@@ -146,13 +147,14 @@ require([
                 }
                 this_modal.modal('show');
             },
-            error: function(xhr) {
-                if(xhr.responseJSON.redirect) {
-                    base.setReloadMsg(xhr.responseJSON.level || "error",xhr.responseJSON.message);
-                    window.location = xhr.responseJSON.redirect;
+            error: function (xhr) {
+                var responseJSON = $.parseJSON(xhr.responseText);
+                if(responseJSON.redirect) {
+                    base.setReloadMsg(responseJSON.level || "error",responseJSON.message);
+                    window.location = responseJSON.redirect;
                 } else {
                     this_modal.modal('hide');
-                    base.showJsMessage('error', xhr.responseJSON.message, true);
+                    base.showJsMessage('error', responseJSON.message, true);
                 }
             },
             complete: function() {

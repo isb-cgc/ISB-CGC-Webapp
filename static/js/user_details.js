@@ -92,13 +92,14 @@ require([
                 }
                 this_modal.modal('show');
             },
-            error: function(xhr) {
-                if(xhr.responseJSON.redirect) {
-                    base.setReloadMsg(xhr.responseJSON.level || "error",xhr.responseJSON.message);
-                    window.location = xhr.responseJSON.redirect;
+            error: function (xhr) {
+                var responseJSON = $.parseJSON(xhr.responseText);
+                if(responseJSON.redirect) {
+                    base.setReloadMsg(responseJSON.level || "error",responseJSON.message);
+                    window.location = responseJSON.redirect;
                 } else {
                     this_modal.modal('hide');
-                    base.showJsMessage('error', xhr.responseJSON.message, true);
+                    base.showJsMessage('error', responseJSON.message, true);
                 }
             },
             complete: function() {
