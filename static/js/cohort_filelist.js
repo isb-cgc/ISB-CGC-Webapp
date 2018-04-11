@@ -357,7 +357,7 @@ require([
             $('#export-to-bq-form').append('<input class="param" type="hidden" name="filters" value="" />');
             $('#export-to-bq-form input[name="filters"]').attr('value',JSON.stringify(SELECTED_FILTERS[active_tab][build]));
         } else {
-            $(tab_selector).find('.download-link').attr('href', download_url +'&total=' + Math.min(FILE_LIST_MAX,file_list_total))
+            $(tab_selector).find('.download-link').attr('href', download_url +'?total=' + Math.min(FILE_LIST_MAX,file_list_total))
         }
 
         if(active_tab !== 'camic') {
