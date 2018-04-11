@@ -435,7 +435,7 @@ require([
         if(files.length <= 0) {
             $(tab_selector).find('.filelist-panel table tbody').append(
                 '<tr>' +
-                '<td colspan="10"><i>No file listings found in this cohort for this build.</i></td><td></td>'
+                '<td colspan="9"><i>No file listings found in this cohort for this build.</i></td><td></td>'
             );
         }
 
