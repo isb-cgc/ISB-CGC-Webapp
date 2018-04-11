@@ -82,6 +82,18 @@
         'camic': 1,
         'dicom': 1
     };
+    var tab_count={
+        'all': 0,
+        'igv': 0,
+        'camic': 0,
+        'dicom': 0
+    }
+    var tab_files_per_page={
+        'all': 25,
+        'igv': 25,
+        'camic': 25,
+        'dicom': 25
+    }
     var download_url = '{{ download_url }}';
     var ajax_update_url = {
         'all': '{% url 'cohort_filelist_ajax_panel' cohort.id 'all' %}'
