@@ -378,7 +378,8 @@ require([
         // Gather filters here
         var filters = {};
         var page = tab_page[active_tab];
-        var url = ajax_update_url[active_tab] + '?page=' + page;
+        var files_per_page = tab_files_per_page[active_tab];
+        var url = ajax_update_url[active_tab] + '?page=' + page +'&files_per_page=' + files_per_page;
 
         if (SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab][build]).length >0) {
             var filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab][build]));
@@ -693,7 +694,8 @@ require([
         // ...and replace it with a new one
         update_displays_thread = setTimeout(function(){
             var build = $('#'+active_tab+'-files').find('.build :selected').val();
-            var url = ajax_update_url[active_tab] + '?build=' + build;
+            var files_per_page = tab_files_per_page[active_tab];
+            var url = ajax_update_url[active_tab] + '?build=' + build +'&files_per_page=' +files_per_page;
             if(SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab][build]).length > 0) {
                 url += '&filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab][build]));
             }
