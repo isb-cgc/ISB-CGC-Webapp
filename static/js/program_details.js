@@ -150,9 +150,11 @@ require([
         }
 
         if(invalid_emails.length > 0) {
-            base.showJsMessage('danger',
-                "The following email addresses appear to be invalid: "+invalid_emails.join("; "),
-                true,'#share-program-js-messages');
+            $('#share-program-js-messages').empty();
+            $('#share-program-js-messages').append(
+                $('<p>')
+                    .addClass('alert alert-danger alert-dismissible')
+                    .text("The following email addresses appear to be invalid: "+invalid_emails.join("; ")));
             return false;
         } else {
             $('#share-program-js-messages').empty();
