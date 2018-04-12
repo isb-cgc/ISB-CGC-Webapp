@@ -40,19 +40,19 @@ require([
 
     // Filelist Manifest Export to GCS
 
-    $('#new-file-name').on('keypress keyup paste', function (e) {
+    $('#file-name').on('keypress keyup paste', function (e) {
         var self = $(this);
         setTimeout(function () {
             $('.message-container').empty();
             var str = self.val();
 
-            if (str.match(/[^A-Za-z0-9_\.\-]/)) {
+            if (str.match(/[^A-Za-z0-9_\.\-\/]/)) {
                 e.preventDefault();
-                base.showJsMessage("error", "File names are restricted to numbers, letters, periods, dashes, and underscores.", false, $('.message-container'));
+                base.showJsMessage("error", "File names are restricted to numbers, letters, periods, dashes, slashes, and underscores.", false, $('.message-container'));
                 return false;
             }
 
-            if (str.length >= parseInt($('#new-file-name').attr('maxlength'))) {
+            if (str.length >= parseInt($('#file-name').attr('maxlength'))) {
                 e.preventDefault();
                 base.showJsMessage("warning", "You have reached the maximum size allowed for a file name.", false, $('.message-container'));
                 return false;
@@ -63,19 +63,20 @@ require([
     $('#export-to-gcs-project-bucket').on('change', function () {
         if ($(this).find(':selected').attr('type') !== "label") {
             $('#export-to-gcs-form input[type="submit"]').removeAttr('disabled');
-            $('.new-file-name').removeAttr('disabled');
-            $('.new-file-name').removeAttr('title');
+            $('.file-name, .file-format').removeAttr('disabled');
+            $('.file-name, .file-format').removeAttr('title');
+            $('.file-name').attr('title','Add slashes (/) to create subfolders.');
         }
     });
 
     $('.container').on('hide.bs.modal', '#export-to-gcs-modal', function () {
-        $('.new-file-name').attr('disabled', 'disabled');
-        $('.new-file-name').attr('title', 'Select a project, dataset, and bucket to enable this option');
-        $('.new-file-name').show();
+        $('.file-name, .file-format').attr('disabled', 'disabled');
+        $('.file-name, .file-format').attr('title', 'Select a project and bucket to enable this option.');
+        $('.file-name, .file-format').show();
         $('.message-container').empty();
         $('#export-to-gcs-form input[type="submit"]').attr('disabled', 'disabled');
         $('#export-to-gcs-form')[0].reset();
-        $('#export-underway').hide();
+        $('#gcs-export-underway').hide();
     });
 
     $('.container').on('click', 'button[data-target="#export-to-gcs-modal"]', function (e) {
@@ -97,13 +98,13 @@ require([
                         var projects = data['data']['projects'];
                         for (var i = 0; i < projects.length; i++) {
                             if ($('optgroup.'+projects[i]['name']+'-buckets').length <= 0) {
-                                $('#export-to-gcs-project-bucket').append('<optgroup class="' + projects[i]['name'] + '" label="' + projects[i]['name'] + '"></optgroup>');
+                                $('#export-to-gcs-project-bucket').append('<optgroup class="' + projects[i]['name'] + '-buckets" label="' + projects[i]['name'] + '"></optgroup>');
                             }
                             var buckets = projects[i]['buckets'];
                             for (var j in buckets) {
                                 if (buckets.hasOwnProperty(j)) {
                                     $('optgroup.' + projects[i]['name']+'-buckets').append(
-                                        '<option class="bucket" value="' + projects[i]['name'] + ':' + j + '">' + j + '</option>'
+                                        '<option class="bucket" value="' + buckets[j] + '">' + buckets[j] + '</option>'
                                     );
                                 }
                             }
@@ -145,7 +146,7 @@ require([
         var fields = $this.serialize();
 
         $('#export-to-gcs-form input[type="submit"]').attr('disabled', 'disabled');
-        $('#export-underway').css('display', 'inline-block');
+        $('#gcs-export-underway').css('display', 'inline-block');
 
         $.ajax({
             url: $this.attr('action'),
@@ -169,7 +170,7 @@ require([
             complete: function(xhr, status) {
                 $('#export-to-gcs-form input[type="submit"]').removeAttr('disabled');
                 $('#export-to-gcs-modal').modal('hide');
-                $('#export-underway').hide();
+                $('#gcs-export-underway').hide();
                 $this[0].reset();
             }
         });
