@@ -435,7 +435,7 @@ require([
         if(files.length <= 0) {
             $(tab_selector).find('.filelist-panel table tbody').append(
                 '<tr>' +
-                '<td colspan="10"><i>No file listings found in this cohort for this build.</i></td><td></td>'
+                '<td colspan="9"><i>No file listings found in this cohort for this build.</i></td><td></td>'
             );
         }
 
@@ -486,14 +486,11 @@ require([
 
             var row = '<tr>' +
                 '<td>' + files[i]['program'] + '</td>' +
-                '<td>' + files[i]['case'] + '</td>' +
-                (active_tab !== 'dicom' ? '<td>'+files[i]['sample']+'</td>' : '')
-                +'<td>'
-                +'<div class="col-filename">'
-                    +'<div>' + files[i]['filename'] + '</div>'
-                    +'<div>[GCD ID: ' + files[i]['file_gdc_id'] + ']</div>'
-                + '</div>'
-                + '</td>' +
+                '<td>' + files[i]['case'] + '</td>'
+                +'<td><div class="col-filename">' +
+                    '<div>' + files[i]['filename'] + '</div>' +
+                    '<div>[GCD ID: ' + files[i]['file_gdc_id'] + ']</div>' +
+                '</div></td>' +
                 '<td>' + files[i]['disease_code'] + '</td>' +
                 (active_tab === 'dicom' ? '<td>'+files[i]['project_short_name']+'</td>' : '') +
                 (active_tab === 'dicom' ? '<td>'+files[i]['study_desc']+'</td>' : '') +
