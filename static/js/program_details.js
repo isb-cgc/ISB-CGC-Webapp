@@ -142,7 +142,8 @@ require([
 
         var invalid_emails = [];
 
-        var emails = $('#share_users').val().split(/\s*,\s*/);
+        var escaped_email_input = $("<div>").text($('#share_users').val()).html();
+        var emails = escaped_email_input.split(/\s*,\s*/);
         for(var i=0; i < emails.length; i++) {
             if(!emails[i].match(base.email)) {
                 invalid_emails.push(emails[i]);
@@ -150,11 +151,9 @@ require([
         }
 
         if(invalid_emails.length > 0) {
-            $('#share-program-js-messages').empty();
-            $('#share-program-js-messages').append(
-                $('<p>')
-                    .addClass('alert alert-danger alert-dismissible')
-                    .text("The following email addresses appear to be invalid: "+invalid_emails.join("; ")));
+            base.showJsMessage('danger',
+                "The following email addresses appear to be invalid: "+invalid_emails.join("; "),
+                true,'#share-program-js-messages');
             return false;
         } else {
             $('#share-program-js-messages').empty();

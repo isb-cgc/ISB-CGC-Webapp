@@ -718,18 +718,18 @@ require([
 
         var $this=$(this);
 
-        var emails = $('#share-share_users').val().split(/\s*,\s*/);
+        var escaped_email_input = $("<div>").text($('#share-share_users').val()).html();
+        var emails = escaped_email_input.split(/\s*,\s*/);
         for(var i=0; i < emails.length; i++) {
             if(!emails[i].match(base.email)) {
                 invalid_emails.push(emails[i]);
             }
         }
         if(invalid_emails.length > 0) {
-            $('#share-cohort-js-messages').empty();
-            $('#share-cohort-js-messages').append(
-                $('<p>')
-                    .addClass('alert alert-danger alert-dismissible')
-                    .text("The following email addresses appear to be invalid: "+invalid_emails.join("; ")));
+            var msg = "The following email addresses appear to be invalid: "+(invalid_emails.join("; "));
+            base.showJsMessage('danger',
+                msg,
+                true,'#share-cohort-js-messages');
             return false;
         } else {
             $('#share-cohort-js-messages').empty();
