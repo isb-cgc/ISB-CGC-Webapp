@@ -26,7 +26,8 @@ require.config({
         underscore: 'libs/underscore-min',
         tokenfield: 'libs/bootstrap-tokenfield.min',
         base: 'base',
-        bq_export: 'export_to_bq'
+        bq_export: 'export_to_bq',
+        gcs_export: 'export_to_gcs'
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -44,7 +45,8 @@ require([
     'bootstrap',
     'session_security',
     'tokenfield',
-    'bq_export'
+    'bq_export',
+    'gcs_export'
 ], function ($, base) {
 
     // For manaaging filter changes
@@ -368,7 +370,8 @@ require([
         }
     };
 
-    var update_table = function (active_tab, do_filter_count=true) {
+    var update_table = function (active_tab, do_filter_count) {
+        do_filter_count = (do_filter_count === undefined || do_filter_count === null ? true : do_filter_count);
         var tab_selector = '#'+active_tab+'-files';
         var build = $(tab_selector).find('.build :selected').val();
         if(active_tab == 'igv'){
@@ -408,7 +411,8 @@ require([
 
     };
 
-    function update_table_display(active_tab, data, do_filter_count=true) {
+    function update_table_display(active_tab, data, do_filter_count) {
+        do_filter_count = (do_filter_count === undefined || do_filter_count === null ? true : do_filter_count);
         var page = tab_page[active_tab];
         var total_files = tab_count[active_tab];
         var tab_selector = '#'+active_tab+'-files';

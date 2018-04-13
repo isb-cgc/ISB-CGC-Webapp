@@ -62,13 +62,15 @@ require([
     });
 
     $('#verify-sa').on('submit', function(e) {
+        // #user-sa is only on the registration page, not on the adjustment page
         $('#user_sa').length > 0 && $('#user_sa').val($('#user_sa').val().trim());
         $('#js-messages').hide();
         $('#invalid-sa-id').hide();
         e.preventDefault();
         e.stopPropagation();
 
-        if($('#user_sa').val().match(/[^A-Za-z0-9\-@\.]/g)) {
+        // #user-sa is only on the registration page, not on the adjustment page
+        if($('#user_sa').length > 0 && $('#user_sa').val().match(/[^A-Za-z0-9\-@\.]/g)) {
             $('#provided-sa-id').text($('#user_sa').val());
             $('#invalid-sa-id').show();
             return false;
