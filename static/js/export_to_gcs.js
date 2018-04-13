@@ -81,7 +81,7 @@ require([
 
     $('.container').on('click', 'button[data-target="#export-to-gcs-modal"]', function (e) {
         // Don't reload the data if we have it already
-        if($('#export-to-bq-modal select optgroup').length > 0) {
+        if($('#export-to-gcs-modal select optgroup').length > 0) {
             $('#export-to-gcs-modal .loading-overlay').hide();
             return true;
         }
