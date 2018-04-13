@@ -125,7 +125,6 @@ def get_project_identifier():
     return BQ_PROJECT_ID
 
 BIGQUERY_DATASET            = os.environ.get('BIGQUERY_DATASET', '')
-BIGQUERY_EXPORT_DATASET     = os.environ.get('BIGQUERY_EXPORT_DATASET', '')
 BIGQUERY_DATASET_V1         = os.environ.get('BIGQUERY_DATASET_V1', '')
 
 PROJECT_NAME                = os.environ.get('GCLOUD_PROJECT_NAME')
