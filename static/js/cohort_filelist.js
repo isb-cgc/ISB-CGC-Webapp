@@ -349,9 +349,8 @@ require([
         }
 
         // Clear the previous parameter settings from the export form, and re-add the build
-        $('#export-to-bq-form input.param').remove();
-        $('#export-to-bq-form').append('<input class="param" type="hidden" name="build" value="'+build+'" />');
-        $('#export-to-bq-form').append('<input class="param" type="hidden" name="total_expected" value="'+file_list_total+'" />');
+        $('#export-to-bq-form, #export-to-gcs-form').find('input[name="build"]').remove();
+        $('#export-to-bq-form , #export-to-gcs-form').append('<input class="param" type="hidden" name="build" value="'+build+'" />');
 
         var downloadToken = new Date().getTime();
         $('.filelist-obtain .download-token').val(downloadToken);

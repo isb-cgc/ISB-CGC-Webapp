@@ -13,7 +13,7 @@
                 <form id="export-to-bq-form" method="POST" action="{{ export_url }}">
                     {% csrf_token %}
                     <input type="hidden" class="param" name="build" value="{{ build }}" />
-                    <input type="hidden" class="param" name="export-dest" value="table" />
+                    <input type="hidden" name="export-dest" value="table" />
                     <div class="loading-overlay" style="display: none;"><div class="spinner"><div><i class="fa fa-cog fa-spin"></i> Loading your BQ datasets and tables...</div></div></div>
                     <div class="modal-body">
                         <div class="message-container"></div>
