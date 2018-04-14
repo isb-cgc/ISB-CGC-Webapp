@@ -68,11 +68,15 @@
                 </button></li>
                 <li class="separator"></li>
                 <li class="menu-item"><a href="{% url 'cohort_filelist' cohort.id %}" class="btn btn-info view-files-btn" title="View this cohort's file list">File Browser</a></li>
-                <li class="menu-item"><a href="{%  url 'download_ids' cohort.id %}" class="btn btn-info download-ids-btn" title="Download this cohort's patient and sample IDs">Download IDs</a></li>
                 {% if cohort.perm.perm == 'OWNER' %}
                 <li class="separator"></li>
+                <li class="menu-item"><a href="{%  url 'download_ids' cohort.id %}" class="btn btn-info download-ids-btn" title="Download this cohort's records as a CSV">CSV</a></li>
+                <li class="menu-item">
+                    <button class="btn btn-info" data-toggle="modal" data-target="#export-to-bq-modal" title="Export this cohort's records to a BigQuery table">BigQuery</button>
+                    <button class="btn btn-info" data-toggle="modal" data-target="#export-to-gcs-modal" title="Export this cohort's records to a GCS bucket">GCS</button>
+                </li>
+                <li class="separator"></li>
                 <li class="menu-item"><button class="btn btn-info" data-toggle="modal" data-target="#share-cohort-modal">Share</button></li>
-                <li class="menu-item"><button class="btn btn-info" data-toggle="modal" data-target="#export-to-bq-modal" title="Export this cohort to a BigQuery table">Export to BQ</button></li>
                 {% endif %}
                 {% if not cohort.is_public and cohort.perm.perm == 'OWNER' %}
                 <li class="separator"></li>
@@ -316,6 +320,7 @@
     {% if cohort.perm.perm == 'OWNER' %}
         <!-- Export File Manifest Modal -->
         {% include "cohorts/bq_export_modal.html" with export_type="Cohort" export_url=export_url %}
+        {% include "cohorts/gcs_export_modal.html" with export_type="Cohort" export_url=export_url %}
         {% include "cohorts/share_cohort_modal.html" %}
 
     {% endif %}

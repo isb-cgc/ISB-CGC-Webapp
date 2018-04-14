@@ -36,7 +36,8 @@ require.config({
         bloodhound: 'libs/bloodhound',
         typeahead : 'libs/typeahead',
         tokenfield: 'libs/bootstrap-tokenfield.min',
-        bq_export: 'export_to_bq'
+        bq_export: 'export_to_bq',
+        gcs_export: 'export_to_gcs'
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -73,7 +74,8 @@ require([
     'vis_helpers',
     'tree_graph',
     'stack_bar_chart',
-    'bq_export'
+    'bq_export',
+    'gcs_export'
 ], function ($, jqueryui, bootstrap, session_security, d3, d3tip, search_helpers, Bloodhound, _, base) {
 
     var UPDATE_PENDING = false;
