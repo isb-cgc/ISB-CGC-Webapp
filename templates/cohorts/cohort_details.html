@@ -316,6 +316,7 @@
     {% if cohort.perm.perm == 'OWNER' %}
         <!-- Export File Manifest Modal -->
         {% include "cohorts/bq_export_modal.html" with export_type="Cohort" export_url=export_url %}
+        {% include "cohorts/gcs_export_modal.html" with export_type="Cohort" export_url=export_url %}
         {% include "cohorts/share_cohort_modal.html" %}
 
     {% endif %}
