@@ -135,6 +135,69 @@ nav
             float: right
             font-family: FontAwesome
 
+/********************************************
+ * dataTable Style Overrides
+ *******************************************/
+
+.dataTable
+    thead
+        tr
+            th
+                cursor: pointer
+                vertical-align: top
+                &.sorting:after
+                    content: ""
+                    float: right
+                    width: 20px
+                    height: 20px
+                &.sorting_asc:after
+                    content: "\f077"
+                    float: right
+                    font-family: FontAwesome
+                &.sorting_desc:after
+                    content: "\f078"
+                    float: right
+                    font-family: FontAwesome
+
+.dataTables_wrapper
+    .dataTables_info
+        padding-top: 0.755em
+
+.dataTables_wrapper
+    .dataTables_paginate
+        padding-top: 0.25em
+
+.dataTables_wrapper
+    .dataTables_paginate
+        .paginate_button
+            box-sizing: border-box
+            display: inline-block
+            min-width: 1em
+            padding: 0.2em 0.5em
+            margin-left: 1px
+            text-align: center
+            text-decoration: none !important
+            cursor: pointer
+            *cursor: hand
+            color: white !important
+            background-color: lighten($isb-primary,10%)
+            border: 1px solid lighten($isb-primary,10%) !important
+            border-radius: 2px
+            font-weight: $regular-font-weight
+            &:hover, &:active, &:focus
+                background-color: darken($isb-primary, 8%) !important
+                color: white !important
+                border: 1px solid darken($isb-primary,8%) !important
+
+.dataTables_wrapper
+    .dataTables_paginate
+        .paginate_button
+            &.current, &.current:hover
+                color: white
+                border: 1px solid darken($isb-primary, 8%)
+                background-color: darken($isb-primary, 8%)
+
+
 
 /********************************************
  * Handy Classes
