@@ -123,7 +123,7 @@ require([
 
     $('.container').on('click', 'button[data-target="#export-to-bq-modal"]', function (e) {
         // Don't reload the data if we have it already
-        if($('select optgroup').length > 0) {
+        if($('#export-to-bq-modal select optgroup').length > 0) {
             $('#export-to-bq-modal .loading-overlay').hide();
             return true;
         }
@@ -156,22 +156,23 @@ require([
                 }
                 $('#export-to-bq-modal .loading-overlay').hide();
             },
-            error: function (data) {
-                var link_to_bqr = data.responseJSON.msg.match(/register at least one dataset/);
-                var link_to_gcpr = data.responseJSON.msg.match(/register at least one project/);
+            error: function (xhr) {
+                var responseJSON = $.parseJSON(xhr);
+                var link_to_bqr = responseJSON.msg.match(/register at least one dataset/);
+                var link_to_gcpr = responseJSON.msg.match(/register at least one project/);
                 if (link_to_bqr) {
-                    data.responseJSON.msg = data.responseJSON.msg.replace(
+                    responseJSON.msg = responseJSON.msg.replace(
                         "register at least one dataset",
                         '<a href="http://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/webapp/program_data_upload.html#registering-cloud-storage-buckets-and-bigquery-datasets-a-pre-requisite-for-using-your-own-data-in-isb-cgc" target="_BLANK">register at least one dataset</a>'
                     );
                 }
                 if (link_to_gcpr) {
-                    data.responseJSON.msg = data.responseJSON.msg.replace(
+                    responseJSON.msg = responseJSON.msg.replace(
                         "register at least one project",
                         '<a href="http://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/webapp/Gaining-Access-To-Contolled-Access-Data.html?#registering-your-google-cloud-project-service-account" target="_BLANK">register at least one project</a>'
                     );
                 }
-                base.showJsMessage('error', data.responseJSON.msg, true, "#export-to-bq-js-messages");
+                base.showJsMessage('error', responseJSON.msg, true, "#export-to-bq-js-messages");
                 $('#export-to-bq-modal .loading-overlay').hide();
             },
             complete: function () {
