@@ -31,7 +31,7 @@ from bq_data_access.v1.protein_data import RPPAFeatureProvider, RPPA_FEATURE_TYP
 from bq_data_access.v1.user_data import UserFeatureProvider, USER_FEATURE_TYPE
 from cohorts.metadata_helpers import get_sql_connection
 from django.conf import settings
-from google_helpers.bigquery_service import get_bigquery_service
+from google_helpers.bigquery.service import get_bigquery_service
 
 
 class FeatureProviderFactory(object):

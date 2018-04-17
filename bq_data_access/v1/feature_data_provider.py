@@ -22,7 +22,7 @@ from uuid import uuid4
 from time import sleep
 
 from django.conf import settings
-from google_helpers.bigquery_service import get_bigquery_service
+from google_helpers.bigquery.service import get_bigquery_service
 from bq_data_access.v1.utils import DurationLogged
 
 

@@ -57,17 +57,33 @@ require([
         }
     });
 
+    $('#verify-sa div input').change(function() {
+        $('.register-sa-btn').attr("disabled","disabled");
+    });
+
     $('#verify-sa').on('submit', function(e) {
         $('#user_sa').length > 0 && $('#user_sa').val($('#user_sa').val().trim());
-        $('#invalid-sa-error button.close').click();
+        $('#js-messages').hide();
+        $('#invalid-sa-id').hide();
         e.preventDefault();
         e.stopPropagation();
+
+        if($('#user_sa').val().match(/[^A-Za-z0-9\-@\.]/g)) {
+            $('#provided-sa-id').text($('#user_sa').val());
+            $('#invalid-sa-id').show();
+            return false;
+        } else {
+            $('#provided-sa-id').val('');
+            $('#invalid-sa-id').hide();
+        }
 
         var $this = $(this);
         var fields = $this.serialize();
         var user_ver_div = $('.user-verification');
-        var spinner = $this.parent('li').find('.load-spinner');
-        spinner.show();
+        user_ver_div.hide();
+        $('.cannot-register').hide();
+        $('.register-sa-div').hide();
+        $('.verify-pending').show();
 
         $this.find('input[type="submit"]').prop('disabled', 'disabled');
         $.ajax({
@@ -77,8 +93,7 @@ require([
             success: function(data) {
                 var tbody = user_ver_div.find('tbody');
                 tbody.empty();
-                spinner.hide();
-
+                $('.verify-pending').hide();
                 var register_form = $('form#register-sa');
                 var user_input = register_form.find('input[name="user_sa"]');
                 var dataset_input = register_form.find('input[name="datasets"]');
@@ -94,36 +109,32 @@ require([
                 }
 
                 var roles = data['roles'];
-                for (var role in roles) {
-                    var memberlist = roles[role];
-                    for (var i in memberlist) {
-                        var member = memberlist[i];
-                        var tr = $('<tr></tr>');
-                        tr.append('<td>' + member['email'] + '</td>');
-                        if (member['registered_user']) {
-                            tr.append('<td><i class="fa fa-check"></i></td>');
-                        } else {
-                            tr.append('<td><i class="fa fa-times"></i></td>');
-                        }
-                        if (member['nih_registered']) {
-                            tr.append('<td><i class="fa fa-check"></i></td>');
-                        } else {
-                            tr.append('<td><i class="fa fa-times"></i></td>');
-                        }
-                        var td = $('<td></td>');
-                        td.append('<span><i class="fa fa-check"></i> All Open Datasets</span><br />');
-                        for(var j=0;j<member['datasets'].length;j++){
-                            var dataset = member['datasets'][j];
-                            if (dataset['valid']) {
-                                td.append('<span><i class="fa fa-check"></i> '+dataset['name']+'</span><br />');
-                            } else {
-                                td.append('<span title="User '+member['email']+' does not have access to this dataset."><i class="fa fa-times"></i> '+dataset['name']+'</span><br />');
-                            }
-                        }
-                        tr.append(td);
-                        
-                        tbody.append(tr);
+                for (var email in roles) {
+                    var member = roles[email];
+                    var tr = $('<tr></tr>');
+                    tr.append('<td>' + email + '</td>');
+                    if (member['registered_user']) {
+                        tr.append('<td><i class="fa fa-check"></i></td>');
+                    } else {
+                        tr.append('<td><i class="fa fa-times"></i></td>');
                     }
+                    if (member['nih_registered']) {
+                        tr.append('<td><i class="fa fa-check"></i></td>');
+                    } else {
+                        tr.append('<td><i class="fa fa-times"></i></td>');
+                    }
+                    var td = $('<td></td>');
+                    td.append('<span><i class="fa fa-check"></i> All Open Datasets</span><br />');
+                    for(var j=0;j<member['datasets'].length;j++){
+                        var dataset = member['datasets'][j];
+                        if (dataset['valid']) {
+                            td.append('<span><i class="fa fa-check"></i> '+dataset['name']+'</span><br />');
+                        } else {
+                            td.append('<span title="User '+email+' does not have access to this dataset."><i class="fa fa-times"></i> '+dataset['name']+'</span><br />');
+                        }
+                    }
+                    tr.append(td);
+                    tbody.append(tr);
                 }
 
                 if($('input[name="select-datasets"][value="remove"]:checked').length > 0) {
@@ -141,15 +152,25 @@ require([
                 // If no datasets were requested, or, they were and verification came out clean, allow registration
                 if(data['datasets'].length <= 0 || data['all_user_datasets_verified']) {
                     $('.register-sa-div').show();
+                    $('.register-sa-btn').removeAttr("disabled","disabled");
                 } else {
                     $('.cannot-register').show();
                     $('.retry-btn').removeAttr("disabled");
                 }
             },
             error: function(xhr, ajaxOptions, thrownError) {
-                spinner.hide();
+                $('.verify-pending').hide();
                 $('.verify-sa-btn').prop('disabled', '');
-                base.showJsMessage(xhr.responseJSON.level || "error",xhr.responseJSON.message,true);
+                // If we received a redirect, honor that
+                if(xhr.responseJSON.redirect) {
+                    base.setReloadMsg(xhr.responseJSON.level || "error",xhr.responseJSON.message);
+                    // hide and reset the form
+                    $('#verify-sa').hide();
+                    $('#verify-sa')[0].reset();
+                    window.location = xhr.responseJSON.redirect;
+                } else {
+                    base.showJsMessage(xhr.responseJSON.level || "error",xhr.responseJSON.message,true);
+                }
             }
         });
         return false;
@@ -157,7 +178,9 @@ require([
 
     $('#register-sa').on('submit', function(e) {
         $('.register-sa-btn').attr("disabled","disabled");
+        $('#verify-sa').hide();
         $('#verify-sa')[0].reset();
+        $('.register-pending').show();
     });
 
     $('.retry-btn').on('click', function(e) {

@@ -128,9 +128,11 @@
         &.dataset-list
             list-style: none
             padding: 0px
+    input
+        margin-bottom: 5px
 
 #register-gcp
-    li
+    ol>li
         margin-top: 30px !important
         >div
             margin-left: 15px
@@ -164,6 +166,15 @@
 
 #datasets-select-div
     margin-top: 15px
+
+#sa-spinner
+    &.load-spinner
+        position: fixed
+        z-index: 999
+        left: 45%
+        top: 45%
+        margin: auto
+        font-size: 75px
 
 #gcp-detail
     h1.page-header

@@ -23,17 +23,16 @@ import sys
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 
-from google_helpers.bigquery_service_v2 import BigQueryServiceSupport
+from google_helpers.bigquery.service_v2 import BigQueryServiceSupport
 from bq_data_access.v2.data_access import FeatureVectorBigQueryBuilder
 from bq_data_access.v2.seqpeek.seqpeek_view import SeqPeekViewDataBuilder
 from bq_data_access.v2.seqpeek.seqpeek_maf_formatter import SeqPeekMAFDataFormatter
 from bq_data_access.v2.seqpeek_maf_data import SeqPeekDataQueryHandler
-from bq_data_access.v2.feature_id_utils import ProviderClassQueryDescription
-from visualizations.data_access_views_v2 import get_confirmed_project_ids_for_cohorts
-
+from bq_data_access.v2.feature_id_utils import ProviderClassQueryDescription, FeatureDataTypeHelper
+from bq_data_access.data_types.definitions import FEATURE_ID_TO_TYPE_MAP
+from visualizations.data_access_views_v2 import get_confirmed_project_ids_for_cohorts, get_public_program_name_set_for_cohorts
 
 logger = logging.getLogger('main_logger')
-
 
 def build_gnab_feature_id(gene_label, genomic_build):
     """
@@ -99,6 +98,17 @@ def seqpeek_view_data(request):
 
         if len(cohort_id_array) == 0:
             return JsonResponse({'error': 'No cohorts specified'}, status=400)
+
+        # By extracting info from the cohort, we get the NAMES of the public projects
+        # we need to access (public projects have unique name tags, e.g. tcga).
+        program_set = get_public_program_name_set_for_cohorts(cohort_id_array)
+
+        # Check to see if these programs have data for the requested vectors; if not, there's no reason to plot
+        programs = FeatureDataTypeHelper.get_supported_programs_from_data_type(FEATURE_ID_TO_TYPE_MAP['gnab'])
+        valid_programs = set(programs).intersection(program_set)
+
+        if not len(valid_programs):
+            return JsonResponse({'message': "The chosen cohorts do not contain samples from programs with Gene Mutation data."})
 
         gnab_feature_id = build_gnab_feature_id(hugo_symbol, genomic_build)
         logger.debug("GNAB feature ID for SeqPeek: {0}".format(gnab_feature_id))

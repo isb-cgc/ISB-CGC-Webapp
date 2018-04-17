@@ -85,21 +85,23 @@ require([
             method: 'GET',
             success: function(data) {
                 var roles = data['roles']
-                for (var key in roles) {
-                    var list = roles[key];
-                    for (var item in list) {
-                        if (list[item]['registered_user']) {
-                            $('#refresh-project-'+project_id).append('<input type="hidden" name="register_users" value="' + list[item]['email'] + '"/>');
-                        }
+                for (var email in roles) {
+                    if (roles[email]['registered_user']) {
+                        $('#refresh-project-'+project_id).append('<input type="hidden" name="register_users" value="' + email + '"/>');
                     }
                 }
+                this_modal.modal('show');
             },
             error: function(xhr) {
-                this_modal.modal('hide');
-                base.showJsMessage('error',xhr.responseJSON.message,true);
+                if(xhr.responseJSON.redirect) {
+                    base.setReloadMsg(xhr.responseJSON.level || "error",xhr.responseJSON.message);
+                    window.location = xhr.responseJSON.redirect;
+                } else {
+                    this_modal.modal('hide');
+                    base.showJsMessage('error', xhr.responseJSON.message, true);
+                }
             },
             complete: function() {
-                this_modal.modal('show');
                 this_modal.data('opening',false);
             }
         });

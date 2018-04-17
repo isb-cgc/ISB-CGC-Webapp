@@ -64,6 +64,16 @@ from scripts.feature_def_gen.clinical_features import CLINDataSourceConfig
 # USER
 from bq_data_access.v2.user_data import UserDataQueryHandler
 
+FEATURE_TYPE_TO_PROPER_NAME = {
+    PlottableDataType.GEXP: "Gene Expression",
+    PlottableDataType.GNAB: "Gene Mutations",
+    PlottableDataType.METH: "DNA Methylation",
+    PlottableDataType.RPPA: "Protein Expression",
+    PlottableDataType.CNVR: "Copy Number Variation",
+    PlottableDataType.MIRN: "miRNA Expression",
+    PlottableDataType.CLIN: "Clinical Data",
+    PlottableDataType.USER: "User Data"
+}
 
 FEATURE_TYPE_TO_PROVIDER_MAP = {
     PlottableDataType.GEXP: GEXPDataQueryHandler,
@@ -74,7 +84,6 @@ FEATURE_TYPE_TO_PROVIDER_MAP = {
     PlottableDataType.MIRN: MIRNDataQueryHandler,
     PlottableDataType.CLIN: ClinicalDataQueryHandler,
     PlottableDataType.USER: UserDataQueryHandler
-
 }
 
 # noinspection PyPackageRequirements
@@ -195,5 +204,19 @@ class FeatureDataTypeHelper(object):
     def get_feature_data_provider_from_data_type(cls, data_type):
         _, _, data_provider_class, _ = FEATURE_TYPE_TO_FEATURE_DEF_PROVIDER_MAP[data_type]
         return data_provider_class
+
+    @classmethod
+    def get_supported_programs_from_data_type(cls, data_type):
+        _, _, _, config_dict = FEATURE_TYPE_TO_FEATURE_DEF_PROVIDER_MAP[data_type]
+        programs = []
+        for table in config_dict['tables']:
+            if table['program'] not in programs:
+                programs.append(table['program'])
+
+        return programs
+
+    @classmethod
+    def get_proper_feature_type_name(cls, data_type):
+        return FEATURE_TYPE_TO_PROPER_NAME[data_type]
 
 

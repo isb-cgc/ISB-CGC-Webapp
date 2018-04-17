@@ -72,8 +72,10 @@
         <div class="filelist-panel panel">
             <div id="" class="alert alert-warning alert-dismissable file-list-warning" style="display: none;">
                 <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                The maximum number of files which can be downloaded in a list is <span class="file-list-limit">{{ file_list_max }}</span>. Your selections currently total
-                <span class="file-list-total">#</span>. Please filter your list using the platform panel at the left (or make a smaller cohort) to limit the size of your file download list.
+                The maximum number of file records which can be downloaded is <span class="file-list-limit">{{ file_list_max }}</span>. Your selections currently total
+                <span class="file-list-total">#</span>. If you download the list now, it will be arbitrarily cut off after the maximum. Please consider using the filter
+                panel to the left to limit the record count. In order to obtain the complete listing, you can register a Google Cloud Project and BigQuery Dataset, and
+                export the file record list to a BigQuery table.
             </div>
             <div class="panel-heading">
                 <h4>File Listing</h4>
@@ -81,14 +83,18 @@
                     <ul>
                         <li class="menu-item">
                             <div class="filelist-obtain">
-                                <a class="download-link" href="{{ download_url }}" title="Download file manifest as CSV"><button class="btn btn-info">CSV</button></a>{# <a id="download-link" href="{{ download_url }}" title="Download file manifest as JSON"><button class="btn btn-info">JSON</button></a>#}
+                                <span class="pending-left" id="download-in-prog" style="display: none;"><i class="fa fa-circle-o-notch fa-spin"></i>Downloading...</span>
+                                <a class="download-link" href="{{ download_url }}" title="Download file manifest as CSV"><button class="btn btn-info download-btn">CSV</button></a>{# <a id="download-link" href="{{ download_url }}" title="Download file manifest as JSON"><button class="btn btn-info">JSON</button></a>#}
+                                <input type="hidden" class="download-token" value="" />
                             </div>
                         </li>
-{#                        <li class="menu-item">#}
-{#                            <div class="filelist-obtain">#}
-{#                                <a id="download-link" href="" title="Export file manifest to BQ"><button class="btn btn-info">BQ</button></a> <a id="download-link" href="" title="Export file manifest to GCS"><button class="btn btn-info">GCS</button></a>#}
-{#                            </div>#}
-{#                        </li>#}
+                        <li class="menu-item">
+                            <div class="filelist-obtain">
+
+                                <button class="btn btn-info export-btn" data-toggle="modal" data-target="#export-to-bq-modal" title="Export this file manifest to a BigQuery table">Export to BQ</button>
+{#                                <a id="download-link" href="{{ export_url }}" title="Export file manifest to BQ"><button class="btn btn-info">BQ</button></a> <a id="download-link" href="" title="Export file manifest to GCS"><button class="btn btn-info">GCS</button></a>#}
+                            </div>
+                        </li>
                     </ul>
                 </div>
             </div>

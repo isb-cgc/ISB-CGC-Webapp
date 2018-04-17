@@ -23,7 +23,7 @@ FROM gcr.io/google_appengine/python
 RUN apt-get update
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get install -y wget
-RUN wget "http://dev.mysql.com/get/mysql-apt-config_0.5.3-1_all.deb" -P /tmp
+RUN wget "http://repo.mysql.com/mysql-apt-config_0.8.9-1_all.deb" -P /tmp
 
 # install lsb-release (a dependency of mysql-apt-config), since dpkg doesn't
 # do dependency resolution
@@ -32,7 +32,7 @@ RUN apt-get install -y lsb-release
 # the mysql config package
 RUN echo "mysql-apt-config mysql-apt-config/select-server select mysql-5.7" | debconf-set-selections
 # having 'selected' mysql-5.7 for 'server', install the mysql config package
-RUN dpkg --install /tmp/mysql-apt-config_0.5.3-1_all.deb
+RUN dpkg --install /tmp/mysql-apt-config_0.8.9-1_all.deb
 
 # fetch the updated package metadata (in particular, mysql-server-5.7)
 RUN apt-get update

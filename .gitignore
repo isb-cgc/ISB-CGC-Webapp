@@ -71,6 +71,7 @@ target/
 *.patch
 .env
 *.env
+!sample.env
 scripts/metadata_featdef_tables.sql
 
 # dummy datasets
@@ -94,6 +95,7 @@ saml/*
 *.crt
 *.pem
 tmp*
+*.b64
 
 # Emacs
 \#*\#

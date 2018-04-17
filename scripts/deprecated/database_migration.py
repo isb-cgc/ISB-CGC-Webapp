@@ -25,7 +25,7 @@ from GenespotRE import secret_settings, settings
 from argparse import ArgumentParser
 from cohorts.metadata_helpers import submit_bigquery_job, is_bigquery_job_finished, get_bq_job_results, fetch_metadata_value_set
 from projects.models import Program, Public_Data_Tables, Public_Metadata_Tables, Public_Annotation_Tables, Project
-from google_helpers.bigquery_service import authorize_credentials_with_Google
+from google_helpers.bigquery.service import authorize_credentials_with_Google
 from django.contrib.auth.models import User
 from genes.models import GeneSymbol
 from cohorts.views import BQ_ATTEMPT_MAX

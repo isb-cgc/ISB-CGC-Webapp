@@ -1,5 +1,5 @@
 """
-Copyright 2015, Institute for Systems Biology
+Copyright 2015-2018, Institute for Systems Biology
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,7 +14,6 @@ limitations under the License.
 import collections
 import json
 import logging
-import os
 import sys
 import re
 from time import sleep
@@ -24,21 +23,21 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
 from django.contrib.auth.models import User
 from django.db.models import Count
-from django.http import HttpResponse
 from django.shortcuts import render
 from django.utils import formats
 from googleapiclient import discovery
 from oauth2client.client import GoogleCredentials
 
 from google_helpers.directory_service import get_directory_resource
-from google_helpers.bigquery_service_v2 import BigQueryServiceSupport
+from google_helpers.bigquery.service_v2 import BigQueryServiceSupport
 from cohorts.metadata_helpers import submit_bigquery_job, is_bigquery_job_finished, get_bq_job_results, get_sample_metadata
 from googleapiclient.errors import HttpError
 from visualizations.models import SavedViz
 from cohorts.models import Cohort, Cohort_Perms
 from projects.models import Program
 from workbooks.models import Workbook
-from accounts.models import NIH_User, GoogleProject, UserAuthorizedDatasets, AuthorizedDataset
+from accounts.models import GoogleProject
+from accounts.sa_utils import get_nih_user_details
 
 from allauth.socialaccount.models import SocialAccount
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
@@ -134,20 +133,9 @@ def user_detail(request, user_id):
 
         user_details['gcp_list'] = len(GoogleProject.objects.filter(user=user))
 
-        try:
-            nih_user = NIH_User.objects.get(user_id=user_id, linked=True)
-            user_auth_datasets = UserAuthorizedDatasets.objects.filter(nih_user=nih_user)
-            user_details['NIH_username'] = nih_user.NIH_username
-            user_details['NIH_assertion_expiration'] = nih_user.NIH_assertion_expiration
-            user_details['dbGaP_authorized'] = (len(user_auth_datasets) > 0) and nih_user.active
-            logger.debug("[DEBUG] User {} has access to {} dataset(s) and is {}".format(nih_user.NIH_username, str(len(user_auth_datasets)), ('not active' if not nih_user.active else 'active')))
-            user_details['NIH_active'] = nih_user.active
-            user_details['auth_datasets'] = [] if len(user_auth_datasets) <= 0 else AuthorizedDataset.objects.filter(id__in=user_auth_datasets.values_list('authorized_dataset',flat=True))
-        except (MultipleObjectsReturned, ObjectDoesNotExist), e:
-            if type(e) is MultipleObjectsReturned:
-                # in this case there is more than one nih_username linked to the same google identity
-                logger.warn("Error when retrieving nih_user with user_id {}. {}".format(str(user_id), str(e)))
-                # todo: add code to unlink all accounts?
+        nih_details = get_nih_user_details(user_id)
+        for key in nih_details.keys():
+            user_details[key] = nih_details[key]
 
         return render(request, 'GenespotRE/user_detail.html',
                       {'request': request,
@@ -355,6 +343,13 @@ def get_image_data(request, slide_barcode):
             }
 
     return JsonResponse(result, status=status)
+
+
+@login_required
+def dicom(request, study_uid=None):
+    template = 'GenespotRE/dicom.html'
+    context = {}
+    return render(request, template, context)
 
 
 @login_required
