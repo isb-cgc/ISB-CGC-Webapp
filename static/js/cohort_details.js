@@ -726,11 +726,12 @@ require([
                 invalid_emails.push(emails[i]);
             }
         }
-
         if(invalid_emails.length > 0) {
-            base.showJsMessage('danger',
-                "The following email addresses appear to be invalid: "+invalid_emails.join("; "),
-                true,'#share-cohort-js-messages');
+            $('#share-cohort-js-messages').empty();
+            $('#share-cohort-js-messages').append(
+                $('<p>')
+                    .addClass('alert alert-danger alert-dismissible')
+                    .text("The following email addresses appear to be invalid: "+invalid_emails.join("; ")));
             return false;
         } else {
             $('#share-cohort-js-messages').empty();
