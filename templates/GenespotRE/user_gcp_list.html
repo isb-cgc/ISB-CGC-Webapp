@@ -78,7 +78,6 @@
 
                                     <td>{{ project.bucket_set.all|length }}</td>
                                     <td>{{ project.bqdataset_set.all|length }}</td>
-                                {% include "GenespotRE/user_gcp_list_modals.html" with project=project %}
                                 </tr>
 
                                     <tr class="{{ project.id }}-expander" style="display:none;">
@@ -105,7 +104,7 @@
                                                                 <td>
                                                                     <a title="Refresh Service Account" data-toggle="modal" role="button" data-target="#refresh-sa-modal-{{ service_account.id }}" class="space-right-5"><i class="fa fa-refresh"></i></a>
                                                                     <a title="Delete Service Account" data-toggle="modal" role="button" data-target="#delete-sa-modal-{{ service_account.id }}"><i class="fa fa-trash"></i></a>
-                                                                    <a title="Adjust Datasets for this Service Account" data-toggle="modal" role="button" href="{% url 'adjust_sa' user.id %}?sa_id={{ service_account.id }}"><i class="fa fa-plus-square"></i></a>
+                                                                    <a title="Adjust Datasets for this Service Account" role="button" href="{% url 'adjust_sa' user.id %}?sa_id={{ service_account.id }}"><i class="fa fa-plus-square"></i></a>
                                                                 </td>
                                                             </tr>
                                                         {% endwith %}
@@ -117,10 +116,12 @@
 
                                         </td>
                                     </tr>
-
                             {% endfor %}
                         </tbody>
                     </table>
+                    {% for project in gcp_list %}
+                        {% include "GenespotRE/user_gcp_list_modals.html" with project=project %}
+                    {% endfor %}
                 </div>
             </div>
         </div>

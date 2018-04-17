@@ -10,7 +10,9 @@
                 <div class="modal-body">
                     {% csrf_token %}
                     <p>
-                        Refreshing this project will update the Web Application users associated with it.
+                        Refreshing this project will update the Web Application users associated with it. If you've
+                        recently added or removed members from your GCP Project's IAM policy, this will ensure the
+                        Web Application has an up to date user list for the project.
                     </p>
                     <input type="hidden" name="is_refresh" value="true" />
                     <input type="hidden" name="gcp_id" value="{{ project.project_id }}" />

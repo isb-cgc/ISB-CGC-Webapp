@@ -24,23 +24,28 @@ require.config({
         jqueryui: 'libs/jquery-ui.min',
         session_security: 'session_security',
         underscore: 'libs/underscore-min',
-        tokenfield: 'libs/bootstrap-tokenfield.min'
+        tokenfield: 'libs/bootstrap-tokenfield.min',
+        base: 'base',
+        bq_export: 'export_to_bq'
     },
     shim: {
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
         'session_security': ['jquery'],
-        'tokenfield': ['jquery', 'jqueryui']
+        'tokenfield': ['jquery', 'jqueryui'],
+        'base': ['jquery', 'jqueryui', 'session_security', 'bootstrap', 'underscore']
     }
 });
 
 require([
     'jquery',
+    'base',
     'jqueryui',
     'bootstrap',
     'session_security',
-    'tokenfield'
-], function ($) {
+    'tokenfield',
+    'bq_export'
+], function ($, base) {
 
     // For manaaging filter changes
     var UPDATE_PENDING = false;
@@ -327,10 +332,10 @@ require([
         }
 
         if(file_list_total <= 0) {
-            // Can't download something that isn't there
-            $(tab_selector).find('.download-link .btn').attr('disabled','disabled');
+            // Can't download/export something that isn't there
+            $(tab_selector).find('.download-link .btn, .export-btn').attr('disabled','disabled');
         } else {
-            $(tab_selector).find('.download-link .btn').removeAttr('disabled');
+            $(tab_selector).find('.download-link .btn, .export-btn').removeAttr('disabled');
         }
 
         $(tab_selector).find('.file-list-total').text(file_list_total);
@@ -341,11 +346,21 @@ require([
             $(tab_selector).find('.file-list-warning').show();
         }
 
+        // Clear the previous parameter settings from the export form, and re-add the build
+        $('#export-to-bq-form input.param').remove();
+        $('#export-to-bq-form').append('<input class="param" type="hidden" name="build" value="'+build+'" />');
+        $('#export-to-bq-form').append('<input class="param" type="hidden" name="total_expected" value="'+file_list_total+'" />');
+
+        var downloadToken = new Date().getTime();
+        $('.filelist-obtain .download-token').val(downloadToken);
+
         if (SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab][build]).length >0) {
             var filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab][build]));
-            $(tab_selector).find('.download-link').attr('href', download_url + '?' + filter_args + '&total=' + file_list_total);
+            $(tab_selector).find('.download-link').attr('href', download_url + '?' + filter_args + '&downloadToken='+downloadToken+'&total=' + Math.min(FILE_LIST_MAX,file_list_total));
+            $('#export-to-bq-form').append('<input class="param" type="hidden" name="filters" value="" />');
+            $('#export-to-bq-form input[name="filters"]').attr('value',JSON.stringify(SELECTED_FILTERS[active_tab][build]));
         } else {
-            $(tab_selector).find('.download-link').attr('href', download_url + '?total=' + file_list_total)
+            $(tab_selector).find('.download-link').attr('href', download_url + '?downloadToken='+downloadToken+'&total=' + Math.min(FILE_LIST_MAX,file_list_total))
         }
 
         if(active_tab !== 'camic') {
@@ -370,7 +385,7 @@ require([
             url += '&'+filter_args;
         }
 
-        if(active_tab !== 'camic') {
+        if(active_tab !== 'camic' && active_tab !== 'dicom') {
             url += '&build='+$(tab_selector).find('.build :selected').val();
         }
 
@@ -464,15 +479,17 @@ require([
 
             var row = '<tr>' +
                 '<td>' + files[i]['program'] + '</td>' +
-                '<td>' + files[i]['sample'] + '</td>' +
+                '<td>' + files[i][(active_tab == 'dicom' ? 'case' : 'sample')] + '</td>' +
                 '<td>' + files[i]['disease_code'] + '</td>' +
+                (active_tab === 'dicom' ? '<td>'+files[i]['project_short_name']+'</td>' : '') +
+                (active_tab === 'dicom' ? '<td>'+files[i]['study_desc']+'</td>' : '') +
+                (active_tab === 'dicom' ? '<td><a href="'+DICOM_URL+files[i]['study_uid']+'/" target="_blank">'+files[i]['study_uid']+'</td>' : '') +
                 (active_tab === 'camic' ? (files[i]['thumbnail'] ? '<td><img src="'+IMG_THUMBS_URL+files[i]['thumbnail']+'/thmb_128x64.jpeg"></td>' : '<td></td>') : '') +
-                (active_tab !== 'camic' ? '<td>' + (files[i]['exp_strat'] || 'N/A') + '</td>' : '')+
-                (active_tab !== 'camic' ? '<td>' + happy_name(files[i]['platform']) + '</td>' : '')+
-                (active_tab !== 'camic' ? '<td>' + files[i]['datacat'] + '</td>' : '') +
-                '<td>' + files[i]['datatype'] + '</td>' +
-                '<td>' + files[i]['dataformat'] + '</td>' +
-                (active_tab !== 'all' ? (files[i]['file_viewer'] ? '<td>' + files[i]['file_viewer'] + '</td>' : '<td></td>') : '') +
+                (active_tab !== 'camic' && active_tab !== 'dicom' ? '<td>' + (files[i]['exp_strat'] || 'N/A') + '</td>' : '')+
+                (active_tab !== 'camic' && active_tab !== 'dicom' ? '<td>' + happy_name(files[i]['platform']) + '</td>' : '')+
+                (active_tab !== 'camic' && active_tab !== 'dicom' ? '<td>' + files[i]['datacat'] + '</td>' : '') +
+                (active_tab !== 'dicom' ? '<td>' + files[i]['datatype'] + '</td><td>' + files[i]['dataformat'] + '</td>' : '') +
+                (active_tab !== 'all' && active_tab !== 'dicom' ? (files[i]['file_viewer'] ? '<td>' + files[i]['file_viewer'] + '</td>' : '<td></td>') : '') +
             '</tr>';
 
             $(tab_selector).find('.filelist-panel table tbody').append(row);
@@ -707,4 +724,16 @@ require([
 
     browser_tab_load(cohort_id);
 
+    $('.data-tab-content').on('click', '.download-btn', function() {
+        var self=$(this);
+        var msg = $('#download-in-prog');
+
+        self.attr('disabled','disabled');
+        msg.show();
+
+        base.blockResubmit(function() {
+            self.removeAttr('disabled');
+            msg.hide();
+        },$('.filelist-obtain .download-token').val(),"downloadToken");
+    });
 });

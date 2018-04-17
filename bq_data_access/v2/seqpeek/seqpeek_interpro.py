@@ -20,7 +20,7 @@ import logging
 from json import loads as json_loads
 
 from django.conf import settings
-from google_helpers.bigquery_service import get_bigquery_service
+from google_helpers.bigquery.service import get_bigquery_service
 from bq_data_access.v2.seqpeek_maf_data import SeqPeekDataSourceConfig
 from bq_data_access.data_types.seqpeek import BIGQUERY_CONFIG as SEQPEEK_BIGQUERY_CONFIG
 

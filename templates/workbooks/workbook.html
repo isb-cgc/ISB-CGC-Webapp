@@ -320,6 +320,10 @@
                             <div class="flyout-footer">
                                 <form class="add_worksheet_comment_form">
                                     {% csrf_token %}
+                                    <div id="unallowed-chars-alert-comment" class="alert alert-warning alert-dismissable" style="display: none;">
+                                        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                        Your comment contains invalid characters (<span id="unallowed-chars-comment"></span>). Please adjust the content accordingly.
+                                    </div>
                                     <label for="comment-content">Add Comment (1000 character limit)</label>
                                     <textarea id="comment-content" class="comment-textarea form-control space-bottom-10" name="content" maxlength="1000"></textarea>
                                     <button class="btn btn-primary save-comment-btn" type="submit">Comment</button>

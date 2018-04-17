@@ -29,7 +29,7 @@ from copy import deepcopy
 from GenespotRE import secret_settings, settings
 from MySQLdb import connect
 from MySQLdb.cursors import DictCursor
-from google_helpers.bigquery_service import authorize_credentials_with_Google
+from google_helpers.bigquery.service import authorize_credentials_with_Google
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "GenespotRE.settings")
 

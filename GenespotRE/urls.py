@@ -34,6 +34,8 @@ urlpatterns = [
     url(r'^igv/$', views.igv, name='igv'),
     url(r'^camic/$', views.camic, name='camic'),
     url(r'^camic/(?P<slide_barcode>[A-Za-z0-9\-]+)/$', views.camic, name='camic_barcode'),
+    url(r'^dicom/$', views.dicom, name='dicom'),
+    url(r'^dicom/(?P<study_uid>[A-Za-z0-9]+)/$', views.dicom, name='dicom_study'),
 
     url(r'^images/(?P<slide_barcode>[A-Za-z0-9\-]+)/$', views.get_image_data, name='image_data'),
     url(r'^images/', views.get_image_data_args, name='image_data_args'),

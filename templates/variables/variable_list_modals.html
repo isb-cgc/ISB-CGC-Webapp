@@ -18,18 +18,22 @@
 </div>
 
 <!-- Create new workbook using favorite Modal -->
-<div class="modal fade" id="new-favorite-workbook-modal-{{ favorite.id }}" tabindex="-1" role="dialog" aria-labelledby="edit-workbook-var-fave-header" aria-hidden="true">
+<div class="modal fade new-workbook-modal" id="new-favorite-workbook-modal-{{ favorite.id }}" tabindex="-1" role="dialog" aria-labelledby="edit-workbook-var-fave-header" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title" id="edit-workbook-var-fave-header">Create a new workbook using the variable favorite "{{ favorite.name|title }}"</h4>
             </div>
-            <form id="edit-workbook" method="POST" action="{% url 'worksheet_create_with_variables' %}">
+            <form class="new-workbook" id="edit-workbook" method="POST" action="{% url 'worksheet_create_with_variables' %}">
                 {% csrf_token %}
                 <div class="modal-body">
+                    <div id="unallowed-chars-alert" class="alert alert-warning alert-dismissable unallowed-chars-wb-alert" style="display: none;">
+                        <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        Your workbook's name contains invalid characters (<span class="unallowed-chars-wb"></span>). Please choose another name.
+                    </div>
                     <label for="name-{{ favorite.id }}">Name (required)</label>
-                    <input id="name-{{ favorite.id }}" class="form-control" type="text" name="name" value="{{ favorite.name }} workbook"/>
+                    <input id="name-{{ favorite.id }}" class="form-control new-workbook-name" type="text" name="name" value="{{ favorite.name }} workbook"/>
                     <input type="hidden" name="variable_list_id" value="{{ favorite.id }}" />
                 </div>
                 <div class="modal-footer">

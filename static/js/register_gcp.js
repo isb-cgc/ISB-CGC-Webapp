@@ -78,32 +78,35 @@ require([
                 $('.user-list').empty();
                 var gcp_id = data['gcp_id'];
                 var roles = data['roles']
-                for (var key in roles) {
-                    var list = roles[key];
-                    for (var item in list) {
-                        var user_item = $('<li>' + list[item]['email'] + '</li>');
-                        if (list[item]['registered_user']) {
-                            user_item.append('<i class="fa fa-check"></i>')
-                            $('#register-gcp-form').append('<input type="hidden" name="register_users" value="' + list[item]['email'] + '"/>');
-                        }
-                        $('.user-list').append(user_item);
+                for (var email in roles) {
+                    var member = roles[email];
+                    var user_item = $('<li>' + email + '</li>');
+                    if (member['registered_user']) {
+                        user_item.append('<i class="fa fa-check"></i>')
+                        $('#register-gcp-form').append('<input type="hidden" name="register_users" value="' + email + '"/>');
                     }
+                    $('.user-list').append(user_item);
                 }
                 $('#register-gcp-form').append('<input type="hidden" name="gcp_id" value="' + gcp_id + '"/>');
                 $('#register-gcp-form').show();
                 submit_button.prop('disabled', false);
             },
             error: function(xhr, ajaxOptions, thrownError) {
-                if(xhr.responseJSON.message) {
-                    $('#verify-error-text').text(xhr.responseJSON.message);
-                    $('#verify-error-base').hide();
+                if(xhr.responseJSON.redirect) {
+                    base.setReloadMsg(xhr.responseJSON.level || "error",xhr.responseJSON.message);
+                    window.location = xhr.responseJSON.redirect;
                 } else {
-                    $('#verify-error-text').hide();
-                    $('#verify-error-base').show();
+                    if(xhr.responseJSON.message) {
+                        $('#verify-error-text').text(xhr.responseJSON.message);
+                        $('#verify-error-base').hide();
+                    } else {
+                        $('#verify-error-text').hide();
+                        $('#verify-error-base').show();
+                    }
+                    $('.verify-error').show();
+                    $("html, body").animate({ scrollTop: 0 }, "slow");
+                    submit_button.prop('disabled', false);
                 }
-                $('.verify-error').show();
-                $("html, body").animate({ scrollTop: 0 }, "slow");
-                submit_button.prop('disabled', false);
             }
         });
         return false;
@@ -131,25 +134,28 @@ require([
 
         $.ajax({
             url: BASE_URL + '/accounts/users/'+user_id+'/verify_gcp/',
-            data: "gcp-id="+project_gcp_id + "&is_refresh=true",
+            data: "gcp-id="+project_gcp_id + "&is_refresh=true&detail=true",
             method: 'GET',
             success: function(data) {
                 var roles = data['roles']
-                for (var key in roles) {
-                    var list = roles[key];
-                    for (var item in list) {
-                        if (list[item]['registered_user']) {
-                            $('#refresh-project').append('<input type="hidden" name="register_users" value="' + list[item]['email'] + '"/>');
-                        }
+                for (var email in roles) {
+                    var member = roles[email];
+                    if (member['registered_user']) {
+                        $('#refresh-project').append('<input type="hidden" name="register_users" value="' + email + '"/>');
                     }
                 }
+                this_modal.modal('show');
             },
             error: function(xhr) {
-                this_modal.modal('hide');
-                base.showJsMessage('error',xhr.responseJSON.message,true);
+                if(xhr.responseJSON.redirect) {
+                    base.setReloadMsg(xhr.responseJSON.level || "error",xhr.responseJSON.message);
+                    window.location = xhr.responseJSON.redirect;
+                } else {
+                    this_modal.modal('hide');
+                    base.showJsMessage('error', xhr.responseJSON.message, true);
+                }
             },
             complete: function() {
-                this_modal.modal('show');
                 this_modal.data('opening',false);
             }
         });

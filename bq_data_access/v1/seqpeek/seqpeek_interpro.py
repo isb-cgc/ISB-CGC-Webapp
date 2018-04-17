@@ -20,7 +20,7 @@ import logging
 from json import loads as json_loads
 
 from django.conf import settings
-from google_helpers.bigquery_service import get_bigquery_service
+from google_helpers.bigquery.service import get_bigquery_service
 
 
 class SeqPeekMAFWithCohorts(object):

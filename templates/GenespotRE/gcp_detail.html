@@ -67,7 +67,7 @@
                                         <td>
                                             <a title="Refresh this Service Account" data-toggle="modal" role="button" data-target="#refresh-sa-modal-{{ service_account.id }}" class="space-right-5"><i class="fa fa-refresh"></i></a>
                                             <a title="Delete this Service Account" data-toggle="modal" role="button" data-target="#delete-sa-modal-{{ service_account.id }}"><i class="fa fa-trash"></i></a>
-                                            <a title="Adjust Datasets for this Service Account" data-toggle="modal" role="button" href="{% url 'adjust_sa' user.id %}?sa_id={{ service_account.id }}"><i class="fa fa-plus-square"></i></a>
+                                            <a title="Adjust Datasets for this Service Account" role="button" href="{% url 'adjust_sa' user.id %}?sa_id={{ service_account.id }}"><i class="fa fa-plus-square"></i></a>
                                         </td>
                                     </tr>
                                 {% endwith %}
@@ -242,6 +242,7 @@
                         </p>
                         <input type="hidden" name="is_refresh" value="true" />
                         <input type="hidden" name="gcp_id" value="{{ gcp.project_id }}" />
+                        <input type="hidden" name="detail" value="true" />
                     </div>
                     <div class="modal-footer">
                         <input type="submit" value="Refresh" class="btn btn-primary" />

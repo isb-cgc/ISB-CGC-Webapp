@@ -403,8 +403,8 @@ require([
         var names = $('input#program-name').val() + ' ' + $('input#project-name').val();
         var descs = $('textarea#project-description').val() + ' ' + $('textarea#program-description').val();
 
-        var unallowed_names = names.match(base.whitelist);
-        var unallowed_descs = descs.match(base.whitelist);
+        var unallowed_names = names.match(base.blacklist);
+        var unallowed_descs = descs.match(base.blacklist);
 
         if(unallowed_names || unallowed_descs) {
             textInputOk = false;

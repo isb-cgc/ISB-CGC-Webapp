@@ -17,7 +17,7 @@ fi
 
 # Install and update apt-get info
 echo "Preparing System..."
-apt-get -y install software-properties-common
+apt-get -y --force-yes install software-properties-common
 if [ -n "$CI" ]; then
     # CI Takes care of Python update
     apt-get update -qq
@@ -25,12 +25,12 @@ else
     # Add apt-get repository to update python from 2.7.6 (default) to latest 2.7.x
     add-apt-repository -y ppa:fkrull/deadsnakes-python2.7
     apt-get update -qq
-    apt-get install -qq -y python2.7
+    apt-get install -qq -y --force-yes python2.7
 fi
 
 # Install apt-get dependencies
 echo "Installing Dependencies..."
-apt-get install -qq -y unzip libffi-dev libssl-dev libmysqlclient-dev python2.7-dev git ruby g++
+apt-get install -qq -y --force-yes unzip libffi-dev libssl-dev libmysqlclient-dev python2.7-dev git ruby g++
 echo "Dependencies Installed"
 
 # Install PIP + Dependencies
@@ -41,7 +41,7 @@ if [ -z "$CI" ]; then
     rm -rf "${HOMEROOT}/lib/*"
 fi
 pip install -q -r ${HOMEROOT}/requirements.txt -t ${HOMEROOT}/lib --upgrade --only-binary all
-if [ "$DEBUG" = "True"] && [ "$DEBUG_TOOLBAR" = "True"]; then
+if [ "$DEBUG" = "True" ] && [ "$DEBUG_TOOLBAR" = "True" ]; then
     pip install -q django-debug-toolbar -t ${HOMEROOT}/lib --only-binary all
 fi
 
@@ -53,7 +53,7 @@ gem install sass
 # Install Google App Engine
 echo "Installing Google App Engine..."
 wget https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.38.zip -O ${HOME}/google_appengine.zip
-unzip -n ${HOME}/google_appengine.zip -d $HOME
+unzip -n -qq ${HOME}/google_appengine.zip -d $HOME
 export PATH=$PATH:${HOME}/google_appengine/
 # If we are in circleCI, we place the endpoints library into a directory where the Dockerfile can find it...
 if [ -n "$CI" ]; then

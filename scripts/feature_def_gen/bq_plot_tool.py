@@ -48,7 +48,7 @@ def run_query(gcp_project_id, x, y, cohort_id_array, program_array, project_id_a
     from bq_data_access.v2.data_access import FeatureVectorBigQueryBuilder
     from bq_data_access.bigquery_cohorts import BigQueryCohortStorageSettings
     from bq_data_access.v2.plot_data_support import get_merged_feature_vectors
-    from google_helpers.bigquery_service_v2 import BigQueryServiceSupport
+    from google_helpers.bigquery.service_v2 import BigQueryServiceSupport
 
     # Verify the program set
     # ----------------------

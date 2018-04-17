@@ -4,9 +4,9 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 id="delete-gene-fave-header" class="modal-title">Delete the gene & miRNA favorite "{{ favorite.name|title }}"?</h4>
+                <h4 id="delete-gene-fave-{{ favorite.id }}-header" class="modal-title">Delete the gene & miRNA favorite "{{ favorite.name|title }}"?</h4>
             </div>
-            <form id="delete-gene-fave" method="POST" action="{% url 'gene_fav_delete' favorite.id %}">
+            <form id="delete-gene-fave-{{ favorite.id }}" method="POST" action="{% url 'gene_fav_delete' favorite.id %}">
                 {% csrf_token %}
                 <div class="modal-footer">
                     <input type="submit" value="Delete" class="btn btn-primary" />
@@ -18,18 +18,22 @@
 </div>
 
 <!-- Create new workbook using favorite Modal -->
-<div class="modal fade" id="new-favorite-workbook-modal-{{ favorite.id }}" tabindex="-1" role="dialog" aria-labelledby="edit-gene-fave-header" aria-hidden="true">
+<div class="modal fade new-workbook-modal" id="new-favorite-workbook-modal-{{ favorite.id }}" tabindex="-1" role="dialog" aria-labelledby="edit-gene-fave-header" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h4 id="edit-gene-fave-header" class="modal-title">Create a new workbook using the gene & miRNA favorite "{{ favorite.name|title }}"</h4>
             </div>
-            <form id="edit-workbook" method="POST" action="{% url 'worksheet_create_with_genes' %}">
+            <form class="new-workbook" id="new-workbook-{{ favorite.id }}" method="POST" action="{% url 'worksheet_create_with_genes' %}">
                 {% csrf_token %}
                 <div class="modal-body">
-                    <label for="list_name-{{ favorite.id }}">Name (required)</label>
-                    <input id="list_name-{{ favorite.id }}" class="form-control" type="text" name="name" value="{{ favorite.name }} workbook"/>
+                    <div id="{{ favorite.id }}-unallowed-chars-alert" class="unallowed-chars-wb-alert alert alert-warning alert-dismissable" style="display: none;">
+                        <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        Your workbook's name contains invalid characters (<span class="unallowed-chars-wb"></span>). Please choose another name.
+                    </div>
+                    <label for="workbook-name-{{ favorite.id }}">Name (required)</label>
+                    <input id="workbook-name-{{ favorite.id }}" class="form-control new-workbook-name" type="text" name="name" value="{{ favorite.name }} workbook"/>
                     <input type="hidden" name="gene_list_id" value="{{ favorite.id }}" />
                 </div>
                 <div class="modal-footer">
