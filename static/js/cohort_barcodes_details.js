@@ -26,14 +26,14 @@ require.config({
         underscore: 'libs/underscore-min',
         ajv: 'libs/ajv.bundle',
         base: 'base',
-        tablesorter:'libs/jquery.tablesorter.min'
+        dataTables:'libs/jquery.dataTables.min'
     },
     shim: {
         'bootstrap': ['jquery'],
         'jqueryui': ['jquery'],
         'session_security': ['jquery'],
         'base': ['jquery', 'jqueryui', 'session_security', 'bootstrap', 'underscore'],
-        'tablesorter': ['jquery']
+        'dataTables':['jquery']
     }
 });
 
@@ -45,7 +45,7 @@ require([
     'underscore',
     'base',
     'ajv',
-    'tablesorter'
+    'dataTables'
 ], function ($, jqueryui, bootstrap, session_security, _, base, ajv) {
 
     var savingChanges = false;
@@ -432,20 +432,22 @@ require([
         tab.find('.valid-entries tbody').empty();
         if(result.invalid_entries && result.invalid_entries.length > 0) {
             tab.find('.validation-messages ul').empty();
-            var entry_set = "";
+            var table = tab.find('.invalid-entries .table').DataTable({
+                    "retrieve": true,
+                    "order": [[0,'asc']],
+                    "lengthMenu": [25, 50, 100],
+                    "searching": false
+                }
+            );
+            table.clear();
             for(var i=0; i < result.invalid_entries.length; i++) {
                 var entry = result.invalid_entries[i];
-                entry_set += (
-                    "<tr><td>"
-                    +(entry['program'] == 'CCLE' && entry['sample'].indexOf('CCLE') < 0 ? 'UNKNOWN' : entry['program'])
-                    +"</td><td>"
-                    +(entry['case'].indexOf(",") < 0 ? entry['case'] : '"' + entry['case'] + '"')
-                    +"</td><td>"
-                    +(entry['sample'].length <= 0 ? "NOT FOUND" : (entry['sample'].indexOf(",") < 0 ? entry['sample'] : '"' + entry['sample'] + '"')) +"</td></tr>"
-                );
+                table.row.add(
+                    [(entry['program'] == 'CCLE' && entry['sample'].indexOf('CCLE') < 0 ? 'UNKNOWN' : entry['program']),
+                        (entry['case'].indexOf(",") < 0 ? entry['case'] : '"' + entry['case'] + '"'),
+                        (entry['sample'].length <= 0 ? "NOT FOUND" : (entry['sample'].indexOf(",") < 0 ? entry['sample'] : '"' + entry['sample'] + '"'))]);
             }
-            tab.find('.invalid-entries tbody').html(entry_set);
-            tab.find('.invalid-entries table').trigger('update');
+            table.draw();
             if(result.messages) {
                 var msg_set = "";
                 for(var i=0; i < result.messages.length; i++) {
@@ -462,26 +464,25 @@ require([
         }
 
         if(result.valid_entries && result.valid_entries.length > 0) {
-            var entry_set = "";
             validated_barcodes = {};
+            var table = tab.find('.valid-entries .table').DataTable({
+                    "retrieve": true,
+                    "order": [[0,'asc']],
+                    "lengthMenu": [25, 50, 100],
+                    "searching": false
+                }
+            );
+            table.clear();
             for(var i=0; i < result.valid_entries.length; i++) {
                 var entry = result.valid_entries[i];
-                entry_set += (
-                    "<tr><td>"
-                    +entry['program']
-                    +"</td><td>"
-                    +(entry['case'].indexOf(",") < 0 ? entry['case'] : '"' + entry['case'] + '"')
-                    +"</td><td> "
-                    +(entry['sample'].indexOf(",") < 0 ? entry['sample'] : '"' + entry['sample'] + '"')
-                    +"</td></tr>"
-                );
+                table.row.add([entry['program'],(entry['case'].indexOf(",") < 0 ? entry['case'] : '"' + entry['case'] + '"'), (entry['sample'].indexOf(",") < 0 ? entry['sample'] : '"' + entry['sample'] + '"')])
                 if(!validated_barcodes[entry['program_id']]){
                     validated_barcodes[entry['program_id']] = []
                 }
                 validated_barcodes[entry['program_id']].push([entry['sample'], entry['case'], entry['project']]);
             }
-            tab.find('.valid-entries tbody').html(entry_set);
-            tab.find('.valid-entries table').trigger('update');
+            table.draw();
+            tab.find('.valid-entries .dataTables_length select').addClass('form-control-sm');
             tab.find('.valid-entries input').remove();
             tab.find('.valid-entries').show();
             tab.find('.cohort-counts tbody').empty();
@@ -499,22 +500,6 @@ require([
         tab.find('.barcode-status').show();
     }
 
-    //make in/valid-entries-tables sortable
-
-    $('.tablesorter th').css('cursor','pointer');
-
-    $('#valid-entries-table').tablesorter(
-        {sortList: [[0,0]]}
-    );
-    $('#invalid-entries-table').tablesorter(
-        {sortList: [[0,0]]}
-    );
-    $('#valid-entries-table2').tablesorter(
-        {sortList: [[0,0]]}
-    );
-    $('#invalid-entries-table2').tablesorter(
-        {sortList: [[0,0]]}
-    );
     // Event bindings
 
     $('button.instructions').on('click',function(){
