@@ -2005,7 +2005,9 @@ a.skip-nav {
 #cohort-filelist .filelist-panel table {
   table-layout: fixed;
   word-wrap: normal;
-  font-size: 11px; }
+  font-size: 13px; }
+  #cohort-filelist .filelist-panel table thead {
+    font-size: 12px; }
   #cohort-filelist .filelist-panel table .col-barcode, #cohort-filelist .filelist-panel table .col-pipeline {
     width: 150px; }
   #cohort-filelist .filelist-panel table .col-datalevel {
