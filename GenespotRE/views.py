@@ -352,12 +352,15 @@ def dicom(request, study_uid=None):
     template = 'GenespotRE/dicom.html'
     orth_response = requests.post(url=settings.ORTHANC_LOOKUP_URI,data=study_uid,headers={"Content-Type": "text/plain"})
 
+    logger.debug("Orthanc status code: {}".format(str(orth_response.status_code)))
+    logger.debug("Orthanc response content: {}".format(str(orth_response.content)))
+    logger.debug("Orthan response JSON: {}".format(str(orth_response.json())))
+
     if orth_response.status_code != '200':
         logger.error("[ERROR] While trying to retrieve Orthanc UID for study instance UID {}: {}".format(study_uid, str(orth_response.content)))
         messages.error(request,"There was an error while attempting to load this DICOM image--please contact the administrator.")
         return redirect('cohort_list', user_id=request.user.id)
-    logger.debug("Orthanc response content: {}".format(str(orth_response.content)))
-    logger.debug("Orthan response JSON: {}".format(str(orth_response.json())))
+
     context = {
         'orthanc_uid': orth_response.json()['ID'],
         'dicom_viewer': settings.OSIMIS_VIEWER

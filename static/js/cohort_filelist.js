@@ -490,14 +490,18 @@ require([
             var row = '<tr>' +
                 '<td>' + files[i]['program'] + '</td>' +
                 '<td>' + files[i]['case'] + '</td>'
-                +'<td><div class="col-filename">' +
+                + (active_tab !== 'dicom' ? '<td><div class="col-filename">' +
                     '<div>' + files[i]['filename'] + '</div>' +
                     '<div>[GCD ID: ' + files[i]['file_gdc_id'] + ']</div>' +
-                '</div></td>' +
+                '</div></td>' : '') +
                 '<td>' + files[i]['disease_code'] + '</td>' +
                 (active_tab === 'dicom' ? '<td>'+files[i]['project_short_name']+'</td>' : '') +
                 (active_tab === 'dicom' ? '<td>'+files[i]['study_desc']+'</td>' : '') +
-                (active_tab === 'dicom' ? '<td><a href="'+DICOM_URL+files[i]['study_uid']+'/" target="_blank">'+files[i]['study_uid']+'</td>' : '') +
+                (active_tab === 'dicom' ?
+                    '<td>' +
+                    '<a class="study-uid" href="'+DICOM_URL+files[i]['study_uid']+'/" target="_blank">'+files[i]['study_uid']+
+                        '<span class="osmisis"><i>Open in OSMISIS</i></span></a>'+
+                    '</td>' : '') +
                 (active_tab === 'camic' ? (files[i]['thumbnail'] ? '<td><img src="'+IMG_THUMBS_URL+files[i]['thumbnail']+'/thmb_128x64.jpeg"></td>' : '<td></td>') : '') +
                 (active_tab !== 'camic' && active_tab !== 'dicom' ? '<td>' + (files[i]['exp_strat'] || 'N/A') + '</td>' : '')+
                 (active_tab !== 'camic' && active_tab !== 'dicom' ? '<td>' + happy_name(files[i]['platform']) + '</td>' : '')+
@@ -638,19 +642,6 @@ require([
         }
     });
 
-    $('.data-tab-content').on('click','.download-link',function(e) {
-        var type_tab = $(this).parents('.data-tab.active')[0];
-        var active_tab = $(type_tab).data('file-type');
-
-        if(parseInt($('.file-list-total').text()) > FILE_LIST_MAX) {
-            $('#'+active_tab+'-files').find('.file-list-warning').show();
-            e.preventDefault();
-            return false;
-        } else {
-            $('#'+active_tab+'-files').find('.file-list-warning').hide();
-        }
-    });
-
     function update_filters(checked) {
         var type_tab = checked.parents('.data-tab.active')[0];
         var active_tab = $(type_tab).data('file-type');
@@ -759,4 +750,26 @@ require([
             msg.hide();
         },$('.filelist-obtain .download-token').val(),"downloadToken");
     });
+
+    $('.data-tab-content').on('click','.download-link',function(e) {
+        var type_tab = $(this).parents('.data-tab.active')[0];
+        var active_tab = $(type_tab).data('file-type');
+
+        if(parseInt($('.file-list-total').text()) > FILE_LIST_MAX) {
+            $('#'+active_tab+'-files').find('.file-list-warning').show();
+            e.preventDefault();
+            return false;
+        } else {
+            $('#'+active_tab+'-files').find('.file-list-warning').hide();
+        }
+    });
+
+    $('.data-tab-content').on('hover enter mouseover','.study-uid',function(e){
+        $(this).siblings('.osmisis').show();
+    });
+
+    $('.data-tab-content').on('leave mouseout mouseleave','.study-uid',function(e){
+        $(this).siblings('.osmisis').show();
+    });
+
 });
