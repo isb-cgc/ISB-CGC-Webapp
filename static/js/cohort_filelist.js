@@ -498,10 +498,10 @@ require([
                 (active_tab === 'dicom' ? '<td>'+files[i]['project_short_name']+'</td>' : '') +
                 (active_tab === 'dicom' ? '<td>'+files[i]['study_desc']+'</td>' : '') +
                 (active_tab === 'dicom' ?
-                    '<td>' +
-                    '<a class="study-uid" href="'+DICOM_URL+files[i]['study_uid']+'/" target="_blank">'+files[i]['study_uid']+
-                        '<span class="osmisis"><i>Open in OSMISIS</i></span></a>'+
-                    '</td>' : '') +
+                    '<td><div class="study-uid">' +
+                    '<a href="'+DICOM_URL+files[i]['study_uid']+'/" target="_blank">'+files[i]['study_uid']+
+                        '<div class="osmisis" style="display: none;"><i>Open in OSMISIS</i></div></a>'+
+                    '</div></td>' : '') +
                 (active_tab === 'camic' ? (files[i]['thumbnail'] ? '<td><img src="'+IMG_THUMBS_URL+files[i]['thumbnail']+'/thmb_128x64.jpeg"></td>' : '<td></td>') : '') +
                 (active_tab !== 'camic' && active_tab !== 'dicom' ? '<td>' + (files[i]['exp_strat'] || 'N/A') + '</td>' : '')+
                 (active_tab !== 'camic' && active_tab !== 'dicom' ? '<td>' + happy_name(files[i]['platform']) + '</td>' : '')+
@@ -765,11 +765,11 @@ require([
     });
 
     $('.data-tab-content').on('hover enter mouseover','.study-uid',function(e){
-        $(this).siblings('.osmisis').show();
+        $(this).find('.osmisis').show();
     });
 
     $('.data-tab-content').on('leave mouseout mouseleave','.study-uid',function(e){
-        $(this).siblings('.osmisis').show();
+        $(this).find('.osmisis').hide();
     });
 
 });
