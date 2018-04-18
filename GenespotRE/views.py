@@ -25,6 +25,7 @@ from django.views.decorators.cache import never_cache
 from django.contrib.auth.models import User
 from django.db.models import Count
 from django.shortcuts import render, redirect
+from django.core.urlresolvers import reverse
 from django.utils import formats
 from django.contrib import messages
 from googleapiclient import discovery
@@ -352,17 +353,13 @@ def dicom(request, study_uid=None):
     template = 'GenespotRE/dicom.html'
     orth_response = requests.post(url=settings.ORTHANC_LOOKUP_URI,data=study_uid,headers={"Content-Type": "text/plain"})
 
-    logger.debug("Orthanc status code: {}".format(str(orth_response.status_code)))
-    logger.debug("Orthanc response content: {}".format(str(orth_response.content)))
-    logger.debug("Orthan response JSON: {}".format(str(orth_response.json())))
-
-    if orth_response.status_code != '200':
+    if orth_response.status_code != 200:
         logger.error("[ERROR] While trying to retrieve Orthanc UID for study instance UID {}: {}".format(study_uid, str(orth_response.content)))
         messages.error(request,"There was an error while attempting to load this DICOM image--please contact the administrator.")
-        return redirect('cohort_list', user_id=request.user.id)
+        return redirect(reverse('cohort_list'))
 
     context = {
-        'orthanc_uid': orth_response.json()['ID'],
+        'orthanc_uid': orth_response.json()[0]['ID'],
         'dicom_viewer': settings.OSIMIS_VIEWER
     }
     return render(request, template, context)
