@@ -356,9 +356,11 @@ def dicom(request, study_uid=None):
         logger.error("[ERROR] While trying to retrieve Orthanc UID for study instance UID {}: {}".format(study_uid, str(orth_response.content)))
         messages.error(request,"There was an error while attempting to load this DICOM image--please contact the administrator.")
         return redirect('cohort_list', user_id=request.user.id)
+    logger.debug("Orthanc response content: {}".format(str(orth_response.content)))
+    logger.debug("Orthan response JSON: {}".format(str(orth_response.json())))
     context = {
-        'orthanc_uid': orth_response.json['ID'],
-        'orthanc_viewer': settings.ORTHANC_VIEWER
+        'orthanc_uid': orth_response.json()['ID'],
+        'dicom_viewer': settings.ORTHANC_VIEWER
     }
     return render(request, template, context)
 

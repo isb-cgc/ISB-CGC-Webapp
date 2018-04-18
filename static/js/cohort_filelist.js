@@ -514,6 +514,8 @@ require([
             selCamFiles[thisCheck.attr('data-type')] && selCamFiles[thisCheck.attr('data-type')][thisCheck.attr('value')] && thisCheck.attr('checked', true);
         }
 
+        console.debug($(tab_selector).find('.filelist-panel .file-list-table tbody'));
+
         // If we're at the max, disable all checkboxes which are not currently checked
         selIgvFiles.count() >= SEL_IGV_FILE_MAX && $(tab_selector).find('.filelist-panel input.igv[type="checkbox"]:not(:checked)').attr('disabled',true);
         selCamFiles.count() >= SEL_IGV_FILE_MAX && $(tab_selector).find('.filelist-panel input.cam[type="checkbox"]:not(:checked)').attr('disabled',true);
