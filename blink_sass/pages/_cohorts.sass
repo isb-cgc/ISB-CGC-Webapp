@@ -462,7 +462,7 @@
                         overflow: hidden
                         text-overflow: ellipsis
                 div
-                    &.col-filename
+                    &.col-filename, &.study-uid
                         &:hover
                             display: block
                             position: absolute
@@ -474,6 +474,12 @@
                             margin-left: -5px
                             margin-top: -5px
                             border-radius: 3px
+                            a
+                                color: #FFF
+                    &.study-uid
+                        font-weight: 700
+                        a:hover
+                            text-decoration: none
                 &:last-child
                     i
                         color: $isb-success
