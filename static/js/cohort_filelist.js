@@ -500,7 +500,7 @@ require([
                 (active_tab === 'dicom' ?
                     '<td><div class="study-uid">' +
                     '<a href="'+DICOM_URL+files[i]['study_uid']+'/" target="_blank">'+files[i]['study_uid']+
-                        '<div class="osmisis" style="display: none;"><i>Open in OSMISIS</i></div></a>'+
+                        '<div class="osmisis" style="display: none;"><i>Open in Osimis Web Viewer</i></div></a>'+
                     '</div></td>' : '') +
                 (active_tab === 'camic' ? (files[i]['thumbnail'] ? '<td><img src="'+IMG_THUMBS_URL+files[i]['thumbnail']+'/thmb_128x64.jpeg"></td>' : '<td></td>') : '') +
                 (active_tab !== 'camic' && active_tab !== 'dicom' ? '<td>' + (files[i]['exp_strat'] || 'N/A') + '</td>' : '')+
