@@ -42,7 +42,7 @@
                     <div class="panel-body">
                         <div class="iframe-container">
                             <div class="load-spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                            <iframe id="dicom-iframe" width="100%" src="https://{{ dicom_viewer }}/"></iframe>
+                            <iframe id="dicom-iframe" width="100%" src="https://{{ dicom_viewer }}?study={{ orthanc_uid }}"></iframe>
                         </div>
                     </div>
                 </div>

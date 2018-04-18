@@ -360,7 +360,7 @@ def dicom(request, study_uid=None):
     logger.debug("Orthan response JSON: {}".format(str(orth_response.json())))
     context = {
         'orthanc_uid': orth_response.json()['ID'],
-        'dicom_viewer': settings.ORTHANC_VIEWER
+        'dicom_viewer': settings.OSIMIS_VIEWER
     }
     return render(request, template, context)
 
