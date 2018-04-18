@@ -528,6 +528,12 @@ MAX_FILES_IGV = 5
 CAMIC_VIEWER = os.environ.get('CAMIC_VIEWER', None)
 IMG_THUMBS_URL = os.environ.get('IMG_THUMBS_URL', None)
 
+#################################
+# DICOM Viewer settings
+#################################
+ORTHANC_LOOKUP_URI = os.environ.get('ORTHANC_VIEWER', None)
+ORTHANC_VIEWER = os.environ.get('ORTHANC_VIEWER', None)
+
 ##############################################################
 #   MailGun Email Settings
 ##############################################################

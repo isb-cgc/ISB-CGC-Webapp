@@ -17,14 +17,16 @@ import logging
 import sys
 import re
 from time import sleep
+import requests
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
 from django.contrib.auth.models import User
 from django.db.models import Count
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.utils import formats
+from django.contrib import messages
 from googleapiclient import discovery
 from oauth2client.client import GoogleCredentials
 
@@ -348,7 +350,16 @@ def get_image_data(request, slide_barcode):
 @login_required
 def dicom(request, study_uid=None):
     template = 'GenespotRE/dicom.html'
-    context = {}
+    orth_response = requests.post(url=settings.ORTHANC_LOOKUP_URI,data=study_uid,headers={"Content-Type": "text/plain"})
+
+    if orth_response.status_code != '200':
+        logger.error("[ERROR] While trying to retrieve Orthanc UID for study instance UID {}: {}".format(study_uid, str(orth_response.content)))
+        messages.error(request,"There was an error while attempting to load this DICOM image--please contact the administrator.")
+        return redirect('cohort_list', user_id=request.user.id)
+    context = {
+        'orthanc_uid': orth_response.json['ID'],
+        'orthanc_viewer': settings.ORTHANC_VIEWER
+    }
     return render(request, template, context)
 
 
