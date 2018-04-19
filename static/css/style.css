@@ -1598,21 +1598,21 @@ a.skip-nav {
 
 #cohort-details .curr-filter-panel, #cohort-details .creation-filter-panel, #cohort-filelist .curr-filter-panel, #cohort-filelist .creation-filter-panel {
   overflow: hidden;
-  height: 95px;
-  first-child-border-left: none; }
+  height: 95px;}
   #cohort-details .curr-filter-panel .creation-prog-filter-set, #cohort-details .creation-filter-panel .creation-prog-filter-set, #cohort-filelist .curr-filter-panel .creation-prog-filter-set, #cohort-filelist .creation-filter-panel .creation-prog-filter-set {
     height: 100%; }
   #cohort-details .curr-filter-panel .prog-filter-set, #cohort-details .creation-filter-panel .prog-filter-set, #cohort-filelist .curr-filter-panel .prog-filter-set, #cohort-filelist .creation-filter-panel .prog-filter-set {
     border-left: 2px solid #2A537A; }
     #cohort-details .curr-filter-panel .prog-filter-set h5, #cohort-details .creation-filter-panel .prog-filter-set h5, #cohort-filelist .curr-filter-panel .prog-filter-set h5, #cohort-filelist .creation-filter-panel .prog-filter-set h5 {
       margin-top: 0; }
+  #cohort-details .curr-filter-panel :first-child, #cohort-details .creation-filter-panel :first-child, #cohort-filelist .curr-filter-panel :first-child, #cohort-filelist .creation-filter-panel :first-child {
+    border-left: none; }
   #cohort-details .curr-filter-panel .label, #cohort-details .curr-filter-panel .tokenfield .token, .tokenfield #cohort-details .curr-filter-panel .token, #cohort-details .creation-filter-panel .label, #cohort-details .creation-filter-panel .tokenfield .token, .tokenfield #cohort-details .creation-filter-panel .token, #cohort-filelist .curr-filter-panel .label, #cohort-filelist .curr-filter-panel .tokenfield .token, .tokenfield #cohort-filelist .curr-filter-panel .token, #cohort-filelist .creation-filter-panel .label, #cohort-filelist .creation-filter-panel .tokenfield .token, .tokenfield #cohort-filelist .creation-filter-panel .token {
     margin: 0; }
 
 #cohort-details .revision-filter-panel, #cohort-filelist .revision-filter-panel {
   overflow: hidden;
-  padding: 0;
-  first-child-border-left: none; }
+  padding: 0; }
   #cohort-details .revision-filter-panel .revision-prog-filter-set, #cohort-filelist .revision-filter-panel .revision-prog-filter-set {
     height: 100%;
     padding: 0px 8px !important; }
@@ -1620,6 +1620,8 @@ a.skip-nav {
     border-left: 2px solid #2A537A; }
     #cohort-details .revision-filter-panel .prog-filter-set h5, #cohort-filelist .revision-filter-panel .prog-filter-set h5 {
       margin-top: 0; }
+  #cohort-details .revision-filter-panel :first-child, #cohort-filelist .revision-filter-panel :first-child {
+    border-left: none; }
   #cohort-details .revision-filter-panel .label, #cohort-details .revision-filter-panel .tokenfield .token, .tokenfield #cohort-details .revision-filter-panel .token, #cohort-filelist .revision-filter-panel .label, #cohort-filelist .revision-filter-panel .tokenfield .token, .tokenfield #cohort-filelist .revision-filter-panel .token {
     margin: 0; }
 
