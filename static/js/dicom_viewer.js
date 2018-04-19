@@ -46,7 +46,7 @@ require([
         $('.load-spinner').hide();
         // Resize the iFrame's height to center the view vertically
         $('#dicom-iframe').height(($(window).height() - $('.navbar').height() - ($('#dicom-viewer').height() - $('#dicom-iframe').height())));
-        $(window).scrollTop($('.case-info').height());
+        $(window).scrollTop(0);
     });
 
     // Because we're operating a bit outside the Bootstrap framework,

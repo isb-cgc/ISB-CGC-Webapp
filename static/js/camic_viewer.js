@@ -57,8 +57,7 @@ require([
         // Resize the iFrame's height to center the view vertically
         if($('#camic-single').length > 0) {
             $('#camic-iframe').height(($(window).height() - $('.navbar').height() - ($('#camic-viewer').height() - $('#camic-iframe').height())));
-            $(window).scrollTop($('.case-info').height());
-
+            $(window).scrollTop(0);
         }
     });
 
