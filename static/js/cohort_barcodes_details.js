@@ -433,6 +433,7 @@ require([
         if(result.invalid_entries && result.invalid_entries.length > 0) {
             tab.find('.validation-messages ul').empty();
             var table = tab.find('.invalid-entries .table').DataTable({
+                    "dom": '<"top"i<lp>>t<"clear">',
                     "retrieve": true,
                     "order": [[0,'asc']],
                     "lengthMenu": [25, 50, 100],
@@ -466,6 +467,7 @@ require([
         if(result.valid_entries && result.valid_entries.length > 0) {
             validated_barcodes = {};
             var table = tab.find('.valid-entries .table').DataTable({
+                    "dom": '<"top"i<lp>>t<"clear">',
                     "retrieve": true,
                     "order": [[0,'asc']],
                     "lengthMenu": [25, 50, 100],
@@ -482,7 +484,6 @@ require([
                 validated_barcodes[entry['program_id']].push([entry['sample'], entry['case'], entry['project']]);
             }
             table.draw();
-            tab.find('.valid-entries .dataTables_length select').addClass('form-control-sm');
             tab.find('.valid-entries input').remove();
             tab.find('.valid-entries').show();
             tab.find('.cohort-counts tbody').empty();
@@ -503,7 +504,10 @@ require([
     // Event bindings
 
     $('button.instructions').on('click',function(){
-        $(this).siblings('div.instructions').is(':visible') ? $(this).siblings('div.instructions').hide() : $(this).siblings('div.instructions').show();
+        var is_instruction_vis = $(this).siblings('div.instructions').is(':visible')
+        is_instruction_vis ? $(this).siblings('div.instructions').hide() : $(this).siblings('div.instructions').show();
+        $(this).toggleClass('instructions_show', is_instruction_vis);
+        $(this).toggleClass('instructions_hide', !is_instruction_vis);
     });
 
     $('button[data-target="#create-cohort-modal"]').on('click',function(e){
