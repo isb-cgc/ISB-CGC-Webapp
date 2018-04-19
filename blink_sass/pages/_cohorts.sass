@@ -479,23 +479,16 @@
                         color: $isb-success
         input
             margin-left: 5px
-    .file-page-count
-        display: block
-        span
-            &.files-per-page
-                clear: right
-                float: right
-        .files-per-page .form-control
-            display: inline-block
-            width: auto
-
     .nav-tabs
         li,li.active
             a
                 text-transform: none
-
     .token-label
         max-width: none !important
+
+
+
+
 
 .parsets-tooltip
     background-color: rgba($tooltip-color, 0.8)
@@ -541,9 +534,28 @@
     button
         display: inline-block
         &.instructions
-            margin-bottom: 15px
-            display: block
-            clear: both
+            &.instructions_show
+                margin-bottom: 15px
+                display: block
+                clear: both
+                &:before
+                    content: "\f103"
+                    float: left
+                    font-family: FontAwesome
+                &:after
+                    content: "Show Instructions"
+                    margin-left: 5px
+            &.instructions_hide
+                margin-bottom: 15px
+                display: block
+                clear: both
+                &:before
+                    content: "\f102"
+                    float: left
+                    font-family: FontAwesome
+                &:after
+                    content: "Hide Instructions"
+                    margin-left: 5px
     h5
         margin-top: 25px
     h6
@@ -555,6 +567,10 @@
     .valid-entries, .invalid-entries
         overflow-y: auto
         max-height: 1200px
+    .barcode-status
+        .table_wrapper
+            padding-left: 20px
+
 
 #saving-cohort, .verify-pending, .register-pending
     margin-left: 20px

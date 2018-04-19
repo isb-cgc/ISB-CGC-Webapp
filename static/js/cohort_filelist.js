@@ -415,31 +415,53 @@ require([
         var page = tab_page[active_tab];
         var total_files = tab_count[active_tab];
         var tab_selector = '#'+active_tab+'-files';
+
+
         var files_per_page = tab_files_per_page[active_tab];
+
         if(do_filter_count) {
             tab_count[active_tab] = total_files = data['total_file_count'];
         }
-        $(tab_selector).find('.showing').text((total_files < files_per_page ? total_files : files_per_page));
         var total_pages = Math.ceil(total_files / files_per_page);
         if (total_pages <= 0) {
             $(tab_selector).find('.file-page-count').hide();
             $(tab_selector).find('.no-file-page-count').show();
+            $(tab_selector).find('.paginate_button_space').hide();
+            $(tab_selector).find('.dataTables_length').addClass('disabled');
         } else {
+            var page_list = pagination(page,total_pages);
+            var html_page_button = "";
+            for(let i of page_list){
+                if(i === "..."){
+                    html_page_button += "<span class='\ellipsis\'>...</span>"
+                }
+                else{
+                    html_page_button += "<a class=\'paginate_button numeric_button"+ (i == page ? " current\'":"\'") +">" + i + "</a>";
+                }
+            }
+
             $(tab_selector).find('.file-page-count').show();
             $(tab_selector).find('.no-file-page-count').hide();
-            $(tab_selector).find('.filelist-panel .panel-body .page-count').html(total_pages);
+            $(tab_selector).find('.paginate_button_space').show();
+            $(tab_selector).find('.dataTables_length').removeClass('disabled');
             $(tab_selector).find('.filelist-panel .panel-body .total-file-count').html(total_files);
-            $(tab_selector).find('.filelist-panel .panel-body .page-num').html(page);
+            $(tab_selector).find('.filelist-panel .panel-body .paginate_button_space').html(html_page_button);
         }
 
-        var files = data['file_list'];
         $(tab_selector).find('.filelist-panel table tbody').empty();
 
+        var files = data['file_list'];
         if(files.length <= 0) {
             $(tab_selector).find('.filelist-panel table tbody').append(
                 '<tr>' +
                 '<td colspan="9"><i>No file listings found in this cohort for this build.</i></td><td></td>'
             );
+        }
+        else {
+
+            var first_page_entry = ((page - 1) * files_per_page) + 1;
+            var last_page_entry = first_page_entry + files.length - 1;
+            $(tab_selector).find('.showing').text(first_page_entry + " to " + last_page_entry);
         }
 
         for (var i = 0; i < files.length; i++) {
@@ -579,25 +601,35 @@ require([
 
     };
 
-    // Next page button click
-    $('.data-tab-content').on('click', '.next-page', function () {
-        var this_tab = $(this).parents('.data-tab').data('file-type');
-        tab_page[this_tab]++;
-        update_table(this_tab, false);
-    });
+    function update_page(tab, page_no){
+        tab_page[tab] = page_no;
+        update_table(tab, false);
+    }
 
-    // Previous page button click
-    $('.data-tab-content').on('click', '.prev-page', function () {
+    $('.data-tab-content').on('click', '.paginate_button', function () {
         var this_tab = $(this).parents('.data-tab').data('file-type');
-        tab_page[this_tab]--;
-        update_table(this_tab, false);
+        var page_no;
+        if($(this).hasClass('next-page')){
+            page_no = parseInt(tab_page[this_tab])+1;
+        }
+        else if($(this).hasClass('prev-page')){
+            page_no = page_no == 1 ? 1 : tab_page[this_tab]-1;
+        }
+        else if($(this).hasClass('numeric_button')){
+            if($(this).hasClass('current'))
+                return;
+            page_no = $(this).text();
+        }
+        else{
+            page_no = 1;
+        }
+        update_page(this_tab, page_no)
     });
 
     $('.data-tab-content').on('change', '.files-per-page', function () {
         var this_tab = $(this).parents('.data-tab').data('file-type');
         tab_files_per_page[this_tab] = $('#'+this_tab+'-files').find('.files-per-page :selected').val();
-        tab_page[this_tab]=1;
-        update_table(this_tab, false);
+        update_page(this_tab, 1);
     });
 
     // Show more/less links on categories with >6 fiilters
@@ -676,6 +708,34 @@ require([
         if(UPDATE_QUEUE.length > 0) {
             UPDATE_QUEUE.shift()();
         }
+    };
+
+    function pagination(c, m) {
+        var current = parseInt(c),
+            last = m,
+            delta = 2,
+            left = current - delta,
+            right = current + delta + 1,
+            range = [],
+            rangeWithDots = [],
+            l;
+        for (var i = 1; i <= last; i++) {
+            if (i == 1 || i == last || i >= left && i < right) {
+                range.push(i);
+            }
+        }
+        for(let i of range) {
+            if (l) {
+                if (i - l === 2) {
+                    rangeWithDots.push(l + 1);
+                } else if (i - l !== 1) {
+                    rangeWithDots.push('...');
+                }
+            }
+            rangeWithDots.push(i);
+            l = i;
+        }
+        return rangeWithDots;
     };
 
     var update_displays = function(active_tab) {
@@ -759,4 +819,6 @@ require([
             msg.hide();
         },$('.filelist-obtain .download-token').val(),"downloadToken");
     });
+
+
 });
