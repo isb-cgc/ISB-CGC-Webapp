@@ -171,7 +171,10 @@ require([
     });
 
     $('button.instructions').on('click',function(){
-        $(this).siblings('div.instructions').is(':visible') ? $(this).siblings('div.instructions').hide() : $(this).siblings('div.instructions').show();
+        var is_instruction_vis = $(this).siblings('div.instructions').is(':visible')
+        is_instruction_vis ? $(this).siblings('div.instructions').hide() : $(this).siblings('div.instructions').show();
+        $(this).toggleClass('instructions_show', is_instruction_vis);
+        $(this).toggleClass('instructions_hide', !is_instruction_vis);
     });
 
 });

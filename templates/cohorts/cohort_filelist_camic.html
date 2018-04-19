@@ -26,25 +26,25 @@
                 <h4>File Listing</h4>
             </div>
             <div class="panel-body">
-                <div class="file-page-count">
-                    <span>Showing <span class="showing">25</span> of <span class="total-file-count"></span> files</span>
-                    <span>
-                        (Page: <span class="page-num">1</span> of <span class="page-count">unknown</span>)
-                    </span>
-                    <span class="files-per-page">Display
-                        <select class="form-control">
+                <div class="dataTables_info">
+                    <span class="file-page-count">Showing <span class="showing">25</span> of <span class="total-file-count"></span> entries</span>
+                    <span class="no-file-page-count" style="display: none;">Showing 0 files.</span>
+                    <span class="spinner"><i class="fa fa-spin fa-spinner hidden"></i></span>
+                </div>
+                <div>
+                    <div class="dataTables_length files-per-page"><label>Show</label>
+                        <select>
                             <option value="25">25</option>
                             <option value="50">50</option>
                             <option value="100">100</option>
                         </select>
-                        per page
-                    </span>
-                </div>
-                <div><span class="no-file-page-count" style="display: none;">Showing 0 files.</span></div>
-                <div>
-                    <a role="button" class="btn btn-primary prev-page disabled">Previous Page</a>
-                    <a role="button" class="btn btn-primary next-page">Next Page</a>
-                    <span class="spinner"><i class="fa fa-spin fa-spinner hidden"></i></span>
+                        <label>entries</label>
+                    </div>
+                    <div class="dataTables_paginate">
+                        <a class="prev-page paginate_button disabled">Previous</a>
+                        <span class="paginate_button_space"/>
+                        <a class="next-page paginate_button">Next</a>
+                    </div>
                 </div>
 
                 <table class="table table-striped file-list-table" aria-label="File Listing Table">
@@ -62,8 +62,8 @@
                     </thead>
                     <colgroup>
                         <col style="width: 6%">
-                        <col style="width: 14%">
-                        <col style="width: 35%">
+                        <col style="width: 12%">
+                        <col style="width: 37%">
                         <col style="width: 6%">
                         <col style="width: 13%">
                         <col style="width: 16%">
