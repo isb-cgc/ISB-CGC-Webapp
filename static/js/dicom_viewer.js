@@ -45,13 +45,13 @@ require([
     $('#dicom-iframe').on('load',function(){
         $('.load-spinner').hide();
         // Resize the iFrame's height to center the view vertically
-        $('#dicom-iframe').height(($(window).height() - $('.navbar').height() - ($('#camic-viewer').height() - $('#camic-iframe').height())));
+        $('#dicom-iframe').height(($(window).height() - $('.navbar').height() - ($('#dicom-viewer').height() - $('#dicom-iframe').height())));
         $(window).scrollTop($('.case-info').height());
     });
 
-    // Because we're operating a bit outside the Bootstrap framework on the camic-single template,
+    // Because we're operating a bit outside the Bootstrap framework,
     // we need to force the loading spinner to size properly
-    $('.load-spinner').width($('#camic-iframe').css('width'));
-    $('.load-spinner').height($('#camic-iframe').css('height'));
+    $('.load-spinner').width($('#dicom-iframe').css('width'));
+    $('.load-spinner').height($('#dicom-iframe').css('height'));
     $('.load-spinner').show();
 });
