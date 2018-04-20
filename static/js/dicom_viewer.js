@@ -54,4 +54,10 @@ require([
     $('.load-spinner').width($('#dicom-iframe').css('width'));
     $('.load-spinner').height($('#dicom-iframe').css('height'));
     $('.load-spinner').show();
+
+    // Set a timeout, since sometimes Osimis can take a while to load
+    // *everything* and our spinner would be running the whole time
+    setTimeout(function(){
+        $('.load-spinner').hide();
+    },3500);
 });
