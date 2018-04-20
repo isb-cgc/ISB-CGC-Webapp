@@ -381,7 +381,9 @@ require([
         var filters = {};
         var page = tab_page[active_tab];
         var files_per_page = tab_files_per_page[active_tab];
-        var url = ajax_update_url[active_tab] + '?page=' + page +'&files_per_page=' + files_per_page;
+        var sort_column = tab_sort_column[active_tab][0];
+        var sort_order = tab_sort_column[active_tab][1];
+        var url = ajax_update_url[active_tab] + '?page=' + page +'&files_per_page=' + files_per_page +'&sort_column='+ sort_column +'&sort_order='+sort_order;
 
         if (SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab][build]).length >0) {
             var filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab][build]));
@@ -416,6 +418,7 @@ require([
         var total_files = tab_count[active_tab];
         var tab_selector = '#'+active_tab+'-files';
         var files_per_page = tab_files_per_page[active_tab];
+        var sort_column = tab_sort_column[active_tab];
         if(do_filter_count) {
             tab_count[active_tab] = total_files = data['total_file_count'];
         }
@@ -443,6 +446,11 @@ require([
             $(tab_selector).find('.dataTables_length').removeClass('disabled');
             $(tab_selector).find('.filelist-panel .panel-body .total-file-count').html(total_files);
             $(tab_selector).find('.filelist-panel .panel-body .paginate_button_space').html(html_page_button);
+            // set column sorting class
+            $(tab_selector).find('.sortable_table th:not(.sorting_disabled)').removeClass('sorting_asc sorting_desc').addClass('sorting');
+            $(tab_selector).find('.sortable_table th:not(.sorting_disabled)[columnId=\''+tab_sort_column[active_tab][0]+'\']')
+                .removeClass('sorting')
+                .addClass(tab_sort_column[active_tab][1]?'sorting_desc':'sorting_asc');
         }
 
         $(tab_selector).find('.filelist-panel table tbody').empty();
@@ -627,10 +635,20 @@ require([
         update_page(this_tab, page_no)
     });
 
+    // change no of entries per page
     $('.data-tab-content').on('change', '.files-per-page', function () {
         var this_tab = $(this).parents('.data-tab').data('file-type');
         tab_files_per_page[this_tab] = $('#'+this_tab+'-files').find('.files-per-page :selected').val();
         update_page(this_tab, 1);
+    });
+
+    // change column sorting
+    $('.data-tab-content').on('click', '.sortable_table th:not(.sorting_disabled)', function () {
+        var this_tab = $(this).parents('.data-tab').data('file-type');
+        var column = $(this).attr("columnId");
+        var order = $(this).is('.sorting, .sorting_desc') ? 0 : 1;
+        tab_sort_column[this_tab] = [column, order];
+        update_table(this_tab, false);
     });
 
     // Show more/less links on categories with >6 fiilters
