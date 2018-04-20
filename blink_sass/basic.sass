@@ -139,25 +139,26 @@ nav
  * dataTable Style Overrides
  *******************************************/
 
-.dataTable
+.dataTable, .sortable_table
     thead
         tr
             th
-                cursor: pointer
                 vertical-align: top
-                &.sorting:after
-                    content: ""
-                    float: right
-                    width: 20px
-                    height: 20px
-                &.sorting_asc:after
-                    content: "\f077"
-                    float: right
-                    font-family: FontAwesome
-                &.sorting_desc:after
-                    content: "\f078"
-                    float: right
-                    font-family: FontAwesome
+                &:not(.sorting_disabled)
+                    cursor: pointer
+                    &.sorting:after
+                        content: ""
+                        float: right
+                        width: 20px
+                        height: 20px
+                    &.sorting_asc:after
+                        content: "\f077"
+                        float: right
+                        font-family: FontAwesome
+                    &.sorting_desc:after
+                        content: "\f078"
+                        float: right
+                        font-family: FontAwesome
 
 
 .dataTables_info
@@ -184,9 +185,9 @@ nav
     border-radius: 2px
     font-weight: $regular-font-weight
     &:hover, &:active, &:focus
-        background-color: darken($gray-button-bg, 20%) !important
+        background-color: $warning-bgcolor-dark !important
         color: $white !important
-        border: 1px solid darken($gray-button-bg-border, 20%) !important
+        border: 1px solid darken($warning-bgcolor-dark, 20%) !important
     &.current, &.current:hover
         color: $white
         border: 1px solid darken($gray-button-bg, 30%)
