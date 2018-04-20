@@ -2205,36 +2205,36 @@ span.code {
   font-family: monospace;
   font-weight: 600; }
 
-#camic .camic-tabs li a, #camic-single .camic-tabs li a {
+#camic .camic-tabs li a, #camic-single .camic-tabs li a, #dicom-viewer .camic-tabs li a {
   font-size: 13px;
   font-weight: 700; }
 
-#camic .camic-tabs li:not(:last-child), #camic-single .camic-tabs li:not(:last-child) {
+#camic .camic-tabs li:not(:last-child), #camic-single .camic-tabs li:not(:last-child), #dicom-viewer .camic-tabs li:not(:last-child) {
   margin-bottom: 10px; }
 
-#camic .camic-tabs img, #camic-single .camic-tabs img {
+#camic .camic-tabs img, #camic-single .camic-tabs img, #dicom-viewer .camic-tabs img {
   margin-top: 5px; }
 
-#camic iframe, #camic-single iframe {
+#camic iframe, #camic-single iframe, #dicom-viewer iframe {
   min-height: 700px;
   margin-top: 10px; }
 
-#camic .logo, #camic-single .logo {
+#camic .logo, #camic-single .logo, #dicom-viewer .logo {
   margin-right: 10px; }
 
-#camic .camic-header-container, #camic-single .camic-header-container {
+#camic .camic-header-container, #camic-single .camic-header-container, #dicom-viewer .camic-header-container {
   background-color: #2e66bc; }
-  #camic .camic-header-container a, #camic-single .camic-header-container a {
+  #camic .camic-header-container a, #camic-single .camic-header-container a, #dicom-viewer .camic-header-container a {
     color: white; }
 
-#camic .load-spinner, #camic-single .load-spinner {
+#camic .load-spinner, #camic-single .load-spinner, #dicom-viewer .load-spinner {
   position: absolute;
   width: 100%;
   height: 900px;
-  margin-top: 25px;
+  margin-top: 12px;
   background: #829ebc;
   z-index: 10; }
-  #camic .load-spinner i, #camic-single .load-spinner i {
+  #camic .load-spinner i, #camic-single .load-spinner i, #dicom-viewer .load-spinner i {
     position: absolute;
     left: 45%;
     top: 40%;
