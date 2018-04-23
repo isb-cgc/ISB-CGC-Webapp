@@ -428,6 +428,7 @@ require([
             $(tab_selector).find('.no-file-page-count').show();
             $(tab_selector).find('.paginate_button_space').hide();
             $(tab_selector).find('.dataTables_length').addClass('disabled');
+            $(tab_selector).find('.sortable_table th').addClass('disabled');
         } else {
             var page_list = pagination(page,total_pages);
             var html_page_button = "";
@@ -444,16 +445,13 @@ require([
             $(tab_selector).find('.no-file-page-count').hide();
             $(tab_selector).find('.paginate_button_space').show();
             $(tab_selector).find('.dataTables_length').removeClass('disabled');
+            $(tab_selector).find('.sortable_table th').removeClass('disabled');
             $(tab_selector).find('.filelist-panel .panel-body .total-file-count').html(total_files);
             $(tab_selector).find('.filelist-panel .panel-body .paginate_button_space').html(html_page_button);
-            // set column sorting class
-            $(tab_selector).find('.sortable_table th:not(.sorting_disabled)').removeClass('sorting_asc sorting_desc').addClass('sorting');
-            $(tab_selector).find('.sortable_table th:not(.sorting_disabled)[columnId=\''+tab_sort_column[active_tab][0]+'\']')
-                .removeClass('sorting')
-                .addClass(tab_sort_column[active_tab][1]?'sorting_desc':'sorting_asc');
         }
 
         $(tab_selector).find('.filelist-panel table tbody').empty();
+        $(tab_selector).find('.sortable_table th:not(.sorting_disabled)').removeClass('sorting_asc sorting_desc').addClass('sorting');
 
         var files = data['file_list'];
         if(files.length <= 0) {
@@ -463,10 +461,13 @@ require([
             );
         }
         else {
-
             var first_page_entry = ((page - 1) * files_per_page) + 1;
             var last_page_entry = first_page_entry + files.length - 1;
             $(tab_selector).find('.showing').text(first_page_entry + " to " + last_page_entry);
+            // set column sorting class
+            $(tab_selector).find('.sortable_table th:not(.sorting_disabled)[columnId=\'' + tab_sort_column[active_tab][0] + '\']')
+                .removeClass('sorting')
+                .addClass(tab_sort_column[active_tab][1] ? 'sorting_desc' : 'sorting_asc');
         }
 
         for (var i = 0; i < files.length; i++) {
