@@ -434,6 +434,9 @@ def help_page(request):
 def about_page(request):
     return render(request, 'GenespotRE/about.html')
 
+def vid_tutorials_page(request):
+    return render(request, 'GenespotRE/video_tutorials.html')
+
 @login_required
 def dashboard_page(request):
 
