@@ -138,17 +138,17 @@ require([
 
         if(selIgvFiles.count() >= SEL_IGV_FILE_MAX) {
             $('#file-max-alert-igv').show();
-            $('.filelist-panel input.igv[type="checkbox"]:not(:checked)').attr('disabled',true);
+            $('.filelist-panel input.igv.accessible[type="checkbox"]:not(:checked)').attr('disabled',true);
         } else {
             $('#file-max-alert-igv').hide();
-            $('.filelist-panel input.igv[type="checkbox"]').attr('disabled',false);
+            $('.filelist-panel input.igv.accessible[type="checkbox"]').attr('disabled',false);
         }
         if(selCamFiles.count() >= SEL_IGV_FILE_MAX) {
             $('#file-max-alert-cam').show();
-            $('.filelist-panel input.cam[type="checkbox"]:not(:checked)').attr('disabled',true);
+            $('.filelist-panel input.cam.accessible[type="checkbox"]:not(:checked)').attr('disabled',true);
         } else {
             $('#file-max-alert-cam').hide();
-            $('.filelist-panel input.cam[type="checkbox"]').attr('disabled',false);
+            $('.filelist-panel input.cam.accessible[type="checkbox"]').attr('disabled',false);
         }
     };
 
@@ -176,7 +176,7 @@ require([
 
             update_on_selex_change();
 
-           $('.filelist-panel input.igv[type="checkbox"]').attr('disabled',false);
+           //$('.filelist-panel input.igv[type="checkbox"]').attr('disabled',false);
 
         });
 
@@ -480,9 +480,9 @@ require([
             var label = '';
             var tokenLabel = files[i]['sample']+", "+files[i]['exp_strat']+", "+happy_name(files[i]['platform'])+", "+files[i]['datatype'];
             var checkbox_inputs = '';
-            var disable = true;
+            var accessible = false;
             if (files[i]['access'] != 'controlled' || files[i]['user_access'] == 'True') {
-                disable = false;
+                accessible = true;
             }
 
             if(active_tab !== 'all') {
@@ -491,9 +491,9 @@ require([
                         val = files[i]['cloudstorage_location'] + ';' + files[i]['cloudstorage_location'].substring(0, files[i]['cloudstorage_location'].lastIndexOf("/") + 1) + files[i]['index_name'] + ',' + files[i]['sample'];
                         dataTypeName = "gcs_bam";
                         label = "IGV";
-                        checkbox_inputs += '<input class="igv" type="checkbox" token-label="' + tokenLabel + '" program="' + files[i]['program'] + '" name="' + dataTypeName + '" data-type="' + dataTypeName + '" value="' + val + '"';
-                        if (disable) {
-                            checkbox_inputs += ' disabled="disabled"';
+                        checkbox_inputs += '<input class="igv'+(accessible? ' accessible':'')+'" type="checkbox" token-label="' + tokenLabel + '" program="' + files[i]['program'] + '" name="' + dataTypeName + '" data-type="' + dataTypeName + '" value="' + val + '"';
+                        if (!accessible) {
+                            checkbox_inputs += ' disabled';
                         }
                         checkbox_inputs += '>';
                     } else if(active_tab === 'camic' && (files[i]['datatype'] == 'Tissue slide image' || files[i]['datatype'] == 'Diagnostic image')) {
@@ -501,13 +501,13 @@ require([
                         files[i]['thumbnail'] = files[i]['cloudstorage_location'].split('/').slice(-2)[0];
                         dataTypeName = "slide_image";
                         label = "caMicro";
-                        checkbox_inputs += '<input class="cam" type="checkbox" name="' + dataTypeName
+                        checkbox_inputs += '<input class="cam'+ (accessible? ' accessible':'') +'" type="checkbox" name="' + dataTypeName
                             + '" data-thumb="'+files[i]['thumbnail']+'" data-sub-type="'+files[i]['datatype']
                             + '" data-sample="' + files[i]['sample'] + '" data-case="' + files[i]['case']
                             + '" data-disease-code="' + files[i]['disease_code'] + '" data-project="' + files[i]['project']
                             + '" data-type="' + dataTypeName + '" value="' + val + '"';
-                        if (disable) {
-                            checkbox_inputs += ' disabled="disabled"';
+                        if (!accessible) {
+                            checkbox_inputs += ' disabled';
                         }
                         checkbox_inputs += '>';
                     }
@@ -547,8 +547,8 @@ require([
         }
 
         // If we're at the max, disable all checkboxes which are not currently checked
-        selIgvFiles.count() >= SEL_IGV_FILE_MAX && $(tab_selector).find('.filelist-panel input.igv[type="checkbox"]:not(:checked)').attr('disabled',true);
-        selCamFiles.count() >= SEL_IGV_FILE_MAX && $(tab_selector).find('.filelist-panel input.cam[type="checkbox"]:not(:checked)').attr('disabled',true);
+        selIgvFiles.count() >= SEL_IGV_FILE_MAX && $(tab_selector).find('.filelist-panel input.igv.accessible[type="checkbox"]:not(:checked)').attr('disabled',true);
+        selCamFiles.count() >= SEL_IGV_FILE_MAX && $(tab_selector).find('.filelist-panel input.cam.accessible[type="checkbox"]:not(:checked)').attr('disabled',true);
 
         // Update the Launch buttons
         $('#igv-viewer input[type="submit"]').prop('disabled', (selIgvFiles.count() <= 0));
@@ -611,7 +611,7 @@ require([
 
     };
 
-    function update_page(tab, page_no){
+    function goto_table_page(tab, page_no){
         tab_page[tab] = page_no;
         update_table(tab, false);
     }
@@ -633,14 +633,14 @@ require([
         else{
             page_no = 1;
         }
-        update_page(this_tab, page_no)
+        goto_table_page(this_tab, page_no)
     });
 
     // change no of entries per page
     $('.data-tab-content').on('change', '.files-per-page', function () {
         var this_tab = $(this).parents('.data-tab').data('file-type');
         tab_files_per_page[this_tab] = $('#'+this_tab+'-files').find('.files-per-page :selected').val();
-        update_page(this_tab, 1);
+        goto_table_page(this_tab, 1);
     });
 
     // change column sorting
