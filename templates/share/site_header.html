@@ -9,23 +9,27 @@
         <div class="row">
             <div class="col-lg-12">
             <div class="nav navbar-left">
-                 <ul class="">
+                <ul class="">
                     <li class="navbar-item">
                         {% if user.is_authenticated %}
                              <a href="{% url 'dashboard' %}" title="Dashboard" >
                         {%  else %}
                             <a href="{% url 'landing_page' %}" title="Home Page" >
                         {%  endif %}
-                        <img class="navbar-brand" src="{% static 'img/isblogo.png' %}" alt="ISB Logo"/><span class="navbar-item">ISB-CGC</span></a></li>
-                     {% if request.path != '/' %}
-                       <li class="navbar-link navbar-item">
+                        <img class="navbar-brand" src="{% static 'img/isblogo.png' %}" alt="ISB Logo"/><span class="navbar-item">ISB-CGC</span></a>
+                    </li>
+                    {% if request.path != '/' %}
+                        <li class="navbar-link navbar-item">
                             <a href="{% url 'landing_page' %}">Home Page</a>
                         </li>
-                     {% endif %}
-                     <li class="navbar-link navbar-item">
-                         <a href="http://isb-cancer-genomics-cloud.readthedocs.org/en/latest/" target="_blank">Documentation</a>
-                     </li>
-                     <li class="navbar-link navbar-item">
+                    {% endif %}
+                    <li class="navbar-link navbar-item">
+                        <a href="http://isb-cancer-genomics-cloud.readthedocs.org/en/latest/" target="_blank">Documentation</a>
+                    </li>
+                    <li class="navbar-link navbar-item">
+                        <a href="{% url 'vid_tutorials' %}" target="_blank" title="Video Tutorials">Video Tutorials</a>
+                    </li>
+                    <li class="navbar-link navbar-item">
                         <div class="dropdown">
                             <a role="button class=dropdown-toggle navbar-item__text" id="help-dropdown" data-toggle="dropdown" aria-label="Help Dropdown" aria-expanded="true">
                                 Feedback <i class="fa fa-caret-down"></i>
@@ -34,7 +38,6 @@
                                 <li role="menuitem"><a href="https://groups.google.com/a/isb-cgc.org/forum/#!newtopic/feedback" target="_blank">Send Feedback</a></li>
                                 <li role="menuitem"><a href="https://github.com/isb-cgc/ISB-CGC-Webapp/issues/new" target="_blank">Submit Github Issue</a></li>
                             </ul>
-
                         </div>
                     </li>
                 </ul>

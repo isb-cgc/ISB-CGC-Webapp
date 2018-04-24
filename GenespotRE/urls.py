@@ -59,6 +59,7 @@ urlpatterns = [
     url(r'^help/', views.help_page, name='help'),
     url(r'^about/', views.about_page, name='about_page'),
     url(r'^dashboard/', views.dashboard_page, name='dashboard'),
+    url(r'^videotutorials/', views.vid_tutorials_page, name='vid_tutorials'),
 
     url(r'^programs/', include('projects.urls')),
     url(r'^genes/', include('genes.urls')),
