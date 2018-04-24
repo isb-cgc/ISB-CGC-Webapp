@@ -79,7 +79,7 @@
                             <h4>Upload a GDC Data Portal Case Manifest or a CSV/TSV file of barcodes and programs</h4>
                         </div>
                         <div class="panel-body">
-                            <button class="btn btn-primary instructions" title="Show/Hide the instructions">Instructions</button>
+                            <button class="btn btn-primary instructions instructions_show" title="Show/Hide the instructions"></button>
                             <div class="instructions" style="display: none;">
                                 <p>Files must be in <a href="#gdc-manifest">GDC Data Portal case manifest format</a>, or in <a href="#tcsv-format">comma/tab-delimited case/sample/program format</a>. After selecting the file and uploading it, the entries will be validated. Any entries which are found to be invalid will be listed, and you can choose to omit them and continue with cohort creation, or select a new file for verification and upload.</p>
                                 <a name="tcsv-format"></a><h5>CSV/TSV Barcode Files</h5>
@@ -123,25 +123,29 @@ TARGET-10-CAAABF-60.11C</pre>
                                 <hr>
                                 <div class="valid-entries">
                                     <h5>Valid Entries</h5>
-                                    <table id="valid-entries-table" class="table table-striped tablesorter">
-                                        <thead><tr>
-                                            <th>Program</th>
-                                            <th>Case</th>
-                                            <th>Sample</th>
-                                        </tr></thead>
-                                        <tbody><td></td><td></td><td></td></tbody>
-                                    </table>
-                                </div>
-                                <div class="cohort-counts">
-                                    <h5>Resulting Cohort Counts</h5>
-                                    <table class="table table-striped">
-                                        <thead><tr>
+                                    <div class="table_wrapper">
+                                        <table class="table table-striped">
+                                            <thead><tr>
                                                 <th>Program</th>
                                                 <th>Case</th>
                                                 <th>Sample</th>
-                                        </tr></thead>
-                                        <tbody></tbody>
-                                    </table>
+                                            </tr></thead>
+                                            <tbody><td></td><td></td><td></td></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="cohort-counts">
+                                    <h5>Resulting Cohort Counts</h5>
+                                    <div class="table_wrapper">
+                                        <table class="table table-striped">
+                                            <thead><tr>
+                                                    <th>Program</th>
+                                                    <th>Case</th>
+                                                    <th>Sample</th>
+                                            </tr></thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
                                 </div>
                                 <p class="invalid-not-saved">Note: Invalid entries <b>will not</b> be included if you choose to create this cohort.</p>
                                 <div class="save-cohort" style="display: none;">
@@ -155,18 +159,20 @@ TARGET-10-CAAABF-60.11C</pre>
                                 </div>
                                 <div class="invalid-entries">
                                     <h5>Invalid Entries</h5>
-                                    <table id="invalid-entries-table" class="table table-striped tablesorter">
-                                        <thead><tr>
-                                            <th>Program</th>
-                                            <th>Case</th>
-                                            <th>Sample</th>
-                                            </tr></thead>
-                                        <tbody><td></td><td></td><td></td></tbody>
-                                    </table>
-                                    <div class="validation-messages">
-                                        <p><b>Information regarding the invalid entries</b></p>
-                                        <ul>
-                                        </ul>
+                                    <div class="table_wrapper">
+                                        <table class="table table-striped">
+                                            <thead><tr>
+                                                <th>Program</th>
+                                                <th>Case</th>
+                                                <th>Sample</th>
+                                                </tr></thead>
+                                            <tbody><td></td><td></td><td></td></tbody>
+                                        </table>
+                                        <div class="validation-messages">
+                                            <p><b>Information regarding the invalid entries</b></p>
+                                            <ul>
+                                            </ul>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -181,7 +187,7 @@ TARGET-10-CAAABF-60.11C</pre>
                             <h4>Paste a set of barcodes and programs</h4>
                         </div>
                         <div class="panel-body">
-                            <button class="btn btn-primary instructions" title="Show/Hide the instructions">Instructions</button>
+                            <button class="btn btn-primary instructions instructions_show" title="Show/Hide the instructions"></button>
                             <div class="instructions" style="display: none;">
                                 <p>There is a maximum length of 10000 character for the text box. Please use the file upload option if you need to upload more barcodes than will fit in that space.</p>
                                 <p>All entries must be either a valid <span class="code">case barcode</span> <b><i>or</i></b> <span class="code">sample barcode</span>. When a case barcode is provided, all samples from that case will be included in the cohort. Make a separate entry per sample if only specific samples from a case should be added to the cohort.</p>
@@ -217,25 +223,29 @@ TARGET-10-CAAABF-60.11C
                                 <hr>
                                 <div class="valid-entries">
                                     <h5>Valid Entries</h5>
-                                    <table id="valid-entries-table2" class="table table-striped tablesorter">
-                                        <thead><tr>
-                                            <th>Program</th>
-                                            <th>Case</th>
-                                            <th>Sample</th>
-                                        </tr></thead>
-                                        <tbody><td></td><td></td><td></td></tbody>
-                                    </table>
-                                </div>
-                                <div class="cohort-counts">
-                                    <h5>Resulting Cohort Counts</h5>
-                                    <table class="table table-striped">
-                                        <thead><tr>
+                                    <div class="table_wrapper">
+                                        <table class="table table-striped">
+                                            <thead><tr>
                                                 <th>Program</th>
                                                 <th>Case</th>
                                                 <th>Sample</th>
-                                        </tr></thead>
-                                        <tbody></tbody>
-                                    </table>
+                                            </tr></thead>
+                                            <tbody><td></td><td></td><td></td></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="cohort-counts">
+                                    <h5>Resulting Cohort Counts</h5>
+                                    <div class="table_wrapper">
+                                        <table class="table table-striped">
+                                            <thead><tr>
+                                                    <th>Program</th>
+                                                    <th>Case</th>
+                                                    <th>Sample</th>
+                                            </tr></thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
                                 </div>
                                 <p class="invalid-not-saved">Note: Invalid entries <b>will not</b> be saved if you choose to create this cohort.</p>
                                 <div class="save-cohort" style="display: none;">
@@ -249,18 +259,20 @@ TARGET-10-CAAABF-60.11C
                                 </div>
                                 <div class="invalid-entries">
                                     <h5>Invalid Entries</h5>
-                                    <table id="invalid-entries-table2" class="table table-striped tablesorter">
-                                        <thead><tr>
-                                            <th>Program</th>
-                                            <th>Cases</th>
-                                            <th>Sample</th>
-                                        </tr></thead>
-                                        <tbody><td></td><td></td><td></td></tbody>
-                                    </table>
-                                    <div class="validation-messages">
-                                        <p><b>Information regarding the invalid entries</b></p>
-                                        <ul>
-                                        </ul>
+                                    <div class="table_wrapper">
+                                        <table class="table table-striped">
+                                            <thead><tr>
+                                                <th>Program</th>
+                                                <th>Cases</th>
+                                                <th>Sample</th>
+                                            </tr></thead>
+                                            <tbody><td></td><td></td><td></td></tbody>
+                                        </table>
+                                        <div class="validation-messages">
+                                            <p><b>Information regarding the invalid entries</b></p>
+                                            <ul>
+                                            </ul>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

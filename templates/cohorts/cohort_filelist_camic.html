@@ -26,30 +26,49 @@
                 <h4>File Listing</h4>
             </div>
             <div class="panel-body">
-                <p class="file-page-count">Showing <span class="showing">20</span> files. Page: <span class="page-num">1</span> of <span class="file-count">unknown</span> pages.</p>
-                <p class="no-file-page-count" style="display: none;">Showing 0 files.</p>
-                <div>
-                    <a role="button" class="btn btn-primary prev-page disabled">Previous Page</a>
-                    <a role="button" class="btn btn-primary next-page">Next Page</a>
+                <div class="dataTables_info">
+                    <span class="file-page-count">Showing <span class="showing">25</span> of <span class="total-file-count"></span> entries</span>
+                    <span class="no-file-page-count" style="display: none;">Showing 0 files.</span>
                     <span class="spinner"><i class="fa fa-spin fa-spinner hidden"></i></span>
                 </div>
+                <div>
+                    <div class="dataTables_length files-per-page"><label>Show</label>
+                        <select>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                        <label>entries</label>
+                    </div>
+                    <div class="dataTables_paginate">
+                        <a class="prev-page paginate_button disabled">Previous</a>
+                        <span class="paginate_button_space"/>
+                        <a class="next-page paginate_button">Next</a>
+                    </div>
+                </div>
 
-                <table class="table table-striped file-list-table" aria-label="File Listing Table">
+                <table class="table table-striped file-list-table sortable_table" aria-label="File Listing Table">
                     <thead>
                         <tr>
-                            <th class="col-program">Program</th>
-                            <th class="col-barcode">Sample Barcode</th>
-                            <th class="col-diseasecode">Disease Code</th>
-                            <th class="col-thumbnail">Thumbnail</th>
-                            <th class="col-datatype">Data Type</th>
-                            <th class="col-dataformat">Data Format</th>
-                            <th class="col-viewer">View</th>
+                            <th class="col-program" columnId="col-program">Program</th>
+                            <th class="col-barcode" columnId="col-barcode">Case Barcode</th>
+                            <th class="col-filename" columnId="col-filename">File Name</th>
+                            <th class="col-diseasecode" columnId="col-diseasecode">Disease Code</th>
+                            <th class="col-thumbnail sorting_disabled">Thumbnail</th>
+                            <th class="col-datatype" columnId="col-datatype">Data Type</th>
+                            <th class="col-dataformat" columnId="col-dataformat">Data Format</th>
+                            <th class="col-viewer sorting_disabled">View</th>
                         </tr>
                     </thead>
                     <colgroup>
-                        <col style="width: 8%">
-                        <col style="width: 17%">
-                        <col style="width: 8%">
+                        <col style="width: 7%">
+                        <col style="width: 10%">
+                        <col style="width: 35%">
+                        <col style="width: 10%">
+                        <col style="width: 14%">
+                        <col style="width: 10%">
+                        <col style="width: 9%">
+                        <col style="width: 5%">
                     </colgroup>
                     <tbody>
                     </tbody>
