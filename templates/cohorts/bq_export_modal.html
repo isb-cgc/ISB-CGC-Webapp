@@ -6,13 +6,15 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 id="export-to-bq-header" class="modal-title">{{ export_type }} Export</h4>
+                    <h4 id="export-to-bq-header" class="modal-title">{{ export_type }} Export to BigQuery</h4>
                     <div class="modal-js-messages" id="export-to-bq-js-messages">
                     </div>
                 </div>
                 <form id="export-to-bq-form" method="POST" action="{{ export_url }}">
                     {% csrf_token %}
                     <input type="hidden" class="param" name="build" value="{{ build }}" />
+                    <input type="hidden" class="param" name="export-dest" value="table" />
+                    <div class="loading-overlay" style="display: none;"><div class="spinner"><div><i class="fa fa-cog fa-spin"></i> Loading your BQ datasets and tables...</div></div></div>
                     <div class="modal-body">
                         <div class="message-container"></div>
                         <div class="form-group">
@@ -32,7 +34,7 @@
                             </ul>
                         </div>
                         <div class="form-group table-list" style="display: none;">
-                            <label for="table-name">Choose a table:</label>
+                            <label for="export-to-bq-table">Choose a table:</label>
                             <select id="export-to-bq-table" name="table-name" class="form-control">
                                 <option value="" disabled selected type="label">Please select a table</option>
                             </select>
@@ -43,7 +45,6 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        {% csrf_token %}
                         <input type="submit" value="Export" class="btn btn-primary" />
                         <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
                         <div id="export-underway" class="collapse" style="display: none;">

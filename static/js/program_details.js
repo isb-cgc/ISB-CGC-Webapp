@@ -142,7 +142,8 @@ require([
 
         var invalid_emails = [];
 
-        var emails = $('#share_users').val().split(/\s*,\s*/);
+        var escaped_email_input = $("<div>").text($('#share_users').val()).html();
+        var emails = escaped_email_input.split(/\s*,\s*/);
         for(var i=0; i < emails.length; i++) {
             if(!emails[i].match(base.email)) {
                 invalid_emails.push(emails[i]);

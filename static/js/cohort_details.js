@@ -36,7 +36,8 @@ require.config({
         bloodhound: 'libs/bloodhound',
         typeahead : 'libs/typeahead',
         tokenfield: 'libs/bootstrap-tokenfield.min',
-        bq_export: 'export_to_bq'
+        bq_export: 'export_to_bq',
+        gcs_export: 'export_to_gcs'
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -73,7 +74,8 @@ require([
     'vis_helpers',
     'tree_graph',
     'stack_bar_chart',
-    'bq_export'
+    'bq_export',
+    'gcs_export'
 ], function ($, jqueryui, bootstrap, session_security, d3, d3tip, search_helpers, Bloodhound, _, base) {
 
     var UPDATE_PENDING = false;
@@ -718,16 +720,17 @@ require([
 
         var $this=$(this);
 
-        var emails = $('#share-share_users').val().split(/\s*,\s*/);
+        var escaped_email_input = $("<div>").text($('#share-share_users').val()).html();
+        var emails = escaped_email_input.split(/\s*,\s*/);
         for(var i=0; i < emails.length; i++) {
             if(!emails[i].match(base.email)) {
                 invalid_emails.push(emails[i]);
             }
         }
-
         if(invalid_emails.length > 0) {
+            var msg = "The following email addresses appear to be invalid: "+(invalid_emails.join("; "));
             base.showJsMessage('danger',
-                "The following email addresses appear to be invalid: "+invalid_emails.join("; "),
+                msg,
                 true,'#share-cohort-js-messages');
             return false;
         } else {
