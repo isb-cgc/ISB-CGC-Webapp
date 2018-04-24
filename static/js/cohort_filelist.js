@@ -520,7 +520,7 @@ require([
                 '<td>' + files[i]['case'] + '</td>'
                 + (active_tab !== 'dicom' ? '<td><div class="col-filename">' +
                     '<div>' + files[i]['filename'] + '</div>' +
-                    '<div>[GCD ID: ' + files[i]['file_gdc_id'] + ']</div>' +
+                    '<div>[GDC ID: ' + files[i]['file_gdc_id'] + ']</div>' +
                 '</div></td>' : '') +
                 '<td>' + files[i]['disease_code'] + '</td>' +
                 (active_tab === 'dicom' ? '<td>'+files[i]['project_short_name']+'</td>' : '') +
