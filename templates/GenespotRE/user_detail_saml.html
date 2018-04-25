@@ -3,7 +3,7 @@
 
 {% block saml_content %}
 
-    {% if not user_details.NIH_username or not user_details.NIH_active %} {# No eRA account, no dbGaP #}
+    {% if not user_details.NIH_username or not user_details.NIH_active %} {# No eRA account OR no current dbGaP access #}
 
         {% if not user_details.NIH_username %}
             <p>Apply for dbGaP Authorized Access to access underlying Level 1 genomics data.</p>
