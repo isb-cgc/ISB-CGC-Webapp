@@ -25,10 +25,11 @@
                         <a class="next-page paginate_button">Next</a>
                     </div>
                 </div>
-                <div>
-                    <a class="click_here_column_display_button">Click here to toggle column display >></a>
-                    <a class="hide_column_display_button hide">Hide<<</a>
-                    <div class="column-toggle hide"></div>
+                <div class="column-inputs">
+                    <a role="button" data-toggle="collapse" href="#column-toggle-div-dicom" aria-expanded="false" aria-controls="column-toggle-div-dicom">
+                        Choose Columns to Display <i class="fa fa-caret-down"></i><i class="fa fa-caret-up"></i>
+                    </a>
+                    <div id="column-toggle-div-dicom" class="collapse column-toggle"></div>
                 </div>
                 <table class="table table-striped file-list-table sortable_table" aria-label="File Listing Table">
                     <thead>
