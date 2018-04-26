@@ -647,12 +647,6 @@ require([
         goto_table_page(this_tab, page_no)
     });
 
-    /*//toggle button
-    $('.data-tab-content').on('click', '.click_here_column_display_button, .hide_column_display_button', function () {
-        $(this).toggleClass('hide');
-        $(this).siblings().toggleClass('hide');
-    });*/
-
     //toggle column display
     $('.data-tab-content').on('click', '.column_toggle_button', function () {
         var this_tab = $(this).parents('.data-tab').data('file-type');
