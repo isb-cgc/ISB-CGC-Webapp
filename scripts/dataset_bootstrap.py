@@ -33,7 +33,7 @@ def get_mysql_connection(user, password, database, host='127.0.0.1', port=3306):
 
 def add_authorized_datasets(db):
     auth_dataset_rows = [
-        ('All Open Datasets', 'isb-cgc-open@isb-cgc.org', '', 0, None),
+        ('All Open Datasets', 'isb-cgc-open@isb-cgc.org', '', None, 1),
         ('Fake TCGA Dataset', 'isb-cgc-dev-cntl@isb-cgc.org', 'phs000178', 'phs000178.v9.p8', 0),
         ('Fake TARGET Dataset', 'isb-cgc-dev-cntl-target@isb-cgc.org', 'phs000218', 'phs000218.v18.p7', 0),
         ('Fake CGCI Dataset', 'isb-cgc-dev-cntl-cgci@isb-cgc.org', 'phs000235', None, 0)
