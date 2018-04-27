@@ -275,8 +275,7 @@ function($, d3, d3textwrap, vizhelpers, _) {
             var violin_area = plot_area.append('svg')
                 .attr('class', 'violin_area')
                 .style('fill-opacity', 0)
-                .attr('height', height - margin.bottom - margin.top)
-                .attr('transform', 'translate(' + margin.left + ',0)');
+                .attr('height', height - margin.bottom - margin.top);
 
             // iterate over data to generate a separate violin plot for each
             var i = 0;
