@@ -432,15 +432,14 @@ require([
         } else {
             var page_list = pagination(page,total_pages);
             var html_page_button = "";
-            for(let i of page_list){
-                if(i === "..."){
+            for(var i in page_list){
+                if(page_list[i] === "..."){
                     html_page_button += "<span class='\ellipsis\'>...</span>"
                 }
                 else{
-                    html_page_button += "<a class=\'paginate_button numeric_button"+ (i == page ? " current\'":"\'") +">" + i + "</a>";
+                    html_page_button += "<a class=\'paginate_button numeric_button"+ (page_list[i] == page ? " current\'":"\'") +">" + page_list[i] + "</a>";
                 }
             }
-
             $(tab_selector).find('.file-page-count').show();
             $(tab_selector).find('.no-file-page-count').hide();
             $(tab_selector).find('.paginate_button_space').show();
@@ -472,7 +471,6 @@ require([
                 if (!('datatype' in files[i])) {
                     files[i]['datatype'] = '';
                 }
-
                 var val = "";
                 var dataTypeName = '';
                 var label = '';
@@ -653,8 +651,9 @@ require([
         $(this).toggleClass('column_show').toggleClass('column_hide');
         var col_index = $(this).index();
         tab_columns_display[this_tab][col_index][1] ^= 1;
-        $('table.file-list-table').find('td:nth-child('+(col_index+1)+'), th:nth-child('+(col_index+1)+'), col:nth-child('+(col_index+1)+')').toggleClass('hide');
-        //$('table.file-list-table td:nth-child('+(col_index+1)+'),table.file-list-table th:nth-child('+(col_index+1)+')')
+        $('#'+this_tab+'-files table.file-list-table')
+            .find('td:nth-child('+(col_index+1)+'), th:nth-child('+(col_index+1)+'), col:nth-child('+(col_index+1)+')')
+            .toggleClass('hide');
     });
 
     // change no of entries per page
@@ -752,16 +751,16 @@ require([
                 range.push(i);
             }
         }
-        for(let i of range) {
+        for(var i in range){
             if (l) {
-                if (i - l === 2) {
+                if (range[i] - l === 2) {
                     rangeWithDots.push(l + 1);
-                } else if (i - l !== 1) {
+                } else if (range[i] - l !== 1) {
                     rangeWithDots.push('...');
                 }
             }
-            rangeWithDots.push(i);
-            l = i;
+            rangeWithDots.push(range[i]);
+            l = range[i];
         }
         return rangeWithDots;
     };
