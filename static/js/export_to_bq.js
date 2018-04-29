@@ -157,7 +157,7 @@ require([
                 $('#export-to-bq-modal .loading-overlay').hide();
             },
             error: function (xhr) {
-                var responseJSON = $.parseJSON(xhr);
+                var responseJSON = $.parseJSON(xhr.responseText);
                 var link_to_bqr = responseJSON.msg.match(/register at least one dataset/);
                 var link_to_gcpr = responseJSON.msg.match(/register at least one project/);
                 if (link_to_bqr) {
