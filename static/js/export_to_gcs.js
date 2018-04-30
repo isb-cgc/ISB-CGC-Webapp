@@ -159,13 +159,22 @@ require([
             },
             error: function (xhr) {
                 var responseJSON = $.parseJSON(xhr.responseText);
-                // If we received a redirect, honor that
-                if(responseJSON.redirect) {
-                    base.setReloadMsg(responseJSON.level || "error",responseJSON.message);
-                    window.location = responseJSON.redirect;
-                } else {
-                    base.showJsMessage(responseJSON.level || "error",responseJSON.message,true);
+                var link_to_bckt = responseJSON.msg.match(/register at least one bucket/);
+                var link_to_gcpr = responseJSON.msg.match(/register at least one project/);
+                if (link_to_bckt) {
+                    responseJSON.msg = responseJSON.msg.replace(
+                        "register at least one bucket",
+                        '<a href="http://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/webapp/program_data_upload.html#registering-cloud-storage-buckets-and-bigquery-datasets-a-pre-requisite-for-using-your-own-data-in-isb-cgc" target="_BLANK">register at least one bucket</a>'
+                    );
                 }
+                if (link_to_gcpr) {
+                    responseJSON.msg = responseJSON.msg.replace(
+                        "register at least one project",
+                        '<a href="http://isb-cancer-genomics-cloud.readthedocs.io/en/latest/sections/webapp/Gaining-Access-To-Contolled-Access-Data.html?#registering-your-google-cloud-project-service-account" target="_BLANK">register at least one project</a>'
+                    );
+                }
+                base.showJsMessage('error', responseJSON.msg, true, "#export-to-gcs-js-messages");
+                $('#export-to-gcs-modal .loading-overlay').hide();
             },
             complete: function(xhr, status) {
                 $('#export-to-gcs-form input[type="submit"]').removeAttr('disabled');
