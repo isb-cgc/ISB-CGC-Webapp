@@ -69,7 +69,7 @@
         </div>
     </div>
 
-    {% if cohort.perm.perm == 'OWNER' %}
+    {% if not has_user_data %}
         <!-- Export File Manifest Modals -->
         {% include "cohorts/bq_export_modal.html" with export_type="File Manifest" export_url=export_url %}
         {% include "cohorts/gcs_export_modal.html" with export_type="File Manifest" export_url=export_url %}
