@@ -67,7 +67,7 @@
                     {% endif %}
                 </button></li>
                 <li class="separator"></li>
-                <li class="menu-item"><a href="{% url 'cohort_filelist' cohort.id %}" class="btn btn-info view-files-btn" title="View this cohort's file list">File Browser</a></li>
+                <li class="menu-item"><a href="{% url 'cohort_filelist' cohort.id %}" class="btn btn-info view-files-btn" {% if cohort.get_programs|length <= 1 and cohort_programs|has_user_data %}disabled {% endif %}title="{% if cohort.get_programs|length <= 1 and cohort_programs|has_user_data %}The file browser is not available at this time for cohorts containing only user data.{% else %}View this cohort's file list{% endif %}">File Browser</a></li>
                 {% if cohort.perm.perm == 'OWNER' %}
                 <li class="separator"></li>
                 <li class="menu-item"><a href="{%  url 'download_ids' cohort.id %}" class="btn btn-info download-ids-btn" title="Download this cohort's records as a CSV">CSV</a></li>
@@ -198,7 +198,7 @@
                     {% for program in programs %}
                          <li role="presentation" class="program-tab{% if not program|program_is_in_cohort:cohort.get_programs %} disabled{% elif program|program_is_first_in_cohort:cohort.get_programs %} active{% endif %}"><a href="#{{ program.id }}-data" role="tab" data-toggle="tab" title="ISB-CGC Data" data-program-id="{{ program.id }}">{{ program.name }} Data</a></li>
                     {% endfor %}
-                    <li role="presentation" class="program-tab {% if cohort.get_programs|length <= 1 and cohort_programs|has_user_data %}active{% endif %} {% if not cohort_programs|has_user_data %}disabled{% endif %}"><a href="#0-data" role="tab" data-toggle="tab" title="User Data" data-program-id="0">User Data</a></li>
+                    <li role="presentation" class="program-tab {% if cohort.only_user_data %}active{% endif %} {% if not cohort_programs|has_user_data %}disabled{% endif %}"><a href="#0-data" role="tab" data-toggle="tab" title="User Data" data-program-id="0">User Data</a></li>
                 </ul>
             </div>
         </div>
