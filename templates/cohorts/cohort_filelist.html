@@ -112,6 +112,7 @@
     var SEL_IGV_FILE_MAX = '{{  sel_file_max }}';
     var FILE_LIST_MAX = '{{  file_list_max }}';
     var IMG_THUMBS_URL = '{{ img_thumbs_url }}';
+    var HAS_USER_DATA = {% if has_user_data %}true{% else %}false{% endif %};
     var request_user_id = {{ user.id }};
     </script>
 {% endblock %}
