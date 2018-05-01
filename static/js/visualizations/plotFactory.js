@@ -157,7 +157,8 @@ define([
 
         var svg = d3.select(plot_selector)
             .append('svg')
-            .attr('width', width + 10)
+            //.attr('width', width + 10)
+            .attr('width', width)
             .attr('height', height);
 
         var plot = violin_plot_obj.createViolinPlot(svg,
@@ -188,11 +189,12 @@ define([
         var max_n = tmp[1];
         var legend = d3.select(legend_selector)
             .append('svg')
-            .attr('width', 850);
+            .attr('width', 800);
 
         var svg = d3.select(plot_selector)
             .append('svg')
-            .attr('width', width + 10)
+            //.attr('width', width + 10)
+            .attr('width', width)
             .attr('height', height);
 
         var plot = violin_plot_obj.createViolinPlot(svg,

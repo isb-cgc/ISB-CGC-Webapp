@@ -1136,20 +1136,21 @@ require([
 
         plot_loader.fadeIn();
         plot_element.find('.resubmit-button').hide();
-        plotFactory.generate_plot({
-            plot_selector    : plot_selector,
-            legend_selector  : legend_selector,
-            pairwise_element : pair_wise,
-            type             : args.type,
-            x                : args.x,
-            y                : args.y,
-            logTransform     : args.logTransform,
-            color_by         : args.color_by,
-            color_by_sel     : args.color_by_sel,
-            gene_label       : args.gene_label,
-            cohorts          : cohort_ids,
-            color_override   : color_override
-         }, function(result){
+        plotFactory.generate_plot(
+            {
+                plot_selector    : plot_selector,
+                legend_selector  : legend_selector,
+                pairwise_element : pair_wise,
+                type             : args.type,
+                x                : args.x,
+                y                : args.y,
+                logTransform     : args.logTransform,
+                color_by         : args.color_by,
+                color_by_sel     : args.color_by_sel,
+                gene_label       : args.gene_label,
+                cohorts          : cohort_ids,
+                color_override   : color_override
+            }, function(result){
                 if(result.error){
                     plot_element.find('.resubmit-button').show();
                 }

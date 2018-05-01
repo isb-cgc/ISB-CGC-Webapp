@@ -87,8 +87,7 @@ function($, d3, d3textwrap, vizhelpers, _) {
                 .style('fill', 'none')
                 .attr('transform', 'rotate(90, 0, 0) scale(1, -1)');
         },
-        addPoints: function (svg, raw_data, values_only, height, width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, margin, cohort_set) {
-
+        addPoints: function (svg, raw_data, values_only, height, width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, cohort_set, padding) {
             // remove counts from xdomain
             var tmp = xdomain;
             xdomain = [];
@@ -103,7 +102,7 @@ function($, d3, d3textwrap, vizhelpers, _) {
 
             var x = d3.scale.ordinal()
                 .domain(xdomain)
-                .rangeBands([0, width-(violin_width/2)]);
+                .rangeBands([0, width]);
 
             var colorVal = function(d) { return d[colorBy]; };
 
@@ -131,6 +130,9 @@ function($, d3, d3textwrap, vizhelpers, _) {
                     nonNullData.push(d);
                 }
             });
+            /*var div = d3.select("body").append("div")
+                    .attr("class", "tooltip")
+                    .style("opacity", 0);*/
 
             svg.selectAll('.dot')
                 .data(nonNullData)
@@ -139,7 +141,7 @@ function($, d3, d3textwrap, vizhelpers, _) {
                 .attr('class', function(d) { return d[colorBy]; })
                 .style('fill', function(d) { return color(colorVal(d)); })
                 .attr('cx', function(d) {
-                    var histogram = histo_dict[x(d[xAttr])/violin_width];
+                    var histogram = histo_dict[parseInt(x(d[xAttr])/(violin_width+padding))];
                     var histo_index = 0;
                     for (var j = 0; j < histogram.length; j++) {
                         var higher = histogram[j][0];
@@ -156,12 +158,27 @@ function($, d3, d3textwrap, vizhelpers, _) {
                             .domain([0, d3.max(histogram, function(d) { return d.y; })]);
                         rand_pos = plusOrMinus * Math.floor(Math.random() * y_horizontal(histogram[histo_index]['y']) * 0.8);
                     }
-                    return x(d[xAttr]) + violin_width/2 + rand_pos;
+                    return x(d[xAttr]) + (violin_width+padding)/2 + rand_pos;
                 }) // Staggers points across a histogram
                 .attr('cy', function(d) {
                     return y(d[yAttr]);
                 })
                 .attr('r', 2);
+                /*.on("mouseover", function(d) {
+                    div.transition()
+                        .duration(200)
+                        .style("opacity", .9);
+                    div	.html(
+                             "("+(typeof d[yAttr] == "number"? d[yAttr] : d3.format("s")(d[yAttr]))+")"
+                            )
+                        .style("left", (d3.event.pageX) + "px")
+                        .style("top", (d3.event.pageY - 28) + "px");
+                    })
+                .on("mouseout", function(d) {
+                    div.transition()
+                        .duration(500)
+                        .style("opacity", 0);
+                });*/
 
             legend = legend.attr('height', 20 * color.domain().length + 30);
             legend.append('text')
@@ -231,14 +248,15 @@ function($, d3, d3textwrap, vizhelpers, _) {
                 .attr('class', 'median-line')
                 .attr('d', line)
                 .style('stroke', 'green')
-                .style('fill', 'none')
+                .style('fill', 'none');
         },
         createViolinPlot: function(svg, raw_Data, height, violin_width, max_y, min_y, xLabel, yLabel, xAttr, yAttr, colorBy, legend, cohort_set) {
-            var margin = {top: 0, bottom: 120, left: 110, right: 0};
+            var margin = {top: 50, bottom: 120, left: 110, right: 0};
             var domain = [min_y, max_y];
-            var range = [height-margin.bottom, 0];
-            var view_width = 800;
+            var range = [height - margin.bottom - margin.top, 0];
+            var view_width = svg.attr("width") - margin.left - margin.right;
             var processed_data = {};
+            var x_padding = 20; //x padding between plots
 
             // Split data into separate violins
             for (var i = 0; i < raw_Data.length; i++) {
@@ -268,14 +286,15 @@ function($, d3, d3textwrap, vizhelpers, _) {
             plot_area.append('clipPath')
                 .attr('id', 'plot_area_clip')
                 .append('rect')
-                .attr('height', height-margin.top-margin.bottom)
+                .attr('height', height - margin.top - margin.bottom)
                 .attr('width', view_width)
                 .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-            var violin_area = plot_area.append('svg')
+            var violin_area = plot_area.append('g')
                 .attr('class', 'violin_area')
                 .style('fill-opacity', 0)
-                .attr('height', height - margin.bottom - margin.top);
+                .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
 
             // iterate over data to generate a separate violin plot for each
             var i = 0;
@@ -287,7 +306,7 @@ function($, d3, d3textwrap, vizhelpers, _) {
                 xdomain.push(key + ':' + point_count);
                 var g = violin_area.append('g')
                     .attr('class', 'violin-plot')
-                    .attr('transform', 'translate(' + (i * violin_width + margin.left) + ')');
+                    .attr('transform', 'translate(' + (i * (violin_width+x_padding)+x_padding/2) + ')');
                 scatter_processed_data[i] = [];
                 var values_only = [];
 
@@ -310,18 +329,19 @@ function($, d3, d3textwrap, vizhelpers, _) {
             }
 
             // Set width of overall plot in here
-            var width = violin_width * Object.keys(processed_data).length + (violin_width / 2);
+            //var width = violin_width * Object.keys(processed_data).length + (violin_width / 2);
+            var width = (violin_width+x_padding) * Object.keys(processed_data).length;
             violin_area.attr('width', width);
-            svg.attr('width', width + margin.left);
+            svg.attr('width', width + margin.left + margin.right);
 
             plot_area.select('rect')
-                .attr('width', width - margin.left - margin.right);
+                .attr('width', width);
 
             var plotg = plot_area.append('g')
                 .attr('width', width)
                 .attr('height', height)
-                .attr('transform', 'translate(' + (margin.left) + ',0)');
-            this.addPoints(plotg, raw_Data, scatter_processed_data, height, width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, margin, cohort_set);
+                .attr('transform', 'translate(' + margin.left + ', ' + margin.top + ')');
+            this.addPoints(plotg, raw_Data, scatter_processed_data, height, width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, cohort_set, x_padding);
 
             // create y axis
             var y = d3.scale.linear()
@@ -336,7 +356,7 @@ function($, d3, d3textwrap, vizhelpers, _) {
             // create x axis
             var x = d3.scale.ordinal()
                 .domain(xdomain)
-                .rangeBands([0, width-(violin_width/2)]);
+                .rangeBands([0, width]);
             var xAxis = d3.svg.axis()
                 .scale(x)
                 .ticks(xdomain.length)
@@ -352,7 +372,7 @@ function($, d3, d3textwrap, vizhelpers, _) {
             // append axes
             svg.append('g')
                 .attr('class', 'y axis')
-                .attr('transform', 'translate(' + margin.left + ',0)')
+                .attr('transform', 'translate(' + margin.left +', '+ margin.top+')')
                 .call(yAxis);
 
             var x_axis_area = svg.append('g')
@@ -361,9 +381,9 @@ function($, d3, d3textwrap, vizhelpers, _) {
             x_axis_area.append('clipPath')
                 .attr('id', 'x_axis_area_clip')
                 .append('rect')
-                .attr('height', margin.bottom+margin.top)
-                .attr('width', width-margin.left-margin.right)
-                .attr('transform', 'translate(' + margin.left + ',' + (height-margin.top-margin.bottom) + ')');
+                .attr('height', height-margin.top)
+                .attr('width', width)
+                .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
             x_axis_area.append('g')
                 .attr('class', 'x axis')
@@ -446,7 +466,7 @@ function($, d3, d3textwrap, vizhelpers, _) {
                     svg.select('.x.axis').attr('transform', 'translate(' + (d3.event.translate[0] + margin.left) + ',' + (height - margin.bottom) + ')').call(xAxis);
                     plot_area.selectAll('circle').attr('transform', 'translate(' + d3.event.translate[0] + ',0)');
                     violin_area.selectAll('.violin-plot').attr('transform', function (d, i) {
-                        return 'translate(' + ((i * violin_width) + d3.event.translate[0] + margin.left) + ',0)';
+                        return 'translate(' + ((i * (violin_width+x_padding) +x_padding/2) + d3.event.translate[0]) + ',0)';
                     });
                 }
             };
