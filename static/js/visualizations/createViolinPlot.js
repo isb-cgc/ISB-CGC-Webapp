@@ -60,7 +60,8 @@ function($, d3, d3textwrap, vizhelpers, _) {
                 .nice();
 
             var line = d3.svg.line()
-                .interpolate('basis')
+                .interpolate('cardinal')
+                //.interpolate('basis')
                 .x(function(d) {
                     return x(d.x);
                 })
@@ -133,7 +134,6 @@ function($, d3, d3textwrap, vizhelpers, _) {
             /*var div = d3.select("body").append("div")
                     .attr("class", "tooltip")
                     .style("opacity", 0);*/
-
             svg.selectAll('.dot')
                 .data(nonNullData)
                 .enter().append('circle')
