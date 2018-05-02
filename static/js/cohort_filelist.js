@@ -336,7 +336,7 @@ require([
         if(file_list_total <= 0) {
             // Can't download/export something that isn't there
             $(tab_selector).find('.download-link .btn, .export-btn').attr('disabled','disabled');
-        } else {
+        } else if(!HAS_USER_DATA) {
             $(tab_selector).find('.download-link .btn, .export-btn').removeAttr('disabled');
         }
 
