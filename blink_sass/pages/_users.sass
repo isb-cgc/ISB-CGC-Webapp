@@ -128,6 +128,8 @@
         &.dataset-list
             list-style: none
             padding: 0px
+    input
+        margin-bottom: 5px
 
 #register-gcp
     ol>li
@@ -151,6 +153,30 @@
         width: 550px
     ol
         margin-bottom: 20px
+    button
+        &.instructions
+            &.instructions_show
+                margin-bottom: 15px
+                display: block
+                clear: both
+                &:before
+                    content: "\f103"
+                    float: left
+                    font-family: FontAwesome
+                &:after
+                    content: "Show Instructions"
+                    margin-left: 5px
+            &.instructions_hide
+                margin-bottom: 15px
+                display: block
+                clear: both
+                &:before
+                    content: "\f102"
+                    float: left
+                    font-family: FontAwesome
+                &:after
+                    content: "Hide Instructions"
+                    margin-left: 5px
 
 #user-adjust-sa
     h4

@@ -39,6 +39,7 @@ urlpatterns = [
 
     url(r'^images/(?P<slide_barcode>[A-Za-z0-9\-]+)/$', views.get_image_data, name='image_data'),
     url(r'^images/', views.get_image_data_args, name='image_data_args'),
+    url(r'dicom/(?P<study_uid>[A-Za-z0-9\.]+)/$', views.dicom, name='dicom'),
 
     url(r'^analysis/', include('analysis.urls')),
     url(r'^workbooks/', include('workbooks.urls')),
@@ -58,6 +59,7 @@ urlpatterns = [
     url(r'^help/', views.help_page, name='help'),
     url(r'^about/', views.about_page, name='about_page'),
     url(r'^dashboard/', views.dashboard_page, name='dashboard'),
+    url(r'^videotutorials/', views.vid_tutorials_page, name='vid_tutorials'),
 
     url(r'^programs/', include('projects.urls')),
     url(r'^genes/', include('genes.urls')),
