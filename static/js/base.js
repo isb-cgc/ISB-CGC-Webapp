@@ -194,7 +194,6 @@ require([
     $("[data-hide]").on("click", function(){
         $(this).closest("." + $(this).attr("data-hide")).hide();
     });
-
 });
 
 // Return an object for consts/methods used by most views
@@ -257,6 +256,7 @@ define(['jquery', 'utils'], function($, utils) {
                 },
                 "required": ["project","submitter_id"]
             }
-        }
+        },
+        blockResubmit: utils.blockResubmit
     };
 });

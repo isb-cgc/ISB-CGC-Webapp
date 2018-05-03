@@ -3,7 +3,7 @@
 
 {% comment %}
 
-   Copyright 2015, Institute for Systems Biology
+   Copyright 2018, Institute for Systems Biology
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@
                     <div class="panel-body">
                         <div class="iframe-container">
                             <div class="load-spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                            <iframe id="dicom-iframe" width="100%" src="https://{{ dicom_viewer }}/"></iframe>
+                            <iframe id="dicom-iframe" width="100%" src="https://{{ dicom_viewer }}?study={{ orthanc_uid }}"></iframe>
                         </div>
                     </div>
                 </div>

@@ -124,7 +124,7 @@ def get_project_identifier():
     return BQ_PROJECT_ID
 
 BIGQUERY_DATASET            = os.environ.get('BIGQUERY_DATASET', '')
-BIGQUERY_DATASET_V1            = os.environ.get('BIGQUERY_DATASET_V1', '')
+BIGQUERY_DATASET_V1         = os.environ.get('BIGQUERY_DATASET_V1', '')
 
 PROJECT_NAME                = os.environ.get('GCLOUD_PROJECT_NAME')
 BIGQUERY_PROJECT_NAME       = os.environ.get('BIGQUERY_PROJECT_NAME', PROJECT_NAME)
@@ -526,6 +526,12 @@ MAX_FILES_IGV = 5
 #################################
 CAMIC_VIEWER = os.environ.get('CAMIC_VIEWER', None)
 IMG_THUMBS_URL = os.environ.get('IMG_THUMBS_URL', None)
+
+#################################
+# DICOM Viewer settings
+#################################
+ORTHANC_LOOKUP_URI = os.environ.get('ORTHANC_LOOKUP_URI', None)
+OSIMIS_VIEWER = os.environ.get('OSIMIS_VIEWER', None)
 
 ##############################################################
 #   MailGun Email Settings
