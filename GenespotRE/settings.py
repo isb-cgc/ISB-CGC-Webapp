@@ -489,6 +489,14 @@ DATASET_CONFIGURATION_PATH               = os.environ.get('DATASET_CONFIGURATION
 # DCF Testing flag
 DCF_TEST                                 = bool(os.environ.get('DCF_TEST', 'False') == 'True')
 
+#################################
+#   For DCF login               #
+#################################
+
+DCF_AUTH_URL                             = os.environ.get('DCF_AUTH_URL', '')
+DCF_TOKEN_URL                            = os.environ.get('DCF_TOKEN_URL', '')
+DCF_USER_URL                             = os.environ.get('DCF_USER_URL', '')
+
 ##############################
 #   Start django-finalware   #
 ##############################

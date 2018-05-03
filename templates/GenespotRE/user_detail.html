@@ -64,7 +64,7 @@
             </div>
             <div class="panel-body">
                 {% if DCF_TEST %}
-                <p><a href="">Log in via DCF</a></p>
+                <p><a href="{% url 'dcf_login' %}">Log in via DCF</a></p>
                 <hr>
                 {% endif %}
                 {% if NIH_AUTH_ON %}
