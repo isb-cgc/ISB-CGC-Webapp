@@ -49,7 +49,7 @@
                     <li role="presentation" class="file-browser-tab active"><a href="#all-files" role="tab" data-toggle="tab" title="Browse All Files" data-file-type="all">All Files</a></li>
                     <li role="presentation" class="file-browser-tab"><a href="#igv-files" role="tab" data-toggle="tab" title="Browse IGV Files" data-file-type="igv">IGV</a></li>
                     <li role="presentation" class="file-browser-tab"><a href="#camic-files" role="tab" data-toggle="tab" title="Browse Pathology Image Files" data-file-type="camic">Pathology Images</a></li>
-{#                  <li role="presentation" class="file-browser-tab"><a href="#dicom-files" role="tab" data-toggle="tab" title="Browse Radiology Image Files" data-file-type="dicom">Radiology Images</a></li>  #}
+                    <li role="presentation" class="file-browser-tab"><a href="#dicom-files" role="tab" data-toggle="tab" title="Browse Radiology Image Files" data-file-type="dicom">Radiology Images</a></li>
                 </ul>
             </div>
         </div>
@@ -81,7 +81,7 @@
         'all': 1
         ,'igv': 1
         ,'camic': 1
-{#        ,'dicom': 1#}
+        ,'dicom': 1
     };
     var tab_count={
         'all': 0,
@@ -106,9 +106,9 @@
         'all': '{% url 'cohort_filelist_ajax_panel' cohort.id 'all' %}'
         ,'igv': '{% url 'cohort_filelist_ajax_panel' cohort.id 'igv' %}'
         ,'camic':'{% url 'cohort_filelist_ajax_panel' cohort.id 'camic' %}'
-{#        ,'dicom':'{% url 'cohort_filelist_ajax_panel' cohort.id 'dicom' %}'#}
+        ,'dicom':'{% url 'cohort_filelist_ajax_panel' cohort.id 'dicom' %}'
     };
-{#    var DICOM_URL = {% url 'dicom' %};#}
+    var DICOM_URL = {% url 'dicom' %};
     var SEL_IGV_FILE_MAX = '{{  sel_file_max }}';
     var FILE_LIST_MAX = '{{  file_list_max }}';
     var IMG_THUMBS_URL = '{{ img_thumbs_url }}';

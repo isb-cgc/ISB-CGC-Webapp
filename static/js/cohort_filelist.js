@@ -827,21 +827,6 @@ require([
         },$('.filelist-obtain .download-token').val(),"downloadToken");
     });
 
-
-
-    $('.data-tab-content').on('click','.download-link',function(e) {
-        var type_tab = $(this).parents('.data-tab.active')[0];
-        var active_tab = $(type_tab).data('file-type');
-
-        if(parseInt($('.file-list-total').text()) > FILE_LIST_MAX) {
-            $('#'+active_tab+'-files').find('.file-list-warning').show();
-            e.preventDefault();
-            return false;
-        } else {
-            $('#'+active_tab+'-files').find('.file-list-warning').hide();
-        }
-    });
-
     $('.data-tab-content').on('hover enter mouseover','.study-uid',function(e){
         $(this).find('.osmisis').show();
     });
