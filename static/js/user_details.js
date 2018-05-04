@@ -111,4 +111,8 @@ require([
         return false;
     });
 
+    $('.modal input[type="submit"]').on('click',function(){
+        $(this).attr("disabled","disabled");
+    });
+
 });
