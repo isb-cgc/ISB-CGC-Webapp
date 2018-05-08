@@ -52,7 +52,7 @@ gem install sass
 
 # Install Google App Engine
 echo "Installing Google App Engine..."
-wget https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.38.zip -O ${HOME}/google_appengine.zip
+wget https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.69.zip -O ${HOME}/google_appengine.zip
 unzip -n -qq ${HOME}/google_appengine.zip -d $HOME
 export PATH=$PATH:${HOME}/google_appengine/
 # If we are in circleCI, we place the endpoints library into a directory where the Dockerfile can find it...

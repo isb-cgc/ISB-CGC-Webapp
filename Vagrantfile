@@ -16,9 +16,9 @@ Vagrant.configure(2) do |config|
   # Map Common for the WebApp
   config.vm.synced_folder "../ISB-CGC-Common", "/home/vagrant/www/ISB-CGC-Common"
 
-  # Map Common and lib for API
-  config.vm.synced_folder "../ISB-CGC-Common", "/home/vagrant/parentDir/ISB-CGC-API/ISB-CGC-Common"
-  config.vm.synced_folder "../ISB-CGC-WebApp/lib", "/home/vagrant/parentDir/ISB-CGC-API/lib"
+  # Map Common and lib for API - DISABLED until Google fixes local API development
+  # config.vm.synced_folder "../ISB-CGC-Common", "/home/vagrant/parentDir/ISB-CGC-API/ISB-CGC-Common"
+  # config.vm.synced_folder "../ISB-CGC-WebApp/lib", "/home/vagrant/parentDir/ISB-CGC-API/lib"
 
   # Map Common for Cron
   config.vm.synced_folder "../ISB-CGC-Common", "/home/vagrant/parentDir/ISB-CGC-Cron/ISB-CGC-Common"
