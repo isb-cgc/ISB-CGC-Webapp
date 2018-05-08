@@ -111,8 +111,8 @@ require([
         return false;
     });
 
-    $('.modal input[type="submit"]').on('click',function(){
-        $(this).attr("disabled","disabled");
+    $('.modal form').on('click',function(){
+        $(this).find('input[type="submit"]').attr("disabled","disabled");
     });
 
 });
