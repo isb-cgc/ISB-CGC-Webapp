@@ -423,19 +423,8 @@ require([
                         }
                         checkbox_inputs += '>';
                     } else if(active_tab === 'camic' && (files[i]['datatype'] == 'Tissue slide image' || files[i]['datatype'] == 'Diagnostic image')) {
-                        val = files[i]['cloudstorage_location'].split('/').pop().split(/\./).shift();
+                        files[i]['slide_barcode'] = files[i]['cloudstorage_location'].split('/').pop().split(/\./).shift();
                         files[i]['thumbnail'] = files[i]['cloudstorage_location'].split('/').slice(-2)[0];
-                        dataTypeName = "slide_image";
-                        label = "caMicro";
-                        checkbox_inputs += '<input class="cam'+ (accessible? ' accessible':'') +'" type="checkbox" name="' + dataTypeName
-                            + '" data-thumb="'+files[i]['thumbnail']+'" data-sub-type="'+files[i]['datatype']
-                            + '" data-sample="' + files[i]['sample'] + '" data-case="' + files[i]['case']
-                            + '" data-disease-code="' + files[i]['disease_code'] + '" data-project="' + files[i]['project']
-                            + '" data-type="' + dataTypeName + '" value="' + val + '"';
-                        if (!accessible) {
-                            checkbox_inputs += ' disabled';
-                        }
-                        checkbox_inputs += '>';
                     }
                 }
                 files[i]['file_viewer'] = checkbox_inputs;
@@ -444,13 +433,14 @@ require([
             var row = '<tr>' +
                 '<td>' + files[i]['program'] + '</td>' +
                 '<td>' + files[i]['case'] + '</td>' +
-                (active_tab === 'igv' ? '<td><div class="col-filename">' +
+                (active_tab === 'igv' || active_tab === 'all' ? '<td><div class="col-filename">' +
                     '<div>' + files[i]['filename'] + '</div>' +
                     '<div>[GDC ID: ' + files[i]['file_gdc_id'] + ']</div>' +
                 '</div></td>' : '') +
-                (active_tab === 'camic' ? '<td><div class="col-filename">' +
-                    '<div><a href="'+CAMIC_URL+files[i]['study_uid']+'/" target="_blank">' + files[i]['filename'] + '</div>' +
+                (active_tab === 'camic' ? '<td><div class="col-filename camic-filename">' +
+                    '<div><a href="'+CAMIC_URL+files[i]['slide_barcode']+'/" target="_blank">' + files[i]['filename'] +
                     '<div>[GDC ID: ' + files[i]['file_gdc_id'] + ']</div>' +
+                    '<div class="osmisis" style="display: none;"><i>Open in caMicroscope</i></div></a></div>' +
                 '</div></td>' : '') +
                 '<td>' + files[i]['disease_code'] + '</td>' +
                 (active_tab === 'dicom' ? '<td>'+files[i]['project_short_name']+'</td>' : '') +
@@ -465,7 +455,7 @@ require([
                 (active_tab !== 'camic' && active_tab !== 'dicom' ? '<td>' + happy_name(files[i]['platform']) + '</td>' : '')+
                 (active_tab !== 'camic' && active_tab !== 'dicom' ? '<td>' + files[i]['datacat'] + '</td>' : '') +
                 (active_tab !== 'dicom' ? '<td>' + files[i]['datatype'] + '</td><td>' + files[i]['dataformat'] + '</td>' : '') +
-                (active_tab === 'igv' ? (files[i]['file_viewer'] ? '<td>' + files[i]['file_viewer'] + '</td>' : '<td></td>') : '') +
+                (active_tab !== 'camic' && active_tab !== 'dicom' ? (files[i]['file_viewer'] ? '<td>' + files[i]['file_viewer'] + '</td>' : '<td></td>') : '') +
             '</tr>';
 
             $(tab_selector).find('.filelist-panel .file-list-table tbody').append(row);
@@ -733,11 +723,11 @@ require([
         },$('.filelist-obtain .download-token').val(),"downloadToken");
     });
 
-    $('.data-tab-content').on('hover enter mouseover','.study-uid',function(e){
+    $('.data-tab-content').on('hover enter mouseover','.study-uid, .col-filename',function(e){
         $(this).find('.osmisis').show();
     });
 
-    $('.data-tab-content').on('leave mouseout mouseleave','.study-uid',function(e){
+    $('.data-tab-content').on('leave mouseout mouseleave','.study-uid, .col-filename',function(e){
         $(this).find('.osmisis').hide();
     });
 
