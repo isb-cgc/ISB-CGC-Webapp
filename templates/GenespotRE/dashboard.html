@@ -131,7 +131,7 @@
                         {% for cohort in cohorts|slice:':6' %}
                            <li>
                                <a href="{% url 'cohort_details' cohort.id %}">
-                                   <div class="list-main">
+                                   <div class="list-main col-3">
                                        <span class="list-title" title="{{ cohort.name|wrap_text }}">{{ cohort.name }}</span>
                                    </div>
                                </a>
@@ -140,7 +140,7 @@
                                        <span class="list-title" title="Browse this cohort's file manifest">File browser</span>
                                    </div>
                                </a>
-                               <div class="list-info">
+                               <div class="list-info col-3">
                                    <span>{{ cohort.last_date_saved|date:'M d, Y, g:i a' }}</span>
                                </div>
                            </li>
