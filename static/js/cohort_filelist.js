@@ -205,7 +205,7 @@ require([
                 success : function (data) {
                     data_tab_content_div.append(data);
 
-                    update_download_link(active_tab);
+                    update_download_link(active_tab, total_files);
                     update_table_display(active_tab, {'total_file_count': total_files, 'file_list': file_listing});
 
                     $('.tab-pane.data-tab').each(function() { $(this).removeClass('active'); });
@@ -242,22 +242,9 @@ require([
         }
     });
 
-    function update_download_link(active_tab) {
+    function update_download_link(active_tab, file_list_total) {
         var tab_selector = '#'+active_tab+'-files';
         var build = $(tab_selector).find('.build :selected').val();
-
-        file_list_total = 0;
-
-        // Calculate the file total based on the reported counts for any given filter (data_format used here)
-        if($(tab_selector).find('div[data-filter-build="'+build+'"] input[data-feature-name="data_format"]:checked').length <= 0) {
-             $(tab_selector).find('div[data-filter-build="'+build+'"] input[data-feature-name="data_format"]').each(function(i) {
-               file_list_total += parseInt($(this).attr('data-count'));
-            });
-        } else {
-            $(tab_selector).find('div[data-filter-build="'+build+'"] input[data-feature-name="data_format"]:checked').each(function(i) {
-               file_list_total += parseInt($(this).attr('data-count'));
-            });
-        }
 
         if(file_list_total <= 0) {
             // Can't download/export something that isn't there
@@ -274,23 +261,33 @@ require([
             $(tab_selector).find('.file-list-warning').show();
         }
 
-        // Clear the previous parameter settings from the export form, and re-add the build
-        $('#export-to-bq-form, #export-to-gcs-form').find('input[name="build"]').remove();
-        $('#export-to-bq-form , #export-to-gcs-form').append('<input class="param" type="hidden" name="build" value="'+build+'" />');
-
         var downloadToken = new Date().getTime();
         $('.filelist-obtain .download-token').val(downloadToken);
 
-        if (SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab][build]).length >0) {
-            var filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab][build]));
-            $(tab_selector).find('.download-link').attr('href', download_url + '?' + filter_args + '&downloadToken='+downloadToken+'&total=' + Math.min(FILE_LIST_MAX,file_list_total));
-            $('#export-to-bq-form').append('<input class="param" type="hidden" name="filters" value="" />');
-            $('#export-to-bq-form input[name="filters"]').attr('value',JSON.stringify(SELECTED_FILTERS[active_tab][build]));
-        } else {
-            $(tab_selector).find('.download-link').attr('href', download_url + '?downloadToken='+downloadToken+'&total=' + Math.min(FILE_LIST_MAX,file_list_total))
+        var filter_args = null;
+
+        switch(active_tab) {
+            case "igv":
+                if(!SELECTED_FILTERS[active_tab][build]["data_format"]) {
+                    SELECTED_FILTERS[active_tab][build]["data_format"] = [];
+                }
+                SELECTED_FILTERS[active_tab][build]["data_format"].indexOf("BAM") < 0 && SELECTED_FILTERS[active_tab][build]["data_format"].push("BAM");
+            case "all":
+                if (SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab][build]).length >0) {
+                    filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab][build]));
+                }
+                break;
+            case "camic":
+                filter_args = 'filters=' + encodeURIComponent(JSON.stringify({"data_type": ["Diagnostic image","Tissue slide image"]}));
+                break;
+            case "dicom":
+                filter_args = 'filters=' + encodeURIComponent(JSON.stringify({"data_type": ["Radiology image"]}));
+                break;
         }
 
-        if(active_tab !== 'camic') {
+        $(tab_selector).find('.download-link').attr('href', download_url + '?' + (filter_args ? filter_args + '&' : '')+ 'downloadToken='+downloadToken+'&total=' + Math.min(FILE_LIST_MAX,file_list_total));
+
+        if(active_tab !== 'camic' && active_tab !== 'dicom') {
             $(tab_selector).find('.download-link').attr('href',$(tab_selector).find('.download-link').attr('href')+'&build='+build);
         }
     };
@@ -327,7 +324,7 @@ require([
         $.ajax({
             url: url,
             success: function (data) {
-                update_download_link(active_tab);
+                update_download_link(active_tab, data.total_file_count);
                 update_table_display(active_tab,data,do_filter_count);
             },
             error: function(e) {
@@ -676,7 +673,7 @@ require([
                             $('#'+active_tab+'-'+data.build+'-'+this_attr.name+'-'+this_val.value).attr('data-count',this_val.count);
                         }
                     }
-                    update_download_link(active_tab);
+                    update_download_link(active_tab, data.total_file_count);
                     update_table_display(active_tab, data);
                 },
                 error: function() {
@@ -729,6 +726,55 @@ require([
 
     $('.data-tab-content').on('leave mouseout mouseleave','.study-uid, .col-filename',function(e){
         $(this).find('.osmisis').hide();
+    });
+
+    // When an export button is clicked, add the filters to that modal's form
+    // Note that the export modals will always clear any 'filters' inputs applied to them when hidden/closed
+    $('.container').on('click', 'button[data-target="#export-to-bq-modal"], button[data-target="#export-to-gcs-modal"]', function (e) {
+        var target_form = $($($(this).data('target')).find('form')[0]);
+        var this_tab = $(this).parents('.data-tab');
+        var tab_type = this_tab.data('file-type');
+
+        // Clear the previous parameter settings from the export form, and re-add the build
+        target_form.find('input[name="build"], input[name="filters"]').remove();
+        target_form.append(
+            '<input class="param" type="hidden" name="filters" value="" />'
+        );
+
+        var build = this_tab.find('.build :selected').val() || null;
+
+        switch(tab_type) {
+            case "igv":
+                target_form.find('input[name="filters"]').attr(
+                    'value',JSON.stringify({"data_format": ["BAM"]})
+                );
+                target_form.append(
+                    '<input class="param" type="hidden" name="build" value="'+build+'" />'
+                );
+                break;
+            case "all":
+                target_form.append(
+                    '<input class="param" type="hidden" name="build" value="'+build+'" />'
+                );
+                if(Object.keys(SELECTED_FILTERS[tab_type][build]).length > 0) {
+                    target_form.find('input[name="filters"]').attr(
+                        'value',JSON.stringify(SELECTED_FILTERS[tab_type][build])
+                    );
+                } else {
+                    target_form.find('input[name="filters"]').remove();
+                }
+                break;
+            case "dicom":
+                target_form.find('input[name="filters"]').attr(
+                    'value',JSON.stringify({"data_type": ["Radiology image"]})
+                );
+                break;
+            case "camic":
+                target_form.find('input[name="filters"]').attr(
+                    'value',JSON.stringify({"data_type": ["Diagnostic image", "Tissue slide image"]})
+                );
+                break;
+        }
     });
 
 });
