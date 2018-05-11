@@ -33,6 +33,16 @@ require.config({
         stats: 'libs/science.stats.min',
         vizhelpers: 'helpers/vis_helpers',
         select2: 'libs/select2.min',
+        oncoprintjs: 'libs/oncoprint.bundle',
+        geneticrules: 'libs/geneticrules',
+        canvas_toBlob: 'libs/canvas-toBlob',
+        zlibs: 'libs/zlibs',
+        png: 'libs/png',
+        jspdf: 'libs/jspdf.min',
+        jspdf_plugin_addimage: 'libs/jspdf.plugin.addimage',
+        jspdf_plugin_png_support: 'libs/jspdf.plugin.png_support',
+        jqueryqtip: 'libs/jquery.qtip.min',
+        oncoprint_setup: 'visualizations/oncoprint-setup',
         base: 'base',
         plot_factory : 'visualizations/plotFactory',
         histogram_plot : 'visualizations/createHistogram',
@@ -40,6 +50,7 @@ require.config({
         cubby_plot : 'visualizations/createCubbyPlot',
         violin_plot : 'visualizations/createViolinPlot',
         bar_plot : 'visualizations/createBarGraph',
+        oncoprint_plot: 'visualizations/createOncoprintPlot',
         seqpeek_view: 'seqpeek_view',
         seqpeek: 'seqpeek_view/seqpeek'
     },
@@ -53,6 +64,13 @@ require.config({
         'plot_factory':['vizhelpers', 'session_security'],
         'stats':['science'],
         'histogram_plot' : ['science','stats'],
+        //'oncoprintjs': ['jquery'],
+        'geneticrules': ['jquery'],
+        'jqueryqtip': ['jquery'],
+        //'jspdf_plugin_addimage': ['jspdf'],
+        //'jspdf_plugin_png_support': ['jspdf'],
+        //'oncoprint_glyphmap': ['jquery'],
+        //'oncoprint_heatmap': ['jquery'],
         'underscore': {exports: '_'}
     },
     map: {
@@ -68,12 +86,19 @@ require([
     'vizhelpers',
     'underscore',
     'base',
-    'jqueryui',
-    'bootstrap',
-    'd3',
-    'd3tip',
-    'select2'
-], function ($, plot_factory, vizhelpers, _, base) {
+
+//    'jqueryui',
+ //   'bootstrap',
+ //   'd3',
+  //  'd3tip',
+   // 'select2',
+    //'oncoprintjs',
+    'geneticrules',
+    'jqueryqtip'
+    //'oncoprint_glyphmap',
+    //'heatmap_data',
+    //'oncoprint_heatmap'
+], function ($, plot_factory, vizhelpers, _, base, geneticrules, jqueryqtip) {
 
     var savingComment = false;
 
@@ -812,13 +837,9 @@ require([
                 yLogCheck.show();
                 break;
             case "Violin Plot": //(x_type == 'STRING' && (y_type == 'INTEGER'|| y_type == 'FLOAT')) {
+            case 'Violin Plot with axis swap':
                 xLogCheck.hide();
                 yLogCheck.show();
-                swap.hide();
-                break;
-            case 'Violin Plot with axis swap'://(y_type == 'STRING' && (x_type == 'INTEGER'|| x_type == 'FLOAT')) {
-                yLogCheck.hide();
-                xLogCheck.show();
                 swap.hide();
                 break;
             case 'Cubby Hole Plot': //(x_type == 'STRING' && y_type == 'STRING') {
@@ -827,6 +848,7 @@ require([
                 yLogCheck.hide();
                 break;
             case 'SeqPeek':
+            case 'OncoPrint':
                 sp_genes.show();
                 x_widgets.hide();
                 y_widgets.hide();
@@ -1088,7 +1110,7 @@ require([
             return false;
         }
 
-        if(data.attrs.type !== 'SeqPeek') {
+        if(data.attrs.type !== 'SeqPeek' && data.attrs.type !== 'OncoPrint') {
             if (data.attrs.x_axis.url_code === undefined || data.attrs.x_axis.url_code === null || data.attrs.x_axis.url_code.length <= 0) {
                 return false;
             }

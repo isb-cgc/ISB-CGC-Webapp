@@ -45,7 +45,7 @@ require([
     'underscore',
     'base',
     'ajv',
-    'dataTables'
+    //'dataTables'
 ], function ($, jqueryui, bootstrap, session_security, _, base, ajv) {
 
     var savingChanges = false;
