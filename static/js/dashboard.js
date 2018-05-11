@@ -43,4 +43,9 @@ require([
     $('#create-workbook').on('submit', function() {
         $(this).find('button[type="submit"]').attr('disabled', 'disabled');
     });
+
+    $('.min-max a').on('click',function(){
+        $(this).find('i').toggleClass('fa-angle-double-up');
+        $(this).find('i').toggleClass('fa-angle-double-down');
+    });
 });
