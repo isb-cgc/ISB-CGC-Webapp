@@ -35,14 +35,34 @@ echo "Dependencies Installed"
 
 # Install PIP + Dependencies
 echo "Installing Python Libraries..."
+
 curl --silent https://bootstrap.pypa.io/get-pip.py | python
+
+# If this is local development, clean out lib for a re-structuring
 if [ -z "${CI}" ]; then
     # Clean out lib to prevent confusion over multiple builds in local development
+    # and prep for local install
     echo "Emptying out ${HOMEROOT}/lib/ ..."
     rm -rf "${HOMEROOT}/lib/*"
+    mkdir "${HOMEROOT}/lib/endpoints_lib/"
 fi
+
+# Install our primary libraries
 pip install -q -r ${HOMEROOT}/requirements.txt -t ${HOMEROOT}/lib --upgrade --only-binary all
+
+if [ -z "${CI}" ]; then
+    # Install the Endpoints library for API usage (separate directory because the WebApp doesn't need it
+    echo "Installing Google Endpoints for local API..."
+    pip install -t "${HOMEROOT}/lib/endpoints_lib/" google-endpoints==3.0.0 --only-binary --ignore-installed
+
+    # Delete the offending collision packages (socketserver and queue) which create issues with six
+    echo "Removing colliding packages (socketserver and queue)"
+    rm -rf "${HOMEROOT}/lib/endpoints_lib/queue"
+    rm -rf "${HOMEROOT}/lib/endpoints_lib/socketserver"
+fi
+
 if [ "$DEBUG" = "True" ] && [ "$DEBUG_TOOLBAR" = "True" ]; then
+    echo "Installing Django Debug Toolbar for local dev..."
     pip install -q django-debug-toolbar -t ${HOMEROOT}/lib --only-binary all
 fi
 
@@ -56,15 +76,6 @@ echo "Installing Google App Engine..."
 wget https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.69.zip -O ${HOME}/google_appengine.zip
 unzip -n -qq ${HOME}/google_appengine.zip -d $HOME
 export PATH=$PATH:${HOME}/google_appengine/
-# If we are in circleCI, we place the endpoints library into a directory where the Dockerfile can find it...
-if [ -n "$CI" ]; then
-    mkdir ${HOMEROOT}/endpoints/ 2> /dev/null
-    cp ${HOME}/google_appengine/lib/endpoints-1.0/endpoints/* ${HOMEROOT}/endpoints/
-else
-# ...otherwise, we place it directly into /lib/ with the other libraries
-    mkdir ${HOMEROOT}/lib/endpoints/ 2> /dev/null
-    cp ${HOME}/google_appengine/lib/endpoints-1.0/endpoints/* ${HOMEROOT}/lib/endpoints/
-fi
 
 ls ${HOMEROOT}
 

@@ -22,12 +22,12 @@ require.config({
 
 require([
     'jquery',
+    'base',
     'jqueryui',
     'bootstrap',
     'session_security',
-    'tablesorter',
-    'base'
-], function($) {
+    'tablesorter'
+], function($, base) {
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function() {
@@ -48,4 +48,29 @@ require([
         $(this).find('i').toggleClass('fa-angle-double-up');
         $(this).find('i').toggleClass('fa-angle-double-down');
     });
+
+    $(window).on('beforeunload',function(){
+        var settingsObj = {};
+        $('.panel-collapse').each(function(index, elem){
+            settingsObj[$(elem).attr('id')] = $(elem).attr('aria-expanded');
+        });
+        sessionStorage.setItem(USER_SETTINGS_KEY, JSON.stringify(settingsObj));
+    });
+
+    if(sessionStorage.getItem(USER_SETTINGS_KEY)) {
+        var settingsObj = JSON.parse(sessionStorage.getItem(USER_SETTINGS_KEY));
+
+        for(var i in settingsObj) {
+            if(settingsObj.hasOwnProperty(i)){
+                var expanded = settingsObj[i];
+                var elem = $('#'+i);
+                if(elem.attr('aria-expanded') !== expanded) {
+                    elem.attr('aria-expanded',expanded);
+                    elem.toggleClass('in');
+                    elem.siblings('.panel-heading').find('i').toggleClass('fa-angle-double-up');
+                    elem.siblings('.panel-heading').find('i').toggleClass('fa-angle-double-down');
+                }
+            }
+        }
+    }
 });
