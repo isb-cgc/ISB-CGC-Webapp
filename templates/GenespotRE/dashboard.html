@@ -77,7 +77,7 @@
                 <a data-toggle="collapse" href="#workbook-panel"><i class="show fa fa-angle-double-down"></i></a>
             </div>
         </div>
-        <div id="workbook-panel" class="panel panel-collapse collapse in">
+        <div id="workbook-panel" class="panel panel-collapse collapse in" aria-expanded="true">
             <div class="panel-body">
                 <p>Workbooks store the analyses you create, and their related data.</p>
                 <ul class="table-list">
@@ -124,7 +124,7 @@
                         <a data-toggle="collapse" href="#cohorts-panel"><i class="show fa fa-angle-double-down"></i></a>
                     </div>
                 </div>
-                <div id="cohorts-panel" class="panel panel-collapse collapse in">
+                <div id="cohorts-panel" class="panel panel-collapse collapse in" aria-expanded="true">
                     <div class="panel-body">
                     {% if cohorts.count > 0 %}
                     <ul class="table-list">
@@ -168,7 +168,7 @@
                         <a data-toggle="collapse" href="#gene-fave-panel"><i class="show fa fa-angle-double-up"></i></a>
                     </div>
                 </div>
-                <div id="gene-fave-panel" class="panel panel-collapse collapse">
+                <div id="gene-fave-panel" class="panel panel-collapse collapse" aria-expanded="false">
                     <div class="panel-body">
                     {% if gene_fave_count > 0 %}
                     <ul class="table-list">
@@ -206,7 +206,7 @@
                         <a data-toggle="collapse" href="#var-faves-panel"><i class="show fa fa-angle-double-up"></i></a>
                     </div>
                 </div>
-                <div id="var-faves-panel" class="panel panel-collapse collapse">
+                <div id="var-faves-panel" class="panel panel-collapse collapse" aria-expanded="false">
                     <div class="panel-body">
                     {% if varfave_count > 0 %}
                     <ul class="table-list">
@@ -251,7 +251,7 @@
                         <a data-toggle="collapse" href="#programs-panel"><i class="show fa fa-angle-double-up"></i></a>
                     </div>
                 </div>
-                <div id="programs-panel" class="panel panel-collapse collapse">
+                <div id="programs-panel" class="panel panel-collapse collapse" aria-expanded="false">
                     <div class="panel-body">
                         <p>You can upload data from your own research programs.</p>
                         {% if program_count > 0 %}
@@ -295,6 +295,9 @@
     {% endif %}
 
 </div>
+    <script type="text/javascript">
+        var USER_SETTINGS_KEY = 'user_' + {{ request.user.id }} + '_dash_settings';
+    </script>
 {% endblock %}
 
 {% block js_file %}{% static 'js/dashboard.js' %}{% endblock %}
