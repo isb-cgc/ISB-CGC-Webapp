@@ -51,18 +51,18 @@ fi
 pip install -q -r ${HOMEROOT}/requirements.txt -t ${HOMEROOT}/lib --upgrade --only-binary all
 
 if [ -z "${CI}" ]; then
-    echo "Installing Google Endpoints for local API"
     # Install the Endpoints library for API usage (separate directory because the WebApp doesn't need it
+    echo "Installing Google Endpoints for local API..."
     pip install -t "${HOMEROOT}/lib/endpoints_lib/" google-endpoints==3.0.0 --only-binary --ignore-installed
 
-    echo "Removing colliding packages (socketserver and queue)"
     # Delete the offending collision packages (socketserver and queue) which create issues with six
+    echo "Removing colliding packages (socketserver and queue)"
     rm -rf "${HOMEROOT}/lib/endpoints_lib/queue"
     rm -rf "${HOMEROOT}/lib/endpoints_lib/socketserver"
 fi
 
 if [ "$DEBUG" = "True" ] && [ "$DEBUG_TOOLBAR" = "True" ]; then
-    # Installing Django Debug Toolbar for local dev
+    echo "Installing Django Debug Toolbar for local dev..."
     pip install -q django-debug-toolbar -t ${HOMEROOT}/lib --only-binary all
 fi
 
