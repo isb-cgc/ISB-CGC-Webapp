@@ -34,8 +34,7 @@ apt-get install -qq -y --force-yes unzip libffi-dev libssl-dev libmysqlclient-de
 echo "Dependencies Installed"
 
 # Install PIP + Dependencies
-echo "Installing Python Libraries..."
-
+echo "Installing pip..."
 curl --silent https://bootstrap.pypa.io/get-pip.py | python
 
 # If this is local development, clean out lib for a re-structuring
@@ -47,7 +46,8 @@ if [ -z "${CI}" ]; then
     mkdir "${HOMEROOT}/lib/endpoints_lib/"
 fi
 
-# Install our primary libraries
+# Install our primary python libraries
+echo "Installing Python Libraries..."
 pip install -q -r ${HOMEROOT}/requirements.txt -t ${HOMEROOT}/lib --upgrade --only-binary all
 
 if [ -z "${CI}" ]; then
@@ -76,8 +76,6 @@ echo "Installing Google App Engine..."
 wget https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.69.zip -O ${HOME}/google_appengine.zip
 unzip -n -qq ${HOME}/google_appengine.zip -d $HOME
 export PATH=$PATH:${HOME}/google_appengine/
-
-ls ${HOMEROOT}
 
 echo "Google App Engine Installed"
 
