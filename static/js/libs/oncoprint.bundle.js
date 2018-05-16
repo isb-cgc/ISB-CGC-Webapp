@@ -5692,8 +5692,8 @@ var OncoprintToolTip = (function() {
 	    tt.$div.stop().fadeIn('fast');
 	}
 	var container_offset = tt.$container.offset();
-	var x = page_x - container_offset.left - (tt.center ? tt.$div.width()/2 : 0);
-	var y = page_y - container_offset.top - tt.$div.height();
+	var y = page_y - container_offset.top + 5;
+	var x = page_x - container_offset.left - tt.$div.width() - 5;
 	tt.$div.css({'top':y, 'left':x, 'z-index':9999});
 	tt.shown = true;
     };

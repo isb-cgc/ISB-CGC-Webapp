@@ -33,6 +33,9 @@ define([
     'seqpeek_view/seqpeek_view',
     'oncoprint_plot',
     'select2',
+    'fileSaver',
+    'cbio_util',
+    'download_util',
 
 ], function($, jqueryui, bootstrap, session_security, d3, d3tip, d3textwrap, vizhelpers, scatter_plot, cubby_plot, violin_plot, histogram, bar_graph, seqpeek_view, oncoprint_plot, mock_histogram_data ) {
 
@@ -277,6 +280,7 @@ define([
 
     function generate_oncoprint_plot(plot_selector, view_data) {
         //var plot_data = view_data['plot_data'];
+        //console.log()
         var plot_data = "TCGA-25-2393-01	TP53	FUSION	FUSION\n\
 TCGA-04-1331-01	PTEN	HOMDEL	CNA\n\
 TCGA-04-1365-01	PTEN	HOMDEL	CNA\n\
@@ -867,7 +871,7 @@ TCGA-25-2401-01\n\
 TCGA-25-2392-01\n\
 TCGA-25-2393-01\n\
         ";
-        var hugo_symbol = view_data['hugo_symbol'];
+        var gene_list = view_data['gene_list'];
         var element = $(plot_selector)[0];
         $(element).append('<div id="oncoprint_controls"></div>')
             .append('<script type="text/template" id="main-controls-template">'+
@@ -879,17 +883,18 @@ TCGA-25-2393-01\n\
                             '</script>')
             .append('<div id="oncoprint"></div>');
         $('#oncoprint').html(
-            "<div class=\"btn-group btn-group-sm\" id=\"oncoprint-diagram-toolbar-buttons\" style=\"float: right; margin-right: 15px; height: 33px; visibility: visible; opacity: 0;\">\n" +
-            "   <button type=\"button\" class=\"btn btn-default\" id=\"oncoprint_diagram_showmutationcolor_icon\" style=\"background-color:#efefef;margin:0px\" data-hasqtip=\"5\"><img checked=\"0\" src=\"/static/img/colormutations.svg\" alt=\"icon\" width=\"16\" height=\"16\"></button>\n" +
-            "   <button type=\"button\" class=\"btn btn-default\" id=\"oncoprint-diagram-removeUCases-icon\" style=\"background-color:#efefef;margin:0px\" data-hasqtip=\"3\"><img class=\"oncoprint-diagram-removeUCases-icon\" checked=\"0\" src=\"/static/img/unremoveUCases.svg\" alt=\"icon\" width=\"16\" height=\"16\"></button>\n" +
-            "   <button type=\"button\" class=\"btn btn-default\" id=\"oncoprint-diagram-removeWhitespace-icon\" style=\"background-color: rgb(239, 239, 239); margin: 0px;\" data-hasqtip=\"2\"><img class=\"oncoprint-diagram-removeWhitespace-icon\" checked=\"0\" src=\"/static/img/unremoveWhitespace.svg\" alt=\"icon\" width=\"16\" height=\"16\"></button>\n" +
-            "   <button type=\"button\" class=\"btn btn-default\" id=\"oncoprint-diagram-downloads-icon\" style=\"background-color:#efefef;margin:0px\" data-hasqtip=\"6\"><img class=\"oncoprint-diagram-downloads-icon\" src=\"/static/img/in.svg\" alt=\"icon\" width=\"16\" height=\"16\"></button>\n" +
-            "   <div class=\"btn-group btn-group-sm\">\n" +
-            "       <button type=\"button\" id=\"oncoprint_zoomout\" class=\"btn btn-default\" style=\"background-color:#efefef;margin:0px\" data-hasqtip=\"0\"><img src=\"/static/img/zoom-out.svg\" alt=\"icon\" width=\"16\" height=\"16\"></button>\n" +
-            "       <span class=\"btn btn-default\" id=\"oncoprint_diagram_slider_icon\" style=\"background-color:#efefef;width: 100px;display:inline\"></span>\n" +
-            "       <button type=\"button\" id=\"oncoprint_zoomin\" class=\"btn btn-default\" style=\"background-color:#efefef;margin:0px\" data-hasqtip=\"1\"><img src=\"/static/img/zoom-in.svg\" alt=\"icon\" width=\"16\" height=\"16\"></button>\n" +
-            "       <button type=\"button\" id=\"oncoprint_zoomtofit\" class=\"btn btn-default\" style=\"background-color:#efefef;margin:0px;border-left: 0;\" data-hasqtip=\"4\"><img src=\"/static/img/fitalteredcases.svg\" alt=\"icon\" width=\"18\" height=\"18\" preserveaspectratio=\"none\"></button>\n" +
-            "   </div>\n" +
+            "<div class=\"cbioportal_logo\">" +
+            "   <img src=\"/static/img/cbioportal_logo.png\">\n"+
+            "</div>\n"+
+            "<div class=\"btn-group btn-group-sm\" id=\"oncoprint-diagram-toolbar-buttons\">\n" +
+            "   <button type=\"button\" class=\"btn\" id=\"oncoprint_diagram_showmutationcolor_icon\"data-hasqtip=\"5\"><img checked=\"0\" src=\"/static/img/colormutations.svg\" alt=\"icon\"></button>\n" +
+            "   <button type=\"button\" class=\"btn\" id=\"oncoprint-diagram-removeUCases-icon\" data-hasqtip=\"3\"><img class=\"oncoprint-diagram-removeUCases-icon\" checked=\"0\" src=\"/static/img/unremoveUCases.svg\" alt=\"icon\"></button>\n" +
+            "   <button type=\"button\" class=\"btn\" id=\"oncoprint-diagram-removeWhitespace-icon\" data-hasqtip=\"2\"><img class=\"oncoprint-diagram-removeWhitespace-icon\" checked=\"0\" src=\"/static/img/unremoveWhitespace.svg\" alt=\"icon\"></button>\n" +
+            "   <button type=\"button\" class=\"btn\" id=\"oncoprint-diagram-downloads-icon\" data-hasqtip=\"6\"><img class=\"oncoprint-diagram-downloads-icon\" src=\"/static/img/in.svg\" alt=\"icon\"></button>\n" +
+            "   <button type=\"button\" class=\"btn\" id=\"oncoprint_zoomout\" class=\"btn\" data-hasqtip=\"0\"><img src=\"/static/img/zoom-out.svg\" alt=\"icon\"></button>\n" +
+            "   <div class=\"btn\" id=\"oncoprint_diagram_slider_icon\"></div>\n" +
+            "   <button type=\"button\" class=\"btn\" id=\"oncoprint_zoomin\" class=\"btn\" data-hasqtip=\"1\"><img src=\"/static/img/zoom-in.svg\" alt=\"icon\"></button>\n" +
+            "   <button type=\"button\" class=\"btn\" id=\"oncoprint_zoomtofit\" class=\"btn\" data-hasqtip=\"4\"><img src=\"/static/img/fitalteredcases.svg\" alt=\"icon\" preserveaspectratio=\"none\"></button>\n" +
             "</div><br/><br/>" +
             "<div id=\"oncoprint_body\"></div>");
         plot_data = plot_data.trim();
@@ -897,7 +902,8 @@ TCGA-25-2393-01\n\
             oncoprint_obj.createOncoprintPlot(plot_data);
         }
         else {
-            oncoprint_view.render_no_data_message(plot_selector, hugo_symbol);
+            //oncoprint_view.render_no_data_message(plot_selector, gene_list);
+            //TODO: create oncoprint no data to render message
         }
     }
     /*
@@ -947,7 +953,7 @@ TCGA-25-2393-01\n\
     }
 
     // Generate url for gathering data for a OncoPrint plot
-    function get_oncoprint_data_url(base_url, cohorts, gene_label){
+    function get_oncoprint_data_url(base_url, cohorts, gene_list){
         var cohort_str = '';
         for (var i = 0; i < cohorts.length; i++) {
             if (i == 0) {
@@ -957,7 +963,7 @@ TCGA-25-2393-01\n\
             }
         }
         var oncoprintUrl = base_url + '/visualizations/oncoprint_data_plot/' + VERSION + '?' + cohort_str;
-        oncoprintUrl += "&hugo_symbol=" + gene_label
+        oncoprintUrl += "&gene_list=" + gene_list
             + (VERSION == 'v2' ? "&genomic_build=" + $('.workbook-build-display').data('build') : '');
         return oncoprintUrl;
     }
@@ -1139,7 +1145,7 @@ TCGA-25-2393-01\n\
             plot_data_url = get_seqpeek_data_url(BASE_URL, args.cohorts, args.gene_label, VERSION);
         }
         else if(args.type == "OncoPrint"){
-            plot_data_url = get_oncoprint_data_url(BASE_URL, args.cohorts, args.gene_label, VERSION);
+            plot_data_url = get_oncoprint_data_url(BASE_URL, args.cohorts, args.gene_list, VERSION);
         }
         else {
             plot_data_url = get_data_url(BASE_URL, args.cohorts, args.x, args.y, args.color_by, args.logTransform, VERSION);

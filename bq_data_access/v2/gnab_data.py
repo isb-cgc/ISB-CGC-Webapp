@@ -44,7 +44,7 @@ class GNABFeatureDef(object):
     # Example ID: v2:GNAB:SMYD3:tcga_hg19_mc3:Variant_Classification
     regex = re_compile("^v2:GNAB:"
                        # gene
-                       "([a-zA-Z0-9_.\-]+):"
+                       "([a-zA-Z0-9_.,\-]+):"
                        "(" + "|".join([table.internal_table_id for table in config_instance.data_table_list]) + "):"
                        # value field
                        "([vV]ariant_[cC]lassification|[vV]ariant_[tT]ype|{})$".format(VALUE_FIELD_NUM_MUTATIONS))

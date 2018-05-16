@@ -17,10 +17,10 @@
  */
 
 
-        /*png: 'libs/png',
-        jspdf: 'libs/jspdf.min',
-        jspdf_plugin_addimage: 'libs/jspdf.plugin.addimage',
-        png_support: 'libs/png_support',*/
+/*png: 'libs/png',
+jspdf: 'libs/jspdf.min',
+jspdf_plugin_addimage: 'libs/jspdf.plugin.addimage',
+png_support: 'libs/png_support',*/
 define(['jquery', 'oncoprintjs', 'underscore', 'oncoprint_setup', 'canvas_toBlob', 'zlibs', 'png'], function ($, oncoprintjs, _) {
     var processData = function (str) {
         // Need to mock webservice data to be compatible with tooltip
@@ -105,21 +105,22 @@ define(['jquery', 'oncoprintjs', 'underscore', 'oncoprint_setup', 'canvas_toBlob
 
         return {'data_by_gene': data_by_gene, 'altered_by_gene': altered_by_gene};
     };
-
     return {
-        isInputValid: function(str) {
-	var lines = _.map(str.split('\n'), function(x) { return x.trim(); });
-	if (lines[0].split(/\s+/).length !== 4) {
-		return false;
-	}
-	for (var i=1; i<lines.length; i++) {
-		var split_line_length = lines[i].split(/\s+/).length;
-		if (split_line_length !== 1 && split_line_length !== 4) {
-			return false;
-		}
-	}
-	return true;
-},
+        isInputValid: function (str) {
+            var lines = _.map(str.split('\n'), function (x) {
+                return x.trim();
+            });
+            if (lines[0].split(/\s+/).length !== 4) {
+                return false;
+            }
+            for (var i = 1; i < lines.length; i++) {
+                var split_line_length = lines[i].split(/\s+/).length;
+                if (split_line_length !== 1 && split_line_length !== 4) {
+                    return false;
+                }
+            }
+            return true;
+        },
         createOncoprintPlot: function (data) {
             var updateOncoprinter = CreateOncoprinterWithToolbar('#oncoprint #oncoprint_body', '#oncoprint #oncoprint-diagram-toolbar-buttons');
             $('#oncoprint_controls').html(_.template($('#main-controls-template').html())());

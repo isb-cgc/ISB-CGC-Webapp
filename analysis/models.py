@@ -6,7 +6,6 @@ class AnalysisManager(models.Manager):
 # TODO: notice that this list must be synchronized with PlotFactory.js on the names of plot types
 class Analysis(models.Model):
     objects = AnalysisManager()
-# TODO: get oncoprint.png
     @classmethod
     def get_types(self):
         types = [{'name' : 'Bar Chart',
@@ -22,7 +21,7 @@ class Analysis(models.Model):
                   'description' : "Used to plot a categorical feature on the x-axis versus a numerical feature on the y-axis. Points in the plot can be colored by another categorical feature.",
                   'image' : 'img/violinplot.png'},
                  {'name': 'OncoPrint',
-                  'description': "Used to plot multiple genomic alteration events by heatmap",
+                  'description': "Used to plot multiple genomic alteration events by heatmap. Tool is licensed under cBioPortal(c).",
                   'image': 'img/oncoprint.png'},
                  # {'name' : 'Violin Plot with axis swap',
                  #  'description' : "Used to plot a categorical feature on the y-axis versus a numerical feature on the x-axis. Points in the plot can be colored by another categorical feature.",

@@ -205,10 +205,22 @@
                         </select>
                     </div>
 
-{#                    <div class="form-group">#}
-{#                        <label for="{{ worksheet.id }}-color-by-cohort">Color By Cohort</label>#}
-{#                        <input type="checkbox" class="color-by-cohort" id="color-by-cohort" />#}
-{#                    </div>#}
+                    <!-- Gene Label for OncoPrint -->
+                    <div class="form-group oncoprint-genes">
+                        <label for="{{ worksheet.id }}-gene_label">Gene or miRNA</label>
+                        <div class="gene-listing" plot="{{ worksheet.id }}">
+                        {% for gene_item in genes %}
+                            {% if not plot or plot.gene_label != gene_item.gene %}
+                            <div class="checkbox" style="margin-top: 0px; margin-bottom: 5px;">
+                                <label>
+                                    <input class="variable-toggle-checkbox gene-selex" name="gene-checkbox" aria-label="gene-checkbox" type="checkbox" value="{{ gene_item.gene }}"/>
+                                        {{ gene_item.gene }}
+                                </label>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                        </div>
+                    </div>
 
                     <div class="form-group">
                         <label>Cohorts</label>
