@@ -19,35 +19,34 @@ limitations under the License.
 import logging
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-
-from google_helpers.bigquery.service_v2 import BigQueryServiceSupport
-from bq_data_access.v2.data_access import FeatureVectorBigQueryBuilder
-from bq_data_access.v2.oncoprint.oncoprint_maf_formatter import OncoprintMAFDataFormatter
-from bq_data_access.v2.oncoprint_maf_data import OncoprintDataQueryHandler
-from bq_data_access.v2.feature_id_utils import ProviderClassQueryDescription, FeatureDataTypeHelper
-from bq_data_access.data_types.definitions import FEATURE_ID_TO_TYPE_MAP
-from visualizations.data_access_views_v2 import get_confirmed_project_ids_for_cohorts, get_public_program_name_set_for_cohorts
+from django.conf import settings
+from google_helpers.bigquery.cohort_support import BigQuerySupport
+from cohorts.metadata_helpers import *
+from visualizations.data_access_views_v2 import get_confirmed_project_ids_for_cohorts
 
 logger = logging.getLogger('main_logger')
 
-def build_gnab_feature_id(gene_list, genomic_build):
-    """
-    Creates a GNAB v2 feature identifier that will be used to fetch data to be rendered in SeqPeek.
-
-    For more information on GNAB feature IDs, please see:
-    bq_data_access/data_types/gnab.py
-    bq_data_accvess/v2/gnab_data.py
-
-    Params:
-        gene_label: Gene label.
-        genomic_build: "hg19" or "hg38"
-
-    Returns: GNAB v2 feature identifier.
-    """
-    if genomic_build == "hg19":
-        return "v2:GNAB:{gene_list}:tcga_hg19_mc3:Variant_Classification".format(gene_list=gene_list)
-    elif genomic_build == "hg38":
-        return "v2:GNAB:{gene_list}:tcga_hg38:Variant_Classification".format(gene_list=gene_list)
+# def build_gnab_feature_id(gene_list, genomic_build):
+#     """
+#     Creates a GNAB v2 feature identifier that will be used to fetch data to be rendered in SeqPeek.
+#
+#     For more information on GNAB feature IDs, please see:
+#     bq_data_access/data_types/gnab.py
+#     bq_data_accvess/v2/gnab_data.py
+#
+#     Params:
+#         gene_label: Gene label.
+#         genomic_build: "hg19" or "hg38"
+#
+#     Returns: GNAB v2 feature identifier.
+#     """
+#     gene_list_id = ""
+#     # if gene_list:
+#     #     gene_list_id = gene_list.replace(",","_")
+#     if genomic_build == "hg19":
+#         return "v2:GNAB:{gene_list}:tcga_hg19_mc3:Variant_Classification".format(gene_list=gene_list)
+#     elif genomic_build == "hg38":
+#         return "v2:GNAB:{gene_list}:tcga_hg38:Variant_Classification".format(gene_list=gene_list)
 
 
 def get_program_set_for_oncoprint(cohort_id_array):
@@ -78,69 +77,239 @@ def oncoprint_view_data(request):
         gene_list = request.GET.get('gene_list', None)
         genomic_build = request.GET.get('genomic_build', None)
         cohort_id_param_array = request.GET.getlist('cohort_id', None)
-        cohort_id_array = []
 
+        if not is_valid_genomic_build(genomic_build):
+            return JsonResponse({'error': 'Invalid genomic build'}, status=400)
+
+        cohort_id_array = []
         for cohort_id in cohort_id_param_array:
             try:
                 cohort_id = int(cohort_id)
                 cohort_id_array.append(cohort_id)
             except Exception as e:
                 return JsonResponse({'error': 'Invalid cohort parameter'}, status=400)
-
-        if not is_valid_genomic_build(genomic_build):
-            return JsonResponse({'error': 'Invalid genomic build'}, status=400)
-
-        genomic_build = genomic_build.lower()
-
         if len(cohort_id_array) == 0:
             return JsonResponse({'error': 'No cohorts specified'}, status=400)
 
-        # By extracting info from the cohort, we get the NAMES of the public projects
-        # we need to access (public projects have unique name tags, e.g. tcga).
-        program_set = get_public_program_name_set_for_cohorts(cohort_id_array)
 
-        # Check to see if these programs have data for the requested vectors; if not, there's no reason to plot
-        programs = FeatureDataTypeHelper.get_supported_programs_from_data_type(FEATURE_ID_TO_TYPE_MAP['gnab'])
-        valid_programs = set(programs).intersection(program_set)
+        #QUERY
 
-        if not len(valid_programs):
-            return JsonResponse(
-                {'message': "The chosen cohorts do not contain samples from programs with Gene Mutation data."})
-        gnab_feature_id = build_gnab_feature_id(gene_list, genomic_build)
-        logger.debug("GNAB feature ID for OncoPrint: {0}".format(gnab_feature_id))
-
-        # Get the project IDs these cohorts' samples come from
+        # cohort_join_str = ''
+        # cohort_where_str = ''
+        # bq_cohort_table = ''
+        # bq_cohort_dataset = ''
+        # bq_cohort_project_id = ''
+        # cohort = ''
+        # query_template = None
+        #
+        # bq_table_info = BQ_MOLECULAR_ATTR_TABLES[Program.objects.get(id=program_id).name][build]
+        # sample_barcode_col = bq_table_info['sample_barcode_col']
+        # bq_dataset = bq_table_info['dataset']
+        # bq_table = bq_table_info['table']
+        # bq_data_project_id = settings.BIGQUERY_DATA_PROJECT_NAME
+        #
+        # query_template = None
+        #
+        # if cohort_id is not None:
+        #     query_template = \
+        #         ("SELECT ct.sample_barcode"
+        #          " FROM [{project_id}:{cohort_dataset}.{cohort_table}] ct"
+        #          " JOIN (SELECT sample_barcode_tumor AS barcode "
+        #          " FROM [{data_project_id}:{dataset_name}.{table_name}]"
+        #          " WHERE " + mutation_where_clause['big_query_str'] +
+        #          " GROUP BY barcode) mt"
+        #          " ON mt.barcode = ct.sample_barcode"
+        #          " WHERE ct.cohort_id = {cohort};")
+        program_set = get_program_set_for_oncoprint(cohort_id_array)
         confirmed_project_ids, user_only_study_ids = get_confirmed_project_ids_for_cohorts(cohort_id_array)
 
-        bqss = BigQueryServiceSupport.build_from_django_settings()
-        fvb = FeatureVectorBigQueryBuilder.build_from_django_settings(bqss)
-        program_set = get_program_set_for_oncoprint(cohort_id_array)
+        if not len(program_set):
+            return JsonResponse(
+                {'message': "The chosen cohorts do not contain samples from programs with Gene Mutation data."})
 
-        extra_provider_params = {
-            "genomic_buid": genomic_build
-        }
+        query_template = \
+            ("SELECT sample_barcode_tumor, {brk}"
+             "    SYMBOL, {brk}"
+             "    Variant_Type, {brk}"
+             "    Variant_Classification, {brk}"
+             "FROM [{data_project_id}:{dataset_name}.{table_name}] {brk}"
+             "WHERE SYMBOL IN ({gene_list}) {brk}"
+             "AND sample_barcode_tumor IN ( {brk}"
+             "    SELECT sample_barcode {brk}"
+             "    FROM [{project_id}:{cohort_dataset}.{cohort_table}] {brk}"
+             "    WHERE cohort_id IN ({cohort_id_list}) {brk}"
+             "         AND (project_id IS NULL {brk}")
+        query_template += (" OR project_id IN ({project_id_list})))" if confirmed_project_ids is not None else "))")
 
-        async_params = [
-            ProviderClassQueryDescription(OncoprintDataQueryHandler, gnab_feature_id, cohort_id_array,
-                                          confirmed_project_ids, program_set, extra_provider_params)]
-        maf_data_result = fvb.get_feature_vectors_tcga_only(async_params, skip_formatting_for_plot=True)
+        bq_table_info = BQ_MOLECULAR_ATTR_TABLES['TCGA'][genomic_build]
+        bq_dataset = bq_table_info['dataset']
+        bq_table = bq_table_info['table']
+        bq_data_project_id = settings.BIGQUERY_DATA_PROJECT_NAME
+        bq_cohort_table = settings.BIGQUERY_COHORT_TABLE_ID
+        bq_cohort_dataset = settings.COHORT_DATASET_ID
+        bq_cohort_project_id = settings.BIGQUERY_PROJECT_NAME
 
-        maf_data_vector = maf_data_result[gnab_feature_id]['data']
+        cohort_id_stmt = ', '.join([str(cohort_id) for cohort_id in cohort_id_array])
 
-        if len(maf_data_vector) == 0:
-            return JsonResponse(build_empty_data_response(gene_list, cohort_id_array, maf_data_result['tables_queried']))
-        print(maf_data_vector)
+        gene_list_stmt = ''
+        gene_array = gene_list.split(',')
+        if gene_array is not None:
+            gene_list_stmt = ', '.join('\'{0}\''.format(gene) for gene in gene_array)
 
-        if len(maf_data_vector) > 0:
-           oncoprint_data = OncoprintMAFDataFormatter().format_maf_vector_for_view(maf_data_vector, cohort_id_array)
+        project_id_stmt = ''
+        if confirmed_project_ids is not None:
+            project_id_stmt = ', '.join([str(project_id) for project_id in confirmed_project_ids])
 
-        if len(oncoprint_data.maf_vector) == 0:
-            return JsonResponse(build_empty_data_response(gene_list, cohort_id_array, maf_data_result['tables_queried']))
+        query = query_template.format(
+            data_project_id = bq_data_project_id,
+            dataset_name = bq_dataset,
+            table_name = bq_table,
+            gene_list = gene_list_stmt,
+            project_id = bq_cohort_project_id,
+            cohort_dataset = bq_cohort_dataset,
+            cohort_table = bq_cohort_table,
+            cohort_id_list = cohort_id_stmt,
+            project_id_list = project_id_stmt,
+            brk='\n'
+        )
+        logger.debug("BQ_QUERY_ONCOPRINT: " + query)
+        results = BigQuerySupport.execute_query_and_fetch_results(query)
+        plot_data =""
+
+        if results and len(results) > 0:
+            for row in results:
+                plot_data+="{}\t{}\t{}\t{}\n".format(str(row['f'][0]['v']),str(row['f'][1]['v']),str(row['f'][2]['v']),str(row['f'][3]['v']))
+        else:
+            return JsonResponse(
+                {'message': "The chosen genes and cohorts do not contain any samples with Gene Mutation data."})
+        print("result size: ",len(results))
+
+
+
+
+
+
+        # # By extracting info from the cohort, we get the NAMES of the public projects
+        # # we need to access (public projects have unique name tags, e.g. tcga).
+        # program_set = get_public_program_name_set_for_cohorts(cohort_id_array)
+        #
+        # # Check to see if these programs have data for the requested vectors; if not, there's no reason to plot
+        # programs = FeatureDataTypeHelper.get_supported_programs_from_data_type(FEATURE_ID_TO_TYPE_MAP['gnab'])
+        # valid_programs = set(programs).intersection(program_set)
+        #
+        # if not len(valid_programs):
+        #     return JsonResponse(
+        #         {'message': "The chosen cohorts do not contain samples from programs with Gene Mutation data."})
+        #gnab_feature_id = build_gnab_feature_id(gene_list, genomic_build)
+        #logger.debug("GNAB feature ID for OncoPrint: {0}".format(gnab_feature_id))
+
+        # job_id = str(uuid4())
+        # bqs = get_bigquery_service()
+        # confirmed_project_ids, user_only_study_ids = get_confirmed_project_ids_for_cohorts(cohort_id_array)
+        # # Generate the 'IN' statement string: (%s, %s, ..., %s)
+        #
+        # cohort_id_stmt = ', '.join([str(cohort_id) for cohort_id in cohort_id_array])
+        # project_id_stmt = ''
+        # gene_list_stmt = ''
+        # gene_array = gene_list.split(',')
+        #
+        # if confirmed_project_ids is not None:
+        #     project_id_stmt = ', '.join([str(project_id) for project_id in confirmed_project_ids])
+        #
+        # if gene_array is not None:
+        #     gene_list_stmt = ', '.join('\'{0}\''.format(gene) for gene in gene_array)
+        #
+        # query_template = \
+        #     ("SELECT sample_barcode_tumor, {brk}"
+        #      "    SYMBOL, {brk}"
+        #      "    Variant_Type, {brk}"
+        #      "    Variant_Classification, {brk}"
+        #      "FROM [{table_id}] {brk}"
+        #      "WHERE SYMBOL IN ({gene_list}) {brk}"
+        #      "AND sample_barcode_tumor IN ( {brk}"
+        #      "    SELECT sample_barcode {brk}"
+        #      "    FROM [{cohort_dataset_and_table}] {brk}"
+        #      "    WHERE cohort_id IN ({cohort_id_list}) {brk}"
+        #      "         AND (project_id IS NULL {brk}")
+        # query_template += (" OR project_id IN ({project_id_list})))" if confirmed_project_ids is not None else "))")
+        #
+        # cohort_table_id = "{project_name}:{dataset_id}.{table_id}".format(
+        #     project_name=settings.BQ_PROJECT_ID,
+        #     dataset_id=settings.COHORT_DATASET_ID,
+        #     table_id=settings.BIGQUERY_COHORT_TABLE_ID
+        # )
+        # table_config=OncoprintMAFData.get_table_configuration()
+        # table_id = "{project_name}:{dataset_id}.{table_id}".format(
+        #     project_name=settings.BQ_PROJECT_ID,
+        #     dataset_id=settings.COHORT_DATASET_ID,
+        #     table_id=settings.BIGQUERY_COHORT_TABLE_ID
+        # )
+        # query = query_template.format(table_id=table_id,
+        #                               gene_list=gene_list_stmt,
+        #                               cohort_dataset_and_table=cohort_table_id,
+        #                               cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt,
+        #                               brk='\n')
+        #
+        # logger.debug("BQ_QUERY_ONCOPRINT: " + query)
+        # Submit your job
+
+        # query_job = submit_bigquery_job(bqs, settings.BQ_PROJECT_ID,
+        #                                 file_count_query.format(select_clause=file_list_query_base))
+        # job_is_done = is_bigquery_job_finished(bqs, settings.BQ_PROJECT_ID,
+        #                                        query_job['jobReference']['jobId'])
+        # retries = 0
+        # start = time.time()
+        # while not job_is_done and retries < BQ_ATTEMPT_MAX:
+        #     retries += 1
+        #     sleep(1)
+        #     job_is_done = is_bigquery_job_finished(bq_service, settings.BQ_PROJECT_ID,
+        #                                            query_job['jobReference']['jobId'])
+        # stop = time.time()
+        # logger.debug('[BENCHMARKING] Time to query BQ for dicom count: ' + (stop - start).__str__())
+        # results = get_bq_job_results(bq_service, query_job['jobReference'])
+        # for entry in results:
+        #     total_file_count = int(entry['f'][0]['v'])
+
+        # table_config = feature_def.get_table_configuration()
+        # query = query_template.format(table_id=table_config.table_id,
+        #                               gene_list=gene_list_stmt,
+        #                               cohort_dataset_and_table=cohort_table,
+        #                               cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt,
+        #                               brk='\n')
+        #
+        # logger.debug("BQ_QUERY_ONCOPRINT: " + query)
+        # print("####")
+        # print([table_config.table_id.split(":")[-1]])
+        # return query, [table_config.table_id.split(":")[-1]], True
+
+        # fvb = FeatureVectorBigQueryBuilder.build_from_django_settings(bqss)
+        # program_set = get_program_set_for_oncoprint(cohort_id_array)
+        #
+        # extra_provider_params = {
+        #     "genomic_buid": genomic_build
+        # }
+        #
+        # async_params = [
+        #     ProviderClassQueryDescription(OncoprintDataQueryHandler, gnab_feature_id, cohort_id_array,
+        #                                   confirmed_project_ids, program_set, extra_provider_params)]
+        # maf_data_result = fvb.get_feature_vectors_tcga_only(async_params, skip_formatting_for_plot=True)
+        #
+        # maf_data_vector = maf_data_result[gnab_feature_id]['data']
+        #
+        # if len(maf_data_vector) == 0:
+        #     return JsonResponse(build_empty_data_response(gene_list, cohort_id_array, maf_data_result['tables_queried']))
+        # print(maf_data_vector)
+        #
+        # if len(maf_data_vector) > 0:
+        #    oncoprint_data = OncoprintMAFDataFormatter().format_maf_vector_for_view(maf_data_vector, cohort_id_array)
+
+        # if len(oncoprint_data.maf_vector) == 0:
+        #     return JsonResponse(build_empty_data_response(gene_list, cohort_id_array, maf_data_result['tables_queried']))
 
         # Since the gene (hugo_symbol) parameter is part of the GNAB feature ID,
         # it will be sanity-checked in the OncoprintMAFWithCohorts instance.
-        oncoprint_maf_vector = oncoprint_data.maf_vector
-        oncoprint_cohort_info = oncoprint_data.cohort_info
+        # oncoprint_maf_vector = oncoprint_data.maf_vector
+        # oncoprint_cohort_info = oncoprint_data.cohort_info
         # removed_row_statistics_dict = oncoprint_data.removed_row_statistics
         #
         # oncoprint_view_data = OncoprintDataBuilder().build_view_data(hugo_symbol,
@@ -150,10 +319,10 @@ def oncoprint_view_data(request):
         #                                                              maf_data_result['tables_queried'])
         # return JsonResponse(oncoprint_view_data)
         # plot_data = generate_heatmap_data()
-
-
         # return JsonResponse(oncoprint_view_data)
-        return JsonResponse({#"plot_data": plot_data,
+
+
+        return JsonResponse({"plot_data": plot_data,
                              "gene_list": gene_list})
 
 

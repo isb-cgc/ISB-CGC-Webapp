@@ -279,9 +279,9 @@ define([
     }
 
     function generate_oncoprint_plot(plot_selector, view_data) {
-        //var plot_data = view_data['plot_data'];
+        var plot_data = view_data['plot_data'];
         //console.log()
-        var plot_data = "TCGA-25-2393-01	TP53	FUSION	FUSION\n\
+        /*var plot_data = "TCGA-25-2393-01	TP53	FUSION	FUSION\n\
 TCGA-04-1331-01	PTEN	HOMDEL	CNA\n\
 TCGA-04-1365-01	PTEN	HOMDEL	CNA\n\
 TCGA-04-1648-01	TP53	HOMDEL	CNA\n\
@@ -870,7 +870,7 @@ TCGA-25-2400-01\n\
 TCGA-25-2401-01\n\
 TCGA-25-2392-01\n\
 TCGA-25-2393-01\n\
-        ";
+        ";*/
         var gene_list = view_data['gene_list'];
         var element = $(plot_selector)[0];
         $(element).append('<div id="oncoprint_controls"></div>')
