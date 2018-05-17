@@ -32,8 +32,8 @@ from googleapiclient import discovery
 from oauth2client.client import GoogleCredentials
 
 from google_helpers.directory_service import get_directory_resource
-from google_helpers.bigquery.service_v2 import BigQueryServiceSupport
-from cohorts.metadata_helpers import submit_bigquery_job, is_bigquery_job_finished, get_bq_job_results, get_sample_metadata
+from google_helpers.bigquery.bq_support import BigQuerySupport
+from cohorts.metadata_helpers import get_sample_metadata
 from googleapiclient.errors import HttpError
 from visualizations.models import SavedViz
 from cohorts.models import Cohort, Cohort_Perms
@@ -300,22 +300,9 @@ def get_image_data(request, slide_barcode):
                 WHERE slide_barcode = '{}';
             """
 
-            bqs = BigQueryServiceSupport.build_from_application_default().get_client()
-            query_job = submit_bigquery_job(bqs, settings.BQ_PROJECT_ID, img_data_query.format(slide_barcode))
-            job_is_done = is_bigquery_job_finished(bqs, settings.BQ_PROJECT_ID,
-                                                   query_job['jobReference']['jobId'])
+            query_results = BigQuerySupport.execute_query_and_fetch_results(img_data_query.format(slide_barcode))
 
-            retries = 0
-
-            while not job_is_done and retries < BQ_ATTEMPT_MAX:
-                retries += 1
-                sleep(1)
-                job_is_done = is_bigquery_job_finished(bqs, settings.BQ_PROJECT_ID,
-                                                       query_job['jobReference']['jobId'])
-
-            query_results = get_bq_job_results(bqs, query_job['jobReference'])
-
-            if len(query_results) > 0:
+            if query_results and len(query_results) > 0:
                 result = {
                     'Width': query_results[0]['f'][1]['v'],
                     'Height': query_results[0]['f'][2]['v'],
