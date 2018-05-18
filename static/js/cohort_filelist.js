@@ -691,6 +691,8 @@ require([
         $('#'+this_tab+'-filter-panel-'+$(this).find(':selected').val()).show();
 
         if(this_tab == 'igv') {
+            //prevent users from selecting igv files during loading time
+            $('.filelist-panel input.igv.accessible[type="checkbox"]').attr('disabled',true);
             // Remove any selected files not from this build
             var new_build = $('#'+this_tab+'-files').find('.build :selected').val();
             var selCount = Object.keys(selIgvFiles.gcs_bam).length;

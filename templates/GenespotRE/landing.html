@@ -57,24 +57,15 @@
         <div class="col-sm-12">
             <div class="row">
                 <div class="col-sm-10 col-sm-offset-1 lj-icon-box-heading lj-text-left">
-                    <p>
-                        When using these tools in your publication, please cite Reynolds et al. Cancer Res 2017
-                    </p>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-12">
-            <div class="row">
-                <div class="col-sm-10 col-sm-offset-1 lj-icon-box-heading lj-text-left">
-                    <h2>Partners</h2>
-                    <p style="text-align: center;">
-                        <a href="https://cloud.google.com/">
-                            <img class="alignnone wp-image-800 size-full" src="{% static 'img/gcp-logo.png' %}" alt="Google Cloud Platform" />
+                    <h2 style="display:inline-block">Partners</h2>
+                    <div style="display:inline-block; padding-left:50px">
+                        <a href="https://cloud.google.com/" target = "_blank" style="text-decoration:none">
+                            <img src="{% static 'img/gcp-logo.png' %}" alt="Google Cloud Platform" style="width:130px;height:80px;"/>
                         </a>
-                        <a href="https://www.sra.com/">
-                            <img class="alignnone size-full wp-image-801" src="{% static 'img/csra-logo.png' %}" alt="SRA International" />
+                        <a href="https://www.sra.com/" target = "_blank" style="text-decoration:none">
+                            <img src="{% static 'img/csra-logo.png' %}" alt="SRA International" style="width:130px;height:80px;"/>
                         </a>
-                    </p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -83,6 +74,7 @@
             <h2>About Us</h2>
             <p>The Cancer Genomics Cloud is a platform that serves as a large scale repository and provides the computational infrastructure necessary to carry out cancer genomics research at unprecedented scales. </p>
             <p>Please use a Google managed email account to log into this systems.</p>
+            <p style="font-weight:bold">When using these tools in your publication, please cite <a href="http://cancerres.aacrjournals.org/content/77/21/e7.long" target = "_blank">Reynolds et al. Cancer Res 2017</a></p>
 
 
             {% if version %}
