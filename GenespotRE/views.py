@@ -368,22 +368,14 @@ def dicom(request, study_uid=None):
 @login_required
 def camic(request, slide_barcode=None):
     if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
-    images = []
     context = {}
-    images_obj = None
-    template = 'GenespotRE/camic.html'
 
-    if slide_barcode:
-        images = [{'barcode': slide_barcode, 'thumb': '', 'type': ''}]
-        template = 'GenespotRE/camic_single.html'
+    if not slide_barcode:
+        messages.error("Error while attempting to display this pathology image: a slide barcode was not provided.")
+        return redirect(reverse('cohort_list'))
 
-    if request.POST.get('checked_list', None):
-        images_obj = json.loads(request.POST.get('checked_list'))
-
-    if images_obj and 'slide_image' in images_obj:
-        for img_barcode in images_obj['slide_image'].keys():
-            slide_img = images_obj['slide_image'][img_barcode]
-            images.append({'barcode': img_barcode, 'thumb': slide_img['thumb'], 'type': slide_img['type']})
+    images = [{'barcode': slide_barcode, 'thumb': '', 'type': ''}]
+    template = 'GenespotRE/camic_single.html'
 
     context['barcodes'] = images
     context['camic_viewer'] = settings.CAMIC_VIEWER

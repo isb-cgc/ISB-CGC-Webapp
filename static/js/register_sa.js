@@ -64,7 +64,7 @@ require([
     $('#verify-sa').on('submit', function(e) {
         // #user-sa is only on the registration page, not on the adjustment page
         $('#user_sa').length > 0 && $('#user_sa').val($('#user_sa').val().trim());
-        $('#js-messages').hide();
+        $('#js-messages').empty();
         $('#invalid-sa-id').hide();
         e.preventDefault();
         e.stopPropagation();

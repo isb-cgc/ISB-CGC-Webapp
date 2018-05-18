@@ -91,50 +91,22 @@ require([
         }
     };
 
-    var selCamFiles = {
-        slide_image: {},
-        toTokens: function() {
-            var tokens = [];
-            for(var i in this.slide_image) {
-                var img = this.slide_image[i];
-                tokens.push({
-                    label: img['label'],
-                    value: i,
-                    dataType: "slide_image",
-                    sample: img['sample'],
-                    case: img['case'],
-                    project: img['project'],
-                    disease_code: img['disease_code']
-                });
-            }
-            return tokens;
-        },
-        count: function() {
-            return (Object.keys(this.slide_image).length);
-        }
-    };
-
     // Set of display controls to update when we check or uncheck
     var update_on_selex_change = function() {
         // Update the hidden form control
         $('#checked_list_input').attr('value',JSON.stringify(selIgvFiles));
-        $('#checked_list_input_camic').attr('value',JSON.stringify(selCamFiles));
 
         // Update the submit buttons
         $('input.igv[type="submit"]').prop('disabled', (selIgvFiles.count() <= 0));
-        $('input.cam[type="submit"]').prop('disabled', (selCamFiles.count() <= 0));
 
         // Update the display counter
         $('.selected-count-igv').text(selIgvFiles.count());
-        $('.selected-count-camic').text(selCamFiles.count());
 
         // Update the limit display
         $('.file-limit-igv').css('color', (selIgvFiles.count() < SEL_IGV_FILE_MAX ? "#000000" : "#BD12CC"));
-        $('.file-limit-camic').css('color', (selCamFiles.count() < SEL_IGV_FILE_MAX ? "#000000" : "#BD12CC"));
 
         // If we've cleared out our tokenfield, re-display the placeholder
         selIgvFiles.count() <= 0 && $('#selected-files-igv-tokenfield').show();
-        selCamFiles.count() <= 0 && $('#selected-files-camic-tokenfield').show();
 
         if(selIgvFiles.count() >= SEL_IGV_FILE_MAX) {
             $('#file-max-alert-igv').show();
@@ -142,13 +114,6 @@ require([
         } else {
             $('#file-max-alert-igv').hide();
             $('.filelist-panel input.igv.accessible[type="checkbox"]').attr('disabled',false);
-        }
-        if(selCamFiles.count() >= SEL_IGV_FILE_MAX) {
-            $('#file-max-alert-cam').show();
-            $('.filelist-panel input.cam.accessible[type="checkbox"]:not(:checked)').attr('disabled',true);
-        } else {
-            $('#file-max-alert-cam').hide();
-            $('.filelist-panel input.cam.accessible[type="checkbox"]').attr('disabled',false);
         }
     };
 
@@ -176,8 +141,6 @@ require([
 
             update_on_selex_change();
 
-           //$('.filelist-panel input.igv[type="checkbox"]').attr('disabled',false);
-
         });
 
         // Prevent direct user input on the tokenfield
@@ -187,40 +150,6 @@ require([
 
         $('input.igv[type="submit"]').prop('disabled', true);
     }
-
-    function build_camic_widgets() {
-        // Build the file tokenizer for caMic
-        // Bootstrap tokenfield requires 'value' as the datem attribute field
-        $('#selected-files-cam').tokenfield({
-            delimiter : " ",
-            minLength: 2,
-            limit: SEL_IGV_FILE_MAX,
-            tokens: selCamFiles.toTokens()
-        // No creating
-        }).on('tokenfield:edittoken',function(e){
-            e.preventDefault();
-            return false;
-        }).on('tokenfield:removedtoken',function(e){
-
-            // Uncheck the input checkbox - note this will not fire the event, which
-            // is bound to form click
-            var thisCheck = $('.filelist-panel input[value="'+e.attrs.value+'"');
-            thisCheck.prop('checked',false);
-
-            delete selCamFiles[e.attrs.dataType][e.attrs.value];
-
-            update_on_selex_change();
-
-            $('.filelist-panel input.cam[type="checkbox"]').attr('disabled',false);
-        });
-
-        // Prevent direct user input on the tokenfield
-        $('#selected-files-cam-tokenfield').prop('disabled','disabled');
-
-        $('.file-limit-camic').text(SEL_IGV_FILE_MAX);
-
-        $('input.cam[type="submit"]').prop('disabled', true);
-    };
 
     var happy_name = function(input) {
         var dictionary = {
@@ -276,7 +205,7 @@ require([
                 success : function (data) {
                     data_tab_content_div.append(data);
 
-                    update_download_link(active_tab);
+                    update_download_link(active_tab, total_files);
                     update_table_display(active_tab, {'total_file_count': total_files, 'file_list': file_listing});
 
                     $('.tab-pane.data-tab').each(function() { $(this).removeClass('active'); });
@@ -284,9 +213,6 @@ require([
                     $('#placeholder').hide();
 
                     switch(active_tab) {
-                        case 'camic':
-                            build_camic_widgets();
-                            break;
                         case 'igv':
                             build_igv_widgets();
                             break;
@@ -316,27 +242,14 @@ require([
         }
     });
 
-    function update_download_link(active_tab) {
+    function update_download_link(active_tab, file_list_total) {
         var tab_selector = '#'+active_tab+'-files';
         var build = $(tab_selector).find('.build :selected').val();
-
-        file_list_total = 0;
-
-        // Calculate the file total based on the reported counts for any given filter (data_format used here)
-        if($(tab_selector).find('div[data-filter-build="'+build+'"] input[data-feature-name="data_format"]:checked').length <= 0) {
-             $(tab_selector).find('div[data-filter-build="'+build+'"] input[data-feature-name="data_format"]').each(function(i) {
-               file_list_total += parseInt($(this).attr('data-count'));
-            });
-        } else {
-            $(tab_selector).find('div[data-filter-build="'+build+'"] input[data-feature-name="data_format"]:checked').each(function(i) {
-               file_list_total += parseInt($(this).attr('data-count'));
-            });
-        }
 
         if(file_list_total <= 0) {
             // Can't download/export something that isn't there
             $(tab_selector).find('.download-link .btn, .export-btn').attr('disabled','disabled');
-        } else {
+        } else if(!HAS_USER_DATA) {
             $(tab_selector).find('.download-link .btn, .export-btn').removeAttr('disabled');
         }
 
@@ -348,23 +261,33 @@ require([
             $(tab_selector).find('.file-list-warning').show();
         }
 
-        // Clear the previous parameter settings from the export form, and re-add the build
-        $('#export-to-bq-form, #export-to-gcs-form').find('input[name="build"]').remove();
-        $('#export-to-bq-form , #export-to-gcs-form').append('<input class="param" type="hidden" name="build" value="'+build+'" />');
-
         var downloadToken = new Date().getTime();
         $('.filelist-obtain .download-token').val(downloadToken);
 
-        if (SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab][build]).length >0) {
-            var filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab][build]));
-            $(tab_selector).find('.download-link').attr('href', download_url + '?' + filter_args + '&downloadToken='+downloadToken+'&total=' + Math.min(FILE_LIST_MAX,file_list_total));
-            $('#export-to-bq-form').append('<input class="param" type="hidden" name="filters" value="" />');
-            $('#export-to-bq-form input[name="filters"]').attr('value',JSON.stringify(SELECTED_FILTERS[active_tab][build]));
-        } else {
-            $(tab_selector).find('.download-link').attr('href', download_url + '?downloadToken='+downloadToken+'&total=' + Math.min(FILE_LIST_MAX,file_list_total))
+        var filter_args = null;
+
+        switch(active_tab) {
+            case "igv":
+                if(!SELECTED_FILTERS[active_tab][build]["data_format"]) {
+                    SELECTED_FILTERS[active_tab][build]["data_format"] = [];
+                }
+                SELECTED_FILTERS[active_tab][build]["data_format"].indexOf("BAM") < 0 && SELECTED_FILTERS[active_tab][build]["data_format"].push("BAM");
+            case "all":
+                if (SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab][build]).length >0) {
+                    filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab][build]));
+                }
+                break;
+            case "camic":
+                filter_args = 'filters=' + encodeURIComponent(JSON.stringify({"data_type": ["Diagnostic image","Tissue slide image"]}));
+                break;
+            case "dicom":
+                filter_args = 'filters=' + encodeURIComponent(JSON.stringify({"data_type": ["Radiology image"]}));
+                break;
         }
 
-        if(active_tab !== 'camic') {
+        $(tab_selector).find('.download-link').attr('href', download_url + '?' + (filter_args ? filter_args + '&' : '')+ 'downloadToken='+downloadToken+'&total=' + Math.min(FILE_LIST_MAX,file_list_total));
+
+        if(active_tab !== 'camic' && active_tab !== 'dicom') {
             $(tab_selector).find('.download-link').attr('href',$(tab_selector).find('.download-link').attr('href')+'&build='+build);
         }
     };
@@ -401,7 +324,7 @@ require([
         $.ajax({
             url: url,
             success: function (data) {
-                update_download_link(active_tab);
+                update_download_link(active_tab, data.total_file_count);
                 update_table_display(active_tab,data,do_filter_count);
             },
             error: function(e) {
@@ -481,66 +404,59 @@ require([
                     accessible = true;
                 }
 
-                if (active_tab !== 'all') {
-                    if (files[i]['cloudstorage_location'] && ((files[i]['dataformat'] == 'BAM') || (files[i]['datatype'] == 'Tissue slide image') || (files[i]['datatype'] == 'Diagnostic image'))) {
-                        if (active_tab === 'igv' && files[i]['dataformat'] == 'BAM') {
-                            val = files[i]['cloudstorage_location'] + ';' + files[i]['cloudstorage_location'].substring(0, files[i]['cloudstorage_location'].lastIndexOf("/") + 1) + files[i]['index_name'] + ',' + files[i]['sample'];
-                            dataTypeName = "gcs_bam";
-                            label = "IGV";
-                            checkbox_inputs += '<input class="igv' + (accessible ? ' accessible' : '') + '" type="checkbox" token-label="' + tokenLabel + '" program="' + files[i]['program'] + '" name="' + dataTypeName + '" data-type="' + dataTypeName + '" value="' + val + '"';
-                            if (!accessible) {
-                                checkbox_inputs += ' disabled';
-                            }
-                            checkbox_inputs += '>';
-                        } else if (active_tab === 'camic' && (files[i]['datatype'] == 'Tissue slide image' || files[i]['datatype'] == 'Diagnostic image')) {
-                            val = files[i]['cloudstorage_location'].split('/').pop().split(/\./).shift();
-                            files[i]['thumbnail'] = files[i]['cloudstorage_location'].split('/').slice(-2)[0];
-                            dataTypeName = "slide_image";
-                            label = "caMicro";
-                            checkbox_inputs += '<input class="cam' + (accessible ? ' accessible' : '') + '" type="checkbox" name="' + dataTypeName
-                                + '" data-thumb="' + files[i]['thumbnail'] + '" data-sub-type="' + files[i]['datatype']
-                                + '" data-sample="' + files[i]['sample'] + '" data-case="' + files[i]['case']
-                                + '" data-disease-code="' + files[i]['disease_code'] + '" data-project="' + files[i]['project']
-                                + '" data-type="' + dataTypeName + '" value="' + val + '"';
-                            if (!accessible) {
-                                checkbox_inputs += ' disabled';
-                            }
-                            checkbox_inputs += '>';
+            if(active_tab !== 'all') {
+                if (files[i]['cloudstorage_location'] && ((files[i]['dataformat'] == 'BAM') || (files[i]['datatype'] == 'Tissue slide image') || (files[i]['datatype'] == 'Diagnostic image'))) {
+                    if(active_tab === 'igv' && files[i]['dataformat'] == 'BAM') {
+                        val = files[i]['cloudstorage_location'] + ';' + files[i]['cloudstorage_location'].substring(0, files[i]['cloudstorage_location'].lastIndexOf("/") + 1) + files[i]['index_name'] + ',' + files[i]['sample'];
+                        dataTypeName = "gcs_bam";
+                        label = "IGV";
+                        checkbox_inputs += '<input class="igv'+(accessible? ' accessible':'')+'" type="checkbox" token-label="' + tokenLabel + '" program="' + files[i]['program'] + '" name="' + dataTypeName + '" data-type="' + dataTypeName + '" value="' + val + '"';
+                        if (!accessible) {
+                            checkbox_inputs += ' disabled';
                         }
+                        checkbox_inputs += '>';
+                    } else if(active_tab === 'camic' && (files[i]['datatype'] == 'Tissue slide image' || files[i]['datatype'] == 'Diagnostic image')) {
+                        files[i]['slide_barcode'] = files[i]['cloudstorage_location'].split('/').pop().split(/\./).shift();
+                        files[i]['thumbnail'] = files[i]['cloudstorage_location'].split('/').slice(-2)[0];
                     }
-                    files[i]['file_viewer'] = checkbox_inputs;
                 }
+                files[i]['file_viewer'] = checkbox_inputs;
+            }
 
-                var row = '<tr>' +
-                    '<td>' + files[i]['program'] + '</td>' +
-                    '<td>' + files[i]['case'] + '</td>'
-                    + (active_tab !== 'dicom' ? '<td><div class="col-filename">' +
-                        '<div>' + files[i]['filename'] + '</div>' +
-                        '<div>[GCD ID: ' + files[i]['file_gdc_id'] + ']</div>' +
-                        '</div></td>' : '') +
-                    '<td>' + files[i]['disease_code'] + '</td>' +
-                    (active_tab === 'dicom' ? '<td>' + files[i]['project_short_name'] + '</td>' : '') +
-                    (active_tab === 'dicom' ? '<td>' + files[i]['study_desc'] + '</td>' : '') +
-                    (active_tab === 'dicom' ?
-                        '<td><div class="study-uid">' +
-                        '<a href="' + DICOM_URL + files[i]['study_uid'] + '/" target="_blank">' + files[i]['study_uid'] +
-                        '<div class="osmisis" style="display: none;"><i>Open in Osimis Web Viewer</i></div></a>' +
-                        '</div></td>' : '') +
-                    (active_tab === 'camic' ? (files[i]['thumbnail'] ? '<td><img src="' + IMG_THUMBS_URL + files[i]['thumbnail'] + '/thmb_128x64.jpeg"></td>' : '<td></td>') : '') +
-                    (active_tab !== 'camic' && active_tab !== 'dicom' ? '<td>' + (files[i]['exp_strat'] || 'N/A') + '</td>' : '') +
-                    (active_tab !== 'camic' && active_tab !== 'dicom' ? '<td>' + happy_name(files[i]['platform']) + '</td>' : '') +
-                    (active_tab !== 'camic' && active_tab !== 'dicom' ? '<td>' + files[i]['datacat'] + '</td>' : '') +
-                    (active_tab !== 'dicom' ? '<td>' + files[i]['datatype'] + '</td><td>' + files[i]['dataformat'] + '</td>' : '') +
-                    (active_tab !== 'all' && active_tab !== 'dicom' ? (files[i]['file_viewer'] ? '<td>' + files[i]['file_viewer'] + '</td>' : '<td></td>') : '') +
-                    '</tr>';
+            var row = '<tr>' +
+                '<td>' + files[i]['program'] + '</td>' +
+                '<td>' + files[i]['case'] + '</td>' +
+                (active_tab === 'igv' || active_tab === 'all' ? '<td><div class="col-filename">' +
+                    '<div>' + files[i]['filename'] + '</div>' +
+                    '<div>[GDC ID: ' + files[i]['file_gdc_id'] + ']</div>' +
+                '</div></td>' : '') +
+                (active_tab === 'camic' ? '<td><div class="col-filename camic-filename">' +
+                    '<div><a href="'+CAMIC_URL+files[i]['slide_barcode']+'/" target="_blank">' + files[i]['filename'] +
+                    '<div>[GDC ID: ' + files[i]['file_gdc_id'] + ']</div>' +
+                    '<div class="osmisis" style="display: none;"><i>Open in caMicroscope</i></div></a></div>' +
+                '</div></td>' : '') +
+                '<td>' + files[i]['disease_code'] + '</td>' +
+                (active_tab === 'dicom' ? '<td>'+files[i]['project_short_name']+'</td>' : '') +
+                (active_tab === 'dicom' ? '<td>'+files[i]['study_desc']+'</td>' : '') +
+                (active_tab === 'dicom' ?
+                    '<td><div class="study-uid">' +
+                    '<a href="'+DICOM_URL+files[i]['study_uid']+'/" target="_blank">'+files[i]['study_uid']+
+                        '<div class="osmisis" style="display: none;"><i>Open in Osimis Web Viewer</i></div></a>'+
+                    '</div></td>' : '') +
+                (active_tab === 'camic' ? (files[i]['thumbnail'] ? '<td><img src="'+IMG_THUMBS_URL+files[i]['thumbnail']+'/thmb_128x64.jpeg"></td>' : '<td></td>') : '') +
+                (active_tab !== 'camic' && active_tab !== 'dicom' ? '<td>' + (files[i]['exp_strat'] || 'N/A') + '</td>' : '')+
+                (active_tab !== 'camic' && active_tab !== 'dicom' ? '<td>' + happy_name(files[i]['platform']) + '</td>' : '')+
+                (active_tab !== 'camic' && active_tab !== 'dicom' ? '<td>' + files[i]['datacat'] + '</td>' : '') +
+                (active_tab !== 'dicom' ? '<td>' + files[i]['datatype'] + '</td><td>' + files[i]['dataformat'] + '</td>' : '') +
+                (active_tab !== 'camic' && active_tab !== 'dicom' ? (files[i]['file_viewer'] ? '<td>' + files[i]['file_viewer'] + '</td>' : '<td></td>') : '') +
+            '</tr>';
 
                 $(tab_selector).find('.filelist-panel .file-list-table tbody').append(row);
 
-                // Remember any previous checks
-                var thisCheck = $(tab_selector).find('.filelist-panel input[value="' + val + '"]');
-                selIgvFiles[thisCheck.attr('data-type')] && selIgvFiles[thisCheck.attr('data-type')][thisCheck.attr('value')] && thisCheck.attr('checked', true);
-                selCamFiles[thisCheck.attr('data-type')] && selCamFiles[thisCheck.attr('data-type')][thisCheck.attr('value')] && thisCheck.attr('checked', true);
-            }
+            // Remember any previous checks
+            var thisCheck = $(tab_selector).find('.filelist-panel input[value="'+val+'"]');
+            selIgvFiles[thisCheck.attr('data-type')] && selIgvFiles[thisCheck.attr('data-type')][thisCheck.attr('value')] && thisCheck.attr('checked', true);
+        }
 
             var columns_display = tab_columns_display[active_tab];
             var column_toggle_html = "";
@@ -557,53 +473,30 @@ require([
 
         // If we're at the max, disable all checkboxes which are not currently checked
         selIgvFiles.count() >= SEL_IGV_FILE_MAX && $(tab_selector).find('.filelist-panel input.igv.accessible[type="checkbox"]:not(:checked)').attr('disabled',true);
-        selCamFiles.count() >= SEL_IGV_FILE_MAX && $(tab_selector).find('.filelist-panel input.cam.accessible[type="checkbox"]:not(:checked)').attr('disabled',true);
 
         // Update the Launch buttons
         $('#igv-viewer input[type="submit"]').prop('disabled', (selIgvFiles.count() <= 0));
-        $('#camic-viewer input[type="submit"]').prop('disabled', (selCamFiles.count() <= 0));
 
         $('#selected-files-igv').tokenfield('setTokens',selIgvFiles.toTokens());
-        $('#selected-files-cam').tokenfield('setTokens',selCamFiles.toTokens());
 
         // Bind event handler to checkboxes
         $(tab_selector).find('.filelist-panel input[type="checkbox"]').on('click', function() {
 
             var self=$(this);
 
-            if(self.data('type') == 'slide_image') {
-                if(self.is(':checked')) {
-                    selCamFiles[self.data('type')][self.attr('value')] = {
-                        'label': self.attr('value'),
-                        'type': self.data('sub-type'),
-                        'thumb': self.data('thumb'),
-                        'sample': self.data('sample'),
-                        'case': self.data('case'),
-                        'disease_code': self.data('disease-code'),
-                        'project': self.data('project'),
-
-                    };
-                    $('#selected-files-cam-tokenfield').hide();
-                } else {
-                    delete selCamFiles[self.attr('data-type')][self.attr('value')];
-                }
-
-                $('#selected-files-cam').tokenfield('setTokens',selCamFiles.toTokens());
+            if(self.is(':checked')) {
+                var build = $(tab_selector).find('.build :selected').val();
+                selIgvFiles[self.attr('data-type')][self.attr('value')] = {
+                    'label': self.attr('token-label') + ' ['+build+']',
+                    'program': self.attr('program'),
+                    'build': build
+                };
+                $('#selected-files-igv-tokenfield').hide();
             } else {
-                if(self.is(':checked')) {
-                    var build = $(tab_selector).find('.build :selected').val();
-                    selIgvFiles[self.attr('data-type')][self.attr('value')] = {
-                        'label': self.attr('token-label') + ' ['+build+']',
-                        'program': self.attr('program'),
-                        'build': build
-                    };
-                    $('#selected-files-igv-tokenfield').hide();
-                } else {
-                    delete selIgvFiles[self.attr('data-type')][self.attr('value')];
-                }
-
-                $('#selected-files-igv').tokenfield('setTokens',selIgvFiles.toTokens());
+                delete selIgvFiles[self.attr('data-type')][self.attr('value')];
             }
+
+            $('#selected-files-igv').tokenfield('setTokens',selIgvFiles.toTokens());
 
             update_on_selex_change();
         });
@@ -802,7 +695,7 @@ require([
                             $('#'+active_tab+'-'+data.build+'-'+this_attr.name+'-'+this_val.value).attr('data-count',this_val.count);
                         }
                     }
-                    update_download_link(active_tab);
+                    update_download_link(active_tab, data.total_file_count);
                     update_table_display(active_tab, data);
                 },
                 error: function() {
@@ -849,27 +742,61 @@ require([
         },$('.filelist-obtain .download-token').val(),"downloadToken");
     });
 
-
-
-    $('.data-tab-content').on('click','.download-link',function(e) {
-        var type_tab = $(this).parents('.data-tab.active')[0];
-        var active_tab = $(type_tab).data('file-type');
-
-        if(parseInt($('.file-list-total').text()) > FILE_LIST_MAX) {
-            $('#'+active_tab+'-files').find('.file-list-warning').show();
-            e.preventDefault();
-            return false;
-        } else {
-            $('#'+active_tab+'-files').find('.file-list-warning').hide();
-        }
-    });
-
-    $('.data-tab-content').on('hover enter mouseover','.study-uid',function(e){
+    $('.data-tab-content').on('hover enter mouseover','.study-uid, .col-filename',function(e){
         $(this).find('.osmisis').show();
     });
 
-    $('.data-tab-content').on('leave mouseout mouseleave','.study-uid',function(e){
+    $('.data-tab-content').on('leave mouseout mouseleave','.study-uid, .col-filename',function(e){
         $(this).find('.osmisis').hide();
+    });
+
+    // When an export button is clicked, add the filters to that modal's form
+    // Note that the export modals will always clear any 'filters' inputs applied to them when hidden/closed
+    $('.container').on('click', 'button[data-target="#export-to-bq-modal"], button[data-target="#export-to-gcs-modal"]', function (e) {
+        var target_form = $($($(this).data('target')).find('form')[0]);
+        var this_tab = $(this).parents('.data-tab');
+        var tab_type = this_tab.data('file-type');
+
+        // Clear the previous parameter settings from the export form, and re-add the build
+        target_form.find('input[name="build"], input[name="filters"]').remove();
+        target_form.append(
+            '<input class="param" type="hidden" name="filters" value="" />'
+        );
+
+        var build = this_tab.find('.build :selected').val() || null;
+
+        switch(tab_type) {
+            case "igv":
+                target_form.find('input[name="filters"]').attr(
+                    'value',JSON.stringify({"data_format": ["BAM"]})
+                );
+                target_form.append(
+                    '<input class="param" type="hidden" name="build" value="'+build+'" />'
+                );
+                break;
+            case "all":
+                target_form.append(
+                    '<input class="param" type="hidden" name="build" value="'+build+'" />'
+                );
+                if(Object.keys(SELECTED_FILTERS[tab_type][build]).length > 0) {
+                    target_form.find('input[name="filters"]').attr(
+                        'value',JSON.stringify(SELECTED_FILTERS[tab_type][build])
+                    );
+                } else {
+                    target_form.find('input[name="filters"]').remove();
+                }
+                break;
+            case "dicom":
+                target_form.find('input[name="filters"]').attr(
+                    'value',JSON.stringify({"data_type": ["Radiology image"]})
+                );
+                break;
+            case "camic":
+                target_form.find('input[name="filters"]').attr(
+                    'value',JSON.stringify({"data_type": ["Diagnostic image", "Tissue slide image"]})
+                );
+                break;
+        }
     });
 
 });

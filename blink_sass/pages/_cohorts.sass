@@ -50,8 +50,8 @@
             border-left: 2px solid $isb-primary
             h5
                 margin-top: 0
-        :first-child
-            border-left: none
+            &:first-child
+                border-left: none
         .label
             margin: 0
 
@@ -65,8 +65,8 @@
             border-left: 2px solid $isb-primary
             h5
                 margin-top: 0
-        :first-child
-            border-left: none
+            &:first-child
+                border-left: none
         .label
             margin: 0
 
@@ -116,9 +116,9 @@
             background-color: #fff
             text-align: center
             font-size: 12.7px
-            &.program-tab
+            &.program-tab, &.file-browser-tab
                 width: (100% / 4)
-            &.filter-tab, &.file-browser-tab
+            &.filter-tab
                 width: (100% / 3)
             &:first-child a
                 border-top-left-radius: 3px
@@ -476,13 +476,12 @@
                             border-radius: 3px
                             a
                                 color: #FFF
-                    &.study-uid
+                    &.study-uid, &.camic-filename
                         font-weight: 700
                         a:hover
                             text-decoration: none
-                &:last-child
-                    i
-                        color: $isb-success
+                        i
+                            color: $isb-success
         input
             margin-left: 5px
     .nav-tabs

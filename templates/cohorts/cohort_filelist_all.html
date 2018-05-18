@@ -90,8 +90,8 @@
                         </li>
                         <li class="menu-item">
                             <div class="filelist-obtain">
-                                <button class="btn btn-info export-btn" data-toggle="modal" data-target="#export-to-bq-modal" title="Export this file manifest to a BigQuery table">BigQuery</button>
-                                <button class="btn btn-info export-btn" data-toggle="modal" data-target="#export-to-gcs-modal" title="Export this file manifest to a GCS bucket">GCS</button>
+                                <button class="btn btn-info export-btn" data-toggle="modal" {% if has_user_data %}disabled {% endif %}data-target="#export-to-bq-modal" title="{% if has_user_data %}Export for file manifests containing user data is not available at this time.{% else %}Export this file manifest to a BigQuery table{% endif %}">BigQuery</button>
+                                <button class="btn btn-info export-btn" data-toggle="modal" {% if has_user_data %}disabled {% endif %}data-target="#export-to-gcs-modal" title="{% if has_user_data %}Export for file manifests containing user data is not available at this time.{% else %}Export this file manifest to a GCS bucket{% endif %}">GCS</button>
                             </div>
                         </li>
                     </ul>
