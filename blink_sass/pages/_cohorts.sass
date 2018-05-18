@@ -50,8 +50,8 @@
             border-left: 2px solid $isb-primary
             h5
                 margin-top: 0
-        :first-child
-            border-left: none
+            &:first-child
+                border-left: none
         .label
             margin: 0
 
@@ -65,8 +65,8 @@
             border-left: 2px solid $isb-primary
             h5
                 margin-top: 0
-        :first-child
-            border-left: none
+            &:first-child
+                border-left: none
         .label
             margin: 0
 
@@ -406,10 +406,6 @@
     .hidden_form_value
         display: none
 
-    .filelist-panel
-        h4
-            display: inline
-
     .file-list
         .alert-dismissable
             display: none
@@ -442,23 +438,53 @@
             input
                 margin-right: 5px
 
-
     .filelist-panel
+        h4
+            display: inline
         .page-num, .file-count
             display: inline-block
-
         table
+            thead
+                font-size: 12px
             table-layout: fixed
             word-wrap: normal
+            font-size: 13px
             .col-barcode, .col-pipeline
                 width: 150px
             .col-datalevel
                 width: 90px
-            td:last-child i
-                color: $isb-success
+            td
+                height: 53px
+                .col-filename
+                    div
+                        display: block
+                        white-space: nowrap
+                        overflow: hidden
+                        text-overflow: ellipsis
+                div
+                    &.col-filename, &.study-uid
+                        &:hover
+                            display: block
+                            position: absolute
+                            z-index: 1
+                            color: #FFF
+                            background-color: #2a537a
+                            border-color: #2a537a
+                            padding: 5px
+                            margin-left: -5px
+                            margin-top: -5px
+                            border-radius: 3px
+                            a
+                                color: #FFF
+                    &.study-uid
+                        font-weight: 700
+                        a:hover
+                            text-decoration: none
+                &:last-child
+                    i
+                        color: $isb-success
         input
             margin-left: 5px
-
     .nav-tabs
         li,li.active
             a
@@ -511,9 +537,28 @@
     button
         display: inline-block
         &.instructions
-            margin-bottom: 15px
-            display: block
-            clear: both
+            &.instructions_show
+                margin-bottom: 15px
+                display: block
+                clear: both
+                &:before
+                    content: "\f103"
+                    float: left
+                    font-family: FontAwesome
+                &:after
+                    content: "Show Instructions"
+                    margin-left: 5px
+            &.instructions_hide
+                margin-bottom: 15px
+                display: block
+                clear: both
+                &:before
+                    content: "\f102"
+                    float: left
+                    font-family: FontAwesome
+                &:after
+                    content: "Hide Instructions"
+                    margin-left: 5px
     h5
         margin-top: 25px
     h6
@@ -524,7 +569,11 @@
         border-color: $isb-primary
     .valid-entries, .invalid-entries
         overflow-y: auto
-        max-height: 700px
+        max-height: 1200px
+    .barcode-status
+        .table_wrapper
+            padding-left: 20px
+
 
 #saving-cohort, .verify-pending, .register-pending
     margin-left: 20px
@@ -539,7 +588,7 @@ span.code
     font-family: monospace
     font-weight: 600
 
-#camic, #camic-single
+#camic, #camic-single, #dicom-viewer
     .camic-tabs
         li a
             font-size: 13px
@@ -564,7 +613,7 @@ span.code
         position: absolute
         width: 100%
         height: 900px
-        margin-top: 25px
+        margin-top: 12px
         background: rgb(130, 158, 188)
         z-index: 10
         i
@@ -590,3 +639,25 @@ span.code
             padding-right: 25px
             padding-left: 25px
             display: inline-block
+
+#export-to-bq-modal, #export-to-gcs-modal
+    .spinner
+        position: absolute
+        width: 100%
+        height: 65%
+        top: 18%
+        left: 0px
+        background: rgba(255,255,255,.5)
+        z-index: 10
+        div
+            position: absolute
+            text-align: center
+            height: 50px
+            top: 35%
+            padding-top: 20px
+            margin: auto
+            font-size: 18px
+            width: 100%
+            background: rgba(255,255,255,1)
+        i
+            font-size: 20px

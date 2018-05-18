@@ -26,7 +26,8 @@ require.config({
         underscore: 'libs/underscore-min',
         tokenfield: 'libs/bootstrap-tokenfield.min',
         base: 'base',
-        bq_export: 'export_to_bq'
+        bq_export: 'export_to_bq',
+        gcs_export: 'export_to_gcs'
     },
     shim: {
         'bootstrap': ['jquery'],
@@ -44,7 +45,8 @@ require([
     'bootstrap',
     'session_security',
     'tokenfield',
-    'bq_export'
+    'bq_export',
+    'gcs_export'
 ], function ($, base) {
 
     // For manaaging filter changes
@@ -136,17 +138,17 @@ require([
 
         if(selIgvFiles.count() >= SEL_IGV_FILE_MAX) {
             $('#file-max-alert-igv').show();
-            $('.filelist-panel input.igv[type="checkbox"]:not(:checked)').attr('disabled',true);
+            $('.filelist-panel input.igv.accessible[type="checkbox"]:not(:checked)').attr('disabled',true);
         } else {
             $('#file-max-alert-igv').hide();
-            $('.filelist-panel input.igv[type="checkbox"]').attr('disabled',false);
+            $('.filelist-panel input.igv.accessible[type="checkbox"]').attr('disabled',false);
         }
         if(selCamFiles.count() >= SEL_IGV_FILE_MAX) {
             $('#file-max-alert-cam').show();
-            $('.filelist-panel input.cam[type="checkbox"]:not(:checked)').attr('disabled',true);
+            $('.filelist-panel input.cam.accessible[type="checkbox"]:not(:checked)').attr('disabled',true);
         } else {
             $('#file-max-alert-cam').hide();
-            $('.filelist-panel input.cam[type="checkbox"]').attr('disabled',false);
+            $('.filelist-panel input.cam.accessible[type="checkbox"]').attr('disabled',false);
         }
     };
 
@@ -174,7 +176,7 @@ require([
 
             update_on_selex_change();
 
-           $('.filelist-panel input.igv[type="checkbox"]').attr('disabled',false);
+           //$('.filelist-panel input.igv[type="checkbox"]').attr('disabled',false);
 
         });
 
@@ -334,7 +336,7 @@ require([
         if(file_list_total <= 0) {
             // Can't download/export something that isn't there
             $(tab_selector).find('.download-link .btn, .export-btn').attr('disabled','disabled');
-        } else {
+        } else if(!HAS_USER_DATA) {
             $(tab_selector).find('.download-link .btn, .export-btn').removeAttr('disabled');
         }
 
@@ -347,9 +349,8 @@ require([
         }
 
         // Clear the previous parameter settings from the export form, and re-add the build
-        $('#export-to-bq-form input.param').remove();
-        $('#export-to-bq-form').append('<input class="param" type="hidden" name="build" value="'+build+'" />');
-        $('#export-to-bq-form').append('<input class="param" type="hidden" name="total_expected" value="'+file_list_total+'" />');
+        $('#export-to-bq-form, #export-to-gcs-form').find('input[name="build"]').remove();
+        $('#export-to-bq-form , #export-to-gcs-form').append('<input class="param" type="hidden" name="build" value="'+build+'" />');
 
         var downloadToken = new Date().getTime();
         $('.filelist-obtain .download-token').val(downloadToken);
@@ -368,7 +369,8 @@ require([
         }
     };
 
-    var update_table = function (active_tab) {
+    var update_table = function (active_tab, do_filter_count) {
+        do_filter_count = (do_filter_count === undefined || do_filter_count === null ? true : do_filter_count);
         var tab_selector = '#'+active_tab+'-files';
         var build = $(tab_selector).find('.build :selected').val();
         if(active_tab == 'igv'){
@@ -377,8 +379,11 @@ require([
 
         // Gather filters here
         var filters = {};
-
-        var url = ajax_update_url[active_tab] + '?page=' + page;
+        var page = tab_page[active_tab];
+        var files_per_page = tab_files_per_page[active_tab];
+        var sort_column = tab_sort_column[active_tab][0];
+        var sort_order = tab_sort_column[active_tab][1];
+        var url = ajax_update_url[active_tab] + '?page=' + page +'&files_per_page=' + files_per_page +'&sort_column='+ sort_column +'&sort_order='+sort_order;
 
         if (SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab][build]).length >0) {
             var filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab][build]));
@@ -397,7 +402,7 @@ require([
             url: url,
             success: function (data) {
                 update_download_link(active_tab);
-                update_table_display(active_tab,data);
+                update_table_display(active_tab,data,do_filter_count);
             },
             error: function(e) {
                 console.log(e);
@@ -407,29 +412,62 @@ require([
 
     };
 
-    function update_table_display(active_tab, data) {
+    function update_table_display(active_tab, data, do_filter_count) {
+        do_filter_count = (do_filter_count === undefined || do_filter_count === null ? true : do_filter_count);
+        var page = tab_page[active_tab];
+        var total_files = tab_count[active_tab];
         var tab_selector = '#'+active_tab+'-files';
-        var total_files = data['total_file_count'];
-        $(tab_selector).find('.showing').text((total_files < 20 ? total_files : "20"));
-        var total_pages = Math.ceil(total_files / 20);
-        if(total_pages <= 0) {
+        var files_per_page = tab_files_per_page[active_tab];
+        var sort_column = tab_sort_column[active_tab];
+        if(do_filter_count) {
+            tab_count[active_tab] = total_files = data['total_file_count'];
+        }
+        var total_pages = Math.ceil(total_files / files_per_page);
+        if (total_pages <= 0) {
             $(tab_selector).find('.file-page-count').hide();
             $(tab_selector).find('.no-file-page-count').show();
+            $(tab_selector).find('.paginate_button_space').hide();
+            $(tab_selector).find('.dataTables_length').addClass('disabled');
+            $(tab_selector).find('.sortable_table th').addClass('disabled');
         } else {
+            var page_list = pagination(page,total_pages);
+            var html_page_button = "";
+            for(let i of page_list){
+                if(i === "..."){
+                    html_page_button += "<span class='\ellipsis\'>...</span>"
+                }
+                else{
+                    html_page_button += "<a class=\'paginate_button numeric_button"+ (i == page ? " current\'":"\'") +">" + i + "</a>";
+                }
+            }
+
             $(tab_selector).find('.file-page-count').show();
             $(tab_selector).find('.no-file-page-count').hide();
-            $(tab_selector).find('.filelist-panel .panel-body .file-count').html(total_pages);
-            $(tab_selector).find('.filelist-panel .panel-body .page-num').html(page);
+            $(tab_selector).find('.paginate_button_space').show();
+            $(tab_selector).find('.dataTables_length').removeClass('disabled');
+            $(tab_selector).find('.sortable_table th').removeClass('disabled');
+            $(tab_selector).find('.filelist-panel .panel-body .total-file-count').html(total_files);
+            $(tab_selector).find('.filelist-panel .panel-body .paginate_button_space').html(html_page_button);
         }
 
-        var files = data['file_list'];
         $(tab_selector).find('.filelist-panel table tbody').empty();
+        $(tab_selector).find('.sortable_table th:not(.sorting_disabled)').removeClass('sorting_asc sorting_desc').addClass('sorting');
 
+        var files = data['file_list'];
         if(files.length <= 0) {
             $(tab_selector).find('.filelist-panel table tbody').append(
                 '<tr>' +
-                '<td colspan="7"><i>No file listings found in this cohort for this build.</i></td><td></td>'
+                '<td colspan="9"><i>No file listings found in this cohort for this build.</i></td><td></td>'
             );
+        }
+        else {
+            var first_page_entry = ((page - 1) * files_per_page) + 1;
+            var last_page_entry = first_page_entry + files.length - 1;
+            $(tab_selector).find('.showing').text(first_page_entry + " to " + last_page_entry);
+            // set column sorting class
+            $(tab_selector).find('.sortable_table th:not(.sorting_disabled)[columnId=\'' + tab_sort_column[active_tab][0] + '\']')
+                .removeClass('sorting')
+                .addClass(tab_sort_column[active_tab][1] ? 'sorting_desc' : 'sorting_asc');
         }
 
         for (var i = 0; i < files.length; i++) {
@@ -442,9 +480,9 @@ require([
             var label = '';
             var tokenLabel = files[i]['sample']+", "+files[i]['exp_strat']+", "+happy_name(files[i]['platform'])+", "+files[i]['datatype'];
             var checkbox_inputs = '';
-            var disable = true;
+            var accessible = false;
             if (files[i]['access'] != 'controlled' || files[i]['user_access'] == 'True') {
-                disable = false;
+                accessible = true;
             }
 
             if(active_tab !== 'all') {
@@ -453,9 +491,9 @@ require([
                         val = files[i]['cloudstorage_location'] + ';' + files[i]['cloudstorage_location'].substring(0, files[i]['cloudstorage_location'].lastIndexOf("/") + 1) + files[i]['index_name'] + ',' + files[i]['sample'];
                         dataTypeName = "gcs_bam";
                         label = "IGV";
-                        checkbox_inputs += '<input class="igv" type="checkbox" token-label="' + tokenLabel + '" program="' + files[i]['program'] + '" name="' + dataTypeName + '" data-type="' + dataTypeName + '" value="' + val + '"';
-                        if (disable) {
-                            checkbox_inputs += ' disabled="disabled"';
+                        checkbox_inputs += '<input class="igv'+(accessible? ' accessible':'')+'" type="checkbox" token-label="' + tokenLabel + '" program="' + files[i]['program'] + '" name="' + dataTypeName + '" data-type="' + dataTypeName + '" value="' + val + '"';
+                        if (!accessible) {
+                            checkbox_inputs += ' disabled';
                         }
                         checkbox_inputs += '>';
                     } else if(active_tab === 'camic' && (files[i]['datatype'] == 'Tissue slide image' || files[i]['datatype'] == 'Diagnostic image')) {
@@ -463,13 +501,13 @@ require([
                         files[i]['thumbnail'] = files[i]['cloudstorage_location'].split('/').slice(-2)[0];
                         dataTypeName = "slide_image";
                         label = "caMicro";
-                        checkbox_inputs += '<input class="cam" type="checkbox" name="' + dataTypeName
+                        checkbox_inputs += '<input class="cam'+ (accessible? ' accessible':'') +'" type="checkbox" name="' + dataTypeName
                             + '" data-thumb="'+files[i]['thumbnail']+'" data-sub-type="'+files[i]['datatype']
                             + '" data-sample="' + files[i]['sample'] + '" data-case="' + files[i]['case']
                             + '" data-disease-code="' + files[i]['disease_code'] + '" data-project="' + files[i]['project']
                             + '" data-type="' + dataTypeName + '" value="' + val + '"';
-                        if (disable) {
-                            checkbox_inputs += ' disabled="disabled"';
+                        if (!accessible) {
+                            checkbox_inputs += ' disabled';
                         }
                         checkbox_inputs += '>';
                     }
@@ -479,11 +517,19 @@ require([
 
             var row = '<tr>' +
                 '<td>' + files[i]['program'] + '</td>' +
-                '<td>' + files[i][(active_tab == 'dicom' ? 'case' : 'sample')] + '</td>' +
+                '<td>' + files[i]['case'] + '</td>'
+                + (active_tab !== 'dicom' ? '<td><div class="col-filename">' +
+                    '<div>' + files[i]['filename'] + '</div>' +
+                    '<div>[GDC ID: ' + files[i]['file_gdc_id'] + ']</div>' +
+                '</div></td>' : '') +
                 '<td>' + files[i]['disease_code'] + '</td>' +
                 (active_tab === 'dicom' ? '<td>'+files[i]['project_short_name']+'</td>' : '') +
                 (active_tab === 'dicom' ? '<td>'+files[i]['study_desc']+'</td>' : '') +
-                (active_tab === 'dicom' ? '<td><a href="'+DICOM_URL+files[i]['study_uid']+'/" target="_blank">'+files[i]['study_uid']+'</td>' : '') +
+                (active_tab === 'dicom' ?
+                    '<td><div class="study-uid">' +
+                    '<a href="'+DICOM_URL+files[i]['study_uid']+'/" target="_blank">'+files[i]['study_uid']+
+                        '<div class="osmisis" style="display: none;"><i>Open in Osimis Web Viewer</i></div></a>'+
+                    '</div></td>' : '') +
                 (active_tab === 'camic' ? (files[i]['thumbnail'] ? '<td><img src="'+IMG_THUMBS_URL+files[i]['thumbnail']+'/thmb_128x64.jpeg"></td>' : '<td></td>') : '') +
                 (active_tab !== 'camic' && active_tab !== 'dicom' ? '<td>' + (files[i]['exp_strat'] || 'N/A') + '</td>' : '')+
                 (active_tab !== 'camic' && active_tab !== 'dicom' ? '<td>' + happy_name(files[i]['platform']) + '</td>' : '')+
@@ -492,7 +538,7 @@ require([
                 (active_tab !== 'all' && active_tab !== 'dicom' ? (files[i]['file_viewer'] ? '<td>' + files[i]['file_viewer'] + '</td>' : '<td></td>') : '') +
             '</tr>';
 
-            $(tab_selector).find('.filelist-panel table tbody').append(row);
+            $(tab_selector).find('.filelist-panel .file-list-table tbody').append(row);
 
             // Remember any previous checks
             var thisCheck = $(tab_selector).find('.filelist-panel input[value="'+val+'"]');
@@ -501,8 +547,8 @@ require([
         }
 
         // If we're at the max, disable all checkboxes which are not currently checked
-        selIgvFiles.count() >= SEL_IGV_FILE_MAX && $(tab_selector).find('.filelist-panel input.igv[type="checkbox"]:not(:checked)').attr('disabled',true);
-        selCamFiles.count() >= SEL_IGV_FILE_MAX && $(tab_selector).find('.filelist-panel input.cam[type="checkbox"]:not(:checked)').attr('disabled',true);
+        selIgvFiles.count() >= SEL_IGV_FILE_MAX && $(tab_selector).find('.filelist-panel input.igv.accessible[type="checkbox"]:not(:checked)').attr('disabled',true);
+        selCamFiles.count() >= SEL_IGV_FILE_MAX && $(tab_selector).find('.filelist-panel input.cam.accessible[type="checkbox"]:not(:checked)').attr('disabled',true);
 
         // Update the Launch buttons
         $('#igv-viewer input[type="submit"]').prop('disabled', (selIgvFiles.count() <= 0));
@@ -558,25 +604,52 @@ require([
         if (parseInt(page) == 1) {
             $(tab_selector).find('.prev-page').addClass('disabled');
         }
-        if (parseInt(page) * 20 > total_files) {
+        if (parseInt(page) * files_per_page >= total_files) {
             $(tab_selector).find('.next-page').addClass('disabled');
         }
         $(tab_selector).find('.filelist-panel .spinner i').addClass('hidden');
 
     };
 
-    // Next page button click
-    $('.data-tab-content').on('click', '.next-page', function () {
+    function goto_table_page(tab, page_no){
+        tab_page[tab] = page_no;
+        update_table(tab, false);
+    }
+
+    $('.data-tab-content').on('click', '.paginate_button', function () {
         var this_tab = $(this).parents('.data-tab').data('file-type');
-        page = page + 1;
-        update_table(this_tab);
+        var page_no;
+        if($(this).hasClass('next-page')){
+            page_no = parseInt(tab_page[this_tab])+1;
+        }
+        else if($(this).hasClass('prev-page')){
+            page_no = page_no == 1 ? 1 : tab_page[this_tab]-1;
+        }
+        else if($(this).hasClass('numeric_button')){
+            if($(this).hasClass('current'))
+                return;
+            page_no = $(this).text();
+        }
+        else{
+            page_no = 1;
+        }
+        goto_table_page(this_tab, page_no)
     });
 
-    // Previous page button click
-    $('.data-tab-content').on('click', '.prev-page', function () {
+    // change no of entries per page
+    $('.data-tab-content').on('change', '.files-per-page', function () {
         var this_tab = $(this).parents('.data-tab').data('file-type');
-        page = page - 1;
-        update_table(this_tab);
+        tab_files_per_page[this_tab] = $('#'+this_tab+'-files').find('.files-per-page :selected').val();
+        goto_table_page(this_tab, 1);
+    });
+
+    // change column sorting
+    $('.data-tab-content').on('click', '.sortable_table th:not(.sorting_disabled)', function () {
+        var this_tab = $(this).parents('.data-tab').data('file-type');
+        var column = $(this).attr("columnId");
+        var order = $(this).is('.sorting, .sorting_desc') ? 0 : 1;
+        tab_sort_column[this_tab] = [column, order];
+        update_table(this_tab, false);
     });
 
     // Show more/less links on categories with >6 fiilters
@@ -617,19 +690,6 @@ require([
         }
     });
 
-    $('.data-tab-content').on('click','.download-link',function(e) {
-        var type_tab = $(this).parents('.data-tab.active')[0];
-        var active_tab = $(type_tab).data('file-type');
-
-        if(parseInt($('.file-list-total').text()) > FILE_LIST_MAX) {
-            $('#'+active_tab+'-files').find('.file-list-warning').show();
-            e.preventDefault();
-            return false;
-        } else {
-            $('#'+active_tab+'-files').find('.file-list-warning').hide();
-        }
-    });
-
     function update_filters(checked) {
         var type_tab = checked.parents('.data-tab.active')[0];
         var active_tab = $(type_tab).data('file-type');
@@ -642,6 +702,7 @@ require([
             }
             SELECTED_FILTERS[active_tab][build][$(this).data('feature-name')].push($(this).data('value-name'));
         });
+        tab_page[active_tab] = 1;
     };
 
     function enqueueUpdate(active_tab){
@@ -654,6 +715,34 @@ require([
         if(UPDATE_QUEUE.length > 0) {
             UPDATE_QUEUE.shift()();
         }
+    };
+
+    function pagination(c, m) {
+        var current = parseInt(c),
+            last = m,
+            delta = 2,
+            left = current - delta,
+            right = current + delta + 1,
+            range = [],
+            rangeWithDots = [],
+            l;
+        for (var i = 1; i <= last; i++) {
+            if (i == 1 || i == last || i >= left && i < right) {
+                range.push(i);
+            }
+        }
+        for(let i of range) {
+            if (l) {
+                if (i - l === 2) {
+                    rangeWithDots.push(l + 1);
+                } else if (i - l !== 1) {
+                    rangeWithDots.push('...');
+                }
+            }
+            rangeWithDots.push(i);
+            l = i;
+        }
+        return rangeWithDots;
     };
 
     var update_displays = function(active_tab) {
@@ -672,7 +761,8 @@ require([
         // ...and replace it with a new one
         update_displays_thread = setTimeout(function(){
             var build = $('#'+active_tab+'-files').find('.build :selected').val();
-            var url = ajax_update_url[active_tab] + '?build=' + build;
+            var files_per_page = tab_files_per_page[active_tab];
+            var url = ajax_update_url[active_tab] + '?build=' + build +'&files_per_page=' +files_per_page;
             if(SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab][build]).length > 0) {
                 url += '&filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab][build]));
             }
@@ -736,4 +826,28 @@ require([
             msg.hide();
         },$('.filelist-obtain .download-token').val(),"downloadToken");
     });
+
+
+
+    $('.data-tab-content').on('click','.download-link',function(e) {
+        var type_tab = $(this).parents('.data-tab.active')[0];
+        var active_tab = $(type_tab).data('file-type');
+
+        if(parseInt($('.file-list-total').text()) > FILE_LIST_MAX) {
+            $('#'+active_tab+'-files').find('.file-list-warning').show();
+            e.preventDefault();
+            return false;
+        } else {
+            $('#'+active_tab+'-files').find('.file-list-warning').hide();
+        }
+    });
+
+    $('.data-tab-content').on('hover enter mouseover','.study-uid',function(e){
+        $(this).find('.osmisis').show();
+    });
+
+    $('.data-tab-content').on('leave mouseout mouseleave','.study-uid',function(e){
+        $(this).find('.osmisis').hide();
+    });
+
 });

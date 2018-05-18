@@ -1,0 +1,59 @@
+{% load static %}
+
+    <!-- Share Cohort Modal -->
+    <div class="modal fade" id="share-cohort-modal" tabindex="-1" role="dialog" aria-labelledby="shareCohortModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Cohort Sharing</h4>
+                    <div class="modal-js-messages" id="share-cohort-js-messages">
+                    </div>
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li role="presentation" class="share-cohort active"><a data-target="#share-cohort-pane" data-toggle="tab" aria-controls="home" role="tab" id="shareCohortModal">Share Cohort</a></li>
+                        <li role="presentation" class="shared"><a data-target="#shared-pane" data-toggle="tab" aria-controls="home" role="tab">Shared With (<span class="share-count">{{shared_with_users|length}}</span>)</a></li>
+                    </ul>
+                </div>
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane active" id="share-cohort-pane">
+                        <form id="share-cohort-form" data-cohort-id="{{ cohort.id }}" method="" action="">
+                            <div class="modal-body">
+                                <label for="share-share_users">Enter email addresses separated by a comma</label>
+                                <textarea id="share-share_users" class="form-control" name="share_users"></textarea>
+                            </div>
+                            <div class="modal-footer">
+                                {% csrf_token %}
+                                <input type="submit" value="Share Cohort" class="btn btn-primary owner-only" />
+                            </div>
+                        </form>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="shared-pane">
+                        <div class="modal-body">
+                            {% if shared_with_users|length > 0 %}
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% for user in shared_with_users %}
+                                    <tr>
+                                        <td>{{user.first_name}} {{user.last_name}}</td>
+                                        <td>{{user.email}}</td>
+                                        <td><a class="remove-shared-user" role="button" data-user-id="{{ user.id }}" data-cohort-id="{{ cohort.id }}"><i class="fa fa-times"></i></a></td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                            {% else %}
+                            <p class="center">This cohort is not currently shared with any users.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
