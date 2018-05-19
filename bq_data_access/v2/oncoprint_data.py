@@ -56,34 +56,65 @@ class OncoPrintDataQueryHandler(GNABDataQueryHandler):
             The "tables used" are the tables queried for data.
             The "run_query" is always True.
         """
-        # Generate the 'IN' statement string: (%s, %s, ..., %s)
-        cohort_id_stmt = ', '.join([str(cohort_id) for cohort_id in cohort_id_array])
+
         project_id_stmt = ''
         if project_id_array is not None:
             project_id_stmt = ', '.join([str(project_id) for project_id in project_id_array])
 
-        query_template = \
-            ("SELECT sample_barcode_tumor, {brk}"
-             "    SYMBOL, {brk}"
-             "    Variant_Classification, {brk}"
-             "    Gene, {brk}"
-             "FROM [{table_id}] {brk}"
-             "WHERE SYMBOL IN ('{genes}') {brk}"
-             "AND sample_barcode_tumor IN ( {brk}"
-             "    SELECT sample_barcode {brk}"
-             "    FROM [{cohort_dataset_and_table}] {brk}"
-             "    WHERE cohort_id IN ({cohort_id_list}) {brk}"
-             "         AND (project_id IS NULL {brk}")
+        query_template = """
+            SELECT
+              sample_barcode_tumor AS Sample, Hugo_Symbol AS Gene,
+              CASE
+                WHEN Amino_acids IS NOT NULL THEN
+                  CONCAT(
+                    REGEXP_EXTRACT(Amino_acids,r'^([A-Za-z*\-]+)[^A-Za-z*\-]+'),
+                    REGEXP_EXTRACT(Protein_position,r'^([0-9]+)[^0-9]+'),
+                    CASE
+                      WHEN Variant_Classification IN ('Frame_Shift_Del', 'Frame_Shift_Ins') THEN 'fs'
+                      WHEN Variant_Classification IN ('Splice_Site', 'Splice_Region') THEN '_splice'
+                      WHEN Amino_acids LIKE '%/%' THEN REGEXP_EXTRACT(Amino_acids,r'^.*/([A-Za-z*-]+)$')
+                      ELSE '-'
+                    END
+                  )
+                ELSE
+                  CASE
+                    WHEN Variant_Classification IN ('Splice_Site', 'Splice_Region') THEN 'Splice'
+                    WHEN Variant_Classification = 'IGR' THEN 'Intergenic'
+                    ELSE REPLACE(Variant_Classification,'_',' ')
+                  END
+              END AS Alteration,
+              CASE
+                WHEN (Amino_acids IS NOT NULL AND REGEXP_EXTRACT(Amino_acids,r'^.*/([A-Za-z*-]+)$') = '*') OR Variant_Classification IN ('Frame_Shift_Del', 'Frame_Shift_Ins', 'Splice_Site', 'Splice_Region') THEN 'TRUNC'
+                WHEN Variant_Classification = 'Nonstop_Mutation' OR (Variant_Classification = 'Missense_Mutation' AND Variant_Type IN ('DEL','INS')) OR (Variant_Classification = 'Translation_Start_Site') THEN 'MISSENSE'
+                WHEN (Variant_Classification = 'Missense_Mutation' AND Variant_Type IN ('ONP','SNP', 'TNP')) OR (Variant_Classification IN ('In_Frame_Del','In_Frame_Ins')) THEN 'INFRAME'
+                WHEN Variant_Classification IN ('RNA','IGR', '3'UTR','3\'Flank','5\'UTR','5\'Flank') THEN
+                  CASE
+                    WHEN {conseq_col} LIKE '%intergenic%' THEN 'INTERGENIC'
+                    WHEN {conseq_col} LIKE '%regulatory%' THEN 'REGULATORY'
+                    WHEN {conseq_col} LIKE '%miRNA%' THEN 'miRNA'
+                    WHEN {conseq_col} LIKE '%transcript%' THEN 'TRANSCRIPT'
+                    WHEN {conseq_col} LIKE '%downstream%' THEN 'DOWNSTREAM'
+                    WHEN {conseq_col} LIKE '%upstream%' THEN 'UPSTREAM'
+                  END
+                ELSE UPPER(REPLACE(Variant_Classification,'_',' '))
+              END AS Type
+            FROM {bq_mutation_table}
+            WHERE Variant_Classification NOT IN ('Silent') {filter_clause}
+            AND sample_barcode_tumor IN (
+              SELECT DISTINCT sample_barcode
+              FROM {cohort_table}
+              WHERE cohort_id = @cohort_id
+              AND (project_id IS NULL{project_clause})
+            );
+        """
 
-        query_template += (" OR project_id IN ({project_id_list})))" if project_id_array is not None else "))")
+        project_clause = " OR project_id IN ({})".format(project_id_stmt) if project_id_array is not None else ""
 
         table_config = feature_def.get_table_configuration()
 
-        query = query_template.format(table_id=table_config.table_id,
-                                      genes="', '".join(feature_def.genes),
-                                      cohort_dataset_and_table=cohort_table,
-                                      cohort_id_list=cohort_id_stmt, project_id_list=project_id_stmt,
-                                      brk='\n')
+        query = query_template.format(bq_mutation_table=table_config.table_id,
+                                      conseq_col=("one_consequence" if table_config.genomic_build == "hg38" else 'consequence'),
+                                      cohort_table=cohort_table, project_clause=project_clause)
 
         logger.debug("BQ_QUERY_ONCOPRINT: " + query)
         return query, [table_config.table_id.split(":")[-1]], True
