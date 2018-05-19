@@ -95,11 +95,52 @@
         'camic': 25,
         'dicom': 25
     };
-    var tab_sort_column={
-        'all': ['col-program',0], //column class, 0: asc 1: desc
+    var tab_sort_column={   //columnId, 0: asc 1: desc
+        'all': ['col-program',0],
         'igv': ['col-program',0],
         'camic': ['col-program',0],
         'dicom': ['col-program',0]
+    };
+    var tab_columns_display={   //0:hide, 1:show
+        'all': [
+            ['Program', 1],
+            ['Case Barcode', 1],
+            ['File Name', 1],
+            ['Disease Code', 1],
+            ['Exp. Strategy', 1],
+            ['Platform', 1],
+            ['Data Category', 1],
+            ['Data Type', 1],
+            ['Data Format', 1]
+        ],
+        'igv': [
+            ['Program', 1],
+            ['Case Barcode', 1],
+            ['File Name', 1],
+            ['Disease Code', 1],
+            ['Exp. Strategy', 1],
+            ['Platform', 1],
+            ['Data Category', 1],
+            ['Data Type', 1],
+            ['Data Format', 1]
+        ],
+        'camic': [
+            ['Program', 1],
+            ['Case Barcode', 1],
+            ['File Name', 1],
+            ['Disease Code', 1],
+            ['Thumbnail', 1],
+            ['Data Type', 1],
+            ['Data Format', 1]
+        ],
+        'dicom': [
+            ['Program', 1],
+            ['Case Barcode', 1],
+            ['Disease Code', 1],
+            ['Project Short Name', 1],
+            ['Study Description', 1],
+            ['Study Instance UID', 1]
+        ]
     };
     var download_url = '{{ download_url }}';
     var ajax_update_url = {

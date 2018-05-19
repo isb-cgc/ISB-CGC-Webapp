@@ -355,15 +355,14 @@ require([
         } else {
             var page_list = pagination(page,total_pages);
             var html_page_button = "";
-            for(let i of page_list){
-                if(i === "..."){
+            for(var i in page_list){
+                if(page_list[i] === "..."){
                     html_page_button += "<span class='\ellipsis\'>...</span>"
                 }
                 else{
-                    html_page_button += "<a class=\'paginate_button numeric_button"+ (i == page ? " current\'":"\'") +">" + i + "</a>";
+                    html_page_button += "<a class=\'paginate_button numeric_button"+ (page_list[i] == page ? " current\'":"\'") +">" + page_list[i] + "</a>";
                 }
             }
-
             $(tab_selector).find('.file-page-count').show();
             $(tab_selector).find('.no-file-page-count').hide();
             $(tab_selector).find('.paginate_button_space').show();
@@ -391,22 +390,19 @@ require([
             $(tab_selector).find('.sortable_table th:not(.sorting_disabled)[columnId=\'' + tab_sort_column[active_tab][0] + '\']')
                 .removeClass('sorting')
                 .addClass(tab_sort_column[active_tab][1] ? 'sorting_desc' : 'sorting_asc');
-        }
-
-        for (var i = 0; i < files.length; i++) {
-            if (!('datatype' in files[i])) {
-                files[i]['datatype'] = '';
-            }
-
-            var val = "";
-            var dataTypeName = '';
-            var label = '';
-            var tokenLabel = files[i]['sample']+", "+files[i]['exp_strat']+", "+happy_name(files[i]['platform'])+", "+files[i]['datatype'];
-            var checkbox_inputs = '';
-            var accessible = false;
-            if (files[i]['access'] != 'controlled' || files[i]['user_access'] == 'True') {
-                accessible = true;
-            }
+            for (var i = 0; i < files.length; i++) {
+                if (!('datatype' in files[i])) {
+                    files[i]['datatype'] = '';
+                }
+                var val = "";
+                var dataTypeName = '';
+                var label = '';
+                var tokenLabel = files[i]['sample'] + ", " + files[i]['exp_strat'] + ", " + happy_name(files[i]['platform']) + ", " + files[i]['datatype'];
+                var checkbox_inputs = '';
+                var accessible = false;
+                if (files[i]['access'] != 'controlled' || files[i]['user_access'] == 'True') {
+                    accessible = true;
+                }
 
             if(active_tab !== 'all') {
                 if (files[i]['cloudstorage_location'] && ((files[i]['dataformat'] == 'BAM') || (files[i]['datatype'] == 'Tissue slide image') || (files[i]['datatype'] == 'Diagnostic image'))) {
@@ -455,11 +451,24 @@ require([
                 (active_tab !== 'camic' && active_tab !== 'dicom' ? (files[i]['file_viewer'] ? '<td>' + files[i]['file_viewer'] + '</td>' : '<td></td>') : '') +
             '</tr>';
 
-            $(tab_selector).find('.filelist-panel .file-list-table tbody').append(row);
+                $(tab_selector).find('.filelist-panel .file-list-table tbody').append(row);
 
             // Remember any previous checks
             var thisCheck = $(tab_selector).find('.filelist-panel input[value="'+val+'"]');
             selIgvFiles[thisCheck.attr('data-type')] && selIgvFiles[thisCheck.attr('data-type')][thisCheck.attr('value')] && thisCheck.attr('checked', true);
+        }
+
+            var columns_display = tab_columns_display[active_tab];
+            var column_toggle_html = "";
+            for (var i in columns_display) {
+                column_toggle_html += "<a class=\'column_toggle_button " + (columns_display[i][1] ? '' : 'column_hide') + "\'>" + columns_display[i][0] + "</a>";
+                if(columns_display[i][1]) {
+                    $(tab_selector).find('table.file-list-table th:nth-child(' + (parseInt(i) + 1) + '), table.file-list-table td:nth-child(' + (parseInt(i) + 1) + ')').removeClass('hide');
+                }
+                else
+                    $(tab_selector).find('table.file-list-table th:nth-child('+(parseInt(i)+1)+'), table.file-list-table td:nth-child('+(parseInt(i)+1)+')').addClass('hide');
+            }
+            $(tab_selector).find('.column-toggle').html(column_toggle_html);
         }
 
         // If we're at the max, disable all checkboxes which are not currently checked
@@ -529,6 +538,17 @@ require([
         goto_table_page(this_tab, page_no)
     });
 
+    //toggle column display
+    $('.data-tab-content').on('click', '.column_toggle_button', function () {
+        var this_tab = $(this).parents('.data-tab').data('file-type');
+        $(this).toggleClass('column_show').toggleClass('column_hide');
+        var col_index = $(this).index();
+        tab_columns_display[this_tab][col_index][1] ^= 1;
+        $('#'+this_tab+'-files table.file-list-table')
+            .find('td:nth-child('+(col_index+1)+'), th:nth-child('+(col_index+1)+'), col:nth-child('+(col_index+1)+')')
+            .toggleClass('hide');
+    });
+
     // change no of entries per page
     $('.data-tab-content').on('change', '.files-per-page', function () {
         var this_tab = $(this).parents('.data-tab').data('file-type');
@@ -564,6 +584,8 @@ require([
         $('#'+this_tab+'-filter-panel-'+$(this).find(':selected').val()).show();
 
         if(this_tab == 'igv') {
+            //prevent users from selecting igv files during loading time
+            $('.filelist-panel input.igv.accessible[type="checkbox"]').attr('disabled',true);
             // Remove any selected files not from this build
             var new_build = $('#'+this_tab+'-files').find('.build :selected').val();
             var selCount = Object.keys(selIgvFiles.gcs_bam).length;
@@ -624,16 +646,16 @@ require([
                 range.push(i);
             }
         }
-        for(let i of range) {
+        for(var i in range){
             if (l) {
-                if (i - l === 2) {
+                if (range[i] - l === 2) {
                     rangeWithDots.push(l + 1);
-                } else if (i - l !== 1) {
+                } else if (range[i] - l !== 1) {
                     rangeWithDots.push('...');
                 }
             }
-            rangeWithDots.push(i);
-            l = i;
+            rangeWithDots.push(range[i]);
+            l = range[i];
         }
         return rangeWithDots;
     };
