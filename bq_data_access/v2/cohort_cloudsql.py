@@ -157,12 +157,12 @@ class CloudSQLCohortAccess(object):
                 message=str(e.message)))
 
 
-def add_cohort_info_to_merged_vectors(target, x_id, y_id, c_id, cohort_id_array):
+def add_cohort_info_to_merged_vectors(data, x_id, y_id, c_id, cohort_id_array):
     """
     Adds cohort information to a plot data query result (dict).
      
     Args: 
-        target: Plot data query result (from get_merged_feature_vectors)
+        data: Plot data query result (from get_merged_feature_vectors)
     
     Returns: 
         None
@@ -180,7 +180,7 @@ def add_cohort_info_to_merged_vectors(target, x_id, y_id, c_id, cohort_id_array)
         cohort_info_obj_array.append({'id': item['id'], 'name': item['name']})
 
     items = []
-    for item in target['items']:
+    for item in data['items']:
         sample_id = item['sample_id']
 
         # Add an array of cohort
@@ -201,7 +201,7 @@ def add_cohort_info_to_merged_vectors(target, x_id, y_id, c_id, cohort_id_array)
     # TODO assign label for y if y_id is None, as in that case the y-field will be missing from the response
     label_message = {'x': x_id, 'y': y_id, 'c': c_id}
 
-    target.update({
+    data.update({
         'labels':           label_message,
         'items':            items,
         'cohort_set':       cohort_info_obj_array,
