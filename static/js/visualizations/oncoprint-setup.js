@@ -229,7 +229,7 @@ var tooltip_utils = {
 		mutations = listOfMutationOrFusionDataToHTML(mutations);
 		for (var i = 0; i < mutations.length; i++) {
 		    if (i > 0) {
-			ret.append(",");
+			ret.append(", ");
 		    }
 		    ret.append(mutations[i]);
 		}

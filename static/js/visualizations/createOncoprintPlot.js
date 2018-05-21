@@ -110,10 +110,7 @@ define(['jquery', 'oncoprintjs', 'underscore', 'oncoprint_setup', 'canvas_toBlob
             var lines = _.map(str.split('\n'), function (x) {
                 return x.trim();
             });
-            if (lines[0].split(/\s+/).length !== 4) {
-                return false;
-            }
-            for (var i = 1; i < lines.length; i++) {
+            for (var i = 0; i < lines.length; i++) {
                 var split_line_length = lines[i].split(/\s+/).length;
                 if (split_line_length !== 1 && split_line_length !== 4) {
                     return false;
@@ -124,7 +121,6 @@ define(['jquery', 'oncoprintjs', 'underscore', 'oncoprint_setup', 'canvas_toBlob
         createOncoprintPlot: function (data) {
             var updateOncoprinter = CreateOncoprinterWithToolbar('#oncoprint #oncoprint_body', '#oncoprint #oncoprint-diagram-toolbar-buttons');
             $('#oncoprint_controls').html(_.template($('#main-controls-template').html())());
-            //var data_input = hm_data.trim();
 
             /*var gene_order = $('#gene_order').val().trim().split(/\s+/g);
             if (gene_order.length === 0 || gene_order[0].length === 0) {
@@ -140,21 +136,6 @@ define(['jquery', 'oncoprintjs', 'underscore', 'oncoprint_setup', 'canvas_toBlob
             if (data.length > 0) {
                 var process_result = processData(data);
                 updateOncoprinter(process_result.data_by_gene, 'sample', process_result.altered_by_gene, sample_order, gene_order);
-            /*}else if ($('#mutation-form #mutation').val().trim().length > 0) {
-                var file = $('#mutation-form #mutation')[0].files[0];
-                var reader = new FileReader();
-                reader.readAsText(file);
-                reader.onload = function (e) {
-                    var input = reader.result.trim().replace(/\r/g, "\n");
-                    if (isInputValid(input)) {
-                        var process_result = processData(input);
-                        updateOncoprinter(process_result.data_by_gene, 'sample', process_result.altered_by_gene, sample_order, gene_order);
-                        $('#error_msg').hide();
-                    } else {
-                        $('#error_msg').html("Error in input data");
-                        $('#error_msg').show();
-                    }
-                };*/
             } else {
 
             }

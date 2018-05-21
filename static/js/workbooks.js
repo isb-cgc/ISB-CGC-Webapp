@@ -871,11 +871,18 @@ require([
 
     // generate plot upon user click
     $('.update-plot').on('click', function(event){
+
         if($('.toggle-selection').hasClass('active')) {
             $('.toggle-selection').click();
         }
-        if(valid_plot_settings($(this).parent())) {
+        if (($(this).parent())) {
             var data = get_plot_info_on_page($(this).parent());
+            if (data.attrs.type === 'SeqPeek' || data.attrs.type === 'OncoPrint') {
+                $('.toggle-selection').hide();
+            }
+            else {
+                $('.toggle-selection').show();
+            }
             update_plot_model(workbook_id, data.worksheet_id, data.plot_id, data.attrs, data.selections, data.logTransform, function(result){
                 generate_plot({ worksheet_id : data.worksheet_id,
                                 type         : data.attrs.type,
@@ -1118,7 +1125,7 @@ require([
             setPlotPanelHeight(active_sheet);
         }
     });
-
+valid_plot_settings
     // validate the plot settings before initiating the plot
     function valid_plot_settings(plot_settings){
         var data = get_plot_info_on_page(plot_settings);
@@ -1135,7 +1142,7 @@ require([
             return (data.attrs.gene_label !== undefined && data.attrs.gene_label !== null && data.attrs.gene_label !== "");
         }
         else if(data.attrs.type == 'OncoPrint'){
-            return (data.attrs.gene_list !== undefined && data.gene_list !== null && data.attrs.gene_list !== "");
+            return (data.attrs.gene_list !== undefined && data.gene_list !== null && data.attrs.gene_list.length>0);
         }
         else{
             if (data.attrs.x_axis.url_code === undefined || data.attrs.x_axis.url_code === null || data.attrs.x_axis.url_code.length <= 0) {
