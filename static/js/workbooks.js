@@ -871,11 +871,18 @@ require([
 
     // generate plot upon user click
     $('.update-plot').on('click', function(event){
+
         if($('.toggle-selection').hasClass('active')) {
             $('.toggle-selection').click();
         }
-        if(($(this).parent())) {
+        if (($(this).parent())) {
             var data = get_plot_info_on_page($(this).parent());
+            if (data.attrs.type === 'SeqPeek' || data.attrs.type === 'OncoPrint') {
+                $('.toggle-selection').hide();
+            }
+            else {
+                $('.toggle-selection').show();
+            }
             update_plot_model(workbook_id, data.worksheet_id, data.plot_id, data.attrs, data.selections, data.logTransform, function(result){
                 generate_plot({ worksheet_id : data.worksheet_id,
                                 type         : data.attrs.type,
