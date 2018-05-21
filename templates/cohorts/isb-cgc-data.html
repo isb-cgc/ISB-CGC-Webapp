@@ -127,9 +127,18 @@
                                 <ul class="list">
                                     {% if molecular_attr_builds %}
                                         <li class="list-item">
+                                            <button class="btn btn-primary build-mol-filter" disabled title="Choose a Gene and Mutation Type, then click this button to create the filter.">Build Filter</button>
+                                            <button class="btn btn-primary clear-mol-filter" title="Clear the current filter settings (does not delete a filter from your Selected Filters).">Clear</button>
+                                        </li>
+                                        <li class="list-item">
+                                            <label title="Make this filter a 'negative' filter, eg. 'TP53 does not have mutations'">
+                                                <input class="inversion-checkbox" type="checkbox" name="invert-filter" /> Negative Filter?
+                                            </label>
+                                        </li>
+                                        <li class="list-item">
                                             <!-- build selector -->
                                             <div class="list-item__heading" role="tab" id="p-{{ program.id }}-heading-sel-build">
-                                                    Genomic Build
+                                                Genomic Build
                                             </div>
                                             <div id="p-{{ program.id }}-sel-build" class="list-group-item__body sel-build" role="tabpanel" aria-labelledby="p-{{ program.id }}-heading-sel-build">
                                                 {% if molecular_attr_builds|length > 1 %}
@@ -173,8 +182,7 @@
                                              aria-labelledby="p-{{ program.id }}-heading-sel-molecular-attr-cat" data-feature-displ-name="Mutation Category" data-feature-id="category"
                                              data-feature-name="mutation-category" data-feature-type="molecular">
                                             <select id="p-{{ program.id }}-mutation-category" class="mutation-category-selector form-control" aria-labelledby="p-{{ program.id }}-heading-sel-molecular-attr-cat">
-                                                <option value="no-gene" selected disabled>-- Select a Gene to Enable --</option>
-                                                <option value="label" disabled>-- Select a Category --</option>
+                                                <option value="label" disabled selected>-- Select a Category --</option>
                                                 <option value="any" data-value-displ-name="Any" data-value-name="Any" data-value-id="any">Any</option>
                                                 {% for cat in molecular_attr.categories %}
                                                     <option value="{{ cat.value }}" data-value-displ-name="{{ cat.name }}" data-value-name="{{ cat.name }}"
@@ -193,7 +201,7 @@
                                         <div id="p-{{ program.id }}-spec-molecular-attrs" class="list-group-item__body cohort-feature-select-block spec-molecular-attrs" role="tabpanel"
                                              aria-labelledby="p-{{ program.id }}-heading-spec-molecular-attrs" data-feature-displ-name="Specific Mutation Type" data-feature-name="specific-mutation"
                                              data-feature-id="specific" data-feature-type="molecular">
-                                            <ul class="search-checkbox-list" id="p-{{ program.id }}-{{ attr.value }}">
+                                            <ul class="search-checkbox-list" id="p-{{ program.id }}-{{ attr.value }}" style="display: none;">
                                                 {% for attr in molecular_attr.attrs %}
                                                     <li class="checkbox">
                                                         <label>
