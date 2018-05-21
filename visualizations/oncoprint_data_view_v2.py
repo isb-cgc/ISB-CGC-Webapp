@@ -127,58 +127,140 @@ def oncoprint_view_data(request):
             return JsonResponse(
                 {'message': "The chosen cohorts do not contain samples from programs with Gene Mutation data."})
 
-        query_template = \
-            ("SELECT sample_barcode_tumor, {brk}"
-             "    SYMBOL, {brk}"
-             "    Variant_Type, {brk}"
-             "    Variant_Classification, {brk}"
-             "FROM [{data_project_id}:{dataset_name}.{table_name}] {brk}"
-             "WHERE SYMBOL IN ({gene_list}) {brk}"
-             "AND sample_barcode_tumor IN ( {brk}"
-             "    SELECT sample_barcode {brk}"
-             "    FROM [{project_id}:{cohort_dataset}.{cohort_table}] {brk}"
-             "    WHERE cohort_id IN ({cohort_id_list}) {brk}"
-             "         AND (project_id IS NULL {brk}")
-        query_template += (" OR project_id IN ({project_id_list})))" if confirmed_project_ids is not None else "))")
+        # query_template = \
+        #     ("SELECT sample_barcode_tumor, {brk}"
+        #      "    SYMBOL, {brk}"
+        #      "    Variant_Type, {brk}"
+        #      "    Variant_Classification, {brk}"
+        #      "FROM [{data_project_id}:{dataset_name}.{table_name}] {brk}"
+        #      "WHERE SYMBOL IN ({gene_list}) {brk}"
+        #      "AND sample_barcode_tumor IN ( {brk}"
+        #      "    SELECT sample_barcode {brk}"
+        #      "    FROM [{project_id}:{cohort_dataset}.{cohort_table}] {brk}"
+        #      "    WHERE cohort_id IN ({cohort_id_list}) {brk}"
+        #      "         AND (project_id IS NULL {brk}")
+        # query_template += (" OR project_id IN ({project_id_list})))" if confirmed_project_ids is not None else "))")
+        #
+        # bq_table_info = BQ_MOLECULAR_ATTR_TABLES['TCGA'][genomic_build]
+        # bq_dataset = bq_table_info['dataset']
+        # bq_table = bq_table_info['table']
+        # bq_data_project_id = settings.BIGQUERY_DATA_PROJECT_NAME
+        # bq_cohort_table = settings.BIGQUERY_COHORT_TABLE_ID
+        # bq_cohort_dataset = settings.COHORT_DATASET_ID
+        # bq_cohort_project_id = settings.BIGQUERY_PROJECT_NAME
+        #
+        # cohort_id_stmt = ', '.join([str(cohort_id) for cohort_id in cohort_id_array])
+        #
+        # gene_list_stmt = ''
+        # gene_array = gene_list.split(',')
+        # if gene_array is not None:
+        #     gene_list_stmt = ', '.join('\'{0}\''.format(gene) for gene in gene_array)
+        #
+        # project_id_stmt = ''
+        # if confirmed_project_ids is not None:
+        #     project_id_stmt = ', '.join([str(project_id) for project_id in confirmed_project_ids])
+        #
+        # query = query_template.format(
+        #     data_project_id = bq_data_project_id,
+        #     dataset_name = bq_dataset,
+        #     table_name = bq_table,
+        #     gene_list = gene_list_stmt,
+        #     project_id = bq_cohort_project_id,
+        #     cohort_dataset = bq_cohort_dataset,
+        #     cohort_table = bq_cohort_table,
+        #     cohort_id_list = cohort_id_stmt,
+        #     project_id_list = project_id_stmt,
+        #     brk='\n'
+        # )
 
-        bq_table_info = BQ_MOLECULAR_ATTR_TABLES['TCGA'][genomic_build]
-        bq_dataset = bq_table_info['dataset']
-        bq_table = bq_table_info['table']
-        bq_data_project_id = settings.BIGQUERY_DATA_PROJECT_NAME
-        bq_cohort_table = settings.BIGQUERY_COHORT_TABLE_ID
-        bq_cohort_dataset = settings.COHORT_DATASET_ID
-        bq_cohort_project_id = settings.BIGQUERY_PROJECT_NAME
-
-        cohort_id_stmt = ', '.join([str(cohort_id) for cohort_id in cohort_id_array])
+        query_template = """
+                    SELECT
+                      sample_barcode_tumor AS Sample, Hugo_Symbol,
+                      CASE
+                        WHEN Amino_acids IS NOT NULL THEN
+                          CONCAT(
+                            REGEXP_EXTRACT(Amino_acids,r'^([A-Za-z*\-]+)[^A-Za-z*\-]+'),
+                            REGEXP_EXTRACT(Protein_position,r'^([0-9]+)[^0-9]+'),
+                            CASE
+                              WHEN Variant_Classification IN ('Frame_Shift_Del', 'Frame_Shift_Ins') THEN 'fs'
+                              WHEN Variant_Classification IN ('Splice_Site', 'Splice_Region') THEN '_splice'
+                              WHEN Amino_acids LIKE '%/%' THEN REGEXP_EXTRACT(Amino_acids,r'^.*/([A-Za-z*-]+)$')
+                              ELSE '-'
+                            END
+                          )
+                        ELSE
+                          CASE
+                            WHEN Variant_Classification IN ('Splice_Site', 'Splice_Region') THEN 'Splice'
+                            WHEN Variant_Classification = 'IGR' THEN 'Intergenic'
+                            ELSE REPLACE(Variant_Classification,'_',' ')
+                          END
+                      END AS Alteration,
+                      CASE
+                        WHEN (Amino_acids IS NOT NULL AND REGEXP_EXTRACT(Amino_acids,r'^.*/([A-Za-z*-]+)$') = '*') OR Variant_Classification IN ('Frame_Shift_Del', 'Frame_Shift_Ins', 'Splice_Site', 'Splice_Region') THEN 'TRUNC'
+                        WHEN Variant_Classification = 'Nonstop_Mutation' OR (Variant_Classification = 'Missense_Mutation' AND Variant_Type IN ('DEL','INS')) OR (Variant_Classification = 'Translation_Start_Site') THEN 'MISSENSE'
+                        WHEN (Variant_Classification = 'Missense_Mutation' AND Variant_Type IN ('ONP','SNP', 'TNP')) OR (Variant_Classification IN ('In_Frame_Del','In_Frame_Ins')) THEN 'INFRAME'
+                        WHEN Variant_Classification IN ("RNA","IGR", "3\'UTR","3\'Flank","5\'UTR","5\'Flank") THEN
+                          CASE
+                            WHEN {conseq_col} LIKE '%intergenic%' THEN 'INTERGENIC'
+                            WHEN {conseq_col} LIKE '%regulatory%' THEN 'REGULATORY'
+                            WHEN {conseq_col} LIKE '%miRNA%' THEN 'miRNA'
+                            WHEN {conseq_col} LIKE '%transcript%' THEN 'TRANSCRIPT'
+                            WHEN {conseq_col} LIKE '%downstream%' THEN 'DOWNSTREAM'
+                            WHEN {conseq_col} LIKE '%upstream%' THEN 'UPSTREAM'
+                          END
+                        ELSE UPPER(REPLACE(Variant_Classification,'_',' '))
+                      END AS Type
+                    FROM [{bq_data_project_id}:{dataset_name}.{table_name}]
+                    WHERE Variant_Classification NOT IN ('Silent', 'Nonsense_Mutation') {filter_clause}
+                    AND sample_barcode_tumor IN (
+                      SELECT sample_barcode
+                      FROM [{cohort_table}]
+                      WHERE cohort_id IN ({cohort_id_list})
+                      AND (project_id IS NULL{project_clause})
+                      GROUP BY sample_barcode
+                    )
+                    GROUP BY Sample, Hugo_Symbol, Alteration, Type
+                    ORDER BY Sample
+                    ;
+                    
+                """
+        project_id_stmt = ""
+        if confirmed_project_ids is not None:
+            project_id_stmt = ', '.join([str(project_id) for project_id in confirmed_project_ids])
+        project_clause = " OR project_id IN ({})".format(project_id_stmt) if confirmed_project_ids is not None else ""
 
         gene_list_stmt = ''
         gene_array = gene_list.split(',')
         if gene_array is not None:
             gene_list_stmt = ', '.join('\'{0}\''.format(gene) for gene in gene_array)
+        filter_clause = "AND Hugo_Symbol IN ({})".format(gene_list_stmt) if gene_array is not None else ""
 
-        project_id_stmt = ''
-        if confirmed_project_ids is not None:
-            project_id_stmt = ', '.join([str(project_id) for project_id in confirmed_project_ids])
+        cohort_id_list = ', '.join([str(cohort_id) for cohort_id in cohort_id_array])
 
-        query = query_template.format(
-            data_project_id = bq_data_project_id,
-            dataset_name = bq_dataset,
-            table_name = bq_table,
-            gene_list = gene_list_stmt,
-            project_id = bq_cohort_project_id,
-            cohort_dataset = bq_cohort_dataset,
-            cohort_table = bq_cohort_table,
-            cohort_id_list = cohort_id_stmt,
-            project_id_list = project_id_stmt,
-            brk='\n'
-        )
+        cohort_table_id = "{project_name}:{dataset_id}.{table_id}".format(
+            project_name=settings.BQ_PROJECT_ID,
+            dataset_id=settings.COHORT_DATASET_ID,
+            table_id=settings.BIGQUERY_COHORT_TABLE_ID)
+
+        bq_table_info = BQ_MOLECULAR_ATTR_TABLES['TCGA'][genomic_build]
+        query = query_template.format(bq_data_project_id = settings.BIGQUERY_DATA_PROJECT_NAME,
+                                        dataset_name=bq_table_info['dataset'],
+                                        table_name=bq_table_info['table'],
+                                        conseq_col=("one_consequence" if genomic_build == "hg38" else 'consequence'),
+                                        cohort_table=cohort_table_id,
+                                        filter_clause=filter_clause,
+                                        cohort_id_list=cohort_id_list,
+                                        project_clause=project_clause)
+
         logger.debug("BQ_QUERY_ONCOPRINT: " + query)
         results = BigQuerySupport.execute_query_and_fetch_results(query)
         plot_data =""
 
         if results and len(results) > 0:
+            print(len(results))
             for row in results:
                 plot_data+="{}\t{}\t{}\t{}\n".format(str(row['f'][0]['v']),str(row['f'][1]['v']),str(row['f'][2]['v']),str(row['f'][3]['v']))
+            print(plot_data)
         else:
             return JsonResponse(
                 {'message': "The chosen genes and cohorts do not contain any samples with Gene Mutation data."})
