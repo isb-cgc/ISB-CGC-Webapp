@@ -22,8 +22,7 @@ import views, feature_access_views, feature_access_views_v2, data_access_views, 
 
 import seqpeek_data_views_v1
 import seqpeek_data_views_v2
-
-import oncoprint_data_views_v2
+import oncoprint_data_view_v2
 
 
 urlpatterns = [
@@ -58,6 +57,6 @@ urlpatterns = [
     url(r'^seqpeek_data_plot/v1', seqpeek_data_views_v1.seqpeek_view_data, name='seqpeek_data_plot_v1'),
     url(r'^seqpeek_data_plot/v2', seqpeek_data_views_v2.seqpeek_view_data, name='seqpeek_data_plot_v2'),
 
-    # Oncoprint data access views
-    url(r'^oncoprint/v2', oncoprint_data_views_v2.oncoprint_view_data, name='oncoprint_data_plot_v2'),
+    # OncoPrint data access views
+    url(r'^oncoprint_data_plot/v2', oncoprint_data_view_v2.oncoprint_view_data, name='oncoprint_data_plot_v2'),
 ]
