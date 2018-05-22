@@ -18,7 +18,7 @@ from django.http import JsonResponse
 from django.core.exceptions import RequestDataTooBig
 
 
-class CheckRequest(object):
+class CheckReqSize(object):
 
     def __init__(self, get_response):
         self.get_response = get_response

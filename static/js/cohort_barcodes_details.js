@@ -340,7 +340,12 @@ require([
 
             if(file.size > FILE_SIZE_UPLOAD_MAX) {
                 // Request is going to be too big
-                base.showJsMessage("error","The selected file is too large. Please reduce the size of your barcode file (eg. remove any text which is not a barcode or a delimiter) and try again.",true);
+                base.showJsMessage(
+                    "error",
+                    "The selected file is too large. Please reduce the size of your barcode file (eg. remove any text "
+                    + "which is not a barcode or a delimiter) and try again.",
+                    true
+                );
                 fileUploadField.val("");
                 return false;
             }

@@ -241,7 +241,7 @@ MIDDLEWARE = [
     # 'google.appengine.ext.appstats.recording.AppStatsDjangoMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'GenespotRE.req_body_size_check.CheckRequest',
+    'GenespotRE.checkreqsize_middleware.CheckReqSize',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'adminrestrict.middleware.AdminPagesRestrictMiddleware',
