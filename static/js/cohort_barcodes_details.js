@@ -238,9 +238,14 @@ require([
                     result.valid_entries && deferred.resolve(result);
                     !result.valid_entries && deferred.reject(result);
                 },
-                error: function (data) {
-                    // If no valid barcodes were found we wind up here
-                    deferred.reject(data);
+                error: function (xhr) {
+                    var responseJSON = null;
+                    if(xhr.responseText.length <= 0) {
+                        responseJSON = {};
+                    } else {
+                        responseJSON = $.parseJSON(xhr.responseText);
+                    }
+                    deferred.reject(responseJSON);
                 }
             });
             return deferred;
@@ -293,7 +298,7 @@ require([
                 $('.verify-pending').hide();
                 // We only reach this point if no entries are valid, so show an error message as well.
                 base.showJsMessage("error","None of the supplied barcode entries were valid. Please double-check the format of your entries.",true);
-                showEntries(result.responseJSON,$('#enter-barcodes'));
+                showEntries(result,$('#enter-barcodes'));
                 fileUploadField.val("");
                 $('#enter-barcodes .save-cohort button').attr('disabled','disabled');
                 $('#enter-barcodes .save-cohort').hide();
@@ -331,11 +336,18 @@ require([
                 base.showJsMessage("error","Please choose a .txt, .tsv, .csv, or .json file.",true);
                 fileUploadField.val("");
                 return false;
-            } else{
-                $('#selected-file-name').text(file.name);
-                $('#uploading').addClass('in');
-                $('#file-upload-btn').hide();
             }
+
+            if(file.size > FILE_SIZE_UPLOAD_MAX) {
+                // Request is going to be too big
+                base.showJsMessage("error","The selected file is too large. Please reduce the size of your barcode file (eg. remove any text which is not a barcode or a delimiter) and try again.",true);
+                fileUploadField.val("");
+                return false;
+            }
+
+            $('#selected-file-name').text(file.name);
+            $('#uploading').addClass('in');
+            $('#file-upload-btn').hide();
 
             if(event.target.files != undefined){
                 var fr = new FileReader();
@@ -408,7 +420,7 @@ require([
                         },function(result){
                             // We only reach this point if no entries are valid, so show an error message as well.
                             base.showJsMessage("error","None of the supplied barcode entries were valid. Please double-check the format of your entries.",true);
-                            showEntries(result.responseJSON,$('#upload-file'));
+                            showEntries(result,$('#upload-file'));
                             fileUploadField.val("");
                             $('#upload-file .save-cohort button').attr('disabled','disabled');
                             $('#upload-file .save-cohort').hide();
@@ -498,7 +510,7 @@ require([
             tab.find('.cohort-counts').hide();
             tab.find('.invalid-not-saved').hide();
         }
-        tab.find('.barcode-status').show();
+        (result.invalid_entries || result.valid_entries) && tab.find('.barcode-status').show();
     }
 
     // Event bindings

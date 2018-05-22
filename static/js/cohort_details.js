@@ -855,8 +855,9 @@ require([
                    $(this).html(count-1);
                 });
             },
-            error: function (err) {
-                base.showJsMessage('error',err,true);
+            error: function (xhr) {
+                var responseJSON = $.parseJSON(xhr.responseText);
+                base.showJsMessage(responseJSON.level || 'error',responseJSON.msg || responseJSON.message,true);
             }
         })
     });
