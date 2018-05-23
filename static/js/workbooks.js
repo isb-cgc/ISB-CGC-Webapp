@@ -1125,7 +1125,7 @@ require([
             setPlotPanelHeight(active_sheet);
         }
     });
-valid_plot_settings
+
     // validate the plot settings before initiating the plot
     function valid_plot_settings(plot_settings){
         var data = get_plot_info_on_page(plot_settings);

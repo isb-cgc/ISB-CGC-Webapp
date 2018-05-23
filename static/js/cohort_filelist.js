@@ -448,7 +448,7 @@ require([
                 (active_tab !== 'camic' && active_tab !== 'dicom' ? '<td>' + happy_name(files[i]['platform']) + '</td>' : '')+
                 (active_tab !== 'camic' && active_tab !== 'dicom' ? '<td>' + files[i]['datacat'] + '</td>' : '') +
                 (active_tab !== 'dicom' ? '<td>' + files[i]['datatype'] + '</td><td>' + files[i]['dataformat'] + '</td>' : '') +
-                (active_tab !== 'camic' && active_tab !== 'dicom' ? (files[i]['file_viewer'] ? '<td>' + files[i]['file_viewer'] + '</td>' : '<td></td>') : '') +
+                (active_tab === 'igv' ? (files[i]['file_viewer'] ? '<td>' + files[i]['file_viewer'] + '</td>' : '<td></td>') : '') +
             '</tr>';
 
                 $(tab_selector).find('.filelist-panel .file-list-table tbody').append(row);
@@ -552,8 +552,11 @@ require([
     // change no of entries per page
     $('.data-tab-content').on('change', '.files-per-page', function () {
         var this_tab = $(this).parents('.data-tab').data('file-type');
-        tab_files_per_page[this_tab] = $('#'+this_tab+'-files').find('.files-per-page :selected').val();
-        goto_table_page(this_tab, 1);
+        var old_fpp = tab_files_per_page[this_tab];
+        var new_fpp = tab_files_per_page[this_tab] = $('#'+this_tab+'-files').find('.files-per-page :selected').val();
+        //calculate the new page no that would include the first file item
+        var new_page_no = parseInt((tab_page[this_tab]-1) * old_fpp/new_fpp) + 1;
+        goto_table_page(this_tab, new_page_no);
     });
 
     // change column sorting

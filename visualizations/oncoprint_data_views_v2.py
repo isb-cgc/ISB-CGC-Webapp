@@ -153,7 +153,6 @@ def oncoprint_view_data(request):
             return JsonResponse({
                 'plot_data': plot_data,
                 'gene_list': gene_list,
-                #'cohort_id_list': [str(i) for i in cohort_id_array],
                 'bq_tables': ["{bq_data_project_id}:{dataset_name}.{table_name}".format(
                     bq_data_project_id=settings.BIGQUERY_DATA_PROJECT_NAME,
                     dataset_name=bq_table_info['dataset'],
