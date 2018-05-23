@@ -352,6 +352,7 @@ require([
             $(tab_selector).find('.paginate_button_space').hide();
             $(tab_selector).find('.dataTables_length').addClass('disabled');
             $(tab_selector).find('.sortable_table th').addClass('disabled');
+            $(tab_selector).find('.dataTables_goto_page').addClass('disabled');
         } else {
             var page_list = pagination(page,total_pages);
             var html_page_button = "";
@@ -368,6 +369,8 @@ require([
             $(tab_selector).find('.paginate_button_space').show();
             $(tab_selector).find('.dataTables_length').removeClass('disabled');
             $(tab_selector).find('.sortable_table th').removeClass('disabled');
+            $(tab_selector).find('.dataTables_goto_page').removeClass('disabled');
+            $(tab_selector).find('.dataTables_goto_page .goto-page-number').attr('max', total_pages);
             $(tab_selector).find('.filelist-panel .panel-body .total-file-count').html(total_files);
             $(tab_selector).find('.filelist-panel .panel-body .paginate_button_space').html(html_page_button);
         }
@@ -517,6 +520,24 @@ require([
         tab_page[tab] = page_no;
         update_table(tab, false);
     }
+
+    $('.data-tab-content').on('click', '.goto-page-button', function () {
+        var this_tab = $(this).parents('.data-tab').data('file-type');
+        var page_no_input = $(this).siblings('.goto-page-number').val()
+        if (page_no_input == "")
+            return;
+        var page = parseInt(page_no_input);
+        var max_page_no = parseInt($(this).siblings('.goto-page-number').attr('max'));
+        if (page > 0 && page <= max_page_no) {
+            goto_table_page(this_tab, page);
+            $(this).siblings('.goto-page-number').val("");
+        }
+        else {
+            base.showJsMessage("warning",
+                "Page number you have entered is invalid. Please enter a number between 1 and "+max_page_no, true);
+            $('#placeholder').hide();
+        }
+    });
 
     $('.data-tab-content').on('click', '.paginate_button', function () {
         var this_tab = $(this).parents('.data-tab').data('file-type');
