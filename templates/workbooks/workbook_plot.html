@@ -252,7 +252,15 @@
                     <p><i class="fa fa-exclamation-circle"></i> To complete this analysis: </p>
                     <ul class="ul no-bullet">
                         <li class="checkbox"><label><input class="plot-ready-check" type="checkbox" id="selAnType-{{ worksheet.id }}" readonly onclick="this.checked=!this.checked;"> Select an Analysis Type (above)</label></li>
-                        <li class="checkbox"><label><input class="plot-ready-check" type="checkbox" id="selGenVar-{{ worksheet.id }}" readonly onclick="this.checked=!this.checked;"> Select <a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Genes & miRNAs</a> and/or <a href="{% url 'variable_select_for_existing_workbook' workbook.id worksheet.id %}">Variables</a></label></li>
+                        <li class="checkbox">
+                            <label>
+                                <input class="plot-ready-check" type="checkbox" id="selGenVar-{{ worksheet.id }}" readonly onclick="this.checked=!this.checked;">
+                                Select <a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Genes & miRNAs</a>
+                                <span class="and_or_variables_label">
+                                    and/or <a href="{% url 'variable_select_for_existing_workbook' workbook.id worksheet.id %}">Variables</a>
+                                </span>
+                            </label>
+                        </li>
                         <li class="checkbox"><label><input class="plot-ready-check" type="checkbox" id="selCoh-{{ worksheet.id }}" readonly onclick="this.checked=!this.checked;"> Select a <a href="{% url 'cohort_select_for_existing_workbook' workbook.id worksheet.id %}">Cohort</a></label></li>
                     </ul>
                 </div>

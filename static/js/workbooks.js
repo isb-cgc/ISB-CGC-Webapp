@@ -800,6 +800,7 @@ require([
         var swap = settings_flyout.find('button.swap');
         var sp_genes = settings_flyout.find('.seqpeek-genes');
         var op_genes = settings_flyout.find('.oncoprint-genes');
+        var and_or_variables_label = $('.worksheet.active .and_or_variables_label');
         var xLogCheck = $('#'+active_worksheet+'-x-log-transform').parent();
         var yLogCheck = $('#'+active_worksheet+'-y-log-transform').parent();
 
@@ -815,6 +816,7 @@ require([
         swap.show();
         sp_genes.hide();
         op_genes.hide();
+        and_or_variables_label.show();
         switch (plot_type){
             case "Bar Chart" : //x_type == 'STRING' && y_type == 'none'
                 y_widgets.hide();
@@ -847,6 +849,7 @@ require([
                 break;
             case 'SeqPeek':
                 sp_genes.show();
+                and_or_variables_label.hide();
                 x_widgets.hide();
                 y_widgets.hide();
                 c_widgets.hide();
@@ -856,12 +859,14 @@ require([
                 break;
             case 'OncoPrint':
                 op_genes.show();
+                and_or_variables_label.hide();
                 x_widgets.hide();
                 y_widgets.hide();
                 c_widgets.hide();
                 xLogCheck.hide();
                 yLogCheck.hide();
                 swap.hide();
+
                 break;
             default :
                 break;
@@ -1023,9 +1028,11 @@ require([
             axisRdy = false;
         } else{
             var plot_val = $('.worksheet.active').find('.plot_selection :selected').val();
-            if(plot_val == 'SeqPeek' &&
-                !$('#' + $('.worksheet.active').attr('id') + '-gene_label').find(':selected').val()) {
+
+            if(plot_val == 'SeqPeek'){
+                if(!$('#' + $('.worksheet.active').attr('id') + '-gene_label').find(':selected').val()) {
                     axisRdy = false;
+                }
             }
             else if(plot_val == 'OncoPrint'){
                 axisRdy = false;
