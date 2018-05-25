@@ -11,5 +11,6 @@ def additional_context(request):
             'BASE_API_URL': settings.BASE_API_URL,
             'STATIC_FILES_URL': settings.STATIC_URL,
             'GCP_REG_CLIENT_EMAIL': settings.GCP_REG_CLIENT_EMAIL,
-            'DCF_TEST': settings.DCF_TEST
+            'DCF_TEST': settings.DCF_TEST,
+            'FILE_SIZE_UPLOAD_MAX': settings.FILE_SIZE_UPLOAD_MAX
     }
