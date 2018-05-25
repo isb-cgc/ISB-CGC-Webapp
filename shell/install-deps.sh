@@ -23,7 +23,7 @@ if [ -n "$CI" ]; then
     apt-get update -qq
 else
     # Add apt-get repository to update python from 2.7.6 (default) to latest 2.7.x
-    add-apt-repository -y ppa:fkrull/deadsnakes-python2.7
+    add-apt-repository -y ppa:jonathonf/python-2.7
     apt-get update -qq
     apt-get install -qq -y --force-yes python2.7
 fi

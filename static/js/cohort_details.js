@@ -78,6 +78,12 @@ require([
     'gcs_export'
 ], function ($, jqueryui, bootstrap, session_security, d3, d3tip, search_helpers, Bloodhound, _, base) {
 
+    var SELECTED_FILTERS = {};
+
+    $('.program-tab a').each(function(){
+        SELECTED_FILTERS[$(this).data('program-id')] = {};
+    });
+
     var UPDATE_PENDING = false;
 
     var savingComment = false;
@@ -243,18 +249,23 @@ require([
         if((element.parents('.list').find('.mutation-category-selector').val() === 'nonsilent'
             || element.parents('.list').find('.mutation-category-selector').val() === 'any'
             || (element.parents('.list').find('.mutation-category-selector').val() === 'indv-selex'
-            && element.parents('.list').find('.spec-molecular-attrs input').find(':checked').length > 0))
+            && element.parents('.list').find('.spec-molecular-attrs input').is(':checked')))
             && element.parents('.list').find('.sel-gene .token-label').length > 0) {
 
             element.parents('.list').find('.build-mol-filter').removeAttr('disabled');
+        } else {
+            element.parents('.list').find('.build-mol-filter').attr('disabled', 'disabled');
         }
     };
-
-    // Loads a molecular filter into the builder for editing
-    $('.tab-content').on('click', '.mol-filter', function(){
-
-
-    });
+    
+    var clear_mol_filters = function(btn) {
+        btn.siblings('.build-mol-filter').attr('disabled','disabled');
+        btn.parents('.list').find('.mutation-build').val('HG19');
+        btn.parents('.list').find('.sel-gene a.close').click();
+        btn.parents('.list').find('.mutation-category-selector').val("label");
+        btn.parents('.list').find('.spec-molecular-attrs input').prop("checked",false);
+        btn.parents('.list').find('.spec-molecular-attrs ul').hide();
+    };
 
     $('.tab-content').on('change', '.mutation-build', function(e){
         $(this).siblings().find('.bq-table-display').text($(this).find(':selected').data('bq-table'));
@@ -264,12 +275,7 @@ require([
     // Clears the current filter build (note this does NOT clear the filter
     // from the Selected Filters, it's just to undue any pending settings)
     $('.tab-content').on('click', '.clear-mol-filter', function(){
-        $(this).siblings('.build-mol-filter').attr('disabled','disabled');
-        $(this).parents('.list').find('.mutation-build').val('HG19');
-        $(this).parents('.list').find('.sel-gene a.close').click();
-        $(this).parents('.list').find('.mutation-category-selector').val("label");
-        $(this).parents('.list').find('.spec-molecular-attrs input').prop("checked",false);
-        $(this).parents('.list').find('.spec-molecular-attrs ul').hide();
+        clear_mol_filters($(this));
     });
 
     $('.tab-content').on('change', '.mutation-category-selector', function(){
@@ -281,18 +287,27 @@ require([
         check_for_filter_build($(this));
     });
 
+    $('.tab-content').on('change', '.spec-molecular-attrs input',function(){
+        check_for_filter_build($(this));
+    });
+
+    $('.tab-content').on('change', '.mut-filter-combine',function(){
+        var comb = $(this).find(':selected').val();
+        var not_comb = $(this).find(':not(:selected)').val();
+        $('input[name="mut_filter_combine"]').val(comb);
+        $('span.mol-filter').toggleClass('filter-combine-'+comb);
+        $('span.mol-filter').toggleClass('filter-combine-'+not_comb);
+        update_displays();
+    });
+
     $('.tab-content').on('click', '.build-mol-filter', function(){
-        // If this was actually a mutation-build change, use the mutation-category handler code
-        if($this.hasClass('mutation-build')) {
-            // Do nothing if a gene and/or category hasn't been selected
-            if($('#'+activeDataTab+' .paste-in-genes').tokenfield('getTokens').length <= 0 ||
-                $this.parents('.gene-mutation-status').find('select.mutation-category-selector :selected').val() == 'label') {
-                return;
-            }
-            $this = $this.parents('.gene-mutation-status').find('select.mutation-category-selector');
-        }
+        var activeDataTab = $('.data-tab.active').attr('id');
+        var selFilterPanel = '.'+activeDataTab+ '-selected-filters';
+        var createFormFilterSet = $('p#'+activeDataTab+'-filters');
 
+        var token = null, value = null, feature = null;
 
+        var prog = $(this).closest('.filter-panel');
 
         if(createFormFilterSet.length <= 0) {
             $('#selected-filters').append('<p id="'+activeDataTab+'-filters"></p>');
@@ -305,100 +320,66 @@ require([
         var tokenProgDisplName = prog.data('prog-displ-name'),
             tokenProgId = prog.data('prog-id');
 
-        if($this.prop('id').indexOf('mutation-category') > 0) {
-            var build = $('#p-' + tokenProgId + '-mutation-build :selected').val();
+        var build = $('#p-' + tokenProgId + '-mutation-build :selected').val();
+        var gene = $('#' + activeDataTab + ' .paste-in-genes').tokenfield('getTokens')[0];
+        var invert = $(this).parents('.molecular-accordion').find('.inversion-checkbox').is(':checked');
+        var mut_cat = $(this).parents('.molecular-accordion').find('.mutation-category-selector :selected').val();
+        var feature_id = 'MUT:' + build + ':' + gene.value + ':' + (invert ? "NOT:" : "");
 
-            // Remove prior filters
-            $('a.mol-cat-filter-x').trigger('click', {forNewVal: true});
-            $('a.mol-spec-filter-x').trigger('click');
+        if (mut_cat !== 'indv-selex') {
+            feature = $(this).parents('.molecular-accordion').find('.mutation-category-selector').parents('.cohort-feature-select-block');
+            value = $(this).parents('.molecular-accordion').find('.mutation-category-selector :selected');
+        } else {
+            feature = $(this).parents('.molecular-accordion').find('.spec-molecular-attrs.cohort-feature-select-block');
+            value = $(this).parents('.molecular-accordion').find('.spec-molecular-attrs.cohort-feature-select-block :checked');
+        }
 
-            value = $this.find('option:selected');
+        feature_id += feature.data('feature-id');
+        var tokenDisplay = gene.label + ' [' + build + ', ' + feature.data('feature-displ-name') + ', ';
 
-            if (value.val() !== 'indv-selex') { // Categorized sets
+        value.each(function(index){
+            var elem = $(this);
+            var filter = feature_id+':'+elem.data('value-id');
+            if(!SELECTED_FILTERS[tokenProgId][filter]) {
+                SELECTED_FILTERS[tokenProgId][filter] = true;
+                var valTokenDisplay = tokenDisplay+elem.data('value-displ-name') + ']';
 
-                // If we've previously been in a user-selected set,
-                // disable that selection set and remove all of its
-                // filter tokens
-                $('#' + activeDataTab + ' .spec-molecular-attrs .search-checkbox-list').addClass('disabled');
-                $('#' + activeDataTab + ' .spec-mol-attr-heading-note').show();
+                if(invert) {
+                    valTokenDisplay = "NOT("+valTokenDisplay+")";
+                }
 
-                // Generate the new filter token
-                var gene = $('#' + activeDataTab + ' .paste-in-genes').tokenfield('getTokens')[0];
-
-                var tokenValDisplName = value.data('value-displ-name'),
-                    tokenFeatDisplName = feature.data('feature-displ-name');
-
-                var feature_id = 'MUT:' + build + ':' + gene.value + ':' + feature.data('feature-id');
-
-                var token = $('<span>').data({
+                token = $('<span>').data({
                     'feature-id': feature_id,
+                    'feature-type': 'molecular',
                     'feature-name': feature.data('feature-name'),
+                    'filter': filter,
                     'prog-id': tokenProgId,
                     'prog-name': tokenProgDisplName,
+                    'class': '',
                     'build': build,
-                    'value-id': value.data('value-id'),
-                    'value-name': value.data('value-name')
-                }).attr('data-feature-id', feature_id).attr('data-value-id', value.data('value-id')).addClass(activeDataTab + '-token');
+                    'value-id': elem.data('value-id'),
+                    'value-name': elem.data('value-name')
+                })
+                    .attr('data-feature-id', feature_id)
+                    .attr('data-value-id', elem.data('value-id'))
+                    .addClass(activeDataTab + '-token mol-filter filter-combine-'+$('.mut-filter-combine :selected').val());
 
                 token.append(
                     $('<a>').addClass('delete-x filter-label label label-default mol-cat-filter-x')
-                        .text(gene.label + ' [' + build + ', ' + tokenFeatDisplName + ': ' + tokenValDisplName + ']')
+                        .text(valTokenDisplay)
                         .append('<i class="fa fa-times">')
-                        .attr("title", gene.label + ' [' + build + ', ' + tokenFeatDisplName + ': ' + tokenValDisplName + ']')
+                        .attr("title", valTokenDisplay)
                 );
 
-                $this.data({
-                    'select-filters-item': token.clone(true),
-                    'create-cohort-form-item': token.clone(true)
-                });
-
-                // Check the corresponding checkboxes in the specific set
-                $('#' + activeDataTab + ' .mutation-checkbox').each(function () {
-                    $(this).prop('checked', ($(this).data('category') == value.val()));
-                });
-
-                $(selFilterPanel + ' .panel-body').append($this.data('select-filters-item'));
-                createFormFilterSet.append($this.data('create-cohort-form-item'));
-            } else {        // indv-selex
-                // Enable the checkbox set
-                $('#' + activeDataTab + ' .spec-molecular-attrs .search-checkbox-list').removeClass('disabled');
-                $('#' + activeDataTab + ' .spec-mol-attr-heading-note').hide();
-
-                // Any checked boxes from a category won't be in the filter set - add them now
-                $('#' + activeDataTab + ' .mutation-checkbox').each(function () {
-                    if ($(this).is(':checked')) {
-                        $(this).triggerHandler('change');
-                    }
-                });
+                $(selFilterPanel+' .panel-body').append(token.clone(true));
+                createFormFilterSet.append(token.clone(true));
             }
-
-            var gene = $('#' + activeDataTab + ' .paste-in-genes').tokenfield('getTokens')[0];
-            var build = $('#p-' + tokenProgId + '-mutation-build :selected').val();
-            feature_id = 'MUT:' + build + ':' + gene.value + ':' + feature.data('feature-id');
-
-            if ($('.inversion-checkbox').is(':checked')) {
-                feature_id += ':NOT';
-            }
-
-            token = $('<span>').data({
-                'feature-id': feature_id,
-                'feature-type': 'molecular',
-                'feature-name': feature.data('feature-name'),
-                'value-id': value_id,
-                'value-name': value.data('value-name'),
-                'class': '',
-                'build': build,
-                'prog-id': tokenProgId,
-                'prog-name': tokenProgDisplName
-            }).attr('data-feature-id', feature_id).attr('data-value-id', value_id).addClass(activeDataTab + '-token');
-
-            tokenFeatDisplName = gene.label + ' [' + build + ', ' + feature.data('feature-displ-name');
-            tokenValDisplName += ']'
-        }
+        });
+        clear_mol_filters($(this));
+        update_displays();
     });
 
-
-    var filter_change_callback = function(e,data) {
+    var filter_change_callback = function(e) {
 
         var activeDataTab = $('.data-tab.active').attr('id');
         var selFilterPanel = '.'+activeDataTab+ '-selected-filters';
@@ -412,18 +393,16 @@ require([
             prog = $this.closest('.filter-panel'),
             value = $this;
 
-        // If a specific mutation checkbox was checked, check to see if we need to switch
-        // into indv-selex mode
-        if(feature.data('feature-type') == 'molecular' && $('#'+activeDataTab+' .mutation-category-selector').val() !== 'indv-selex') {
-            $('a.mol-cat-filter-x').trigger('click');
-            $('#'+activeDataTab+' .mutation-category-selector').val('indv-selex');
-            // Any checked boxes from a category won't be in the filter set - add them now
-            $('#'+activeDataTab+' .mutation-checkbox').each(function(){
-                if(value.data('value-id') !== $(this).data('value-id') && $(this).is(':checked')) {
-                    $(this).triggerHandler('change');
-                }
-            });
+        if(createFormFilterSet.length <= 0) {
+            $('#selected-filters').append('<p id="'+activeDataTab+'-filters"></p>');
+            createFormFilterSet = $('p#'+activeDataTab+'-filters')
+            createFormFilterSet.append('<h5>'+(prog.data('prog-displ-name'))+'</h5>');
+        } else {
+            createFormFilterSet.show();
         }
+
+        var tokenProgDisplName = prog.data('prog-displ-name'),
+            tokenProgId = prog.data('prog-id');
 
         if ($this.is(':checked')) { // Checkbox checked
             var tokenValDisplName = (value.data('value-displ-name') && value.data('value-displ-name').length > 0) ?
@@ -509,9 +488,7 @@ require([
             }
         }
 
-        if(!data || !data.without_update) {
-            update_displays();
-        }
+        update_displays();
 
         if(!cohort_id && $('.selected-filters .panel-body span').length > 0) {
             $('#at-least-one-filter-alert-modal').hide();
@@ -522,14 +499,14 @@ require([
 
     $('.clear-filters').on('click', function() {
         var activeDataTab = $('.data-tab.active').attr('id');
+        var prog_id = $('.data-tab.active .filter-panel').data('prog-id');
         var filterType = $(this).attr('id').split('-clear-filters')[0];
         $(this).parents('.selected-filters').find('.panel-body').empty();
         $(this).parents('.data-tab').find('.filter-panel input:checked').each(function() {
             $(this).prop('checked', false);
         });
-        if(filterType === 'isb-cgc-data') {
-            $('#paste-in-genes').siblings('div.token').find('a.close').trigger('click');
-        }
+
+        delete SELECTED_FILTERS[prog_id];
 
         $('p#'+activeDataTab+'-filters span.'+filterType+'-token').remove();
         update_displays();
@@ -1000,23 +977,28 @@ require([
         });
 
         createTokenizer($(program_data_selector+' .paste-in-genes'), [], program_data_selector, activeDataTab);
-
     };
 
-    // Event handlers for the 'x' of the case and data type filter tokens
-    $('.tab-content, #selected-filters').on('click', 'a.mol-cat-filter-x', function (e,data) {
-        var activeDataTab = $(this).parents('span').data('prog-id')+'-data';
+    // Handler for the 'x' of the mutation 'category' filter tokens
+    $('.tab-content, #selected-filters').on('click', 'a.mol-cat-filter-x', function (e) {
+        var prog_id = $(this).parents('span').data('prog-id');
+        var activeDataTab = prog_id+'-data';
         var selFilterPanel = '.'+activeDataTab+ '-selected-filters';
         var createFormFilterSet = $('p#'+activeDataTab+'-filters');
 
+        var filter = $(this).parents('span').data('filter');
+
+        if(filter && SELECTED_FILTERS[prog_id][filter]) {
+            delete SELECTED_FILTERS[prog_id][filter];
+        }
+
         // When the 'Selected Filters' token is removed, remove this filter from other
         // locations in which it's stored
-        var mut_cat = $('#'+activeDataTab+' .mutation-category-selector');
-        (!data || !data.forNewVal) &&  mut_cat.val('label');
         $(this).parent('span').remove();
+        $('span[data-attached-to="'+filter+'"]').remove()
 
-        $(selFilterPanel+' .panel-body').find('span[data-feature-id="'+$(this).parent('span').data('feature-id')+'"]').remove();
-        createFormFilterSet.find('span[data-feature-id="'+$(this).parent('span').data('feature-id')+'"]').remove();
+        $(selFilterPanel+' .panel-body').find('span[data-filter="'+filter+'"]').remove();
+        createFormFilterSet.find('span[data-filter="'+filter+'"]').remove();
 
         if(!cohort_id && $('.selected-filters .panel-body span').length <= 0) {
             $('#at-least-one-filter-alert-modal').show();
@@ -1025,7 +1007,7 @@ require([
 
         // If this has emptied out a program's filter set, hide the modal's subsection for that program
         // if a new value isn't replacing it
-        if(createFormFilterSet.find('span').length <= 0 && (!data || !data.forNewVal)) {
+        if(createFormFilterSet.find('span').length <= 0) {
             createFormFilterSet.hide();
         }
 
@@ -1038,11 +1020,11 @@ require([
         });
         (progCount > 1) ? $('#multi-prog-cohort-create-warn').show() : $('#multi-prog-cohort-create-warn').hide();
 
-        (!data || !data.without_update) && update_displays(true,false,$(this).parent('span').data('prog-id'));
+        update_displays(true,false,$(this).parent('span').data('prog-id'));
         return false;
     });
 
-    // Handler for the 'x' of the mutation filter tokens
+
     $('.tab-content, #selected-filters').on('click', 'a.delete-x', function(e,data) {
         var activeDataTab = $(this).parents('span').data('prog-id')+'-data';
         var selFilterPanel = '.'+activeDataTab+ '-selected-filters';
@@ -1081,7 +1063,7 @@ require([
         });
         (progCount > 1) ? $('#multi-prog-cohort-create-warn').show() : $('#multi-prog-cohort-create-warn').hide();
 
-        (!data || !data.without_update) && update_displays(true,false,span_data['prog-id']);
+        update_displays(true,false,span_data['prog-id']);
         return false;
     });
 

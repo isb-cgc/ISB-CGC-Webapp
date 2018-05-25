@@ -1,4 +1,6 @@
 #cohort-details, #cohort-filelist
+    .filter-label
+        display: inline-flex
     .pending-left
         margin-right: 5px
         i
@@ -28,6 +30,14 @@
                 top: 40%
                 margin: auto
                 font-size: 100px
+
+    .selected-filters
+        .mol-filter.filter-combine-or:not(:first-child):before
+            content: "OR"
+            margin-right: 5px
+        .mol-filter.filter-combine-and:not(:first-child):before
+            content: "AND"
+            margin-right: 5px
 
     .cohort-selected-filters
         overflow: hidden
@@ -213,7 +223,7 @@
         a:hover
             text-decoration: none
     #filter-list-div
-        .search-checkbox-list
+        .search-checkbox-list, .mol-checkbox-list
             max-height: 100px
             overflow-y: scroll
 
