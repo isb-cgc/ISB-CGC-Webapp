@@ -39,7 +39,8 @@ def is_valid_genomic_build(genomic_build_param):
 @login_required
 def oncoprint_view_data(request):
     try:
-        gene_list = request.GET.get('gene_list', None)
+        gene_list_str = request.GET.get('gene_list', None)
+        gene_array = gene_list_str.split(',');
         genomic_build = request.GET.get('genomic_build', None)
         cohort_id_param_array = request.GET.getlist('cohort_id', None)
 
@@ -119,12 +120,10 @@ def oncoprint_view_data(request):
             project_id_stmt = ', '.join([str(project_id) for project_id in confirmed_project_ids])
         project_clause = " OR project_id IN ({})".format(project_id_stmt) if confirmed_project_ids is not None else ""
 
-        gene_list_stmt = ''
-        gene_array = gene_list.split(',')
+        gene_list_stm = ''
         if gene_array is not None:
-            gene_list_stmt = ', '.join('\'{0}\''.format(gene) for gene in gene_array)
-        filter_clause = "AND Hugo_Symbol IN ({})".format(gene_list_stmt) if gene_array is not None else ""
-
+            gene_list_stm = ', '.join('\'{0}\''.format(gene) for gene in gene_array)
+        filter_clause = "AND Hugo_Symbol IN ({})".format(gene_list_stm) if gene_list_stm != "" else ""
         cohort_id_list = ', '.join([str(cohort_id) for cohort_id in cohort_id_array])
 
         cohort_table_id = "{project_name}:{dataset_id}.{table_id}".format(
@@ -152,7 +151,7 @@ def oncoprint_view_data(request):
 
             return JsonResponse({
                 'plot_data': plot_data,
-                'gene_list': gene_list,
+                'gene_list': gene_array,
                 'bq_tables': ["{bq_data_project_id}:{dataset_name}.{table_name}".format(
                     bq_data_project_id=settings.BIGQUERY_DATA_PROJECT_NAME,
                     dataset_name=bq_table_info['dataset'],

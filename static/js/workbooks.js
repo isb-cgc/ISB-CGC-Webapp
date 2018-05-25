@@ -309,13 +309,19 @@ require([
 
     // gather the options and selections on a variable, used for gathering the color_by variable
     function get_simple_values(selection) {
-        var result;
-        result = {variable: selection.find(":selected").val(), type : "common", options: []};
+        var result = {variable: selection.find(":selected").val(), type : "common", options: []};
         $(selection).find("option").each(function(i,ele){
            result.options.push({value : $(ele).val(), text : $(ele).text()});
         });
         return result;
     };
+
+    function get_simple_checkbox_values(selection){
+        var checked_vals = selection.map(function () {
+                    return this.value;}).get()
+        result = {values: checked_vals, type : "checkbox"};
+        return result;
+    }
 
     // gather the options and selections on a variable in the plot settings
     function get_values(selection){
@@ -335,13 +341,6 @@ require([
                 result['logTransform'] = true;
             }
         }
-        // else if(selection.attr("type") == "checkbox") {
-        //     result = {
-        //         variable: selection.val(),
-        //         text: selection.text(),
-        //         type: "checkbox"
-        //     };
-        // }
         else {
             result = {variable : selection.val(), type : "gene"};
             var parent = selection.parents(".variable-container");
@@ -877,6 +876,7 @@ require([
         }
         if (($(this).parent())) {
             var data = get_plot_info_on_page($(this).parent());
+            //hide 'Enable Sample Selection for Oncoprint and SeqPeek'
             if (data.attrs.type === 'SeqPeek' || data.attrs.type === 'OncoPrint') {
                 $('.toggle-selection').hide();
             }
@@ -897,6 +897,10 @@ require([
                 hide_plot_settings();
             });
         }
+    });
+
+    $('.select-all-genes-checkbox').on('click', function(event){
+        $('.worksheet.active').find(".gene-selex").prop("checked", $(this).prop("checked"));
     });
 
     $('.resubmit-button').on("click", function(){
@@ -933,9 +937,7 @@ require([
         }
 
         var worksheet_id = $(plot_settings).find('.update-plot').attr("worksheet_id");
-
         var xLog = $(plot_settings).find('#'+worksheet_id+'-x-log-transform'), yLog = $(plot_settings).find('#'+worksheet_id+'-y-log-transform');
-
         var result = {
             worksheet_id : worksheet_id,
             plot_type    : $('#'+worksheet_id+'-analysis-type').val(),
@@ -944,8 +946,8 @@ require([
                 x_axis   : get_values($(plot_settings).find('.x-axis-select').find(":selected")),
                 y_axis   : get_values($(plot_settings).find('.y-axis-select').find(":selected")),
                 color_by : get_simple_values(plot_settings.find('.color_by')),
-                gene_label: get_simple_values(plot_settings.find('#'+worksheet_id+'gene_label')),
-                //gene_list: get_values(plot_settings.find('[name="gene-checkbox"]'))
+                gene_label: get_simple_values(plot_settings.find('#'+worksheet_id+'-gene_label')),
+                gene_list: get_simple_checkbox_values(plot_settings.find('.gene-checkbox:checkbox:checked'))
             },
             attrs : {
                 type    : worksheet.find('.plot_selection :selected').val(),
@@ -956,8 +958,8 @@ require([
                     return {id: this.value, cohort_id: $(this).attr("cohort-id")};
                 }).get(),
                 gene_label: plot_settings.find('#'+worksheet_id+'-gene_label :selected').val(),
-                gene_list: plot_settings.find('[name="gene-checkbox"]:checked').map(function () {
-                   return this.value;
+                gene_list: plot_settings.find('.gene-selex:checked').map(function () {
+                    return this.value;
                 }).get()
             },
             logTransform: {
@@ -970,7 +972,6 @@ require([
             },
             color_by_sel: plot_settings.find('.color_by :selected').val() !== null && plot_settings.find('.color_by :selected').val() !== ""
         }
-
         return result;
     }
 
@@ -1039,6 +1040,10 @@ require([
                     if($(this).is(':checked')) {
                         axisRdy = true;
                     }
+                    else{
+                        $('.worksheet.active').find('.select-all-genes-checkbox').prop('checked', false);
+                    }
+
                 });
             }
             else{
@@ -1085,7 +1090,7 @@ require([
         cohort_selex_update();
     });
 
-    $('.axis-select, .gene-selex').on('change',function(e){
+    $('.axis-select, .gene-selex, .select-all-genes-checkbox').on('change',function(e){
         axis_selex_update();
     });
 
@@ -1115,6 +1120,7 @@ require([
                                         y            : data.attrs.y_axis.url_code,
                                         logTransform : data.logTransform,
                                         gene_label   : data.attrs.gene_label,
+                                        gene_list    : data.attrs.gene_list,
                                         color_by     : data.attrs.color_by.url_code,
                                         cohorts      : data.attrs.cohorts,
                                         color_by_sel : data.color_by_sel});
@@ -1244,7 +1250,13 @@ require([
             apply_axis_values(plot_element.find('.color_by'), plot_data.color_by);
         }
         if(plot_data.gene_label) {
-            plot_element.find("#"+worksheet_id+"gene_label").val(plot_data.gene_label.variable);
+            plot_element.find("#"+worksheet_id+"-gene_label").val(plot_data.gene_label.variable);
+        }
+        if(plot_data.gene_list) {
+            plot_element.find('.gene-checkbox').each(function () {
+                $(this).prop("checked", ($.inArray(this.value, plot_data.gene_list['values']) != -1));
+
+                });
         }
 
         if(plot_data.cohort) {
@@ -1605,7 +1617,7 @@ require([
                                 y            : data.attrs.y_axis.url_code,
                                 logTransform : data.logTransform,
                                 gene_label   : data.attrs.gene_label,
-                                //gene_list    : data.attrs.gene_list,
+                                gene_list    : data.attrs.gene_list,
                                 color_by     : data.attrs.color_by.url_code,
                                 cohorts      : data.attrs.cohorts,
                                 color_by_sel : data.color_by_sel});
