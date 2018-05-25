@@ -876,13 +876,6 @@ require([
         }
         if (($(this).parent())) {
             var data = get_plot_info_on_page($(this).parent());
-            //hide 'Enable Sample Selection for Oncoprint and SeqPeek'
-            if (data.attrs.type === 'SeqPeek' || data.attrs.type === 'OncoPrint') {
-                $('.toggle-selection').hide();
-            }
-            else {
-                $('.toggle-selection').show();
-            }
             update_plot_model(workbook_id, data.worksheet_id, data.plot_id, data.attrs, data.selections, data.logTransform, function(result){
                 generate_plot({ worksheet_id : data.worksheet_id,
                                 type         : data.attrs.type,
@@ -1195,6 +1188,14 @@ require([
 
         plot_loader.fadeIn();
         plot_element.find('.resubmit-button').hide();
+
+        //hide 'Enable Sample Selection for Oncoprint and SeqPeek'
+        if (args.type === 'SeqPeek' || args.type === 'OncoPrint') {
+            $('.toggle-selection').hide();
+        }
+        else {
+            $('.toggle-selection').show();
+        }
         plotFactory.generate_plot(
             {
                 plot_selector    : plot_selector,
