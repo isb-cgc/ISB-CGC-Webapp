@@ -230,9 +230,7 @@ class FeatureVectorBigQueryBuilder(object):
         for parameter_object in params_array:
             job_item = submit_tcga_job(parameter_object, self.project_id_number, bigquery_client, self.cohort_settings)
             provider_array.append(job_item)
-
         result = get_submitted_job_results(provider_array, self.project_id_number, poll_retry_limit, skip_formatting_for_plot)
-
         return result
 
     @classmethod

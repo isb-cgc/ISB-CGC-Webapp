@@ -3,9 +3,13 @@
 {% load custom_tags %}
 {% load workbook_custom_tags %}
 
-{% block title %}Workbooks | ISB-CGC{% endblock %}}
+{% block title %}Workbooks | ISB-CGC{% endblock %}
 {% block extra_css_libs %}{% endblock %}
-{% block header %}{% endblock %}
+
+{% block header %}
+{<link type="text/css" rel="stylesheet" href="{% static 'css/jquery.qtip.min.css' %}" />}
+{% endblock %}
+
 
 {% block link_page_name %}workbook_detail{% endblock %}
 {% block page_name %}workbook_detail{% endblock %}

@@ -91,6 +91,23 @@
         <div class="filelist-panel panel">
             <div class="panel-heading">
                 <h4>File Listing</h4>
+                <div class="page-action-group pull-right">
+                    <ul>
+                        <li class="menu-item">
+                            <div class="filelist-obtain">
+                                <span class="pending-left" id="download-in-prog" style="display: none;"><i class="fa fa-circle-o-notch fa-spin"></i>Downloading...</span>
+                                <a class="download-link" href="{{ download_url }}" title="Download file manifest as CSV"><button class="btn btn-info download-btn">CSV</button></a>{# <a id="download-link" href="{{ download_url }}" title="Download file manifest as JSON"><button class="btn btn-info">JSON</button></a>#}
+                                <input type="hidden" class="download-token" value="" />
+                            </div>
+                        </li>
+                        <li class="menu-item">
+                            <div class="filelist-obtain">
+                                <button class="btn btn-info export-btn" data-toggle="modal" {% if has_user_data %}disabled {% endif %}data-target="#export-to-bq-modal" title="{% if has_user_data %}Export for file manifests containing user data is not available at this time.{% else %}Export this file manifest to a BigQuery table{% endif %}">BigQuery</button>
+                                <button class="btn btn-info export-btn" data-toggle="modal" {% if has_user_data %}disabled {% endif %}data-target="#export-to-gcs-modal" title="{% if has_user_data %}Export for file manifests containing user data is not available at this time.{% else %}Export this file manifest to a GCS bucket{% endif %}">GCS</button>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
             </div>
             <div class="panel-body">
                 <div class="dataTables_info">
@@ -111,6 +128,15 @@
                         <a class="prev-page paginate_button disabled">Previous</a>
                         <span class="paginate_button_space"/>
                         <a class="next-page paginate_button">Next</a>
+                    </div>
+                </div>
+                <div class="column-inputs">
+                    <a role="button" data-toggle="collapse" href="#column-toggle-div-igv" aria-expanded="false" aria-controls="column-toggle-div-igv">
+                        Choose Columns to Display <i class="fa fa-caret-down"></i><i class="fa fa-caret-up"></i>
+                    </a>
+                    <div id="column-toggle-div-igv" class="column-collapse collapse">
+                        <div class="column-toggle"></div>
+                        <p>*Click on column names above to hide/show columns in table</p>
                     </div>
                 </div>
                 <table class="table table-striped file-list-table sortable_table" aria-label="File Listing Table">
