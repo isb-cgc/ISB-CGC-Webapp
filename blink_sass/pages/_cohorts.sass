@@ -29,6 +29,16 @@
                 margin: auto
                 font-size: 100px
 
+    .selected-filters
+        .mol-cat-filter-x
+            display: inline-flex
+        .mol-filter.filter-combine-or:not(:first-child):before
+            content: "OR"
+            margin-right: 5px
+        .mol-filter.filter-combine-and:not(:first-child):before
+            content: "AND"
+            margin-right: 5px
+
     .cohort-selected-filters
         overflow: hidden
         .more-filters, .less-filters
@@ -213,7 +223,7 @@
         a:hover
             text-decoration: none
     #filter-list-div
-        .search-checkbox-list
+        .search-checkbox-list, .mol-checkbox-list
             max-height: 100px
             overflow-y: scroll
 
