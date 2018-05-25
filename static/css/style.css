@@ -486,16 +486,16 @@ nav {
   padding-right: 0px; }
   #search .search-left-column h5 {
     text-transform: capitalize; }
-  #search .search-left-column .search-checkbox-list {
+  #search .search-left-column .search-checkbox-list, #search .search-left-column .mol-checkbox-list {
     border: 1px #999999 solid;
     max-height: 100px;
     overflow-y: scroll;
     padding: 0px 3px;
     width: auto; }
-    #search .search-left-column .search-checkbox-list label {
+    #search .search-left-column .search-checkbox-list label, #search .search-left-column .mol-checkbox-list label {
       font-weight: normal;
       margin: 0px; }
-    #search .search-left-column .search-checkbox-list li span {
+    #search .search-left-column .search-checkbox-list li span, #search .search-left-column .mol-checkbox-list li span {
       float: right; }
 
 #search .search-right-column {
@@ -1668,6 +1668,12 @@ section .min-max {
   .workbook-build-display span, .workbook-ver-display span {
     font-weight: 600; }
 
+#cohort-details .filter-label, #cohort-filelist .filter-label {
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex; }
+
 #cohort-details .pending-left, #cohort-filelist .pending-left {
   margin-right: 5px; }
   #cohort-details .pending-left i, #cohort-filelist .pending-left i {
@@ -1697,6 +1703,14 @@ section .min-max {
     top: 40%;
     margin: auto;
     font-size: 100px; }
+
+#cohort-details .selected-filters .mol-filter.filter-combine-or:not(:first-child):before, #cohort-filelist .selected-filters .mol-filter.filter-combine-or:not(:first-child):before {
+  content: "OR";
+  margin-right: 5px; }
+
+#cohort-details .selected-filters .mol-filter.filter-combine-and:not(:first-child):before, #cohort-filelist .selected-filters .mol-filter.filter-combine-and:not(:first-child):before {
+  content: "AND";
+  margin-right: 5px; }
 
 #cohort-details .cohort-selected-filters, #cohort-filelist .cohort-selected-filters {
   overflow: hidden; }
@@ -1888,7 +1902,7 @@ section .min-max {
 #cohort-details .filter-label:hover a:hover, #cohort-filelist .filter-label:hover a:hover {
   text-decoration: none; }
 
-#cohort-details #filter-list-div .search-checkbox-list, #cohort-filelist #filter-list-div .search-checkbox-list {
+#cohort-details #filter-list-div .search-checkbox-list, #cohort-details #filter-list-div .mol-checkbox-list, #cohort-filelist #filter-list-div .search-checkbox-list, #cohort-filelist #filter-list-div .mol-checkbox-list {
   max-height: 100px;
   overflow-y: scroll; }
 
