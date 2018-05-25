@@ -21,3 +21,4 @@ django-allauth==0.35.0
 pexpect==4.0.1
 enum34==1.1.6
 jsonschema==2.6.0
+pyjwt==1.6.1

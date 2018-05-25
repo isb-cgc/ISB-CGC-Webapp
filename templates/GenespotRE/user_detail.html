@@ -64,10 +64,10 @@
             </div>
             <div class="panel-body">
                 {% if DCF_TEST %}
-                <p><a href="{% url 'dcf_login' %}">Log in via DCF</a></p>
-                <hr>
-                {% endif %}
-                {% if NIH_AUTH_ON %}
+                    {% include 'GenespotRE/user_detail_dcf.html' %}
+                    {% block dcf_content %}
+                    {% endblock %}
+                {% elif NIH_AUTH_ON %}
                     {% include 'GenespotRE/user_detail_saml.html' %}
                     {% block saml_content %}
                     {% endblock %}

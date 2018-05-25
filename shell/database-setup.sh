@@ -72,10 +72,5 @@ python ${HOMEROOT}/scripts/dataset_bootstrap.py -u $MYSQL_ROOT_USER -p $MYSQL_RO
 echo "Setting Up Social Application Login..."
 mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME -e "BEGIN; INSERT INTO socialaccount_socialapp (provider, name, client_id, secret) VALUES ('google', 'Google', '$GOOGLE_CLIENT_ID', '$GOOGLE_CLIENT_SECRET'); INSERT INTO socialaccount_socialapp_sites (socialapp_id, site_id) VALUES (1, 2), (1, 3), (1, 4); COMMIT;"
 
-if [ -n "${DCF_FENCE_CLIENT_ID}" ]; then
-    echo "Setting Up DCF Fence Social Application Login..."
-    mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME -e "BEGIN; INSERT INTO socialaccount_socialapp (provider, name, client_id, secret) VALUES ('dcf', 'DCF', '$DCF_FENCE_CLIENT_ID', '$DCF_FENCE_CLIENT_SECRET'); INSERT INTO socialaccount_socialapp_sites (socialapp_id, site_id) VALUES (2, 2), (2, 3), (2, 4); COMMIT;"
-fi
-
 echo "Populating Gene Symbol list..."
 mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NAME < ${HOMEROOT}/scripts/populate_gene_symbols.sql
