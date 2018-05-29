@@ -38,6 +38,18 @@
         .mol-filter.filter-combine-and:not(:first-child):before
             content: "AND"
             margin-right: 5px
+        .mol-filter-container:not(:only-child):before
+            content: "("
+            margin-left: 5px
+        .mol-filter-container:not(:only-child):not(:first-child):before
+            content: "AND ("
+            margin-left: 5px
+        .mol-filter-container:not(:only-child):after
+            content: ")"
+            margin-right: 5px
+        .mol-filter-container:not(:only-child):not(:last-child):after
+            content: ") AND"
+            margin-right: 5px
 
     .cohort-selected-filters
         overflow: hidden
