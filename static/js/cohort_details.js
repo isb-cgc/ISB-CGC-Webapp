@@ -366,7 +366,7 @@ require([
                 })
                     .attr('data-feature-id', feature_id)
                     .attr('data-value-id', elem.data('value-id'))
-                    .addClass(activeDataTab + '-token mol-filter filter-combine-'+$('.mut-filter-combine :selected').val());
+                    .addClass(activeDataTab + '-token mol-filter filter-token filter-combine-'+$('.mut-filter-combine :selected').val());
 
                 token.append(
                     $('<a>').addClass('delete-x filter-label label label-default mol-cat-filter-x')
@@ -436,7 +436,7 @@ require([
                     'value-name': value.data('value-name'),
                     'prog-id': tokenProgId,
                     'prog-name': tokenProgDisplName,
-                }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token');
+                }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token filter-token');
 
             } else if (feature.data('feature-type') == 'donor') { // Case filter
                 token = $('<span>').data({
@@ -446,7 +446,7 @@ require([
                     'value-name': value.data('value-name'),
                     'prog-id': tokenProgId,
                     'prog-name': tokenProgDisplName
-                }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token');
+                }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token filter-token');
 
             } else if (feature.data('feature-type') == 'user-data') { // User data filter
                 token = $('<span>').data({
@@ -457,7 +457,7 @@ require([
                     'prog-id': tokenProgId,
                     'prog-name': tokenProgDisplName,
                     'user-program-id': tokenUserProgId,
-                }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token');
+                }).attr('data-feature-id',feature_id).attr('data-value-id',value_id).addClass(activeDataTab+'-token filter-token');
             }
 
             // Don't re-add the token and filter if it already exists
