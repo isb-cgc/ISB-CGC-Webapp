@@ -968,12 +968,12 @@ var Oncoprint = (function () {
 	this.id_clipboard = [];
 	this.clipboard_change_callbacks = [];
     }
-
+	var legend_div_top_margin = 60;
     var _SetLegendTop = function (oncoprint) {
 	if (oncoprint.model.rendering_suppressed_depth > 0) {
 	    return;
 	}
-	oncoprint.$legend_div.css({'top': oncoprint.model.getCellViewHeight() + 60});
+	oncoprint.$legend_div.css({'top': oncoprint.model.getCellViewHeight() + legend_div_top_margin});
     };
     var setLegendTopAfterTimeout = function (oncoprint) {
 	if (oncoprint.model.rendering_suppressed_depth > 0) {
@@ -986,7 +986,7 @@ var Oncoprint = (function () {
     };
 
     var setHeight = function(oncoprint) {
-	oncoprint.$ctr.css({'min-height': oncoprint.model.getCellViewHeight() + Math.max(oncoprint.$legend_div.outerHeight(), (oncoprint.$minimap_div.is(":visible") ? oncoprint.$minimap_div.outerHeight() : 0)) + 30});
+	oncoprint.$ctr.css({'min-height': oncoprint.model.getCellViewHeight() + Math.max(oncoprint.$legend_div.outerHeight(), (oncoprint.$minimap_div.is(":visible") ? oncoprint.$minimap_div.outerHeight() : 0)) + legend_div_top_margin});
     };
 
     var resizeAndOrganize = function (oncoprint) {

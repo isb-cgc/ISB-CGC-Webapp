@@ -208,11 +208,18 @@
                     <div class="form-group oncoprint-genes">
                         <label for="{{ worksheet.id }}-gene_label">Gene or miRNA</label>
                         <div class="gene-listing" plot="{{ worksheet.id }}">
+                        {% if genes and genes|length > 1 %}
+                            <div class="checkbox" style="margin-top: 0px; margin-bottom: 15px;">
+                                <label>
+                                    <input class="select-all-genes-checkbox gene-checkbox" type="checkbox">Select All
+                                </label>
+                            </div>
+                        {% endif %}
                         {% for gene_item in genes %}
                             {% if not plot or plot.gene_label != gene_item.gene %}
                             <div class="checkbox" style="margin-top: 0px; margin-bottom: 5px;">
                                 <label>
-                                    <input class="variable-toggle-checkbox gene-selex" name="gene-checkbox" aria-label="gene-checkbox" type="checkbox" value="{{ gene_item.gene }}"/>
+                                    <input class="variable-toggle-checkbox gene-selex gene-checkbox" type="checkbox" value="{{ gene_item.gene }}"/>
                                         {{ gene_item.gene }}
                                 </label>
                             </div>
@@ -245,7 +252,15 @@
                     <p><i class="fa fa-exclamation-circle"></i> To complete this analysis: </p>
                     <ul class="ul no-bullet">
                         <li class="checkbox"><label><input class="plot-ready-check" type="checkbox" id="selAnType-{{ worksheet.id }}" readonly onclick="this.checked=!this.checked;"> Select an Analysis Type (above)</label></li>
-                        <li class="checkbox"><label><input class="plot-ready-check" type="checkbox" id="selGenVar-{{ worksheet.id }}" readonly onclick="this.checked=!this.checked;"> Select <a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Genes & miRNAs</a> and/or <a href="{% url 'variable_select_for_existing_workbook' workbook.id worksheet.id %}">Variables</a></label></li>
+                        <li class="checkbox">
+                            <label>
+                                <input class="plot-ready-check" type="checkbox" id="selGenVar-{{ worksheet.id }}" readonly onclick="this.checked=!this.checked;">
+                                Select <a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Genes & miRNAs</a>
+                                <span class="and_or_variables_label">
+                                    and/or <a href="{% url 'variable_select_for_existing_workbook' workbook.id worksheet.id %}">Variables</a>
+                                </span>
+                            </label>
+                        </li>
                         <li class="checkbox"><label><input class="plot-ready-check" type="checkbox" id="selCoh-{{ worksheet.id }}" readonly onclick="this.checked=!this.checked;"> Select a <a href="{% url 'cohort_select_for_existing_workbook' workbook.id worksheet.id %}">Cohort</a></label></li>
                     </ul>
                 </div>
