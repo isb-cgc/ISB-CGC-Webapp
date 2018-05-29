@@ -558,20 +558,16 @@ window.CreateOncoprinterWithToolbar = function (ctr_selector, toolbar_selector) 
         return {
             'first_genetic_alteration_track': null,
             'genetic_alteration_tracks': {}, // track_id -> gene
-
+			'using_sample_data': true,
             'cell_padding_on': true,
             'unaltered_cases_hidden': false,
             'mutations_colored_by_type': true,
             'sorted_by_mutation_type': true,
-
             'user_specified_order': null,
-
             'altered_ids': [],
             'unaltered_ids': [],
             'ids': [],
-
             'trackIdsInOriginalOrder': {},
-
             'addGeneticTracks': function (genes) {
                 genes = [].concat(genes);
                 oncoprint.suppressRendering();
