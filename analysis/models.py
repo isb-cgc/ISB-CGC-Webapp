@@ -21,7 +21,7 @@ class Analysis(models.Model):
                   'description' : "Used to plot a categorical feature on the x-axis versus a numerical feature on the y-axis. Points in the plot can be colored by another categorical feature.",
                   'image' : 'img/violinplot.png'},
                  {'name': 'OncoPrint',
-                  'description': "Used to plot multiple genomic alteration events by heatmap. Tool is licensed under cBioPortal(c).",
+                  'description': "Used to plot multiple genomic alteration (somatic mutation) events across a set of samples by heatmap. OncoPrint is developed and provided by cBioPortal.",
                   'image': 'img/oncoprint.png'},
                  # {'name' : 'Violin Plot with axis swap',
                  #  'description' : "Used to plot a categorical feature on the y-axis versus a numerical feature on the x-axis. Points in the plot can be colored by another categorical feature.",

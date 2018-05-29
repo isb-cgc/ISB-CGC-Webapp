@@ -963,7 +963,7 @@ TCGA-25-2393-01\n\
             }
         }
         var oncoprintUrl = base_url + '/visualizations/oncoprint_data_plot/' + VERSION + '?' + cohort_str;
-        oncoprintUrl += "&gene_list=" + gene_list
+        oncoprintUrl += "&gene_list=" + gene_list.join(",")
             + (VERSION == 'v2' ? "&genomic_build=" + $('.workbook-build-display').data('build') : '');
         return oncoprintUrl;
     }

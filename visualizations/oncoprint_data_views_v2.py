@@ -17,44 +17,16 @@ limitations under the License.
 """
 
 import logging
-import traceback
-import sys
-
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-
-from google_helpers.bigquery.service_v2 import BigQueryServiceSupport
-from bq_data_access.v2.data_access import FeatureVectorBigQueryBuilder
-from bq_data_access.v2.oncoprint.oncoprint_view import OncoPrintViewDataBuilder
-from bq_data_access.v2.oncoprint.oncoprint_maf_formatter import OncoPrintMAFDataFormatter
-from bq_data_access.v2.oncoprint_data import OncoPrintDataQueryHandler
-from bq_data_access.v2.feature_id_utils import ProviderClassQueryDescription, FeatureDataTypeHelper
-from bq_data_access.data_types.definitions import FEATURE_ID_TO_TYPE_MAP
-from visualizations.data_access_views_v2 import get_confirmed_project_ids_for_cohorts, get_public_program_name_set_for_cohorts
+from django.conf import settings
+from google_helpers.bigquery.cohort_support import BigQuerySupport
+from cohorts.metadata_helpers import *
+from visualizations.data_access_views_v2 import get_confirmed_project_ids_for_cohorts
 
 logger = logging.getLogger('main_logger')
 
-def build_gnab_feature_id(gene_label, genomic_build):
-    """
-    Creates a GNAB v2 feature identifier that will be used to fetch data to be rendered in OncoPrint.
-
-    For more information on GNAB feature IDs, please see:
-    bq_data_access/data_types/gnab.py
-    bq_data_accvess/v2/gnab_data.py
-
-    Params:
-        gene_label: Gene label.
-        genomic_build: "hg19" or "hg38"
-
-    Returns: GNAB v2 feature identifier.
-    """
-    if genomic_build == "hg19":
-        return "v2:GNAB:{gene_label}:tcga_hg19_mc3:Variant_Classification".format(gene_label=gene_label)
-    elif genomic_build == "hg38":
-        return "v2:GNAB:{gene_label}:tcga_hg38:Variant_Classification".format(gene_label=gene_label)
-
-
-def get_program_set_for_oncoprint_plot(cohort_id_array):
+def get_program_set_for_oncoprint(cohort_id_array):
     return {'tcga'}
 
 
@@ -64,102 +36,131 @@ def is_valid_genomic_build(genomic_build_param):
     """
     return genomic_build_param == "HG19" or genomic_build_param == "HG38"
 
-
-def build_empty_data_response(hugo_symbol, cohort_id_array, tables_used):
-    return {
-        # The OncoPrint client side view detects data availability by checking if
-        # the "plot_data" object has the "tracks" key present.
-        'plot_data': {},
-        'hugo_symbol': hugo_symbol,
-        'cohort_id_list': [str(i) for i in cohort_id_array],
-        'removed_row_statistics': [],
-        'bq_tables': list(set(tables_used))
-    }
-
 @login_required
 def oncoprint_view_data(request):
     try:
-        hugo_symbols = request.GET.getlist('hugo_symbola', None)
+        gene_list_str = request.GET.get('gene_list', None)
+        gene_array = gene_list_str.split(',');
         genomic_build = request.GET.get('genomic_build', None)
         cohort_id_param_array = request.GET.getlist('cohort_id', None)
-        cohort_id_array = []
 
+        if not is_valid_genomic_build(genomic_build):
+            return JsonResponse({'error': 'Invalid genomic build'}, status=400)
+
+        cohort_id_array = []
         for cohort_id in cohort_id_param_array:
             try:
                 cohort_id = int(cohort_id)
                 cohort_id_array.append(cohort_id)
             except Exception as e:
                 return JsonResponse({'error': 'Invalid cohort parameter'}, status=400)
-
-        if not is_valid_genomic_build(genomic_build):
-            return JsonResponse({'error': 'Invalid genomic build'}, status=400)
-
-        genomic_build = genomic_build.lower()
-
         if len(cohort_id_array) == 0:
             return JsonResponse({'error': 'No cohorts specified'}, status=400)
 
-        # By extracting info from the cohort, we get the NAMES of the public projects
-        # we need to access (public projects have unique name tags, e.g. tcga).
-        program_set = get_public_program_name_set_for_cohorts(cohort_id_array)
-
-        # Check to see if these programs have data for the requested vectors; if not, there's no reason to plot
-        programs = FeatureDataTypeHelper.get_supported_programs_from_data_type(FEATURE_ID_TO_TYPE_MAP['gnab'])
-        valid_programs = set(programs).intersection(program_set)
-
-        if not len(valid_programs):
-            return JsonResponse({'message': "The chosen cohorts do not contain samples from programs with Gene Mutation data."})
-
-        gnab_feature_ids = []
-
-        for hugo_symbol in hugo_symbols:
-            gnab_feature_ids.append(build_gnab_feature_id(hugo_symbol, genomic_build))
-
-        logger.debug("GNAB feature IDs for OncoPrint: {0}".format(str(gnab_feature_ids)))
-
-        # Get the project IDs these cohorts' samples come from
+        program_set = get_program_set_for_oncoprint(cohort_id_array)
         confirmed_project_ids, user_only_study_ids = get_confirmed_project_ids_for_cohorts(cohort_id_array)
 
-        bqss = BigQueryServiceSupport.build_from_django_settings()
-        fvb = FeatureVectorBigQueryBuilder.build_from_django_settings(bqss)
-        program_set = get_program_set_for_oncoprint_plot(cohort_id_array)
+        if not len(program_set):
+            return JsonResponse(
+                {'message': "The chosen cohorts do not contain samples from programs with Gene Mutation data."})
 
-        extra_provider_params = {
-            "genomic_buid": genomic_build
-        }
+        query_template = """
+                    SELECT
+                      sample_barcode_tumor AS Sample, Hugo_Symbol,
+                      CASE
+                        WHEN Amino_acids IS NOT NULL THEN
+                          CONCAT(
+                            REGEXP_EXTRACT(Amino_acids,r'^([A-Za-z*\-]+)[^A-Za-z*\-]+'),
+                            REGEXP_EXTRACT(Protein_position,r'^([0-9]+)[^0-9]+'),
+                            CASE
+                              WHEN Variant_Classification IN ('Frame_Shift_Del', 'Frame_Shift_Ins') THEN 'fs'
+                              WHEN Variant_Classification IN ('Splice_Site', 'Splice_Region') THEN '_splice'
+                              WHEN Amino_acids LIKE '%/%' THEN REGEXP_EXTRACT(Amino_acids,r'^.*/([A-Za-z*-]+)$')
+                              ELSE '-'
+                            END
+                          )
+                        ELSE
+                          CASE
+                            WHEN Variant_Classification IN ('Splice_Site', 'Splice_Region') THEN 'Splice'
+                            WHEN Variant_Classification = 'IGR' THEN 'Intergenic'
+                            ELSE REPLACE(Variant_Classification,'_',' ')
+                          END
+                      END AS Alteration,
+                      CASE
+                        WHEN (Amino_acids IS NOT NULL AND REGEXP_EXTRACT(Amino_acids,r'^.*/([A-Za-z*-]+)$') = '*') OR Variant_Classification IN ('Frame_Shift_Del', 'Frame_Shift_Ins', 'Splice_Site', 'Splice_Region') THEN 'TRUNC'
+                        WHEN Variant_Classification = 'Nonstop_Mutation' OR (Variant_Classification = 'Missense_Mutation' AND Variant_Type IN ('DEL','INS')) OR (Variant_Classification = 'Translation_Start_Site') THEN 'MISSENSE'
+                        WHEN (Variant_Classification = 'Missense_Mutation' AND Variant_Type IN ('ONP','SNP', 'TNP')) OR (Variant_Classification IN ('In_Frame_Del','In_Frame_Ins')) THEN 'INFRAME'
+                        WHEN Variant_Classification IN ("RNA","IGR", "3\'UTR","3\'Flank","5\'UTR","5\'Flank") THEN
+                          CASE
+                            WHEN {conseq_col} LIKE '%intergenic%' THEN 'INTERGENIC'
+                            WHEN {conseq_col} LIKE '%regulatory%' THEN 'REGULATORY'
+                            WHEN {conseq_col} LIKE '%miRNA%' THEN 'miRNA'
+                            WHEN {conseq_col} LIKE '%transcript%' THEN 'TRANSCRIPT'
+                            WHEN {conseq_col} LIKE '%downstream%' THEN 'DOWNSTREAM'
+                            WHEN {conseq_col} LIKE '%upstream%' THEN 'UPSTREAM'
+                          END
+                        ELSE UPPER(REPLACE(Variant_Classification,'_',' '))
+                      END AS Type
+                    FROM [{bq_data_project_id}:{dataset_name}.{table_name}]
+                    WHERE Variant_Classification NOT IN ('Silent', 'Nonsense_Mutation') {filter_clause}
+                    AND sample_barcode_tumor IN (
+                      SELECT sample_barcode
+                      FROM [{cohort_table}]
+                      WHERE cohort_id IN ({cohort_id_list})
+                      AND (project_id IS NULL{project_clause})
+                      GROUP BY sample_barcode
+                    )
+                    GROUP BY Sample, Hugo_Symbol, Alteration, Type
+                    ORDER BY Sample
+                    ;
+                    
+                """
+        project_id_stmt = ""
+        if confirmed_project_ids is not None:
+            project_id_stmt = ', '.join([str(project_id) for project_id in confirmed_project_ids])
+        project_clause = " OR project_id IN ({})".format(project_id_stmt) if confirmed_project_ids is not None else ""
 
-        async_params = [
-            ProviderClassQueryDescription(OncoPrintDataQueryHandler, gnab_feature_ids, cohort_id_array,
-                                          confirmed_project_ids, program_set, extra_provider_params)]
-        maf_data_result = fvb.get_feature_vectors_tcga_only(async_params, skip_formatting_for_plot=True)
+        gene_list_stm = ''
+        if gene_array is not None:
+            gene_list_stm = ', '.join('\'{0}\''.format(gene) for gene in gene_array)
+        filter_clause = "AND Hugo_Symbol IN ({})".format(gene_list_stm) if gene_list_stm != "" else ""
+        cohort_id_list = ', '.join([str(cohort_id) for cohort_id in cohort_id_array])
 
-        maf_data_vectors = maf_data_result['data']
+        cohort_table_id = "{project_name}:{dataset_id}.{table_id}".format(
+            project_name=settings.BQ_PROJECT_ID,
+            dataset_id=settings.COHORT_DATASET_ID,
+            table_id=settings.BIGQUERY_COHORT_TABLE_ID)
 
-        if len(maf_data_vectors) == 0:
-            return JsonResponse(build_empty_data_response(hugo_symbols, cohort_id_array, maf_data_result['tables_queried']))
+        bq_table_info = BQ_MOLECULAR_ATTR_TABLES['TCGA'][genomic_build]
+        query = query_template.format(bq_data_project_id = settings.BIGQUERY_DATA_PROJECT_NAME,
+                                        dataset_name=bq_table_info['dataset'],
+                                        table_name=bq_table_info['table'],
+                                        conseq_col=("one_consequence" if genomic_build == "hg38" else 'consequence'),
+                                        cohort_table=cohort_table_id,
+                                        filter_clause=filter_clause,
+                                        cohort_id_list=cohort_id_list,
+                                        project_clause=project_clause)
 
-        if len(maf_data_vectors) > 0:
-           oncoprint_data = OncoPrintMAFDataFormatter().format_maf_vector_for_view(
-               maf_data_vectors, cohort_id_array, genomic_build)
+        logger.debug("BQ_QUERY_ONCOPRINT: " + query)
+        results = BigQuerySupport.execute_query_and_fetch_results(query)
+        plot_data =""
 
-        if len(oncoprint_data.maf_vector) == 0:
-            return JsonResponse(build_empty_data_response(hugo_symbols, cohort_id_array, maf_data_result['tables_queried']))
+        if results and len(results) > 0:
+            for row in results:
+                plot_data+="{}\t{}\t{}\t{}\n".format(str(row['f'][0]['v']),str(row['f'][1]['v']),str(row['f'][2]['v']),str(row['f'][3]['v']))
 
-        # Since the gene (hugo_symbol) parameter is part of the GNAB feature ID,
-        # it will be sanity-checked in the OncoPrintMAFDataAccess instance.
-        seqpeek_maf_vector = oncoprint_data.maf_vector
-        seqpeek_cohort_info = oncoprint_data.cohort_info
-        removed_row_statistics_dict = oncoprint_data.removed_row_statistics
-
-        seqpeek_view_data = OncoPrintViewDataBuilder().build_view_data(hugo_symbols,
-                                                                     seqpeek_maf_vector,
-                                                                     seqpeek_cohort_info,
-                                                                     cohort_id_array,
-                                                                     removed_row_statistics_dict,
-                                                                     maf_data_result['tables_queried'])
-        return JsonResponse(seqpeek_view_data)
+            return JsonResponse({
+                'plot_data': plot_data,
+                'gene_list': gene_array,
+                'bq_tables': ["{bq_data_project_id}:{dataset_name}.{table_name}".format(
+                    bq_data_project_id=settings.BIGQUERY_DATA_PROJECT_NAME,
+                    dataset_name=bq_table_info['dataset'],
+                    table_name=bq_table_info['table'])]})
+        else:
+            return JsonResponse(
+                {'message': "The chosen genes and cohorts do not contain any samples with Gene Mutation data."})
 
     except Exception as e:
-        logger.error("[ERROR] In seqpeek_view_data: ")
+        logger.error("[ERROR] In oncoprint_view_data: ")
         logger.exception(e)
         return JsonResponse({'Error': str(e)}, status=500)
