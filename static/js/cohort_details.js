@@ -356,9 +356,9 @@ require([
                     'feature-id': feature_id,
                     'feature-type': 'molecular',
                     'feature-name': feature.data('feature-name'),
-                    'filter': filter,
                     'prog-id': tokenProgId,
                     'prog-name': tokenProgDisplName,
+                    'filter': filter,
                     'class': '',
                     'build': build,
                     'value-id': elem.data('value-id'),
@@ -366,6 +366,7 @@ require([
                 })
                     .attr('data-feature-id', feature_id)
                     .attr('data-value-id', elem.data('value-id'))
+                    .attr('data-filter', filter)
                     .addClass(activeDataTab + '-token mol-filter filter-token filter-combine-'+$('.mut-filter-combine :selected').val());
 
                 token.append(
@@ -622,7 +623,7 @@ require([
         $(this).find('input[type="submit"]').attr("disabled","disabled");
         savingChanges = true;
 
-        if($('.selected-filters .panel-body span').length > 0) {
+        if($('.selected-filters .panel-body span.filter-token').length > 0) {
             form.append('<input type="hidden" name="apply-filters" value="true" />');
         }
 
@@ -630,7 +631,7 @@ require([
             form.append('<input type="hidden" name="apply-name" value="true" />');
         }
 
-        $('.selected-filters .panel-body span').each(function() {
+        $('.selected-filters .panel-body span.filter-token').each(function() {
             var $this = $(this);
             var value = {
                 'feature': { name: $this.data('feature-name'), id: $this.data('feature-id') },
