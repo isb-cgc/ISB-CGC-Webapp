@@ -13,6 +13,11 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 {% endcomment %}
+{% load staticfiles %}
+
+<script type="text/javascript">
+   var static_img_url = "{% static '/img/' %}";
+</script>
 
 <div class="plot panel" id="plot-{{ worksheet.id }}">
     <div class="panel-heading">
@@ -266,6 +271,40 @@
                 </div>
             {% endif %}
         </div>
+
+        <div class="oncoprint_div">
+            <div class="oncoprint">
+                <div class="cbioportal_logo">
+                    <img src="{% static 'img/cbioportal_logo.png' %}">
+                </div>
+                <div class="btn-group btn-group-sm oncoprint-diagram-toolbar-buttons">
+                    <button type="button" class="btn oncoprint_diagram_showmutationcolor_icon" data-hasqtip="5">
+                        <img checked="0" src="{% static 'img/colormutations.svg' %}" alt="icon">
+                    </button>
+                    <button type="button" class="btn oncoprint-diagram-removeUCases-icon" data-hasqtip="3">
+                        <img class="oncoprint-diagram-removeUCases-icon-img" checked="0" src="{% static '/img/unremoveUCases.svg' %}" alt="icon">
+                    </button>
+                    <button type="button" class="btn oncoprint-diagram-removeWhitespace-icon" data-hasqtip="2">
+                        <img class="oncoprint-diagram-removeWhitespace-icon-img" checked="0" src="{% static '/img/unremoveWhitespace.svg' %}" alt="icon">
+                    </button>
+                    <button type="button" class="btn oncoprint-diagram-downloads-icon" data-hasqtip="6">
+                        <img class="oncoprint-diagram-downloads-icon-img" src="{% static '/img/in.svg' %}" alt="icon">
+                    </button>
+                    <button type="button" class="btn oncoprint_zoomout" class="btn" data-hasqtip="0">
+                        <img src="{% static '/img/zoom-out.svg' %}" alt="icon">
+                    </button>
+                    <div class="btn oncoprint_diagram_slider_icon"></div>
+                    <button type="button" class="btn oncoprint_zoomin" class="btn" data-hasqtip="1">
+                        <img src="{% static '/img/zoom-in.svg' %}" alt="icon">
+                    </button>
+                    <button type="button" class="btn oncoprint_zoomtofit" class="btn" data-hasqtip="4">
+                        <img src="{% static '/img/fitalteredcases.svg' %}" alt="icon" preserveaspectratio="none">
+                    </button>
+                </div><br/><br/>
+                <div class="oncoprint_body"></div>
+            </div>
+        </div>
+
         <div class="legend" style="display: none;"></div>
         <button class="resubmit-button btn btn-primary">Submit Plot</button>
         <div class="pairwise-result"></div>

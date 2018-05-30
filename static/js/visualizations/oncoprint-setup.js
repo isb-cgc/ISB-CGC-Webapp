@@ -466,10 +466,12 @@ comparator_utils.numericalClinicalComparator = comparator_utils.makeNumericalCom
 comparator_utils.heatmapComparator = comparator_utils.makeNumericalComparator('profile_data');
 
 
-window.CreateOncoprinterWithToolbar = function (ctr_selector, toolbar_selector) {
+window.CreateOncoprinterWithToolbar = function (plot_selector, _ctr_selector, _toolbar_selector) {
 
-    //$('#oncoprint #everything').show();
-    $('#oncoprint #oncoprint-diagram-toolbar-buttons').show();
+    ctr_selector = $(plot_selector).find(_ctr_selector);
+	toolbar_selector = $(plot_selector).find(_toolbar_selector);
+
+    $(plot_selector).find('.oncoprint .oncoprint-diagram-toolbar-buttons').show();
 
     if (!utils.isWebGLAvailable()) {
         $(ctr_selector).append("<p>"+utils.getUnavailableMessageHTML()+"</p>");
@@ -814,7 +816,7 @@ window.CreateOncoprinterWithToolbar = function (ctr_selector, toolbar_selector) 
 	    updateButton();
 	};
 	var $zoom_slider = (function setUpZoom() {
-	    var zoom_elt = $(toolbar_selector + ' #oncoprint_diagram_slider_icon');
+	    var zoom_elt = $(toolbar_selector).find('.oncoprint_diagram_slider_icon');
 	    var $slider = $('<input>', {
 		type: "range",
 		min: 0,
@@ -830,10 +832,10 @@ window.CreateOncoprinterWithToolbar = function (ctr_selector, toolbar_selector) 
 		},
 	    });
 
-	    $('#oncoprint_zoom_scale_input').on("keypress", function(e) {
+	    $('.oncoprint_zoom_scale_input').on("keypress", function(e) {
 		if (e.keyCode === 13) {
 		    // 'Enter' key
-		    var new_zoom = parseFloat($('#oncoprint_zoom_scale_input').val())/100;
+		    var new_zoom = parseFloat($('.oncoprint_zoom_scale_input').val())/100;
 		    new_zoom = Math.min(1, new_zoom);
 		    new_zoom = Math.max(0, new_zoom);
 		    oncoprint.setHorzZoom(new_zoom);
@@ -841,7 +843,7 @@ window.CreateOncoprinterWithToolbar = function (ctr_selector, toolbar_selector) 
 	    });
 	    oncoprint.onHorzZoom(function() {
 		$zoom_slider.trigger('change');
-		$('#oncoprint_zoom_scale_input').val(Math.round(10000*oncoprint.getHorzZoom())/100);
+		$('.oncoprint_zoom_scale_input').val(Math.round(10000*oncoprint.getHorzZoom())/100);
 	    });
 
 	    appendTo($slider, zoom_elt);
@@ -860,37 +862,19 @@ window.CreateOncoprinterWithToolbar = function (ctr_selector, toolbar_selector) 
 	    $slider.removeAttr('aria-describedby');
 	    setUpHoverEffect($slider);
 
-	    setUpButton($(toolbar_selector + ' #oncoprint_zoomout'), [], ["Zoom out of oncoprint"], null, function () {
+	    setUpButton($(toolbar_selector).find('.oncoprint_zoomout'), [], ["Zoom out of oncoprint"], null, function () {
 		oncoprint.setHorzZoom(oncoprint.getHorzZoom()*zoom_discount);
 	    });
-	    setUpButton($(toolbar_selector + ' #oncoprint_zoomin'), [], ["Zoom in to oncoprint"], null, function () {
+	    setUpButton($(toolbar_selector).find('.oncoprint_zoomin'), [], ["Zoom in to oncoprint"], null, function () {
 		oncoprint.setHorzZoom(oncoprint.getHorzZoom()/zoom_discount);
 	    });
 
 	    return $slider;
 	})();
 
-	(function setUpSortBySelector() {
-	    $(toolbar_selector + ' #by_data_a').click(function () {
-		oncoprint.setSortConfig({'type':'tracks'});
-		State.sorting_by_given_order = false;
-	    });
-	    $(toolbar_selector + ' #alphabetically_first_a').click(function() {
-		oncoprint.setSortConfig({'type':'alphabetical'});
-		State.sorting_by_given_order = false;
-	    });
-	    $(toolbar_selector + ' #user_defined_first_a').click(function() {
-		State.sorting_by_given_order = true;
-		State.patient_order_loaded.then(function() {
-		    oncoprint.setSortConfig({'type':'order', order: State.user_specified_order});
-		});
-	    });
-	})();
-
-
 	(function setUpToggleCellPadding() {
-	    setUpButton($(toolbar_selector + ' #oncoprint-diagram-removeWhitespace-icon'),
-		    ['/static/img/unremoveWhitespace.svg','/static/img/removeWhitespace.svg'],
+	    setUpButton($(toolbar_selector).find('.oncoprint-diagram-removeWhitespace-icon'),
+		    [static_img_url +'unremoveWhitespace.svg',static_img_url +'removeWhitespace.svg'],
 		    ["Remove whitespace between columns", "Show whitespace between columns"],
 		    function () {
 			return (State.cell_padding_on ? 0 : 1);
@@ -901,8 +885,8 @@ window.CreateOncoprinterWithToolbar = function (ctr_selector, toolbar_selector) 
 		    });
 	})();
 	(function setUpHideUnalteredCases() {
-	    setUpButton($(toolbar_selector + ' #oncoprint-diagram-removeUCases-icon'),
-		    ['/static/img/unremoveUCases.svg', '/static/img/removeUCases.svg'],
+	    setUpButton($(toolbar_selector).find('.oncoprint-diagram-removeUCases-icon'),
+		    [static_img_url +'unremoveUCases.svg', static_img_url +'removeUCases.svg'],
 		    ['Hide unaltered cases', 'Show unaltered cases'],
 		    function () {
 			return (State.unaltered_cases_hidden ? 1 : 0);
@@ -917,14 +901,14 @@ window.CreateOncoprinterWithToolbar = function (ctr_selector, toolbar_selector) 
 		    });
 	})();
 	(function setUpZoomToFit() {
-	    setUpButton($(toolbar_selector + ' #oncoprint_zoomtofit'), [], ["Zoom to fit altered cases in screen"], null, function () {
+	    setUpButton($(toolbar_selector).find('.oncoprint_zoomtofit'), [], ["Zoom to fit altered cases in screen"], null, function () {
 		oncoprint.setHorzZoomToFit(State.altered_ids);
 		oncoprint.scrollTo(0);
 	    });
 	})();
 	(function setUpChangeMutationRuleSet() {
-	    $('#oncoprint_diagram_showmutationcolor_icon').show();
-	    $('#oncoprint_diagram_mutation_color').hide();
+	    $('.oncoprint_diagram_showmutationcolor_icon').show();
+	    $('.oncoprint_diagram_mutation_color').hide();
 	    var setGeneticAlterationTracksRuleSet = function(rule_set_params) {
 		var genetic_alteration_track_ids = Object.keys(State.genetic_alteration_tracks);
 		oncoprint.setRuleSet(genetic_alteration_track_ids[0], rule_set_params);
@@ -933,8 +917,8 @@ window.CreateOncoprinterWithToolbar = function (ctr_selector, toolbar_selector) 
 		}
 	    };
 
-	    setUpButton($(toolbar_selector + ' #oncoprint_diagram_showmutationcolor_icon'),
-		    ['/static/img/colormutations.svg', '/static/img/uncolormutations.svg','/static/img/mutationcolorsort.svg'],
+	    setUpButton($(toolbar_selector).find('.oncoprint_diagram_showmutationcolor_icon'),
+		    [static_img_url +'colormutations.svg', static_img_url +'uncolormutations.svg',static_img_url +'mutationcolorsort.svg'],
 		    ['Show all mutations with the same color', 'Color-code mutations but don\'t sort by type', 'Color-code mutations and sort by type', ],
 		    function () {
 			if (State.mutations_colored_by_type && State.sorted_by_mutation_type) {
@@ -971,8 +955,7 @@ window.CreateOncoprinterWithToolbar = function (ctr_selector, toolbar_selector) 
 	})();
 	(function setUpDownload() {
 	    var xml_serializer = new XMLSerializer();
-	    addQTipTo($(toolbar_selector + ' #oncoprint-diagram-downloads-icon'), {
-				//id: "#oncoprint-diagram-downloads-icon-qtip",
+	    addQTipTo($(toolbar_selector).find('.oncoprint-diagram-downloads-icon'), {
 				style: {classes: 'qtip-light qtip-rounded qtip-shadow qtip-lightwhite'},
 				show: {event: "mouseover"},
 				hide: {fixed: true, delay: 100, event: "mouseout"},
