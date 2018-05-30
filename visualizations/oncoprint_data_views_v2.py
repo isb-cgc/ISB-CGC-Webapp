@@ -71,9 +71,9 @@ def oncoprint_view_data(request):
                         WHEN Amino_acids IS NOT NULL THEN
                           CONCAT(
                             REGEXP_EXTRACT(Amino_acids,r'^([A-Za-z*\-]+)[^A-Za-z*\-]+'),
-                            REGEXP_EXTRACT(Protein_position,r'^([0-9]+)[^0-9]+'),
+                            REGEXP_EXTRACT(Protein_position,r'^([0-9]+)[^0-9]*'),
                             CASE
-                              WHEN Variant_Classification IN ('Frame_Shift_Del', 'Frame_Shift_Ins') THEN 'fs'
+                              WHEN Variant_Classification IN ('Frame_Shift_Del', 'Frame_Shift_Ins') OR {conseq_col} LIKE '%frameshift%' THEN 'fs'
                               WHEN Variant_Classification IN ('Splice_Site', 'Splice_Region') THEN '_splice'
                               WHEN Amino_acids LIKE '%/%' THEN REGEXP_EXTRACT(Amino_acids,r'^.*/([A-Za-z*-]+)$')
                               ELSE '-'
@@ -88,8 +88,9 @@ def oncoprint_view_data(request):
                       END AS Alteration,
                       CASE
                         WHEN (Amino_acids IS NOT NULL AND REGEXP_EXTRACT(Amino_acids,r'^.*/([A-Za-z*-]+)$') = '*') OR Variant_Classification IN ('Frame_Shift_Del', 'Frame_Shift_Ins', 'Splice_Site', 'Splice_Region') THEN 'TRUNC'
+                        WHEN Variant_Classification = 'Nonsense_Mutation' AND {conseq_col} LIKE 'stop_gained%' THEN 'TRUNC'
                         WHEN Variant_Classification = 'Nonstop_Mutation' OR (Variant_Classification = 'Missense_Mutation' AND Variant_Type IN ('DEL','INS')) OR (Variant_Classification = 'Translation_Start_Site') THEN 'MISSENSE'
-                        WHEN (Variant_Classification = 'Missense_Mutation' AND Variant_Type IN ('ONP','SNP', 'TNP')) OR (Variant_Classification IN ('In_Frame_Del','In_Frame_Ins')) THEN 'INFRAME'
+                        WHEN (Variant_Classification = 'Missense_Mutation' AND Variant_Type IN ('ONP','SNP', 'TNP')) OR (Variant_Classification IN ('In_Frame_Del','In_Frame_Ins')) OR {conseq_col} LIKE '%inframe%' THEN 'INFRAME'
                         WHEN Variant_Classification IN ("RNA","IGR", "3\'UTR","3\'Flank","5\'UTR","5\'Flank") THEN
                           CASE
                             WHEN {conseq_col} LIKE '%intergenic%' THEN 'INTERGENIC'
@@ -102,7 +103,7 @@ def oncoprint_view_data(request):
                         ELSE UPPER(REPLACE(Variant_Classification,'_',' '))
                       END AS Type
                     FROM [{bq_data_project_id}:{dataset_name}.{table_name}]
-                    WHERE Variant_Classification NOT IN ('Silent', 'Nonsense_Mutation') {filter_clause}
+                    WHERE Variant_Classification NOT IN ('Silent') {filter_clause}
                     AND sample_barcode_tumor IN (
                       SELECT sample_barcode
                       FROM [{cohort_table}]
