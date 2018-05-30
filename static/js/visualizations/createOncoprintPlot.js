@@ -118,21 +118,10 @@ define(['jquery', 'oncoprintjs', 'underscore', 'oncoprint_setup', 'canvas_toBlob
             }
             return true;
         },
-        createOncoprintPlot: function (data) {
-            var updateOncoprinter = CreateOncoprinterWithToolbar('#oncoprint #oncoprint_body', '#oncoprint #oncoprint-diagram-toolbar-buttons');
-            $('#oncoprint_controls').html(_.template($('#main-controls-template').html())());
-
-            /*var gene_order = $('#gene_order').val().trim().split(/\s+/g);
-            if (gene_order.length === 0 || gene_order[0].length === 0) {
-                gene_order = null;
-            }
-
-            var sample_order = $('#sample_order').val().trim().split(/[,\s]+/g);
-            if (sample_order.length === 0 || sample_order[0].length === 0) {
-                sample_order = null;
-            }*/
+        createOncoprintPlot: function (plot_selector, data) {
+            $(plot_selector).html($(plot_selector).siblings('.oncoprint_div').html());
+            var updateOncoprinter = CreateOncoprinterWithToolbar(plot_selector, '.oncoprint .oncoprint_body', '.oncoprint .oncoprint-diagram-toolbar-buttons');
             gene_order = sample_order = null;
-
             if (data.length > 0) {
                 var process_result = processData(data);
                 updateOncoprinter(process_result.data_by_gene, 'sample', process_result.altered_by_gene, sample_order, gene_order);
