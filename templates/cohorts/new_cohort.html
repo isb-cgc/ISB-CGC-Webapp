@@ -137,6 +137,7 @@
                             <p id="selected-filters" class="form-control-static"></p>
                         </div>
                     </div>
+                    <input type="hidden" name="mut_filter_combine" value="AND" />
                     <div class="modal-footer">
                         {% csrf_token %}
                         <input type="submit" value="Create Cohort" class="btn btn-primary" />

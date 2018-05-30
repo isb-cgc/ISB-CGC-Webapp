@@ -241,6 +241,7 @@ MIDDLEWARE = [
     # 'google.appengine.ext.appstats.recording.AppStatsDjangoMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'GenespotRE.checkreqsize_middleware.CheckReqSize',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'adminrestrict.middleware.AdminPagesRestrictMiddleware',
@@ -486,6 +487,9 @@ MANAGED_SERVICE_ACCOUNTS_PATH            = os.environ.get('MANAGED_SERVICE_ACCOU
 # Dataset configuration file path
 DATASET_CONFIGURATION_PATH               = os.environ.get('DATASET_CONFIGURATION_PATH', '')
 
+# DCF Testing flag
+DCF_TEST                                 = bool(os.environ.get('DCF_TEST', 'False') == 'True')
+
 ##############################
 #   Start django-finalware   #
 ##############################
@@ -521,6 +525,9 @@ MAX_FILE_LIST_REQUEST = 65000
 
 # IGV limit to prevent users from trying ot open dozens of files
 MAX_FILES_IGV = 5
+
+# Rough max file size to allow for eg. barcode list upload, to revent triggering RequestDataTooBig
+FILE_SIZE_UPLOAD_MAX = 1950000
 
 #################################
 # caMicroscope Viewer settings

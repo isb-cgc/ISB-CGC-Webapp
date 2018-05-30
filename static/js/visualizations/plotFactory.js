@@ -31,9 +31,13 @@ define([
     'histogram_plot',
     'bar_plot',
     'seqpeek_view/seqpeek_view',
+    'oncoprint_plot',
     'select2',
+    'fileSaver',
+    'cbio_util',
+    'download_util',
 
-], function($, jqueryui, bootstrap, session_security, d3, d3tip, d3textwrap, vizhelpers, scatter_plot, cubby_plot, violin_plot, histogram, bar_graph, seqpeek_view, mock_histogram_data ) {
+], function($, jqueryui, bootstrap, session_security, d3, d3tip, d3textwrap, vizhelpers, scatter_plot, cubby_plot, violin_plot, histogram, bar_graph, seqpeek_view, oncoprint_plot, mock_histogram_data ) {
 
     var VERSION = $('#workbook-build :selected').data('plot-version') || $('.workbook-build-display').data('plot-version');
 
@@ -42,6 +46,7 @@ define([
     var violin_plot_obj  = Object.create(violin_plot, {});
     var histogram_obj    = Object.create(histogram, {});
     var bar_graph_obj    = Object.create(bar_graph, {});
+    var oncoprint_obj    = Object.create(oncoprint_plot, {});
     var helpers          = Object.create(vizhelpers, {});
     var cubby_tip = d3tip()
             .attr('class', 'd3-tip')
@@ -157,9 +162,9 @@ define([
 
         var svg = d3.select(plot_selector)
             .append('svg')
-            .attr('width', width + 10)
+            //.attr('width', width + 10)
+            .attr('width', width)
             .attr('height', height);
-
         var plot = violin_plot_obj.createViolinPlot(svg,
             data,
             height,
@@ -188,11 +193,12 @@ define([
         var max_n = tmp[1];
         var legend = d3.select(legend_selector)
             .append('svg')
-            .attr('width', 850);
+            .attr('width', 800);
 
         var svg = d3.select(plot_selector)
             .append('svg')
-            .attr('width', width + 10)
+            //.attr('width', width + 10)
+            .attr('width', width)
             .attr('height', height);
 
         var plot = violin_plot_obj.createViolinPlot(svg,
@@ -272,6 +278,18 @@ define([
         }
     }
 
+    function generate_oncoprint_plot(plot_selector, view_data) {
+        var plot_data = view_data['plot_data'];
+        var gene_list = view_data['gene_list'];
+        plot_data = plot_data.trim();
+        if (plot_data && oncoprint_obj.isInputValid(plot_data)) {
+            oncoprint_obj.createOncoprintPlot(plot_selector, plot_data);
+        }
+        else {
+            var message = "The selected cohorts have no somatic mutations in the gene ";
+            $(plot_selector).html('<p>'+message + '<b>' + gene_list.join(', ') + '</b></p>');
+        }
+    }
     /*
         Generate url for gathering data
      */
@@ -316,6 +334,22 @@ define([
 
 
         return seqpeek_url;
+    }
+
+    // Generate url for gathering data for a OncoPrint plot
+    function get_oncoprint_data_url(base_url, cohorts, gene_list){
+        var cohort_str = '';
+        for (var i = 0; i < cohorts.length; i++) {
+            if (i == 0) {
+                cohort_str += 'cohort_id=' + cohorts[i];
+            } else {
+                cohort_str += '&cohort_id=' + cohorts[i];
+            }
+        }
+        var oncoprintUrl = base_url + '/visualizations/oncoprint_data_plot/' + VERSION + '?' + cohort_str;
+        oncoprintUrl += "&gene_list=" + gene_list.join(",")
+            + (VERSION == 'v2' ? "&genomic_build=" + $('.workbook-build-display').data('build') : '');
+        return oncoprintUrl;
     }
 
     function configure_pairwise_display(element, data){
@@ -424,7 +458,9 @@ define([
             args.color_by_sel && $(args.legend_selector).show();
 
         } else if (args.type == "SeqPeek" && !data.message) {
-            visualization = generate_seqpeek_plot(args.plot_selector, args.legend_selector, data);
+            generate_seqpeek_plot(args.plot_selector, args.legend_selector, data);
+        } else if (args.type == "OncoPrint" && !data.message) {
+            generate_oncoprint_plot(args.plot_selector, data);
         } else {
             // No data returned
             d3.select(args.plot_selector)
@@ -491,6 +527,9 @@ define([
         var plot_data_url;
         if (args.type == "SeqPeek") {
             plot_data_url = get_seqpeek_data_url(BASE_URL, args.cohorts, args.gene_label, VERSION);
+        }
+        else if(args.type == "OncoPrint"){
+            plot_data_url = get_oncoprint_data_url(BASE_URL, args.cohorts, args.gene_list, VERSION);
         }
         else {
             plot_data_url = get_data_url(BASE_URL, args.cohorts, args.x, args.y, args.color_by, args.logTransform, VERSION);

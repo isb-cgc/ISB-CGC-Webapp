@@ -71,62 +71,78 @@
     <section class="panel panel-default">
         <div class="panel-heading">
             <h3 class="panel-title">
-                <a href="{% url 'workbooks' %}">Saved Workbooks ({{ workbooks.count }})</a></h3>
+                <a href="{% url 'workbooks' %}">Saved Workbooks ({{ workbooks.count }})</a>
+            </h3>
+            <div class="min-max">
+                <a data-toggle="collapse" href="#workbook-panel"><i class="show fa fa-angle-double-down"></i></a>
+            </div>
         </div>
-        <div class="panel-body">
-            <p>Workbooks store the Analyses you create -- and their related data.</p>
-            <ul class="table-list">
-            {% if workbooks.count > 0 %}
-                {% for workbook in workbooks|slice:':6'  %}
-                    <li>
-                        <a href="{% url 'workbook_detail' workbook.id %}" title="{{ workbook.name|title|wrap_text }}">
-                            <div class="list-main">
-                                <h5 class="list-title">{{ workbook.name }}</h5>
-                                <p>{{ workbook.description }}</p>
-                            </div>
-                            <div class="list-info">
-                               {{ workbook.last_date_saved|date:'M d, Y, g:i a' }}
-                            </div>
-                        </a>
-                    </li>
-                {% endfor %}
-                {% if workbooks.count > 6 %}
-                <a class="btn btn-link" href="{% url 'workbooks' %}">View All</a>
+        <div id="workbook-panel" class="panel panel-collapse collapse in" aria-expanded="true">
+            <div class="panel-body">
+                <p>Workbooks store the analyses you create, and their related data.</p>
+                <ul class="table-list">
+                {% if workbooks.count > 0 %}
+                    {% for workbook in workbooks|slice:':6'  %}
+                        <li>
+                            <a href="{% url 'workbook_detail' workbook.id %}" title="{{ workbook.name|title|wrap_text }}">
+                                <div class="list-main">
+                                    <h5 class="list-title">{{ workbook.name }}</h5>
+                                    <p>{{ workbook.description }}</p>
+                                </div>
+                                <div class="list-info">
+                                   {{ workbook.last_date_saved|date:'M d, Y, g:i a' }}
+                                </div>
+                            </a>
+                        </li>
+                    {% endfor %}
+                    {% if workbooks.count > 6 %}
+                    <a class="btn btn-link" href="{% url 'workbooks' %}">View All</a>
+                    {% endif %}
                 {% endif %}
-            {% endif %}
-            </ul>
-        </div>
-        <div class="panel-footer">
-            <div style="height:40px">
-                <form id="create-workbook" method="POST" action="{% url 'workbook_create' %}" class="pull-left">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-link" ><i class="fa fa-plus"></i>Create a New Workbook</button>
-                </form>
-                {#            <a class="btn btn-link" href="{% url 'workbook_samples' %}">Sample Workbooks</a>#}
+                </ul>
+            </div>
+            <div class="panel-footer">
+                <div style="height:40px">
+                    <form id="create-workbook" method="POST" action="{% url 'workbook_create' %}" class="pull-left">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-link" ><i class="fa fa-plus"></i>Create a New Workbook</button>
+                    </form>
+                    {#            <a class="btn btn-link" href="{% url 'workbook_samples' %}">Sample Workbooks</a>#}
+                </div>
             </div>
         </div>
     </section>
+
     <div class="row">
         <div class="col-md-6">
-
             <section class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">
-                    <a href="{% url 'cohort_list' %}">Saved Cohorts ({{ cohorts.count }})</a></h3>
+                        <a href="{% url 'cohort_list' %}">Saved Cohorts ({{ cohorts.count }})</a>
+                    </h3>
+                    <div class="min-max">
+                        <a data-toggle="collapse" href="#cohorts-panel"><i class="show fa fa-angle-double-down"></i></a>
+                    </div>
                 </div>
-                <div class="panel-body">
+                <div id="cohorts-panel" class="panel panel-collapse collapse in" aria-expanded="true">
+                    <div class="panel-body">
                     {% if cohorts.count > 0 %}
                     <ul class="table-list">
                         {% for cohort in cohorts|slice:':6' %}
                            <li>
                                <a href="{% url 'cohort_details' cohort.id %}">
-                                   <div class="list-main">
+                                   <div class="list-main col-3">
                                        <span class="list-title" title="{{ cohort.name|wrap_text }}">{{ cohort.name }}</span>
                                    </div>
-                                   <div class="list-info">
-                                       <span>{{ cohort.last_date_saved|date:'M d, Y, g:i a' }}</span>
+                               </a>
+                               <a href="{% url 'cohort_filelist' cohort.id %}">
+                                   <div class="list-link">
+                                       <span class="list-title" title="Browse this cohort's file manifest">File browser</span>
                                    </div>
                                </a>
+                               <div class="list-info col-3">
+                                   <span>{{ cohort.last_date_saved|date:'M d, Y, g:i a' }}</span>
+                               </div>
                            </li>
                         {% endfor %}
                         {% if cohorts.count > 6 %}
@@ -138,6 +154,7 @@
                     {% endif %}
                     Create a Cohort: <a href="{% url 'cohort' %}" class="btn btn-link">Filters</a>/<a href="{% url 'cohort_barcodes' %}" class="btn btn-link">Barcodes</a>
                 </div>
+                </div>
             </section>
         </div>
         <div class="col-md-6">
@@ -145,9 +162,14 @@
             <section class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">
-                        <a href="{% url 'genes' %}">Gene & miRNA Favorites ({{ gene_fave_count }})</a></h3>
+                        <a href="{% url 'genes' %}">Gene & miRNA Favorites ({{ gene_fave_count }})</a>
+                    </h3>
+                    <div class="min-max">
+                        <a data-toggle="collapse" href="#gene-fave-panel"><i class="show fa fa-angle-double-up"></i></a>
+                    </div>
                 </div>
-                <div class="panel-body">
+                <div id="gene-fave-panel" class="panel panel-collapse collapse" aria-expanded="false">
+                    <div class="panel-body">
                     {% if gene_fave_count > 0 %}
                     <ul class="table-list">
                         {% for genefavorite in genefaves_sorted|slice:':6' %}
@@ -171,15 +193,21 @@
                     {% endif %}
                     <a href="{% url 'gene_fav_create' %}" class="nocap btn btn-link">Create Gene & miRNA Favorites</a>
                 </div>
+                </div>
             </section>
             {% endwith %}
             {% with varfave_count=varfaves.count %}
             <section class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">
-                        <a href="{% url 'variables' %}">Variable Favorites ({{ varfave_count }})</a></h3>
+                        <a href="{% url 'variables' %}">Variable Favorites ({{ varfave_count }})</a>
+                    </h3>
+                    <div class="min-max">
+                        <a data-toggle="collapse" href="#var-faves-panel"><i class="show fa fa-angle-double-up"></i></a>
+                    </div>
                 </div>
-                <div class="panel-body">
+                <div id="var-faves-panel" class="panel panel-collapse collapse" aria-expanded="false">
+                    <div class="panel-body">
                     {% if varfave_count > 0 %}
                     <ul class="table-list">
                         {% for variablefavorite in varfaves|sort_last_save|slice:':6' %}
@@ -203,6 +231,7 @@
                     {% endif %}
                     <a href="{% url 'variable_fav_create' %}" class="btn btn-link">Create Variable Favorites</a>
                 </div>
+                </div>
             </section>
             {% endwith %}
         </div>
@@ -216,30 +245,36 @@
             <section class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">
-                        <a href="{% url 'programs' %}">Saved Programs ({{ program_count }})</a></h3>
+                        <a href="{% url 'programs' %}">Saved Programs ({{ program_count }})</a>
+                    </h3>
+                    <div class="min-max">
+                        <a data-toggle="collapse" href="#programs-panel"><i class="show fa fa-angle-double-up"></i></a>
+                    </div>
                 </div>
-                <div class="panel-body">
-                    <p>You can upload data from your own research programs.</p>
-                    {% if program_count > 0 %}
-                    <ul class="table-list">
-                        {% for program in programs|slice:':6' %}
-                           <li>
-                               <a href="{% url 'program_detail' program.id %}">
-                                   <p class="list-title">{{ program.name }}</p>
-                                   {% if program.description %}
-                                    <p>{{ program.description|slice:':65' }}{% if program.description|length > 65 %}&hellip;{% endif %}</p>
-                                   {% endif %}
-                               </a>
-                           </li>
-                        {% endfor %}
-                        {% if program_count > 6 %}
-                            <a class="btn btn-link" href="{% url 'programs' %}">View All</a>
+                <div id="programs-panel" class="panel panel-collapse collapse" aria-expanded="false">
+                    <div class="panel-body">
+                        <p>You can upload data from your own research programs.</p>
+                        {% if program_count > 0 %}
+                        <ul class="table-list">
+                            {% for program in programs|slice:':6' %}
+                               <li>
+                                   <a href="{% url 'program_detail' program.id %}">
+                                       <p class="list-title">{{ program.name }}</p>
+                                       {% if program.description %}
+                                        <p>{{ program.description|slice:':65' }}{% if program.description|length > 65 %}&hellip;{% endif %}</p>
+                                       {% endif %}
+                                   </a>
+                               </li>
+                            {% endfor %}
+                            {% if program_count > 6 %}
+                                <a class="btn btn-link" href="{% url 'programs' %}">View All</a>
+                            {% endif %}
+                        </ul>
                         {% endif %}
-                    </ul>
-                    {% endif %}
-                </div>
-                <div class="panel-footer">
-                    <a href="{% url 'program_upload' %}" class="btn btn-link"><i class="fa fa-cloud-upload"></i>Upload Program Data</a>
+                    </div>
+                    <div class="panel-footer">
+                        <a href="{% url 'program_upload' %}" class="btn btn-link"><i class="fa fa-cloud-upload"></i>Upload Program Data</a>
+                    </div>
                 </div>
             </section>
             {% endwith %}
@@ -260,6 +295,9 @@
     {% endif %}
 
 </div>
+    <script type="text/javascript">
+        var USER_SETTINGS_KEY = 'user_' + {{ request.user.id }} + '_dash_settings';
+    </script>
 {% endblock %}
 
 {% block js_file %}{% static 'js/dashboard.js' %}{% endblock %}
