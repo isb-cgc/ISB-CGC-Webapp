@@ -148,18 +148,18 @@ var tooltip_utils = {
 		var ret = $('<span>');
 		ret.append('<b>'+d.amino_acid_change+'</b>');
 		if (d.cancer_hotspots_hotspot) {
-		    ret.append('<img src="/static/img/cancer-hotspots.svg" title="Hotspot" style="height:11px; width:11px; margin-left:3px"/>');
+		    //ret.append('<img src="/static/img/cancer-hotspots.svg" title="Hotspot" style="height:11px; width:11px; margin-left:3px"/>');
 		}
 		if (d.oncokb_oncogenic) {
-		    ret.append('<img src="/static/img/oncokb-oncogenic-1.svg" title="'+d.oncokb_oncogenic+'" style="height:11px; width:11px;margin-left:3px"/>');
+		    //ret.append('<img src="/static/img/oncokb-oncogenic-1.svg" title="'+d.oncokb_oncogenic+'" style="height:11px; width:11px;margin-left:3px"/>');
 		}
 		//If we have data for the binary custom driver annotations, append an icon to the tooltip with the annotation information
 		if (d.driver_filter && showBinaryCustomDriverAnnotation === "true") {
-		    ret.append('<img src="/static/img/driver.png" title="'+d.driver_filter+': '+d.driver_filter_annotation+'" alt="driver filter" style="height:11px; width:11px;margin-left:3px"/>');
+		    //ret.append('<img src="/static/img/driver.png" title="'+d.driver_filter+': '+d.driver_filter_annotation+'" alt="driver filter" style="height:11px; width:11px;margin-left:3px"/>');
 		}
 		//If we have data for the class custom driver annotations, append an icon to the tooltip with the annotation information
 		if (d.driver_tiers_filter && showTiersCustomDriverAnnotation === "true") {
-		    ret.append('<img src="/static/img/driver_tiers.png" title="'+d.driver_tiers_filter+': '+d.driver_tiers_filter_annotation+'" alt="driver tiers filter" style="height:11px; width:11px;margin-left:3px"/>');
+		    //ret.append('<img src="/static/img/driver_tiers.png" title="'+d.driver_tiers_filter+': '+d.driver_tiers_filter_annotation+'" alt="driver tiers filter" style="height:11px; width:11px;margin-left:3px"/>');
 		}
 		return ret;
 	    });
