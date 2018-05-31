@@ -13,6 +13,9 @@ var MUT_COLOR_TRUNC_PASSENGER = '#708090';
 var MUT_COLOR_FUSION = '#8B00C9';
 var MUT_COLOR_PROMOTER = '#FFA942';
 var MUT_COLOR_GERMLINE = '#FFFFFF';
+var MUT_COLOR_INTRON = '#f922a3';
+var MUT_COLOR_REGULATORY = '#28e3ed';
+
 
 var PROT_COLOR_UP = "#9224A6";
 var PROT_COLOR_DOWN = "#00BCD4";
@@ -260,6 +263,30 @@ window.geneticrules.genetic_rule_set_different_colors_no_recurrence = $.extend({
 		    }],
 		legend_label: 'Truncating Mutation',
 	    },
+	    'regulatory,regulatory_rec': {
+		shapes: [{
+			'type': 'rectangle',
+			'fill': MUT_COLOR_REGULATORY,
+			'x': '0%',
+			'y': '0%',
+			'width': '100%',
+			'height': '33.33%',
+			'z': 6,
+		    }],
+		legend_label: 'Regulatory Region Mutation'
+	    },
+	    'intron,intron_rec': {
+		shapes: [{
+			'type': 'rectangle',
+			'fill': MUT_COLOR_INTRON,
+			'x': '0%',
+			'y': '66.67%',
+			'width': '100%',
+			'height': '33.33%',
+			'z': 6,
+		    }],
+		legend_label: 'Regulatory Region Mutation'
+	    },
 	    'inframe,inframe_rec': {
 		shapes: [{
 			'type': 'rectangle',
@@ -294,6 +321,18 @@ window.geneticrules.genetic_rule_set_different_colors_recurrence = $.extend({}, 
 		shapes: [{
 			'type': 'rectangle',
 			'fill': MUT_COLOR_PROMOTER,
+			'x': '0%',
+			'y': '33.33%',
+			'width': '100%',
+			'height': '33.33%',
+			'z': 6,
+		    }],
+		legend_label: 'Promoter Mutation'
+	    },
+	    'regulatory,regulatory_rec': {
+		shapes: [{
+			'type': 'rectangle',
+			'fill': MUT_COLOR_REGULATORY,
 			'x': '0%',
 			'y': '33.33%',
 			'width': '100%',
