@@ -69,7 +69,7 @@ def oncoprint_view_data(request):
                     SELECT
                       sample_barcode_tumor AS Sample, Hugo_Symbol,
                       CASE
-                        WHEN Protein_position IS NOT NULL
+                        WHEN Protein_position IS NOT NULL THEN
                           CONCAT(
                             COALESCE(REGEXP_EXTRACT(Amino_acids,r'^([A-Za-z*\-]+)'),'-'),
                             REGEXP_EXTRACT(Protein_position,r'^([0-9]+)'),
