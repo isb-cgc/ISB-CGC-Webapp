@@ -20,7 +20,7 @@ test:
     - echo 'No Tests'
 deployment:
   staging:
-    branch: [master]
+    branch: [isb-cgc-test]
     commands:
       - sudo -E rm -rf ./lib
-      - sudo -E ./google-cloud-sdk/bin/gcloud app deploy --quiet
+      - sudo -E ./google-cloud-sdk/bin/gcloud app deploy --quiet --log-http

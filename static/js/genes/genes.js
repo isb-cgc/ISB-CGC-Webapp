@@ -44,6 +44,11 @@ require([
 ], function($, jqueryui, bootstrap, session_security, Bloodhound, typeahead, _, base) {
     'use strict';
 
+    // Doesn't work for Chrome, may work for other browsers
+    $('.cancel-edit').on('click', function() {
+        window.onbeforeunload = null
+    });
+
     var geneListField = $('#paste-in-genes');
     var geneFavs = (gene_fav) ? gene_fav.genes : [];
 

@@ -88,7 +88,6 @@ require([
     'geneticrules',
     'jqueryqtip'
 ], function ($, plot_factory, vizhelpers, _, base) {
-
     var savingComment = false;
 
     var plotReady = {

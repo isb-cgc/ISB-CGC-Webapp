@@ -11,7 +11,7 @@
             <div class="nav navbar-left">
                 <ul class="">
                     <li class="navbar-item">
-                        {% if user.is_authenticated %}
+                        {% if user.is_authenticated and not user|is_superuser %}
                              <a href="{% url 'dashboard' %}" title="Dashboard" >
                         {%  else %}
                             <a href="{% url 'landing_page' %}" title="Home Page" >
@@ -44,7 +44,7 @@
             </div>
 
             <div class="nav navbar-right">
-                {% if user.is_authenticated %}
+                {% if user.is_authenticated and not user|is_superuser %}
                     <div id="user-login" class="navbar-item">
                         <a class="avatar-link" href="{% url 'user_detail' user.id %}">
                             <img src="{{ user.socialaccount_set.all.0.get_avatar_url }}" width="32" height="32" alt="Avatar Link to User Details">
@@ -76,7 +76,7 @@
             </div>
         </div>
     </nav>
-    {% if user.is_authenticated %}
+    {% if user.is_authenticated and not user|is_superuser %}
     <nav class="nav subnav collapse" role="navigation" id="subnav">
         <ul class="container">
             {% if user.is_authenticated %}
