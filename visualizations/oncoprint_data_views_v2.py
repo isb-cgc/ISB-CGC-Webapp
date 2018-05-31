@@ -65,17 +65,18 @@ def oncoprint_view_data(request):
                 {'message': "The chosen cohorts do not contain samples from programs with Gene Mutation data."})
 
         query_template = """
+                    #standardSQL
                     SELECT
                       sample_barcode_tumor AS Sample, Hugo_Symbol,
                       CASE
-                        WHEN Amino_acids IS NOT NULL THEN
+                        WHEN Protein_position IS NOT NULL
                           CONCAT(
-                            REGEXP_EXTRACT(Amino_acids,r'^([A-Za-z*\-]+)[^A-Za-z*\-]+'),
-                            REGEXP_EXTRACT(Protein_position,r'^([0-9]+)[^0-9]*'),
+                            COALESCE(REGEXP_EXTRACT(Amino_acids,r'^([A-Za-z*\-]+)'),'-'),
+                            REGEXP_EXTRACT(Protein_position,r'^([0-9]+)'),
                             CASE
-                              WHEN Variant_Classification IN ('Frame_Shift_Del', 'Frame_Shift_Ins') OR {conseq_col} LIKE '%frameshift%' THEN 'fs'
+                              WHEN Variant_Classification IN ('Frame_Shift_Del', 'Frame_Shift_Ins') OR {conseq_col} LIKE '%frameshift%' THEN '_fs'
                               WHEN Variant_Classification IN ('Splice_Site', 'Splice_Region') THEN '_splice'
-                              WHEN Amino_acids LIKE '%/%' THEN REGEXP_EXTRACT(Amino_acids,r'^.*/([A-Za-z*-]+)$')
+                              WHEN Amino_acids LIKE '%/%' THEN REGEXP_EXTRACT(Amino_acids,r'^.*/([A-Za-z*-]+)')
                               ELSE '-'
                             END
                           )
@@ -102,11 +103,11 @@ def oncoprint_view_data(request):
                           END
                         ELSE UPPER(REPLACE(Variant_Classification,'_',' '))
                       END AS Type
-                    FROM [{bq_data_project_id}:{dataset_name}.{table_name}]
+                    FROM `{bq_data_project_id}.{dataset_name}.{table_name}`
                     WHERE Variant_Classification NOT IN ('Silent') {filter_clause}
                     AND sample_barcode_tumor IN (
                       SELECT sample_barcode
-                      FROM [{cohort_table}]
+                      FROM `{cohort_table}`
                       WHERE cohort_id IN ({cohort_id_list})
                       AND (project_id IS NULL{project_clause})
                       GROUP BY sample_barcode
@@ -127,8 +128,8 @@ def oncoprint_view_data(request):
         filter_clause = "AND Hugo_Symbol IN ({})".format(gene_list_stm) if gene_list_stm != "" else ""
         cohort_id_list = ', '.join([str(cohort_id) for cohort_id in cohort_id_array])
 
-        cohort_table_id = "{project_name}:{dataset_id}.{table_id}".format(
-            project_name=settings.BQ_PROJECT_ID,
+        cohort_table_id = "{project_name}.{dataset_id}.{table_id}".format(
+            project_name=settings.BIGQUERY_PROJECT_NAME,
             dataset_id=settings.COHORT_DATASET_ID,
             table_id=settings.BIGQUERY_COHORT_TABLE_ID)
 
