@@ -22,7 +22,7 @@ jspdf: 'libs/jspdf.min',
 jspdf_plugin_addimage: 'libs/jspdf.plugin.addimage',
 png_support: 'libs/png_support',*/
 define(['jquery', 'oncoprintjs', 'underscore', 'oncoprint_setup', 'canvas_toBlob', 'zlibs', 'png'], function ($, oncoprintjs, _) {
-    var processData = function (str) {
+    var processData = function (array) {
         // Need to mock webservice data to be compatible with tooltip
         var gene_to_sample_to_datum = {};
         var cna = {'AMP': 'amp', 'GAIN': 'gain', 'HETLOSS': 'hetloss', 'HOMDEL': 'homdel'};
@@ -31,7 +31,7 @@ define(['jquery', 'oncoprintjs', 'underscore', 'oncoprint_setup', 'canvas_toBlob
         var mrna_int = {'UP': 1, 'DOWN': -1};
         var prot = {'PROT-UP': 'up', 'PROT-DOWN': 'down'};
         var prot_int = {'PROT-UP': 1, 'PROT-DOWN': -1};
-        var lines = str.split('\n');
+        var lines = array;
         var samples = {};
         for (var i = 0; i < lines.length; i++) {
             var sline = lines[i].trim().split(/\s+/);
@@ -106,8 +106,8 @@ define(['jquery', 'oncoprintjs', 'underscore', 'oncoprint_setup', 'canvas_toBlob
         return {'data_by_gene': data_by_gene, 'altered_by_gene': altered_by_gene};
     };
     return {
-        isInputValid: function (str) {
-            var lines = _.map(str.split('\n'), function (x) {
+        isInputValid: function (array) {
+            var lines = _.map(array, function (x) {
                 return x.trim();
             });
             for (var i = 0; i < lines.length; i++) {

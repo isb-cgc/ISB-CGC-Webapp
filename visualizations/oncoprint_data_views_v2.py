@@ -69,10 +69,10 @@ def oncoprint_view_data(request):
                     SELECT
                       sample_barcode_tumor AS Sample, Hugo_Symbol,
                       CASE
-                        WHEN Protein_position IS NOT NULL THEN
+                        WHEN Protein_position IS NOT NULL AND Protein_position NOT LIKE '-/%' THEN
                           CONCAT(
                             COALESCE(REGEXP_EXTRACT(Amino_acids,r'^([A-Za-z*\-]+)'),'-'),
-                            REGEXP_EXTRACT(Protein_position,r'^([0-9]+)'),
+                            COALESCE(REGEXP_EXTRACT(Protein_position,r'^([0-9]+)'), '-'),
                             CASE
                               WHEN Variant_Classification IN ('Frame_Shift_Del', 'Frame_Shift_Ins') OR {conseq_col} LIKE '%frameshift%' THEN '_fs'
                               WHEN Variant_Classification IN ('Splice_Site', 'Splice_Region') THEN '_splice'
@@ -82,9 +82,10 @@ def oncoprint_view_data(request):
                           )
                         ELSE
                           CASE
-                            WHEN Variant_Classification IN ('Splice_Site', 'Splice_Region') THEN 'Splice'
+                            WHEN {conseq_col} LIKE '%splice_%_variant%' THEN REGEXP_EXTRACT({conseq_col},r'^(splice_[^_]+_variant)')
+                            WHEN {conseq_col} LIKE '%intron_variant%' THEN 'intron_variant'
                             WHEN Variant_Classification = 'IGR' THEN 'Intergenic'
-                            ELSE REPLACE(Variant_Classification,'_',' ')
+                            ELSE Variant_Classification
                           END
                       END AS Alteration,
                       CASE
@@ -100,8 +101,9 @@ def oncoprint_view_data(request):
                             WHEN {conseq_col} LIKE '%transcript%' THEN 'TRANSCRIPT'
                             WHEN {conseq_col} LIKE '%downstream%' THEN 'DOWNSTREAM'
                             WHEN {conseq_col} LIKE '%upstream%' THEN 'UPSTREAM'
+                            ELSE UPPER(Variant_Classification)
                           END
-                        ELSE UPPER(REPLACE(Variant_Classification,'_',' '))
+                        ELSE UPPER(Variant_Classification)
                       END AS Type
                     FROM `{bq_data_project_id}.{dataset_name}.{table_name}`
                     WHERE Variant_Classification NOT IN ('Silent') {filter_clause}
@@ -145,11 +147,11 @@ def oncoprint_view_data(request):
 
         logger.debug("BQ_QUERY_ONCOPRINT: " + query)
         results = BigQuerySupport.execute_query_and_fetch_results(query)
-        plot_data =""
+        plot_data = []
 
         if results and len(results) > 0:
             for row in results:
-                plot_data+="{}\t{}\t{}\t{}\n".format(str(row['f'][0]['v']),str(row['f'][1]['v']),str(row['f'][2]['v']),str(row['f'][3]['v']))
+                plot_data.append("{}\t{}\t{}\t{}".format(str(row['f'][0]['v']),str(row['f'][1]['v']),str(row['f'][2]['v']),str(row['f'][3]['v'])))
 
             return JsonResponse({
                 'plot_data': plot_data,

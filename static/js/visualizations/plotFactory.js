@@ -281,7 +281,6 @@ define([
     function generate_oncoprint_plot(plot_selector, view_data) {
         var plot_data = view_data['plot_data'];
         var gene_list = view_data['gene_list'];
-        plot_data = plot_data.trim();
         if (plot_data && oncoprint_obj.isInputValid(plot_data)) {
             oncoprint_obj.createOncoprintPlot(plot_selector, plot_data);
         }
