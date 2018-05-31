@@ -327,11 +327,11 @@ var comparator_utils = {
 		    return ({'true': 1, 'false': 2})[!!m];
 		}
 	    } else if (!distinguish_mutation_types && distinguish_recurrent) {
-		_order = makeComparatorMetric([['inframe_rec', 'missense_rec', 'promoter_rec', 'trunc_rec', 'inframe', 'promoter', 'trunc',], 'missense', undefined]);
+		_order = makeComparatorMetric([['inframe_rec', 'missense_rec', 'promoter_rec', 'trunc_rec', 'inframe', 'promoter', 'regulatory', 'intron', 'trunc'], 'missense', undefined]);
 	    } else if (distinguish_mutation_types && !distinguish_recurrent) {
-		_order = makeComparatorMetric([['trunc', 'trunc_rec'], ['inframe','inframe_rec'], ['promoter', 'promoter_rec'], ['missense', 'missense_rec'], undefined, true, false]);
+		_order = makeComparatorMetric([['trunc', 'trunc_rec'], ['inframe','inframe_rec'], ['promoter', 'promoter_rec'], ['missense', 'missense_rec'], ['intron'], ['regulatory'], undefined, true, false]);
 	    } else if (distinguish_mutation_types && distinguish_recurrent) {
-		_order = makeComparatorMetric(['trunc_rec', 'inframe_rec', 'promoter_rec', 'missense_rec', 'trunc', 'inframe', 'promoter', 'missense',  undefined, true, false]);
+		_order = makeComparatorMetric(['trunc_rec', 'inframe_rec', 'promoter_rec', 'missense_rec', 'trunc', 'inframe', 'promoter', 'missense', 'regulatory', 'intron', undefined, true, false]);
 	    }
 	    return function(m) {
 		return _order[m];
