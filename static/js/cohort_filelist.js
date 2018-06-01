@@ -324,7 +324,9 @@ require([
         $.ajax({
             url: url,
             success: function (data) {
-                update_download_link(active_tab, data.total_file_count);
+                if(do_filter_count) {
+                    update_download_link(active_tab, data.total_file_count);
+                }
                 update_table_display(active_tab,data,do_filter_count);
             },
             error: function(e) {
