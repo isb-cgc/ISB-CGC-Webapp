@@ -462,19 +462,18 @@ require([
             var thisCheck = $(tab_selector).find('.filelist-panel input[value="'+val+'"]');
             selIgvFiles[thisCheck.attr('data-type')] && selIgvFiles[thisCheck.attr('data-type')][thisCheck.attr('value')] && thisCheck.attr('checked', true);
         }
-
-            var columns_display = tab_columns_display[active_tab];
-            var column_toggle_html = "";
-            for (var i in columns_display) {
-                column_toggle_html += "<a class=\'column_toggle_button " + (columns_display[i][1] ? '' : 'column_hide') + "\'>" + columns_display[i][0] + "</a>";
-                if(columns_display[i][1]) {
-                    $(tab_selector).find('table.file-list-table th:nth-child(' + (parseInt(i) + 1) + '), table.file-list-table td:nth-child(' + (parseInt(i) + 1) + ')').removeClass('hide');
-                }
-                else
-                    $(tab_selector).find('table.file-list-table th:nth-child('+(parseInt(i)+1)+'), table.file-list-table td:nth-child('+(parseInt(i)+1)+')').addClass('hide');
-            }
-            $(tab_selector).find('.column-toggle').html(column_toggle_html);
         }
+        var columns_display = tab_columns_display[active_tab];
+        var column_toggle_html = "";
+        for (var i in columns_display) {
+            column_toggle_html += "<a class=\'column_toggle_button " + (columns_display[i][1] ? '' : 'column_hide') + "\'>" + columns_display[i][0] + "</a>";
+            if (columns_display[i][1]) {
+                $(tab_selector).find('table.file-list-table th:nth-child(' + (parseInt(i) + 1) + '), table.file-list-table td:nth-child(' + (parseInt(i) + 1) + ')').removeClass('hide');
+            }
+            else
+                $(tab_selector).find('table.file-list-table th:nth-child(' + (parseInt(i) + 1) + '), table.file-list-table td:nth-child(' + (parseInt(i) + 1) + ')').addClass('hide');
+        }
+        $(tab_selector).find('.column-toggle').html(column_toggle_html);
 
         // If we're at the max, disable all checkboxes which are not currently checked
         selIgvFiles.count() >= SEL_IGV_FILE_MAX && $(tab_selector).find('.filelist-panel input.igv.accessible[type="checkbox"]:not(:checked)').attr('disabled',true);
