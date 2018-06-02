@@ -33,8 +33,19 @@
         <div class="bq-tables" style="display: none;"><h5>BigQuery Table(s) Used</h5><ul class="bq-table-display"></ul></div>
         <div id="missing-plot-reqs-alert" class="alert alert-warning alert-dismissable" style="display: none;">
             <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-            Some of the settings required to produce a plot are missing. You can check the current plot settings using the <b>Edit Analysis Settings</b> link.
-            Ensure that an Analysis Type and any relevant axis variables have been selected, and that at least one Cohort is chosen.
+            <h5>Plot Settings Incomplete</h5>
+            Some of the settings required to produce a plot are missing.<br>You can check the current plot settings using the
+            {% if workbook.owner.id == user.id %}
+                <a role="button" class="show-settings-flyout" data-target=".setting-flyout" aria-label="Show Plot Settings">
+                    <i class="fa fa-bar-chart"></i> Edit Analysis Settings
+                </a> link.<br>
+            {% else %}
+                <a role="button" class="show-settings-flyout" data-target=".setting-flyout" aria-label="Show Plot Settings">
+                    <i class="fa fa-tasks"></i> View Plot Settings
+                </a> link.<br>
+            {% endif %}
+            Ensure that an <b>Analysis Type</b> and any relevant <b>Axis Variables</b>
+            (or <b>Gene or miRNA</b>) have been selected, and that at least one <b>Cohort</b> is chosen.
         </div>
     </div>
     <div class="worksheet-panel-body panel-body">
