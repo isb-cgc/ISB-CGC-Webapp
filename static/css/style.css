@@ -1115,6 +1115,10 @@ a.skip-nav {
   margin-bottom: 0;
   color: #676767; }
 
+.table-list .file-browser-link:hover, .table-list_warning .file-browser-link:hover {
+  color: #2B7388;
+  text-decoration: underline; }
+
 .table-list .list-main, .table-list_warning .list-main {
   display: inline-block;
   vertical-align: middle;
@@ -1547,6 +1551,8 @@ section .min-max {
     overflow-x: hidden; }
   .worksheet .panel-heading {
     min-height: 100px; }
+    .worksheet .panel-heading div {
+      padding: 5px; }
     .worksheet .panel-heading .bq-tables {
       max-height: 90px;
       padding: 5px;
