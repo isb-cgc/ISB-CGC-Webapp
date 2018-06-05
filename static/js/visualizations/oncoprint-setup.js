@@ -329,7 +329,7 @@ var comparator_utils = {
 	    } else if (!distinguish_mutation_types && distinguish_recurrent) {
 		_order = makeComparatorMetric([["3'utr", "5'utr", "upstream", "downstream", "intergenic", "transcript", "mirna", 'inframe_rec', 'missense_rec', 'promoter_rec', 'trunc_rec', 'inframe', 'promoter', 'regulatory', 'intron', 'trunc'], 'missense', undefined]);
 	    } else if (distinguish_mutation_types && !distinguish_recurrent) {
-		_order = makeComparatorMetric([["3'utr", "5'utr", "upstream", "downstream"], ["intergenic", "transcript", "mirna"], ['trunc', 'trunc_rec'], ['inframe','inframe_rec'], ['promoter', 'promoter_rec'], ['missense', 'missense_rec'], ['intron'], ['regulatory'], undefined, true, false]);
+		_order = makeComparatorMetric([["3'utr"], ["5'utr"], ["upstream"], ["downstream"], ["intergenic"], ["transcript"], ["mirna"], ['trunc', 'trunc_rec'], ['inframe','inframe_rec'], ['promoter', 'promoter_rec'], ['missense', 'missense_rec'], ['intron'], ['regulatory'], undefined, true, false]);
 	    } else if (distinguish_mutation_types && distinguish_recurrent) {
 		_order = makeComparatorMetric(["3'utr", "5'utr", "upstream", "downstream", "intergenic", "transcript", "mirna", 'trunc_rec', 'inframe_rec', 'promoter_rec', 'missense_rec', 'trunc', 'inframe', 'promoter', 'missense', 'regulatory', 'intron', undefined, true, false]);
 	    }
@@ -337,9 +337,24 @@ var comparator_utils = {
 		return _order[m];
 	    }
 	})();
+	var mut_comparator = function(d1, d2){
+		return utils.sign(mut_order(d1) - mut_order(d2));
+	};
 	var mrna_key = 'disp_mrna';
 	var rppa_key = 'disp_prot';
 	var regulation_order = makeComparatorMetric(['up', 'down', undefined]);
+	var get_data_mutation_type = function (d, i) {
+		if (d == null || i >= Object.keys(d).length) {
+			return 'undefined';
+		}
+		else {
+			return Object.keys(d).sort(mut_comparator)[i];
+		}
+	};
+
+	var get_mut_type_diff = function(d1, d2, i){
+		return utils.sign(mut_order(get_data_mutation_type(d1, i)) - mut_order(get_data_mutation_type(d2, i)));
+	};
 
 	var mandatory = function(d1, d2) {
 	    // Test fusion
@@ -355,28 +370,20 @@ var comparator_utils = {
 		return cna_diff;
 	    }
 
-
-
-
 	    // Next, mutation type
 
-		var d1var, d2var;
-	    if(d1[mut_type_key] == null){
-	    	d1 = 'undefined';
-		}
-		else{
-	    	d1 = Object.keys(d1[mut_type_key]).sort(mut_order)[0];
-		}
-		if(d2[mut_type_key] == null){
-	    	d2 = 'undefined';
-		}
-		else{
-	    	d2 = Object.keys(d2[mut_type_key]).sort(mut_order)[0];
+
+		var mut_type_diff = 0;
+		var mut_type_length = Math.max(d1[mut_type_key] == null ? 0 : Object.keys(d1[mut_type_key]).length,
+											d2[mut_type_key] == null ? 0 : Object.keys(d2[mut_type_key]).length);
+
+		for(var i=0; i<mut_type_length; i++){
+			mut_type_diff = get_mut_type_diff(d1[mut_type_key], d2[mut_type_key], i);
+			if(mut_type_diff !== 0) {
+					break;
+			}
 		}
 
-		//var mut_type_diff = utils.sign(mut_order(d1[mut_type_key] == null ? 'undefined': Object.keys(d1[mut_type_key]))
-		//									- mut_order(d2[mut_type_key] == null ? 'undefined' : d2[mut_type_key][0]));
-		var mut_type_diff = utils.sign(mut_order(d1) - mut_order(d2));
 	    if (mut_type_diff !== 0) {
 			return mut_type_diff;
 		}

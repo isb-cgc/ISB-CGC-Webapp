@@ -2035,9 +2035,22 @@ var OncoprintLegendView = (function() {
 	var root = svgfactory.group(0,0);
 	var config = rule.getLegendConfig();
 	if (config.type === 'rule') {
+
 	    var concrete_shapes = rule.apply(config.target, model.getCellWidth(true), view.base_height);
+	    var background_rectagle = {
+	    	"type": "rectangle",
+			"fill": "rgba(190, 190, 190, 1)",
+			"x":0,
+			"y":0,
+			"z": 0,
+			"width": 6,
+			"height": 20,
+			"stroke-width": "0",
+			"stroke": "rgba(0,0,0,0)"
+	    };
 	    for (var i=0; i<concrete_shapes.length; i++) {
-		root.appendChild(svgfactory.fromShape(concrete_shapes[i], 0, 0));
+	    	root.appendChild(svgfactory.fromShape(background_rectagle, 0, 0));
+	    	root.appendChild(svgfactory.fromShape(concrete_shapes[i], 0, 0));
 	    }
 	    if (typeof rule.legend_label !== 'undefined') {
 		var font_size = 12;
