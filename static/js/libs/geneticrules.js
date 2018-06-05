@@ -193,7 +193,7 @@ window.geneticrules = {};
 window.geneticrules.genetic_rule_set_same_color_for_all_no_recurrence = $.extend({}, baseRuleSetParams, {
     'rule_params': $.extend({}, non_mutation_rule_params, {
 	'disp_mut': {
-	    'trunc,inframe,missense,promoter,trunc_rec,inframe_rec,missense_rec,promoter_rec': {
+	    "trunc,inframe,missense,promoter,trunc_rec,inframe_rec,missense_rec,promoter_rec,intron,regulatory,3'utr,5'utr,downstream,upstream,intergenic,mirna,transcript": {
 		shapes: [{
 			'type': 'rectangle',
 			'fill': MUT_COLOR_MISSENSE,
@@ -261,7 +261,7 @@ window.geneticrules.genetic_rule_set_different_colors_no_recurrence = $.extend({
 			'y': '33.33%',
 			'width': '100%',
 			'height': '33.33%',
-			'z': 6,
+			'z': 7,
 		    }],
 		legend_label: 'Truncating Mutation',
 	    },
@@ -270,10 +270,10 @@ window.geneticrules.genetic_rule_set_different_colors_no_recurrence = $.extend({
 			'type': 'rectangle',
 			'fill': MUT_COLOR_3PRIME,
 			'x': '0%',
-			'y': '33.33%',
+			'y': '0%',
 			'width': '100%',
 			'height': '33.33%',
-			'z': 6,
+			'z': 8,
 		    }],
 		legend_label: "3'UTR/Downstream Region Mutation"
 	    },
@@ -282,10 +282,10 @@ window.geneticrules.genetic_rule_set_different_colors_no_recurrence = $.extend({
 			'type': 'rectangle',
 			'fill': MUT_COLOR_5PRIME,
 			'x': '0%',
-			'y': '33.33%',
+			'y': '0%',
 			'width': '100%',
 			'height': '33.33%',
-			'z': 6,
+			'z': 9,
 		    }],
 		legend_label: "5'UTR/Upstream Region Mutation"
 	    },
@@ -294,10 +294,10 @@ window.geneticrules.genetic_rule_set_different_colors_no_recurrence = $.extend({
 			'type': 'rectangle',
 			'fill': MUT_COLOR_REGULATORY,
 			'x': '0%',
-			'y': '33.33%',
+			'y': '0%',
 			'width': '100%',
 			'height': '33.33%',
-			'z': 6,
+			'z': 10,
 		    }],
 		legend_label: 'Regulatory Region Mutation'
 	    },
@@ -309,7 +309,7 @@ window.geneticrules.genetic_rule_set_different_colors_no_recurrence = $.extend({
 			'y': '33.33%',
 			'width': '100%',
 			'height': '33.33%',
-			'z': 6,
+			'z': 11,
 		    }],
 		legend_label: 'Intron Mutation'
 	    },
@@ -321,7 +321,7 @@ window.geneticrules.genetic_rule_set_different_colors_no_recurrence = $.extend({
 			'y': '33.33%',
 			'width': '100%',
 			'height': '33.33%',
-			'z': 6,
+			'z': 12,
 		    }],
 		legend_label: 'miRNA Mutation'
 	    },
@@ -333,7 +333,7 @@ window.geneticrules.genetic_rule_set_different_colors_no_recurrence = $.extend({
 			'y': '33.33%',
 			'width': '100%',
 			'height': '33.33%',
-			'z': 6,
+			'z': 13,
 		    }],
 		legend_label: 'Intergenic Mutation'
 	    },
@@ -345,7 +345,7 @@ window.geneticrules.genetic_rule_set_different_colors_no_recurrence = $.extend({
 			'y': '33.33%',
 			'width': '100%',
 			'height': '33.33%',
-			'z': 6,
+			'z': 14,
 		    }],
 		legend_label: 'Transcript Mutation'
 	    },
@@ -357,7 +357,7 @@ window.geneticrules.genetic_rule_set_different_colors_no_recurrence = $.extend({
 			'y': '33.33%',
 			'width': '100%',
 			'height': '33.33%',
-			'z': 6,
+			'z': 15,
 		    }],
 		legend_label: 'Inframe Mutation',
 	    },
@@ -369,7 +369,7 @@ window.geneticrules.genetic_rule_set_different_colors_no_recurrence = $.extend({
 			'y': '33.33%',
 			'width': '100%',
 			'height': '33.33%',
-			'z': 6,
+			'z': 16,
 		    }],
 		legend_label: 'Missense Mutation',
 	    },

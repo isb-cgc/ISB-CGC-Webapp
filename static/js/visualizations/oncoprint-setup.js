@@ -355,11 +355,31 @@ var comparator_utils = {
 		return cna_diff;
 	    }
 
+
+
+
 	    // Next, mutation type
-	    var mut_type_diff = utils.sign(mut_order(d1[mut_type_key]) - mut_order(d2[mut_type_key]));
+
+		var d1var, d2var;
+	    if(d1[mut_type_key] == null){
+	    	d1 = 'undefined';
+		}
+		else{
+	    	d1 = Object.keys(d1[mut_type_key]).sort(mut_order)[0];
+		}
+		if(d2[mut_type_key] == null){
+	    	d2 = 'undefined';
+		}
+		else{
+	    	d2 = Object.keys(d2[mut_type_key]).sort(mut_order)[0];
+		}
+
+		//var mut_type_diff = utils.sign(mut_order(d1[mut_type_key] == null ? 'undefined': Object.keys(d1[mut_type_key]))
+		//									- mut_order(d2[mut_type_key] == null ? 'undefined' : d2[mut_type_key][0]));
+		var mut_type_diff = utils.sign(mut_order(d1) - mut_order(d2));
 	    if (mut_type_diff !== 0) {
-		return mut_type_diff;
-	    }
+			return mut_type_diff;
+		}
 
 	    // Next, mrna expression
 	    var mrna_diff = utils.sign(regulation_order[d1[mrna_key]] - regulation_order[d2[mrna_key]]);
@@ -945,7 +965,7 @@ window.CreateOncoprinterWithToolbar = function (plot_selector, _ctr_selector, _t
 			    State.mutations_colored_by_type = true;
 			    State.sorted_by_mutation_type = false;
 			    setGeneticAlterationTracksRuleSet(window.geneticrules.genetic_rule_set_different_colors_no_recurrence);
-			    for (var i=0; i<genetic_alteration_track_ids.length; i++) {
+				for (var i=0; i<genetic_alteration_track_ids.length; i++) {
 				oncoprint.setTrackSortComparator(genetic_alteration_track_ids[i], comparator_utils.makeGeneticComparator(false));
 			    }
 			}
