@@ -261,6 +261,7 @@ require([
     var clear_mol_filters = function(btn) {
         btn.siblings('.build-mol-filter').attr('disabled','disabled');
         btn.parents('.list').find('.mutation-build').val('HG19');
+        btn.parents('.list').find('.mutation-build').trigger('change');
         btn.parents('.list').find('.sel-gene a.close').click();
         btn.parents('.list').find('.mutation-category-selector').val("label");
         btn.parents('.list').find('.spec-molecular-attrs input').prop("checked",false);
