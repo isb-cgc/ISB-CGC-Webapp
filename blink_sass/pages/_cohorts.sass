@@ -50,6 +50,10 @@
         .mol-filter-container:not(:only-child):not(:last-child):after
             content: ") AND"
             margin-right: 5px
+        .label
+            background-color: $token-bg-color
+            &:hover
+                background-color: $token-bg-color-hover
 
     .cohort-selected-filters
         overflow: hidden
@@ -62,6 +66,10 @@
                 transform: translateX(-50%)
                 position: absolute
                 z-index: 20
+        .label
+            background-color: $token-bg-color
+            &:hover
+                background-color: $token-bg-color-hover
 
     .curr-filter-panel, .creation-filter-panel
         overflow: hidden
@@ -75,7 +83,10 @@
             &:first-child
                 border-left: none
         .label
-            margin: 0
+            margin: 5px 0px 0px 0px
+            background-color: $token-bg-color
+            &:hover
+                background-color: $token-bg-color-hover
 
     .revision-filter-panel
         overflow: hidden
@@ -324,6 +335,10 @@
         max-height: 300px
         overflow-y: auto
         overflow-x: hidden
+        .label
+            background-color: $token-bg-color
+            &:hover
+                background-color: $token-bg-color-hover
 
     .multi-categorical
         overflow-x: auto

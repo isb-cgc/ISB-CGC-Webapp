@@ -264,6 +264,7 @@ require([
         btn.parents('.list').find('.sel-gene a.close').click();
         btn.parents('.list').find('.mutation-category-selector').val("label");
         btn.parents('.list').find('.spec-molecular-attrs input').prop("checked",false);
+        btn.parents('.list').find('.inversion-checkbox').prop('checked',false);
         btn.parents('.list').find('.spec-molecular-attrs ul').hide();
     };
 
