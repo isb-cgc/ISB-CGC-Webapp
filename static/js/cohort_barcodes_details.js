@@ -164,7 +164,7 @@ require([
                         if (!result.invalid_entries) {
                             result.invalid_entries = [];
                         }
-                        result.invalid_entries.push(barcode);
+                        result.invalid_entries.push({'case': barcode, 'sample': barcode, 'program': "UNKNOWN"});
                     } else {
                         if (!result.valid_entries) {
                             result.valid_entries = [];
