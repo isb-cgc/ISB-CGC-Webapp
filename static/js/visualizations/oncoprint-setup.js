@@ -587,7 +587,7 @@ window.CreateOncoprinterWithToolbar = function (plot_selector, _ctr_selector, _t
         return {
             'first_genetic_alteration_track': null,
             'genetic_alteration_tracks': {}, // track_id -> gene
-			'using_sample_data': true,
+			'using_sample_data': false,
             'cell_padding_on': true,
             'unaltered_cases_hidden': false,
             'mutations_colored_by_type': true,
