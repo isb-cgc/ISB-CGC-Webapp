@@ -48,6 +48,7 @@ require([
     'dataTables'
 ], function ($, jqueryui, bootstrap, session_security, _, base, ajv) {
 
+    var BARCODE_LENGTH_MAX = 45;
     var savingChanges = false;
     var validated_barcodes = null;
 
@@ -159,7 +160,7 @@ require([
                     if (isGdcTsv) {
                         entry_split = barcode.split(/\s*\t\s*/);
                     }
-                    if ((isGdcTsv && entry_split.length < 2) || barcode.length <= 0) {
+                    if ((isGdcTsv && entry_split.length < 2) || barcode.length <= 0 || barcode.replace(/["']/g, "").length > BARCODE_LENGTH_MAX) {
                         if (!result.invalid_entries) {
                             result.invalid_entries = [];
                         }
@@ -574,6 +575,4 @@ require([
             return false;
         }
     });
-
-
 });
