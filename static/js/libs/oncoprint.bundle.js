@@ -2035,9 +2035,22 @@ var OncoprintLegendView = (function() {
 	var root = svgfactory.group(0,0);
 	var config = rule.getLegendConfig();
 	if (config.type === 'rule') {
+
 	    var concrete_shapes = rule.apply(config.target, model.getCellWidth(true), view.base_height);
+	    var background_rectagle = {
+	    	"type": "rectangle",
+			"fill": "rgba(190, 190, 190, 1)",
+			"x":0,
+			"y":0,
+			"z": 0,
+			"width": 6,
+			"height": 20,
+			"stroke-width": "0",
+			"stroke": "rgba(0,0,0,0)"
+	    };
 	    for (var i=0; i<concrete_shapes.length; i++) {
-		root.appendChild(svgfactory.fromShape(concrete_shapes[i], 0, 0));
+	    	root.appendChild(svgfactory.fromShape(background_rectagle, 0, 0));
+	    	root.appendChild(svgfactory.fromShape(concrete_shapes[i], 0, 0));
 	    }
 	    if (typeof rule.legend_label !== 'undefined') {
 		var font_size = 12;
@@ -2892,6 +2905,7 @@ var OncoprintMinimapView = (function () {
     };
 
     var drawOverlayRect = function (view, model, cell_view, opt_rect) {
+
 	if (view.rendering_suppressed) {
 	    return;
 	}
@@ -4567,7 +4581,7 @@ var RuleSet = (function () {
 	// Returns a list of lists of concrete shapes, in the same order as data
 	var ret = [];
 	for (var i = 0; i < data.length; i++) {
-	    var rules = this.getRulesWithId(data[i]);
+		var rules = this.getRulesWithId(data[i]);
 	    if (typeof out_active_rules !== 'undefined') {
 		for (var j = 0; j < rules.length; j++) {
 		    out_active_rules[rules[j].id] = true;
@@ -4593,21 +4607,41 @@ var LookupRuleSet = (function () {
     LookupRuleSet.prototype = Object.create(RuleSet.prototype);
 
     LookupRuleSet.prototype.getRulesWithId = function (datum) {
-	if (typeof datum === 'undefined') {
+
+    if (typeof datum === 'undefined') {
 	    return this.rules_with_id;
 	}
 	var ret = [];
 	ret = ret.concat(this.universal_rules);
+
 	for (var key in datum) {
 	    if (typeof datum[key] !== 'undefined') {
-		var key_rule = this.lookup_map_by_key[key];
-		if (typeof key_rule !== 'undefined') {
-		    ret.push(key_rule);
-		}
-		var key_and_value_rule = (this.lookup_map_by_key_and_value[key] && this.lookup_map_by_key_and_value[key][datum[key]]) || undefined;
-		if (typeof key_and_value_rule !== 'undefined') {
-		    ret.push(key_and_value_rule);
-		}
+	    	if(key == 'disp_mut'){
+				var lookup_map_by_key = this.lookup_map_by_key;
+				var lookup_map_by_key_and_value = this.lookup_map_by_key_and_value;
+				Object.keys(datum[key]).map(function(type){
+					var key_rule = lookup_map_by_key[type];
+					if (typeof key_rule !== 'undefined') {
+						ret.push(key_rule);
+					}
+					var key_and_value_rule = (lookup_map_by_key_and_value[key] && lookup_map_by_key_and_value[key][type]) || undefined;
+					if (typeof key_and_value_rule !== 'undefined') {
+						ret.push(key_and_value_rule);
+                    }
+				});
+
+			}
+			else{
+				var key_rule = this.lookup_map_by_key[key];
+				if (typeof key_rule !== 'undefined') {
+					ret.push(key_rule);
+				}
+				var key_and_value_rule = (this.lookup_map_by_key_and_value[key] && this.lookup_map_by_key_and_value[key][datum[key]]) || undefined;
+				if (typeof key_and_value_rule !== 'undefined') {
+					ret.push(key_and_value_rule);
+				}
+			}
+
 	    }
 	}
 	return ret;

@@ -51,7 +51,9 @@ define(['jquery', 'oncoprintjs', 'underscore', 'oncoprint_setup', 'canvas_toBlob
             gene_to_sample_to_datum[gene][sample] = gene_to_sample_to_datum[gene][sample] || {
                 'gene': gene,
                 'sample': sample,
-                'data': []
+                'data': [],
+                'disp_mut':{}
+                //'disp_mut':[]
             };
 
             if (cna.hasOwnProperty(alteration)) {
@@ -81,7 +83,7 @@ define(['jquery', 'oncoprintjs', 'underscore', 'oncoprint_setup', 'canvas_toBlob
                     ws_datum.oncoprint_mutation_type = "fusion";
                     gene_to_sample_to_datum[gene][sample].disp_fusion = true;
                 } else {
-                    gene_to_sample_to_datum[gene][sample].disp_mut = type;
+                    gene_to_sample_to_datum[gene][sample].disp_mut[type] = "";
                 }
                 gene_to_sample_to_datum[gene][sample].data.push(ws_datum);
             }
@@ -102,7 +104,6 @@ define(['jquery', 'oncoprintjs', 'underscore', 'oncoprint_setup', 'canvas_toBlob
                 altered_by_gene[gene].push(sample);
             });
         });
-
         return {'data_by_gene': data_by_gene, 'altered_by_gene': altered_by_gene};
     };
     return {
