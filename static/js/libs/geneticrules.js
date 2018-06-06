@@ -14,6 +14,9 @@ var MUT_COLOR_FUSION = '#8B00C9';
 var MUT_COLOR_PROMOTER = '#FFA942';
 var MUT_COLOR_GERMLINE = '#FFFFFF';
 var MUT_COLOR_INTRON = '#f922a3';
+var MUT_COLOR_miRNA = '#00ced1';
+var MUT_COLOR_INTERGENIC = '#999900';
+var MUT_COLOR_TRANSCRIPT = '#ADFF2F';
 var MUT_COLOR_REGULATORY = '#28e3ed';
 var MUT_COLOR_3PRIME = '#FFA942';
 var MUT_COLOR_5PRIME = '#5312c4';
@@ -272,7 +275,7 @@ window.geneticrules.genetic_rule_set_different_colors_no_recurrence = $.extend({
 			'x': '0%',
 			'y': '0%',
 			'width': '100%',
-			'height': '25%',
+			'height': '12.25%',
 			'z': 6,
 		    }],
 		legend_label: "3'UTR/Downstream Region Mutation"
@@ -282,9 +285,9 @@ window.geneticrules.genetic_rule_set_different_colors_no_recurrence = $.extend({
 			'type': 'rectangle',
 			'fill': MUT_COLOR_5PRIME,
 			'x': '0%',
-			'y': '0%',
+			'y': '12.25%',
 			'width': '100%',
-			'height': '25%',
+			'height': '12.25%',
 			'z': 6,
 		    }],
 		legend_label: "5'UTR/Upstream Region Mutation"
@@ -316,7 +319,7 @@ window.geneticrules.genetic_rule_set_different_colors_no_recurrence = $.extend({
 		'mirna': {
 		shapes: [{
 			'type': 'rectangle',
-			'fill': MUT_COLOR_INTRON,
+			'fill': MUT_COLOR_miRNA,
 			'x': '0%',
 			'y': '25%',
 			'width': '100%',
@@ -328,7 +331,7 @@ window.geneticrules.genetic_rule_set_different_colors_no_recurrence = $.extend({
 		'intergenic': {
 		shapes: [{
 			'type': 'rectangle',
-			'fill': MUT_COLOR_INTRON,
+			'fill': MUT_COLOR_INTERGENIC,
 			'x': '0%',
 			'y': '75%',
 			'width': '100%',
@@ -340,7 +343,7 @@ window.geneticrules.genetic_rule_set_different_colors_no_recurrence = $.extend({
 		'transcript': {
 		shapes: [{
 			'type': 'rectangle',
-			'fill': MUT_COLOR_INTRON,
+			'fill': MUT_COLOR_TRANSCRIPT,
 			'x': '0%',
 			'y': '50%',
 			'width': '100%',
