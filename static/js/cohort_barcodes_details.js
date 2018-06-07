@@ -506,7 +506,7 @@ require([
             tab.find('.cohort-counts tbody').empty();
             for(var i = 0; i < result.counts.length; i++) {
                 var prog_deets = result.counts[i];
-                tab.find('.cohort-counts tbody').append('<tr><td>'+prog_deets['program']+'</td><td>'+prog_deets['samples']+'</td><td>'+prog_deets['cases']+'</td>');
+                tab.find('.cohort-counts tbody').append('<tr><td>'+prog_deets['program']+'</td><td>'+prog_deets['cases']+'</td><td>'+prog_deets['samples']+'</td>');
             }
             tab.find('.cohort-counts').show();
             result.invalid_entries && result.invalid_entries.length > 0 && tab.find('.invalid-not-saved').show();
