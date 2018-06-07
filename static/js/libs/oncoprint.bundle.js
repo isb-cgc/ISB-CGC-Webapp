@@ -5682,7 +5682,7 @@ var OncoprintToolTip = (function() {
     function OncoprintToolTip($container, params) {
 	params = params || {};
 	this.$container = $container;
-	this.$div = $('<div></div>').appendTo($container).css({'background-color':'rgba(255,255,255,1)', 'position':'absolute', 'display':'none', 'border':'1px solid black', 'max-width':300, 'min-width':150});
+	this.$div = $('<div></div>').appendTo($container).css({'background-color':'rgba(255,255,255,1)', 'position':'absolute', 'display':'none', 'border':'1px solid black', 'width':150});
 	if (params.noselect) {
 	    this.$div.addClass("noselect");
 	}
@@ -5726,7 +5726,8 @@ var OncoprintToolTip = (function() {
 	    tt.$div.stop().fadeIn('fast');
 	}
 	var container_offset = tt.$container.offset();
-	var y = page_y - container_offset.top + 5;
+	var h = tt.$div.height()
+	var y = page_y - container_offset.top -(h > 40 ? 50 : h > 150 ? 100 : 5);
 	var x = page_x - container_offset.left - tt.$div.width() - 5;
 	tt.$div.css({'top':y, 'left':x, 'z-index':9999});
 	tt.shown = true;
