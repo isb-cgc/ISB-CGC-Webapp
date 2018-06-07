@@ -67,7 +67,7 @@ def oncoprint_view_data(request):
         query_template = """
                     #standardSQL
                     SELECT
-                      sample_barcode_tumor AS Sample, Hugo_Symbol,
+                      case_barcode, Hugo_Symbol,
                       CASE
                         WHEN Protein_position IS NOT NULL AND Protein_position NOT LIKE '-/%' THEN
                           CONCAT(
@@ -107,15 +107,15 @@ def oncoprint_view_data(request):
                       END AS Type
                     FROM `{bq_data_project_id}.{dataset_name}.{table_name}`
                     WHERE Variant_Classification NOT IN ('Silent') {filter_clause}
-                    AND sample_barcode_tumor IN (
-                      SELECT sample_barcode
+                    AND case_barcode IN (
+                      SELECT case_barcode
                       FROM `{cohort_table}`
                       WHERE cohort_id IN ({cohort_id_list})
                       AND (project_id IS NULL{project_clause})
-                      GROUP BY sample_barcode
+                      GROUP BY case_barcode
                     )
-                    GROUP BY Sample, Hugo_Symbol, Alteration, Type
-                    ORDER BY Sample
+                    GROUP BY case_barcode, Hugo_Symbol, Alteration, Type
+                    ORDER BY case_barcode
                     ;
                     
                 """
