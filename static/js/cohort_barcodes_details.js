@@ -48,6 +48,7 @@ require([
     'dataTables'
 ], function ($, jqueryui, bootstrap, session_security, _, base, ajv) {
 
+    var BARCODE_LENGTH_MAX = 45;
     var savingChanges = false;
     var validated_barcodes = null;
 
@@ -159,11 +160,11 @@ require([
                     if (isGdcTsv) {
                         entry_split = barcode.split(/\s*\t\s*/);
                     }
-                    if ((isGdcTsv && entry_split.length < 2) || barcode.length <= 0) {
+                    if ((isGdcTsv && entry_split.length < 2) || barcode.length <= 0 || barcode.replace(/["']/g, "").length > BARCODE_LENGTH_MAX) {
                         if (!result.invalid_entries) {
                             result.invalid_entries = [];
                         }
-                        result.invalid_entries.push(barcode);
+                        result.invalid_entries.push({'case': barcode, 'sample': barcode, 'program': "UNKNOWN"});
                     } else {
                         if (!result.valid_entries) {
                             result.valid_entries = [];
@@ -506,7 +507,7 @@ require([
             tab.find('.cohort-counts tbody').empty();
             for(var i = 0; i < result.counts.length; i++) {
                 var prog_deets = result.counts[i];
-                tab.find('.cohort-counts tbody').append('<tr><td>'+prog_deets['program']+'</td><td>'+prog_deets['samples']+'</td><td>'+prog_deets['cases']+'</td>');
+                tab.find('.cohort-counts tbody').append('<tr><td>'+prog_deets['program']+'</td><td>'+prog_deets['cases']+'</td><td>'+prog_deets['samples']+'</td>');
             }
             tab.find('.cohort-counts').show();
             result.invalid_entries && result.invalid_entries.length > 0 && tab.find('.invalid-not-saved').show();
@@ -574,6 +575,4 @@ require([
             return false;
         }
     });
-
-
 });
