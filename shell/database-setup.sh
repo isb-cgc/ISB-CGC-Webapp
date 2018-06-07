@@ -15,7 +15,7 @@ export PYTHONPATH=${HOMEROOT}/lib/:${HOMEROOT}/:${HOME}/google_appengine/:${HOME
 echo $PYTHONPATH
 
 echo "Increase group_concat max, for longer data type names"
-mysql -u $MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -e "SET GLOBAL group_concat_max_len=150000;"
+mysql -u $MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -e "SET GLOBAL group_concat_max_len=18446744073709547520;"
 
 echo "Creating django-user for web application..."
 mysql -u $MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON $DATABASE_NAME.* TO '${DATABASE_USER}'@'localhost' IDENTIFIED BY '${DATABASE_PASSWORD}';"
