@@ -221,8 +221,14 @@ require([
                     }
                 },
                 error: function () {
-                    base.showJsMessage("error","Failed to load file browser panel.",true);
-                    $('#placeholder').hide();
+                     var responseJSON = $.parseJSON(xhr.responseText);
+                    // If we received a redirect, honor that
+                    if(responseJSON.redirect) {
+                        base.setReloadMsg(responseJSON.level || "error",responseJSON.message);
+                        window.location = responseJSON.redirect;
+                    } else {
+                        base.showJsMessage(responseJSON.level || "error",responseJSON.message,true);
+                    }
                 },
                 complete: function(xhr, status) {
                    reject_load = false;
