@@ -66,58 +66,68 @@ def oncoprint_view_data(request):
 
         query_template = """
                     #standardSQL
-                    SELECT
-                      case_barcode, Hugo_Symbol,
-                      CASE
-                        WHEN Protein_position IS NOT NULL AND Protein_position NOT LIKE '-/%' THEN
-                          CONCAT(
-                            COALESCE(REGEXP_EXTRACT(Amino_acids,r'^([A-Za-z*\-]+)'),'-'),
-                            COALESCE(REGEXP_EXTRACT(Protein_position,r'^([0-9]+)'), '-'),
-                            CASE
-                              WHEN Variant_Classification IN ('Frame_Shift_Del', 'Frame_Shift_Ins') OR {conseq_col} LIKE '%frameshift%' THEN '_fs'
-                              WHEN Variant_Classification IN ('Splice_Site', 'Splice_Region') THEN '_splice'
-                              WHEN Amino_acids LIKE '%/%' THEN REGEXP_EXTRACT(Amino_acids,r'^.*/([A-Za-z*-]+)')
-                              ELSE '-'
-                            END
-                          )
-                        ELSE
+                    SELECT cs.case_barcode, sm.Hugo_Symbol, sm.Alteration, sm.Type
+                    FROM (
+                          SELECT case_barcode
+                          FROM `{cohort_table}`
+                          WHERE cohort_id IN ({cohort_id_list})
+                          AND (project_id IS NULL{project_clause})
+                          GROUP BY case_barcode
+                    ) cs
+                    LEFT JOIN (
+                        SELECT
+                          case_barcode, Hugo_Symbol,
                           CASE
-                            WHEN {conseq_col} LIKE '%splice_%_variant%' THEN REGEXP_EXTRACT({conseq_col},r'^(splice_[^_]+_variant)')
-                            WHEN {conseq_col} LIKE '%intron_variant%' THEN 'intron_variant'
-                            WHEN Variant_Classification = 'IGR' THEN 'Intergenic'
-                            ELSE Variant_Classification
-                          END
-                      END AS Alteration,
-                      CASE
-                        WHEN (Amino_acids IS NOT NULL AND REGEXP_EXTRACT(Amino_acids,r'^.*/([A-Za-z*-]+)$') = '*') OR Variant_Classification IN ('Frame_Shift_Del', 'Frame_Shift_Ins', 'Splice_Site', 'Splice_Region') THEN 'TRUNC'
-                        WHEN Variant_Classification = 'Nonsense_Mutation' AND {conseq_col} LIKE 'stop_gained%' THEN 'TRUNC'
-                        WHEN Variant_Classification = 'Nonstop_Mutation' OR (Variant_Classification = 'Missense_Mutation' AND Variant_Type IN ('DEL','INS')) OR (Variant_Classification = 'Translation_Start_Site') THEN 'MISSENSE'
-                        WHEN (Variant_Classification = 'Missense_Mutation' AND Variant_Type IN ('ONP','SNP', 'TNP')) OR (Variant_Classification IN ('In_Frame_Del','In_Frame_Ins')) OR {conseq_col} LIKE '%inframe%' THEN 'INFRAME'
-                        WHEN Variant_Classification IN ("RNA","IGR", "3\'UTR","3\'Flank","5\'UTR","5\'Flank") THEN
+                            WHEN Protein_position IS NOT NULL AND Protein_position NOT LIKE '-/%' THEN
+                              CONCAT(
+                                COALESCE(REGEXP_EXTRACT(Amino_acids,r'^([A-Za-z*\-]+)'),'-'),
+                                COALESCE(REGEXP_EXTRACT(Protein_position,r'^([0-9]+)'), '-'),
+                                CASE
+                                  WHEN Variant_Classification IN ('Frame_Shift_Del', 'Frame_Shift_Ins') OR {conseq_col} LIKE '%frameshift%' THEN '_fs'
+                                  WHEN Variant_Classification IN ('Splice_Site', 'Splice_Region') THEN '_splice'
+                                  WHEN Amino_acids LIKE '%/%' THEN REGEXP_EXTRACT(Amino_acids,r'^.*/([A-Za-z*-]+)')
+                                  ELSE '-'
+                                END
+                              )
+                            ELSE
+                              CASE
+                                WHEN {conseq_col} LIKE '%splice_%_variant%' THEN REGEXP_EXTRACT({conseq_col},r'^(splice_[^_]+_variant)')
+                                WHEN {conseq_col} LIKE '%intron_variant%' THEN 'intron_variant'
+                                WHEN Variant_Classification = 'IGR' THEN 'Intergenic'
+                                ELSE Variant_Classification
+                              END
+                          END AS Alteration,
                           CASE
-                            WHEN {conseq_col} LIKE '%intergenic%' THEN 'INTERGENIC'
-                            WHEN {conseq_col} LIKE '%regulatory%' THEN 'REGULATORY'
-                            WHEN {conseq_col} LIKE '%miRNA%' THEN 'miRNA'
-                            WHEN {conseq_col} LIKE '%transcript%' THEN 'TRANSCRIPT'
-                            WHEN {conseq_col} LIKE '%downstream%' THEN 'DOWNSTREAM'
-                            WHEN {conseq_col} LIKE '%upstream%' THEN 'UPSTREAM'
+                            WHEN (Amino_acids IS NOT NULL AND REGEXP_EXTRACT(Amino_acids,r'^.*/([A-Za-z*-]+)$') = '*') OR Variant_Classification IN ('Frame_Shift_Del', 'Frame_Shift_Ins', 'Splice_Site', 'Splice_Region') THEN 'TRUNC'
+                            WHEN Variant_Classification = 'Nonsense_Mutation' AND {conseq_col} LIKE 'stop_gained%' THEN 'TRUNC'
+                            WHEN Variant_Classification = 'Nonstop_Mutation' OR (Variant_Classification = 'Missense_Mutation' AND Variant_Type IN ('DEL','INS')) OR (Variant_Classification = 'Translation_Start_Site') THEN 'MISSENSE'
+                            WHEN (Variant_Classification = 'Missense_Mutation' AND Variant_Type IN ('ONP','SNP', 'TNP')) OR (Variant_Classification IN ('In_Frame_Del','In_Frame_Ins')) OR {conseq_col} LIKE '%inframe%' THEN 'INFRAME'
+                            WHEN Variant_Classification IN ("RNA","IGR", "3\'UTR","3\'Flank","5\'UTR","5\'Flank") THEN
+                              CASE
+                                WHEN {conseq_col} LIKE '%intergenic%' THEN 'INTERGENIC'
+                                WHEN {conseq_col} LIKE '%regulatory%' THEN 'REGULATORY'
+                                WHEN {conseq_col} LIKE '%miRNA%' THEN 'miRNA'
+                                WHEN {conseq_col} LIKE '%transcript%' THEN 'TRANSCRIPT'
+                                WHEN {conseq_col} LIKE '%downstream%' THEN 'DOWNSTREAM'
+                                WHEN {conseq_col} LIKE '%upstream%' THEN 'UPSTREAM'
+                                ELSE UPPER(Variant_Classification)
+                              END
                             ELSE UPPER(Variant_Classification)
-                          END
-                        ELSE UPPER(Variant_Classification)
-                      END AS Type
-                    FROM `{bq_data_project_id}.{dataset_name}.{table_name}`
-                    WHERE Variant_Classification NOT IN ('Silent') {filter_clause}
-                    AND case_barcode IN (
-                      SELECT case_barcode
-                      FROM `{cohort_table}`
-                      WHERE cohort_id IN ({cohort_id_list})
-                      AND (project_id IS NULL{project_clause})
-                      GROUP BY case_barcode
-                    )
-                    GROUP BY case_barcode, Hugo_Symbol, Alteration, Type
-                    ORDER BY case_barcode
+                          END AS Type
+                        FROM `{bq_data_project_id}.{dataset_name}.{table_name}`
+                        WHERE Variant_Classification NOT IN ('Silent') {filter_clause}
+                        AND case_barcode IN (
+                          SELECT case_barcode
+                          FROM `{cohort_table}`
+                          WHERE cohort_id IN ({cohort_id_list})
+                          AND (project_id IS NULL{project_clause})
+                          GROUP BY case_barcode
+                        )
+                        GROUP BY case_barcode, Hugo_Symbol, Alteration, Type
+                        ORDER BY case_barcode
+                    ) sm
+                    ON sm.case_barcode = cs.case_barcode
                     ;
-                    
                 """
         project_id_stmt = ""
         if confirmed_project_ids is not None:
