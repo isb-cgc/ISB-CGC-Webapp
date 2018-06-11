@@ -91,18 +91,20 @@ define(['jquery', 'oncoprintjs', 'underscore', 'oncoprint_setup', 'canvas_toBlob
         var data_by_gene = {};
         var altered_by_gene = {};
         _.each(gene_to_sample_to_datum, function (sample_data, gene) {
-            data_by_gene[gene] = [];
-            altered_by_gene[gene] = [];
-            _.each(Object.keys(samples), function (sample) {
-                // pad out data
-                if (!sample_data.hasOwnProperty(sample)) {
-                    data_by_gene[gene].push({'gene': gene, 'sample': sample, 'data': []});
-                }
-            });
-            _.each(sample_data, function (datum, sample) {
-                data_by_gene[gene].push(datum);
-                altered_by_gene[gene].push(sample);
-            });
+            if(gene !== "None") {
+                data_by_gene[gene] = [];
+                altered_by_gene[gene] = [];
+                _.each(Object.keys(samples), function (sample) {
+                    // pad out data
+                    if (!sample_data.hasOwnProperty(sample)) {
+                        data_by_gene[gene].push({'gene': gene, 'sample': sample, 'data': []});
+                    }
+                });
+                _.each(sample_data, function (datum, sample) {
+                    data_by_gene[gene].push(datum);
+                    altered_by_gene[gene].push(sample);
+                });
+            }
         });
         return {'data_by_gene': data_by_gene, 'altered_by_gene': altered_by_gene};
     };
