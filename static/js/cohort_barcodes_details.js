@@ -342,9 +342,10 @@ require([
 
             if(file.size > FILE_SIZE_UPLOAD_MAX) {
                 // Request is going to be too big
+                var file_size_max_str = FILE_SIZE_UPLOAD_MAX/1000000 + "MB";
                 base.showJsMessage(
                     "error",
-                    "The selected file is too large. Please reduce the size of your barcode file (eg. remove any text "
+                    "The selected file is too large; the maximum size allowed is "+file_size_max_str+". Please reduce the size of your barcode file (eg. remove any text "
                     + "which is not a barcode or a delimiter) and try again.",
                     true
                 );
