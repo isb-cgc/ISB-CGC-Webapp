@@ -611,12 +611,9 @@ require([
     $('.data-tab-content').on('change','.build', function(){
         var this_tab = $(this).parents('.data-tab').data('file-type');
         $('#'+this_tab+'-files').find('.filter-build-panel').hide();
-        update_displays(this_tab);
         $('#'+this_tab+'-filter-panel-'+$(this).find(':selected').val()).show();
 
         if(this_tab == 'igv') {
-            //prevent users from selecting igv files during loading time
-            $('.filelist-panel input.igv.accessible[type="checkbox"]').attr('disabled',true);
             // Remove any selected files not from this build
             var new_build = $('#'+this_tab+'-files').find('.build :selected').val();
             var selCount = Object.keys(selIgvFiles.gcs_bam).length;
@@ -633,7 +630,10 @@ require([
                 update_on_selex_change();
             }
             $('#igv-form-build').attr("value",new_build);
+            // Prevent users from selecting igv files during loading time
+            $('.filelist-panel input.igv.accessible[type="checkbox"]').attr('disabled',true);
         }
+        update_displays(this_tab);
     });
 
     function update_filters(checked) {
