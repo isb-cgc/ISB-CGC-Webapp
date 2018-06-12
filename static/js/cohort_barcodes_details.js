@@ -160,7 +160,8 @@ require([
                     if (isGdcTsv) {
                         entry_split = barcode.split(/\s*\t\s*/);
                     }
-                    if ((isGdcTsv && entry_split.length < 2) || barcode.length <= 0 || barcode.replace(/["']/g, "").length > BARCODE_LENGTH_MAX) {
+                    if ((isGdcTsv && entry_split.length < 2) || barcode.length <= 0 || (!isGdcTsv && barcode.replace(/["']/g, "").length > BARCODE_LENGTH_MAX
+                        || (isGdcTsv && entry_split[case_id_col].length > BARCODE_LENGTH_MAX))) {
                         if (!result.invalid_entries) {
                             result.invalid_entries = [];
                         }
@@ -341,9 +342,10 @@ require([
 
             if(file.size > FILE_SIZE_UPLOAD_MAX) {
                 // Request is going to be too big
+                var file_size_max_str = FILE_SIZE_UPLOAD_MAX/1000000 + "MB";
                 base.showJsMessage(
                     "error",
-                    "The selected file is too large. Please reduce the size of your barcode file (eg. remove any text "
+                    "The selected file is too large; the maximum size allowed is "+file_size_max_str+". Please reduce the size of your barcode file (eg. remove any text "
                     + "which is not a barcode or a delimiter) and try again.",
                     true
                 );
