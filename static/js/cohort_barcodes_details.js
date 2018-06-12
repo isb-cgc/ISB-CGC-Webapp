@@ -160,7 +160,8 @@ require([
                     if (isGdcTsv) {
                         entry_split = barcode.split(/\s*\t\s*/);
                     }
-                    if ((isGdcTsv && entry_split.length < 2) || barcode.length <= 0 || barcode.replace(/["']/g, "").length > BARCODE_LENGTH_MAX) {
+                    if ((isGdcTsv && entry_split.length < 2) || barcode.length <= 0 || (!isGdcTsv && barcode.replace(/["']/g, "").length > BARCODE_LENGTH_MAX
+                        || (isGdcTsv && entry_split[case_id_col].length > BARCODE_LENGTH_MAX))) {
                         if (!result.invalid_entries) {
                             result.invalid_entries = [];
                         }
