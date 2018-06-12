@@ -155,7 +155,6 @@ def oncoprint_view_data(request):
                                         cohort_id_list=cohort_id_list,
                                         project_clause=project_clause)
 
-        logger.debug("BQ_QUERY_ONCOPRINT: " + query)
         results = BigQuerySupport.execute_query_and_fetch_results(query)
         plot_data = []
 
