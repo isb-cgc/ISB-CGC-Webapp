@@ -35,29 +35,29 @@ jobs:
             - lib
             - google-cloud-sdk
       - persist_to_workspace:
-                root: /home/circleci/ISB-CGC-Webapp
-                paths:
-                  - "*"
-                  - adminrestrict
-                  - blink_sass
-                  - demo
-                  - genes
-                  - sass
-                  - seqpeek
-                  - shell
-                  - tasks
-                  - variables
-                  - workbooks
-                  - analysis
-                  - bq_data_access
-                  - etc
-                  - GenespotRE
-                  - offline
-                  - scripts
-                  - session_security
-                  - templates
-                  - visualizations
-                  - ISB-CGC-Common
+          root: /home/circleci/ISB-CGC-Webapp
+          paths:
+            - "*"
+            - adminrestrict
+            - blink_sass
+            - demo
+            - genes
+            - sass
+            - seqpeek
+            - shell
+            - tasks
+            - variables
+            - workbooks
+            - analysis
+            - bq_data_access
+            - etc
+            - GenespotRE
+            - offline
+            - scripts
+            - session_security
+            - templates
+            - visualizations
+            - ISB-CGC-Common
 
   deploy_job:
     environment:
