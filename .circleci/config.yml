@@ -1,0 +1,60 @@
+version: 2
+jobs:
+  build_job:
+    environment:
+      TZ: "/usr/share/zoneinfo/America/Los_Angeles"
+    name: Building Deployment Container
+    working_directory: ~/ISB-CGC-WebApp
+    docker:
+      - image: circleci/python:2.7.14
+      - image: circleci/mysql:5.7
+        environment:
+          MYSQL_ROOT_HOST: "%"
+          MYSQL_USER: ubuntu
+          MYSQL_PASSWORD: "isb"
+          MYSQL_ROOT_PASSWORD: "isb"
+    steps:
+      - checkout
+      - run:
+          name: Set Python Path
+          command: |
+            echo "export PYTHONPATH=/home/circleci/${CIRCLE_PROJECT_REPONAME}:/home/circleci/${CIRCLE_PROJECT_REPONAME}/lib" >> $BASH_ENV
+      - run:
+          name: Install Dependencies
+          command: |
+            sudo -E /bin/bash ./shell/install-deps.sh
+      - run:
+          name: Auth, Staging, and Database testing
+          command: |
+            sudo -E /bin/sh ./shell/gcloud_authenticate.sh
+            sudo -E /bin/bash ./shell/gcloud-pull-staging-files.sh
+            sudo -E /bin/bash ./shell/database-setup.sh
+      - persist_to_workspace:
+                root: /home/circleci
+                paths: ISB-CGC-WebApp
+  deploy_job:
+    environment:
+      TZ: "/usr/share/zoneinfo/America/Los_Angeles"
+    name: Deploy to AppEngine Flex
+    docker:
+      - image: circleci/python:2.7.14
+    working_directory: ~/ISB-CGC-Webapp
+    steps:
+      - attach_workspace:
+          at: /home/circleci
+      - deploy:
+          command: |
+            sudo -E rm -rf ./lib
+            sudo -E /bin/bash ./shell/gcloud_authenticate.sh
+            sudo -E ./google-cloud-sdk/bin/gcloud app deploy --verbosity=debug ./app.yaml --quiet
+workflows:
+  version: 2
+  build_and_deploy:
+    jobs:
+      - build_job
+      - deploy_job:
+          requires:
+            - build_job
+          filters:
+            branches:
+              only: master
