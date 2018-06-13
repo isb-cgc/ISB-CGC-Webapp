@@ -55,7 +55,9 @@ jobs:
             - ISB-CGC-Webapp/templates
             - ISB-CGC-Webapp/visualizations
             - ISB-CGC-Webapp/ISB-CGC-Common
-            - ISB-CGC-Webapp/*
+            - ISB-CGC-Webapp/*.*
+            - ISB-CGC-Webapp/Dockerfile
+            - ISB-CGC-Webapp/.dockerignore
 
   deploy_job:
     environment:
