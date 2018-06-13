@@ -30,10 +30,10 @@ jobs:
             sudo -E /bin/bash ./shell/gcloud-pull-staging-files.sh
             sudo -E /bin/bash ./shell/database-setup.sh
       - save_cache:
-        key: lib-v1-{{ checksum "requirements.txt" }}
-        paths:
-          - lib
-          - google-cloud-sdk
+          key: lib-v1-{{ checksum "requirements.txt" }}
+          paths:
+            - lib
+            - google-cloud-sdk
       - persist_to_workspace:
                 root: /home/circleci/ISB-CGC-Webapp
                 paths:
