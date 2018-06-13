@@ -23,11 +23,12 @@ from django.conf import settings
 from google_helpers.bigquery.cohort_support import BigQuerySupport
 from cohorts.metadata_helpers import *
 from visualizations.data_access_views_v2 import get_confirmed_project_ids_for_cohorts
+from cohorts.models import Project, Program
 
 logger = logging.getLogger('main_logger')
 
 def get_program_set_for_oncoprint(cohort_id_array):
-    return {'tcga'}
+    return Program.objects.filter(name='TCGA',is_public=True,active=True)
 
 
 def is_valid_genomic_build(genomic_build_param):
@@ -59,6 +60,8 @@ def oncoprint_view_data(request):
 
         program_set = get_program_set_for_oncoprint(cohort_id_array)
         confirmed_project_ids, user_only_study_ids = get_confirmed_project_ids_for_cohorts(cohort_id_array)
+        # Only samples in projects from a data type's valid programs should be queried
+        projects_this_program_set = Project.objects.filter(id__in=confirmed_project_ids,program__in=program_set).values_list('id', flat=True)
 
         if not len(program_set):
             return JsonResponse(
@@ -130,9 +133,9 @@ def oncoprint_view_data(request):
                     ;
                 """
         project_id_stmt = ""
-        if confirmed_project_ids is not None:
-            project_id_stmt = ', '.join([str(project_id) for project_id in confirmed_project_ids])
-        project_clause = " OR project_id IN ({})".format(project_id_stmt) if confirmed_project_ids is not None else ""
+        if projects_this_program_set and len(projects_this_program_set):
+            project_id_stmt = ', '.join([str(project_id) for project_id in projects_this_program_set])
+        project_clause = " OR project_id IN ({})".format(project_id_stmt) if projects_this_program_set else ""
 
         gene_list_stm = ''
         if gene_array is not None:
