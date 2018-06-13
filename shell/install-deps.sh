@@ -1,6 +1,6 @@
 if [ -n "$CI" ]; then
-    export HOME=/home/ubuntu/${CIRCLE_PROJECT_REPONAME}
-    export HOMEROOT=/home/ubuntu/${CIRCLE_PROJECT_REPONAME}
+    export HOME=/home/circleci/${CIRCLE_PROJECT_REPONAME}
+    export HOMEROOT=/home/circleci/${CIRCLE_PROJECT_REPONAME}
 
     # Clone dependencies
     git clone -b master https://github.com/isb-cgc/ISB-CGC-Common.git
