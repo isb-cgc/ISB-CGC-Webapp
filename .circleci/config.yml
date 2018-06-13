@@ -29,9 +29,36 @@ jobs:
             sudo -E /bin/sh ./shell/gcloud_authenticate.sh
             sudo -E /bin/bash ./shell/gcloud-pull-staging-files.sh
             sudo -E /bin/bash ./shell/database-setup.sh
+      - save_cache:
+        key: lib-v1-{{ checksum "requirements.txt" }}
+        paths:
+          - lib
+          - google-cloud-sdk
       - persist_to_workspace:
-                root: /home/circleci
-                paths: ISB-CGC-Webapp
+                root: /home/circleci/ISB-CGC-Webapp
+                paths:
+                  - "*"
+                  - adminrestrict
+                  - blink_sass
+                  - demo
+                  - genes
+                  - sass
+                  - seqpeek
+                  - shell
+                  - tasks
+                  - variables
+                  - workbooks
+                  - analysis
+                  - bq_data_access
+                  - etc
+                  - GenespotRE
+                  - offline
+                  - scripts
+                  - session_security
+                  - templates
+                  - visualizations
+                  - ISB-CGC-Common
+
   deploy_job:
     environment:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
@@ -42,6 +69,9 @@ jobs:
     steps:
       - attach_workspace:
           at: /home/circleci
+      - restore_cache:
+          keys:
+            - lib-v1-{{ checksum "requirements.txt" }}
       - deploy:
           command: |
             sudo -E rm -rf ./lib
