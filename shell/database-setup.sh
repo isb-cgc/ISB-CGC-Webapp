@@ -47,7 +47,7 @@ mysql -u$MYSQL_ROOT_USER -h $MYSQL_DB_HOST -p$MYSQL_ROOT_PASSWORD -D$DATABASE_NA
 if [ ! -f ${HOMEROOT}/scripts/metadata_featdef_tables.sql ]; then
     # Sometimes CircleCI loses its authentication, re-auth with the dev key if we're on circleCI...
     if [ -n "$CI" ]; then
-        ${HOME}/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file ${HOMEROOT}/deployment.key.json
+        sudo ${HOME}/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file ${HOMEROOT}/deployment.key.json
     # otherwise just use privatekey.json
     else
         sudo ${HOME}/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file ${HOMEROOT}/privatekey.json

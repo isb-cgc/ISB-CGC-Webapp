@@ -31,7 +31,7 @@ jobs:
             sudo -E /bin/bash ./shell/database-setup.sh
       - persist_to_workspace:
                 root: /home/circleci
-                paths: ISB-CGC-WebApp
+                paths: ISB-CGC-Webapp
   deploy_job:
     environment:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
