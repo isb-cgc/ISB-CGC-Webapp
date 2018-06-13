@@ -30,7 +30,7 @@ fi
 
 # Install apt-get dependencies
 echo "Installing Dependencies..."
-apt-get install -qq -y --force-yes unzip libffi-dev libssl-dev libmysqlclient-dev python2.7-dev git ruby g++
+apt-get install -qq -y --force-yes unzip libffi-dev libssl-dev mysql-client libmysqlclient-dev python2.7-dev git ruby g++
 echo "Dependencies Installed"
 
 # Install PIP + Dependencies

@@ -1,5 +1,3 @@
-
-
 if [ -n "$CI" ]; then
     export HOME=/home/circleci/${CIRCLE_PROJECT_REPONAME}
     export HOMEROOT=/home/circleci/${CIRCLE_PROJECT_REPONAME}
@@ -10,6 +8,7 @@ else
     export HOME=/home/vagrant
     export HOMEROOT=/home/vagrant/www
     export MYSQL_ROOT_USER=root
+    export MYSQL_DB_HOST=localhost
 fi
 
 export PYTHONPATH=${HOMEROOT}/lib/:${HOMEROOT}/:${HOME}/google_appengine/:${HOME}/google_appengine/lib/protorpc-1.0/
