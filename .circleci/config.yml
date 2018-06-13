@@ -4,7 +4,7 @@ jobs:
     environment:
       TZ: "/usr/share/zoneinfo/America/Los_Angeles"
     name: Building Deployment Container
-    working_directory: ~/ISB-CGC-WebApp
+    working_directory: ~/ISB-CGC-Webapp
     docker:
       - image: circleci/python:2.7.14
       - image: circleci/mysql:5.7
