@@ -1,5 +1,5 @@
 if [ -n "$CI" ]; then
-    export HOME=/home/ubuntu
+    export HOME=/home/circleci
     export MYSQL_ROOT_USER=ubuntu
 else
     export $(cat /home/vagrant/www/.env | grep -v ^# | xargs) 2> /dev/null

@@ -4,7 +4,7 @@
 
 {% comment %}
 
-   Copyright 2016, Institute for Systems Biology
+   Copyright 2018, Institute for Systems Biology
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -314,8 +314,8 @@ TARGET-10-CAAABF-60.11C
                             <table id="cohort-counts-modal" class="table table-striped">
                                 <thead><tr>
                                         <th>Program</th>
-                                        <th>Samples</th>
                                         <th>Cases</th>
+                                        <th>Samples</th>
                                 </tr></thead>
                                 <tbody></tbody>
                             </table>
@@ -336,6 +336,7 @@ TARGET-10-CAAABF-60.11C
     <script type="text/javascript">
     var cohort_id = undefined;
     var PROGRAM_PREFIXES = {{ program_prefixes|tojson|safe }};
+    var FILE_SIZE_UPLOAD_MAX = {{ FILE_SIZE_UPLOAD_MAX }};
     </script>
 {% endblock %}
 

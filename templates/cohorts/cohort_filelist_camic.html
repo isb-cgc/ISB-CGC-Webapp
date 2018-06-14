@@ -1,29 +1,25 @@
 <div id="camic-files" class="tab-pane data-tab" data-file-type="camic" role="tabpanel">
     <div id="camic-file-panel" class="col-sm-12 col-md-12 col-lg-12">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <input type="submit" form ="view-camic" value="Launch caMicroscope" class="btn btn-primary pull-right nocap cam" />
-                <h4>Selected Image Files</h4>
-            </div>
-            <div class="panel-body file-list">
-                <div id="file-max-alert-cam" class="alert alert-warning alert-dismissable">
-                    <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                    The maximum number of images which can be queued for caMicroscope simultaneously is <span class="file-limit-camic">#</span>.
-                </div>
-                <p><span class="selected-count-camic">0</span> file(s) selected (<span id="selected-file-limit-camic">limit <span class="file-limit-camic file-limit">#</span></span>)</p>
-                <div id="tokenfield-holder-cam">
-                    <!-- "caM selected file tokenizer" -->
-                    <textarea name="selected-files-cam" class="form-control tokenfield" id="selected-files-cam" placeholder="Select files"></textarea>
-                </div>
-                <form id="view-camic" method="POST" action="{% url 'camic' %}" target="_blank">
-                    <input type="text" class="hidden_form_value" id="checked_list_input_camic" name="checked_list" data-type="checked_list">
-                    {% csrf_token %}
-                </form>
-            </div>
-        </div>
         <div class="filelist-panel panel">
             <div class="panel-heading">
                 <h4>File Listing</h4>
+                <div class="page-action-group pull-right">
+                    <ul>
+                        <li class="menu-item">
+                            <div class="filelist-obtain">
+                                <span class="pending-left" id="download-in-prog" style="display: none;"><i class="fa fa-circle-o-notch fa-spin"></i>Downloading...</span>
+                                <a class="download-link" href="{{ download_url }}" title="Download file manifest as CSV"><button class="btn btn-info download-btn">CSV</button></a>{# <a id="download-link" href="{{ download_url }}" title="Download file manifest as JSON"><button class="btn btn-info">JSON</button></a>#}
+                                <input type="hidden" class="download-token" value="" />
+                            </div>
+                        </li>
+                        <li class="menu-item">
+                            <div class="filelist-obtain">
+                                <button class="btn btn-info export-btn" data-toggle="modal" {% if has_user_data %}disabled {% endif %}data-target="#export-to-bq-modal" title="{% if has_user_data %}Export for file manifests containing user data is not available at this time.{% else %}Export this file manifest to a BigQuery table{% endif %}">BigQuery</button>
+                                <button class="btn btn-info export-btn" data-toggle="modal" {% if has_user_data %}disabled {% endif %}data-target="#export-to-gcs-modal" title="{% if has_user_data %}Export for file manifests containing user data is not available at this time.{% else %}Export this file manifest to a GCS bucket{% endif %}">GCS</button>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
             </div>
             <div class="panel-body">
                 <div class="dataTables_info">
@@ -40,13 +36,25 @@
                         </select>
                         <label>entries</label>
                     </div>
+                    <div class="dataTables_goto_page"><label>Page</label>
+                        <input type="number" class="goto-page-number" min="1" max="1">
+                        <input type="button" class="goto-page-button btn-sm" value="Go">
+                    </div>
                     <div class="dataTables_paginate">
                         <a class="prev-page paginate_button disabled">Previous</a>
                         <span class="paginate_button_space"/>
                         <a class="next-page paginate_button">Next</a>
                     </div>
                 </div>
-
+                <div class="column-inputs">
+                    <a role="button" data-toggle="collapse" href="#column-toggle-div-camic" aria-expanded="false" aria-controls="column-toggle-div-camic">
+                        Choose Columns to Display <i class="fa fa-caret-down"></i><i class="fa fa-caret-up"></i>
+                    </a>
+                    <div id="column-toggle-div-camic" class="column-collapse collapse">
+                        <div class="column-toggle"></div>
+                        <p>*Click on column names above to hide/show columns in table</p>
+                    </div>
+                </div>
                 <table class="table table-striped file-list-table sortable_table" aria-label="File Listing Table">
                     <thead>
                         <tr>
@@ -57,18 +65,16 @@
                             <th class="col-thumbnail sorting_disabled">Thumbnail</th>
                             <th class="col-datatype" columnId="col-datatype">Data Type</th>
                             <th class="col-dataformat" columnId="col-dataformat">Data Format</th>
-                            <th class="col-viewer sorting_disabled">View</th>
                         </tr>
                     </thead>
                     <colgroup>
                         <col style="width: 7%">
                         <col style="width: 10%">
-                        <col style="width: 35%">
+                        <col style="width: 40%">
                         <col style="width: 10%">
                         <col style="width: 14%">
                         <col style="width: 10%">
                         <col style="width: 9%">
-                        <col style="width: 5%">
                     </colgroup>
                     <tbody>
                     </tbody>
