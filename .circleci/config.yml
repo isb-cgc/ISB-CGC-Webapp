@@ -32,7 +32,7 @@ jobs:
       - save_cache:
           key: isb-cgc-webapp-{{ epoch }}
           paths:
-            - /home/circleci/ISB-CGC-Webapp
+            - ./
 
   deploy_job:
     environment:
