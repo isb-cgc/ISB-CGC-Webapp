@@ -1,6 +1,6 @@
 if [ -n "$CI" ]; then
-    export HOME=/home/ubuntu/${CIRCLE_PROJECT_REPONAME}
-    export HOMEROOT=/home/ubuntu/${CIRCLE_PROJECT_REPONAME}
+    export HOME=/home/circleci/${CIRCLE_PROJECT_REPONAME}
+    export HOMEROOT=/home/circleci/${CIRCLE_PROJECT_REPONAME}
 
     # Clone dependencies
     git clone -b isb-cgc-uat https://github.com/isb-cgc/ISB-CGC-Common.git
@@ -23,25 +23,46 @@ if [ -n "$CI" ]; then
     apt-get update -qq
 else
     # Add apt-get repository to update python from 2.7.6 (default) to latest 2.7.x
-    add-apt-repository -y ppa:fkrull/deadsnakes-python2.7
+    add-apt-repository -y ppa:jonathonf/python-2.7
     apt-get update -qq
     apt-get install -qq -y --force-yes python2.7
 fi
 
 # Install apt-get dependencies
 echo "Installing Dependencies..."
-apt-get install -qq -y --force-yes unzip libffi-dev libssl-dev libmysqlclient-dev python2.7-dev git ruby g++
+apt-get install -qq -y --force-yes unzip libffi-dev libssl-dev mysql-client libmysqlclient-dev python2.7-dev git ruby g++
 echo "Dependencies Installed"
 
 # Install PIP + Dependencies
-echo "Installing Python Libraries..."
+echo "Installing pip..."
 curl --silent https://bootstrap.pypa.io/get-pip.py | python
-if [ -z "$CI" ]; then
+
+# If this is local development, clean out lib for a re-structuring
+if [ -z "${CI}" ]; then
     # Clean out lib to prevent confusion over multiple builds in local development
+    # and prep for local install
+    echo "Emptying out ${HOMEROOT}/lib/ ..."
     rm -rf "${HOMEROOT}/lib/*"
+    mkdir "${HOMEROOT}/lib/endpoints_lib/"
 fi
+
+# Install our primary python libraries
+echo "Installing Python Libraries..."
 pip install -q -r ${HOMEROOT}/requirements.txt -t ${HOMEROOT}/lib --upgrade --only-binary all
+
+if [ -z "${CI}" ]; then
+    # Install the Endpoints library for API usage (separate directory because the WebApp doesn't need it
+    echo "Installing Google Endpoints for local API..."
+    pip install -t "${HOMEROOT}/lib/endpoints_lib/" google-endpoints==3.0.0 --only-binary --ignore-installed
+
+    # Delete the offending collision packages (socketserver and queue) which create issues with six
+    echo "Removing colliding packages (socketserver and queue)"
+    rm -rf "${HOMEROOT}/lib/endpoints_lib/queue"
+    rm -rf "${HOMEROOT}/lib/endpoints_lib/socketserver"
+fi
+
 if [ "$DEBUG" = "True" ] && [ "$DEBUG_TOOLBAR" = "True" ]; then
+    echo "Installing Django Debug Toolbar for local dev..."
     pip install -q django-debug-toolbar -t ${HOMEROOT}/lib --only-binary all
 fi
 
@@ -52,20 +73,9 @@ gem install sass
 
 # Install Google App Engine
 echo "Installing Google App Engine..."
-wget https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.38.zip -O ${HOME}/google_appengine.zip
+wget https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.69.zip -O ${HOME}/google_appengine.zip
 unzip -n -qq ${HOME}/google_appengine.zip -d $HOME
 export PATH=$PATH:${HOME}/google_appengine/
-# If we are in circleCI, we place the endpoints library into a directory where the Dockerfile can find it...
-if [ -n "$CI" ]; then
-    mkdir ${HOMEROOT}/endpoints/ 2> /dev/null
-    cp ${HOME}/google_appengine/lib/endpoints-1.0/endpoints/* ${HOMEROOT}/endpoints/
-else
-# ...otherwise, we place it directly into /lib/ with the other libraries
-    mkdir ${HOMEROOT}/lib/endpoints/ 2> /dev/null
-    cp ${HOME}/google_appengine/lib/endpoints-1.0/endpoints/* ${HOMEROOT}/lib/endpoints/
-fi
-
-ls ${HOMEROOT}
 
 echo "Google App Engine Installed"
 

@@ -67,29 +67,31 @@
             margin-top: 20px
         .lj-header-vid
             text-align: right
+            &.custom-width-55
+                width: 55%
         .lj-header-button
             text-align: left
-
-
-
-        .lj-header-button a
-            display: inline-block
-            color: #fff
-            text-align: center
-            background-color: transparent
-            font-family: 'Montserrat'
-            font-weight: 700
-            padding: 10px 20px
-            border: 2px solid #4cc2d6
-            -webkit-border-radius: 3px
-            -moz-border-radius: 3px
-            border-radius: 3px
-
-
-        .lj-header-button a:hover
-            color: #fff
-            background-color: darken($isb-primary, 10%)
-            border: 2px solid #4cc2d6
+            margin-top: 2px
+            a
+                display: inline-block
+                color: #fff
+                text-align: center
+                background-color: transparent
+                font-family: 'Montserrat'
+                font-weight: 700
+                padding: 8px 10px
+                border: 2px solid #4cc2d6
+                -webkit-border-radius: 3px
+                -moz-border-radius: 3px
+                border-radius: 3px
+                width: 200px
+                text-decoration: none
+                &:hover
+                    color: #fff
+                    background-color: darken($isb-primary, 10%)
+                    border: 2px solid #4cc2d6
+            &.custom-width-45
+                width: 45%
 
     .landing-content
         margin-top: 550px
