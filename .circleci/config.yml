@@ -22,7 +22,11 @@ jobs:
       - restore_cache:
           keys:
             - isb-cgc-webapp-lib-{{ checksum "requirements.txt" }}
+      - restore_cache:
+          keys:
             - isb-cgc-webapp-google-cloud-sdk-{{ checksum "shell/install-deps.sh" }}
+      - restore_cache:
+          keys:
             - isb-cgc-webapp-google-appengine-{{ checksum "shell/install-deps.sh" }}
       - run:
           name: Install Dependencies
@@ -89,7 +93,11 @@ jobs:
       - restore_cache:
           keys:
             - isb-cgc-webapp-
+      - restore_cache:
+          keys:
             - isb-cgc-webapp-google-cloud-sdk-
+      - restore_cache:
+          keys:
             - isb-cgc-webapp-google-appengine-
       - deploy:
           command: |
