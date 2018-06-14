@@ -44,7 +44,7 @@ jobs:
     steps:
       - restore_cache:
           keys:
-            - isb-cgc-webapp-{{ epoch }}
+            - isb-cgc-webapp-
       - deploy:
           command: |
             sudo -E rm -rf ./lib
