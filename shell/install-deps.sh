@@ -52,7 +52,7 @@ if [ -z "${CI}" ] || [ ! -d "lib" ]; then
     echo "Installing Python Libraries..."
     pip install -q -r ${HOMEROOT}/requirements.txt -t ${HOMEROOT}/lib --upgrade --only-binary all
 else
-    echo "Using restored cache for ./lib"
+    echo "Using restored cache for Python Libraries"
 fi
 
 if [ -z "${CI}" ]; then
