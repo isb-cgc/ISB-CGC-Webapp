@@ -19,10 +19,27 @@ jobs:
           name: Set Python Path
           command: |
             echo "export PYTHONPATH=/home/circleci/${CIRCLE_PROJECT_REPONAME}:/home/circleci/${CIRCLE_PROJECT_REPONAME}/lib" >> $BASH_ENV
+      - restore_cache:
+          keys:
+            - isb-cgc-webapp-lib-{{ checksum "requirements.txt" }}
+            - isb-cgc-webapp-google-cloud-sdk-{{ checksum "shell/install-deps.sh" }}
+            - isb-cgc-webapp-google-appengine-{{ checksum "shell/install-deps.sh" }}
       - run:
           name: Install Dependencies
           command: |
             sudo -E /bin/bash ./shell/install-deps.sh
+      - save_cache:
+          key: isb-cgc-webapp-lib-{{ checksum "requirements.txt" }}
+          paths:
+            - ./lib
+      - save_cache:
+          key: isb-cgc-webapp-google-cloud-sdk-{{ checksum "./shell/install-deps.sh" }}
+          paths:
+            - ./google-cloud-sdk
+      - save_cache:
+          key: isb-cgc-webapp-google-appengine-{{ checksum "./shell/install-deps.sh" }}
+          paths:
+            - ./google_appengine
       - run:
           name: Auth, Staging, and Database testing
           command: |
@@ -43,8 +60,6 @@ jobs:
             - ./analysis
             - ./bq_data_access
             - ./etc
-            - ./google-cloud-sdk
-            - ./google_appengine
             - ./GenespotRE
             - ./offline
             - ./scripts
@@ -74,6 +89,8 @@ jobs:
       - restore_cache:
           keys:
             - isb-cgc-webapp-
+            - isb-cgc-webapp-google-cloud-sdk-
+            - isb-cgc-webapp-google-appengine-
       - deploy:
           command: |
             sudo -E rm -rf ./lib
