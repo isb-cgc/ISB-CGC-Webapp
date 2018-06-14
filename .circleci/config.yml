@@ -44,6 +44,7 @@ jobs:
             - ./bq_data_access
             - ./etc
             - ./google-cloud-sdk
+            - ./google_appengine
             - ./GenespotRE
             - ./offline
             - ./scripts
