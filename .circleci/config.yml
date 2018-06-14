@@ -32,7 +32,36 @@ jobs:
       - save_cache:
           key: isb-cgc-webapp-{{ epoch }}
           paths:
-            - /home/circleci/ISB-CGC-Webapp
+            - ./adminrestrict
+            - ./demo
+            - ./genes
+            - ./seqpeek
+            - ./shell
+            - ./tasks
+            - ./variables
+            - ./workbooks
+            - ./analysis
+            - ./bq_data_access
+            - ./etc
+            - ./lib
+            - ./google-cloud-sdk
+            - ./GenespotRE
+            - ./offline
+            - ./scripts
+            - ./session_security
+            - ./templates
+            - ./visualizations
+            - ./ISB-CGC-Common
+            - ./Dockerfile
+            - ./main.py
+            - ./appengine_config.py
+            - ./.dockerignore
+            - ./app.yaml
+            - ./gunicorn.conf.py
+            - ./manage.py
+            - ./LICENSE.txt
+            - ./*.json
+            - ./.env
 
   deploy_job:
     environment:
