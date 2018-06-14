@@ -77,7 +77,7 @@ jobs:
           command: |
             sudo -E rm -rf ./lib
             sudo -E /bin/bash ./shell/gcloud_authenticate.sh
-            suco -E /bin/bash ./shell/unpack_for_deployment.sh
+            sudo -E /bin/bash ./shell/unpack_for_deployment.sh
             sudo -E ./google-cloud-sdk/bin/gcloud app deploy --verbosity=debug ./app.yaml --quiet
 workflows:
   version: 2
