@@ -30,34 +30,9 @@ jobs:
             sudo -E /bin/bash ./shell/gcloud-pull-staging-files.sh
             sudo -E /bin/bash ./shell/database-setup.sh
       - save_cache:
-          key: lib-v1-{{ checksum "requirements.txt" }}
+          key: isb-cgc-webapp-{{ epoch }}
           paths:
-            - lib
-            - google-cloud-sdk
-      - persist_to_workspace:
-          root: /home/circleci/
-          paths:
-            - ISB-CGC-Webapp/adminrestrict
-            - ISB-CGC-Webapp/demo
-            - ISB-CGC-Webapp/genes
-            - ISB-CGC-Webapp/seqpeek
-            - ISB-CGC-Webapp/shell
-            - ISB-CGC-Webapp/tasks
-            - ISB-CGC-Webapp/variables
-            - ISB-CGC-Webapp/workbooks
-            - ISB-CGC-Webapp/analysis
-            - ISB-CGC-Webapp/bq_data_access
-            - ISB-CGC-Webapp/etc
-            - ISB-CGC-Webapp/GenespotRE
-            - ISB-CGC-Webapp/offline
-            - ISB-CGC-Webapp/scripts
-            - ISB-CGC-Webapp/session_security
-            - ISB-CGC-Webapp/templates
-            - ISB-CGC-Webapp/visualizations
-            - ISB-CGC-Webapp/ISB-CGC-Common
-            - ISB-CGC-Webapp/*.*
-            - ISB-CGC-Webapp/Dockerfile
-            - ISB-CGC-Webapp/.dockerignore
+            - "*"
 
   deploy_job:
     environment:
@@ -67,11 +42,9 @@ jobs:
       - image: circleci/python:2.7.14
     working_directory: ~/ISB-CGC-Webapp
     steps:
-      - attach_workspace:
-          at: /home/circleci
       - restore_cache:
           keys:
-            - lib-v1-{{ checksum "requirements.txt" }}
+            - isb-cgc-webapp-{{ epoch }}
       - deploy:
           command: |
             sudo -E rm -rf ./lib
