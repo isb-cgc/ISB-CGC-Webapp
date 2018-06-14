@@ -47,8 +47,13 @@ if [ -z "${CI}" ]; then
 fi
 
 # Install our primary python libraries
-echo "Installing Python Libraries..."
-pip install -q -r ${HOMEROOT}/requirements.txt -t ${HOMEROOT}/lib --upgrade --only-binary all
+# If we're not on CircleCI, or we are but the lib directory isn't there (cache miss), install lib
+if [ -z "${CI}" ] || [ ! -d "lib" ]; then
+    echo "Installing Python Libraries..."
+    pip install -q -r ${HOMEROOT}/requirements.txt -t ${HOMEROOT}/lib --upgrade --only-binary all
+else
+    echo "Using restored cache for ./lib"
+fi
 
 if [ -z "${CI}" ]; then
     # Install the Endpoints library for API usage (separate directory because the WebApp doesn't need it
@@ -72,17 +77,26 @@ echo "Libraries Installed"
 gem install sass
 
 # Install Google App Engine
-echo "Installing Google App Engine..."
-wget https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.69.zip -O ${HOME}/google_appengine.zip
-unzip -n -qq ${HOME}/google_appengine.zip -d $HOME
-export PATH=$PATH:${HOME}/google_appengine/
-
-echo "Google App Engine Installed"
+# If we're not on CircleCI or we are but google_appengine isn't there, install it
+if [ -z "${CI}" ] || [ ! -d "google_appengine" ]; then
+    echo "Installing Google App Engine..."
+    wget https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.69.zip -O ${HOME}/google_appengine.zip
+    unzip -n -qq ${HOME}/google_appengine.zip -d $HOME
+    export PATH=$PATH:${HOME}/google_appengine/
+    echo "Google App Engine Installed"
+else
+    echo "Using restored cache for Google App Engine."
+fi
 
 # Install Google Cloud SDK
-echo "Installing Google Cloud SDK..."
-export CLOUDSDK_CORE_DISABLE_PROMPTS=1
-curl https://sdk.cloud.google.com | bash
-export PATH=$PATH:${HOME}/google-cloud-sdk/bin
-echo 'export PATH=$PATH:${HOME}/google-cloud-sdk/bin' | tee -a ${HOME}/.bash_profile
-echo "Google Cloud SDK Installed"
+# If we're not on CircleCI or we are but google-cloud-sdk isn't there, install it
+if [ -z "${CI}" ] || [ ! -d "google-cloud-sdk" ]; then
+    echo "Installing Google Cloud SDK..."
+    export CLOUDSDK_CORE_DISABLE_PROMPTS=1
+    curl https://sdk.cloud.google.com | bash
+    export PATH=$PATH:${HOME}/google-cloud-sdk/bin
+    echo 'export PATH=$PATH:${HOME}/google-cloud-sdk/bin' | tee -a ${HOME}/.bash_profile
+    echo "Google Cloud SDK Installed"
+else
+    echo "Using restored cache for Google Cloud SDK."
+fi
