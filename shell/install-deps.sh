@@ -51,6 +51,8 @@ fi
 if [ -z "${CI}" ] || [ ! -d "lib" ]; then
     echo "Installing Python Libraries..."
     pip install -q -r ${HOMEROOT}/requirements.txt -t ${HOMEROOT}/lib --upgrade --only-binary all
+else
+    echo "Using restored cache for ./lib"
 fi
 
 if [ -z "${CI}" ]; then
@@ -82,6 +84,8 @@ if [ -z "${CI}" ] || [ ! -d "google_appengine" ]; then
     unzip -n -qq ${HOME}/google_appengine.zip -d $HOME
     export PATH=$PATH:${HOME}/google_appengine/
     echo "Google App Engine Installed"
+else
+    echo "Using restored cache for Google App Engine."
 fi
 
 # Install Google Cloud SDK
@@ -93,4 +97,6 @@ if [ -z "${CI}" ] || [ ! -d "google-cloud-sdk" ]; then
     export PATH=$PATH:${HOME}/google-cloud-sdk/bin
     echo 'export PATH=$PATH:${HOME}/google-cloud-sdk/bin' | tee -a ${HOME}/.bash_profile
     echo "Google Cloud SDK Installed"
+else
+    echo "Using restored cache for Google Cloud SDK."
 fi
