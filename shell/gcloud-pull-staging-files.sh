@@ -15,5 +15,19 @@ mkdir ./txt
 cp *.json ./json
 cp *.txt ./txt
 
-echo "Beginning rsync of /static..."
-./google-cloud-sdk/bin/gsutil rsync -R static/ gs://webapp-uat-static-files/static
+# Pull down the previous checksum
+./google-cloud-sdk/bin/gsutil cp gs://webapp-uat-static-files/static/static.md5 ./
+
+# Calculate the current checksum
+STATIC_MD5=`tar -cf - static | md5sum | awk '{ print $1 }'`
+
+# Compare them--if we found a prior one and it matched, no need to upload; otherwise, upload.
+if [ -f "static.md5" ] && [ "$STATIC_MD5" == "$(cat static.md5)" ]; then
+    echo "Static folder contents have not changed -- skipping rsync"
+else
+    echo "Beginning rsync of /static..."
+    ./google-cloud-sdk/bin/gsutil rsync -R static/ gs://webapp-uat-static-files/static
+    echo "Replacing static checksum..."
+    tar -cf - static | md5sum | awk '{ print $1 }' > static.md5
+    ./google-cloud-sdk/bin/gsutil cp static.md5 gs://webapp-uat-static-files/static
+fi
