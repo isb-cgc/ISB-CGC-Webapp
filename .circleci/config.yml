@@ -24,10 +24,7 @@ jobs:
             - isb-cgc-webapp-lib-{{ checksum "requirements.txt" }}
       - restore_cache:
           keys:
-            - isb-cgc-webapp-google-cloud-sdk-{{ checksum "shell/install-deps.sh" }}
-      - restore_cache:
-          keys:
-            - isb-cgc-webapp-google-appengine-{{ checksum "shell/install-deps.sh" }}
+            - isb-cgc-webapp-google-deps-{{ checksum "shell/install-deps.sh" }}
       - run:
           name: Install Dependencies
           command: |
@@ -37,12 +34,9 @@ jobs:
           paths:
             - ./lib
       - save_cache:
-          key: isb-cgc-webapp-google-cloud-sdk-{{ checksum "./shell/install-deps.sh" }}
+          key: isb-cgc-webapp-google-deps-{{ checksum "./shell/install-deps.sh" }}
           paths:
             - ./google-cloud-sdk
-      - save_cache:
-          key: isb-cgc-webapp-google-appengine-{{ checksum "./shell/install-deps.sh" }}
-          paths:
             - ./google_appengine
       - run:
           name: Auth, Staging, and Database testing
@@ -95,10 +89,7 @@ jobs:
             - isb-cgc-webapp-
       - restore_cache:
           keys:
-            - isb-cgc-webapp-google-cloud-sdk-
-      - restore_cache:
-          keys:
-            - isb-cgc-webapp-google-appengine-
+            - isb-cgc-webapp-google-deps-
       - deploy:
           command: |
             sudo -E rm -rf ./lib
