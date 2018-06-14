@@ -43,7 +43,6 @@ jobs:
             - ./analysis
             - ./bq_data_access
             - ./etc
-            - ./lib
             - ./google-cloud-sdk
             - ./GenespotRE
             - ./offline
@@ -59,7 +58,7 @@ jobs:
             - ./app.yaml
             - ./gunicorn.conf.py
             - ./manage.py
-            - ./LICENSE.txt
+            - ./*.txt
             - ./*.json
             - ./.env
 
