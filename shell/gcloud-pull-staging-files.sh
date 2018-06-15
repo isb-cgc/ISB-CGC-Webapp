@@ -14,6 +14,3 @@ mkdir ./txt
 # Pack staged files for caching
 cp *.json ./json
 cp *.txt ./txt
-
-echo "Beginning rsync of /static..."
-./google-cloud-sdk/bin/gsutil rsync -R static/ gs://webapp-uat-static-files/static
