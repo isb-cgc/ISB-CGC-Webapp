@@ -25,6 +25,7 @@ STATIC_MD5=`tar -cf - static | md5sum | awk '{ print $1 }'`
 if [ -f "static.md5" ] && [ "$STATIC_MD5" == "$(cat static.md5)" ]; then
     echo "Static folder contents have not changed -- skipping rsync"
 else
+    echo "Checksum mismatch: calculated ${STATIC_MD5} but found $(cat static.md5)!"
     echo "Beginning rsync of /static..."
     ./google-cloud-sdk/bin/gsutil rsync -R static/ gs://webapp-uat-static-files/static
     echo "Replacing static checksum..."
