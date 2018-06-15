@@ -63,6 +63,10 @@
                 </h5>
             </div>
             <div class="panel-body">
+                {% if DCF_TEST %}
+                <p><a href="">Log in via DCF</a></p>
+                <hr>
+                {% endif %}
                 {% if NIH_AUTH_ON %}
                     {% include 'GenespotRE/user_detail_saml.html' %}
                     {% block saml_content %}
