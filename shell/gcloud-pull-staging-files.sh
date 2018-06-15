@@ -16,7 +16,7 @@ cp *.json ./json
 cp *.txt ./txt
 
 # Pull down the previous checksum
-./google-cloud-sdk/bin/gsutil cp gs://webapp-uat-static-files/static/static.md5 ./
+./google-cloud-sdk/bin/gsutil cp gs://${GCLOUD_BUCKET_UAT}/static.md5 ./
 
 # Calculate the current checksum
 STATIC_MD5=`tar -cf - static | md5sum | awk '{ print $1 }'`
@@ -29,5 +29,5 @@ else
     ./google-cloud-sdk/bin/gsutil rsync -R static/ gs://webapp-uat-static-files/static
     echo "Replacing static checksum..."
     tar -cf - static | md5sum | awk '{ print $1 }' > static.md5
-    ./google-cloud-sdk/bin/gsutil cp static.md5 gs://webapp-uat-static-files/static
+    ./google-cloud-sdk/bin/gsutil cp static.md5 gs://${GCLOUD_BUCKET_UAT}/
 fi
