@@ -58,6 +58,7 @@ jobs:
             - ./analysis
             - ./bq_data_access
             - ./etc
+            - ./static
             - ./GenespotRE
             - ./offline
             - ./scripts
