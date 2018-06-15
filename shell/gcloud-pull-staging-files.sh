@@ -1,3 +1,6 @@
+mkdir ./json
+mkdir ./txt
+
 ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_DEV}/${DEV_ENV_FILE}" ./.env
 ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_DEV}/${DEV_SECRETS_FILE}" ./client_secrets.json
 ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_DEV}/${DEV_JSON_FILE}" ./privatekey.json
@@ -16,4 +19,6 @@ if [ -n "${DEV_NIH_AUTH_ON}" ]; then
   ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_DEV}/NIH_FTP.txt" ./NIH_FTP.txt
 fi
 
-./google-cloud-sdk/bin/gsutil rsync -R static/ gs://webapp-dev-static-files/static
+# Pack staged files for caching
+cp *.json ./json
+cp *.txt ./txt
