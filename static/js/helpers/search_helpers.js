@@ -292,7 +292,7 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             if (program_id != '0') {
                 program_selector = '#' + program_id + '-data ';
             }
-            $(program_selector + '.selected-filters .panel-body span').each(function() {
+            $(program_selector + '.selected-filters .panel-body span.filter-token').each(function() {
                 var $this = $(this),
                     key = $this.data('feature-name'),
                     val = $this.data('value-name');
@@ -324,7 +324,8 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             if (filters) {
                 url += 'filters=' + encodeURIComponent(JSON.stringify(filters)) + '&';
             }
-            console.log(url)
+
+            url += 'mut_filter_combine='+$('.mut-filter-combine :selected').val();
             return url;
         },
 

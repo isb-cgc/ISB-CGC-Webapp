@@ -152,8 +152,6 @@ class Workbook(models.Model):
     def is_shareable(self, request):
         is_shareable = (self.owner.id == request.user.id)
 
-        logger.debug("Shareable: {}".format(str(is_shareable)))
-
         if is_shareable:
             for worksheet in self.get_deep_worksheets():
                 # Check all cohorts are owned by the user
@@ -173,8 +171,6 @@ class Workbook(models.Model):
 
                 if not is_shareable:
                     break
-
-        logger.debug("Shareable: {}".format(str(is_shareable)))
 
         return is_shareable
 
