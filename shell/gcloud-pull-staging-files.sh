@@ -11,6 +11,8 @@ mkdir ./txt
 ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_UAT}/${MANAGED_SERVICE_ACCOUNTS_JSON_FILE}" ./
 ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_UAT}/${GOOGLE_ORG_WHITELIST_JSON_FILE}" ./
 
+./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_UAT}/static_last_commit.txt" ./
+
 # Pack staged files for caching
 cp *.json ./json
 cp *.txt ./txt
