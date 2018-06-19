@@ -165,6 +165,9 @@ def get_confirmed_project_ids_for_cohorts(cohort_id_array):
                 confirmed_study_ids.append(project.id)
             else:
                 user_only_study_ids.append(project.id)
+
+    logger.info("In get_confirmed_project_ids_for_cohorts, confirmed study IDs: {}".format(str(confirmed_study_ids)))
+
     return confirmed_study_ids, user_only_study_ids
 
 
@@ -264,7 +267,7 @@ def data_access_for_plot(request):
 
         if len(user_programs):
             program_set.update(user_programs)
-            confirmed_study_ids = user_only_study_ids
+            confirmed_study_ids += user_only_study_ids
 
         data = get_merged_feature_vectors(fvb, x_id, y_id, c_id, cohort_id_array, logTransform, confirmed_study_ids, program_set=program_set)
 
