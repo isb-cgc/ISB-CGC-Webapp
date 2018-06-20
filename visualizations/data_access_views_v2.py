@@ -265,6 +265,9 @@ def data_access_for_plot(request):
 
         user_programs = get_user_program_id_set_for_user_only_projects(user_only_study_ids)
 
+        # Fix for #2381: confirmed_study_ids MUST ALWAYS contain the public dataset project IDs, because that's how we
+        # enable older cohorts which didn't story project IDs (check for NULL) against ones where we did (require the project
+        # ID be one of our known public projects, or a user-data only project
         if len(user_programs):
             program_set.update(user_programs)
             confirmed_study_ids += user_only_study_ids
