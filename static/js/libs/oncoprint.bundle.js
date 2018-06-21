@@ -968,12 +968,12 @@ var Oncoprint = (function () {
 	this.id_clipboard = [];
 	this.clipboard_change_callbacks = [];
     }
-
+	var legend_div_top_margin = 60;
     var _SetLegendTop = function (oncoprint) {
 	if (oncoprint.model.rendering_suppressed_depth > 0) {
 	    return;
 	}
-	oncoprint.$legend_div.css({'top': oncoprint.model.getCellViewHeight() + 60});
+	oncoprint.$legend_div.css({'top': oncoprint.model.getCellViewHeight() + legend_div_top_margin});
     };
     var setLegendTopAfterTimeout = function (oncoprint) {
 	if (oncoprint.model.rendering_suppressed_depth > 0) {
@@ -986,7 +986,7 @@ var Oncoprint = (function () {
     };
 
     var setHeight = function(oncoprint) {
-	oncoprint.$ctr.css({'min-height': oncoprint.model.getCellViewHeight() + Math.max(oncoprint.$legend_div.outerHeight(), (oncoprint.$minimap_div.is(":visible") ? oncoprint.$minimap_div.outerHeight() : 0)) + 30});
+	oncoprint.$ctr.css({'min-height': oncoprint.model.getCellViewHeight() + Math.max(oncoprint.$legend_div.outerHeight(), (oncoprint.$minimap_div.is(":visible") ? oncoprint.$minimap_div.outerHeight() : 0)) + legend_div_top_margin});
     };
 
     var resizeAndOrganize = function (oncoprint) {
@@ -2035,9 +2035,22 @@ var OncoprintLegendView = (function() {
 	var root = svgfactory.group(0,0);
 	var config = rule.getLegendConfig();
 	if (config.type === 'rule') {
+
 	    var concrete_shapes = rule.apply(config.target, model.getCellWidth(true), view.base_height);
+	    var background_rectagle = {
+	    	"type": "rectangle",
+			"fill": "rgba(190, 190, 190, 1)",
+			"x":0,
+			"y":0,
+			"z": 0,
+			"width": 6,
+			"height": 20,
+			"stroke-width": "0",
+			"stroke": "rgba(0,0,0,0)"
+	    };
 	    for (var i=0; i<concrete_shapes.length; i++) {
-		root.appendChild(svgfactory.fromShape(concrete_shapes[i], 0, 0));
+	    	root.appendChild(svgfactory.fromShape(background_rectagle, 0, 0));
+	    	root.appendChild(svgfactory.fromShape(concrete_shapes[i], 0, 0));
 	    }
 	    if (typeof rule.legend_label !== 'undefined') {
 		var font_size = 12;
@@ -2892,6 +2905,7 @@ var OncoprintMinimapView = (function () {
     };
 
     var drawOverlayRect = function (view, model, cell_view, opt_rect) {
+
 	if (view.rendering_suppressed) {
 	    return;
 	}
@@ -4567,7 +4581,7 @@ var RuleSet = (function () {
 	// Returns a list of lists of concrete shapes, in the same order as data
 	var ret = [];
 	for (var i = 0; i < data.length; i++) {
-	    var rules = this.getRulesWithId(data[i]);
+		var rules = this.getRulesWithId(data[i]);
 	    if (typeof out_active_rules !== 'undefined') {
 		for (var j = 0; j < rules.length; j++) {
 		    out_active_rules[rules[j].id] = true;
@@ -4593,21 +4607,41 @@ var LookupRuleSet = (function () {
     LookupRuleSet.prototype = Object.create(RuleSet.prototype);
 
     LookupRuleSet.prototype.getRulesWithId = function (datum) {
-	if (typeof datum === 'undefined') {
+
+    if (typeof datum === 'undefined') {
 	    return this.rules_with_id;
 	}
 	var ret = [];
 	ret = ret.concat(this.universal_rules);
+
 	for (var key in datum) {
 	    if (typeof datum[key] !== 'undefined') {
-		var key_rule = this.lookup_map_by_key[key];
-		if (typeof key_rule !== 'undefined') {
-		    ret.push(key_rule);
-		}
-		var key_and_value_rule = (this.lookup_map_by_key_and_value[key] && this.lookup_map_by_key_and_value[key][datum[key]]) || undefined;
-		if (typeof key_and_value_rule !== 'undefined') {
-		    ret.push(key_and_value_rule);
-		}
+	    	if(key == 'disp_mut'){
+				var lookup_map_by_key = this.lookup_map_by_key;
+				var lookup_map_by_key_and_value = this.lookup_map_by_key_and_value;
+				Object.keys(datum[key]).map(function(type){
+					var key_rule = lookup_map_by_key[type];
+					if (typeof key_rule !== 'undefined') {
+						ret.push(key_rule);
+					}
+					var key_and_value_rule = (lookup_map_by_key_and_value[key] && lookup_map_by_key_and_value[key][type]) || undefined;
+					if (typeof key_and_value_rule !== 'undefined') {
+						ret.push(key_and_value_rule);
+                    }
+				});
+
+			}
+			else{
+				var key_rule = this.lookup_map_by_key[key];
+				if (typeof key_rule !== 'undefined') {
+					ret.push(key_rule);
+				}
+				var key_and_value_rule = (this.lookup_map_by_key_and_value[key] && this.lookup_map_by_key_and_value[key][datum[key]]) || undefined;
+				if (typeof key_and_value_rule !== 'undefined') {
+					ret.push(key_and_value_rule);
+				}
+			}
+
 	    }
 	}
 	return ret;
@@ -5648,7 +5682,7 @@ var OncoprintToolTip = (function() {
     function OncoprintToolTip($container, params) {
 	params = params || {};
 	this.$container = $container;
-	this.$div = $('<div></div>').appendTo($container).css({'background-color':'rgba(255,255,255,1)', 'position':'absolute', 'display':'none', 'border':'1px solid black', 'max-width':300, 'min-width':150});
+	this.$div = $('<div></div>').appendTo($container).css({'background-color':'rgba(255,255,255,1)', 'position':'absolute', 'display':'none', 'border':'1px solid black', 'width':150});
 	if (params.noselect) {
 	    this.$div.addClass("noselect");
 	}
@@ -5692,7 +5726,8 @@ var OncoprintToolTip = (function() {
 	    tt.$div.stop().fadeIn('fast');
 	}
 	var container_offset = tt.$container.offset();
-	var y = page_y - container_offset.top + 5;
+	var h = tt.$div.height()
+	var y = page_y - container_offset.top -(h > 40 ? 50 : h > 150 ? 100 : 5);
 	var x = page_x - container_offset.left - tt.$div.width() - 5;
 	tt.$div.css({'top':y, 'left':x, 'z-index':9999});
 	tt.shown = true;
@@ -6022,7 +6057,7 @@ var OncoprintTrackOptionsView = (function () {
 	var $div, $img, $sortarrow, $dropdown;
 	var top = model.getZoomedTrackTops(track_id);
 	$div = $('<div>').appendTo(view.$buttons_ctr).css({'position': 'absolute', 'left': '0px', 'top': top + 'px', 'white-space': 'nowrap'});
-	$img = $('<img/>').appendTo($div).attr({'src': '/static/img/menudots.svg', 'width': view.img_size, 'height': view.img_size}).css({'float': 'left', 'cursor': 'pointer', 'border': '1px solid rgba(125,125,125,0)'});
+	$img = $('<img/>').appendTo($div).attr({'src': static_img_url+'menudots.svg', 'width': view.img_size, 'height': view.img_size}).css({'float': 'left', 'cursor': 'pointer', 'border': '1px solid rgba(125,125,125,0)'});
 	$sortarrow = $('<span>').appendTo($div).css({'position': 'absolute', 'top': Math.floor(view.img_size / 4) + 'px'});
 	$dropdown = $('<ul>').appendTo(view.$dropdown_ctr).css({'position':'absolute', 'width': 120, 'display': 'none', 'list-style-type': 'none', 'padding-left': '6', 'padding-right': '6', 'float': 'right', 'background-color': 'rgb(255,255,255)',
 								'left':'0px', 'top': top + view.img_size + 'px'});

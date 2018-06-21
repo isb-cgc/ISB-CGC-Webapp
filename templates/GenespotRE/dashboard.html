@@ -135,11 +135,17 @@
                                        <span class="list-title" title="{{ cohort.name|wrap_text }}">{{ cohort.name }}</span>
                                    </div>
                                </a>
+                               {% if not cohort.only_user_data %}
                                <a href="{% url 'cohort_filelist' cohort.id %}">
                                    <div class="list-link">
-                                       <span class="list-title" title="Browse this cohort's file manifest">File browser</span>
+                                       <span class="list-title file-browser-link" title="Browse this cohort's file manifest">File browser</span>
                                    </div>
                                </a>
+                               {% else %}
+                                   <div class="list-link">
+                                       <span class="list-title file-browser-link" title="File browsing is unavailable for cohorts which contain only user data.">File Browser</span>
+                                   </div>
+                               {% endif %}
                                <div class="list-info col-3">
                                    <span>{{ cohort.last_date_saved|date:'M d, Y, g:i a' }}</span>
                                </div>

@@ -309,13 +309,19 @@ require([
 
     // gather the options and selections on a variable, used for gathering the color_by variable
     function get_simple_values(selection) {
-        var result;
-        result = {variable: selection.find(":selected").val(), type : "common", options: []};
+        var result = {variable: selection.find(":selected").val(), type : "common", options: []};
         $(selection).find("option").each(function(i,ele){
            result.options.push({value : $(ele).val(), text : $(ele).text()});
         });
         return result;
     };
+
+    function get_simple_checkbox_values(selection){
+        var checked_vals = selection.map(function () {
+                    return this.value;}).get()
+        result = {values: checked_vals, type : "checkbox"};
+        return result;
+    }
 
     // gather the options and selections on a variable in the plot settings
     function get_values(selection){
@@ -335,13 +341,6 @@ require([
                 result['logTransform'] = true;
             }
         }
-        // else if(selection.attr("type") == "checkbox") {
-        //     result = {
-        //         variable: selection.val(),
-        //         text: selection.text(),
-        //         type: "checkbox"
-        //     };
-        // }
         else {
             result = {variable : selection.val(), type : "gene"};
             var parent = selection.parents(".variable-container");
@@ -801,6 +800,7 @@ require([
         var swap = settings_flyout.find('button.swap');
         var sp_genes = settings_flyout.find('.seqpeek-genes');
         var op_genes = settings_flyout.find('.oncoprint-genes');
+        var and_or_variables_label = $('.worksheet.active .and_or_variables_label');
         var xLogCheck = $('#'+active_worksheet+'-x-log-transform').parent();
         var yLogCheck = $('#'+active_worksheet+'-y-log-transform').parent();
 
@@ -816,6 +816,7 @@ require([
         swap.show();
         sp_genes.hide();
         op_genes.hide();
+        and_or_variables_label.show();
         switch (plot_type){
             case "Bar Chart" : //x_type == 'STRING' && y_type == 'none'
                 y_widgets.hide();
@@ -848,6 +849,7 @@ require([
                 break;
             case 'SeqPeek':
                 sp_genes.show();
+                and_or_variables_label.hide();
                 x_widgets.hide();
                 y_widgets.hide();
                 c_widgets.hide();
@@ -857,12 +859,14 @@ require([
                 break;
             case 'OncoPrint':
                 op_genes.show();
+                and_or_variables_label.hide();
                 x_widgets.hide();
                 y_widgets.hide();
                 c_widgets.hide();
                 xLogCheck.hide();
                 yLogCheck.hide();
                 swap.hide();
+
                 break;
             default :
                 break;
@@ -871,10 +875,11 @@ require([
 
     // generate plot upon user click
     $('.update-plot').on('click', function(event){
+
         if($('.toggle-selection').hasClass('active')) {
             $('.toggle-selection').click();
         }
-        if(valid_plot_settings($(this).parent())) {
+        if (($(this).parent())) {
             var data = get_plot_info_on_page($(this).parent());
             update_plot_model(workbook_id, data.worksheet_id, data.plot_id, data.attrs, data.selections, data.logTransform, function(result){
                 generate_plot({ worksheet_id : data.worksheet_id,
@@ -890,6 +895,10 @@ require([
                 hide_plot_settings();
             });
         }
+    });
+
+    $('.select-all-genes-checkbox').on('click', function(event){
+        $('.worksheet.active').find(".gene-selex").prop("checked", $(this).prop("checked"));
     });
 
     $('.resubmit-button').on("click", function(){
@@ -926,9 +935,7 @@ require([
         }
 
         var worksheet_id = $(plot_settings).find('.update-plot').attr("worksheet_id");
-
         var xLog = $(plot_settings).find('#'+worksheet_id+'-x-log-transform'), yLog = $(plot_settings).find('#'+worksheet_id+'-y-log-transform');
-
         var result = {
             worksheet_id : worksheet_id,
             plot_type    : $('#'+worksheet_id+'-analysis-type').val(),
@@ -937,8 +944,8 @@ require([
                 x_axis   : get_values($(plot_settings).find('.x-axis-select').find(":selected")),
                 y_axis   : get_values($(plot_settings).find('.y-axis-select').find(":selected")),
                 color_by : get_simple_values(plot_settings.find('.color_by')),
-                gene_label: get_simple_values(plot_settings.find('#'+worksheet_id+'gene_label')),
-                //gene_list: get_values(plot_settings.find('[name="gene-checkbox"]'))
+                gene_label: get_simple_values(plot_settings.find('#'+worksheet_id+'-gene_label')),
+                gene_list: get_simple_checkbox_values(plot_settings.find('.gene-checkbox:checkbox:checked'))
             },
             attrs : {
                 type    : worksheet.find('.plot_selection :selected').val(),
@@ -949,8 +956,8 @@ require([
                     return {id: this.value, cohort_id: $(this).attr("cohort-id")};
                 }).get(),
                 gene_label: plot_settings.find('#'+worksheet_id+'-gene_label :selected').val(),
-                gene_list: plot_settings.find('[name="gene-checkbox"]:checked').map(function () {
-                   return this.value;
+                gene_list: plot_settings.find('.gene-selex:checked').map(function () {
+                    return this.value;
                 }).get()
             },
             logTransform: {
@@ -963,7 +970,6 @@ require([
             },
             color_by_sel: plot_settings.find('.color_by :selected').val() !== null && plot_settings.find('.color_by :selected').val() !== ""
         }
-
         return result;
     }
 
@@ -1022,9 +1028,11 @@ require([
             axisRdy = false;
         } else{
             var plot_val = $('.worksheet.active').find('.plot_selection :selected').val();
-            if(plot_val == 'SeqPeek' &&
-                !$('#' + $('.worksheet.active').attr('id') + '-gene_label').find(':selected').val()) {
+
+            if(plot_val == 'SeqPeek'){
+                if(!$('#' + $('.worksheet.active').attr('id') + '-gene_label').find(':selected').val()) {
                     axisRdy = false;
+                }
             }
             else if(plot_val == 'OncoPrint'){
                 axisRdy = false;
@@ -1032,6 +1040,10 @@ require([
                     if($(this).is(':checked')) {
                         axisRdy = true;
                     }
+                    else{
+                        $('.worksheet.active').find('.select-all-genes-checkbox').prop('checked', false);
+                    }
+
                 });
             }
             else{
@@ -1078,7 +1090,7 @@ require([
         cohort_selex_update();
     });
 
-    $('.axis-select, .gene-selex').on('change',function(e){
+    $('.axis-select, .gene-selex, .select-all-genes-checkbox').on('change',function(e){
         axis_selex_update();
     });
 
@@ -1108,6 +1120,7 @@ require([
                                         y            : data.attrs.y_axis.url_code,
                                         logTransform : data.logTransform,
                                         gene_label   : data.attrs.gene_label,
+                                        gene_list    : data.attrs.gene_list,
                                         color_by     : data.attrs.color_by.url_code,
                                         cohorts      : data.attrs.cohorts,
                                         color_by_sel : data.color_by_sel});
@@ -1135,7 +1148,7 @@ require([
             return (data.attrs.gene_label !== undefined && data.attrs.gene_label !== null && data.attrs.gene_label !== "");
         }
         else if(data.attrs.type == 'OncoPrint'){
-            return (data.attrs.gene_list !== undefined && data.gene_list !== null && data.attrs.gene_list !== "");
+            return (data.attrs.gene_list !== undefined && data.gene_list !== null && data.attrs.gene_list.length>0);
         }
         else{
             if (data.attrs.x_axis.url_code === undefined || data.attrs.x_axis.url_code === null || data.attrs.x_axis.url_code.length <= 0) {
@@ -1182,6 +1195,14 @@ require([
 
         plot_loader.fadeIn();
         plot_element.find('.resubmit-button').hide();
+
+        //hide 'Enable Sample Selection for Oncoprint and SeqPeek'
+        if (args.type === 'SeqPeek' || args.type === 'OncoPrint') {
+            $('.toggle-selection').hide();
+        }
+        else {
+            $('.toggle-selection').show();
+        }
         plotFactory.generate_plot(
             {
                 plot_selector    : plot_selector,
@@ -1237,7 +1258,13 @@ require([
             apply_axis_values(plot_element.find('.color_by'), plot_data.color_by);
         }
         if(plot_data.gene_label) {
-            plot_element.find("#"+worksheet_id+"gene_label").val(plot_data.gene_label.variable);
+            plot_element.find("#"+worksheet_id+"-gene_label").val(plot_data.gene_label.variable);
+        }
+        if(plot_data.gene_list) {
+            plot_element.find('.gene-checkbox').each(function () {
+                $(this).prop("checked", ($.inArray(this.value, plot_data.gene_list['values']) != -1));
+
+                });
         }
 
         if(plot_data.cohort) {
@@ -1598,7 +1625,7 @@ require([
                                 y            : data.attrs.y_axis.url_code,
                                 logTransform : data.logTransform,
                                 gene_label   : data.attrs.gene_label,
-                                //gene_list    : data.attrs.gene_list,
+                                gene_list    : data.attrs.gene_list,
                                 color_by     : data.attrs.color_by.url_code,
                                 cohorts      : data.attrs.cohorts,
                                 color_by_sel : data.color_by_sel});

@@ -231,25 +231,23 @@
         i:first-child
             margin-right: 5px
 
-#oncoprint
+.oncoprint
     .btn-group
     .btn-group-sm
         float: right
         margin-right: 15px
+        margin-top: 1px
         height: 33px
         visibility: visible
         opacity: 0
         .btn
             background-color: rgb(239,239,239)
             border-color: #e5e5e5
-            &.active, &.focus
-                @extend .btn
-                background-color: #efefef
-                margin: 0px
+            margin: 0px
             img
                 width: 18px
                 height: 18px
-        #oncoprint_diagram_slider_icon
+        .oncoprint_diagram_slider_icon
             display: inline-block
             width: 100px
             height: 31px
@@ -261,6 +259,8 @@
             width: 132px
             height: 30px
 
+.oncoprint_div
+    visibility: hidden
 
 .hovercard
     position: fixed

@@ -1,4 +1,6 @@
 #cohort-details, #cohort-filelist
+    .filter-label
+        display: inline-flex
     .pending-left
         margin-right: 5px
         i
@@ -29,6 +31,30 @@
                 margin: auto
                 font-size: 100px
 
+    .selected-filters
+        .mol-filter.filter-combine-or:not(:first-child):before
+            content: "OR"
+            margin-right: 5px
+        .mol-filter.filter-combine-and:not(:first-child):before
+            content: "AND"
+            margin-right: 5px
+        .mol-filter-container:not(:only-child):before
+            content: "("
+            margin-left: 5px
+        .mol-filter-container:not(:only-child):not(:first-child):before
+            content: "AND ("
+            margin-left: 5px
+        .mol-filter-container:not(:only-child):after
+            content: ")"
+            margin-right: 5px
+        .mol-filter-container:not(:only-child):not(:last-child):after
+            content: ") AND"
+            margin-right: 5px
+        .label
+            background-color: $token-bg-color
+            &:hover
+                background-color: $token-bg-color-hover
+
     .cohort-selected-filters
         overflow: hidden
         .more-filters, .less-filters
@@ -40,6 +66,10 @@
                 transform: translateX(-50%)
                 position: absolute
                 z-index: 20
+        .label
+            background-color: $token-bg-color
+            &:hover
+                background-color: $token-bg-color-hover
 
     .curr-filter-panel, .creation-filter-panel
         overflow: hidden
@@ -53,7 +83,10 @@
             &:first-child
                 border-left: none
         .label
-            margin: 0
+            margin: 5px 0px 0px 0px
+            background-color: $token-bg-color
+            &:hover
+                background-color: $token-bg-color-hover
 
     .revision-filter-panel
         overflow: hidden
@@ -213,7 +246,7 @@
         a:hover
             text-decoration: none
     #filter-list-div
-        .search-checkbox-list
+        .search-checkbox-list, .mol-checkbox-list
             max-height: 100px
             overflow-y: scroll
 
@@ -302,6 +335,10 @@
         max-height: 300px
         overflow-y: auto
         overflow-x: hidden
+        .label
+            background-color: $token-bg-color
+            &:hover
+                background-color: $token-bg-color-hover
 
     .multi-categorical
         overflow-x: auto

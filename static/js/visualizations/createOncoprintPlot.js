@@ -22,7 +22,7 @@ jspdf: 'libs/jspdf.min',
 jspdf_plugin_addimage: 'libs/jspdf.plugin.addimage',
 png_support: 'libs/png_support',*/
 define(['jquery', 'oncoprintjs', 'underscore', 'oncoprint_setup', 'canvas_toBlob', 'zlibs', 'png'], function ($, oncoprintjs, _) {
-    var processData = function (str) {
+    var processData = function (array) {
         // Need to mock webservice data to be compatible with tooltip
         var gene_to_sample_to_datum = {};
         var cna = {'AMP': 'amp', 'GAIN': 'gain', 'HETLOSS': 'hetloss', 'HOMDEL': 'homdel'};
@@ -31,7 +31,7 @@ define(['jquery', 'oncoprintjs', 'underscore', 'oncoprint_setup', 'canvas_toBlob
         var mrna_int = {'UP': 1, 'DOWN': -1};
         var prot = {'PROT-UP': 'up', 'PROT-DOWN': 'down'};
         var prot_int = {'PROT-UP': 1, 'PROT-DOWN': -1};
-        var lines = str.split('\n');
+        var lines = array;
         var samples = {};
         for (var i = 0; i < lines.length; i++) {
             var sline = lines[i].trim().split(/\s+/);
@@ -51,7 +51,9 @@ define(['jquery', 'oncoprintjs', 'underscore', 'oncoprint_setup', 'canvas_toBlob
             gene_to_sample_to_datum[gene][sample] = gene_to_sample_to_datum[gene][sample] || {
                 'gene': gene,
                 'sample': sample,
-                'data': []
+                'data': [],
+                'disp_mut':{}
+                //'disp_mut':[]
             };
 
             if (cna.hasOwnProperty(alteration)) {
@@ -81,7 +83,7 @@ define(['jquery', 'oncoprintjs', 'underscore', 'oncoprint_setup', 'canvas_toBlob
                     ws_datum.oncoprint_mutation_type = "fusion";
                     gene_to_sample_to_datum[gene][sample].disp_fusion = true;
                 } else {
-                    gene_to_sample_to_datum[gene][sample].disp_mut = type;
+                    gene_to_sample_to_datum[gene][sample].disp_mut[type] = "";
                 }
                 gene_to_sample_to_datum[gene][sample].data.push(ws_datum);
             }
@@ -89,31 +91,29 @@ define(['jquery', 'oncoprintjs', 'underscore', 'oncoprint_setup', 'canvas_toBlob
         var data_by_gene = {};
         var altered_by_gene = {};
         _.each(gene_to_sample_to_datum, function (sample_data, gene) {
-            data_by_gene[gene] = [];
-            altered_by_gene[gene] = [];
-            _.each(Object.keys(samples), function (sample) {
-                // pad out data
-                if (!sample_data.hasOwnProperty(sample)) {
-                    data_by_gene[gene].push({'gene': gene, 'sample': sample, 'data': []});
-                }
-            });
-            _.each(sample_data, function (datum, sample) {
-                data_by_gene[gene].push(datum);
-                altered_by_gene[gene].push(sample);
-            });
+            if(gene !== "None") {
+                data_by_gene[gene] = [];
+                altered_by_gene[gene] = [];
+                _.each(Object.keys(samples), function (sample) {
+                    // pad out data
+                    if (!sample_data.hasOwnProperty(sample)) {
+                        data_by_gene[gene].push({'gene': gene, 'sample': sample, 'data': []});
+                    }
+                });
+                _.each(sample_data, function (datum, sample) {
+                    data_by_gene[gene].push(datum);
+                    altered_by_gene[gene].push(sample);
+                });
+            }
         });
-
         return {'data_by_gene': data_by_gene, 'altered_by_gene': altered_by_gene};
     };
     return {
-        isInputValid: function (str) {
-            var lines = _.map(str.split('\n'), function (x) {
+        isInputValid: function (array) {
+            var lines = _.map(array, function (x) {
                 return x.trim();
             });
-            if (lines[0].split(/\s+/).length !== 4) {
-                return false;
-            }
-            for (var i = 1; i < lines.length; i++) {
+            for (var i = 0; i < lines.length; i++) {
                 var split_line_length = lines[i].split(/\s+/).length;
                 if (split_line_length !== 1 && split_line_length !== 4) {
                     return false;
@@ -121,40 +121,13 @@ define(['jquery', 'oncoprintjs', 'underscore', 'oncoprint_setup', 'canvas_toBlob
             }
             return true;
         },
-        createOncoprintPlot: function (data) {
-            var updateOncoprinter = CreateOncoprinterWithToolbar('#oncoprint #oncoprint_body', '#oncoprint #oncoprint-diagram-toolbar-buttons');
-            $('#oncoprint_controls').html(_.template($('#main-controls-template').html())());
-            //var data_input = hm_data.trim();
-
-            /*var gene_order = $('#gene_order').val().trim().split(/\s+/g);
-            if (gene_order.length === 0 || gene_order[0].length === 0) {
-                gene_order = null;
-            }
-
-            var sample_order = $('#sample_order').val().trim().split(/[,\s]+/g);
-            if (sample_order.length === 0 || sample_order[0].length === 0) {
-                sample_order = null;
-            }*/
+        createOncoprintPlot: function (plot_selector, data) {
+            $(plot_selector).html($(plot_selector).siblings('.oncoprint_div').html());
+            var updateOncoprinter = CreateOncoprinterWithToolbar(plot_selector, '.oncoprint .oncoprint_body', '.oncoprint .oncoprint-diagram-toolbar-buttons');
             gene_order = sample_order = null;
-
             if (data.length > 0) {
                 var process_result = processData(data);
                 updateOncoprinter(process_result.data_by_gene, 'sample', process_result.altered_by_gene, sample_order, gene_order);
-            /*}else if ($('#mutation-form #mutation').val().trim().length > 0) {
-                var file = $('#mutation-form #mutation')[0].files[0];
-                var reader = new FileReader();
-                reader.readAsText(file);
-                reader.onload = function (e) {
-                    var input = reader.result.trim().replace(/\r/g, "\n");
-                    if (isInputValid(input)) {
-                        var process_result = processData(input);
-                        updateOncoprinter(process_result.data_by_gene, 'sample', process_result.altered_by_gene, sample_order, gene_order);
-                        $('#error_msg').hide();
-                    } else {
-                        $('#error_msg').html("Error in input data");
-                        $('#error_msg').show();
-                    }
-                };*/
             } else {
 
             }

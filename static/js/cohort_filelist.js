@@ -221,8 +221,14 @@ require([
                     }
                 },
                 error: function () {
-                    base.showJsMessage("error","Failed to load file browser panel.",true);
-                    $('#placeholder').hide();
+                     var responseJSON = $.parseJSON(xhr.responseText);
+                    // If we received a redirect, honor that
+                    if(responseJSON.redirect) {
+                        base.setReloadMsg(responseJSON.level || "error",responseJSON.message);
+                        window.location = responseJSON.redirect;
+                    } else {
+                        base.showJsMessage(responseJSON.level || "error",responseJSON.message,true);
+                    }
                 },
                 complete: function(xhr, status) {
                    reject_load = false;
@@ -324,7 +330,9 @@ require([
         $.ajax({
             url: url,
             success: function (data) {
-                update_download_link(active_tab, data.total_file_count);
+                if(do_filter_count) {
+                    update_download_link(active_tab, data.total_file_count);
+                }
                 update_table_display(active_tab,data,do_filter_count);
             },
             error: function(e) {
@@ -352,6 +360,7 @@ require([
             $(tab_selector).find('.paginate_button_space').hide();
             $(tab_selector).find('.dataTables_length').addClass('disabled');
             $(tab_selector).find('.sortable_table th').addClass('disabled');
+            $(tab_selector).find('.dataTables_goto_page').addClass('disabled');
         } else {
             var page_list = pagination(page,total_pages);
             var html_page_button = "";
@@ -368,6 +377,8 @@ require([
             $(tab_selector).find('.paginate_button_space').show();
             $(tab_selector).find('.dataTables_length').removeClass('disabled');
             $(tab_selector).find('.sortable_table th').removeClass('disabled');
+            $(tab_selector).find('.dataTables_goto_page').removeClass('disabled');
+            $(tab_selector).find('.dataTables_goto_page .goto-page-number').attr('max', total_pages);
             $(tab_selector).find('.filelist-panel .panel-body .total-file-count').html(total_files);
             $(tab_selector).find('.filelist-panel .panel-body .paginate_button_space').html(html_page_button);
         }
@@ -448,7 +459,7 @@ require([
                 (active_tab !== 'camic' && active_tab !== 'dicom' ? '<td>' + happy_name(files[i]['platform']) + '</td>' : '')+
                 (active_tab !== 'camic' && active_tab !== 'dicom' ? '<td>' + files[i]['datacat'] + '</td>' : '') +
                 (active_tab !== 'dicom' ? '<td>' + files[i]['datatype'] + '</td><td>' + files[i]['dataformat'] + '</td>' : '') +
-                (active_tab !== 'camic' && active_tab !== 'dicom' ? (files[i]['file_viewer'] ? '<td>' + files[i]['file_viewer'] + '</td>' : '<td></td>') : '') +
+                (active_tab === 'igv' ? (files[i]['file_viewer'] ? '<td>' + files[i]['file_viewer'] + '</td>' : '<td></td>') : '') +
             '</tr>';
 
                 $(tab_selector).find('.filelist-panel .file-list-table tbody').append(row);
@@ -457,19 +468,18 @@ require([
             var thisCheck = $(tab_selector).find('.filelist-panel input[value="'+val+'"]');
             selIgvFiles[thisCheck.attr('data-type')] && selIgvFiles[thisCheck.attr('data-type')][thisCheck.attr('value')] && thisCheck.attr('checked', true);
         }
-
-            var columns_display = tab_columns_display[active_tab];
-            var column_toggle_html = "";
-            for (var i in columns_display) {
-                column_toggle_html += "<a class=\'column_toggle_button " + (columns_display[i][1] ? '' : 'column_hide') + "\'>" + columns_display[i][0] + "</a>";
-                if(columns_display[i][1]) {
-                    $(tab_selector).find('table.file-list-table th:nth-child(' + (parseInt(i) + 1) + '), table.file-list-table td:nth-child(' + (parseInt(i) + 1) + ')').removeClass('hide');
-                }
-                else
-                    $(tab_selector).find('table.file-list-table th:nth-child('+(parseInt(i)+1)+'), table.file-list-table td:nth-child('+(parseInt(i)+1)+')').addClass('hide');
-            }
-            $(tab_selector).find('.column-toggle').html(column_toggle_html);
         }
+        var columns_display = tab_columns_display[active_tab];
+        var column_toggle_html = "";
+        for (var i in columns_display) {
+            column_toggle_html += "<a class=\'column_toggle_button " + (columns_display[i][1] ? '' : 'column_hide') + "\'>" + columns_display[i][0] + "</a>";
+            if (columns_display[i][1]) {
+                $(tab_selector).find('table.file-list-table th:nth-child(' + (parseInt(i) + 1) + '), table.file-list-table td:nth-child(' + (parseInt(i) + 1) + ')').removeClass('hide');
+            }
+            else
+                $(tab_selector).find('table.file-list-table th:nth-child(' + (parseInt(i) + 1) + '), table.file-list-table td:nth-child(' + (parseInt(i) + 1) + ')').addClass('hide');
+        }
+        $(tab_selector).find('.column-toggle').html(column_toggle_html);
 
         // If we're at the max, disable all checkboxes which are not currently checked
         selIgvFiles.count() >= SEL_IGV_FILE_MAX && $(tab_selector).find('.filelist-panel input.igv.accessible[type="checkbox"]:not(:checked)').attr('disabled',true);
@@ -518,6 +528,24 @@ require([
         update_table(tab, false);
     }
 
+    $('.data-tab-content').on('click', '.goto-page-button', function () {
+        var this_tab = $(this).parents('.data-tab').data('file-type');
+        var page_no_input = $(this).siblings('.goto-page-number').val()
+        if (page_no_input == "")
+            return;
+        var page = parseInt(page_no_input);
+        var max_page_no = parseInt($(this).siblings('.goto-page-number').attr('max'));
+        if (page > 0 && page <= max_page_no) {
+            goto_table_page(this_tab, page);
+            $(this).siblings('.goto-page-number').val("");
+        }
+        else {
+            base.showJsMessage("warning",
+                "Page number you have entered is invalid. Please enter a number between 1 and "+max_page_no, true);
+            $('#placeholder').hide();
+        }
+    });
+
     $('.data-tab-content').on('click', '.paginate_button', function () {
         var this_tab = $(this).parents('.data-tab').data('file-type');
         var page_no;
@@ -552,8 +580,11 @@ require([
     // change no of entries per page
     $('.data-tab-content').on('change', '.files-per-page', function () {
         var this_tab = $(this).parents('.data-tab').data('file-type');
-        tab_files_per_page[this_tab] = $('#'+this_tab+'-files').find('.files-per-page :selected').val();
-        goto_table_page(this_tab, 1);
+        var old_fpp = tab_files_per_page[this_tab];
+        var new_fpp = tab_files_per_page[this_tab] = $('#'+this_tab+'-files').find('.files-per-page :selected').val();
+        //calculate the new page no that would include the first file item
+        var new_page_no = parseInt((tab_page[this_tab]-1) * old_fpp/new_fpp) + 1;
+        goto_table_page(this_tab, new_page_no);
     });
 
     // change column sorting
@@ -580,12 +611,9 @@ require([
     $('.data-tab-content').on('change','.build', function(){
         var this_tab = $(this).parents('.data-tab').data('file-type');
         $('#'+this_tab+'-files').find('.filter-build-panel').hide();
-        update_displays(this_tab);
         $('#'+this_tab+'-filter-panel-'+$(this).find(':selected').val()).show();
 
         if(this_tab == 'igv') {
-            //prevent users from selecting igv files during loading time
-            $('.filelist-panel input.igv.accessible[type="checkbox"]').attr('disabled',true);
             // Remove any selected files not from this build
             var new_build = $('#'+this_tab+'-files').find('.build :selected').val();
             var selCount = Object.keys(selIgvFiles.gcs_bam).length;
@@ -602,7 +630,10 @@ require([
                 update_on_selex_change();
             }
             $('#igv-form-build').attr("value",new_build);
+            // Prevent users from selecting igv files during loading time
+            $('.filelist-panel input.igv.accessible[type="checkbox"]').attr('disabled',true);
         }
+        update_displays(this_tab);
     });
 
     function update_filters(checked) {

@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2017, Institute for Systems Biology
+ * Copyright 2018, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,9 +45,10 @@ require([
     'underscore',
     'base',
     'ajv',
-    //'dataTables'
+    'dataTables'
 ], function ($, jqueryui, bootstrap, session_security, _, base, ajv) {
 
+    var BARCODE_LENGTH_MAX = 45;
     var savingChanges = false;
     var validated_barcodes = null;
 
@@ -159,11 +160,12 @@ require([
                     if (isGdcTsv) {
                         entry_split = barcode.split(/\s*\t\s*/);
                     }
-                    if ((isGdcTsv && entry_split.length < 2) || barcode.length <= 0) {
+                    if ((isGdcTsv && entry_split.length < 2) || barcode.length <= 0 || (!isGdcTsv && barcode.replace(/["']/g, "").length > BARCODE_LENGTH_MAX
+                        || (isGdcTsv && entry_split[case_id_col].length > BARCODE_LENGTH_MAX))) {
                         if (!result.invalid_entries) {
                             result.invalid_entries = [];
                         }
-                        result.invalid_entries.push(barcode);
+                        result.invalid_entries.push({'case': barcode, 'sample': barcode, 'program': "UNKNOWN"});
                     } else {
                         if (!result.valid_entries) {
                             result.valid_entries = [];
@@ -340,9 +342,10 @@ require([
 
             if(file.size > FILE_SIZE_UPLOAD_MAX) {
                 // Request is going to be too big
+                var file_size_max_str = FILE_SIZE_UPLOAD_MAX/1000000 + "MB";
                 base.showJsMessage(
                     "error",
-                    "The selected file is too large. Please reduce the size of your barcode file (eg. remove any text "
+                    "The selected file is too large; the maximum size allowed is "+file_size_max_str+". Please reduce the size of your barcode file (eg. remove any text "
                     + "which is not a barcode or a delimiter) and try again.",
                     true
                 );
@@ -506,7 +509,7 @@ require([
             tab.find('.cohort-counts tbody').empty();
             for(var i = 0; i < result.counts.length; i++) {
                 var prog_deets = result.counts[i];
-                tab.find('.cohort-counts tbody').append('<tr><td>'+prog_deets['program']+'</td><td>'+prog_deets['samples']+'</td><td>'+prog_deets['cases']+'</td>');
+                tab.find('.cohort-counts tbody').append('<tr><td>'+prog_deets['program']+'</td><td>'+prog_deets['cases']+'</td><td>'+prog_deets['samples']+'</td>');
             }
             tab.find('.cohort-counts').show();
             result.invalid_entries && result.invalid_entries.length > 0 && tab.find('.invalid-not-saved').show();
@@ -574,6 +577,4 @@ require([
             return false;
         }
     });
-
-
 });
