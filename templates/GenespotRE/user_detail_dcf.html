@@ -14,12 +14,16 @@
     {% elif not user_details.refresh_key_ok%}
         <p><a href="{% url 'dcf_login' %}">Log in to Data Commons to refresh your NIH identity: {{ user_details.NIH_username }}</a></p>
     {# User has been seen and has a current token, but is unlinked at DCF. They will need to go to DCF & Google to link #}
-    {# Note that we use the same call as the above (dcf_login). This is because the DCF link request requires the user #}
+    {# NO!! Look into this again! :: Note that we use the same call as the above (dcf_login). This is because the DCF link request requires the user #}
     {# to directly contact DCF on a redirect and provide a cookie that they can only get as part of an NIH login. #}
     {# We have no way of knowing (easily?) if they have such a cookie in their current browser session. #}
     {# Note that if they are not linked at DCF, we *still* need to give them a way to change NIH identity #}
     {% elif not user_details.NIH_DCF_linked %}
-        <p><a href="{% url 'dcf_login' %}">Link your Google ID to your NIH identity: {{ user_details.NIH_username }}</a></p>
+        {% if user_details.link_mismatch %}
+            <p><a href="{% url 'dcf_unlink' %}">Disconnect Link ID</a></p>
+        {% else %}
+            <p><a href="{% url 'dcf_link_redo' %}">Link your Google ID to your NIH identity: {{ user_details.NIH_username }}</a></p>
+        {% endif %}
         <hr>
         <p><a data-toggle="modal" data-target="#unlink-nih-account-modal">Unlink {{ user_details.email }} from the NIH identity: {{ user_details.NIH_username }}</a></p>
     {# User has been seen, has a current token, is linked, and just needs to ask to be put back on lists. #}
