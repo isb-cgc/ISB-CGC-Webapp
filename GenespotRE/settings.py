@@ -492,6 +492,21 @@ DATASET_CONFIGURATION_PATH               = os.environ.get('DATASET_CONFIGURATION
 # DCF Testing flag
 DCF_TEST                                 = bool(os.environ.get('DCF_TEST', 'False') == 'True')
 
+#################################
+#   For DCF login               #
+#################################
+
+DCF_AUTH_URL                             = os.environ.get('DCF_AUTH_URL', '')
+DCF_TOKEN_URL                            = os.environ.get('DCF_TOKEN_URL', '')
+DCF_USER_URL                             = os.environ.get('DCF_USER_URL', '')
+DCF_KEY_URL                              = os.environ.get('DCF_KEY_URL', '')
+DCF_GOOGLE_URL                           = os.environ.get('DCF_GOOGLE_URL', '')
+DCF_REVOKE_URL                           = os.environ.get('DCF_REVOKE_URL', '')
+DCF_LOGOUT_URL                           = os.environ.get('DCF_LOGOUT_URL', '')
+DCF_URL_URL                              = os.environ.get('DCF_URL_URL', '')
+DCF_CLIENT_SECRETS                       = os.environ.get('DCF_CLIENT_SECRETS', '')
+DCF_TOKEN_REFRESH_WINDOW_SECONDS         = int(os.environ.get('DCF_TOKEN_REFRESH_WINDOW_SECONDS', 86400))
+
 ##############################
 #   Start django-finalware   #
 ##############################
