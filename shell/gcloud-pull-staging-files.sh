@@ -23,5 +23,7 @@ if [ -n "${DEV_NIH_AUTH_ON}" ]; then
 fi
 
 # Pack staged files for caching
-cp *.json ./json
-cp *.txt ./txt
+echo "Packing JSON and text files for caching into deployment..."
+cp --verbose *.json ./json
+cp --verbose *.txt ./txt
+
