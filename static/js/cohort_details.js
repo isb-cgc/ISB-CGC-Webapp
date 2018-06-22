@@ -712,13 +712,30 @@ require([
     // Disable save changes if no change to title or no added filters
     var save_changes_btn_modal = $('#apply-edits-form input[type="submit"]');
     var save_changes_btn = $('button[data-target="#apply-filters-modal"]');
+    var save_new_cohort_btn = $('button[data-target="#create-cohort-modal"]');
     var check_for_changes = function() {
-        if ($('#edit-cohort-name').val() !== original_title || $('.selected-filters span').length > 0) {
+        var totalCases = 0;
+        $('.total-cases').each(function(){
+            totalCases += parseInt($('.total-cases').text());
+        });
+        if ($('#edit-cohort-name').val() !== original_title
+            || $('.selected-filters span').length > 0) {
             save_changes_btn.prop('disabled', false)
             save_changes_btn_modal.prop('disabled',false);
+            if(save_new_cohort_btn.length > 0) {
+                if (totalCases > 0) {
+                    save_new_cohort_btn.removeAttr('disabled');
+                    save_new_cohort_btn.removeAttr('title');
+                } else {
+                    save_new_cohort_btn.attr("title", "Please adjust your filters to include at least one case in the cohort.");
+                    save_new_cohort_btn.attr('disabled','disabled');
+                }
+            }
         } else {
             save_changes_btn.prop('disabled', true)
             save_changes_btn_modal.prop('disabled',true);
+            save_new_cohort_btn.attr('disabled','disabled');
+            save_new_cohort_btn.attr("title","Please select at least one filter.");
         }
     };
 
@@ -1034,7 +1051,7 @@ require([
         });
         (progCount > 1) ? $('#multi-prog-cohort-create-warn').show() : $('#multi-prog-cohort-create-warn').hide();
 
-        update_displays(true,false,$(this).parent('span').data('prog-id'));
+        update_displays(false,false,$(this).parent('span').data('prog-id'));
         return false;
     });
 
@@ -1077,7 +1094,7 @@ require([
         });
         (progCount > 1) ? $('#multi-prog-cohort-create-warn').show() : $('#multi-prog-cohort-create-warn').hide();
 
-        update_displays(true,false,span_data['prog-id']);
+        update_displays(false,false,span_data['prog-id']);
         return false;
     });
 
