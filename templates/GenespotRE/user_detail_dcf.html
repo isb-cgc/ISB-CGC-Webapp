@@ -23,6 +23,7 @@
             <p><a href="{% url 'dcf_unlink' %}">Disconnect Link ID</a></p>
         {% else %}
             <p><a href="{% url 'dcf_link_redo' %}">Link your Google ID to your NIH identity: {{ user_details.NIH_username }}</a></p>
+            <p><a href="{% url 'dcf_login' %}">Link your Google ID to your NIH via login</a></p>
         {% endif %}
         <hr>
         <p><a data-toggle="modal" data-target="#unlink-nih-account-modal">Unlink {{ user_details.email }} from the NIH identity: {{ user_details.NIH_username }}</a></p>
