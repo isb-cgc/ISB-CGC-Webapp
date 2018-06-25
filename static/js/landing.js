@@ -57,9 +57,11 @@ require([
     */
 ], function(/* $, jqueryui, bootstrap, session_security, d3, d3tip, treegraph, vis_helpers */) {
     A11y.Core();
-    $(".carousel-control").click(function () {
+
+    //pause video when scrolling to other videos
+    $(".carousel-control, .carousel-indicators li:not(.active)").click(function () {
         $('.tutorial-vid').each(function() {
-            this.contentWindow.postMessage('{"event":"command","func":"' + 'stopVideo' + '","args":""}', '*');
+            this.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
         });
     });
 
