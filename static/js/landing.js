@@ -57,6 +57,12 @@ require([
     */
 ], function(/* $, jqueryui, bootstrap, session_security, d3, d3tip, treegraph, vis_helpers */) {
     A11y.Core();
+    $(".carousel-control").click(function () {
+        $('.tutorial-vid').each(function() {
+            this.contentWindow.postMessage('{"event":"command","func":"' + 'stopVideo' + '","args":""}', '*');
+        });
+    });
+
 
     //var treegraph_obj = Object.create(treegraph, {});
     //var total = 0;
