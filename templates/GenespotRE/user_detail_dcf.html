@@ -14,7 +14,7 @@
     {% elif not user_details.refresh_key_ok%}
         <p><a href="{% url 'dcf_login' %}">Log in to Data Commons to refresh your NIH identity: {{ user_details.NIH_username }}</a></p>
     {# User has been seen and has a current token, but is unlinked at DCF. They will need to go to DCF & Google to link #}
-    {# NO!! Look in to this again! : : : Note that we use the same call as the above (dcf_login). This is because the DCF link request requires the user #}
+    {# NO!! Look in to this again! :  : : : Note that we use the same call as the above (dcf_login). This is because the DCF link request requires the user #}
     {# to directly contact DCF on a redirect and provide a cookie that they can only get as part of an NIH login. #}
     {# We have no way of knowing (easily?) if they have such a cookie in their current browser session. #}
     {# Note that if they are not linked at DCF, we *still* need to give them a way to change NIH identity #}
