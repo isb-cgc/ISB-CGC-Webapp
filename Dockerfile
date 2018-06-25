@@ -38,7 +38,7 @@ RUN dpkg --install /tmp/mysql-apt-config_0.8.9-1_all.deb
 RUN apt-get update
 
 # aaaand now let's install mysql-server
-RUN apt-get install -y --force-yes mysql-server
+RUN apt-get install -y mysql-server
 
 RUN apt-get -y install python-mysqldb
 RUN apt-get -y install python-pip

@@ -122,7 +122,7 @@ def user_detail(request, user_id):
     if int(request.user.id) == int(user_id):
 
         user = User.objects.get(id=user_id)
-        social_account = SocialAccount.objects.get(user_id=user_id)
+        social_account = SocialAccount.objects.get(user_id=user_id, provider='google')
 
         user_details = {
             'date_joined':  user.date_joined,
