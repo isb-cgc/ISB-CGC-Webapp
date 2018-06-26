@@ -60,7 +60,6 @@
             <p id="NIH_expiration"></p>
             <p><a href="{% url 'dcf_link_extend' %}">Extend controlled access period to 24 hours from now.</a></p>
             <p><a href="{% url 'dcf_unlink' %}">ISB CGC INTERNAL: UNLINK IDS BUT RETAIN NIH ID</a></p>
-            <p><a href="{% url 'dcf_test' %}">ISB CGC INTERNAL: TEST CALL SIGNED URL ENDPOINT</a></p>
             <p><a href="{% url 'dcf_get_user_data' %}">ISB CGC INTERNAL: GET USER DATA</a></p>
             <hr>
             <p><a data-toggle="modal" data-target="#unlink-nih-account-modal">Unlink {{ user_details.email }} from the NIH identity: {{ user_details.NIH_username }}</a></p>
