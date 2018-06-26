@@ -20,6 +20,8 @@
     {# Note that if they are not linked at DCF, we *still* need to give them a way to change NIH identity, #}
     {# so we continue to provide the alternative to disconnect!! #}
     {% elif not user_details.NIH_DCF_linked %}
+
+        <p><a href="{% url 'dcf_link_redo' %}">DO NOT USE IF SESSION IS STALE Link your Google ID to your NIH identity: {{ user_details.NIH_username }}</a></p>
         {% if user_details.link_mismatch %}
             <p><a href="{% url 'dcf_login' %}">Correctly link your ISB-CGC Google ID {{ user_details.email }} to your NIH ID</a></p>
         {% endif %}
@@ -76,7 +78,7 @@
 
     {# Always include the unlinking dialog #}
     {#   if user_details.NIH_username and not user_details.NIH_active  #}
-    {#   WJRL: FIXME! WHAT IS THE not user_details.NIH_active DOING HERE??? #}
+    {#   WJRL: FIXME!  WHAT IS THE not user_details.NIH_active DOING HERE??? #}
     {% if user_details.NIH_username %}
     <div class="modal fade" id="unlink-nih-account-modal" tabindex="-1" role="dialog" aria-labelledby="unlink-nih-account-header" aria-hidden="true">
         <div class="modal-dialog">
