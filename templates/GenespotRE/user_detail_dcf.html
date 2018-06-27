@@ -3,8 +3,11 @@
 
 {% block dcf_content %}
 
-    {# User has *never* been seen before with an NIH login, or they have disconnected from it. #}
-    {% if not user_details.NIH_username %}
+    {# User has tried to sign in with a conflicting NIH Username and must be forced to change it: #}
+    {% if user_details.force_DCF_logout%}
+        <p><a href="{% url 'dcf_simple_logout' %}">Logout from Data Commons now to use another NIH identity.</a></p>
+     {# User has *never* been seen before with an NIH login, or they have disconnected from it. #}
+    {% elif not user_details.NIH_username %}
         <p>Apply for dbGaP Authorized Access to access underlying Level 1 genomics data.</p>
         <p><a href="{% url 'dcf_login' %}">Associate with eRA Commons Account</a></p>
         <p><a href="https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login" target="_blank">Learn More</a></p>
