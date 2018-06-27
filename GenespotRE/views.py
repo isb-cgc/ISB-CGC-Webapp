@@ -136,7 +136,8 @@ def user_detail(request, user_id):
 
         user_details['gcp_list'] = len(GoogleProject.objects.filter(user=user))
 
-        nih_details = get_nih_user_details(user_id)
+        forced_logout = request.session['dcfForcedLogout'] if 'dcfForcedLogout' in request.session else None
+        nih_details = get_nih_user_details(user_id, forced_logout)
         for key in nih_details.keys():
             user_details[key] = nih_details[key]
 
