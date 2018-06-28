@@ -318,7 +318,9 @@ require([
             var filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab][build]));
             url += '&'+filter_args;
         }
-
+        if(tab_case_barcode[active_tab]){
+            url += '&case_barcode='+ encodeURIComponent(tab_case_barcode[active_tab]);
+        }
         if(active_tab !== 'camic' && active_tab !== 'dicom') {
             url += '&build='+$(tab_selector).find('.build :selected').val();
         }
@@ -369,7 +371,7 @@ require([
                     html_page_button += "<span class='\ellipsis\'>...</span>"
                 }
                 else{
-                    html_page_button += "<a class=\'paginate_button numeric_button"+ (page_list[i] == page ? " current\'":"\'") +">" + page_list[i] + "</a>";
+                    html_page_button += "<a class=\'dataTables_button paginate_button numeric_button"+ (page_list[i] == page ? " current\'":"\'") +">" + page_list[i] + "</a>";
                 }
             }
             $(tab_selector).find('.file-page-count').show();
@@ -521,7 +523,7 @@ require([
         }
         $(tab_selector).find('.filelist-panel .spinner i').addClass('hidden');
 
-    };
+    }
 
     function goto_table_page(tab, page_no){
         tab_page[tab] = page_no;
@@ -530,7 +532,7 @@ require([
 
     $('.data-tab-content').on('click', '.goto-page-button', function () {
         var this_tab = $(this).parents('.data-tab').data('file-type');
-        var page_no_input = $(this).siblings('.goto-page-number').val()
+        var page_no_input = $(this).siblings('.goto-page-number').val();
         if (page_no_input == "")
             return;
         var page = parseInt(page_no_input);
@@ -564,6 +566,27 @@ require([
             page_no = 1;
         }
         goto_table_page(this_tab, page_no)
+    });
+
+    $('.data-tab-content').on('click', '.case-barcode-search-btn', function () {
+        var this_tab = $(this).parents('.data-tab').data('file-type');
+        var search_input = $(this).siblings('.dataTables_search_input').children('.case-barcode-search-text');
+        tab_case_barcode[this_tab] = $(this).siblings('.dataTables_search_input').children('.case-barcode-search-text').val().trim();
+        tab_page[this_tab] = 1;
+        update_displays(this_tab);
+    });
+
+    $('.data-tab-content').on('click', '.case-barcode-search-clear-btn', function () {
+        var search_input = $(this).siblings('.case-barcode-search-text');
+        var this_tab = $(this).parents('.data-tab').data('file-type');
+        if(search_input.val().trim()) {
+            search_input.val("");
+        }
+        if(tab_case_barcode[this_tab]){
+            tab_case_barcode[this_tab] = "";
+            tab_page[this_tab] = 1;
+            update_displays(this_tab);
+        }
     });
 
     //toggle column display
@@ -708,7 +731,10 @@ require([
         update_displays_thread = setTimeout(function(){
             var build = $('#'+active_tab+'-files').find('.build :selected').val();
             var files_per_page = tab_files_per_page[active_tab];
-            var url = ajax_update_url[active_tab] + '?build=' + build +'&files_per_page=' +files_per_page;
+            var url = ajax_update_url[active_tab] + '?files_per_page=' +files_per_page + (build ? '&build='+build : '');
+            if(tab_case_barcode[active_tab]){
+                url += '&case_barcode='+ encodeURIComponent(tab_case_barcode[active_tab]);
+            }
             if(SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab][build]).length > 0) {
                 url += '&filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab][build]));
             }

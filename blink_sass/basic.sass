@@ -169,7 +169,7 @@ nav
     .dataTables_paginate
         padding-top: 0.25em
 
-.paginate_button
+.dataTables_button
     box-sizing: border-box
     display: inline-block
     min-width: 1em
@@ -202,6 +202,26 @@ nav
 
 .dataTables_paginate, .dataTables_goto_page
     padding-left: 20px
+
+.dataTables_search
+    display: inline-block
+    float: right
+    .dataTables_search_input
+        display: inline-block
+        width: 180px
+        border: 1px solid lighten($gray-button-bg-border, 8%) !important
+        border-radius: 7px 0px 0px 7px
+        margin-right: -5px
+        i
+            color: lighten($gray-button-bg-border, 8%)
+        input
+            border: none
+            line-height: 22px
+            width: 155px
+    .case-barcode-search-btn
+        border-radius: 0px 7px 7px 0px
+        height: 26px
+        width: 35px
 
 .goto-page-number
     width: 4em
