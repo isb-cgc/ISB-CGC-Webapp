@@ -3,8 +3,11 @@
 
 {% block dcf_content %}
 
-    {# User has *never* been seen before with an NIH login #}
-    {% if not user_details.NIH_username %}
+    {# User has tried to sign in with a conflicting NIH Username and must be forced to change it: #}
+    {% if user_details.force_DCF_logout%}
+        <p><a href="{% url 'dcf_simple_logout' %}">Logout from Data Commons now to use another NIH identity.</a></p>
+     {# User has *never* been seen before with an NIH login, or they have disconnected from it. #}
+    {% elif not user_details.NIH_username %}
         <p>Apply for dbGaP Authorized Access to access underlying Level 1 genomics data.</p>
         <p><a href="{% url 'dcf_login' %}">Associate with eRA Commons Account</a></p>
         <p><a href="https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login" target="_blank">Learn More</a></p>
@@ -12,18 +15,18 @@
     {# they log into NIH again and get a new token. Following login, they will (if not linked) be asked to #}
     {# link, and then be on for 24 hours #}
     {% elif not user_details.refresh_key_ok%}
-        <p><a href="{% url 'dcf_login' %}">Log in to Data Commons to refresh your NIH identity: {{ user_details.NIH_username }}</a></p>
+        <p><a href="{% url 'dcf_login' %}">Log in to Data Commons to refresh your NIH identity: {{ user_details.NIH_username }} or change it</a></p>
     {# User has been seen and has a current token, but is unlinked at DCF. They will need to go to DCF & Google to link #}
-    {# NO!! Look in to this again! :  : : : Note that we use the same call as the above (dcf_login). This is because the DCF link request requires the user #}
+    {# Note that we use the same call as the above (dcf_login). This is because the DCF link request requires the user #}
     {# to directly contact DCF on a redirect and provide a cookie that they can only get as part of an NIH login. #}
     {# We have no way of knowing (easily?) if they have such a cookie in their current browser session. #}
-    {# Note that if they are not linked at DCF, we *still* need to give them a way to change NIH identity #}
+    {# Note that if they are not linked at DCF, we *still* need to give them a way to change NIH identity, #}
+    {# so we continue to provide the alternative to disconnect!! #}
     {% elif not user_details.NIH_DCF_linked %}
+
+        <p><a href="{% url 'dcf_link_redo' %}">DO NOT USE IF SESSION IS STALE Link your Google ID to your NIH identity: {{ user_details.NIH_username }}</a></p>
         {% if user_details.link_mismatch %}
-            <p><a href="{% url 'dcf_unlink' %}">Disconnect Link ID</a></p>
-        {% else %}
-            <p><a href="{% url 'dcf_link_redo' %}">DO NOT USE IF SESSION IS STALE Link your Google ID to your NIH identity: {{ user_details.NIH_username }}</a></p>
-            <p><a href="{% url 'dcf_login' %}">Link your Google ID to your NIH via login</a></p>
+            <p><a href="{% url 'dcf_login' %}">Correctly link your ISB-CGC Google ID {{ user_details.email }} to your NIH ID</a></p>
         {% endif %}
         <hr>
         <p><a data-toggle="modal" data-target="#unlink-nih-account-modal">Unlink {{ user_details.email }} from the NIH identity: {{ user_details.NIH_username }}</a></p>
@@ -60,7 +63,6 @@
             <p id="NIH_expiration"></p>
             <p><a href="{% url 'dcf_link_extend' %}">Extend controlled access period to 24 hours from now.</a></p>
             <p><a href="{% url 'dcf_unlink' %}">ISB CGC INTERNAL: UNLINK IDS BUT RETAIN NIH ID</a></p>
-            <p><a href="{% url 'dcf_test' %}">ISB CGC INTERNAL: TEST CALL SIGNED URL ENDPOINT</a></p>
             <p><a href="{% url 'dcf_get_user_data' %}">ISB CGC INTERNAL: GET USER DATA</a></p>
             <hr>
             <p><a data-toggle="modal" data-target="#unlink-nih-account-modal">Unlink {{ user_details.email }} from the NIH identity: {{ user_details.NIH_username }}</a></p>
@@ -78,7 +80,7 @@
 
     {# Always include the unlinking dialog #}
     {#   if user_details.NIH_username and not user_details.NIH_active  #}
-    {#   WJRL: FIXME! WHAT IS THE not user_details.NIH_active DOING HERE??? #}
+    {#   WJRL: FIXME!  WHAT IS THE not user_details.NIH_active DOING HERE??? #}
     {% if user_details.NIH_username %}
     <div class="modal fade" id="unlink-nih-account-modal" tabindex="-1" role="dialog" aria-labelledby="unlink-nih-account-header" aria-hidden="true">
         <div class="modal-dialog">

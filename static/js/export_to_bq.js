@@ -60,18 +60,21 @@ require([
     $('#new-table-name').on('keypress keyup paste', function (e) {
         var self = $(this);
         setTimeout(function () {
-            $('.message-container').empty();
+            $('#export-to-bq-modal .modal-js-messages').empty();
             var str = self.val();
 
             if (str.match(/[^A-Za-z0-9_]/)) {
                 e.preventDefault();
-                base.showJsMessage("error", "BigQuery table names are restricted to numbers, letters, and underscores.", false, $('.message-container'));
+                base.showJsMessage("error", "BigQuery table names are restricted to numbers, letters, and underscores.", false, $('#export-to-bq-modal .modal-js-messages'));
+                $('#export-to-bq-form input[type="submit"]').attr('disabled', 'disabled');
                 return false;
+            } else {
+                $('#export-to-bq-form input[type="submit"]').removeAttr('disabled');
             }
 
             if (str.length >= parseInt($('#new-table-name').attr('maxlength'))) {
                 e.preventDefault();
-                base.showJsMessage("warning", "You have reached the maximum size of the table name.", false, $('.message-container'));
+                base.showJsMessage("warning", "You have reached the maximum size of the table name.", false, $('#export-to-bq-modal .modal-js-messages'));
                 return false;
             }
         }, 70);

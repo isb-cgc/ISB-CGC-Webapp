@@ -55,6 +55,7 @@ jobs:
           key: isb-cgc-webapp-{{ epoch }}
           paths:
             - ./adminrestrict
+            - ./.git
             - ./demo
             - ./genes
             - ./seqpeek

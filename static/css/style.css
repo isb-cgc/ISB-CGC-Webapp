@@ -1352,8 +1352,16 @@ a.skip-nav {
     background-color: #F8F8F8;
     border-color: #D32F2F; }
 
+.modal-js-messages > .alert {
+  border-width: 2px;
+  border-style: solid;
+  padding: 5px;
+  margin-bottom: 0;
+  font-size: 13px; }
+
 .modal-js-messages {
-  margin-top: 8px; }
+  margin-top: 8px;
+  min-height: 35px; }
 
 .message {
   margin: 0 -15px 10px -15px;
@@ -2392,6 +2400,9 @@ span.code {
   padding-right: 25px;
   padding-left: 25px;
   display: inline-block; }
+
+#export-to-bq-modal .modal-header, #export-to-gcs-modal .modal-header {
+  padding-bottom: 10px; }
 
 #export-to-bq-modal .spinner, #export-to-gcs-modal .spinner {
   position: absolute;
