@@ -22,12 +22,8 @@
     {# We have no way of knowing (easily?) if they have such a cookie in their current browser session. #}
     {# Note that if they are not linked at DCF, we *still* need to give them a way to change NIH identity, #}
     {# so we continue to provide the alternative to disconnect!! #}
-    {% elif not user_details.NIH_DCF_linked %}
-
-        <p><a href="{% url 'dcf_link_redo' %}">DO NOT USE IF SESSION IS STALE Link your Google ID to your NIH identity: {{ user_details.NIH_username }}</a></p>
-        {% if user_details.link_mismatch %}
-            <p><a href="{% url 'dcf_login' %}">Correctly link your ISB-CGC Google ID {{ user_details.email }} to your NIH ID</a></p>
-        {% endif %}
+    {% elif user_details.link_mismatch %}
+        <p><a href="{% url 'dcf_login' %}">Correctly link your ISB-CGC Google ID {{ user_details.email }} to your NIH ID</a></p>
         <hr>
         <p><a data-toggle="modal" data-target="#unlink-nih-account-modal">Unlink {{ user_details.email }} from the NIH identity: {{ user_details.NIH_username }}</a></p>
     {# User has been seen, has a current token, is linked, and just needs to ask to be put back on lists. #}
@@ -62,8 +58,6 @@
             <p>Your access is valid until:</p>
             <p id="NIH_expiration"></p>
             <p><a href="{% url 'dcf_link_extend' %}">Extend controlled access period to 24 hours from now.</a></p>
-            <p><a href="{% url 'dcf_unlink' %}">ISB CGC INTERNAL: UNLINK IDS BUT RETAIN NIH ID</a></p>
-            <p><a href="{% url 'dcf_get_user_data' %}">ISB CGC INTERNAL: GET USER DATA</a></p>
             <hr>
             <p><a data-toggle="modal" data-target="#unlink-nih-account-modal">Unlink {{ user_details.email }} from the NIH identity: {{ user_details.NIH_username }}</a></p>
         {% endwith %}
