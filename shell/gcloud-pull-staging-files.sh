@@ -12,7 +12,7 @@ mkdir ./txt
 ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_DEV}/${MANAGED_SERVICE_ACCOUNTS_JSON_FILE}" ./
 ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_DEV}/${DEV_DATASET_JSON_FILE}" ./
 
-./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_DEV}/static_last_commit.txt" ./
+./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_DEV}/${STATIC_COMMIT_CHECK_FILE}" ./
 
 if [ -n "${DEV_NIH_AUTH_ON}" ]; then
   ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_DEV}/saml/advanced_settings.json" ./saml/advanced_settings.json
