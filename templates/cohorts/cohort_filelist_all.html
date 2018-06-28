@@ -13,18 +13,18 @@
             {% for attr_build, vals in metadata_data_attr.items %}
             <div class="panel-body tab-content filter-build-panel" data-filter-build="{{ attr_build }}" id="all-filter-panel-{{ attr_build }}" {% if build != attr_build %}style="display: none;"{% endif %}>
                 <ul class="list-group" id="metadata-data-accordian-all" role="tablist" aria-multiselectable="true">
-                    <li class="list-group-item">
-                        <div id="heading-all-{{ attr_build }}-case-id" class="list-group-item__heading">
-                            <a role="button" data-toggle="collapse" data-parent="#metadata-data-accordian-all" href="#collapse-all-{{ attr_build }}-case-id" aria-expanded="false" aria-controls="collapse-all-{{ attr_build }}-case-id">
-                                <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> CASE ID
-                            </a>
-                        </div>
-                        <div id="collapse-all-{{ attr_build }}-case-id" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" data-feature-type="donor"
-                                 aria-labelledby="heading-all-{{ attr_build }}-case-id" data-feature-name="case-id" data-feature-displ-name="CASE ID">
-                            <input type="text" class="case-search-text" id="case_id" name="case_id" placeholder="eg. TCGA-DD*, *DD*, TCGA-DD-AAVP" value="">
-                            <a class=" css-kqip4w active" aria-current="true" href="/repository?facetTab=cases&amp;filters=%7B%22op%22%3A%22and%22%2C%22content%22%3A%5B%7B%22op%22%3A%22in%22%2C%22content%22%3A%7B%22field%22%3A%22cases.submitter_id%22%2C%22value%22%3A%5B%22%22%5D%7D%7D%5D%7D&amp;searchTableTab=files">Go!</a>
-                        </div>
-                    </li>
+{#                    <li class="list-group-item">#}
+{#                        <div id="heading-all-{{ attr_build }}-case-id" class="list-group-item__heading">#}
+{#                            <a role="button" data-toggle="collapse" data-parent="#metadata-data-accordian-all" href="#collapse-all-{{ attr_build }}-case-id" aria-expanded="false" aria-controls="collapse-all-{{ attr_build }}-case-id">#}
+{#                                <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> CASE ID#}
+{#                            </a>#}
+{#                        </div>#}
+{#                        <div id="collapse-all-{{ attr_build }}-case-id" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" data-feature-type="donor"#}
+{#                                 aria-labelledby="heading-all-{{ attr_build }}-case-id" data-feature-name="case-id" data-feature-displ-name="CASE ID">#}
+{#                            <input type="text" class="case-search-text" id="case_id" name="case_id" placeholder="eg. TCGA-DD*, *DD*, TCGA-DD-AAVP" value="">#}
+{#                            <a class=" css-kqip4w active" aria-current="true" href="/repository?facetTab=cases&amp;filters=%7B%22op%22%3A%22and%22%2C%22content%22%3A%5B%7B%22op%22%3A%22in%22%2C%22content%22%3A%7B%22field%22%3A%22cases.submitter_id%22%2C%22value%22%3A%5B%22%22%5D%7D%7D%5D%7D&amp;searchTableTab=files">Go!</a>#}
+{#                        </div>#}
+{#                    </li>#}
                     {% for attr in vals %}
                         <li class="list-group-item">
                             <div id="heading-all-{{ attr_build }}-{{attr.name}}" class="list-group-item__heading">
