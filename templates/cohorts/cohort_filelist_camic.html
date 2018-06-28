@@ -1,5 +1,73 @@
 <div id="camic-files" class="tab-pane data-tab" data-file-type="camic" role="tabpanel">
-    <div id="camic-file-panel" class="col-sm-12 col-md-12 col-lg-12">
+    <div id="camic-filter-panel" class="col-lg-3 col-md-3 col-sm-3">
+        <div class="panel panel-default hidden">
+            <div class="panel-body">
+                <label for="build">Build</label>
+                <select aria-label="Build" id="camic-build" class="form-control build">
+                    <option value="HG19" selected>HG19</option>
+                </select>
+            </div>
+        </div>
+        <div class="panel panel-default filter-panel">
+            {% for attr_build, vals in metadata_data_attr.items %}
+            <div class="panel-body tab-content filter-build-panel" data-filter-build="HG19" id="camic-filter-panel-HG19" {% if build != attr_build %}style="display: none;"{% endif %}>
+                <ul class="list-group" id="metadata-data-accordian-camic" role="tablist" aria-multiselectable="true">
+                    {% for attr in vals %}
+                        <li class="list-group-item">
+                            <div id="heading-camic-HG19-{{attr.name}}" class="list-group-item__heading">
+                                <a role="button" data-toggle="collapse" data-parent="#metadata-data-accordian-camic" href="#collapse-camic-HG19-{{ attr.name }}" aria-expanded="false" aria-controls="collapse-camic-HG19-{{ attr.name }}">
+                                    <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr.displ_name }}
+                                </a>
+                            </div>
+                            <div id="collapse-camic-HG19-{{ attr.name }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" data-feature-type="donor"
+                                 aria-labelledby="heading-camic-HG19-{{ attr.name }}" data-feature-name="{{ attr.name }}" data-feature-displ-name="{{ attr.displ_name }}">
+                                <ul class="search-checkbox-list" id="camic-{{ attr.name }}">
+                                    {% with attr.values|how_many_more:6 as num_more %}
+                                        {% for v in attr.values|check_for_order:attr.name %}
+                                            {% if forloop.counter0 < 6 %}
+                                                <li class="checkbox">
+                                                    <label title="{% if v.tooltip %}{{ v.tooltip }}{% else %} {% endif %}">
+                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="camic-HG19-{{ attr.name }}-{{ v.value }}"
+                                                               data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
+                                                        {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}
+                                                         <span class="count">({{ v.count }})</span>
+                                                    </label>
+                                                </li>
+                                            {% elif forloop.counter0 == 6 and num_more > 0 %}
+                                                <p class="more-checks"><a class="show-more">{{ num_more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                                <li class="extra-values checkbox" style="display:none;">
+                                                    <label title="{% if v.tooltip %}{{ v.tooltip }}{% else %} {% endif %}">
+                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="camic-HG19-{{ attr.name}}-{{ v.value }}"
+                                                               data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
+                                                        {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.name }}{% endif %}
+                                                         <span class="count">({{ v.count }})</span>
+                                                    </label>
+                                                </li>
+                                            {% else %}
+                                                <li class="extra-values checkbox" style="display:none;">
+                                                    <label title="{% if v.tooltip %}{{ v.tooltip }}{% else %} {% endif %}">
+                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="camic-HG19-{{ attr.name }}-{{ v.value }}"
+                                                               data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
+                                                        {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.name }}{% endif %}
+                                                         <span class="count">({{ v.count }})</span>
+                                                    </label>
+                                                </li>
+                                            {% endif %}
+                                        {% endfor %}
+                                        {% if num_more > 0 %}
+                                            <p class="less-checks" style="display: none;"><a class="show-less">less</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
+                                        {% endif %}
+                                    {% endwith %}
+                                </ul>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div id="camic-file-panel" class="col-sm-9 col-md-9 col-lg-9">
         <div class="filelist-panel panel">
             <div class="panel-heading">
                 <h4>File Listing</h4>

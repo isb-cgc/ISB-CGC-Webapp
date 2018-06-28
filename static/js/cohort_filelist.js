@@ -63,6 +63,9 @@ require([
         'igv': {
             'HG19': {},
             'HG38': {}
+        },
+        'camic': {
+            'HG19': {}
         }
     };
         
@@ -284,7 +287,14 @@ require([
                 }
                 break;
             case "camic":
-                filter_args = 'filters=' + encodeURIComponent(JSON.stringify({"data_type": ["Diagnostic image","Tissue slide image"]}));
+                if(!SELECTED_FILTERS[active_tab][build]["data_type"]) {
+                    SELECTED_FILTERS[active_tab][build]["data_type"] = [];
+                    SELECTED_FILTERS[active_tab][build]["data_type"].push("Diagnostic image");
+                    SELECTED_FILTERS[active_tab][build]["data_type"].push("Tissue slide image");
+                }
+                if (SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab][build]).length >0) {
+                    filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab][build]));
+                }
                 break;
             case "dicom":
                 filter_args = 'filters=' + encodeURIComponent(JSON.stringify({"data_type": ["Radiology image"]}));
@@ -731,7 +741,7 @@ require([
         update_displays_thread = setTimeout(function(){
             var build = $('#'+active_tab+'-files').find('.build :selected').val();
             var files_per_page = tab_files_per_page[active_tab];
-            var url = ajax_update_url[active_tab] + '?files_per_page=' +files_per_page + (build ? '&build='+build : '');
+            var url = ajax_update_url[active_tab] + '?files_per_page=' +files_per_page + (active_tab != 'camic' && active_tab != 'dicom'  ? '&build='+build : '');
             if(tab_case_barcode[active_tab]){
                 url += '&case_barcode='+ encodeURIComponent(tab_case_barcode[active_tab]);
             }
@@ -851,6 +861,9 @@ require([
             case "camic":
                 target_form.find('input[name="filters"]').attr(
                     'value',JSON.stringify({"data_type": ["Diagnostic image", "Tissue slide image"]})
+                );
+                target_form.append(
+                    '<input class="param" type="hidden" name="build" value="'+build+'" />'
                 );
                 break;
         }
