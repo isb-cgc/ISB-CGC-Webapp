@@ -1,41 +1,41 @@
 <div id="dicom-files" class="tab-pane data-tab" data-file-type="dicom" role="tabpanel">
-{#    <div id="dicom-filter-panel" class="col-lg-3 col-md-3 col-sm-3">#}
-{#        <div class="panel panel-default hidden">#}
-{#            <div class="panel-body">#}
-{#                <label for="build">Build</label>#}
-{#                <select aria-label="Build" id="dicom-build" class="form-control build">#}
-{#                    <option value="HG19" selected>HG19</option>#}
-{#                </select>#}
-{#            </div>#}
-{#        </div>#}
-{#        <div class="panel panel-default filter-panel">#}
-{#            {% for attr_build, vals in metadata_data_attr.items %}#}
-{#            <div class="panel-body tab-content filter-build-panel" data-filter-build="HG19" id="dicom-filter-panel-HG19" {% if build != attr_build %}style="display: none;"{% endif %}>#}
-{#                <ul class="list-group" id="metadata-data-accordian-dicom" role="tablist" aria-multiselectable="true">#}
-{#                    <li class="list-group-item">#}
-{#                        <div id="heading-dicom-HG19-case-id" class="list-group-item__heading">#}
-{#                            <a role="button" data-toggle="collapse" data-parent="#metadata-data-accordian-all"#}
-{#                               href="#collapse-dicom-HG19-case-id" aria-expanded="false"#}
-{#                               aria-controls="collapse-dicom-HG19-case-id">#}
-{#                                <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> CASE#}
-{#                            </a>#}
-{#                        </div>#}
-{#                        <div id="collapse-dicom-HG19-case-id"#}
-{#                             class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"#}
-{#                             data-feature-type="donor"#}
-{#                             aria-labelledby="heading-dicom-HG19-case-id" data-feature-name="case-id"#}
-{#                             data-feature-displ-name="CASE ID">#}
-{#                            <div class="search_enter">#}
-{#                                <div class="search_input">#}
-{#                                    <input class="case-barcode-search-text" type="search" placeholder="Case Barcode"#}
-{#                                           value="">#}
-{#                                    <a class="case-barcode-search-clear-btn search_clear_btn"><i class="fa fa-times-circle"></i></a>#}
-{#                                    <a class="case-barcode-search-btn search_btn"><i class="fa fa-search"></i>#}
-{#                                    </a>#}
-{#                                </div>#}
-{#                            </div>#}
-{#                        </div>#}
-{#                    </li>#}
+    <div id="camic-filter-panel" class="col-lg-3 col-md-3 col-sm-3">
+        <div class="panel panel-default hidden">
+            <div class="panel-body">
+                <label for="build">Build</label>
+                <select aria-label="Build" id="dicom-build" class="form-control build">
+                    <option value="HG19" selected>HG19</option>
+                </select>
+            </div>
+        </div>
+        <div class="panel panel-default filter-panel">
+            {% for attr_build, vals in metadata_data_attr.items %}
+            <div class="panel-body tab-content filter-build-panel" data-filter-build="HG19" id="dicom-filter-panel-HG19" {% if build != attr_build %}style="display: none;"{% endif %}>
+                <ul class="list-group" id="metadata-data-accordian-dicom" role="tablist" aria-multiselectable="true">
+                    <li class="list-group-item">
+                        <div id="heading-dicom-HG19-case-id" class="list-group-item__heading">
+                            <a role="button" data-toggle="collapse" data-parent="#metadata-data-accordian-all"
+                               href="#collapse-dicom-HG19-case-id" aria-expanded="false"
+                               aria-controls="collapse-dicom-HG19-case-id">
+                                <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> CASE
+                            </a>
+                        </div>
+                        <div id="collapse-dicom-HG19-case-id"
+                             class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"
+                             data-feature-type="donor"
+                             aria-labelledby="heading-dicom-HG19-case-id" data-feature-name="case-id"
+                             data-feature-displ-name="CASE ID">
+                            <div class="search_enter">
+                                <div class="search_input">
+                                    <input class="case-barcode-search-text" type="search" placeholder="Case Barcode"
+                                           value="">
+                                    <a class="case-barcode-search-clear-btn search_clear_btn"><i class="fa fa-times-circle"></i></a>
+                                    <a class="case-barcode-search-btn search_btn"><i class="fa fa-search"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
 {#                    {% for attr in vals %}#}
 {#                        <li class="list-group-item">#}
 {#                            <div id="heading-dicom-HG19-{{attr.name}}" class="list-group-item__heading">#}
@@ -86,11 +86,11 @@
 {#                            </div>#}
 {#                        </li>#}
 {#                    {% endfor %}#}
-{#                </ul>#}
-{#            </div>#}
-{#            {% endfor %}#}
-{#        </div>#}
-{#    </div>#}
+                </ul>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
     <div id="dicom-file-panel" class="col-sm-9 col-md-9 col-lg-9">
         <div class="filelist-panel panel">
             <div class="panel-heading">
