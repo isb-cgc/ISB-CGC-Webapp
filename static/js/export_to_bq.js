@@ -118,7 +118,7 @@ require([
         $('.table-type, .new-table-name').attr('title', 'Select a project and dataset to enable this option');
         $('.new-table-name').show();
         $('.table-list').hide();
-        $('.message-container').empty();
+        $('.modal-js-messages').empty();
         $('#export-to-bq-form input[type="submit"]').attr('disabled', 'disabled');
         $('#export-to-bq-form')[0].reset();
         $('#export-underway').hide();

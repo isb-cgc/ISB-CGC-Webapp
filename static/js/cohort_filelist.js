@@ -34,6 +34,7 @@ require.config({
         'jqueryui': ['jquery'],
         'session_security': ['jquery'],
         'tokenfield': ['jquery', 'jqueryui'],
+        'underscore': {exports: '_'},
         'base': ['jquery', 'jqueryui', 'session_security', 'bootstrap', 'underscore']
     }
 });
@@ -41,13 +42,14 @@ require.config({
 require([
     'jquery',
     'base',
+    'underscore',
     'jqueryui',
     'bootstrap',
     'session_security',
     'tokenfield',
     'bq_export',
     'gcs_export'
-], function ($, base) {
+], function ($, base, _) {
 
     // For manaaging filter changes
     var UPDATE_PENDING = false;
@@ -334,6 +336,7 @@ require([
                     update_download_link(active_tab, data.total_file_count);
                 }
                 update_table_display(active_tab,data,do_filter_count);
+                programs_this_cohort = data.programs_this_cohort;
             },
             error: function(e) {
                 console.log(e);
@@ -827,6 +830,16 @@ require([
                     'value',JSON.stringify({"data_type": ["Diagnostic image", "Tissue slide image"]})
                 );
                 break;
+        }
+
+        if(this_tab.find('.build :selected').val() == 'HG38' && _.find(programs_this_cohort, function(prog){return prog == 'CCLE';})) {
+            base.showJsMessage(
+                "warning",
+                "You are exporting a file list for a cohort which contains CCLE samples, with the build set to HG38. "
+                +"Please note that there are no HG38 samples for CCLE, so that program will be absent from the export.",
+                false,
+                $($(this).data('target')).find('.modal-js-messages')
+            );
         }
     });
 

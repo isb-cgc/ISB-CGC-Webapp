@@ -156,6 +156,7 @@
     var IMG_THUMBS_URL = '{{ img_thumbs_url }}';
     var HAS_USER_DATA = {% if has_user_data %}true{% else %}false{% endif %};
     var request_user_id = {{ user.id }};
+    var programs_this_cohort = {{ programs_this_cohort|tojson|safe }};
     </script>
 {% endblock %}
 
