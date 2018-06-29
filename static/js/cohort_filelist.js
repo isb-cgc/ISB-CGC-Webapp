@@ -336,7 +336,6 @@ require([
                     update_download_link(active_tab, data.total_file_count);
                 }
                 update_table_display(active_tab,data,do_filter_count);
-                programs_this_cohort = data.programs_this_cohort;
             },
             error: function(e) {
                 console.log(e);
