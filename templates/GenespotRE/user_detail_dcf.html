@@ -3,9 +3,14 @@
 
 {% block dcf_content %}
 
+    {% if user_details.dcf_comm_error%}
+        <p>Currently unable to contact Data Commons Framework. Please try later.</p>
     {# User has tried to sign in with a conflicting NIH Username and must be forced to change it: #}
-    {% if user_details.force_DCF_logout%}
+    {% elif user_details.force_DCF_logout%}
         <p><a href="{% url 'dcf_simple_logout' %}">Logout from Data Commons now to use another NIH identity.</a></p>
+    {# Refresh token has expired (30 days). User must log into DCF again t #}
+    {% elif user_details.refresh_required%}
+        <p><a href="{% url 'dcf_login' %}">Data Commons session has expired. Please log in again.</a></p>
      {# User has *never* been seen before with an NIH login, or they have disconnected from it. #}
     {% elif not user_details.NIH_username %}
         <p>Apply for dbGaP Authorized Access to access underlying Level 1 genomics data.</p>
