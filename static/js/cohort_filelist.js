@@ -66,6 +66,9 @@ require([
         },
         'camic': {
             'HG19': {}
+        },
+        'dicom': {
+            'HG19': {}
         }
     };
         
@@ -583,9 +586,9 @@ require([
     $('.data-tab-content').on('click', '.case-barcode-search-btn', function () {
         var this_tab = $(this).parents('.data-tab').data('file-type');
         var search_input = $(this).siblings('.case-barcode-search-text');
-        tab_case_barcode[this_tab] = search_input.val().trim();
-        tab_page[this_tab] = 1;
-        update_displays(this_tab);
+        search_input.val(search_input.val().trim());
+        search_case_barcode(this_tab, search_input.val());
+
         /*
         var this_tab = $(this).parents('.data-tab').data('file-type');
         var search_input = $(this).siblings('.dataTables_search_input').children('.case-barcode-search-text');
@@ -596,17 +599,19 @@ require([
     });
 
     $('.data-tab-content').on('click', '.case-barcode-search-clear-btn', function () {
-        var search_input = $(this).siblings('.case-barcode-search-text');
         var this_tab = $(this).parents('.data-tab').data('file-type');
-        if(search_input.val().trim()) {
-            search_input.val("");
-        }
-        if(tab_case_barcode[this_tab]){
-            tab_case_barcode[this_tab] = "";
-            tab_page[this_tab] = 1;
-            update_displays(this_tab);
-        }
+        var search_input = $(this).siblings('.case-barcode-search-text');
+        search_input.val("");
+        search_case_barcode(this_tab, search_input.val());
     });
+
+    function search_case_barcode(tab, search_input_val){
+        if(search_input_val.trim() != tab_case_barcode[tab]) {
+            tab_case_barcode[tab] = search_input_val.trim();
+            tab_page[tab] = 1;
+            update_displays(tab);
+        }
+    }
 
     //toggle column display
     $('.data-tab-content').on('click', '.column_toggle_button', function () {
@@ -691,19 +696,19 @@ require([
             SELECTED_FILTERS[active_tab][build][$(this).data('feature-name')].push($(this).data('value-name'));
         });
         tab_page[active_tab] = 1;
-    };
+    }
 
     function enqueueUpdate(active_tab){
         UPDATE_QUEUE.push(function(){
             update_displays(active_tab);
         });
-    };
+    }
 
     function dequeueUpdate(){
         if(UPDATE_QUEUE.length > 0) {
             UPDATE_QUEUE.shift()();
         }
-    };
+    }
 
     function pagination(c, m) {
         var current = parseInt(c),
@@ -731,7 +736,7 @@ require([
             l = range[i];
         }
         return rangeWithDots;
-    };
+    }
 
     var update_displays = function(active_tab) {
         // If a user has clicked more filters while an update was going out, queue up a future update and return
