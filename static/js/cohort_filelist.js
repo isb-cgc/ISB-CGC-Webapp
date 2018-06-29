@@ -301,12 +301,14 @@ require([
                 break;
         }
 
-        $(tab_selector).find('.download-link').attr('href', download_url + '?' + (filter_args ? filter_args + '&' : '')+ 'downloadToken='+downloadToken+'&total=' + Math.min(FILE_LIST_MAX,file_list_total));
-
+        $(tab_selector).find('.download-link').attr('href', download_url + '?'
+            + (filter_args ? filter_args + '&' : '')
+            + (tab_case_barcode[active_tab] ? 'case_barcode='+ encodeURIComponent(tab_case_barcode[active_tab]) + '&' : '')
+            + 'downloadToken='+downloadToken+'&total=' + Math.min(FILE_LIST_MAX,file_list_total));
         if(active_tab !== 'camic' && active_tab !== 'dicom') {
             $(tab_selector).find('.download-link').attr('href',$(tab_selector).find('.download-link').attr('href')+'&build='+build);
         }
-    };
+    }
 
     var update_table = function (active_tab, do_filter_count) {
         do_filter_count = (do_filter_count === undefined || do_filter_count === null ? true : do_filter_count);
@@ -580,10 +582,17 @@ require([
 
     $('.data-tab-content').on('click', '.case-barcode-search-btn', function () {
         var this_tab = $(this).parents('.data-tab').data('file-type');
+        var search_input = $(this).siblings('.case-barcode-search-text');
+        tab_case_barcode[this_tab] = search_input.val().trim();
+        tab_page[this_tab] = 1;
+        update_displays(this_tab);
+        /*
+        var this_tab = $(this).parents('.data-tab').data('file-type');
         var search_input = $(this).siblings('.dataTables_search_input').children('.case-barcode-search-text');
         tab_case_barcode[this_tab] = $(this).siblings('.dataTables_search_input').children('.case-barcode-search-text').val().trim();
         tab_page[this_tab] = 1;
         update_displays(this_tab);
+        */
     });
 
     $('.data-tab-content').on('click', '.case-barcode-search-clear-btn', function () {
