@@ -3,9 +3,16 @@
 
 {% block dcf_content %}
 
+    {% if user_details.error_state%}
+        <p>{{ user_details.error_state }}</p>
+    {% elif user_details.dcf_comm_error%}
+        <p>Currently unable to contact Data Commons Framework. Please try later.</p>
     {# User has tried to sign in with a conflicting NIH Username and must be forced to change it: #}
-    {% if user_details.force_DCF_logout%}
+    {% elif user_details.force_DCF_logout%}
         <p><a href="{% url 'dcf_simple_logout' %}">Logout from Data Commons now to use another NIH identity.</a></p>
+    {# Refresh token has expired (30 days). User must log into DCF again t #}
+    {% elif user_details.refresh_required%}
+        <p><a href="{% url 'dcf_login' %}">Data Commons session has expired. Please log in again.</a></p>
      {# User has *never* been seen before with an NIH login, or they have disconnected from it. #}
     {% elif not user_details.NIH_username %}
         <p>Apply for dbGaP Authorized Access to access underlying Level 1 genomics data.</p>
@@ -22,12 +29,8 @@
     {# We have no way of knowing (easily?) if they have such a cookie in their current browser session. #}
     {# Note that if they are not linked at DCF, we *still* need to give them a way to change NIH identity, #}
     {# so we continue to provide the alternative to disconnect!! #}
-    {% elif not user_details.NIH_DCF_linked %}
-
-        <p><a href="{% url 'dcf_link_redo' %}">DO NOT USE IF SESSION IS STALE Link your Google ID to your NIH identity: {{ user_details.NIH_username }}</a></p>
-        {% if user_details.link_mismatch %}
-            <p><a href="{% url 'dcf_login' %}">Correctly link your ISB-CGC Google ID {{ user_details.email }} to your NIH ID</a></p>
-        {% endif %}
+    {% elif user_details.link_mismatch %}
+        <p><a href="{% url 'dcf_login' %}">Correctly link your ISB-CGC Google ID {{ user_details.email }} to your NIH ID</a></p>
         <hr>
         <p><a data-toggle="modal" data-target="#unlink-nih-account-modal">Unlink {{ user_details.email }} from the NIH identity: {{ user_details.NIH_username }}</a></p>
     {# User has been seen, has a current token, is linked, and just needs to ask to be put back on lists. #}
@@ -62,21 +65,11 @@
             <p>Your access is valid until:</p>
             <p id="NIH_expiration"></p>
             <p><a href="{% url 'dcf_link_extend' %}">Extend controlled access period to 24 hours from now.</a></p>
-            <p><a href="{% url 'dcf_unlink' %}">ISB CGC INTERNAL: UNLINK IDS BUT RETAIN NIH ID</a></p>
-            <p><a href="{% url 'dcf_get_user_data' %}">ISB CGC INTERNAL: GET USER DATA</a></p>
             <hr>
             <p><a data-toggle="modal" data-target="#unlink-nih-account-modal">Unlink {{ user_details.email }} from the NIH identity: {{ user_details.NIH_username }}</a></p>
         {% endwith %}
     {% endif %}
 
-    {% if membership %}
-        <hr>
-        <p>
-           You are a member of the group isb-cgc-cntl.
-            <a data-toggle="modal" data-target="#bucket-contents-modal">View bucket contents</a>
-        </p>
-
-    {% endif %}
 
     {# Always include the unlinking dialog #}
     {#   if user_details.NIH_username and not user_details.NIH_active  #}
