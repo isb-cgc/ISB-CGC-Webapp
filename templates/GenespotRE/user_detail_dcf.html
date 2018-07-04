@@ -3,7 +3,9 @@
 
 {% block dcf_content %}
 
-    {% if user_details.dcf_comm_error%}
+    {% if user_details.error_state%}
+        <p>{{ user_details.error_state }}</p>
+    {% elif user_details.dcf_comm_error%}
         <p>Currently unable to contact Data Commons Framework. Please try later.</p>
     {# User has tried to sign in with a conflicting NIH Username and must be forced to change it: #}
     {% elif user_details.force_DCF_logout%}
@@ -68,14 +70,6 @@
         {% endwith %}
     {% endif %}
 
-    {% if membership %}
-        <hr>
-        <p>
-           You are a member of the group isb-cgc-cntl.
-            <a data-toggle="modal" data-target="#bucket-contents-modal">View bucket contents</a>
-        </p>
-
-    {% endif %}
 
     {# Always include the unlinking dialog #}
     {#   if user_details.NIH_username and not user_details.NIH_active  #}
