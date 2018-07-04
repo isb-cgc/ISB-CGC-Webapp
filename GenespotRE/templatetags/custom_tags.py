@@ -117,8 +117,6 @@ def check_for_order(items, attr):
         return sorted(items, key=lambda k: k['value'])
     else:
         # Otherwise, sort them by count, descending
-        print("**items")
-        print(items)
         return sorted(items, key=lambda k: k['count'], reverse=True)
 
 

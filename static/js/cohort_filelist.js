@@ -299,15 +299,12 @@ require([
                     filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab][build]));
                 }
                 break;
-            case "dicom":
-                //filter_args = 'filters=' + encodeURIComponent(JSON.stringify({"data_type": ["Radiology image"]}));
-                if(!SELECTED_FILTERS[active_tab][build]["data_type"]) {
-                    SELECTED_FILTERS[active_tab][build]["data_type"] = [];
-                    SELECTED_FILTERS[active_tab][build]["data_type"].push("Radiology image");
-                }
+            case "dicom":var
+                filters = {"data_type": ["Radiology image"]};
                 if (SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab][build]).length >0) {
-                    filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab][build]));
+                    filters = Object.assign(filters, SELECTED_FILTERS[active_tab][build]);
                 }
+                filter_args = 'filters=' + encodeURIComponent(JSON.stringify(filters));
                 break;
         }
 
