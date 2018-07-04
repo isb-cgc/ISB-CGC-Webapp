@@ -28,7 +28,7 @@
     {# to directly contact DCF on a redirect and provide a cookie that they can only get as part of an NIH login. #}
     {# We have no way of knowing (easily?) if they have such a cookie in their current browser session. #}
     {# Note that if they are not linked at DCF, we *still* need to give them a way to change NIH identity, #}
-    {# so we continue to provide the alternative to disconnect!! #}
+    {# so we continue to provide the alternative to disconnect!!  #}
     {% elif user_details.link_mismatch %}
         <p><a href="{% url 'dcf_login' %}">Correctly link your ISB-CGC Google ID {{ user_details.email }} to your NIH ID</a></p>
         <hr>
