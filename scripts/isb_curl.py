@@ -18,9 +18,6 @@ limitations under the License.
 
 isb_curl can be called by commandline or used as a library
 
-Use the endpoint URL structure in the API Documentation
-https://docs.google.com/document/d/1Jax7HCmGPM7J-52c8AsSbfFcQv8L8AkB612s-50_7GU
-
 URL = https://isb-cgc.appspot.com/_ah/api/{API-NAME}/{VERSION}/{ENDPOINT}?{QUERYSTRING-PARAMS}
   e.g. for the "cohorts_list" endpoint:
   https://isb-cgc.appspot.com/_ah/api/cohort_api/v1/cohorts_list

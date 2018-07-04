@@ -1,16 +1,17 @@
-<div id="user-data" class="tab-pane data-tab{% if cohort.id and user_data and metadata_counts.user_data_total > 0 %} active{% endif %}" role="tabpanel">
-    <div id="user-data-filter-panel" class="col-lg-4 filter-panel" role="tabpanel" {% if cohort.id %}style="display:none;"{% endif %}>
+<div id="0-data" class="tab-pane data-tab{% if cohort.id and user_data and metadata_counts.user_data_total > 0 %} active{% endif %}" role="tabpanel">
+    <div id="0-data-filter-panel" class="col-lg-3 filter-panel" role="tabpanel" {% if cohort.id %}style="display:none;"{% endif %} data-prog-id="0" data-prog-displ-name="User Data">
         <div class="tabpanel" role="tabpanel">
             <ul class="nav nav-tabs nav-tabs-ud-filters" role="tablist">
-                <li role="presentation" class="active"><a href="#ud-proj-study-filters" role="tab" data-toggle="tab" title="User Data Projects & Studies">Projects & Studies</a></li>
+                <li role="presentation" class="active"><a href="#ud-prog-project-filters" role="tab" data-toggle="tab" title="User Data Programs & Projects">Programs & Projects</a></li>
                 {% if user_data.features %}<li role="presentation" class=""><a href="#ud-feature-filters" role="tab" data-toggle="tab" title="User Data Features">Features</a></li>
-                {% else %}<li role="presentation" class="disabled"><a href="" role="tab" data-toggle="tab" title="">&nbsp;</a></li>{% endif %}
+                {# {% else %}<li role="presentation" class="disabled"><a href="" role="tab" data-toggle="tab" title="">&nbsp;</a></li> #}
+                {% endif %}
             </ul>
             <div class="tab-content">
-                <!-- user data projects & studies filters tab -->
-                <div role="tabpanel" class="tab-pane active" id="ud-proj-study-filters">
+                <!-- user data programs & projects filters tab -->
+                <div role="tabpanel" class="tab-pane active" id="ud-prog-project-filters">
                     <ul class="list-group" id="data-type-accordion" role="tablist" aria-multiselectable="true">
-                        {% if not user_data or metadata_counts.user_data_total <= 0 %}
+                        {% if not metadata_counts.user_data %}
                             <li class="list-group-item">
                                 <div id="user-data-alert" class="alert alert-warning alert-dismissable">
                                     <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
@@ -18,23 +19,24 @@
                                 </div>
                             </li>
                         {% endif %}
-                        {% for attr in user_data %}
+                        {% for attr in attr_counts|get_sorted_items %}
                             <li class="list-group-item">
                                 <div class="list-group-item__heading" role="tab" id="heading-{{ attr.id }}">
                                     <a role="button" data-toggle="collapse" data-parent="#data-type-accordion" href="#collapse-{{ attr.id }}"
                                        aria-expanded="false" aria-controls="collapse-{{ attr.id }}">
-                                        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down" style="display:none;"></i> {% if attr.displ_name %}{{ attr.displ_name }}{% elif attr.name %}{{ attr.name }}{% else %}{{ attr.id }}{% endif %}
+                                        <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {% if attr.displ_name %}{{ attr.displ_name }}{% elif attr.name %}{{ attr.name }}{% else %}{{ attr.id }}{% endif %}
                                     </a>
                                 </div>
                                 <div id="collapse-{{ attr.id }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"
                                      aria-labelledby="heading-{{ attr.id }}" data-feature-name="{{ attr.name }}" data-feature-id="{{ attr.id }}"
                                      data-feature-displ-name="{% if attr.displ_name %}{{ attr.displ_name }}{% elif attr.name %}{{ attr.name }}{% else %}{{ attr.id }}{% endif %}"
                                      data-feature-type="user-data">
-                                    <ul class="search-checkbox-list" id="{{ attr.id }}">
+                                    <ul class="search-checkbox-list" id="0-{{ attr.id }}">
                                         {% for v in attr.values %}
                                             <li class="checkbox">
                                                 <label>
-                                                    <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}"
+                                                    <input type="checkbox" name="elements-selected" data-user-program-id="{{ v.program }}" data-value-name="{{ v.name }}"
+                                                           id="{% if v.full_id %}0-{{ v.full_id }}{% endif %}"
                                                            data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}"
                                                            data-value-displ-name="{% if v.display_name %}{{ v.displ_name }}{% elif v.name %}{{ v.name }}{% else %}{{ v.id }}{% endif %}">
                                                     {% if v.display_name %}{{ v.displ_name }}{% elif v.name %}{{ v.name }}{% else %}{{ v.id }}{% endif %} <span class="count">({{ v.count }})</span>
@@ -54,7 +56,7 @@
                             <li class="list-group-item">
                                 <div id="user-data-filter-alert" class="alert alert-warning alert-dismissable">
                                     <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                                    If a feature is not present across all active user-uploaded studies, it will not be available here for filtering.
+                                    If a feature is not present across all active user-uploaded projects, it will not be available here for filtering.
                                 </div>
                             </li>
                             {% for attr in user_data.features %}
@@ -69,11 +71,12 @@
                                          aria-labelledby="heading-{{ attr.id }}" data-feature-name="{{ attr.name }}" data-feature-id="{{ attr.id }}"
                                          data-feature-displ-name="{% if attr.displ_name %}{{ attr.displ_name }}{% elif attr.name %}{{ attr.name }}{% else %}{{ attr.id }}{% endif %}"
                                          data-feature-type="user-data">
-                                        <ul class="search-checkbox-list" id="{{ attr.id }}">
+                                        <ul class="search-checkbox-list" id=0-"{{ attr.id }}">
                                             {% for v in attr.values %}
                                                 <li class="checkbox">
                                                     <label>
                                                         <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}"
+                                                               id="{% if v.full_id %}0-{{ v.full_id }}{% endif %}"
                                                                data-value-id="{% if v.id %}{{ v.id }}{% elif v.name %}{{ v.name }}{% else %}{{ v.value }}{% endif %}"
                                                                data-value-displ-name="{% if v.display_name %}{{ v.displ_name }}{% elif v.name %}{{ v.name }}{% else %}{{ v.id }}{% endif %}">
                                                         {% if v.display_name %}{{ v.displ_name }}{% elif v.name %}{{ v.name }}{% else %}{{ v.id }}{% endif %} <span class="count">({{ v.count }})</span>
@@ -90,8 +93,8 @@
             </div>
         </div>
     </div>
-    <div class="{% if cohort.id %}col-md-12{% else %}col-lg-8{% endif %} data-tab-content-panel">
-        <div class="selected-filters user-data-selected-filters panel panel-default" {% if cohort.id %}style="display: none;"{% endif %}>
+    <div class="{% if cohort.id %}col-md-12{% else %}col-md-9{% endif %} data-tab-content-panel">
+        <div class="selected-filters 0-data-selected-filters panel panel-default" {% if cohort.id %}style="display: none;"{% endif %}>
             <div class="panel-heading clearfix">
                 <h4 class="panel-title pull-left">{% if cohort.id %}New Filters{% else %}Selected Filters{% endif %}</h4>
                 <a class="pull-right clear-filters" role="button" id="user-data-clear-filters">Clear All</a>
@@ -124,14 +127,14 @@
                         <span>Internal ISB-CGC Cohort ID: {{ cohort.id }}</span>
                     </div>
                     <div class="row col-md-12 space-bottom-10">
-                        <span class="detail-label">Total Number of Samples:</span>
+                        <span class="detail-label">Total Number of Cases:</span>
                         <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                        <span class="total-values user-data-samples">{{ total_samples }}</span>
+                        <span class="total-values" id="p-0-data-total-participants">{{ total_patients }}</span>
                     </div>
                     <div class="row col-md-12 space-bottom-10">
-                        <span class="detail-label">Total Number of Participants:</span>
+                        <span class="detail-label">Total Number of Samples:</span>
                         <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                        <span class="total-values user-data-participants">{{ total_patients }}</span>
+                        <span class="total-values" id="p-0-data-total-samples">{{ total_samples }}</span>
                     </div>
                     <div class="row col-md-12 space-bottom-10">
                         <span>Your Permissions: {{ cohort.perm.perm }}</span>
@@ -177,18 +180,18 @@
         {% else %}
             <div class="cohort-info panel panel-default">
                 <div class="panel-heading">
-                    <h4 class="panel-title">Details</h4>
+                    <h4 class="panel-title">Program Details</h4>
                 </div>
                 <div class="panel-body">
                     <div class="row col-md-6">
-                        <span class="detail-label">Total Number of Samples:</span>
+                        <span class="detail-label">Total Number of Cases:</span>
                         <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                        <span class="total-values user-data-samples">{% if user_data %}{{ metadata_counts.user_data_total  }}{% else %}NA{% endif %}</span>
+                        <span class="total-values" id="p-0-data-total-participants">{{ total_cases }}</span>
                     </div>
                     <div class="row col-md-6">
-                        <span class="detail-label">Total Number of Participants:</span>
+                        <span class="detail-label">Total Number of Samples:</span>
                         <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                        <span class="total-values user-data-participants">{% if user_data %}{{ metadata_counts.user_data_participants  }}{% else %}NA{% endif %}</span>
+                        <span class="total-values" id="p-0-data-total-samples">{{ total_samples }}</span>
                     </div>
                 </div>
             </div>
@@ -196,12 +199,18 @@
 
         <div class="user-data-trees panel panel-default">
             <div class="panel-heading">
-                <h4 class="panel-title">Projects & Studies</h4>
+                <h4 class="panel-title">Programs & Projects</h4>
             </div>
             <div class="panel-body">
                 <div class="spinner" style="display:none;"><i class="fa fa-spinner fa-spin"></i></div>
-                <div id="user-data-tree-graph" class="tree-graph-clinical"></div>
+                <div id="tree-graph-clinical-0" class="tree-graph-clinical"></div>
             </div>
         </div>
     </div>
 </div>
+<script type="text/javascript">
+    var total_samples = {{ total_samples|safe }};
+    var metadata_counts = {{ metadata_counts|tojson|safe }};
+    var metadata_filters = {{ metadata_filters|tojson|safe }};
+    var attr_counts = {{ attr_counts|tojson|safe }};
+</script>

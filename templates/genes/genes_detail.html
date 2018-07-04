@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% load custom_tags %}
-{% block title %}Genes Favorite Details | ISB-CGC{% endblock %}}
+{% block title %}Gene & miRNA Favorites Details | ISB-CGC{% endblock %}}
 {% block extra_css_libs %}{% endblock %}
 {% block header %}{% endblock %}
 
@@ -18,12 +18,12 @@
             <li><a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Saved Gene Favorites</a></li>
         {% elif new_workbook %}
             <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
-            <li><a href="{% url 'gene_select_for_new_workbook' %}">Saved Gene Favorites</a></li>
+            <li><a href="{% url 'gene_select_for_new_workbook' %}">Saved Gene & miRNA Favorites</a></li>
         {% else %}
-            <li><a href="{% url 'genes' %}">Saved Gene Favorites</a></li>
+            <li><a href="{% url 'genes' %}">Saved Gene & miRNA Favorites</a></li>
         {% endif %}
     </ol>
-    <h1 class="page-header">Gene Favorite Details</h1>
+    <h1 class="page-header">Gene & miRNA Favorite Details</h1>
 </div>
 {% endblock %}
 {% block content %}
@@ -35,7 +35,7 @@
         </div>
         <div class="panel-body">
             <div>
-                <h5>Selected Genes</h5>
+                <h5>Selected Genes & miRNAs</h5>
                 <ul>
                     {% for gene in gene_favorite.genes  %}
                         <li class="delete-x filter-label label label-default">{{gene.name}}</li>
@@ -60,7 +60,8 @@
                             </form>
                         {% endif %}
                     </li>
-                    <li class="pull-right"><a class="btn btn-link" href="http://www.genenames.org/" target="_blank">View System Gene Identifier</a></li>
+                    <li class="pull-right"><a class="nocap btn btn-link" href="http://www.genenames.org/" target="_blank">View System Gene Identifier</a></li>
+                    <li class="pull-right"><a class="nocap btn btn-link" href="http://www.mirbase.org/cgi-bin/mirna_summary.pl?org=hsa" target="_blank">View miRNA Identifier</a></li>
                 </ul>
             </div>
         </div>
@@ -72,9 +73,9 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 id="delete-favorite-header" class="modal-title">Delete this gene favorite "{{ gene_favorite.name|title }}"?</h4>
+                <h4 id="delete-favorite-header" class="modal-title">Delete this gene & miRNA favorite "{{ gene_favorite.name|title }}"?</h4>
             </div>
-            <form id="delete-workbook" method="POST" action="{% url 'gene_fav_delete' gene_favorite.id %}">
+            <form id="delete-favorite" method="POST" action="{% url 'gene_fav_delete' gene_favorite.id %}">
                 {% csrf_token %}
                 <div class="modal-footer">
                     <input type="submit" value="Delete" class="btn btn-primary" />
@@ -86,18 +87,22 @@
 </div>
 
 <!-- Create new workbook using favorite Modal -->
-<div class="modal fade" id="new-favorite-workbook-modal" tabindex="-1" role="dialog" aria-labelledby="edit-workbook-header" aria-hidden="true">
+<div class="modal fade new-workbook-modal" id="new-favorite-workbook-modal" tabindex="-1" role="dialog" aria-labelledby="edit-workbook-header" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="edit-workbook-header">Create a new workbook using the gene favorite "{{ gene_favorite.name|title }}"</h4>
+                <h4 class="modal-title" id="edit-workbook-header">Create a new workbook using the gene & miRNA favorite "{{ gene_favorite.name|title }}"</h4>
             </div>
-            <form id="edit-workbook" method="POST" action="{% url 'worksheet_create_with_genes' %}">
+            <form class="new-workbook" id="edit-workbook" method="POST" action="{% url 'worksheet_create_with_genes' %}">
                 {% csrf_token %}
                 <div class="modal-body">
+                    <div id="{{ gene_favorite.id }}-unallowed-chars-alert" class="unallowed-chars-wb-alert alert alert-warning alert-dismissable" style="display: none;">
+                        <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        Your workbook's name contains invalid characters (<span class="unallowed-chars-wb"></span>). Please choose another name.
+                    </div>
                     <label id="name-label" for="name-input">Name (required)</label>
-                    <input id="name-input" class="form-control" type="text" name="name" value="{{ gene_favorite.name }} workbook" aria-labelledby="name-label"/>
+                    <input id="name-input" class="form-control new-workbook-name" type="text" name="name" value="{{ gene_favorite.name }} workbook" aria-labelledby="name-label"/>
                     <input type="hidden" name="gene_list_id" value="{{ gene_favorite.id }}" />
                 </div>
                 <div class="modal-footer">
@@ -110,4 +115,4 @@
 </div>
 {% endblock %}
 
-{% block js_file %}{% static 'js/base.js' %}{% endblock %}
+{% block js_file %}{% static 'js/form_utils.js' %}{% endblock %}

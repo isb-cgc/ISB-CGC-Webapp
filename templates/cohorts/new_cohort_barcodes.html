@@ -1,0 +1,343 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load custom_tags %}
+
+{% comment %}
+
+   Copyright 2018, Institute for Systems Biology
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+{% endcomment %}
+
+{% block header %}
+{% endblock %}
+{% block link_page_name %}cohort-details{% endblock %}
+{% block page_name %}cohort-details{% endblock %}
+
+{% block page_header %}
+<link type="text/css" rel="stylesheet" href="{% static 'css/token-typeahead.css' %}" />
+
+<div class="container">
+    {% if workbook %}
+        <ol class="breadcrumb">
+            <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+            <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
+            <li><a href="{% url 'worksheet_display' workbook.id worksheet.id%}">{{ workbook.name }}</a></li>
+        </ol>
+    {% else %}
+        <ol class="breadcrumb">
+            <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
+            <li><a href="{% url 'cohort_list' %}">Cohorts</a></li>
+        </ol>
+    {% endif %}
+    <h1 class="page-header pull-left">Create Cohort - Barcodes</h1>
+</div>
+
+{% endblock %}
+
+{% block content %}
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div id="url-len-max-alert" class="alert alert-warning alert-dismissable" style="display: none;">
+                    <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    You have selected too many filters. The current counts shown will not be accurate until one or more filter options are removed.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row cgc-user-data-type-tabs">
+        <div class="col-sm-12 col-md-12 col-lg-12">
+            <div class="panel panel-default">
+                <ul class="nav nav-tabs nav-tabs-data" role="tablist">
+                    <li role="presentation" class="active"><a href="#upload-file" role="tab" data-toggle="tab" title="Upload a JSON or TSV/CSV file">Upload</a></li>
+                    <li role="presentation"><a href="#enter-barcodes" role="tab" data-toggle="tab" title="Enter a list of barcodes">Enter</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="tab-content data-tab-content">
+            <div id="upload-file" class="tab-pane active data-tab" role="tabpanel">
+                <div class="col-md-12 data-tab-content-panel spinner-panel">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4>Upload a GDC Data Portal Case Manifest or a CSV/TSV file of barcodes and programs</h4>
+                        </div>
+                        <div class="panel-body">
+                            <button class="btn btn-primary instructions instructions_show" title="Show/Hide the instructions"></button>
+                            <div class="instructions" style="display: none;">
+                                <p>Files must be in <a href="#gdc-manifest">GDC Data Portal case manifest format</a>, or in <a href="#tcsv-format">comma/tab-delimited case/sample/program format</a>. After selecting the file and uploading it, the entries will be validated. Any entries which are found to be invalid will be listed, and you can choose to omit them and continue with cohort creation, or select a new file for verification and upload.</p>
+                                <a name="tcsv-format"></a><h5>CSV/TSV Barcode Files</h5>
+                                <p>All entries must be either a valid <span class="code">case barcode</span> <b><i>or</i></b> <span class="code">sample barcode</span>. When a case barcode is provided, all samples from that case will be included in the cohort. Make a separate entry per sample if only specific samples from a case should be added to the cohort.</p>
+                                <p>Barcode sets may be in tab-, comma-, or newline-separated format. Values may be placed in single or double quotes, and can be on a single line or on multiple lines.</p>
+                                <p>Tab- or comma-delimited files must have an extension of <span class="code">.txt</span>, <span class="code">.csv</span>, or <span class="code">.tsv</span>. Please do not include any column headers.</p>
+                                <h5>Example Barcode File Contents</h5>
+                                <ul>
+                                    <pre>TCGA-N9-A4Q4,TCGA-N7-A4Y8-01A,'Saos-2','Hs 863.T'
+
+"TCGA-N7-A4Y8-01A"
+'Hs 863.T', TARGET-51-PAJMFS
+
+LAMA-84
+LC-1F
+LCLC-103H
+TARGET-10-CAAABC-60.3A
+TARGET-10-CAAABD-60.2A
+TARGET-10-CAAABF-60.11C</pre>
+                                </ul>
+                                <a name="gdc-manifest"></a><h5>GDC Data Portal Case Manifest Files</h5>
+                                <p>GDC Data Portal case manifests can be obtained on the <a target="_BLANK" href="https://portal.gdc.cancer.gov/exploration">'Cases' tab of the Exploration section of the data portal.</a></p>
+                                <p>JSON case manifests must have a .json extension, and will be validated against the GDC's JSON schema. The minimum required properties for each entry in the JSON file are the <span class="code">project</span> object and the <span class="code">submitter_id</span> field. The <span class="code">project</span> object must include the <span class="code">project_id</span> property. All other properties will be ignored.</p>
+                                <p>TSV case manifests must have a .tsv extension, and must contain the Case ID and Project columns. Any other columns will be ignored. <b><i>Do not remove the header row of the TSV case manifest.</i></b> Please note that currently, TSV case manifests will only contain the current page of the 'Cases' Exploration tab.</p>
+                                <p>Because the GDC Data Portal case manifest entries are cases, all samples from a case will be included in the cohort.</p>
+                            </div>
+                            <hr>
+                            <div id="uploadField" class="center" style="display : inline-block;">
+                                <button class="btn btn-link nocap" id="file-upload-btn">
+                                    <i class="fa fa-file"></i> Upload barcode list or case manifest
+                                </button>
+                                <input type="file" name="upload" id="file-upload-field" style="display: none">
+                                <div id="uploading" class="collapse" style="margin-left: 20px;">
+                                    <i class="fa fa-circle-o-notch fa-spin"></i>  <span id="selected-file-name"></span>
+                                </div>
+                                <div class="collapse verify-pending" style="display: none;">
+                                    <i class="fa fa-circle-o-notch fa-spin"></i>  Verifying barcodes...
+                                </div>
+                            </div>
+                            <div class="barcode-status" style="display: none;">
+                                <hr>
+                                <div class="valid-entries">
+                                    <h5>Valid Entries</h5>
+                                    <div class="table_wrapper">
+                                        <table class="table table-striped">
+                                            <thead><tr>
+                                                <th>Program</th>
+                                                <th>Case</th>
+                                                <th>Sample</th>
+                                            </tr></thead>
+                                            <tbody><td></td><td></td><td></td></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="cohort-counts">
+                                    <h5>Resulting Cohort Counts</h5>
+                                    <div class="table_wrapper">
+                                        <table class="table table-striped">
+                                            <thead><tr>
+                                                    <th>Program</th>
+                                                    <th>Case</th>
+                                                    <th>Sample</th>
+                                            </tr></thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <p class="invalid-not-saved">Note: Invalid entries <b>will not</b> be included if you choose to create this cohort.</p>
+                                <div class="save-cohort" style="display: none;">
+                                    {% if workbook %}
+                                        <button class="btn btn-primary" data-toggle="modal" data-target="#create-cohort-modal">Apply to Worksheet</button>
+                                    {% elif create_workbook %}
+                                        <button class="btn btn-primary" data-toggle="modal" data-target="#create-cohort-modal">Apply to new Worksheet</button>
+                                    {% else %}
+                                        <button class="btn btn-primary" data-toggle="modal" data-target="#create-cohort-modal">Save As New Cohort</button>
+                                    {% endif %}
+                                </div>
+                                <div class="invalid-entries">
+                                    <h5>Invalid Entries</h5>
+                                    <div class="table_wrapper">
+                                        <table class="table table-striped">
+                                            <thead><tr>
+                                                <th>Program</th>
+                                                <th>Case</th>
+                                                <th>Sample</th>
+                                                </tr></thead>
+                                            <tbody><td></td><td></td><td></td></tbody>
+                                        </table>
+                                        <div class="validation-messages">
+                                            <p><b>Information regarding the invalid entries</b></p>
+                                            <ul>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="enter-barcodes" class="tab-pane data-tab" role="tabpanel">
+                <div class="col-md-12 data-tab-content-panel spinner-panel">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4>Paste a set of barcodes and programs</h4>
+                        </div>
+                        <div class="panel-body">
+                            <button class="btn btn-primary instructions instructions_show" title="Show/Hide the instructions"></button>
+                            <div class="instructions" style="display: none;">
+                                <p>There is a maximum length of 10000 character for the text box. Please use the file upload option if you need to upload more barcodes than will fit in that space.</p>
+                                <p>All entries must be either a valid <span class="code">case barcode</span> <b><i>or</i></b> <span class="code">sample barcode</span>. When a case barcode is provided, all samples from that case will be included in the cohort. Make a separate entry per sample if only specific samples from a case should be added to the cohort.</p>
+                                <p>Barcode sets must be in tab-, comma-, or newline-separated format, and there should be no headers. Values may be placed in single or double quotes, and can be in a single or multiple lines.</p>
+                                <h5>Example Barcode Sets</h5>
+                                <ul>
+                                    <pre>TCGA-N9-A4Q4,TCGA-N7-A4Y8-01A,'Saos-2','Hs 863.T'
+
+"TCGA-N7-A4Y8-01A"
+'Hs 863.T', TARGET-51-PAJMFS
+
+LAMA-84
+LC-1F
+LCLC-103H
+TARGET-10-CAAABC-60.3A
+TARGET-10-CAAABD-60.2A
+TARGET-10-CAAABF-60.11C
+
+"TARGET-51-PAJLIV", Saos-2</pre>
+                                </ul>
+                                <p>Click the 'Verify' button to validate your entries. Any entries which are found to be invalid will be listed. You can choose to omit them and continue with cohort creation, or re-enter the set.</p>
+                            </div>
+                            <hr>
+                            <h5>Barcode Entries</h5> <i>(Maximum length: 10000 characters)</i>
+                            <textarea id="pasted-barcodes" maxlength="10000"></textarea>
+                            <div class="block">
+                                <button class="btn btn-primary verify" title="Verify the barcode set">Verify</button>
+                                <div class="collapse verify-pending" style="display: none;">
+                                    <i class="fa fa-circle-o-notch fa-spin"></i>  Verifying barcodes...
+                                </div>
+                            </div>
+                            <div class="barcode-status" style="display: none;">
+                                <hr>
+                                <div class="valid-entries">
+                                    <h5>Valid Entries</h5>
+                                    <div class="table_wrapper">
+                                        <table class="table table-striped">
+                                            <thead><tr>
+                                                <th>Program</th>
+                                                <th>Case</th>
+                                                <th>Sample</th>
+                                            </tr></thead>
+                                            <tbody><td></td><td></td><td></td></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="cohort-counts">
+                                    <h5>Resulting Cohort Counts</h5>
+                                    <div class="table_wrapper">
+                                        <table class="table table-striped">
+                                            <thead><tr>
+                                                    <th>Program</th>
+                                                    <th>Case</th>
+                                                    <th>Sample</th>
+                                            </tr></thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <p class="invalid-not-saved">Note: Invalid entries <b>will not</b> be saved if you choose to create this cohort.</p>
+                                <div class="save-cohort" style="display: none;">
+                                    {% if workbook %}
+                                        <button class="btn btn-primary" data-toggle="modal" data-target="#create-cohort-modal">Apply to Worksheet</button>
+                                    {% elif create_workbook %}
+                                        <button class="btn btn-primary" data-toggle="modal" data-target="#create-cohort-modal">Apply to new Worksheet</button>
+                                    {% else %}
+                                        <button class="btn btn-primary" data-toggle="modal" data-target="#create-cohort-modal">Save Cohort</button>
+                                    {% endif %}
+                                </div>
+                                <div class="invalid-entries">
+                                    <h5>Invalid Entries</h5>
+                                    <div class="table_wrapper">
+                                        <table class="table table-striped">
+                                            <thead><tr>
+                                                <th>Program</th>
+                                                <th>Cases</th>
+                                                <th>Sample</th>
+                                            </tr></thead>
+                                            <tbody><td></td><td></td><td></td></tbody>
+                                        </table>
+                                        <div class="validation-messages">
+                                            <p><b>Information regarding the invalid entries</b></p>
+                                            <ul>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Cohort Modal -->
+    <div class="modal fade" id="create-cohort-modal" tabindex="-1" role="dialog" aria-labelledby="createCohortModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="createCohortModal">Create Cohort</h4>
+                </div>
+                {% if workbook and worksheet %}
+                    <form id="create-cohort-form" method="POST" action="{% url 'save_cohort_for_existing_workbook' %}" >
+                    <input type="hidden" value="{{ worksheet.id }}" name="worksheet_id" />
+                    <input type="hidden" value="{{ workbook.id }}" name="workbook_id" />
+                {% elif create_workbook %}
+                    <form id="create-cohort-form" method="POST" action="{% url 'save_cohort_for_new_workbook' %}" >
+                {% else %}
+                    <form id="create-cohort-form" method="POST" action="{% url 'save_cohort' %}">
+                {% endif %}
+                    <div class="modal-body">
+                        <div id="unallowed-chars-alert" class="alert alert-warning alert-dismissable" style="display: none;">
+                            <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                            Your cohort's name contains invalid characters (<span class="unallowed-chars"></span>). Please choose another name.
+                        </div>
+                        <div class="form-group">
+                            <label for="cohort-name">Name:</label>
+                            <input class="form-control" type="text" id="create-cohort-name" name="name" required />
+                        </div>
+                        <div class="form-group">
+                            <h5>Barcode Counts:</h5>
+                            <table id="cohort-counts-modal" class="table table-striped">
+                                <thead><tr>
+                                        <th>Program</th>
+                                        <th>Cases</th>
+                                        <th>Samples</th>
+                                </tr></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        {% csrf_token %}
+                        <input type="submit" value="Create Cohort" class="btn btn-primary" />
+                        <div id="saving-cohort" class="collapse" style="display: none;">
+                            <i class="fa fa-circle-o-notch fa-spin"></i>  Saving Cohort...
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+    var cohort_id = undefined;
+    var PROGRAM_PREFIXES = {{ program_prefixes|tojson|safe }};
+    var FILE_SIZE_UPLOAD_MAX = {{ FILE_SIZE_UPLOAD_MAX }};
+    </script>
+{% endblock %}
+
+{% block js_file %}{% static 'js/cohort_barcodes_details.js' %}{% endblock %}

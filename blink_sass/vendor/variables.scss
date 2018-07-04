@@ -5,6 +5,8 @@
 $screen-sm: 768px;
 $screen-md: 992px;
 $screen-lg: 1200px;
+$screen-md-h: 964px;
+$screen-lg-h: 965px;
 
 // --------------------------------------------
 // Colors
@@ -14,6 +16,7 @@ $base-dark: #000;
 
 // Brand color
 $isb-primary: #2A537A;
+$isb-lighter: #58a8d6;
 $isb-info: #2B7388;
 $isb-success: #C9DD03;
 $isb-warning: #F7991B;
@@ -34,12 +37,12 @@ $primary-color: #0c4fba;
 $primary-color-dark: #0a429d;
 
 $secondary-color: #006DC6;
-$secondary-color: #005EAE;
+$secondary-color-dark: #005EAE;
 
 $success-bgcolor: #89D889;
 $success-bgcolor-dark: #76b876;
 
-$info-color: #64B5F6;
+$info-color: #2d81c4;
 $info-bgcolor: #E3F2FD;
 $info-bgcolor-dark: #1976D2;
 $warning-bgcolor: #FFF8E1;
@@ -48,6 +51,12 @@ $danger-bgcolor: #FFEBEE;
 $danger-bgcolor-dark: #D32F2F;
 
 $border: 1px solid $border-color;
+
+$gray-button-bg: #ccc;
+$gray-button-bg-border: #888;
+
+$blue-button-bg: #2a537a;
+$blue-button-bg-border: #2a537a;
 
 // --------------------------------------------
 // Typography
@@ -92,7 +101,7 @@ $padding-small-horizontal: 10px;
 $padding-xs-vertical: 1px;
 $padding-xs-horizontal: 5px;
 
-$line-height-large: 1.33333;
+$line-height-large: 1.3333333;
 $line-height-small: 1.5;
 
 $border-radius-base: 2px;

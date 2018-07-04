@@ -1,6 +1,5 @@
 """
-
-Copyright 2015, Institute for Systems Biology
+Copyright 2017, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,7 +12,6 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
 """
 
 from django.conf.urls import include, url
@@ -21,7 +19,6 @@ from django.contrib import admin
 from django.conf import settings
 
 import views
-
 
 admin.autodiscover()
 
@@ -35,6 +32,14 @@ urlpatterns = [
 
     url(r'^bucket_object_list/$', views.bucket_object_list, name='bucket_object_list'),
     url(r'^igv/$', views.igv, name='igv'),
+    url(r'^camic/$', views.camic, name='camic'),
+    url(r'^camic/(?P<slide_barcode>[A-Za-z0-9\-]+)/$', views.camic, name='camic_barcode'),
+    url(r'^dicom/$', views.dicom, name='dicom'),
+    url(r'^dicom/(?P<study_uid>[A-Za-z0-9]+)/$', views.dicom, name='dicom_study'),
+
+    url(r'^images/(?P<slide_barcode>[A-Za-z0-9\-]+)/$', views.get_image_data, name='image_data'),
+    url(r'^images/', views.get_image_data_args, name='image_data_args'),
+    url(r'dicom/(?P<study_uid>[A-Za-z0-9\.]+)/$', views.dicom, name='dicom'),
 
     url(r'^analysis/', include('analysis.urls')),
     url(r'^workbooks/', include('workbooks.urls')),
@@ -45,7 +50,7 @@ urlpatterns = [
     url(r'^seqpeek/', include('seqpeek.urls')),
     url(r'session_security/', include('session_security.urls')),
     url(r'^data/', include('data_upload.urls')),
-    url(r'^_ah/health$', views.health_check),
+    url(r'^_ah/(vm_)?health$', views.health_check),
 
     # ------------------------------------------
     # Blink views
@@ -54,8 +59,9 @@ urlpatterns = [
     url(r'^help/', views.help_page, name='help'),
     url(r'^about/', views.about_page, name='about_page'),
     url(r'^dashboard/', views.dashboard_page, name='dashboard'),
+    url(r'^videotutorials/', views.vid_tutorials_page, name='vid_tutorials'),
 
-    url(r'^projects/', include('projects.urls')),
+    url(r'^programs/', include('projects.urls')),
     url(r'^genes/', include('genes.urls')),
     url(r'^variables/', include('variables.urls')),
     url(r'^share/', include('sharing.urls')),
@@ -67,3 +73,9 @@ if settings.IS_DEV:
 
 if settings.NIH_AUTH_ON:
     urlpatterns.append(url(r'^demo/', include('demo.urls', namespace='demo')))
+
+if settings.DEBUG and settings.DEBUG_TOOLBAR:
+    import debug_toolbar
+    urlpatterns = [
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+    ] + urlpatterns

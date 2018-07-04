@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% load custom_tags %}
-{% block title %}System Data Dictionary | ISB-CGC{% endblock %}}
+{% block title %}System Data Dictionaries | ISB-CGC{% endblock %}}
 {% block extra_css_libs %}{% endblock %}
 {% block header %}{% endblock %}
 
@@ -12,32 +12,52 @@
     <div class="container">
         <ol class="breadcrumb">
             <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
-            <li><a href="{% url 'projects' %}">Saved Projects</a></li>
+            <li><a href="{% url 'programs' %}">Saved Programs</a></li>
         </ol>
-        <h1 class="page-header">System Data Dictionary</h1>
+        <h1 class="page-header">System Data Dictionaries</h1>
     </div>
 {% endblock %}
 {% block content %}
 <div class="container">
-
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>System Attribute Name</th>
-                <th>Type</th>
-                <th>Possible Values</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for attr in attr_list %}
-            <tr>
-                <td>{{ attr.name }}</td>
-                <td>{{ attr.type }}</td>
-                <td>{{ attr.values }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="tabpanel" role="tabpanel">
+        <ul class="nav nav-tabs" role="tablist">
+            {% with attr_list_all.items|first as first_object %}
+                {% with first_object.0 as first_key %}
+                    {% for key in attr_list_all %}
+                    <li role="presentation" class="{% if key == first_key %}active{% endif %}"><a href="#dict-{{ key }}" role="tab" data-toggle="tab" title="{{ key }} Dictionary">{{ key }}</a></li>
+                    {% endfor %}
+                {% endwith %}
+            {% endwith %}
+        </ul>
+        <div class="tab-content">
+            {% with attr_list_all.items|first as first_object %}
+                {% with first_object.0 as first_key %}
+                    {% for key, values in attr_list_all.items %}
+                    <div role="tabpanel" class="tab-pane {% if key == first_key %}active{% endif %}" id="dict-{{ key }}">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th nowrap>System Attribute Name</th>
+                                    <th>Type</th>
+                                    <th>Possible Values</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for attr in values %}
+                                <tr>
+                                    <td>{{ attr.name }}</td>
+                                    <td>{{ attr.type }}</td>
+                                    <td>{{ attr.values }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endfor %}
+                {% endwith %}
+            {% endwith %}
+        </div>
+    </div>
 </div>
 
 {% endblock %}

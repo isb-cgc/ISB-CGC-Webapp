@@ -30,6 +30,7 @@ BASE_DIR                = os.path.abspath(os.path.join(os.path.dirname(__file__)
 SHARED_SOURCE_DIRECTORIES = [
     'ISB-CGC-Common',
     'ISB-CGC-API',
+    'ISB-CGC-Cron',
 ]
 
 # Add the shared Django application subdirectory to the Python module search path
@@ -42,6 +43,9 @@ ALLOWED_HOSTS           = [os.environ.get('ALLOWED_HOST', 'localhost')]
 ADMINS                  = ()
 MANAGERS                = ADMINS
 
+# Log Names
+SERVICE_ACCOUNT_LOG_NAME = os.environ.get('SERVICE_ACCOUNT_LOG_NAME', 'local_dev_logging')
+
 BASE_URL                = os.environ.get('BASE_URL', 'http://isb-cgc.appspot.com/')
 BASE_API_URL            = os.environ.get('BASE_API_URL', 'https://api-dot-isb-cgc.appspot.com/')
 
@@ -50,8 +54,8 @@ DATABASES = {'default': {
     'HOST': '127.0.0.1',
     'PORT': 3306,
     'NAME': os.environ.get('DATABASE_NAME', ''),
-    'USER': os.environ.get('DATABASE_USER'),
-    'PASSWORD': os.environ.get('DATABASE_PASSWORD')
+    'USER': os.environ.get('MYSQL_ROOT_USER'),
+    'PASSWORD': os.environ.get('MYSQL_ROOT_PASSWORD')
 }}
 
 USE_CLOUD_STORAGE           = os.environ.get('USE_CLOUD_STORAGE', 'False')
@@ -269,6 +273,12 @@ SOCIALACCOUNT_PROVIDERS = \
     }
 
 
+# Service account blacklist file path
+SERVICE_ACCOUNT_BLACKLIST_PATH           = os.environ.get('SERVICE_ACCOUNT_BLACKLIST_PATH')
+
+# Dataset configuration file path
+DATASET_CONFIGURATION_PATH               = os.environ.get('DATASET_CONFIGURATION_PATH')
+
 ##########################
 #   End django-allauth   #
 ##########################
@@ -286,7 +296,6 @@ LOGIN_EXPIRATION_HOURS = 24
 FAKE_DBGAP_AUTHENTICATION_LIST_FILENAME = os.environ.get('FAKE_DBGAP_AUTHENTICATION_LIST_FILENAME', '') # This should be removed in favour of putting the change in .env files
 DBGAP_AUTHENTICATION_LIST_FILENAME      = os.environ.get('DBGAP_AUTHENTICATION_LIST_FILENAME', '')
 DBGAP_AUTHENTICATION_LIST_BUCKET        = os.environ.get('DBGAP_AUTHENTICATION_LIST_BUCKET', '')
-ACL_GOOGLE_GROUP                        = os.environ.get('ACL_GOOGLE_GROUP', '')
 GOOGLE_GROUP_ADMIN                      = os.environ.get('GOOGLE_GROUP_ADMIN', '')
 SUPERADMIN_FOR_REPORTS                  = os.environ.get('SUPERADMIN_FOR_REPORTS', '')
 OPEN_ACL_GOOGLE_GROUP                   = os.environ.get('OPEN_ACL_GOOGLE_GROUP', '')

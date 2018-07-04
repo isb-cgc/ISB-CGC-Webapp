@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 
 import views
 
@@ -13,7 +13,7 @@ urlpatterns = [
     url(r'^(?P<workbook_id>\d+)/share$',    views.workbook_share, name='workbook_share'),
     url(r'^(?P<workbook_id>\d+)/copy$',     views.workbook, name='workbook_copy'),
 
-    url(r'^create_with_project$',           views.workbook_create_with_project,     name='worksheet_create_with_projects'),
+    url(r'^create_with_program$', views.workbook_create_with_program, name='worksheet_create_with_programs'),
     url(r'^create_with_genes$',             views.workbook_create_with_genes,       name='worksheet_create_with_genes'),
     url(r'^create_with_variables$',         views.workbook_create_with_variables,   name='worksheet_create_with_variables'),
     url(r'^create_with_cohort$',            views.workbook_create_with_cohort,      name='worksheet_create_with_cohort'),

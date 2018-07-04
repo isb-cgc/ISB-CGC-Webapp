@@ -19,25 +19,39 @@ limitations under the License.
 import os
 import MySQLdb
 import logging
+import traceback
+import sys
 from GenespotRE import secret_settings
 
 logging.basicConfig(level=logging.INFO)
 
-db_settings = secret_settings.get('DATABASE')['default']
-ssl = None
-if 'OPTIONS' in db_settings and 'ssl' in db_settings['OPTIONS']:
-    ssl = db_settings['OPTIONS']['ssl']
-db = MySQLdb.connect(host=db_settings['HOST'], port=db_settings['PORT'], db=db_settings['NAME'], user=db_settings['USER'], passwd=db_settings['PASSWORD'], ssl=ssl)
+db = None
+cursor = None
 
-delete_str = 'DELETE FROM django_site WHERE id in (2, 3, 4);'
-insert_str = 'INSERT INTO django_site (id, domain, name) VALUES (%s, %s, %s), (%s, %s, %s), (%s, %s, %s);'
-insert_tuple = ('2', 'localhost:8000', 'localhost:8000')
-insert_tuple += ('3', 'localhost:8080', 'localhost:8080')
-insert_tuple += ('4', 'mvm-dot-isb-cgc.appspot.com', 'mvm-dot-isb-cgc.appspot.com')
+try:
 
-cursor = db.cursor()
-cursor.execute(delete_str)
-cursor.execute(insert_str, insert_tuple)
-db.commit()
+    db_settings = secret_settings.get('DATABASE')['default']
+    ssl = None
+    if 'OPTIONS' in db_settings and 'ssl' in db_settings['OPTIONS']:
+        ssl = db_settings['OPTIONS']['ssl']
+    db = MySQLdb.connect(host=db_settings['HOST'], port=db_settings['PORT'], db=db_settings['NAME'], user=db_settings['USER'], passwd=db_settings['PASSWORD'], ssl=ssl)
 
-cursor.close()
+    delete_str = 'DELETE FROM django_site WHERE id in (2, 3, 4, 5);'
+    insert_str = 'INSERT INTO django_site (id, domain, name) VALUES (%s, %s, %s), (%s, %s, %s), (%s, %s, %s), (%s, %s, %s);'
+
+    insert_tuple = ('2', 'localhost:8000', 'localhost:8000')
+    insert_tuple += ('3', 'localhost:8080', 'localhost:8080')
+    insert_tuple += ('4', 'mvm-dot-isb-cgc.appspot.com', 'mvm-dot-isb-cgc.appspot.com')
+    insert_tuple += ('5', 'mvm-dot-isb-cgc.appspot-preview.com', 'mvm-dot-isb-cgc.appspot-preview.com')
+
+    cursor = db.cursor()
+    cursor.execute(delete_str)
+    cursor.execute(insert_str, insert_tuple)
+    db.commit()
+
+except Exception as e:
+    print >> sys.stderr, "[ERROR] Exception in add_site_ids: " + e.message
+    print >> sys.stderr, traceback.format_exc()
+finally:
+    if cursor: cursor.close()
+    if db and db.open: db.close()

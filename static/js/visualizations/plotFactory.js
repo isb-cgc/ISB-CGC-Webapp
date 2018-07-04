@@ -31,15 +31,22 @@ define([
     'histogram_plot',
     'bar_plot',
     'seqpeek_view/seqpeek_view',
+    'oncoprint_plot',
     'select2',
+    'fileSaver',
+    'cbio_util',
+    'download_util',
 
-], function($, jqueryui, bootstrap, session_security, d3, d3tip, d3textwrap, vizhelpers, scatter_plot, cubby_plot, violin_plot, histogram, bar_graph, seqpeek_view, mock_histogram_data ) {
+], function($, jqueryui, bootstrap, session_security, d3, d3tip, d3textwrap, vizhelpers, scatter_plot, cubby_plot, violin_plot, histogram, bar_graph, seqpeek_view, oncoprint_plot, mock_histogram_data ) {
+
+    var VERSION = $('#workbook-build :selected').data('plot-version') || $('.workbook-build-display').data('plot-version');
 
     var scatter_plot_obj = Object.create(scatter_plot, {});
     var cubby_plot_obj   = Object.create(cubby_plot, {});
     var violin_plot_obj  = Object.create(violin_plot, {});
     var histogram_obj    = Object.create(histogram, {});
     var bar_graph_obj    = Object.create(bar_graph, {});
+    var oncoprint_obj    = Object.create(oncoprint_plot, {});
     var helpers          = Object.create(vizhelpers, {});
     var cubby_tip = d3tip()
             .attr('class', 'd3-tip')
@@ -118,7 +125,7 @@ define([
 
          var legend = d3.select(legend_selector)
              .append('svg')
-             .attr('width', width);
+             .attr('width', 850);
          var svg = d3.select(plot_selector)
              .append('svg')
              .attr('width', width + 10)
@@ -151,13 +158,13 @@ define([
         var max_n = tmp[1];
         var legend = d3.select(legend_selector)
             .append('svg')
-            .attr('width', width);
+            .attr('width', 850);
 
         var svg = d3.select(plot_selector)
             .append('svg')
-            .attr('width', width + 10)
+            //.attr('width', width + 10)
+            .attr('width', width)
             .attr('height', height);
-
         var plot = violin_plot_obj.createViolinPlot(svg,
             data,
             height,
@@ -186,11 +193,12 @@ define([
         var max_n = tmp[1];
         var legend = d3.select(legend_selector)
             .append('svg')
-            .attr('width', width);
+            .attr('width', 800);
 
         var svg = d3.select(plot_selector)
             .append('svg')
-            .attr('width', width + 10)
+            //.attr('width', width + 10)
+            .attr('width', width)
             .attr('height', height);
 
         var plot = violin_plot_obj.createViolinPlot(svg,
@@ -261,17 +269,30 @@ define([
             var gene_element = seqpeek_el.gene_element;
 
             seqpeek_view.render_seqpeek(table_selector, gene_element, view_data);
+            $(legend_selector).show();
         }
         else {
             // No data was found for the gene and cohorts
             seqpeek_view.render_no_data_message(plot_selector, hugo_symbol);
+            $(legend_selector).hide();
         }
     }
 
+    function generate_oncoprint_plot(plot_selector, view_data) {
+        var plot_data = view_data['plot_data'];
+        var gene_list = view_data['gene_list'];
+        if (plot_data && oncoprint_obj.isInputValid(plot_data)) {
+            oncoprint_obj.createOncoprintPlot(plot_selector, plot_data);
+        }
+        else {
+            var message = "The selected cohorts have no somatic mutations in the gene ";
+            $(plot_selector).html('<p>'+message + '<b>' + gene_list.join(', ') + '</b></p>');
+        }
+    }
     /*
         Generate url for gathering data
      */
-    function get_data_url(url, cohorts, x_attr, y_attr, color_by, logTransform){
+    function get_data_url(base_url, cohorts, x_attr, y_attr, color_by, logTransform){
         var cohort_str = '';
         for (var i = 0; i < cohorts.length; i++) {
             if (i == 0) {
@@ -280,7 +301,7 @@ define([
                 cohort_str += '&cohort_id=' + cohorts[i];
             }
         }
-        var api_url = url + '/_ah/api/feature_data_api/v1/feature_data_plot?' + cohort_str;
+        var api_url = base_url + '/visualizations/feature_data_plot/'+ VERSION + '?' + cohort_str;
 
         api_url += '&x_id=' + x_attr;
         if(color_by && color_by !== ''){
@@ -296,7 +317,7 @@ define([
     }
 
     // Generate url for gathering data for a SeqPeek plot
-    function get_seqpeek_data_url(url, cohorts, gene_label){
+    function get_seqpeek_data_url(base_url, cohorts, gene_label){
         var cohort_str = '';
         for (var i = 0; i < cohorts.length; i++) {
             if (i == 0) {
@@ -305,14 +326,33 @@ define([
                 cohort_str += '&cohort_id=' + cohorts[i];
             }
         }
-        var api_url = url + '/_ah/api/seqpeek_data_api/v1/view_data?' + cohort_str;
-        api_url += "&hugo_symbol=" + gene_label;
+        var seqpeek_url = base_url + '/visualizations/seqpeek_data_plot/' + VERSION + '?' + cohort_str;
 
-        return api_url;
+        seqpeek_url += "&hugo_symbol=" + gene_label
+            + (VERSION == 'v2' ? "&genomic_build=" + $('.workbook-build-display').data('build') : '');
+
+
+        return seqpeek_url;
+    }
+
+    // Generate url for gathering data for a OncoPrint plot
+    function get_oncoprint_data_url(base_url, cohorts, gene_list){
+        var cohort_str = '';
+        for (var i = 0; i < cohorts.length; i++) {
+            if (i == 0) {
+                cohort_str += 'cohort_id=' + cohorts[i];
+            } else {
+                cohort_str += '&cohort_id=' + cohorts[i];
+            }
+        }
+        var oncoprintUrl = base_url + '/visualizations/oncoprint_data_plot/' + VERSION + '?' + cohort_str;
+        oncoprintUrl += "&gene_list=" + gene_list.join(",")
+            + (VERSION == 'v2' ? "&genomic_build=" + $('.workbook-build-display').data('build') : '');
+        return oncoprintUrl;
     }
 
     function configure_pairwise_display(element, data){
-        if (data['pairwise_result'].hasOwnProperty('result_vectors')) {
+        if (data['pairwise_result'] && data['pairwise_result'].hasOwnProperty('result_vectors')) {
             var vectors = data['pairwise_result']['result_vectors'];
 
             var output = $('<table class="table"><thead><tr>' +
@@ -349,7 +389,7 @@ define([
         }
         // The response form the SeqPeek data endpoint has a different schema. This is case is handled in
         // another branch below.
-        if (data.hasOwnProperty('items')) {
+        if (data.hasOwnProperty('items') && data['items'].length > 0) {
 
             var cohort_set = data['cohort_set'];
 
@@ -390,13 +430,17 @@ define([
                     break;
             }
 
-            if(!visualization.plot) {
             // Data was not valid
+            if(!visualization.plot) {
+
                 $(args.plot_selector).empty().prepend('<div id="log-scale-alert" class="alert alert-warning alert-dismissable">'
                     + '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>'
                     + 'No valid data was returned for this plot. Double-check your plot type, '
                     + 'axis variables, and cohorts to make sure they can return valid data. Please note, some data types '
                     + 'cannot be log transformed due to negative values.</div>');
+
+                // Hide the legend
+                $(args.legend_selector).hide();
                 return;
             }
 
@@ -410,13 +454,14 @@ define([
 
             //establish resize call to data
             d3.select(window).on('resize', visualization.plot.resize);
+            args.color_by_sel && $(args.legend_selector).show();
 
-        }
-        else if (args.type == "SeqPeek") {
-            visualization = generate_seqpeek_plot(args.plot_selector, args.legend_selector, data);
-        }
-        else {
-            // No samples provided TODO abstract view information
+        } else if (args.type == "SeqPeek" && !data.message) {
+            generate_seqpeek_plot(args.plot_selector, args.legend_selector, data);
+        } else if (args.type == "OncoPrint" && !data.message) {
+            generate_oncoprint_plot(args.plot_selector, data);
+        } else {
+            // No data returned
             d3.select(args.plot_selector)
                 .append('svg')
                 .attr('width', width)
@@ -425,12 +470,15 @@ define([
                 .attr('fill', 'black')
                 .style('font-size', 20)
                 .attr('text-anchor', 'middle')
-                .attr('transform', 'translate(' + (width/2) + ',' + (height/2) + ')')
-                .text('No samples were found for this combination of plot type, cohort, and axis variables.');
+                .attr('transform', 'translate(' + (width/2) + ',' + (height/6) + ')')
+                .text((data.message ? data.message : 'No samples were found for this combination of plot type, cohort, and axis variables.'));
+
+            // Hide the legend
+            $(args.legend_selector).hide();
         }
     };
 
-    function get_plot_settings(plot_type){
+    function get_plot_settings(plot_type, as_map){
         var settings = {
             axis : []
         };
@@ -461,16 +509,29 @@ define([
                 break;
         };
 
+        if(as_map) {
+            var map_settings = {};
+            settings.axis.map(function(axis){
+                map_settings[axis.name] = {
+                    type: axis.type
+                };
+            });
+            return map_settings;
+        }
+
         return settings;
     }
 
     function generate_plot(args, callback){ //plot_selector, legend_selector, pairwise_element, type, x_attr, y_attr, color_by, cohorts, cohort_override, callback) {
         var plot_data_url;
         if (args.type == "SeqPeek") {
-            plot_data_url = get_seqpeek_data_url(BASE_API_URL, args.cohorts, args.gene_label);
+            plot_data_url = get_seqpeek_data_url(BASE_URL, args.cohorts, args.gene_label, VERSION);
+        }
+        else if(args.type == "OncoPrint"){
+            plot_data_url = get_oncoprint_data_url(BASE_URL, args.cohorts, args.gene_list, VERSION);
         }
         else {
-            plot_data_url = get_data_url(BASE_API_URL, args.cohorts, args.x, args.y, args.color_by, args.logTransform);
+            plot_data_url = get_data_url(BASE_URL, args.cohorts, args.x, args.y, args.color_by, args.logTransform, VERSION);
         }
 
         $.ajax({
@@ -486,8 +547,9 @@ define([
                              logTransform     : args.logTransform,
                              color_by         : args.cohorts,
                              cohort_override  : args.color_override,
+                             color_by_sel     : args.color_by_sel,
                              data             : data});
-                callback({});
+                callback({bq_tables: data.bq_tables});
 
             },
             error: function(xhr, status, error) {

@@ -4,7 +4,7 @@
 {% load tz %}
 {% comment %}
 
-   Copyright 2016, Institute for Systems Biology
+   Copyright 2017, Institute for Systems Biology
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -59,25 +59,25 @@
                                         <ul class="dropdown-menu">
                                             <li><a href="{% url 'register_sa' user.id %}?gcp_id={{ project.project_id }}">Register Service Account</a> </li>
                                             <li><a data-toggle="modal" role="button" data-target="#delete-project-modal-{{ project.id }}" >Unregister Project</a></li>
+                                            <li><a class="refresh-project" data-toggle="modal" role="button" data-user-id="{{ request.user.id }}" data-project-gcp-id="{{ project.project_id }}" data-project-id="{{ project.id }}" data-project-name="{{ project.project_name }}" data-target="#refresh-project-modal-{{ project.id }}" >Refresh Project</a></li>
 {#                                            <li><a data-toggle="modal" role="button" data-target="#new-favorite-workbook-modal-{{ favorite.id }}" >Start New Workbook</a></li>#}
                                         </ul>
                                         </div>
                                     </td>
-                                    <td><a href="{% url 'gcp_detail' user.id project.id %}">{{ project.project_name }}</a> <a href="https://console.cloud.google.com/home/dashboard?project={{ project.project_name }}"><i class="fa fa-external-link"></i></a></td>
+                                    <td><a href="{% url 'gcp_detail' user.id project.id %}">{{ project.project_name }}</a> <a target="_BLANK" href="https://console.cloud.google.com/home/dashboard?project={{ project.project_id }}"><i class="fa fa-external-link"></i></a></td>
                                     <td>{{ project.project_id }}</td>
 {#                                    <td>{% if project.big_query_dataset %}{{ project.big_query_dataset }}{% else %}N/A{% endif %}</td>#}
 
                                     <td>
-                                        {% if project.serviceaccount_set.all|length > 0 %}
-                                        <a role="button" class="show-service-accounts" data-target="{{ project.id }}-expander"><i class="fa fa-caret-right"></i> {{ project.serviceaccount_set.all|length }}</a>
+                                        {% if project.active_service_accounts|length > 0 %}
+                                        <a role="button" class="show-service-accounts" data-target="{{ project.id }}-expander"><i class="fa fa-caret-right"></i> {{ project.active_service_accounts|length }}</a>
                                         {% else %}
-                                        {{ project.serviceaccount_set.all|length }}
+                                        {{ project.active_service_accounts|length }}
                                         {% endif %}
                                     </td>
 
                                     <td>{{ project.bucket_set.all|length }}</td>
                                     <td>{{ project.bqdataset_set.all|length }}</td>
-                                {% include "GenespotRE/user_gcp_list_modals.html" with project=project %}
                                 </tr>
 
                                     <tr class="{{ project.id }}-expander" style="display:none;">
@@ -89,24 +89,25 @@
                                                     <thead>
                                                     <tr>
                                                         <th>Service Account</th>
-                                                        <th>Authorized Dataset</th>
-                                                        <th>Date Activated</th>
-                                                        <th>Active</th>
+                                                        <th>Authorized Datasets</th>
+                                                        <th>Date Last Activated</th>
                                                         <th></th>
                                                     </tr>
                                                     </thead>
                                                     <tbody>
-                                                    {% for service_account in project.serviceaccount_set.all %}
-                                                    <tr>
-                                                        <td>{{ service_account.service_account }}</td>
-                                                        <td>{{ service_account.authorized_dataset.name }}</td>
-                                                        <td>{{ service_account.authorized_date|date:'M d, Y, g:i a' }}</td>
-                                                        <td>{% if service_account.active %}<i class="fa fa-check"></i>{% endif %}</td>
-                                                        <td>
-                                                            <a data-toggle="modal" role="button" data-target="#refresh-sa-modal-{{ service_account.id }}" class="space-right-5"><i class="fa fa-refresh"></i></a>
-                                                            <a data-toggle="modal" role="button" data-target="#delete-sa-modal-{{ service_account.id }}"><i class="fa fa-trash"></i></a>
-                                                        </td>
-                                                    </tr>
+                                                    {% for service_account in project.active_service_accounts %}
+                                                        {% with auth_datasets=service_account.get_auth_datasets %}
+                                                            <tr>
+                                                                <td>{{ service_account.service_account }}</td>
+                                                                <td>{% if auth_datasets|length == 0 %}None{% else %}{{ auth_datasets|get_values_list:"name"|joinwith:", " }}{% endif %}</td>
+                                                                <td{% if service_account.is_expired and auth_datasets|length > 0 %} class="red" title="Service Account's authorization date has expired; refresh to extend access."{% endif %}>{{ service_account.authorized_date|date:'M d, Y, g:i a' }}</td>
+                                                                <td>
+                                                                    <a title="Refresh Service Account" data-toggle="modal" role="button" data-target="#refresh-sa-modal-{{ service_account.id }}" class="space-right-5"><i class="fa fa-refresh"></i></a>
+                                                                    <a title="Delete Service Account" data-toggle="modal" role="button" data-target="#delete-sa-modal-{{ service_account.id }}"><i class="fa fa-trash"></i></a>
+                                                                    <a title="Adjust Datasets for this Service Account" role="button" href="{% url 'adjust_sa' user.id %}?sa_id={{ service_account.id }}"><i class="fa fa-plus-square"></i></a>
+                                                                </td>
+                                                            </tr>
+                                                        {% endwith %}
                                                     {% endfor %}
                                                     </tbody>
                                                 </table>
@@ -115,10 +116,12 @@
 
                                         </td>
                                     </tr>
-
                             {% endfor %}
                         </tbody>
                     </table>
+                    {% for project in gcp_list %}
+                        {% include "GenespotRE/user_gcp_list_modals.html" with project=project %}
+                    {% endfor %}
                 </div>
             </div>
         </div>

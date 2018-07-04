@@ -1,6 +1,6 @@
 """
 
-Copyright 2016, Institute for Systems Biology
+Copyright 2017, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,166 +18,80 @@ limitations under the License.
 
 import logging
 
-from feature_def_bq_provider import FeatureDefBigqueryProvider
-
-from scripts.feature_def_gen.feature_def_utils import DataSetConfig
+from bq_data_access.data_types.definitions import PlottableDataType
 
 logger = logging
 
+METH_FEATURE_TYPE = PlottableDataType.METH
 
-class METHFeatureDefConfig(object):
-    def __init__(self, project_id, reference, target_config, data_table, feature_id_prefix, annotation_table, out_path):
-        self.project_id = project_id
-        self.reference_config = reference
-        self.target_config = target_config
-        self.data_table_name = data_table
-        self.feature_id_prefix = feature_id_prefix
-        self.annotation_table_name = annotation_table
-        self.output_csv_path = out_path
+
+class METHTableConfig(object):
+    """
+    Configuration class for a BigQuery table accessible through METH feature
+    definitions.
+    
+    Args:
+        table_name: Full BigQuery table identifier - project-name:dataset_name.table_name 
+    
+    """
+    def __init__(self, table_id, chromosome, genomic_build, value_field,
+                 internal_table_id, program):
+        self.table_id = table_id
+        self.chromosome = chromosome
+        self.genomic_build = genomic_build
+        self.value_field = value_field
+        self.internal_table_id = internal_table_id
+        self.program = program
+
+    def __str__(self):
+        return "METHTableConfig(table_id: {}, chr: {}, build: {}, value_field: {}, internal_table_id: {}, program: {})".format(
+            str(self.table_id),str(self.chromosome),str(self.genomic_build),str(self.value_field),str(self.internal_table_id),str(self.program)
+        )
+
+    def __repr__(self):
+        return self.__str__()
 
     @classmethod
     def from_dict(cls, param):
-        project_id = param['project_id']
-        reference_config = DataSetConfig.from_dict(param['reference_config'])
-        target_config = DataSetConfig.from_dict(param['target_config'])
-        data_table = param['methylation_table_name']
-        feature_id_prefix = param['methylation_feature_id_prefix']
-        annotation_table = param['methylation_annotation_table_name']
-        output_csv_path = param['output_csv_path']
+        table_id = param['table_id']
+        chromosome = param['chromosome']
+        genomic_build = param['genomic_build']
+        value_field = param['value_field']
+        internal_table_id = param['internal_table_id']
+        program = param['program']
 
-        return cls(project_id, reference_config, target_config, data_table, feature_id_prefix, annotation_table, output_csv_path)
-
-
-# TODO remove duplicate code
-def get_feature_type():
-    return 'METH'
+        return cls(table_id, chromosome, genomic_build, value_field, internal_table_id, program)
 
 
-def build_internal_feature_id(feature_type, probe, platform, chromosome, table_id_prefix):
-    return '{feature_type}:{probe}:{platform}:{table_id}'.format(
-        feature_type=feature_type,
-        probe=probe,
-        platform=platform,
-        table_id=table_id_prefix + chromosome
-    )
+class METHDataSourceConfig(object):
+    """
+    Configuration class for METH feature definitions.
+    """
+    CHROMOSOMES = [str(c) for c in range(1, 23)]
+    CHROMOSOMES.extend(['X', 'Y'])
 
+    def __init__(self, methylation_annotation_table_id, supported_genomic_builds, table_templates):
+        self.methylation_annotation_table_id = methylation_annotation_table_id
+        # TODO Remove "supported_genomic_builds" if not needed
+        self.supported_genomic_builds = supported_genomic_builds
 
-class METHFeatureDefProvider(FeatureDefBigqueryProvider):
-    VALUES = ['beta_value']
-    MYSQL_SCHEMA = [
-        {
-            'name': 'gene_name',
-            'type': 'string'
-        },
-        {
-            'name': 'probe_name',
-            'type': 'string'
-        },
-        {
-            'name': 'platform',
-            'type': 'string'
-        },
-        {
-            'name': 'relation_to_gene',
-            'type': 'string'
-        },
-        {
-            'name': 'relation_to_island',
-            'type': 'string'
-        },
-        {
-            'name': 'value_field',
-            'type': 'string'
-        },
-        {
-            'name': 'internal_feature_id',
-            'type': 'string'
-        },
-    ]
+        self.data_table_list = []
 
-    def get_mysql_schema(self):
-        return self.MYSQL_SCHEMA
-
-    def build_create_table_stmt(self, table_name):
-        return ("CREATE TABLE IF NOT EXISTS {table_name} ( "
-                "id int(11) unsigned NOT NULL AUTO_INCREMENT, "
-                "gene_name tinytext, "
-                "probe_name tinytext, "
-                "platform tinytext, "
-                "relation_to_gene tinytext, "
-                "relation_to_island tinytext, "
-                "num_search_hits tinytext, "
-                "value_field tinytext, "
-                "internal_feature_id tinytext, "
-                "PRIMARY KEY (id))").format(table_name=table_name)
-
-    def insert_features_stmt(self, table_name):
-        stmt = ("INSERT INTO {table_name} "
-                "(gene_name, probe_name, platform, relation_to_gene, relation_to_island, value_field, internal_feature_id) "
-                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)").format(table_name=table_name)
-
-        return stmt
-
-    def build_query(self, config):
-        query_template = (
-            "SELECT GENEcpg.UCSC.RefGene_Name, GENEcpg.UCSC.RefGene_Group, \
-                    GENEcpg.Relation_to_UCSC_CpG_Island, GENEcpg.Name, data.Platform, GENEcpg.CHR \
-               FROM ( \
-                  SELECT UCSC.RefGene_Name, UCSC.RefGene_Group, Name, Relation_to_UCSC_CpG_Island, CHR \
-                  FROM [{reference_project_name}:{reference_dataset}.{methylation_annotation_table_name}] \
-                  WHERE REGEXP_MATCH(Name,\'^cg\') \
-                  GROUP BY UCSC.RefGene_Name, UCSC.RefGene_Group, Name, Relation_to_UCSC_CpG_Island, CHR \
-                  ) AS GENEcpg \
-               JOIN EACH ( \
-                  SELECT Probe_Id, Platform \
-                  FROM [{main_project_name}:{open_access_dataset}.{methylation_table_name}] \
-                  WHERE REGEXP_MATCH(Probe_Id,\'^cg\') \
-                  GROUP BY Probe_Id, Platform \
-                  ) AS data \
-               ON GENEcpg.Name = data.Probe_Id ")
-
-        query = query_template.format(
-            reference_project_name=config.reference_config.project_name,
-            reference_dataset=config.reference_config.dataset_name,
-            main_project_name=config.target_config.project_name,
-            open_access_dataset=config.target_config.dataset_name,
-            methylation_annotation_table_name=config.annotation_table_name,
-            methylation_table_name=config.data_table_name
-        )
-
-        return query
-
-    def unpack_query_response(self, row_item_array):
-        feature_type = get_feature_type()
-        result = []
-
-        for row_item in row_item_array:
-            row = row_item['f']
-
-            gene = row[0]['v']
-            relation_to_gene = row[1]['v']
-            relation_to_island = row[2]['v']
-            probe = row[3]['v']
-            platform = row[4]['v']
-            chr = row[5]['v']
-
-            if gene is None:
-                gene = ''
-                relation_to_gene = ''
-            if relation_to_island is None:
-                relation_to_island = ''
-
-            for value in self.VALUES:
-                result.append({
-                    'gene_name': gene,
-                    'probe_name': probe,
-                    'platform': platform,
-                    'relation_to_gene': relation_to_gene,
-                    'relation_to_island': relation_to_island,
-                    'value_field': value,
-                    'internal_feature_id': build_internal_feature_id(feature_type, probe, platform, chr, self.config.feature_id_prefix)
+        for c in self.CHROMOSOMES:
+            for table_template in table_templates:
+                table_config = {key: table_template[key] for key in ['genomic_build', 'value_field', 'program']}
+                table_config.update({
+                    "table_id": table_template['table_id_prefix'] + c,
+                    "chromosome": c,
+                    "internal_table_id": table_template['genomic_build'] + '_chr' + c.lower()
                 })
+                self.data_table_list.append(METHTableConfig.from_dict(table_config))
 
-        return result
+    @classmethod
+    def from_dict(cls, param):
+        methylation_annotation_table_id = param['methylation_annotation_table_id']
+        supported_genomic_builds = param['supported_genomic_builds']
+
+        return cls(methylation_annotation_table_id, supported_genomic_builds, param['table_structure'])
 
 

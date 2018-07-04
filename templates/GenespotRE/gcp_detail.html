@@ -29,7 +29,10 @@
 
 {% block page_header %}
     <div class="container">
-        <h1 class="page-header pull-left"><a href="{% url 'user_gcp_list' user.id %}" role="link"><i class="fa fa-chevron-left"></i></a> {{ gcp.project_name }}</h1>
+        <h1 class="page-header pull-left"><a href="{% url 'user_gcp_list' user.id %}" role="link"><i class="fa fa-chevron-left"></i></a> {{ gcp.project_name }} ({{ gcp.project_id }})</h1>
+        <div class="pull-right refresh-project">
+            <a class="refresh-project btn btn-primary" data-toggle="modal" role="button" data-user-id="{{ request.user.id }}" data-project-gcp-id="{{ gcp.project_id }}" data-project-name="{{ gcp.project_name }}" data-target="#refresh-project-modal" >Refresh Project</a></li>
+        </div>
     </div>
 {% endblock %}
 
@@ -49,34 +52,35 @@
                             <thead>
                             <tr>
                                 <th>Service Account</th>
-                                <th>Authorized Dataset</th>
-                                <th>Date Activated</th>
-                                <th>Active</th>
+                                <th>Authorized Datasets</th>
+                                <th>Date Last Activated</th>
                                 <th></th>
                             </tr>
                             </thead>
                             <tbody>
-                            {% for service_account in gcp.serviceaccount_set.all %}
-                            <tr>
-                                <td>{{ service_account.service_account }}</td>
-                                <td>{{ service_account.authorized_dataset.name }}</td>
-                                <td>{{ service_account.authorized_date|date:'M d, Y, g:i a' }}</td>
-                                <td>{% if service_account.active %}<i class="fa fa-check"></i>{% endif %}</td>
-                                <td>
-                                    <a data-toggle="modal" role="button" data-target="#refresh-sa-modal-{{ service_account.id }}" class="space-right-5"><i class="fa fa-refresh"></i></a>
-                                    <a data-toggle="modal" role="button" data-target="#delete-sa-modal-{{ service_account.id }}"><i class="fa fa-trash"></i></a>
-                                </td>
-                            </tr>
-
+                            {% for service_account in gcp.active_service_accounts %}
+                                {% with auth_datasets=service_account.get_auth_datasets %}
+                                    <tr>
+                                        <td>{{ service_account.service_account }}</td>
+                                        <td>{% if auth_datasets|length == 0 %}None{% else %}{{ auth_datasets|get_values_list:"name"|joinwith:", " }}{% endif %}</td>
+                                        <td{% if service_account.is_expired and auth_datasets|length > 0 %} class="red" title="Service Account's authorization date has expired; refresh to extend access."{% endif %}>{{ service_account.authorized_date|date:'M d, Y, g:i a' }}</td>
+                                        <td>
+                                            <a title="Refresh this Service Account" data-toggle="modal" role="button" data-target="#refresh-sa-modal-{{ service_account.id }}" class="space-right-5"><i class="fa fa-refresh"></i></a>
+                                            <a title="Delete this Service Account" data-toggle="modal" role="button" data-target="#delete-sa-modal-{{ service_account.id }}"><i class="fa fa-trash"></i></a>
+                                            <a title="Adjust Datasets for this Service Account" role="button" href="{% url 'adjust_sa' user.id %}?sa_id={{ service_account.id }}"><i class="fa fa-plus-square"></i></a>
+                                        </td>
+                                    </tr>
+                                {% endwith %}
                             <!-- Refresh Service Account Modal -->
-                            <div class="modal fade" id="refresh-sa-modal-{{ service_account.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-project-header" aria-hidden="true">
+                            <!-- TODO: this should be using the user_gcp_list_modals template instead -->
+                            <div class="modal fade" id="refresh-sa-modal-{{ service_account.id }}" tabindex="-1" role="dialog" aria-labelledby="refresh-sa-header" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
                                         <div class="modal-header">
                                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                                             <h4 class="modal-title">Refresh this Service Account?</h4>
                                         </div>
-                                        <form id="delete-project" method="POST" action="{% url 'register_sa' user.id %}">
+                                        <form id="refresh-sa" method="POST" action="{% url 'register_sa' user.id %}">
                                             <div class="modal-body">
                                                 {% csrf_token %}
                                                 <p>
@@ -84,10 +88,34 @@
                                                 </p>
                                                 <input type="hidden" name="gcp_id" value="{{ gcp.project_id }}" />
                                                 <input type="hidden" name="user_sa" value="{{ service_account.service_account }}" />
-                                                <input type="hidden" name="datasets" value="{{ service_account.authorized_dataset_id }}" />
+                                                <input type="hidden" name="datasets" value="{{ service_account.get_auth_datasets|get_id_string:"," }}" />
+                                                <input type="hidden" name="is_refresh" value="true" />
                                             </div>
                                             <div class="modal-footer">
                                                 <input type="submit" value="Refresh" class="btn btn-primary" />
+                                                <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Delete Service Account Modal -->
+                            <div class="modal fade" id="delete-sa-modal-{{ service_account.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-sa-header" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                            <h4 id="delete-sa-header" class="modal-title">Unregister this Service Account?</h4>
+                                        </div>
+                                        <form id="delete-sa" method="POST" action="{% url 'delete_sa' user.id service_account.id %}">
+                                            <div class="modal-body">
+                                                {% csrf_token %}
+                                                <p>
+                                                    <em>Note</em>: By unregistering this Service Account, you are only revoking its access to controlled datasets.
+                                                </p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <input type="submit" value="Unregister" class="btn btn-primary" />
                                                 <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
                                             </div>
                                         </form>
@@ -116,14 +144,14 @@
                             <li>{{ bucket.bucket_name }}<span class="remove"><a data-toggle="modal" role="button" data-target="#remove-bucket-modal-{{ bucket.id }}"><i class="fa fa-times"></i></a></span></li>
 
                             <!-- Remove Bucket Modal -->
-                            <div class="modal fade" id="remove-bucket-modal-{{ bucket.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-bucket-header" aria-hidden="true">
+                            <div class="modal fade" id="remove-bucket-modal-{{ bucket.id }}" tabindex="-1" role="dialog" aria-labelledby="remove-bucket-header" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
                                         <div class="modal-header">
                                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                            <h4 class="modal-title">Unregister Bucket</h4>
+                                            <h4 id="remove-bucket-header" class="modal-title">Unregister Bucket</h4>
                                         </div>
-                                        <form id="delete-project" method="POST" action="{% url 'delete_bucket' user.id bucket.id %}">
+                                        <form id="remove-bucket" method="POST" action="{% url 'delete_bucket' user.id bucket.id %}">
                                             <div class="modal-body">
                                                 {% csrf_token %}
                                                 <p>
@@ -167,9 +195,9 @@
                                     <div class="modal-content">
                                         <div class="modal-header">
                                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                            <h4 class="modal-title">Unregister BigQuery Dataset</h4>
+                                            <h4 id="delete-bqdataset-header" class="modal-title">Unregister BigQuery Dataset</h4>
                                         </div>
-                                        <form id="delete-project" method="POST" action="{% url 'delete_bqdataset' user.id dataset.id %}">
+                                        <form id="delete-bqdataset" method="POST" action="{% url 'delete_bqdataset' user.id dataset.id %}">
                                             <div class="modal-body">
                                                 {% csrf_token %}
                                                 <p>
@@ -198,13 +226,40 @@
         </div>
     </div>
 
-    <!-- Register Bucket Modal -->
-    <div class="modal fade" id="register-bucket-modal" tabindex="-1" role="dialog" aria-labelledby="delete-project-header" aria-hidden="true">
+    <!-- Refresh Google Cloud Project Modal -->
+    <div class="modal fade" id="refresh-project-modal" tabindex="-1" role="dialog" aria-labelledby="refresh-project-header" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Register Bucket</h4>
+                    <h4 id="refresh-project-header" class="modal-title">Refresh the Google Cloud Project "{{ gcp.project_name }}"?</h4>
+                </div>
+                <form id="refresh-project" method="POST" action="{% url 'register_gcp' user.id %}">
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        <p>
+                            Refreshing this project will update the Web Application users associated with it.
+                        </p>
+                        <input type="hidden" name="is_refresh" value="true" />
+                        <input type="hidden" name="gcp_id" value="{{ gcp.project_id }}" />
+                        <input type="hidden" name="detail" value="true" />
+                    </div>
+                    <div class="modal-footer">
+                        <input type="submit" value="Refresh" class="btn btn-primary" />
+                        <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Bucket Modal -->
+    <div class="modal fade" id="register-bucket-modal" tabindex="-1" role="dialog" aria-labelledby="register-bucket-header" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 id="register-bucket" class="modal-title">Register Bucket</h4>
                 </div>
                 <form id="register-bucket" method="POST" action="{% url 'register_bucket' user.id gcp.id %}">
                     <div class="modal-body">
@@ -217,7 +272,7 @@
 
                         <label for="bucket_name_input">Bucket Name:</label>
                         <input type="text" name="bucket_name" id="bucket_name_input" class="form-control" required/>
-                        <input type="hidden" name="gcp_id" value="{{ project.project_id }}" />
+                        <input type="hidden" name="gcp_id" value="{{ gcp.project_id }}" />
                     </div>
                     <div class="modal-footer">
                         <input type="submit" value="Register" class="btn btn-primary" />
@@ -229,12 +284,12 @@
     </div>
 
     <!-- Register BQ Dataset Modal -->
-    <div class="modal fade" id="register-bqdataset-modal" tabindex="-1" role="dialog" aria-labelledby="delete-project-header" aria-hidden="true">
+    <div class="modal fade" id="register-bqdataset-modal" tabindex="-1" role="dialog" aria-labelledby="register-bqdataset-header" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Register BigQuery Dataset</h4>
+                    <h4 id="register-bqdataset-header" class="modal-title">Register BigQuery Dataset</h4>
                 </div>
                 <form id="register-bqdataset" method="POST" action="{% url 'register_bqdataset' user.id gcp.id %}">
                     <div class="modal-body">
@@ -247,7 +302,7 @@
 
                         <label for="bqdataset_name_input">Dataset Name:</label>
                         <input type="text" name="bqdataset_name" id="bqdataset_name_input" class="form-control" required />
-                        <input type="hidden" name="gcp_id" value="{{ project.project_id }}" />
+                        <input type="hidden" name="gcp_id" value="{{ gcp.project_id }}" />
                     </div>
                     <div class="modal-footer">
                         <input type="submit" value="Register" class="btn btn-primary" />

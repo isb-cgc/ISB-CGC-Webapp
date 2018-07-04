@@ -1,25 +1,21 @@
-from copy import deepcopy
 import json
-import re
 import logging
-import sys
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from django.utils.safestring import mark_safe
-from django.core import serializers
-from django.core.urlresolvers import reverse
-from django.core.exceptions import ObjectDoesNotExist
-from django.views.decorators.csrf import csrf_protect
+import re
+
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.urlresolvers import reverse
+from django.http import HttpResponse
+from django.shortcuts import render, redirect
+from django.utils.safestring import mark_safe
 from models import GeneFavorite, GeneSymbol
 from workbooks.models import Workbook, Worksheet
-from django.contrib.auth.models import User
-from django.conf import settings
 
-WHITELIST_RE = settings.WHITELIST_RE
+BLACKLIST_RE = settings.BLACKLIST_RE
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('main_logger')
 
 # validates whether each gene is a list of gene symbols are known gene symbols
 # returns a json object keyed on each gene symbol with values of whether or not they are valid
@@ -84,9 +80,11 @@ def gene_fav_list(request, workbook_id=0, worksheet_id=0, new_workbook=0):
 
     return render(request, template, context)
 
+
 @login_required
 def gene_fav_detail_for_new_workbook(request, gene_fav_id):
     return gene_fav_detail(request=request, gene_fav_id=gene_fav_id, new_workbook=True)
+
 
 @login_required
 def gene_fav_detail(request, gene_fav_id, workbook_id=0, worksheet_id=0, new_workbook=0):
@@ -106,7 +104,7 @@ def gene_fav_detail(request, gene_fav_id, workbook_id=0, worksheet_id=0, new_wor
             messages.error(request, 'The workbook you were referencing does not exist.')
             return redirect('genes')
     try:
-        gene_favorite_model = GeneFavorite.objects.get(id=gene_fav_id)
+        gene_favorite_model = GeneFavorite.objects.get(id=gene_fav_id, user=request.user)
         gene_favorite_model.genes = gene_favorite_model.get_genes()
         context['gene_favorite'] = gene_favorite_model
         gene_favorite_model.mark_viewed(request)
@@ -116,9 +114,11 @@ def gene_fav_detail(request, gene_fav_id, workbook_id=0, worksheet_id=0, new_wor
 
     return render(request, template, context)
 
+
 @login_required
 def gene_fav_edit_for_new_workbook(request):
     return gene_fav_edit(request=request, new_workbook=True)
+
 
 @login_required
 def gene_fav_edit(request, gene_fav_id=0, workbook_id=0, worksheet_id=0, new_workbook=0):
@@ -129,7 +129,7 @@ def gene_fav_edit(request, gene_fav_id=0, workbook_id=0, worksheet_id=0, new_wor
     if new_workbook :
         context['new_workbook'] = True
 
-    if workbook_id != 0 :
+    if workbook_id != 0:
         try:
             workbook_model = Workbook.objects.get(id=workbook_id)
             context['workbook'] = workbook_model
@@ -145,7 +145,7 @@ def gene_fav_edit(request, gene_fav_id=0, workbook_id=0, worksheet_id=0, new_wor
             context['gene_favorite'] = gene_favorite_model
             gene_list = gene_favorite_model.get_genes()
             gene_names = []
-            for g in gene_list :
+            for g in gene_list:
                 gene_names.append(g.name)
             context['genes'] = mark_safe(json.dumps(gene_names))
         except ObjectDoesNotExist:
@@ -153,6 +153,7 @@ def gene_fav_edit(request, gene_fav_id=0, workbook_id=0, worksheet_id=0, new_wor
             return redirect('genes')
 
     return render(request, template, context)
+
 
 def gene_fav_delete(request, gene_fav_id):
     redirect_url = reverse('genes')
@@ -170,39 +171,40 @@ def gene_fav_delete(request, gene_fav_id):
 
     return redirect(redirect_url)
 
+
 @login_required
 def gene_fav_save(request, gene_fav_id=0):
     name = request.POST.get("genes-name")
     gene_list = request.POST.get("genes-list")
 
-    gene_list = [x.strip().upper() for x in gene_list.split(' ')]
+    gene_list = [x.strip() for x in gene_list.split(' ')]
     gene_list = list(set(gene_list))
 
-    whitelist = re.compile(WHITELIST_RE, re.UNICODE)
-    match = whitelist.search(unicode(name))
+    blacklist = re.compile(BLACKLIST_RE, re.UNICODE)
+    match = blacklist.search(unicode(name))
     if match:
         # XSS risk, log and fail this cohort save
-        match = whitelist.findall(unicode(name))
-        logger.error('[ERROR] While saving a gene list, saw a malformed name: ' + name + ', characters: ' + match.__str__())
+        match = blacklist.findall(unicode(name))
+        logger.error('[ERROR] While saving a gene list, saw a malformed name: ' + name + ', characters: ' + str(match))
         messages.error(request, "Your gene list's name contains invalid characters; please choose another name.")
-        redirect_url = reverse('genes') if not gene_fav_id else reverse('gene_fav_detail', kwargs={'gene_fav_id':gene_fav_id})
+        redirect_url = reverse('genes') if not gene_fav_id else reverse('gene_fav_detail', kwargs={'gene_fav_id': gene_fav_id})
         return redirect(redirect_url)
 
-    if gene_fav_id :
+    if gene_fav_id:
         try:
             gene_fav_model = GeneFavorite.objects.get(id=gene_fav_id)
-            if gene_fav_model.user == request.user :
+            if gene_fav_model.user == request.user:
                 gene_fav_model.name = name
                 gene_fav_model.save()
                 gene_fav_model.edit_list(gene_list, request.user)
                 redirect_url = reverse('gene_fav_detail', kwargs={'gene_fav_id':gene_fav_id})
-            else :
+            else:
                 messages.error(request, 'You do not have permission to update this gene favorite list')
                 redirect_url = reverse('genes')
         except ObjectDoesNotExist:
             messages.error(request, 'The gene list you want does not exist.')
             redirect_url = reverse('genes')
-    else :
+    else:
         GeneFavorite.create(name=name, gene_list=gene_list, user=request.user)
         redirect_url = reverse('genes')
 

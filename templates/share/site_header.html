@@ -1,7 +1,7 @@
 {% load staticfiles %}
 {% load cohort_filters %}
 {% load custom_tags %}
-{% load project_custom_tags %}
+{% load program_custom_tags %}
 {% load workbook_custom_tags %}
 
 <header class="navbar navbar-fixed-top site-header" role="menubar">
@@ -9,19 +9,27 @@
         <div class="row">
             <div class="col-lg-12">
             <div class="nav navbar-left">
-                 <ul class="">
+                <ul class="">
                     <li class="navbar-item">
                         {% if user.is_authenticated and not user|is_superuser %}
                              <a href="{% url 'dashboard' %}" title="Dashboard" >
                         {%  else %}
                             <a href="{% url 'landing_page' %}" title="Home Page" >
                         {%  endif %}
-                        <img class="navbar-brand" src="{% static 'img/isblogo.png' %}" alt="ISB Logo"/><span class="navbar-item">ISB-CGC</span></a></li>
-                     <li class="navbar-link navbar-item"><a href="{% url 'landing_page' %}">About Us</a></li>
-                     <li class="navbar-link navbar-item">
-                         <a href="http://isb-cancer-genomics-cloud.readthedocs.org/en/latest/" target="_blank">Documentation</a>
-                     </li>
-                     <li class="navbar-link navbar-item">
+                        <img class="navbar-brand" src="{% static 'img/isblogo.png' %}" alt="ISB Logo"/><span class="navbar-item">ISB-CGC</span></a>
+                    </li>
+                    {% if request.path != '/' %}
+                        <li class="navbar-link navbar-item">
+                            <a href="{% url 'landing_page' %}">Home Page</a>
+                        </li>
+                    {% endif %}
+                    <li class="navbar-link navbar-item">
+                        <a href="http://isb-cancer-genomics-cloud.readthedocs.org/en/latest/" target="_blank">Documentation</a>
+                    </li>
+                    <li class="navbar-link navbar-item">
+                        <a href="{% url 'vid_tutorials' %}" target="_blank" title="Video Tutorials">Video Tutorials</a>
+                    </li>
+                    <li class="navbar-link navbar-item">
                         <div class="dropdown">
                             <a role="button class=dropdown-toggle navbar-item__text" id="help-dropdown" data-toggle="dropdown" aria-label="Help Dropdown" aria-expanded="true">
                                 Feedback <i class="fa fa-caret-down"></i>
@@ -30,7 +38,6 @@
                                 <li role="menuitem"><a href="https://groups.google.com/a/isb-cgc.org/forum/#!newtopic/feedback" target="_blank">Send Feedback</a></li>
                                 <li role="menuitem"><a href="https://github.com/isb-cgc/ISB-CGC-Webapp/issues/new" target="_blank">Submit Github Issue</a></li>
                             </ul>
-
                         </div>
                     </li>
                 </ul>
@@ -80,25 +87,6 @@
             <li class="menu-item has-drop-down">
                 <a>WORKBOOKS <i class="fa fa-caret-down"></i></a>
                 <ul class="sub-menu drop">
-                    {% if user|get_workbooks_this_user|length > 0 %}
-                    <li class="menu-item">
-                        <strong>Recent</strong>
-                        <ul class="item-list">
-                            {% for wlv in user|get_workbooks_this_user|slice:':5' %}
-                            <li class="menu-item" title="{{ wlv.name|wrap_text }}"><a class="inline-block" href="{% url 'workbook_detail' wlv.id %}">{{ wlv.name }}</a></li>
-                            {% endfor %}
-                            {% if user|get_workbooks_this_user|length > 5 %}
-                            <li class="menu-item has-drop-down__more"> More
-                                <ul class="drop">
-                                    {% for wlv in user|get_workbooks_this_user|slice:'5:' %}
-                                    <li class="menu-item" title="{{ wlv.name|wrap_text }}"><a class="inline-block" href="{% url 'workbook_detail' wlv.id %}">{{ wlv.name }}</a></li>
-                                    {% endfor %}
-                                </ul>
-                            </li>
-                            {% endif %}
-                        </ul>
-                    </li>
-                    {% endif %}
                     <li class="menu-item"><a href="{% url 'workbooks' %}">Saved Workbooks ( {% user_workbook_count %} )</a></li>
                     <li class="menu-item">
                         <form action="{% url 'workbook_create' %}" method="POST">
@@ -111,42 +99,11 @@
             </li>
             {% if USER_DATA_ON %}
             <li class="menu-item has-drop-down">
-                <a>PROJECTS <i class="fa fa-caret-down"></i></a>
+                <a>PROGRAMS <i class="fa fa-caret-down"></i></a>
                 <ul class="sub-menu drop">
-                    {% if user|get_projects_this_user|length > 0 %}
-                    <li class="menu-item">
-                        <strong>Start New Workbook With ...</strong>
-                        <ul class="item-list">
-                            {% for plv in user|get_projects_this_user|slice:':5' %}
-                            <li class="menu-item">
-                                <form action="{% url 'worksheet_create_with_projects' %}" method="POST">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="project_id" value="{{ plv.id }}">
-                                    <button type="submit" title="{{ plv.name|wrap_text }}">{{ plv.name }}</button>
-                                </form>
-                            </li>
-                            {% endfor %}
-                            {% if user|get_projects_this_user|length > 5 %}
-                            <li class="menu-item has-drop-down__more"> More
-                                <ul class="drop">
-                                    {% for plv in user|get_projects_this_user|slice:'5:' %}
-                                    <li class="menu-item">
-                                        <form action="{% url 'worksheet_create_with_projects' %}">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="project_id" value="{{ plv.id }}">
-                                            <button type="submit" title="{{ plv.name|wrap_text }}">{{ plv.name }}</button>
-                                        </form>
-                                    </li>
-                                    {% endfor %}
-                                </ul>
-                            </li>
-                            {% endif %}
-                        </ul>
-                    </li>
-                    {% endif %}
-                    <li class="menu-item"><a href="{% url 'projects' %}">Saved Projects ( {% user_project_count %} )</a></li>
-                    <li class="menu-item"><a href="{% url 'project_upload' %}">Upload Project Data</a></li>
-                    <li class="menu-item"><a href="{% url 'public_projects' %}">Public Projects ( {% public_project_count %} )</a></li>
+                    <li class="menu-item"><a href="{% url 'programs' %}">Saved Programs ( {% user_program_count %} )</a></li>
+                    <li class="menu-item"><a href="{% url 'program_upload' %}">Upload Program Data</a></li>
+                    <li class="menu-item"><a href="{% url 'public_programs' %}">Public Program ( {% public_program_count %} )</a></li>
                 </ul>
             </li>
             {% endif %}
@@ -194,6 +151,13 @@
                             <li class="menu-item">
                                 <form action="{% url 'worksheet_create_with_analysis' %}" method="POST">
                                     {% csrf_token %}
+                                    <input type="hidden" name="analysis" value="OncoPrint">
+                                    <button type="submit">OncoPrint</button>
+                                </form>
+                            </li>
+                            <li class="menu-item">
+                                <form action="{% url 'worksheet_create_with_analysis' %}" method="POST">
+                                    {% csrf_token %}
                                     <input type="hidden" name="analysis" value="Cubby Hole Plot">
                                     <button type="submit">Cubby Hole</button>
                                 </form>
@@ -211,79 +175,19 @@
                 </ul>
             </li>
             <li class="menu-item has-drop-down">
-                <a>GENES <i class="fa fa-caret-down"></i></a>
-                <ul class="sub-menu drop">
-                    {% if user.genefavorite_set.all|active|length > 0 %}
-                    <li class="menu-item">
-                        <strong>Start New Workbook With ...</strong>
-                        <ul class="item-list">
-                            {% for gflv in user.genefavorite_set.all|active|dictsortreversed:'last_date_saved'|slice:':5' %}
-                            <li class="menu-item">
-                                <form action="{% url 'worksheet_create_with_genes' %}" method="POST">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="gene_list_id" value="{{ gflv.id }}">
-                                    <button type="submit" title="{{ gflv.name|wrap_text }}">{{ gflv.name }}</button>
-                                </form>
-                            </li>
-                            {% endfor %}
-                            {% if user.genefavorite_set.all|active|length > 5 %}
-                            <li class="menu-item has-drop-down__more"> More
-                                <ul class="drop">
-                                    {% for gflv in user.genefavorite_set.all|active|dictsortreversed:'last_date_saved'|slice:'5:' %}
-                                    <li class="menu-item">
-                                        <form action="{% url 'worksheet_create_with_genes' %}">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="gene_list_id" value="{{ gflv.id }}">
-                                            <button type="submit" title="{{ gflv.name|wrap_text }}">{{ gflv.name }}</button>
-                                        </form>
-                                    {% endfor %}
-                                </ul>
-                            </li>
-                            {% endif %}
-                        </ul>
-                    </li>
-                    {% endif %}
-                    <li class="menu-item"><a href="{% url 'genes' %}">Manage Gene Favorite ( {{ user.genefavorite_set.all|active|length }} )</a></li>
-                    <li class="menu-item"><a href="{% url 'gene_fav_create' %}">Create Gene Favorite(s)</a></li>
-                    <li class="menu-item"><a href="{% url 'gene_select_for_new_workbook' %}">Select Genes for a New Workbook</a></li>
+                {% with genefaves_count=user.genefavorite_set.all|active|count %}
+                <a>GENES & miRNAs <i class="fa fa-caret-down"></i></a>
+                <ul class="sub-menu drop genes-mirnas">
+                    <li class="menu-item"><a href="{% url 'genes' %}">Manage Gene & miRNA Favorites ( {{ genefaves_count }} )</a></li>
+                    <li class="menu-item"><a href="{% url 'gene_fav_create' %}">Create Gene & miRNA Favorites</a></li>
+                    <li class="menu-item"><a href="{% url 'gene_select_for_new_workbook' %}">Select Genes & miRNAs for a New Workbook</a></li>
                 </ul>
+                {% endwith %}
             </li>
             <li class="menu-item has-drop-down">
                 <a>VARIABLES <i class="fa fa-caret-down"></i></a>
                 <ul class="sub-menu drop">
-                    <!--Temporary code to showcase recent variables items-->
-                    {% if user.variablefavorite_set.all|active|length > 0 %}
-                    <li class="menu-item">
-                        <strong>Start New Workbook With ...</strong>
-                        <ul class="item-list">
-                            {% for vflv in user.variablefavorite_set.all|active|dictsortreversed:'last_date_saved'|slice:':5' %}
-                            <li class="menu-item">
-                                <form action="{% url 'worksheet_create_with_variables' %}" method="POST">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="variable_list_id" value="{{ vflv.id }}">
-                                    <button type="submit" title="{{ vflv.name|wrap_text }}">{{ vflv.name }}</button>
-                                </form>
-                            </li>
-                            {% endfor %}
-                            {% if user.variablefavorite_set.all|active|length > 5 %}
-                            <li class="menu-item has-drop-down__more"> More
-                                <ul class="drop">
-                                    {% for vflv in user.variablefavorite_set.all|active|dictsortreversed:'last_date_saved'|slice:'5:' %}
-                                    <li class="menu-item">
-                                        <form action="{% url 'worksheet_create_with_variables' %}" method="POST">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="variable_list_id" value="{{ vflv.id }}">
-                                            <button type="submit" title="{{ vflv.name|wrap_text }}">{{ vflv.name }}</button>
-                                        </form>
-                                    </li>
-                                    {% endfor %}
-                                </ul>
-                            </li>
-                            {% endif %}
-                        </ul>
-                    </li>
-                    {% endif %}
-                    <li class="menu-item"><a href="{% url 'variables' %}">Manage Favorite Variable(s) Lists ( {{ user.variablefavorite_set.all|active|length }} )</a></li>
+                    <li class="menu-item"><a href="{% url 'variables' %}">Manage Favorite Variable(s) Lists ( {{ user.variablefavorite_set.all|active|count }} )</a></li>
                     <li class="menu-item"><a href="{% url 'variable_fav_create' %}">Create Favorite Variable(s) List</a></li>
                     <li class="menu-item"><a href="{% url 'variable_select_for_new_workbook' %}">Select Variables for a New Workbook</a></li>
                 </ul>
@@ -291,40 +195,14 @@
             <li class="menu-item has-drop-down">
                 <a>COHORTS <i class="fa fa-caret-down"></i></a>
                 <ul class="sub-menu drop">
-                    {% if user|get_cohorts_this_user|length > 0 %}
-                    <li class="menu-item">
-                        <strong>Start New Workbook With ...</strong>
-                        <ul class="item-list">
-                            {% for clv in user|get_cohorts_this_user|slice:':5' %}
-                            <li class="menu-item">
-                                <form action="{% url 'worksheet_create_with_cohort' %}" method="POST">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="cohort_id" value="{{ clv.id}}">
-                                    <button type="submit" title="{{ clv.name|wrap_text }}">{{ clv.name }}</button>
-                                </form>
-                            </li>
-                            {% endfor %}
-                            {% if user|get_cohorts_this_user|length > 5 %}
-                            <li class="menu-item has-drop-down__more"> More
-                                <ul class="drop">
-                                    {% for clv in user|get_cohorts_this_user|slice:'5:' %}
-                                    <li class="menu-item">
-                                        <form action="{% url 'worksheet_create_with_cohort' %}" method="POST">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="cohort_id" value="{{ clv.id}}">
-                                            <button type="submit" title="{{ clv.name|wrap_text }}">{{ clv.name }}</button>
-                                        </form>
-                                    </li>
-                                    {% endfor %}
-                                </ul>
-                            </li>
-                            {% endif %}
+                    <li class="menu-item"><a href="{% url 'cohort_list' %}">Manage Saved Cohorts ( {{ user.cohort_perms_set.all|active:'cohort'|cohort_owner_permission|count }} )</a></li>
+                    <li class="menu-item"><a href="{% url 'public_cohort_list' %}">Public Cohorts ( {% public_cohort_count %} )</a></li>
+                    <li class="menu-item has-drop-down__more"> Create a New Cohort
+                        <ul class="drop">
+                            <li class="menu-item"><a href="{% url 'cohort' %}">Filters</a></li>
+                            <li class="menu-item"><a href="{% url 'cohort_barcodes' %}">Barcodes</a></li>
                         </ul>
                     </li>
-                    {% endif %}
-                    <li class="menu-item"><a href="{% url 'cohort_list' %}">Manage Saved Cohorts ( {{ user.cohort_perms_set.all|active:'cohort'|cohort_owner_permission|length }} )</a></li>
-                    <li class="menu-item"><a href="{% url 'public_cohort_list' %}">Public Cohorts ( {% public_cohort_count %} )</a></li>
-                    <li class="menu-item"><a href="{% url 'cohort' %}">Create new Cohort</a></li>
                     <li class="menu-item"><a href="{% url 'cohort_select_for_new_workbook' %}">Select Cohort for a New Workbook</a></li>
                 </ul>
             </li>

@@ -29,6 +29,7 @@
 
     {% block extra_css_libs %}{% endblock %}
     <link type="text/css" rel="stylesheet" href="{% static 'css/select2.min.css' %}" />
+    <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}" />
     <link type="text/css" rel="stylesheet" href="{% static 'css/style.css' %}" />
     <script type="text/javascript" src="{% static 'js/libs/modernizr.js' %}"></script>
     {% block header %}{% endblock %}
@@ -62,15 +63,8 @@
     {%  endif %}
     <script>
         var STATIC_FILES_URL = '{{ STATIC_FILES_URL }}';
-
         var BASE_URL = '{{ BASE_URL }}' || "";
-        if(location.host.includes("-preview.com") && !BASE_URL.includes("-preview.com")) {
-            BASE_URL = BASE_URL.replace('appspot.com','appspot-preview.com');
-        }
-
-        var BASE_API_URL = '{{ BASE_API_URL }}' || "";
     </script>
-
 </head>
 <body id="body">
 <!--Include site main header-->
@@ -85,20 +79,21 @@
         {% block page_header %}{% endblock %}
     </div>
     <div class="container">
-        {% if messages %}
-            {% autoescape off %}
-            <div class="row">
-                <div class="col-lg-12">
-                    {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }} alert-dismissible">
-                            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                </div>
+        <div class="row">
+            <div class="col-lg-12">
+                {% if messages %}
+                    {% autoescape off %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible">
+                                <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endautoescape %}
+                {% endif %}
+                <div id="js-messages"></div>
             </div>
-            {% endautoescape %}
-        {% endif %}
+        </div>
         <div class="row">{% block content %}{% endblock %}</div>
     </div>
 
@@ -143,7 +138,7 @@
         var warnAfter = {{ request|warn_after|unlocalize }};
         var expireAfter = {{ request|expire_after|unlocalize }};
         var confirmFormDiscard = "{% trans 'You have unsaved changes in a form of this page.' %}";
-
+        var returnToUrl = '{% url 'landing_page' %}';
     </script>
     {% endlocalize %}
 {% endif %}

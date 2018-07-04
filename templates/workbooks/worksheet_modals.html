@@ -31,7 +31,7 @@
             <div class="modal-body" id="delete-worksheet-body">
                 Delete this Worksheet "{{ worksheet.name }}"?
             </div>
-            <form id="delete-workbook" method="POST" action="{% url 'worksheet_delete' workbook.id worksheet.id %}">
+            <form class="delete-worksheet" id="delete-worksheet" method="POST" action="{% url 'worksheet_delete' workbook.id worksheet.id %}">
                 {% csrf_token %}
                 <div class="modal-footer">
                     <input type="submit" value="Delete" class="btn btn-primary" />
@@ -57,11 +57,11 @@
                         <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                         Your worksheet's <span class="sheet-unallowed"></span> invalid characters (<span class="unallowed-chars-sheet"></span>). Please choose another <span class="sheet-fields"></span>.
                     </div>
-                    <label for="edit-sheet-name">Name (required)</label>
-                    <input class="form-control edit-sheet-name" type="text" name="name" value="{{ worksheet.name }}"/>
+                    <label for="edit-sheet-name-{{ worksheet.id }}">Name (required)</label>
+                    <input id="edit-sheet-name-{{ worksheet.id }}" class="form-control edit-sheet-name" type="text" name="name" value="{{ worksheet.name }}"/>
                     <br>
-                    <label for="edit-sheet-desc">Description (optional, max length is 2000 characters)</label>
-                    <textarea class="form-control edit-sheet-desc" name="description" maxlength="2000">{{worksheet.description }}</textarea>
+                    <label for="edit-sheet-desc-{{ worksheet.id }}">Description (optional, max length is 2000 characters)</label>
+                    <textarea id="edit-sheet-desc-{{ worksheet.id }}" class="form-control edit-sheet-desc" name="description" maxlength="2000">{{worksheet.description }}</textarea>
                 </div>
                 <div class="modal-footer">
                     <input type="submit" value="Update" class="btn btn-primary" />

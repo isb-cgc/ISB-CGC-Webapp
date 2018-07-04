@@ -1,5 +1,5 @@
 """
-Copyright 2015, Institute for Systems Biology
+Copyright 2015-2018, Institute for Systems Biology
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,46 +14,45 @@ limitations under the License.
 import collections
 import json
 import logging
-import os
 import sys
+import re
+from time import sleep
+import requests
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
 from django.contrib.auth.models import User
 from django.db.models import Count
-from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.core.urlresolvers import reverse
 from django.utils import formats
+from django.contrib import messages
 from googleapiclient import discovery
 from oauth2client.client import GoogleCredentials
 
-debug = settings.DEBUG
-
 from google_helpers.directory_service import get_directory_resource
+from google_helpers.bigquery.bq_support import BigQuerySupport
+from cohorts.metadata_helpers import get_sample_metadata
 from googleapiclient.errors import HttpError
 from visualizations.models import SavedViz
 from cohorts.models import Cohort, Cohort_Perms
-from projects.models import Project
+from projects.models import Program
 from workbooks.models import Workbook
-from accounts.models import NIH_User, GoogleProject
+from accounts.models import GoogleProject
+from accounts.sa_utils import get_nih_user_details
 
 from allauth.socialaccount.models import SocialAccount
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 
+from django.http import HttpResponse, JsonResponse
 
 debug = settings.DEBUG
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('main_logger')
 
-login_expiration_seconds = settings.LOGIN_EXPIRATION_HOURS * 60 * 60
-# schedule check_login tasks for 15 minutes after the user's login will expire
-COUNTDOWN_SECONDS = login_expiration_seconds + (60 * 15)
-
-USER_API_URL = settings.BASE_API_URL + '/_ah/api/user_api/v1'
-ACL_GOOGLE_GROUP = settings.ACL_GOOGLE_GROUP
-DBGAP_AUTHENTICATION_LIST_BUCKET = settings.DBGAP_AUTHENTICATION_LIST_BUCKET
 ERA_LOGIN_URL = settings.ERA_LOGIN_URL
 OPEN_ACL_GOOGLE_GROUP = settings.OPEN_ACL_GOOGLE_GROUP
+BQ_ATTEMPT_MAX = 10
 
 
 def convert(data):
@@ -103,8 +102,7 @@ Returns user to landing page.
 '''
 @never_cache
 def landing_page(request):
-    return render(request, 'GenespotRE/landing.html',
-                  {'request': request})
+    return render(request, 'GenespotRE/landing.html', {'request': request, })
 
 '''
 Returns css_test page used to test css for general ui elements
@@ -119,7 +117,7 @@ Returns page that has user details
 '''
 @login_required
 def user_detail(request, user_id):
-    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+    if debug: logger.debug('Called '+sys._getframe().f_code.co_name)
 
     if int(request.user.id) == int(user_id):
 
@@ -138,17 +136,9 @@ def user_detail(request, user_id):
 
         user_details['gcp_list'] = len(GoogleProject.objects.filter(user=user))
 
-        try:
-            nih_user = NIH_User.objects.get(user_id=user_id, linked=True)
-            user_details['NIH_username'] = nih_user.NIH_username
-            user_details['NIH_assertion_expiration'] = nih_user.NIH_assertion_expiration
-            user_details['dbGaP_authorized'] = nih_user.dbGaP_authorized and nih_user.active
-            user_details['NIH_active'] = nih_user.active
-        except (MultipleObjectsReturned, ObjectDoesNotExist), e:
-            if type(e) is MultipleObjectsReturned:
-                # in this case there is more than one nih_username linked to the same google identity
-                logger.warn("Error when retrieving nih_user with user_id {}. {}".format(str(user_id), str(e)))
-                # todo: add code to unlink all accounts?
+        nih_details = get_nih_user_details(user_id)
+        for key in nih_details.keys():
+            user_details[key] = nih_details[key]
 
         era_login_url = "{}?sso&redirect_url={}/accounts/nih_login".format(settings.ERA_LOGIN_URL,
                                                                             settings.BASE_URL)
@@ -169,9 +159,9 @@ def nih_login(request):
 
 @login_required
 def bucket_object_list(request):
-    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+    if debug: logger.debug('Called '+sys._getframe().f_code.co_name)
     credentials = GoogleCredentials.get_application_default()
-    service = discovery.build('storage', 'v1', credentials=credentials)
+    service = discovery.build('storage', 'v1', credentials=credentials, cache_discovery=False)
 
     req = service.objects().list(bucket='isb-cgc-dev')
     resp = req.execute()
@@ -203,7 +193,7 @@ def user_landing(request):
     except HttpError, e:
         logger.info(e)
 
-    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+    if debug: logger.debug('Called '+sys._getframe().f_code.co_name)
     # check to see if user has read access to 'All TCGA Data' cohort
     isb_superuser = User.objects.get(username='isb')
     superuser_perm = Cohort_Perms.objects.get(user=isb_superuser)
@@ -215,7 +205,7 @@ def user_landing(request):
 
     users = User.objects.filter(is_superuser=0)
     cohort_perms = Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True)
-    cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved').annotate(num_patients=Count('samples'))
+    cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved').annotate(num_cases=Count('samples__case_barcode'))
 
     for item in cohorts:
         item.perm = item.get_perm(request).get_perm_display()
@@ -256,7 +246,7 @@ DEPRECATED - Returns Results from text search
 '''
 @login_required
 def search_cohorts_viz(request):
-    if debug: print >> sys.stderr,'Called '+sys._getframe().f_code.co_name
+    if debug: logger.debug('Called '+sys._getframe().f_code.co_name)
     q = request.GET.get('q', None)
     result_obj = {
         'q': q
@@ -286,41 +276,152 @@ def search_cohorts_viz(request):
         result_obj['visualizations'] = list
     return HttpResponse(json.dumps(result_obj), status=200)
 
+# get_image_data which allows for URI arguments, falls through to get_image_data(request, slide_barcode)
+def get_image_data_args(request):
+    slide_barcode = None
+    if request.GET:
+        slide_barcode = request.GET.get('slide_barcode',None)
+    elif request.POST:
+        slide_barcode = request.POST.get('slide_barcode',None)
+
+    if slide_barcode:
+        slide_barcode = (None if re.compile(ur'[^A-Za-z0-9\-]').search(slide_barcode) else slide_barcode)
+
+    return get_image_data(request, slide_barcode)
+
+# Given a slide_barcode, returns image metadata in JSON format
+def get_image_data(request, slide_barcode):
+    status=200
+    result = {}
+
+    if not slide_barcode:
+        status=503
+        result = {
+            'message': "There was an error while processing this request: a valid slide_barcode was not supplied."
+        }
+    else:
+        try:
+            img_data_query = """
+                SELECT slide_barcode, level_0__width AS width, level_0__height AS height, mpp_x, mpp_y, GCSurl, sample_barcode, case_barcode
+                FROM [isb-cgc:metadata.TCGA_slide_images]
+                WHERE slide_barcode = '{}';
+            """
+
+            query_results = BigQuerySupport.execute_query_and_fetch_results(img_data_query.format(slide_barcode))
+
+            if query_results and len(query_results) > 0:
+                result = {
+                    'Width': query_results[0]['f'][1]['v'],
+                    'Height': query_results[0]['f'][2]['v'],
+                    'MPP-X': query_results[0]['f'][3]['v'],
+                    'MPP-Y': query_results[0]['f'][4]['v'],
+                    'FileLocation': re.sub(r'isb-cgc-open/.*_image', 'imaging-west', query_results[0]['f'][5]['v']),
+                    'TissueID': query_results[0]['f'][0]['v'],
+                    'sample-barcode': query_results[0]['f'][6]['v'],
+                    'case-barcode': query_results[0]['f'][7]['v'],
+                    'img-type': ('Diagnostic Image' if slide_barcode.split("-")[-1].startswith("DX") else 'Tissue Slide Image' if slide_barcode.split("-")[-1].startswith("TS") else "N/A")
+                }
+
+                sample_metadata = get_sample_metadata(result['sample-barcode'])
+                result['disease-code'] = sample_metadata['disease_code']
+                result['project'] = sample_metadata['project']
+
+            else:
+                result = {
+                    'msg': 'Slide barcode {} was not found.'.format(slide_barcode)
+                }
+
+        except Exception as e:
+            logger.error("[ERROR] While attempting to retrieve image data for {}:".format(slide_barcode))
+            logger.exception(e)
+            status = '503'
+            result = {
+                'message': "There was an error while processing this request."
+            }
+
+    return JsonResponse(result, status=status)
+
+
+@login_required
+def dicom(request, study_uid=None):
+    template = 'GenespotRE/dicom.html'
+    orth_response = requests.post(url=settings.ORTHANC_LOOKUP_URI,data=study_uid,headers={"Content-Type": "text/plain"})
+
+    if orth_response.status_code != 200:
+        logger.error("[ERROR] While trying to retrieve Orthanc UID for study instance UID {}: {}".format(study_uid, str(orth_response.content)))
+        messages.error(request,"There was an error while attempting to load this DICOM image--please contact the administrator.")
+        return redirect(reverse('cohort_list'))
+
+    context = {
+        'orthanc_uid': orth_response.json()[0]['ID'],
+        'dicom_viewer': settings.OSIMIS_VIEWER
+    }
+    return render(request, template, context)
+
+
+@login_required
+def camic(request, slide_barcode=None):
+    if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
+    context = {}
+
+    if not slide_barcode:
+        messages.error("Error while attempting to display this pathology image: a slide barcode was not provided.")
+        return redirect(reverse('cohort_list'))
+
+    images = [{'barcode': slide_barcode, 'thumb': '', 'type': ''}]
+    template = 'GenespotRE/camic_single.html'
+
+    context['barcodes'] = images
+    context['camic_viewer'] = settings.CAMIC_VIEWER
+    context['img_thumb_url'] = settings.IMG_THUMBS_URL
+
+    return render(request, template, context)
+
+
 @login_required
 def igv(request, sample_barcode=None, readgroupset_id=None):
-    if debug: print >> sys.stderr, 'Called '+sys._getframe().f_code.co_name
+    if debug: logger.debug('Called '+sys._getframe().f_code.co_name)
 
     readgroupset_list = []
     bam_list = []
 
     checked_list = json.loads(request.POST.__getitem__('checked_list'))
-
-    # for item in checked_list['readgroupset_id']:
-    #    id_barcode = item.split(',')
-    #    readgroupset_list.append({'sample_barcode': id_barcode[1],
-    #                              'readgroupset_id': id_barcode[0]})
+    build = request.POST.__getitem__('build')
 
     for item in checked_list['gcs_bam']:
+        bam_item = checked_list['gcs_bam'][item]
         id_barcode = item.split(',')
-        bam_list.append({'sample_barcode': id_barcode[1],
-                         'gcs_path': id_barcode[0]})
+        bam_list.append({
+            'sample_barcode': id_barcode[1], 'gcs_path': id_barcode[0], 'build': build, 'program': bam_item['program']
+        })
 
-    context = {}
-    context['readgroupset_list'] = readgroupset_list
-    context['bam_list'] = bam_list
-    context['base_url'] = settings.BASE_URL
-    context['service_account'] = settings.IGV_WEB_CLIENT_ID
+    context = {
+        'readgroupset_list': readgroupset_list,
+        'bam_list': bam_list,
+        'base_url': settings.BASE_URL,
+        'service_account': settings.WEB_CLIENT_ID,
+        'build': build,
+    }
 
     return render(request, 'GenespotRE/igv.html', context)
 
-def health_check(request):
+
+# Because the match for vm_ is always done regardless of its presense in the URL
+# we must always provide an argument slot for it
+#
+def health_check(request, match):
     return HttpResponse('')
+
 
 def help_page(request):
     return render(request, 'GenespotRE/help.html')
 
+
 def about_page(request):
     return render(request, 'GenespotRE/about.html')
+
+def vid_tutorials_page(request):
+    return render(request, 'GenespotRE/video_tutorials.html')
 
 @login_required
 def dashboard_page(request):
@@ -331,21 +432,29 @@ def dashboard_page(request):
     cohort_perms = list(set(Cohort_Perms.objects.filter(user=request.user).values_list('cohort', flat=True).exclude(cohort__id__in=public_cohorts)))
     cohorts = Cohort.objects.filter(id__in=cohort_perms, active=True).order_by('-last_date_saved')
 
-    # Project List
-    ownedProjects = request.user.project_set.all().filter(active=True)
-    sharedProjects = Project.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
-    projects = ownedProjects | sharedProjects
-    projects = projects.distinct().order_by('-last_date_saved')
+    # Program List
+    ownedPrograms = request.user.program_set.filter(active=True)
+    sharedPrograms = Program.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
+    programs = ownedPrograms | sharedPrograms
+    programs = programs.distinct().order_by('-last_date_saved')
 
     # Workbook List
-    userWorkbooks = request.user.workbook_set.all().filter(active=True)
+    userWorkbooks = request.user.workbook_set.filter(active=True)
     sharedWorkbooks = Workbook.objects.filter(shared__matched_user=request.user, shared__active=True, active=True)
     workbooks = userWorkbooks | sharedWorkbooks
     workbooks = workbooks.distinct().order_by('-last_date_saved')
 
+    # Gene & miRNA Favorites
+    genefaves = request.user.genefavorite_set.filter(active=True)
+
+    # Variable Favorites
+    varfaves = request.user.variablefavorite_set.filter(active=True)
+
     return render(request, 'GenespotRE/dashboard.html', {
         'request'  : request,
         'cohorts'  : cohorts,
-        'projects' : projects,
+        'programs' : programs,
         'workbooks': workbooks,
+        'genefaves': genefaves,
+        'varfaves' : varfaves
     })

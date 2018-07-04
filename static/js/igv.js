@@ -65,31 +65,45 @@ require([
 
     for (var i = 0; i < bam_divs.length; i++) {
         var row = $(bam_divs[i]);
-        var bam_path = row.data('gcs');
+        var bam_path = row.data('gcs').split(';')[0];
+        var bai_path = row.data('gcs').split(';')[1];
         var sample_barcode = row.data('sample');
-        tracks.push({
+        var obj = {
             sourceType: 'gcs',
             type: 'bam',
-            url: bam_path, // gs:// url to .bam file. Location must also contain .bai file.
+            url: bam_path, // gs:// url to .bam file
             name: sample_barcode + ': GCS bam file',
-            withCredentials: true
-        });
+            withCredentials: true,
+            indexURL: bai_path
+        };
+        tracks.push(obj);
     }
 
-    tracks.push({
-        name: "Genes",
-        url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
+    var genes_obj = {
+        name: "Genes: Gencode v18",
+        url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
+        indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.idx",
         order: Number.MAX_VALUE,
         displayMode: "EXPANDED"
-    });
+    };
+
+    if(genome_build === 'HG38') {
+        genes_obj.url = 'https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg38/genes/gencode.v24.annotation.sorted.gtf.gz';
+        genes_obj.indexURL = 'https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg38/genes/gencode.v24.annotation.sorted.gtf.gz.tbi';
+        genes_obj.name = 'Genes: Gencode v24';
+        genes_obj.format = 'gtf';
+    }
+
+    tracks.push(genes_obj);
 
     var options = {
         showNavigation: true,
-        genome: "hg19",
-        locus: "egfr",
+        genome: genome_build.toLowerCase(),
+        locus: "EGFR",
         tracks: tracks,
         withCredentials: true
     };
+
     $('#igv-div').empty();
 
     // Invoking libs/igv creates a global igv var for us to use

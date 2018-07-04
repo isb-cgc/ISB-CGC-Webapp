@@ -67,7 +67,6 @@
 
         a
             text-decoration: underline
-            display: block
             cursor: pointer
 
         .gcp-panel a
@@ -75,15 +74,17 @@
 
         table.user-info
             tr
+                td
+                    vertical-align: top
                 td:first-child
                     font-weight: bold
                     text-align: right
                     padding: 5px 10px
-                    width: 31%
+                    width: 20%
                 td:last-child
                     padding: 5px 10px
                     margin-left: 5px
-                    width: 500px
+                    width: 80%
 
         .fa-check-circle
             color: $primary-color
@@ -92,8 +93,16 @@
 
         hr
             margin: 0px -15px 10px -15px
+
+        ul
+            margin-bottom: 10px
+            list-style: circle
+            margin-left: 20px
     .modal
         h4
+            text-align: left
+    .alert-dismissible
+        p
             text-align: left
 
 #user-gcp-list
@@ -103,23 +112,99 @@
     i.fa-check
         color: $isb-success
 
-#register-gcp, #user-register-sa
+#register-gcp, #user-register-sa, #user-adjust-sa
     margin-bottom: 30px
+    i.fa-check
+        color: $isb-success
+
+#register-gcp, #user-register-sa
     ul
-        list-style: circle
-        padding-left: 20px
+        list-style: none
+        padding-left: -15px
         li
             margin: 5px 0px
             img
                 display: block
+        &.dataset-list
+            list-style: none
+            padding: 0px
+    input
+        margin-bottom: 5px
 
-    i.fa-check
-        color: $isb-success
+#register-gcp
+    ol>li
+        margin-top: 30px !important
+        >div
+            margin-left: 15px
+    div.instructions
+        margin-top: 15px
+        margin-bottom: 15px
+        padding: 15px
+        border-radius: 2px
+        border: 1px solid #ccc
+        background: #f5f5f5
+    .verify
+        margin-top: 15px
+        display: block
+    label
+        font-weight: 500
+    #verify-gcp-id
+        display: inline-block
+        width: 550px
+    ol
+        margin-bottom: 20px
+    button
+        &.instructions
+            &.instructions_show
+                margin-bottom: 15px
+                display: block
+                clear: both
+                &:before
+                    content: "\f103"
+                    float: left
+                    font-family: FontAwesome
+                &:after
+                    content: "Show Instructions"
+                    margin-left: 5px
+            &.instructions_hide
+                margin-bottom: 15px
+                display: block
+                clear: both
+                &:before
+                    content: "\f102"
+                    float: left
+                    font-family: FontAwesome
+                &:after
+                    content: "Hide Instructions"
+                    margin-left: 5px
+
+#user-adjust-sa
+    h4
+        margin-bottom: 25px
+    .radio, .checkbox
+        margin-left: 10px
+    ul
+        list-style: none
+        li.upper
+            margin-bottom: 20px
+
+#datasets-select-div
+    margin-top: 15px
+
+#sa-spinner
+    &.load-spinner
+        position: fixed
+        z-index: 999
+        left: 45%
+        top: 45%
+        margin: auto
+        font-size: 75px
 
 #gcp-detail
     h1.page-header
         text-transform: none
-
+    div.refresh-project
+        margin-top: 15px
     ul
         list-style: none
         li span.remove

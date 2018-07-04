@@ -19,11 +19,7 @@ limitations under the License.
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-
-debug = settings.DEBUG
 from models import Analysis
-
-debug = settings.DEBUG
 
 @login_required
 def sample_analyses(request):

@@ -23,7 +23,7 @@ FROM gcr.io/google_appengine/python
 RUN apt-get update
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get install -y wget
-RUN wget "http://dev.mysql.com/get/mysql-apt-config_0.5.3-1_all.deb" -P /tmp
+RUN wget "http://repo.mysql.com/mysql-apt-config_0.8.9-1_all.deb" -P /tmp
 
 # install lsb-release (a dependency of mysql-apt-config), since dpkg doesn't
 # do dependency resolution
@@ -32,7 +32,7 @@ RUN apt-get install -y lsb-release
 # the mysql config package
 RUN echo "mysql-apt-config mysql-apt-config/select-server select mysql-5.7" | debconf-set-selections
 # having 'selected' mysql-5.7 for 'server', install the mysql config package
-RUN dpkg --install /tmp/mysql-apt-config_0.5.3-1_all.deb
+RUN dpkg --install /tmp/mysql-apt-config_0.8.9-1_all.deb
 
 # fetch the updated package metadata (in particular, mysql-server-5.7)
 RUN apt-get update
@@ -58,10 +58,11 @@ ADD . /app
 # We need to recompile some of the items because of differences in compiler versions
 RUN pip install -r /app/requirements.txt -t /app/lib/ --upgrade
 RUN pip install gunicorn==19.6.0
-RUN mkdir /app/lib/endpoints/
-RUN cp /app/endpoints/* /app/lib/endpoints/
 
 ENV PYTHONPATH=/app:/app/lib:/app/google_appengine:/app/google_appengine/lib/protorpc-1.0
 
-# -t to 130 until we can diagnose database response speed issues
-CMD gunicorn -c gunicorn.conf.py -b :$PORT GenespotRE.wsgi -w 3 -t 130
+# Until we figure out a way to do it in CircleCI without whitelisting IPs this has to be done by a dev from
+# ISB
+# RUN python /app/manage.py migrate --noinput
+
+CMD gunicorn -c gunicorn.conf.py -b :$PORT GenespotRE.wsgi -w 3 -t 180

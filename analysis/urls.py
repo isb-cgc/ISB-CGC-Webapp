@@ -16,11 +16,8 @@ limitations under the License.
 
 """
 
-from django.conf.urls import patterns, include, url
-from django.contrib import admin
-from django.conf import settings
-
 import views
+from django.conf.urls import url
 
 urlpatterns = [
     url(r'^samples/', views.sample_analyses, name='sample_analyses')

@@ -17,34 +17,23 @@ limitations under the License.
 """
 
 from csv import DictWriter
+from json import load as load_json
 import logging
 from StringIO import StringIO
 from time import sleep
-from os.path import join as path_join
+import os
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "GenespotRE.settings")
+
+import django
+django.setup()
 
 import click
 
-from gexp_features import GEXPFeatureDefConfig, GEXPFeatureDefProvider
-from gnab_features import GNABFeatureDefConfig, GNABFeatureDefProvider
-from protein_features import RPPAFeatureDefConfig, RPPAFeatureDefProvider
-from methylation_features import METHFeatureDefConfig, METHFeatureDefProvider
-from copynumber_features import CNVFeatureDefConfig, CNVFeatureDefProvider
-from mirna_features import MIRNFeatureDefConfig, MIRNFeatureDefProvider
-
-from scripts.feature_def_gen.feature_def_utils import load_config_json
+from bq_data_access.v2.feature_id_utils import FeatureDataTypeHelper
 
 
 logging.basicConfig(level=logging.INFO)
-
-data_type_registry = {
-    'gexp': (GEXPFeatureDefConfig, GEXPFeatureDefProvider),
-    'gnab': (GNABFeatureDefConfig, GNABFeatureDefProvider),
-    'rppa': (RPPAFeatureDefConfig, RPPAFeatureDefProvider),
-    'meth': (METHFeatureDefConfig, METHFeatureDefProvider),
-    'cnv': (CNVFeatureDefConfig, CNVFeatureDefProvider),
-    'mirn': (MIRNFeatureDefConfig, MIRNFeatureDefProvider)
-}
-
 
 
 def run_query(project_id, provider, config):
@@ -71,10 +60,9 @@ def run_query(project_id, provider, config):
     return query_result
 
 
-def load_config_from_path(data_type, config_json):
-    config_class, _ = data_type_registry[data_type]
-    config = load_config_json(config_json, config_class)
-    return config
+def load_config_from_path(config_class, config_json_path):
+    config_dict = load_json(open(config_json_path, 'r'))
+    return config_class.from_dict(config_dict)
 
 
 def get_csv_object(data_rows, schema, include_header=False):
@@ -95,30 +83,62 @@ def save_csv(data_rows, schema, csv_path, include_header=False):
 
 @click.command()
 @click.argument('data_type', type=str)
-@click.argument('config_json', type=click.Path(exists=True))
-def print_query(data_type, config_json):
-    config = load_config_from_path(data_type, config_json)
-    _, provider_class = data_type_registry[data_type]
-    provider = provider_class(config)
-    query = provider.build_query(config)
+@click.option('--config_json', type=str)
+@click.option('-chr', "chromosome_array", type=str, multiple=True, help="Chromosome (required for methylation)")
+def print_query(data_type, config_json, chromosome_array):
+
+    feature_type = FeatureDataTypeHelper.get_type(data_type)
+    logging.info("Feature type: {}".format(str(feature_type)))
+    config_class = FeatureDataTypeHelper.get_feature_def_config_from_data_type(feature_type)
+    provider_class = FeatureDataTypeHelper.get_feature_def_provider_from_data_type(feature_type)
+
+    if config_json is not None:
+        config_instance = load_config_from_path(config_class, config_json)
+    else:
+        config_dict = FeatureDataTypeHelper.get_feature_def_default_config_dict_from_data_type(feature_type)
+        config_instance = config_class.from_dict(config_dict)
+
+    if not chromosome_array:
+        chromosome_array = [str(c) for c in range(1, 23)]
+        chromosome_array.extend(['X', 'Y'])
+
+    provider = provider_class(config_instance, chromosome_array=chromosome_array)
+    query = provider.build_query(config_instance)
     print(query)
 
+
+# project_id: project number of the BQ data project (typically isb-cgc's project number)
+# data_type: 4-letter data type code, eg. GNAB
 
 @click.command()
 @click.argument('project_id', type=click.INT)
 @click.argument('data_type', type=str)
-@click.argument('base_dir', type=click.Path(exists=True))
-@click.argument('config_json', type=click.Path(exists=True))
-def run(project_id, data_type, base_dir, config_json):
-    _, provider_class = data_type_registry[data_type]
-    config = load_config_from_path(data_type, config_json)
-    provider = provider_class(config)
+@click.argument('csv_path', type=str)
+@click.option('--config_json', type=str)
+@click.option('-chr', "chromosome_array", type=str, multiple=True, help="Chromosome (required for methylation)")
+def run(project_id, data_type, csv_path, config_json, chromosome_array):
+    feature_type = FeatureDataTypeHelper.get_type(data_type)
+    logging.info("Feature type: {}".format(str(feature_type)))
+    config_class = FeatureDataTypeHelper.get_feature_def_config_from_data_type(feature_type)
+    provider_class = FeatureDataTypeHelper.get_feature_def_provider_from_data_type(feature_type)
 
-    csv_path = path_join(base_dir, config.output_csv_path)
+    if config_json is not None:
+        config_instance = load_config_from_path(config_class, config_json)
+    else:
+        config_dict = FeatureDataTypeHelper.get_feature_def_default_config_dict_from_data_type(feature_type)
+        config_instance = config_class.from_dict(config_dict)
+
+    if not chromosome_array:
+        chromosome_array = [str(c) for c in range(1, 23)]
+        chromosome_array.extend(['X', 'Y'])
+    else:
+        chromosome_array = chromosome_array[0].split(",")
+
+    provider = provider_class(config_instance, chromosome_array=chromosome_array)
+
     logging.info("Output CSV: {}".format(csv_path))
-    result = run_query(project_id, provider, config)
+    result = run_query(project_id, provider, config_instance)
     save_csv(result, provider.get_mysql_schema(), csv_path, include_header=True)
-
 
 @click.group()
 def main():

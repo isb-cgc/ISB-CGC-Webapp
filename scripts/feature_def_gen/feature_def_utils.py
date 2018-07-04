@@ -17,18 +17,15 @@ limitations under the License.
 """
 
 from csv import DictWriter
-import httplib2
 from json import load as load_json
 import logging
 from time import sleep
 from uuid import uuid4
 from sys import stdout
 
-from apiclient.discovery import build
-from oauth2client.client import GoogleCredentials
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('main_logger')
 logger.setLevel(logging.DEBUG)
 _ch = logging.StreamHandler(stream=stdout)
 logger.addHandler(_ch)
@@ -50,6 +47,10 @@ def load_config_json(config_json_path, config_class):
 
 
 def build_bigquery_service():
+    import httplib2
+    from apiclient.discovery import build
+    from oauth2client.client import GoogleCredentials
+
     SCOPES = ['https://www.googleapis.com/auth/bigquery']
 
     credentials = GoogleCredentials.get_application_default().create_scoped(SCOPES)

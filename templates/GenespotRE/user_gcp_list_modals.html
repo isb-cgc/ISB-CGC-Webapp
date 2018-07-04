@@ -1,10 +1,38 @@
+<!-- Refresh Google Cloud Project Modal -->
+<div class="modal fade" id="refresh-project-modal-{{ project.id }}" tabindex="-1" role="dialog" aria-labelledby="refresh-project-header" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 id="refresh-project-header" class="modal-title">Refresh the Google Cloud Project "{{ project.project_name }}"?</h4>
+            </div>
+            <form id="refresh-project-{{ project.id }}" method="POST" action="{% url 'register_gcp' user.id %}">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <p>
+                        Refreshing this project will update the Web Application users associated with it. If you've
+                        recently added or removed members from your GCP Project's IAM policy, this will ensure the
+                        Web Application has an up to date user list for the project.
+                    </p>
+                    <input type="hidden" name="is_refresh" value="true" />
+                    <input type="hidden" name="gcp_id" value="{{ project.project_id }}" />
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" value="Refresh" class="btn btn-primary" />
+                    <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Delete Google Cloud Project Modal -->
 <div class="modal fade" id="delete-project-modal-{{ project.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-project-header" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Unregister this Google Cloud Project "{{ project.project_name }}"?</h4>
+                <h4 id="delete-project-header" class="modal-title">Unregister this Google Cloud Project "{{ project.project_name }}"?</h4>
             </div>
             <form id="delete-project" method="POST" action="{% url 'user_gcp_delete' user.id project.id %}">
                 <div class="modal-body">
@@ -27,20 +55,20 @@
     </div>
 </div>
 
-{% for service_account in project.serviceaccount_set.all %}
+{% for service_account in project.active_service_accounts %}
 <!-- Delete Service Account Modal -->
-<div class="modal fade" id="delete-sa-modal-{{ service_account.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-project-header" aria-hidden="true">
+<div class="modal fade" id="delete-sa-modal-{{ service_account.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-sa-header" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Unregister this Service Account?</h4>
+                <h4 id="delete-sa-header" class="modal-title">Unregister this Service Account?</h4>
             </div>
-            <form id="delete-project" method="POST" action="{% url 'delete_sa' user.id service_account.id %}">
+            <form id="delete-sa" method="POST" action="{% url 'delete_sa' user.id service_account.id %}">
                 <div class="modal-body">
                     {% csrf_token %}
                     <p>
-                        <em>Note</em>: By unregistering this Service Account, you are only revoking its access to the specified dataset.
+                        <em>Note</em>: By unregistering this Service Account, you are only revoking its access to controlled datasets.
                     </p>
                 </div>
                 <div class="modal-footer">
@@ -53,14 +81,14 @@
 </div>
 
 <!-- Refresh Service Account Modal -->
-<div class="modal fade" id="refresh-sa-modal-{{ service_account.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-project-header" aria-hidden="true">
+<div class="modal fade" id="refresh-sa-modal-{{ service_account.id }}" tabindex="-1" role="dialog" aria-labelledby="refresh-sa-header" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Refresh this Service Account?</h4>
+                <h4 id="refresh-sa-header" class="modal-title">Refresh this Service Account?</h4>
             </div>
-            <form id="delete-project" method="POST" action="{% url 'register_sa' user.id %}">
+            <form id="refresh-sa-{{ project.id }}" method="POST" action="{% url 'register_sa' user.id %}">
                 <div class="modal-body">
                     {% csrf_token %}
                     <p>
@@ -68,7 +96,8 @@
                     </p>
                     <input type="hidden" name="gcp_id" value="{{ project.project_id }}" />
                     <input type="hidden" name="user_sa" value="{{ service_account.service_account }}" />
-                    <input type="hidden" name="datasets" value="{{ service_account.authorized_dataset_id }}" />
+                    <input type="hidden" name="datasets" value="{{ service_account.get_auth_datasets|get_id_string:"," }}" />
+                    <input type="hidden" name="is_refresh" value="true" />
                 </div>
                 <div class="modal-footer">
                     <input type="submit" value="Refresh" class="btn btn-primary" />

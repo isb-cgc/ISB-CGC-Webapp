@@ -1,6 +1,6 @@
 /**
  *
- * Copyright 2015, Institute for Systems Biology
+ * Copyright 2017, Institute for Systems Biology
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,8 @@
  */
 
 define(['jquery'], function($) {
-    var base_feature_search_url = BASE_API_URL + '/_ah/api/feature_type_api/v1/feature_search?';
+    var base_feature_search_url = BASE_URL + '/visualizations/feature_search/';
+
     return {
         isValidNumber: function(val) {
             return (
@@ -158,10 +159,14 @@ define(['jquery'], function($) {
           *     filters     : an array of filters unique to the data type, eg [{filter : "", value : ""}, {},..]
           *     callback    : the return call on success
           */
-        get_variable_field_options : function(datatype, filters, callback){
+        get_variable_field_options : function(datatype, filters, version, callback){
             if(typeof(callback) !== 'undefined'){
-                var base_feature_search_url = BASE_API_URL + '/_ah/api/feature_type_api/v1/feature_search?';
+                var base_feature_search_url = BASE_URL + '/visualizations/feature_search/'+version+'?';
+                if(version == 'v2') {
+                    filters.push({filter: 'genomic_build', value: $('#workbook-build-'+workbook_id+' :selected').val()});
+                }
                 var feature_search_url = base_feature_search_url + "datatype=" + datatype;
+
                 for (var i in filters) {
                     feature_search_url += "&" + filters[i].filter + "=" + filters[i].value; //+ ",";
                 }
@@ -185,10 +190,13 @@ define(['jquery'], function($) {
           * This performs a similar function to field_option_change_callback
           *
           */
-        get_datatype_search_interfaces : function(obj, datatype) {
+        get_datatype_search_interfaces : function(obj, datatype, version) {
+            if(!version) {
+                version = 'v2'
+            }
             var value   = datatype;
             var helpers = this;
-            var feature_search_url = base_feature_search_url + 'datatype=' + value;
+            var feature_search_url = base_feature_search_url + version + '?datatype=' + value;
 
             // Hide all field options
             $(obj).parents('.field-search').find('.search-field').each(function() {
@@ -205,7 +213,7 @@ define(['jquery'], function($) {
                 if ($(this).hasClass('select2')) {
                     var datatype = value;
                     var field = $(this).attr('data-field');
-                    var feature_search_url = BASE_API_URL + '/_ah/api/feature_type_api/v1/feature_field_search?datatype=' + datatype + '&field=' + field;
+                    var feature_search_url = BASE_URL + '/visualizations/feature_field_search?datatype=' + datatype + '&field=' + field;
                     $(this).select2({
                         ajax: {
                             url: feature_search_url,
@@ -270,27 +278,6 @@ define(['jquery'], function($) {
                     templateSelection: helpers.select2_formatting,
                     width: '100%'
                 })
-            } else if (value == 'MIRN') {
-                // Initialize select box with new features from feature search url
-                var that = this;
-                $.ajax({
-                    type: 'GET',
-                    url: feature_search_url,
-                    success: function(data) {
-                        data = data['items'];
-                        var selectbox = $(that).parents('.search-field').find('.feature-search .search-term-field');
-                        selectbox.empty();
-                        selectbox.append('<option value="" disabled selected>Please select an option</option>');
-                        if (data) {
-                            for (var i = 0; i < data.length; i++) {
-                                selectbox.append('<option value="'+data[i]['internal_feature_id']+'">'+data[i]['label']+'</option>')
-                            }
-                        }
-                    },
-                    error: function(e) {
-                        console.error("[ERROR] " + e.status + ": "+ e.statusText);
-                    }
-                });
             }
         },
 

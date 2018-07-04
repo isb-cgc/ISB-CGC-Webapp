@@ -33,7 +33,7 @@
                             <option value="string" <%- !column.controlled && column.type == 'string' ? 'selected' : '' %>>Categorical</option>
                             <optgroup label="Barcodes">
                                 <option value="sample" <%- column.controlled && column.controlled.key == 'sample_barcode' ? 'selected' : '' %>>Sample Barcode</option>
-                                <option value="participant" <%- column.controlled && column.controlled.key == 'participant_barcode' ? 'selected' : '' %>>Participant Barcode</option>
+                                <option value="case" <%- column.controlled && column.controlled.key == 'case_barcode' ? 'selected' : '' %>>Case Barcode</option>
                             </optgroup>
                         </select>
                     </td>

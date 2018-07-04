@@ -35,8 +35,9 @@ require([
     'jquery',
     'jqueryui',
     'bootstrap',
-    'session_security'
-], function($, jqueryui, bootstrap, session_security) {
+    'session_security',
+    'base'
+], function($, jqueryui, bootstrap, session_security, base) {
 
     // Resets forms in modals on cancel. Suppressed warning when leaving page with dirty forms
     $('.modal').on('hide.bs.modal', function() {
@@ -47,23 +48,44 @@ require([
     });
 
     $('input[name="select-datasets"]:radio').change(function() {
-        if ($('input[name="select-datasets"]:checked').val() === 'yes') {
+        if ($('input[name="select-datasets"]:checked').val() === 'yes' || $('input[name="select-datasets"]:checked').val() === 'alter') {
             $('#datasets-select-div').show();
+            $('#register-sa input[name="select-datasets"][value="remove"]').remove();
         } else {
+            $('input[name="datasets"]').attr('checked',false);
             $('#datasets-select-div').hide();
-            $('#datasets-select-div select option:selected').removeAttr('selected');
         }
     });
 
+    $('#verify-sa div input').change(function() {
+        $('.register-sa-btn').attr("disabled","disabled");
+    });
+
     $('#verify-sa').on('submit', function(e) {
+        // #user-sa is only on the registration page, not on the adjustment page
+        $('#user_sa').length > 0 && $('#user_sa').val($('#user_sa').val().trim());
+        $('#js-messages').empty();
+        $('#invalid-sa-id').hide();
         e.preventDefault();
         e.stopPropagation();
+
+        // #user-sa is only on the registration page, not on the adjustment page
+        if($('#user_sa').length > 0 && $('#user_sa').val().match(/[^A-Za-z0-9\-@\.]/g)) {
+            $('#provided-sa-id').text($('#user_sa').val());
+            $('#invalid-sa-id').show();
+            return false;
+        } else {
+            $('#provided-sa-id').val('');
+            $('#invalid-sa-id').hide();
+        }
 
         var $this = $(this);
         var fields = $this.serialize();
         var user_ver_div = $('.user-verification');
-        var spinner = $this.parent('li').find('.load-spinner');
-        spinner.show();
+        user_ver_div.hide();
+        $('.cannot-register').hide();
+        $('.register-sa-div').hide();
+        $('.verify-pending').show();
 
         $this.find('input[type="submit"]').prop('disabled', 'disabled');
         $.ajax({
@@ -71,11 +93,9 @@ require([
             data: fields,
             method: 'POST',
             success: function(data) {
-                console.log(data);
                 var tbody = user_ver_div.find('tbody');
                 tbody.empty();
-                spinner.hide();
-
+                $('.verify-pending').hide();
                 var register_form = $('form#register-sa');
                 var user_input = register_form.find('input[name="user_sa"]');
                 var dataset_input = register_form.find('input[name="datasets"]');
@@ -91,28 +111,38 @@ require([
                 }
 
                 var roles = data['roles'];
-                for (var role in roles) {
-                    var memberlist = roles[role];
-                    for (var i in memberlist) {
-                        var tr = $('<tr></tr>');
-                        tr.append('<td>' + memberlist[i]['email'] + '</td>');
-                        if (memberlist[i]['registered_user']) {
-                            tr.append('<td><i class="fa fa-check"></i></td>');
-                        } else {
-                            tr.append('<td><i class="fa fa-times"></i></td>');
-                        }
-                        if (memberlist[i]['nih_registered']) {
-                            tr.append('<td><i class="fa fa-check"></i></td>');
-                        } else {
-                            tr.append('<td><i class="fa fa-times"></i></td>');
-                        }
-                        if (memberlist[i]['datasets_valid']) {
-                            tr.append('<td><i class="fa fa-check"></i></td>');
-                        } else {
-                            tr.append('<td><i class="fa fa-times"></i> ' + memberlist[i]['datasets'] + '</td>');
-                        }
-                        tbody.append(tr);
+                for (var email in roles) {
+                    var member = roles[email];
+                    var tr = $('<tr></tr>');
+                    tr.append('<td>' + email + '</td>');
+                    if (member['registered_user']) {
+                        tr.append('<td><i class="fa fa-check"></i></td>');
+                    } else {
+                        tr.append('<td><i class="fa fa-times"></i></td>');
                     }
+                    if (member['nih_registered']) {
+                        tr.append('<td><i class="fa fa-check"></i></td>');
+                    } else {
+                        tr.append('<td><i class="fa fa-times"></i></td>');
+                    }
+                    var td = $('<td></td>');
+                    td.append('<span><i class="fa fa-check"></i> All Open Datasets</span><br />');
+                    for(var j=0;j<member['datasets'].length;j++){
+                        var dataset = member['datasets'][j];
+                        if (dataset['valid']) {
+                            td.append('<span><i class="fa fa-check"></i> '+dataset['name']+'</span><br />');
+                        } else {
+                            td.append('<span title="User '+email+' does not have access to this dataset."><i class="fa fa-times"></i> '+dataset['name']+'</span><br />');
+                        }
+                    }
+                    tr.append(td);
+                    tbody.append(tr);
+                }
+
+                if($('input[name="select-datasets"][value="remove"]:checked').length > 0) {
+                    var remove_all = $('input[value="remove"]').clone();
+                    remove_all.attr("type","hidden");
+                    register_form.append(remove_all[0]);
                 }
 
                 user_ver_div.show();
@@ -121,30 +151,43 @@ require([
                 $('.register-sa-div').hide();
                 $('.cannot-register').hide();
 
-                if (data['user_dataset_verified']) {
+                // If no datasets were requested, or, they were and verification came out clean, allow registration
+                if(data['datasets'].length <= 0 || data['all_user_datasets_verified']) {
                     $('.register-sa-div').show();
+                    $('.register-sa-btn').removeAttr("disabled","disabled");
                 } else {
                     $('.cannot-register').show();
+                    $('.retry-btn').removeAttr("disabled");
                 }
             },
-            error: function(xhr, ajaxOptions, thrownError) {
-                var response = $.parseJSON(xhr.responseText);
-                spinner.hide();
+            error: function (xhr) {
+                var responseJSON = $.parseJSON(xhr.responseText);
+                $('.verify-pending').hide();
                 $('.verify-sa-btn').prop('disabled', '');
-                $('#invalid-sa-error').append('<div class="alert alert-error alert-dismissible">' +
-                    '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>'
-                        + response['message'] + '</div>'
-                );
+                // If we received a redirect, honor that
+                if(responseJSON.redirect) {
+                    base.setReloadMsg(responseJSON.level || "error",responseJSON.message);
+                    // hide and reset the form
+                    $('#verify-sa').hide();
+                    $('#verify-sa')[0].reset();
+                    window.location = responseJSON.redirect;
+                } else {
+                    base.showJsMessage(responseJSON.level || "error",responseJSON.message,true);
+                }
             }
         });
         return false;
     });
 
     $('#register-sa').on('submit', function(e) {
+        $('.register-sa-btn').attr("disabled","disabled");
+        $('#verify-sa').hide();
         $('#verify-sa')[0].reset();
+        $('.register-pending').show();
     });
 
     $('.retry-btn').on('click', function(e) {
+        $('.retry-btn').attr("disabled","disabled");
         var user_ver_div = $('.user-verification');
         var table_body = user_ver_div.find('tbody');
 

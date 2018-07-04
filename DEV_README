@@ -1,0 +1,17 @@
+Developer Specific Notes 
+------------------------
+
+Health checks and HTTPS
+    - Health checks can fail if they are not sent over HTTPS; if this is happening they should be disabled until they
+      can be reliably run over HTTPS, because otherwise the VM will constantly reboot in an attempt to 'fix' the app
+
+
+Gulp+Windows
+------------
+1. Install Windows NodeJS
+2. Open the NodeJS command prompt as the current user (do not Run As Administrator)
+3. Install Gulp globally with `npm install gulp -g`
+4. Change directories to the project directory
+5. Run `npm install`
+6. Run `gulp`
+7. If you are still having dependency problems, install each package by hand *while in the project directory* with `npm install <package name>`

@@ -14,6 +14,29 @@
 
   .panel-heading
     min-height: 100px
+    div
+      padding: 5px
+    .bq-tables
+      max-height: 90px
+      padding: 5px
+      border: 2px solid $isb-primary
+      h5
+        margin: 0 0 5px 0
+      ul
+        margin-left: 5px
+      li
+        text-overflow: ellipsis
+        overflow: hidden
+        white-space: nowrap
+      float: right
+      width: 50%
+      overflow-y: scroll
+    .options-bar
+      float: left
+      width: 50%
+      margin-bottom: 10px
+    .alert
+      clear: both
 
   .fly-out
     position: absolute
@@ -120,3 +143,14 @@
 
   .alert-dismissable
     margin-top: 8px
+
+.workbook-build
+  width: 100px
+  margin-bottom: 15px
+  height: 28px
+  padding: 2px 5px
+
+.workbook-build-display, .workbook-ver-display
+  font-size: 16px
+  span
+    font-weight: 600

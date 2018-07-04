@@ -23,13 +23,20 @@
     </ol>
     <h1 class="page-header pull-left">{% if from_workbook %}Data Source | {% endif %}Cohorts</h1>
     {% if from_workbook %}
-        <a href="{% if workbook %}{% url 'cohort_create_for_existing_workbook' workbook_id=workbook.id worksheet_id=worksheet.id %}{% else %}{% url 'cohort_create_for_new_workbook' %}{% endif %}" class="btn btn-primary pull-right"><i class="fa fa-plus"></i> Create New Cohort</a>
-        <form id="cohort-apply-to-workbook" action="{% url 'add_cohorts_to_worksheet' workbook_id=workbook.id worksheet_id=worksheet.id %}" method="POST">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-primary pull-right" disabled="disabled">{% if create_workbook %}Create Workbook{% else %}Apply to Worksheet{% endif %}</button>
-        </form>
+        <div class="pull-right new-cohort">
+            <li class="separator"></li>
+            <h5>New Cohort:</h5>
+            <a href="{% if workbook %}{% url 'cohort_create_for_existing_workbook' workbook_id=workbook.id worksheet_id=worksheet.id %}{% else %}{% url 'cohort_create_for_new_workbook' %}{% endif %}" class="btn btn-primary"><i class="fa fa-plus"></i> Filters</a>
+            <a href="{% if workbook %}{% url 'cohort_create_for_existing_workbook_barcodes' workbook_id=workbook.id worksheet_id=worksheet.id %}{% else %}{% url 'cohort_create_for_new_workbook_barcodes' %}{% endif %}" class="btn btn-primary"><i class="fa fa-plus"></i> Barcodes</a>
+        </div>
+        <div class="pull-right">
+            <form id="cohort-apply-to-workbook" action="{% url 'add_cohorts_to_worksheet' workbook_id=workbook.id worksheet_id=worksheet.id %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary" disabled="disabled">{% if create_workbook %}Create Workbook{% else %}Apply to Worksheet{% endif %}</button>
+            </form>
+        </div>
     {% else %}
-        <a href="{% url 'cohort' %}" class="btn btn-primary pull-right"><i class="fa fa-plus"></i> Create New Cohort</a>
+        <div class="pull-right new-cohort"><h5>New Cohort:</h5> <a href="{% url 'cohort' %}" class="btn btn-primary"><i class="fa fa-plus"></i> Filters</a> <a href="{% url 'cohort_barcodes' %}" class="btn btn-primary"><i class="fa fa-plus"></i> Barcodes</a></div>
     {% endif %}
 </div>
 {% endblock %}
@@ -50,22 +57,22 @@
                     {% if not from_workbook %}
                         <div class="page-action-group">
                             <li role="menuitem">
-                                <button class="btn btn-primary createWorkbookWithCohort">New Workbook</button>
+                                <button class="btn btn-primary createWorkbookWithCohort" disabled title="Select one or more cohorts.">New Workbook</button>
                             </li>
                             <li class="separator"></li>
                             <li role="menuitem">
-                                <button id='delete-cohorts' type="button" class="btn btn-info" data-toggle="modal" data-target="#delete-cohorts-modal" aria-label="delete-cohorts" role="button" aria-expanded="true">
+                                <button id="delete-cohorts" type="button" class="btn btn-info owner-only" data-toggle="modal" data-target="#delete-cohorts-modal" aria-label="delete-cohorts" role="button" aria-expanded="true" disabled title="Select one or more cohorts.">
                                     <i class="fa fa-trash"></i>
                                     Delete
                                 </button>
                             </li>
                             <li role="menuitem">
-                                <button id="cohort-sets" type="button" class="btn btn-info" data-toggle="modal" data-target="#union-modal" aria-label="set-logic" role="button" aria-expanded="true">
+                                <button id="cohort-sets" type="button" class="btn btn-info set-ops" data-toggle="modal" data-target="#set-ops-modal" aria-label="set-logic" role="button" aria-expanded="true" disabled title="Select one or more cohorts.">
                                 Set Operations
                                 </button>
                             </li>
                             <li role="menuitem">
-                                <button class="btn btn-info" id="share-cohorts-btn" type="button" data-toggle="modal" data-target="#share-cohorts-modal" aria-label="share-cohorts" role="button" aria-expanded="true">
+                                <button class="btn btn-info owner-only" id="share-cohorts-btn" type="button" data-toggle="modal" data-target="#share-cohorts-modal" aria-label="share-cohorts" role="button" aria-expanded="true" disabled title="Select one or more cohorts.">
                                     <i class="fa fa-share-alt"></i>
                                     Share
                                 </button>
@@ -73,15 +80,15 @@
                         </div>
                     {% endif %}
 
-                    <table id="cohort-table" class="table table-striped tablesorter">
+                    <table id="cohort-table" class="table table-striped tablesorter cohort-table">
                         <thead><tr>
                             <th class="checkbox-col"><input type="checkbox" class="select-all" title="select-all"/></th>
                             <th class="name-col">Cohort Name</th>
+                            <th class="case-col"># Cases</th>
                             <th class="sample-col"># Samples</th>
-                            <th># Patients</th>
                             <th class="owner-col">Ownership</th>
-                            <th>Shared With</th>
-                            <th>Cohort ID</th>
+                            <th class="share-col">Shared With</th>
+                            <th class="id-col">Cohort ID</th>
                             <th class="date-col">Last Modified</th>
                         </tr></thead>
                         <tbody>
@@ -89,11 +96,11 @@
                         {% if cohort.owner.is_superuser == False %}
                             <tr>
                                 <td class="checkbox-col">
-                                    <input {% if cohort.id in previously_selected_cohort_ids %}checked{% endif %} type="checkbox" name="id" value="{{ cohort.id }}" title="Cohort {{ cohort.id }} checkbox" aria-label="cohort-checkbox"/>
+                                    <input {% if cohort.id in previously_selected_cohort_ids %}checked{% endif %} class="cohort" type="checkbox" name="id" value="{{ cohort.id }}" title="Cohort {{ cohort.id }} checkbox" aria-label="cohort-checkbox"/>
                                 </td>
                                 <td class="name-col"><a href="{% url 'cohort_details' cohort.id %}" title="{{ cohort.name|wrap_text }}">{{ cohort.name }}</a></td>
-                                <td class="sample-col">{#{ cohort.num_patients }#} {{ cohort.sample_size }} </td>
-                                <td>{{ cohort.patient_size }}</td>
+                                <td class="case-col">{{ cohort.case_size }}</td>
+                                <td class="sample-col"> {{ cohort.sample_size }} </td>
                                 <td class="owner-col">
                                     {% if cohort.perm == 'Owner' %}
                                         You
@@ -102,13 +109,13 @@
                                     {% endif %}
                                 </td>
                                 <td class="share-col">
-                                    {% if cohort.shared_with_users|length %}
-                                        ( <a data-toggle="modal" data-target="#share-cohorts-modal" data-cohort-id="{{ cohort.id }}" class="shared">{{cohort.shared_with_users|length}}</a> )
+                                    {% if request.user.id == cohort.owner.id %}
+                                        ( {% if cohort.shared_with_users|length %}<a data-toggle="modal" data-target="#share-cohorts-modal" data-cohort-id="{{ cohort.id }}" class="shared">{{cohort.shared_with_users|length}}</a>{% else %}0{% endif %} )
                                     {% else %}
-                                        ( 0 )
+                                        You
                                     {% endif %}
                                 </td>
-                                <td>
+                                <td class="id-col">
                                     {{ cohort.id }}
                                 </td>
                                 <td class="date-col">{{ cohort.last_date_saved|date:'M d, Y, g:i a' }}</td>
@@ -120,7 +127,7 @@
                 {% else %}
                     <div class="panel-body">
                         <br>
-                        <p class="center">You don't have any cohorts created yet. <br><a href="{% url 'cohort' %}" class="btn btn-link">Create Your First Cohort</a></p>
+                        <p class="center">You don't have any cohorts created yet. <br><a href="{% url 'cohort' %}" class="btn btn-primary">Create Your First Cohort</a></p>
                         <br>
                     </div>
                 {% endif %}
@@ -130,16 +137,16 @@
                 <div class="page-action-group">
                     <li role="menuitem"><button class="btn btn-primary createWorkbookWithCohort">New Workbook</button></li>
                     <li class="separator"></li>
-                    <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#union-modal" aria-label="set-logic" role="button" aria-expanded="true">Set Operations</button></li>
+                    <li role="menuitem"><button class="btn btn-info set-ops" data-toggle="modal" data-target="#set-ops-modal" aria-label="set-logic" role="button" title="Select two or more cohorts." aria-expanded="true">Set Operations</button></li>
                 </div>
                 {% endif %}
                 {% if cohorts %}
-                    <table id="public-cohort-table" class="table table-striped tablesorter">
+                    <table id="public-cohort-table" class="table table-striped tablesorter cohort-table">
                         <thead><tr>
                             <th class="checkbox-col"><input type="checkbox" class="select-all" title="select-all"/></th>
                             <th class="name-col">Cohort Name</th>
+                            <th># Cases</th>
                             <th class="sample-col"># Samples</th>
-                            <th># Patients</th>
                             <th class="date-col">Last Modified</th>
                         </tr></thead>
                         <tbody>
@@ -150,8 +157,8 @@
                                     <input {% if cohort.id in previously_selected_cohort_ids %}checked{% endif %} type="checkbox" name="id" value="{{ cohort.id }}" title="{{ cohort.name }} Checkbox" aria-label="cohort-checkbox"/>
                                 </td>
                                 <td class="name-col"><a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a></td>
+                                <td>{{ cohort.case_size }}</td>
                                 <td class="sample-col"> {{ cohort.sample_size }} </td>
-                                <td>{{ cohort.patient_size }}</td>
                                 <td class="date-col">{{ cohort.last_date_saved|date:'M d, Y, g:i a' }}</td>
                             </tr>
                             {% endif %}
@@ -166,7 +173,7 @@
 </div>
 
     <!-- Set Operation Modal -->
-    <div class="modal fade" id="union-modal" tabindex="-1" role="dialog" aria-labelledby="union-header" aria-hidden="true">
+    <div class="modal fade" id="set-ops-modal" tabindex="-1" role="dialog" aria-labelledby="union-header" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -195,10 +202,6 @@
                                 <div class="form-control-static" id="selected-ids">
 
                                 </div>
-                                <div class="cohort-search-div">
-                                    <a class="add-cohort btn btn-link"><i class="fa fa-plus"></i> Add A Cohort</a>
-                                    <input type="text" class="search-cohorts form-control" aria-label="Cohort Search Box"/>
-                                </div>
                             </div>
                         </div>
                         <div class="form-group complement-control">
@@ -206,7 +209,7 @@
                             <div>
                                 <p class="form-control-static" id="base-id"></p>
                                 <div class="cohort-search-div">
-                                    <a class="add-cohort btn btn-link"><i class="fa fa-plus"></i> Add A Cohort</a>
+                                    <a class="add-cohort btn btn-link"><i class="fa fa-plus"></i> Choose Cohort</a>
                                     <input type="text" class="search-cohorts form-control" aria-label="Cohort Search Box"/>
                                 </div>
                             </div>
@@ -216,7 +219,7 @@
                             <div>
                                 <p class="form-control-static" id="subtract-ids"></p>
                                 <div class="cohort-search-div">
-                                    <a class="add-cohort btn btn-link"><i class="fa fa-plus"></i> Add Cohort</a>
+                                    <a class="add-cohort btn btn-link"><i class="fa fa-plus"></i> Choose Cohort</a>
                                     <input type="text" class="search-cohorts form-control" aria-label="Cohort Search Box"/>
                                 </div>
                             </div>
@@ -226,7 +229,7 @@
                     <div class="modal-footer">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-primary">Okay</button>
-                        <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
                     </div>
                 </form>
             </div>
@@ -248,8 +251,8 @@
                     </div>
                     <div class="modal-footer">
                         {% csrf_token %}
-                        <input type="submit" value="Delete" class="btn btn-primary" />
-                        <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                        <input type="submit" value="Delete" class="btn btn-primary owner-only" />
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
                     </div>
                 </form>
             </div>
@@ -262,28 +265,26 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Cohort Sharing</h4>
+                    <div class="modal-js-messages" id="share-cohort-js-messages"></div>
                     <ul class="nav nav-tabs">
                         <li role="presentation" class="active"><a data-target="#share-pane" data-toggle="tab" id="share-cohort-header">Share Cohort</a></li>
                         <li role="presentation"><a data-target="#shared-with-pane" data-toggle="tab">Shared With</a></li>
                     </ul>
-
                 </div>
                 <div class="tab-content">
                     <div class="tab-pane active" id="share-pane">
-                        <form id="share-cohort-form" method="POST" action="{% url 'share_cohorts' %}">
+                        <form id="share-cohort-form">
                             <div class="modal-body">
                                 <label>Selected Cohorts</label>
                                 <p class="form-control-static selected-cohorts"></p>
-                                <label for="share-cohort-users">Please select the users you would like to share these cohorts with:</label>
-                                <select id="share-cohort-users" name="users" multiple="multiple" class="form-control" required>
-                                    {% for user in user_list %}
-                                    <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }} ({{ user.email }})</option>
-                                    {% endfor %}
-                                </select>
+                                <label for="share-share_users">Enter email addresses separated by a comma</label>
+                                <textarea id="share-share_users" class="form-control" name="share_users"></textarea>
                             </div>
                             <div class="modal-footer">
                                 {% csrf_token %}
-                                <input type="submit" value="Share Cohort" class="btn btn-primary" />
+                                <input type="submit" value="Share Cohort" class="btn btn-primary owner-only" />
+                                <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
                             </div>
                         </form>
                     </div>

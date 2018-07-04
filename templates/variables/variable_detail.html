@@ -25,6 +25,7 @@
     <section class="panel panel-default">
         <div class="panel-heading">
             <h4 class="panel-title">{{ variables.name }}</h4>
+            <p class="varfave-ver-display"><span>Version: </span> {{ variables.get_readable_version }}</p>
         </div>
         <div class="panel-body">
             <h5>Selected Variables</h5>
@@ -38,19 +39,26 @@
             <div>
                 <ul class="page-action-group" role="menubar">
                     {% if not workbook and not new_workbook %}
-                        <li><a class="btn btn-info" href="{% url 'variable_fav_edit' variables.id %}"><i class="fa fa-pencil"></i> Edit</a></li>
+                        <li>{% if variables.version == 'v2' %}<a class="btn btn-info" href="{% url 'variable_fav_edit' variables.id %}"><i class="fa fa-pencil"></i> Edit</a>
+                            {% else %}<span class="btn btn-info" title="Version 1 Variable lists cannot be edited due to changes in variable names." disabled> Edit</span>{% endif %}
                         <li><a data-toggle="modal" data-target="#delete-favorite-modal" class="btn btn-info">Delete</a></li>
                     {% endif %}
                     <li role="menuitem">
                         {% if not workbook %}
-                            <a data-toggle="modal" data-target="#new-favorite-workbook-modal" class="btn btn-primary">Apply to New Workbook</a>
+                            {% if variables.version == 'v2' %}<a data-toggle="modal" data-target="#new-favorite-workbook-modal" class="btn btn-primary">Apply to New Workbook</a>
+                            {% else %}<span class="btn btn-info" title="Version 1 Variable lists cannot be added to new Workbooks." disabled>Apply to New Workbook</span>{% endif %}
                         {% else %}
-                            <form action="{% url 'worksheet_variables_edit' workbook.id worksheet.id %}" method="POST">
-                                {% csrf_token %}
-                                <input type="hidden" name="variable_list_id" value="{{ variables.id }}">
-                                <button class="btn btn-primary" type="submit"><i class="fa fa-plus"></i>Apply to Worksheet</button>
+                            {% if workbook|workbook_matches_varfave:variables %}
+                                <form action="{% url 'worksheet_variables_edit' workbook.id worksheet.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="variable_list_id" value="{{ variables.id }}">
+                                    <button class="btn btn-primary" type="submit"><i class="fa fa-plus"></i>Apply to Worksheet</button>
+                                    <a class="btn btn-info"  href="{% url 'variable_select_for_existing_workbook' workbook.id worksheet.id %}">Back</a>
+                                </form>
+                            {% else %}
+                                <span class="btn btn-info" title="Variable lists can only be applied to Workbooks of the same plot version." disabled> Apply to Worksheet</span>
                                 <a class="btn btn-info"  href="{% url 'variable_select_for_existing_workbook' workbook.id worksheet.id %}">Back</a>
-                            </form>
+                            {% endif %}
                         {% endif %}
                     </li>
                 </ul>
@@ -66,7 +74,7 @@
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h4 id="delete-favorite-header" class="modal-title">Delete this variable favorite "{{ variables.name|title }}"?</h4>
             </div>
-            <form id="delete-workbook" method="POST" action="{% url 'variable_fav_delete' variables.id %}">
+            <form id="delete-favorite" method="POST" action="{% url 'variable_fav_delete' variables.id %}">
                 {% csrf_token %}
                 <div class="modal-footer">
                     <input type="submit" value="Delete" class="btn btn-primary" />
@@ -78,18 +86,22 @@
 </div>
 
 <!-- Create new workbook using favorite Modal -->
-<div class="modal fade" id="new-favorite-workbook-modal" tabindex="-1" role="dialog" aria-labelledby="edit-workbook-header" aria-hidden="true">
+<div class="modal fade new-workbook-modal" id="new-favorite-workbook-modal" tabindex="-1" role="dialog" aria-labelledby="edit-workbook-header" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h4 id="edit-workbook-header" class="modal-title">Create a new workbook using the variable favorite "{{ variables.name|title }}"</h4>
             </div>
-            <form id="edit-workbook" method="POST" action="{% url 'worksheet_create_with_variables' %}">
+            <form id="edit-workbook" class="new-workbook" method="POST" action="{% url 'worksheet_create_with_variables' %}">
                 {% csrf_token %}
                 <div class="modal-body">
+                    <div id="unallowed-chars-alert" class="alert alert-warning alert-dismissable unallowed-chars-wb-alert" style="display: none;">
+                        <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        Your workbook's name contains invalid characters (<span class="unallowed-chars-wb"></span>). Please choose another name.
+                    </div>
                     <label id="name-label" for="name-input">Name (required)</label>
-                    <input id="name-input" class="form-control" type="text" name="name" value="{{ variables.name }} workbook" aria-labelledby="name-label"/>
+                    <input id="name-input" class="form-control new-workbook-name" type="text" name="name" value="{{ variables.name }} workbook" aria-labelledby="name-label"/>
                     <input type="hidden" name="variable_list_id" value="{{ variables.id }}" />
                 </div>
                 <div class="modal-footer">
@@ -102,4 +114,4 @@
 </div>
 {% endblock %}
 
-{% block js_file %}{% static 'js/base.js' %}{% endblock %}
+{% block js_file %}{% static 'js/form_utils.js' %}{% endblock %}

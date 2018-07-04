@@ -41,7 +41,7 @@
             <li><a href="{% url 'cohort_list' %}">Cohorts</a></li>
         </ol>
     {% endif %}
-    <h1 class="page-header pull-left">Create Cohort</h1>
+    <h1 class="page-header pull-left">Create Cohort - Filters</h1>
     {% if workbook %}
         <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal">Apply to Worksheet</button>
     {% elif create_workbook %}
@@ -59,19 +59,25 @@
         <div class="col-lg-12">
             <div class="panel panel-default">
                 <div id="url-len-max-alert" class="alert alert-warning alert-dismissable" style="display: none;">
-                    <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                     You have selected too many filters. The current counts shown will not be accurate until one or more filter options are removed.
+                </div>
+                <div id="at-least-one-filter-alert" class="alert alert-warning alert-dismissable" style="display: none;">
+                    <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    You must choose at least one filter to include samples in your cohort.
                 </div>
             </div>
         </div>
     </div>
 
     <div class="row cgc-user-data-type-tabs">
-        <div class="col-lg-4">
+        <div class="col-sm-12 col-md-12 col-lg-12">
             <div class="panel panel-default">
                 <ul class="nav nav-tabs nav-tabs-data" role="tablist">
-                    <li role="presentation" class="active"><a href="#isb-cgc-data" role="tab" data-toggle="tab" title="Donor Filters">ISB-CGC Data</a></li>
-                    <li role="presentation" class=""><a href="#user-data" role="tab" data-toggle="tab" title="User Data">User Data</a></li>
+                    {% for program in programs %}
+                    <li role="presentation" class="{% if forloop.first %}active{% endif %} program-tab"><a href="#{{ program.id }}-data" role="tab" data-toggle="tab" title="ISB-CGC Data" data-program-id="{{ program.id }}">{{ program.name }} Data</a></li>
+                    {% endfor %}
+                    <li role="presentation" class="program-tab"><a href="#0-data" role="tab" data-toggle="tab" title="User Data" data-program-id="0">User Data</a></li>
                 </ul>
             </div>
         </div>
@@ -79,8 +85,15 @@
 
     <div class="row">
         <div class="tab-content data-tab-content">
-            {% include "cohorts/isb-cgc-data.html" %}
-            {% include "cohorts/user-data.html" %}
+            <div id="placeholder" class="tab-pane active data-tab" role="tabpanel">
+                <div class="col-md-12 data-tab-content-panel spinner-panel">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="spinner"><i class="fa fa-spinner fa-spin"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -102,15 +115,18 @@
                     <form id="create-cohort-form" method="POST" action="{% url 'save_cohort' %}">
                 {% endif %}
                     <div class="modal-body">
-                        <div id="one-cohort-type-per-create-warn" class="alert alert-warning alert-dismissable" style="display: none;">
-                            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                            A cohort can only be filtered with ISB-CGC Data <b>or</b> User Data filters, not with both. Because the <span class="one-per-warn"></span> tab was active,
-                            we have chosen those filters. If you wish to create your cohort with the other filter set, cancel this dialog (using the X in the upper-right corner) and
-                            switch to that tab before clicking the <b>Save as New Cohort</b> button.
+                        <div id="multi-prog-cohort-create-warn" class="alert alert-warning alert-dismissable" style="display: none;">
+                            <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                            Your cohort contains samples from multiple programs. Please note that filters will only apply to samples from the program indicated
+                            by the tab they were chosen on - they will not apply to samples from other programs in this cohort.
                         </div>
                         <div id="unallowed-chars-alert" class="alert alert-warning alert-dismissable" style="display: none;">
-                            <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                            <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                             Your cohort's name contains invalid characters (<span class="unallowed-chars"></span>). Please choose another name.
+                        </div>
+                        <div id="at-least-one-filter-alert-modal" class="alert alert-warning alert-dismissable" style="display: none;">
+                            <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                            You must choose at least one filter to include samples in your cohort.
                         </div>
                         <div class="form-group">
                             <label for="cohort-name">Name:</label>
@@ -118,12 +134,16 @@
                         </div>
                         <div class="form-group">
                             <h5>Selected Filters:</h5>
-                            <p class="form-control-static"></p>
+                            <p id="selected-filters" class="form-control-static"></p>
                         </div>
                     </div>
+                    <input type="hidden" name="mut_filter_combine" value="AND" />
                     <div class="modal-footer">
                         {% csrf_token %}
                         <input type="submit" value="Create Cohort" class="btn btn-primary" />
+                        <div id="saving-cohort" class="collapse" style="display: none;">
+                            <i class="fa fa-circle-o-notch fa-spin"></i>  Saving Cohort...
+                        </div>
                     </div>
                 </form>
             </div>
@@ -131,13 +151,8 @@
     </div>
 
     <script type="text/javascript">
-    var attr_list = {{ attr_list|tojson|safe }};
-    var total_samples = {{ total_samples|safe }};
-    var attr_counts = {{ attr_list_count|tojson|safe }};
+    var base_url = '{{ base_url|safe }}';
     var cohort_id = undefined;
-    var user_data = {{ user_data|tojson|safe }};
-    var metadata_counts = {{ metadata_counts|tojson|safe }};
-    var metadata_filters = {{ metadata_filters|tojson|safe }};
     </script>
 {% endblock %}
 

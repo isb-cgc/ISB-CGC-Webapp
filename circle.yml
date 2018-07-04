@@ -10,6 +10,7 @@ dependencies:
     - sudo -E /bin/sh ./shell/install-deps.sh
 database:
   post:
+    - echo "CIRCLE_PROJECT_REPONAME = ${CIRCLE_PROJECT_REPONAME}"
     - mysql -u ubuntu -e "USE mysql; SET PASSWORD FOR 'ubuntu'@'localhost' = PASSWORD('isb')"
     - sudo -E /bin/sh ./shell/gcloud_authenticate.sh
     - sudo -E /bin/sh ./shell/gcloud-pull-staging-files.sh

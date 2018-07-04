@@ -16,8 +16,19 @@
  *
  */
 
-define (['jquery', 'd3', 'd3textwrap', 'vizhelpers'],
-function($, d3, d3textwrap, vizhelpers) {
+var Counter = {
+    lastSet: null,
+    firstSet: 'aaaaa',
+    getNextSet: function() {
+        this.lastSet = (this.lastSet ? ((parseInt(this.lastSet, 36)+1).toString(36).replace(/0/g,'a')) : this.firstSet);
+        return this.lastSet;
+    }
+};
+
+var RECALC_THROTTLE = 75;
+
+define (['jquery', 'd3', 'd3textwrap', 'vizhelpers', 'underscore'],
+function($, d3, d3textwrap, vizhelpers, _) {
 
     var helpers = Object.create(vizhelpers, {});
 
@@ -26,6 +37,13 @@ function($, d3, d3textwrap, vizhelpers) {
         translation: null,
         scale: null
     };
+
+    // The samples in our data, keyed by their SVG element ID attributes
+    var sampleSet = {};
+
+    // The samples found in the selected ID set; this is used to produce the JSON which
+    // is submitted by the form
+    var selectedSamples = null;
 
     return {
         addViolin: function (svg, raw_data, values_only, height, width, domain, range) {
@@ -42,7 +60,8 @@ function($, d3, d3textwrap, vizhelpers) {
                 .nice();
 
             var line = d3.svg.line()
-                .interpolate('basis')
+                .interpolate('cardinal')
+                //.interpolate('basis')
                 .x(function(d) {
                     return x(d.x);
                 })
@@ -69,8 +88,7 @@ function($, d3, d3textwrap, vizhelpers) {
                 .style('fill', 'none')
                 .attr('transform', 'rotate(90, 0, 0) scale(1, -1)');
         },
-        addPoints: function (svg, raw_data, values_only, height, width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, margin, cohort_set) {
-
+        addPoints: function (svg, raw_data, values_only, height, width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, cohort_set, padding) {
             // remove counts from xdomain
             var tmp = xdomain;
             xdomain = [];
@@ -85,7 +103,7 @@ function($, d3, d3textwrap, vizhelpers) {
 
             var x = d3.scale.ordinal()
                 .domain(xdomain)
-                .rangeBands([0, width-(violin_width/2)]);
+                .rangeBands([0, width]);
 
             var colorVal = function(d) { return d[colorBy]; };
 
@@ -106,18 +124,24 @@ function($, d3, d3textwrap, vizhelpers) {
 
             raw_data.map(function(d){
                 if(helpers.isValidNumber(d.y)) {
+                    var id = Counter.getNextSet();
+                    d['id'] = id;
+                    sampleSet[id] = {sample: d['sample_id'], case: d['case_id'], project: d['project']};
+
                     nonNullData.push(d);
                 }
             });
-
+            /*var div = d3.select("body").append("div")
+                    .attr("class", "tooltip")
+                    .style("opacity", 0);*/
             svg.selectAll('.dot')
                 .data(nonNullData)
                 .enter().append('circle')
-                .attr('id', function(d) { return d['sample_id']; })
+                .attr('id', function(d) { return d['id']; })
                 .attr('class', function(d) { return d[colorBy]; })
                 .style('fill', function(d) { return color(colorVal(d)); })
                 .attr('cx', function(d) {
-                    var histogram = histo_dict[x(d[xAttr])/violin_width];
+                    var histogram = histo_dict[parseInt(x(d[xAttr])/(violin_width+padding))];
                     var histo_index = 0;
                     for (var j = 0; j < histogram.length; j++) {
                         var higher = histogram[j][0];
@@ -134,12 +158,27 @@ function($, d3, d3textwrap, vizhelpers) {
                             .domain([0, d3.max(histogram, function(d) { return d.y; })]);
                         rand_pos = plusOrMinus * Math.floor(Math.random() * y_horizontal(histogram[histo_index]['y']) * 0.8);
                     }
-                    return x(d[xAttr]) + violin_width/2 + rand_pos;
+                    return x(d[xAttr]) + (violin_width+padding)/2 + rand_pos;
                 }) // Staggers points across a histogram
                 .attr('cy', function(d) {
                     return y(d[yAttr]);
                 })
                 .attr('r', 2);
+                /*.on("mouseover", function(d) {
+                    div.transition()
+                        .duration(200)
+                        .style("opacity", .9);
+                    div	.html(
+                             "("+(typeof d[yAttr] == "number"? d[yAttr] : d3.format("s")(d[yAttr]))+")"
+                            )
+                        .style("left", (d3.event.pageX) + "px")
+                        .style("top", (d3.event.pageY - 28) + "px");
+                    })
+                .on("mouseout", function(d) {
+                    div.transition()
+                        .duration(500)
+                        .style("opacity", 0);
+                });*/
 
             legend = legend.attr('height', 20 * color.domain().length + 30);
             legend.append('text')
@@ -209,21 +248,22 @@ function($, d3, d3textwrap, vizhelpers) {
                 .attr('class', 'median-line')
                 .attr('d', line)
                 .style('stroke', 'green')
-                .style('fill', 'none')
+                .style('fill', 'none');
         },
         createViolinPlot: function(svg, raw_Data, height, violin_width, max_y, min_y, xLabel, yLabel, xAttr, yAttr, colorBy, legend, cohort_set) {
-            var margin = {top: 0, bottom: 120, left: 110, right: 0};
+            var margin = {top: 50, bottom: 120, left: 110, right: 0};
             var domain = [min_y, max_y];
-            var range = [height-margin.bottom, 0];
-            var view_width = 800;
+            var range = [height - margin.bottom - margin.top, 0];
+            var view_width = svg.attr("width") - margin.left - margin.right;
             var processed_data = {};
+            var x_padding = 20; //x padding between plots
 
             // Split data into separate violins
             for (var i = 0; i < raw_Data.length; i++) {
                 var item = raw_Data[i];
                 var key = item[xAttr];
                 var tmp = {};
-                if (colorBy && tmp[colorBy]) {
+                if (colorBy && item[colorBy]) {
                     if (colorBy == 'cohort'){
                         tmp[colorBy] = item[colorBy][0];
                     } else {
@@ -246,15 +286,15 @@ function($, d3, d3textwrap, vizhelpers) {
             plot_area.append('clipPath')
                 .attr('id', 'plot_area_clip')
                 .append('rect')
-                .attr('height', height-margin.top-margin.bottom)
+                .attr('height', height - margin.top - margin.bottom)
                 .attr('width', view_width)
                 .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-            var violin_area = plot_area.append('svg')
+            var violin_area = plot_area.append('g')
                 .attr('class', 'violin_area')
                 .style('fill-opacity', 0)
-                .attr('height', height - margin.bottom - margin.top)
-                .attr('transform', 'translate(' + margin.left + ',0)');
+                .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
 
             // iterate over data to generate a separate violin plot for each
             var i = 0;
@@ -266,7 +306,7 @@ function($, d3, d3textwrap, vizhelpers) {
                 xdomain.push(key + ':' + point_count);
                 var g = violin_area.append('g')
                     .attr('class', 'violin-plot')
-                    .attr('transform', 'translate(' + (i * violin_width + margin.left) + ')');
+                    .attr('transform', 'translate(' + (i * (violin_width+x_padding)+x_padding/2) + ')');
                 scatter_processed_data[i] = [];
                 var values_only = [];
 
@@ -289,18 +329,19 @@ function($, d3, d3textwrap, vizhelpers) {
             }
 
             // Set width of overall plot in here
-            var width = violin_width * Object.keys(processed_data).length + (violin_width / 2);
+            //var width = violin_width * Object.keys(processed_data).length + (violin_width / 2);
+            var width = (violin_width+x_padding) * Object.keys(processed_data).length;
             violin_area.attr('width', width);
-            svg.attr('width', width + margin.left);
+            svg.attr('width', width + margin.left + margin.right);
 
             plot_area.select('rect')
-                .attr('width', width - margin.left - margin.right);
+                .attr('width', width);
 
             var plotg = plot_area.append('g')
                 .attr('width', width)
                 .attr('height', height)
-                .attr('transform', 'translate(' + (margin.left) + ',0)');
-            this.addPoints(plotg, raw_Data, scatter_processed_data, height, width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, margin, cohort_set);
+                .attr('transform', 'translate(' + margin.left + ', ' + margin.top + ')');
+            this.addPoints(plotg, raw_Data, scatter_processed_data, height, width, violin_width, domain, range, xdomain, xAttr, yAttr, colorBy, legend, cohort_set, x_padding);
 
             // create y axis
             var y = d3.scale.linear()
@@ -315,7 +356,7 @@ function($, d3, d3textwrap, vizhelpers) {
             // create x axis
             var x = d3.scale.ordinal()
                 .domain(xdomain)
-                .rangeBands([0, width-(violin_width/2)]);
+                .rangeBands([0, width]);
             var xAxis = d3.svg.axis()
                 .scale(x)
                 .ticks(xdomain.length)
@@ -331,7 +372,7 @@ function($, d3, d3textwrap, vizhelpers) {
             // append axes
             svg.append('g')
                 .attr('class', 'y axis')
-                .attr('transform', 'translate(' + margin.left + ',0)')
+                .attr('transform', 'translate(' + margin.left +', '+ margin.top+')')
                 .call(yAxis);
 
             var x_axis_area = svg.append('g')
@@ -340,9 +381,9 @@ function($, d3, d3textwrap, vizhelpers) {
             x_axis_area.append('clipPath')
                 .attr('id', 'x_axis_area_clip')
                 .append('rect')
-                .attr('height', margin.bottom+margin.top)
-                .attr('width', width-margin.left-margin.right)
-                .attr('transform', 'translate(' + margin.left + ',' + (height-margin.top-margin.bottom) + ')');
+                .attr('height', height-margin.top)
+                .attr('width', width)
+                .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
             x_axis_area.append('g')
                 .attr('class', 'x axis')
@@ -354,25 +395,45 @@ function($, d3, d3textwrap, vizhelpers) {
             d3.select('.x.axis').selectAll('foreignObject div').attr('class','centered');
 
             // Highlight the selected circles.
-            var brushmove = function(p) {
-                var sample_list = [];
+            var brushmove = _.throttle(function(p) {
                 var e = brush.extent();
+                var oldSet = selectedSamples;
+                selectedSamples = {};
+                var reCalc = false;
 
-                var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                 plot_area.selectAll("circle").classed("selected", function(d) {
                     return e[0][0] <= $(this).attr('cx') && $(this).attr('cx') <= e[1][0]
                         && e[0][1] <= d[yAttr] && d[yAttr] <= e[1][1]
                         && !$(this).is('.hidden');
                 });
-                var selected_samples = $('svg circle.selected');
-                selected_samples.each(function(){ sample_list.push(this.id); });
-                var patient_list = $.map(sample_list, function(d) { return d.substr(0, 12); })
-                    .filter(function(item, i, a) { return i == a.indexOf(item); });
 
-                sample_form_update(e, selected_samples.length, patient_list.length, sample_list);
-            };
+                var oldSetKeys = Object.keys(oldSet);
+
+                if(oldSetKeys.length !== $('svg circle.selected').length) {
+                    reCalc = true;
+                }
+
+                $('svg circle.selected').each(function(){
+                    if(!oldSet[this.id]) {
+                        reCalc = true;
+                    }
+                    selectedSamples[this.id] = 1;
+                });
+
+                for(var i=0;i<oldSetKeys.length;i++) {
+                    if(!selectedSamples[oldSetKeys[i]]) {
+                        reCalc = true;
+                    }
+                }
+
+                sample_form_update(e, reCalc);
+
+            },RECALC_THROTTLE);
+
+            var mouseDown = null;
 
             var brushend = function() {
+                mouseDown = null;
                 if (brush.empty()) {
                     svg.selectAll(".hidden").classed("hidden", false);
                     $('.save-cohort-card').hide();
@@ -382,7 +443,22 @@ function($, d3, d3textwrap, vizhelpers) {
             var brush = d3.svg.brush()
                 .x(x2)
                 .y(y)
-                .on('brush', brushmove)
+                .on('brushstart',function(e){
+                    selectedSamples = {};
+                    mouseDown = null;
+                })
+                .on('brush', function(p){
+                    mouseDown = mouseDown || brush.extent();
+                    // We call brushmove separately so the selection recalculation can be throttled...
+                    brushmove(p);
+                    // ...but we don't want to throttle visual updating of the selection card, because
+                    // that looks weird and isn't really necessary
+                    var e = brush.extent();
+                    var topVal = Math.min((y(e[1][1]) + $('.save-cohort-card').height()+20),(height-$('.save-cohort-card').height()));
+                    var leftVal = Math.min((x2(mouseDown[0][0]) > x2(e[0][0]) ? x2(e[0][0]) : x2(e[1][0]))+margin.left+30, (view_width+margin.left-$('.save-cohort-card').width()));
+                    $('.save-cohort-card').show()
+                        .attr('style', 'position:absolute; top: '+ topVal +'px; left:' +leftVal+'px;');
+                })
                 .on('brushend', brushend);
 
             var zoomer = function() {
@@ -390,7 +466,7 @@ function($, d3, d3textwrap, vizhelpers) {
                     svg.select('.x.axis').attr('transform', 'translate(' + (d3.event.translate[0] + margin.left) + ',' + (height - margin.bottom) + ')').call(xAxis);
                     plot_area.selectAll('circle').attr('transform', 'translate(' + d3.event.translate[0] + ',0)');
                     violin_area.selectAll('.violin-plot').attr('transform', function (d, i) {
-                        return 'translate(' + ((i * violin_width) + d3.event.translate[0] + margin.left) + ',0)';
+                        return 'translate(' + ((i * (violin_width+x_padding) +x_padding/2) + d3.event.translate[0]) + ',0)';
                     });
                 }
             };
@@ -461,32 +537,45 @@ function($, d3, d3textwrap, vizhelpers) {
                     // Clear selections
                     $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + 0);
                     $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Participants: ' + 0);
-                    $('#save-cohort-'+plot_id+'-modal input[name="samples"]').attr('value', []);
+                    $('#save-cohort-'+plot_id+'-modal input[name="samples"]').attr('value', "");
                     svg.selectAll('.selected').classed('selected', false);
                     $(svg[0]).parents('.plot').find('.save-cohort-card').hide();
+                    selectedSamples = {};
+
+                    // Get rid of the selection rectangle - comment out if we want to enable selection carry-over
+                    brush.clear();
 
                     // Remove brush event listener plot area
                     plot_area.selectAll('.brush').remove();
                 }
             };
 
-             /*
-                Update the sample cohort bar update
-             */
-            function sample_form_update(extent, total_samples, total_patients, sample_list){
-                var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
+            // Recalculate the counts of selected samples if there was a change
+            function sample_form_update(extent, reCalc){
+                if(reCalc) {
+                    var case_set = {};
+                    _.each(Object.keys(selectedSamples),function(val) {
+                        case_set[sampleSet[val]['case']] = 1;
+                    });
 
-                $('.selected-samples-count').html('Number of Samples: ' + total_samples);
-                $('.selected-patients-count').html('Number of Participants: ' + total_patients);
-                $('#save-cohort-' + plot_id + '-modal input[name="samples"]').attr('value', sample_list);
-                var topVal = Math.min((y(extent[1][1]) + 180),(height-$('.save-cohort-card').height()));
-                var leftVal = Math.min((x(extent[1][0])+ 40),(view_width-$('.save-cohort-card').width()));
-                $('.save-cohort-card').show()
-                    .attr('style', 'position:absolute; top: '+ topVal +'px; left:' +leftVal+'px;');
-
-                $('.save-cohort-card').find('.btn').prop('disabled', (total_samples <= 0));
-
+                    $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + Object.keys(selectedSamples).length);
+                    $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Cases: ' + Object.keys(case_set).length);
+                    $('.save-cohort-card').find('.btn').prop('disabled', (Object.keys(selectedSamples).length <= 0));
+                }
             }
+
+            // If we are ready to save out this cohort, JSONify the selection set and set it to the form value
+            $('.save-cohort-card').find('.btn').on('click',function(e){
+                if(Object.keys(selectedSamples).length > 0){
+                    var selected_sample_set = [];
+                    _.each(Object.keys(selectedSamples),function(sample){
+                        selected_sample_set.push(sampleSet[sample]);
+                    });
+
+                    var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
+                    $('#save-cohort-' + plot_id + '-modal input[name="samples"]').attr('value', JSON.stringify(selected_sample_set));
+                }
+            });
 
             function resize() {
                 width = svg.node().parentNode.offsetWidth - 10;

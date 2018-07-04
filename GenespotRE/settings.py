@@ -18,12 +18,13 @@ limitations under the License.
 import os
 from os.path import join, dirname
 import sys
-
 import dotenv
+from socket import gethostname, gethostbyname
 
 dotenv.read_dotenv(join(dirname(__file__), '../.env'))
 
 APP_ENGINE_FLEX = 'aef-'
+APP_ENGINE = 'Google App Engine/'
 
 BASE_DIR                = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)) + os.sep
 
@@ -36,9 +37,14 @@ SHARED_SOURCE_DIRECTORIES = [
 for directory_name in SHARED_SOURCE_DIRECTORIES:
     sys.path.append(os.path.join(BASE_DIR, directory_name))
 
-DEBUG                   = bool(os.environ.get('DEBUG', False))
+DEBUG                   = (os.environ.get('DEBUG', 'False') == 'True')
+DEBUG_TOOLBAR           = (os.environ.get('DEBUG_TOOLBAR', 'False') == 'True')
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOST', 'localhost').split(',')
+print >> sys.stdout, "[STATUS] DEBUG mode is "+str(DEBUG)
+
+# Testing health checks problem
+ALLOWED_HOSTS = list(set(os.environ.get('ALLOWED_HOST', 'localhost').split(',') + ['localhost', '127.0.0.1', '[::1]', gethostname(), gethostbyname(gethostname()),]))
+#ALLOWED_HOSTS = ['*']
 
 SSL_DIR = os.path.abspath(os.path.dirname(__file__))+os.sep
 
@@ -69,26 +75,30 @@ GCLOUD_BUCKET           = os.environ.get('GOOGLE_STORAGE_BUCKET')
 # BigQuery cohort storage settings
 COHORT_DATASET_ID           = os.environ.get('COHORT_DATASET_ID', 'cohort_dataset')
 BIGQUERY_COHORT_TABLE_ID    = os.environ.get('BIGQUERY_COHORT_TABLE_ID', 'developer_cohorts')
+MAX_BQ_INSERT               = int(os.environ.get('MAX_BQ_INSERT', '500'))
 
 NIH_AUTH_ON             = bool(os.environ.get('NIH_AUTH_ON', False))
 USER_DATA_ON            = bool(os.environ.get('USER_DATA_ON', False))
 
-DATABASES = {'default': {
-    'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.mysql'),
-    'HOST': os.environ.get('DATABASE_HOST', '127.0.0.1'),
-    'NAME': os.environ.get('DATABASE_NAME', ''),
-    'USER': os.environ.get('DATABASE_USER'),
-    'PASSWORD': os.environ.get('DATABASE_PASSWORD')
-}}
+DATABASES = {
+    'default': {
+        'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.mysql'),
+        'HOST': os.environ.get('DATABASE_HOST', '127.0.0.1'),
+        'NAME': os.environ.get('DATABASE_NAME', ''),
+        'USER': os.environ.get('DATABASE_USER'),
+        'PASSWORD': os.environ.get('DATABASE_PASSWORD')
+    }
+}
 
 DB_SOCKET = DATABASES['default']['HOST'] if 'cloudsql' in DATABASES['default']['HOST'] else None
 
-IS_DEV = bool(os.environ.get('IS_DEV', False))
+IS_DEV = (os.environ.get('IS_DEV', 'False') == 'True')
 IS_APP_ENGINE_FLEX = os.getenv('GAE_INSTANCE', '').startswith(APP_ENGINE_FLEX)
+IS_APP_ENGINE = os.getenv('SERVER_SOFTWARE', '').startswith(APP_ENGINE)
 
-# If this is a GAE-Flex deployment, we don't need to specify SSL; the proxy will take
+# If this is a GAE deployment, we don't need to specify SSL; the proxy will take
 # care of that for us
-if os.environ.has_key('DB_SSL_CERT') and not IS_APP_ENGINE_FLEX:
+if os.environ.has_key('DB_SSL_CERT') and not (IS_APP_ENGINE_FLEX or IS_APP_ENGINE):
     DATABASES['default']['OPTIONS'] = {
         'ssl': {
             'ca': os.environ.get('DB_SSL_CA'),
@@ -100,9 +110,8 @@ if os.environ.has_key('DB_SSL_CERT') and not IS_APP_ENGINE_FLEX:
 # Default to localhost for the site ID
 SITE_ID = 3
 
-# Swap to appspot.com site ID if we detect AEF
-if IS_APP_ENGINE_FLEX:
-    print >> sys.stdout, "[STATUS] AppEngine Flex detected."
+if IS_APP_ENGINE_FLEX or IS_APP_ENGINE:
+    print >> sys.stdout, "[STATUS] AppEngine detected."
     SITE_ID = 4
 
 # Default to no NIH Auth unless we are not on a local dev environment *and* are in AppEngine-Flex
@@ -116,18 +125,28 @@ def get_project_identifier():
     return BQ_PROJECT_ID
 
 BIGQUERY_DATASET            = os.environ.get('BIGQUERY_DATASET', '')
+BIGQUERY_DATASET_V1         = os.environ.get('BIGQUERY_DATASET_V1', '')
 
 PROJECT_NAME                = os.environ.get('GCLOUD_PROJECT_NAME')
 BIGQUERY_PROJECT_NAME       = os.environ.get('BIGQUERY_PROJECT_NAME', PROJECT_NAME)
+BIGQUERY_DATA_PROJECT_NAME  = os.environ.get('BIGQUERY_DATA_PROJECT_NAME', PROJECT_NAME)
 
 # Set cohort table here
 if BIGQUERY_COHORT_TABLE_ID is None:
     raise Exception("Developer-specific cohort table ID is not set.")
 
+BQ_MAX_ATTEMPTS             = int(os.environ.get('BQ_MAX_ATTEMPTS', '10'))
+
+
+# TODO Remove duplicate class.
+#
+# This class is retained here, as it is required by bq_data_access/v1.
+# bq_data_access/v2 uses the class from the bq_data_access/bigquery_cohorts module.
 class BigQueryCohortStorageSettings(object):
     def __init__(self, dataset_id, table_id):
         self.dataset_id = dataset_id
         self.table_id = table_id
+
 
 def GET_BQ_COHORT_SETTINGS():
     return BigQueryCohortStorageSettings(COHORT_DATASET_ID, BIGQUERY_COHORT_TABLE_ID)
@@ -146,17 +165,11 @@ CSRF_COOKIE_SECURE = bool(os.environ.get('CSRF_COOKIE_SECURE', False))
 SESSION_COOKIE_SECURE = bool(os.environ.get('SESSION_COOKIE_SECURE', False))
 SECURE_SSL_REDIRECT = bool(os.environ.get('SECURE_SSL_REDIRECT', False))
 
-# Due to the behavior of AppEngine Flex and the load balancer, we have to explicitly
-# use SSLify to enforce redirect of http to https even though we're on Django 1.8+
-# --> DO NOT REMOVE THIS OR ITS REQUIREMENTS ENTRY <--
-SSLIFY_DISABLE = True if not SECURE_SSL_REDIRECT else False
+SECURE_REDIRECT_EXEMPT = []
 
 if SECURE_SSL_REDIRECT:
     # Exempt the health check so it can go through
-    SECURE_REDIRECT_EXEMPT = [r'^_ah/health$', ]
-    SSLIFY_DISABLE_FOR_REQUEST = [
-        lambda request: request.get_full_path().startswith('/_ah/health')
-    ]
+    SECURE_REDIRECT_EXEMPT = [r'^_ah/(vm_)?health$', ]
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -221,11 +234,8 @@ STATICFILES_FINDERS = (
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '')
 
-MIDDLEWARE_CLASSES = (
-    # Due to the behavior of AppEngine Flex and the load balancer, we have to explicitly
-    # use SSLify to enforce redirect of http to https even though we're on Django 1.8+
-    # --> DO NOT REMOVE THIS OR ITS REQUIREMENTS ENTRY <--
-    'sslify.middleware.SSLifyMiddleware',
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
     # For using NDB with Django
     # documentation: https://cloud.google.com/appengine/docs/python/ndb/#integration
     # WE DON'T SEEM TO BE USING NDB SO I'M COMMENTING THIS OUT - PL
@@ -233,6 +243,7 @@ MIDDLEWARE_CLASSES = (
     # 'google.appengine.ext.appstats.recording.AppStatsDjangoMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'GenespotRE.checkreqsize_middleware.CheckReqSize',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'adminrestrict.middleware.AdminPagesRestrictMiddleware',
@@ -240,7 +251,7 @@ MIDDLEWARE_CLASSES = (
     # Uncomment the next line for simple clickjacking protection:
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'offline.middleware.OfflineMiddleware',
-)
+]
 
 ROOT_URLCONF = 'GenespotRE.urls'
 
@@ -280,7 +291,7 @@ INSTALLED_APPS += ('session_security',)
 SESSION_SECURITY_WARN_AFTER = 540
 SESSION_SECURITY_EXPIRE_AFTER = 600
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-MIDDLEWARE_CLASSES += (
+MIDDLEWARE.append(
     # for django-session-security -- must go *after* AuthenticationMiddleware
     'session_security.middleware.SessionSecurityMiddleware',
 )
@@ -302,7 +313,18 @@ LOGGING = {
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
-        }
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue'
+        },
+    },
+    'formatters': {
+        'verbose': {
+            'format': '[%(levelname)s] @%(asctime)s in %(module)s/%(process)d/%(thread)d - %(message)s'
+        },
+        'simple': {
+            'format': '[%(levelname)s] @%(asctime)s in %(module)s: %(message)s'
+        },
     },
     'handlers': {
         'mail_admins': {
@@ -310,15 +332,18 @@ LOGGING = {
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
         },
-        'console': {
+        'console_dev': {
             'level': 'DEBUG',
-            'class': 'logging.StreamHandler'
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
         },
-        'console_all': {
+        'console_prod': {
             'level': 'DEBUG',
             'filters': ['require_debug_false'],
-            'class': 'logging.StreamHandler'
-        }
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
     },
     'loggers': {
         'django.request': {
@@ -326,37 +351,27 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
-        'cohorts': {
-            'handlers': ['console_all'],
+        'main_logger': {
+            'handlers': ['console_dev', 'console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'allauth': {
-            'handlers': ['console_all'],
+            'handlers': ['console_dev', 'console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
-        'demo': {
-            'handlers': ['console_all'],
+        'google_helpers': {
+            'handlers': ['console_dev', 'console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
-        'projects': {
-            'handlers': ['console_all'],
+        'data_upload': {
+            'handlers': ['console_dev', 'console_prod'],
             'level': 'DEBUG',
             'propagate': True,
         },
-        'workbooks': {
-            'handlers': ['console_all'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'accounts': {
-            'handlers': ['console_all'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-    }
+    },
 }
 
 ##########################
@@ -430,42 +445,52 @@ if IS_DEV:
 
 GOOGLE_APPLICATION_CREDENTIALS  = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')) if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS') else '' # Path to privatekey.json
 CLIENT_SECRETS                  = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('CLIENT_SECRETS')) if os.environ.get('CLIENT_SECRETS') else ''
-PEM_FILE                        = os.path.join(os.path.dirname(os.path.dirname(__file__)), os.environ.get('PEM_FILE')) if os.environ.get('PEM_FILE') else ''
-CLIENT_EMAIL                    = os.environ.get('CLIENT_EMAIL', '') # Client email from client_secrets.json
 WEB_CLIENT_ID                   = os.environ.get('WEB_CLIENT_ID', '') # Client ID from client_secrets.json
 IGV_WEB_CLIENT_ID               = os.environ.get('IGV_WEB_CLIENT_ID', WEB_CLIENT_ID)
 INSTALLED_APP_CLIENT_ID         = os.environ.get('INSTALLED_APP_CLIENT_ID', '') # Native Client ID
+GCP_REG_CLIENT_EMAIL            = os.environ.get('CLIENT_EMAIL','')
 
 #################################
 #   For NIH/eRA Commons login   #
 #################################
 
-LOGIN_EXPIRATION_HOURS = 24
-DBGAP_AUTHENTICATION_LIST_FILENAME      = os.environ.get('DBGAP_AUTHENTICATION_LIST_FILENAME', '')
-DBGAP_AUTHENTICATION_LIST_BUCKET        = os.environ.get('DBGAP_AUTHENTICATION_LIST_BUCKET', '')
-ACL_GOOGLE_GROUP                        = os.environ.get('ACL_GOOGLE_GROUP', '')
+LOGIN_EXPIRATION_MINUTES                = int(os.environ.get('LOGIN_EXPIRATION_MINUTES', 24*60))
 OPEN_ACL_GOOGLE_GROUP                   = os.environ.get('OPEN_ACL_GOOGLE_GROUP', '')
 GOOGLE_GROUP_ADMIN                      = os.environ.get('GOOGLE_GROUP_ADMIN', '')
 SUPERADMIN_FOR_REPORTS                  = os.environ.get('SUPERADMIN_FOR_REPORTS', '')
 ERA_LOGIN_URL                           = os.environ.get('ERA_LOGIN_URL', '')
-SAML_FOLDER                             = os.environ.get('SAML_FOLDER')
+SAML_FOLDER                             = os.environ.get('SAML_FOLDER', '')
 
 # TaskQueue used when users go through the ERA flow
-LOGOUT_WORKER_TASKQUEUE                  = os.environ.get('LOGOUT_WORKER_TASKQUEUE')
-CHECK_NIH_USER_LOGIN_TASK_URI            = os.environ.get('CHECK_NIH_USER_LOGIN_TASK_URI')
+LOGOUT_WORKER_TASKQUEUE                  = os.environ.get('LOGOUT_WORKER_TASKQUEUE', '')
+CHECK_NIH_USER_LOGIN_TASK_URI            = os.environ.get('CHECK_NIH_USER_LOGIN_TASK_URI', '')
 
 # TaskQueue used by the sweep_nih_user_logins task
-LOGOUT_SWEEPER_FALLBACK_TASKQUEUE        = os.environ.get('LOGOUT_SWEEPER_FALLBACK_TASKQUEUE')
+LOGOUT_SWEEPER_FALLBACK_TASKQUEUE        = os.environ.get('LOGOUT_SWEEPER_FALLBACK_TASKQUEUE', '')
 
 # PubSub topic for ERA login notifications
-PUBSUB_TOPIC_ERA_LOGIN                   = os.environ.get('PUBSUB_TOPIC_ERA_LOGIN')
+PUBSUB_TOPIC_ERA_LOGIN                   = os.environ.get('PUBSUB_TOPIC_ERA_LOGIN', '')
 
 # User project access key
-USER_GCP_ACCESS_CREDENTIALS              = os.environ.get('USER_GCP_ACCESS_CREDENTIALS')
+USER_GCP_ACCESS_CREDENTIALS              = os.environ.get('USER_GCP_ACCESS_CREDENTIALS', '')
 
 # Log name for ERA login views
-LOG_NAME_ERA_LOGIN_VIEW                  = os.environ.get('LOG_NAME_ERA_LOGIN_VIEW')
+LOG_NAME_ERA_LOGIN_VIEW                  = os.environ.get('LOG_NAME_ERA_LOGIN_VIEW', '')
 
+# Service account blacklist file path
+SERVICE_ACCOUNT_BLACKLIST_PATH           = os.environ.get('SERVICE_ACCOUNT_BLACKLIST_PATH', '')
+
+# Google Org whitelist file path
+GOOGLE_ORG_WHITELIST_PATH                = os.environ.get('GOOGLE_ORG_WHITELIST_PATH', '')
+
+# Managed Service Account file path
+MANAGED_SERVICE_ACCOUNTS_PATH            = os.environ.get('MANAGED_SERVICE_ACCOUNTS_PATH', '')
+
+# Dataset configuration file path
+DATASET_CONFIGURATION_PATH               = os.environ.get('DATASET_CONFIGURATION_PATH', '')
+
+# DCF Testing flag
+DCF_TEST                                 = bool(os.environ.get('DCF_TEST', 'False') == 'True')
 
 ##############################
 #   Start django-finalware   #
@@ -503,6 +528,21 @@ MAX_FILE_LIST_REQUEST = 65000
 # IGV limit to prevent users from trying ot open dozens of files
 MAX_FILES_IGV = 5
 
+# Rough max file size to allow for eg. barcode list upload, to revent triggering RequestDataTooBig
+FILE_SIZE_UPLOAD_MAX = 1950000
+
+#################################
+# caMicroscope Viewer settings
+#################################
+CAMIC_VIEWER = os.environ.get('CAMIC_VIEWER', None)
+IMG_THUMBS_URL = os.environ.get('IMG_THUMBS_URL', None)
+
+#################################
+# DICOM Viewer settings
+#################################
+ORTHANC_LOOKUP_URI = os.environ.get('ORTHANC_LOOKUP_URI', None)
+OSIMIS_VIEWER = os.environ.get('OSIMIS_VIEWER', None)
+
 ##############################################################
 #   MailGun Email Settings
 ##############################################################
@@ -511,4 +551,25 @@ EMAIL_SERVICE_API_URL = os.environ.get('EMAIL_SERVICE_API_URL', '')
 EMAIL_SERVICE_API_KEY = os.environ.get('EMAIL_SERVICE_API_KEY', '')
 NOTIFICATION_EMAIL_FROM_ADDRESS = os.environ.get('NOTIFICATOON_EMAIL_FROM_ADDRESS', '')
 
-WHITELIST_RE = ur'([^\\\_\|\"\+~@:#\$%\^&\*=\-\.,\(\)0-9a-zA-Z\s\xc7\xfc\xe9\xe2\xe4\xe0\xe5\xe7\xea\xeb\xe8\xef\xee\xed\xec\xc4\xc5\xc9\xe6\xc6\xf4\xf6\xf2\xfb\xf9\xd6\xdc\xe1\xf3\xfa\xf1\xd1\xc0\xc1\xc2\xc3\xc8\xca\xcb\xcc\xcd\xce\xcf\xd0\xd2\xd3\xd4\xd5\xd8\xd9\xda\xdb\xdd\xdf\xe3\xf0\xf5\xf8\xfd\xfe\xff])'
+# Explicitly check for known items
+BLACKLIST_RE = ur'((?i)<script>|(?i)</script>|!\[\]|!!\[\]|\[\]\[\".*\"\]|(?i)<iframe>|(?i)</iframe>)'
+
+if DEBUG and DEBUG_TOOLBAR:
+    INSTALLED_APPS += ('debug_toolbar',)
+    MIDDLEWARE.append('debug_toolbar.middleware.DebugToolbarMiddleware',)
+    DEBUG_TOOLBAR_PANELS = [
+        'debug_toolbar.panels.versions.VersionsPanel',
+        'debug_toolbar.panels.timer.TimerPanel',
+        'debug_toolbar.panels.settings.SettingsPanel',
+        'debug_toolbar.panels.headers.HeadersPanel',
+        'debug_toolbar.panels.request.RequestPanel',
+        'debug_toolbar.panels.sql.SQLPanel',
+        'debug_toolbar.panels.staticfiles.StaticFilesPanel',
+        'debug_toolbar.panels.templates.TemplatesPanel',
+        'debug_toolbar.panels.cache.CachePanel',
+        'debug_toolbar.panels.signals.SignalsPanel',
+        'debug_toolbar.panels.logging.LoggingPanel',
+        'debug_toolbar.panels.redirects.RedirectsPanel',
+    ]
+    SHOW_TOOLBAR_CALLBACK = True
+    INTERNAL_IPS = (os.environ.get('INTERNAL_IP', ''),)

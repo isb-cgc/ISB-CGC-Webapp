@@ -16,8 +16,8 @@
  *
  */
 
-define (['jquery', 'd3', 'd3tip', 'd3textwrap','vizhelpers'],
-function($, d3, d3tip, d3textwrap, vizhelpers) {
+define (['jquery', 'd3', 'd3tip', 'd3textwrap','underscore'],
+function($, d3, d3tip, d3textwrap, _) {
     
     var tip = d3tip()
         .attr('class', 'd3-tip')
@@ -34,6 +34,18 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
         scale: null
     };
 
+    // The samples in our data, bucketed by their corresponding
+    // bar graph value
+    var sampleSet = {};
+
+    // The currently selected values on the bar graph, corresponding to the buckets
+    // in the sampleSet
+    var selectedCubbies = {};
+
+    // The samples found in the selected value buckets; this is used to produce the JSON which
+    // is submitted by the form
+    var selectedSamples = null;
+
     return {
         data_totals: function(data, x_attr, y_attr, x_domain, y_domain) {
             var results_dict = {};
@@ -46,15 +58,26 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                 x_total[x_domain[x_item]] = 0;
                 for (y_item in y_domain) {
                     y_total[y_domain[y_item]] = 0;
-                    results_dict[x_domain[x_item] + '-' + y_domain[y_item]] = {x: x_domain[x_item], y: y_domain[y_item], total: 0, samples: []};
+                    var val = x_domain[x_item] + '-' + y_domain[y_item];
+                    results_dict[val] = {x: x_domain[x_item], y: y_domain[y_item], total: 0};
+                    if(!sampleSet[val]) {
+                        sampleSet[val] = {
+                            samples: {},
+                            cases: new Set([])
+                        };
+                    }
                 }
             }
             for (var i = 0; i < data.length; i++) {
                 x_item = data[i][x_attr];
                 y_item = data[i][y_attr];
 
-                results_dict[x_item + '-' + y_item]['total']++;
-                results_dict[x_item + '-' + y_item]['samples'].push(data[i]['sample_id']);
+                var val = x_item + '-' + y_item;
+
+                results_dict[val]['total']++;
+
+                sampleSet[val].samples['{'+data[i]['sample_id']+'}{'+data[i]['case_id']+'}'] = {sample: data[i]['sample_id'], case: data[i]['case_id'], project: data[i]['project']};
+                sampleSet[val].cases.add(data[i]['case_id']);
 
                 x_total[x_item] += 1;
                 y_total[y_item] += 1;
@@ -299,7 +322,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                 .data(data_counts)
                 .enter().append('rect')
                 .attr('class', 'expected_fill')
-                .attr('data-samples', function(d) { return d['samples']; })
+                .attr('value', function(d) { return d['x'] + '-' + d['y']; })
                 .attr('fill', function(d) { return d['log_ratio'] > 0 ? 'red' : 'blue'; })
                 .attr('fill-opacity', function(d) { return Math.abs(d['log_ratio']); })
                 .attr('width', cubby_size)
@@ -310,6 +333,9 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                 })
                 .on('click', function() {
                     if(selex_active) {
+                        var reCalc = false;
+                        var oldSet = selectedCubbies;
+
                         // add/remove/hasClass won't work with SVG elements, but attr will
                         var obj_class = $(this).attr('class');
                         if (obj_class.indexOf('selected') >= 0) {
@@ -318,25 +344,26 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                             obj_class += ' selected';
                         }
                         $(this).attr('class', obj_class);
-                        var total_samples = 0;
-                        var total_patients = 0;
-                        var sample_list = [];
-                        var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
+
+                        var oldSetKeys = Object.keys(oldSet);
+                        if(oldSetKeys.length !== $('rect.expected_fill.selected').length) {
+                            reCalc = true;
+                        }
+
                         $('rect.expected_fill.selected').each(function () {
-                            if($(this).attr('data-samples') !== null && $(this).attr('data-samples').length > 0) {
-                                var samples = $(this).attr('data-samples').split(',');
-                                total_samples += samples.length;
-                                total_patients += $.map(samples, function (d) {
-                                    return d.substr(0, 12);
-                                })
-                                    .filter(function (item, i, a) {
-                                        return i == a.indexOf(item)
-                                    }).length;
-                                sample_list = sample_list.concat(samples);
+                            if(!oldSet[$(this).attr('value')]) {
+                                reCalc = true;
                             }
+                            selectedCubbies[$(this).attr('value')] = 1;
                         });
 
-                        sample_form_update({}, total_samples, total_patients, sample_list);
+                        for(var i=0; i<oldSetKeys.length && !reCalc; i++) {
+                            if(!selectedCubbies[oldSet[oldSetKeys[i]]]) {
+                                reCalc = true;
+                            }
+                        }
+
+                        sample_form_update({}, reCalc);
                     }
                 });
 
@@ -404,7 +431,7 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                     svg.on('.zoom',null);
                     zoom_status.translation = zoom.translate();
                     $('.save-cohort-card').attr('style','position: absolute; top: '+($('.worksheet-content').outerHeight()-$('.plot-container').outerHeight())
-                        +'px; left: '+($('.worksheet-content').width()-$('.save-cohort-card').outerWidth())+'px;');
+                        +'px; left: 275px;');
                     $('.save-cohort-card').show();
                 } else {
                     // Resume zooming, restoring the zoom's last state
@@ -415,8 +442,10 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
                     var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
                     // Clear selections
                     $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + 0);
-                    $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Participants: ' + 0);
-                    $('#save-cohort-'+plot_id+'-modal input[name="samples"]').attr('value', []);
+                    $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Cases: ' + 0);
+                    $('#save-cohort-'+plot_id+'-modal input[name="samples"]').attr('value', "");
+                    selectedCubbies = {};
+                    selectedSamples = null;
                     svg.selectAll('.selected').classed('selected', false);
                     $('.save-cohort-card').hide();
                 }
@@ -425,14 +454,34 @@ function($, d3, d3tip, d3textwrap, vizhelpers) {
              /*
                 Update the sample cohort bar update
              */
-            function sample_form_update(extent, total_samples, total_patients, sample_list){
-                var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
+            function sample_form_update(extent, reCalc){
+                if(reCalc) {
+                    var case_set = {};
+                    selectedSamples = {};
+                    _.each(Object.keys(selectedCubbies),function(val) {
+                        _.each(Object.keys(sampleSet[val]['samples']),function(sample) {
+                            selectedSamples[sample] = sampleSet[val]['samples'][sample];
+                            case_set[sampleSet[val]['samples'][sample]['case']] = 1;
+                        });
+                    });
 
-                $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + total_samples);
-                $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Participants: ' + total_patients);
-                $('#save-cohort-' + plot_id + '-modal input[name="samples"]').attr('value', sample_list);
-                $('.save-cohort-card .btn').prop('disabled', (total_samples <= 0));
+                    $(svg[0]).parents('.plot').find('.selected-samples-count').html('Number of Samples: ' + Object.keys(selectedSamples).length);
+                    $(svg[0]).parents('.plot').find('.selected-patients-count').html('Number of Cases: ' + Object.keys(case_set).length);
+                    $('.save-cohort-card').find('.btn').prop('disabled', (Object.keys(selectedSamples).length <= 0));
+                }
             }
+
+            $('.save-cohort-card').find('.btn').on('click',function(e){
+                if(Object.keys(selectedCubbies).length > 0){
+                    var selected_sample_set = [];
+                    _.each(Object.keys(selectedSamples),function(sample){
+                        selected_sample_set.push(selectedSamples[sample]);
+                    });
+
+                    var plot_id = $(svg[0]).parents('.plot').attr('id').split('-')[1];
+                    $('#save-cohort-' + plot_id + '-modal input[name="samples"]').attr('value', JSON.stringify(selected_sample_set));
+                }
+            });
 
             function resize() {
                 width = svg.node().parentNode.offsetWidth - 10;

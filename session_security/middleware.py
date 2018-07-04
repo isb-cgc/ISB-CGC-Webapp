@@ -19,8 +19,32 @@ from django.core.urlresolvers import reverse
 from .utils import get_last_activity, set_last_activity
 from .settings import EXPIRE_AFTER, PASSIVE_URLS
 
+# Customized for ISB-CGC by spaquett@systemsbiology.org
+# Changes:
+#   - Upgraded to Django 1.10+ Middleware support
 
-class SessionSecurityMiddleware(object):
+try:
+    # Django 1.10
+    from django.utils.deprecation import MiddlewareMixin
+except ImportError:
+    # Django <1.10
+    class MiddlewareMixin(object):
+        def __init__(self, get_response=None):
+            self.get_response = get_response
+            super(MiddlewareMixin, self).__init__()
+
+        def __call__(self, request):
+            response = None
+            if hasattr(self, 'process_request'):
+                response = self.process_request(request)
+            if not response:
+                response = self.get_response(request)
+            if hasattr(self, 'process_response'):
+                response = self.process_response(request, response)
+            return response
+
+
+class SessionSecurityMiddleware(MiddlewareMixin):
     """
     In charge of maintaining the real 'last activity' time, and log out the
     user if appropriate.

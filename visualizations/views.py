@@ -31,8 +31,8 @@ from django.core.urlresolvers import reverse
 from django.utils import formats
 
 from models import SavedViz, Plot, Plot_Cohorts, Viz_Perms, Plot_Comments
-from cohorts.models import Cohort, Cohort_Perms, Patients, Samples
-from bq_data_access.feature_search.util import SearchableFieldHelper
+from cohorts.models import Cohort, Cohort_Perms, Samples
+from bq_data_access.v2.feature_search.util import SearchableFieldHelper
 
 
 def _decode_list(data):
@@ -71,10 +71,10 @@ def convert(data):
     else:
         return data
 
-def union_cohort_samples_patients(cohort_ids):
-    cohort_patients = Patients.objects.filter(cohort_id__in=cohort_ids).distinct().values_list('patient_id', flat=True)
-    cohort_samples = Samples.objects.filter(cohort_id__in=cohort_ids).distinct().values_list('sample_id', flat=True)
-    return cohort_samples, cohort_patients
+def union_cohort_samples_cases(cohort_ids):
+    cohort_cases = Samples.objects.filter(cohort_id__in=cohort_ids).distinct().values_list('case_barcode', flat=True)
+    cohort_samples = Samples.objects.filter(cohort_id__in=cohort_ids).distinct().values_list('sample_barcode', flat=True)
+    return cohort_samples, cohort_cases
 
 friendly_name_map = {
     'disease_code':'Disease Code',
@@ -379,7 +379,7 @@ def genericplot(request, id=0):
         if viz:
             viz_perm = viz.get_perm(request)
             for plot in plots:
-                sample_set, patient_set = union_cohort_samples_patients(plot.plot_cohorts_set.all().values_list('cohort', flat=True))
+                sample_set, patient_set = union_cohort_samples_cases(plot.plot_cohorts_set.all().values_list('cohort', flat=True))
                 cohorts = Cohort.objects.filter(id__in=plot.plot_cohorts_set.all().values_list('cohort', flat=True))
                 # for c in plot.plot_cohorts_set.all():
                 #     cohorts.append(Cohort.objects.filter(id__in=)

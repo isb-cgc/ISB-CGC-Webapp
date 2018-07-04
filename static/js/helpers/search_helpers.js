@@ -18,32 +18,77 @@
 
 var MAX_URL_LEN = 2000;
 
+var TRANSLATION_DICT = {
+    'DNAseq_data':              'DNAseq',
+    'Yes':                      'GA',
+    'No':                       'N/A',
+    'mirnPlatform':             'microRNA',
+    'None':                     'N/A',
+    'IlluminaHiSeq_miRNASeq':   'HiSeq',
+    'IlluminaGA_miRNASeq':      'GA',
+    'cnvrPlatform':             'SNP/CN',
+    'Genome_Wide_SNP_6':        'SNP6',
+    'methPlatform':             'DNAmeth',
+    'HumanMethylation27':       '27k',
+    'HumanMethylation450':      '450k',
+    'gexpPlatform':             'mRNA',
+    'IlluminaHiSeq_RNASeq':     'HiSeq/BCGSC', // actually this is bcgsc, broad, and unc
+    'IlluminaHiSeq_RNASeqV2':   'HiSeq/UNC V2',
+    'IlluminaGA_RNASeq':        'GA/BCGSC', // actually this is bcgsc and unc
+    'IlluminaGA_RNASeqV2':      'GA/UNC V2',
+    'rppaPlatform':             'Protein',
+    'MDA_RPPA_Core':            'RPPA',
+    'FEMALE':                   'Female',
+    'MALE':                     'Male',
+    '0':                        'Wild Type',
+    '1':                        'Mutant'
+};
+
 define(['jquery', 'tree_graph', 'stack_bar_chart', 'draw_parsets'],
 function($, tree_graph, stack_bar_chart, draw_parsets) {
     
     var tree_graph_obj = Object.create(tree_graph, {});
     var parsets_obj = Object.create(draw_parsets, {});
 
-    var clin_tree_attr = {
-        Study: 'Study',
-        vital_status: 'Vital Status',
-        SampleTypeCode: 'Sample Type',
-        tumor_tissue_site: 'Tumor Tissue Site',
-        gender: 'Gender',
-        age_at_initial_pathologic_diagnosis: 'Age at Initial Pathologic Diagnosis'
+    var PROG_CLIN_TREES = {
+        'TCGA': {
+            disease_code: 'Disease Code',
+            vital_status: 'Vital Status',
+            sample_type: 'Sample Type',
+            tumor_tissue_site: 'Tumor Tissue Site',
+            gender: 'Gender',
+            age_at_diagnosis: 'Age at Diagnosis'
+        },
+        'CCLE':{
+            disease_code: 'Disease Code',
+            gender: 'Gender',
+            site_primary: 'Site Primary',
+            histology: 'Histology',
+            hist_subtype: 'Histological Subtype'
+        },
+        'TARGET':{
+            disease_code: 'Disease Code',
+            vital_status: 'Vital Status',
+            gender: 'Gender',
+            sample_type: 'Sample Type',
+            age_at_diagnosis: 'Age at Diagnosis'
+        }
     };
 
     var user_data_attr = {
-        user_project: 'Project',
-        user_study: 'Study'
+        user_program: 'Program',
+        user_project: 'Project'
     };
 
     return  {
 
-        filter_data_for_clin_trees: function(attr_counts, these_attr) {
+        filter_data_for_clin_trees: function(attr_counts, these_attr, program_id) {
+            if(program_id == null || program_id == undefined) {
+                program_id = $('ul.nav-tabs-data li.active a').data('program-id');
+            }
             var filtered_clin_trees = {};
             var attr_counts_clin_trees = null;
-            var filters = this.format_filters();
+            var filters = this.format_filters(program_id);
             var tree_attr_map = {};
 
             Object.keys(these_attr).map(function(attr){
@@ -81,171 +126,173 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             return (attr_counts_clin_trees || attr_counts);
         },
 
-        update_counts_parsets_direct: function(filters) {
+        update_counts_parsets: function(base_url_domain, endpoint, cohort_id, version, program_id, filter_panel_load){
+
+            if(program_id == null || program_id == undefined) {
+                program_id = $('ul.nav-tabs-data li.active a').data('program-id');
+            }
+
+            var clin_tree_attr = program_id <= 0 ? user_data_attr : PROG_CLIN_TREES[$('#'+program_id+'-data-filter-panel').data('prog-displ-name')];
+
+            var context = this;
+            var filters = {};
+            if(cohort_id && !filter_panel_load) {
+                cohort_programs.map(function(prog){
+                    filters[prog.id] = context.format_filters(prog.id);
+                });
+            } else {
+                filters[program_id] = this.format_filters(program_id);
+            }
+
+            // Get active panel
+            var active_program_id = program_id || $('ul.nav-tabs-data li.active a').data('program-id');
+            var active_panel = '' + active_program_id+'-data';
 
             $('.clinical-trees .spinner').show();
             $('.user-data-trees .spinner').show();
             $('.parallel-sets .spinner').show();
-            $('.cohort-info .total-values').hide();
-            $('.cohort-info .spinner').show();
-
-            var context = this;
-
-            attr_counts = metadata_counts['count'];
-
-            $('.total-values.isb-cgc-samples').html(metadata_counts['total']);
-            $('.total-values.isb-cgc-participants').html(metadata_counts['participants']);
-            $('.total-values.user-data-samples').html(user_data && metadata_counts['user_data_total'] !== null ? metadata_counts['user_data_total'] : "NA");
-            $('.total-values.user-data-participants').html(user_data && metadata_counts['user_data_participants'] !== null ? metadata_counts['user_data_participants'] : "NA");
-
-
-            this.update_filter_counts(attr_counts);
-            // If there were filters, we need to adjust their counts so the barchart reflects what
-            // was actually filtered
-            var filters = this.format_filters();
-            var clin_tree_attr_counts = Object.keys(filters).length > 0 ? this.filter_data_for_clin_trees(attr_counts, clin_tree_attr) : attr_counts;
-            tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,'#isb-cgc-tree-graph-clinical');
-
-            if(user_data) {
-                var user_data_attr_counts = Object.keys(filters).length > 0 ? this.filter_data_for_clin_trees(user_data, user_data_attr) : user_data;
-                tree_graph_obj.draw_trees(user_data_attr_counts,user_data_attr,'#user-data-tree-graph');
-            }
-
-            if (metadata_counts.hasOwnProperty('items')) {
-                var features = [
-                    'cnvrPlatform',
-                    'DNAseq_data',
-                    'methPlatform',
-                    'gexpPlatform',
-                    'mirnPlatform',
-                    'rppaPlatform'
-                ];
-
-                var plot_features = [
-                    context.get_readable_name(features[0]),
-                    context.get_readable_name(features[1]),
-                    context.get_readable_name(features[2]),
-                    context.get_readable_name(features[3]),
-                    context.get_readable_name(features[4]),
-                    context.get_readable_name(features[5])
-                ];
-                for (var i = 0; i < metadata_counts['items'].length; i++) {
-                    var new_item = {};
-                    for (var j = 0; j < features.length; j++) {
-                        var item = metadata_counts['items'][i];
-                        new_item[plot_features[j]] = context.get_readable_name(item[features[j]]);
-                    }
-                    metadata_counts['items'][i] = new_item;
-                }
-
-                parsets_obj.draw_parsets(metadata_counts, plot_features);
-            } else {
-                console.warn("No 'items' found in metadata_counts: " + metadata_counts);
-            }
-
-            $('.clinical-trees .spinner').hide();
-            $('.user-data-trees .spinner').hide();
-            $('.parallel-sets .spinner').hide();
-            $('.cohort-info .spinner').hide();
-            $('.cohort-info .total-values').show();
-        },
-
-        update_counts_parsets: function(base_url_domain, endpoint, cohort_id, version){
-            var context = this;
-            var filters = this.format_filters();
-            var api_url = this.generate_metadata_url(base_url_domain, endpoint, filters, cohort_id, undefined, version);
-
-            if(api_url.length > MAX_URL_LEN) {
-                $('#url-len-max-alert').show();
-                // This method is expected to return a promise, so send back a pre-rejected one
-                return $.Deferred().reject();
-            } else {
-                $('#url-len-max-alert').hide();
-            }
-
-            $('.clinical-trees .spinner').show();
-            $('.user-data-trees .spinner').show();
-            $('.parallel-sets .spinner').show();
-            $('.cohort-info .total-values').hide();
-            $('.cohort-info .spinner').show();
 
             $('button[data-target="#apply-filters-modal"]').prop('disabled',true);
             $('#apply-filters-form input[type="submit"]').prop('disabled',true);
             
             var startReq = new Date().getTime();
-            return $.ajax({
-                type: 'GET',
-                url: api_url,
 
-                // On success
-                success: function (results, status, xhr) {
-                    var stopReq = new Date().getTime();
-                    console.debug("[BENCHMARKING] Time for response in update_counts_parsets: "+(stopReq-startReq)+ "ms");
-                    attr_counts = results['count'];
-                    $('.total-values.isb-cgc-samples').html(results['total']);
-                    $('.total-values.isb-cgc-participants').html(results['participants']);
-                    $('.total-values.user-data-samples').html(results['user_data'] && results['user_data_total'] !== null ? results['user_data_total'] : "NA");
-                    $('.total-values.user-data-participants').html(results['user_data'] && results['user_data_participants'] !== null ? results['user_data_participants'] : "NA");
-                    context.update_filter_counts(attr_counts);
+            if(filter_panel_load) {
+                var clin_tree_attr_counts = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(attr_counts, clin_tree_attr) : attr_counts;
+                clin_tree_attr_counts.length > 0 && tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,active_program_id,'#tree-graph-clinical-'+active_program_id);
 
-                    var clin_tree_attr_counts = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(attr_counts, clin_tree_attr) : attr_counts;
-                    tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,'#isb-cgc-tree-graph-clinical');
-
-                    if(user_data) {
-                        var user_data_attr_counts = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(user_data, user_data_attr) : user_data;
-                        tree_graph_obj.draw_trees(user_data_attr_counts, user_data_attr, '#user-data-tree-graph');
+                if (metadata_counts.hasOwnProperty('data_avail')) {
+                    var features = [
+                        'cnvrPlatform',
+                        'DNAseq_data',
+                        'methPlatform',
+                        'gexpPlatform',
+                        'mirnPlatform',
+                        'rppaPlatform'
+                    ];
+                    var plot_features = [
+                        context.get_readable_name(features[0]),
+                        context.get_readable_name(features[1]),
+                        context.get_readable_name(features[2]),
+                        context.get_readable_name(features[3]),
+                        context.get_readable_name(features[4]),
+                        context.get_readable_name(features[5])
+                    ];
+                    for (var i = 0; i < metadata_counts['data_avail'].length; i++) {
+                        var new_item = {};
+                        for (var j = 0; j < features.length; j++) {
+                            var item = metadata_counts['data_avail'][i];
+                            new_item[plot_features[j]] = context.get_readable_name(item[features[j]]);
+                        }
+                        metadata_counts['data_avail'][i] = new_item;
                     }
-                    
-                    if (results.hasOwnProperty('items')) {
-                        var features = [
-                            'cnvrPlatform',
-                            'DNAseq_data',
-                            'methPlatform',
-                            'gexpPlatform',
-                            'mirnPlatform',
-                            'rppaPlatform'
-                        ];
-                        var plot_features = [
-                            context.get_readable_name(features[0]),
-                            context.get_readable_name(features[1]),
-                            context.get_readable_name(features[2]),
-                            context.get_readable_name(features[3]),
-                            context.get_readable_name(features[4]),
-                            context.get_readable_name(features[5])
-                        ];
-                        for (var i = 0; i < results['items'].length; i++) {
-                            var new_item = {};
-                            for (var j = 0; j < features.length; j++) {
-                                var item = results['items'][i];
-                                new_item[plot_features[j]] = context.get_readable_name(item[features[j]]);
-                            }
-                            results['items'][i] = new_item;
+
+                    if(cohort_id) {
+                        parsets_obj.draw_parsets(metadata_counts, plot_features, program_id);
+                    }
+                } else {
+                    console.debug(metadata_counts);
+                }
+
+                $('.clinical-trees .spinner').hide();
+                $('.user-data-trees .spinner').hide();
+                $('.parallel-sets .spinner').hide();
+
+                return $.Deferred().resolve();
+            } else {
+                $('.cohort-info .total-values').hide();
+                $('.cohort-info .spinner').show();
+                var metadata_url = this.generate_metadata_url(base_url_domain, endpoint, filters, cohort_id, undefined, version, program_id);
+
+                if(metadata_url.length > MAX_URL_LEN) {
+                    $('#url-len-max-alert').show();
+                    // This method is expected to return a promise, so send back a pre-rejected one
+                    return $.Deferred().reject();
+                } else {
+                    $('#url-len-max-alert').hide();
+                }
+
+                return $.ajax({
+                    type: 'GET',
+                    url: metadata_url,
+
+                    // On success
+                    success: function (results, status, xhr) {
+                        metadata_counts = results;
+                        var stopReq = new Date().getTime();
+                        console.debug("[BENCHMARKING] Time for response in update_counts_parsets: "+(stopReq-startReq)+ "ms");
+                        case_counts = results['count'];
+                        data_counts = results['data_counts'];
+
+
+                        $('#p-'+program_id+'-data-total-samples').html(metadata_counts['total']);
+                        $('#p-'+program_id+'-data-total-participants').html(metadata_counts['cases']);
+
+                        if(cohort_id){
+                            $('#c-'+cohort_id+'-data-total-samples').html(metadata_counts['cohort-total']);
+                            $('#c-'+cohort_id+'-data-total-participants').html(metadata_counts['cohort-cases']);
                         }
 
-                        parsets_obj.draw_parsets(results, plot_features);
-                    } else {
-                        console.debug(results);
+                        context.update_filter_counts(case_counts, data_counts, program_id);
+
+                        var clin_tree_attr_counts = Object.keys(filters).length > 0 ? context.filter_data_for_clin_trees(case_counts, clin_tree_attr) : case_counts;
+                        clin_tree_attr_counts.length > 0 && tree_graph_obj.draw_trees(clin_tree_attr_counts,clin_tree_attr,active_program_id,'#tree-graph-clinical-'+active_program_id);
+
+                        if (metadata_counts.hasOwnProperty('data_avail')) {
+                            var features = [
+                                'cnvrPlatform',
+                                'DNAseq_data',
+                                'methPlatform',
+                                'gexpPlatform',
+                                'mirnPlatform',
+                                'rppaPlatform'
+                            ];
+                            var plot_features = [
+                                context.get_readable_name(features[0]),
+                                context.get_readable_name(features[1]),
+                                context.get_readable_name(features[2]),
+                                context.get_readable_name(features[3]),
+                                context.get_readable_name(features[4]),
+                                context.get_readable_name(features[5])
+                            ];
+                            for (var i = 0; i < metadata_counts['data_avail'].length; i++) {
+                                var new_item = {};
+                                for (var j = 0; j < features.length; j++) {
+                                    var item = metadata_counts['data_avail'][i];
+                                    new_item[plot_features[j]] = context.get_readable_name(item[features[j]]);
+                                }
+                                metadata_counts['data_avail'][i] = new_item;
+                            }
+
+                            if(cohort_id) {
+                                parsets_obj.draw_parsets(results, plot_features, program_id);
+                            }
+                        } else {
+                            console.debug(results);
+                        }
+                    },
+                    error: function(req,status,err){
+                        $('#' + active_program_id + '-data-total-samples').html("Error");
+                        $('#' + active_program_id + '-data-total-participants').html("Error");
+                    },
+                    complete: function(xhr,status) {
+                        $('.clinical-trees .spinner').hide();
+                        $('.user-data-trees .spinner').hide();
+                        $('.parallel-sets .spinner').hide();
+                        $('.cohort-info .spinner').hide();
+                        $('.cohort-info .total-values').show();
                     }
-                },
-                error: function(req,status,err){
-                    $('#isb-cgc-data-total-samples').html("Error");
-                    $('#isb-cgc-data-total-participants').html("Error");
-                    $('#user-data-total-samples').html("Error");
-                    $('#user-data-total-participants').html("Error");
-                },
-                complete: function(xhr,status) {
-                    $('.clinical-trees .spinner').hide();
-                    $('.user-data-trees .spinner').hide();
-                    $('.parallel-sets .spinner').hide();
-                    $('.cohort-info .spinner').hide();
-                    $('.cohort-info .total-values').show();
-                }
-            });
+                });
+            }
         },
 
-        format_filters: function() {
+        format_filters: function(program_id) {
             var list = {};
-            $('.selected-filters .panel-body span').each(function() {
+            var program_selector = '';
+            if (program_id != '0') {
+                program_selector = '#' + program_id + '-data ';
+            }
+            $(program_selector + '.selected-filters .panel-body span.filter-token').each(function() {
                 var $this = $(this),
                     key = $this.data('feature-name'),
                     val = $this.data('value-name');
@@ -262,31 +309,32 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
             return list;
         },
 
-        generate_metadata_url: function(base_url_domain, endpoint, filters, cohort_id, limit, version) {
+        generate_metadata_url: function(base_url_domain, endpoint, filters, cohort_id, limit, version, program_id) {
             version = version || 'v1';
-            var api_url = base_url_domain + '/cohorts/get_metadata_ajax/?version=' + version + '&endpoint=' + endpoint + '&';
+            var url = base_url_domain + '/cohorts/get_metadata_ajax/?version=' + version + '&endpoint=' + endpoint + '&program_id=' + program_id + '&';
 
             if (cohort_id) {
-                api_url += 'cohort_id=' + cohort_id + '&';
+                url += 'cohort_id=' + cohort_id + '&';
             }
             if (limit != null && limit !== undefined) {
-                api_url += 'limit=' + limit + '&';
+                url += 'limit=' + limit + '&';
             }
 
 
             if (filters) {
-                api_url += 'filters=' + encodeURIComponent(JSON.stringify(filters)) + '&';
+                url += 'filters=' + encodeURIComponent(JSON.stringify(filters)) + '&';
             }
 
-            return api_url;
+            url += 'mut_filter_combine='+$('.mut-filter-combine :selected').val();
+            return url;
         },
 
-        update_filter_counts: function(counts) {
+        update_filter_counts: function(case_counts, data_counts, program_id) {
 
             counts_by_name = {};
 
-            // Convert the array into a map for easier searching
-            counts.map(function(obj){
+            // Convert the arrays into a map for easier searching
+            case_counts.map(function(obj){
                 counts_by_name[obj.name] = {
                     values: {},
                     total: obj.total
@@ -297,11 +345,26 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
                 });
             });
 
-            $('.filter-panel li.list-group-item div.cohort-feature-select-block').each(function() {
+            // User data (program_id === 0) doesn't have data type information at this time
+            if(program_id > 0) {
+                data_counts.map(function(obj){
+                    counts_by_name[obj.name] = {
+                        values: {},
+                        total: obj.total
+                    }
+                    var values = counts_by_name[obj.name].values;
+                    obj.values.map(function(val){
+                        values[val.value] = val.count;
+                    });
+                });
+            }
+
+
+            $('#'+program_id+'-data-filter-panel li.list-group-item div.cohort-feature-select-block').each(function() {
                 var $this = $(this),
                     attr = $this.data('feature-name');
                 if(attr && attr.length > 0 && attr !== 'specific-mutation' ) {
-                    $('ul#' + attr + ' input').each(function () {
+                    $('#'+program_id+'-data-filter-panel ul#'+program_id+'-'+attr+' input').each(function () {
 
                         var $that = $(this),
                             value = $that.data('value-name'),
@@ -325,39 +388,15 @@ function($, tree_graph, stack_bar_chart, draw_parsets) {
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         get_readable_name: function(csv_name) {
-            var translation_dictionary = {
-                'DNAseq_data':              'DNAseq',
-                'Yes':                      'GA',
-                'No':                       'N/A',
-                'mirnPlatform':             'microRNA',
-                'None':                     'N/A',
-                'IlluminaHiSeq_miRNASeq':   'HiSeq',
-                'IlluminaGA_miRNASeq':      'GA',
-                'cnvrPlatform':             'SNP/CN',
-                'Genome_Wide_SNP_6':        'SNP6',
-                'methPlatform':             'DNAmeth',
-                'HumanMethylation27':       '27k',
-                'HumanMethylation450':      '450k',
-                'gexpPlatform':             'mRNA',
-                'IlluminaHiSeq_RNASeq':     'HiSeq/BCGSC', // actually this is bcgsc, broad, and unc
-                'IlluminaHiSeq_RNASeqV2':   'HiSeq/UNC V2',
-                'IlluminaGA_RNASeq':        'GA/BCGSC', // actually this is bcgsc and unc
-                'IlluminaGA_RNASeqV2':      'GA/UNC V2',
-                'rppaPlatform':             'Protein',
-                'MDA_RPPA_Core':            'RPPA',
-                'FEMALE':                   'Female',
-                'MALE':                     'Male',
-                '0':                        'Wild Type',
-                '1':                        'Mutant',
-                'age_at_initial_pathologic_diagnosis': 'Age at Diagnosis'
-            };
-
-            if (csv_name in translation_dictionary){
-                return translation_dictionary[csv_name];
-            } else{
+            if(csv_name && csv_name.length > 0) {
+                if (csv_name in TRANSLATION_DICT) {
+                    return TRANSLATION_DICT[csv_name];
+                }
                 csv_name = csv_name.replace(/_/g, ' ');
-                return csv_name.replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
+                //return csv_name.replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
+                return csv_name;
             }
+            return '';
         }
     }
 });

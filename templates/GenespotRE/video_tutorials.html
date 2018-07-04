@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}
+    ISB-CGC|Video Tutorials
+{% endblock %}
+
+{% block description %}
+    Video Tutorials of ISB-CGC
+{% endblock %}
+{% block page_name %}video-tutorials{% endblock %}
+{% block page_header %}
+<div class="container">
+    <h1 class="page-header">Video Tutorials</h1>
+</div>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <section class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">
+                    Video Tutorials
+                </h3>
+            </div>
+            <div class="panel-body">
+                <ul>
+                    <li>
+                        <h5>How to Sign Up with a Google Account</h5>
+                        <iframe width="640" height="365" src="https://www.youtube-nocookie.com/embed/q9q1g1-cf7M?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                    </li>
+                    <li>
+                        <h5>How to Build a Cohort</h5>
+                        <iframe width="640" height="360" src="https://www.youtube-nocookie.com/embed/2db_zxp8-8M?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                    </li>
+                    <li>
+                        <h5>How to Make a Gene List</h5>
+                        <iframe width="640" height="365" src="https://www.youtube-nocookie.com/embed/tbjfZC9wQ9o?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                    </li>
+
+                </ul>
+            </div>
+
+        </section>
+    </div>
+
+{% endblock %}
+
+{% block js_file %}{% static 'js/landing.js' %}{% endblock %}

@@ -1,6 +1,6 @@
 """
 
-Copyright 2015, Institute for Systems Biology
+Copyright 2017, Institute for Systems Biology
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,9 +16,13 @@ limitations under the License.
 
 """
 
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 
-import views
+import views, feature_access_views, feature_access_views_v2, data_access_views, data_access_views_v2
+
+import seqpeek_data_views_v1
+import seqpeek_data_views_v2
+import oncoprint_data_views_v2
 
 
 urlpatterns = [
@@ -35,5 +39,24 @@ urlpatterns = [
     url(r'^stackviz/(?P<id>\d+)/$', views.stackviz, name='stackviz_id'),
     url(r'^circviz/$', views.circviz, name='circviz'),
     url(r'^circviz/(?P<id>\d+)/$', views.circviz, name='circviz_id'),
-    url(r'^save_comment/$', views.save_comment, name='save_comment')
+    url(r'^save_comment/$', views.save_comment, name='save_comment'),
+
+    # Feature access views
+    url(r'^feature_search/v1', feature_access_views.feature_search, name='feature_search'),
+    url(r'^feature_search/v2', feature_access_views_v2.feature_search, name='feature_search'),
+    url(r'^feature_field_search', feature_access_views_v2.feature_field_search, name='feature_field_search'),
+
+    # Clinical data column search
+    url(r'^clinical_feature_get/v2', feature_access_views_v2.clinical_feature_get, name='clinical_feature_get'),
+
+    # Feature data access views
+    url(r'^feature_data_plot/v1', data_access_views.data_access_for_plot, name='feature_data_plot'),
+    url(r'^feature_data_plot/v2', data_access_views_v2.data_access_for_plot, name='feature_data_plot_v2'),
+
+    # SeqPeek data access views
+    url(r'^seqpeek_data_plot/v1', seqpeek_data_views_v1.seqpeek_view_data, name='seqpeek_data_plot_v1'),
+    url(r'^seqpeek_data_plot/v2', seqpeek_data_views_v2.seqpeek_view_data, name='seqpeek_data_plot_v2'),
+
+    # OncoPrint data access views
+    url(r'^oncoprint_data_plot/v2', oncoprint_data_views_v2.oncoprint_view_data, name='oncoprint_data_plot_v2'),
 ]

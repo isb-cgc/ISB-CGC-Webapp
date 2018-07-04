@@ -39,86 +39,91 @@
             <div class="col-lg-12 verify-error" style="display: none;">
                 <div class="alert alert-warning alert-dismissible">
                     <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                    There was an error accessing your Google Cloud Project. Please ensure that you have followed the instructions correctly and try again.
+                    <span id="verify-error-text"></span>
+                    <span id="verify-error-base">There was an error accessing your Google Cloud Project. Please ensure that you have followed the instructions correctly and try again.</span>
                 </div>
             </div>
             <div class="col-sm-12 col-md-12 col-lg-12">
-                <h4>To register a Google Cloud Project, please follow these instructions:</h4>
-                <form id="verify-gcp" method="GET" action="{% url 'verify_gcp' user.id %}">
-                    <p>
-                        In order for the ISB-CGC to verify that all users of your Google Cloud Project have the same access
-                        rights to protected data as you do, we require that you add an ISB-CGC Service Account to your Google
-                        Cloud Project. To do so, please complete the following steps:
-                        <br>
-
-                        <div class="row space-bottom-10">
-                            <div class="col-lg-6">
-                                <label for="verify-gcp-id">Please enter your Google Cloud Project ID: </label>
-                                <input id="verify-gcp-id" name="gcp-id" type="text" class="form-control" placeholder="Google Cloud Project ID" required="required"/>
+                <h5>To register your Google Cloud Project with ISB-CGC, please take the following steps:</h5>
+                <ol>
+                    <li>
+                        <h4>Grant the ISB-CGC Service Account access to your project</h4>
+                        <div>
+                            <p>This will allow ISB-CGC to verify that all users of your Google Cloud Project have the same access
+                                rights to protected data as you do. Use the <b>Instructions</b> button to hide or show the steps in this process.
+                                If you have already granted the ISB-CGC Service Account access to your project, you can <a href="#verify">proceed below to verification</a>.</p>
+                            <button class="btn btn-primary instructions instructions_hide" title="Show/Hide the instructions"></button>
+                            <div class="instructions">
+                                <div class="row space-bottom-10">
+                                    <div class="col-lg-12">
+                                        Access your <a href="https://console.cloud.google.com/home/dashboard" target="_blank">Google Cloud Project</a> in the GCP Console (this link will open a new browser tab or window).
+                                    </div>
+                                </div>
+                                <div class="row space-bottom-10">
+                                    <div class="col-lg-6">
+                                        Select the hamburger menu in the top left corner.
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <img src="{% static 'img/select-hamburger.png' %}" alt="Select Hamburger Menu" width="50%"/>
+                                    </div>
+                                </div>
+                                <div class="row space-bottom-10">
+                                    <div class="col-lg-6">
+                                        Select IAM & Admin.
+                                    </div>
+                                    <div class="col-lg-6">
+                                         <img src="{% static 'img/select-iam.png' %}" alt="Select IAM & Admin Menu Item" width="50%"/>
+                                    </div>
+                                </div>
+                                <div class="row space-bottom-10">
+                                    <div class="col-lg-6">
+                                        Click + Add Member.
+                                    </div>
+                                </div>
+                                <div class="row space-bottom-10">
+                                    <div class="col-lg-6">
+                                        Paste <code>{{ GCP_REG_CLIENT_EMAIL }}</code> in the text box.
+                                    </div>
+                                    <div class="col-lg-6">
+                                         <img src="{% static 'img/add-members.png' %}" alt="Add Member Modal Window" width="100%"/>
+                                    </div>
+                                </div>
+                                <div class="row space-bottom-10">
+                                    <div class="col-lg-6">
+                                        In the Role selection, choose Project > Editor.
+                                    </div>
+                                    <div class="col-lg-6">
+                                         <img src="{% static 'img/role-selector-editor.png' %}" alt="Select Project Viewer" width="100%"/>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="row space-bottom-10">
-                            <div class="col-lg-12">
-                                Go to your <a href="https://console.cloud.google.com/home/dashboard" target="_blank">Google Cloud Project</a>.
-                            </div>
+                    </li>
+                    <li>
+                        <a name="verify"></a><h4>Verify your Google Cloud Project</h4>
+                        <div>
+                            <form id="verify-gcp" method="GET" action="{% url 'verify_gcp' user.id %}">
+                                <label for="verify-gcp-id">Your Google Cloud Project ID: </label> <input id="verify-gcp-id" name="gcp-id" type="text" class="form-control" placeholder="Google Cloud Project ID" required="required"/>
+                                <span class="verify"><input class="btn btn-primary" type="submit" value="Verify"/> your Google Cloud Project</span>
+                            </form>
                         </div>
-                        <div class="row space-bottom-10">
-                            <div class="col-lg-6">
-                                Select the hamburger menu in the top left corner.
-                            </div>
-                            <div class="col-lg-6">
-                                <img src="{% static 'img/select-hamburger.png' %}" alt="Select Hamburger Menu" width="50%"/>
-                            </div>
-                        </div>
-                        <div class="row space-bottom-10">
-                            <div class="col-lg-6">
-                                Select IAM & Admin.
-                            </div>
-                            <div class="col-lg-6">
-                                 <img src="{% static 'img/select-iam.png' %}" alt="Select IAM & Admin Menu Item" width="50%"/>
-                            </div>
-                        </div>
-                        <div class="row space-bottom-10">
-                            <div class="col-lg-6">
-                                Click + Add Member.
-                            </div>
-                        </div>
-                        <div class="row space-bottom-10">
-                            <div class="col-lg-6">
-                                Paste <code>907668440978-oskt05du3ao083cke14641u35deokgjj@developer.gserviceaccount.com</code> in the text box.
-                            </div>
-                            <div class="col-lg-6">
-                                 <img src="{% static 'img/add-members.png' %}" alt="Add Member Modal Window" width="100%"/>
-                            </div>
-                        </div>
-                        <div class="row space-bottom-10">
-                            <div class="col-lg-6">
-                                In the Role selection, choose Project > Editor.
-                            </div>
-                            <div class="col-lg-6">
-                                 <img src="{% static 'img/role-selector-editor.png' %}" alt="Select Project Viewer" width="100%"/>
-                            </div>
-                        </div>
-
-                        <br>
-                        Once complete, click <input class="btn btn-default" type="submit" value="here" /> to verify that it worked.
-                        <br>
-                    </p>
-                </form>
+                    </li>
+                </ol>
+                <div id="invalid-gcp-id" class="alert alert-warning alert-dismissible" style="display: none;">
+                    <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <span id="verify-error-text"></span>
+                    <span id="verify-error-base">The Google Cloud Project ID provided (<span id="provided-gcp-id"></span>) does not appear to be a valid GCP ID. Please double-check and ensure you are not providing the GCP Name or Number. Only the GCP ID can be registered. Note that per Google's requirements, Google Cloud Project IDs can only contain lowercase letters, numbers, and dashes, and must start with a letter.</span>
+                </div>
                 <form id="register-gcp-form" method="POST" action="{% url 'register_gcp' user.id %}" style="display:none;">
                     <p>
                         The following people are identified as members of your Google Cloud Project:
 
-                        <ul class="user-list">
-
-                        </ul>
-                        <br>
-                        Users listed with a <i class="fa fa-check"></i> will have this Google Cloud Project registered under
-                        their account as well, if not already done. Users without a <i class="fa fa-check"></i> will have to
-                        register this project themselves.
-
+                        <ul class="user-list"></ul>
                     </p>
-                    <input class="btn btn-primary" type="submit" value="Register"/>
+                    <p>Users listed with a <i class="fa fa-check"></i> were found in our system and will have this Google Cloud Project registered under
+                        their account as well.</p>
+                    <p>Users without a <i class="fa fa-check"></i> will have to request another user perform a project refresh (accessible from the GCP Project list and details pages).</p>
+                    <input class="btn btn-primary register-gcp-btn" type="submit" value="Register"/>
                     {% csrf_token %}
                 </form>
             </div>

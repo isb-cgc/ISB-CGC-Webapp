@@ -42,6 +42,8 @@ htmlcov/
 nosetests.xml
 coverage.xml
 
+testbed.py
+
 # Translations
 *.mo
 *.pot
@@ -69,6 +71,7 @@ target/
 *.patch
 .env
 *.env
+!sample.env
 scripts/metadata_featdef_tables.sql
 
 # dummy datasets
@@ -92,6 +95,7 @@ saml/*
 *.crt
 *.pem
 tmp*
+*.b64
 
 # Emacs
 \#*\#
@@ -101,7 +105,6 @@ static/js/visualizations/mock_histogram_data.js
 
 # ignore Windows-related things
 .npmignore
-DEV_README
 
 ISB-CGC-API
 ISB-CGC-API/

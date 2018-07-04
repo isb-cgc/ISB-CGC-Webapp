@@ -45,11 +45,11 @@
                         <td>{{ user_details.first_name }} {{ user_details.last_name }}</td>
                     </tr>
                     <tr>
-                        <td>Email Address</td>
+                        <td>Email</td>
                         <td>{{ user_details.email }}</td>
                     </tr>
                     <tr>
-                        <td>Last Logged In</td>
+                        <td>Last Login</td>
                         <td id="last_login">{{ user_details.last_login }}</td>
                     </tr>
                 </table>
@@ -63,6 +63,10 @@
                 </h5>
             </div>
             <div class="panel-body">
+                {% if DCF_TEST %}
+                <p><a href="">Log in via DCF</a></p>
+                <hr>
+                {% endif %}
                 {% if NIH_AUTH_ON %}
                     {% include 'GenespotRE/user_detail_saml.html' %}
                     {% block saml_content %}
@@ -183,8 +187,8 @@
         </div>
     </div>
     <script type="text/javascript"> 
-            var last_login_client_time = new Date("{{ user_details.last_login|safe }}".replace(" ","T"));
-            document.getElementById('last_login').innerHTML = last_login_client_time; 
+        var last_login_client_time = new Date("{{ user_details.last_login|safe }}".replace(" ","T"));
+        document.getElementById('last_login').innerHTML = last_login_client_time; 
     </script>
 {% endblock %}
 

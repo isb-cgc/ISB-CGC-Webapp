@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% load custom_tags %}
-{% block title %}Gene Favorite Edit | ISB-CGC{% endblock %}}
+{% block title %}Gene & miRNA Favorite Edit | ISB-CGC{% endblock %}}
 {% block header %}{% endblock %}
 
 {% block link_page_name %}genes_edit{% endblock %}
@@ -18,25 +18,25 @@
             <li><a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Saved Gene Favorites</a></li>
         {% elif new_workbook %}
             <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
-            <li><a href="{% url 'gene_select_for_new_workbook' %}">Saved Gene Favorites</a></li>
+            <li><a href="{% url 'gene_select_for_new_workbook' %}">Saved Gene & miRNA Favorites</a></li>
         {% else %}
-            <li><a href="{% url 'genes' %}">Saved Gene Favorites</a></li>
+            <li><a href="{% url 'genes' %}">Saved Gene & miRNA Favorites</a></li>
         {% endif %}
     </ol>
-    {% if workbook %}
-        <h1 class="page-header">Create Gene List</h1>
+    {% if workbook or not gene_favorite %}
+        <h1 class="page-header">Create Gene & miRNA Favorite</h1>
     {% else %}
-        <h1 class="page-header">Edit Gene Favorite</h1>
+        <h1 class="page-header">Edit Gene & miRNA Favorite</h1>
     {% endif %}
 </div>
 {% endblock %}
 {% block content %}
 <div class="container">
     <div id="unallowed-chars-alert" class="alert alert-warning alert-dismissable" style="display: none;">
-        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-        Your variable list's name contains invalid characters (<span class="unallowed-chars"></span>). Please choose another name.
+        <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        Your gene & miRNA list's name contains invalid characters (<span class="unallowed-chars"></span>). Please choose another name.
     </div>
-    <section class="panel panel-defaul">
+    <section class="panel panel-default">
         <div class="panel-heading">
         </div>
         <div class="panel-body">
@@ -57,12 +57,12 @@
 
                 <div class="form-group">
                     <div>
-                        <label for="genes-list">Selected Genes (required)</label>
+                        <label for="genes-list">Selected Genes & miRNAs (required)</label>
                         <button class="btn btn-link" id="clearAll">Clear All</button>
                         <span> | </span>
                         <div id="uploadField" class="center" style="display : inline-block;">
-                            <button class="btn btn-link" id="file-upload-btn">
-                                <i class="fa fa-file"></i> Upload Genes List
+                            <button class="btn btn-link nocap" id="file-upload-btn">
+                                <i class="fa fa-file"></i> Upload Gene and miRNA List
                             </button>
                             <input type="file" name="upload" id="file-upload-field" style="display: none">
                             <div id="uploading" class="collapse" style="margin-left: 20px;">
@@ -72,11 +72,11 @@
                     </div>
                     <div id="tokenfield-holder">
                         <!-- "paste-in-genes" -->
-                        <textarea name="genes-list" class="form-control tokenfield" id="paste-in-genes"  placeholder="Enter your favorite gene's name" required></textarea>
+                        <textarea name="genes-list" class="form-control tokenfield" id="paste-in-genes"  placeholder="Enter your favorite gene or miRNA's name" required></textarea>
                     </div>
                     <div class="tokenfield">
-                        <p class="helper-text__repeat" style="display: none;"><i class="fa fa-exclamation-circle"></i> <span class="token invalid repeat">Repetitive</span>Genes will be removed on submit </p>
-                        <p class="helper-text__invalid" style="display: none;"><i class="fa fa-exclamation-circle"></i> The following <span class="token invalid">items</span>were not recognized as gene identifiers. You may either correct or delete these items -- or upload them as-is.</p>
+                        <p class="helper-text__repeat" style="display: none;"><i class="fa fa-exclamation-circle"></i> <span class="token invalid repeat">Repetitive</span>Genes and miRNAs will be removed on submit </p>
+                        <p class="helper-text__invalid" style="display: none;"><i class="fa fa-exclamation-circle"></i> The following <span class="token invalid">items</span>were not recognized as gene or miRNA identifiers. You may either correct or delete these items or upload them as-is.</p>
                     </div>
                 </div>
                 <ul class="page-action-group">
@@ -96,7 +96,8 @@
                         </li>
                         <li role="menuitem"><a class="cancel-edit" href="{% url 'genes' %}">Cancel</a></li>
                     {% endif %}
-                    <menuitem class="btn btn-link pull-right"><a href="http://www.genenames.org/" target="_blank">View Gene Identifiers</a></menuitem>
+                    <menuitem class="btn nocap btn-link pull-right"><a href="http://www.genenames.org/" target="_blank">View Gene Identifiers</a></menuitem>
+                    <menuitem class="btn nocap btn-link pull-right"><a href="http://www.mirbase.org/cgi-bin/mirna_summary.pl?org=hsa" target="_blank">View miRNA Identifiers</a></menuitem>
                 </ul>
             </form>
         </div>

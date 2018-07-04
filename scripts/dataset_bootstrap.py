@@ -33,13 +33,15 @@ def get_mysql_connection(user, password, database, host='127.0.0.1', port=3306):
 
 def add_authorized_datasets(db):
     auth_dataset_rows = [
-        ("Public Development Dataset", "dev-dataset@test.org", "", 1),
-        ("Development Dataset", "dev-dataset@test.org", "dev000123", 0)
+        ('All Open Datasets', 'isb-cgc-open@isb-cgc.org', '', None, 1),
+        ('Fake TCGA Dataset', 'isb-cgc-dev-cntl@isb-cgc.org', 'phs000178', 'phs000178.v9.p8', 0),
+        ('Fake TARGET Dataset', 'isb-cgc-dev-cntl-target@isb-cgc.org', 'phs000218', 'phs000218.v18.p7', 0),
+        ('Fake CGCI Dataset', 'isb-cgc-dev-cntl-cgci@isb-cgc.org', 'phs000235', None, 0)
     ]
 
     insert_auth_dataset_tpl = """
-        INSERT INTO {table_name} (`name`, `acl_google_group`, `whitelist_id`, `public`)
-        VALUES (%s, %s, %s, %s);
+        INSERT INTO {table_name} (`name`, `acl_google_group`, `whitelist_id`, `duca_id`, `public`)
+        VALUES (%s, %s, %s, %s, %s);
     """
 
     stmt = insert_auth_dataset_tpl.format(table_name=AUTHORIZED_DATASET_TABLE)

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% load custom_tags %}
-{% block title %}Saved Genes Favorites | ISB-CGC{% endblock %}}
+{% block title %}Saved Gene & miRNA Favorites | ISB-CGC{% endblock %}}
 {% block extra_css_libs %}{% endblock %}
 {% block header %}{% endblock %}
 
@@ -13,7 +13,7 @@
     <ol class="breadcrumb">
         <li><a href="{% url 'dashboard' %}">Your Dashboard</a></li>
     </ol>
-    <h1 class="page-header pull-left">Saved Gene Favorites</h1>
+    <h1 class="page-header pull-left">Saved Gene & miRNA Favorites</h1>
     <a class="btn btn-primary pull-right" href="{% url 'gene_fav_create' %}"><i class="fa fa-plus"></i>Create New Favorite</a></li>
 </div>
 {% endblock %}
@@ -27,7 +27,7 @@
                         <tr>
                             <th></th>
                             <th>Name</th>
-                            <th># of Genes</th>
+                            <th># of Genes & miRNAs</th>
                             <th>Last Updated</th>
                         </tr>
                     </thead>
@@ -48,18 +48,21 @@
                                 <td>{{genes_fav.genes | length}}</td>
                                 <td>{{genes_fav.last_date_saved|date:'M d, Y, g:i a'}}</td>
                             </tr>
-                            {% include "genes/genes_list_modals.html" with favorite=genes_fav %}
                         {% endfor %}
                     </tbody>
                 </table>
+                {% for genes_fav in gene_fav_list %}
+                    {% include "genes/genes_list_modals.html" with favorite=genes_fav %}
+                {% endfor %}
             {% else %}
                 <br>
-                <p class="center">You don't have any gene favorites created yet. <br><a href="{% url 'gene_fav_create' %}" class="btn btn-link">Create A Gene Favorite</a></p>
+                <p class="center">You don't have any gene & miRNA favorites created yet. <br><a href="{% url 'gene_fav_create' %}" class="btn btn-link">Create A Favorite</a></p>
                 <br>
             {% endif %}
         </div>
     </div>
 </div>
+
 {% endblock %}
 
-{% block js_file %}{% static 'js/base.js' %}{% endblock %}
+{% block js_file %}{% static 'js/form_utils.js' %}{% endblock %}

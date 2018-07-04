@@ -4,6 +4,11 @@
 ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_TEST}/${TEST_USER_GCP_KEY}" ./
 ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_TEST}/${TEST_DCF_SECRETS_FILE}" ./dcf_secrets.txt
 
+./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_TEST}/${SERVICE_ACCOUNT_BLACKLIST_JSON_FILE}" ./
+./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_TEST}/${GOOGLE_ORG_WHITELIST_JSON_FILE}" ./
+./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_TEST}/${MANAGED_SERVICE_ACCOUNTS_JSON_FILE}" ./
+./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_TEST}/${TEST_DATASET_JSON_FILE}" ./
+
 if [ -n "${TEST_NIH_AUTH_ON}" ]; then
   ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_TEST}/saml/advanced_settings.json" ./saml/advanced_settings.json
   ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET_TEST}/saml/settings.json" ./saml/settings.json

@@ -1,19 +1,21 @@
 <!-- Edit Details Modal -->
-<div class="modal fade" id="edit-project-details-modal" tabindex="-1" role="dialog" aria-labelledby="edit-project-header" aria-hidden="true">
+<div class="modal fade" id="edit-project-details-modal-{{ project.id }}" tabindex="-1" role="dialog" aria-labelledby="edit-project-header" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title">Project Details</h4>
             </div>
-            <form id="edit-project" method="POST" action="{% url 'project_edit' project.id %}">
+            <div class="modal-js-messages" id="edit-project-js-messages-{{ project.id }}">
+            </div>
+            <form id="edit-project-{{ project.id }}" method="POST" class="project-edit-form" action="{% url 'project_edit' program.id project.id %}">
                 {% csrf_token %}
                 <div class="modal-body">
                     <label for="share-viz-users">Name (required)</label>
-                    <input class="form-control" type="text" name="name" value="{{ project.name }}" required/>
+                    <input class="form-control edit-name-field" type="text" name="name" value="{{ project.name }}" required/>
                     <br>
                     <label for="share-viz-users">Description (optional)</label>
-                    <textarea class="form-control" name="description">{{project.description }}</textarea>
+                    <textarea class="form-control edit-desc-field"  name="description">{{project.description }}</textarea>
                 </div>
                 <div class="modal-footer">
                     <input type="submit" value="Update" class="btn btn-primary" />
@@ -25,7 +27,7 @@
 </div>
 
 <!-- Delete Project Modal -->
-<div class="modal fade" id="delete-project-modal" tabindex="-1" role="dialog" aria-labelledby="delete-project-header" aria-hidden="true">
+<div class="modal fade" id="delete-project-modal-{{ project.id }}" tabindex="-1" role="dialog" aria-labelledby="delete-project-header" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -37,109 +39,15 @@
                     Deleting this project will not delete underlying Google BigQuery tables or files in Google Cloud Storage. Those must be removed manually.
                 </div>
             </div>
-            <form id="delete-project" method="POST" action="{% url 'project_delete' project.id %}" data-redirect="{% url 'projects' %}">
+            <div class="modal-js-messages" id="delete-project-js-messages-{{ project.id }}">
+            </div>
+            <form id="delete-project-{{ project.id }}" method="POST" class="project-delete-form" action="{% url 'project_delete' program.id project.id %}">
                 {% csrf_token %}
                 <div class="modal-footer">
                     <input type="submit" value="Delete" class="btn btn-primary" />
                     <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
                 </div>
             </form>
-        </div>
-    </div>
-</div>
-
-{% if shared %}
-<!-- Remove Project Modal -->
-<div class="modal fade" id="remove-project-modal" tabindex="-1" role="dialog" aria-labelledby="remove-project-header" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Remove Yourself from this Project?</h4>
-            </div>
-            <form id="remove-project" method="POST" action="{% url 'sharing_remove' shared.id %}" data-redirect="{% url 'projects' %}">
-                {% csrf_token %}
-                <div class="modal-footer">
-                    <input type="submit" value="Remove" class="btn btn-primary" />
-                    <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-{% endif %}
-
-<!-- Share Project Modal -->
-<div class="modal fade" id="share-project-modal" tabindex="-1" role="dialog" aria-labelledby="delete-project-header" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <!--<h4 class="modal-title">Project Sharing</h4>-->
-                <ul class="nav nav-tabs" data-tabs="tablist">
-                    {% if project.owner == request.user %}
-                        <li class="active"><a href="#share" data-toggle="tab">Share</a></li>
-                    {% endif %}
-                    <li class="{% if not project.owner == request.user %}active{% endif %}"><a href="#shared-with" data-toggle="tab">Shared With</a></li>
-                </ul>
-            </div>
-            <div class="tab-content">
-                {% if project.owner == request.user %}
-                <form class="tab-pane fade in active" id="share" method="POST" action="{% url 'project_share' project.id %}">
-                    {% csrf_token %}
-                    <div class="modal-body">
-                        <p>
-                            This will share the web view of the project.  This will not share the underlying Google cloud project
-                            and big query data needed if you wish to access this project outside of the website.
-                        </p>
-                        <label for="share-users">Enter email addresses separated by a comma</label>
-                        <textarea class="form-control" name="share_users"></textarea>
-                    </div>
-                    <div class="modal-footer">
-                        <input type="submit" value="Send" class="btn btn-primary" />
-                        <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
-                    </div>
-                </form>
-                {% endif %}
-                <div class="tab-pane fade {% if not project.owner == request.user %}active in{% endif %}" id="shared-with">
-                    <div class="modal-body">
-                        {% if project.shared.count > 0 %}
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            {% for shared in project.shared.all %}
-                                <tr>
-                                    <td>
-                                        {% if shared.matched_user %}
-                                        {{shared.matched_user.first_name}} {{shared.matched_user.last_name}}
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {{shared.email}}
-                                    </td>
-                                    <td>
-                                        {% if project.owner == request.user %}
-                                        <a class="remove-shared-user" role="button" data-shared-id="{{ shared.id }}"><i class="fa fa-times"></i></a>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                        {% else %}
-                        <p class="center">This list is empty.</p>
-                        {% endif %}
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" data-dismiss="modal">Ok</button>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>

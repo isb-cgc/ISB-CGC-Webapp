@@ -25,206 +25,68 @@ import textwrap
 from django.template.defaulttags import register
 from cohorts.models import Cohort, Cohort_Perms
 from django.contrib.auth.models import User
-from projects.models import Project
+from django.db.models.query import QuerySet
+from projects.models import Program
 from workbooks.models import Workbook
+import logging
 
-DATA_ATTR_DICTIONARY = {
-    'DNA_sequencing-True': 'has_Illumina_DNASeq-True',
-    'DNA_sequencing-False': 'has_Illumina_DNASeq-False',
-    'DNA_sequencing-None': 'has_Illumina_DNASeq-None',
+logger = logging.getLogger('main_logger')
 
-    'RNA_sequencing-UNC Illumina HiSeq': 'has_UNC_HiSeq_RNASeq-True',
-    'RNA_sequencing-BCGSC Illumina HiSeq': 'has_BCGSC_HiSeq_RNASeq-True',
-    'RNA_sequencing-UNC Illumina GA': 'has_UNC_GA_RNASeq-True',
-    'RNA_sequencing-BCGSC Illumina GA': 'has_BCGSC_GA_RNASeq-True',
 
-    'miRNA_sequencing-Illumina GA': 'has_GA_miRNASeq-True',
-    'miRNA_sequencing-Illumina HiSeq': 'has_HiSeq_miRnaSeq-True',
+# If an attribute's values should be alphanumerically sorted, list them here
+ALPHANUM_SORT = [
 
-    'Protein-False': 'has_RPPA-False',
-    'Protein-True': 'has_RPPA-True',
-    'Protein-None': 'has_RPPA-None',
+]
 
-    'SNP_CN-True': 'has_SNP6-True',
-    'SNP_CN-False': 'has_SNP6-False',
-    'SNP_CN-None': 'has_SNP6-None',
+simple_number_sort = [
+    '0 to 200', '200.01 to 400', '400.01 to 600', '600.01 to 800', '800.01 to 1000', '1000.01 to 1200', '1200.01 to 1400', '1400.01+',
+    '0 to 4', '5 to 9', '10 to 14', '15 to 19', '20 to 24', '25 to 29', '30 to 34', '35 to 39', 'Over 40',
+    '10 to 39', '40 to 49', '50 to 59', '60 to 69', '70 to 79', 'Over 80',
+    '1 to 500','501 to 1000','1001 to 1500','1501 to 2000','2001 to 2500','2501 to 3000', '3001 to 3500',
+    '3501 to 4000', '4001 to 4500', '4501 to 5000', '5001 to 5500', '5501 to 6000', '0 to -5000', 
+    '-5001 to -10000', '-10001 to -15000', '-15001 to -20000', '-20001 to -25000', '-25001 to -30000', 
+    '-30001 to -35000', 'None', 'NA',]
 
-    'DNA_methylation-450k': 'has_450k-True',
-    'DNA_methylation-27k': 'has_27k-True'
-}
-
-ATTR_SPECIFIC_ORDERS = {
-    'BMI': ['underweight', 'normal weight', 'overweight', 'obese', 'None', ],
+# If an attribute has a specific order, list it here; these should be the *values* not the display strings
+VALUE_SPECIFIC_ORDERS = {
+    'bmi': ['underweight', 'normal weight', 'overweight', 'obese', 'None', ],
     'hpv_status': ['Positive', 'Negative', 'None', ],
-    'age_at_initial_pathologic_diagnosis': ['10 to 39', '40 to 49', '50 to 59', '60 to 69', '70 to 79', 'Over 80', 'None', ],
+    'age_at_diagnosis': simple_number_sort,
+    'year_of_diagnosis': ['1976 to 1980', '1981 to 1985', '1986 to 1990', '1991 to 1995', '1996 to 2000', '2001 to 2005', '2006 to 2010', '2011 to 2015', 'None',],
+    'overall_survival': simple_number_sort,
+    'event_free_survival': simple_number_sort,
+    'days_to_death': simple_number_sort,
+    'days_to_last_followp': simple_number_sort,
+    'days_to_last_known_alive': simple_number_sort,
+    'wbc_at_diagnosis': simple_number_sort,
     'pathologic_stage': ['Stage 0','Stage I','Stage IA','Stage IB','Stage II','Stage IIA','Stage IIB','Stage IIC',
                          'Stage III','Stage IIIA','Stage IIIB','Stage IIIC','Stage IS','Stage IV','Stage IVA',
                          'Stage IVB','Stage IVC','Stage X','I or II NOS','None',],
     'residual_tumor': ['R0','R1','R2','RX','None',],
 }
 
-NOT_CAPWORDS = [
-    'pathologic_stage',
-    'residual_tumor',
+ATTR_SPECIFIC_ORDERS = [
+    'program_name',
+    'project_short_name',
+    'user_program',
+    'user_project',
+    'disease_code',
+    'vital_status',
+    'gender',
+    'age_at_diagnosis',
+    'sample_type',
+    'tumor_tissue_site',
     'histological_type',
-    'DNA_sequencing',
-    'RNA_sequencing',
-    'DNA_methylation',
-    'BMI',
-]
-
-ALPHANUM_SORT = [
+    'pathologic_stage',
+    'person_neoplasm_cancer_status',
     'neoplasm_histologic_grade',
-    'icd_10',
-    'icd_o_3_histology',
-    'icd_o_3_site'
+    'bmi',
+    'hpv_status',
+    'residual_tumor',
+    'tobacco_smoking_history',
+    'race',
+    'ethnicity',
 ]
-
-ATTR_SPECIFIC_TRANSLATION = {
-    'BMI': {
-        'underweight': 'Underweight: BMI less than 18.5',
-        'normal weight': 'Normal weight: BMI is 18.5 - 24.9',
-        'overweight': 'Overweight: BMI is 25 - 29.9',
-        'obese': 'Obese: BMI is 30 or more',
-    },
-    'SampleTypeCode': {
-        '01': 'Primary Solid Tumor',
-        '02': 'Recurrent Solid Tumor',
-        '03': 'Primary Blood Derived Cancer - Peripheral Blood',
-        '04': 'Recurrent Blood Derived Cancer - Bone Marrow',
-        '05': 'Additional - New Primary',
-        '06': 'Metastatic',
-        '07': 'Additional Metastatic',
-        '08': 'Human Tumor Original Cells',
-        '09': 'Primary Blood Derived Cancer - Bone Marrow',
-        '10': 'Blood Derived Normal',
-        '11': 'Solid Tissue Normal',
-        '12': 'Buccal Cell Normal',
-        '13': 'EBV Immortalized Normal',
-        '14': 'Bone Marrow Normal',
-        '20': 'Control Analyte',
-        '40': 'Recurrent Blood Derived Cancer - Peripheral Blood',
-        '50': 'Cell Lines',
-        '60': 'Primary Xenograft Tissue',
-        '61': 'Cell Line Derived Xenograft Tissue',
-        'None': 'NA',
-    },
-    'tobacco_smoking_history': {
-        '1': 'Lifelong Non-smoker',
-        '2': 'Current Smoker',
-        '3': 'Current Reformed Smoker for > 15 years',
-        '4': 'Current Reformed Smoker for <= 15 years',
-        '5': 'Current Reformed Smoker, Duration Not Specified',
-        '6': 'Smoker at Diagnosis',
-        '7': 'Smoking History Not Documented',
-        'None': 'NA',
-    },
-}
-
-TRANSLATION_DICTIONARY = {
-    'DNAseq_data': 'DNAseq',
-    'Yes': 'GA',
-    'No': 'N/A',
-    'mirnPlatform': 'microRNA',
-    'None': 'N/A',
-    'IlluminaHiSeq_miRNASeq': 'HiSeq',
-    'IlluminaGA_miRNASeq': 'GA',
-    'cnvrPlatform': 'SNP/CN',
-    'Genome_Wide_SNP_6': 'SNP6',
-    'methPlatform': 'DNAmeth',
-    'HumanMethylation27': '27k',
-    'HumanMethylation450': '450k',
-    'gexpPlatform': 'mRNA',
-    'IlluminaHiSeq_RNASeq': 'HiSeq/BCGSC',
-    'IlluminaHiSeq_RNASeqV2': 'HiSeq/UNC V2',
-    'IlluminaGA_RNASeq': 'GA/BCGSC',
-    'IlluminaGA_RNASeqV2': 'GA/UNC V2',
-    'rppaPlatform': 'Protein',
-    'MDA_RPPA_Core': 'RPPA',
-    'FEMALE': 'Female',
-    'MALE': 'Male',
-    '0': 'Wild Type',
-    '1': 'Mutant',
-    'age_at_initial_pathologic_diagnosis': 'Age at Diagnosis',
-    'other_dx': 'Prior Diagnosis',
-    'person_neoplasm_cancer_status': 'Tumor Status',
-    'neoplasm_histologic_grade': 'Histological Grade',
-    'icd_10': 'ICD-10',
-    'icd_o_3_histology': 'ICD-O-3 Histology',
-    'icd_o_3_site': 'ICD-O-3 Site',
-    'SampleTypeCode': 'Sample Type',
-    'Project': 'Public Projects',
-    'Study': 'Public Studies',
-    'user_projects': 'Your Projects',
-    'user_studys': 'Your Studies',
-    'SNP_CN': 'SNP Copy Number',
-    'miRNA_sequencing': 'miRNA SEQUENCING',
-    'nonsilent': 'Non-silent',
-}
-
-FEATURE_DISPLAY_NAMES = {
-    'Project': 'Project',
-    'Study': 'Study',
-    'BMI': 'BMI',
-    'miRNA_sequencing': 'miRNA Sequencing',
-    'DNA_methylation': 'DNA Methylation',
-    'RNA_sequencing': 'RNA Sequencing',
-    'DNA_sequencing': 'has DNA Sequencing',
-    'SNP_CN': 'has SNP Copy Number',
-    'Protein': 'has RPPA',
-    'has_HiSeq_miRnaSeq': 'has HiSeq miRNA Sequencing',
-    'has_GA_miRnaSeq': 'has GA miRNA Sequencing',
-    'has_27k': 'has DNA Methylation (27k)',
-    'has_450k': 'has DNA Methylation (450k)',
-    'has_Illumina_DNASeq': 'has Illumina DNA Sequencing',
-    'has_BCGSC_GA_RNASeq': 'has BCGSC GA RNA Sequencing',
-    'has_UNC_GA_RNASeq': 'has UNC GA RNA Sequencing',
-    'has_BCGSC_HiSeq_RNASeq': 'has BCGSC HiSeq RNA Sequencing',
-    'has_UNC_HiSeq_RNASeq': 'has UNC HiSeq RNA Sequencing',
-    'hpv_status': 'HPV Status',
-}
-
-DISEASE_DICTIONARY = {
-    'Study': {
-        'LAML': 'Acute Myeloid Leukemia',
-        'ACC': 'Adrenocortical Carcinoma',
-        'BLCA': 'Bladder Urothelial Carcinoma',
-        'LGG': 'Brain Lower Grade Glioma',
-        'BRCA': 'Breast Invasive Carcinoma',
-        'CESC': 'Cervical Squamous Cell Carcinoma and Endocervical Adenocarcinoma',
-        'CHOL': 'Cholangiocarcinoma',
-        'LCML': 'Chronic Myelogenous Leukemia',
-        'COAD': 'Colon Adenocarcinoma',
-        'CNTL': 'Controls',
-        'ESCA': 'Esophageal Carcinoma',
-        'FPPP': 'FFPE Pilot Phase II',
-        'GBM': 'Glioblastoma Multiforme',
-        'HNSC': 'Head and Neck Squamous Cell Carcinoma',
-        'KICH': 'Kidney Chromophobe',
-        'KIRC': 'Kidney Renal Clear Cell Carcinoma',
-        'KIRP': 'Kidney Renal Papillary Cell Carcinoma',
-        'LIHC': 'Liver Hepatocellular Carcinoma',
-        'LUAD': 'Lung Adenocarcinoma',
-        'LUSC': 'Lung Squamous Cell Carcinoma',
-        'DLBC': 'Lymphoid Neoplasm Diffuse Large B-cell Lymphoma',
-        'MESO': 'Mesothelioma',
-        'MISC': 'Miscellaneous',
-        'OV': 'Ovarian Serous Cystadenocarcinoma',
-        'PAAD': 'Pancreatic Adenocarcinoma',
-        'PCPG': 'Pheochromocytoma and Paraganglioma',
-        'PRAD': 'Prostate Adenocarcinoma',
-        'READ': 'Rectum Adenocarcinoma',
-        'SARC': 'Sarcoma',
-        'SKCM': 'Skin Cutaneous Melanoma',
-        'STAD': 'Stomach Adenocarcinoma',
-        'TGCT': 'Testicular Germ Cell Tumors',
-        'THYM': 'Thymoma',
-        'THCA': 'Thyroid Carcinoma',
-        'UCS': 'Uterine Carcinosarcoma',
-        'UCEC': 'Uterine Corpus Endometrial Carcinoma',
-        'UVM': 'Uveal Melanoma',
-    }
-}
 
 
 def quick_js_bracket_replace(matchobj):
@@ -241,34 +103,31 @@ def get_item(dictionary, key):
 
 @register.filter
 def check_for_order(items, attr):
-    if attr in ALPHANUM_SORT:
-        return sorted(items, key=lambda k: k['value'])
-    elif attr in ATTR_SPECIFIC_ORDERS:
-        item_order = ATTR_SPECIFIC_ORDERS[attr]
+    if attr in VALUE_SPECIFIC_ORDERS:
+        # If they have a specific order defined in the dict
+        item_order = VALUE_SPECIFIC_ORDERS[attr]
         ordered_items = []
         for ordinal in item_order:
             for item in items:
                 if item['value'] == ordinal:
                     ordered_items.append(item)
         return ordered_items
+    elif attr in ALPHANUM_SORT:
+        # If they should be sorted alphanumerically based on the value
+        return sorted(items, key=lambda k: k['value'])
     else:
-        return items
+        # Otherwise, sort them by count, descending
+        return sorted(items, key=lambda k: k['count'], reverse=True)
 
 
 # A specific filter for producing readable token names in cohort filter displays
 @register.filter
 def get_feat_displ_name(name):
-    feat_name = name.replace('CLIN:','').replace('SAMP:','')
-    if feat_name in FEATURE_DISPLAY_NAMES:
-        return FEATURE_DISPLAY_NAMES[feat_name]
-    else:
-        return get_readable_name(name)
+    return get_readable_name(name)
 
 
 @register.filter
 def get_readable_name(csv_name, attr=None):
-    # if csv_name.startswith('user_') and csv_name != 'user_project' and csv_name != 'user_study':
-    #     csv_name = csv_name[5:]
 
     is_mutation = False
     is_data_type = False
@@ -276,9 +135,6 @@ def get_readable_name(csv_name, attr=None):
 
     if 'MUT:' in csv_name or (attr and 'MUT:' in attr):
         is_mutation = True
-
-    if 'has_' in csv_name or (attr and 'has_' in attr):
-        is_data_type = True
 
     if 'user_' in csv_name:
         is_user_data = True
@@ -294,8 +150,6 @@ def get_readable_name(csv_name, attr=None):
             gene = csv_name.split(':')[0].upper()
             type = string.capwords(csv_name.split(':')[1])
             return gene + ' [' + type
-        elif TRANSLATION_DICTIONARY.get(csv_name):
-            return TRANSLATION_DICTIONARY.get(csv_name) + ']'
         else:
             return string.capwords(csv_name) + ']'
     # Data type filters
@@ -307,18 +161,9 @@ def get_readable_name(csv_name, attr=None):
         else:
             return 'None'
     # Clinical filters
-    elif ATTR_SPECIFIC_TRANSLATION.get(attr) and ATTR_SPECIFIC_TRANSLATION[attr].get(csv_name):
-        return ATTR_SPECIFIC_TRANSLATION[attr][csv_name]
-    elif attr == 'Project' or attr == 'Study':
+    elif attr == 'Project' or attr == 'Program Name':
         return csv_name.upper()
-    elif TRANSLATION_DICTIONARY.get(csv_name) and attr != 'other_dx' and attr != 'tobacco_smoking_history' and not is_data_type:
-        return TRANSLATION_DICTIONARY.get(csv_name)
     else:
-        csv_name = csv_name.replace('_', ' ')
-        # If something shouldn't be subjected to capwords add its attr name to NOT_CAPWORDS
-        if attr not in NOT_CAPWORDS and not is_data_type:
-            csv_name = string.capwords(csv_name)
-        csv_name = csv_name.replace(' To ', ' to ')
         return csv_name
 
 
@@ -335,24 +180,15 @@ def replace_whitespace(str, chr):
 
 @register.filter
 def get_data_attr_id(value, attr):
-    display_str = attr + '-' + value
-
-    if DATA_ATTR_DICTIONARY.get(display_str):
-        return DATA_ATTR_DICTIONARY[display_str]
-    else:
-        return display_str
+    return attr + '-' + value
 
 
 @register.filter
-def get_tooltip_text(value_id, attr):
-
-    if attr in DISEASE_DICTIONARY:
-        if value_id in DISEASE_DICTIONARY[attr]:
-            return DISEASE_DICTIONARY[attr][value_id]
-        else:
-            return ''
-    else:
-        return ''
+def has_user_data(programs):
+    for prog in programs:
+        if prog['type'] == 'user-data':
+            return True
+    return False
 
 
 @register.filter
@@ -371,17 +207,17 @@ def get_cohorts_this_user(this_user, is_active=True):
 
 
 @register.filter
-def get_projects_this_user(this_user, is_active=True):
-    ownedProjects = this_user.project_set.all().filter(active=True)
-    sharedProjects = Project.objects.filter(shared__matched_user=this_user, shared__active=True, active=is_active)
-    projects = ownedProjects | sharedProjects
-    projects = projects.distinct().order_by('-last_date_saved')
-    return projects
+def get_programs_this_user(this_user, is_active=True):
+    ownedPrograms = this_user.program_set.filter(active=True)
+    sharedPrograms = Program.objects.filter(shared__matched_user=this_user, shared__active=True, active=is_active)
+    programs = ownedPrograms | sharedPrograms
+    programs = programs.distinct().order_by('-last_date_saved')
+    return programs
 
 
 @register.filter
 def get_workbooks_this_user(this_user, is_active=True):
-    userWorkbooks = this_user.workbook_set.all().filter(active=is_active)
+    userWorkbooks = this_user.workbook_set.filter(active=is_active)
     sharedWorkbooks = Workbook.objects.filter(shared__matched_user=this_user, shared__active=True, active=is_active)
     workbooks = userWorkbooks | sharedWorkbooks
     workbooks = workbooks.distinct().order_by('-last_date_saved')
@@ -389,10 +225,23 @@ def get_workbooks_this_user(this_user, is_active=True):
 
 
 @register.filter
+def get_cohort_perm(cohort, request):
+    return cohort.get_perm(request)
+
+
+@register.filter
 def get_barcodes_length(barcodes):
     codes = barcodes.replace('[','').replace(']','').split(',')
     codes = filter(None, codes)
     return len(codes)
+
+
+@register.filter
+def joinwith(a_list, delimiter):
+    if a_list is None:
+        logger.warn("[WARNING] In custom_tags: attempted to join with a None list object.")
+        return ""
+    return delimiter.join(a_list)
 
 
 @register.filter
@@ -421,6 +270,28 @@ def active(list, key=None):
 
 
 @register.filter
+def count(querySet):
+    if not querySet:
+        return 0
+    if isinstance(querySet, QuerySet):
+        return querySet.count()
+    return None
+
+
+@register.filter
+def active_and_v2(list, key=None):
+    if not key:
+        return list.filter(active=True, version='v2')
+    return list.filter(**{key + '__active':True, key+'__version':'v2'})
+
+
+@register.filter
+def workbook_matches_varfave(workbook, var_fave):
+    return (((workbook.build is None or workbook.build == 'Legacy') and var_fave.version == 'v1')
+        or ((workbook.build is not None and workbook.build != 'Legacy') and var_fave.version == 'v2'))
+
+
+@register.filter
 def is_public(list, key=None):
     if not key:
         return list.filter(is_public=True)
@@ -446,6 +317,46 @@ def tojson(obj, esacpe_html=True):
 
 
 @register.filter
+def get_prog_col_size(programs):
+    return (12/len(programs))
+
+
+@register.filter
+def program_is_in_cohort(prog, cohort_progs):
+    return (prog in cohort_progs)
+
+
+@register.filter
+def program_is_first_in_cohort(prog, cohort_progs):
+    if cohort_progs.count():
+        return (prog.id == cohort_progs[0].id)
+    logger.error("[ERROR] This cohort doesn't appear to have any programs associated with it--this means the samples may not have project IDs!")
+    return False
+
+
+@register.filter
+def get_prog_attr(prog, prog_attr):
+    if prog in prog_attr:
+        return [prog_attr[prog][x] for x in prog_attr[prog]]
+    return None
+
+
+@register.filter
+def get_values_list(object_list, value):
+    if not object_list:
+        logger.warn('[WARNING] get_values_list called with a None list object.')
+        return []
+    return object_list.values_list(value, flat=True)
+
+
+@register.filter
+def get_id_string(object_list, seperator):
+    if len(object_list):
+        return seperator.join([str(x) for x in get_values_list(object_list, "id")])
+    return ""
+
+
+@register.filter
 def list_contains_name(list, value):
     for item in list:
         if item['name'] == value:
@@ -459,3 +370,31 @@ def get_named_item(list, value):
         if item['name'] == value:
             return item
     return None
+
+
+@register.filter
+def check_special_casing(attr):
+    if 'miRNA' in attr or 'mRNA' in attr:
+        return attr.upper().replace('MIRNA','miRNA').replace('MRNA','mRNA')
+    return attr
+
+
+@register.filter
+def get_sorted_items(attr_set):
+    sorted_list = []
+
+    if type(attr_set) is list:
+        tmp_set = attr_set
+        attr_set = {x['name']: x for x in tmp_set}
+
+    # First load in the ordered attributes, if they exist in the provided set
+    for attr in ATTR_SPECIFIC_ORDERS:
+        if attr in attr_set:
+            sorted_list.append(attr_set[attr])
+
+    # ...then load in anything else which is in the set but not in the ordering list
+    for attr in attr_set:
+        if attr not in ATTR_SPECIFIC_ORDERS:
+            sorted_list.append(attr_set[attr])
+
+    return sorted_list

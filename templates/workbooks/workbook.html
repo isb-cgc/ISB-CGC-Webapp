@@ -3,9 +3,13 @@
 {% load custom_tags %}
 {% load workbook_custom_tags %}
 
-{% block title %}Workbooks | ISB-CGC{% endblock %}}
+{% block title %}Workbooks | ISB-CGC{% endblock %}
 {% block extra_css_libs %}{% endblock %}
-{% block header %}{% endblock %}
+
+{% block header %}
+{<link type="text/css" rel="stylesheet" href="{% static 'css/jquery.qtip.min.css' %}" />}
+{% endblock %}
+
 
 {% block link_page_name %}workbook_detail{% endblock %}
 {% block page_name %}workbook_detail{% endblock %}
@@ -18,27 +22,34 @@
         <li><a href="{% url 'workbooks' %}">Saved Workbooks</a></li>
     </ol>
     <h1 class="page-header">{{ workbook.name }}</h1>
+    <p class="workbook-ver-display"><span>Version: </span> {% if not workbook.build %}Version 1{% else %}Version 2{% endif %}</p>
+    <p class="workbook-build-display" data-plot-version="{% if not workbook.build %}v1{% else %}v2{% endif %}"
+       data-build="{% if not workbook.build %}None{% else %}{{ workbook.build }}{% endif %}">
+        <span>Build: </span> {% if not workbook.build %}Legacy{% else %}{{ workbook.build }}{% endif %}</p>
     <p>{{ workbook.description }}</p>
     <ul class="page-action-group" role="menubar">
         {% if workbook.owner.id == request.user.id %}
-        <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target=".edit-workbook-details-modal">Edit Details</button></li>
-        <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#copy-workbook-modal-{{ workbook.id }}">Duplicate</button></li>
-        <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#delete-workbook-modal-{{ workbook.id }}">Delete</button></li>
-        {% if is_shareable %}
-        <li class="separator"></li>
-        <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#share-workbook-modal-{{ workbook.id }}">Share</button></li>
-        <li role="menuitem"><button class="btn btn-link" data-toggle="modal" data-target="#share-workbook-modal-{{ workbook.id }}">Shared with (<span class="share-count">{{ workbook.shared.all|shared_active_count }}</span>)</button></li>
-        {% endif %}
+            <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target=".edit-workbook-details-modal">Edit Details</button></li>
+            <li role="menuitem"><button class="btn btn-info {% if not workbook.build %}disabled{% endif %}" data-toggle="modal" data-target="{% if workbook.build %}#copy-workbook-modal-{{ workbook.id }}{% endif %}">Duplicate</button></li>
+            <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#delete-workbook-modal-{{ workbook.id }}">Delete</button></li>
+            <li class="separator"></li>
+            {% if is_shareable %}
+            <li role="menuitem"><button class="btn btn-info share-modal" data-toggle="modal" data-target="#share-workbook-modal-{{ workbook.id }}">Share</button></li>
+            <li role="menuitem"><button class="btn btn-link shared-with" data-toggle="modal" data-target="#share-workbook-modal-{{ workbook.id }}">Shared with (<span class="share-count">{{ workbook.shared.all|shared_active_count }}</span>)</button></li>
+            {% else %}
+            <li role="menuitem" title="This workbook cannot be shared because you are not the owner of some components (cohort, variable list, gene list)."><button class="btn btn-info disabled">Share</button></li>
+            {% endif %}
         {% elif workbook.is_public %}
-        {# Is a public workbook #}
-        <li><em>Public Workbook</em></li>
-        <li class="separator"></li>
-        <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#copy-workbook-modal-{{ workbook.id }}">Duplicate</button></li>
+            {# Is a public workbook #}
+            <li><h4>Public Workbook</h4></li>
+            <li class="separator"></li>
+            <li role="menuitem"><button class="btn btn-info {% if not workbook.build %}disabled{% endif %}" data-toggle="modal" data-target="{% if workbook.build %}#copy-workbook-modal-{{ workbook.id }}{% endif %}">Duplicate</button></li>
         {% else %}
-        {# Is a shared workbook #}
-        <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#copy-workbook-modal-{{ workbook.id }}">Duplicate</button></li>
-        <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#remove-workbook-modal-{{ workbook.id }}">Remove</button></li>
-        <li role="menuitem"><button class="btn btn-link" data-toggle="modal" data-target="#share-workbook-modal-{{ workbook.id }}">Shared with (<span class="share-count">{{ workbook.shared.all|shared_active_count }}</span>)</button></li>
+            {# Is a shared workbook #}
+            <li><h4>Owner: {{ workbook.owner.first_name }} {{ workbook.owner.last_name }}</h4></li>
+            <li class="separator"></li>
+            <li role="menuitem"><button class="btn btn-info {% if not workbook.build %}disabled{% endif %}" data-toggle="modal" data-target="{% if workbook.build %}#copy-workbook-modal-{{ workbook.id }}{% endif %}">Duplicate</button></li>
+            <li role="menuitem"><button class="btn btn-info" data-toggle="modal" data-target="#remove-workbook-modal-{{ workbook.id }}">Remove</button></li>
         {% endif %}
 
     </ul>
@@ -47,8 +58,6 @@
 {% block content %}
 
 <div class="container">
-    <div id="js-messages">
-    </div>
     <div class="panel-invisible" id="worksheets">
          <!-- tabs of worksheets -->
         <ul class="nav nav-tabs_excel" id="worksheets-tabs">
@@ -56,14 +65,14 @@
             {% for worksheet in workbook.worksheets %}
                 {% if forloop.counter < 4 %}
                     <li class="{% if display_worksheet and display_worksheet.id == worksheet.id %} active {% elif not display_worksheet and forloop.counter == 1 %} active {% endif %}">
-                         <a href="#{{ worksheet.id }}" data-toggle="tab" data-sheet-id="{{ worksheet.id }}" is-loaded="false" title="{{ worksheet.name|wrap_text }}">{{ worksheet.name }}</a>
+                         <a href="#{{ worksheet.id }}" data-toggle="tab" data-toggle-type="worksheet" data-sheet-id="{{ worksheet.id }}" is-loaded="false" title="{{ worksheet.name|wrap_text }}">{{ worksheet.name }}</a>
                          {% if workbook.owner.id == request.user.id %}
                          <div class="dropdown">
                              <a class="dropdown-toggle worksheet-drop" role="button" data-toggle="dropdown"><i class="fa fa-caret-down" ></i></a>
 
                              <ul class="dropdown-menu">
                                 <li role="menuitem"><a data-toggle="modal" role="button" data-target="#edit-worksheet-details-modal-{{ worksheet.id }}">Edit details</a></li>
-                                <li role="menuitem"><a data-toggle="modal" role="button" data-target="#copy-worksheet-modal-{{ worksheet.id }}">Duplicate</a></li>
+                                <li role="menuitem"><a data-toggle="modal" role="button" class="{% if not workbook.build %}disabled{% endif %}" data-target="{% if workbook.build %}#copy-worksheet-modal-{{ worksheet.id }}{% endif %}">Duplicate</a></li>
                                 {% if workbook.worksheet_set.count > 1 %}
                                     <li role="menuitem"><a data-toggle="modal" role="button" data-target="#delete-worksheet-modal-{{ worksheet.id }}">Delete</a></li>
                                 {% endif %}
@@ -98,7 +107,7 @@
                 </li>
             {% endif %}
 
-            {% if workbook.owner.id == request.user.id %}
+            {% if workbook.owner.id == request.user.id and workbook.build %}
             <li>
                 <a data-target="#create-worksheet-modal-{{ workbook.id }}" data-toggle="modal"><i class="fa fa-plus"></i></a>
             </li>
@@ -123,9 +132,9 @@
                                 <li class="list-item">
                                     <div class="list-item__heading">
                                         {% if workbook.owner.id == request.user.id %}
-                                        <a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Genes <i class="fa fa-plus pull-right"></i></a>
+                                        <a href="{% url 'gene_select_for_existing_workbook' workbook.id worksheet.id %}">Genes & miRNAs <i class="fa fa-plus pull-right"></i></a>
                                         {% else %}
-                                        <span>Genes </span>
+                                        <span>Genes & miRNAs </span>
                                         {% endif %}
                                     </div>
                                     {% if worksheet.worksheet_gene_set.count > 0 %}
@@ -140,7 +149,7 @@
                                                             <form action="{% url 'worksheet_gene_delete' workbook_id=workbook.id worksheet_id=worksheet.id gene_id=gene.id %}" method="POST">
                                                                 {% csrf_token %}
                                                                 {% if workbook.owner.id == user.id %}
-                                                                    <button type="submit" class="text-danger workbook-remove-item" aria-label="Remove Gene"><i class="fa fa-close"></i></button>
+                                                                    <button type="submit" class="text-danger workbook-remove-item" aria-label="Remove Gene or miRNA"><i class="fa fa-close"></i></button>
                                                                 {% endif %}
                                                                 {{ gene.gene }}
                                                             </form>
@@ -209,25 +218,27 @@
                                                 {% with wsch.cohort as cohort %}
                                                 {% if forlook.counter0 < 6 %}
                                                     <li class="sublist-item">
-                                                        {% if shared %}
-                                                            {{ cohort.name }}
-                                                        {% else %}
+                                                        {% if workbook.owner.id == user.id %}
                                                             <form action="{% url 'remove_cohort_from_worksheet' workbook_id=workbook.id worksheet_id=worksheet.id cohort_id=cohort.id %}" method="POST">
                                                                 {% csrf_token %}
-                                                                {% if workbook.owner.id == user.id %}
-                                                                    <button type="submit" class="text-danger workbook-remove-item" aria-label="Remove Cohort"><i class="fa fa-close"></i></button>
-                                                                {% endif %}
-                                                                <a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a>
+                                                                <button type="submit" class="text-danger workbook-remove-item" aria-label="Remove Cohort"><i class="fa fa-close"></i></button>
+                                                        {% endif %}
+                                                        {% if cohort|get_cohort_perm:request %}
+                                                            <a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a>
+                                                        {% else %}
+                                                            <span title="You do not have permission to view this cohort.">{{ cohort.name }}</span>
+                                                        {% endif %}
+                                                        {% if workbook.owner.id == user.id %}
                                                             </form>
                                                         {% endif %}
                                                     </li>
                                                 {% elif forloop.counter0 == 6 and num_more > 0 %}
                                                     <a class="show-more">{{num_more}} more</a>
                                                     <li class="extra-values sublist-item">
-                                                        {% if shared %}
-                                                            {{ cohort.name }}
-                                                        {% else %}
+                                                        {% if cohort|get_cohort_perm:request %}
                                                             <a href="{% url 'cohort_details' cohort.id %}">{{ cohort.name }}</a>
+                                                        {% else %}
+                                                            <span title="You do not have permission to view this cohort.">{{ cohort.name }}</span>
                                                         {% endif %}
                                                     </li>
                                                 {% endif %}
@@ -253,7 +264,7 @@
                             {% if workbook.owner.id == user.id %}
                                 <h5>Analysis Type</h5>
                                 <div class="form-group gray-area">
-                                    <select aria-label="Analysis Type" id="analysis-type" worksheet_id="{{ worksheet.id }}" class="form-control plot_selection">
+                                    <select aria-label="Analysis Type" id="{{ worksheet.id }}-analysis-type" worksheet_id="{{ worksheet.id }}" class="form-control plot_selection">
                                         {% if worksheet.active_plot %}
                                             <option value="{{ worksheet.active_plot.type }}" selected >{{ worksheet.active_plot.type }}</option>
                                         {% else %}
@@ -313,6 +324,10 @@
                             <div class="flyout-footer">
                                 <form class="add_worksheet_comment_form">
                                     {% csrf_token %}
+                                    <div id="unallowed-chars-alert-comment" class="alert alert-warning alert-dismissable" style="display: none;">
+                                        <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                        Your comment contains invalid characters (<span id="unallowed-chars-comment"></span>). Please adjust the content accordingly.
+                                    </div>
                                     <label for="comment-content">Add Comment (1000 character limit)</label>
                                     <textarea id="comment-content" class="comment-textarea form-control space-bottom-10" name="content" maxlength="1000"></textarea>
                                     <button class="btn btn-primary save-comment-btn" type="submit">Comment</button>
@@ -332,7 +347,7 @@
 {% include "workbooks/workbook_modals.html" %}
 
 <script type="text/javascript">
-    var base_api_url            = '{{ BASE_API_URL|safe }}';
+    var base_url            = '{{ BASE_URL|safe }}';
     var display_worksheet_id    = '{{ display_worksheet.id|safe }}';
     var workbook_id             = '{{ workbook.id }}';
 </script>
