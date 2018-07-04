@@ -41,10 +41,8 @@ from projects.models import Program
 from workbooks.models import Workbook
 from accounts.models import GoogleProject
 from accounts.sa_utils import get_nih_user_details
-from accounts.dcf_views import DCFCommFailure
 
 from allauth.socialaccount.models import SocialAccount
-from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 
 from django.http import HttpResponse, JsonResponse
 
