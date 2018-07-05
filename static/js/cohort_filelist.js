@@ -34,6 +34,7 @@ require.config({
         'jqueryui': ['jquery'],
         'session_security': ['jquery'],
         'tokenfield': ['jquery', 'jqueryui'],
+        'underscore': {exports: '_'},
         'base': ['jquery', 'jqueryui', 'session_security', 'bootstrap', 'underscore']
     }
 });
@@ -41,13 +42,14 @@ require.config({
 require([
     'jquery',
     'base',
+    'underscore',
     'jqueryui',
     'bootstrap',
     'session_security',
     'tokenfield',
     'bq_export',
     'gcs_export'
-], function ($, base) {
+], function ($, base, _) {
 
     // For manaaging filter changes
     var UPDATE_PENDING = false;
@@ -887,6 +889,16 @@ require([
                     '<input class="param" type="hidden" name="build" value="'+build+'" />'
                 );
                 break;
+        }
+
+        if(this_tab.find('.build :selected').val() == 'HG38' && _.find(programs_this_cohort, function(prog){return prog == 'CCLE';})) {
+            base.showJsMessage(
+                "warning",
+                "You are exporting a file list for a cohort which contains CCLE samples, with the build set to HG38. "
+                +"Please note that there are no HG38 samples for CCLE, so that program will be absent from the export.",
+                false,
+                $($(this).data('target')).find('.modal-js-messages')
+            );
         }
     });
 
