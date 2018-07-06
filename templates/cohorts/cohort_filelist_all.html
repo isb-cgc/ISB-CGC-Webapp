@@ -1,5 +1,5 @@
 <div id="all-files" class="tab-pane data-tab" data-file-type="all" role="tabpanel">
-    <div id="all-filter-panel" class="col-lg-3 col-md-3 col-sm-3">
+    <div id="all-filter-panel" class="col-lg-3 col-md-3 col-sm-3 side-filter-panel">
         <div class="panel panel-default">
             <div class="panel-body">
                 <label for="build">Build</label>
@@ -92,9 +92,14 @@
             {% endfor %}
         </div>
     </div>
-    <div id="all-file-panel" class="col-lg-9 col-md-9 col-sm-9">
+
+    <div id="all-file-panel" class="file-panel col-lg-9 col-md-9 col-sm-9">
+        <div class="file-panel-toggle">
+            <a class="fa fa-caret-left" style="font-family :'FontAwesome' !important"></a>
+            <a class="fa fa-caret-right" style="font-family :'FontAwesome' !important"></a>
+        </div>
         <div class="filelist-panel panel">
-            <div id="" class="alert alert-warning alert-dismissable file-list-warning" style="display: none;">
+            <div class="alert alert-warning alert-dismissable file-list-warning" style="display: none;">
                 <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                 The maximum number of file records which can be downloaded is <span class="file-list-limit">{{ file_list_max }}</span>. Your selections currently total
                 <span class="file-list-total">#</span>. If you download the list now, it will be arbitrarily cut off after the maximum. Please consider using the filter

@@ -619,6 +619,14 @@ require([
         }
     }
 
+    $('.data-tab-content').on('click', '.file-panel-toggle', function () {
+        $(this).parent().toggleClass('col-lg-9 col-md-9 col-sm-9');
+        $(this).parent().toggleClass('col-lg-12 col-md-12 col-sm-12 open');
+        $(this).toggleClass('open');
+        //$(this).parent().prev('.side-filter-panel').toggleClass('closed');
+        $(this).parent().prev('.side-filter-panel').toggleClass('hidden');
+    });
+
     //toggle column display
     $('.data-tab-content').on('click', '.column_toggle_button', function () {
         var this_tab = $(this).parents('.data-tab').data('file-type');
@@ -901,5 +909,10 @@ require([
             );
         }
     });
+
+
+
+
+
 
 });

@@ -467,7 +467,6 @@
         .panel
             .panel-heading
                 background-color: #fff
-
             .panel-body
                 padding: 10px 10px 10px 10px
                 ul
@@ -529,6 +528,58 @@
                             color: $isb-success
         input
             margin-left: 5px
+
+    //.side-filter-panel
+    //    //padding: 10px 15px
+    //    //float: left
+    //    //width: 25%
+    //    //background: darken($white, 8%)
+    //    //min-height: 1200px
+    //    //position: relative
+    //    transition: width 0.45s ease-in-out
+    //    *
+    //        //opacity: 1
+    //        transition: opacity 0.45s ease-in-out
+    //    &.closed
+    //        width: 0
+    //        transition: width 0.45s ease-in-out
+    //        *
+    //            opacity: 0
+    //            z-index: -1
+    //            transition: opacity 0.45s ease-in-out
+
+    .file-panel-toggle
+        background-color: $white
+        position: absolute
+        left: -1px
+        top: 10px
+        border-bottom:
+        cursor: pointer
+        &:after
+            content: ''
+            width: 0
+            height: 0
+            border-style: solid
+            border-width: 0 16px 12px 0
+            border-color: transparent rgba(0, 0, 0, 0.1) transparent transparent
+            position: absolute
+            top: 100%
+            right: 0
+        .fa-caret-right
+            display: none
+        &.open
+            .fa-caret-right
+                display: inline-block
+            .fa-caret-left
+                display: none
+        a
+            display: block
+            width: 16px
+            height: 24px
+            padding: 5px
+            &:hover
+                text-decoration: none
+
     .nav-tabs
         li,li.active
             a
