@@ -476,6 +476,10 @@
             input
                 margin-right: 5px
 
+    .panel-heading
+        h4
+            padding: 10px 8px
+
     .filelist-panel
         h4
             display: inline
@@ -529,31 +533,26 @@
         input
             margin-left: 5px
 
-    //.side-filter-panel
-    //    //padding: 10px 15px
-    //    //float: left
-    //    //width: 25%
-    //    //background: darken($white, 8%)
-    //    //min-height: 1200px
-    //    //position: relative
-    //    transition: width 0.45s ease-in-out
-    //    *
-    //        //opacity: 1
-    //        transition: opacity 0.45s ease-in-out
-    //    &.closed
-    //        width: 0
-    //        transition: width 0.45s ease-in-out
-    //        *
-    //            opacity: 0
-    //            z-index: -1
-    //            transition: opacity 0.45s ease-in-out
+    .side-filter-panel
+        transition: width 0.45s ease-in-out
+        *
+            opacity: 1
+            transition: opacity 0.45s ease-in-out
+        &.closed
+            width: 0px
+            padding: 0
+            transition: width 0.45s ease-in-out
+            *
+                opacity: 0
+                z-index: -1
+                transition: opacity 0.45s ease-in-out
 
     .file-panel-toggle
         background-color: $white
         position: absolute
         left: -1px
         top: 10px
-        border-bottom:
+        height: 26px
         cursor: pointer
         &:after
             content: ''
@@ -568,6 +567,14 @@
         .fa-caret-right
             display: none
         &.open
+            margin-left: 16px
+            border-width: 1px 1px 1px 0
+            border-style: solid
+            border-color: rgba(0, 0, 0, 0.1)
+            border-radius: 0 3px 3px 0
+            width: 13px
+            &:after
+                border: none
             .fa-caret-right
                 display: inline-block
             .fa-caret-left
@@ -575,7 +582,7 @@
         a
             display: block
             width: 16px
-            height: 24px
+            height: 25px
             padding: 5px
             &:hover
                 text-decoration: none

@@ -623,8 +623,7 @@ require([
         $(this).parent().toggleClass('col-lg-9 col-md-9 col-sm-9');
         $(this).parent().toggleClass('col-lg-12 col-md-12 col-sm-12 open');
         $(this).toggleClass('open');
-        //$(this).parent().prev('.side-filter-panel').toggleClass('closed');
-        $(this).parent().prev('.side-filter-panel').toggleClass('hidden');
+        $(this).parent().prev('.side-filter-panel').toggleClass('closed');
     });
 
     //toggle column display
