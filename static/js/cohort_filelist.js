@@ -65,6 +65,12 @@ require([
         'igv': {
             'HG19': {},
             'HG38': {}
+        },
+        'camic': {
+            'HG19': {}
+        },
+        'dicom': {
+            'HG19': {}
         }
     };
         
@@ -286,19 +292,32 @@ require([
                 }
                 break;
             case "camic":
-                filter_args = 'filters=' + encodeURIComponent(JSON.stringify({"data_type": ["Diagnostic image","Tissue slide image"]}));
+                if(!SELECTED_FILTERS[active_tab][build]["data_type"]) {
+                    SELECTED_FILTERS[active_tab][build]["data_type"] = [];
+                    SELECTED_FILTERS[active_tab][build]["data_type"].push("Diagnostic image");
+                    SELECTED_FILTERS[active_tab][build]["data_type"].push("Tissue slide image");
+                }
+                if (SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab][build]).length >0) {
+                    filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab][build]));
+                }
                 break;
             case "dicom":
-                filter_args = 'filters=' + encodeURIComponent(JSON.stringify({"data_type": ["Radiology image"]}));
+                var filters = {"data_type": ["Radiology image"]};
+                if (SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab][build]).length >0) {
+                    filters = Object.assign(filters, SELECTED_FILTERS[active_tab][build]);
+                }
+                filter_args = 'filters=' + encodeURIComponent(JSON.stringify(filters));
                 break;
         }
 
-        $(tab_selector).find('.download-link').attr('href', download_url + '?' + (filter_args ? filter_args + '&' : '')+ 'downloadToken='+downloadToken+'&total=' + Math.min(FILE_LIST_MAX,file_list_total));
-
+        $(tab_selector).find('.download-link').attr('href', download_url + '?'
+            + (filter_args ? filter_args + '&' : '')
+            + (tab_case_barcode[active_tab] ? 'case_barcode='+ encodeURIComponent(tab_case_barcode[active_tab]) + '&' : '')
+            + 'downloadToken='+downloadToken+'&total=' + Math.min(FILE_LIST_MAX,file_list_total));
         if(active_tab !== 'camic' && active_tab !== 'dicom') {
             $(tab_selector).find('.download-link').attr('href',$(tab_selector).find('.download-link').attr('href')+'&build='+build);
         }
-    };
+    }
 
     var update_table = function (active_tab, do_filter_count) {
         do_filter_count = (do_filter_count === undefined || do_filter_count === null ? true : do_filter_count);
@@ -320,7 +339,9 @@ require([
             var filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab][build]));
             url += '&'+filter_args;
         }
-
+        if(tab_case_barcode[active_tab]){
+            url += '&case_barcode='+ encodeURIComponent(tab_case_barcode[active_tab]);
+        }
         if(active_tab !== 'camic' && active_tab !== 'dicom') {
             url += '&build='+$(tab_selector).find('.build :selected').val();
         }
@@ -371,7 +392,7 @@ require([
                     html_page_button += "<span class='\ellipsis\'>...</span>"
                 }
                 else{
-                    html_page_button += "<a class=\'paginate_button numeric_button"+ (page_list[i] == page ? " current\'":"\'") +">" + page_list[i] + "</a>";
+                    html_page_button += "<a class=\'dataTables_button paginate_button numeric_button"+ (page_list[i] == page ? " current\'":"\'") +">" + page_list[i] + "</a>";
                 }
             }
             $(tab_selector).find('.file-page-count').show();
@@ -523,7 +544,7 @@ require([
         }
         $(tab_selector).find('.filelist-panel .spinner i').addClass('hidden');
 
-    };
+    }
 
     function goto_table_page(tab, page_no){
         tab_page[tab] = page_no;
@@ -532,7 +553,7 @@ require([
 
     $('.data-tab-content').on('click', '.goto-page-button', function () {
         var this_tab = $(this).parents('.data-tab').data('file-type');
-        var page_no_input = $(this).siblings('.goto-page-number').val()
+        var page_no_input = $(this).siblings('.goto-page-number').val();
         if (page_no_input == "")
             return;
         var page = parseInt(page_no_input);
@@ -567,6 +588,36 @@ require([
         }
         goto_table_page(this_tab, page_no)
     });
+
+    $('.data-tab-content').on('click', '.case-barcode-search-btn', function () {
+        var this_tab = $(this).parents('.data-tab').data('file-type');
+        var search_input = $(this).siblings('.case-barcode-search-text');
+        search_input.val(search_input.val().trim());
+        search_case_barcode(this_tab, search_input.val());
+
+        /*
+        var this_tab = $(this).parents('.data-tab').data('file-type');
+        var search_input = $(this).siblings('.dataTables_search_input').children('.case-barcode-search-text');
+        tab_case_barcode[this_tab] = $(this).siblings('.dataTables_search_input').children('.case-barcode-search-text').val().trim();
+        tab_page[this_tab] = 1;
+        update_displays(this_tab);
+        */
+    });
+
+    $('.data-tab-content').on('click', '.case-barcode-search-clear-btn', function () {
+        var this_tab = $(this).parents('.data-tab').data('file-type');
+        var search_input = $(this).siblings('.case-barcode-search-text');
+        search_input.val("");
+        search_case_barcode(this_tab, search_input.val());
+    });
+
+    function search_case_barcode(tab, search_input_val){
+        if(search_input_val.trim() != tab_case_barcode[tab]) {
+            tab_case_barcode[tab] = search_input_val.trim();
+            tab_page[tab] = 1;
+            update_displays(tab);
+        }
+    }
 
     //toggle column display
     $('.data-tab-content').on('click', '.column_toggle_button', function () {
@@ -651,19 +702,19 @@ require([
             SELECTED_FILTERS[active_tab][build][$(this).data('feature-name')].push($(this).data('value-name'));
         });
         tab_page[active_tab] = 1;
-    };
+    }
 
     function enqueueUpdate(active_tab){
         UPDATE_QUEUE.push(function(){
             update_displays(active_tab);
         });
-    };
+    }
 
     function dequeueUpdate(){
         if(UPDATE_QUEUE.length > 0) {
             UPDATE_QUEUE.shift()();
         }
-    };
+    }
 
     function pagination(c, m) {
         var current = parseInt(c),
@@ -691,7 +742,7 @@ require([
             l = range[i];
         }
         return rangeWithDots;
-    };
+    }
 
     var update_displays = function(active_tab) {
         // If a user has clicked more filters while an update was going out, queue up a future update and return
@@ -710,7 +761,10 @@ require([
         update_displays_thread = setTimeout(function(){
             var build = $('#'+active_tab+'-files').find('.build :selected').val();
             var files_per_page = tab_files_per_page[active_tab];
-            var url = ajax_update_url[active_tab] + '?build=' + build +'&files_per_page=' +files_per_page;
+            var url = ajax_update_url[active_tab] + '?files_per_page=' +files_per_page + (active_tab != 'camic' && active_tab != 'dicom'  ? '&build='+build : '');
+            if(tab_case_barcode[active_tab]){
+                url += '&case_barcode='+ encodeURIComponent(tab_case_barcode[active_tab]);
+            }
             if(SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab][build]).length > 0) {
                 url += '&filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab][build]));
             }
@@ -823,10 +877,16 @@ require([
                 target_form.find('input[name="filters"]').attr(
                     'value',JSON.stringify({"data_type": ["Radiology image"]})
                 );
+                target_form.append(
+                    '<input class="param" type="hidden" name="build" value="'+build+'" />'
+                );
                 break;
             case "camic":
                 target_form.find('input[name="filters"]').attr(
                     'value',JSON.stringify({"data_type": ["Diagnostic image", "Tissue slide image"]})
+                );
+                target_form.append(
+                    '<input class="param" type="hidden" name="build" value="'+build+'" />'
                 );
                 break;
         }

@@ -64,30 +64,37 @@ class FeatureDefinitionSearcherFactory(object):
         raise InvalidDataTypeException("Invalid datatype '{datatype}'".format(datatype=datatype))
 
 
+def build_feature_ids(datatype, params):
+    searcher = FeatureDefinitionSearcherFactory.build_from_datatype(datatype)
+    items = []
+
+    if params.keys():
+        result = searcher.search(params)
+
+        fields = ['label', 'internal_feature_id', 'feature_type']
+        for row in result:
+            obj = {key: row[key] for key in fields}
+            if obj['feature_type'] == 'CLIN':
+                obj['type'] = row['type']
+                obj['column_name'] = row['column_name']
+            items.append(obj)
+
+    return items
+
+
 @login_required
 def feature_search(request):
     """ Used by the web application."""
     try:
         datatype = request.GET.get('datatype')
-        searcher = FeatureDefinitionSearcherFactory.build_from_datatype(datatype)
         parameters = {}
         for param in request.GET:
             if param != 'datatype':
                 value = request.GET.get(param)
                 if value is not None:
                     parameters[param] = value
-        items = []
 
-        if parameters.keys():
-            result = searcher.search(parameters)
-
-            fields = ['label', 'internal_feature_id', 'feature_type']
-            for row in result:
-                obj = {key: row[key] for key in fields}
-                if obj['feature_type'] == 'CLIN':
-                    obj['type'] = row['type']
-                    obj['column_name'] = row['column_name']
-                items.append(obj)
+        items = build_feature_ids(datatype,parameters)
 
         return JsonResponse({'items': items}, status=200)
 

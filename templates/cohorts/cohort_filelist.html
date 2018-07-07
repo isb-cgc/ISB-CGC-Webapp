@@ -142,6 +142,12 @@
             ['Study Instance UID', 1]
         ]
     };
+    var tab_case_barcode ={
+        'all': ''
+        ,'igv': ''
+        ,'camic': ''
+        ,'dicom': ''
+    };
     var download_url = '{{ download_url }}';
     var ajax_update_url = {
         'all': '{% url 'cohort_filelist_ajax_panel' cohort.id 'all' %}'
