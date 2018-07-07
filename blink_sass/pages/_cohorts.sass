@@ -551,30 +551,18 @@
         background-color: $white
         position: absolute
         left: -1px
-        top: 10px
-        height: 26px
+        height: 30px
         cursor: pointer
-        &:after
-            content: ''
-            width: 0
-            height: 0
-            border-style: solid
-            border-width: 0 16px 12px 0
-            border-color: transparent rgba(0, 0, 0, 0.1) transparent transparent
-            position: absolute
-            top: 100%
-            right: 0
+        border-radius: 3px 0px 0px 3px
+        width: 16px
+        box-shadow: $box-shadow
+        clip-path: inset(-5px 0px -5px -5px)
         .fa-caret-right
             display: none
         &.open
             margin-left: 16px
-            border-width: 1px 1px 1px 0
-            border-style: solid
-            border-color: rgba(0, 0, 0, 0.1)
             border-radius: 0 3px 3px 0
-            width: 13px
-            &:after
-                border: none
+            clip-path: inset(-5px -5px -5px 0px)
             .fa-caret-right
                 display: inline-block
             .fa-caret-left
@@ -582,8 +570,8 @@
         a
             display: block
             width: 16px
-            height: 25px
-            padding: 5px
+            line-height: 30px
+            text-align: center
             &:hover
                 text-decoration: none
 
