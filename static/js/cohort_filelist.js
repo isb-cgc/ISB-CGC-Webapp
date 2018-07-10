@@ -68,6 +68,9 @@ require([
         },
         'camic': {
             'HG19': {}
+        },
+        'dicom': {
+            'HG19': {}
         }
     };
         
@@ -299,7 +302,11 @@ require([
                 }
                 break;
             case "dicom":
-                filter_args = 'filters=' + encodeURIComponent(JSON.stringify({"data_type": ["Radiology image"]}));
+                var filters = {"data_type": ["Radiology image"]};
+                if (SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab][build]).length >0) {
+                    filters = Object.assign(filters, SELECTED_FILTERS[active_tab][build]);
+                }
+                filter_args = 'filters=' + encodeURIComponent(JSON.stringify(filters));
                 break;
         }
 
