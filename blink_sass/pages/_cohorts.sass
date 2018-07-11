@@ -467,7 +467,6 @@
         .panel
             .panel-heading
                 background-color: #fff
-
             .panel-body
                 padding: 10px 10px 10px 10px
                 ul
@@ -476,6 +475,10 @@
         .platform-counts
             input
                 margin-right: 5px
+
+    .panel-heading
+        h4
+            padding: 10px 8px
 
     .filelist-panel
         h4
@@ -529,6 +532,49 @@
                             color: $isb-success
         input
             margin-left: 5px
+
+    .side-filter-panel
+        transition: width 0.45s ease-in-out
+        *
+            opacity: 1
+            transition: opacity 0.45s ease-in-out
+        &.closed
+            width: 0px
+            padding: 0
+            transition: width 0.45s ease-in-out
+            *
+                opacity: 0
+                z-index: -1
+                transition: opacity 0.45s ease-in-out
+
+    .file-panel-toggle
+        position: absolute
+        padding: 0
+        top: 8px
+        height: 45px
+        cursor: pointer
+        border-radius: 0 3px 3px 0
+        border-style: solid
+        border-width: 1px 1px 1px 0
+        border-color: $border-color
+        width: 18px
+        .fa-angle-double-right
+            display: none
+        &.open
+            .fa-angle-double-right
+                display: inline-block
+            .fa-angle-double-left
+                display: none
+        a
+            display: block
+            width: 18px
+            line-height: 43px
+            text-align: center
+            font-weight: 700
+            font-size: 18px
+            &:hover
+                text-decoration: none
+
     .nav-tabs
         li,li.active
             a

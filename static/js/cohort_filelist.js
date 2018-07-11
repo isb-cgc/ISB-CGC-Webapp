@@ -619,6 +619,13 @@ require([
         }
     }
 
+    $('.data-tab-content').on('click', '.file-panel-toggle', function () {
+        $(this).parent().toggleClass('col-lg-9 col-md-9 col-sm-9');
+        $(this).parent().toggleClass('col-lg-12 col-md-12 col-sm-12 open');
+        $(this).toggleClass('open');
+        $(this).parent().prev('.side-filter-panel').toggleClass('closed');
+    });
+
     //toggle column display
     $('.data-tab-content').on('click', '.column_toggle_button', function () {
         var this_tab = $(this).parents('.data-tab').data('file-type');
@@ -877,16 +884,10 @@ require([
                 target_form.find('input[name="filters"]').attr(
                     'value',JSON.stringify({"data_type": ["Radiology image"]})
                 );
-                target_form.append(
-                    '<input class="param" type="hidden" name="build" value="'+build+'" />'
-                );
                 break;
             case "camic":
                 target_form.find('input[name="filters"]').attr(
                     'value',JSON.stringify({"data_type": ["Diagnostic image", "Tissue slide image"]})
-                );
-                target_form.append(
-                    '<input class="param" type="hidden" name="build" value="'+build+'" />'
                 );
                 break;
         }
