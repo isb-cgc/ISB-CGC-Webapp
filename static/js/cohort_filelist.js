@@ -884,16 +884,10 @@ require([
                 target_form.find('input[name="filters"]').attr(
                     'value',JSON.stringify({"data_type": ["Radiology image"]})
                 );
-                target_form.append(
-                    '<input class="param" type="hidden" name="build" value="'+build+'" />'
-                );
                 break;
             case "camic":
                 target_form.find('input[name="filters"]').attr(
                     'value',JSON.stringify({"data_type": ["Diagnostic image", "Tissue slide image"]})
-                );
-                target_form.append(
-                    '<input class="param" type="hidden" name="build" value="'+build+'" />'
                 );
                 break;
         }
@@ -908,10 +902,5 @@ require([
             );
         }
     });
-
-
-
-
-
 
 });
