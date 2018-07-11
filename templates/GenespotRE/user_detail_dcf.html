@@ -10,7 +10,10 @@
     {# User has tried to sign in with a conflicting NIH Username and must be forced to change it: #}
     {% elif user_details.force_DCF_logout%}
         <p><a href="{% url 'dcf_simple_logout' %}">Logout from Data Commons now to use another NIH identity.</a></p>
-    {# Refresh token has expired (30 days). User must log into DCF again t #}
+    {# User is linked, but has never talked to DCF #}
+    {% elif user_details.legacy_linkage%}
+        <p><a href="{% url 'dcf_login' %}">Please use new Data Commons login to re-establish NIH identity: {{ user_details.NIH_username }}</a></p>
+    {# Refresh token has expired (30 days). User must log into DCF again #}
     {% elif user_details.refresh_required%}
         <p><a href="{% url 'dcf_login' %}">Data Commons session has expired. Please log in again.</a></p>
      {# User has *never* been seen before with an NIH login, or they have disconnected from it. #}
