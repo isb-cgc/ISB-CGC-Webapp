@@ -852,44 +852,42 @@ require([
         var tab_type = this_tab.data('file-type');
 
         // Clear the previous parameter settings from the export form, and re-add the build
+        var build = this_tab.find('.build :selected').val() || null;
         target_form.find('input[name="build"], input[name="filters"]').remove();
+        target_form.append(
+            '<input class="param" type="hidden" name="build" value="'+build+'" />'
+        );
         target_form.append(
             '<input class="param" type="hidden" name="filters" value="" />'
         );
 
-        var build = this_tab.find('.build :selected').val() || null;
-
+        var filter_param = {};
         switch(tab_type) {
             case "igv":
-                target_form.find('input[name="filters"]').attr(
-                    'value',JSON.stringify({"data_format": ["BAM"]})
-                );
-                target_form.append(
-                    '<input class="param" type="hidden" name="build" value="'+build+'" />'
-                );
-                break;
-            case "all":
-                target_form.append(
-                    '<input class="param" type="hidden" name="build" value="'+build+'" />'
-                );
-                if(Object.keys(SELECTED_FILTERS[tab_type][build]).length > 0) {
-                    target_form.find('input[name="filters"]').attr(
-                        'value',JSON.stringify(SELECTED_FILTERS[tab_type][build])
-                    );
-                } else {
-                    target_form.find('input[name="filters"]').remove();
-                }
+                filter_param = {"data_format": ["BAM"]};
                 break;
             case "dicom":
-                target_form.find('input[name="filters"]').attr(
-                    'value',JSON.stringify({"data_type": ["Radiology image"]})
-                );
+                filter_param = {"data_type": ["Radiology image"]};
                 break;
             case "camic":
-                target_form.find('input[name="filters"]').attr(
-                    'value',JSON.stringify({"data_type": ["Diagnostic image", "Tissue slide image"]})
-                );
+                filter_param = {"data_type": ["Diagnostic image", "Tissue slide image"]};
                 break;
+        }
+
+        if(Object.keys(SELECTED_FILTERS[tab_type][build]).length > 0) {
+            Object.assign(filter_param, SELECTED_FILTERS[tab_type][build]);
+        }
+        if(tab_case_barcode[tab_type]) {
+            filter_param['case_barcode'] = tab_case_barcode[tab_type];
+        }
+
+        if(Object.keys(filter_param).length>0){
+            target_form.find('input[name="filters"]').attr(
+                'value',JSON.stringify(filter_param)
+            );
+        }
+        else{
+            target_form.find('input[name="filters"]').remove();
         }
 
         if(this_tab.find('.build :selected').val() == 'HG38' && _.find(programs_this_cohort, function(prog){return prog == 'CCLE';})) {
