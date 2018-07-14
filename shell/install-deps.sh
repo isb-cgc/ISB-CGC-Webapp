@@ -30,10 +30,8 @@ else
 fi
 
 # Install apt-get dependencies
-# We have to install libmysqlclient-dev here so that MySQL-Python will install with pip
-# We install mysql-client-5.6 and mysql-server-5.6 in create-database.sh, separately
 echo "Installing Dependencies..."
-apt-get install -qq -y --force-yes unzip libffi-dev libssl-dev libmysqlclient-dev python2.7-dev git ruby g++
+apt-get install -qq -y --force-yes unzip libffi-dev libssl-dev libmysqlclient-dev mysql-client-5.6 python2.7-dev git ruby g++
 echo "Dependencies Installed"
 
 # If this is local development, clean out lib for a re-structuring
@@ -41,8 +39,7 @@ if [ -z "${CI}" ]; then
     # Clean out lib to prevent confusion over multiple builds in local development
     # and prep for local install
     echo "Emptying out ${HOMEROOT}/lib/ ..."
-    rm -rf "${HOMEROOT}/lib/*"
-    mkdir "${HOMEROOT}/lib/endpoints_lib/"
+    rm -rf "${HOMEROOT}/lib/"
 fi
 
 # Install PIP + Dependencies
