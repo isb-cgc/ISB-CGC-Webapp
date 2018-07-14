@@ -23,19 +23,18 @@ if [ -n "$CI" ]; then
     apt-get update -qq
 else
     # Add apt-get repository to update python from 2.7.6 (default) to latest 2.7.x
+    echo "Installing Python 2.7..."
     add-apt-repository -y ppa:jonathonf/python-2.7
     apt-get update -qq
     apt-get install -qq -y --force-yes python2.7
 fi
 
 # Install apt-get dependencies
+# We have to install libmysqlclient-dev here so that MySQL-Python will install with pip
+# We install mysql-client-5.6 and mysql-server-5.6 in create-database.sh, separately
 echo "Installing Dependencies..."
-apt-get install -qq -y --force-yes unzip libffi-dev libssl-dev mysql-client libmysqlclient-dev python2.7-dev git ruby g++
+apt-get install -qq -y --force-yes unzip libffi-dev libssl-dev libmysqlclient-dev python2.7-dev git ruby g++
 echo "Dependencies Installed"
-
-# Install PIP + Dependencies
-echo "Installing pip..."
-curl --silent https://bootstrap.pypa.io/get-pip.py | python
 
 # If this is local development, clean out lib for a re-structuring
 if [ -z "${CI}" ]; then
@@ -46,10 +45,16 @@ if [ -z "${CI}" ]; then
     mkdir "${HOMEROOT}/lib/endpoints_lib/"
 fi
 
+# Install PIP + Dependencies
+echo "Installing pip..."
+curl --silent https://bootstrap.pypa.io/get-pip.py | python
+
 # Install our primary python libraries
 # If we're not on CircleCI, or we are but the lib directory isn't there (cache miss), install lib
 if [ -z "${CI}" ] || [ ! -d "lib" ]; then
     echo "Installing Python Libraries..."
+    # Install PyCrypto in here so that GitHub won't constantly error about it
+    pip install pycrypto==2.6.1 -t ${HOMEROOT}/lib --upgrade --only-binary all
     pip install -q -r ${HOMEROOT}/requirements.txt -t ${HOMEROOT}/lib --upgrade --only-binary all
 else
     echo "Using restored cache for Python Libraries"
@@ -58,7 +63,7 @@ fi
 if [ -z "${CI}" ]; then
     # Install the Endpoints library for API usage (separate directory because the WebApp doesn't need it
     echo "Installing Google Endpoints for local API..."
-    pip install -t "${HOMEROOT}/lib/endpoints_lib/" google-endpoints==3.0.0 --only-binary --ignore-installed
+    pip install -t "${HOMEROOT}/lib/endpoints_lib/" google-endpoints==3.0.0 --only-binary --upgrade --ignore-installed
 
     # Delete the offending collision packages (socketserver and queue) which create issues with six
     echo "Removing colliding packages (socketserver and queue)"
