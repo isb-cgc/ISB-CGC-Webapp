@@ -187,7 +187,6 @@ def oncoprint_view_data(request):
                             cnvr_result = "AMP" if seg_mean > 1 else "GAIN" if seg_mean > 0.62 else "HOMDEL" if seg_mean < -1 else "HETLOSS"
                             plot_data.append("{}\t{}\t{}\t{}".format(item['case_id'],gene,cnvr_result,"CNA"))
 
-
         attempts = 0
         job_is_done = BigQuerySupport.check_job_is_done(somatic_mut_query_job)
         while attempts < settings.BQ_MAX_ATTEMPTS and not job_is_done:
