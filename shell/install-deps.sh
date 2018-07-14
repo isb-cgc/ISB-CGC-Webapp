@@ -20,6 +20,8 @@ echo "Preparing System..."
 apt-get -y --force-yes install software-properties-common
 if [ -n "$CI" ]; then
     wget https://dev.mysql.com/get/mysql-apt-config_0.8.9-1_all.deb
+    apt-get install -y lsb-release
+    echo "mysql-apt-config mysql-apt-config/select-client select mysql-5.6" | debconf-set-selections
     dpkg -i mysql-apt-config_0.8.9-1_all.deb
     apt-get update -qq
 else
@@ -34,7 +36,7 @@ fi
 echo "Installing Dependencies..."
 if [ -n "$CI" ]; then
     apt-get install -qq -y --force-yes unzip libffi-dev libssl-dev libmysqlclient-dev python2.7-dev git ruby g++
-    apt-get install mysql-client-5.7
+    apt-get install -y mysql-client-5.6
 else
     apt-get install -qq -y --force-yes unzip libffi-dev libssl-dev libmysqlclient-dev mysql-client-5.6 python2.7-dev git ruby g++
 fi
