@@ -31,7 +31,11 @@ fi
 
 # Install apt-get dependencies
 echo "Installing Dependencies..."
-apt-get install -qq -y --force-yes unzip libffi-dev libssl-dev libmysqlclient-dev mysql-client-5.6 python2.7-dev git ruby g++
+if [ -n "$CI" ]; then
+    apt-get install -qq -y --force-yes unzip libffi-dev libssl-dev libmysqlclient-dev mysql-client python2.7-dev git ruby g++
+else
+    apt-get install -qq -y --force-yes unzip libffi-dev libssl-dev libmysqlclient-dev mysql-client-5.6 python2.7-dev git ruby g++
+fi
 echo "Dependencies Installed"
 
 # If this is local development, clean out lib for a re-structuring
