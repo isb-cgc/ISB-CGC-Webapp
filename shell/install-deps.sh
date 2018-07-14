@@ -19,7 +19,8 @@ fi
 echo "Preparing System..."
 apt-get -y --force-yes install software-properties-common
 if [ -n "$CI" ]; then
-    # CI Takes care of Python update
+    wget https://dev.mysql.com/get/mysql-apt-config_0.8.9-1_all.deb
+    dpkg -i mysql-apt-config_0.8.9-1_all.deb
     apt-get update -qq
 else
     # Add apt-get repository to update python from 2.7.6 (default) to latest 2.7.x
@@ -33,7 +34,7 @@ fi
 echo "Installing Dependencies..."
 if [ -n "$CI" ]; then
     apt-get install -qq -y --force-yes unzip libffi-dev libssl-dev libmysqlclient-dev python2.7-dev git ruby g++
-    apt-get -qq -y --force-yes install mysql-client-5.6
+    apt-get install mysql-client-5.6
 else
     apt-get install -qq -y --force-yes unzip libffi-dev libssl-dev libmysqlclient-dev mysql-client-5.6 python2.7-dev git ruby g++
 fi
