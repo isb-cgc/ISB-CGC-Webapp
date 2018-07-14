@@ -32,7 +32,8 @@ fi
 # Install apt-get dependencies
 echo "Installing Dependencies..."
 if [ -n "$CI" ]; then
-    apt-get install -qq -y --force-yes unzip libffi-dev libssl-dev libmysqlclient-dev mysql-client python2.7-dev git ruby g++
+    apt-get install -qq -y --force-yes unzip libffi-dev libssl-dev libmysqlclient-dev python2.7-dev git ruby g++
+    apt-get -qq -y --force-yes install mysql-client-5.6
 else
     apt-get install -qq -y --force-yes unzip libffi-dev libssl-dev libmysqlclient-dev mysql-client-5.6 python2.7-dev git ruby g++
 fi
