@@ -41,7 +41,7 @@ else
 fi
 echo "Dependencies Installed"
 
-# If this is local development, clean out lib for a re-structuring
+# If this is local development, clean out lib for a re-structuring 
 if [ -z "${CI}" ]; then
     # Clean out lib to prevent confusion over multiple builds in local development
     # and prep for local install
