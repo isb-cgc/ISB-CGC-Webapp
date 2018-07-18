@@ -20,14 +20,20 @@ import logging
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
+from time import sleep
 from google_helpers.bigquery.cohort_support import BigQuerySupport
 from cohorts.metadata_helpers import *
 from visualizations.data_access_views_v2 import get_confirmed_project_ids_for_cohorts
+from visualizations.feature_access_views_v2 import build_feature_ids
+from bq_data_access.v2.plot_data_support import get_merged_feature_vectors
+from bq_data_access.v2.data_access import FeatureVectorBigQueryBuilder
+from google_helpers.bigquery.service_v2 import BigQueryServiceSupport
+from cohorts.models import Project, Program
 
 logger = logging.getLogger('main_logger')
 
 def get_program_set_for_oncoprint(cohort_id_array):
-    return {'tcga'}
+    return Program.objects.filter(name='TCGA',is_public=True,active=True)
 
 
 def is_valid_genomic_build(genomic_build_param):
@@ -40,7 +46,7 @@ def is_valid_genomic_build(genomic_build_param):
 def oncoprint_view_data(request):
     try:
         gene_list_str = request.GET.get('gene_list', None)
-        gene_array = gene_list_str.split(',');
+        gene_array = gene_list_str.split(',')
         genomic_build = request.GET.get('genomic_build', None)
         cohort_id_param_array = request.GET.getlist('cohort_id', None)
 
@@ -59,6 +65,8 @@ def oncoprint_view_data(request):
 
         program_set = get_program_set_for_oncoprint(cohort_id_array)
         confirmed_project_ids, user_only_study_ids = get_confirmed_project_ids_for_cohorts(cohort_id_array)
+        # Only samples in projects from a data type's valid programs should be queried
+        projects_this_program_set = Project.objects.filter(id__in=confirmed_project_ids,program__in=program_set).values_list('id', flat=True)
 
         if not len(program_set):
             return JsonResponse(
@@ -130,9 +138,9 @@ def oncoprint_view_data(request):
                     ;
                 """
         project_id_stmt = ""
-        if confirmed_project_ids is not None:
-            project_id_stmt = ', '.join([str(project_id) for project_id in confirmed_project_ids])
-        project_clause = " OR project_id IN ({})".format(project_id_stmt) if confirmed_project_ids is not None else ""
+        if projects_this_program_set and len(projects_this_program_set):
+            project_id_stmt = ', '.join([str(project_id) for project_id in projects_this_program_set])
+        project_clause = " OR project_id IN ({})".format(project_id_stmt) if projects_this_program_set else ""
 
         gene_list_stm = ''
         if gene_array is not None:
@@ -146,7 +154,7 @@ def oncoprint_view_data(request):
             table_id=settings.BIGQUERY_COHORT_TABLE_ID)
 
         bq_table_info = BQ_MOLECULAR_ATTR_TABLES['TCGA'][genomic_build]
-        query = query_template.format(bq_data_project_id = settings.BIGQUERY_DATA_PROJECT_NAME,
+        somatic_mut_query = query_template.format(bq_data_project_id = settings.BIGQUERY_DATA_PROJECT_NAME,
                                         dataset_name=bq_table_info['dataset'],
                                         table_name=bq_table_info['table'],
                                         conseq_col=("one_consequence" if genomic_build == "hg38" else 'consequence'),
@@ -155,13 +163,45 @@ def oncoprint_view_data(request):
                                         cohort_id_list=cohort_id_list,
                                         project_clause=project_clause)
 
-        results = BigQuerySupport.execute_query_and_fetch_results(query)
+
+
+        somatic_mut_query_job = BigQuerySupport.insert_query_job(somatic_mut_query)
+
         plot_data = []
+
+        # Build the CNVR features
+        for gene in gene_array:
+            feature = build_feature_ids(
+                "CNVR", {'value_field': 'segment_mean', 'gene_name': gene, 'genomic_build': genomic_build}
+            )[0]['internal_feature_id']
+
+            fvb = FeatureVectorBigQueryBuilder.build_from_django_settings(BigQueryServiceSupport.build_from_django_settings())
+            data = get_merged_feature_vectors(fvb, feature, None, None, cohort_id_array, None, projects_this_program_set, program_set=program_set)['items']
+
+            if data and len(data):
+                for item in data:
+                    # 01A are tumor samples, which is what we want
+                    if item['sample_id'].split('-')[-1] == '01A':
+                        seg_mean = float(item['x'])
+                        if seg_mean > 0.112 or seg_mean < -0.112:
+                            cnvr_result = "AMP" if seg_mean > 1 else "GAIN" if seg_mean > 0.62 else "HOMDEL" if seg_mean < -1 else "HETLOSS"
+                            plot_data.append("{}\t{}\t{}\t{}".format(item['case_id'],gene,cnvr_result,"CNA"))
+
+        attempts = 0
+        job_is_done = BigQuerySupport.check_job_is_done(somatic_mut_query_job)
+        while attempts < settings.BQ_MAX_ATTEMPTS and not job_is_done:
+            job_is_done = BigQuerySupport.check_job_is_done(somatic_mut_query_job['jobReference'])
+            sleep(1)
+            attempts += 1
+
+        if job_is_done:
+            results = BigQuerySupport.get_job_results(somatic_mut_query_job['jobReference'])
 
         if results and len(results) > 0:
             for row in results:
                 plot_data.append("{}\t{}\t{}\t{}".format(str(row['f'][0]['v']),str(row['f'][1]['v']),str(row['f'][2]['v']),str(row['f'][3]['v'])))
 
+        if len(plot_data):
             return JsonResponse({
                 'plot_data': plot_data,
                 'gene_list': gene_array,

@@ -1,5 +1,5 @@
 <div id="igv-files" class="tab-pane data-tab" data-file-type="igv" role="tabpanel">
-    <div id="igv-filter-panel" class="col-lg-3 col-md-3 col-sm-3">
+    <div id="igv-filter-panel" class="col-lg-3 col-md-3 col-sm-3 side-filter-panel">
         <div class="panel panel-default">
             <div class="panel-body">
                 <label for="build">Build</label>
@@ -13,6 +13,30 @@
             {% for attr_build, vals in metadata_data_attr.items %}
             <div class="panel-body tab-content filter-build-panel" data-filter-build="{{ attr_build }}" id="igv-filter-panel-{{ attr_build }}" {% if build != attr_build %}style="display: none;"{% endif %}>
                 <ul class="list-group" id="metadata-data-accordian-igv" role="tablist" aria-multiselectable="true">
+                    <li class="list-group-item">
+                        <div id="heading-igv-{{ attr_build }}-case-id" class="list-group-item__heading">
+                            <a role="button" data-toggle="collapse" data-parent="#metadata-data-accordian-all"
+                               href="#collapse-igv-{{ attr_build }}-case-id" aria-expanded="false"
+                               aria-controls="collapse-igv-{{ attr_build }}-case-id">
+                                <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> CASE
+                            </a>
+                        </div>
+                        <div id="collapse-igv-{{ attr_build }}-case-id"
+                             class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"
+                             data-feature-type="donor"
+                             aria-labelledby="heading-igv-{{ attr_build }}-case-id" data-feature-name="case-id"
+                             data-feature-displ-name="CASE ID">
+                            <div class="search_enter">
+                                <div class="search_input">
+                                    <input class="case-barcode-search-text" type="search" placeholder="Case Barcode"
+                                           value="">
+                                    <a class="case-barcode-search-clear-btn search_clear_btn"><i class="fa fa-times-circle"></i></a>
+                                    <a class="case-barcode-search-btn search_btn"><i class="fa fa-search"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
                     {% for attr in vals %}
                         <li class="list-group-item">
                             <div id="heading-igv-{{ attr_build }}-{{attr.name}}" class="list-group-item__heading">
@@ -69,6 +93,10 @@
         </div>
     </div>
     <div id="igv-file-panel" class="col-lg-9 col-md-9 col-sm-9" role="tabpanel">
+        <div class="file-panel-toggle">
+            <a class="fa fa-angle-double-left" title="Click to hide the filters"></a>
+            <a class="fa fa-angle-double-right" title ="Click to see the filters"></a>
+        </div>
         <div class="panel panel-default">
             <div class="panel-heading">
                 <input type="submit" form ="view-igv" value="Launch IGV" class="btn btn-primary pull-right igv" />
@@ -126,13 +154,20 @@
                     </div>
                     <div class="dataTables_goto_page"><label>Page</label>
                         <input type="number" class="goto-page-number" min="1" max="1">
-                        <input type="button" class="goto-page-button btn-sm" value="Go">
+                        <div class="goto-page-button dataTables_button">Go</div>
                     </div>
                     <div class="dataTables_paginate">
-                        <a class="prev-page paginate_button disabled">Previous</a>
+                        <a class="prev-page paginate_button dataTables_button disabled">Previous</a>
                         <span class="paginate_button_space"/>
-                        <a class="next-page paginate_button">Next</a>
+                        <a class="next-page paginate_button dataTables_button">Next</a>
                     </div>
+{#                    <div class="dataTables_search">#}
+{#                        <div class="dataTables_search_input">#}
+{#                            <input class="case-barcode-search-text" type="search" placeholder="Case Barcode" value="">#}
+{#                            <a class="case-barcode-search-clear-btn"><i class="fa fa-times-circle"></i></a>#}
+{#                        </div>#}
+{#                        <div class="case-barcode-search-btn dataTables_button"><i class="fa fa-search"></i></div>#}
+{#                    </div>#}
                 </div>
                 <div class="column-inputs">
                     <a role="button" data-toggle="collapse" href="#column-toggle-div-igv" aria-expanded="false" aria-controls="column-toggle-div-igv">

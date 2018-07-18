@@ -43,11 +43,11 @@
     {% endif %}
     <h1 class="page-header pull-left">Create Cohort - Filters</h1>
     {% if workbook %}
-        <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal">Apply to Worksheet</button>
+        <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal" title="Please select at least one filter." disabled>Apply to Worksheet</button>
     {% elif create_workbook %}
-        <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal">Apply to new Worksheet</button>
+        <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal" title="Please select at least one filter." disabled>Apply to new Worksheet</button>
     {% else %}
-        <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal">Save As New Cohort</button>
+        <button class="btn btn-primary pull-right" data-toggle="modal" data-target="#create-cohort-modal" title="Please select at least one filter." disabled>Save As New Cohort</button>
     {% endif %}
 </div>
 
@@ -104,17 +104,7 @@
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <h4 class="modal-title" id="createCohortModal">Create Cohort</h4>
-                </div>
-                {% if workbook and worksheet %}
-                    <form id="create-cohort-form" method="POST" action="{% url 'save_cohort_for_existing_workbook' %}" >
-                    <input type="hidden" value="{{ worksheet.id }}" name="worksheet_id" />
-                    <input type="hidden" value="{{ workbook.id }}" name="workbook_id" />
-                {% elif create_workbook %}
-                    <form id="create-cohort-form" method="POST" action="{% url 'save_cohort_for_new_workbook' %}" >
-                {% else %}
-                    <form id="create-cohort-form" method="POST" action="{% url 'save_cohort' %}">
-                {% endif %}
-                    <div class="modal-body">
+                    <div class="modal-js-messages" id="create-cohort-modal-js-messages">
                         <div id="multi-prog-cohort-create-warn" class="alert alert-warning alert-dismissable" style="display: none;">
                             <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                             Your cohort contains samples from multiple programs. Please note that filters will only apply to samples from the program indicated
@@ -128,6 +118,18 @@
                             <button type="button" class="close" data-hide="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                             You must choose at least one filter to include samples in your cohort.
                         </div>
+                    </div>
+                </div>
+                {% if workbook and worksheet %}
+                    <form id="create-cohort-form" method="POST" action="{% url 'save_cohort_for_existing_workbook' %}" >
+                    <input type="hidden" value="{{ worksheet.id }}" name="worksheet_id" />
+                    <input type="hidden" value="{{ workbook.id }}" name="workbook_id" />
+                {% elif create_workbook %}
+                    <form id="create-cohort-form" method="POST" action="{% url 'save_cohort_for_new_workbook' %}" >
+                {% else %}
+                    <form id="create-cohort-form" method="POST" action="{% url 'save_cohort' %}">
+                {% endif %}
+                    <div class="modal-body">
                         <div class="form-group">
                             <label for="cohort-name">Name:</label>
                             <input class="form-control" type="text" id="create-cohort-name" name="name" required />

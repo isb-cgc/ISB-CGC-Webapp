@@ -43,7 +43,6 @@ from accounts.models import GoogleProject
 from accounts.sa_utils import get_nih_user_details
 
 from allauth.socialaccount.models import SocialAccount
-from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 
 from django.http import HttpResponse, JsonResponse
 
@@ -122,7 +121,7 @@ def user_detail(request, user_id):
     if int(request.user.id) == int(user_id):
 
         user = User.objects.get(id=user_id)
-        social_account = SocialAccount.objects.get(user_id=user_id)
+        social_account = SocialAccount.objects.get(user_id=user_id, provider='google')
 
         user_details = {
             'date_joined':  user.date_joined,
@@ -136,7 +135,8 @@ def user_detail(request, user_id):
 
         user_details['gcp_list'] = len(GoogleProject.objects.filter(user=user))
 
-        nih_details = get_nih_user_details(user_id)
+        forced_logout = request.session['dcfForcedLogout'] if 'dcfForcedLogout' in request.session else None
+        nih_details = get_nih_user_details(user_id, forced_logout)
         for key in nih_details.keys():
             user_details[key] = nih_details[key]
 
