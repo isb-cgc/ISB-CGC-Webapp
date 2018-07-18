@@ -16,10 +16,10 @@ var MUT_COLOR_GERMLINE = '#FFFFFF';
 var MUT_COLOR_INTRON = '#f922a3';
 var MUT_COLOR_miRNA = '#00ced1';
 var MUT_COLOR_INTERGENIC = '#999900';
-var MUT_COLOR_TRANSCRIPT = '#ADFF2F';
+var MUT_COLOR_TRANSCRIPT = '#e0bf2c';
 var MUT_COLOR_REGULATORY = '#28e3ed';
-var MUT_COLOR_3PRIME = '#FFA942';
-var MUT_COLOR_5PRIME = '#5312c4';
+var MUT_COLOR_3PRIME = '#16ad53';
+var MUT_COLOR_5PRIME = '#ab59c6';
 
 
 var PROT_COLOR_UP = "#9224A6";
@@ -47,7 +47,7 @@ var non_mutation_rule_params = {
 	'amp': {
 	    shapes: [{
 		    'type': 'rectangle',
-		    'fill': 'rgba(255,0,0,1)',
+		    'fill': 'rgba(249,206,137,1)',
 		    'x': '0%',
 		    'y': '0%',
 		    'width': '100%',
@@ -73,7 +73,7 @@ var non_mutation_rule_params = {
 	'homdel': {
 	    shapes: [{
 		    'type': 'rectangle',
-		    'fill': 'rgba(0,0,255,1)',
+		    'fill': 'rgba(222,197,249,1)',
 		    'x': '0%',
 		    'y': '0%',
 		    'width': '100%',
@@ -86,7 +86,7 @@ var non_mutation_rule_params = {
 	'hetloss': {
 	    shapes: [{
 		    'type': 'rectangle',
-		    'fill': 'rgba(143, 216, 216,1)',
+		    'fill': 'rgba(209, 227, 255,1)',
 		    'x': '0%',
 		    'y': '0%',
 		    'width': '100%',

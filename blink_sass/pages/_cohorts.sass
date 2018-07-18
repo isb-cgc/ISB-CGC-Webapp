@@ -467,7 +467,6 @@
         .panel
             .panel-heading
                 background-color: #fff
-
             .panel-body
                 padding: 10px 10px 10px 10px
                 ul
@@ -477,9 +476,13 @@
             input
                 margin-right: 5px
 
+    .panel-heading
+        margin-left: 16px
+
     .filelist-panel
         h4
-            display: inline
+            margin-top: 10px
+            display: inline-block
         .page-num, .file-count
             display: inline-block
         table
@@ -500,6 +503,12 @@
                         white-space: nowrap
                         overflow: hidden
                         text-overflow: ellipsis
+                .study-uid
+                    display: block
+                    white-space: nowrap
+                    overflow: hidden
+                    text-overflow: ellipsis
+                    text-decoration: none
                 div
                     &.col-filename, &.study-uid
                         &:hover
@@ -523,6 +532,51 @@
                             color: $isb-success
         input
             margin-left: 5px
+
+    .side-filter-panel
+        transition: width 0.45s ease-in-out
+        *
+            opacity: 1
+            transition: opacity 0.45s ease-in-out
+        &.closed
+            width: 0px
+            padding: 0
+            transition: width 0.45s ease-in-out
+            *
+                opacity: 0
+                z-index: -1
+                transition: opacity 0.45s ease-in-out
+
+    .file-panel-toggle
+        position: absolute
+        padding: 0
+        top: 8px
+        height: 45px
+        cursor: pointer
+        border-radius: 0 3px 3px 0
+        border-width: 1px 1px 1px 0
+        background-color: $gray-button-bg
+        width: 18px
+        &:hover
+            background-color: $warning-bgcolor-dark !important
+        .fa-angle-double-right
+            display: none
+        &.open
+            .fa-angle-double-right
+                display: inline-block
+            .fa-angle-double-left
+                display: none
+        a
+            display: block
+            width: 18px
+            line-height: 43px
+            text-align: center
+            font-weight: 700
+            font-size: 18px
+            color: $white
+            &:hover
+                text-decoration: none
+
     .nav-tabs
         li,li.active
             a
@@ -679,6 +733,8 @@ span.code
             display: inline-block
 
 #export-to-bq-modal, #export-to-gcs-modal
+    .modal-header
+        padding-bottom: 10px
     .spinner
         position: absolute
         width: 100%

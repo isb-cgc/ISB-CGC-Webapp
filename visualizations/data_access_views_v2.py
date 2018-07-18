@@ -165,6 +165,9 @@ def get_confirmed_project_ids_for_cohorts(cohort_id_array):
                 confirmed_study_ids.append(project.id)
             else:
                 user_only_study_ids.append(project.id)
+
+    logger.info("In get_confirmed_project_ids_for_cohorts, confirmed study IDs: {}".format(str(confirmed_study_ids)))
+
     return confirmed_study_ids, user_only_study_ids
 
 
@@ -262,9 +265,12 @@ def data_access_for_plot(request):
 
         user_programs = get_user_program_id_set_for_user_only_projects(user_only_study_ids)
 
+        # Fix for #2381: confirmed_study_ids MUST ALWAYS contain the public dataset project IDs, because that's how we
+        # enable older cohorts which didn't store project IDs (check for NULL) against ones where we did require the
+        # project ID
         if len(user_programs):
             program_set.update(user_programs)
-            confirmed_study_ids = user_only_study_ids
+            confirmed_study_ids += user_only_study_ids
 
         data = get_merged_feature_vectors(fvb, x_id, y_id, c_id, cohort_id_array, logTransform, confirmed_study_ids, program_set=program_set)
 

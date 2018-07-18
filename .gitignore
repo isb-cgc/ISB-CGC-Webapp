@@ -73,6 +73,7 @@ target/
 *.env
 !sample.env
 scripts/metadata_featdef_tables.sql
+*secrets.txt
 
 # dummy datasets
 *.tsv
