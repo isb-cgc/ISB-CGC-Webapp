@@ -296,7 +296,7 @@ require([
     $('.tab-content').on('change', '.mut-filter-combine',function(){
         var comb = $(this).find(':selected').val();
         var not_comb = $(this).find(':not(:selected)').val();
-        $('input[name="mut_filter_combine"]').val(comb);
+        $('input[name="mut_filter_combine"]').val(comb.toUpperCase());
         $('span.mol-filter').toggleClass('filter-combine-'+comb);
         $('span.mol-filter').toggleClass('filter-combine-'+not_comb);
         update_displays();
