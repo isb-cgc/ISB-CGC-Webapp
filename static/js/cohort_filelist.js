@@ -615,10 +615,12 @@ require([
     }
 
     $('.data-tab-content').on('click', '.file-panel-toggle', function () {
-        $(this).parent().toggleClass('col-lg-9 col-md-9 col-sm-9');
-        $(this).parent().toggleClass('col-lg-12 col-md-12 col-sm-12 open');
+        var this_tab = $(this).parents('.data-tab').data('file-type');
+        var active_file_panel = $('#'+this_tab+'-file-panel');
+        active_file_panel.toggleClass('col-lg-9 col-md-9 col-sm-9');
+        active_file_panel.toggleClass('col-lg-12 col-md-12 col-sm-12 open');
         $(this).toggleClass('open');
-        $(this).parent().prev('.side-filter-panel').toggleClass('closed');
+        active_file_panel.prev('.side-filter-panel').toggleClass('closed');
     });
 
     //toggle column display
