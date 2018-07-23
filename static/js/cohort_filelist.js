@@ -618,9 +618,9 @@ require([
         var this_tab = $(this).parents('.data-tab').data('file-type');
         var active_file_panel = $('#'+this_tab+'-file-panel');
         active_file_panel.toggleClass('col-lg-9 col-md-9 col-sm-9');
-        active_file_panel.toggleClass('col-lg-12 col-md-12 col-sm-12 open');
+        active_file_panel.toggleClass('col-lg-12 col-md-12 col-sm-12');
         $(this).toggleClass('open');
-        active_file_panel.prev('.side-filter-panel').toggleClass('closed');
+        active_file_panel.prev('.side-filter-panel').toggleClass('hidden');
     });
 
     //toggle column display
