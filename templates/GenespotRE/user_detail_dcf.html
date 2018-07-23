@@ -109,15 +109,15 @@
                 </div>
                 <div class="modal-body">
                     <p>
-                        You will now be sent to the Data Commons Framework (DCF) site to link your NIH and Google IDs.
-                        This will take three steps the first time you do it:
+                        You will now be sent to the Data Commons Framework (DCF) site to login to NIH and then to link your
+                        NIH and Google IDs. This will take three steps the first time you do it:
                         <ul>
                           <li>On the NIH iTrust page, login with your NIH ID and password.</li>
-                          <li>Next, you must allow ISB-CGC to access your account information (click "Yes, I authorize").</li>
-                          <li>Finally, you must login to the Data Commons Framework (i.e. "datacommons.io") <b>using your {{ user_details.email }} Google ID</b>.</li>
+                          <li>Next, you must allow ISB-CGC to access your account information (click <i>Yes, I authorize</i>).</li>
+                          <li>Finally, you must login to the Data Commons Framework (i.e. <i>datacommons.io</i>) <b>using your {{ user_details.email }} Google ID</b>.</li>
                         </ul>
                     </p>
-                    <p>If you are having problems with linking, you might try <a href="{% url 'dcf_simple_logout' %}">loggin out</a> of DCF before trying again.</p>
+                    <p>If you are having problems with linking, you might try <a href="{% url 'dcf_simple_logout' %}">logging out</a> of DCF before trying again.</p>
                 </div>
                 <form id="link-nih-account" method="GET" action="{% url 'dcf_login' %}">
                     {% csrf_token %}
