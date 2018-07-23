@@ -143,10 +143,20 @@
         ]
     };
     var tab_case_barcode ={
-        'all': ''
-        ,'igv': ''
-        ,'camic': ''
-        ,'dicom': ''
+        'all': {
+            'HG19': '',
+            'HG38': ''
+        },
+        'igv': {
+            'HG19': '',
+            'HG38': ''
+        },
+        'camic': {
+            'HG19': ''
+        },
+        'dicom': {
+            'HG19': ''
+        }
     };
     var download_url = '{{ download_url }}';
     var ajax_update_url = {

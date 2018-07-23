@@ -312,7 +312,8 @@ require([
 
         $(tab_selector).find('.download-link').attr('href', download_url + '?'
             + (filter_args ? filter_args + '&' : '')
-            + (tab_case_barcode[active_tab] ? 'case_barcode='+ encodeURIComponent(tab_case_barcode[active_tab]) + '&' : '')
+            + (tab_case_barcode[active_tab] && Object.keys(tab_case_barcode[active_tab][build]).length > 0 ?
+                    'case_barcode='+ encodeURIComponent(tab_case_barcode[active_tab][build]) + '&' : '')
             + 'downloadToken='+downloadToken+'&total=' + Math.min(FILE_LIST_MAX,file_list_total));
         if(active_tab !== 'camic' && active_tab !== 'dicom') {
             $(tab_selector).find('.download-link').attr('href',$(tab_selector).find('.download-link').attr('href')+'&build='+build);
@@ -339,8 +340,8 @@ require([
             var filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab][build]));
             url += '&'+filter_args;
         }
-        if(tab_case_barcode[active_tab]){
-            url += '&case_barcode='+ encodeURIComponent(tab_case_barcode[active_tab]);
+        if(tab_case_barcode[active_tab] && Object.keys(tab_case_barcode[active_tab][build]).length >0){
+            url += '&case_barcode='+ encodeURIComponent(tab_case_barcode[active_tab][build]);
         }
         if(active_tab !== 'camic' && active_tab !== 'dicom') {
             url += '&build='+$(tab_selector).find('.build :selected').val();
@@ -594,14 +595,6 @@ require([
         var search_input = $(this).siblings('.case-barcode-search-text');
         search_input.val(search_input.val().trim());
         search_case_barcode(this_tab, search_input.val());
-
-        /*
-        var this_tab = $(this).parents('.data-tab').data('file-type');
-        var search_input = $(this).siblings('.dataTables_search_input').children('.case-barcode-search-text');
-        tab_case_barcode[this_tab] = $(this).siblings('.dataTables_search_input').children('.case-barcode-search-text').val().trim();
-        tab_page[this_tab] = 1;
-        update_displays(this_tab);
-        */
     });
 
     $('.data-tab-content').on('click', '.case-barcode-search-clear-btn', function () {
@@ -612,8 +605,10 @@ require([
     });
 
     function search_case_barcode(tab, search_input_val){
-        if(search_input_val.trim() != tab_case_barcode[tab]) {
-            tab_case_barcode[tab] = search_input_val.trim();
+        var build = $('#'+tab+'-files').find('.build :selected').val();
+        if(!tab_case_barcode[tab] || Object.keys(tab_case_barcode[tab][build]).length == 0
+                                                        || search_input_val.trim() != tab_case_barcode[tab][build]) {
+            tab_case_barcode[tab][build] = search_input_val.trim();
             tab_page[tab] = 1;
             update_displays(tab);
         }
@@ -769,8 +764,8 @@ require([
             var build = $('#'+active_tab+'-files').find('.build :selected').val();
             var files_per_page = tab_files_per_page[active_tab];
             var url = ajax_update_url[active_tab] + '?files_per_page=' +files_per_page + (active_tab != 'camic' && active_tab != 'dicom'  ? '&build='+build : '');
-            if(tab_case_barcode[active_tab]){
-                url += '&case_barcode='+ encodeURIComponent(tab_case_barcode[active_tab]);
+            if(tab_case_barcode[active_tab] && Object.keys(tab_case_barcode[active_tab][build]).length > 0){
+                url += '&case_barcode='+ encodeURIComponent(tab_case_barcode[active_tab][build]);
             }
             if(SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab][build]).length > 0) {
                 url += '&filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab][build]));
@@ -877,8 +872,8 @@ require([
         if(Object.keys(SELECTED_FILTERS[tab_type][build]).length > 0) {
             Object.assign(filter_param, SELECTED_FILTERS[tab_type][build]);
         }
-        if(tab_case_barcode[tab_type]) {
-            filter_param['case_barcode'] = tab_case_barcode[tab_type];
+        if(tab_case_barcode[tab_type] && Object.keys(tab_case_barcode[tab_type][build]).length > 0) {
+            filter_param['case_barcode'] = tab_case_barcode[tab_type][build];
         }
 
         if(Object.keys(filter_param).length>0){
