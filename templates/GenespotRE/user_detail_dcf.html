@@ -105,17 +105,19 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="link-nih-account-header">Link {{ user_details.email }} to an NIH identity?</h4>
+                    <h4 class="modal-title" id="link-nih-account-header">Link {{ user_details.email }} to an NIH identity</h4>
                 </div>
                 <div class="modal-body">
                     <p>
-                        You will now be going to the Data Commons Framework (DCF) to log in. There will be three steps:
+                        You will now be sent to the Data Commons Framework (DCF) site to link your NIH and Google IDs.
+                        This will take three steps the first time you do it:
                         <ul>
-                          <li>On the iTrust login page, login with your NIH ID and password.</li>
-                          <li>Next, you must approve ISB-CGC access.</li>
-                          <li>Finally, you must login to the Data Commons Framework using only your {{ user_details.email }} Google ID.</li>
+                          <li>On the NIH iTrust page, login with your NIH ID and password.</li>
+                          <li>Next, you must allow ISB-CGC to access your account information (click "Yes, I authorize").</li>
+                          <li>Finally, you must login to the Data Commons Framework (i.e. "datacommons.io") <b>using your {{ user_details.email }} Google ID</b>.</li>
                         </ul>
                     </p>
+                    <p>If you are having problems with linking, you might try <a href="{% url 'dcf_simple_logout' %}">loggin out</a> of DCF before trying again.</p>
                 </div>
                 <form id="link-nih-account" method="GET" action="{% url 'dcf_login' %}">
                     {% csrf_token %}
@@ -124,7 +126,6 @@
                         <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
                     </div>
                 </form>
-                <p>Having problems? You might need to <a href="{% url 'dcf_simple_logout' %}">logout</a> from DCF first.</p>
             </div>
         </div>
     </div>
