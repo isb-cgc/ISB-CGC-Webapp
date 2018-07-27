@@ -173,7 +173,12 @@ def oncoprint_view_data(request):
         for gene in gene_array:
             feature = build_feature_ids(
                 "CNVR", {'value_field': 'segment_mean', 'gene_name': gene, 'genomic_build': genomic_build}
-            )[0]['internal_feature_id']
+            )
+            if not feature or not len(feature):
+                logger.warn("[WARNING] No internal feature ID found for CNVR, gene {}, build {}.".format(gene,genomic_build))
+                continue
+
+            feature = feature[0]['internal_feature_id']
 
             fvb = FeatureVectorBigQueryBuilder.build_from_django_settings(BigQueryServiceSupport.build_from_django_settings())
             data = get_merged_feature_vectors(fvb, feature, None, None, cohort_id_array, None, projects_this_program_set, program_set=program_set)['items']
