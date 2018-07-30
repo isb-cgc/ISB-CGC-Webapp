@@ -1,0 +1,141 @@
+{% load staticfiles %}
+{% load tz %}
+
+{% block dcf_content %}
+
+    {% if user_details.error_state%}
+        <p>{{ user_details.error_state }}</p>
+    {% elif user_details.dcf_comm_error%}
+        <p>Currently unable to contact Data Commons Framework. Please try later. </p>
+    {# User has tried to sign in with a conflicting NIH Username and must be forced to change it: #}
+    {% elif user_details.force_DCF_logout%}
+        <p><a href="{% url 'dcf_simple_logout' %}">Logout from Data Commons now to restart linking process.</a></p>
+    {# User is linked, but has never talked to DCF #}
+    {% elif user_details.legacy_linkage%}
+        <p><a data-toggle="modal" data-target="#link-nih-account-modal">Please use new Data Commons login process to re-establish NIH identity: {{ user_details.NIH_username }}</a></p>
+    {# Refresh token has expired (30 days). User must log into DCF again #}
+    {% elif user_details.refresh_required%}
+        <p><a href="{% url 'dcf_login' %}">Stored Data Commons credentials have expired. Please log in again to refresh.</a></p>
+     {# User has *never* been seen before with an NIH login, or they have disconnected from it. #}
+    {% elif not user_details.NIH_username %}
+        <p>Apply for dbGaP Authorized Access to access underlying Level 1 genomics data.</p>
+        <p><a data-toggle="modal" data-target="#link-nih-account-modal">Associate with eRA Commons Account</a></p>
+        <p><a href="https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login" target="_blank">Learn More</a></p>
+    {# We have no Google ID on record for the user, so they need to do the whole login process. Note that if #}
+    {# the record was nulled as part of a bad link attempt, that should be caught above as a forced logout. #}
+    {# If they need to use another NIH ID, that should also result in a forced logout. #}
+    {# If the user gets here anyway, if they have stale cookie problems, that should result in an eventual forced logout #}
+    {% elif user_details.no_google_link or user_details.link_mismatch %}
+        <p><a data-toggle="modal" data-target="#link-nih-account-modal">Log in to Data Commons to complete the linking process.</a></p>
+        <hr>
+        <p><a data-toggle="modal" data-target="#unlink-nih-account-modal">Unlink {{ user_details.email }} from the NIH identity: {{ user_details.NIH_username }}</a></p>
+    {# User has been seen, has a current token, is linked, and just needs to ask to be put back on lists. #}
+    {# NOTE this captures all users outside of 24 hours #}
+    {% elif not user_details.NIH_active %}
+        <p><a href="{% url 'dcf_link_extend' %}">Obtain controlled access for 24 hours.</a></p>
+        <hr>
+        <p><a data-toggle="modal" data-target="#unlink-nih-account-modal">Unlink {{ user_details.email }} from the NIH identity: {{ user_details.NIH_username }}</a></p>
+    {# They are linked and active, but have no datasets they are authorized for #}
+    {% elif not user_details.dbGaP_has_datasets %}
+        <p><i class="fa fa-check-circle"></i> eRA Account Authenticated</p>
+        <hr>
+        <p>Congratulations, {{ user_details.NIH_username }}! Your eRA account has been authenticated, but we do not currently
+           have any authorized datasets on record for this NIH username. Recently authorized datasets may take up to 24 hours
+           to verify. If you believe this is in error, please contact dbGaP and inquire about your status on the dataset whitelists.</p>
+        <p><a href="https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login" target="_blank">How to Apply for dbGaP Access</a></p>
+        <p>Your access is valid until:</p>
+            <p id="NIH_expiration"></p>
+        <hr>
+        <p><a data-toggle="modal" data-target="#unlink-nih-account-modal">Unlink {{ user_details.email }} from the NIH identity: {{ user_details.NIH_username }}</a></p>
+    {# Everything is great. Note we only tell people what they are valid during their 24 hour access period. #}
+    {% else %}
+        <p><i class="fa fa-check-circle"></i> dbGaP Access Authorized</p>
+        <hr>
+        {% with user_datasets_count=user_details.auth_datasets|length user_auth_datasets=user_details.auth_datasets %}
+            <p>Congratulations, {{ user_details.NIH_username }}! You now have access to the following ISB-CGC controlled dataset{% if user_datasets_count > 1 %}s{% endif %}:</p>
+            <ul>
+                {% for dataset in user_auth_datasets %}
+                    <li><a href="https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id={{ dataset.whitelist_id }}" target="_BLANK">{{ dataset.name }}</a>{% if dataset.duca_id %} - <a href="https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?view_pdf&stacc={{ dataset.duca_id }}" target="_BLANK">DUCA</a>{% endif %}</li>
+                {% endfor %}
+            </ul>
+            <p>Your access is valid until:</p>
+            <p id="NIH_expiration"></p>
+            <p><a href="{% url 'dcf_link_extend' %}">Extend controlled access period to 24 hours from now.</a></p>
+            <hr>
+            <p><a data-toggle="modal" data-target="#unlink-nih-account-modal">Unlink {{ user_details.email }} from the NIH identity: {{ user_details.NIH_username }}</a></p>
+        {% endwith %}
+    {% endif %}
+
+
+    {# Always include the unlinking dialog #}
+    {# Previously (eRA SAML), it was only here is we were not active. That is not relevant anymore, if it ever was.#}
+    {# Have removed the "not user_details.NIH_active" test #}
+    {% if user_details.NIH_username %}
+    <div class="modal fade" id="unlink-nih-account-modal" tabindex="-1" role="dialog" aria-labelledby="unlink-nih-account-header" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="unlink-nih-account-header">Unlink {{ user_details.email }} from the NIH identity '{{ user_details.NIH_username }}'?</h4>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        This will remove your access to any controlled datasets. In addition, service accounts from Google Cloud Projects you are associated with
+                        which were accessing controlled data will also lose their access.
+                    </p>
+                </div>
+                <form id="unlink-nih-account" method="GET" action="{% url 'dcf_disconnect_user' %}">
+                    {% csrf_token %}
+                    <div class="modal-footer">
+                        <input type="submit" value="Unlink" class="btn btn-primary" />
+                        <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% endif %}
+
+
+    {# We need to provide some context to the user who is about to head off to DCF to run through three web pages and #}
+    {# log in twice. #}
+    <div class="modal fade" id="link-nih-account-modal" tabindex="-1" role="dialog" aria-labelledby="link-nih-account-header" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="link-nih-account-header">Link {{ user_details.email }} to an NIH identity</h4>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        You will now be sent to the Data Commons Framework (DCF) site to login to NIH and then to link your
+                        NIH and Google IDs. This will take three steps the first time you do it:
+                        <ul>
+                          <li>On the NIH iTrust page, login with your NIH ID and password.</li>
+                          <li>Next, you must allow ISB-CGC to access your account information (click <i>Yes, I authorize</i>).</li>
+                          <li>Finally, you must login to the Data Commons Framework (i.e. <i>datacommons.io</i>) <b>using your {{ user_details.email }} Google ID</b>.</li>
+                        </ul>
+                    </p>
+                    <p>If you are having problems with linking, you might try <a href="{% url 'dcf_simple_logout' %}">logging out</a> of DCF before trying again.</p>
+                </div>
+                <form id="link-nih-account" method="GET" action="{% url 'dcf_login' %}">
+                    {% csrf_token %}
+                    <div class="modal-footer">
+                        <input type="submit" value="Go to DCF" class="btn btn-primary" />
+                        <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <script type="text/javascript"> 
+        var expiry_time = new Date("{{ user_details.NIH_assertion_expiration|safe }}".replace(" ","T"));
+        if(document.getElementById('NIH_expiration') != null)
+            document.getElementById('NIH_expiration').innerHTML = expiry_time; 
+    </script>
+{%  endblock %}

@@ -96,6 +96,7 @@ def submit_tcga_job(param_obj, project_id_number, bigquery_client, cohort_settin
     feature_id = param_obj.feature_id
     cohort_id_array = param_obj.cohort_id_array
     project_id_array = param_obj.project_id_array
+    logger.info("[STATUS] In submit_tcga_job, project_id_array: {}".format(str(project_id_array)))
     program_set = param_obj.program_set
 
     job_description = bigquery_runner.get_data_job_reference(

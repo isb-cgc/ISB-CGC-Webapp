@@ -1,11 +1,5 @@
-touch deployment.key.json
-echo "{\
-  \"private_key_id\": \"$GAE_PRIVATE_KEY_ID\",\
-  \"private_key\": \"$GAE_PRIVATE_KEY\",\
-  \"client_email\": \"$GAE_CLIENT_EMAIL\",\
-  \"client_id\": \"$GAE_CLIENT_ID\",\
-  \"type\": \"service_account\"\
-}" | tee deployment.key.json > /dev/null 2> /dev/null
-/home/ubuntu/${CIRCLE_PROJECT_REPONAME}/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file deployment.key.json
-/home/ubuntu/${CIRCLE_PROJECT_REPONAME}/google-cloud-sdk/bin/gcloud config set account $GAE_CLIENT_EMAIL
-/home/ubuntu/${CIRCLE_PROJECT_REPONAME}/google-cloud-sdk/bin/gcloud config set project "$GAE_PROJECT_ID"
+echo $PROD_PRIVATE_KEY_FOR_V2 | base64 --decode --ignore-garbage > deployment.key.json
+
+/home/circleci/${CIRCLE_PROJECT_REPONAME}/google-cloud-sdk/bin/gcloud auth activate-service-account --key-file deployment.key.json
+/home/circleci/${CIRCLE_PROJECT_REPONAME}/google-cloud-sdk/bin/gcloud config set account $GAE_CLIENT_EMAIL
+/home/circleci/${CIRCLE_PROJECT_REPONAME}/google-cloud-sdk/bin/gcloud config set project "$GAE_PROJECT_ID"

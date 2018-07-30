@@ -38,7 +38,7 @@ RUN dpkg --install /tmp/mysql-apt-config_0.8.9-1_all.deb
 RUN apt-get update
 
 # aaaand now let's install mysql-server
-RUN apt-get install -y --force-yes mysql-server
+RUN apt-get install -y mysql-server
 
 RUN apt-get -y install python-mysqldb
 RUN apt-get -y install python-pip
@@ -55,8 +55,9 @@ RUN easy_install -U distribute
 
 ADD . /app
 
-# We need to recompile some of the items because of differences in compiler versions
+# We need to recompile some of the items because of differences in compiler versions 
 RUN pip install -r /app/requirements.txt -t /app/lib/ --upgrade
+RUN pip install pycrypto==2.6.1 -t /app/lib --upgrade --only-binary all
 RUN pip install gunicorn==19.6.0
 
 ENV PYTHONPATH=/app:/app/lib:/app/google_appengine:/app/google_appengine/lib/protorpc-1.0
