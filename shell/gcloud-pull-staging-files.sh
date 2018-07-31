@@ -14,7 +14,7 @@ mkdir ./txt
 
 ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET}/${STATIC_COMMIT_CHECK_FILE}" ./
 
-if [ -n "${DEV_NIH_AUTH_ON}" ]; then
+if [ -n "${PROD_NIH_AUTH_ON}" ]; then
   ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET}/saml/advanced_settings.json" ./saml/advanced_settings.json
   ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET}/saml/settings.json" ./saml/settings.json
   ./google-cloud-sdk/bin/gsutil cp "gs://${GCLOUD_BUCKET}/saml/certs/cert.pem" ./saml/certs/cert.pem
