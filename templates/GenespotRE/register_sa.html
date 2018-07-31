@@ -43,7 +43,7 @@
                     <li>
                         <form id="verify-sa" method="POST" action="{% url 'verify_sa' user.id %}">
                             {% csrf_token %}
-                            <p>Your project's default Compute Engine Service Account ID is entered automtically; if you wish to register a different service account, delete the default ID and enter the other service account ID. Service Account IDs are located in your Google Cloud Platform console under IAM & Admin.</p>
+                            <p>Your project's default Compute Engine Service Account ID is entered automatically; if you wish to register a different service account, delete the default ID and enter the other service account ID. Service Account IDs are located in your Google Cloud Platform console under IAM & Admin.</p>
                             <label for="user_sa">Service Account ID</label>
                             <input id="user_sa" type="text" name="user_sa" placeholder="ex. 000000000000-alphanumericstringofcharacters@developer.gserviceaccount.com" value={{ default_sa_id }} class="form-control" required/>
                             <br />

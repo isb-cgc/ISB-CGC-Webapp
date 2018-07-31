@@ -142,6 +142,22 @@
             ['Study Instance UID', 1]
         ]
     };
+    var tab_case_barcode ={
+        'all': {
+            'HG19': '',
+            'HG38': ''
+        },
+        'igv': {
+            'HG19': '',
+            'HG38': ''
+        },
+        'camic': {
+            'HG19': ''
+        },
+        'dicom': {
+            'HG19': ''
+        }
+    };
     var download_url = '{{ download_url }}';
     var ajax_update_url = {
         'all': '{% url 'cohort_filelist_ajax_panel' cohort.id 'all' %}'
@@ -156,6 +172,7 @@
     var IMG_THUMBS_URL = '{{ img_thumbs_url }}';
     var HAS_USER_DATA = {% if has_user_data %}true{% else %}false{% endif %};
     var request_user_id = {{ user.id }};
+    var programs_this_cohort = {{ programs_this_cohort|tojson|safe }};
     </script>
 {% endblock %}
 

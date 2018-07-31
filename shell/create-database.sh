@@ -1,10 +1,12 @@
 if [ -n "$CI" ]; then
-    export HOME=/home/ubuntu
+    export HOME=/home/circleci
     export MYSQL_ROOT_USER=ubuntu
+    export MYSQL_DB_HOST=127.0.0.1
 else
     export $(cat /home/vagrant/www/.env | grep -v ^# | xargs) 2> /dev/null
     export HOME=/home/vagrant
     export MYSQL_ROOT_USER=root
+    export MYSQL_DB_HOST=localhost
 fi
 
 # MySQL Install
@@ -14,4 +16,4 @@ sudo debconf-set-selections <<< "mysql-server-5.6 mysql-server/root_password_aga
 sudo DEBIAN_FRONTEND=noninteractive apt-get -qq -y --force-yes install mysql-server-5.6
 
 echo "Creating Databases..."
-mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -e "CREATE DATABASE $DATABASE_NAME"
+mysql -u$MYSQL_ROOT_USER -p$MYSQL_ROOT_PASSWORD -h $MYSQL_DB_HOST -e "CREATE DATABASE $DATABASE_NAME"

@@ -34,6 +34,7 @@ require.config({
         'jqueryui': ['jquery'],
         'session_security': ['jquery'],
         'tokenfield': ['jquery', 'jqueryui'],
+        'underscore': {exports: '_'},
         'base': ['jquery', 'jqueryui', 'session_security', 'bootstrap', 'underscore']
     }
 });
@@ -41,13 +42,14 @@ require.config({
 require([
     'jquery',
     'base',
+    'underscore',
     'jqueryui',
     'bootstrap',
     'session_security',
     'tokenfield',
     'bq_export',
     'gcs_export'
-], function ($, base) {
+], function ($, base, _) {
 
     // For manaaging filter changes
     var UPDATE_PENDING = false;
@@ -63,6 +65,12 @@ require([
         'igv': {
             'HG19': {},
             'HG38': {}
+        },
+        'camic': {
+            'HG19': {}
+        },
+        'dicom': {
+            'HG19': {}
         }
     };
         
@@ -284,19 +292,33 @@ require([
                 }
                 break;
             case "camic":
-                filter_args = 'filters=' + encodeURIComponent(JSON.stringify({"data_type": ["Diagnostic image","Tissue slide image"]}));
+                if(!SELECTED_FILTERS[active_tab][build]["data_type"]) {
+                    SELECTED_FILTERS[active_tab][build]["data_type"] = [];
+                    SELECTED_FILTERS[active_tab][build]["data_type"].push("Diagnostic image");
+                    SELECTED_FILTERS[active_tab][build]["data_type"].push("Tissue slide image");
+                }
+                if (SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab][build]).length >0) {
+                    filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab][build]));
+                }
                 break;
             case "dicom":
-                filter_args = 'filters=' + encodeURIComponent(JSON.stringify({"data_type": ["Radiology image"]}));
+                var filters = {"data_type": ["Radiology image"]};
+                if (SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab][build]).length >0) {
+                    filters = Object.assign(filters, SELECTED_FILTERS[active_tab][build]);
+                }
+                filter_args = 'filters=' + encodeURIComponent(JSON.stringify(filters));
                 break;
         }
 
-        $(tab_selector).find('.download-link').attr('href', download_url + '?' + (filter_args ? filter_args + '&' : '')+ 'downloadToken='+downloadToken+'&total=' + Math.min(FILE_LIST_MAX,file_list_total));
-
+        $(tab_selector).find('.download-link').attr('href', download_url + '?'
+            + (filter_args ? filter_args + '&' : '')
+            + (tab_case_barcode[active_tab] && Object.keys(tab_case_barcode[active_tab][build]).length > 0 ?
+                    'case_barcode='+ encodeURIComponent(tab_case_barcode[active_tab][build]) + '&' : '')
+            + 'downloadToken='+downloadToken+'&total=' + Math.min(FILE_LIST_MAX,file_list_total));
         if(active_tab !== 'camic' && active_tab !== 'dicom') {
             $(tab_selector).find('.download-link').attr('href',$(tab_selector).find('.download-link').attr('href')+'&build='+build);
         }
-    };
+    }
 
     var update_table = function (active_tab, do_filter_count) {
         do_filter_count = (do_filter_count === undefined || do_filter_count === null ? true : do_filter_count);
@@ -318,7 +340,9 @@ require([
             var filter_args = 'filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab][build]));
             url += '&'+filter_args;
         }
-
+        if(tab_case_barcode[active_tab] && Object.keys(tab_case_barcode[active_tab][build]).length >0){
+            url += '&case_barcode='+ encodeURIComponent(tab_case_barcode[active_tab][build]);
+        }
         if(active_tab !== 'camic' && active_tab !== 'dicom') {
             url += '&build='+$(tab_selector).find('.build :selected').val();
         }
@@ -369,7 +393,7 @@ require([
                     html_page_button += "<span class='\ellipsis\'>...</span>"
                 }
                 else{
-                    html_page_button += "<a class=\'paginate_button numeric_button"+ (page_list[i] == page ? " current\'":"\'") +">" + page_list[i] + "</a>";
+                    html_page_button += "<a class=\'dataTables_button paginate_button numeric_button"+ (page_list[i] == page ? " current\'":"\'") +">" + page_list[i] + "</a>";
                 }
             }
             $(tab_selector).find('.file-page-count').show();
@@ -418,7 +442,7 @@ require([
             if(active_tab !== 'all') {
                 if (files[i]['cloudstorage_location'] && ((files[i]['dataformat'] == 'BAM') || (files[i]['datatype'] == 'Tissue slide image') || (files[i]['datatype'] == 'Diagnostic image'))) {
                     if(active_tab === 'igv' && files[i]['dataformat'] == 'BAM') {
-                        val = files[i]['cloudstorage_location'] + ';' + files[i]['cloudstorage_location'].substring(0, files[i]['cloudstorage_location'].lastIndexOf("/") + 1) + files[i]['index_name'] + ',' + files[i]['sample'];
+                        val = files[i]['cloudstorage_location'] + ';' + files[i]['index_name'] + ',' + files[i]['sample'];
                         dataTypeName = "gcs_bam";
                         label = "IGV";
                         checkbox_inputs += '<input class="igv'+(accessible? ' accessible':'')+'" type="checkbox" token-label="' + tokenLabel + '" program="' + files[i]['program'] + '" name="' + dataTypeName + '" data-type="' + dataTypeName + '" value="' + val + '"';
@@ -521,7 +545,7 @@ require([
         }
         $(tab_selector).find('.filelist-panel .spinner i').addClass('hidden');
 
-    };
+    }
 
     function goto_table_page(tab, page_no){
         tab_page[tab] = page_no;
@@ -530,7 +554,7 @@ require([
 
     $('.data-tab-content').on('click', '.goto-page-button', function () {
         var this_tab = $(this).parents('.data-tab').data('file-type');
-        var page_no_input = $(this).siblings('.goto-page-number').val()
+        var page_no_input = $(this).siblings('.goto-page-number').val();
         if (page_no_input == "")
             return;
         var page = parseInt(page_no_input);
@@ -564,6 +588,39 @@ require([
             page_no = 1;
         }
         goto_table_page(this_tab, page_no)
+    });
+
+    $('.data-tab-content').on('click', '.case-barcode-search-btn', function () {
+        var this_tab = $(this).parents('.data-tab').data('file-type');
+        var search_input = $(this).siblings('.case-barcode-search-text');
+        search_input.val(search_input.val().trim());
+        search_case_barcode(this_tab, search_input.val());
+    });
+
+    $('.data-tab-content').on('click', '.case-barcode-search-clear-btn', function () {
+        var this_tab = $(this).parents('.data-tab').data('file-type');
+        var search_input = $(this).siblings('.case-barcode-search-text');
+        search_input.val("");
+        search_case_barcode(this_tab, search_input.val());
+    });
+
+    function search_case_barcode(tab, search_input_val){
+        var build = $('#'+tab+'-files').find('.build :selected').val();
+        if(!tab_case_barcode[tab] || Object.keys(tab_case_barcode[tab][build]).length == 0
+                                                        || search_input_val.trim() != tab_case_barcode[tab][build]) {
+            tab_case_barcode[tab][build] = search_input_val.trim();
+            tab_page[tab] = 1;
+            update_displays(tab);
+        }
+    }
+
+    $('.data-tab-content').on('click', '.file-panel-toggle', function () {
+        var this_tab = $(this).parents('.data-tab').data('file-type');
+        var active_file_panel = $('#'+this_tab+'-file-panel');
+        active_file_panel.toggleClass('col-lg-9 col-md-9 col-sm-9');
+        active_file_panel.toggleClass('col-lg-12 col-md-12 col-sm-12');
+        $(this).toggleClass('open');
+        active_file_panel.prev('.side-filter-panel').toggleClass('hidden');
     });
 
     //toggle column display
@@ -649,19 +706,19 @@ require([
             SELECTED_FILTERS[active_tab][build][$(this).data('feature-name')].push($(this).data('value-name'));
         });
         tab_page[active_tab] = 1;
-    };
+    }
 
     function enqueueUpdate(active_tab){
         UPDATE_QUEUE.push(function(){
             update_displays(active_tab);
         });
-    };
+    }
 
     function dequeueUpdate(){
         if(UPDATE_QUEUE.length > 0) {
             UPDATE_QUEUE.shift()();
         }
-    };
+    }
 
     function pagination(c, m) {
         var current = parseInt(c),
@@ -689,7 +746,7 @@ require([
             l = range[i];
         }
         return rangeWithDots;
-    };
+    }
 
     var update_displays = function(active_tab) {
         // If a user has clicked more filters while an update was going out, queue up a future update and return
@@ -708,7 +765,10 @@ require([
         update_displays_thread = setTimeout(function(){
             var build = $('#'+active_tab+'-files').find('.build :selected').val();
             var files_per_page = tab_files_per_page[active_tab];
-            var url = ajax_update_url[active_tab] + '?build=' + build +'&files_per_page=' +files_per_page;
+            var url = ajax_update_url[active_tab] + '?files_per_page=' +files_per_page + (active_tab != 'camic' && active_tab != 'dicom'  ? '&build='+build : '');
+            if(tab_case_barcode[active_tab] && Object.keys(tab_case_barcode[active_tab][build]).length > 0){
+                url += '&case_barcode='+ encodeURIComponent(tab_case_barcode[active_tab][build]);
+            }
             if(SELECTED_FILTERS[active_tab] && Object.keys(SELECTED_FILTERS[active_tab][build]).length > 0) {
                 url += '&filters=' + encodeURIComponent(JSON.stringify(SELECTED_FILTERS[active_tab][build]));
             }
@@ -789,44 +849,52 @@ require([
         var tab_type = this_tab.data('file-type');
 
         // Clear the previous parameter settings from the export form, and re-add the build
+        var build = this_tab.find('.build :selected').val() || null;
         target_form.find('input[name="build"], input[name="filters"]').remove();
+        target_form.append(
+            '<input class="param" type="hidden" name="build" value="'+build+'" />'
+        );
         target_form.append(
             '<input class="param" type="hidden" name="filters" value="" />'
         );
 
-        var build = this_tab.find('.build :selected').val() || null;
-
+        var filter_param = {};
         switch(tab_type) {
             case "igv":
-                target_form.find('input[name="filters"]').attr(
-                    'value',JSON.stringify({"data_format": ["BAM"]})
-                );
-                target_form.append(
-                    '<input class="param" type="hidden" name="build" value="'+build+'" />'
-                );
-                break;
-            case "all":
-                target_form.append(
-                    '<input class="param" type="hidden" name="build" value="'+build+'" />'
-                );
-                if(Object.keys(SELECTED_FILTERS[tab_type][build]).length > 0) {
-                    target_form.find('input[name="filters"]').attr(
-                        'value',JSON.stringify(SELECTED_FILTERS[tab_type][build])
-                    );
-                } else {
-                    target_form.find('input[name="filters"]').remove();
-                }
+                filter_param = {"data_format": ["BAM"]};
                 break;
             case "dicom":
-                target_form.find('input[name="filters"]').attr(
-                    'value',JSON.stringify({"data_type": ["Radiology image"]})
-                );
+                filter_param = {"data_type": ["Radiology image"]};
                 break;
             case "camic":
-                target_form.find('input[name="filters"]').attr(
-                    'value',JSON.stringify({"data_type": ["Diagnostic image", "Tissue slide image"]})
-                );
+                filter_param = {"data_type": ["Diagnostic image", "Tissue slide image"]};
                 break;
+        }
+
+        if(Object.keys(SELECTED_FILTERS[tab_type][build]).length > 0) {
+            Object.assign(filter_param, SELECTED_FILTERS[tab_type][build]);
+        }
+        if(tab_case_barcode[tab_type] && Object.keys(tab_case_barcode[tab_type][build]).length > 0) {
+            filter_param['case_barcode'] = tab_case_barcode[tab_type][build];
+        }
+
+        if(Object.keys(filter_param).length>0){
+            target_form.find('input[name="filters"]').attr(
+                'value',JSON.stringify(filter_param)
+            );
+        }
+        else{
+            target_form.find('input[name="filters"]').remove();
+        }
+
+        if(this_tab.find('.build :selected').val() == 'HG38' && _.find(programs_this_cohort, function(prog){return prog == 'CCLE';})) {
+            base.showJsMessage(
+                "warning",
+                "You are exporting a file list for a cohort which contains CCLE samples, with the build set to HG38. "
+                +"Please note that there are no HG38 samples for CCLE, so that program will be absent from the export.",
+                false,
+                $($(this).data('target')).find('.modal-js-messages')
+            );
         }
     });
 

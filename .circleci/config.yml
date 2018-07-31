@@ -1,0 +1,119 @@
+version: 2
+jobs:
+  build_job:
+    environment:
+      TZ: "/usr/share/zoneinfo/America/Los_Angeles"
+    name: Building Deployment Container
+    working_directory: ~/ISB-CGC-Webapp
+    docker:
+      - image: circleci/python:2.7.14
+      - image: circleci/mysql:5.7
+        environment:
+          MYSQL_ROOT_HOST: "%"
+          MYSQL_USER: ubuntu
+          MYSQL_PASSWORD: "isb"
+          MYSQL_ROOT_PASSWORD: "isb"
+    steps:
+      - checkout
+      - run:
+          name: Set Python Path
+          command: |
+            echo "export PYTHONPATH=/home/circleci/${CIRCLE_PROJECT_REPONAME}:/home/circleci/${CIRCLE_PROJECT_REPONAME}/lib" >> $BASH_ENV
+      - restore_cache:
+          keys:
+            - isb-cgc-webapp-lib-{{ checksum "requirements.txt" }}
+      - restore_cache:
+          keys:
+            - isb-cgc-webapp-google-deps-{{ checksum "shell/install-deps.sh" }}
+      - restore_cache:
+          keys:
+            - isb-cgc-database-{{ checksum "shell/database-setup.sh" }}
+      - run:
+          name: Install Dependencies
+          command: |
+            sudo -E /bin/bash ./shell/install-deps.sh
+      - save_cache:
+          key: isb-cgc-webapp-lib-{{ checksum "requirements.txt" }}
+          paths:
+            - ./lib
+      - save_cache:
+          key: isb-cgc-webapp-google-deps-{{ checksum "./shell/install-deps.sh" }}
+          paths:
+            - ./google-cloud-sdk
+            - ./google_appengine
+      - save_cache:
+          key: isb-cgc-database-{{ checksum "shell/database-setup.sh" }}
+          paths:
+            - ./scripts/metadata_featdef_tables.sql
+      - run:
+          name: Auth, Staging, and Database testing
+          command: |
+            sudo -E /bin/sh ./shell/gcloud_authenticate.sh
+            sudo -E /bin/bash ./shell/gcloud-pull-staging-files.sh
+            sudo -E /bin/bash ./shell/database-setup.sh
+      - save_cache:
+          key: isb-cgc-webapp-{{ epoch }}
+          paths:
+            - ./adminrestrict
+            - ./.git
+            - ./demo
+            - ./genes
+            - ./seqpeek
+            - ./shell
+            - ./tasks
+            - ./variables
+            - ./workbooks
+            - ./analysis
+            - ./bq_data_access
+            - ./etc
+            - ./static
+            - ./saml
+            - ./GenespotRE
+            - ./offline
+            - ./scripts
+            - ./session_security
+            - ./templates
+            - ./visualizations
+            - ./ISB-CGC-Common
+            - ./Dockerfile
+            - ./main.py
+            - ./appengine_config.py
+            - ./.dockerignore
+            - ./app.yaml
+            - ./gunicorn.conf.py
+            - ./manage.py
+            - ./txt
+            - ./json
+            - ./.env
+
+  deploy_job:
+    environment:
+      TZ: "/usr/share/zoneinfo/America/Los_Angeles"
+    name: Deploy to AppEngine Flex
+    docker:
+      - image: circleci/python:2.7.14
+    working_directory: ~/ISB-CGC-Webapp
+    steps:
+      - restore_cache:
+          keys:
+            - isb-cgc-webapp-
+      - restore_cache:
+          keys:
+            - isb-cgc-webapp-google-deps-
+      - deploy:
+          command: |
+            sudo -E rm -rf ./lib
+            sudo -E /bin/bash ./shell/gcloud_authenticate.sh
+            sudo -E /bin/bash ./shell/unpack_for_deployment.sh
+            sudo -E ./google-cloud-sdk/bin/gcloud app deploy --verbosity=debug ./app.yaml --quiet
+workflows:
+  version: 2
+  build_and_deploy:
+    jobs:
+      - build_job
+      - deploy_job:
+          requires:
+            - build_job
+          filters:
+            branches:
+              only: isb-cgc-prod
