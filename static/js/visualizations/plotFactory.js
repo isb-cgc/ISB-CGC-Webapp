@@ -281,6 +281,11 @@ define([
     function generate_oncoprint_plot(plot_selector, view_data) {
         var plot_data = view_data['plot_data'];
         var gene_list = view_data['gene_list'];
+        var plot_message = view_data['plot_message'];
+        if (plot_message){
+            $('#plot-message-alert').show();
+            $('#plot-message-alert p').text(plot_message);
+        }
         if (plot_data && oncoprint_obj.isInputValid(plot_data)) {
             oncoprint_obj.createOncoprintPlot(plot_selector, plot_data);
         }
