@@ -716,7 +716,9 @@ require([
     var check_for_changes = function() {
         var totalCases = 0;
         $('.total-cases').each(function(){
-            totalCases += parseInt($('.total-cases').text());
+            if($(this).parents('.data-tab').find('.selected-filters .filter-token').length > 0) {
+                totalCases += parseInt($(this).text());
+            }
         });
         if ($('#edit-cohort-name').val() !== original_title
             || $('.selected-filters span').length > 0) {

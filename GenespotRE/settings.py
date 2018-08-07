@@ -234,6 +234,10 @@ STATICFILES_FINDERS = (
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '')
 
+SECURE_HSTS_INCLUDE_SUBDOMAINS = (os.environ.get('SECURE_HSTS_INCLUDE_SUBDOMAINS','True') == 'True')
+SECURE_HSTS_PRELOAD = (os.environ.get('SECURE_HSTS_PRELOAD','True') == 'True')
+SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS','3600'))
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     # For using NDB with Django
@@ -566,6 +570,7 @@ IMG_THUMBS_URL = os.environ.get('IMG_THUMBS_URL', None)
 #################################
 ORTHANC_LOOKUP_URI = os.environ.get('ORTHANC_LOOKUP_URI', None)
 OSIMIS_VIEWER = os.environ.get('OSIMIS_VIEWER', None)
+DCM4CHEE_VIEWER = os.environ.get('DCM4CHEE_VIEWER', None)
 
 ##############################################################
 #   MailGun Email Settings
