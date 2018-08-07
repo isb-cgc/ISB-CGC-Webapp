@@ -57,7 +57,7 @@
                                     {% for dataset in authorized_datasets %}
                                         <li class="checkbox">
                                             <label>
-                                                <input type="checkbox" name="datasets" value="{{ dataset.id }}"{% if dataset in sa_datasets %}checked="checked"{% endif %}>{{ dataset.name }}
+                                                <input type="checkbox" name="datasets" value="{{ dataset.whitelist_id }}"{% if dataset.whitelist_id in sa_dataset_ids %}checked="checked"{% endif %}>{{ dataset.name }}
                                             </label>
                                         </li>
                                     {% endfor %}
