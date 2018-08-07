@@ -493,8 +493,12 @@ MANAGED_SERVICE_ACCOUNTS_PATH            = os.environ.get('MANAGED_SERVICE_ACCOU
 # Dataset configuration file path
 DATASET_CONFIGURATION_PATH               = os.environ.get('DATASET_CONFIGURATION_PATH', '')
 
-# DCF Testing flag
+# DCF Phase I enable flag
 DCF_TEST                                 = bool(os.environ.get('DCF_TEST', 'False') == 'True')
+
+# SA via DCF
+SA_VIA_DCF                               = bool(os.environ.get('SA_VIA_DCF', 'False') == 'True')
+
 
 #################################
 #   For DCF login               #
@@ -509,6 +513,10 @@ DCF_REVOKE_URL                           = os.environ.get('DCF_REVOKE_URL', '')
 DCF_LOGOUT_URL                           = os.environ.get('DCF_LOGOUT_URL', '')
 DCF_URL_URL                              = os.environ.get('DCF_URL_URL', '')
 DCF_CLIENT_SECRETS                       = os.environ.get('DCF_CLIENT_SECRETS', '')
+DCF_GOOGLE_SA_REGISTER_URL               = os.environ.get('DCF_GOOGLE_SA_REGISTER_URL', '')
+DCF_GOOGLE_SA_VERIFY_URL                 = os.environ.get('DCF_GOOGLE_SA_VERIFY_URL', '')
+DCF_GOOGLE_SA_MONITOR_URL                = os.environ.get('DCF_GOOGLE_SA_MONITOR_URL', '')
+DCF_GOOGLE_SA_URL                        = os.environ.get('DCF_GOOGLE_SA_URL', '')
 DCF_TOKEN_REFRESH_WINDOW_SECONDS         = int(os.environ.get('DCF_TOKEN_REFRESH_WINDOW_SECONDS', 86400))
 DCF_LOGIN_EXPIRATION_SECONDS             = int(os.environ.get('DCF_LOGIN_EXPIRATION_SECONDS', 86400))
 
