@@ -36,6 +36,16 @@
 {% block content %}
     <div class="container">
         <div class="row">
+            <div class="col-lg-12">
+                <div class="alert alert-warning alert-dismissible">
+                    <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    Please note that you must now add two Service Accounts to your project in order to register with ISB-CGC: the ISB-CGC monitoring Service Account,
+                    and the new DCF monitoring Service Account. Our instructions below have been altered accordingly. Please update all of your projects to include
+                    the new DCF monitoring Service Account, <code>{{ DCF_MONITORING_SA }}</code>, as a Project Editor.
+                </div>
+            </div>
+        </div>
+        <div class="row">
             <div class="col-lg-12 verify-error" style="display: none;">
                 <div class="alert alert-warning alert-dismissible">
                     <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
@@ -47,19 +57,19 @@
                 <h5>To register your Google Cloud Project with ISB-CGC, please take the following steps:</h5>
                 <ol>
                     <li>
-                        <h4>Grant the ISB-CGC Service Account access to your project</h4>
+                        <h4>Grant the ISB-CGC and DCF Service Accounts access to your project</h4>
                         <div>
-                            <p>This will allow ISB-CGC to verify that all users of your Google Cloud Project have the same access
+                            <p>This will allow ISB-CGC and DCF to verify that all users of your Google Cloud Project have the same access
                                 rights to protected data as you do. Use the <b>Instructions</b> button to hide or show the steps in this process.
                                 If you have already granted the ISB-CGC Service Account access to your project, you can <a href="#verify">proceed below to verification</a>.</p>
                             <button class="btn btn-primary instructions instructions_hide" title="Show/Hide the instructions"></button>
                             <div class="instructions">
-                                <div class="row space-bottom-10">
+                                <div class="row space-bottom-20">
                                     <div class="col-lg-12">
                                         Access your <a href="https://console.cloud.google.com/home/dashboard" target="_blank">Google Cloud Project</a> in the GCP Console (this link will open a new browser tab or window).
                                     </div>
                                 </div>
-                                <div class="row space-bottom-10">
+                                <div class="row space-bottom-20">
                                     <div class="col-lg-6">
                                         Select the hamburger menu in the top left corner.
                                     </div>
@@ -67,33 +77,45 @@
                                         <img src="{% static 'img/select-hamburger.png' %}" alt="Select Hamburger Menu" width="50%"/>
                                     </div>
                                 </div>
-                                <div class="row space-bottom-10">
+                                <div class="row space-bottom-20">
                                     <div class="col-lg-6">
-                                        Select IAM & Admin.
+                                        Scroll down to the 'Products' heading and select IAM & Admin.
                                     </div>
                                     <div class="col-lg-6">
                                          <img src="{% static 'img/select-iam.png' %}" alt="Select IAM & Admin Menu Item" width="50%"/>
                                     </div>
                                 </div>
-                                <div class="row space-bottom-10">
+                                <div class="row space-bottom-20">
                                     <div class="col-lg-6">
-                                        Click + Add Member.
+                                        Click +Add Member.
+                                    </div>
+                                    <div class="col-lg-6">
+                                         <img src="{% static 'img/click-add.png' %}" alt="Add Member Modal Window" width="100%"/>
                                     </div>
                                 </div>
-                                <div class="row space-bottom-10">
+                                <div class="row space-bottom-20">
                                     <div class="col-lg-6">
-                                        Paste <code>{{ GCP_REG_CLIENT_EMAIL }}</code> in the text box.
+                                        Paste <code>{{ GCP_REG_CLIENT_EMAIL }}</code> in the text box and hit Enter.
+                                        Once the first Service Account displays in the box, add the second one, <code>{{ DCF_MONITORING_SA }}</code>, and click enter.
                                     </div>
                                     <div class="col-lg-6">
                                          <img src="{% static 'img/add-members.png' %}" alt="Add Member Modal Window" width="100%"/>
                                     </div>
                                 </div>
-                                <div class="row space-bottom-10">
+                                <div class="row space-bottom-20">
                                     <div class="col-lg-6">
-                                        In the Role selection, choose Project > Editor.
+                                        Click on 'Select a role', and choose Project > Editor.
                                     </div>
                                     <div class="col-lg-6">
                                          <img src="{% static 'img/role-selector-editor.png' %}" alt="Select Project Viewer" width="100%"/>
+                                    </div>
+                                </div>
+                                <div class="row space-bottom-20">
+                                    <div class="col-lg-6">
+                                        Click the Save button.
+                                    </div>
+                                    <div class="col-lg-6">
+                                         <img src="{% static 'img/click-save-btn.png' %}" alt="Click Add to finalize addition of the Service Account" width="100%"/>
                                     </div>
                                 </div>
                             </div>
