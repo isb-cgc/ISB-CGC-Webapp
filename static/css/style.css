@@ -2658,7 +2658,7 @@ span.code {
     position: absolute;
     top: 0;
     left: 0;
-    height: 600px; }
+    height: 650px; }
     #landing header a {
       color: #4CC2D6; }
     #landing header .container {
@@ -2758,10 +2758,6 @@ span.code {
     font-size: 20px; }
   #landing #disease-map rect {
     cursor: pointer; }
-  #landing .jumbotron #isb-logo {
-    float: left; }
-  #landing .jumbotron #sra-logo {
-    float: right; }
 
 #user-landing {
   margin-top: 80px; }
