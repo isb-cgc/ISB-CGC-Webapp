@@ -499,6 +499,8 @@ DCF_TEST                                 = bool(os.environ.get('DCF_TEST', 'Fals
 # SA via DCF
 SA_VIA_DCF                               = bool(os.environ.get('SA_VIA_DCF', 'False') == 'True')
 
+# DCF Monitoring SA
+DCF_MONITORING_SA                        = os.environ.get('DCF_MONITORING_SA', '')
 
 #################################
 #   For DCF login               #
