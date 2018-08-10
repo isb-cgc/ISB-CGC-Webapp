@@ -858,6 +858,7 @@ require([
                 swap.hide();
                 break;
             case 'OncoPrint':
+            case 'OncoGrid':
                 op_genes.show();
                 and_or_variables_label.hide();
                 x_widgets.hide();
@@ -866,7 +867,6 @@ require([
                 xLogCheck.hide();
                 yLogCheck.hide();
                 swap.hide();
-
                 break;
             default :
                 break;
@@ -969,7 +969,7 @@ require([
                 yFormula: "n+1"
             },
             color_by_sel: plot_settings.find('.color_by :selected').val() !== null && plot_settings.find('.color_by :selected').val() !== ""
-        }
+        };
         return result;
     }
 
@@ -1034,7 +1034,7 @@ require([
                     axisRdy = false;
                 }
             }
-            else if(plot_val == 'OncoPrint'){
+            else if(plot_val == 'OncoPrint' || plot_val == 'OncoGrid'){
                 axisRdy = false;
                 $('.worksheet.active').find('.gene-selex').each(function(){
                     if($(this).is(':checked')) {
@@ -1147,7 +1147,7 @@ require([
         if(data.attrs.type == 'SeqPeek'){
             return (data.attrs.gene_label !== undefined && data.attrs.gene_label !== null && data.attrs.gene_label !== "");
         }
-        else if(data.attrs.type == 'OncoPrint'){
+        else if(data.attrs.type == 'OncoPrint' || data.attrs.type == 'OncoGrid'){
             return (data.attrs.gene_list !== undefined && data.gene_list !== null && data.attrs.gene_list.length>0);
         }
         else{
@@ -1197,7 +1197,7 @@ require([
         plot_element.find('.resubmit-button').hide();
 
         //hide 'Enable Sample Selection for Oncoprint and SeqPeek'
-        if (args.type === 'SeqPeek' || args.type === 'OncoPrint') {
+        if (args.type === 'SeqPeek' || args.type === 'OncoPrint' || args.type === 'OncoGrid') {
             $('.toggle-selection').hide();
         }
         else {

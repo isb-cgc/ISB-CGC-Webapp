@@ -158,6 +158,13 @@
                             <li class="menu-item">
                                 <form action="{% url 'worksheet_create_with_analysis' %}" method="POST">
                                     {% csrf_token %}
+                                    <input type="hidden" name="analysis" value="OncoGrid">
+                                    <button type="submit">OncoGrid</button>
+                                </form>
+                            </li>
+                            <li class="menu-item">
+                                <form action="{% url 'worksheet_create_with_analysis' %}" method="POST">
+                                    {% csrf_token %}
                                     <input type="hidden" name="analysis" value="Cubby Hole Plot">
                                     <button type="submit">Cubby Hole</button>
                                 </form>

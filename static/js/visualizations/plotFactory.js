@@ -351,6 +351,22 @@ define([
         return oncoprintUrl;
     }
 
+    // Generate url for gathering data for a OncoPrint plot
+    function get_oncogrid_data_url(base_url, cohorts, gene_list){
+        var cohort_str = '';
+        for (var i = 0; i < cohorts.length; i++) {
+            if (i == 0) {
+                cohort_str += 'cohort_id=' + cohorts[i];
+            } else {
+                cohort_str += '&cohort_id=' + cohorts[i];
+            }
+        }
+        var oncogridUrl = base_url + '/visualizations/oncogrid_data_plot/' + VERSION + '?' + cohort_str;
+        oncogridUrl += "&gene_list=" + gene_list.join(",")
+            + (VERSION == 'v2' ? "&genomic_build=" + $('.workbook-build-display').data('build') : '');
+        return oncogridUrl;
+    }
+
     function configure_pairwise_display(element, data){
         if (data['pairwise_result'] && data['pairwise_result'].hasOwnProperty('result_vectors')) {
             var vectors = data['pairwise_result']['result_vectors'];
@@ -529,6 +545,9 @@ define([
         }
         else if(args.type == "OncoPrint"){
             plot_data_url = get_oncoprint_data_url(BASE_URL, args.cohorts, args.gene_list, VERSION);
+        }
+        else if(args.type == "OncoGrid"){
+            plot_data_url = get_oncogrid_data_url(BASE_URL, args.cohorts, args.gene_list, VERSION);
         }
         else {
             plot_data_url = get_data_url(BASE_URL, args.cohorts, args.x, args.y, args.color_by, args.logTransform, VERSION);
