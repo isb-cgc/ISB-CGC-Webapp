@@ -43,18 +43,21 @@ require([
     $('#file-name').on('keypress keyup paste', function (e) {
         var self = $(this);
         setTimeout(function () {
-            $('.message-container').empty();
+            $('#export-to-gcs-modal .modal-js-messages').empty();
             var str = self.val();
 
             if (str.match(/[^A-Za-z0-9_\.\-\/]/)) {
                 e.preventDefault();
-                base.showJsMessage("error", "File names are restricted to numbers, letters, periods, dashes, slashes, and underscores.", false, $('.message-container'));
+                base.showJsMessage("error", "File names are restricted to numbers, letters, periods, dashes, slashes, and underscores.", false, $('#export-to-gcs-modal .modal-js-messages'));
+                $('#export-to-gcs-form input[type="submit"]').attr('disabled', 'disabled');
                 return false;
+            } else {
+                $('#export-to-gcs-form input[type="submit"]').removeAttr('disabled');
             }
 
             if (str.length >= parseInt($('#file-name').attr('maxlength'))) {
                 e.preventDefault();
-                base.showJsMessage("warning", "You have reached the maximum size allowed for a file name.", false, $('.message-container'));
+                base.showJsMessage("warning", "You have reached the maximum size allowed for a file name.", false, $('#export-to-gcs-modal .modal-js-messages'));
                 return false;
             }
         }, 70);
@@ -73,7 +76,7 @@ require([
         $('.file-name, .file-format').attr('disabled', 'disabled');
         $('.file-name, .file-format').attr('title', 'Select a project and bucket to enable this option.');
         $('.file-name, .file-format').show();
-        $('.message-container').empty();
+        $('.modal-js-messages').empty();
         $('#export-to-gcs-form input[type="submit"]').attr('disabled', 'disabled');
         $('#export-to-gcs-form')[0].reset();
         $('#gcs-export-underway').hide();

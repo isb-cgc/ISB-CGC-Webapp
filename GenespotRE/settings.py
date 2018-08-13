@@ -30,7 +30,6 @@ BASE_DIR                = os.path.abspath(os.path.join(os.path.dirname(__file__)
 
 SHARED_SOURCE_DIRECTORIES = [
     'ISB-CGC-Common',
-    'ISB-CGC-API',
 ]
 
 # Add the shared Django application subdirectory to the Python module search path
@@ -233,6 +232,10 @@ STATICFILES_FINDERS = (
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '')
+
+SECURE_HSTS_INCLUDE_SUBDOMAINS = (os.environ.get('SECURE_HSTS_INCLUDE_SUBDOMAINS','True') == 'True')
+SECURE_HSTS_PRELOAD = (os.environ.get('SECURE_HSTS_PRELOAD','True') == 'True')
+SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS','3600'))
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -491,6 +494,22 @@ DATASET_CONFIGURATION_PATH               = os.environ.get('DATASET_CONFIGURATION
 
 # DCF Testing flag
 DCF_TEST                                 = bool(os.environ.get('DCF_TEST', 'False') == 'True')
+
+#################################
+#   For DCF login               #
+#################################
+
+DCF_AUTH_URL                             = os.environ.get('DCF_AUTH_URL', '')
+DCF_TOKEN_URL                            = os.environ.get('DCF_TOKEN_URL', '')
+DCF_USER_URL                             = os.environ.get('DCF_USER_URL', '')
+DCF_KEY_URL                              = os.environ.get('DCF_KEY_URL', '')
+DCF_GOOGLE_URL                           = os.environ.get('DCF_GOOGLE_URL', '')
+DCF_REVOKE_URL                           = os.environ.get('DCF_REVOKE_URL', '')
+DCF_LOGOUT_URL                           = os.environ.get('DCF_LOGOUT_URL', '')
+DCF_URL_URL                              = os.environ.get('DCF_URL_URL', '')
+DCF_CLIENT_SECRETS                       = os.environ.get('DCF_CLIENT_SECRETS', '')
+DCF_TOKEN_REFRESH_WINDOW_SECONDS         = int(os.environ.get('DCF_TOKEN_REFRESH_WINDOW_SECONDS', 86400))
+DCF_LOGIN_EXPIRATION_SECONDS             = int(os.environ.get('DCF_LOGIN_EXPIRATION_SECONDS', 86400))
 
 ##############################
 #   Start django-finalware   #

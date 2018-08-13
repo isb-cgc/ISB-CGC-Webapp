@@ -35,7 +35,41 @@
 
     &__body
       padding-bottom: 10px
-      
+
+    .search_enter
+      .search_input
+        display: inline-block
+        width: 260px
+        border: 1px solid lighten($gray-button-bg-border, 8%) !important
+        border-radius: 7px 7px 7px 7px
+        height: 28px
+        padding-top: 0px
+        .search_clear_btn
+          color: lighten($gray-button-bg-border, 8%)
+        input
+          margin: 1px 0px 0px 5px
+          vertical-align: center
+          border: none
+          line-height: 22px
+          width: 200px
+        .search_btn
+          float: right
+          box-sizing: border-box
+          display: inline-block
+          text-align: center
+          padding-top: 4px
+          border-radius: 0px 7px 7px 0px
+          height: 28px
+          width: 30px
+          border-left: 1px solid lighten($gray-button-bg-border, 8%) !important
+          margin-right: -1px
+          margin-top: -1px
+          color: white
+          background-color: $isb-info
+        i
+          cursor: pointer
+          *cursor: hand
+
 .list
   &-item
     background: transparent
