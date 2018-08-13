@@ -55,8 +55,9 @@ RUN easy_install -U distribute
 
 ADD . /app
 
-# We need to recompile some of the items because of differences in compiler versions
+# We need to recompile some of the items because of differences in compiler versions 
 RUN pip install -r /app/requirements.txt -t /app/lib/ --upgrade
+RUN pip install pycrypto==2.6.1 -t /app/lib --upgrade --only-binary all
 RUN pip install gunicorn==19.6.0
 
 ENV PYTHONPATH=/app:/app/lib:/app/google_appengine:/app/google_appengine/lib/protorpc-1.0
@@ -65,4 +66,4 @@ ENV PYTHONPATH=/app:/app/lib:/app/google_appengine:/app/google_appengine/lib/pro
 # ISB
 # RUN python /app/manage.py migrate --noinput
 
-CMD gunicorn -c gunicorn.conf.py -b :$PORT GenespotRE.wsgi -w 3 -t 130
+CMD gunicorn -c gunicorn.conf.py -b :$PORT GenespotRE.wsgi -w 3 -t 240

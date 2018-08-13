@@ -187,8 +187,8 @@
             <li class="menu-item has-drop-down">
                 <a>VARIABLES <i class="fa fa-caret-down"></i></a>
                 <ul class="sub-menu drop">
-                    <li class="menu-item"><a href="{% url 'variables' %}">Manage Favorite Variable(s) Lists ( {{ user.variablefavorite_set.all|active|count }} )</a></li>
-                    <li class="menu-item"><a href="{% url 'variable_fav_create' %}">Create Favorite Variable(s) List</a></li>
+                    <li class="menu-item"><a href="{% url 'variables' %}">Manage Variable Favorites Lists ( {{ user.variablefavorite_set.all|active|count }} )</a></li>
+                    <li class="menu-item"><a href="{% url 'variable_fav_create' %}">Create Variable Favorites List</a></li>
                     <li class="menu-item"><a href="{% url 'variable_select_for_new_workbook' %}">Select Variables for a New Workbook</a></li>
                 </ul>
             </li>

@@ -42,7 +42,41 @@
             </div>
             <div class="row lj-header-vid-button-div">
                 <div class="col-sm-6 lj-header-vid custom-width-55">
-                    <iframe width="320" height="240" src="https://www.youtube.com/embed/2db_zxp8-8M?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                    <div id="carousel-video-tutorials" class="carousel slide" data-ride="carousel" data-interval="false">
+                        <ol class="carousel-indicators">
+                            <li data-target="#carousel-video-tutorials" data-slide-to="0" class="active"></li>
+                            <li data-target="#carousel-video-tutorials" data-slide-to="1" class=""></li>
+                            <li data-target="#carousel-video-tutorials" data-slide-to="2" class=""></li>
+                            <li data-target="#carousel-video-tutorials" data-slide-to="3" class=""></li>
+                            <li data-target="#carousel-video-tutorials" data-slide-to="4" class=""></li>
+                        </ol>
+                        <div class="carousel-inner">
+                            {% comment %}
+                                include 'enablejsapi=1' inside the iframe src. This will enable javascript code to control the video play & pause
+                            {% endcomment %}
+                            <div class="item active">
+                                <iframe class="tutorial-vid" src="https://www.youtube-nocookie.com/embed/q9q1g1-cf7M?enablejsapi=1&version=3&playerapiid=ytplayer"  frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                            </div>
+                            <div class="item">
+                                <iframe class="tutorial-vid" src="https://www.youtube-nocookie.com/embed/2db_zxp8-8M?enablejsapi=1&version=3&playerapiid=ytplayer" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                            </div>
+                            <div class="item">
+                                <iframe class="tutorial-vid" src="https://www.youtube-nocookie.com/embed/tbjfZC9wQ9o?enablejsapi=1&version=3&playerapiid=ytplayer" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                            </div>
+                            <div class="item">
+                                <iframe class="tutorial-vid" src="https://www.youtube-nocookie.com/embed/HaeJo9UaJZk?enablejsapi=1&version=3&playerapiid=ytplayer" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                            </div>
+                            <div class="item">
+                                <iframe class="tutorial-vid" src="https://www.youtube-nocookie.com/embed/sikbGP3WHCg?enablejsapi=1&version=3&playerapiid=ytplayer" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                            </div>
+                        </div>
+                        <a class="left carousel-control" href="#carousel-video-tutorials" data-slide="prev">
+                            <i class="fa fa-chevron-left fa-2x prev"></i>
+                        </a>
+                        <a class="right carousel-control" href="#carousel-video-tutorials" data-slide="next">
+                            <i class="fa fa-chevron-right fa-2x next"></i>
+                        </a>
+                    </div>
                 </div>
                 <div class="col-sm-6 lj-header-button custom-width-45" data-scroll-reveal="wait 0.5s, then enter bottom and move 20px over 0.5s">
                     <p><a href="http://isb-cancer-genomics-cloud.readthedocs.org/en/latest/" target="_blank">Documentation</a></p>
