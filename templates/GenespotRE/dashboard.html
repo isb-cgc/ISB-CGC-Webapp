@@ -70,14 +70,11 @@
 
     <div class="row">
         <div class="col-lg-12">
-            <div class="alert alert-warning alert-dismissible">
+            <div class="alert alert-info alert-dismissible">
                 <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                On Monday and Tuesday, Aug. 6-7 2018 we will be changing over to our new flattened data buckets and deleting the old data buckets.
-                The new buckets are in place and the new file paths are already being provided by the API and WebApp, however if you have previously
-                exported/downloaded any file manifests, you will need to re-export/download them to obtain the new file paths. The BigQuery tables which
-                list these file paths (eg. tcga_metadata_data_hg19) have been superceded by new tables in the same datasets with a suffix of <b>_250718</b>.
-                The obsolete tables have been marked as such with a suffix of <b>_obsolete</b>, and will be deleted within the week. If you have a job currently
-                running that uses the old file paths and which will not complete by Monday Aug. 6, please contact us at <b>feedback@isb-cgc.org</b> for assistance.
+                The previous BigQuery tables which list GCS file paths (eg. tcga_metadata_data_hg19) have been superceded by new tables in the same datasets
+                with a suffix of <b>_250718</b>. The obsolete tables have been marked as such with a suffix of <b>_obsolete</b>, and will be deleted in the coming
+                weeks.
             </div>
         </div>
     </div>
