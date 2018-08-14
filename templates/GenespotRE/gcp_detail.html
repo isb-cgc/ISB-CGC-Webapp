@@ -58,10 +58,10 @@
                             </tr>
                             </thead>
                             <tbody>
-                            {% for service_account in gcp.active_service_accounts %}
+                            {% for service_account in sa_list %}
                                 {% with auth_datasets=service_account.get_auth_datasets %}
                                     <tr>
-                                        <td>{{ service_account.service_account }}</td>
+                                        <td>{{ service_account.name }}</td>
                                         <td>{% if auth_datasets|length == 0 %}None{% else %}{{ auth_datasets|get_values_list:"name"|joinwith:", " }}{% endif %}</td>
                                         <td{% if service_account.is_expired and auth_datasets|length > 0 %} class="red" title="Service Account's authorization date has expired; refresh to extend access."{% endif %}>{{ service_account.authorized_date|date:'M d, Y, g:i a' }}</td>
                                         <td>
