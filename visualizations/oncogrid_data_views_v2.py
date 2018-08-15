@@ -24,13 +24,12 @@ from time import sleep
 from google_helpers.bigquery.cohort_support import BigQuerySupport
 from cohorts.metadata_helpers import *
 from visualizations.data_access_views_v2 import get_confirmed_project_ids_for_cohorts
-from visualizations.feature_access_views_v2 import build_feature_ids
-from bq_data_access.v2.plot_data_support import get_merged_feature_vectors
-from bq_data_access.v2.data_access import FeatureVectorBigQueryBuilder
-from google_helpers.bigquery.service_v2 import BigQueryServiceSupport
 from cohorts.models import Project, Program
 
 logger = logging.getLogger('main_logger')
+
+DONOR_TRACK_TYPE = 'donor'
+GENE_TRACK_TYPE = 'gene'
 
 def get_program_set_for_oncogrid(cohort_id_array):
     return Program.objects.filter(name='TCGA',is_public=True,active=True)
@@ -71,110 +70,55 @@ def oncogrid_view_data(request):
         if not len(project_set):
             return JsonResponse(
                 {'message': "The chosen cohorts do not contain samples from programs with Gene Mutation data."})
-        #get_donor_track(genomic_build, project_set, cohort_ids, gene_list)
-        get_gene_track(genomic_build, project_set, cohort_ids, gene_list)
-        return JsonResponse(
-            {'message': "The chosen genes and cohorts do not contain any samples with Gene Mutation data."})
+
+        # get donor list
+        donor_data_query, donor_bq_tables = create_oncogrid_bq_statement(DONOR_TRACK_TYPE, genomic_build, project_set, cohort_ids, gene_list)
+
+        #print(donor_data_query)
+        donor_data_list = get_donor_data_list(donor_data_query)
+
+        # get gene list
+        gene_data_query, gene_bq_tables = create_oncogrid_bq_statement(GENE_TRACK_TYPE, genomic_build, project_set, cohort_ids, gene_list)
+        print(gene_data_query)
+        gene_data_list, observation_data_list = get_gene_data_list(gene_data_query)
+
+        bq_tables = list(set(donor_bq_tables + gene_bq_tables))
+
+        if len(donor_data_list) and len(gene_data_list):
+            return JsonResponse({
+                'donor_data_list': donor_data_list,
+                'gene_data_list': gene_data_list,
+                'observation_data_list': observation_data_list,
+                'bq_tables': bq_tables})
+        else:
+            return JsonResponse(
+                {'message': "The chosen genes and cohorts do not contain any samples with Gene Mutation data."})
+
     except Exception as e:
         logger.error("[ERROR] In oncogrid_view_data: ")
         logger.exception(e)
         return JsonResponse({'Error': str(e)}, status=500)
 
 
-def get_donor_track(genomic_build, project_set, cohort_ids, gene_list):
-    donor_query_template = """
-                #standardSQL
-                    SELECT md.project_short_name,
-                            cs.case_barcode,
-                             cs.sample_barcode,
-                              bc.gender,
-                               bc.vital_status,
-                                bc.race,
-                                 bc.ethnicity,
-                                  bc.age_at_diagnosis,
-                                   bc.days_to_death,
-                                    md.data_category,
-                                     COUNT(md.data_category) AS score
-                    FROM `{cohort_table}` cs,
-                         `{bq_data_project_id}.{sm_dataset_name}.{sm_table_name}` sm,
-                         `{bq_data_project_id}.{md_dataset_name}.{md_table_name}` md,
-                         `{bq_data_project_id}.{bc_dataset_name}.{bc_table_name}` bc
-                    WHERE cs.cohort_id IN ({cohort_id_list})
-                    -- AND Variant_Classification NOT IN('Silent')
-                    AND cs.sample_barcode = sm.sample_barcode_tumor
-                    AND cs.sample_barcode = md.sample_barcode
-                    AND cs.case_barcode = bc.case_barcode
-                    AND (cs.project_id IS NULL{project_clause})
-                    {filter_clause}
-                    GROUP BY md.project_short_name, cs.case_barcode, cs.sample_barcode, bc.gender, bc.vital_status, bc.race, bc.ethnicity, bc.age_at_diagnosis, bc.days_to_death, md.data_category
-                    ;
-            """
-
-    project_id_stmt = ""
-    if project_set and len(project_set):
-        project_id_stmt = ', '.join([str(project_id) for project_id in project_set])
-    project_clause = " OR project_id IN ({})".format(project_id_stmt) if project_set else ""
-
-    gene_list_stm = ''
-    if gene_list is not None:
-        gene_list_stm = ', '.join('\'{0}\''.format(gene) for gene in gene_list)
-    filter_clause = "AND Hugo_Symbol IN ({})".format(gene_list_stm) if gene_list_stm != "" else ""
-    cohort_id_list = ', '.join([str(cohort_id) for cohort_id in cohort_ids])
-
-    cohort_table_id = "{project_name}.{dataset_id}.{table_id}".format(
-        project_name=settings.BIGQUERY_PROJECT_NAME,
-        dataset_id=settings.COHORT_DATASET_ID,
-        table_id=settings.BIGQUERY_COHORT_TABLE_ID)
-
-    bq_sm_table_info = BQ_MOLECULAR_ATTR_TABLES['TCGA'][genomic_build]
-    bq_md_table_info = BQ_METADATA_DATA_TABLES['TCGA'][genomic_build]
-    bq_bc_table_info = BQ_BIOCLIN_DATA_TABLES['TCGA']
-
-    donor_query = donor_query_template.format(
-        bq_data_project_id=settings.BIGQUERY_DATA_PROJECT_NAME,
-        sm_dataset_name=bq_sm_table_info['dataset'],
-        sm_table_name=bq_sm_table_info['table'],
-        md_dataset_name=bq_md_table_info['dataset'],
-        md_table_name=bq_md_table_info['table'],
-        bc_dataset_name=bq_bc_table_info['dataset'],
-        bc_table_name=bq_bc_table_info['table'],
-        cohort_table=cohort_table_id,
-        filter_clause=filter_clause,
-        cohort_id_list=cohort_id_list,
-        project_clause=project_clause
-    )
-    #print(donor_query)
-
-    donor_query_job = BigQuerySupport.insert_query_job(donor_query)
-
-    attempts = 0
-    job_is_done = BigQuerySupport.check_job_is_done(donor_query_job)
-    while attempts < settings.BQ_MAX_ATTEMPTS and not job_is_done:
-        job_is_done = BigQuerySupport.check_job_is_done(donor_query_job['jobReference'])
-        sleep(1)
-        attempts += 1
-
-    if job_is_done:
-        results = BigQuerySupport.get_job_results(donor_query_job['jobReference'])
-
-    donor_track = []
+def get_donor_data_list(bq_statement):
+    results = get_bq_query_result(bq_statement)
+    donor_data_list = []
     donors = {}
     if results and len(results) > 0:
         for row in results:
             project_short_name = row['f'][0]['v']
             case_barcode = row['f'][1]['v']
-            gender = row['f'][3]['v']
-            vital_status = row['f'][4]['v']
-            race = row['f'][5]['v']
-            ethnicity = row['f'][6]['v']
-            age_at_diagnosis = str(row['f'][7]['v'])
-            days_to_death = str(row['f'][8]['v'])
-            data_category = row['f'][9]['v']
-            score = str(str(row['f'][10]['v']))
+            gender = row['f'][2]['v']
+            vital_status = row['f'][3]['v']
+            race = row['f'][4]['v']
+            ethnicity = row['f'][5]['v']
+            age_at_diagnosis = str(row['f'][6]['v'])
+            days_to_death = str(row['f'][7]['v'])
+            data_category = row['f'][8]['v']
+            score = str(str(row['f'][9]['v']))
 
             if not donors.has_key(case_barcode):
                 donors[case_barcode] = {
-                    'case_barcode': case_barcode,
                     'case_code': project_short_name + '/' + case_barcode,
                     'gender': gender,
                     'vital_status': vital_status,
@@ -186,101 +130,192 @@ def get_donor_track(genomic_build, project_set, cohort_ids, gene_list):
                 }
             if not donors[case_barcode]['data_category'].has_key(data_category):
                 donors[case_barcode]['data_category'][data_category] = {
-                    'name': data_category,
                     'score': score,
                 }
     if donors and len(donors) > 0:
-        for casebarcode_key in donors:
-            donor_track.append(
-                donors[casebarcode_key]
-            )
-    #print(donor_track)
+        for case_barcode_key in donors:
+            donor_data = {
+                'id': donors[case_barcode_key]['case_code'],
+                'gender': donors[case_barcode_key]['gender'],
+                'vital_status': donors[case_barcode_key]['vital_status'],
+                'race': donors[case_barcode_key]['race'],
+                'ethnicity': donors[case_barcode_key]['ethnicity'],
+                'age_at_diagnosis': donors[case_barcode_key]['age_at_diagnosis'],
+                'days_to_death': donors[case_barcode_key]['days_to_death'],
+            }
+
+            for data_category_key in donors[case_barcode_key]['data_category']:
+                if data_category_key == 'Clinical':
+                    donor_data['clinical'] = donors[case_barcode_key]['data_category'][data_category_key]['score']
+                elif data_category_key == 'Biospecimen':
+                    donor_data['biospecimen'] = donors[case_barcode_key]['data_category'][data_category_key]['score']
+                elif data_category_key.lower() == 'Raw Sequencing Data'.lower():
+                    donor_data['rsd'] = donors[case_barcode_key]['data_category'][data_category_key]['score']
+                elif data_category_key == 'Simple Nucleotide Variation':
+                    donor_data['snv'] = donors[case_barcode_key]['data_category'][data_category_key]['score']
+
+            donor_data_list.append(donor_data.copy())
+    return donor_data_list
 
 
-def get_gene_track(genomic_build, project_set, cohort_ids, gene_list):
-    gene_query_template = """
-        #standardSQL
-            SELECT cs.case_barcode,
-                    cs.sample_barcode,
-                      sm.Hugo_Symbol,
-                        sm.Variant_Classification,
-                          COUNT(sm.Variant_Classification) as score
-            FROM `{cohort_table}` cs,
-                  `{bq_data_project_id}.{sm_dataset_name}.{sm_table_name}` sm
-            WHERE cs.cohort_id IN ({cohort_id_list})
-            AND cs.sample_barcode = sm.sample_barcode_tumor                    
-            AND (cs.project_id IS NULL{project_clause})
-            {filter_clause}
-            GROUP BY cs.case_barcode, cs.sample_barcode, sm.Hugo_Symbol, sm.Variant_Classification
-            ;
-    """
 
-    project_id_stmt = ""
-    if project_set and len(project_set):
-        project_id_stmt = ', '.join([str(project_id) for project_id in project_set])
-    project_clause = " OR project_id IN ({})".format(project_id_stmt) if project_set else ""
+def get_gene_data_list(bq_statement):
+    results = get_bq_query_result(bq_statement)
+    gene_data_list = []
+    observation_data_list = []
+    genes_mut_data = {}
+    if results and len(results) > 0:
+        for row in results:
+            hugo_symbol = row['f'][0]['v']
+            project_short_name = row['f'][1]['v']
+            case_barcode = row['f'][2]['v']
+            variant_classification = row['f'][3]['v']
+            score = str(row['f'][4]['v'])
+            if not genes_mut_data.has_key(hugo_symbol):
+                genes_mut_data[hugo_symbol] = {
+                    'case_barcode': {},
+                }
+            if not genes_mut_data[hugo_symbol]['case_barcode'].has_key(case_barcode):
+                genes_mut_data[hugo_symbol]['case_barcode'][case_barcode] = {
+                    'case_code': project_short_name +'/'+case_barcode,
+                    'variant_classification': {},
+                }
+            if not genes_mut_data[hugo_symbol]['case_barcode'][case_barcode]['variant_classification'].has_key(variant_classification):
+                genes_mut_data[hugo_symbol]['case_barcode'][case_barcode]['variant_classification'][variant_classification] = {
+                    'score': score,
+                }
 
-    gene_list_stm = ''
-    if gene_list is not None:
-        gene_list_stm = ', '.join('\'{0}\''.format(gene) for gene in gene_list)
-    filter_clause = "AND Hugo_Symbol IN ({})".format(gene_list_stm) if gene_list_stm != "" else ""
-    cohort_id_list = ', '.join([str(cohort_id) for cohort_id in cohort_ids])
+    ob_id = 0
+    if genes_mut_data and len(genes_mut_data) > 0:
+        for hugo_symbol in genes_mut_data:
+            gene_data = {
+                'id' : hugo_symbol,
+                'symbol': hugo_symbol
+            }
+            observation_data = {
+                'geneId' : hugo_symbol
+            }
+            score = 0
+            for case_barcode in genes_mut_data[hugo_symbol]['case_barcode']:
+                for vc in genes_mut_data[hugo_symbol]['case_barcode'][case_barcode]['variant_classification']:
+                    score += int(genes_mut_data[hugo_symbol]['case_barcode'][case_barcode]['variant_classification'][vc]['score'])
+                    ob_id += 1
+                    observation_data['id'] = ob_id
+                    observation_data['donorId'] = genes_mut_data[hugo_symbol]['case_barcode'][case_barcode]['case_code']
+                    observation_data['consequence'] = vc
+                    #print(observation_data)
+                    observation_data_list.append(observation_data.copy())
 
-    cohort_table_id = "{project_name}.{dataset_id}.{table_id}".format(
-        project_name=settings.BIGQUERY_PROJECT_NAME,
-        dataset_id=settings.COHORT_DATASET_ID,
-        table_id=settings.BIGQUERY_COHORT_TABLE_ID)
+            gene_data['gene_score'] = score
+            gene_data['case_score'] = len(genes_mut_data[hugo_symbol]['case_barcode'])
+            gene_data_list.append(gene_data.copy())
 
-    bq_sm_table_info = BQ_MOLECULAR_ATTR_TABLES['TCGA'][genomic_build]
+    return gene_data_list, observation_data_list
 
-    gene_query = gene_query_template.format(
-        bq_data_project_id=settings.BIGQUERY_DATA_PROJECT_NAME,
-        sm_dataset_name=bq_sm_table_info['dataset'],
-        sm_table_name=bq_sm_table_info['table'],
-        cohort_table=cohort_table_id,
-        filter_clause=filter_clause,
-        cohort_id_list=cohort_id_list,
-        project_clause=project_clause
-    )
-    #print(gene_query)
-
-    gene_query_job = BigQuerySupport.insert_query_job(gene_query)
-
+def get_bq_query_result(bq_query_statement):
+    results = []
+    bq_query_job = BigQuerySupport.insert_query_job(bq_query_statement)
     attempts = 0
-    job_is_done = BigQuerySupport.check_job_is_done(gene_query_job)
+    job_is_done = BigQuerySupport.check_job_is_done(bq_query_job)
     while attempts < settings.BQ_MAX_ATTEMPTS and not job_is_done:
-        job_is_done = BigQuerySupport.check_job_is_done(gene_query_job['jobReference'])
+        job_is_done = BigQuerySupport.check_job_is_done(bq_query_job)
         sleep(1)
         attempts += 1
 
     if job_is_done:
-        results = BigQuerySupport.get_job_results(gene_query_job['jobReference'])
+        results = BigQuerySupport.get_job_results(bq_query_job['jobReference'])
+    return results
 
-    gene_track = []
-    genes = {}
-    if results and len(results) > 0:
-        for row in results:
-            case_barcode = row['f'][0]['v']
-            #sample_barcode = row['f'][1]['v']
-            hugo_symbol = row['f'][2]['v']
-            variant_classification = row['f'][3]['v']
-            score = str(row['f'][4]['v'])
-            if not genes.has_key(case_barcode):
-                genes[case_barcode] = {
-                    'case_barcode': case_barcode,
-                    'hugo_symbol': hugo_symbol,
-                    'variant_classification': {},
-                }
-            if not genes[case_barcode]['variant_classification'].has_key(variant_classification):
-                genes[case_barcode]['variant_classification'][variant_classification] = {
-                    'name': variant_classification,
-                    'score': score,
-                }
-    if genes and len(genes) > 0:
-        print(genes)
-        for casebarcode_key in genes:
-            gene_track.append(
-                genes[casebarcode_key]
-            )
-    print(gene_track)
+def create_oncogrid_bq_statement(type, genomic_build, project_set, cohort_ids, gene_list):
+    query_template = ''
+    gene_query_template = """
+        #standardSQL
+        SELECT sm.Hugo_Symbol,
+                sm.project_short_name,
+                  cs.case_barcode,
+                    sm.Variant_Classification,
+                      COUNT(sm.Variant_Classification) as score
+        FROM  `{cohort_table}` cs,
+              `{somatic_mut_table}` sm
+        WHERE cs.cohort_id IN ({cohort_id_list})
+        AND cs.sample_barcode = sm.sample_barcode_tumor                    
+        AND (cs.project_id IS NULL{project_clause})
+        {filter_clause}
+        GROUP BY sm.Hugo_Symbol, sm.project_short_name, cs.case_barcode, sm.Variant_Classification
+        ;
+    """
+
+    donor_query_template = """
+        #standardSQL
+        SELECT md.project_short_name,
+                cs.case_barcode,
+                   bc.gender,
+                     bc.vital_status,
+                       bc.race,
+                         bc.ethnicity,
+                           bc.age_at_diagnosis,
+                             bc.days_to_death,
+                               md.data_category,
+        COUNT(md.data_category) AS score
+        FROM 
+        `{cohort_table}` cs,
+        `{somatic_mut_table}` sm,
+        `{metadata_data_table}` md,
+        `{bioclinic_clin_table}` bc
+        WHERE cs.cohort_id IN ({cohort_id_list})
+        -- AND Variant_Classification NOT IN('Silent')
+        AND cs.sample_barcode = sm.sample_barcode_tumor
+        AND cs.sample_barcode = md.sample_barcode
+        AND cs.case_barcode = bc.case_barcode
+        AND (cs.project_id IS NULL{project_clause})
+        {filter_clause}
+        GROUP BY md.project_short_name, cs.case_barcode, cs.sample_barcode, bc.gender, bc.vital_status, bc.race, bc.ethnicity, bc.age_at_diagnosis, bc.days_to_death, md.data_category
+        ;
+    """
+
+    bq_data_project_id = settings.BIGQUERY_DATA_PROJECT_NAME
+
+    bq_sm_table_info = BQ_MOLECULAR_ATTR_TABLES['TCGA'][genomic_build]
+    bq_md_table_info = BQ_METADATA_DATA_TABLES['TCGA'][genomic_build]
+    bq_bc_table_info = BQ_BIOCLIN_DATA_TABLES['TCGA']
+
+    sm_dataset_name = bq_sm_table_info['dataset']
+    sm_table_name = bq_sm_table_info['table']
+    md_dataset_name = bq_md_table_info['dataset']
+    md_table_name = bq_md_table_info['table']
+    bc_dataset_name = bq_bc_table_info['dataset']
+    bc_table_name = bq_bc_table_info['table']
+
+    cohort_table = "{}.{}.{}".format(bq_data_project_id, settings.COHORT_DATASET_ID, settings.BIGQUERY_COHORT_TABLE_ID)
+    somatic_mut_table = "{}.{}.{}".format(bq_data_project_id, sm_dataset_name, sm_table_name)
+    metadata_data_table = "{}.{}.{}".format(bq_data_project_id, md_dataset_name, md_table_name)
+    bioclinic_clin_table = "{}.{}.{}".format(bq_data_project_id, bc_dataset_name, bc_table_name)
+
+    gene_list_str = ''
+    if gene_list is not None:
+        gene_list_str = ', '.join('\'{0}\''.format(gene) for gene in gene_list)
+
+    cohort_id_list = ', '.join([str(cohort_id) for cohort_id in cohort_ids])
+    filter_clause = "AND Hugo_Symbol IN ({})".format(gene_list_str) if gene_list_str != "" else ""
+    if type == GENE_TRACK_TYPE:
+        query_template = gene_query_template
+    elif type == DONOR_TRACK_TYPE:
+        query_template = donor_query_template
+
+    project_id_str = ""
+    if project_set and len(project_set):
+        project_id_str = ', '.join([str(project_id) for project_id in project_set])
+    project_clause = " OR project_id IN ({})".format(project_id_str) if project_set else ""
+
+    bq_statement = query_template.format(
+        cohort_table = cohort_table,
+        somatic_mut_table = somatic_mut_table,
+        metadata_data_table = metadata_data_table,
+        bioclinic_clin_table = bioclinic_clin_table,
+        cohort_id_list=cohort_id_list,
+        project_clause=project_clause,
+        filter_clause=filter_clause
+    )
+
+    return bq_statement, [somatic_mut_table, metadata_data_table, bioclinic_clin_table]
 

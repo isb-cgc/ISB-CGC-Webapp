@@ -34,6 +34,8 @@ require.config({
         vizhelpers: 'helpers/vis_helpers',
         select2: 'libs/select2.min',
         oncoprintjs: 'libs/oncoprint.bundle',
+        oncogridjs: 'libs/oncogrid-debug',
+        //oncogridjs: 'libs/oncogrid.min',
         geneticrules: 'libs/geneticrules',
         canvas_toBlob: 'libs/canvas-toBlob',
         zlibs: 'libs/zlibs',
@@ -54,6 +56,7 @@ require.config({
         violin_plot : 'visualizations/createViolinPlot',
         bar_plot : 'visualizations/createBarGraph',
         oncoprint_plot: 'visualizations/createOncoprintPlot',
+        oncogrid_plot: 'visualizations/createOncogridPlot',
         seqpeek_view: 'seqpeek_view',
         seqpeek: 'seqpeek_view/seqpeek'
     },
@@ -70,24 +73,25 @@ require.config({
         'geneticrules': ['jquery'],
         'jqueryqtip': ['jquery'],
         'download_util': ['cbio_util'],
-        'underscore': {exports: '_'}
+        'underscore': {exports: '_'},
     },
     map: {
         d3textwrap: {
             'd3-selection': 'd3'
-        }
+        },
     }
 });
 
 require([
     'jquery',
+    'd3',
     'plot_factory',
     'vizhelpers',
     'underscore',
     'base',
     'geneticrules',
-    'jqueryqtip'
-], function ($, plot_factory, vizhelpers, _, base) {
+    'jqueryqtip',
+], function ($, d3, plot_factory, vizhelpers, _, base) {
 
     var savingComment = false;
 

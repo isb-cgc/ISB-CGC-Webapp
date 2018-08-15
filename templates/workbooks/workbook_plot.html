@@ -315,6 +315,16 @@
                 <div class="oncoprint_body"></div>
             </div>
         </div>
+        <div class="oncogrid_div">
+            <div id="grid-div">
+            </div>
+            <button onclick="removeCleanDonors()">Remove Clean Donors</button>
+            <button onclick="toggleGridLines()">Grid</button>
+            <button onclick="toggleCrosshair()">Crosshair Mode</button>
+            <input type="text" size="5" id="width-resize"/>
+            <input type="text" size="5" id="height-resize"/>
+            <button onclick="resize()">Resize</button>
+        </div>
 
         <div class="legend" style="display: none;"></div>
         <button class="resubmit-button btn btn-primary">Submit Plot</button>
@@ -356,3 +366,4 @@
         </div>
     </div>
 </div>
+
