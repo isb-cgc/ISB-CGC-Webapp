@@ -48,7 +48,7 @@
         <div class="row">
             <div class="col-sm-12 col-md-12 col-lg-12">
                 <div id="invalid-sa-error"></div>
-                <h4>Adjust available datasets for Service Account {{ sa_id }}</h4>
+                <h4>Adjust available datasets for Service Account {{ sa_name }}</h4>
                 <ul>
                     <li class="upper">
                         <form id="verify-sa" method="POST" action="{% url 'verify_sa' user.id %}">
@@ -74,7 +74,7 @@
                                 </ul>
                             </div>
                             <input type="hidden" name="gcp_id" value="{{ gcp_id }}"/>
-                            <input type="hidden" name="user_sa" value="{{ sa_id }}"/>
+                            <input type="hidden" name="user_sa" value="{{ sa_name }}"/>
                             <input type="hidden" name="is_adjust" value="true" />
                             <div class="block">
                                 <input type="submit" class="verify-sa-btn btn btn-primary" value="Verify Service Account Users"/>
@@ -110,7 +110,7 @@
                             {% csrf_token %}
                             <p>We have verified that all of the users in your Google Cloud Project have permission to access the proposed datasets.</p>
                             <input type="hidden" name="gcp_id" value="{{ gcp_id }}"/>
-                            <input type="hidden" name="user_sa" value="{{ sa_id }}"/>
+                            <input type="hidden" name="user_sa" value="{{ sa_name }}"/>
                             <div class="block">
                                 <input type="submit" class="register-sa-btn btn btn-primary" value="Adjust"/>
                                 <div class="collapse register-pending" style="display: none;">
