@@ -58,6 +58,7 @@
                             </tr>
                             </thead>
                             <tbody>
+                            {% comment %}
                             {% for svc_act in sa_list  %}
                                 <tr>
                                     <td>{{ svc_act.name }}</td>
@@ -121,6 +122,7 @@
                                 </div>
                             </div>
                             {% endfor %}
+                            {% endcomment %}
                             </tbody>
                         </table>
                         <a href="{% url 'register_sa' user.id %}?gcp_id={{ gcp.project_id }}" class="btn btn-link">Register Service Account</a>
