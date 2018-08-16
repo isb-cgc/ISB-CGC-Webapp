@@ -41,7 +41,7 @@ SELECT DISTINCT mirna_name
 FROM feature_defs_mirn
 UNION
 SELECT DISTINCT mirna_name
-FROM feature_defs_mirn_v2
+FROM feature_defs_mirn_v3
 UNION
 SELECT DISTINCT mirna_name
 FROM feature_defs_mirna
