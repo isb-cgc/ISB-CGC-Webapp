@@ -69,7 +69,7 @@
 {#                                    <td>{% if project.big_query_dataset %}{{ project.big_query_dataset }}{% else %}N/A{% endif %}</td>#}
 
                                     <td>
-                                        {% if project.active_service_accounts|length > 0 %}
+                                        {% if project.active_service_accounts|length > 0  %}
                                         <a role="button" class="show-service-accounts" data-target="{{ project.id }}-expander"><i class="fa fa-caret-right"></i> {{ project.active_service_accounts|length }}</a>
                                         {% else %}
                                         {{ project.active_service_accounts|length }}
