@@ -126,7 +126,7 @@ require([
                         tr.append('<td><i class="fa fa-times"></i></td>');
                     }
                     var td = $('<td></td>');
-                    td.append('<span><i class="fa fa-check"></i> All Open Datasets</span><br />');
+                    td.append('<span><i class="fa fa-check"></i> All Open Datasets FIX ME ADD THIS BACK</span><br />');
                     /*
                     No longer listing users for DCF verification
                     for(var j=0;j<member['datasets'].length;j++){
