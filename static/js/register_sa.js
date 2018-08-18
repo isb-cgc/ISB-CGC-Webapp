@@ -126,9 +126,7 @@ require([
                         tr.append('<td><i class="fa fa-times"></i></td>');
                     }
                     var td = $('<td></td>');
-                    td.append('<span><i class="fa fa-check"></i> All Open Datasets FIX ME ADD THIS BACK</span><br />');
-                    /*
-                    No longer listing users for DCF verification
+                    td.append('<span><i class="fa fa-check"></i> All Open Datasets </span><br />');
                     for(var j=0;j<member['datasets'].length;j++){
                         var dataset = member['datasets'][j];
                         if (dataset['valid']) {
@@ -137,7 +135,6 @@ require([
                             td.append('<span title="User '+email+' does not have access to this dataset."><i class="fa fa-times"></i> '+dataset['name']+'</span><br />');
                         }
                     }
-                    */
                     tr.append(td);
                     tbody.append(tr);
                 }
