@@ -51,7 +51,7 @@
             {% endif %}
                 {% csrf_token %}
                 <div class="form-group">
-                    <label for="genes-name">Name of Favorite (Required)</label>
+                    <label for="genes-list-name">Name of Favorite (Required)</label>
                     <input id="genes-list-name" class="form-control" type="text" value="{% if 'gene_fav_detail' %}{{gene_favorite.name}}{% endif %}" name="genes-name" required>
                 </div>
 
@@ -64,7 +64,7 @@
                             <button class="btn btn-link nocap" id="file-upload-btn">
                                 <i class="fa fa-file"></i> Upload Gene and miRNA List
                             </button>
-                            <input type="file" name="upload" id="file-upload-field" style="display: none">
+                            <input type="file" name="upload" id="file-upload-field" aria-label="File Upload" style="display: none">
                             <div id="uploading" class="collapse" style="margin-left: 20px;">
                                 <i class="fa fa-circle-o-notch fa-spin"></i>  <span id="selected-file-name"></span>
                             </div>
@@ -72,7 +72,7 @@
                     </div>
                     <div id="tokenfield-holder">
                         <!-- "paste-in-genes" -->
-                        <textarea name="genes-list" class="form-control tokenfield" id="paste-in-genes"  placeholder="Enter your favorite gene or miRNA's name" required></textarea>
+                        <textarea name="genes-list" class="form-control tokenfield" id="paste-in-genes"  placeholder="Enter your favorite gene or miRNA's name" aria-label="Name" required></textarea>
                     </div>
                     <div class="tokenfield">
                         <p class="helper-text__repeat" style="display: none;"><i class="fa fa-exclamation-circle"></i> <span class="token invalid repeat">Repetitive</span>Genes and miRNAs will be removed on submit </p>
