@@ -399,6 +399,23 @@ def igv(request, sample_barcode=None, readgroupset_id=None):
     return render(request, 'GenespotRE/igv.html', context)
 
 
+@login_required
+def path_report(request, report_file=None):
+    if debug: logger.debug('Called ' + sys._getframe().f_code.co_name)
+    context = {}
+
+    if not path_report:
+        messages.error("Error while attempting to display this pathology report: a report file name was not provided.")
+        return redirect(reverse('cohort_list'))
+
+    template = 'GenespotRE/path-pdf.html'
+
+    context['path_report_file'] = report_file
+    context['path_report_uri'] = settings.STATIC_URL
+
+    return render(request, template, context)
+
+
 # Because the match for vm_ is always done regardless of its presense in the URL
 # we must always provide an argument slot for it
 #
