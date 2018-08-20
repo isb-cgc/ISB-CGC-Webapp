@@ -79,7 +79,7 @@
                             <h4>Upload a GDC Data Portal Case Manifest or a CSV/TSV file of barcodes and programs</h4>
                         </div>
                         <div class="panel-body">
-                            <button class="btn btn-primary instructions instructions_show" title="Show/Hide the instructions"></button>
+                            <div class="btn btn-primary button instructions instructions_show" title="Show/Hide the instructions"></div>
                             <div class="instructions" style="display: none;">
                                 <p>Files must be in <a href="#gdc-manifest">GDC Data Portal case manifest format</a>, or in <a href="#tcsv-format">comma/tab-delimited case/sample/program format</a>. After selecting the file and uploading it, the entries will be validated. Any entries which are found to be invalid will be listed, and you can choose to omit them and continue with cohort creation, or select a new file for verification and upload.</p>
                                 <a name="tcsv-format"></a><h5>CSV/TSV Barcode Files</h5>
@@ -111,7 +111,7 @@ TARGET-10-CAAABF-60.11C</pre>
                                 <button class="btn btn-link nocap" id="file-upload-btn">
                                     <i class="fa fa-file"></i> Upload barcode list or case manifest
                                 </button>
-                                <input type="file" name="upload" id="file-upload-field" style="display: none">
+                                <input type="file" name="upload" aria-label="File Upload" id="file-upload-field" style="display: none">
                                 <div id="uploading" class="collapse" style="margin-left: 20px;">
                                     <i class="fa fa-circle-o-notch fa-spin"></i>  <span id="selected-file-name"></span>
                                 </div>
@@ -187,7 +187,7 @@ TARGET-10-CAAABF-60.11C</pre>
                             <h4>Paste a set of barcodes and programs</h4>
                         </div>
                         <div class="panel-body">
-                            <button class="btn btn-primary instructions instructions_show" title="Show/Hide the instructions"></button>
+                            <div class="btn btn-primary button instructions instructions_show" title="Show/Hide the instructions"></div>
                             <div class="instructions" style="display: none;">
                                 <p>There is a maximum length of 10000 character for the text box. Please use the file upload option if you need to upload more barcodes than will fit in that space.</p>
                                 <p>All entries must be either a valid <span class="code">case barcode</span> <b><i>or</i></b> <span class="code">sample barcode</span>. When a case barcode is provided, all samples from that case will be included in the cohort. Make a separate entry per sample if only specific samples from a case should be added to the cohort.</p>
@@ -212,7 +212,7 @@ TARGET-10-CAAABF-60.11C
                             </div>
                             <hr>
                             <h5>Barcode Entries</h5> <i>(Maximum length: 10000 characters)</i>
-                            <textarea id="pasted-barcodes" maxlength="10000"></textarea>
+                            <textarea id="pasted-barcodes" aria-label="Barcode Entries" maxlength="10000"></textarea>
                             <div class="block">
                                 <button class="btn btn-primary verify" title="Verify the barcode set">Verify</button>
                                 <div class="collapse verify-pending" style="display: none;">
@@ -306,7 +306,7 @@ TARGET-10-CAAABF-60.11C
                             Your cohort's name contains invalid characters (<span class="unallowed-chars"></span>). Please choose another name.
                         </div>
                         <div class="form-group">
-                            <label for="cohort-name">Name:</label>
+                            <label for="create-cohort-name">Name:</label>
                             <input class="form-control" type="text" id="create-cohort-name" name="name" required />
                         </div>
                         <div class="form-group">
