@@ -457,7 +457,7 @@ require([
                             val = files[i]['cloudstorage_location'] + ';' + files[i]['index_name'] + ',' + files[i]['sample'];
                             dataTypeName = "gcs_bam";
                             label = "IGV";
-                            checkbox_inputs += '<input class="igv'+(accessible? ' accessible':'')+'" type="checkbox" token-label="' + tokenLabel + '" program="' + files[i]['program'] + '" name="' + dataTypeName + '" data-type="' + dataTypeName + '" value="' + val + '"';
+                            checkbox_inputs += '<input aria-label="IGV Checkbox" class="igv'+(accessible? ' accessible':'')+'" type="checkbox" token-label="' + tokenLabel + '" program="' + files[i]['program'] + '" name="' + dataTypeName + '" data-type="' + dataTypeName + '" value="' + val + '"';
                             if (!accessible) {
                                 checkbox_inputs += ' disabled';
                             }
@@ -502,15 +502,13 @@ require([
                                     '</div></td>';
                             break;
                         case 'thumbnail':
-                            table_row_data += '<td><img src="'+IMG_THUMBS_URL+files[i]['thumbnail']+'/thmb_128x64.jpeg"></td>';
+                            table_row_data += '<td><alt="thumb" img src="'+IMG_THUMBS_URL+files[i]['thumbnail']+'/thmb_128x64.jpeg"></td>';
                             break;
                         case 'platform':
                             table_row_data += '<td>' + happy_name(files[i][column_name]) + '</td>';
                             break;
-
                         default:
                             table_row_data += '<td>' + (files[i][column_name] || 'N/A') + '</td>';
-
                     }
                 }
                 row = '<tr>'+table_row_data+'</tr>';
