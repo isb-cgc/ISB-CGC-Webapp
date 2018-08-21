@@ -149,7 +149,9 @@
             background-color: #fff
             text-align: center
             font-size: 12.7px
-            &.program-tab, &.file-browser-tab
+            &.file-browser-tab
+                width: (100% / 5)
+            &.program-tab
                 width: (100% / 4)
             &.filter-tab
                 width: (100% / 3)
@@ -521,7 +523,7 @@
                             border-radius: 3px
                             a
                                 color: #FFF
-                    &.study-uid, &.camic-filename
+                    &.study-uid, &.accessible-filename
                         font-weight: 700
                         a:hover
                             text-decoration: none
@@ -678,7 +680,7 @@ span.code
     font-family: monospace
     font-weight: 600
 
-#camic, #camic-single, #dicom-viewer
+#camic, #camic-single, #dicom-viewer, #path-report-viewer
     .camic-tabs
         li a
             font-size: 13px

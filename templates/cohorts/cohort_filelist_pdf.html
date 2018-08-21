@@ -1,29 +1,29 @@
-<div id="dicom-files" class="tab-pane data-tab" data-file-type="dicom" role="tabpanel">
-    <div id="dicom-filter-panel" class="col-lg-3 col-md-3 col-sm-3 side-filter-panel">
+<div id="pdf-files" class="tab-pane data-tab" data-file-type="pdf" role="tabpanel">
+    <div id="pdf-filter-panel" class="col-lg-3 col-md-3 col-sm-3 side-filter-panel">
         <div class="panel panel-default hidden">
             <div class="panel-body">
                 <label for="build">Build</label>
-                <select aria-label="Build" id="dicom-build" class="form-control build">
+                <select aria-label="Build" id="pdf-build" class="form-control build">
                     <option value="HG19" selected>HG19</option>
                 </select>
             </div>
         </div>
         <div class="panel panel-default filter-panel">
             {% for attr_build, vals in metadata_data_attr.items %}
-            <div class="panel-body tab-content filter-build-panel" data-filter-build="HG19" id="dicom-filter-panel-HG19" {% if build != attr_build %}style="display: none;"{% endif %}>
-                <ul class="list-group" id="metadata-data-accordian-dicom" role="tablist" aria-multiselectable="true">
+            <div class="panel-body tab-content filter-build-panel" data-filter-build="HG19" id="pdf-filter-panel-HG19" {% if build != attr_build %}style="display: none;"{% endif %}>
+                <ul class="list-group" id="metadata-data-accordian-pdf" role="tablist" aria-multiselectable="true">
                     <li class="list-group-item">
-                        <div id="heading-dicom-HG19-case-id" class="list-group-item__heading">
+                        <div id="heading-pdf-HG19-case-id" class="list-group-item__heading">
                             <a role="button" data-toggle="collapse" data-parent="#metadata-data-accordian-all"
-                               href="#collapse-dicom-HG19-case-id" aria-expanded="false"
-                               aria-controls="collapse-dicom-HG19-case-id">
+                               href="#collapse-pdf-HG19-case-id" aria-expanded="false"
+                               aria-controls="collapse-pdf-HG19-case-id">
                                 <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> CASE
                             </a>
                         </div>
-                        <div id="collapse-dicom-HG19-case-id"
+                        <div id="collapse-pdf-HG19-case-id"
                              class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel"
                              data-feature-type="donor"
-                             aria-labelledby="heading-dicom-HG19-case-id" data-feature-name="case-id"
+                             aria-labelledby="heading-pdf-HG19-case-id" data-feature-name="case-id"
                              data-feature-displ-name="CASE ID">
                             <div class="search_enter">
                                 <div class="search_input">
@@ -38,20 +38,20 @@
                     </li>
                     {% for attr in vals %}
                         <li class="list-group-item">
-                            <div id="heading-dicom-HG19-{{attr.name}}" class="list-group-item__heading">
-                                <a role="button" data-toggle="collapse" data-parent="#metadata-data-accordian-dicom" href="#collapse-dicom-HG19-{{ attr.name }}" aria-expanded="false" aria-controls="collapse-dicom-HG19-{{ attr.name }}">
+                            <div id="heading-pdf-HG19-{{attr.name}}" class="list-group-item__heading">
+                                <a role="button" data-toggle="collapse" data-parent="#metadata-data-accordian-pdf" href="#collapse-pdf-HG19-{{ attr.name }}" aria-expanded="false" aria-controls="collapse-pdf-HG19-{{ attr.name }}">
                                     <i class="fa fa-caret-right"></i><i class="fa fa-caret-down"></i> {{ attr.displ_name }}
                                 </a>
                             </div>
-                            <div id="collapse-dicom-HG19-{{ attr.name }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" data-feature-type="donor"
-                                 aria-labelledby="heading-dicom-HG19-{{ attr.name }}" data-feature-name="{{ attr.name }}" data-feature-displ-name="{{ attr.displ_name }}">
-                                <ul class="search-checkbox-list" id="dicom-{{ attr.name }}">
+                            <div id="collapse-pdf-HG19-{{ attr.name }}" class="list-group-item__body collapse cohort-feature-select-block" role="tabpanel" data-feature-type="donor"
+                                 aria-labelledby="heading-pdf-HG19-{{ attr.name }}" data-feature-name="{{ attr.name }}" data-feature-displ-name="{{ attr.displ_name }}">
+                                <ul class="search-checkbox-list" id="pdf-{{ attr.name }}">
                                     {% with attr.values|how_many_more:6 as num_more %}
                                         {% for v in attr.values|check_for_order:attr.name %}
                                             {% if forloop.counter0 < 6 %}
                                                 <li class="checkbox">
                                                     <label title="{% if v.tooltip %}{{ v.tooltip }}{% else %} {% endif %}">
-                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="dicom-HG19-{{ attr.name }}-{{ v.value }}"
+                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="pdf-HG19-{{ attr.name }}-{{ v.value }}"
                                                                data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
                                                         {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_value }}{% else %}{{ v.name }}{% endif %}
                                                          <span class="count">({{ v.count }})</span>
@@ -61,7 +61,7 @@
                                                 <p class="more-checks"><a class="show-more">{{ num_more }} more</a><span class="checks"><a class="check-all">Check All</a> / <a class="uncheck-all">Uncheck All</a></span></p>
                                                 <li class="extra-values checkbox" style="display:none;">
                                                     <label title="{% if v.tooltip %}{{ v.tooltip }}{% else %} {% endif %}">
-                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="dicom-HG19-{{ attr.name}}-{{ v.value }}"
+                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="pdf-HG19-{{ attr.name}}-{{ v.value }}"
                                                                data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
                                                         {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.name }}{% endif %}
                                                          <span class="count">({{ v.count }})</span>
@@ -70,7 +70,7 @@
                                             {% else %}
                                                 <li class="extra-values checkbox" style="display:none;">
                                                     <label title="{% if v.tooltip %}{{ v.tooltip }}{% else %} {% endif %}">
-                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="dicom-HG19-{{ attr.name }}-{{ v.value }}"
+                                                        <input type="checkbox" name="elements-selected" data-value-name="{{ v.name }}" id="pdf-HG19-{{ attr.name }}-{{ v.value }}"
                                                                data-feature-name="{{ attr.name }}" data-count="{{ v.count }}">
                                                         {% if v.value == 'None' %}NA{% elif v.displ_name %}{{ v.displ_name }}{% else %}{{ v.name }}{% endif %}
                                                          <span class="count">({{ v.count }})</span>
@@ -91,7 +91,7 @@
             {% endfor %}
         </div>
     </div>
-    <div id="dicom-file-panel" class="file-panel col-sm-9 col-md-9 col-lg-9">
+    <div id="pdf-file-panel" class="file-panel col-sm-9 col-md-9 col-lg-9">
         <div class="filelist-panel panel">
             <div class="panel-heading">
                 <div class="file-panel-toggle">
@@ -104,7 +104,7 @@
                         <li class="menu-item">
                             <div class="filelist-obtain">
                                 <span class="pending-left" id="download-in-prog" style="display: none;"><i class="fa fa-circle-o-notch fa-spin"></i>Downloading...</span>
-                                <a class="download-link" href="{{ download_url }}" title="Download file manifest as CSV"><button class="btn btn-info download-btn">CSV</button></a>{# <a id="download-link" href="{{ download_url }}" title="Download file manifest as JSON"><button class="btn btn-info">JSON</button></a>#}
+                                <a class="download-link" href="{{ download_url }}" title="Download file manifest as CSV"><button class="btn btn-info download-btn">CSV</button></a>
                                 <input type="hidden" class="download-token" value="" />
                             </div>
                         </li>
@@ -141,19 +141,12 @@
                         <span class="paginate_button_space"/>
                         <a class="next-page paginate_button dataTables_button">Next</a>
                     </div>
-{#                    <div class="dataTables_search">#}
-{#                        <div class="dataTables_search_input">#}
-{#                            <input class="case-barcode-search-text" type="search" placeholder="Case Barcode" value="">#}
-{#                            <a class="case-barcode-search-clear-btn"><i class="fa fa-times-circle"></i></a>#}
-{#                        </div>#}
-{#                        <div class="case-barcode-search-btn dataTables_button"><i class="fa fa-search"></i></div>#}
-{#                    </div>#}
                 </div>
                 <div class="column-inputs">
-                    <a role="button" data-toggle="collapse" href="#column-toggle-div-dicom" aria-expanded="false" aria-controls="column-toggle-div-dicom">
+                    <a role="button" data-toggle="collapse" href="#column-toggle-div-pdf" aria-expanded="false" aria-controls="column-toggle-div-pdf">
                         Choose Columns to Display <i class="fa fa-caret-down"></i><i class="fa fa-caret-up"></i>
                     </a>
-                    <div id="column-toggle-div-dicom" class="column-collapse collapse">
+                    <div id="column-toggle-div-pdf" class="column-collapse collapse">
                         <div class="column-toggle"></div>
                         <p>*Click on column names above to hide/show columns in table</p>
                     </div>
@@ -163,19 +156,21 @@
                         <tr>
                             <th class="col-program" columnId="col-program">Program</th>
                             <th class="col-barcode" columnId="col-barcode">Case Barcode</th>
+                            <th class="col-filename" columnId="col-filename">File Name</th>
                             <th class="col-diseasecode" columnId="col-diseasecode">Disease Code</th>
-                            <th class="col-projectname"  columnId="col-projectname">Project Short Name</th>
-                            <th class="col-studydesc" columnId="col-studydesc">Study Description</th>
-                            <th class="col-studyuid" columnId="col-studyuid">Study Instance UID</th>
+                            <th class="col-datacat" columnId="col-datacat">Data Category</th>
+                            <th class="col-datatype" columnId="col-datatype">Data Type</th>
+                            <th class="col-dataformat" columnId="col-dataformat">Data Format</th>
                         </tr>
                     </thead>
                     <colgroup>
-                        <col style="width: 8%">
+                        <col style="width: 10%">
+                        <col style="width: 15%">
+                        <col style="width: 35%">
                         <col style="width: 10%">
                         <col style="width: 10%">
-                        <col style="width: 12%">
-                        <col style="width: 24%">
-                        <col style="width: 36%">
+                        <col style="width: 10%">
+                        <col style="width: 10%">
                     </colgroup>
                     <tbody>
                     </tbody>
