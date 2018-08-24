@@ -445,7 +445,7 @@ require([
                         val = files[i]['cloudstorage_location'] + ';' + files[i]['index_name'] + ',' + files[i]['sample'];
                         dataTypeName = "gcs_bam";
                         label = "IGV";
-                        checkbox_inputs += '<input class="igv'+(accessible? ' accessible':'')+'" type="checkbox" token-label="' + tokenLabel + '" program="' + files[i]['program'] + '" name="' + dataTypeName + '" data-type="' + dataTypeName + '" value="' + val + '"';
+                        checkbox_inputs += '<input aria-label="IGV Checkbox" class="igv'+(accessible? ' accessible':'')+'" type="checkbox" token-label="' + tokenLabel + '" program="' + files[i]['program'] + '" name="' + dataTypeName + '" data-type="' + dataTypeName + '" value="' + val + '"';
                         if (!accessible) {
                             checkbox_inputs += ' disabled';
                         }
@@ -478,7 +478,7 @@ require([
                     '<a href="'+DICOM_URL+files[i]['study_uid']+'/" target="_blank">'+files[i]['study_uid']+
                         '<div class="osmisis" style="display: none;"><i>Open in Osimis Web Viewer</i></div></a>'+
                     '</div></td>' : '') +
-                (active_tab === 'camic' ? (files[i]['thumbnail'] ? '<td><img src="'+IMG_THUMBS_URL+files[i]['thumbnail']+'/thmb_128x64.jpeg"></td>' : '<td></td>') : '') +
+                (active_tab === 'camic' ? (files[i]['thumbnail'] ? '<td><img alt="thumb" src="'+IMG_THUMBS_URL+files[i]['thumbnail']+'/thmb_128x64.jpeg"></td>' : '<td></td>') : '') +
                 (active_tab !== 'camic' && active_tab !== 'dicom' ? '<td>' + (files[i]['exp_strat'] || 'N/A') + '</td>' : '')+
                 (active_tab !== 'camic' && active_tab !== 'dicom' ? '<td>' + happy_name(files[i]['platform']) + '</td>' : '')+
                 (active_tab !== 'camic' && active_tab !== 'dicom' ? '<td>' + files[i]['datacat'] + '</td>' : '') +
