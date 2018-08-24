@@ -75,7 +75,7 @@ def oncogrid_view_data(request):
         donor_data_query, donor_bq_tables = create_oncogrid_bq_statement(DONOR_TRACK_TYPE, genomic_build, project_set, cohort_ids, gene_list)
 
         #print(donor_data_query)
-        donor_data_list = get_donor_data_list(donor_data_query)
+        donor_data_list, donor_track_count_max = get_donor_data_list(donor_data_query)
 
         # get gene list
         gene_data_query, gene_bq_tables = create_oncogrid_bq_statement(GENE_TRACK_TYPE, genomic_build, project_set, cohort_ids, gene_list)
@@ -89,7 +89,9 @@ def oncogrid_view_data(request):
                 'donor_data_list': donor_data_list,
                 'gene_data_list': gene_data_list,
                 'observation_data_list': observation_data_list,
-                'bq_tables': bq_tables})
+                'bq_tables': bq_tables,
+                'donor_track_count_max': donor_track_count_max
+            })
         else:
             return JsonResponse(
                 {'message': "The chosen genes and cohorts do not contain any samples with Gene Mutation data."})
@@ -104,6 +106,21 @@ def get_donor_data_list(bq_statement):
     results = get_bq_query_result(bq_statement)
     donor_data_list = []
     donors = {}
+    donor_track_count_max = {
+        'race': 0,
+        'age_at_diagnosis': 0,
+        'vital_status': 0,
+        'days_to_death': 0,
+        'gender': 0,
+        'ethnicity': 0,
+        'clinical': 0,
+        'biospecimen': 0,
+        'rsd': 0,
+        'snv': 0,
+        'cnv': 0,
+        'gene_exp': 0
+    }
+
     if results and len(results) > 0:
         for row in results:
             project_short_name = row['f'][0]['v']
@@ -112,26 +129,26 @@ def get_donor_data_list(bq_statement):
             vital_status = row['f'][3]['v']
             race = row['f'][4]['v']
             ethnicity = row['f'][5]['v']
-            age_at_diagnosis = str(row['f'][6]['v'])
-            days_to_death = str(row['f'][7]['v'])
+            age_at_diagnosis = row['f'][6]['v']
+            days_to_death = row['f'][7]['v']
             data_category = row['f'][8]['v']
-            score = str(str(row['f'][9]['v']))
-
+            score = row['f'][9]['v']
             if not donors.has_key(case_barcode):
                 donors[case_barcode] = {
                     'case_code': project_short_name + '/' + case_barcode,
-                    'gender': gender,
-                    'vital_status': vital_status,
-                    'race': race if not race == None else 'None',
-                    'ethnicity': ethnicity if not ethnicity == None else 'None',
-                    'age_at_diagnosis': age_at_diagnosis,
-                    'days_to_death': days_to_death,
+                    'gender': gender if gender != None else 'Not Reported',
+                    'vital_status': vital_status if vital_status != None else 'Not Reported',
+                    'race': race if race != None else 'Not Reported',
+                    'ethnicity': ethnicity if ethnicity != None else 'Not Reported',
+                    'age_at_diagnosis': age_at_diagnosis if age_at_diagnosis != None else 'Not Reported',
+                    'days_to_death': days_to_death if days_to_death != None else 'Not Reported',
                     'data_category': {},
                 }
             if not donors[case_barcode]['data_category'].has_key(data_category):
                 donors[case_barcode]['data_category'][data_category] = {
                     'score': score,
                 }
+
     if donors and len(donors) > 0:
         for case_barcode_key in donors:
             donor_data = {
@@ -142,20 +159,47 @@ def get_donor_data_list(bq_statement):
                 'ethnicity': donors[case_barcode_key]['ethnicity'],
                 'age_at_diagnosis': donors[case_barcode_key]['age_at_diagnosis'],
                 'days_to_death': donors[case_barcode_key]['days_to_death'],
+                'clinical' : 0,
+                'biospecimen': 0,
+                'rsd': 0,
+                'snv': 0,
+                'cnv': 0,
+                'gene_exp': 0
             }
+            if donor_track_count_max['gender'] == 0 and donor_data['gender'] != 'Not Reported':
+                donor_track_count_max['gender'] = 1
+            if donor_track_count_max['vital_status'] == 0 and donor_data['vital_status'] != 'Not Reported':
+                donor_track_count_max['vital_status'] = 1
+            if donor_track_count_max['race'] == 0 and donor_data['race'] != 'Not Reported':
+                donor_track_count_max['race'] = 1
+            if donor_track_count_max['ethnicity'] == 0 and donor_data['race'] != 'Not Reported':
+                donor_track_count_max['ethnicity'] = 1
+            if donor_data['age_at_diagnosis'] != 'Not Reported':
+                donor_track_count_max['age_at_diagnosis'] = max(int(donor_track_count_max['age_at_diagnosis']), int(donor_data['age_at_diagnosis']))
+            if donor_data['days_to_death'] != 'Not Reported':
+                donor_track_count_max['days_to_death'] = max(int(donor_track_count_max['days_to_death']), int(donor_data['days_to_death']))
 
             for data_category_key in donors[case_barcode_key]['data_category']:
                 if data_category_key == 'Clinical':
                     donor_data['clinical'] = donors[case_barcode_key]['data_category'][data_category_key]['score']
-                elif data_category_key == 'Biospecimen':
+                    donor_track_count_max['clinical'] = max(donor_track_count_max['clinical'], donor_data['clinical'])
+                elif data_category_key.lower() == 'biospecimen':
                     donor_data['biospecimen'] = donors[case_barcode_key]['data_category'][data_category_key]['score']
-                elif data_category_key.lower() == 'Raw Sequencing Data'.lower():
+                    donor_track_count_max['biospecimen'] = max(donor_track_count_max['biospecimen'], donor_data['biospecimen'])
+                elif data_category_key.lower() == 'raw sequencing data':
                     donor_data['rsd'] = donors[case_barcode_key]['data_category'][data_category_key]['score']
-                elif data_category_key == 'Simple Nucleotide Variation':
+                    donor_track_count_max['rsd'] = max(donor_track_count_max['rsd'], donor_data['rsd'])
+                elif data_category_key.lower() == 'simple nucleotide variation':
                     donor_data['snv'] = donors[case_barcode_key]['data_category'][data_category_key]['score']
-
+                    donor_track_count_max['snv'] = max(donor_track_count_max['snv'], donor_data['clinical'])
+                elif data_category_key.lower() == 'copy number variation':
+                    donor_data['cnv'] = donors[case_barcode_key]['data_category'][data_category_key]['score']
+                    donor_track_count_max['cnv'] = max(donor_track_count_max['cnv'], donor_data['clinical'])
+                elif data_category_key.lower() == 'gene expression':
+                    donor_data['gene_exp'] = donors[case_barcode_key]['data_category'][data_category_key]['score']
+                    donor_track_count_max['gene_exp'] = max(donor_track_count_max['gene_exp'], donor_data['clinical'])
             donor_data_list.append(donor_data.copy())
-    return donor_data_list
+    return donor_data_list, donor_track_count_max
 
 
 
@@ -202,7 +246,7 @@ def get_gene_data_list(bq_statement):
                     ob_id += 1
                     observation_data['id'] = ob_id
                     observation_data['donorId'] = genes_mut_data[hugo_symbol]['case_barcode'][case_barcode]['case_code']
-                    observation_data['consequence'] = vc
+                    observation_data['consequence'] = vc.lower()
                     #print(observation_data)
                     observation_data_list.append(observation_data.copy())
 
@@ -230,48 +274,87 @@ def create_oncogrid_bq_statement(type, genomic_build, project_set, cohort_ids, g
     query_template = ''
     gene_query_template = """
         #standardSQL
-        SELECT sm.Hugo_Symbol,
+        SELECT * FROM (
+            SELECT sm.Hugo_Symbol,
                 sm.project_short_name,
                   cs.case_barcode,
-                    sm.Variant_Classification,
-                      COUNT(sm.Variant_Classification) as score
-        FROM  `{cohort_table}` cs,
-              `{somatic_mut_table}` sm
-        WHERE cs.cohort_id IN ({cohort_id_list})
-        AND cs.sample_barcode = sm.sample_barcode_tumor                    
-        AND (cs.project_id IS NULL{project_clause})
-        {filter_clause}
-        GROUP BY sm.Hugo_Symbol, sm.project_short_name, cs.case_barcode, sm.Variant_Classification
-        ;
+                    CASE
+                      WHEN sm.Variant_Classification IN ('Frame_Shift_Del', 'Frame_Shift_Ins') 
+                          OR {conseq_col} LIKE '%frameshift%' 
+                        THEN 'frameshift_variant' 
+                      WHEN sm.Variant_Classification IN ('Nonstop_Mutation', 'Nonsense_Mutation')
+                        THEN
+                            CASE 
+                              WHEN sm.all_effects like '%stop_gained%'
+                                THEN 'stop_gained'
+                              ELSE 'stop_lost'
+                            END
+                      WHEN sm.Variant_Classification = 'Nonstop_Mutation' 
+                        OR (Variant_Classification = 'Missense_Mutation' AND Variant_Type IN ('DEL','INS')) 
+                        OR (Variant_Classification = 'Translation_Start_Site')
+                        THEN 'missense_variant'                                              
+                        /*THEN 
+                          CASE
+                            WHEN sm.all_effects like '%missense_variant%'
+                              THEN 'missense_variant'
+                          END*/
+                      WHEN {conseq_col} = 'start_lost'
+                        THEN
+                          CASE
+                           WHEN sm.all_effects like '%start_lost%'
+                            THEN 'start_lost'
+                          END
+                      --ELSE                        
+                        --{conseq_col}
+                        
+                    END AS conseq,
+                      COUNT({conseq_col}) as score
+                    --,
+                      --COUNT(sm.Variant_Classification) as score
+                    -- END AS consequence
+            FROM  `{cohort_table}` cs,
+                  `{somatic_mut_table}` sm
+            WHERE cs.cohort_id IN ({cohort_id_list})
+            AND cs.sample_barcode = sm.sample_barcode_tumor                    
+            AND (cs.project_id IS NULL{project_clause})
+            {filter_clause}
+            GROUP BY sm.Hugo_Symbol, sm.project_short_name, cs.case_barcode, conseq            
+        )
+        WHERE conseq is not null;
     """
 
     donor_query_template = """
-        #standardSQL
-        SELECT md.project_short_name,
-                cs.case_barcode,
-                   bc.gender,
-                     bc.vital_status,
-                       bc.race,
-                         bc.ethnicity,
-                           bc.age_at_diagnosis,
-                             bc.days_to_death,
-                               md.data_category,
-        COUNT(md.data_category) AS score
-        FROM 
-        `{cohort_table}` cs,
-        `{somatic_mut_table}` sm,
-        `{metadata_data_table}` md,
-        `{bioclinic_clin_table}` bc
-        WHERE cs.cohort_id IN ({cohort_id_list})
-        -- AND Variant_Classification NOT IN('Silent')
-        AND cs.sample_barcode = sm.sample_barcode_tumor
-        AND cs.sample_barcode = md.sample_barcode
-        AND cs.case_barcode = bc.case_barcode
-        AND (cs.project_id IS NULL{project_clause})
-        {filter_clause}
-        GROUP BY md.project_short_name, cs.case_barcode, cs.sample_barcode, bc.gender, bc.vital_status, bc.race, bc.ethnicity, bc.age_at_diagnosis, bc.days_to_death, md.data_category
-        ;
-    """
+            #standardSQL
+            SELECT md.project_short_name,
+                    cs.case_barcode,
+                       bc.gender,
+                         bc.vital_status,
+                           bc.race,
+                             bc.ethnicity,
+                               bc.age_at_diagnosis,
+                                 bc.days_to_death,
+                                   md.data_category,
+            COUNT(md.data_category) AS score
+            FROM
+            `{cohort_table}` cs,
+            `{metadata_data_table}` md,
+            `{bioclinic_clin_table}` bc,
+            (                
+                SELECT distinct sample_barcode_tumor
+                FROM `{somatic_mut_table}`
+                WHERE TRUE {filter_clause}
+            ) sm
+            
+            WHERE cs.cohort_id IN ({cohort_id_list})
+            -- AND Variant_Classification NOT IN('Silent')
+            AND cs.sample_barcode = sm.sample_barcode_tumor            
+            AND cs.sample_barcode = md.sample_barcode
+            AND cs.case_barcode = bc.case_barcode
+            AND (cs.project_id IS NULL{project_clause})
+            GROUP BY md.project_short_name, cs.case_barcode, bc.gender, bc.vital_status, bc.race, bc.ethnicity, bc.age_at_diagnosis, bc.days_to_death, md.data_category
+            ;
+        """
+
 
     bq_data_project_id = settings.BIGQUERY_DATA_PROJECT_NAME
 
@@ -312,6 +395,7 @@ def create_oncogrid_bq_statement(type, genomic_build, project_set, cohort_ids, g
         somatic_mut_table = somatic_mut_table,
         metadata_data_table = metadata_data_table,
         bioclinic_clin_table = bioclinic_clin_table,
+        conseq_col = ("one_consequence" if genomic_build == "hg38" else 'consequence'),
         cohort_id_list=cohort_id_list,
         project_clause=project_clause,
         filter_clause=filter_clause

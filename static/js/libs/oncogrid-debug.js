@@ -16270,7 +16270,6 @@ OncoTrackGroup.prototype.refreshData = function () {
             track = _self.tracks[j];
             value = domain[track.fieldName];
             var isNullSentinel = value === _self.nullSentinel;
-            console.log(track.template);
             _self.trackData.push({
                 id: domain.id,
                 displayId: _self.rotated ? domain.symbol : domain.id,
