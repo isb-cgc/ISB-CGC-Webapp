@@ -170,7 +170,7 @@ require([
         $('#refresh-project input[name="register_users"]').remove();
     });
 
-    $('button.instructions').on('click',function(){
+    $('div.instruction_button').on('click',function(){
         var is_instruction_vis = $(this).siblings('div.instructions').is(':visible')
         is_instruction_vis ? $(this).siblings('div.instructions').hide() : $(this).siblings('div.instructions').show();
         $(this).toggleClass('instructions_show', is_instruction_vis);

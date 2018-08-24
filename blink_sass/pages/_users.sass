@@ -155,30 +155,25 @@
         width: 550px
     ol
         margin-bottom: 20px
-    button
-        &.instructions
-            &.instructions_show
-                margin-bottom: 15px
-                display: block
-                clear: both
-                &:before
-                    content: "\f103"
-                    float: left
-                    font-family: FontAwesome
-                &:after
-                    content: "Show Instructions"
-                    margin-left: 5px
-            &.instructions_hide
-                margin-bottom: 15px
-                display: block
-                clear: both
-                &:before
-                    content: "\f102"
-                    float: left
-                    font-family: FontAwesome
-                &:after
-                    content: "Hide Instructions"
-                    margin-left: 5px
+    div.instruction_button
+        display: inline-block
+        margin-bottom: 15px
+        &.instructions_show
+            &:before
+                content: "\f102"
+                float: left
+                font-family: FontAwesome
+            &:after
+                content: "Show Instructions"
+                margin-left: 5px
+        &.instructions_hide
+            &:before
+                content: "\f103"
+                float: left
+                font-family: FontAwesome
+            &:after
+                content: "Hide Instructions"
+                margin-left: 5px
 
 #user-adjust-sa
     h4
