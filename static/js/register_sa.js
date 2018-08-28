@@ -110,6 +110,8 @@ require([
                     dataset_input.val(data['datasets']);
                 }
 
+                /*
+                ** Moving to DCF verification, we no longer enumerate roles of each project member
                 var roles = data['roles'];
                 for (var email in roles) {
                     var member = roles[email];
@@ -138,6 +140,7 @@ require([
                     tr.append(td);
                     tbody.append(tr);
                 }
+                */
 
                 if($('input[name="select-datasets"][value="remove"]:checked').length > 0) {
                     var remove_all = $('input[value="remove"]').clone();
