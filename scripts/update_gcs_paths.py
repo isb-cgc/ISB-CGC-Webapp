@@ -17,6 +17,9 @@ from GenespotRE import settings
 db = None
 cursor = None
 
+INDEXD_URI = settings.INDEXD_URI + "?ids="
+LIMIT = settings.INDEXD_REQ_LIMIT
+
 try:
     db = get_sql_connection()
     cursor = db.cursor()
@@ -29,20 +32,17 @@ try:
         LIMIT {limit} OFFSET {offset};
     """
 
-    indexd_uri = "https://nci-crdc.datacommons.io/index/index?ids="
-
     program_tables = Public_Data_Tables.objects.filter(program__in=Program.get_public_programs())
 
     for table in program_tables:
         program_paths[table.program.name] = {}
         program_paths[table.program.name][table.build] = None
 
-        limit=3
         offset=0
         files_found = True
-        counter = 0
-        while files_found and counter < 1:
-            cursor.execute(query_base.format(limit=limit,offset=offset,metadata_data_table=table.data_table))
+
+        while files_found:
+            cursor.execute(query_base.format(limit=LIMIT,offset=offset,metadata_data_table=table.data_table))
             files = cursor.fetchall()
             files_found = len(files) > 0
 
@@ -59,7 +59,7 @@ try:
 
             build_obj = program_paths[table.program.name][table.build]
 
-            indexd_resp = requests.get(url=indexd_uri + indexd_req_string)
+            indexd_resp = requests.get(url=INDEXD_URI + indexd_req_string)
 
             if 'records' in indexd_resp.json():
                 for record in indexd_resp.json()['records']:
@@ -67,11 +67,7 @@ try:
                         if 'gs://' in url:
                             build_obj[record['did']]['gcs_path'] = url
 
-            logger.info("Result: {}".format(str(build_obj)))
-
             offset += len(files)
-
-            counter += 1
 
 except Exception as e:
     logger.error("[ERROR] While updating GCS paths: ")
