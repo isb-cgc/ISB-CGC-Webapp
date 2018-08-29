@@ -29,7 +29,7 @@
 
 {% block page_header %}
     <div class="container">
-        <h1 class="page-header pull-left"><a href="{% url 'user_gcp_list' user.id %}" role="link"><i class="fa fa-chevron-left"></i></a> {{ gcp.project_name }} ({{ gcp.project_id }})</h1>
+        <h1 class="page-header pull-left"><a href="{% url 'user_gcp_list' user.id %}" aria-label="Back" role="link"><i class="fa fa-chevron-left"></i></a> {{ gcp.project_name }} ({{ gcp.project_id }})</h1>
         <div class="pull-right refresh-project">
             <a class="refresh-project btn btn-primary" data-toggle="modal" role="button" data-user-id="{{ request.user.id }}" data-project-gcp-id="{{ gcp.project_id }}" data-project-name="{{ gcp.project_name }}" data-target="#refresh-project-modal" >Refresh Project</a></li>
         </div>
@@ -64,19 +64,19 @@
                                     <td>{% if svc_act.num_auth == 0 %}None{% else %}{{ svc_act.auth_dataset_names }}{% endif %}</td>
                                     <td>{% if svc_act.is_expired and svc_act.num_auth > 0 %} class="red" title="Service Account's authorization date has expired; refresh to extend access."{% endif %}{{ svc_act.authorized_date|date:'M d, Y, g:i a' }}</td>
                                     <td>
-                                        <a title="Refresh this Service Account" data-toggle="modal" role="button" data-target="#refresh-sa-modal-{{ svc_act.esc_name }}" class="space-right-5"><i class="fa fa-refresh"></i></a>
-                                        <a title="Delete this Service Account" data-toggle="modal" role="button" data-target="#delete-sa-modal-{{ svc_act.esc_name }}"><i class="fa fa-trash"></i></a>
-                                        <a title="Adjust Datasets for this Service Account" role="button" href="{% url 'adjust_sa' user.id %}?sa_name={{ svc_act.name }}"><i class="fa fa-plus-square"></i></a>
+                                        <a title="Refresh this Service Account" aria-label="Refresh SA" data-toggle="modal" role="button" data-target="#refresh-sa-modal-{{ svc_act.esc_name }}" class="space-right-5"><i class="fa fa-refresh"></i></a>
+                                        <a title="Delete this Service Account" aria-label="Delete SA" data-toggle="modal" role="button" data-target="#delete-sa-modal-{{ svc_act.esc_name }}"><i class="fa fa-trash"></i></a>
+                                        <a title="Adjust Datasets for this Service Account" aria-label="Adjust Datasets for SA" role="button" href="{% url 'adjust_sa' user.id %}?sa_name={{ svc_act.name }}"><i class="fa fa-plus-square"></i></a>
                                     </td>
                                 </tr>
                             <!-- Refresh Service Account Modal -->
                             <!-- TODO: this should be using the user_gcp_list_modals template instead -->
-                            <div class="modal fade" id="refresh-sa-modal-{{ svc_act.esc_name }}" tabindex="-1" role="dialog" aria-labelledby="refresh-sa-header" aria-hidden="true">
+                            <div class="modal fade" id="refresh-sa-modal-{{ svc_act.esc_name  }}" tabindex="-1" role="dialog" aria-labelledby="refresh-sa-header" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
                                         <div class="modal-header">
                                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                            <h4 class="modal-title">Refresh this Service Account?</h4>
+                                            <h4 id="refresh-sa-header" class="modal-title">Refresh this Service Account?</h4>
                                         </div>
                                         <form id="refresh-sa" method="POST" action="{% url 'register_sa' user.id %}">
                                             <div class="modal-body">
@@ -252,7 +252,7 @@
     </div>
 
     <!-- Register Bucket Modal -->
-    <div class="modal fade" id="register-bucket-modal" tabindex="-1" role="dialog" aria-labelledby="register-bucket-header" aria-hidden="true">
+    <div class="modal fade" id="register-bucket-modal" tabindex="-1" role="dialog" aria-labelledby="register-bucket" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
