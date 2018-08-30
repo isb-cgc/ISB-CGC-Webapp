@@ -18,38 +18,43 @@
 define (['jquery', 'oncogridjs'],
     function ($, oncogridjs) {
     var grid;
-    var updateOncogrid = function(donors, genes, observations, donor_track_count_max){
-        //console.log(donors);
-        //console.log(genes);
-        //console.log(observations);
+    var observation_donors;
+    var updateOncogrid = function(donors, genes, observations, donor_track_count_max, obs_donors){
+        console.log(donors);
+        console.log(genes);
+        console.log(observations);
+        observation_donors = obs_donors;
         //console.log(observations);
 
-        var track_template = '<div class="wrapper">{{displayId}}<br>{{displayName}}: {{displayValue}}</div>';
+        var default_track_template = '<div class="wrapper">{{displayId}}<br>{{displayName}}: {{displayValue}}</div>';
+        var datatype_track_template = '<div class="wrapper">{{displayId}}<br>{{displayName}}: {{displayValue}} file(s)</div>';
         var donorTracks_temp = [
-            { 'name': 'Race', 'fieldName': 'race', 'type': 'race', 'group': 'Clinical', 'sort': sortByString, 'template': track_template },
-            { 'name': 'Age at Diagnosis', 'fieldName': 'age_at_diagnosis', 'type': 'age', 'group': 'Clinical', 'sort': sortByInt, 'template': track_template},
-            { 'name': 'Vital Status', 'fieldName': 'vital_status', 'type': 'vital', 'group': 'Clinical', 'sort': sortByInt, 'template': track_template},
-            { 'name': 'Days to Death', 'fieldName': 'days_to_death', 'type': 'dd', 'group': 'Clinical', 'sort': sortByInt, 'template': track_template},
-            { 'name': 'Gender', 'fieldName': 'gender', 'type': 'gender', 'group': 'Clinical', 'sort': sortByString, 'collapsed': true, 'template': track_template},
-            { 'name': 'Ethnicity', 'fieldName': 'ethnicity', 'type': 'ethnicity', 'group': 'Clinical', 'sort': sortByString, 'collapsed': true, 'template': track_template},
-            { 'name': 'Clinical', 'fieldName': 'clinical', 'type': 'clinical', 'group': 'Data Types', 'sort': sortByInt, 'template': track_template},
-            { 'name': 'Biospecimen', 'fieldName': 'biospecimen', 'type': 'biospecimen', 'group': 'Data Types', 'sort': sortByInt, 'template': track_template},
-            { 'name': 'Raw Sequencing Data', 'fieldName': 'rsd', 'type': 'rsd', 'group': 'Data Types', 'sort': sortByInt, 'template': track_template},
-            { 'name': 'Simple Nucleotide Variation', 'fieldName': 'snv', 'type': 'snv', 'group': 'Data Types', 'sort': sortByInt, 'template': track_template},
-            { 'name': 'Copy Number Variation', 'fieldName': 'cnv', 'type': 'cnv', 'group': 'Data Types', 'sort': sortByInt, 'template': track_template},
-            { 'name': 'Gene Expression', 'fieldName': 'gene_exp', 'type': 'gene_exp', 'group': 'Data Types', 'sort': sortByInt, 'template': track_template},
+            { 'name': 'Race', 'fieldName': 'race', 'type': 'race', 'group': 'Clinical', 'sort': sortByString, 'template': default_track_template },
+            { 'name': 'Age at Diagnosis', 'fieldName': 'age_at_diagnosis', 'type': 'age', 'group': 'Clinical', 'sort': sortByIntDesc, 'template': default_track_template},
+            { 'name': 'Vital Status', 'fieldName': 'vital_status', 'type': 'vital', 'group': 'Clinical', 'sort': sortByString, 'template': default_track_template},
+            { 'name': 'Days to Death', 'fieldName': 'days_to_death', 'type': 'dd', 'group': 'Clinical', 'sort': sortByIntDesc, 'template': default_track_template},
+            { 'name': 'Gender', 'fieldName': 'gender', 'type': 'gender', 'group': 'Clinical', 'sort': sortByString, 'collapsed': true, 'template': default_track_template},
+            { 'name': 'Ethnicity', 'fieldName': 'ethnicity', 'type': 'ethnicity', 'group': 'Clinical', 'sort': sortByString, 'collapsed': true, 'template': default_track_template},
+            { 'name': 'Clinical', 'fieldName': 'clinical', 'type': 'clinical', 'group': 'Data Types', 'sort': sortByIntDesc, 'template': datatype_track_template},
+            { 'name': 'Biospecimen', 'fieldName': 'biospecimen', 'type': 'biospecimen', 'group': 'Data Types', 'sort': sortByIntDesc, 'template': datatype_track_template},
+            { 'name': 'Raw Sequencing Data', 'fieldName': 'rsd', 'type': 'rsd', 'group': 'Data Types', 'sort': sortByIntDesc, 'template': datatype_track_template},
+            { 'name': 'Simple Nucleotide Variation', 'fieldName': 'snv', 'type': 'snv', 'group': 'Data Types', 'sort': sortByIntDesc, 'template': datatype_track_template},
+            { 'name': 'Copy Number Variation', 'fieldName': 'cnv', 'type': 'cnv', 'group': 'Data Types', 'sort': sortByIntDesc, 'template': datatype_track_template},
+            { 'name': 'Gene Expression', 'fieldName': 'gene_exp', 'type': 'gene_exp', 'group': 'Data Types', 'sort': sortByIntDesc, 'template': datatype_track_template},
         ];
         var donorTracks =[];
 
-        for(var i = 0; i< donorTracks_temp.length; i++){
+        //do not add donor tracks with no counts
+        for (var i = 0; i< donorTracks_temp.length; i++){
             var fieldName = donorTracks_temp[i]['fieldName'];
             var max_count = donor_track_count_max[fieldName];
-            if(max_count > 0)
+            if(max_count > 0) {
                 donorTracks.push(donorTracks_temp[i]);
+            }
         }
-        //console.log(donorTracks);
+
         var geneTracks = [
-            {'name': '#Cases affected', 'fieldName': 'case_score', 'type': 'int', 'group': 'GDC', 'template': track_template},
+            {'name': '#Cases affected', 'fieldName': 'case_score', 'type': 'int', 'group': 'GDC', 'template': default_track_template},
         ];
 
         var mainGrid_templates = {
@@ -58,7 +63,6 @@ define (['jquery', 'oncogridjs'],
         };
 
         var donorOpacity = function (d) {
-            //console.log(donor_track_count_max);
             var opacity;
             switch (d.fieldName){
                 case 'age_at_diagnosis':
@@ -85,39 +89,40 @@ define (['jquery', 'oncogridjs'],
             }
             return opacity;
         };
-        /*colorMap = {
-            'missense_variant': '#ff9b6c',
-            'frameshift_variant': '#57dba4',
-            'stop_gained': '#af57db',
-            'start_lost': '#ff2323',
-            'stop_lost': '#d3ec00',
-            'initiator_codon_variant': '#5abaff'
-        };*/
+        var max_case_count = 0;
 
+        for (var i=0; i<genes.length; i++){
+            max_case_count = Math.max(max_case_count, genes[i]['case_score']);
+        }
+
+        var geneOpacity = function (d) {
+            return d.value / max_case_count;
+        };
 
         var params = {
             element: '#grid-div',
             donors: donors,
             genes: genes,
+            margin: { top: 40, right: 100, bottom: 80, left: 50 },
             observations: observations,
             height: 150,
             width: 600,
             heatMap: false,
-            trackHeight: 20,
-            trackLegendLabel: '<i>?</i>',
+            trackHeight: 12,
+            trackLegendLabel: '<img style="width:13px;height:13px;margin-top:-7px;" src="/static/img/question.png" alt="legend">',
             donorTracks: donorTracks,
             donorOpacityFunc: donorOpacity,
             donorFillFunc: donorFill,
-            //colorMap: colorMap,
             geneTracks: geneTracks,
             geneOpacityFunc: geneOpacity,
             geneFillFunc: geneFill,
             expandableGroups: ['Clinical'],
-            templates: mainGrid_templates
+            templates: mainGrid_templates,
 
         };
 
         grid = new OncoGrid(params);
+
         grid.render();
     };
 
@@ -158,13 +163,13 @@ define (['jquery', 'oncogridjs'],
         'rsd' : 'cyan',
         'snv': 'darkkhaki',
         'cnv': 'darksalmon',
-        'gene_exp': 'mediumseagreen'
+        //'gene_exp': 'mediumseagreen'
     };
 
 
     var geneFill =function(d){
         return 'mediumpurple';
-    }
+    };
     var donorFill = function (d) {
         var data_type = d.type;
         var data_value = d.value ? d.value.toLowerCase() : 'not reported';
@@ -194,63 +199,39 @@ define (['jquery', 'oncogridjs'],
                 break;
         }
         return fill_color;
-        /*if (d.type === 'race') {
-            var race = d.value.toLowerCase() in legend_race ? d.value.toLowerCase() : 'other';
-            return legend_race[race];
-        }
-        else if (d.type === 'age') {
-            return 'darkslategrey';
-        }
-        else if (d.type === 'vital'){
-            var vital_status = d.value.toLowerCase() in legend_vital ? d.value.toLowerCase() : 'unknown';
-            return legend_vital[vital_status];
-        } else if (d.type === 'dd'){
-            return d.value == 'None' ? 'white':'blue';
-        } else if (d.type === 'gender'){
-            return legend_gender[d.value.toLowerCase()]
-        } else if (d.type === 'ethnicity'){
-            return legend_ethnicity[d.value.toLowerCase()];
-        }*/
     };
 
-    var geneOpacity = function (d) {
-        return d.value / 400;
-    };
 
-    var sortByBool = function (field) {
+
+    var sortByString = function (field) {
         return function (a, b) {
-            if (a[field] && !b[field]) {
+            if(a[field].toLowerCase() == 'not reported')
                 return 1;
-            } else if (!a[field] && b[field]) {
+            else if(b[field].toLowerCase() == 'not reported')
                 return -1;
-            } else {
-                return 0;
-            }
+            else
+                return a[field].localeCompare(b[field]);
         };
     };
 
-    var sortByInt = function (field) {
+    var sortByIntDesc = function (field) {
         return function (a, b) {
-            return a[field] - b[field];
+            var a_int = a[field] == 'Not Reported' ? -1 : a[field];
+            var b_int = b[field] == 'Not Reported' ? -1 : b[field];
+            return b_int - a_int;
         };
     };
 
-    var sortByString = function () {
+    /*var sortByString = function (field) {
         return function (a, b) {
-            return a - b;
+            console.log('a:'+a[field]);
+            console.log('b:'+b[field]);
+            console.log('a-b:'+(a[field] - b[field]));
+            if (a)
+            return a[field] > b[field] ? 1 : -1;
         }
-    };
+    };*/
 
-        // var grid = new OncoGrid(params);
-        //
-        // grid.render();
-
-    function removeCleanDonors() {
-        var criteria = function (d) {
-            return d.score === 0;
-        };
-        grid.removeDonors(criteria);
-    }
 
     function toggleCrosshair() {
         grid.toggleCrosshair();
@@ -266,14 +247,12 @@ define (['jquery', 'oncogridjs'],
         grid.resize(width, height);
     }
 
-        // function renderOncogrid(){
-        //     grid.render();
-        // }
     return {
-        createOncogridPlot: function (donor_data, gene_data, observation_data, donor_track_count_max) {
+        createOncogridPlot: function (donor_data, gene_data, observation_data, donor_track_count_max, obs_donors) {
             if (donor_data.length > 0 && gene_data.length > 0 && observation_data.length) {
-                updateOncogrid(donor_data, gene_data, observation_data, donor_track_count_max);
+                updateOncogrid(donor_data, gene_data, observation_data, donor_track_count_max, obs_donors);
             }
         }
     }
 })
+

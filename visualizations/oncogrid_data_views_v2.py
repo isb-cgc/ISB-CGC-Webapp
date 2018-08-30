@@ -71,24 +71,24 @@ def oncogrid_view_data(request):
             return JsonResponse(
                 {'message': "The chosen cohorts do not contain samples from programs with Gene Mutation data."})
 
-        # get donor list
-        donor_data_query, donor_bq_tables = create_oncogrid_bq_statement(DONOR_TRACK_TYPE, genomic_build, project_set, cohort_ids, gene_list)
-
-        #print(donor_data_query)
-        donor_data_list, donor_track_count_max = get_donor_data_list(donor_data_query)
-
         # get gene list
-        gene_data_query, gene_bq_tables = create_oncogrid_bq_statement(GENE_TRACK_TYPE, genomic_build, project_set, cohort_ids, gene_list)
-        print(gene_data_query)
-        gene_data_list, observation_data_list = get_gene_data_list(gene_data_query)
+        gene_data_query, gene_bq_tables = create_oncogrid_bq_statement(GENE_TRACK_TYPE, genomic_build, project_set,
+                                                                           cohort_ids, gene_list, None)
+        gene_data_list, observation_data_list, obs_donors = get_gene_data_list(gene_data_query)
+
+        # get donor list
+        donor_data_query, donor_bq_tables = create_oncogrid_bq_statement(DONOR_TRACK_TYPE, genomic_build, project_set,
+                                                                         None, None, obs_donors)
+        donor_data_list, donor_track_count_max = get_donor_data_list(donor_data_query)
 
         bq_tables = list(set(donor_bq_tables + gene_bq_tables))
 
-        if len(donor_data_list) and len(gene_data_list):
+        if len(observation_data_list):
             return JsonResponse({
                 'donor_data_list': donor_data_list,
                 'gene_data_list': gene_data_list,
                 'observation_data_list': observation_data_list,
+                'obs_donors': obs_donors,
                 'bq_tables': bq_tables,
                 'donor_track_count_max': donor_track_count_max
             })
@@ -207,6 +207,7 @@ def get_gene_data_list(bq_statement):
     results = get_bq_query_result(bq_statement)
     gene_data_list = []
     observation_data_list = []
+    obs_donors = []
     genes_mut_data = {}
     if results and len(results) > 0:
         for row in results:
@@ -214,7 +215,7 @@ def get_gene_data_list(bq_statement):
             project_short_name = row['f'][1]['v']
             case_barcode = row['f'][2]['v']
             variant_classification = row['f'][3]['v']
-            score = str(row['f'][4]['v'])
+            #score = str(row['f'][4]['v'])
             if not genes_mut_data.has_key(hugo_symbol):
                 genes_mut_data[hugo_symbol] = {
                     'case_barcode': {},
@@ -226,7 +227,8 @@ def get_gene_data_list(bq_statement):
                 }
             if not genes_mut_data[hugo_symbol]['case_barcode'][case_barcode]['variant_classification'].has_key(variant_classification):
                 genes_mut_data[hugo_symbol]['case_barcode'][case_barcode]['variant_classification'][variant_classification] = {
-                    'score': score,
+                    #'score': score,
+                    'name': variant_classification
                 }
 
     ob_id = 0
@@ -239,22 +241,24 @@ def get_gene_data_list(bq_statement):
             observation_data = {
                 'geneId' : hugo_symbol
             }
-            score = 0
+            #score = 0
             for case_barcode in genes_mut_data[hugo_symbol]['case_barcode']:
                 for vc in genes_mut_data[hugo_symbol]['case_barcode'][case_barcode]['variant_classification']:
-                    score += int(genes_mut_data[hugo_symbol]['case_barcode'][case_barcode]['variant_classification'][vc]['score'])
+                    #score += int(genes_mut_data[hugo_symbol]['case_barcode'][case_barcode]['variant_classification'][vc]['score'])
                     ob_id += 1
                     observation_data['id'] = ob_id
                     observation_data['donorId'] = genes_mut_data[hugo_symbol]['case_barcode'][case_barcode]['case_code']
                     observation_data['consequence'] = vc.lower()
                     #print(observation_data)
                     observation_data_list.append(observation_data.copy())
+                    #obs_donors.append(genes_mut_data[hugo_symbol]['case_barcode'][case_barcode]['case_code'])
+                    obs_donors.append(case_barcode)
 
-            gene_data['gene_score'] = score
+            #gene_data['gene_score'] = score
             gene_data['case_score'] = len(genes_mut_data[hugo_symbol]['case_barcode'])
             gene_data_list.append(gene_data.copy())
 
-    return gene_data_list, observation_data_list
+    return gene_data_list, observation_data_list, obs_donors
 
 def get_bq_query_result(bq_query_statement):
     results = []
@@ -270,7 +274,7 @@ def get_bq_query_result(bq_query_statement):
         results = BigQuerySupport.get_job_results(bq_query_job['jobReference'])
     return results
 
-def create_oncogrid_bq_statement(type, genomic_build, project_set, cohort_ids, gene_list):
+def create_oncogrid_bq_statement(type, genomic_build, project_set, cohort_ids, gene_list, casebarcode_list):
     query_template = ''
     gene_query_template = """
         #standardSQL
@@ -307,54 +311,71 @@ def create_oncogrid_bq_statement(type, genomic_build, project_set, cohort_ids, g
                       --ELSE                        
                         --{conseq_col}
                         
-                    END AS conseq,
-                      COUNT({conseq_col}) as score
-                    --,
-                      --COUNT(sm.Variant_Classification) as score
-                    -- END AS consequence
+                    END AS conseq
+                    
             FROM  `{cohort_table}` cs,
                   `{somatic_mut_table}` sm
             WHERE cs.cohort_id IN ({cohort_id_list})
             AND cs.sample_barcode = sm.sample_barcode_tumor                    
             AND (cs.project_id IS NULL{project_clause})
-            {filter_clause}
+            {filter_clause1}
             GROUP BY sm.Hugo_Symbol, sm.project_short_name, cs.case_barcode, conseq            
         )
         WHERE conseq is not null;
     """
 
-    donor_query_template = """
-            #standardSQL
-            SELECT md.project_short_name,
-                    cs.case_barcode,
-                       bc.gender,
-                         bc.vital_status,
-                           bc.race,
-                             bc.ethnicity,
-                               bc.age_at_diagnosis,
-                                 bc.days_to_death,
-                                   md.data_category,
-            COUNT(md.data_category) AS score
-            FROM
-            `{cohort_table}` cs,
-            `{metadata_data_table}` md,
-            `{bioclinic_clin_table}` bc,
-            (                
-                SELECT distinct sample_barcode_tumor
-                FROM `{somatic_mut_table}`
-                WHERE TRUE {filter_clause}
-            ) sm
-            
-            WHERE cs.cohort_id IN ({cohort_id_list})
-            -- AND Variant_Classification NOT IN('Silent')
-            AND cs.sample_barcode = sm.sample_barcode_tumor            
-            AND cs.sample_barcode = md.sample_barcode
-            AND cs.case_barcode = bc.case_barcode
-            AND (cs.project_id IS NULL{project_clause})
-            GROUP BY md.project_short_name, cs.case_barcode, bc.gender, bc.vital_status, bc.race, bc.ethnicity, bc.age_at_diagnosis, bc.days_to_death, md.data_category
-            ;
-        """
+    # donor_query_template = """
+    #         #standardSQL
+    #         SELECT md.project_short_name,
+    #                 cs.case_barcode,
+    #                    bc.gender,
+    #                      bc.vital_status,
+    #                        bc.race,
+    #                          bc.ethnicity,
+    #                            bc.age_at_diagnosis,
+    #                              bc.days_to_death,
+    #                                md.data_category,
+    #         COUNT(md.data_category) AS score
+    #         FROM
+    #         `{cohort_table}` cs,
+    #         `{metadata_data_table}` md,
+    #         `{bioclinic_clin_table}` bc,
+    #         (
+    #             SELECT distinct sample_barcode_tumor
+    #             FROM `{somatic_mut_table}`
+    #             WHERE TRUE {filter_clause}
+    #         ) sm
+    #
+    #         WHERE cs.cohort_id IN ({cohort_id_list})
+    #         -- AND Variant_Classification NOT IN('Silent')
+    #         AND cs.sample_barcode = sm.sample_barcode_tumor
+    #         AND cs.sample_barcode = md.sample_barcode
+    #         AND cs.case_barcode = bc.case_barcode
+    #         AND (cs.project_id IS NULL{project_clause})
+    #         GROUP BY md.project_short_name, cs.case_barcode, bc.gender, bc.vital_status, bc.race, bc.ethnicity, bc.age_at_diagnosis, bc.days_to_death, md.data_category
+    #         ;
+    #     """
 
+    donor_query_template = """
+        #standardSQL
+        SELECT md.project_short_name,
+                md.case_barcode,
+                  bc.gender,
+                    bc.vital_status,
+                      bc.race,
+                        bc.ethnicity,
+                          bc.age_at_diagnosis,
+                            bc.days_to_death,
+                              md.data_category,
+                COUNT(md.data_category) AS score
+                FROM
+                `{metadata_data_table}` md,
+                `{bioclinic_clin_table}` bc
+                WHERE md.case_barcode = bc.case_barcode
+                {filter_clause2}                
+                GROUP BY md.project_short_name, md.case_barcode, bc.gender, bc.vital_status, bc.race, bc.ethnicity, bc.age_at_diagnosis, bc.days_to_death, md.data_category
+                ;
+            """
 
     bq_data_project_id = settings.BIGQUERY_DATA_PROJECT_NAME
 
@@ -378,8 +399,14 @@ def create_oncogrid_bq_statement(type, genomic_build, project_set, cohort_ids, g
     if gene_list is not None:
         gene_list_str = ', '.join('\'{0}\''.format(gene) for gene in gene_list)
 
-    cohort_id_list = ', '.join([str(cohort_id) for cohort_id in cohort_ids])
-    filter_clause = "AND Hugo_Symbol IN ({})".format(gene_list_str) if gene_list_str != "" else ""
+    casebarcode_list_str = ''
+    if casebarcode_list is not None:
+        casebarcode_list_str = ', '.join('\'{0}\''.format(cs_barcode) for cs_barcode in casebarcode_list)
+
+    cohort_id_list = ', '.join([str(cohort_id) for cohort_id in cohort_ids]) if cohort_ids != None else ''
+    filter_clause1 = "AND Hugo_Symbol IN ({})".format(gene_list_str) if gene_list_str != "" else ""
+    filter_clause2 = "AND md.case_barcode IN ({})".format(casebarcode_list_str) if casebarcode_list_str != "" else ""
+
     if type == GENE_TRACK_TYPE:
         query_template = gene_query_template
     elif type == DONOR_TRACK_TYPE:
@@ -398,7 +425,8 @@ def create_oncogrid_bq_statement(type, genomic_build, project_set, cohort_ids, g
         conseq_col = ("one_consequence" if genomic_build == "hg38" else 'consequence'),
         cohort_id_list=cohort_id_list,
         project_clause=project_clause,
-        filter_clause=filter_clause
+        filter_clause1=filter_clause1,
+        filter_clause2 = filter_clause2
     )
 
     return bq_statement, [somatic_mut_table, metadata_data_table, bioclinic_clin_table]

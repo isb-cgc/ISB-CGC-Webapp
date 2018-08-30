@@ -284,7 +284,44 @@
 
 
 /*oncogrid*/
-
+.oncogrid-header
+    display: flex
+    flex-direction: row
+    box-sizing: border-box
+    position: relative
+    outline: none
+    margin-left: 0px
+    min-height: 70px
+    .oncogrid-legend
+        flex-grow: 1
+        .oncogrid-legends
+            display: inline-flex
+            font-size: 1.28rem
+            &-column
+                display: flex
+                flex-direction: column
+                padding: 6px
+                &-cell
+                    padding-top: 4px
+                    padding-bottom: 4px
+                    .oncogrid-legends-colorblock
+                        margin-right: 5px
+                        display: inline-block
+                        width: 15px
+                        height: 15px
+                        vertical-align: middle
+                        &-missense
+                            background: rgb(255, 155, 108)
+                        &-frame-shift
+                            background: rgb(87, 219, 164)
+                        &-start-lost
+                            background: rgb(255, 35, 35)
+                        &-stop-lost
+                            background: rgb(211, 236, 0)
+                        &-initiator-codon
+                            background: rgb(90, 186, 255)
+                        &-stop-gained
+                            background: rgb(175, 87, 219)
 #grid-div
     cursor: pointer
 

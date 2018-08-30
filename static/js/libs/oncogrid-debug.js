@@ -14417,9 +14417,9 @@ OncoHistogram.prototype.render = function (div) {
                 .style('opacity', 0.9);
             _self.div.html( function() {
                 if (_self.rotated) {
-                    return  '<div class="wrapper">'+domain.symbol + '<br/> Count:' + domain.count + '<br/></div>';
+                    return  '<div class="wrapper">'+domain.symbol + '<br/> Count: ' + domain.count + '<br/></div>';
                 } else {
-                    return '<div class="wrapper">'+domain.id + '<br/> Count:' + domain.count + '<br/></div>';
+                    return '<div class="wrapper">'+domain.id + '<br/> Count: ' + domain.count + '<br/></div>';
                 }
             })
                 .style('left', (coordinates[0] + 10) + 'px')

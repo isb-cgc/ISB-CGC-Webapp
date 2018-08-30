@@ -299,24 +299,11 @@ define([
         var donor_data_list = view_data['donor_data_list'];
         var gene_data_list = view_data['gene_data_list'];
         var observation_data_list = view_data['observation_data_list'];
-        var bq_tables = view_data['bq_tables'];
         var donor_track_count_max = view_data['donor_track_count_max'];
-        /*var donor_track_count_max = {
-            'race': 1,
-            'age_at_diagnosis': 1,
-            'vital_status': 1,
-            'days_to_death': 1,
-            'gender': 1,
-            'ethnicity': 1,
-            'clinical': 1,
-            'biospecimen': 1,
-            'rsd': 1,
-            'snv': 1,
-            'cnv': 0,
-            'gene_exp': 0
-        };*/
+        var obs_donors = view_data['obs_donors'];
+        console.log(obs_donors);
         if (donor_data_list && gene_data_list && observation_data_list) {
-            oncogrid_obj.createOncogridPlot(donor_data_list, gene_data_list, observation_data_list, donor_track_count_max);
+            oncogrid_obj.createOncogridPlot(donor_data_list, gene_data_list, observation_data_list, donor_track_count_max, obs_donors);
         }
         else {
             var message = "The selected cohorts have no somatic mutations in the gene ";

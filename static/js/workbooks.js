@@ -1207,6 +1207,12 @@ require([
         else {
             $('.toggle-selection').show();
         }
+
+        if(args.type === 'OncoGrid'){
+            var oncogrid_template = $('#oncogrid_div').html();
+            plot_area.html(oncogrid_template);
+        }
+
         plotFactory.generate_plot(
             {
                 plot_selector    : plot_selector,

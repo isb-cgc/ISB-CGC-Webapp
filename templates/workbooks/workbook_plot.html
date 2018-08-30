@@ -262,6 +262,7 @@
             </div>
         </div>
 
+
         <div class="plot-div">
             {% if workbook.owner.id == user.id %}
                 <div class="worksheet-instruction">
@@ -282,7 +283,135 @@
                 </div>
             {% endif %}
         </div>
+        <div id="oncogrid_div" style="display:none;">
+            <div class="oncogrid-header">
+                <div class="oncogrid-legend">
+                    <div class="oncogrid-legends">
+                        <div class="oncogrid-legends-column">
+                            <div class="oncogrid-legends-column-cell">
+                                <div class="oncogrid-legends-colorblock oncogrid-legends-colorblock-missense">
+                                </div>
+                                <span>missense</span>
+                            </div>
+                            <div class="oncogrid-legends-column-cell">
+                                <div class="oncogrid-legends-colorblock oncogrid-legends-colorblock-frame-shift">
+                                </div>
+                                <span>frameshift</span>
+                            </div>
+                        </div>
+                        <div class="oncogrid-legends-column">
+                            <div class="oncogrid-legends-column-cell">
+                                <div class="oncogrid-legends-colorblock oncogrid-legends-colorblock-start-lost">
+                                </div>
+                                <span>start lost</span>
+                            </div>
+                            <div class="oncogrid-legends-column-cell">
+                                <div class="oncogrid-legends-colorblock oncogrid-legends-colorblock-stop-lost">
+                                </div>
+                                <span>stop lost</span>
+                            </div>
+                        </div>
+                        <div class="oncogrid-legends-column">
+                            <div class="oncogrid-legends-column-cell">
+                                <div class="oncogrid-legends-colorblock oncogrid-legends-colorblock-initiator-codon">
+                                </div>
+                                <span>initiator codon</span>
+                            </div>
+                            <div class="oncogrid-legends-column-cell">
+                                <div class="oncogrid-legends-colorblock oncogrid-legends-colorblock-stop-gained">
+                                </div>
+                                <span>stop gained</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; flex-flow: row wrap; box-sizing: border-box; position: relative; outline: none; justify-content: flex-end; margin-right: 12px;">
+                    <span class="oncogrid-download-viz-button dropdown" style="position: relative;">
+                        <span>
+                            <span>
+                                <button class="button css-ced7gm">
+                                    <div style="display: flex; align-items: center;">
+                                        <span style="display: flex; align-items: center; justify-content: center;">
+                                            <span>
+                                                <i class=" fa fa-download"></i>
+                                                <div class=" css-1n48rl3">Download</div>
+                                            </span>
+                                        </span>
+                                    </div>
+                                </button>
+                            </span>
+                        </span>
+                    </span>
+                    <span style="margin-left: 1rem;">
+                        <button class="button css-vpoukx">
+                            <div style="display: flex; align-items: center;">
+                                <span style="display: flex; align-items: center; justify-content: center;">
+                                    <i class="fa fa-undo"></i>
+                                    <div class=" css-1n48rl3">Reload</div>
+                                </span>
+                            </div>
+                        </button>
+                    </span>
+                    <span style="margin-left: 1rem;">
+                        <button class="button css-vpoukx">
+                            <div style="display: flex; align-items: center;">
+                                <span style="display: flex; align-items: center; justify-content: center;">
+                                    <i class="fa fa-sort-amount-desc"></i>
+                                    <div class=" css-1n48rl3">Cluster</div>
+                                </span>
+                            </div>
+                        </button>
+                    </span>
+                    <span style="margin-left: 1rem;">
+                        <button class="button css-vpoukx">
+                            <div style="display: flex; align-items: center;">
+                                <span style="display: flex; align-items: center; justify-content: center;">
+                                    <i class="fa fa-fire"></i>
+                                    <div class=" css-1n48rl3">Heatmap</div>
+                                </span>
+                            </div>
+                        </button>
+                    </span>
+                    <span style="margin-left: 1rem;">
+                        <button class="button css-lfo8f2">
+                            <div style="display: flex; align-items: center;">
+                                <span style="display: flex; align-items: center; justify-content: center;">
+                                    <i class="fa fa-th"></i>
+                                    <div class=" css-1n48rl3">Lines</div>
+                                </span>
+                            </div>
+                        </button>
+                    </span>
+                    <span style="margin-left: 1rem;">
+                        <button class="button css-vpoukx">
+                            <div style="display: flex; align-items: center;">
+                                <span style="display: flex; align-items: center; justify-content: center;">
+                                    <i class="fa fa-crosshairs"></i>
+                                    <div class=" css-1n48rl3">Crosshair</div>
+                                </span>
+                            </div>
+                        </button>
+                    </span>
+                    <span style="margin-left: 1rem;">
+                        <button class="button css-54f09y">
+                            <div style="display: flex; align-items: center;">
+                                <span style="display: flex; align-items: center; justify-content: center;">
+                                    <svg fill="currentColor" preserveAspectRatio="xMidYMid meet" height="1em" width="1em" viewBox="0 0 40 40" style="vertical-align: middle;">
+                                        <g>
+                                            <path d="m23.4 8.4h8.2v8.2h-3.2v-5h-5v-3.2z m5 20v-5h3.2v8.2h-8.2v-3.2h5z m-20-11.8v-8.2h8.2v3.2h-5v5h-3.2z m3.2 6.8v5h5v3.2h-8.2v-8.2h3.2z">
 
+                                            </path>
+                                        </g>
+                                    </svg>
+                                    <div class=" css-1n48rl3">Fullscreen</div>
+                                </span>
+                            </div>
+                        </button>
+                    </span>
+                </div>
+            </div>
+            <div id='grid-div'></div>
+        </div>
         <div class="oncoprint_div">
             <div class="oncoprint">
                 <div class="cbioportal_logo">
@@ -315,16 +444,16 @@
                 <div class="oncoprint_body"></div>
             </div>
         </div>
-        <div class="oncogrid_div">
-            <div id="grid-div">
-            </div>
-            <button onclick="removeCleanDonors()">Remove Clean Donors</button>
-            <button onclick="toggleGridLines()">Grid</button>
-            <button onclick="toggleCrosshair()">Crosshair Mode</button>
-            <input type="text" size="5" id="width-resize"/>
-            <input type="text" size="5" id="height-resize"/>
-            <button onclick="resize()">Resize</button>
-        </div>
+{#        <div class="oncogrid_div">#}
+{#            <div id="grid-div">#}
+{#            </div>#}
+{#            <button onclick="removeCleanDonors()">Remove Clean Donors</button>#}
+{#            <button onclick="toggleGridLines()">Grid</button>#}
+{#            <button onclick="toggleCrosshair()">Crosshair Mode</button>#}
+{#            <input type="text" size="5" id="width-resize"/>#}
+{#            <input type="text" size="5" id="height-resize"/>#}
+{#            <button onclick="resize()">Resize</button>#}
+{#        </div>#}
 
         <div class="legend" style="display: none;"></div>
         <button class="resubmit-button btn btn-primary">Submit Plot</button>
