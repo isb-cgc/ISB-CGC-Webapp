@@ -62,9 +62,9 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 id="delete-sa-header" class="modal-title">Unregister this Service Account {{ svc_act.name }}?</h4>
+                <h4 id="delete-sa-header" class="modal-title">Unregister this Service Account?</h4>
             </div>
-            <form id="delete-sa" method="POST" action="{% url 'delete_sa' user.id  user.id %}">
+            <form id="delete-sa" method="POST" action="{% url 'delete_sa' user.id  svc_act.name %}">
                 <div class="modal-body">
                     {% csrf_token %}
                     <p>
