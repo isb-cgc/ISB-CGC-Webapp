@@ -51,7 +51,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for project in gcp_list %}
+                            {% for project, sa_list in gcp_sa_tups %}
                                 <tr>
                                     <td>
                                         <div class="dropdown">
@@ -95,19 +95,17 @@
                                                     </tr>
                                                     </thead>
                                                     <tbody>
-                                                    {% for service_account in project.active_service_accounts %}
-                                                        {% with auth_datasets=service_account.get_auth_datasets %}
-                                                            <tr>
-                                                                <td>{{ service_account.service_account }}</td>
-                                                                <td>{% if auth_datasets|length == 0 %}None{% else %}{{ auth_datasets|get_values_list:"name"|joinwith:", " }}{% endif %}</td>
-                                                                <td{% if service_account.is_expired and auth_datasets|length > 0 %} class="red" title="Service Account's authorization date has expired; refresh to extend access."{% endif %}>{{ service_account.authorized_date|date:'M d, Y, g:i a' }}</td>
-                                                                <td>
-                                                                    <a title="Refresh Service Account" aria-label="Refresh SA" data-toggle="modal" role="button" data-target="#refresh-sa-modal-{{ service_account.id }}" class="space-right-5"><i class="fa fa-refresh"></i></a>
-                                                                    <a title="Delete Service Account" aria-label="Delete SA" data-toggle="modal" role="button" data-target="#delete-sa-modal-{{ service_account.id }}"><i class="fa fa-trash"></i></a>
-                                                                    <a title="Adjust Datasets for this Service Account" aria-label="Adjust Datasets for SA" role="button" href="{% url 'adjust_sa' user.id %}?sa_id={{ service_account.id }}"><i class="fa fa-plus-square"></i></a>
-                                                                </td>
-                                                            </tr>
-                                                        {% endwith %}
+                                                    {% for svc_act in sa_list  %}
+                                                        <tr>
+                                                            <td>{{ svc_act.name }}</td>
+                                                            <td>{% if svc_act.num_auth == 0 %}None{% else %}{{ svc_act.auth_dataset_names }}{% endif %}</td>
+                                                            <td{% if svc_act.is_expired and svc_act.num_auth > 0 %} class="red" title="Service Account's authorization date has expired; refresh to extend access."{% endif %}>{{ svc_act.authorized_date|date:'M d, Y, g:i a' }}</td>
+                                                            <td>
+                                                                <a title="Refresh Service Account" aria-label="Refresh SA" data-toggle="modal" role="button" data-target="#refresh-sa-modal-{{ svc_act.esc_name }}" class="space-right-5"><i class="fa fa-refresh"></i></a>
+                                                                <a title="Delete Service Account" aria-label="Delete SA" data-toggle="modal" role="button" data-target="#delete-sa-modal-{{ svc_act.esc_name }}"><i class="fa fa-trash"></i></a>
+                                                                <a title="Adjust Datasets for this Service Account" aria-label="Adjust Datasets for SA" role="button" href="{% url 'adjust_sa' user.id %}?sa_name={{ svc_act.name }}"><i class="fa fa-plus-square"></i></a>
+                                                            </td>
+                                                        </tr>
                                                     {% endfor %}
                                                     </tbody>
                                                 </table>
@@ -119,8 +117,8 @@
                             {% endfor %}
                         </tbody>
                     </table>
-                    {% for project in gcp_list %}
-                        {% include "GenespotRE/user_gcp_list_modals.html" with project=project %}
+                    {% for project, sa_dict in gcp_sa_tups %}
+                        {% include "GenespotRE/user_gcp_list_modals.html" with project=project sa_dict=sa_dict %}
                     {% endfor %}
                 </div>
             </div>
