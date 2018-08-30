@@ -68,6 +68,16 @@
     </section>
     {% endif %}
 
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="alert alert-info alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                The previous BigQuery tables which list GCS file paths (eg. tcga_metadata_data_hg19) have been superceded by new tables in the same datasets
+                with a suffix of <b>_250718</b>. The obsolete tables have been marked as such with a suffix of <b>_obsolete</b>, and will be deleted in the coming
+                weeks.
+            </div>
+        </div>
+    </div>
     <section class="panel panel-default">
         <div class="panel-heading">
             <h3 class="panel-title">
