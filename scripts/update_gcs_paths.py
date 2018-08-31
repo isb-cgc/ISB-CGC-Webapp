@@ -20,8 +20,7 @@ db = None
 cursor = None
 
 INDEXD_URI = settings.INDEXD_URI + "?ids="
-# LIMIT = settings.INDEXD_REQ_LIMIT
-LIMIT = 10
+LIMIT = settings.INDEXD_REQ_LIMIT
 
 EXECUTION_PROJECT = "isb-cgc"
 STORAGE_DATASET = "gcs_path_import_staging"
@@ -67,7 +66,6 @@ try:
         WHERE inc.file_gcs_path = '';
     """
 
-
     program_tables = Public_Data_Tables.objects.filter(program__in=Program.get_public_programs())
 
     for table in program_tables:
@@ -93,7 +91,7 @@ try:
         offset=0
         files_found = True
 
-        while files_found and offset < 50:
+        while files_found:
             cursor.execute(query_base.format(limit=LIMIT,offset=offset,metadata_data_table=table.data_table))
             files = cursor.fetchall()
             files_found = len(files) > 0
