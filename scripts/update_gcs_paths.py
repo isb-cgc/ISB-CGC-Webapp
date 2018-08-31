@@ -67,7 +67,6 @@ try:
         WHERE inc.file_gcs_path = '';
     """
 
-
     program_tables = Public_Data_Tables.objects.filter(program__in=Program.get_public_programs())
 
     for table in program_tables:
